@@ -61,7 +61,7 @@
 
 static herr_t H5AC__check_if_write_permitted(const H5F_t *f, hbool_t *write_permitted_ptr);
 static herr_t H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr,
-                                            H5C_auto_size_ctl_t *int_conf_ptr);
+                                            H5C_auto_size_ctl_t *      int_conf_ptr);
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
@@ -1796,8 +1796,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_size(const H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr, size_t *cur_size_ptr,
-                    uint32_t *cur_num_entries_ptr)
+H5AC_get_cache_size(const H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+                    size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

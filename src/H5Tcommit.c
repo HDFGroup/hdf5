@@ -1243,7 +1243,7 @@ H5T_construct_datatype(H5VL_object_t *vol_obj)
 {
     H5T_t *                  dt = NULL;        /* Datatype object from VOL connector */
     H5VL_datatype_get_args_t vol_cb_args;      /* Arguments to VOL callback */
-    size_t                   nalloc = 0;       /* Size required to store serialized form of datatype */
+    size_t                   nalloc    = 0;    /* Size required to store serialized form of datatype */
     void *                   buf       = NULL; /* Buffer to store serialized datatype */
     H5T_t *                  ret_value = NULL;
 

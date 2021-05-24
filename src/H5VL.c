@@ -991,8 +991,7 @@ H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name string")
     if (!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
           (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) || (H5VL_SUBCLS_GROUP == subcls) ||
-          (H5VL_SUBCLS_OBJECT == subcls) || (H5VL_SUBCLS_LINK == subcls) ||
-          (H5VL_SUBCLS_REQUEST == subcls)))
+          (H5VL_SUBCLS_OBJECT == subcls) || (H5VL_SUBCLS_LINK == subcls) || (H5VL_SUBCLS_REQUEST == subcls)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid VOL subclass type")
 
     /* Register the operation */
@@ -1031,8 +1030,7 @@ H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val 
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name string")
     if (!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
           (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) || (H5VL_SUBCLS_GROUP == subcls) ||
-          (H5VL_SUBCLS_OBJECT == subcls) || (H5VL_SUBCLS_LINK == subcls) ||
-          (H5VL_SUBCLS_REQUEST == subcls)))
+          (H5VL_SUBCLS_OBJECT == subcls) || (H5VL_SUBCLS_LINK == subcls) || (H5VL_SUBCLS_REQUEST == subcls)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid VOL subclass type")
 
     /* Find the operation */
@@ -1068,8 +1066,7 @@ H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid op_name string")
     if (!((H5VL_SUBCLS_ATTR == subcls) || (H5VL_SUBCLS_DATASET == subcls) ||
           (H5VL_SUBCLS_DATATYPE == subcls) || (H5VL_SUBCLS_FILE == subcls) || (H5VL_SUBCLS_GROUP == subcls) ||
-          (H5VL_SUBCLS_OBJECT == subcls) || (H5VL_SUBCLS_LINK == subcls) ||
-          (H5VL_SUBCLS_REQUEST == subcls)))
+          (H5VL_SUBCLS_OBJECT == subcls) || (H5VL_SUBCLS_LINK == subcls) || (H5VL_SUBCLS_REQUEST == subcls)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid VOL subclass type")
 
     /* Unregister the operation */

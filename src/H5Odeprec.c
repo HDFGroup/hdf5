@@ -161,11 +161,11 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     /* Check for retrieving native information */
     nat_fields = shim_data->fields & (H5O_INFO_HDR | H5O_INFO_META_SIZE);
     if (nat_fields) {
-        H5VL_object_t *   vol_obj;    /* Object of obj_id */
-        H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
-        H5VL_native_object_optional_args_t obj_opt_args;    /* Arguments for optional operation */
-        H5VL_loc_params_t loc_params; /* Location parameters for VOL callback */
-        H5O_native_info_t nat_info;   /* Native object info */
+        H5VL_object_t *                    vol_obj;      /* Object of obj_id */
+        H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+        H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+        H5VL_loc_params_t                  loc_params;   /* Location parameters for VOL callback */
+        H5O_native_info_t                  nat_info;     /* Native object info */
 
         /* Fill out location struct */
         loc_params.type                         = H5VL_OBJECT_BY_NAME;
@@ -179,12 +179,13 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
 
         /* Set up VOL callback arguments */
         obj_opt_args.get_native_info.fields = nat_fields;
-        obj_opt_args.get_native_info.ninfo = &nat_info;
-        vol_cb_args.op_type           = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
-        vol_cb_args.args = &obj_opt_args;
+        obj_opt_args.get_native_info.ninfo  = &nat_info;
+        vol_cb_args.op_type                 = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
+        vol_cb_args.args                    = &obj_opt_args;
 
         /* Retrieve the object's native information */
-        if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                 H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native info for object")
 
         /* Set the native fields */
@@ -235,12 +236,12 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
     /* Check for retrieving data model information */
     dm_fields = fields & (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS);
     if (dm_fields) {
-        H5VL_object_get_args_t vol_cb_args;        /* Arguments to VOL callback */
-        H5O_info2_t dm_info; /* Data model object info */
+        H5VL_object_get_args_t vol_cb_args; /* Arguments to VOL callback */
+        H5O_info2_t            dm_info;     /* Data model object info */
 
         /* Set up VOL callback arguments */
-        vol_cb_args.op_type           = H5VL_OBJECT_GET_INFO;
-        vol_cb_args.args.get_info.oinfo = &dm_info;
+        vol_cb_args.op_type              = H5VL_OBJECT_GET_INFO;
+        vol_cb_args.args.get_info.oinfo  = &dm_info;
         vol_cb_args.args.get_info.fields = dm_fields;
 
         /* Retrieve the object's data model information */
@@ -277,18 +278,19 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
     /* Check for retrieving native information */
     nat_fields = fields & (H5O_INFO_HDR | H5O_INFO_META_SIZE);
     if (nat_fields) {
-        H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
-        H5VL_native_object_optional_args_t obj_opt_args;    /* Arguments for optional operation */
-        H5O_native_info_t nat_info; /* Native object info */
+        H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+        H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+        H5O_native_info_t                  nat_info;     /* Native object info */
 
         /* Set up VOL callback arguments */
         obj_opt_args.get_native_info.fields = nat_fields;
-        obj_opt_args.get_native_info.ninfo = &nat_info;
-        vol_cb_args.op_type           = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
-        vol_cb_args.args = &obj_opt_args;
+        obj_opt_args.get_native_info.ninfo  = &nat_info;
+        vol_cb_args.op_type                 = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
+        vol_cb_args.args                    = &obj_opt_args;
 
         /* Retrieve the object's native information */
-        if (H5VL_object_optional(vol_obj, loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        if (H5VL_object_optional(vol_obj, loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                 H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native info for object")
 
         /* Set the native fields */
@@ -770,11 +772,11 @@ done:
 herr_t
 H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1_t op, void *op_data)
 {
-    H5VL_object_t *      vol_obj = NULL; /* Object of loc_id */
-    H5VL_object_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    H5O_visit1_adapter_t shim_data; /* Adapter for passing app callback & user data */
-    herr_t               ret_value; /* Return value */
+    H5VL_object_t *             vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;     /* Location parameters for object access */
+    H5O_visit1_adapter_t        shim_data;      /* Adapter for passing app callback & user data */
+    herr_t                      ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIiIoOi*x", obj_id, idx_type, order, op, op_data);
@@ -801,15 +803,16 @@ H5Ovisit1(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
     shim_data.real_op_data = op_data;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_OBJECT_VISIT;
+    vol_cb_args.op_type             = H5VL_OBJECT_VISIT;
     vol_cb_args.args.visit.idx_type = idx_type;
-    vol_cb_args.args.visit.order = order;
-    vol_cb_args.args.visit.op = H5O__iterate1_adapter;
-    vol_cb_args.args.visit.op_data = &shim_data;
-    vol_cb_args.args.visit.fields = H5O_INFO_ALL;
+    vol_cb_args.args.visit.order    = order;
+    vol_cb_args.args.visit.op       = H5O__iterate1_adapter;
+    vol_cb_args.args.visit.op_data  = &shim_data;
+    vol_cb_args.args.visit.fields   = H5O_INFO_ALL;
 
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                          H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
@@ -852,11 +855,11 @@ herr_t
 H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                   H5O_iterate1_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj = NULL; /* Object of loc_id */
-    H5VL_object_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    H5O_visit1_adapter_t shim_data; /* Adapter for passing app callback & user data */
-    herr_t               ret_value; /* Return value */
+    H5VL_object_t *             vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;     /* Location parameters for object access */
+    H5O_visit1_adapter_t        shim_data;      /* Adapter for passing app callback & user data */
+    herr_t                      ret_value;      /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIoOi*xi", loc_id, obj_name, idx_type, order, op, op_data, lapl_id);
@@ -893,15 +896,16 @@ H5Ovisit_by_name1(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     shim_data.real_op_data = op_data;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_OBJECT_VISIT;
+    vol_cb_args.op_type             = H5VL_OBJECT_VISIT;
     vol_cb_args.args.visit.idx_type = idx_type;
-    vol_cb_args.args.visit.order = order;
-    vol_cb_args.args.visit.op = H5O__iterate1_adapter;
-    vol_cb_args.args.visit.op_data = &shim_data;
-    vol_cb_args.args.visit.fields = H5O_INFO_ALL;
+    vol_cb_args.args.visit.order    = order;
+    vol_cb_args.args.visit.op       = H5O__iterate1_adapter;
+    vol_cb_args.args.visit.op_data  = &shim_data;
+    vol_cb_args.args.visit.fields   = H5O_INFO_ALL;
 
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                          H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
 
 done:
@@ -947,12 +951,12 @@ herr_t
 H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1_t op, void *op_data,
           unsigned fields)
 {
-    H5VL_object_t *      vol_obj; /* Object of loc_id */
-    H5VL_object_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    H5O_visit1_adapter_t shim_data; /* Adapter for passing app callback & user data */
-    hbool_t              is_native_vol_obj;
-    herr_t               ret_value; /* Return value */
+    H5VL_object_t *             vol_obj;     /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;  /* Location parameters for object access */
+    H5O_visit1_adapter_t        shim_data;   /* Adapter for passing app callback & user data */
+    hbool_t                     is_native_vol_obj;
+    herr_t                      ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iIiIoOi*xIu", obj_id, idx_type, order, op, op_data, fields);
@@ -989,15 +993,16 @@ H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
     shim_data.real_op_data = op_data;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_OBJECT_VISIT;
+    vol_cb_args.op_type             = H5VL_OBJECT_VISIT;
     vol_cb_args.args.visit.idx_type = idx_type;
-    vol_cb_args.args.visit.order = order;
-    vol_cb_args.args.visit.op = H5O__iterate1_adapter;
-    vol_cb_args.args.visit.op_data = &shim_data;
-    vol_cb_args.args.visit.fields = fields;
+    vol_cb_args.args.visit.order    = order;
+    vol_cb_args.args.visit.op       = H5O__iterate1_adapter;
+    vol_cb_args.args.visit.op_data  = &shim_data;
+    vol_cb_args.args.visit.fields   = fields;
 
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                          H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object iteration failed")
 
 done:
@@ -1043,12 +1048,12 @@ herr_t
 H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                   H5O_iterate1_t op, void *op_data, unsigned fields, hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj; /* Object of loc_id */
-    H5VL_object_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    H5O_visit1_adapter_t shim_data; /* Adapter for passing app callback & user data */
-    hbool_t              is_native_vol_obj;
-    herr_t               ret_value; /* Return value */
+    H5VL_object_t *             vol_obj;     /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;  /* Location parameters for object access */
+    H5O_visit1_adapter_t        shim_data;   /* Adapter for passing app callback & user data */
+    hbool_t                     is_native_vol_obj;
+    herr_t                      ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "i*sIiIoOi*xIui", loc_id, obj_name, idx_type, order, op, op_data, fields, lapl_id);
@@ -1095,15 +1100,16 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     shim_data.real_op_data = op_data;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_OBJECT_VISIT;
+    vol_cb_args.op_type             = H5VL_OBJECT_VISIT;
     vol_cb_args.args.visit.idx_type = idx_type;
-    vol_cb_args.args.visit.order = order;
-    vol_cb_args.args.visit.op = H5O__iterate1_adapter;
-    vol_cb_args.args.visit.op_data = &shim_data;
-    vol_cb_args.args.visit.fields = fields;
+    vol_cb_args.args.visit.order    = order;
+    vol_cb_args.args.visit.op       = H5O__iterate1_adapter;
+    vol_cb_args.args.visit.op_data  = &shim_data;
+    vol_cb_args.args.visit.fields   = fields;
 
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                          H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object iteration failed")
 
 done:

@@ -479,9 +479,9 @@ H5ES__handle_fail(H5ES_t *es, H5ES_event_t *ev)
 static herr_t
 H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
 {
-    H5VL_request_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    hid_t  err_stack_id = H5I_INVALID_HID; /* Error stack for failed operation */
-    herr_t ret_value    = SUCCEED;         /* Return value */
+    H5VL_request_specific_args_t vol_cb_args;                    /* Arguments to VOL callback */
+    hid_t                        err_stack_id = H5I_INVALID_HID; /* Error stack for failed operation */
+    herr_t                       ret_value    = SUCCEED;         /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -503,13 +503,14 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
                 op_status = H5ES_STATUS_SUCCEED;
 
                 /* Set up VOL callback arguments */
-                vol_cb_args.op_type           = H5VL_REQUEST_GET_EXEC_TIME;
-                vol_cb_args.args.get_exec_time.exec_ts = &ev->op_info.op_exec_ts;
+                vol_cb_args.op_type                      = H5VL_REQUEST_GET_EXEC_TIME;
+                vol_cb_args.args.get_exec_time.exec_ts   = &ev->op_info.op_exec_ts;
                 vol_cb_args.args.get_exec_time.exec_time = &ev->op_info.op_exec_time;
 
                 /* Retrieve the execution time info */
                 if (H5VL_request_specific(ev->request, &vol_cb_args) < 0)
-                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "unable to retrieve execution time info for operation")
+                    HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL,
+                                "unable to retrieve execution time info for operation")
             }
             else
                 /* Translate status */
@@ -527,7 +528,7 @@ H5ES__op_complete(H5ES_t *es, H5ES_event_t *ev, H5VL_request_status_t ev_status)
         /* Invoke the event set's 'complete' callback, if present */
         if (es->comp_func) {
             /* Set up VOL callback arguments */
-            vol_cb_args.op_type           = H5VL_REQUEST_GET_ERR_STACK;
+            vol_cb_args.op_type                         = H5VL_REQUEST_GET_ERR_STACK;
             vol_cb_args.args.get_err_stack.err_stack_id = H5I_INVALID_HID;
 
             /* Retrieve the error stack for the operation */
@@ -802,9 +803,9 @@ done:
 static int
 H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
 {
-    H5VL_request_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5ES_gei_ctx_t *ctx       = (H5ES_gei_ctx_t *)_ctx; /* Callback context */
-    int             ret_value = H5_ITER_CONT;           /* Return value */
+    H5VL_request_specific_args_t vol_cb_args;                        /* Arguments to VOL callback */
+    H5ES_gei_ctx_t *             ctx       = (H5ES_gei_ctx_t *)_ctx; /* Callback context */
+    int                          ret_value = H5_ITER_CONT;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -832,7 +833,7 @@ H5ES__get_err_info_cb(H5ES_event_t *ev, void *_ctx)
     ctx->curr_err_info->op_exec_time = ev->op_info.op_exec_time;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_REQUEST_GET_ERR_STACK;
+    vol_cb_args.op_type                         = H5VL_REQUEST_GET_ERR_STACK;
     vol_cb_args.args.get_err_stack.err_stack_id = H5I_INVALID_HID;
 
     /* Get error stack for event */

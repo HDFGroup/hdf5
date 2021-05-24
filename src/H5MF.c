@@ -2341,7 +2341,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     H5MF_sect_iter_ud_t sect_udata;                  /* User data for callback */
     H5F_mem_page_t      start_type, end_type;        /* Memory types to iterate over */
     H5F_mem_page_t      ty;                          /* Memory type for iteration */
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t              ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 

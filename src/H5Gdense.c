@@ -1117,10 +1117,10 @@ herr_t
 H5G__dense_get_name_by_idx(H5F_t *f, H5O_linfo_t *linfo, H5_index_t idx_type, H5_iter_order_t order,
                            hsize_t n, char *name, size_t name_size, size_t *name_len)
 {
-    H5HF_t *         fheap  = NULL;      /* Fractal heap handle */
-    H5G_link_table_t ltable = {0, NULL}; /* Table of links */
-    H5B2_t *         bt2    = NULL;      /* v2 B-tree handle for index */
-    haddr_t          bt2_addr;           /* Address of v2 B-tree to use for lookup */
+    H5HF_t *         fheap  = NULL;       /* Fractal heap handle */
+    H5G_link_table_t ltable = {0, NULL};  /* Table of links */
+    H5B2_t *         bt2    = NULL;       /* v2 B-tree handle for index */
+    haddr_t          bt2_addr;            /* Address of v2 B-tree to use for lookup */
     herr_t           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE

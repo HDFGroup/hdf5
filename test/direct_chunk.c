@@ -2161,7 +2161,7 @@ test_single_chunk(unsigned config)
     else
         /* Write the data to the dataset */
         if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)wdata) < 0)
-            FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
 
     /*
      * Close and release resources.
@@ -2203,7 +2203,7 @@ test_single_chunk(unsigned config)
     else
         /* Read the data */
         if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
-            FAIL_STACK_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Verify that the data read was correct.  */
     for (i = 0; i < DIM0; i++)

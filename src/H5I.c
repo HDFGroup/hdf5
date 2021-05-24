@@ -925,11 +925,11 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name /*out*/, size_t size)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object stored in ID */
-    H5VL_object_get_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;
-    size_t obj_name_len = 0;    /* Length of object's name */
-    ssize_t           ret_value = -1; /* Return value */
+    H5VL_object_t *        vol_obj = NULL; /* Object stored in ID */
+    H5VL_object_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t      loc_params;
+    size_t                 obj_name_len = 0;  /* Length of object's name */
+    ssize_t                ret_value    = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "ixz", id, name, size);
@@ -943,7 +943,7 @@ H5Iget_name(hid_t id, char *name /*out*/, size_t size)
     loc_params.obj_type = H5I_get_type(id);
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_OBJECT_GET_NAME;
+    vol_cb_args.op_type                = H5VL_OBJECT_GET_NAME;
     vol_cb_args.args.get_name.buf_size = size;
     vol_cb_args.args.get_name.buf      = name;
     vol_cb_args.args.get_name.name_len = &obj_name_len;

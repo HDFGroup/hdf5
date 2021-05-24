@@ -1252,10 +1252,10 @@ done:
 ssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
 {
-    H5VL_object_t *      vol_obj = NULL; /* Attribute object for ID */
-    H5VL_attr_get_args_t vol_cb_args;    /* Arguments to VOL callback */
-    size_t               attr_name_len = 0; /* Length of attribute name */
-    ssize_t              ret_value = -1; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;     /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;        /* Arguments to VOL callback */
+    size_t               attr_name_len = 0;  /* Length of attribute name */
+    ssize_t              ret_value     = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "izx", attr_id, buf_size, buf);
@@ -1306,10 +1306,10 @@ ssize_t
 H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                    char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5VL_object_t *      vol_obj = NULL; /* Attribute object for ID */
-    H5VL_attr_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_object_t *      vol_obj = NULL;    /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;       /* Arguments to VOL callback */
     size_t               attr_name_len = 0; /* Length of attribute name */
-    ssize_t              ret_value;      /* Return value */
+    ssize_t              ret_value;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("Zs", "i*sIiIohxzi", loc_id, obj_name, idx_type, order, n, name, size, lapl_id);
@@ -1378,10 +1378,10 @@ done:
 hsize_t
 H5Aget_storage_size(hid_t attr_id)
 {
-    H5VL_object_t *      vol_obj = NULL; /* Attribute object for ID */
-    H5VL_attr_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_object_t *      vol_obj = NULL;   /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;      /* Arguments to VOL callback */
     hsize_t              storage_size = 0; /* Storage size of attribute */
-    hsize_t              ret_value;      /* Return value */
+    hsize_t              ret_value;        /* Return value */
 
     FUNC_ENTER_API(0)
     H5TRACE1("h", "i", attr_id);

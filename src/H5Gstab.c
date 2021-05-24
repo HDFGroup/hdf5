@@ -713,14 +713,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n, char *name, size_t name_size,
-                          size_t *name_len)
+H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t n, char *name,
+                          size_t name_size, size_t *name_len)
 {
-    H5HL_t *         heap = NULL;         /* Pointer to local heap */
-    H5O_stab_t       stab;                /* Info about local heap & B-tree */
-    H5G_bt_it_gnbi_t udata;               /* Iteration information */
-    hbool_t          udata_valid = FALSE; /* Whether iteration information is valid */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5HL_t *         heap = NULL;           /* Pointer to local heap */
+    H5O_stab_t       stab;                  /* Info about local heap & B-tree */
+    H5G_bt_it_gnbi_t udata;                 /* Iteration information */
+    hbool_t          udata_valid = FALSE;   /* Whether iteration information is valid */
+    herr_t           ret_value   = SUCCEED; /* Return value */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));

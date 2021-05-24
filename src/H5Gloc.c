@@ -610,8 +610,8 @@ H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_
                    const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
                    H5G_own_loc_t *own_loc /*out*/)
 {
-    hbool_t *exists = (hbool_t *)_udata; /* User data passed in */
-    herr_t ret_value = SUCCEED; /* Return value */
+    hbool_t *exists    = (hbool_t *)_udata; /* User data passed in */
+    herr_t   ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -648,7 +648,7 @@ done:
 herr_t
 H5G_loc_exists(const H5G_loc_t *loc, const char *name, hbool_t *exists)
 {
-    herr_t           ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -1042,10 +1042,10 @@ done:
  */
 herr_t
 H5G_loc_get_comment(const H5G_loc_t *loc, const char *name, char *comment /*out*/, size_t bufsize,
-    size_t *comment_len)
+                    size_t *comment_len)
 {
-    H5G_loc_gc_t udata;          /* User data for traversal callback */
-    herr_t        ret_value = SUCCEED;            /* Return value */
+    H5G_loc_gc_t udata;               /* User data for traversal callback */
+    herr_t       ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -203,7 +203,8 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
         case H5VL_OBJECT_GET_NAME: {
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
                 /* Retrieve object's name */
-                if (H5G_get_name(&loc, args->args.get_name.buf, args->args.get_name.buf_size, args->args.get_name.name_len, NULL) < 0)
+                if (H5G_get_name(&loc, args->args.get_name.buf, args->args.get_name.buf_size,
+                                 args->args.get_name.name_len, NULL) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve object name")
             } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_TOKEN) {
@@ -220,7 +221,8 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                                 "can't deserialize object token into address")
 
                 /* Retrieve object's name */
-                if (H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, args->args.get_name.buf, args->args.get_name.buf_size, args->args.get_name.name_len) < 0)
+                if (H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, args->args.get_name.buf,
+                                         args->args.get_name.buf_size, args->args.get_name.name_len) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't determine object name")
             } /* end else-if */
             else
@@ -261,11 +263,12 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
                 if (H5G_loc_info(&loc, ".", args->args.get_info.oinfo, args->args.get_info.fields) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
-            }                                                   /* end if */
+            } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) {
-                if (H5G_loc_info(&loc, loc_params->loc_data.loc_by_name.name, args->args.get_info.oinfo, args->args.get_info.fields) < 0)
+                if (H5G_loc_info(&loc, loc_params->loc_data.loc_by_name.name, args->args.get_info.oinfo,
+                                 args->args.get_info.fields) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
-            }                                                  /* end else-if */
+            } /* end else-if */
             else if (loc_params->type == H5VL_OBJECT_BY_IDX) {
                 H5G_loc_t  obj_loc;  /* Location used to open group */
                 H5G_name_t obj_path; /* Opened object group hier. path */
@@ -369,7 +372,8 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
 
                 /* Encode token */
-                if (H5VL_native_addr_to_token(loc.oloc->file, H5I_FILE, obj_loc.oloc->addr, args->args.lookup.token_ptr) < 0)
+                if (H5VL_native_addr_to_token(loc.oloc->file, H5I_FILE, obj_loc.oloc->addr,
+                                              args->args.lookup.token_ptr) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL,
                                 "can't serialize address into object token")
 
@@ -388,12 +392,14 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
 
             /* Call internal object visitation routine */
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
-                if ((ret_value = H5O__visit(&loc, ".", visit_args->idx_type, visit_args->order, visit_args->op, visit_args->op_data, visit_args->fields)) < 0)
+                if ((ret_value = H5O__visit(&loc, ".", visit_args->idx_type, visit_args->order,
+                                            visit_args->op, visit_args->op_data, visit_args->fields)) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
             } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) {
-                if ((ret_value = H5O__visit(&loc, loc_params->loc_data.loc_by_name.name, visit_args->idx_type, visit_args->order, visit_args->op,
-                                            visit_args->op_data, visit_args->fields)) < 0)
+                if ((ret_value = H5O__visit(&loc, loc_params->loc_data.loc_by_name.name, visit_args->idx_type,
+                                            visit_args->order, visit_args->op, visit_args->op_data,
+                                            visit_args->fields)) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
             } /* end else-if */
             else
@@ -436,13 +442,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
-                             H5VL_optional_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
-                             void H5_ATTR_UNUSED **req)
+H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
+                             hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5G_loc_t loc;                 /* Location of group */
-    H5VL_native_object_optional_args_t *opt_args = args->args; /* Pointer to native operation's arguments */
-    herr_t    ret_value = SUCCEED; /* Return value */
+    H5G_loc_t                           loc;                    /* Location of group */
+    H5VL_native_object_optional_args_t *opt_args  = args->args; /* Pointer to native operation's arguments */
+    herr_t                              ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -460,7 +465,8 @@ H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
             }                                                   /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Oget_comment_by_name */
-                if (H5G_loc_get_comment(&loc, loc_params->loc_data.loc_by_name.name, gc_args->buf, gc_args->buf_size, gc_args->comment_len) < 0)
+                if (H5G_loc_get_comment(&loc, loc_params->loc_data.loc_by_name.name, gc_args->buf,
+                                        gc_args->buf_size, gc_args->comment_len) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
             } /* end else-if */
             else
@@ -476,7 +482,8 @@ H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
             }                                                   /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Oset_comment_by_name */
-                if (H5G_loc_set_comment(&loc, loc_params->loc_data.loc_by_name.name, opt_args->set_comment.comment) < 0)
+                if (H5G_loc_set_comment(&loc, loc_params->loc_data.loc_by_name.name,
+                                        opt_args->set_comment.comment) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
             } /* end else-if */
             else
@@ -519,7 +526,8 @@ H5VL__native_object_optional(void *obj, const H5VL_loc_params_t *loc_params,
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
             }                                                   /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Oget_info_by_name */
-                if (H5G_loc_native_info(&loc, loc_params->loc_data.loc_by_name.name, gni_args->ninfo, gni_args->fields) < 0)
+                if (H5G_loc_native_info(&loc, loc_params->loc_data.loc_by_name.name, gni_args->ninfo,
+                                        gni_args->fields) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
             }                                                  /* end else-if */
             else if (loc_params->type == H5VL_OBJECT_BY_IDX) { /* H5Oget_info_by_idx */

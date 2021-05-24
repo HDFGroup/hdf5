@@ -213,7 +213,7 @@ H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5
                              size_t *name_len)
 {
     H5G_link_table_t ltable    = {0, NULL}; /* Link table */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t           ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 

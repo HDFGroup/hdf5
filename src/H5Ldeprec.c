@@ -141,13 +141,13 @@ herr_t
 H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate1_t op,
             void *op_data)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;
-    H5I_type_t        id_type; /* Type of ID */
-    H5L_shim_data_t   shim_data;
-    hbool_t           is_native_vol_obj;
-    herr_t            ret_value; /* Return value */
+    H5VL_object_t *           vol_obj = NULL; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t         loc_params;
+    H5I_type_t                id_type; /* Type of ID */
+    H5L_shim_data_t           shim_data;
+    hbool_t                   is_native_vol_obj;
+    herr_t                    ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iIiIo*hLi*x", group_id, idx_type, order, idx_p, op, op_data);
@@ -183,16 +183,17 @@ H5Literate1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
     shim_data.real_op_data = op_data;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_LINK_ITER;
+    vol_cb_args.op_type                = H5VL_LINK_ITER;
     vol_cb_args.args.iterate.recursive = FALSE;
-    vol_cb_args.args.iterate.idx_type = idx_type;
-    vol_cb_args.args.iterate.order = order;
-    vol_cb_args.args.iterate.idx_p = idx_p;
-    vol_cb_args.args.iterate.op = H5L__iterate2_shim;
-    vol_cb_args.args.iterate.op_data = &shim_data;
+    vol_cb_args.args.iterate.idx_type  = idx_type;
+    vol_cb_args.args.iterate.order     = order;
+    vol_cb_args.args.iterate.idx_p     = idx_p;
+    vol_cb_args.args.iterate.op        = H5L__iterate2_shim;
+    vol_cb_args.args.iterate.op_data   = &shim_data;
 
     /* Iterate over the links */
-    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                        H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -227,12 +228,12 @@ herr_t
 H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                     hsize_t *idx_p, H5L_iterate1_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;
-    H5L_shim_data_t   shim_data;
-    hbool_t           is_native_vol_obj;
-    herr_t            ret_value; /* Return value */
+    H5VL_object_t *           vol_obj = NULL; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t         loc_params;
+    H5L_shim_data_t           shim_data;
+    hbool_t                   is_native_vol_obj;
+    herr_t                    ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "i*sIiIo*hLi*xi", loc_id, group_name, idx_type, order, idx_p, op, op_data, lapl_id);
@@ -275,16 +276,17 @@ H5Literate_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
     shim_data.real_op_data = op_data;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_LINK_ITER;
+    vol_cb_args.op_type                = H5VL_LINK_ITER;
     vol_cb_args.args.iterate.recursive = FALSE;
-    vol_cb_args.args.iterate.idx_type = idx_type;
-    vol_cb_args.args.iterate.order = order;
-    vol_cb_args.args.iterate.idx_p = idx_p;
-    vol_cb_args.args.iterate.op = H5L__iterate2_shim;
-    vol_cb_args.args.iterate.op_data = &shim_data;
+    vol_cb_args.args.iterate.idx_type  = idx_type;
+    vol_cb_args.args.iterate.order     = order;
+    vol_cb_args.args.iterate.idx_p     = idx_p;
+    vol_cb_args.args.iterate.op        = H5L__iterate2_shim;
+    vol_cb_args.args.iterate.op_data   = &shim_data;
 
     /* Iterate over the links */
-    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                        H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "link iteration failed")
 
 done:
@@ -309,12 +311,12 @@ done:
 herr_t
 H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;
-    H5L_info2_t       linfo2; /* New-style link info */
-    hbool_t           is_native_vol_obj;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *      vol_obj = NULL; /* object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t    loc_params;
+    H5L_info2_t          linfo2; /* New-style link info */
+    hbool_t              is_native_vol_obj;
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sxi", loc_id, name, linfo, lapl_id);
@@ -345,7 +347,7 @@ H5Lget_info1(hid_t loc_id, const char *name, H5L_info1_t *linfo /*out*/, hid_t l
                     "H5Lget_info1 is only meant to be used with the native VOL connector")
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_LINK_GET_INFO;
+    vol_cb_args.op_type             = H5VL_LINK_GET_INFO;
     vol_cb_args.args.get_info.linfo = &linfo2;
 
     /* Get the link information */
@@ -397,12 +399,12 @@ herr_t
 H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                     hsize_t n, H5L_info1_t *linfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_link_get_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;
-    H5L_info2_t       linfo2; /* New-style link info */
-    hbool_t           is_native_vol_obj;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *      vol_obj = NULL; /* object of loc_id */
+    H5VL_link_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t    loc_params;
+    H5L_info2_t          linfo2; /* New-style link info */
+    hbool_t              is_native_vol_obj;
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIohxi", loc_id, group_name, idx_type, order, n, linfo, lapl_id);
@@ -440,7 +442,7 @@ H5Lget_info_by_idx1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
                     "H5Lget_info_by_idx1 is only meant to be used with the native VOL connector")
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_LINK_GET_INFO;
+    vol_cb_args.op_type             = H5VL_LINK_GET_INFO;
     vol_cb_args.args.get_info.linfo = &linfo2;
 
     /* Get the link information */
@@ -505,13 +507,13 @@ done:
 herr_t
 H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterate1_t op, void *op_data)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;
-    H5I_type_t        id_type; /* Type of ID */
-    H5L_shim_data_t   shim_data;
-    hbool_t           is_native_vol_obj;
-    herr_t            ret_value; /* Return value */
+    H5VL_object_t *           vol_obj = NULL; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t         loc_params;
+    H5I_type_t                id_type; /* Type of ID */
+    H5L_shim_data_t           shim_data;
+    hbool_t                   is_native_vol_obj;
+    herr_t                    ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "iIiIoLi*x", group_id, idx_type, order, op, op_data);
@@ -547,13 +549,13 @@ H5Lvisit1(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, H5L_iterat
     shim_data.real_op_data = op_data;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_LINK_ITER;
+    vol_cb_args.op_type                = H5VL_LINK_ITER;
     vol_cb_args.args.iterate.recursive = TRUE;
-    vol_cb_args.args.iterate.idx_type = idx_type;
-    vol_cb_args.args.iterate.order = order;
-    vol_cb_args.args.iterate.idx_p = NULL;
-    vol_cb_args.args.iterate.op = H5L__iterate2_shim;
-    vol_cb_args.args.iterate.op_data = &shim_data;
+    vol_cb_args.args.iterate.idx_type  = idx_type;
+    vol_cb_args.args.iterate.order     = order;
+    vol_cb_args.args.iterate.idx_p     = NULL;
+    vol_cb_args.args.iterate.op        = H5L__iterate2_shim;
+    vol_cb_args.args.iterate.op_data   = &shim_data;
 
     /* Iterate over the links */
     if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
@@ -598,12 +600,12 @@ herr_t
 H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                   H5L_iterate1_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_link_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;
-    H5L_shim_data_t   shim_data;
-    hbool_t           is_native_vol_obj;
-    herr_t            ret_value; /* Return value */
+    H5VL_object_t *           vol_obj = NULL; /* Object of loc_id */
+    H5VL_link_specific_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t         loc_params;
+    H5L_shim_data_t           shim_data;
+    hbool_t                   is_native_vol_obj;
+    herr_t                    ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIoLi*xi", loc_id, group_name, idx_type, order, op, op_data, lapl_id);
@@ -646,13 +648,13 @@ H5Lvisit_by_name1(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     shim_data.real_op_data = op_data;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_LINK_ITER;
+    vol_cb_args.op_type                = H5VL_LINK_ITER;
     vol_cb_args.args.iterate.recursive = TRUE;
-    vol_cb_args.args.iterate.idx_type = idx_type;
-    vol_cb_args.args.iterate.order = order;
-    vol_cb_args.args.iterate.idx_p = NULL;
-    vol_cb_args.args.iterate.op = H5L__iterate2_shim;
-    vol_cb_args.args.iterate.op_data = &shim_data;
+    vol_cb_args.args.iterate.idx_type  = idx_type;
+    vol_cb_args.args.iterate.order     = order;
+    vol_cb_args.args.iterate.idx_p     = NULL;
+    vol_cb_args.args.iterate.op        = H5L__iterate2_shim;
+    vol_cb_args.args.iterate.op_data   = &shim_data;
 
     /* Visit the links */
     if ((ret_value = H5VL_link_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,

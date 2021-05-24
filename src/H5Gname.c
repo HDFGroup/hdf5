@@ -469,8 +469,7 @@ H5G_name_copy(H5G_name_t *dst, const H5G_name_t *src, H5_copy_depth_t depth)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name_len,
-    hbool_t *cached)
+H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name_len, hbool_t *cached)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -481,7 +480,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name
 
     /* If the user path is available and it's not "hidden", use it */
     if (loc->path->user_path_r != NULL && loc->path->obj_hidden == 0) {
-        size_t len;  /* Length of object's name */
+        size_t len; /* Length of object's name */
 
         len = H5RS_len(loc->path->user_path_r);
 
@@ -492,7 +491,7 @@ H5G_get_name(const H5G_loc_t *loc, char *name /*out*/, size_t size, size_t *name
         } /* end if */
 
         /* Set name length, if requested */
-        if(name_len)
+        if (name_len)
             *name_len = len;
 
         /* Indicate that the name is cached, if requested */
@@ -1158,12 +1157,12 @@ done:
 herr_t
 H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, size_t *name_len)
 {
-    H5G_gnba_iter_t udata;             /* User data for iteration  */
-    size_t          len;               /* Length of path name */
-    H5G_loc_t       root_loc;          /* Root group's location    */
-    hbool_t         found_obj = FALSE; /* If we found the object   */
-    herr_t          status;            /* Status from iteration    */
-    herr_t          ret_value = SUCCEED;    /* Return value             */
+    H5G_gnba_iter_t udata;               /* User data for iteration  */
+    size_t          len;                 /* Length of path name */
+    H5G_loc_t       root_loc;            /* Root group's location    */
+    hbool_t         found_obj = FALSE;   /* If we found the object   */
+    herr_t          status;              /* Status from iteration    */
+    herr_t          ret_value = SUCCEED; /* Return value             */
 
     /* Portably clear udata struct (before FUNC_ENTER) */
     HDmemset(&udata, 0, sizeof(udata));
@@ -1214,7 +1213,7 @@ H5G_get_name_by_addr(H5F_t *f, const H5O_loc_t *loc, char *name, size_t size, si
         len = 0;
 
     /* Set path name length, if given */
-    if(name_len)
+    if (name_len)
         *name_len = len;
 
 done:

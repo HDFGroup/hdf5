@@ -160,14 +160,14 @@
 #define H5D_XFER_XFORM_CMP   H5P__dxfr_xform_cmp
 #define H5D_XFER_XFORM_CLOSE H5P__dxfr_xform_close
 /* Definitions for dataset I/O selection property */
-#define H5D_XFER_DSET_IO_SEL_SIZE sizeof(H5S_t *)
-#define H5D_XFER_DSET_IO_SEL_DEF  NULL
+#define H5D_XFER_DSET_IO_SEL_SIZE  sizeof(H5S_t *)
+#define H5D_XFER_DSET_IO_SEL_DEF   NULL
 #define H5D_XFER_DSET_IO_SEL_COPY  H5P__dxfr_dset_io_hyp_sel_copy
 #define H5D_XFER_DSET_IO_SEL_CMP   H5P__dxfr_dset_io_hyp_sel_cmp
 #define H5D_XFER_DSET_IO_SEL_CLOSE H5P__dxfr_dset_io_hyp_sel_close
 #ifdef QAK
-#define H5D_XFER_DSET_IO_SEL_ENC  H5P__dxfr_edc_enc
-#define H5D_XFER_DSET_IO_SEL_DEC  H5P__dxfr_edc_dec
+#define H5D_XFER_DSET_IO_SEL_ENC H5P__dxfr_edc_enc
+#define H5D_XFER_DSET_IO_SEL_DEC H5P__dxfr_edc_dec
 #endif /* QAK */
 
 /******************/
@@ -275,8 +275,9 @@ static const H5Z_EDC_t H5D_def_enable_edc_g = H5D_XFER_EDC_DEF;       /* Default
 static const H5Z_cb_t  H5D_def_filter_cb_g  = H5D_XFER_FILTER_CB_DEF; /* Default value for filter callback */
 static const H5T_conv_cb_t H5D_def_conv_cb_g =
     H5D_XFER_CONV_CB_DEF; /* Default value for datatype conversion callback */
-static const void *H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF; /* Default value for data transform */
-static const H5S_t *H5D_def_dset_io_sel_g = H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
+static const void * H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF; /* Default value for data transform */
+static const H5S_t *H5D_def_dset_io_sel_g =
+    H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -435,9 +436,9 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the dataset I/O selection property */
-    if (H5P__register_real(pclass, H5D_XFER_DSET_IO_SEL_NAME, H5D_XFER_DSET_IO_SEL_SIZE, &H5D_def_dset_io_sel_g, NULL,
-                           NULL, NULL, NULL, NULL,
-                           NULL, H5D_XFER_DSET_IO_SEL_COPY, H5D_XFER_DSET_IO_SEL_CMP,
+    if (H5P__register_real(pclass, H5D_XFER_DSET_IO_SEL_NAME, H5D_XFER_DSET_IO_SEL_SIZE,
+                           &H5D_def_dset_io_sel_g, NULL, NULL, NULL, NULL, NULL, NULL,
+                           H5D_XFER_DSET_IO_SEL_COPY, H5D_XFER_DSET_IO_SEL_CMP,
                            H5D_XFER_DSET_IO_SEL_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
@@ -2147,8 +2148,8 @@ static herr_t
 H5P__dxfr_dset_io_hyp_sel_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
     H5S_t *orig_space = *(H5S_t **)value; /* Original dataspace for property */
-    H5S_t *new_space = NULL;            /* New dataspace for property */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5S_t *new_space  = NULL;             /* New dataspace for property */
+    herr_t ret_value  = SUCCEED;          /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2187,9 +2188,9 @@ done:
 static int
 H5P__dxfr_dset_io_hyp_sel_cmp(const void *_space1, const void *_space2, size_t H5_ATTR_UNUSED size)
 {
-    const H5S_t *const *space1 = (const H5S_t *const *)_space1; /* Create local aliases for values */
-    const H5S_t *const *space2 = (const H5S_t *const *)_space2; /* Create local aliases for values */
-    herr_t      ret_value = 0;                    /* Return value */
+    const H5S_t *const *space1    = (const H5S_t *const *)_space1; /* Create local aliases for values */
+    const H5S_t *const *space2    = (const H5S_t *const *)_space2; /* Create local aliases for values */
+    herr_t              ret_value = 0;                             /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -2222,7 +2223,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__dxfr_dset_io_hyp_sel_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_dset_io_hyp_sel_close
  *
@@ -2238,8 +2238,8 @@ done:
 static herr_t
 H5P__dxfr_dset_io_hyp_sel_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *_value)
 {
-    H5S_t *space = *(H5S_t **)_value;   /* Dataspace for property */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5S_t *space     = *(H5S_t **)_value; /* Dataspace for property */
+    herr_t ret_value = SUCCEED;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -2278,15 +2278,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op,
-                                      const hsize_t start[], const hsize_t stride[],
-                                      const hsize_t count[], const hsize_t block[])
+H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op, const hsize_t start[],
+                                      const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5P_genplist_t * plist;                   /* Property list pointer */
-    H5S_t          * space;                   /* Dataspace to hold selection */
-    hbool_t          space_created = FALSE;   /* Whether a new dataspace has been created */
-    hbool_t          reset_prop_on_error = FALSE; /* Whether to reset the property on failure */
-    herr_t           ret_value     = SUCCEED; /* return value */
+    H5P_genplist_t *plist;                         /* Property list pointer */
+    H5S_t *         space;                         /* Dataspace to hold selection */
+    hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
+    hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
+    herr_t          ret_value           = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "iIuSs*h*h*h*h", plist_id, rank, op, start, stride, count, block);
@@ -2320,7 +2319,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
 
     /* Check for operation on existing dataspace selection */
     if (NULL != space) {
-        int sndims;     /* Rank of existing dataspace */
+        int sndims; /* Rank of existing dataspace */
 
         /* Get dimensions from current dataspace for selection */
         if ((sndims = H5S_GET_EXTENT_NDIMS(space)) < 0)
@@ -2343,15 +2342,15 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
             else
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "different rank for previous and new selections")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Check for first time called */
     if (NULL == space) {
-        hsize_t dims[H5S_MAX_RANK];     /* Dimensions for new dataspace */
-        unsigned u;                     /* Local index variable */
+        hsize_t  dims[H5S_MAX_RANK]; /* Dimensions for new dataspace */
+        unsigned u;                  /* Local index variable */
 
         /* Initialize dimensions to largest possible actual size */
-        for(u = 0; u < rank; u++)
+        for (u = 0; u < rank; u++)
             dims[u] = (H5S_UNLIMITED - 1);
 
         /* Create dataspace of the correct dimensionality, with maximum dimensions */
@@ -2367,7 +2366,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
     /* Update property list (takes ownership of dataspace, if new) */
     if (H5P_poke(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection")
-    space_created = FALSE;      /* Reset now that property owns the dataspace */
+    space_created = FALSE; /* Reset now that property owns the dataspace */
 
 done:
     /* Cleanup on failure */
@@ -2380,4 +2379,3 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dataset_io_hyperslab_selection() */
-

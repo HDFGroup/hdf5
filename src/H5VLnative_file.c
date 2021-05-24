@@ -391,17 +391,17 @@ herr_t
 H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
                            void H5_ATTR_UNUSED **req)
 {
-    H5F_t *f         = (H5F_t *)obj;    /* File */
-    H5VL_native_file_optional_args_t *opt_args = args->args; /* Pointer to native operation's arguments */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5F_t *                           f         = (H5F_t *)obj; /* File */
+    H5VL_native_file_optional_args_t *opt_args  = args->args;   /* Pointer to native operation's arguments */
+    herr_t                            ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     switch (args->op_type) {
         /* H5Fget_filesize */
         case H5VL_NATIVE_FILE_GET_SIZE: {
-            haddr_t  max_eof_eoa; /* Maximum of the EOA & EOF */
-            haddr_t  base_addr;   /* Base address for the file */
+            haddr_t max_eof_eoa; /* Maximum of the EOA & EOF */
+            haddr_t base_addr;   /* Base address for the file */
 
             /* Get the actual file size & base address */
             if (H5F__get_max_eof_eoa(f, &max_eof_eoa) < 0)
@@ -409,7 +409,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             base_addr = H5FD_get_base_addr(f->shared->lf);
 
             /* Convert relative base address for file to absolute address */
-            *opt_args->get_size.size =  (hsize_t)(max_eof_eoa + base_addr);
+            *opt_args->get_size.size = (hsize_t)(max_eof_eoa + base_addr);
 
             break;
         }
@@ -441,7 +441,8 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             H5VL_native_file_get_free_sections_t *gfs_args = &opt_args->get_free_sections;
 
             /* Go get the free-space section information in the file */
-            if (H5MF_get_free_sections(f, gfs_args->type, gfs_args->nsects, gfs_args->sect_info, gfs_args->sect_count) < 0)
+            if (H5MF_get_free_sections(f, gfs_args->type, gfs_args->nsects, gfs_args->sect_info,
+                                       gfs_args->sect_count) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
 
             break;
@@ -487,7 +488,8 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             H5VL_native_file_get_mdc_size_t *gms_args = &opt_args->get_mdc_size;
 
             /* Get the size data */
-            if (H5AC_get_cache_size(f->shared->cache, gms_args->max_size, gms_args->min_clean_size, gms_args->cur_size, gms_args->cur_num_entries) < 0)
+            if (H5AC_get_cache_size(f->shared->cache, gms_args->max_size, gms_args->min_clean_size,
+                                    gms_args->cur_size, gms_args->cur_num_entries) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get metadata cache size")
 
             break;
@@ -571,7 +573,8 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
             H5VL_native_file_get_mdc_logging_status_t *gmls_args = &opt_args->get_mdc_logging_status;
 
             /* Call mdc logging function */
-            if (H5C_get_logging_status(f->shared->cache, gmls_args->is_enabled, gmls_args->is_currently_logging) < 0)
+            if (H5C_get_logging_status(f->shared->cache, gmls_args->is_enabled,
+                                       gmls_args->is_currently_logging) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "unable to get logging status")
 
             break;
@@ -608,7 +611,8 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
 
             /* Get the statistics */
-            if (H5PB_get_stats(f->shared->page_buf, gpbs_args->accesses, gpbs_args->hits, gpbs_args->misses, gpbs_args->evictions, gpbs_args->bypasses) < 0)
+            if (H5PB_get_stats(f->shared->page_buf, gpbs_args->accesses, gpbs_args->hits, gpbs_args->misses,
+                               gpbs_args->evictions, gpbs_args->bypasses) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
 
             break;
@@ -627,7 +631,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
 
         /* H5Fget_eoa */
         case H5VL_NATIVE_FILE_GET_EOA: {
-            haddr_t  rel_eoa; /* Relative address of EOA */
+            haddr_t rel_eoa; /* Relative address of EOA */
 
             /* This routine will work only for drivers with this feature enabled.*/
             /* We might introduce a new feature flag in the future */
@@ -688,7 +692,8 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
         /* H5Fset_dset_no_attrs_hint */
         case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG: {
             if (H5F_set_min_dset_ohdr(f, opt_args->set_min_dset_ohdr_flag.minimize) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set file's dataset object header minimization flag")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
+                            "cannot set file's dataset object header minimization flag")
 
             break;
         }

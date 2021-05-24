@@ -441,7 +441,7 @@ H5T__ref_mem_getsize(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf
         H5VL_file_get_args_t vol_cb_args;               /* Arguments to VOL callback */
         char *               file_name = NULL;          /* Actual file name */
         char                 file_name_buf_static[256]; /* File name */
-        size_t file_name_len = 0; /* Length of file name */
+        size_t               file_name_len = 0;         /* Length of file name */
 
         /* Pass the correct encoding version for the selection depending on the
          * file libver bounds, this is later retrieved in H5S hyper encode */
@@ -583,8 +583,8 @@ H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf, s
 
     /* Get file name (if external reference) */
     if (flags) {
-        H5VL_file_get_args_t vol_cb_args; /* Arguments to VOL callback */
-        size_t file_name_len = 0; /* Length of file name */
+        H5VL_file_get_args_t vol_cb_args;       /* Arguments to VOL callback */
+        size_t               file_name_len = 0; /* Length of file name */
 
         /* Set up VOL callback arguments */
         vol_cb_args.op_type                     = H5VL_FILE_GET_NAME;
@@ -775,13 +775,13 @@ H5T__ref_disk_isnull(const H5VL_object_t *src_file, const void *src_buf, hbool_t
         *isnull = FALSE;
     }
     else {
-        H5VL_blob_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
+        H5VL_blob_specific_args_t vol_cb_args; /* Arguments to VOL callback */
 
         /* Skip the size / header */
         p = (const uint8_t *)src_buf + H5R_ENCODE_HEADER_SIZE + H5_SIZEOF_UINT32_T;
 
         /* Set up VOL callback arguments */
-        vol_cb_args.op_type           = H5VL_BLOB_ISNULL;
+        vol_cb_args.op_type             = H5VL_BLOB_ISNULL;
         vol_cb_args.args.is_null.isnull = isnull;
 
         /* Check if blob ID is "nil" */
@@ -805,10 +805,10 @@ done:
 static herr_t
 H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
 {
-    H5VL_blob_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-    uint8_t *q         = (uint8_t *)dst_buf;
-    uint8_t *p_bg      = (uint8_t *)bg_buf;
-    herr_t   ret_value = SUCCEED;
+    H5VL_blob_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+    uint8_t *                 q         = (uint8_t *)dst_buf;
+    uint8_t *                 p_bg      = (uint8_t *)bg_buf;
+    herr_t                    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
     H5T_REF_LOG_DEBUG("");
@@ -822,7 +822,7 @@ H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
         p_bg += (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
 
         /* Set up VOL callback arguments */
-        vol_cb_args.op_type           = H5VL_BLOB_DELETE;
+        vol_cb_args.op_type = H5VL_BLOB_DELETE;
 
         /* Remove blob for old data */
         if (H5VL_blob_specific(dst_file, (void *)p_bg, &vol_cb_args) < 0)
@@ -837,7 +837,7 @@ H5T__ref_disk_setnull(H5VL_object_t *dst_file, void *dst_buf, void *bg_buf)
     UINT32ENCODE(q, 0);
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_BLOB_SETNULL;
+    vol_cb_args.op_type = H5VL_BLOB_SETNULL;
 
     /* Set blob ID to "nil" */
     if (H5VL_blob_specific(dst_file, q, &vol_cb_args) < 0)
@@ -970,8 +970,8 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
 
     /* TODO Should get rid of bg stuff */
     if (p_bg) {
-        H5VL_blob_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
-        size_t p_buf_size_left = dst_size;
+        H5VL_blob_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+        size_t                    p_buf_size_left = dst_size;
 
         /* Skip the size / header */
         p_bg += (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
@@ -979,7 +979,7 @@ H5T__ref_disk_write(H5VL_object_t H5_ATTR_UNUSED *src_file, const void *src_buf,
         p_buf_size_left -= (H5_SIZEOF_UINT32_T + H5R_ENCODE_HEADER_SIZE);
 
         /* Set up VOL callback arguments */
-        vol_cb_args.op_type           = H5VL_BLOB_DELETE;
+        vol_cb_args.op_type = H5VL_BLOB_DELETE;
 
         /* Remove blob for old data */
         if (H5VL_blob_specific(dst_file, (void *)p_bg, &vol_cb_args) < 0)

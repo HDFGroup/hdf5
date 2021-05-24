@@ -771,9 +771,9 @@ herr_t
 H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                         char *name, size_t name_size, size_t *name_len)
 {
-    H5O_linfo_t linfo;          /* Link info message */
-    htri_t      linfo_exists;   /* Whether the link info message exists */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5O_linfo_t linfo;               /* Link info message */
+    htri_t      linfo_exists;        /* Whether the link info message exists */
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(oloc->addr, FAIL)
 
@@ -793,7 +793,8 @@ H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_orde
         /* Check for dense link storage */
         if (H5F_addr_defined(linfo.fheap_addr)) {
             /* Get the object's name from the dense link storage */
-            if (H5G__dense_get_name_by_idx(oloc->file, &linfo, idx_type, order, n, name, name_size, name_len) < 0)
+            if (H5G__dense_get_name_by_idx(oloc->file, &linfo, idx_type, order, n, name, name_size,
+                                           name_len) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
         } /* end if */
         else {

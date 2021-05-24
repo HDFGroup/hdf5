@@ -3119,9 +3119,9 @@ done:
 herr_t
 H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_len)
 {
-    H5FD_t *fd_ptr;         /* file driver */
-    haddr_t eoa;            /* End of file address */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5FD_t *fd_ptr;              /* file driver */
+    haddr_t eoa;                 /* End of file address */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3900,12 +3900,12 @@ done:
 hid_t
 H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 {
-    void *            vol_obj_file = NULL;               /* File object pointer */
-    H5VL_object_get_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_loc_params_t loc_params;                        /* Location parameters */
-    hid_t             file_id         = H5I_INVALID_HID; /* File ID for object */
-    hbool_t           vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    hid_t             ret_value       = H5I_INVALID_HID; /* Return value */
+    void *                 vol_obj_file = NULL;               /* File object pointer */
+    H5VL_object_get_args_t vol_cb_args;                       /* Arguments to VOL callback */
+    H5VL_loc_params_t      loc_params;                        /* Location parameters */
+    hid_t                  file_id         = H5I_INVALID_HID; /* File ID for object */
+    hbool_t                vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    hid_t                  ret_value       = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -3914,7 +3914,7 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
     loc_params.obj_type = obj_type;
 
     /* Set up VOL callback arguments */
-    vol_cb_args.op_type           = H5VL_OBJECT_GET_FILE;
+    vol_cb_args.op_type            = H5VL_OBJECT_GET_FILE;
     vol_cb_args.args.get_file.file = &vol_obj_file;
 
     /* Retrieve VOL file from object */

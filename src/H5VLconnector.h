@@ -98,8 +98,8 @@ typedef struct H5VL_loc_params_t {
 
 /* Struct for all 'optional' callbacks */
 typedef struct H5VL_optional_args_t {
-    int op_type;        /* Operation to perform */
-    void *args;         /* Pointer to operation's argument struct */
+    int   op_type; /* Operation to perform */
+    void *args;    /* Pointer to operation's argument struct */
 } H5VL_optional_args_t;
 
 /* Values for attribute 'get' operations */
@@ -151,7 +151,7 @@ typedef struct H5VL_attr_get_args_t {
 
         /* H5VL_ATTR_GET_STORAGE_SIZE */
         struct {
-            hsize_t * data_size; /* Size of attribute in file (OUT) */
+            hsize_t *data_size; /* Size of attribute in file (OUT) */
         } get_storage_size;
 
         /* H5VL_ATTR_GET_TYPE */
@@ -386,7 +386,7 @@ typedef struct H5VL_file_get_name_args_t {
     H5I_type_t type;          /* ID type of object pointer */
     size_t     buf_size;      /* Size of file name buffer (IN) */
     char *     buf;           /* Buffer for file name (OUT) */
-    size_t     *file_name_len; /* Actual length of file name (OUT) */
+    size_t *   file_name_len; /* Actual length of file name (OUT) */
 } H5VL_file_get_name_args_t;
 
 /* Parameters for file 'get_obj_ids' operation */
@@ -394,7 +394,7 @@ typedef struct H5VL_file_get_obj_ids_args_t {
     unsigned types;    /* Type of objects to count */
     size_t   max_objs; /* Size of array of object IDs */
     hid_t *  oid_list; /* Array of object IDs (OUT) */
-    size_t   *count;    /* # of objects (OUT) */
+    size_t * count;    /* # of objects (OUT) */
 } H5VL_file_get_obj_ids_args_t;
 
 /* Parameters for file 'get' operations */
@@ -483,7 +483,7 @@ typedef struct H5VL_file_specific_args_t {
 
         /* H5VL_FILE_IS_EQUAL */
         struct {
-            void *  obj2;      /* Second file object to compare against */
+            void *   obj2;      /* Second file object to compare against */
             hbool_t *same_file; /* Whether files are the same (OUT) */
         } is_equal;
     } args;
@@ -579,20 +579,20 @@ typedef struct H5VL_link_create_args_t {
     union {
         /* H5VL_LINK_CREATE_HARD */
         struct {
-            void *curr_obj;                     /* Current object */
+            void *            curr_obj;        /* Current object */
             H5VL_loc_params_t curr_loc_params; /* Location parameters for current object */
         } hard;
 
         /* H5VL_LINK_CREATE_SOFT */
         struct {
-            const char *target;         /* Target of soft link */
+            const char *target; /* Target of soft link */
         } soft;
 
         /* H5VL_LINK_CREATE_UD */
         struct {
-            H5L_type_t type;       /* Type of link to create */
-            const void *buf;       /* Buffer that contains link info */
-            size_t     buf_size;   /* Size of link info buffer */
+            H5L_type_t  type;     /* Type of link to create */
+            const void *buf;      /* Buffer that contains link info */
+            size_t      buf_size; /* Size of link info buffer */
         } ud;
     } args;
 } H5VL_link_create_args_t;
@@ -612,20 +612,20 @@ typedef struct H5VL_link_get_args_t {
     union {
         /* H5VL_LINK_GET_INFO */
         struct {
-            H5L_info2_t *linfo;      /* Pointer to link's info (OUT) */
+            H5L_info2_t *linfo; /* Pointer to link's info (OUT) */
         } get_info;
 
         /* H5VL_LINK_GET_NAME */
         struct {
-            size_t name_size;   /* Size of link name buffer (IN) */
-            char * name;        /* Buffer for link name (OUT) */
-            size_t *name_len;    /* Actual length of link name (OUT) */
+            size_t  name_size; /* Size of link name buffer (IN) */
+            char *  name;      /* Buffer for link name (OUT) */
+            size_t *name_len;  /* Actual length of link name (OUT) */
         } get_name;
 
         /* H5VL_LINK_GET_VAL */
         struct {
-            size_t buf_size;   /* Size of link value buffer (IN) */
-            void *buf;          /* Buffer for link value (OUT) */
+            size_t buf_size; /* Size of link value buffer (IN) */
+            void * buf;      /* Buffer for link value (OUT) */
         } get_val;
     } args;
 } H5VL_link_get_args_t;
@@ -639,12 +639,12 @@ typedef enum H5VL_link_specific_t {
 
 /* Parameters for link 'iterate' operation */
 typedef struct H5VL_link_iterate_args_t {
-    hbool_t         recursive;  /* Whether iteration is recursive */
-    H5_index_t      idx_type;   /* Type of index to iterate over */
-    H5_iter_order_t order;      /* Order of index iteration */
-    hsize_t *       idx_p;      /* Start/stop iteration index (OUT) */
-    H5L_iterate2_t  op;         /* Iteration callback function */
-    void *          op_data;    /* Iteration callback context */
+    hbool_t         recursive; /* Whether iteration is recursive */
+    H5_index_t      idx_type;  /* Type of index to iterate over */
+    H5_iter_order_t order;     /* Order of index iteration */
+    hsize_t *       idx_p;     /* Start/stop iteration index (OUT) */
+    H5L_iterate2_t  op;        /* Iteration callback function */
+    void *          op_data;   /* Iteration callback context */
 } H5VL_link_iterate_args_t;
 
 /* Parameters for link 'specific' operations */
@@ -654,11 +654,11 @@ typedef struct H5VL_link_specific_args_t {
     /* Parameters for each operation */
     union {
         /* H5VL_LINK_DELETE */
-            /* No args */
+        /* No args */
 
         /* H5VL_LINK_EXISTS */
         struct {
-            hbool_t *exists;     /* Whether link exists (OUT) */
+            hbool_t *exists; /* Whether link exists (OUT) */
         } exists;
 
         /* H5VL_LINK_ITER */
@@ -686,25 +686,25 @@ typedef struct H5VL_object_get_args_t {
     union {
         /* H5VL_OBJECT_GET_FILE */
         struct {
-            void **file;        /* File object (OUT) */
+            void **file; /* File object (OUT) */
         } get_file;
 
         /* H5VL_OBJECT_GET_NAME */
         struct {
-            size_t buf_size;    /* Size of name buffer (IN) */
-            char *buf;          /* Buffer for name (OUT) */
-            size_t *name_len;    /* Actual length of name (OUT) */
+            size_t  buf_size; /* Size of name buffer (IN) */
+            char *  buf;      /* Buffer for name (OUT) */
+            size_t *name_len; /* Actual length of name (OUT) */
         } get_name;
 
         /* H5VL_OBJECT_GET_TYPE */
         struct {
-            H5O_type_t *obj_type;        /* Type of object (OUT) */
+            H5O_type_t *obj_type; /* Type of object (OUT) */
         } get_type;
 
         /* H5VL_OBJECT_GET_INFO */
         struct {
-            unsigned     fields;        /* Flags for fields to retrieve */
-            H5O_info2_t *oinfo;         /* Pointer to object info (OUT) */
+            unsigned     fields; /* Flags for fields to retrieve */
+            H5O_info2_t *oinfo;  /* Pointer to object info (OUT) */
         } get_info;
     } args;
 } H5VL_object_get_args_t;
@@ -721,11 +721,11 @@ typedef enum H5VL_object_specific_t {
 
 /* Parameters for object 'visit' operation */
 typedef struct H5VL_object_visit_args_t {
-    H5_index_t      idx_type;   /* Type of index to iterate over */
-    H5_iter_order_t order;      /* Order of index iteration */
-    unsigned fields;            /* Flags for fields to provide in 'info' object for 'op' callback */
-    H5O_iterate2_t op;          /* Iteration callback function */
-    void *op_data;              /* Iteration callback context */
+    H5_index_t      idx_type; /* Type of index to iterate over */
+    H5_iter_order_t order;    /* Order of index iteration */
+    unsigned        fields;   /* Flags for fields to provide in 'info' object for 'op' callback */
+    H5O_iterate2_t  op;       /* Iteration callback function */
+    void *          op_data;  /* Iteration callback context */
 } H5VL_object_visit_args_t;
 
 /* Parameters for object 'specific' operations */
@@ -736,17 +736,17 @@ typedef struct H5VL_object_specific_args_t {
     union {
         /* H5VL_OBJECT_CHANGE_REF_COUNT */
         struct {
-            int delta;  /* Amount to modify object's refcount */
+            int delta; /* Amount to modify object's refcount */
         } change_rc;
 
         /* H5VL_OBJECT_EXISTS */
         struct {
-            hbool_t *exists;     /* Whether object exists (OUT) */
+            hbool_t *exists; /* Whether object exists (OUT) */
         } exists;
 
         /* H5VL_OBJECT_LOOKUP */
         struct {
-            H5O_token_t *token_ptr;     /* Pointer to token for lookup (OUT) */
+            H5O_token_t *token_ptr; /* Pointer to token for lookup (OUT) */
         } lookup;
 
         /* H5VL_OBJECT_VISIT */
@@ -794,13 +794,13 @@ typedef struct H5VL_request_specific_args_t {
     union {
         /* H5VL_REQUEST_GET_ERR_STACK */
         struct {
-            hid_t err_stack_id;     /* Error stack ID for operation (OUT) */
+            hid_t err_stack_id; /* Error stack ID for operation (OUT) */
         } get_err_stack;
 
         /* H5VL_REQUEST_GET_EXEC_TIME */
         struct {
-            uint64_t *exec_ts;       /* Timestamp for start of task execution (OUT) */
-            uint64_t *exec_time;     /* Duration of task execution (in ns) (OUT) */
+            uint64_t *exec_ts;   /* Timestamp for start of task execution (OUT) */
+            uint64_t *exec_time; /* Duration of task execution (in ns) (OUT) */
         } get_exec_time;
     } args;
 } H5VL_request_specific_args_t;
@@ -811,9 +811,9 @@ typedef int H5VL_request_optional_t;
 
 /* Values for 'blob' 'specific' operation */
 typedef enum H5VL_blob_specific_t {
-    H5VL_BLOB_DELETE,  /* Delete a blob (by ID) */
-    H5VL_BLOB_ISNULL,  /* Check if a blob ID is "null" */
-    H5VL_BLOB_SETNULL  /* Set a blob ID to the connector's "null" blob ID value */
+    H5VL_BLOB_DELETE, /* Delete a blob (by ID) */
+    H5VL_BLOB_ISNULL, /* Check if a blob ID is "null" */
+    H5VL_BLOB_SETNULL /* Set a blob ID to the connector's "null" blob ID value */
 } H5VL_blob_specific_t;
 
 /* Parameters for blob 'specific' operations */
@@ -823,15 +823,15 @@ typedef struct H5VL_blob_specific_args_t {
     /* Parameters for each operation */
     union {
         /* H5VL_BLOB_DELETE */
-            /* No args */
+        /* No args */
 
         /* H5VL_BLOB_ISNULL */
         struct {
-            hbool_t *isnull;     /* Whether blob ID is "null" (OUT) */
+            hbool_t *isnull; /* Whether blob ID is "null" (OUT) */
         } is_null;
 
         /* H5VL_BLOB_SETNULL */
-            /* No args */
+        /* No args */
     } args;
 } H5VL_blob_specific_args_t;
 
@@ -1044,7 +1044,8 @@ typedef struct H5VL_class_t {
     H5VL_token_class_t      token_cls;      /**< VOL connector object token class callbacks */
 
     /* Catch-all */
-    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req); /**< Optional callback */
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id,
+                       void **req); /**< Optional callback */
 } H5VL_class_t;
 //! <!-- [H5VL_class_t_snip] -->
 
@@ -1125,8 +1126,8 @@ H5_DLL herr_t H5VLfile_optional_op(const char *app_file, const char *app_func, u
 H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                     hid_t group_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_line,
-                                   hid_t loc_id, const char *name, hid_t lapl_id,
-                                   H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
+                                   hid_t loc_id, const char *name, hid_t lapl_id, H5VL_optional_args_t *args,
+                                   hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                      hid_t loc_id, const char *name, hid_t lapl_id,
                                      H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);

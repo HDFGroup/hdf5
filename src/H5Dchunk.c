@@ -7475,14 +7475,14 @@ done:
 static int
 H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
 {
-    const H5D_chunk_iter_ud_t *data = (H5D_chunk_iter_ud_t *)udata;
-    int ret_value = H5_ITER_CONT;
+    const H5D_chunk_iter_ud_t *data      = (H5D_chunk_iter_ud_t *)udata;
+    int                        ret_value = H5_ITER_CONT;
 
     FUNC_ENTER_STATIC
 
     /* Check for callback failure and pass along return value */
     if ((ret_value = (data->op)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
-                           chunk_rec->nbytes, data->op_data)) < 0)
+                                chunk_rec->nbytes, data->op_data)) < 0)
         HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
 
 done:
@@ -7545,7 +7545,8 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t op, void *op_data)
         ud.op_data = op_data;
 
         /* Iterate over the allocated chunks calling the iterator callback */
-        if ((ret_value = (dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
+        if ((ret_value =
+                 (dset->shared->layout.storage.u.chunk.ops->iterate)(&idx_info, H5D__chunk_iter_cb, &ud)) < 0)
             HERROR(H5E_DATASET, H5E_CANTNEXT, "chunk iteration failed");
     } /* end if H5F_addr_defined */
 

@@ -8064,8 +8064,8 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
  *
  */
 H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op,
-                                                 const hsize_t start[], const hsize_t stride[],
-                                                 const hsize_t count[], const hsize_t block[]);
+                                                    const hsize_t start[], const hsize_t stride[],
+                                                    const hsize_t count[], const hsize_t block[]);
 
 /* Link creation property list (LCPL) routines */
 /**
@@ -9319,7 +9319,6 @@ H5_DLL herr_t H5Pset_copy_object(hid_t plist_id, unsigned copy_options);
  *
  */
 H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data);
-
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

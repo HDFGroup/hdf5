@@ -89,12 +89,12 @@
 herr_t
 H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo /*out*/)
 {
-    H5VL_object_t *vol_obj = NULL;
-    H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_native_file_optional_args_t file_opt_args;    /* Arguments for optional operation */
-    H5I_type_t     type;
-    H5F_info2_t    finfo2;              /* Current file info struct */
-    herr_t         ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                  vol_obj = NULL;
+    H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
+    H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
+    H5I_type_t                       type;
+    H5F_info2_t                      finfo2;              /* Current file info struct */
+    herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", obj_id, finfo);
@@ -114,10 +114,10 @@ H5Fget_info1(hid_t obj_id, H5F_info1_t *finfo /*out*/)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Set up VOL callback arguments */
-    file_opt_args.get_info.type = type;
+    file_opt_args.get_info.type  = type;
     file_opt_args.get_info.finfo = &finfo2;
-    vol_cb_args.op_type           = H5VL_NATIVE_FILE_GET_INFO;
-    vol_cb_args.args = &file_opt_args;
+    vol_cb_args.op_type          = H5VL_NATIVE_FILE_GET_INFO;
+    vol_cb_args.args             = &file_opt_args;
 
     /* Get the file information */
     if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
@@ -148,9 +148,9 @@ done:
 htri_t
 H5Fis_hdf5(const char *name)
 {
-    H5VL_file_specific_args_t vol_cb_args; /* Arguments to VOL callback */
-    hbool_t is_accessible = FALSE;      /* Whether file is accessible */
-    htri_t                    ret_value;   /* Return value */
+    H5VL_file_specific_args_t vol_cb_args;           /* Arguments to VOL callback */
+    hbool_t                   is_accessible = FALSE; /* Whether file is accessible */
+    htri_t                    ret_value;             /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE1("t", "*s", name);
@@ -213,11 +213,11 @@ done:
 herr_t
 H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
 {
-    H5VL_object_t *vol_obj;                       /* File as VOL object           */
-    H5VL_optional_args_t vol_cb_args;        /* Arguments to VOL callback */
-    H5VL_native_file_optional_args_t file_opt_args;    /* Arguments for optional operation */
-    H5F_libver_t   low       = H5F_LIBVER_LATEST; /* Low bound 		    */
-    herr_t         ret_value = SUCCEED;           /* Return value                 */
+    H5VL_object_t *                  vol_obj;                       /* File as VOL object           */
+    H5VL_optional_args_t             vol_cb_args;                   /* Arguments to VOL callback */
+    H5VL_native_file_optional_args_t file_opt_args;                 /* Arguments for optional operation */
+    H5F_libver_t                     low       = H5F_LIBVER_LATEST; /* Low bound 		    */
+    herr_t                           ret_value = SUCCEED;           /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", file_id, latest_format);
@@ -237,10 +237,10 @@ H5Fset_latest_format(hid_t file_id, hbool_t latest_format)
         low = H5F_LIBVER_EARLIEST;
 
     /* Set up VOL callback arguments */
-    file_opt_args.set_libver_bounds.low = low;
+    file_opt_args.set_libver_bounds.low  = low;
     file_opt_args.set_libver_bounds.high = H5F_LIBVER_LATEST;
-    vol_cb_args.op_type           = H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS;
-    vol_cb_args.args = &file_opt_args;
+    vol_cb_args.op_type                  = H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS;
+    vol_cb_args.args                     = &file_opt_args;
 
     /* Set the library's version bounds */
     if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)

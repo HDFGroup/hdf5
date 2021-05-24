@@ -50,8 +50,8 @@
 /********************/
 
 /* Helper routines for read/write API calls */
-static herr_t H5VL__native_dataset_io_setup(H5D_t *dset, hid_t dxpl_id, hid_t file_space_id, hid_t mem_space_id,
-                                            H5S_t **file_space, H5S_t **mem_space);
+static herr_t H5VL__native_dataset_io_setup(H5D_t *dset, hid_t dxpl_id, hid_t file_space_id,
+                                            hid_t mem_space_id, H5S_t **file_space, H5S_t **mem_space);
 
 /*********************/
 /* Package Variables */
@@ -94,8 +94,8 @@ H5VL__native_dataset_io_setup(H5D_t *dset, hid_t dxpl_id, hid_t file_space_id, h
     else if (H5S_BLOCK == file_space_id)
         HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "H5S_BLOCK is not allowed for file dataspace")
     else if (H5S_PLIST == file_space_id) {
-        H5P_genplist_t * plist;                   /* Property list pointer */
-        H5S_t          * space;                   /* Dataspace to hold selection */
+        H5P_genplist_t *plist; /* Property list pointer */
+        H5S_t *         space; /* Dataspace to hold selection */
 
         /* Get the plist structure */
         if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
@@ -282,7 +282,8 @@ H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
 
     /* Get file & memory dataspaces */
-    if (H5VL__native_dataset_io_setup(dset, dxpl_id, file_space_id, mem_space_id, &file_space, &mem_space) < 0)
+    if (H5VL__native_dataset_io_setup(dset, dxpl_id, file_space_id, mem_space_id, &file_space, &mem_space) <
+        0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up file and memory dataspaces")
 
     /* Set DXPL for operation */
@@ -332,7 +333,8 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
 
     /* Get file & memory dataspaces */
-    if (H5VL__native_dataset_io_setup(dset, dxpl_id, file_space_id, mem_space_id, &file_space, &mem_space) < 0)
+    if (H5VL__native_dataset_io_setup(dset, dxpl_id, file_space_id, mem_space_id, &file_space, &mem_space) <
+        0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up file and memory dataspaces")
 
     /* Set DXPL for operation */
@@ -493,9 +495,9 @@ done:
 herr_t
 H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *dset      = (H5D_t *)obj; /* Dataset */
-    H5VL_native_dataset_optional_args_t *opt_args = args->args; /* Pointer to native operation's arguments */
-    herr_t ret_value = SUCCEED;      /* Return value */
+    H5D_t *                              dset      = (H5D_t *)obj; /* Dataset */
+    H5VL_native_dataset_optional_args_t *opt_args  = args->args; /* Pointer to native operation's arguments */
+    herr_t                               ret_value = SUCCEED;    /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -513,7 +515,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                     /* Convert the chunk indexing type to version 1 B-tree if not */
                     if (dset->shared->layout.u.chunk.idx_type != H5D_CHUNK_IDX_BTREE)
                         if (H5D__format_convert(dset) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to downgrade chunk indexing type for dataset")
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL,
+                                        "unable to downgrade chunk indexing type for dataset")
                     break;
 
                 case H5D_CONTIGUOUS:
@@ -521,7 +524,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                     /* Downgrade the layout version to 3 if greater than 3 */
                     if (dset->shared->layout.version > H5O_LAYOUT_VERSION_DEFAULT)
                         if (H5D__format_convert(dset) < 0)
-                            HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL, "unable to downgrade layout version for dataset")
+                            HGOTO_ERROR(H5E_DATASET, H5E_CANTLOAD, FAIL,
+                                        "unable to downgrade layout version for dataset")
                     break;
 
                 case H5D_VIRTUAL:
@@ -569,7 +573,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dget_num_chunks */
         case H5VL_NATIVE_DATASET_GET_NUM_CHUNKS: {
             H5VL_native_dataset_get_num_chunks_t *gnc_args = &opt_args->get_num_chunks;
-            const H5S_t *space    = NULL;
+            const H5S_t *                         space    = NULL;
 
             HDassert(dset->shared);
             HDassert(dset->shared->space);
@@ -579,7 +583,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 space = dset->shared->space;
             else /*  otherwise, use the given space ID */
                 if (NULL == (space = (const H5S_t *)H5I_object_verify(gnc_args->space_id, H5I_DATASPACE)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
 
             /* Make sure the dataset is chunked */
             if (H5D_CHUNKED != dset->shared->layout.type)
@@ -595,7 +599,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dget_chunk_info */
         case H5VL_NATIVE_DATASET_GET_CHUNK_INFO_BY_IDX: {
             H5VL_native_dataset_get_chunk_info_by_idx_t *gcibi_args = &opt_args->get_chunk_info_by_idx;
-            const H5S_t *space;
+            const H5S_t *                                space;
 
             HDassert(dset->shared);
             HDassert(dset->shared->space);
@@ -605,14 +609,15 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 space = dset->shared->space;
             else /*  otherwise, use the given space ID */
                 if (NULL == (space = (const H5S_t *)H5I_object_verify(gcibi_args->space_id, H5I_DATASPACE)))
-                    HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a valid dataspace ID")
 
             /* Make sure the dataset is chunked */
             if (H5D_CHUNKED != dset->shared->layout.type)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
 
             /* Call private function */
-            if (H5D__get_chunk_info(dset, space, gcibi_args->chk_index, gcibi_args->offset, gcibi_args->filter_mask, gcibi_args->addr, gcibi_args->size) < 0)
+            if (H5D__get_chunk_info(dset, space, gcibi_args->chk_index, gcibi_args->offset,
+                                    gcibi_args->filter_mask, gcibi_args->addr, gcibi_args->size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by index")
 
             break;
@@ -629,7 +634,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
 
             /* Call private function */
-            if (H5D__get_chunk_info_by_coord(dset, gcibc_args->offset, gcibc_args->filter_mask, gcibc_args->addr, gcibc_args->size) < 0)
+            if (H5D__get_chunk_info_by_coord(dset, gcibc_args->offset, gcibc_args->filter_mask,
+                                             gcibc_args->addr, gcibc_args->size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't get chunk info by its logical coordinates")
 
             break;
@@ -638,7 +644,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dread_chunk */
         case H5VL_NATIVE_DATASET_CHUNK_READ: {
             H5VL_native_dataset_chunk_read_t *chunk_read_args = &opt_args->chunk_read;
-            hsize_t        offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
+            hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
 
             /* Check arguments */
             if (NULL == dset->oloc.file)
@@ -653,7 +659,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array")
 
             /* Read the raw chunk */
-            if (H5D__chunk_direct_read(dset, offset_copy, &chunk_read_args->filters, chunk_read_args->buf) < 0)
+            if (H5D__chunk_direct_read(dset, offset_copy, &chunk_read_args->filters, chunk_read_args->buf) <
+                0)
                 HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read unprocessed chunk data")
 
             break;
@@ -662,7 +669,7 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
         /* H5Dwrite_chunk */
         case H5VL_NATIVE_DATASET_CHUNK_WRITE: {
             H5VL_native_dataset_chunk_write_t *chunk_write_args = &opt_args->chunk_write;
-            hsize_t        offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
+            hsize_t offset_copy[H5O_LAYOUT_NDIMS]; /* Internal copy of chunk offset */
 
             /* Check arguments */
             if (NULL == dset->oloc.file)
@@ -677,7 +684,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "failure to copy offset array")
 
             /* Write chunk */
-            if (H5D__chunk_direct_write(dset, chunk_write_args->filters, offset_copy, chunk_write_args->size, chunk_write_args->buf) < 0)
+            if (H5D__chunk_direct_write(dset, chunk_write_args->filters, offset_copy, chunk_write_args->size,
+                                        chunk_write_args->buf) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write unprocessed chunk data")
 
             break;
@@ -710,7 +718,8 @@ H5VL__native_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a chunked dataset")
 
             /* Call private function */
-            if ((ret_value = H5D__chunk_iter(dset, opt_args->chunk_iter.op, opt_args->chunk_iter.op_data)) < 0)
+            if ((ret_value = H5D__chunk_iter(dset, opt_args->chunk_iter.op, opt_args->chunk_iter.op_data)) <
+                0)
                 HERROR(H5E_DATASET, H5E_BADITER, "chunk iteration failed");
 
             break;

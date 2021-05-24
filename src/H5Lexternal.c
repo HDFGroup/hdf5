@@ -173,8 +173,8 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
 
     /* Make callback if it exists */
     if (cb_info.func) {
-        const char *parent_file_name; /* Parent file name */
-        size_t     group_name_len = 0;   /* Length of parent group name */
+        const char *parent_file_name;   /* Parent file name */
+        size_t      group_name_len = 0; /* Length of parent group name */
 
         /* Get parent file name */
         parent_file_name = H5F_OPEN_NAME(loc.oloc->file);

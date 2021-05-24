@@ -158,8 +158,8 @@ H5VL__native_blob_specific(void *obj, void *blob_id, H5VL_blob_specific_args_t *
 
     switch (args->op_type) {
         case H5VL_BLOB_ISNULL: {
-            const uint8_t *id     = (const uint8_t *)blob_id; /* Pointer to the blob ID */
-            haddr_t        addr; /* Sequence's heap address */
+            const uint8_t *id = (const uint8_t *)blob_id; /* Pointer to the blob ID */
+            haddr_t        addr;                          /* Sequence's heap address */
 
             /* Get the heap address */
             H5F_addr_decode(f, &id, &addr);
