@@ -33,6 +33,7 @@
 #include "H5Iprivate.h"  /* IDs                                              */
 #include "H5MMprivate.h" /* Memory management                                */
 #include "H5Pprivate.h"  /* Property lists                                   */
+#include "H5PLprivate.h" /* Plugins                                          */
 #include "H5VLpkg.h"     /* Virtual Object Layer                             */
 
 /****************/
@@ -42,6 +43,16 @@
 /******************/
 /* Local Typedefs */
 /******************/
+
+/* Structure used when trying to find a
+ * VOL connector to open a given file with.
+ */
+typedef struct H5VL_file_open_find_connector_t {
+    const char *           filename;
+    const H5VL_class_t *   cls;
+    H5VL_connector_prop_t *connector_prop;
+    hid_t                  fapl_id;
+} H5VL_file_open_find_connector_t;
 
 /********************/
 /* Package Typedefs */
@@ -101,6 +112,8 @@ static void * H5VL__file_create(const H5VL_class_t *cls, const char *name, unsig
                                 hid_t fapl_id, hid_t dxpl_id, void **req);
 static void * H5VL__file_open(const H5VL_class_t *cls, const char *name, unsigned flags, hid_t fapl_id,
                               hid_t dxpl_id, void **req);
+static herr_t H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_info,
+                                                void *op_data);
 static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_t get_type, hid_t dxpl_id,
                              void **req, va_list arguments);
 static herr_t H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type,
@@ -3347,6 +3360,98 @@ done:
 } /* end H5VL__file_open() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__file_open_find_connector_cb
+ *
+ * Purpose:     Iteration callback for H5PL_iterate that tries to find the
+ *              correct VOL connector to open a file with when
+ *              H5VL_file_open fails for its given VOL connector. Iterates
+ *              through all of the available VOL connector plugins until
+ *              H5Fis_accessible returns true for the given filename and
+ *              VOL connector.
+ *
+ * Return:      H5_ITER_CONT if current plugin can't open the given file
+ *              H5_ITER_STOP if current plugin can open given file
+ *              H5_ITER_ERROR if an error occurs while trying to determine
+ *                  if current plugin can open given file.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_info, void *op_data)
+{
+    H5VL_file_open_find_connector_t *udata = (H5VL_file_open_find_connector_t *)op_data;
+    const H5VL_class_t *             cls   = (const H5VL_class_t *)plugin_info;
+    H5P_genplist_t *                 fapl_plist;
+    H5P_genplist_t *                 fapl_plist_copy;
+    herr_t                           status;
+    htri_t                           is_accessible = FALSE;
+    hid_t                            connector_id  = H5I_INVALID_HID;
+    hid_t                            fapl_id       = H5I_INVALID_HID;
+    herr_t                           ret_value     = H5_ITER_CONT;
+
+    FUNC_ENTER_STATIC
+
+    HDassert(udata);
+    HDassert(udata->filename);
+    HDassert(udata->connector_prop);
+    HDassert(cls);
+    HDassert(plugin_type == H5PL_TYPE_VOL);
+
+    /* Silence compiler */
+    (void)plugin_type;
+
+    udata->cls = cls;
+
+    /* Attempt to register plugin as a VOL connector */
+    if ((connector_id = H5VL__register_connector_by_class(cls, TRUE, H5P_VOL_INITIALIZE_DEFAULT)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5_ITER_ERROR, "unable to register VOL connector")
+
+    /* Setup FAPL with registered VOL connector */
+    if (NULL == (fapl_plist = (H5P_genplist_t *)H5I_object_verify(udata->fapl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "not a property list")
+    if ((fapl_id = H5P_copy_plist(fapl_plist, TRUE)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, H5_ITER_ERROR, "can't copy fapl");
+    if (NULL == (fapl_plist_copy = (H5P_genplist_t *)H5I_object_verify(fapl_id, H5I_GENPROP_LST)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "not a property list")
+    if (H5P_set_vol(fapl_plist_copy, connector_id, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5_ITER_ERROR, "can't set VOL connector on fapl")
+
+    /* Check if file is accessible with given VOL connector */
+    H5E_BEGIN_TRY
+    {
+        status = H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
+                                    fapl_id, udata->filename, &is_accessible);
+    }
+    H5E_END_TRY;
+
+    /* If the file was accessible with the current VOL connector, return
+     * the FAPL with that VOL connector set on it. Errors are ignored here
+     * as some VOL connectors may not support H5Fis_accessible.
+     */
+    if (status == SUCCEED && is_accessible > 0) {
+        /* Modify 'connector_prop' to point to the VOL connector that
+         * was actually used to open the file, rather than the original
+         * VOL connector that was requested.
+         */
+        udata->connector_prop->connector_id   = connector_id;
+        udata->connector_prop->connector_info = NULL;
+
+        udata->fapl_id = fapl_id;
+        ret_value      = H5_ITER_STOP;
+    } /* end if */
+
+done:
+    if (ret_value != H5_ITER_STOP) {
+        if (fapl_id >= 0 && H5I_dec_app_ref(fapl_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close fapl")
+        if (connector_id >= 0 && H5I_dec_app_ref(connector_id) < 0)
+            HDONE_ERROR(H5E_ID, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "can't close VOL connector ID")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_open_find_connector_cb() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_file_open
  *
  * Purpose:	Opens a file through the VOL.
@@ -3360,7 +3465,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_file_open(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fapl_id,
+H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags, hid_t fapl_id,
                hid_t dxpl_id, void **req)
 {
     H5VL_class_t *cls;              /* VOL Class structure for callback info    */
@@ -3373,8 +3478,54 @@ H5VL_file_open(const H5VL_connector_prop_t *connector_prop, const char *name, un
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
+    if (NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req))) {
+        H5VL_file_open_find_connector_t find_connector_ud;
+        hbool_t                         find_connector;
+        hbool_t                         connector_available = FALSE;
+
+        /* Opening the file failed - Determine whether we should search
+         * the plugin path to see if any other VOL connectors are available
+         * to attempt to open the file with. This only occurs if no particular
+         * VOL connector was specified (either via a FAPL or the
+         * HDF5_VOL_CONNECTOR environment variable).
+         */
+        find_connector = !getenv("HDF5_VOL_CONNECTOR") && ((H5P_FILE_ACCESS_DEFAULT == fapl_id) ||
+                                                           connector_prop->connector_id == H5_DEFAULT_VOL);
+
+        if (find_connector) {
+            herr_t iter_ret;
+
+            find_connector_ud.connector_prop = connector_prop;
+            find_connector_ud.filename       = name;
+            find_connector_ud.cls            = NULL;
+            find_connector_ud.fapl_id        = fapl_id;
+
+            iter_ret = H5PL_iterate(H5PL_ITER_TYPE_VOL, H5VL__file_open_find_connector_cb,
+                                    (void *)&find_connector_ud);
+            if (iter_ret < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_BADITER, NULL,
+                            "failed to iterate over available VOL connector plugins")
+            else if (iter_ret)
+                connector_available = TRUE;
+        } /* end if */
+
+        /* If one of the available VOL connector plugins is
+         * able to open the file, clear the error stack from any
+         * previous file open failures and then open the file.
+         * Otherwise, if no VOL connectors are available, throw
+         * error from original file open failure.
+         */
+        if (connector_available) {
+            H5E_clear_stack(NULL);
+
+            if (NULL == (ret_value = H5VL__file_open(find_connector_ud.cls, name, flags,
+                                                     find_connector_ud.fapl_id, dxpl_id, req)))
+                HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "can't open file '%s' with VOL connector '%s'",
+                            name, find_connector_ud.cls->name)
+        }
+        else
+            HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

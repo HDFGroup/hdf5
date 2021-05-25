@@ -2432,6 +2432,58 @@ done:
 } /* end H5VL_wrap_register() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_check_plugin_load
+ *
+ * Purpose:     Check if a VOL connector matches the search criteria, and
+ *              can be loaded.
+ *
+ * Note:        Matching the connector's name / value, but the connector
+ *              having an incompatible version is not an error, but means
+ *              that the connector isn't a "match".  Setting the SUCCEED
+ *              value to FALSE and not failing for that case allows the
+ *              plugin framework to keep looking for other DLLs that match
+ *              and have a compatible version.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *success)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cls);
+    HDassert(key);
+    HDassert(success);
+
+    /* Which kind of key are we looking for? */
+    if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
+        /* Check if plugin name matches VOL connector class name */
+        if (cls->name && !HDstrcmp(cls->name, key->vol.u.name))
+            *success = TRUE;
+    } /* end if */
+    else {
+        /* Sanity check */
+        HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+
+        /* Check if plugin value matches VOL connector class value */
+        if (cls->value == key->vol.u.value)
+            *success = TRUE;
+    } /* end else */
+
+    /* Connector is a match, but might not be a compatible version */
+    if (*success && cls->version != H5VL_VERSION)
+        *success = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_check_plugin_load() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_setup_args
  *
  * Purpose:     Set up arguments to access an object
