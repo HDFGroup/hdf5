@@ -11,10 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Scott Wegner
- *              June 3, 2008
- *
- * Purpose: This file is used to map HDF macros to Windows functions.  This
+/* Purpose: This file is used to map HDF macros to Windows functions.  This
  *          should get included H5private mappings, so as to override them.
  *          Any macro not mapped here, however, will receive a similar mapping
  *          inside H5private.h
@@ -60,10 +57,11 @@
 #define PRIxMAX "llx"
 #endif
 
-/*
- * _MSC_VER = 1900 VS2015
- * _MSC_VER = 1800 VS2013
- * _MSC_VER = 1700 VS2012
+/* _MSC_VER = 192x  VS2019
+ * _MSC_VER = 191x  VS2017
+ * _MSC_VER = 1900  VS2015
+ * _MSC_VER = 1800  VS2013
+ * _MSC_VER = 1700  VS2012
  */
 #ifdef H5_HAVE_WIN32_API
 
@@ -127,7 +125,7 @@ typedef __int64         h5_stat_size_t;
 #endif /* MSC_VER < 1800 */
 
 /*
- * The (void*) cast just avoids a compiler warning in H5_HAVE_VISUAL_STUDIO
+ * The (void*) cast just avoids a compiler warning in MSVC
  */
 #define HDmemset(X, C, Z) memset((void *)(X), C, Z)
 
