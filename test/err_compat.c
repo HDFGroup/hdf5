@@ -320,10 +320,12 @@ test_error_compat(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(did);
         H5Sclose(sid);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     return FAIL;
 }
@@ -364,7 +366,8 @@ test_h5epush1(hid_t file)
     /* Test H5E_BEGIN_TRY */
     H5E_BEGIN_TRY
     {
-        did = H5Dcreate2(H5I_INVALID_HID, DSET_NAME, H5T_STD_I32BE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+        did =
+            H5Dcreate2(H5I_INVALID_HID, DSET_NAME, H5T_STD_I32BE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     }
     H5E_END_TRY;
 
@@ -372,7 +375,7 @@ test_h5epush1(hid_t file)
     if ((did = H5Dcreate2(file, DSET_NAME, H5T_STD_I32BE, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* Disable the library's default printing function */
+        /* Disable the library's default printing function */
 #ifdef H5_USE_16_API_DEFAULT
     if (H5Eset_auto(NULL, NULL) < 0)
 #else
@@ -382,13 +385,12 @@ test_h5epush1(hid_t file)
 
     /* Make H5Dwrite fail, verify default print is disabled */
     if (H5Dwrite(H5I_INVALID_HID, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, ipoints2) < 0)
-        H5Epush1(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_WRITEERROR,
-                 "expected H5Dwrite error");
+        H5Epush1(__FILE__, FUNC_test_error, __LINE__, H5E_ERROR, H5E_WRITEERROR, "expected H5Dwrite error");
     else
         TEST_ERROR;
 
     /* Save the error stack so the close calls don't interfere with it */
-    if((estack_id = H5Eget_current_stack()) < 0)
+    if ((estack_id = H5Eget_current_stack()) < 0)
         TEST_ERROR;
 
     /* Close open identifiers */
@@ -404,11 +406,13 @@ test_h5epush1(hid_t file)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(did);
         H5Sclose(sid);
         H5Eclose_stack(estack_id);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     return FAIL;
 }
