@@ -683,8 +683,10 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     if (NULL == (dtype = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
-    /* Create VOL object for file */
-    if (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id)))
+    /* Create VOL object for file if necessary (force_conv will be TRUE if and
+     * only if file needs to be passed to H5T_set_loc) */
+    if (H5T_GET_FORCE_CONV(dtype) &&
+        (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id))))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
 
     /* Copy the datatype */
@@ -701,10 +703,12 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     if (H5T_set_loc(file_type, file_vol_obj, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't set datatype location")
 
-    /* file_type now owns file_vol_obj */
-    if (H5T_own_vol_obj(file_type, file_vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
-    file_vol_obj = NULL;
+    /* Release our reference to file_type */
+    if (file_vol_obj) {
+        if (H5VL_free_object(file_vol_obj) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object")
+        file_vol_obj = NULL;
+    } /* end if */
 
     /* Set return value */
     ret_value = file_type_id;

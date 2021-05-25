@@ -568,6 +568,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
     } /* end if */
     else
         new_vol_obj->data = object;
+    new_vol_obj->rc = 1;
 
     /* Bump the reference count on the VOL connector */
     H5VL_conn_inc_rc(vol_connector);
@@ -844,6 +845,7 @@ H5VL_create_object(void *object, H5VL_t *vol_connector)
         HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate memory for VOL object")
     ret_value->connector = vol_connector;
     ret_value->data      = object;
+    ret_value->rc        = 1;
 
     /* Bump the reference count on the VOL connector */
     H5VL_conn_inc_rc(vol_connector);
@@ -981,6 +983,27 @@ done:
 } /* end H5VL_conn_dec_rc() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_object_inc_rc
+ *
+ * Purpose:     Wrapper to increment the ref count on a VOL object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5VL_object_inc_rc(H5VL_object_t *vol_obj)
+{
+    FUNC_ENTER_NOAPI_NOERR_NOFS
+
+    /* Check arguments */
+    HDassert(vol_obj);
+
+    /* Increment refcount for object and return */
+    FUNC_LEAVE_NOAPI(++vol_obj->rc)
+} /* end H5VL_object_inc_rc() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_free_object
  *
  * Purpose:     Wrapper to unregister an object ID with a VOL aux struct
@@ -1000,11 +1023,13 @@ H5VL_free_object(H5VL_object_t *vol_obj)
     /* Check arguments */
     HDassert(vol_obj);
 
-    /* Decrement refcount on connector */
-    if (H5VL_conn_dec_rc(vol_obj->connector) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
+    if (--vol_obj->rc == 0) {
+        /* Decrement refcount on connector */
+        if (H5VL_conn_dec_rc(vol_obj->connector) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
-    vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
+        vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

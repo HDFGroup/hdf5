@@ -1016,8 +1016,11 @@ H5T_open(const H5G_loc_t *loc)
 done:
     if (ret_value == NULL) {
         if (dt) {
-            if (shared_fo == NULL) /* Need to free shared fo */
+            if (shared_fo == NULL) { /* Need to free shared fo */
+                if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            } /* end if */
 
             H5O_loc_free(&(dt->oloc));
             H5G_name_free(&(dt->path));

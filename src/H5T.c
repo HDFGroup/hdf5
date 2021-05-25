@@ -1478,6 +1478,8 @@ done:
             if (copied_dtype)
                 (void)H5T_close_real(dt);
             else {
+                if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
                 dt         = H5FL_FREE(H5T_t, dt);
             } /* end else */
@@ -3387,6 +3389,8 @@ H5T__create(H5T_class_t type, size_t size)
 done:
     if (NULL == ret_value) {
         if (dt) {
+            if (dt->shared->owned_vol_obj && H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
             dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
             dt         = H5FL_FREE(H5T_t, dt);
         }
@@ -3429,9 +3433,12 @@ H5T__initiate_copy(const H5T_t *old_dt)
     /* Copy shared information */
     *(new_dt->shared) = *(old_dt->shared);
 
-    /* Reset VOL fields */
-    new_dt->vol_obj               = NULL;
-    new_dt->shared->owned_vol_obj = NULL;
+    /* Increment ref count on owned VOL object */
+    if (new_dt->shared->owned_vol_obj)
+        (void)H5VL_object_inc_rc(new_dt->shared->owned_vol_obj);
+
+    /* Reset vol_obj field */
+    new_dt->vol_obj = NULL;
 
     /* Set return value */
     ret_value = new_dt;
@@ -3439,8 +3446,11 @@ H5T__initiate_copy(const H5T_t *old_dt)
 done:
     if (ret_value == NULL)
         if (new_dt) {
-            if (new_dt->shared)
+            if (new_dt->shared) {
+                if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
+                    HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
                 new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
+            } /* end if */
             new_dt = H5FL_FREE(H5T_t, new_dt);
         } /* end if */
 
@@ -3769,6 +3779,8 @@ done:
     if (ret_value == NULL)
         if (new_dt) {
             HDassert(new_dt->shared);
+            if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
             new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             new_dt         = H5FL_FREE(H5T_t, new_dt);
         } /* end if */
@@ -3836,6 +3848,8 @@ H5T_copy_reopen(H5T_t *old_dt)
             /* The object is already open.  Free the H5T_shared_t struct
              * we had been using and use the one that already exists.
              * Not terribly efficient. */
+            if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
             new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             new_dt->shared = reopened_fo;
 
@@ -3872,6 +3886,8 @@ done:
     if (ret_value == NULL)
         if (new_dt) {
             HDassert(new_dt->shared);
+            if (new_dt->shared->owned_vol_obj && H5VL_free_object(new_dt->shared->owned_vol_obj) < 0)
+                HDONE_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, NULL, "unable to close owned VOL object")
             new_dt->shared = H5FL_FREE(H5T_shared_t, new_dt->shared);
             new_dt         = H5FL_FREE(H5T_t, new_dt);
         } /* end if */
@@ -3966,8 +3982,10 @@ H5T__alloc(void)
 done:
     if (ret_value == NULL)
         if (dt) {
-            if (dt->shared)
+            if (dt->shared) {
+                HDassert(!dt->shared->owned_vol_obj);
                 dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
+            } /* end if */
             dt = H5FL_FREE(H5T_t, dt);
         } /* end if */
 
@@ -4411,9 +4429,36 @@ H5T_get_size(const H5T_t *dt)
 
     /* check args */
     HDassert(dt);
+    HDassert(dt->shared);
 
     FUNC_LEAVE_NOAPI(dt->shared->size)
 } /* end H5T_get_size() */
+
+/*-------------------------------------------------------------------------
+ * Function:  H5T_get_force_conv
+ *
+ * Purpose:   Determines if the type has forced conversion. This will be
+ *            true if and only if the type keeps a pointer to a file VOL
+ *            object internally.
+ *
+ * Return:    TRUE/FALSE (never fails)
+ *
+ * Programmer:    Neil Fortner
+ *        Thursday, January  21, 2021
+ *-------------------------------------------------------------------------
+ */
+hbool_t
+H5T_get_force_conv(const H5T_t *dt)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* check args */
+    HDassert(dt);
+    HDassert(dt->shared);
+
+    FUNC_LEAVE_NOAPI(dt->shared->force_conv)
+} /* end H5T_get_force_conv() */
 
 /*-------------------------------------------------------------------------
  * Function:  H5T_cmp
@@ -5228,7 +5273,10 @@ H5T__path_find_real(const H5T_t *src, const H5T_t *dst, const char *name, H5T_co
     } /* end else-if */
 
     /* Set the flag to indicate both source and destination types are compound types
-     * for the optimization of data reading (in H5Dio.c). */
+     * for the optimization of data reading (in H5Dio.c).
+     * Make sure that path->are_compounds is only TRUE for compound types.
+     */
+    path->are_compounds = FALSE;
     if (H5T_COMPOUND == H5T_get_class(src, TRUE) && H5T_COMPOUND == H5T_get_class(dst, TRUE))
         path->are_compounds = TRUE;
 
@@ -5831,10 +5879,12 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
             case H5T_VLEN: /* Recurse on the VL information if it's VL, compound or array, then free VL
                               sequence */
-                /* Recurse if it's VL, compound, enum or array */
+                /* Recurse if it's VL, compound, enum or array (ignore references here so that we can encode
+                 * them as part of the same blob)*/
                 /* (If the force_conv flag is _not_ set, the type cannot change in size, so don't recurse) */
                 if (dt->shared->parent->shared->force_conv &&
-                    H5T_IS_COMPLEX(dt->shared->parent->shared->type)) {
+                    H5T_IS_COMPLEX(dt->shared->parent->shared->type) &&
+                    (dt->shared->parent->shared->type != H5T_REFERENCE)) {
                     if ((changed = H5T_set_loc(dt->shared->parent, file, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                     if (changed > 0)
@@ -6239,6 +6289,7 @@ H5T_own_vol_obj(H5T_t *dt, H5VL_object_t *vol_obj)
 
     /* Take ownership */
     dt->shared->owned_vol_obj = vol_obj;
+    (void)H5VL_object_inc_rc(vol_obj);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

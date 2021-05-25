@@ -282,6 +282,13 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 else
                     HDassert(0 && "Invalid VL type");
 
+                /* Release owned file */
+                if (dt->shared->owned_vol_obj) {
+                    if (H5VL_free_object(dt->shared->owned_vol_obj) < 0)
+                        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTCLOSEOBJ, FAIL, "unable to close owned VOL object")
+                    dt->shared->owned_vol_obj = NULL;
+                } /* end if */
+
                 /* Reset file pointer (since this VL is in memory) */
                 dt->shared->u.vlen.file = NULL;
                 break;
@@ -307,6 +314,10 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
                 /* Set file ID (since this VL is on disk) */
                 dt->shared->u.vlen.file = file;
+
+                /* dt now owns a reference to file */
+                if (H5T_own_vol_obj(dt, file) < 0)
+                    HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
                 break;
 
             case H5T_LOC_BADLOC:
