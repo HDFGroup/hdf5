@@ -821,7 +821,7 @@ H5O_attr_debug(H5F_t *f, hid_t dxpl_id, const void *_mesg, FILE *stream, int ind
     } /* end switch */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Character Set of Name:", s);
     HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth, "Object opened:", mesg->obj_opened);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object:", mesg->oloc.addr);
 
     /* Check for attribute creation order index on the attribute */
     if (mesg->shared->crt_idx != H5O_MAX_CRT_ORDER_IDX)

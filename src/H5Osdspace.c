@@ -505,7 +505,7 @@ H5O_sdspace_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const v
 
         HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
         for (u = 0; u < sdim->rank; u++)
-            HDfprintf(stream, "%s%Hu", u ? ", " : "", sdim->size[u]);
+            HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->size[u]);
         HDfprintf(stream, "}\n");
 
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
@@ -515,7 +515,7 @@ H5O_sdspace_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const v
                 if (H5S_UNLIMITED == sdim->max[u])
                     HDfprintf(stream, "%sUNLIM", u ? ", " : "");
                 else
-                    HDfprintf(stream, "%s%Hu", u ? ", " : "", sdim->max[u]);
+                    HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->max[u]);
             } /* end for */
             HDfprintf(stream, "}\n");
         } /* end if */

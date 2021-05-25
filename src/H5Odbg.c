@@ -345,9 +345,9 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
         } /* end if */
     }     /* end if */
 
-    HDfprintf(stream, "%*s%-*s %Zu (%Zu)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu (%zu)\n", indent, "", fwidth,
               "Number of messages (allocated):", oh->nmesgs, oh->alloc_nmesgs);
-    HDfprintf(stream, "%*s%-*s %Zu (%Zu)\n", indent, "", fwidth, "Number of chunks (allocated):", oh->nchunks,
+    HDfprintf(stream, "%*s%-*s %zu (%zu)\n", indent, "", fwidth, "Number of chunks (allocated):", oh->nchunks,
               oh->alloc_nchunks);
 
     /* debug each chunk */
@@ -356,7 +356,8 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
 
         HDfprintf(stream, "%*sChunk %d...\n", indent, "", i);
 
-        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3), "Address:", oh->chunk[i].addr);
+        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
+                  "Address:", oh->chunk[i].addr);
 
         /* Decrement chunk 0's size by the object header prefix size */
         if (0 == i) {
@@ -371,9 +372,9 @@ H5O_debug_real(H5F_t *f, hid_t dxpl_id, H5O_t *oh, haddr_t addr, FILE *stream, i
         chunk_total += chunk_size;
         gap_total += oh->chunk[i].gap;
 
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3), "Size in bytes:", chunk_size);
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3), "Size in bytes:", chunk_size);
 
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3), "Gap:", oh->chunk[i].gap);
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3), "Gap:", oh->chunk[i].gap);
     } /* end for */
 
     /* debug each message */

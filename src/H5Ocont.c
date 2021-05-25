@@ -261,7 +261,7 @@ H5O_cont_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const void
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Continuation address:", cont->addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Continuation address:", cont->addr);
 
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
               "Continuation size in bytes:", (unsigned long)(cont->size));

@@ -369,9 +369,8 @@ H5A_dense_btree2_name_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%016Hx, %02x, %u, %08lx}\n", indent, "", fwidth,
-              "Record:", (hsize_t)nrecord->id.val, (unsigned)nrecord->flags, (unsigned)nrecord->corder,
-              (unsigned long)nrecord->hash);
+    HDfprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u, %08" PRIx32 "}\n", indent, "", fwidth,
+              "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder, nrecord->hash);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_name_debug() */
@@ -521,8 +520,8 @@ H5A_dense_btree2_corder_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%016Hx, %02x, %u}\n", indent, "", fwidth, "Record:", (hsize_t)nrecord->id.val,
-              (unsigned)nrecord->flags, (unsigned)nrecord->corder);
+    HDfprintf(stream, "%*s%-*s {%016" PRIx64 ", %02" PRIx8 ", %u}\n", indent, "", fwidth,
+              "Record:", nrecord->id.val, nrecord->flags, (unsigned)nrecord->corder);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5A_dense_btree2_corder_debug() */

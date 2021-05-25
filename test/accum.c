@@ -2077,14 +2077,16 @@ accum_printf(void)
         HDprintf(" accumulated data size      == %zu\n", accum->size);
         HDfprintf(stdout, " accumulator dirty?         == %t\n", accum->dirty);
         HDprintf("=====================================================\n");
-        HDfprintf(stdout, " start of accumulated data, loc = %a\n", accum->loc);
+        HDfprintf(stdout, " start of accumulated data, loc = %" PRIuHADDR "\n", accum->loc);
         if (accum->dirty) {
-            HDfprintf(stdout, " start of dirty region, loc = %a\n", (haddr_t)(accum->loc + accum->dirty_off));
-            HDfprintf(stdout, " end of dirty region,   loc = %a\n",
+            HDfprintf(stdout, " start of dirty region, loc = %" PRIuHADDR "\n",
+                      (haddr_t)(accum->loc + accum->dirty_off));
+            HDfprintf(stdout, " end of dirty region,   loc = %" PRIuHADDR "\n",
                       (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
         } /* end if */
-        HDfprintf(stdout, " end of accumulated data,   loc = %a\n", (haddr_t)(accum->loc + accum->size));
-        HDfprintf(stdout, " end of accumulator allocation,   loc = %a\n",
+        HDfprintf(stdout, " end of accumulated data,   loc = %" PRIuHADDR "\n",
+                  (haddr_t)(accum->loc + accum->size));
+        HDfprintf(stdout, " end of accumulator allocation,   loc = %" PRIuHADDR "\n",
                   (haddr_t)(accum->loc + accum->alloc_size));
         HDprintf("=====================================================\n");
     }

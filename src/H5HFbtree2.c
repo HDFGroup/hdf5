@@ -478,8 +478,8 @@ H5HF_huge_bt2_indir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%a, %Hu, %Hu}\n", indent, "", fwidth, "Record:", nrecord->addr, nrecord->len,
-              nrecord->id);
+    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %" PRIuHSIZE "}\n", indent, "", fwidth,
+              "Record:", nrecord->addr, nrecord->len, nrecord->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_huge_bt2_indir_debug() */
@@ -681,8 +681,9 @@ H5HF_huge_bt2_filt_indir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%a, %Hu, %x, %Hu, %Hu}\n", indent, "", fwidth, "Record:", nrecord->addr,
-              nrecord->len, nrecord->filter_mask, nrecord->obj_size, nrecord->id);
+    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE ", %" PRIuHSIZE "}\n",
+              indent, "", fwidth, "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask,
+              nrecord->obj_size, nrecord->id);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_huge_bt2_filt_indir_debug() */
@@ -864,7 +865,8 @@ H5HF_huge_bt2_dir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_AT
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%a, %Hu}\n", indent, "", fwidth, "Record:", nrecord->addr, nrecord->len);
+    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE "}\n", indent, "", fwidth,
+              "Record:", nrecord->addr, nrecord->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_huge_bt2_dir_debug() */
@@ -1074,8 +1076,8 @@ H5HF_huge_bt2_filt_dir_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t 
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    HDfprintf(stream, "%*s%-*s {%a, %Hu, %x, %Hu}\n", indent, "", fwidth, "Record:", nrecord->addr,
-              nrecord->len, nrecord->filter_mask, nrecord->obj_size);
+    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIuHSIZE ", %x, %" PRIuHSIZE "}\n", indent, "", fwidth,
+              "Record:", nrecord->addr, nrecord->len, nrecord->filter_mask, nrecord->obj_size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5HF_huge_bt2_filt_dir_debug() */

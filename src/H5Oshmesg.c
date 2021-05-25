@@ -232,7 +232,8 @@ H5O_shmesg_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
     HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", mesg->version);
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth, "Shared message table address:", mesg->addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
+              "Shared message table address:", mesg->addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Number of indexes:", mesg->nindexes);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

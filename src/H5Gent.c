@@ -525,7 +525,7 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth, con
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
               "Name offset into private heap:", (unsigned long)(ent->name_off));
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object header address:", ent->header);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object header address:", ent->header);
 
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cache info type:");
     switch (ent->type) {
@@ -537,10 +537,10 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth, con
             HDfprintf(stream, "Symbol Table\n");
 
             HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Cached entry information:");
-            HDfprintf(stream, "%*s%-*s %a\n", nested_indent, "", nested_fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
                       "B-tree address:", ent->cache.stab.btree_addr);
 
-            HDfprintf(stream, "%*s%-*s %a\n", nested_indent, "", nested_fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
                       "Heap address:", ent->cache.stab.heap_addr);
             break;
 
