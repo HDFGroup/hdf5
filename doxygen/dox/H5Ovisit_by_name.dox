@@ -1,0 +1,54 @@
+/**
+ * \ingroup H5O
+ * \def H5Ovisit_by_name
+ *
+ * #H5Ovisit_by_name is a macro that is mapped to one of the following:
+ * \li #H5Ovisit_by_name3
+ * \li #H5Ovisit_by_name1
+ *
+ * \details Such macros are provided to facilitate application
+ *          compatibility. Their use and mappings are fully described in
+ *          API Compatibility Macros in HDF5; we urge you to read that
+ *          document closely.
+ *
+ *          In HDF5 versions 1.12 and after, #H5Ovisit_by_name is mapped to 
+ *          #H5Ovisit_by_name3.  In version 1.10, #H5Ovisit_by_name
+ *          is identical to #H5Ovisit_by_name1.
+ *
+ *          Specific compile-time compatibility flags and the resulting
+ *          mappings are as follows:
+ *
+ * \par
+ * <table>
+ *  <tr>
+ *      <th>Compatibility settings</th>
+ *      <th>H5Ovisit_by_name</th>
+ *  </tr>
+ *  <tr>
+ *      <td>No compatibility flag \n &nbsp;</td>
+ *      <td>#H5Ovisit_by_name3 for 1.12 and above \n
+ *          #H5Ovisit_by_name1 for 1.10 or 1.8</td>
+ *  </tr>
+ *  <tr>
+ *      <td>Emulate Release 1.12 interface</td>
+ *      <td>#H5Ovisit_by_name3</td>
+ *  </tr>
+ *  <tr>
+ *      <td>Emulate Release 1.10 or 1.8 interface</td>
+ *      <td>#H5Ovisit_by_name1</td>
+ *  </tr>
+ * </table>
+ *
+ * \version 1.12.0 The macro #H5Ovisit_by_name and function #H5Ovisit_by_name3 were added.
+ * \version 1.10.5 The macro #H5Ovisit_by_name was removed.  The functions 
+ *                 #H5Ovisit_by_name and #H5Ovisit_by_name1 are identical 
+ *                 in this release.  This change was added to restore the 
+ *                 broken API compatibility introduced in HDF5-1.10.3.
+ * \version 1.10.3 The function #H5Ovisit_by_name was renamed to #H5Ovisit_by_name1.
+ *                 The macro #H5Ovisit_by_name and the function #H5Ovisit_by_name2 
+ *                 were introduced in this release.
+ * \version 1.8.8 Fortran subroutine introduced in this release.
+ *
+ * \since 1.8.0
+ *
+ */

@@ -1,3 +1,5 @@
+ALIASES += THG="The HDF Group"
+
 ################################################################################
 # Styling
 ################################################################################
@@ -35,6 +37,9 @@ ALIASES += op{1}="\param[in] \1 Callback function"
 ALIASES += op_data="\param[in,out] op_data User-defined callback function context"
 ALIASES += op_data{1}="\param[in,out] \1 User-defined callback function context"
 
+ALIASES += op_data_in="\param[in] op_data User-defined callback function context"
+ALIASES += op_data_in{1}="\param[in] \1 User-defined callback function context"
+
 ################################################################################
 # Attributes
 ################################################################################
@@ -60,11 +65,18 @@ ALIASES += space_id{1}="\param[in] \1 Dataspace identifier"
 # Dataypes
 ################################################################################
 
-ALIASES += dtype_id="\param[in] dtype_id Datatype identifier"
-ALIASES += dtype_id{1}="\param[in] \1 Datatype identifier"
+ALIASES += type_id="\param[in] type_id Datatype identifier"
+ALIASES += type_id{1}="\param[in] \1 Datatype identifier"
 
 ALIASES += file_type_id{1}="\param[in] \1 Datatype (in-file) identifier"
 ALIASES += mem_type_id{1}="\param[in] \1 Datatype (in-memory) identifier"
+
+################################################################################
+# Errors
+################################################################################
+
+ALIASES += estack_id="\param[in] estack_id Error stack identifier"
+ALIASES += estack_id{1}="\param[in] \1 Error stack identifier"
 
 ################################################################################
 # Files
@@ -160,11 +172,32 @@ ALIASES += fgdta_loc_obj_id{1}="\loc_obj_id{\1}. The identifier may be that of a
 
 ALIASES += estack_id="\param[in] estack_id Error stack identifier"
 ALIASES += estack_id{1}="\param[in] \1 Error stack identifier"
+ALIASES += cpp_c_api_note="\attention \Bold{C++ Developers using HDF5 C-API functions beware:}\n Several functions in this C-API take function pointers or callbacks as arguments. Examples include H5Pset_elink_cb(), H5Pset_type_conv_cb(), H5Tconvert(), and H5Ewalk2(). Application code must ensure that those callback functions return normally such to allow the HDF5 to manage its resources and maintain a consistent state. For instance, those functions must not use the C \c setjmp / \c longjmp mechanism to leave those callback functions. Within the context of C++, any exceptions thrown within the callback function must be caught, such as with a \Code{catch(…)} statement. Any exception state can be placed within the provided user data function call arguments, and may be thrown again once the calling function has returned. Exceptions raised and not handled inside the callback are not supported as it might leave the HDF5 library in an inconsistent state. Similarly, using C++20 coroutines cannot be used as callbacks, since they do not support plain return statements. If a callback function yields execution to another C++20 coroutine calling HDF5 functions as well, this may lead to undefined behavior."
+ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_coll_metadata_write() \li H5Pset_all_coll_metadata_ops() \li H5Pset_coll_metadata_write() \li \ref maybe_metadata_reads"
+
+################################################################################
+# References
+################################################################################
+
+ALIASES += ref_cons_semantics="<a href=\"https://portal.hdfgroup.org/display/HDF5/Enabling+a+Strict+Consistency+Semantics+Model+in+Parallel+HDF5\">Enabling a Strict Consistency Semantics Model in Parallel HDF5</a>"
+ALIASES += ref_dld_filters="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+Dynamically+Loaded+Filters\">HDF5 Dynamically Loaded Filters</a>"
+ALIASES += ref_file_image_ops="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+File+Image+Operations\">HDF5 File Image Operations</a>"
+ALIASES += ref_filter_pipe="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+Data+Flow+Pipeline+for+H5Dread\">Data Flow Pipeline for H5Dread()</a>"
+ALIASES += ref_group_impls="<a href=\"https://portal.hdfgroup.org/display/HDF5/Groups\">Group implementations in HDF5</a>"
+ALIASES += ref_h5lib_relver="<a href=\"https://portal.hdfgroup.org/display/HDF5/HDF5+Library+Release+Version+Numbers\">HDF5 Library Release Version Numbers</a>"
+ALIASES += ref_mdc_in_hdf5="<a href=\"https://portal.hdfgroup.org/display/HDF5/Metadata+Caching+in+HDF5\">Metadata Caching in HDF5</a>"
+ALIASES += ref_mdc_logging="<a href=\"https://portal.hdfgroup.org/display/HDF5/H5F_START_MDC_LOGGING\">Metadata Cache Logging</a>"
+ALIASES += ref_news_110="<a href=\"https://portal.hdfgroup.org/display/HDF5/New+Features+in+HDF5+Release+1.10\">New Features in HDF5 Release 1.10</a>"
+ALIASES += ref_h5ocopy="<a href=\"https://portal.hdfgroup.org/display/HDF5/Copying+Committed+Datatypes+with+H5Ocopy\">Copying Committed Datatypes with H5Ocopy()</a>"
+ALIASES += ref_sencode_fmt_change="<a href=\"https://portal.hdfgroup.org/pages/viewpage.action?pageId=58100093&preview=/58100093/58100094/encode_format_RFC.pdf\">RFC H5Secnode() / H5Sdecode() Format Change</a>"
+ALIASES += ref_vlen_strings="\Emph{Creating variable-length string datatypes}"
+ALIASES += ref_vol_doc="VOL documentation"
 
 ################################################################################
 # The Usual Suspects
 ################################################################################
 
+ALIASES += click4more="(Click on a enumerator, field, or type for more information.)"
 ALIASES += csets="<table><tr><td>#H5T_CSET_ASCII</td><td>US ASCII</td></tr><tr><td>#H5T_CSET_UTF8</td><td>UTF-8 Unicode encoding</td></tr></table>"
 ALIASES += datatype_class=" \li #H5T_INTEGER \li #H5T_FLOAT \li #H5T_STRING \li #H5T_BITFIELD \li #H5T_OPAQUE \li #H5T_COMPOUND \li #H5T_REFERENCE \li #H5T_ENUM \li #H5T_VLEN \li #H5T_ARRAY"
 ALIASES += file_access="<table><tr><td>#H5F_ACC_RDWR</td><td>File was opened with read/write access.</td></tr><tr><td>#H5F_ACC_RDONLY</td><td>File was opened with read-only access.</td></tr><tr><td>#H5F_ACC_SWMR_WRITE</td><td>File was opened with read/write access for a single-writer/multiple-reader (SWMR) scenario. Note that the writer process must also open the file with the #H5F_ACC_RDWR flag.</td></tr><tr><td>#H5F_ACC_SWMR_READ</td><td>File was opened with read-only access for a single-writer/multiple-reader (SWMR) scenario. Note that the reader process must also open the file with the #H5F_ACC_RDONLY flag.</td></tr></table>"
@@ -180,5 +213,5 @@ ALIASES += scopes="<table><tr><td>#H5F_SCOPE_GLOBAL</td><td>Flushes the entire v
 ALIASES += sign_prop="<table><tr><td>#H5T_SGN_NONE</td><td>0</td><td>Unsigned integer type</td></tr><tr><td>#H5T_SGN_2</td><td>1</td><td>Two's complement signed integer type</td></tr></table>"
 ALIASES += storage_type="<table><tr><td>#H5G_STORAGE_TYPE_COMPACT</td><td>Compact storage</td></tr><tr><td>#H5G_STORAGE_TYPE_DENSE</td><td>Indexed storage</td></tr><tr><td>#H5G_STORAGE_TYPE_SYMBOL_TABLE</td><td>Symbol tables, the original HDF5 structure</td></tr></table>"
 ALIASES += str_pad_type="<table><tr><td>#H5T_STR_NULLTERM</td><td>0</td><td>Null terminate (as C does)</td></tr><tr><td>#H5T_STR_NULLPAD</td><td>1</td><td>Pad with zeros</td></tr><tr><td>#H5T_STR_SPACEPAD</td><td>2</td><td>Pad with spaces (as FORTRAN does)</td></tr></table>"
-ALIASES += virtual=" \see Supporting Functions: \li H5Pget_layout() \li H5Pset_layout() \li H5Sget_regular_hyperslab() \li H5Sis_regular_hyperslab() \li H5Sselect_hyperslab() \see VDS Functions: \li H5Pget_virtual_count() \li H5Pget_virtual_dsetname() \li H5Pget_virtual_filename() \li H5Pget_virtual_prefix() \li H5Pget_virtual_printf_gap() \li H5Pget_virtual_srcspace() \li H5Pget_virtual_view() \li H5Pget_virtual_vspace() \li H5Pset_virtual \li H5Pset_virtual_prefix() \li H5Pset_virtual_printf_gap() \li H5Pset_virtual_view()"
+ALIASES += see_virtual=" \see Supporting Functions: H5Pget_layout(), H5Pset_layout(), H5Sget_regular_hyperslab(), H5Sis_regular_hyperslab(), H5Sselect_hyperslab() \see VDS Functions: H5Pget_virtual_count(), H5Pget_virtual_dsetname(), H5Pget_virtual_filename(), H5Pget_virtual_prefix(), H5Pget_virtual_printf_gap(), H5Pget_virtual_srcspace(), H5Pget_virtual_view(), H5Pget_virtual_vspace(), H5Pset_virtual(), H5Pset_virtual_prefix(), H5Pset_virtual_printf_gap(), H5Pset_virtual_view()"
 ALIASES += obj_info_fields="<table><tr><th>Flag</th><th>Purpose</th></tr><tr><td>#H5O_INFO_BASIC</td><td>Fill in the fileno, addr, type, and rc fields</td></tr><tr> <td>#H5O_INFO_TIME</td><td>Fill in the atime, mtime, ctime, and btime fields</td></tr><tr> <td>#H5O_INFO_NUM_ATTRS</td> <td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_HDR</td><td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_META_SIZE</td><td>Fill in the meta_size field</td></tr><tr><td>#H5O_INFO_ALL</td><td>#H5O_INFO_BASIC | #H5O_INFO_TIME | #H5O_INFO_NUM_ATTRS | #H5O_INFO_HDR | #H5O_INFO_META_SIZE</td></tr></table>"

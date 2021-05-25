@@ -1,0 +1,72 @@
+/**
+ * \ingroup H5O
+ * \def H5Oget_info
+ *
+ * #H5Oget_info is a macro that is mapped to:
+ * \li #H5Oget_info3
+ * \li #H5Oget_info1
+ *
+ * \details Such macros are provided to facilitate application
+ *          compatibility. Their use and mappings are fully described in
+ *          API Compatibility Macros in HDF5; we urge you to read that
+ *          document closely.
+ *
+ *          In HDF5 versions 1.12 and after, #H5Oget_info is mapped to
+ *          #H5Oget_info3 and #H5Oget_info1 is deprecated. 
+ *          In version 1.10 #H5Oget_info is identical to #H5Oget_info1. 
+ * 
+ *          Specific compile-time compatibility flags and the resulting
+ *          mappings are as follows:
+ * \par
+ * <table>
+ *  <tr>
+ *      <th>Compatibility setting</th>
+ *      <th>H5Oget_info</th>
+ *  </tr>
+ *  <tr>
+ *      <td>No compatibility flag \n &nbsp;</td>
+ *      <td>#H5Oget_info3 (in release 1.12) \n
+ *          #H5Oget_info1 (in 1.8 or 1.10)</td>
+ *  </tr>
+ *  <tr>
+ *      <td>Emulate Release 1.12</td>
+ *      <td>#H5Oget_info3</td>
+ *  </tr>
+ *  <tr>
+ *      <td>Emulate Release 1.10/1.8 interface</td>
+ *      <td>#H5Oget_info1</td>
+ *  </tr>
+ * </table>
+ *
+ * \note    If you are iterating through a lot of different objects to
+ *          retrieve information via the #H5Oget_info family of routines,
+ *          you may see memory building up. This can be due to memory
+ *          allocation for metadata such as object headers and messages
+ *          when the iterated objects are put into the metadata cache.
+ * \note
+ *          If the memory buildup is not desirable, you can configure a
+ *          smaller cache via #H5Fset_mdc_config or set the file access
+ *          property list via #H5Pset_mdc_config. A smaller sized cache
+ *          will force metadata entries to be evicted from the cache,
+ *          thus freeing the memory associated with the entries.
+ *
+ * \version 1.12.0 The macro #H5Oget_info and the function #H5Oget_info3 
+ *                 were added, and #H5Oget_info1 was deprecated.
+ * \version 1.10.5 The macro #H5Oget_info was removed.  The functions 
+ *                 #H5Oget_info1 and #H5Oget_info are identical 
+ *                 in this release.  This change was added to restore the 
+ *                 broken API compatibility introduced in HDF5-1.10.3.
+ * \version 1.10.3 The function #H5Oget_info was renamed 
+ *                 #H5Oget_info1.  The macro #H5Oget_info and the function 
+ *                 #H5Oget_info2 were introduced in this release.
+ * \version 1.8.15 Added a note about the valid values for the \c version field 
+ *                 in the H5O_hdr_info_t structure.
+ * \version 1.8.11 Fortran subroutine introduced in this release.
+ * \version 1.8.10 Added #H5O_type_t structure to the Description section.
+ *                 Separated H5O_hdr_info_t structure from 
+ *                 #H5O_info_t in the Description section.  Clarified the 
+ *                 definition and implementation of the time fields.
+ *
+ * \since 1.8.0
+ *
+ */

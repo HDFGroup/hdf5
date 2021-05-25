@@ -29,4 +29,50 @@
 #define H5_MY_PKG_ERR  H5E_PLIST
 #define H5_MY_PKG_INIT YES
 
+/**\defgroup H5P H5P
+ * \brief Property List Interface
+ *
+ * \details The HDF5 Property List Interface provides a mechanism to take
+ *          advantage of more powerful or unusual features in HDF5.
+ *
+ *          HDF5 objects have properties or characteristics associated with
+ *          them, and there are default properties that handle the most
+ *          common needs. These default properties can be modified using the
+ *          HDF5 Property List Interface. For example, the data storage
+ *          layout property of a dataset is contiguous by default. For better
+ *          performance, the layout can be modified to be chunked or chunked
+ *          and compressed.
+ *
+ * \todo Describe concisely what the functions in this module are about.
+ *
+ * \defgroup GPLO General Property List Operations
+ * \ingroup H5P
+ * \defgroup GPLOA General Property List Operations (Advanced)
+ * \ingroup H5P
+ * \defgroup FCPL File Creation Properties
+ * \ingroup H5P
+ * \defgroup FAPL File Access Properties
+ * \ingroup H5P
+ * \defgroup GCPL Group Creation Properties
+ * \ingroup H5P
+ * \defgroup ALCAPL Attribute and Link Creation Properties
+ * \ingroup H5P
+ * \defgroup LAPL Link Access Properties
+ * \ingroup H5P
+ * \defgroup DCPL Dataset Creation Properties
+ * \ingroup H5P
+ * \defgroup DAPL Dataset Access Properties
+ * \ingroup H5P
+ * \defgroup DXPL Dataset Transfer Properties
+ * \ingroup H5P
+ * \defgroup OCPL Object Creation Properties
+ * \ingroup H5P
+ * \defgroup OCPPL Object Copy Properties
+ * \ingroup H5P
+ * \defgroup GACPL General Access Properties
+ * \ingroup H5P
+ * \defgroup MAPL Map Access Properties
+ * \ingroup H5P
+ */
+
 #endif /* H5Pmodule_H */
