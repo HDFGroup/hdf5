@@ -245,7 +245,7 @@ done:
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
+H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
     htri_t                ret_value = FALSE; /* Indicate success, but no location change */

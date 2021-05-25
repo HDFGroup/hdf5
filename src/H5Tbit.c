@@ -385,7 +385,7 @@ H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value)
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5T__bit_find(uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hbool_t value)
+H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hbool_t value)
 {
     ssize_t base = (ssize_t)offset;
     ssize_t idx, i;

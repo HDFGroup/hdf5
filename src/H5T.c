@@ -1509,7 +1509,8 @@ H5T__unlock_cb(void *_dt, hid_t H5_ATTR_UNUSED id, void *_udata)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(dt && dt->shared);
+    HDassert(dt);
+    HDassert(dt->shared);
 
     if (H5T_STATE_IMMUTABLE == dt->shared->state) {
         dt->shared->state = H5T_STATE_RDONLY;
@@ -6005,7 +6006,7 @@ done:
 } /* end H5T_is_vl_storage() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_upgrade_version_cb
+ * Function:    H5T__upgrade_version_cb
  *
  * Purpose:     H5T__visit callback to Upgrade the version of a datatype
  *              (if there's any benefit to doing so)

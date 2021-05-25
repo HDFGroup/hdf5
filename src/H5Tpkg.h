@@ -851,7 +851,8 @@ H5_DLL herr_t   H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, 
 H5_DLL void     H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value);
 H5_DLL uint64_t H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size);
 H5_DLL void     H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val);
-H5_DLL ssize_t  H5T__bit_find(uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hbool_t value);
+H5_DLL ssize_t  H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
+                              hbool_t value);
 H5_DLL hbool_t  H5T__bit_inc(uint8_t *buf, size_t start, size_t size);
 H5_DLL hbool_t  H5T__bit_dec(uint8_t *buf, size_t start, size_t size);
 H5_DLL void     H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
@@ -859,7 +860,7 @@ H5_DLL void     H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
 /* VL functions */
 H5_DLL H5T_t *H5T__vlen_create(const H5T_t *base);
 H5_DLL herr_t H5T__vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info);
-H5_DLL htri_t H5T__vlen_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
+H5_DLL htri_t H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Array functions */
 H5_DLL H5T_t *H5T__array_create(H5T_t *base, unsigned ndims, const hsize_t dim[/* ndims */]);
@@ -868,7 +869,7 @@ H5_DLL int    H5T__get_array_dims(const H5T_t *dt, hsize_t dims[]);
 
 /* Reference functions */
 H5_DLL herr_t H5T__ref_reclaim(void *elem, const H5T_t *dt);
-H5_DLL htri_t H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
+H5_DLL htri_t H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 
 /* Compound functions */
 H5_DLL herr_t H5T__insert(H5T_t *parent, const char *name, size_t offset, const H5T_t *member);

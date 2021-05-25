@@ -156,7 +156,7 @@ static const H5T_ref_class_t H5T_ref_dsetreg_disk_g = {
  *-------------------------------------------------------------------------
  */
 htri_t
-H5T__ref_set_loc(const H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
+H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
     htri_t ret_value = FALSE; /* Indicate success, but no location change */
 
