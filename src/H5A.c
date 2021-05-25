@@ -40,13 +40,6 @@
 /* Local Typedefs */
 /******************/
 
-/* Object header iterator callbacks */
-/* Data structure for callback for locating the index by name */
-typedef struct H5A_iter_cb1 {
-    const char *name;
-    int         idx;
-} H5A_iter_cb1;
-
 /********************/
 /* Package Typedefs */
 /********************/
@@ -85,6 +78,13 @@ static herr_t H5A__rename_api_common(hid_t loc_id, const char *old_name, const c
                                      void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static herr_t H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *old_attr_name,
                                              const char *new_attr_name, hid_t lapl_id, void **token_ptr,
+                                             H5VL_object_t **_vol_obj_ptr);
+static herr_t H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
+                                 hbool_t *attr_exists, void **token_ptr);
+static herr_t H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists,
+                                     void **token_ptr, H5VL_object_t **_vol_obj_ptr);
+static herr_t H5A__exists_by_name_api_common(hid_t obj_id, const char *obj_name, const char *attr_name,
+                                             hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
                                              H5VL_object_t **_vol_obj_ptr);
 
 /*********************/
@@ -1760,7 +1760,78 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aclose() */
 
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5A__exists_common
+ *  PURPOSE
+ *      Common helper routine for sync/async check if an attribute exists
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+static herr_t
+H5A__exists_common(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, const char *attr_name,
+                   hbool_t *attr_exists, void **token_ptr)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
 
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(vol_obj);
+    HDassert(loc_params);
+
+    /* Check arguments */
+    if (!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+
+    /* Check if the attribute exists */
+    if (H5VL_attr_specific(vol_obj, loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, token_ptr,
+                           attr_name, attr_exists) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__exists_common() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5A__exists_api_common
+ *  PURPOSE
+ *      Common helper routine for sync/async check if an attribute exists
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+static herr_t
+H5A__exists_api_common(hid_t obj_id, const char *attr_name, hbool_t *attr_exists, void **token_ptr,
+                       H5VL_object_t **_vol_obj_ptr)
+{
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
+    herr_t            ret_value = SUCCEED;            /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if (H5I_ATTR == H5I_get_type(obj_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if (!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if (NULL == attr_exists)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for attribute existence")
+
+    /* Set up object access arguments */
+    if (H5VL_setup_self_args(obj_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments")
+
+    /* Check if the attribute exists */
+    if (H5A__exists_common(*vol_obj_ptr, &loc_params, attr_name, attr_exists, token_ptr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__exists_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Aexists
@@ -1779,34 +1850,65 @@ done:
 htri_t
 H5Aexists(hid_t obj_id, const char *attr_name)
 {
-    H5VL_object_t *   vol_obj;
-    H5VL_loc_params_t loc_params;
-    htri_t            ret_value; /* Return value */
+    hbool_t exists;           /* Flag for attribute existance */
+    htri_t  ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "i*s", obj_id, attr_name);
 
-    /* Check arguments */
-    if (H5I_ATTR == H5I_get_type(obj_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if (!attr_name || !*attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    /* Synchronously check if an attribute exists */
+    exists = FALSE;
+    if (H5A__exists_api_common(obj_id, attr_name, &exists, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
 
-    /* get the object */
-    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(obj_id);
-
-    /* Check if the attribute exists */
-    if (H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                           attr_name, &ret_value) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+    /* Set return value */
+    ret_value = (htri_t)exists;
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aexists() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5A__exists_by_name_api_common
+ *  PURPOSE
+ *      Common helper routine for sync/async check if an attribute exists
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+static herr_t
+H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *attr_name,
+                               hbool_t *attr_exists, hid_t lapl_id, void **token_ptr,
+                               H5VL_object_t **_vol_obj_ptr)
+{
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
+    herr_t            ret_value = SUCCEED;            /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if (H5I_ATTR == H5I_get_type(loc_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
+    if (!attr_name || !*attr_name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    if (NULL == attr_exists)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for attribute existence")
+
+    /* obj_name is verified in H5VL_setup_name_args() */
+    /* Set up object access arguments */
+    if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments")
+
+    /* Check if the attribute exists */
+    if (H5A__exists_common(*vol_obj_ptr, &loc_params, attr_name, attr_exists, token_ptr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* H5A__exists_by_name_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Aexists_by_name
@@ -1824,38 +1926,19 @@ done:
 htri_t
 H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
-    H5VL_loc_params_t loc_params;
-    htri_t            ret_value; /* Return value */
+    hbool_t exists;           /* Flag for attribute existance */
+    htri_t  ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("t", "i*s*si", loc_id, obj_name, attr_name, lapl_id);
 
-    /* check arguments */
-    if (H5I_ATTR == H5I_get_type(loc_id))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
-    if (!obj_name || !*obj_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no object name")
-    if (!attr_name || !*attr_name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no attribute name")
+    /* Synchronously check if an attribute exists */
+    exists = FALSE;
+    if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, &exists, lapl_id, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
 
-    /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* get the object */
-    if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
-
-    loc_params.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params.loc_data.loc_by_name.name    = obj_name;
-    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
-
-    /* Check existence of attribute */
-    if (H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_EXISTS, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                           attr_name, &ret_value) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
+    /* Set return value */
+    ret_value = (htri_t)exists;
 
 done:
     FUNC_LEAVE_API(ret_value)
