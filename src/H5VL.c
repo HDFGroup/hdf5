@@ -94,7 +94,7 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list")
 
     /* Register connector */
-    if ((ret_value = H5VL__register_connector(cls, TRUE, vipl_id)) < 0)
+    if ((ret_value = H5VL__register_connector_by_class(cls, TRUE, vipl_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector")
 
 done:
