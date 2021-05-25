@@ -369,10 +369,25 @@ H5_DLL herr_t   H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
 H5_DLL herr_t   H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
 
 /* VFD SWMR */
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Fvfd_swmr_end_tick(hid_t file_id);
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Fvfd_swmr_disable_end_of_tick(hid_t file_id);
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL herr_t H5Fvfd_swmr_enable_end_of_tick(hid_t file_id);
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL bool   vfd_swmr_writer_may_increase_tick_to(uint64_t, bool);
+/**
+ * \todo Add missing documentation
+ */
 H5_DLL void   vfd_swmr_reader_did_increase_tick_to(uint64_t);
 
 #ifdef H5_HAVE_PARALLEL
