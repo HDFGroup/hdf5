@@ -2786,7 +2786,7 @@ AC_ARG_ENABLE([memory-alloc-sanity-check],
                               more memory use and somewhat slower allocation.
                               This option is orthogonal to the
                               --enable-using-memchecker option.
-                               [default=yes if debug build, otherwise no]
+                               [default=no]
                               ])],
               [MEMORYALLOCSANITYCHECK=$enableval])
 
@@ -2796,11 +2796,7 @@ AC_SUBST([MEMORYALLOCSANITYCHECK])
 
 ## Set default
 if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-  if test "X-$BUILD_MODE" = "X-debug" ; then
-    MEMORYALLOCSANITYCHECK=yes
-  else
-    MEMORYALLOCSANITYCHECK=no
-  fi
+  MEMORYALLOCSANITYCHECK=no
 fi
 
 case "X-$MEMORYALLOCSANITYCHECK" in
