@@ -28,13 +28,37 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif
+#endif /* __cplusplus */
 
-/* The code behind the windows VFD has been removed and the windows
- * VFD initialization has been redirected to the SEC2 driver.  The
- * "Windows" VFD was actually identical to the SEC2 driver code
- * (a planned Win32 API driver never happened) so this change
- * should be transparent to users.
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets the Windows I/O driver
+ *
+ * \fapl_id
+ * \returns \herr_t
+ *
+ * \details H5Pset_fapl_windows() sets the default HDF5 Windows I/O driver on
+ *          Windows systems.
+ *
+ *          Since the HDF5 library uses this driver, #H5FD_WINDOWS, by default
+ *          on Windows systems, it is not normally necessary for a user
+ *          application to call H5Pset_fapl_windows(). While it is not
+ *          recommended, there may be times when a user chooses to set a
+ *          different HDF5 driver, such as the standard I/O driver (#H5FD_STDIO)
+ *          or the sec2 driver (#H5FD_SEC2), in a Windows
+ *          application. H5Pset_fapl_windows() is provided so that the
+ *          application can return to the Windows I/O driver when the time
+ *          comes.
+ *
+ *          Only the Windows driver is tested on Windows systems; other drivers
+ *          are used at the application’s and the user’s risk.
+ *
+ *          Furthermore, the Windows driver is tested and available only on
+ *          Windows systems; it is not available on non-Windows systems.
+ *
+ * \since 1.8.0
+ *
  */
 #define H5FD_windows_init H5FD_sec2_init
 #define H5FD_windows_term H5FD_sec2_term
@@ -42,6 +66,6 @@ H5_DLL herr_t H5Pset_fapl_windows(hid_t fapl_id);
 
 #ifdef __cplusplus
 }
-#endif
+#endif /* __cplusplus */
 
-#endif
+#endif /* H5FDwindows_H */
