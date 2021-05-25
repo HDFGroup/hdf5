@@ -1,6 +1,4 @@
-Testing error API H5Eset/get_auto
-Testing error API based on data I/O
-All error API tests passed.
+Testing error API H5Eset/get_autoTesting error API based on data I/OAll error API tests passed.
    This program tests the Error API compatible with HDF5 version (number).  There are supposed to be some error messages
 ********* Print error stack in HDF5 default way *********
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):

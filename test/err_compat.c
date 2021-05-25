@@ -230,7 +230,7 @@ test_error1(void)
     herr_t      ret;
 
     TESTING("error API H5Eset/get_auto");
-    printf("\n");
+    HDfprintf(stderr, "\n");
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -324,7 +324,6 @@ test_error1(void)
     if (dataset >= 0)
         TEST_ERROR;
 
-    fprintf(stderr, "\n");
     return 0;
 
 error:
@@ -356,7 +355,7 @@ test_error2(hid_t file)
     const char *FUNC_test_error = "test_error2";
 
     TESTING("error API based on data I/O");
-    printf("\n");
+    HDfprintf(stderr, "\n");
 
     /* Create the data space */
     dims[0] = DIM0;
@@ -490,7 +489,6 @@ main(void)
     /* Print out the errors on stack */
     dump_error();
 
-    fprintf(stderr, "\n");
     /* Empty error stack */
     H5Eclear1();
 
