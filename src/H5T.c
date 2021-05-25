@@ -4088,6 +4088,7 @@ H5T_close_real(H5T_t *dt)
         if (H5T__free(dt) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFREE, FAIL, "unable to free datatype");
 
+        HDassert(!dt->shared->owned_vol_obj);
         dt->shared = H5FL_FREE(H5T_shared_t, dt->shared);
     } /* end if */
     else
@@ -4222,6 +4223,7 @@ H5T__set_size(H5T_t *dt, size_t size)
 
     /* Check args */
     HDassert(dt);
+    HDassert(dt->shared);
     HDassert(size != 0);
     HDassert(H5T_REFERENCE != dt->shared->type);
     HDassert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
@@ -4448,6 +4450,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
     /* the easy case */
     if (dt1 == dt2)
         HGOTO_DONE(0);
+
+    HDassert(dt1->shared);
+    HDassert(dt2->shared);
 
     /* compare */
     if (dt1->shared->type < dt2->shared->type)
@@ -4853,6 +4858,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                     if (dt1->shared->u.atomic.u.r.loc < dt2->shared->u.atomic.u.r.loc)
                         HGOTO_DONE(-1);
                     if (dt1->shared->u.atomic.u.r.loc > dt2->shared->u.atomic.u.r.loc)
+                        HGOTO_DONE(1);
+                    if (dt1->shared->u.atomic.u.r.file < dt2->shared->u.atomic.u.r.file)
+                        HGOTO_DONE(-1);
+                    if (dt1->shared->u.atomic.u.r.file > dt2->shared->u.atomic.u.r.file)
                         HGOTO_DONE(1);
                     break;
 
