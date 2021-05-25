@@ -1116,7 +1116,7 @@ H5_DLL ssize_t H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comm
  *
  */
 H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate_t op,
-                         void *op_data, unsigned fields);
+                        void *op_data, unsigned fields);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O
@@ -1245,8 +1245,8 @@ H5_DLL herr_t H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order
  *
  */
 H5_DLL herr_t H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type,
-                                 H5_iter_order_t order, H5O_iterate_t op, void *op_data, unsigned fields,
-                                 hid_t lapl_id);
+                                H5_iter_order_t order, H5O_iterate_t op, void *op_data, unsigned fields,
+                                hid_t lapl_id);
 /**
  *-------------------------------------------------------------------------
  * \ingroup H5O

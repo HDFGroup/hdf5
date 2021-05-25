@@ -95,15 +95,15 @@ extern "C" {
 /**
  * For major interface/format changes
  */
-#define H5_VERS_MAJOR      1
+#define H5_VERS_MAJOR 1
 /**
  * For minor interface/format changes
  */
-#define H5_VERS_MINOR      10
+#define H5_VERS_MINOR 10
 /**
  * For tweaks, bug-fixes, or development
  */
-#define H5_VERS_RELEASE    8
+#define H5_VERS_RELEASE 8
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */

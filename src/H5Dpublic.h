@@ -1107,7 +1107,7 @@ H5_DLL herr_t H5Diterate(void *buf, hid_t type_id, hid_t space_id, H5D_operator_
  *          frees them from the bottom up, releasing all the memory without
  *          creating memory leaks.
  *
-  * \since 1.10.2
+ * \since 1.10.2
  *
  */
 H5_DLL herr_t H5Dvlen_reclaim(hid_t type_id, hid_t space_id, hid_t dxpl_id, void *buf);
