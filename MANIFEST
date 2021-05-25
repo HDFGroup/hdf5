@@ -743,6 +743,13 @@
 ./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
+./src/H5ES.c
+./src/H5ESevent.c
+./src/H5ESint.c
+./src/H5ESlist.c
+./src/H5ESmodule.h
+./src/H5ESpkg.h
+./src/H5ESprivate.h
 ./src/H5ESpublic.h
 ./src/H5F.c
 ./src/H5Faccum.c
@@ -1184,6 +1191,7 @@
 ./test/enum.c
 ./test/err_compat.c
 ./test/error_test.c
+./test/event_set.c
 ./test/evict_on_close.c
 ./test/extend.c
 ./test/external.c

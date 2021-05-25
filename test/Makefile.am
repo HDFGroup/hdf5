@@ -75,7 +75,7 @@ TEST_PROG= testhdf5 \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr thread_id vol timer
+           unregister cache_logging cork swmr thread_id vol timer event_set
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -167,6 +167,7 @@ ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c ttsafe_attr_vlen.c
 cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
+event_set_SOURCES=event_set.c
 
 vfd_swmr_zoo_writer_SOURCES=vfd_swmr_zoo_writer.c genall5.c
 vfd_swmr_zoo_reader_SOURCES=vfd_swmr_zoo_writer.c genall5.c
@@ -237,7 +238,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
     tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5 \
-    splitter*.h5 splitter.log mirror_rw mirror_ro
+    splitter*.h5 splitter.log mirror_rw mirror_ro event_set_[0-9].h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
