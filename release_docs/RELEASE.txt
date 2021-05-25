@@ -243,6 +243,72 @@ New Features
 
       (2020/09/24)
 
+    - Disable memory sanity checks in the Autotools in release branches
+
+      The library can be configured to use internal memory sanity checking,
+      which replaces C API calls like malloc(3) and free(3) with our own calls
+      which add things like heap canaries. These canaries can cause problems
+      when external filter plugins reallocate canary-marked buffers.
+
+      For this reason, the default will be to not use the memory allocation
+      sanity check feature in release branches (e.g., hdf5_1_10_7).
+      Debug builds in development branches (e.g., develop, hdf5_1_10) will
+      still use them by default.
+
+      This change only affects Autotools debug builds. Non-debug autotools
+      builds and all CMake builds do not enable this feature by default.
+
+      (2020/08/19)
+
+    - Add file locking configure and CMake options
+
+      HDF5 1.10.0 introduced a file locking scheme, primarily to help
+      enforce SWMR setup. Formerly, the only user-level control of the scheme
+      was via the HDF5_USE_FILE_LOCKING environment variable.
+
+      This change introduces configure-time options that control whether
+      or not file locking will be used and whether or not the library
+      ignores errors when locking has been disabled on the file system
+      (useful on some HPC Lustre installations).
+
+      In both the Autotools and CMake, the settings have the effect of changing
+      the default property list settings (see the H5Pset/get_file_locking()
+      entry, below).
+
+      The yes/no/best-effort file locking configure setting has also been
+      added to the libhdf5.settings file.
+
+      Autotools:
+
+        An --enable-file-locking=(yes|no|best-effort) option has been added.
+
+        yes:          Use file locking.
+        no:           Do not use file locking.
+        best-effort:  Use file locking and ignore "disabled" errors.
+
+      CMake:
+
+        Two self-explanatory options have been added:
+
+        HDF5_USE_FILE_LOCKING
+        HDF5_IGNORE_DISABLED_FILE_LOCKS
+
+        Setting both of these to ON is the equivalent to the Autotools'
+        best-effort setting.
+
+      NOTE:
+      The precedence order of the various file locking control mechanisms is:
+
+        1) HDF5_USE_FILE_LOCKING environment variable (highest)
+
+        2) H5Pset_file_locking()
+
+        3) configure/CMake options (which set the property list defaults)
+
+        4) library defaults (currently best-effort)
+
+      (2020/07/30, HDFFV-11092)
+
     - CMake option to link the generated Fortran MOD files into the include
       directory.
 
@@ -422,11 +488,69 @@ New Features
 
       (2020/12/10)
 
+    - Add BEST_EFFORT value to HDF5_USE_FILE_LOCKING environment variable
+
+      This change adds a BEST_EFFORT to the TRUE/FALSE, 1/0 settings that
+      were previously accepted. This option turns on file locking but
+      ignores locking errors when the library detects that file locking
+      has been disabled on a file system (useful on some HPC Lustre
+      installations).
+
+      The capitalization of BEST_EFFORT is mandatory.
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (2020/07/30, HDFFV-11092)
+
+
+    - Add H5Pset/get_file_locking() API calls
+
+      This change adds new API calls which can be used to set or get the
+      file locking parameters. The single API call sets both the "use file
+      locking" flag and the "ignore disabled file locking" flag.
+
+      When opening a file multiple times without closing, the file MUST be
+      opened with the same file locking settings. Opening a file with different
+      file locking settings will fail (this is similar to the behavior of
+      H5Pset_fclose_degree()).
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (2020/07/30, HDFFV-11092)
+
     - Added two new API routines for tracking library memory use:
       H5get_alloc_stats() and H5get_free_list_sizes().
 
       (2020/03/25)
 
+    - Add Mirror VFD
+
+      Use TCP/IP sockets to perform write-only (W/O) file I/O on a remote
+      machine. Must be used in conjunction with the Splitter VFD.
+
+      (JOS - 2020/03/13, TBD)
+
+    - Add Splitter VFD
+
+      Maintain separate R/W and W/O channels for "concurrent" file writes
+      to two files using a single HDF5 file handle.
+
+      (JOS - 2020/03/13, TBD)
+
+
+    C++ Library:
+    ------------
+    - Add wrappers for H5Pset/get_file_locking() API calls
+
+      FileAccPropList::setFileLocking()
+      FileAccPropList::getFileLocking()
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (2020/07/30, HDFFV-11092)
 
     Java Library:
     -------------
@@ -438,6 +562,20 @@ New Features
       wrapper functions added.
 
       (2020/10/27, HDFFV-10868)
+
+    - Add wrappers for H5Pset/get_file_locking() API calls
+
+      H5Pset_file_locking()
+      H5Pget_use_file_locking()
+      H5Pget_ignore_disabled_file_locking()
+
+      Unlike the C++ and Fortran wrappers, there are separate getters for the
+      two file locking settings, each of which returns a boolean value.
+
+      See the configure option discussion for HDFFV-11092 (above) for more
+      information on the file locking feature and how it's controlled.
+
+      (2020/07/30, HDFFV-11092)
 
 
     Tools:
