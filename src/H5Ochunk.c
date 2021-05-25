@@ -412,7 +412,7 @@ H5O__chunk_dest(H5O_chunk_proxy_t *chk_proxy)
     HDassert(chk_proxy);
 
     /* Decrement reference count of object header */
-    if (chk_proxy->oh && H5O__dec_rc(chk_proxy->oh) < 0)
+    if (H5O__dec_rc(chk_proxy->oh) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTDEC, FAIL, "can't decrement reference count on object header")
 
 done:

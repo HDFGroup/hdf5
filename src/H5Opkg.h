@@ -544,6 +544,8 @@ H5_DLL void *H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *o
 H5_DLL void *H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
                               H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type /*out*/);
 H5_DLL const H5O_obj_class_t *H5O__obj_class(const H5O_loc_t *loc);
+H5_DLL herr_t                 H5O__copy(const H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
+                                        const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 H5_DLL int                    H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted);
 H5_DLL herr_t H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                          H5O_iterate2_t op, void *op_data, unsigned fields);

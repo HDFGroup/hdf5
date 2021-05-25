@@ -283,13 +283,13 @@ H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id, H5O_loc
     /* create object header in freelist
      * header version is set internally
      */
-    oh = H5O__create_ohdr(f, ocpl_id);
+    oh = H5O_create_ohdr(f, ocpl_id);
     if (NULL == oh)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't instantiate object header")
 
     /* apply object header information to file
      */
-    if (H5O__apply_ohdr(f, oh, ocpl_id, size_hint, initial_rc, loc) < 0)
+    if (H5O_apply_ohdr(f, oh, ocpl_id, size_hint, initial_rc, loc) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADVALUE, FAIL, "Can't apply object header to file")
 
 done:
@@ -300,7 +300,7 @@ done:
 } /* end H5O_create() */
 
 /*-----------------------------------------------------------------------------
- * Function:   H5O__create_ohdr
+ * Function:   H5O_create_ohdr
  *
  * Purpose:    Create the object header, set version and flags.
  *
@@ -313,7 +313,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 H5O_t *
-H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
+H5O_create_ohdr(H5F_t *f, hid_t ocpl_id)
 {
     H5P_genplist_t *oc_plist;
     H5O_t *         oh = NULL; /* Object header in Freelist */
@@ -361,10 +361,10 @@ done:
         HDONE_ERROR(H5E_OHDR, H5E_CANTFREE, NULL, "can't delete object header")
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O__create_ohdr() */
+} /* H5O_create_ohdr() */
 
 /*-----------------------------------------------------------------------------
- * Function:   H5O__apply_ohdr
+ * Function:   H5O_apply_ohdr
  *
  * Purpose:    Initialize and set the object header in the file.
  *             Record some information at `loc_out`.
@@ -378,7 +378,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 herr_t
-H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t initial_rc, H5O_loc_t *loc_out)
+H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t initial_rc, H5O_loc_t *loc_out)
 {
     haddr_t         oh_addr;
     size_t          oh_size;
@@ -449,12 +449,16 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 #if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
         if (size_hint > 4294967295UL)
             oh->flags |= H5O_HDR_CHUNK0_8;
-        else
-#endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
-            if (size_hint > 65535)
+        else if (size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;
         else if (size_hint > 255)
             oh->flags |= H5O_HDR_CHUNK0_2;
+#else
+        if (size_hint > 65535)
+            oh->flags |= H5O_HDR_CHUNK0_4;
+        else if (size_hint > 255)
+            oh->flags |= H5O_HDR_CHUNK0_2;
+#endif
     }
     else {
         /* Reset unused time fields */
@@ -538,7 +542,7 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5O__apply_ohdr() */
+} /* H5O_apply_ohdr() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_open
