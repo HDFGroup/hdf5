@@ -1855,8 +1855,7 @@ Optional Features:
                           allocation sanity checking. This could cause more
                           memory use and somewhat slower allocation. This
                           option is orthogonal to the
-                          --enable-using-memchecker option. [default=yes if
-                          debug build, otherwise no]
+                          --enable-using-memchecker option. [default=no]
   --enable-parallel       Search for MPI-IO and MPI support files
   --enable-instrument     Enable library instrumentation of optimization
                           tracing (only used with parallel builds).
@@ -9811,7 +9810,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 9814 "configure" */
+/* #line 9813 "configure" */
 public class Test {
 }
 EOF
@@ -10027,7 +10026,7 @@ else
 JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 cat << \EOF > $JAVA_TEST
-/* #line 10030 "configure" */
+/* #line 10029 "configure" */
 public class Test {
 }
 EOF
@@ -10061,7 +10060,7 @@ JAVA_TEST=Test.java
 CLASS_TEST=Test.class
 TEST=Test
 cat << \EOF > $JAVA_TEST
-/* [#]line 10064 "configure" */
+/* [#]line 10063 "configure" */
 public class Test {
 public static void main (String args[]) {
         System.exit (0);
@@ -10456,7 +10455,7 @@ else
 
 
 cat << \EOF > Test.java
-/* #line 10459 "configure" */
+/* #line 10458 "configure" */
 import junit.textui.TestRunner;
 public class Test {
 
@@ -31692,11 +31691,7 @@ fi
 
 ## Set default
 if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-  if test "X-$BUILD_MODE" = "X-debug" ; then
-    MEMORYALLOCSANITYCHECK=yes
-  else
-    MEMORYALLOCSANITYCHECK=no
-  fi
+  MEMORYALLOCSANITYCHECK=no
 fi
 
 case "X-$MEMORYALLOCSANITYCHECK" in
