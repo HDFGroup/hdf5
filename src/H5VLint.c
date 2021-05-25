@@ -814,6 +814,45 @@ done:
 } /* end H5VL_register_using_vol_id() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_create_object
+ *
+ * Purpose:     Similar to H5VL_register but does not create an ID.
+ *              Creates a new VOL object for the provided generic object
+ *              using the provided vol connector.  Should only be used for
+ *              internal objects returned from the connector such as
+ *              requests.
+ *
+ * Return:      Success:    A valid VOL object
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5VL_create_object(void *object, H5VL_t *vol_connector)
+{
+    H5VL_object_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Check arguments */
+    HDassert(object);
+    HDassert(vol_connector);
+
+    /* Set up VOL object for the passed-in data */
+    /* (Does not wrap object, since it's from a VOL callback) */
+    if (NULL == (ret_value = H5FL_CALLOC(H5VL_object_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate memory for VOL object")
+    ret_value->connector = vol_connector;
+    ret_value->data      = object;
+
+    /* Bump the reference count on the VOL connector */
+    H5VL_conn_inc_rc(vol_connector);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_create_object() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_create_object_using_vol_id
  *
  * Purpose:     Similar to H5VL_register_using_vol_id but does not create
