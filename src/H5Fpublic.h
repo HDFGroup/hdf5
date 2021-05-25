@@ -167,7 +167,7 @@ extern "C" {
  *        list
  *
  * \param[in] filename Name of a file
-  *
+ *
  * \return \htri_t
  *
  * \details H5F__is_hdf5() checks if the file specified by \p
