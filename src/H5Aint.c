@@ -83,7 +83,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
-static herr_t H5A__close_cb(H5VL_object_t *attr_vol_obj);
+static herr_t H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request);
 static herr_t H5A__compact_build_table_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
                                           unsigned *oh_flags_ptr, void *_udata /*in,out*/);
 static herr_t H5A__dense_build_table_cb(const H5A_t *attr, void *_udata);
@@ -1294,7 +1294,7 @@ H5A__shared_free(H5A_t *attr)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5A__close_cb(H5VL_object_t *attr_vol_obj)
+H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1304,7 +1304,7 @@ H5A__close_cb(H5VL_object_t *attr_vol_obj)
     HDassert(attr_vol_obj);
 
     /* Close the attribute */
-    if ((ret_value = H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, request)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "problem closing attribute")
 
     /* Free the VOL object */

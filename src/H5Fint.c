@@ -699,6 +699,7 @@ H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key)
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
             case H5I_SPACE_SEL_ITER:
+            case H5I_EVENTSET:
             case H5I_NTYPES:
             default:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5_ITER_ERROR, "unknown or invalid data object")
@@ -1850,7 +1851,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     }
 
     /*
-     * If the driver has a `cmp' method then the driver is capable of
+     * If the driver has a 'cmp' method then the driver is capable of
      * determining when two file handles refer to the same file and the
      * library can insure that when the application opens a file twice
      * that the two handles coordinate their operations appropriately.
@@ -1905,8 +1906,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Is the file already open? */
     if ((shared = H5F__sfile_search(lf)) != NULL) {
         /*
-         * The file is already open, so use the corresponding H5F_shared_t.
-         * We only allow one H5FD_t* per file so one doesn't
+         * The file is already open, so use that one instead of the one we
+         * just opened. We only one one H5FD_t* per file so one doesn't
          * confuse the other.  But fail if this request was to truncate the
          * file (since we can't do that while the file is open), or if the
          * request was to create a non-existent file (since the file already

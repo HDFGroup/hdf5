@@ -204,7 +204,7 @@ H5O__init_package(void)
 } /* end H5O__init_package() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_set_version
+ * Function:    H5O__set_version
  *
  * Purpose:     Sets the correct version to encode the object header.
  *              Chooses the oldest version possible, unless the file's
@@ -218,12 +218,12 @@ H5O__init_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx)
+H5O__set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx)
 {
     uint8_t version;             /* Message version */
     herr_t  ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(f);
@@ -247,7 +247,7 @@ H5O_set_version(H5F_t *f, H5O_t *oh, uint8_t oh_flags, hbool_t store_msg_crt_idx
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_set_version() */
+} /* end H5O__set_version() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O_create
@@ -349,7 +349,7 @@ H5O__create_ohdr(H5F_t *f, hid_t ocpl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get object header flags")
     }
 
-    if (H5O_set_version(f, oh, oh_flags, H5F_STORE_MSG_CRT_IDX(f)) < 0)
+    if (H5O__set_version(f, oh, oh_flags, H5F_STORE_MSG_CRT_IDX(f)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, NULL, "can't set version of object header")
 
     oh->flags = oh_flags;

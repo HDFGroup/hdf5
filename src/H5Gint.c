@@ -84,7 +84,7 @@ typedef struct {
 
 static herr_t H5G__open_oid(H5G_t *grp);
 static herr_t H5G__visit_cb(const H5O_link_t *lnk, void *_udata);
-static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj);
+static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request);
 
 /*********************/
 /* Package Variables */
@@ -263,7 +263,7 @@ H5G_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G__close_cb(H5VL_object_t *grp_vol_obj)
+H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -273,7 +273,7 @@ H5G__close_cb(H5VL_object_t *grp_vol_obj)
     HDassert(grp_vol_obj);
 
     /* Close the group */
-    if (H5VL_group_close(grp_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_group_close(grp_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CLOSEERROR, FAIL, "unable to close group")
 
     /* Free the VOL object */
