@@ -54,6 +54,11 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id,
+                                     hid_t tcpl_id, hid_t tapl_id, void **token_ptr,
+                                     H5VL_object_t **_vol_obj_ptr);
+static hid_t  H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token_ptr,
+                                   H5VL_object_t **_vol_obj_ptr);
 static H5T_t *H5T__open_oid(const H5G_loc_t *loc);
 
 /*********************/
@@ -79,29 +84,28 @@ H5FL_EXTERN(H5VL_t);
 H5FL_EXTERN(H5VL_object_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5Tcommit2
+ * Function:    H5T__commit_api_common
  *
- * Purpose:     Save a transient datatype to a file and turn the type handle
- *              into a "named", immutable type.
+ * Purpose:     This is the common function for committing a datytype.
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:  Quincey Koziol
- *              April 5, 2007
  *-------------------------------------------------------------------------
  */
-herr_t
-H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id)
+static herr_t
+H5T__commit_api_common(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id,
+                       hid_t tapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
 {
-    void *            data    = NULL; /* VOL-managed datatype data */
-    H5VL_object_t *   new_obj = NULL; /* VOL object that holds the datatype object and the VOL info */
-    H5T_t *           dt      = NULL; /* High level datatype object that wraps the VOL object */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    void *          data        = NULL; /* VOL-managed datatype data */
+    H5VL_object_t * new_obj     = NULL; /* VOL object that holds the datatype object and the VOL info */
+    H5T_t *         dt          = NULL; /* High level datatype object that wraps the VOL object */
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;                     /* Location parameters */
+    herr_t            ret_value = SUCCEED;            /* Return value */
 
-    FUNC_ENTER_API(FAIL)
-    H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     if (!name)
@@ -128,32 +132,54 @@ H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t t
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
 
-    /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* Fill in location struct fields */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
-
-    /* Get the object from the loc_id */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+    /* Set up object access arguments */
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_TACC, TRUE, &tapl_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Commit the type */
-    if (NULL == (data = H5VL_datatype_commit(vol_obj, &loc_params, name, type_id, lcpl_id, tcpl_id, tapl_id,
-                                             H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if (NULL == (data = H5VL_datatype_commit(*vol_obj_ptr, &loc_params, name, type_id, lcpl_id, tcpl_id,
+                                             tapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to commit datatype")
 
     /* Set up VOL object */
     if (NULL == (new_obj = H5FL_CALLOC(H5VL_object_t)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "can't allocate top object structure")
-    new_obj->connector = vol_obj->connector;
+    new_obj->connector = (*vol_obj_ptr)->connector;
     new_obj->connector->nrefs++;
     new_obj->data = data;
 
     /* Set the committed type object to the VOL connector pointer in the H5T_t struct */
     dt->vol_obj = new_obj;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T__commit_api_common() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Tcommit2
+ *
+ * Purpose:     Save a transient datatype to a file and turn the type handle
+ *              into a "named", immutable type.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              April 5, 2007
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Tcommit2(hid_t loc_id, const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE6("e", "i*siiii", loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id);
+
+    /* Commit the dataset synchronously */
+    if ((ret_value = H5T__commit_api_common(loc_id, name, type_id, lcpl_id, tcpl_id, tapl_id, NULL, NULL)) <
+        0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, FAIL, "unable to commit datatype synchronously")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -544,6 +570,58 @@ done:
 } /* end H5T_link() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5T__open_api_common
+ *
+ * Purpose:     This is the common function for opening a datatype.
+ *
+ * Return:      Success:    Object ID of the named datatype
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5T__open_api_common(hid_t loc_id, const char *name, hid_t tapl_id, void **token_ptr,
+                     H5VL_object_t **_vol_obj_ptr)
+{
+    void *          dt          = NULL; /* datatype object created by VOL connector */
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;
+    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
+
+    /* Set up object access arguments */
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_TACC, FALSE, &tapl_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
+
+    /* Open the datatype */
+    if (NULL == (dt = H5VL_datatype_open(*vol_obj_ptr, &loc_params, name, tapl_id, H5P_DATASET_XFER_DEFAULT,
+                                         token_ptr)))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype")
+
+    /* Register the type and return the ID */
+    if ((ret_value = H5VL_register(H5I_DATATYPE, dt, (*vol_obj_ptr)->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype")
+
+done:
+    /* Cleanup on error */
+    if (H5I_INVALID_HID == ret_value)
+        if (dt && H5VL_datatype_close(*vol_obj_ptr, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T__open_api_common() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Topen2
  *
  * Purpose:     Opens a named datatype using a Datatype Access Property
@@ -555,52 +633,22 @@ done:
  *
  * Programmer:  James Laird
  *              Thursday July 27, 2006
+ *
  *-------------------------------------------------------------------------
  */
 hid_t
 H5Topen2(hid_t loc_id, const char *name, hid_t tapl_id)
 {
-    void *            dt      = NULL; /* datatype object created by VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
-    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, tapl_id);
 
-    /* Check args */
-    if (!name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
-    if (!*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&tapl_id, H5P_CLS_TACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
-
-    /* Fill in location struct fields */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
-
-    /* get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
-
-    /* Open the datatype */
-    if (NULL == (dt = H5VL_datatype_open(vol_obj, &loc_params, name, tapl_id, H5P_DATASET_XFER_DEFAULT,
-                                         H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open named datatype")
-
-    /* Register the type and return the ID */
-    if ((ret_value = H5VL_register(H5I_DATATYPE, dt, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register named datatype")
-
+    /* Open the datatype synchronously */
+    if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID,
+                    "unable to open named datatype synchronously")
 done:
-    /* Cleanup on error */
-    if (H5I_INVALID_HID == ret_value)
-        if (dt && H5VL_datatype_close(vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATATYPE, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release datatype")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Topen2() */
 
