@@ -20,7 +20,7 @@
  *
  *     Demonstrates basic use cases and fapl/dxpl interaction.
  *
- * Programmer: Jacob Smith <jake.smith@hdfgroup.org>
+ * Programmer: Jacob Smith
  *             2017-10-11
  */
 
@@ -193,15 +193,21 @@
  *
  *----------------------------------------------------------------------------
  */
+static inline void
+jserr_long(long expected, long actual, const char *reason)
+{
+    if (reason != NULL) {
+        HDprintf("%s\n", reason);
+    }
+    else {
+        HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", expected, actual);
+    }
+}
+
 #define JSERR_LONG(expected, actual, reason)                                                                 \
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
-        if (reason != NULL) {                                                                                \
-            HDprintf("%s\n", (reason));                                                                      \
-        }                                                                                                    \
-        else {                                                                                               \
-            HDprintf("  ! Expected %ld\n  ! Actual   %ld\n", (long)(expected), (long)(actual));              \
-        }                                                                                                    \
+        jserr_long((long)(expected), (long)(actual), (reason));                                              \
     }
 
 /*----------------------------------------------------------------------------
@@ -232,15 +238,21 @@
  *
  *----------------------------------------------------------------------------
  */
+static inline void
+jserr_str(const char *expected, const char *actual, const char *reason)
+{
+    if (reason != NULL) {
+        HDprintf("%s\n", reason);
+    }
+    else {
+        HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", expected, actual);
+    }
+}
+
 #define JSERR_STR(expected, actual, reason)                                                                  \
     {                                                                                                        \
         JSFAILED_AT()                                                                                        \
-        if ((reason) != NULL) {                                                                              \
-            HDprintf("%s\n", (reason));                                                                      \
-        }                                                                                                    \
-        else {                                                                                               \
-            HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
-        }                                                                                                    \
+        jserr_str((expected), (actual), (reason));                                                           \
     }
 
 #ifdef JSVERIFY_EXP_ACT
@@ -306,7 +318,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -351,7 +363,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -548,8 +560,8 @@ test_fapl_config_validation(void)
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -829,8 +841,8 @@ test_vfd_open(void)
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -972,15 +984,15 @@ test_eof_eoa(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1083,15 +1095,15 @@ test_H5FDread_without_eoa_set_fails(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1257,15 +1269,15 @@ test_read(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1401,8 +1413,8 @@ test_noops_and_autofails(void)
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1437,15 +1449,6 @@ test_noops_and_autofails(void)
 
     H5E_BEGIN_TRY{
         JSVERIFY(FAIL, H5FDtruncate(file, H5P_DEFAULT, TRUE), "truncate must fail (closing)")} H5E_END_TRY;
-
-    /* no-op calls to `lock()` and `unlock()`
-     */
-    JSVERIFY(SUCCEED, H5FDlock(file, TRUE), "lock always succeeds; has no effect")
-    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), NULL)
-    JSVERIFY(SUCCEED, H5FDunlock(file), NULL)
-    /* Lock/unlock with null file or similar error crashes tests.
-     * HDassert in calling heirarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
-     */
 
     /************
      * TEARDOWN *
@@ -1530,15 +1533,15 @@ test_cmp(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1654,15 +1657,15 @@ test_H5F_integration(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1709,7 +1712,7 @@ error:
      * CLEANUP *
      ***********/
     HDprintf("\nerror!");
-    fflush(stdout);
+    HDfflush(stdout);
 
     if (fapl_id >= 0) {
         H5E_BEGIN_TRY

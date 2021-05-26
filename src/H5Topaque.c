@@ -34,8 +34,6 @@
  * Programmer:	Robb Matzke
  *		Thursday, May 20, 1999
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -79,8 +77,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Thursday, May 20, 1999
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

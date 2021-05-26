@@ -15,7 +15,7 @@
  *
  * Created:		H5Fsuper_cache.c
  *			Aug 15 2009
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implement file superblock & driver info metadata cache methods.
  *
@@ -294,7 +294,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -322,7 +321,6 @@ H5F__cache_superblock_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t 
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@lbl.gov
  *              November 17, 2016
  *
  *-------------------------------------------------------------------------
@@ -410,7 +408,6 @@ H5F__cache_superblock_verify_chksum(const void *_image, size_t len, void *_udata
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		July 18 2013
  *
  *-------------------------------------------------------------------------
@@ -603,7 +600,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 19, 2013
  *
  *-------------------------------------------------------------------------
@@ -635,7 +631,6 @@ H5F__cache_superblock_image_len(const void *_thing, size_t *image_len)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		July 19 2013
  *
  *-------------------------------------------------------------------------
@@ -777,7 +772,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 20, 2013
  *
  *-------------------------------------------------------------------------
@@ -811,7 +805,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 20, 2013
  *
  *-------------------------------------------------------------------------
@@ -838,7 +831,6 @@ H5F__cache_drvrinfo_get_initial_load_size(void H5_ATTR_UNUSED *_udata, size_t *i
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@lbl.gov
  *              November 17, 2016
  *
  *-------------------------------------------------------------------------
@@ -881,7 +873,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		July 20 2013
  *
  *-------------------------------------------------------------------------
@@ -941,7 +932,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 20, 2013
  *
  *-------------------------------------------------------------------------
@@ -974,7 +964,6 @@ H5F__cache_drvrinfo_image_len(const void *_thing, size_t *image_len)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		July 20 2013
  *
  *-------------------------------------------------------------------------
@@ -1036,7 +1025,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 20, 2013
  *
  *-------------------------------------------------------------------------

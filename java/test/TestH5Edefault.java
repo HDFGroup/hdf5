@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -58,27 +57,27 @@ public class TestH5Edefault {
 
     @Ignore
     public void testH5Eprint() {
-		/*
-		 * If HDF5_VOL_CONNECTOR is set, this might not be the
-		 * native connector and the error stack might be different.
-		 * Only check for the specific error stack if the native
-		 * connector is being used.
-		 */
-		String connector = System.getenv("HDF5_VOL_CONNECTOR");
-		if (connector == null) {
-			try {
-				H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
-			}
-			catch (Throwable err) {
-			}
-			try {
-				H5.H5Eprint2(HDF5Constants.H5E_DEFAULT, null);
-			}
-			catch (Throwable err) {
-				err.printStackTrace();
-				fail("H5.H5Eprint: " + err);
-			}
-		}
+        /*
+        * If HDF5_VOL_CONNECTOR is set, this might not be the
+        * native connector and the error stack might be different.
+        * Only check for the specific error stack if the native
+        * connector is being used.
+        */
+        String connector = System.getenv("HDF5_VOL_CONNECTOR");
+        if (connector == null) {
+            try {
+                H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Throwable err) {
+            }
+            try {
+                H5.H5Eprint2(HDF5Constants.H5E_DEFAULT, null);
+            }
+            catch (Throwable err) {
+                err.printStackTrace();
+                fail("H5.H5Eprint: " + err);
+            }
+        }
     }
 
     @Test
@@ -439,27 +438,27 @@ public class TestH5Edefault {
 
     @Ignore
     public void testH5EprintInt() {
-		/*
-		 * If HDF5_VOL_CONNECTOR is set, this might not be the
-		 * native connector and the error stack might be different.
-		 * Only check for the specific error stack if the native
-		 * connector is being used.
-		 */
-		String connector = System.getenv("HDF5_VOL_CONNECTOR");
-		if (connector == null) {
-			try {
-				H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
-			}
-			catch (Throwable err) {
-			}
-			try {
-				H5.H5Eprint2(HDF5Constants.H5E_DEFAULT, null);
-			}
-			catch (Throwable err) {
-				err.printStackTrace();
-				fail("H5.H5EprintInt: " + err);
-			}
-		}
+        /*
+        * If HDF5_VOL_CONNECTOR is set, this might not be the
+        * native connector and the error stack might be different.
+        * Only check for the specific error stack if the native
+        * connector is being used.
+        */
+        String connector = System.getenv("HDF5_VOL_CONNECTOR");
+        if (connector == null) {
+            try {
+                H5.H5Fopen("test", HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Throwable err) {
+            }
+            try {
+                H5.H5Eprint2(HDF5Constants.H5E_DEFAULT, null);
+            }
+            catch (Throwable err) {
+                err.printStackTrace();
+                fail("H5.H5EprintInt: " + err);
+            }
+        }
     }
 
     @Test

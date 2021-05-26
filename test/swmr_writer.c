@@ -88,22 +88,6 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
             return -1;
     }
 
-#ifdef QAK
-    /* Increase the initial size of the metadata cache */
-    {
-        H5AC_cache_config_t mdc_config;
-
-        mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
-        H5Pget_mdc_config(fapl, &mdc_config);
-        HDfprintf(stderr, "mdc_config.initial_size = %lu\n", (unsigned long)mdc_config.initial_size);
-        HDfprintf(stderr, "mdc_config.epoch_length = %lu\n", (unsigned long)mdc_config.epoch_length);
-        mdc_config.set_initial_size = 1;
-        mdc_config.initial_size     = 16 * 1024 * 1024;
-        /* mdc_config.epoch_length = 5000; */
-        H5Pset_mdc_config(fapl, &mdc_config);
-    }
-#endif /* QAK */
-
     if (use_log_vfd) {
         char verbose_name[1024];
 

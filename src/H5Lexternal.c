@@ -147,7 +147,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(lapl_id, H5P_LINK_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5I_INVALID_HID, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID")
 
     /* Get the fapl_id set for lapl_id if any */
     if (H5P_get(plist, H5L_ACS_ELINK_FAPL_NAME, &fapl_id) < 0)
@@ -175,7 +175,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
 
     /* Get file access property list */
     if (NULL == (fa_plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, H5I_INVALID_HID, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, H5I_INVALID_HID, "can't find object for ID")
 
     /* Make callback if it exists */
     if (cb_info.func) {
@@ -239,7 +239,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
 
     /* Get an ID for the external link's object */
     if ((ext_obj_id = H5VL_wrap_register(opened_type, ext_obj, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register external link object")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register external link object")
 
     /* Set return value */
     ret_value = ext_obj_id;
@@ -248,8 +248,8 @@ done:
     /* XXX (VOL MERGE): Probably also want to consider closing ext_obj here on failures */
     /* Release resources */
     if (fapl_id > 0 && H5I_dec_ref(fapl_id) < 0)
-        HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, H5I_INVALID_HID,
-                    "unable to close atom for file access property list")
+        HDONE_ERROR(H5E_ID, H5E_CANTRELEASE, H5I_INVALID_HID,
+                    "unable to close ID for file access property list")
     if (ext_file && H5F_efc_close(loc.oloc->file, ext_file) < 0)
         HDONE_ERROR(H5E_LINK, H5E_CANTCLOSEFILE, H5I_INVALID_HID, "problem closing external file")
     if (parent_group_name && parent_group_name != local_group_name)
@@ -257,8 +257,7 @@ done:
     if (ret_value < 0) {
         /* Close object if it's open and something failed */
         if (ext_obj_id >= 0 && H5I_dec_ref(ext_obj_id) < 0)
-            HDONE_ERROR(H5E_ATOM, H5E_CANTRELEASE, H5I_INVALID_HID,
-                        "unable to close atom for external object")
+            HDONE_ERROR(H5E_ID, H5E_CANTRELEASE, H5I_INVALID_HID, "unable to close ID for external object")
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -288,7 +287,7 @@ H5L__extern_query(const char H5_ATTR_UNUSED *link_name, const void *_udata, size
     const uint8_t *udata     = (const uint8_t *)_udata; /* Pointer to external link buffer */
     ssize_t        ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check external link version & flags */
     if (((*udata >> 4) & 0x0F) != H5L_EXT_VERSION)

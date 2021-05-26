@@ -32,7 +32,6 @@
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct  2, 2006
  *
  *-------------------------------------------------------------------------
@@ -76,7 +75,6 @@ done:
  *		Failure:	negative
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct  2, 2006
  *
  *-------------------------------------------------------------------------

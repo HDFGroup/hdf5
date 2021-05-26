@@ -110,6 +110,8 @@ const char *FILENAME[] = {"dataset",             /* 0 */
 #define DSET_FLETCHER32_NAME_3    "fletcher32_3"
 #define DSET_SHUF_DEF_FLET_NAME   "shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2 "shuffle+deflate+fletcher32_2"
+#define DSET_OPTIONAL_SCALAR      "dataset_with_scalar_space"
+#define DSET_OPTIONAL_VLEN        "dataset_with_vlen_type"
 #ifdef H5_HAVE_FILTER_SZIP
 #define DSET_SZIP_NAME             "szip"
 #define DSET_SHUF_SZIP_FLET_NAME   "shuffle+szip+fletcher32"
@@ -4599,7 +4601,7 @@ test_nbit_int_size(hid_t file)
     if ((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1 * DSET_DIM2 * (precision / 8) ||
         dset_size > DSET_DIM1 * DSET_DIM2 * (precision / 8) + 1 * KB) {
         H5_FAILED();
-        HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n", __LINE__, dset_size);
+        HDfprintf(stdout, "    Line %d: wrong dataset size: %" PRIuHSIZE "\n", __LINE__, dset_size);
         goto error;
     }
 
@@ -4809,7 +4811,7 @@ test_nbit_flt_size(hid_t file)
     if ((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1 * DSET_DIM2 * (precision / 8) ||
         dset_size > DSET_DIM1 * DSET_DIM2 * (precision / 8) + 1 * KB) {
         H5_FAILED();
-        HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n", __LINE__, dset_size);
+        HDfprintf(stdout, "    Line %d: wrong dataset size: %" PRIuHSIZE "\n", __LINE__, dset_size);
         goto error;
     } /* end if */
 
@@ -6160,6 +6162,115 @@ test_can_apply2(hid_t file)
 error:
     return FAIL;
 } /* end test_can_apply2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_optional_filters
+ *
+ * Purpose:     Tests that H5Dcreate2 will not fail when a combination of
+ *              type, space, etc... doesn't work for a filter and filter is
+ *              optional.
+ *
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
+ *
+ * Programmer:  Binh-Minh Ribler
+ *              24 July 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_optional_filters(hid_t file)
+{
+    unsigned int level        = 9;
+    unsigned int cd_values[1] = {level};
+    size_t       cd_nelmts    = 1;
+    hsize_t      dim1d[1];                  /* Dataspace dimensions */
+    hid_t        dsid    = H5I_INVALID_HID; /* Dataset ID */
+    hid_t        sid     = H5I_INVALID_HID; /* Dataspace ID */
+    hid_t        strtid  = H5I_INVALID_HID; /* Datatype ID for string */
+    hid_t        vlentid = H5I_INVALID_HID; /* Datatype ID for vlen */
+    hid_t        dcplid  = H5I_INVALID_HID; /* Dataspace creation property list ID */
+
+    TESTING("dataset with optional filters");
+
+    /* Create dcpl with special filter */
+    if ((dcplid = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    /* Create the datatype */
+    if ((strtid = H5Tcreate(H5T_STRING, H5T_VARIABLE)) < 0)
+        TEST_ERROR;
+
+    /* Create the data space */
+    if ((sid = H5Screate(H5S_SCALAR)) < 0)
+        TEST_ERROR;
+
+    /* The filter is optional. */
+    if (H5Pset_filter(dcplid, H5Z_FILTER_DEFLATE, H5Z_FLAG_OPTIONAL, cd_nelmts, cd_values) < 0)
+        TEST_ERROR;
+
+    /* Create dataset with optional filter */
+    if ((dsid = H5Dcreate2(file, DSET_OPTIONAL_SCALAR, strtid, sid, H5P_DEFAULT, dcplid, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close datatype */
+    if (H5Tclose(strtid) < 0)
+        TEST_ERROR;
+
+    /* Set dataspace dimensions */
+    dim1d[0] = DIM1;
+
+    /* Create a non-scalar dataspace */
+    if ((sid = H5Screate_simple(1, dim1d, NULL)) < 0)
+        TEST_ERROR;
+
+    /* Create a vlen datatype */
+    if ((vlentid = H5Tvlen_create(H5T_NATIVE_INT)) < 0)
+        TEST_ERROR;
+
+    /* Create dataset with optional filter */
+    if ((dsid = H5Dcreate2(file, DSET_OPTIONAL_VLEN, vlentid, sid, H5P_DEFAULT, dcplid, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Close dataset */
+    if (H5Dclose(dsid) < 0)
+        TEST_ERROR;
+
+    /* Close dataspace */
+    if (H5Sclose(sid) < 0)
+        TEST_ERROR;
+
+    /* Close datatype */
+    if (H5Tclose(vlentid) < 0)
+        TEST_ERROR;
+
+    /* Close dataset creation property list */
+    if (H5Pclose(dcplid) < 0)
+        TEST_ERROR;
+
+    PASSED();
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+        H5Sclose(sid);
+        H5Pclose(dcplid);
+        H5Tclose(strtid);
+        H5Tclose(vlentid);
+    }
+    H5E_END_TRY;
+    return FAIL;
+} /* end test_optional_filters() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_can_apply_szip
@@ -15238,6 +15349,7 @@ main(void)
                 nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
+                nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
                 nerrors += (test_set_local(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_can_apply_szip(file) < 0 ? 1 : 0);
                 nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);

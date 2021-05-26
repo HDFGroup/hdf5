@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -26,10 +25,10 @@ public class H5Ex_T_VLString
     private static String DATASETNAME = "DS1";
 
     private static void createDataset() {
-        long file_id = -1;
-        long type_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long type_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         int rank = 1;
         String[] str_data = { "Parting", "is such", "sweet", "sorrow." };
         long[] dims = { str_data.length };
@@ -93,9 +92,9 @@ public class H5Ex_T_VLString
     }
 
     private static void readDataset() {
-        long file_id = -1;
-        long type_id = -1;
-        long dataset_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long type_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
         String[] str_data = { "", "", "", "" };
 
         try {

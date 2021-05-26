@@ -26,7 +26,7 @@
 /****************/
 
 #include "H5FDmodule.h" /* This source code file is part of the H5FD module */
-#define H5FD_TESTING    /* Suppress warning about H5FD testing funcs        */
+#define H5FD_TESTING    /* Suppress warning about H5FD testing funcs    */
 
 /***********/
 /* Headers */
@@ -106,7 +106,6 @@ H5FD__supports_swmr_test(const char *vfd_name)
         ret_value = !HDstrcmp(vfd_name, "log") || !HDstrcmp(vfd_name, "sec2");
 
     FUNC_LEAVE_NOAPI(ret_value)
-
 } /* end H5FD__supports_swmr_test() */
 
 /*

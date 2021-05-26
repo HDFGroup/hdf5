@@ -17,15 +17,28 @@ import java.util.Arrays;
 
 import hdf.hdf5lib.HDF5Constants;
 
-// Object token, which is a unique and permanent identifier, for an HDF5 object within a container.
+/**
+ * Object token, which is a unique and permanent identifier, for an HDF5 object within a container.
+ *
+ */
 public class H5O_token_t implements Serializable {
     private static final long serialVersionUID = -4754320605310155032L;
+    /**
+     * Tokens are unique and permanent identifiers that are
+     *          used to reference HDF5 objects in a container.
+     *          Use basic byte array to store the dat
+     */
     public byte[] data;
 
     H5O_token_t (byte[] data) {
         this.data = data;
     }
 
+    /**
+     * Check if token data is undefined
+     *
+     * @return true if token data is undefined
+     */
     public boolean isUndefined() {
         return this.equals(HDF5Constants.H5O_TOKEN_UNDEF);
     }

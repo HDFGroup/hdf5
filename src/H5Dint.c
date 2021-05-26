@@ -92,6 +92,7 @@ static herr_t H5D__vlen_get_buf_size_cb(void *elem, hid_t type_id, unsigned ndim
                                         void *op_data);
 static herr_t H5D__vlen_get_buf_size_gen_cb(void *elem, hid_t type_id, unsigned ndim, const hsize_t *point,
                                             void *op_data);
+static herr_t H5D__check_filters(H5D_t *dataset);
 
 /*********************/
 /* Package Variables */
@@ -191,7 +192,7 @@ H5D__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the dataset IDs */
+    /* Initialize the ID group for the dataset IDs */
     if (H5I_register_type(H5I_DATASET_CLS) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -343,11 +344,6 @@ H5D__close_cb(H5VL_object_t *dset_vol_obj)
         HGOTO_ERROR(H5E_DATASET, H5E_CLOSEERROR, FAIL, "unable to close dataset");
 
 done:
-    /* XXX: (MSC) Weird thing for datasets and filters:
-     * Always decrement the ref count on the VOL for datasets, since
-     * the ID is removed even if the close fails.
-     */
-
     /* Free the VOL object */
     if (H5VL_free_object(dset_vol_obj) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTDEC, FAIL, "unable to free VOL object");
@@ -1004,7 +1000,7 @@ H5D__update_oh_info(H5F_t *file, H5D_t *dset, hid_t dapl_id)
     if (TRUE == use_minimized_header) {
         if (H5D__prepare_minimized_oh(file, dset, oloc) == FAIL)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't create minimized dataset object header")
-    }
+    } /* end if */
     else {
         /* Add the dataset's raw data size to the size of the header, if the
          * raw data will be stored as compact
@@ -1276,18 +1272,24 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
 
     /* Check if the dataset has a non-default DCPL & get important values, if so */
     if (new_dset->shared->dcpl_id != H5P_DATASET_CREATE_DEFAULT) {
-        H5O_layout_t *layout; /* Dataset's layout information */
-        H5O_pline_t * pline;  /* Dataset's I/O pipeline information */
-        H5O_fill_t *  fill;   /* Dataset's fill value info */
-        H5O_efl_t *   efl;    /* Dataset's external file list info */
+        H5O_layout_t *layout;                 /* Dataset's layout information */
+        H5O_pline_t * pline;                  /* Dataset's I/O pipeline information */
+        H5O_fill_t *  fill;                   /* Dataset's fill value info */
+        H5O_efl_t *   efl;                    /* Dataset's external file list info */
+        htri_t        ignore_filters = FALSE; /* Ignore optional filters or not */
 
-        /* Check if the filters in the DCPL can be applied to this dataset */
-        if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+        if ((ignore_filters = H5Z_ignore_filters(new_dset->shared->dcpl_id, dt, space)) < 0)
+            HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "H5Z_has_optional_filter() failed")
 
-        /* Make the "set local" filter callbacks for this dataset */
-        if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
+        if (FALSE == ignore_filters) {
+            /* Check if the filters in the DCPL can be applied to this dataset */
+            if (H5Z_can_apply(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_CANTINIT, NULL, "I/O filters can't operate on this dataset")
+
+            /* Make the "set local" filter callbacks for this dataset */
+            if (H5Z_set_local(new_dset->shared->dcpl_id, new_dset->shared->type_id) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, NULL, "unable to set local filter parameters")
+        } /* ignore_filters */
 
         /* Get new dataset's property list object */
         if (NULL == (dc_plist = (H5P_genplist_t *)H5I_object(new_dset->shared->dcpl_id)))
@@ -1311,9 +1313,11 @@ H5D__create(H5F_t *file, hid_t type_id, const H5S_t *space, hid_t dcpl_id, hid_t
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, NULL, "can't retrieve external file list")
         efl_copied = TRUE;
 
-        /* Check that chunked layout is used if filters are enabled */
-        if (pline->nused > 0 && H5D_CHUNKED != layout->type)
-            HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
+        if (FALSE == ignore_filters) {
+            /* Check that chunked layout is used if filters are enabled */
+            if (pline->nused > 0 && H5D_CHUNKED != layout->type)
+                HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, NULL, "filters can only be used with chunked layout")
+        }
 
         /* Check if the alloc_time is the default and error out */
         if (fill->alloc_time == H5D_ALLOC_TIME_DEFAULT)
@@ -1668,7 +1672,7 @@ H5D__append_flush_setup(H5D_t *dset, hid_t dapl_id)
 
         /* Get dataset access property list */
         if (NULL == (dapl = (H5P_genplist_t *)H5I_object(dapl_id)))
-            HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for dapl ID");
+            HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for dapl ID");
 
         /* Check if append flush property exists */
         if (H5P_exist_plist(dapl, H5D_ACS_APPEND_FLUSH_NAME) > 0) {
@@ -2952,13 +2956,13 @@ done:
  * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5D__check_filters(H5D_t *dataset)
 {
     H5O_fill_t *fill;                /* Dataset's fill value */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(dataset);
@@ -3863,9 +3867,9 @@ H5D__get_space(const H5D_t *dset)
     if (NULL == (space = H5S_copy(dset->shared->space, FALSE, TRUE)))
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to get dataspace")
 
-    /* Create an atom */
+    /* Create an ID */
     if ((ret_value = H5I_register(H5I_DATASPACE, space, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register dataspace")
 
 done:
     if (ret_value < 0)
@@ -3910,17 +3914,17 @@ H5D__get_type(const H5D_t *dset)
     if (H5T_lock(dt, FALSE) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to lock transient datatype")
 
-    /* Create an atom */
+    /* Create an ID */
     if (H5T_is_named(dt)) {
         /* If this is a committed datatype, we need to recreate the
          * two-level IDs, where the VOL object is a copy of the
          * returned datatype.
          */
         if ((ret_value = H5VL_wrap_register(H5I_DATATYPE, dt, TRUE)) < 0)
-            HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+            HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register datatype")
     } /* end if */
     else if ((ret_value = H5I_register(H5I_DATATYPE, dt, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register datatype")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register datatype")
 
 done:
     if (ret_value < 0)

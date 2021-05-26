@@ -42,10 +42,6 @@ static herr_t H5T_set_precision(const H5T_t *dt, size_t prec);
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived datatypes.
- *
  *-------------------------------------------------------------------------
  */
 size_t
@@ -129,10 +125,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Moved real work to a private function.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -190,10 +182,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- * 	Robb Matzke, 22 Dec 1998
- *	Also works for derived datatypes.
  *
  *-------------------------------------------------------------------------
  */

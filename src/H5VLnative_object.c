@@ -122,7 +122,7 @@ H5VL__native_object_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, co
 
     /* Copy the object */
     if ((ret_value = H5O_copy(&src_loc, src_name, &dst_loc, dst_name, ocpypl_id, lcpl_id)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTCOPY, FAIL, "unable to copy object")
+        HGOTO_ERROR(H5E_OHDR, H5E_CANTCOPY, FAIL, "unable to copy object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

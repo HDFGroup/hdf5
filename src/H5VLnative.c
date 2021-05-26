@@ -15,17 +15,27 @@
  *              using HDF5 VFDs.
  */
 
-#include "H5private.h"   /* Generic Functions                        */
-#include "H5Aprivate.h"  /* Attributes                               */
-#include "H5Dprivate.h"  /* Datasets                                 */
-#include "H5Eprivate.h"  /* Error handling                           */
-#include "H5Fprivate.h"  /* Files                                    */
-#include "H5Gprivate.h"  /* Groups                                   */
-#include "H5Iprivate.h"  /* IDs                                      */
-#include "H5Oprivate.h"  /* Object headers                           */
-#include "H5Pprivate.h"  /* Property lists                           */
-#include "H5Tprivate.h"  /* Datatypes                                */
-#include "H5VLprivate.h" /* Virtual Object Layer                     */
+/****************/
+/* Module Setup */
+/****************/
+
+#define H5VL_FRIEND /* Suppress error about including H5VLpkg   */
+
+/***********/
+/* Headers */
+/***********/
+
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Aprivate.h" /* Attributes                               */
+#include "H5Dprivate.h" /* Datasets                                 */
+#include "H5Eprivate.h" /* Error handling                           */
+#include "H5Fprivate.h" /* Files                                    */
+#include "H5Gprivate.h" /* Groups                                   */
+#include "H5Iprivate.h" /* IDs                                      */
+#include "H5Oprivate.h" /* Object headers                           */
+#include "H5Pprivate.h" /* Property lists                           */
+#include "H5Tprivate.h" /* Datatypes                                */
+#include "H5VLpkg.h"    /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
 
@@ -37,9 +47,10 @@ static herr_t H5VL__native_term(void);
 
 /* Native VOL connector class struct */
 static const H5VL_class_t H5VL_native_cls_g = {
-    H5VL_NATIVE_VERSION, /* version      */
+    H5VL_VERSION,        /* VOL class struct version */
     H5VL_NATIVE_VALUE,   /* value        */
     H5VL_NATIVE_NAME,    /* name         */
+    H5VL_NATIVE_VERSION, /* connector version */
     0,                   /* capability flags */
     NULL,                /* initialize   */
     H5VL__native_term,   /* terminate    */
@@ -545,6 +556,7 @@ H5VL_native_get_file_struct(void *obj, H5I_type_t type, H5F_t **file)
         case H5I_ERROR_MSG:
         case H5I_ERROR_STACK:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")

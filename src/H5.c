@@ -254,6 +254,8 @@ H5_init_library(void)
      *   It might not be initialized during normal file open.
      *   When the application does not close the file, routines in the module might
      *   be called via H5_term_library() when shutting down the file.
+     * The dataspace interface needs to be initialized so that future IDs for
+     *   dataspaces work.
      */
     if (H5E_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
@@ -271,6 +273,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
     if (H5FS_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface")
+    if (H5S_init() < 0)
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataspace interface")
 
     /* Finish initializing interfaces that depend on the interfaces above */
     if (H5VL_init_phase2() < 0)
@@ -361,21 +365,26 @@ H5_term_library(void)
         /* Try to organize these so the "higher" level components get shut
          * down before "lower" level components that they might rely on. -QAK
          */
-        pending += DOWN(L);
 
-        /* Close the "top" of various interfaces (IDs, etc) but don't shut
-         *  down the whole interface yet, so that the object header messages
-         *  get serialized correctly for entries in the metadata cache and the
-         *  symbol table entry in the superblock gets serialized correctly, etc.
-         *  all of which is performed in the 'F' shutdown.
-         */
-        pending += DOWN(A_top);
-        pending += DOWN(D_top);
-        pending += DOWN(G_top);
-        pending += DOWN(M_top);
-        pending += DOWN(R_top);
-        pending += DOWN(S_top);
-        pending += DOWN(T_top);
+        /* Close down the user-facing interfaces, after the event sets */
+        if (pending == 0) {
+            /* Close the interfaces dependent on others */
+            pending += DOWN(L);
+
+            /* Close the "top" of various interfaces (IDs, etc) but don't shut
+             *  down the whole interface yet, so that the object header messages
+             *  get serialized correctly for entries in the metadata cache and the
+             *  symbol table entry in the superblock gets serialized correctly, etc.
+             *  all of which is performed in the 'F' shutdown.
+             */
+            pending += DOWN(A_top);
+            pending += DOWN(D_top);
+            pending += DOWN(G_top);
+            pending += DOWN(M_top);
+            pending += DOWN(R_top);
+            pending += DOWN(S_top);
+            pending += DOWN(T_top);
+        } /* end if */
 
         /* Don't shut down the file code until objects in files are shut down */
         if (pending == 0)

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *             Friday, September 19, 1997
  */
 
@@ -53,9 +53,6 @@
 /* Package Variables */
 /*********************/
 
-/* Declare extern the PQ free list for the wrapped strings */
-H5FL_BLK_EXTERN(str_buf);
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -76,7 +73,6 @@ H5FL_BLK_EXTERN(str_buf);
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -117,7 +113,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -182,7 +177,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -221,7 +215,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -292,7 +285,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Pedro Vicente
- *              pvn@ncsa.uiuc.edu
  *              ???day, August ??, 2002
  *
  * Notes:       'depth' parameter determines how much of the group entry
@@ -370,7 +362,6 @@ H5G__ent_reset(H5G_entry_t *ent)
  *		Failure:	Negative
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -513,7 +504,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 29 1997
  *
  *-------------------------------------------------------------------------
@@ -533,7 +523,7 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth, con
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
               "Name offset into private heap:", (unsigned long)(ent->name_off));
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object header address:", ent->header);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object header address:", ent->header);
 
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cache info type:");
     switch (ent->type) {
@@ -545,10 +535,10 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth, con
             HDfprintf(stream, "Symbol Table\n");
 
             HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Cached entry information:");
-            HDfprintf(stream, "%*s%-*s %a\n", nested_indent, "", nested_fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
                       "B-tree address:", ent->cache.stab.btree_addr);
 
-            HDfprintf(stream, "%*s%-*s %a\n", nested_indent, "", nested_fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
                       "Heap address:", ent->cache.stab.heap_addr);
             break;
 

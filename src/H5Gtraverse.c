@@ -15,7 +15,7 @@
  *
  * Created:		H5Gtraverse.c
  *			Sep 13 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for traversing group hierarchy
  *
@@ -218,7 +218,7 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
         } /* end if */
         /* else, we really needed to open the object */
         else
-            HGOTO_ERROR(H5E_SYM, H5E_BADATOM, FAIL, "traversal callback returned invalid ID")
+            HGOTO_ERROR(H5E_SYM, H5E_BADID, FAIL, "traversal callback returned invalid ID")
     } /* end if */
 
     /* Get the object location information from the ID the user callback returned */
@@ -241,16 +241,16 @@ H5G__traverse_ud(const H5G_loc_t *grp_loc /*in,out*/, const H5O_link_t *lnk, H5G
      * Close the open ID the user passed back.
      */
     if (H5I_dec_ref(cb_return) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
     cb_return = (hid_t)(-1);
 
 done:
     /* Close location given to callback. */
     if (cur_grp > 0 && H5I_dec_ref(cur_grp) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom for current location")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID for current location")
 
     if (ret_value < 0 && cb_return > 0 && H5I_dec_ref(cb_return) < 0)
-        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close atom from UD callback")
+        HDONE_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close ID from UD callback")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__traverse_ud() */
@@ -345,7 +345,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov 20 2006
  *
  *-------------------------------------------------------------------------
@@ -450,7 +449,6 @@ done:
  *				resolved.
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
@@ -797,7 +795,6 @@ done:
  *				traversed.
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 13 2005
  *
  *-------------------------------------------------------------------------
@@ -820,7 +817,7 @@ H5G_traverse(const H5G_loc_t *loc, const char *name, unsigned target, H5G_traver
 
     /* Retrieve the original # of soft / UD links that are able to be traversed
      * (So that multiple calls to H5G_traverse don't incorrectly look
-     *  like they've traversed too many.  Nested calls, like in H5L_move(),
+     *  like they've traversed too many.  Nested calls, like in H5L__move(),
      *  may need their own mechanism to set & reset the # of links to traverse)
      */
     if (H5CX_get_nlinks(&orig_nlinks) < 0)

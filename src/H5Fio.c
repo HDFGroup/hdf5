@@ -15,7 +15,7 @@
  *
  * Created:             H5Fio.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File I/O routines.
  *
@@ -74,6 +74,10 @@
  *		address for the file.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Jul 10 1997
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -108,6 +112,10 @@ done:
  *		address for the file.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Jul 10 1997
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -124,6 +132,10 @@ H5F_block_read(H5F_t *f, H5FD_mem_t type, haddr_t addr, size_t size, void *buf /
  *		address.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Jul 10 1997
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -159,6 +171,10 @@ done:
  *		address.
  *
  * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Robb Matzke
+ *		Jul 10 1997
+ *
  *-------------------------------------------------------------------------
  */
 herr_t

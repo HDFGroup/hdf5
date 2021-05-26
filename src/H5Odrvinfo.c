@@ -11,7 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+/* Programmer:  Quincey Koziol
  *              Thursday, March  1, 2007
  *
  * Purpose:	A message holding driver info settings
@@ -25,11 +25,11 @@
 #include "H5Opkg.h"      /* Object headers			*/
 #include "H5MMprivate.h" /* Memory management			*/
 
-static void * H5O_drvinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
-                                 size_t p_size, const uint8_t *p);
-static herr_t H5O_drvinfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_drvinfo_copy(const void *_mesg, void *_dest);
-static size_t H5O_drvinfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static void * H5O__drvinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
+                                  size_t p_size, const uint8_t *p);
+static herr_t H5O__drvinfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void * H5O__drvinfo_copy(const void *_mesg, void *_dest);
+static size_t H5O__drvinfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__drvinfo_reset(void *_mesg);
 static herr_t H5O__drvinfo_debug(H5F_t *f, const void *_mesg, FILE *stream, int indent, int fwidth);
 
@@ -38,16 +38,16 @@ const H5O_msg_class_t H5O_MSG_DRVINFO[1] = {{
     H5O_DRVINFO_ID,        /*message id number                     */
     "driver info",         /*message name for debugging            */
     sizeof(H5O_drvinfo_t), /*native message size                   */
-    0,                     /* messages are sharable?       */
-    H5O_drvinfo_decode,    /*decode message                        */
-    H5O_drvinfo_encode,    /*encode message                        */
-    H5O_drvinfo_copy,      /*copy the native value                 */
-    H5O_drvinfo_size,      /*raw message size			*/
+    0,                     /* messages are sharable?               */
+    H5O__drvinfo_decode,   /*decode message                        */
+    H5O__drvinfo_encode,   /*encode message                        */
+    H5O__drvinfo_copy,     /*copy the native value                 */
+    H5O__drvinfo_size,     /*raw message size			*/
     H5O__drvinfo_reset,    /*free internal memory			*/
     NULL,                  /* free method				*/
     NULL,                  /* file delete method			*/
     NULL,                  /* link method				*/
-    NULL,                  /*set share method		*/
+    NULL,                  /*set share method		        */
     NULL,                  /*can share method		        */
     NULL,                  /* pre copy native value to file	*/
     NULL,                  /* copy native value to file		*/
@@ -61,7 +61,7 @@ const H5O_msg_class_t H5O_MSG_DRVINFO[1] = {{
 #define H5O_DRVINFO_VERSION 0
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_drvinfo_decode
+ * Function:	H5O__drvinfo_decode
  *
  * Purpose:	Decode a shared message table message and return a pointer
  *              to a newly allocated H5O_drvinfo_t struct.
@@ -75,13 +75,14 @@ const H5O_msg_class_t H5O_MSG_DRVINFO[1] = {{
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                   unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+H5O__drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
+                    unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
+                    size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
     H5O_drvinfo_t *mesg;             /* Native message */
     void *         ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -118,10 +119,10 @@ H5O_drvinfo_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh, unsig
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_drvinfo_decode() */
+} /* end H5O__drvinfo_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_drvinfo_encode
+ * Function:	H5O__drvinfo_encode
  *
  * Purpose:	Encode a v1 B-tree 'K' value message.
  *
@@ -133,12 +134,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
-                   const void *_mesg)
+H5O__drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p,
+                    const void *_mesg)
 {
     const H5O_drvinfo_t *mesg = (const H5O_drvinfo_t *)_mesg;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -154,10 +155,10 @@ H5O_drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_share
     H5MM_memcpy(p, mesg->buf, mesg->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_drvinfo_encode() */
+} /* end H5O__drvinfo_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_drvinfo_copy
+ * Function:	H5O__drvinfo_copy
  *
  * Purpose:	Copies a message from _MESG to _DEST, allocating _DEST if
  *		necessary.
@@ -171,13 +172,13 @@ H5O_drvinfo_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_share
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_drvinfo_copy(const void *_mesg, void *_dest)
+H5O__drvinfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_drvinfo_t *mesg      = (const H5O_drvinfo_t *)_mesg;
     H5O_drvinfo_t *      dest      = (H5O_drvinfo_t *)_dest;
     void *               ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(mesg);
@@ -202,10 +203,10 @@ H5O_drvinfo_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_drvinfo_copy() */
+} /* end H5O__drvinfo_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_drvinfo_size
+ * Function:	H5O__drvinfo_size
  *
  * Purpose:	Returns the size of the raw message in bytes not counting the
  *		message type or size fields, but only the data fields.
@@ -219,12 +220,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_drvinfo_t *mesg      = (const H5O_drvinfo_t *)_mesg;
     size_t               ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(f);
@@ -236,7 +237,7 @@ H5O_drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
                 mesg->len; /* Buffer */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_drvinfo_size() */
+} /* end H5O__drvinfo_size() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__drvinfo_reset
@@ -247,7 +248,6 @@ H5O_drvinfo_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_s
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  1 2007
  *
  *-------------------------------------------------------------------------
@@ -295,7 +295,7 @@ H5O__drvinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int
     HDassert(fwidth >= 0);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Driver name:", mesg->name);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Buffer size:", mesg->len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5O__drvinfo_debug() */

@@ -235,6 +235,9 @@ H5G_loc_real(void *obj, H5I_type_t type, H5G_loc_t *loc)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                         "unable to get group location of a dataspace selection iterator")
 
+        case H5I_EVENTSET:
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to get group location of a event set")
+
         case H5I_UNINIT:
         case H5I_BADID:
         case H5I_NTYPES:
@@ -597,7 +600,7 @@ done:
 } /* end H5G__loc_insert() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_loc_exists_cb
+ * Function:	H5G__loc_exists_cb
  *
  * Purpose:	Callback for checking if an object exists
  *
@@ -609,13 +612,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_UNUSED *name,
-                  const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
-                  H5G_own_loc_t *own_loc /*out*/)
+H5G__loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_UNUSED *name,
+                   const H5O_link_t H5_ATTR_UNUSED *lnk, H5G_loc_t *obj_loc, void *_udata /*in,out*/,
+                   H5G_own_loc_t *own_loc /*out*/)
 {
     H5G_loc_exists_t *udata = (H5G_loc_exists_t *)_udata; /* User data passed in */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check if the name in this group resolved to a valid object */
     if (obj_loc == NULL)
@@ -631,7 +634,7 @@ H5G_loc_exists_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_ATTR_U
     *own_loc = H5G_OWN_NONE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5G_loc_exists_cb() */
+} /* end H5G__loc_exists_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G_loc_exists
@@ -662,7 +665,7 @@ H5G_loc_exists(const H5G_loc_t *loc, const char *name)
     udata.exists = FALSE;
 
     /* Traverse group hierarchy to locate object */
-    if (H5G_traverse(loc, name, H5G_TARGET_EXISTS, H5G_loc_exists_cb, &udata) < 0)
+    if (H5G_traverse(loc, name, H5G_TARGET_EXISTS, H5G__loc_exists_cb, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't check if object exists")
 
     /* Set return value */

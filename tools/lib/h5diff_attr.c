@@ -104,7 +104,7 @@ table_attrs_free(table_attrs_t *table)
  * Date: March 15, 2011
  *------------------------------------------------------------------------*/
 static void
-table_attr_mark_exist(unsigned *exist, char *name, table_attrs_t *table)
+table_attr_mark_exist(const unsigned *exist, char *name, table_attrs_t *table)
 {
     if (table->nattrs == table->size) {
         match_attr_t *new_attrs;
@@ -343,7 +343,7 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
     hsize_t    dims1[H5S_MAX_RANK];         /* dimensions of dataset */
     hsize_t    dims2[H5S_MAX_RANK];         /* dimensions of dataset */
     hsize_t    nfound = 0;
-    int        j;
+    size_t     sz;
     diff_err_t ret_value = opts->err_stat;
 
     H5TOOLS_START_DEBUG(" - errstat:%d", opts->err_stat);
@@ -394,19 +394,19 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
 
     H5TOOLS_DEBUG("attr_names: %s - %s", name1, name2);
     if (name1) {
-        j = (int)HDstrlen(name1);
-        H5TOOLS_DEBUG("attr1_name: %s - %d", name1, j);
-        if (j > 0) {
-            opts->obj_name[0] = (char *)HDmalloc((size_t)j + 1);
-            HDstrncpy(opts->obj_name[0], name1, (size_t)j + 1);
+        sz = HDstrlen(name1);
+        H5TOOLS_DEBUG("attr1_name: %s - %d", name1, sz);
+        if (sz > 0) {
+            opts->obj_name[0] = (char *)HDmalloc(sz + 1);
+            HDstrncpy(opts->obj_name[0], name1, sz + 1);
         }
     }
     if (name2) {
-        j = (int)HDstrlen(name2);
-        H5TOOLS_DEBUG("attr2_name: %s - %d", name2, j);
-        if (j > 0) {
-            opts->obj_name[1] = (char *)HDmalloc((size_t)j + 1);
-            HDstrncpy(opts->obj_name[1], name2, (size_t)j + 1);
+        sz = HDstrlen(name2);
+        H5TOOLS_DEBUG("attr2_name: %s - %d", name2, sz);
+        if (sz > 0) {
+            opts->obj_name[1] = (char *)HDmalloc(sz + 1);
+            HDstrncpy(opts->obj_name[1], name2, sz + 1);
         }
     }
     H5TOOLS_DEBUG("attr_names: %s - %s", opts->obj_name[0], opts->obj_name[1]);
@@ -414,6 +414,9 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
     /* pass dims1 and dims2 for maxdims as well since attribute's maxdims
      * are always same */
     if (diff_can_type(ftype1_id, ftype2_id, rank1, rank2, dims1, dims2, dims1, dims2, opts, 0) == 1) {
+
+        int j;
+
         /*-----------------------------------------------------------------
          * "upgrade" the smaller memory size
          *------------------------------------------------------------------
@@ -471,22 +474,18 @@ diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *na
 
         H5TOOLS_DEBUG("attr_names: %s - %s : %s - %s", name1, name2, path1, path2);
         if (name1) {
-            j = (int)HDstrlen(name1) + (int)HDstrlen(path1) + 7;
-            H5TOOLS_DEBUG("attr1_name: %s - %d", name1, j);
-            if (j > 0) {
-                opts->obj_name[0] = (char *)HDcalloc((size_t)j + 1, sizeof(char));
-                HDsnprintf(opts->obj_name[0], j, "%s of <%s>", name1, path1);
-                opts->obj_name[0][j] = '\0';
-            }
+            sz = HDstrlen(name1) + HDstrlen(path1) + 7;
+            H5TOOLS_DEBUG("attr1_name: %s - %d", name1, sz);
+            opts->obj_name[0] = (char *)HDcalloc(sz + 1, sizeof(char));
+            HDsnprintf(opts->obj_name[0], sz, "%s of <%s>", name1, path1);
+            opts->obj_name[0][sz] = '\0';
         }
         if (name2) {
-            j = (int)HDstrlen(name2) + (int)HDstrlen(path2) + 7;
-            H5TOOLS_DEBUG("attr2_name: %s - %d", name2, j);
-            if (j > 0) {
-                opts->obj_name[1] = (char *)HDcalloc((size_t)j + 1, sizeof(char));
-                HDsnprintf(opts->obj_name[1], j, "%s of <%s>", name2, path2);
-                opts->obj_name[1][j] = '\0';
-            }
+            sz = HDstrlen(name2) + HDstrlen(path2) + 7;
+            H5TOOLS_DEBUG("attr2_name: %s - %d", name2, sz);
+            opts->obj_name[1] = (char *)HDcalloc(sz + 1, sizeof(char));
+            HDsnprintf(opts->obj_name[1], sz, "%s of <%s>", name2, path2);
+            opts->obj_name[1][sz] = '\0';
         }
 
         /*---------------------------------------------------------------------

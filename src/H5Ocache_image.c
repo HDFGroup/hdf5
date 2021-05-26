@@ -281,37 +281,8 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
          * from the VFD layer at the end of file.  As this was the
          * last file space allocation before shutdown, the cache image
          * should still be the last item in the file.
-         *
-         * If the hack to work around the self referential free space
-         * manager issue is in use, file space for the non-empty self
-         * referential free space managers was also allocated from VFD
-         * layer at the end of file.  Since these allocations directly
-         * preceeded the cache image allocation they should be directly
-         * adjacent to the cache image block at the end of file.
-         *
-         * In this case, just call H5MF_tidy_self_referential_fsm_hack().
-         *
-         * That routine will float the self referential free space
-         * managers, and reduce the eoa to its value just prior to
-         * allocation of space for same.  Since the cache image appears
-         * just after the self referential free space managers, this
-         * will release the file space for the cache image as well.
-         *
-         * Note that in this case, there must not have been any file
-         * space allocations / deallocations prior to the free of the
-         * cache image.  Verify this to the extent possible.
-         *
-         * If the hack to work around the persistent self referential
-         * free space manager issue is NOT in use, just call H5MF_xfree()
-         * to release the cache iamge.  In principle, we should be able
-         * to just reduce the EOA to the base address of the cache
-         * image block, as there shouldn't be any file space allocation
-         * before the first metadata cache access.  However, given
-         * time constraints, I don't want to go there now.
          */
-
         if (f->shared->closing) {
-
             /* Get the eoa, and verify that it has the expected value */
             if (HADDR_UNDEF == (final_eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "unable to get file size")
@@ -321,11 +292,8 @@ H5O__mdci_delete(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, void *_mesg)
             if (H5FD_free(f->shared->lf, H5FD_MEM_SUPER, f, mesg->addr, mesg->size) < 0)
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't free MDC image")
         }
-        else {
-            if (H5MF_xfree(f, H5FD_MEM_SUPER, mesg->addr, mesg->size) < 0)
-                HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
-        }
-
+        else if (H5MF_xfree(f, H5FD_MEM_SUPER, mesg->addr, mesg->size) < 0)
+            HGOTO_ERROR(H5E_OHDR, H5E_CANTFREE, FAIL, "unable to free file space for cache image block")
     } /* end if */
 
 done:
@@ -358,9 +326,10 @@ H5O__mdci_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int in
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Metadata Cache Image Block address:", mdci->addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+              "Metadata Cache Image Block address:", mdci->addr);
 
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Metadata Cache Image Block size in bytes:", mdci->size);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

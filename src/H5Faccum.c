@@ -15,7 +15,7 @@
  *
  * Created:             H5Faccum.c
  *                      Jan 10 2008
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             File metadata "accumulator" routines.  (Used to
  *                      cache small metadata I/Os and group them into a
@@ -95,7 +95,6 @@ H5FL_BLK_DEFINE_STATIC(meta_accum);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan 10 2008
  *
  *-------------------------------------------------------------------------
@@ -265,7 +264,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun 11 2009
  *
  *-------------------------------------------------------------------------
@@ -407,7 +405,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan 10 2008
  *
  *-------------------------------------------------------------------------
@@ -847,7 +844,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Jan 10 2008
  *
  *-------------------------------------------------------------------------
@@ -1014,7 +1010,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan 10 2008
  *
  *-------------------------------------------------------------------------
@@ -1057,7 +1052,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jan 10 2008
  *
  *-------------------------------------------------------------------------

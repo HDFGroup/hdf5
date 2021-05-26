@@ -32,6 +32,10 @@
  * \brief Virtual Object Layer Interface
  * \todo Describe concisely what the functions in this module are about.
  *
+ * \defgroup ASYNC Asynchronous Functions
+ * \brief Asynchronous Functions
+ * \todo Describe concisely what the functions in this module are about.
+ *
  * \defgroup H5VLDEF Definitions
  * \ingroup H5VL
  * \defgroup H5VLDEV VOL Developer

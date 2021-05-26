@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -1361,6 +1360,76 @@ Java_hdf_hdf5lib_H5_H5Pget_1evict_1on_1close(JNIEnv *env, jclass clss, jlong fap
 done:
     return bval;
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1evict_1on_1close */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_file_locking
+ * Signature: (JZZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1file_1locking(JNIEnv *env, jclass clss, jlong fapl_id, jboolean use_file_locking,
+                                          jboolean ignore_when_disabled)
+{
+    hbool_t use_file_locking_val     = TRUE;
+    hbool_t ignore_when_disabled_val = TRUE;
+
+    UNUSED(clss);
+
+    use_file_locking_val     = (use_file_locking == JNI_TRUE) ? TRUE : FALSE;
+    ignore_when_disabled_val = (ignore_when_disabled == JNI_TRUE) ? TRUE : FALSE;
+
+    if (H5Pset_file_locking((hid_t)fapl_id, use_file_locking_val, ignore_when_disabled_val) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1file_1locking */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_use_file_locking
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1use_1file_1locking(JNIEnv *env, jclass clss, jlong fapl_id)
+{
+    hbool_t  use_file_locking_val = TRUE;
+    hbool_t  unused               = TRUE;
+    jboolean bval                 = JNI_FALSE;
+
+    UNUSED(clss);
+
+    if (H5Pget_file_locking((hid_t)fapl_id, &use_file_locking_val, &unused) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    bval = (use_file_locking_val == TRUE) ? JNI_TRUE : JNI_FALSE;
+
+done:
+    return bval;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1use_1file_1locking */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_ignore_disabled_file_locking
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1ignore_1disabled_1file_1locking(JNIEnv *env, jclass clss, jlong fapl_id)
+{
+    hbool_t  ignore_when_disabled_val = TRUE;
+    hbool_t  unused                   = TRUE;
+    jboolean bval                     = JNI_FALSE;
+
+    UNUSED(clss);
+
+    if (H5Pget_file_locking((hid_t)fapl_id, &unused, &ignore_when_disabled_val) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    bval = (ignore_when_disabled_val == TRUE) ? JNI_TRUE : JNI_FALSE;
+
+done:
+    return bval;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1ignore_1disabled_1file_1locking */
 
 /*
  * Class:     hdf_hdf5lib_H5
