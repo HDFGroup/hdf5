@@ -385,6 +385,8 @@ IDE_GENERATED_PROPERTIES ("H5HP" "${H5HP_HDRS}" "${H5HP_SOURCES}" )
 
 set (H5I_SOURCES
     ${HDF5_SRC_DIR}/H5I.c
+    ${HDF5_SRC_DIR}/H5Idbg.c
+    ${HDF5_SRC_DIR}/H5Iint.c
     ${HDF5_SRC_DIR}/H5Itest.c
 )
 set (H5I_HDRS
@@ -606,14 +608,6 @@ set (H5SM_HDRS
 IDE_GENERATED_PROPERTIES ("H5SM" "${H5SM_HDRS}" "${H5SM_SOURCES}" )
 
 
-set (H5ST_SOURCES
-    ${HDF5_SRC_DIR}/H5ST.c
-)
-set (H5ST_HDRS
-)
-IDE_GENERATED_PROPERTIES ("H5ST" "${H5ST_HDRS}" "${H5ST_SOURCES}" )
-
-
 set (H5T_SOURCES
     ${HDF5_SRC_DIR}/H5T.c
     ${HDF5_SRC_DIR}/H5Tarray.c
@@ -807,7 +801,6 @@ set (common_SRCS
     ${H5S_SOURCES}
     ${H5SL_SOURCES}
     ${H5SM_SOURCES}
-    ${H5ST_SOURCES}
     ${H5T_SOURCES}
     ${H5TS_SOURCES}
     ${H5VL_SOURCES}
@@ -898,6 +891,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5FApkg.h
     ${HDF5_SRC_DIR}/H5FAprivate.h
 
+    ${HDF5_SRC_DIR}/H5FDmirror_priv.h
     ${HDF5_SRC_DIR}/H5FDpkg.h
     ${HDF5_SRC_DIR}/H5FDprivate.h
     ${HDF5_SRC_DIR}/H5FDvfd_swmr_private.h
@@ -932,6 +926,7 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Mpkg.h
     ${HDF5_SRC_DIR}/H5Mprivate.h
 
+    ${HDF5_SRC_DIR}/H5MFpkg.h
     ${HDF5_SRC_DIR}/H5MFprivate.h
 
     ${HDF5_SRC_DIR}/H5MMprivate.h
@@ -968,8 +963,6 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5SMpkg.h
     ${HDF5_SRC_DIR}/H5SMprivate.h
 
-    ${HDF5_SRC_DIR}/H5STprivate.h
-
     ${HDF5_SRC_DIR}/H5Tpkg.h
     ${HDF5_SRC_DIR}/H5Tprivate.h
 
@@ -989,6 +982,8 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Zprivate.h
 
     ${HDF5_SRC_DIR}/H5win32defs.h
+
+    ${HDF5_SRC_DIR}/uthash.h
 )
 
 set (H5_GENERATED_HEADERS
@@ -1406,8 +1401,8 @@ endif ()
 # Option to build documentation
 #-----------------------------------------------------------------------------
 if (DOXYGEN_FOUND)
-  set (DOXYGEN_PACKAGE ${HDF5_PACKAGE})
-  set (DOXYGEN_VERSION_STRING ${HDF5_VERSION_STRING})
+  set (DOXYGEN_PACKAGE ${HDF5_PACKAGE_NAME})
+  set (DOXYGEN_VERSION_STRING ${HDF5_PACKAGE_VERSION_STRING})
   set (DOXYGEN_INCLUDE_ALIASES_PATH ${HDF5_DOXYGEN_DIR})
   set (DOXYGEN_INCLUDE_ALIASES aliases)
   set (DOXYGEN_VERBATIM_VARS DOXYGEN_INCLUDE_ALIASES)
@@ -1417,7 +1412,15 @@ if (DOXYGEN_FOUND)
   set (DOXYGEN_OPTIMIZE_OUTPUT_FOR_C YES)
   set (DOXYGEN_MACRO_EXPANSION YES)
   set (DOXYGEN_OUTPUT_DIRECTORY ${HDF5_BINARY_DIR}/hdf5lib_docs)
-  set (DOXYGEN_EXAMPLES_DIRECTORY ${HDF5_DOXYGEN_DIR}/examples)
+  set (DOXYGEN_EXAMPLES_DIRECTORY "${HDF5_DOXYGEN_DIR}/examples ${HDF5_SRC_DIR} ${HDF5_SOURCE_DIR}/examples ${HDF5_TEST_SRC_DIR}")
+  set (DOXYGEN_LAYOUT_FILE ${HDF5_DOXYGEN_DIR}/hdf5doxy_layout.xml)
+  set (DOXYGEN_HTML_HEADER ${HDF5_DOXYGEN_DIR}/hdf5_header.html)
+  set (DOXYGEN_HTML_FOOTER ${HDF5_DOXYGEN_DIR}/hdf5_footer.html)
+  set (DOXYGEN_HTML_EXTRA_STYLESHEET ${HDF5_DOXYGEN_DIR}/hdf5doxy.css)
+  set (DOXYGEN_HTML_EXTRA_FILES "${HDF5_DOXYGEN_DIR}/hdf5_navtree_hacks.js ${HDF5_DOXYGEN_DIR}/img/ftv2node.png ${HDF5_DOXYGEN_DIR}/img/ftv2pnode.png")
+  set (DOXYGEN_SERVER_BASED_SEARCH NO)
+  set (DOXYGEN_EXTERNAL_SEARCH NO)
+  set (DOXYGEN_SEARCHENGINE_URL)
 
 # This configure and custom target work together
   # Replace variables inside @@ with the current values

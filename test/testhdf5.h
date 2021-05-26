@@ -203,7 +203,6 @@ extern "C" {
 /* Prototypes for the test routines */
 void test_metadata(void);
 void test_checksum(void);
-void test_tst(void);
 void test_heap(void);
 void test_refstr(void);
 void test_file(void);

@@ -793,6 +793,7 @@
 ./src/H5FDlog.h
 ./src/H5FDmirror.c
 ./src/H5FDmirror.h
+./src/H5FDmirror_priv.h
 ./src/H5FDmodule.h
 ./src/H5FDmpi.c
 ./src/H5FDmpi.h
@@ -897,6 +898,8 @@
 ./src/H5HP.c
 ./src/H5HPprivate.h
 ./src/H5I.c
+./src/H5Idbg.c
+./src/H5Iint.c
 ./src/H5Imodule.h
 ./src/H5Ipkg.h
 ./src/H5Iprivate.h
@@ -1049,8 +1052,6 @@
 ./src/H5SMpkg.h
 ./src/H5SMprivate.h
 ./src/H5SMtest.c
-./src/H5ST.c
-./src/H5STprivate.h
 ./src/H5T.c
 ./src/H5Tarray.c
 ./src/H5Tbit.c
@@ -1130,6 +1131,7 @@
 ./src/Makefile.am
 ./src/hdf5.h
 ./src/libhdf5.settings.in
+./src/uthash.h
 
 ./test/AtomicWriterReader.txt
 ./test/H5srcdir.h
@@ -1362,7 +1364,6 @@
 ./test/tskiplist.c
 ./test/tsohm.c
 ./test/ttime.c
-./test/ttst.c
 ./test/ttsafe.c
 ./test/ttsafe.h
 ./test/ttsafe_acreate.c
@@ -1771,6 +1772,7 @@
 ./tools/src/misc/Makefile.am
 ./tools/src/misc/h5clear.c
 ./tools/src/misc/h5debug.c
+./tools/src/misc/h5delete.c
 ./tools/src/misc/h5mkgrp.c
 ./tools/src/misc/h5repart.c
 ./tools/test/misc/Makefile.am
@@ -3259,7 +3261,6 @@
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_t.java
 
-./java/src/hdf/hdf5lib/exceptions/HDF5AtomException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5AttributeException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5BtreeException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5DataFiltersException.java
@@ -3273,6 +3274,7 @@
 ./java/src/hdf/hdf5lib/exceptions/HDF5FunctionArgumentException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5HeapException.java
+./java/src/hdf/hdf5lib/exceptions/HDF5IdException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5InternalErrorException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5JavaException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5LibraryException.java
@@ -3432,9 +3434,11 @@
 ./java/test/junit.sh.in
 ./java/test/testfiles/JUnit-TestH5.txt
 ./java/test/testfiles/JUnit-TestH5A.txt
+./java/test/testfiles/JUnit-TestH5Arw.txt
 ./java/test/testfiles/JUnit-TestH5Dparams.txt
 ./java/test/testfiles/JUnit-TestH5D.txt
 ./java/test/testfiles/JUnit-TestH5Dplist.txt
+./java/test/testfiles/JUnit-TestH5Drw.txt
 ./java/test/testfiles/JUnit-TestH5E.txt
 ./java/test/testfiles/JUnit-TestH5Edefault.txt
 ./java/test/testfiles/JUnit-TestH5Eparams.txt
@@ -3462,6 +3466,7 @@
 ./java/test/testfiles/JUnit-TestH5Pvirtual.txt
 ./java/test/testfiles/JUnit-TestH5PL.txt
 ./java/test/testfiles/JUnit-TestH5R.txt
+./java/test/testfiles/JUnit-TestH5Rref.txt
 ./java/test/testfiles/JUnit-TestH5Sbasic.txt
 ./java/test/testfiles/JUnit-TestH5S.txt
 ./java/test/testfiles/JUnit-TestH5Tparams.txt
@@ -3472,9 +3477,11 @@
 ./java/test/h5ex_g_iterate.orig
 ./java/test/TestH5.java
 ./java/test/TestH5A.java
+./java/test/TestH5Arw.java
 ./java/test/TestH5Dparams.java
 ./java/test/TestH5D.java
 ./java/test/TestH5Dplist.java
+./java/test/TestH5Drw.java
 ./java/test/TestH5E.java
 ./java/test/TestH5Edefault.java
 ./java/test/TestH5Eparams.java
@@ -3502,6 +3509,7 @@
 ./java/test/TestH5Pvirtual.java
 ./java/test/TestH5PL.java
 ./java/test/TestH5R.java
+./java/test/TestH5Rref.java
 ./java/test/TestH5Sbasic.java
 ./java/test/TestH5S.java
 ./java/test/TestH5Tparams.java
@@ -3542,7 +3550,6 @@
 ./config/cmake/HDFCompilerFlags.cmake
 ./config/cmake/HDFCXXCompilerFlags.cmake
 ./config/cmake/HDFFortranCompilerFlags.cmake
-./config/cmake/HDF5_Process_Flex_Files.cmake
 ./config/cmake/HDF5Macros.cmake
 ./config/cmake/HDF5PluginMacros.cmake
 ./config/cmake/HDF5PluginCache.cmake
@@ -3550,7 +3557,6 @@
 ./config/cmake/jrunTest.cmake
 ./config/cmake/jvolTest.cmake
 ./config/cmake/libh5cc.in
-./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              Tuesday, May  2, 2006
  *
  * Purpose:     Free space tracking functions.
@@ -793,9 +793,6 @@ H5FS__dirty(H5FS_t *fspace)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
-#ifdef QAK
-    HDfprintf(stderr, "%s: Marking free space header as dirty\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(fspace);
@@ -1209,9 +1206,6 @@ void
 H5FS__assert(const H5FS_t *fspace)
 {
     FUNC_ENTER_PACKAGE_NOERR
-#ifdef QAK
-    HDfprintf(stderr, "%s: fspace->tot_sect_count = %Hu\n", "H5FS__assert", fspace->tot_sect_count);
-#endif /* QAK */
 
     /* Checks for section info, if it's available */
     if (fspace->sinfo) {
@@ -1227,9 +1221,6 @@ H5FS__assert(const H5FS_t *fspace)
     HDassert(fspace->tot_sect_count >= fspace->serial_sect_count);
     HDassert(fspace->tot_sect_count >= fspace->ghost_sect_count);
     HDassert(fspace->tot_sect_count == (fspace->serial_sect_count + fspace->ghost_sect_count));
-#ifdef QAK
-    HDassert(fspace->serial_sect_count > 0 || fspace->ghost_sect_count == 0);
-#endif /* QAK */
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5FS__assert() */

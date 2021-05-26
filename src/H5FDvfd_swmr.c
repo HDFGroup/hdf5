@@ -128,7 +128,8 @@ static const H5FD_class_t H5FD_vfd_swmr_g = {
     H5FD_vfd_swmr_truncate,   /* truncate             */
     H5FD_vfd_swmr_lock,       /* lock                 */
     H5FD_vfd_swmr_unlock,     /* unlock               */
-    H5FD_vfd_swmr_dedup,      /* dedup               */
+    NULL,                     /* del                  */
+    H5FD_vfd_swmr_dedup,      /* dedup                */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 

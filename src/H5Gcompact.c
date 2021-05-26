@@ -15,7 +15,7 @@
  *
  * Created:		H5Gcompact.c
  *			Sep  5 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Functions for handling compact storage.
  *
@@ -72,7 +72,6 @@ static herr_t H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED 
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  5 2005
  *
  *-------------------------------------------------------------------------
@@ -173,7 +172,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  6 2005
  *
  *-------------------------------------------------------------------------
@@ -249,7 +247,7 @@ done:
 } /* end H5G__compact_get_name_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_compact_remove_common_cb
+ * Function:	H5G__compact_remove_common_cb
  *
  * Purpose:	Common callback routine for deleting 'link' message for a
  *              particular name.
@@ -257,19 +255,18 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep  5 2005
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
+H5G__compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_udata)
 {
     const H5O_link_t *lnk       = (const H5O_link_t *)_mesg; /* Pointer to link */
     H5G_iter_rm_t *   udata     = (H5G_iter_rm_t *)_udata;   /* 'User data' passed in */
     herr_t            ret_value = H5_ITER_CONT;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(lnk);
@@ -287,7 +284,7 @@ H5G_compact_remove_common_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, voi
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_compact_remove_common_cb() */
+} /* end H5G__compact_remove_common_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G__compact_remove
@@ -318,7 +315,7 @@ H5G__compact_remove(const H5O_loc_t *oloc, H5RS_str_t *grp_full_path_r, const ch
     udata.name            = name;
 
     /* Iterate over the link messages to delete the right one */
-    if (H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE) < 0)
+    if (H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G__compact_remove_common_cb, &udata, TRUE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message")
 
 done:
@@ -364,7 +361,7 @@ H5G__compact_remove_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5RS
     udata.name            = ltable.lnks[n].name;
 
     /* Iterate over the link messages to delete the right one */
-    if (H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G_compact_remove_common_cb, &udata, TRUE) < 0)
+    if (H5O_msg_remove_op(oloc, H5O_LINK_ID, H5O_FIRST, H5G__compact_remove_common_cb, &udata, TRUE) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTDELETE, FAIL, "unable to delete link message")
 
 done:
@@ -427,7 +424,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -472,7 +468,6 @@ done:
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -517,7 +512,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  6 2006
  *
  *-------------------------------------------------------------------------

@@ -22,27 +22,27 @@
 #include "H5Zpkg.h"      /* Data filters				*/
 
 /* Local function prototypes */
-static herr_t H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static size_t H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                                 size_t *buf_size, void **buf);
+static herr_t H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+                                  size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_SHUFFLE[1] = {{
-    H5Z_CLASS_T_VERS,      /* H5Z_class_t version */
-    H5Z_FILTER_SHUFFLE,    /* Filter id number		*/
-    1,                     /* encoder_present flag (set to true) */
-    1,                     /* decoder_present flag (set to true) */
-    "shuffle",             /* Filter name for debugging	*/
-    NULL,                  /* The "can apply" callback     */
-    H5Z_set_local_shuffle, /* The "set local" callback     */
-    H5Z_filter_shuffle,    /* The actual filter function	*/
+    H5Z_CLASS_T_VERS,       /* H5Z_class_t version */
+    H5Z_FILTER_SHUFFLE,     /* Filter id number		*/
+    1,                      /* encoder_present flag (set to true) */
+    1,                      /* decoder_present flag (set to true) */
+    "shuffle",              /* Filter name for debugging	*/
+    NULL,                   /* The "can apply" callback     */
+    H5Z__set_local_shuffle, /* The "set local" callback     */
+    H5Z__filter_shuffle,    /* The actual filter function	*/
 }};
 
 /* Local macros */
 #define H5Z_SHUFFLE_PARM_SIZE 0 /* "Local" parameter for shuffling size */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_set_local_shuffle
+ * Function:	H5Z__set_local_shuffle
  *
  * Purpose:	Set the "local" dataset parameter for data shuffling to be
  *              the size of the datatype.
@@ -53,12 +53,10 @@ const H5Z_class2_t H5Z_SHUFFLE[1] = {{
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
+H5Z__set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     H5P_genplist_t *dcpl_plist;                          /* Property list pointer */
     const H5T_t *   type;                                /* Datatype */
@@ -67,11 +65,11 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_i
     unsigned        cd_values[H5Z_SHUFFLE_TOTAL_NPARMS]; /* Filter parameters */
     herr_t          ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get datatype */
     if (NULL == (type = (const H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -93,10 +91,10 @@ H5Z_set_local_shuffle(hid_t dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_i
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_set_local_shuffle() */
+} /* end H5Z__set_local_shuffle() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_shuffle
+ * Function:	H5Z__filter_shuffle
  *
  * Purpose:	Implement an I/O filter which "de-interlaces" a block of data
  *              by putting all the bytes in a byte-position for each element
@@ -111,15 +109,11 @@ done:
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
  *
- * Modifications:
- *              Quincey Koziol, November 13, 2002
- *              Cleaned up code.
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                   size_t *buf_size, void **buf)
+H5Z__filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+                    size_t *buf_size, void **buf)
 {
     void *         dest  = NULL;  /* Buffer to deposit [un]shuffled bytes into */
     unsigned char *_src  = NULL;  /* Alias for source buffer */
@@ -133,7 +127,7 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
     size_t leftover;      /* Extra bytes at end of buffer */
     size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     if (cd_nelmts != H5Z_SHUFFLE_TOTAL_NPARMS || cd_values[H5Z_SHUFFLE_PARM_SIZE] == 0)
@@ -183,24 +177,31 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                         case 0:
                             do {
                                 DUFF_GUTS
+                                /* FALLTHROUGH */
                                 H5_ATTR_FALLTHROUGH
                                 case 7:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 6:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 5:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 4:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 3:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 2:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 1:
                                     DUFF_GUTS
@@ -247,24 +248,31 @@ H5Z_filter_shuffle(unsigned flags, size_t cd_nelmts, const unsigned cd_values[],
                         case 0:
                             do {
                                 DUFF_GUTS
+                                /* FALLTHROUGH */
                                 H5_ATTR_FALLTHROUGH
                                 case 7:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 6:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 5:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 4:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 3:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 2:
                                     DUFF_GUTS
+                                    /* FALLTHROUGH */
                                     H5_ATTR_FALLTHROUGH
                                 case 1:
                                     DUFF_GUTS

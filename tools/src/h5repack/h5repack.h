@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5REPACK_H__
-#define H5REPACK_H__
+#ifndef H5REPACK_H
+#define H5REPACK_H
 
 #include "H5private.h"
 #include "hdf5.h"
@@ -222,4 +222,4 @@ obj_list_t *parse_filter(const char *str, unsigned *n_objs, filter_info_t *filt,
 obj_list_t *parse_layout(const char *str, unsigned *n_objs, pack_info_t *pack, /* info about object */
                          pack_opt_t *options);
 
-#endif /* H5REPACK_H__ */
+#endif /* H5REPACK_H */

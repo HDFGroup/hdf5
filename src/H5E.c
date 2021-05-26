@@ -49,7 +49,6 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Epkg.h"      /* Error handling                           */
 #include "H5FLprivate.h" /* Free lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
@@ -86,6 +85,7 @@ static H5E_t *    H5E__get_current_stack(void);
 static herr_t     H5E__set_current_stack(H5E_t *estack);
 static herr_t     H5E__close_stack(H5E_t *err_stack);
 static ssize_t    H5E__get_num(const H5E_t *err_stack);
+static herr_t     H5E__append_stack(H5E_t *dst_estack, const H5E_t *src_stack);
 
 /*********************/
 /* Package Variables */
@@ -181,17 +181,17 @@ H5E__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the error class IDs */
+    /* Initialize the ID group for the error class IDs */
     if (H5I_register_type(H5I_ERRCLS_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
-    /* Initialize the atom group for the major error IDs */
+    /* Initialize the ID group for the major error IDs */
     if (H5I_register_type(H5I_ERRMSG_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
-    /* Initialize the atom group for the error stacks */
+    /* Initialize the ID group for the error stacks */
     if (H5I_register_type(H5I_ERRSTK_CLS) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTINIT, FAIL, "unable to initialize ID group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTINIT, FAIL, "unable to initialize ID group")
 
 #ifndef H5_HAVE_THREADSAFE
     H5E_stack_g[0].nused = 0;
@@ -378,7 +378,7 @@ H5E__get_stack(void)
 #endif /* H5_HAVE_THREADSAFE */
 
 /*-------------------------------------------------------------------------
- * Function:    H5E_free_class
+ * Function:    H5E__free_class
  *
  * Purpose:     Private function to free an error class.
  *
@@ -390,9 +390,9 @@ H5E__get_stack(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E_free_class(H5E_cls_t *cls)
+H5E__free_class(H5E_cls_t *cls)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check arguments */
     HDassert(cls);
@@ -404,7 +404,7 @@ H5E_free_class(H5E_cls_t *cls)
     cls           = H5FL_FREE(H5E_cls_t, cls);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5E_free_class() */
+} /* end H5E__free_class() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Eregister_class
@@ -487,7 +487,7 @@ H5E__register_class(const char *cls_name, const char *lib_name, const char *vers
 
 done:
     if (!ret_value)
-        if (cls && H5E_free_class(cls) < 0)
+        if (cls && H5E__free_class(cls) < 0)
             HDONE_ERROR(H5E_ERROR, H5E_CANTRELEASE, NULL, "unable to free error class")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -498,9 +498,9 @@ done:
  *
  * Purpose:     Closes an error class.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 11, 2003
  *
  *-------------------------------------------------------------------------
@@ -555,7 +555,7 @@ H5E__unregister_class(H5E_cls_t *cls)
         HGOTO_ERROR(H5E_ERROR, H5E_BADITER, FAIL, "unable to free all messages in this error class")
 
     /* Free error class structure */
-    if (H5E_free_class(cls) < 0)
+    if (H5E__free_class(cls) < 0)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTRELEASE, FAIL, "unable to free error class")
 
 done:
@@ -576,13 +576,13 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Eget_class_name(hid_t class_id, char *name, size_t size)
+H5Eget_class_name(hid_t class_id, char *name /*out*/, size_t size)
 {
     H5E_cls_t *cls;            /* Pointer to error class */
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
-    H5TRACE3("Zs", "i*sz", class_id, name, size);
+    H5TRACE3("Zs", "ixz", class_id, name, size);
 
     /* Get the error class */
     if (NULL == (cls = (H5E_cls_t *)H5I_object_verify(class_id, H5I_ERROR_CLASS)))
@@ -837,13 +837,13 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5Eget_msg(hid_t msg_id, H5E_type_t *type, char *msg_str, size_t size)
+H5Eget_msg(hid_t msg_id, H5E_type_t *type /*out*/, char *msg_str /*out*/, size_t size)
 {
     H5E_msg_t *msg;            /* Pointer to error message */
     ssize_t    ret_value = -1; /* Return value */
 
     FUNC_ENTER_API_NOCLEAR((-1))
-    H5TRACE4("Zs", "i*Et*sz", msg_id, type, msg_str, size);
+    H5TRACE4("Zs", "ixxz", msg_id, type, msg_str, size);
 
     /* Get the message object */
     if (NULL == (msg = (H5E_msg_t *)H5I_object_verify(msg_id, H5I_ERROR_MSG)))
@@ -1014,9 +1014,9 @@ done:
  * Purpose:     Replaces current stack with specified stack. This closes the
  *              stack ID also.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 15, 2003
  *
  *-------------------------------------------------------------------------
@@ -1119,9 +1119,9 @@ done:
  *
  * Purpose:     Closes an error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 14, 2003
  *
  *-------------------------------------------------------------------------
@@ -1254,9 +1254,9 @@ H5E__get_num(const H5E_t *estack)
  *
  * Purpose:     Deletes some error messages from the top of error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Friday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1309,9 +1309,9 @@ done:
  *              function name, file name, and error description strings must
  *              be statically allocated.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *		Monday, October 18, 1999
  *
  * Notes:       Basically a new public API wrapper around the H5E__push_stack
@@ -1319,16 +1319,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
+H5_ATTR_FORMAT(printf, 8, 9)
 herr_t
 H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid_t cls_id, hid_t maj_id,
          hid_t min_id, const char *fmt, ...)
 {
-    va_list ap;     /* Varargs info */
-    H5E_t * estack; /* Pointer to error stack to modify */
-#ifndef H5_HAVE_VASPRINTF
-    int tmp_len;                  /* Current size of description buffer */
-    int desc_len;                 /* Actual length of description when formatted */
-#endif                            /* H5_HAVE_VASPRINTF */
+    va_list ap;                   /* Varargs info */
+    H5E_t * estack;               /* Pointer to error stack to modify */
     char *  tmp        = NULL;    /* Buffer to place formatted description in */
     hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
@@ -1357,31 +1354,9 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
     HDva_start(ap, fmt);
     va_started = TRUE;
 
-#ifdef H5_HAVE_VASPRINTF
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if (HDvasprintf(&tmp, fmt, ap) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-#else  /* H5_HAVE_VASPRINTF */
-    /* Allocate space for the formatted description buffer */
-    tmp_len = 128;
-    if (NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-    /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
-    while ((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap)) > (tmp_len - 1)) {
-        /* shutdown & restart the va_list */
-        HDva_end(ap);
-        HDva_start(ap, fmt);
-
-        /* Release the previous description, it's too small */
-        H5MM_xfree(tmp);
-
-        /* Allocate a description of the appropriate length */
-        tmp_len = desc_len + 1;
-        if (NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-    } /* end while */
-#endif /* H5_HAVE_VASPRINTF */
 
     /* Push the error on the stack */
     if (H5E__push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
@@ -1390,16 +1365,11 @@ H5Epush2(hid_t err_stack, const char *file, const char *func, unsigned line, hid
 done:
     if (va_started)
         HDva_end(ap);
-#ifdef H5_HAVE_VASPRINTF
     /* Memory was allocated with HDvasprintf so it needs to be freed
      * with HDfree
      */
     if (tmp)
         HDfree(tmp);
-#else  /* H5_HAVE_VASPRINTF */
-    if (tmp)
-        H5MM_xfree(tmp);
-#endif /* H5_HAVE_VASPRINTF */
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Epush2() */
@@ -1409,9 +1379,9 @@ done:
  *
  * Purpose:     Clears the error stack for the specified error stack.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:  Raymond Lu
  *              Wednesday, July 16, 2003
  *
  *-------------------------------------------------------------------------
@@ -1453,9 +1423,9 @@ done:
  *              prints error messages. Users are encouraged to write their
  *              own more specific error handlers.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1498,9 +1468,9 @@ done:
  * Purpose:     Walks the error stack for the current thread and calls some
  *              function for each error along the way.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Friday, February 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -1548,7 +1518,7 @@ done:
  *              Either (or both) arguments may be null in which case the
  *              value is not returned.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Saturday, February 28, 1998
@@ -1556,14 +1526,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func, void **client_data)
+H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func /*out*/, void **client_data /*out*/)
 {
     H5E_t *       estack;              /* Error stack to operate on */
     H5E_auto_op_t op;                  /* Error stack function */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*EA**x", estack_id, func, client_data);
+    H5TRACE3("e", "ixx", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
         if (NULL == (estack = H5E__get_my_stack())) /*lint !e506 !e774 Make lint 'constant value Boolean' in
@@ -1605,7 +1575,7 @@ done:
  *              Automatic stack traversal is always in the H5E_WALK_DOWNWARD
  *              direction.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *              Friday, February 27, 1998
@@ -1663,7 +1633,7 @@ done:
  *              or the H5E_auto_t typedef.  The IS_STACK parameter is set
  *              to 1 for the first case and 0 for the latter case.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative value on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, September  8, 2004
@@ -1698,3 +1668,111 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Eauto_is_v2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Eappend_stack
+ *
+ * Purpose:     Appends one error stack to another, optionally closing the
+ *              source stack.
+ *
+ * Return:      Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, October 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Eappend_stack(hid_t dst_stack_id, hid_t src_stack_id, hbool_t close_source_stack)
+{
+    H5E_t *dst_stack, *src_stack; /* Error stacks */
+    herr_t ret_value = SUCCEED;   /* Return value */
+
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iib", dst_stack_id, src_stack_id, close_source_stack);
+
+    /* Check args */
+    if (NULL == (dst_stack = (H5E_t *)H5I_object_verify(dst_stack_id, H5I_ERROR_STACK)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dst_stack_id not a error stack ID")
+    if (NULL == (src_stack = (H5E_t *)H5I_object_verify(src_stack_id, H5I_ERROR_STACK)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "src_stack_id not a error stack ID")
+
+    /* Append the source stack to the destination stack */
+    if (H5E__append_stack(dst_stack, src_stack) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTAPPEND, FAIL, "can't append stack")
+
+    /* Close source error stack, if requested */
+    if (close_source_stack)
+        /* Decrement the counter on the error stack.  It will be freed if the
+         * count reaches zero.
+         */
+        if (H5I_dec_app_ref(src_stack_id) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on source error stack")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Eappend_stack() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E__append_stack
+ *
+ * Purpose:     Private function to append error stacks.
+ *
+ * Return:      Non-negative value on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Wednesday, October 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5E__append_stack(H5E_t *dst_stack, const H5E_t *src_stack)
+{
+    unsigned u;                   /* Local index variable */
+    herr_t   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(dst_stack);
+    HDassert(src_stack);
+
+    /* Copy the errors from the source stack to the destination stack */
+    for (u = 0; u < src_stack->nused; u++) {
+        const H5E_error2_t *src_error; /* Pointers to source error on stack */
+        H5E_error2_t *      dst_error; /* Pointers to destination error on stack */
+
+        /* Get pointers into the current error stack location */
+        src_error = &(src_stack->slot[u]);
+        dst_error = &(dst_stack->slot[dst_stack->nused]);
+
+        /* Increment the IDs to indicate that they are used in this stack */
+        if (H5I_inc_ref(src_error->cls_id, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error class")
+        dst_error->cls_id = src_error->cls_id;
+        if (H5I_inc_ref(src_error->maj_num, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error message")
+        dst_error->maj_num = src_error->maj_num;
+        if (H5I_inc_ref(src_error->min_num, FALSE) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error message")
+        dst_error->min_num = src_error->min_num;
+        if (NULL == (dst_error->func_name = H5MM_xstrdup(src_error->func_name)))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        if (NULL == (dst_error->file_name = H5MM_xstrdup(src_error->file_name)))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+        dst_error->line = src_error->line;
+        if (NULL == (dst_error->desc = H5MM_xstrdup(src_error->desc)))
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
+
+        /* Increment # of errors in destination stack */
+        dst_stack->nused++;
+
+        /* Check for destination stack full */
+        if (dst_stack->nused >= H5E_NSLOTS)
+            break;
+    } /* end for */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E__append_stack() */

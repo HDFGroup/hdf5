@@ -15,7 +15,7 @@
  *
  * Created:     H5FA.c
  *              April 2009
- *              Vailin Choi <vchoi@hdfgroup.org>
+ *              Vailin Choi
  *
  * Purpose:     Implements a Fixed Array for storing elements
  *              of datasets with fixed dimensions.
@@ -101,7 +101,6 @@ H5FL_BLK_DEFINE(fa_native_elmt);
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
  *		Oct 17 2016
  *
  *-------------------------------------------------------------------------

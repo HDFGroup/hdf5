@@ -322,9 +322,9 @@ void
 print_found(hsize_t nfound)
 {
     if (g_Parallel)
-        parallel_print("%" H5_PRINTF_LL_WIDTH "u differences found\n", (unsigned long long)nfound);
+        parallel_print("%" PRIuHSIZE " differences found\n", nfound);
     else
-        HDfprintf(stdout, "%Hu differences found\n", nfound);
+        HDfprintf(stdout, "%" PRIuHSIZE " differences found\n", nfound);
 }
 
 /*-----------------------------------------------------------------

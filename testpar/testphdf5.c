@@ -33,9 +33,6 @@ int ngroups   = 512;             /* number of groups to create in root
 int facc_type       = FACC_MPIO; /*Test file access type */
 int dxfer_coll_type = DXFER_COLLECTIVE_IO;
 
-H5E_auto2_t old_func;        /* previous error handler */
-void *      old_client_data; /* previous error handler arg.*/
-
 /* other option flags */
 
 /* FILENAME and filenames must have the same number of names.
@@ -352,6 +349,8 @@ main(int argc, char **argv)
 #endif
 
     AddTest("props", test_file_properties, NULL, "Coll Metadata file property settings", PARATESTFILE);
+
+    AddTest("delete", test_delete, NULL, "MPI-IO VFD file delete", PARATESTFILE);
 
     AddTest("idsetw", dataset_writeInd, NULL, "dataset independent write", PARATESTFILE);
     AddTest("idsetr", dataset_readInd, NULL, "dataset independent read", PARATESTFILE);

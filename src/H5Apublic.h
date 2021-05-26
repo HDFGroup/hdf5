@@ -22,17 +22,40 @@
 #include "H5Opublic.h" /* Object Headers			*/
 #include "H5Tpublic.h" /* Datatypes				*/
 
-/* Information struct for attribute (for H5Aget_info/H5Aget_info_by_idx) */
+//! <!-- [H5A_info_t_snip] -->
+/**
+ * Information struct for H5Aget_info() / H5Aget_info_by_idx()
+ */
 typedef struct {
-    hbool_t           corder_valid; /* Indicate if creation order is valid */
-    H5O_msg_crt_idx_t corder;       /* Creation order                 */
-    H5T_cset_t        cset;         /* Character set of attribute name */
-    hsize_t           data_size;    /* Size of raw data		  */
+    hbool_t           corder_valid; /**< Indicate if creation order is valid */
+    H5O_msg_crt_idx_t corder;       /**< Creation order                 */
+    H5T_cset_t        cset;         /**< Character set of attribute name */
+    hsize_t           data_size;    /**< Size of raw data		  */
 } H5A_info_t;
+//! <!-- [H5A_info_t_snip] -->
 
-/* Typedef for H5Aiterate2() callbacks */
+//! <!-- [H5A_operator2_t_snip] -->
+/**
+ * Typedef for H5Aiterate2() / H5Aiterate_by_name() callbacks
+ * \param[in] location_id The identifier for the group, dataset
+ *            or named datatype being iterated over
+ * \param[in] attr_name The name of the current object attribute
+ * \param[in] ainfo The attribute’s info struct
+ * \param[in,out] op_data A pointer to the operator data passed in to
+ *                H5Aiterate2() or H5Aiterate_by_name()
+ * \returns The return values from an operator are:
+ *          \li Zero causes the iterator to continue, returning zero when
+ *              all attributes have been processed.
+ *          \li Positive causes the iterator to immediately return that
+ *              positive value, indicating short-circuit success. The
+ *              iterator can be restarted at the next attribute.
+ *          \li Negative causes the iterator to immediately return that value,
+ *              indicating failure. The iterator can be restarted at the next
+ *              attribute.
+ */
 typedef herr_t (*H5A_operator2_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
                                   const H5A_info_t *ainfo /*in*/, void *op_data /*in,out*/);
+//! <!-- [H5A_operator2_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -95,9 +118,28 @@ H5_DLL htri_t H5Aexists_by_name(hid_t obj_id, const char *obj_name, const char *
 
 /* Typedefs */
 
-/* Typedef for H5Aiterate1() callbacks */
+//! <!-- [H5A_operator1_t_snip] -->
+/**
+ * \brief Typedef for H5Aiterate1() callbacks
+ *
+ * \param[in] location_id The identifier for the group, dataset
+ *            or named datatype being iterated over
+ * \param[in] attr_name The name of the current object attribute
+ * \param[in,out] operator_data A pointer to the operator data passed in to
+ *                H5Aiterate1()
+ * \returns The return values from an operator are:
+ *          \li Zero causes the iterator to continue, returning zero when
+ *              all attributes have been processed.
+ *          \li Positive causes the iterator to immediately return that
+ *              positive value, indicating short-circuit success. The
+ *              iterator can be restarted at the next attribute.
+ *          \li Negative causes the iterator to immediately return that value,
+ *              indicating failure. The iterator can be restarted at the next
+ *              attribute.
+ */
 typedef herr_t (*H5A_operator1_t)(hid_t location_id /*in*/, const char *attr_name /*in*/,
                                   void *operator_data /*in,out*/);
+//! <!-- [H5A_operator1_t_snip] -->
 
 /* Function prototypes */
 H5_DLL hid_t  H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t acpl_id);

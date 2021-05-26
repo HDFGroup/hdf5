@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -35,7 +34,7 @@ import org.junit.rules.TestName;
 public class TestH5Lbasic {
     @Rule public TestName testname = new TestName();
     private static final String H5_FILE = "h5ex_g_iterateL1.hdf";
-    long H5fid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
 
     @Before
     public void openH5file()

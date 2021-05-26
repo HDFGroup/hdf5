@@ -154,6 +154,7 @@ PropList::PropList(const hid_t plist_id) : IdComponent()
         case H5I_UNINIT:
         case H5I_MAP:
         case H5I_SPACE_SEL_ITER:
+        case H5I_EVENTSET:
         default:
             id = H5P_DEFAULT;
             break;

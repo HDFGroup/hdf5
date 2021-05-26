@@ -828,7 +828,7 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
 
     /* Get the object pointer */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADTYPE, (-1), "invalid identifier")
+        HGOTO_ERROR(H5E_ID, H5E_BADTYPE, (-1), "invalid identifier")
 
     /* Call private iteration function, through VOL callback */
     if ((ret_value = H5VL_group_optional(vol_obj, H5VL_NATIVE_GROUP_ITERATE_OLD, H5P_DATASET_XFER_DEFAULT,

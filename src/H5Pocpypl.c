@@ -15,7 +15,7 @@
  *
  * Created:		H5Pocpypl.c
  *			Mar 13 2006
- *			Peter Cao <xcao@ncsa.uiuc.edu>
+ *			Peter Cao
  *
  * Purpose:		Object copying property list class routines
  *
@@ -656,7 +656,7 @@ H5Pset_copy_object(hid_t plist_id, unsigned cpy_option)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Set value */
     if (H5P_set(plist, H5O_CPY_OPTION_NAME, &cpy_option) < 0)
@@ -689,7 +689,7 @@ H5Pget_copy_object(hid_t plist_id, unsigned *cpy_option /*out*/)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get values */
     if (cpy_option)
@@ -739,7 +739,7 @@ H5Padd_merge_committed_dtype_path(hid_t plist_id, const char *path)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get dtype list */
     if (H5P_peek(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &old_list) < 0)
@@ -794,7 +794,7 @@ H5Pfree_merge_committed_dtype_paths(hid_t plist_id)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get dtype list */
     if (H5P_peek(plist, H5O_CPY_MERGE_COMM_DT_LIST_NAME, &dt_list) < 0)
@@ -846,7 +846,7 @@ H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, void *op_data)
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Populate the callback info struct */
     cb_info.func      = func;
@@ -878,18 +878,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func, void **op_data)
+H5Pget_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t *func /*out*/, void **op_data /*out*/)
 {
     H5P_genplist_t *   plist;               /* Property list pointer */
     H5O_mcdt_cb_info_t cb_info;             /* Callback info struct */
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i*Os**x", plist_id, func, op_data);
+    H5TRACE3("e", "ixx", plist_id, func, op_data);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_OBJECT_COPY)))
-        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
     /* Get callback info */
     if (H5P_get(plist, H5O_CPY_MCDT_SEARCH_CB_NAME, &cb_info) < 0)

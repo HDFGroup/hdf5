@@ -382,7 +382,6 @@ END_FUNC(PKG) /* end H5FA__hdr_modified() */
  * Return:	Non-NULL pointer to header on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 12 2013
  *
  *-------------------------------------------------------------------------
@@ -438,7 +437,6 @@ END_FUNC(PKG) /* end H5FA__hdr_protect() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 12 2013
  *
  *-------------------------------------------------------------------------
@@ -457,7 +455,7 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL, H5FA__hdr_unprotect(H5FA_hdr_t *hdr,
 
     CATCH
 
-END_FUNC(PKG) /* end H5EA__hdr_unprotect() */
+END_FUNC(PKG) /* end H5FA__hdr_unprotect() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5FA__hdr_delete

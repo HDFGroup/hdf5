@@ -15,7 +15,7 @@
  *
  * Created:	H5Gint.c
  *		April 5 2007
- *		Quincey Koziol <koziol@hdfgroup.org>
+ *		Quincey Koziol
  *
  * Purpose:	General use, "internal" routines for groups.
  *
@@ -167,7 +167,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug 11 1997
  *
  *-------------------------------------------------------------------------
@@ -782,7 +781,7 @@ H5G_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter
     if (NULL == (grp = H5G__open_name(loc, group_name)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTOPENOBJ, FAIL, "unable to open group")
     if ((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Set up user data for callback */
     udata.gid      = gid;
@@ -1045,7 +1044,7 @@ H5G_visit(H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_o
 
     /* Register an ID for the starting group */
     if ((gid = H5VL_wrap_register(H5I_GROUP, grp, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATOM, H5E_CANTREGISTER, FAIL, "unable to register group")
+        HGOTO_ERROR(H5E_ID, H5E_CANTREGISTER, FAIL, "unable to register group")
 
     /* Get the location of the starting group */
     if (H5G_loc(gid, &start_loc) < 0)

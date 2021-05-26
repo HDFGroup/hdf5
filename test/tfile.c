@@ -1923,10 +1923,6 @@ test_file_delete(hid_t fapl_id)
     /* HDF5 FILE */
     /*************/
 
-    /* This is just a placeholder until the native VOL connector supports
-     * H5Fdelete().
-     */
-
     /* Get fapl-dependent filename */
     h5_fixname(FILE_DELETE, fapl_id, filename, sizeof(filename));
 
@@ -1942,19 +1938,20 @@ test_file_delete(hid_t fapl_id)
     is_hdf5 = H5Fis_accessible(filename, fapl_id);
     VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
 
-    /* Attempt to delete the file - should fail */
+    /* Delete the file */
+    ret = H5Fdelete(filename, fapl_id);
+    VERIFY(ret, SUCCEED, "H5Fdelete");
+
+    /* Verify that the file is NO LONGER an HDF5 file */
+    /* This should fail since there is no file */
     H5E_BEGIN_TRY
     {
-        ret = H5Fdelete(filename, fapl_id);
+        is_hdf5 = H5Fis_accessible(filename, fapl_id);
     }
     H5E_END_TRY;
-    VERIFY(ret, FAIL, "H5Fdelete");
+    VERIFY(is_hdf5, FAIL, "H5Fis_accessible");
 
-    /* Verify that the file still exists */
-    is_hdf5 = H5Fis_accessible(filename, fapl_id);
-    VERIFY(is_hdf5, TRUE, "H5Fis_accessible");
-
-    /* Actually delete the test file */
+    /* Just in case deletion fails - silent on errors */
     h5_delete_test_file(FILE_DELETE, fapl_id);
 
     /*****************/
