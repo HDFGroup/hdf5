@@ -255,7 +255,7 @@ typedef long long ssize_t;
  * defined in Posix.1g, otherwise it is defined here.
  */
 #ifndef ULLONG_MAX
-#define UULONG_MAX ((haddr_t)(long long)(-1))
+#define ULLONG_MAX ((haddr_t)(long long)(-1))
 #endif
 
 #if H5_SIZEOF_INT64_T >= 8
