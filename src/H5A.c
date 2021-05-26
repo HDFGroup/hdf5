@@ -25,6 +25,7 @@
 #include "H5Apkg.h"      /* Attributes                               */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
+#include "H5ESprivate.h" /* Event Sets                               */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
@@ -239,6 +240,54 @@ done:
 } /* H5Acreate2() */
 
 /*--------------------------------------------------------------------------
+ * Function:    H5Acreate_sync
+ *
+ * Purpose:     Asynchronous version of H5Acreate
+ *
+ * Return:      Success:    A attribute ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Acreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                const char *attr_name, hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id,
+                hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE10("i", "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, attr_name, type_id, space_id,
+              acpl_id, aapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Create the attribute asynchronously */
+    if ((ret_value = H5A__create_api_common(loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, token_ptr,
+                                            &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create attribute")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE10(FUNC, "*s*sIui*siiiii", app_file, app_func, app_line, loc_id, attr_name, type_id, space_id, acpl_id, aapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref(ret_value) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate_async() */
+
+/*--------------------------------------------------------------------------
  * Function:    H5A__create_by_name_api_common
  *
  * Purpose:     This is the common function for creating HDF5 attributes by name
@@ -338,6 +387,54 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Acreate_by_name() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5Acreate_by_name_async
+ *
+ * Purpose:     Asynchronous version of H5Acreate_by_name
+ *
+ * Return:      Success:    A attribute ID
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Acreate_by_name_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                        const char *obj_name, const char *attr_name, hid_t type_id, hid_t space_id,
+                        hid_t acpl_id, hid_t aapl_id, hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE12("i", "*s*sIui*s*siiiiii", app_file, app_func, app_line, loc_id, obj_name, attr_name, type_id,
+              space_id, acpl_id, aapl_id, lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Create the attribute asynchronously */
+    if ((ret_value = H5A__create_by_name_api_common(loc_id, obj_name, attr_name, type_id, space_id, acpl_id,
+                                                    aapl_id, lapl_id, token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously create attribute")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE12(FUNC, "*s*sIui*s*siiiiii", app_file, app_func, app_line, loc_id, obj_name, attr_name, type_id, space_id, acpl_id, aapl_id, lapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref(ret_value) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Acreate_by_name_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5A__open_common
@@ -457,6 +554,51 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aopen() */
 
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Aopen_async
+ *  PURPOSE
+ *      Asynchronous version of H5Aopen
+ *
+ *  RETURNS
+ *      ID of attribute on success, H5I_INVALID_HID on failure
+ *
+ *--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+              const char *attr_name, hid_t aapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, attr_name, aapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Open the attribute asynchronously */
+    if ((ret_value = H5A__open_api_common(loc_id, attr_name, aapl_id, token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously open attribute")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, attr_name, aapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref(ret_value) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aopen_async() */
+
 /*-------------------------------------------------------------------------
  * Function:    H5A__open_by_name_api_common
  *
@@ -540,6 +682,53 @@ H5Aopen_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid_t
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Aopen_by_name() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Aopen_by_name_async
+ *  PURPOSE
+ *      Asynchronous version of H5Aopen_by_name
+ *
+ *  RETURNS
+ *      ID of attribute on success, H5I_INVALID_HID on failure
+ *
+ *--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_by_name_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                      const char *obj_name, const char *attr_name, hid_t aapl_id, hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE9("i", "*s*sIui*s*siii", app_file, app_func, app_line, loc_id, obj_name, attr_name, aapl_id,
+             lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Open the attribute by name asynchronously */
+    if ((ret_value = H5A__open_by_name_api_common(loc_id, obj_name, attr_name, aapl_id, lapl_id, token_ptr,
+                                                  &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to asynchronously open attribute")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE9(FUNC, "*s*sIui*s*siii", app_file, app_func, app_line, loc_id, obj_name, attr_name, aapl_id, lapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref(ret_value) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aopen_by_name_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5A__open_by_idx_api_common
@@ -634,6 +823,54 @@ done:
 } /* H5Aopen_by_idx() */
 
 /*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Aopen_by_idx_async
+ *  PURPOSE
+ *      Asynchronous version of H5Aopen_by_idx
+ *
+ *  RETURNS
+ *      ID of attribute on success, H5I_INVALID_HID on failure
+ *
+ *--------------------------------------------------------------------------*/
+hid_t
+H5Aopen_by_idx_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                     const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+                     hid_t aapl_id, hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value = H5I_INVALID_HID;
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE11("i", "*s*sIui*sIiIohiii", app_file, app_func, app_line, loc_id, obj_name, idx_type, order, n,
+              aapl_id, lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Open the attribute by idx asynchronously */
+    if ((ret_value = H5A__open_by_idx_api_common(loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id,
+                                                 token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTCREATE, H5I_INVALID_HID, "unable to asynchronously open attribute")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE11(FUNC, "*s*sIui*sIiIohiii", app_file, app_func, app_line, loc_id, obj_name, idx_type, order, n, aapl_id, lapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref(ret_value) < 0)
+                HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on attribute ID")
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Aopen_by_idx_async() */
+
+/*--------------------------------------------------------------------------
  NAME
     H5A__write_api_common
  PURPOSE
@@ -703,6 +940,46 @@ done:
 } /* H5Awrite() */
 
 /*--------------------------------------------------------------------------
+ NAME
+    H5Awrite_async
+ PURPOSE
+    Asynchronous version of H5Awrite
+ RETURNS
+    Non-negative on success/Negative on failure
+--------------------------------------------------------------------------*/
+herr_t
+H5Awrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id, hid_t dtype_id,
+               const void *buf, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for attr_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Asynchronously write the data */
+    if (H5A__write_api_common(attr_id, dtype_id, buf, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_WRITEERROR, FAIL, "can't asynchronously write data")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Awrite_async() */
+
+/*--------------------------------------------------------------------------
  *  NAME
  *       H5A__read_api_common
  *  PURPOSE
@@ -769,6 +1046,46 @@ H5Aread(hid_t attr_id, hid_t dtype_id, void *buf /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aread() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Aread_async
+ *  PURPOSE
+ *      Asynchronous version of H5Aread
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+herr_t
+H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id, hid_t dtype_id,
+              void *buf, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for attr_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Asynchronously read the data */
+    if (H5A__read_api_common(attr_id, dtype_id, buf, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_READERROR, FAIL, "can't asynchronously read data")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aread_async() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1309,6 +1626,46 @@ done:
 } /* H5Arename() */
 
 /*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Arename_async
+ *  PURPOSE
+ *      Asynchronous version of H5Arename
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+herr_t
+H5Arename_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                const char *old_name, const char *new_name, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*s*si", app_file, app_func, app_line, loc_id, old_name, new_name, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Asynchronously rename the attribute */
+    if (H5A__rename_api_common(loc_id, old_name, new_name, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously rename attribute")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIui*s*si", app_file, app_func, app_line, loc_id, old_name, new_name, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Arename_async() */
+
+/*--------------------------------------------------------------------------
  NAME
     H5A__rename_by_name_api_common
  PURPOSE
@@ -1384,6 +1741,49 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Arename_by_name() */
+
+/*--------------------------------------------------------------------------
+ *  NAME
+ *      H5Arename_by_name_async
+ *  PURPOSE
+ *      Asynchronous version of H5Arename_by_name
+ *  RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+herr_t
+H5Arename_by_name_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                        const char *obj_name, const char *old_attr_name, const char *new_attr_name,
+                        hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*s*sIui*s*s*sii", app_file, app_func, app_line, loc_id, obj_name, old_attr_name,
+             new_attr_name, lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Asynchronously rename the attribute */
+    if (H5A__rename_by_name_api_common(loc_id, obj_name, old_attr_name, new_attr_name, lapl_id, token_ptr,
+                                       &vol_obj) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't synchronously rename attribute")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE9(FUNC, "*s*sIui*s*s*sii", app_file, app_func, app_line, loc_id, obj_name, old_attr_name, new_attr_name, lapl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Arename_by_name_async() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -1760,6 +2160,67 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aclose() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Aclose_async
+ *
+ * Purpose:     Asynchronous version of H5Aclose
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Aclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    H5VL_t *       connector = NULL;            /* VOL connector */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, attr_id, es_id);
+
+    /* Check arguments */
+    if (H5I_ATTR != H5I_get_type(attr_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a attribute ID")
+
+    /* Prepare for possible asynchronous operation */
+    if (H5ES_NONE != es_id) {
+        /* Get attribute object's connector */
+        if (NULL == (vol_obj = H5VL_vol_object(attr_id)))
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get VOL object for attribute")
+
+        /* Increase connector's refcount, so it doesn't get closed if closing
+         * the attribute closes the file */
+        connector = vol_obj->connector;
+        H5VL_conn_inc_rc(connector);
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+
+    /* Decrement the counter on the attribute ID. It will be freed if the count
+     * reaches zero.
+     */
+    if (H5I_dec_app_ref_async(attr_id, token_ptr) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "decrementing attribute ID failed")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, attr_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_ATTR, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aclose_async() */
+
 /*--------------------------------------------------------------------------
  *  NAME
  *      H5A__exists_common
@@ -1869,6 +2330,46 @@ done:
 } /* H5Aexists() */
 
 /*--------------------------------------------------------------------------
+ * NAME
+ *      H5Aexists_async
+ * PURPOSE
+ *      Asynchronous version of H5Aexists
+ * RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+herr_t
+H5Aexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t obj_id,
+                const char *attr_name, hbool_t *attr_exists, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*s*bi", app_file, app_func, app_line, obj_id, attr_name, attr_exists, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Asynchronously check if an attribute exists */
+    if (H5A__exists_api_common(obj_id, attr_name, attr_exists, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously check if attribute exists")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIui*s*bi", app_file, app_func, app_line, obj_id, attr_name, attr_exists, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aexists_async() */
+
+/*--------------------------------------------------------------------------
  *  NAME
  *      H5A__exists_by_name_api_common
  *  PURPOSE
@@ -1943,3 +2444,46 @@ H5Aexists_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Aexists_by_name() */
+
+/*--------------------------------------------------------------------------
+ * NAME
+ *      H5Aexists_by_name_async
+ * PURPOSE
+ *      Asynchronous version of H5Aexists_by_name
+ * RETURNS
+ *      Non-negative on success/Negative on failure
+ *--------------------------------------------------------------------------*/
+herr_t
+H5Aexists_by_name_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                        const char *obj_name, const char *attr_name, hbool_t *attr_exists, hid_t lapl_id,
+                        hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*s*sIui*s*s*bii", app_file, app_func, app_line, loc_id, obj_name, attr_name, attr_exists,
+             lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Asynchronously check if an attribute exists */
+    if (H5A__exists_by_name_api_common(loc_id, obj_name, attr_name, attr_exists, lapl_id, token_ptr,
+                                       &vol_obj) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTRENAME, FAIL, "can't asynchronously rename attribute")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE9(FUNC, "*s*sIui*s*s*bii", app_file, app_func, app_line, loc_id, obj_name, attr_name, attr_exists, lapl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Aexists_by_name_async() */

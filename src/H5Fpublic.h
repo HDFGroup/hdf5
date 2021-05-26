@@ -441,6 +441,13 @@ H5_DLL htri_t H5Fis_accessible(const char *container_name, hid_t fapl_id);
  */
 H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
 /**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Fcreate}
+ */
+H5_DLL hid_t H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line,
+                             const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id);
+/**
  * \ingroup H5F
  *
  * \brief Opens an existing HDF5 file
@@ -534,6 +541,13 @@ H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_
  */
 H5_DLL hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
 /**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Fopen}
+ */
+H5_DLL hid_t H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line,
+                           const char *filename, unsigned flags, hid_t access_plist, hid_t es_id);
+/**
  * \ingroup H5F
  *
  * \brief Returns a new identifier for a previously-opened HDF5 file
@@ -559,6 +573,13 @@ H5_DLL hid_t H5Fopen(const char *filename, unsigned flags, hid_t fapl_id);
  *
  */
 H5_DLL hid_t H5Freopen(hid_t file_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Freopen}
+ */
+H5_DLL hid_t H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id,
+                             hid_t es_id);
 /**
  * \ingroup H5F
  *
@@ -592,6 +613,13 @@ H5_DLL hid_t H5Freopen(hid_t file_id);
  *
  */
 H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Fflush}
+ */
+H5_DLL herr_t H5Fflush_async(const char *app_file, const char *app_func, unsigned app_line, hid_t object_id,
+                             H5F_scope_t scope, hid_t es_id);
 /**
  * \ingroup H5F
  *
@@ -636,6 +664,13 @@ H5_DLL herr_t H5Fflush(hid_t object_id, H5F_scope_t scope);
  *
  */
 H5_DLL herr_t H5Fclose(hid_t file_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Fclose}
+ */
+H5_DLL herr_t H5Fclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id,
+                             hid_t es_id);
 /**
  * \ingroup H5F
  *
@@ -1738,6 +1773,7 @@ H5_DLL herr_t H5Fget_dset_no_attrs_hint(hid_t file_id, hbool_t *minimize);
  *
  */
 H5_DLL herr_t H5Fset_dset_no_attrs_hint(hid_t file_id, hbool_t minimize);
+H5_DLL herr_t H5Fwait(hid_t file_id);
 
 /* VFD SWMR */
 /**
@@ -1851,6 +1887,26 @@ H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
  */
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
+
+/* API Wrappers for async routines */
+/* (Must be defined _after_ the function prototype) */
+/* (And must only defined when included in application code, not the library) */
+#ifndef H5F_MODULE
+#define H5Fcreate_async(...) H5Fcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fopen_async(...)   H5Fopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Freopen_async(...) H5Freopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fflush_async(...)  H5Fflush_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Fclose_async(...)  H5Fclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ *      be passed in by language wrapper or library layer on top of HDF5.
+ */
+#define H5Fcreate_async_wrap H5_NO_EXPAND(H5Fcreate_async)
+#define H5Fopen_async_wrap   H5_NO_EXPAND(H5Fopen_async)
+#define H5Freopen_async_wrap H5_NO_EXPAND(H5Freopen_async)
+#define H5Fflush_async_wrap  H5_NO_EXPAND(H5Fflush_async)
+#define H5Fclose_async_wrap  H5_NO_EXPAND(H5Fclose_async)
+#endif /* H5F_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

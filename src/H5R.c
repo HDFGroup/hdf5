@@ -27,10 +27,12 @@
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
+#include "H5ESprivate.h" /* Event Sets                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Rpkg.h"      /* References                               */
 #include "H5Sprivate.h"  /* Dataspaces                               */
+#include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 /****************/
 /* Local Macros */
@@ -550,6 +552,50 @@ done:
 } /* end H5Ropen_object() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Ropen_object_async
+ *
+ * Purpose:     Asynchronous version of H5Ropen_object
+ *
+ * Return:      Valid ID on success / H5I_INVALID_HID on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Ropen_object_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr,
+                     hid_t rapl_id, hid_t oapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object of loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Open the object asynchronously */
+    if ((ret_value = H5R__open_object_api_common(ref_ptr, rapl_id, oapl_id, token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open object asynchronously")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on object ID")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ropen_object_async() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5R__open_region_api_common
  *
  * Purpose:     This is the common function for opening a region.
@@ -666,6 +712,50 @@ H5Ropen_region(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t oapl_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ropen_region() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Ropen_region_async
+ *
+ * Purpose:     Asynchronous version of H5Ropen_region
+ *
+ * Return:      Valid ID on success / H5I_INVALID_HID on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Ropen_region_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr,
+                     hid_t rapl_id, hid_t oapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object of loc_id */
+    void *         token     = NULL;            /* Request token for async operation */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Open the region asynchronously */
+    if ((ret_value = H5R__open_region_api_common(ref_ptr, rapl_id, oapl_id, token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open region asynchronously")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, oapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on region ID")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Ropen_region_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5R__open_attr_api_common
@@ -791,6 +881,51 @@ H5Ropen_attr(H5R_ref_t *ref_ptr, hid_t rapl_id, hid_t aapl_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ropen_attr() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5Ropen_attr_async
+ *
+ * Purpose:     Asynchronous version of H5Ropen_attr
+ *
+ * Return:      An attribute ID on success / H5I_INVALID_HID on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Ropen_attr_async(const char *app_file, const char *app_func, unsigned app_line, H5R_ref_t *ref_ptr,
+                   hid_t rapl_id, hid_t aapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value;                   /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE7("i", "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, aapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Open the attribute asynchronously */
+    if ((ret_value = H5R__open_attr_api_common(ref_ptr, rapl_id, aapl_id, token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_REFERENCE, H5E_OPENERROR, H5I_INVALID_HID, "unable to open attribute asynchronously")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIu*Rriii", app_file, app_func, app_line, ref_ptr, rapl_id, aapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDEC, H5I_INVALID_HID,
+                            "can't decrement count on attribute ID")
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Ropen_attr_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Rget_obj_type3

@@ -354,6 +354,14 @@ H5_DLL herr_t H5Lcopy(hid_t src_loc, const char *src_name, hid_t dst_loc, const 
 H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc, const char *dst_name,
                              hid_t lcpl_id, hid_t lapl_id);
 /**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Lcreate_hard}
+ */
+H5_DLL herr_t H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_line,
+                                   hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id,
+                                   const char *new_name, hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
+/**
  * \ingroup H5L
  *
  * \brief Creates a soft link
@@ -418,6 +426,14 @@ H5_DLL herr_t H5Lcreate_hard(hid_t cur_loc, const char *cur_name, hid_t dst_loc,
 H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const char *link_name, hid_t lcpl_id,
                              hid_t lapl_id);
 /**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Lcreate_soft}
+ */
+H5_DLL herr_t H5Lcreate_soft_async(const char *app_file, const char *app_func, unsigned app_line,
+                                   const char *link_target, hid_t link_loc_id, const char *link_name,
+                                   hid_t lcpl_id, hid_t lapl_id, hid_t es_id);
+/**
  * \ingroup H5L
  *
  * \brief Removes a link from a group
@@ -455,6 +471,13 @@ H5_DLL herr_t H5Lcreate_soft(const char *link_target, hid_t link_loc_id, const c
  */
 H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
 /**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Ldelete}
+ */
+H5_DLL herr_t H5Ldelete_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                              const char *name, hid_t lapl_id, hid_t es_id);
+/**
  * \ingroup H5L
  *
  * \brief Removes the \Emph{n}-th link in a group
@@ -482,6 +505,14 @@ H5_DLL herr_t H5Ldelete(hid_t loc_id, const char *name, hid_t lapl_id);
  */
 H5_DLL herr_t H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type,
                                H5_iter_order_t order, hsize_t n, hid_t lapl_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Ldelete_by_idx}
+ */
+H5_DLL herr_t H5Ldelete_by_idx_async(const char *app_file, const char *app_func, unsigned app_line,
+                                     hid_t loc_id, const char *group_name, H5_index_t idx_type,
+                                     H5_iter_order_t order, hsize_t n, hid_t lapl_id, hid_t es_id);
 /**
  * \ingroup H5L
  *
@@ -680,6 +711,13 @@ H5_DLL herr_t H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t
  *
  */
 H5_DLL htri_t H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Lexists}
+ */
+H5_DLL herr_t H5Lexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                              const char *name, hbool_t *exists, hid_t lapl_id, hid_t es_id);
 /**
  * \ingroup H5L
  *
@@ -924,6 +962,14 @@ H5_DLL ssize_t H5Lget_name_by_idx(hid_t loc_id, const char *group_name, H5_index
  */
 H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx,
                           H5L_iterate2_t op, void *op_data);
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Literate}
+ */
+H5_DLL herr_t H5Literate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
+                               H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op,
+                               void *op_data, hid_t es_id);
 /**
  * \ingroup TRAV
  *
@@ -1570,6 +1616,28 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_si
  */
 H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_id,
                                  const char *link_name, hid_t lcpl_id, hid_t lapl_id);
+
+/* API Wrappers for async routines */
+/* (Must be defined _after_ the function prototype) */
+/* (And must only defined when included in application code, not the library) */
+#ifndef H5L_MODULE
+#define H5Lcreate_hard_async(...)   H5Lcreate_hard_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Lcreate_soft_async(...)   H5Lcreate_soft_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ldelete_async(...)        H5Ldelete_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Ldelete_by_idx_async(...) H5Ldelete_by_idx_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Lexists_async(...)        H5Lexists_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Literate_async(...)       H5Literate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ *      be passed in by language wrapper or library layer on top of HDF5.
+ */
+#define H5Lcreate_hard_async_wrap   H5_NO_EXPAND(H5Lcreate_hard_async)
+#define H5Lcreate_soft_async_wrap   H5_NO_EXPAND(H5Lcreate_soft_async)
+#define H5Ldelete_async_wrap        H5_NO_EXPAND(H5Ldelete_async)
+#define H5Ldelete_by_idx_async_wrap H5_NO_EXPAND(H5Ldelete_by_idx_async)
+#define H5Lexists_async_wrap        H5_NO_EXPAND(H5Lexists_async)
+#define H5Literate_async_wrap       H5_NO_EXPAND(H5Literate_async)
+#endif /* H5L_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

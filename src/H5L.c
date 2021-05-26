@@ -25,6 +25,7 @@
 #include "H5CXprivate.h"        /* API Contexts                             */
 #include "H5Dprivate.h"         /* Datasets                                 */
 #include "H5Eprivate.h"         /* Error handling                           */
+#include "H5ESprivate.h"        /* Event Sets                               */
 #include "H5Fprivate.h"         /* File access                              */
 #include "H5Gprivate.h"         /* Groups                                   */
 #include "H5Iprivate.h"         /* IDs                                      */
@@ -530,6 +531,49 @@ done:
 } /* end H5Lcreate_soft() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Lcreate_soft_async
+ *
+ * Purpose:     Asynchronous version of H5Lcreate_soft
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lcreate_soft_async(const char *app_file, const char *app_func, unsigned app_line, const char *link_target,
+                     hid_t link_loc_id, const char *link_name, hid_t lcpl_id, hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE9("e", "*s*sIu*si*siii", app_file, app_func, app_line, link_target, link_loc_id, link_name,
+             lcpl_id, lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Creates a soft link asynchronously */
+    if (H5L__create_soft_api_common(link_target, link_loc_id, link_name, lcpl_id, lapl_id, token_ptr,
+                                    &vol_obj) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to asynchronously create soft link")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE9(FUNC, "*s*sIu*si*siii", app_file, app_func, app_line, link_target, link_loc_id, link_name, lcpl_id, lapl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Lcreate_soft_async() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5L__create_hard_api_common
  *
  * Purpose:     This is the common function for creating a hard link
@@ -652,6 +696,57 @@ H5Lcreate_hard(hid_t cur_loc_id, const char *cur_name, hid_t new_loc_id, const c
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lcreate_hard() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Lcreate_hard_async
+ *
+ * Purpose:     Asynchronous version of H5Lcreate_hard
+ *
+ * Note:        The implementation for this routine is different from other
+ *              _async operations, as the 'api_common' routine needs a "real"
+ *              H5VL_object_t to point at, which is usually provided by the
+ *              loc_id, but isn't here.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Lcreate_hard_async(const char *app_file, const char *app_func, unsigned app_line, hid_t cur_loc_id,
+                     const char *cur_name, hid_t new_loc_id, const char *new_name, hid_t lcpl_id,
+                     hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t   vol_obj;                        /* Object for loc_id */
+    H5VL_object_t * vol_obj_ptr     = &vol_obj;     /* Pointer to object for loc_id */
+    H5VL_object_t **vol_obj_ptr_ptr = &vol_obj_ptr; /* Pointer to object pointer */
+    void *          token           = NULL;         /* Request token for async operation        */
+    void **         token_ptr = H5_REQUEST_NULL;    /* Pointer to request token for async operation        */
+    herr_t          ret_value = SUCCEED;            /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE10("e", "*s*sIui*si*siii", app_file, app_func, app_line, cur_loc_id, cur_name, new_loc_id,
+              new_name, lcpl_id, lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Creates a hard link asynchronously */
+    if (H5L__create_hard_api_common(cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, token_ptr,
+                                    vol_obj_ptr_ptr) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTCREATE, FAIL, "unable to asynchronously create hard link")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj_ptr->connector, token,
+                        H5ARG_TRACE10(FUNC, "*s*sIui*si*siii", app_file, app_func, app_line, cur_loc_id, cur_name, new_loc_id, new_name, lcpl_id, lapl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Lcreate_hard_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Lcreate_external
@@ -893,6 +988,47 @@ done:
 } /* end H5Ldelete() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Ldelete_async
+ *
+ * Purpose:     Asynchronous version of H5Ldelete
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ldelete_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name,
+                hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Delete a link asynchronously */
+    if (H5L__delete_api_common(loc_id, name, lapl_id, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to asynchronously delete link")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, lapl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Ldelete_async() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5L__delete_by_idx_api_common
  *
  * Purpose:     This is the common function for deleting a link
@@ -972,6 +1108,50 @@ H5Ldelete_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_i
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Ldelete_by_idx() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Ldelete_by_idx_async
+ *
+ * Purpose:     Asynchronous version of H5Ldelete_by_idx
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Ldelete_by_idx_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                       const char *group_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
+                       hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE10("e", "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n,
+              lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Delete a link asynchronously */
+    if (H5L__delete_by_idx_api_common(loc_id, group_name, idx_type, order, n, lapl_id, token_ptr, &vol_obj) <
+        0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to asynchronously delete link")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE10(FUNC, "*s*sIui*sIiIohii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, lapl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Ldelete_by_idx_async() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Lget_val
@@ -1161,6 +1341,46 @@ H5Lexists(hid_t loc_id, const char *name, hid_t lapl_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Lexists() */
+
+/*--------------------------------------------------------------------------
+ * Function:    H5Lexists_async
+ *
+ * Purpose:     Asynchronous version of H5Lexists
+ *
+ * Return:      Success:    TRUE/FALSE/FAIL
+ *
+ *--------------------------------------------------------------------------*/
+herr_t
+H5Lexists_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name,
+                hbool_t *exists, hid_t lapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE8("e", "*s*sIui*s*bii", app_file, app_func, app_line, loc_id, name, exists, lapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Asynchronously check if a link exists */
+    if (H5L__exists_api_common(loc_id, name, exists, lapl_id, token_ptr, &vol_obj) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "unable to asynchronously check link existence")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        /* clang-format off */
+                        H5ARG_TRACE8(FUNC, "*s*sIui*s*bii", app_file, app_func, app_line, loc_id, name, exists, lapl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Lexists_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Lget_info2
@@ -1548,6 +1768,57 @@ H5Literate2(hid_t group_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Literate2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Literate_async
+ *
+ * Purpose:     Asynchronous version of H5Literate2
+ *
+ * Return:      Success:    The return value of the first operator that
+ *                          returns non-zero, or zero if all members were
+ *                          processed with no operator returning non-zero.
+ *
+ *              Failure:    Negative if something goes wrong within the
+ *                          library, or the negative value returned by one
+ *                          of the operators.
+ *
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Literate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
+                 H5_index_t idx_type, H5_iter_order_t order, hsize_t *idx_p, H5L_iterate2_t op, void *op_data,
+                 hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value;                   /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE10("e", "*s*sIuiIiIo*hLI*xi", app_file, app_func, app_line, group_id, idx_type, order, idx_p, op,
+              op_data, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Iterate over links asynchronously */
+    if ((ret_value =
+             H5L__iterate_api_common(group_id, idx_type, order, idx_p, op, op_data, token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_LINK, H5E_BADITER, FAIL, "asynchronous link iteration failed")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE10(FUNC, "*s*sIuiIiIo*hLI*xi", app_file, app_func, app_line, group_id, idx_type, order, idx_p, op, op_data, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_LINK, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5Literate_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Literate_by_name2
