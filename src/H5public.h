@@ -257,7 +257,7 @@ typedef long long ssize_t;
 #ifndef ULLONG_MAX
 #define UULONG_MAX ((haddr_t)(long long)(-1))
 #endif
-    
+
 #if H5_SIZEOF_INT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
 typedef int           int64_t;
