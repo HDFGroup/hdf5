@@ -254,6 +254,10 @@ typedef long long ssize_t;
 /* int64_t type is used for creation order field for links.  It may be
  * defined in Posix.1g, otherwise it is defined here.
  */
+#ifndef ULLONG_MAX
+#define UULONG_MAX ((haddr_t)(long long)(-1))
+#endif
+    
 #if H5_SIZEOF_INT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
 typedef int           int64_t;
