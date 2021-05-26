@@ -358,7 +358,7 @@ H5G__obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, voi
     H5G_obj_oh_it_ud1_t *udata     = (H5G_obj_oh_it_ud1_t *)_udata; /* 'User data' passed in */
     herr_t               ret_value = H5_ITER_CONT;                  /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_TAG(udata->oh_addr)
+    FUNC_ENTER_STATIC
 
     /* check arguments */
     HDassert(lnk);
@@ -369,7 +369,7 @@ H5G__obj_compact_to_dense_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, voi
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert link into dense storage")
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__obj_compact_to_dense_cb() */
 
 /*-------------------------------------------------------------------------
@@ -1014,7 +1014,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
     hbool_t     use_old_format;      /* Whether to use 'old format' (symbol table) for deletion or not */
     herr_t      ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(grp_oloc->addr, FAIL)
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(grp_oloc && grp_oloc->file);
@@ -1064,7 +1064,7 @@ H5G_obj_remove_by_idx(const H5O_loc_t *grp_oloc, H5RS_str_t *grp_full_path_r, H5
             HGOTO_ERROR(H5E_SYM, H5E_CANTUPDATE, FAIL, "unable to update link info")
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G_obj_remove() */
 
 /*-------------------------------------------------------------------------

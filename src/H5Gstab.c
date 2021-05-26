@@ -301,7 +301,7 @@ H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_ln
     H5O_stab_t stab;                /* Symbol table message		*/
     herr_t     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
@@ -316,7 +316,7 @@ H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_ln
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name")
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__stab_insert() */
 
 /*-------------------------------------------------------------------------
@@ -506,7 +506,7 @@ H5G__stab_iterate(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t skip, hs
     H5G_link_table_t ltable    = {0, NULL}; /* Link table */
     herr_t           ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(oloc->addr)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(oloc);
@@ -573,7 +573,7 @@ done:
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__stab_iterate() */
 
 /*-------------------------------------------------------------------------
