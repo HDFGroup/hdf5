@@ -2812,6 +2812,7 @@
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
 ./tools/test/h5repack/testfiles/bounds_latest_latest.h5
+./tools/test/h5repack/testfiles/h5copy_extlinks_src.h5
 ./tools/test/h5repack/testfiles/h5repack_aggr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr_refs.h5
@@ -2877,6 +2878,8 @@
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
+./tools/test/h5repack/testfiles/h5repack_CVE-2018-17432.h5
+./tools/test/h5repack/testfiles/h5repack_CVE-2018-14460.h5
 ./tools/test/h5repack/testfiles/GS.h5repack_paged_nopersist.h5.ddl
 ./tools/test/h5repack/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
 ./tools/test/h5repack/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl
@@ -2890,6 +2893,31 @@
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
 ./tools/test/h5repack/testfiles/attrregion.tattrreg.h5.ddl
 ./tools/test/h5repack/testfiles/dataregion.tdatareg.h5.ddl
+./tools/test/h5repack/testfiles/textlink-base.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlink-merge.textlink.h5.tst
+./tools/test/h5repack/testfiles/textlink-mergeprune.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlink-prune.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-base.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-merge.textlinkfar.h5.tst
+./tools/test/h5repack/testfiles/textlinkfar-mergeprune.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-prune.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-base.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-merge.textlinksrc.h5.tst
+./tools/test/h5repack/testfiles/textlinksrc-mergeprune.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-prune.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-base.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-merge.textlinktar.h5.tst
+./tools/test/h5repack/testfiles/textlinktar-mergeprune.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-prune.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-base.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-merge.tsoftlinks.h5.tst
+./tools/test/h5repack/testfiles/tsoftlinks-mergeprune.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-prune.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-base.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-merge.h5copy_extlinks_src.h5.tst
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-mergeprune.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-prune.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_trg.h5
 
 # jam utility and tests
 ./tools/src/h5jam/Makefile.am
