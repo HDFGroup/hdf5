@@ -1173,6 +1173,7 @@
 ./test/cache_tagging.c
 ./test/chunk_info.c
 ./test/cmpd_dset.c
+./test/cmpd_dtransform.c
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
 ./test/cross_read.c
@@ -1226,9 +1227,9 @@
 ./test/freespace.c
 ./test/fsm_aggr_nopersist.h5
 ./test/fsm_aggr_persist.h5
+./test/gen_bad_compound.c
 ./test/gen_bad_offset.c
 ./test/gen_bad_ohdr.c
-./test/gen_bad_compound.c
 ./test/gen_bogus.c
 ./test/gen_bounds.c
 ./test/gen_cross.c
