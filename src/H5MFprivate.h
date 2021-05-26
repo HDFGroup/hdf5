@@ -65,7 +65,6 @@ herr_t H5MF_process_deferred_frees(H5F_t *, uint64_t);
 
 /* 'block aggregator' routines */
 H5_DLL herr_t H5MF_free_aggrs(H5F_t *f);
-H5_DLL htri_t H5MF_aggrs_try_shrink_eoa(H5F_t *f);
 
 /* Free space manager settling routines */
 H5_DLL herr_t H5MF_settle_raw_data_fsm(H5F_t *f, hbool_t *fsm_settled);

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *              Tuesday, January  8, 2008
  *
  * Purpose:	Free space section callbacks for file.
@@ -181,7 +181,6 @@ H5FL_DEFINE(H5MF_free_section_t);
  * Return:	Pointer to new section on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		January  8 2008
  *
  *-------------------------------------------------------------------------
