@@ -1620,7 +1620,7 @@ herr_t
 H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *size /*out*/)
 {
     H5VL_object_t *vol_obj;   /* Dataset for this operation */
-    hbool_t        supported; /* Whether 'get vlen buf size' operation is supported by VOL connector */
+    uint64_t       supported; /* Whether 'get vlen buf size' operation is supported by VOL connector */
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -1637,11 +1637,11 @@ H5Dvlen_get_buf_size(hid_t dataset_id, hid_t type_id, hid_t space_id, hsize_t *s
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid 'size' pointer")
 
     /* Check if the 'get_vlen_buf_size' callback is supported */
-    supported = FALSE;
+    supported = 0;
     if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_DATASET, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE,
                                   &supported) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check for 'get vlen buf size' operation")
-    if (supported) {
+    if (supported & H5VL_OPT_QUERY_SUPPORTED) {
         /* Make the 'get_vlen_buf_size' callback */
         if (H5VL_dataset_optional(vol_obj, H5VL_NATIVE_DATASET_GET_VLEN_BUF_SIZE, H5P_DATASET_XFER_DEFAULT,
                                   H5_REQUEST_NULL, type_id, space_id, size) < 0)

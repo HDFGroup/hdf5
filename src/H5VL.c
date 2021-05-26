@@ -881,7 +881,8 @@ done:
  * Function:    H5VLquery_optional
  *
  * Purpose:     Determine if a VOL connector supports a particular optional
- *              callback operation.
+ *              callback operation, and a general sense of the operation's
+ *              behavior.
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -889,23 +890,23 @@ done:
  *---------------------------------------------------------------------------
  */
 herr_t
-H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, hbool_t *supported)
+H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags /*out*/)
 {
     H5VL_object_t *vol_obj   = NULL;
     herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE4("e", "iVSIs*b", obj_id, subcls, opt_type, supported);
+    H5TRACE4("e", "iVSIsx", obj_id, subcls, opt_type, flags);
 
     /* Check args */
-    if (NULL == supported)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid supported pointer")
+    if (NULL == flags)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid 'flags' pointer")
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(obj_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
     /* Query the connector */
-    if (H5VL_introspect_opt_query(vol_obj, subcls, opt_type, supported) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to query VOL connector support")
+    if (H5VL_introspect_opt_query(vol_obj, subcls, opt_type, flags) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to query VOL connector operation")
 
 done:
     FUNC_LEAVE_API(ret_value)

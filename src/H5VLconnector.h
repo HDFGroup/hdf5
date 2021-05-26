@@ -426,7 +426,7 @@ struct H5VL_class_t;
 /* Container/connector introspection routines */
 typedef struct H5VL_introspect_class_t {
     herr_t (*get_conn_cls)(void *obj, H5VL_get_conn_lvl_t lvl, const struct H5VL_class_t **conn_cls);
-    herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, hbool_t *supported);
+    herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
 } H5VL_introspect_class_t;
 
 /* Async request operation routines */

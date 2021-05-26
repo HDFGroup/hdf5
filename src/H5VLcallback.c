@@ -165,7 +165,7 @@ static herr_t H5VL__object_optional(void *obj, const H5VL_class_t *cls, H5VL_obj
 static herr_t H5VL__introspect_get_conn_cls(void *obj, const H5VL_class_t *cls, H5VL_get_conn_lvl_t lvl,
                                             const H5VL_class_t **conn_cls);
 static herr_t H5VL__introspect_opt_query(void *obj, const H5VL_class_t *cls, H5VL_subclass_t subcls,
-                                         int opt_type, hbool_t *supported);
+                                         int opt_type, uint64_t *flags);
 static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t timeout,
                                  H5VL_request_status_t *status);
 static herr_t H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t cb, void *ctx);
@@ -6001,7 +6001,7 @@ done:
  */
 static herr_t
 H5VL__introspect_opt_query(void *obj, const H5VL_class_t *cls, H5VL_subclass_t subcls, int opt_type,
-                           hbool_t *supported)
+                           uint64_t *flags)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -6012,7 +6012,7 @@ H5VL__introspect_opt_query(void *obj, const H5VL_class_t *cls, H5VL_subclass_t s
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'opt_query' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->introspect_cls.opt_query)(obj, subcls, opt_type, supported) < 0)
+    if ((cls->introspect_cls.opt_query)(obj, subcls, opt_type, flags) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query optional operation support")
 
 done:
@@ -6031,8 +6031,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_introspect_opt_query(const H5VL_object_t *vol_obj, H5VL_subclass_t subcls, int opt_type,
-                          hbool_t *supported)
+H5VL_introspect_opt_query(const H5VL_object_t *vol_obj, H5VL_subclass_t subcls, int opt_type, uint64_t *flags)
 {
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
@@ -6045,7 +6044,7 @@ H5VL_introspect_opt_query(const H5VL_object_t *vol_obj, H5VL_subclass_t subcls, 
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__introspect_opt_query(vol_obj->data, vol_obj->connector->cls, subcls, opt_type, supported) < 0)
+    if (H5VL__introspect_opt_query(vol_obj->data, vol_obj->connector->cls, subcls, opt_type, flags) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query optional operation support")
 
 done:
@@ -6069,20 +6068,20 @@ done:
  */
 herr_t
 H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type,
-                         hbool_t *supported)
+                         uint64_t *flags /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xiVSIs*b", obj, connector_id, subcls, opt_type, supported);
+    H5TRACE5("e", "*xiVSIsx", obj, connector_id, subcls, opt_type, flags);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__introspect_opt_query(obj, cls, subcls, opt_type, supported) < 0)
+    if (H5VL__introspect_opt_query(obj, cls, subcls, opt_type, flags) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query optional operation support")
 
 done:

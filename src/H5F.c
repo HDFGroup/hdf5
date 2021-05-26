@@ -468,16 +468,16 @@ done:
 static herr_t
 H5F__post_open_api_common(H5VL_object_t *vol_obj, void **token_ptr)
 {
-    hbool_t  supported;           /* Whether 'post open' operation is supported by VOL connector */
+    uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
     herr_t   ret_value = SUCCEED; /* Return value     */
 
     FUNC_ENTER_STATIC
 
     /* Check for 'post open' callback */
-    supported = FALSE;
+    supported = 0;
     if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't check for 'post open' operation")
-    if (supported)
+    if (supported & H5VL_OPT_QUERY_SUPPORTED)
         /* Make the 'post open' callback */
         if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to make file 'post open' callback")
