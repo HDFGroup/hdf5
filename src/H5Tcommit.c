@@ -691,6 +691,54 @@ done:
 } /* end H5Topen2() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5Topen_async
+ *
+ * Purpose:     Asynchronous version of H5Topen2.
+ *
+ * Return:      Success:    Object ID of the named datatype
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Topen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name,
+              hid_t tapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Open the datatype asynchronously */
+    if ((ret_value = H5T__open_api_common(loc_id, name, tapl_id, token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPENOBJ, H5I_INVALID_HID,
+                    "unable to open named datatype asynchronously")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, tapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HGOTO_ERROR(H5E_DATATYPE, H5E_CANTDEC, H5I_INVALID_HID,
+                            "can't decrement count on datatype ID")
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Topen_async() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Tget_create_plist
  *
  * Purpose:     Returns a copy of the datatype creation property list.
