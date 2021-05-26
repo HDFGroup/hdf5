@@ -138,7 +138,7 @@ parse_hsize_list(const char *h_list, subset_d *d)
         }
     d->data = p_list;
     d->len  = size_count;
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -187,7 +187,7 @@ parse_subset_params(const char *dset)
 
         parse_hsize_list(brace, &s->block);
     }
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return s;
 }
@@ -208,7 +208,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
     struct exclude_path_list *exclude_attr_head, *exclude_attr_prev, *exclude_attr_node;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* process the command-line */
     HDmemset(opts, 0, sizeof(diff_opt_t));
 
@@ -487,7 +487,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
 
     opts->sset[1] = parse_subset_params(*objname2);
     */
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -821,7 +821,7 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "       symbolic links are compared.).\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     /*
-     * TRILABS-227 is complete except for an issue with printing indices
+     * TRILABS_227 is complete except for an issue with printing indices
      * the following will be needed for subsetting
     PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
     PRINTVALSTREAM(rawoutstream, "  Subsetting is available by using the fcompact form of subsetting, as

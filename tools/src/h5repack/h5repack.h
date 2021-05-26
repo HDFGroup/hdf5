@@ -106,6 +106,8 @@ typedef struct {
     chunk_info_t   chunk_g;                          /* global chunk INFO for the ALL case */
     H5D_layout_t   layout_g;                         /* global layout information for the ALL case */
     int            verbose;                          /* verbose mode */
+    hbool_t        merge;                            /* Merge external file. */
+    hbool_t        prune;                            /* Don't follow external file. */
     hsize_t        min_comp;                         /* minimum size to compress, in bytes */
     int            use_native;                       /* use a native type in write */
     hbool_t        latest;                           /* pack file with the latest file format */
