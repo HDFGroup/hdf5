@@ -153,13 +153,13 @@ static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const un
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
-    H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIBUD,             /* Filter id number        */
-    1, 1,                            /* Encoding and decoding enabled   */
-    "dynlibud",                      /* Filter name for debugging    */
-    NULL,                            /* The "can apply" callback        */
-    NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlibud, /* The actual filter function    */
+    H5Z_CLASS_T_VERS,    /* H5Z_class_t version             */
+    H5Z_FILTER_DYNLIBUD, /* Filter id number        */
+    1, 1,                /* Encoding and decoding enabled   */
+    "dynlibud",          /* Filter name for debugging    */
+    NULL,                /* The "can apply" callback        */
+    NULL,                /* The "set local" callback        */
+    H5Z_filter_dynlibud, /* The actual filter function    */
 }};
 
 /* A UD link traversal function.  Shouldn't actually be called. */
@@ -4008,7 +4008,7 @@ gent_char(void)
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 28, 2003
  *
@@ -4435,7 +4435,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 28, 2003
  *
@@ -4871,7 +4871,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 19, 2003
  *
@@ -4940,7 +4940,7 @@ gent_attr_all(void)
  *
  * Purpose: utility function to write an attribute
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 19, 2003
  *
@@ -4978,7 +4978,7 @@ write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name, hid_t t
  *
  * Return:
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 27, 2003
  *
@@ -6499,7 +6499,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6685,7 +6684,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6945,7 +6943,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -10872,7 +10869,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
         return (0);
 
     /* Assignment to eliminate unused parameter warning. */
-    cd_values = cd_values;
+    (void)cd_values;
 
     if (flags & H5Z_FLAG_REVERSE) { /*read*/
         /* Subtract the original value with MULTIPLIER */

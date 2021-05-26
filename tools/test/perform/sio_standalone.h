@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SIO_STANDALONE_H__
-#define SIO_PERF_H__
+#ifndef SIO_STANDALONE_H
+#define SIO_STANDALONE_H
 
 /* Header file for building h5perf by standalone mode.
  * Created: Christian Chilan, 2005/5/18.
@@ -145,12 +145,12 @@
 #else /* H5_HAVE_WIN32_API */
 #define HDfileno(F) fileno(F)
 #endif /* H5_HAVE_WIN32_API */
-#define HDfloor(X)        floor(X)
-#define HDfmod(X, Y)      fmod(X, Y)
-#define HDfopen(S, M)     fopen(S, M)
-#define HDfork()          fork()
-#define HDfpathconf(F, N) fpathconf(F, N)
-H5_DLL int HDfprintf(FILE *stream, const char *fmt, ...);
+#define HDfloor(X)          floor(X)
+#define HDfmod(X, Y)        fmod(X, Y)
+#define HDfopen(S, M)       fopen(S, M)
+#define HDfork()            fork()
+#define HDfpathconf(F, N)   fpathconf(F, N)
+#define HDfprintf           fprintf
 #define HDfputc(C, F)       fputc(C, F)
 #define HDfputs(S, F)       fputs(S, F)
 #define HDfread(M, Z, N, F) fread(M, Z, N, F)
@@ -363,15 +363,9 @@ H5_DLL int HDrand(void);
 #define HDsin(X)               sin(X)
 #define HDsinh(X)              sinh(X)
 #define HDsleep(N)             sleep(N)
-#ifdef H5_HAVE_WIN32_API
-H5_DLL int c99_snprintf(char *str, size_t size, const char *format, ...);
-#define HDsnprintf c99_snprintf /*varargs*/
-#else
-#define HDsnprintf snprintf /*varargs*/
-#endif
-/* sprintf() variable arguments */
-#define HDsprintf sprintf /*varargs*/
-#define HDsqrt(X) sqrt(X)
+#define HDsnprintf             snprintf /*varargs*/
+#define HDsprintf              sprintf  /*varargs*/
+#define HDsqrt(X)              sqrt(X)
 #ifdef H5_HAVE_RAND_R
 H5_DLL void HDsrand(unsigned int seed);
 #define HDsrandom(S) HDsrand(S)
@@ -382,7 +376,6 @@ H5_DLL void HDsrand(unsigned int seed);
 #define HDsrand(S)   srand(S)
 #define HDsrandom(S) srand(S)
 #endif
-/* sscanf() variable arguments */
 
 #ifdef H5_HAVE_WIN32_API
 #define HDstrcasecmp(A, B) _stricmp(A, B)
@@ -444,25 +437,20 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #else
 #define HDunlink(S) unlink(S)
 #endif
-#define HDutime(S, T)            utime(S, T)
-#define HDva_arg(A, T)           va_arg(A, T)
-#define HDva_end(A)              va_end(A)
-#define HDva_start(A, P)         va_start(A, P)
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#define HDvfprintf(F, FMT, A)    vfprintf(F, FMT, A)
-#define HDvprintf(FMT, A)        vprintf(FMT, A)
-#define HDvsprintf(S, FMT, A)    vsprintf(S, FMT, A)
-#ifdef H5_HAVE_WIN32_API
-H5_DLL int c99_vsnprintf(char *str, size_t size, const char *format, va_list ap);
-#define HDvsnprintf c99_vsnprintf
-#else
+#define HDutime(S, T)             utime(S, T)
+#define HDva_arg(A, T)            va_arg(A, T)
+#define HDva_end(A)               va_end(A)
+#define HDva_start(A, P)          va_start(A, P)
+#define HDvasprintf(RET, FMT, A)  vasprintf(RET, FMT, A)
+#define HDvfprintf(F, FMT, A)     vfprintf(F, FMT, A)
+#define HDvprintf(FMT, A)         vprintf(FMT, A)
+#define HDvsprintf(S, FMT, A)     vsprintf(S, FMT, A)
 #define HDvsnprintf(S, N, FMT, A) vsnprintf(S, N, FMT, A)
-#endif
-#define HDwait(W)           wait(W)
-#define HDwaitpid(P, W, O)  waitpid(P, W, O)
-#define HDwcstombs(S, P, Z) wcstombs(S, P, Z)
-#define HDwctomb(S, C)      wctomb(S, C)
-#define HDwrite(F, M, Z)    write(F, M, Z)
+#define HDwait(W)                 wait(W)
+#define HDwaitpid(P, W, O)        waitpid(P, W, O)
+#define HDwcstombs(S, P, Z)       wcstombs(S, P, Z)
+#define HDwctomb(S, C)            wctomb(S, C)
+#define HDwrite(F, M, Z)          write(F, M, Z)
 
 /*
  * And now for a couple non-Posix functions...  Watch out for systems that
