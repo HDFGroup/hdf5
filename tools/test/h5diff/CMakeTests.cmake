@@ -293,6 +293,7 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_80.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_800.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_801.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_830.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8625.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8639.txt
@@ -919,6 +920,8 @@
           h5diff_800.out.err
           h5diff_801.out
           h5diff_801.out.err
+          h5diff_830.out
+          h5diff_830.out.err
           h5diff_8625.out
           h5diff_8625.out.err
           h5diff_8639.out
@@ -1542,6 +1545,11 @@ ADD_H5_TEST (h5diff_646 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/
 # ##############################################################################
 ADD_H5_TEST (h5diff_800 1 -v ${FILE7} ${FILE8} /g1/array /g1/array)
 ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
+
+# ##############################################################################
+# # dataset subsets
+# ##############################################################################
+ADD_H5_TEST (h5diff_830 1 --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;])
 
 # ##############################################################################
 # # VDS tests

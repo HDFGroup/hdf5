@@ -194,44 +194,48 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
     if (sp == 1 && argv[opt_ind][0] == '-' && argv[opt_ind][1] == '-') {
         /* long command line option */
-        const char *arg = &argv[opt_ind][2];
-        int         i;
+        int        i;
+        const char ch      = '=';
+        char *     arg     = HDstrdup(&argv[opt_ind][2]);
+        size_t     arg_len = 0;
+
+        opt_arg = strchr(&argv[opt_ind][2], ch);
+        arg_len = HDstrlen(&argv[opt_ind][2]);
+        if (opt_arg) {
+            arg_len -= HDstrlen(opt_arg);
+            opt_arg++; /* skip the equal sign */
+        }
+        arg[arg_len] = 0;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            size_t len = HDstrlen(l_opts[i].name);
-
-            if (HDstrncmp(arg, l_opts[i].name, len) == 0) {
+            if (HDstrcmp(arg, l_opts[i].name) == 0) {
                 /* we've found a matching long command line flag */
                 opt_opt = l_opts[i].shortval;
 
                 if (l_opts[i].has_arg != no_arg) {
-                    if (arg[len] == '=') {
-                        opt_arg = &arg[len + 1];
-                    }
-                    else if (l_opts[i].has_arg != optional_arg) {
-                        if (opt_ind < (argc - 1))
-                            if (argv[opt_ind + 1][0] != '-')
-                                opt_arg = argv[++opt_ind];
-                    }
-                    else if (l_opts[i].has_arg == require_arg) {
-                        if (opt_err)
-                            HDfprintf(rawerrorstream, "%s: option required for \"--%s\" flag\n", argv[0],
-                                      arg);
+                    if (opt_arg == NULL) {
+                        if (l_opts[i].has_arg != optional_arg) {
+                            if (opt_ind < (argc - 1))
+                                if (argv[opt_ind + 1][0] != '-')
+                                    opt_arg = argv[++opt_ind];
+                        }
+                        else if (l_opts[i].has_arg == require_arg) {
+                            if (opt_err)
+                                HDfprintf(rawerrorstream, "%s: option required for \"--%s\" flag\n", argv[0],
+                                          arg);
 
-                        opt_opt = '?';
+                            opt_opt = '?';
+                        }
                     }
-                    else
-                        opt_arg = NULL;
                 }
                 else {
-                    if (arg[len] == '=') {
+                    if (opt_arg) {
                         if (opt_err)
                             HDfprintf(rawerrorstream, "%s: no option required for \"%s\" flag\n", argv[0],
                                       arg);
 
                         opt_opt = '?';
                     }
-                    opt_arg = NULL;
                 }
                 break;
             }
@@ -247,6 +251,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         opt_ind++;
         sp = 1;
+
+        HDfree(arg);
     }
     else {
         register char *cp; /* pointer into current token */
