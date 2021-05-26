@@ -228,16 +228,14 @@ test_error_compat(void)
     if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
         TEST_ERROR;
 
-    /* Use H5Eget_auto2 to query the default printing function.  The library
-     *should indicate H5Eprint2 as the default. */
+    /* Use H5Eget_auto2 to query the default printing function. */
     if (H5Eget_auto2(H5E_DEFAULT, &old_func2, &old_data) < 0)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-    if (!old_func2 || (H5E_auto2_t)H5Eprint2 != old_func2)
+    if (old_func2 == NULL)
         TEST_ERROR;
 
-    /* This function sets the default printing function to be H5Eprint2. */
     if (H5Eset_auto2(H5E_DEFAULT, old_func2, old_data) < 0)
         TEST_ERROR;
 
@@ -282,12 +280,12 @@ test_error_compat(void)
     if (did >= 0)
         TEST_ERROR;
 
-    /* This function changes the new-style printing function back to the default H5Eprint2. */
-    if (H5Eset_auto2(H5E_DEFAULT, (H5E_auto2_t)H5Eprint2, NULL) < 0)
+    /* This function changes the new-style printing function to the original. */
+    if (H5Eset_auto2(H5E_DEFAULT, old_func2, NULL) < 0)
         TEST_ERROR;
 
-    /* This call should work because the H5Eset_auto2 above restored the default printing
-     * function H5Eprint2.  It simply returns user_print1. */
+    /* This call should work because the H5Eset_auto2 above set the default printing
+     * function to H5Eprint2.  It simply returns user_print1. */
     if ((ret = H5Eget_auto1(&old_func1, &old_data)) < 0)
         TEST_ERROR;
     if (old_data != NULL)
@@ -305,7 +303,7 @@ test_error_compat(void)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-    if (!old_func2 || (H5E_auto2_t)H5Eprint2 != old_func2)
+    if (old_func2 == NULL)
         TEST_ERROR;
 
     /* Try the printing function. Dataset creation should fail because the file
