@@ -1,0 +1,32 @@
+
+/** \mainpage notitle
+
+This is the documentation set for HDF5. You can
+<a href="hdf5-doc.tgz">download</a> it as a tgz archive for offline reading.
+
+This is the documention set for HDF5 in terms of specifications and software
+developed and maintained by <a href="https://www.hdfgroup.org/">The HDF
+Group</a>. It is impractical to document the entire HDF5 ecosystem in one place,
+and you should also consult the documentation sets of the many outstanding
+community projects.
+
+For a first contact with HDF5, the best place is to have a look at the \link
+GettingStarted getting started \endlink page that shows you how to write and
+compile your first program with HDF5.
+
+The \b main \b documentation is organized by documentation flavor. Most
+technical documentation consists to varying degrees of information related to
+<em>tasks</em>, <em>concepts</em>, or <em>reference</em> material. As its title
+suggests, the \link RM Reference Manual \endlink is 100% reference material,
+while the \link Cookbook \endlink is focused on tasks. The different guide-type
+documents cover a mix of tasks, concepts, and reference, to help a certain
+<em>audience</em> succeed.
+
+Finally, do not miss the search engine (top right-hand corner)! If you are
+looking for a specific function, it'll take you there directly. If unsure, it'll
+give you an idea of what's on offer and a few promising leads.
+
+\par ToDo List
+     There is plenty of <a href="./todo.html">unfinished business</a>.
+
+*/
