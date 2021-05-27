@@ -168,7 +168,6 @@ ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c ttsafe_attr_vlen.c
 cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
-event_set_SOURCES=event_set.c
 
 vfd_swmr_zoo_writer_SOURCES=vfd_swmr_zoo_writer.c genall5.c
 vfd_swmr_zoo_reader_SOURCES=vfd_swmr_zoo_writer.c genall5.c
