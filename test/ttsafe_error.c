@@ -38,7 +38,7 @@
 
 /* Having a common dataset name is an error */
 #define DATASETNAME          "commonname"
-#define EXPECTED_ERROR_DEPTH 10
+#define EXPECTED_ERROR_DEPTH 11
 #define WRITE_NUMBER         37
 
 /* Typedefs */
@@ -72,34 +72,37 @@ tts_error(void)
 
     /* Must initialize these at runtime */
     expected_g[0].maj_num = H5E_DATASET;
-    expected_g[0].min_num = H5E_CANTINIT;
+    expected_g[0].min_num = H5E_CANTCREATE;
 
-    expected_g[1].maj_num = H5E_VOL;
+    expected_g[1].maj_num = H5E_DATASET;
     expected_g[1].min_num = H5E_CANTCREATE;
 
     expected_g[2].maj_num = H5E_VOL;
     expected_g[2].min_num = H5E_CANTCREATE;
 
-    expected_g[3].maj_num = H5E_DATASET;
-    expected_g[3].min_num = H5E_CANTINIT;
+    expected_g[3].maj_num = H5E_VOL;
+    expected_g[3].min_num = H5E_CANTCREATE;
 
     expected_g[4].maj_num = H5E_DATASET;
     expected_g[4].min_num = H5E_CANTINIT;
 
-    expected_g[5].maj_num = H5E_LINK;
+    expected_g[5].maj_num = H5E_DATASET;
     expected_g[5].min_num = H5E_CANTINIT;
 
     expected_g[6].maj_num = H5E_LINK;
-    expected_g[6].min_num = H5E_CANTINSERT;
+    expected_g[6].min_num = H5E_CANTINIT;
 
-    expected_g[7].maj_num = H5E_SYM;
-    expected_g[7].min_num = H5E_NOTFOUND;
+    expected_g[7].maj_num = H5E_LINK;
+    expected_g[7].min_num = H5E_CANTINSERT;
 
     expected_g[8].maj_num = H5E_SYM;
-    expected_g[8].min_num = H5E_CALLBACK;
+    expected_g[8].min_num = H5E_NOTFOUND;
 
-    expected_g[9].maj_num = H5E_LINK;
-    expected_g[9].min_num = H5E_EXISTS;
+    expected_g[9].maj_num = H5E_SYM;
+    expected_g[9].min_num = H5E_CALLBACK;
+
+    expected_g[10].maj_num = H5E_LINK;
+    expected_g[10].min_num = H5E_EXISTS;
 
     /* set up mutex for global count of errors */
     H5TS_mutex_init(&error_mutex_g);
@@ -134,7 +137,8 @@ tts_error(void)
         if (error_flag_g) {
             TestErrPrintf(
                 "At least one thread reported a value that was different from the expected value\n");
-            HDprintf("(Update this test if the error stack changed!)\n");
+            HDprintf(
+                "(Update the expected_g[] array in tts_error for this test if the error stack changed!)\n");
         }
 
         if (error_count_g != NUM_THREAD - 1)
@@ -241,7 +245,18 @@ walk_error_callback(unsigned n, const H5E_error2_t *err_desc, void H5_ATTR_UNUSE
             return SUCCEED;
     }
 
+    /* Unexpected error stack entry, print some info and set flag */
+    HDfprintf(stderr, "Unexpected error stack entry!\n");
+    HDfprintf(stderr, "Stack entry: %d\n", n);
+    HDfprintf(stderr,
+              "Actual: maj_num = %" PRIxHID ", min_num = %" PRIxHID
+              ", line = %u, func = '%s', file = '%s', desc = '%s'\n",
+              err_desc->maj_num, err_desc->min_num, err_desc->line, err_desc->func_name, err_desc->file_name,
+              err_desc->desc);
+    HDfprintf(stderr, "Expected: maj_num = %" PRIxHID ", min_num = %" PRIxHID "\n", expected_g[n].maj_num,
+              expected_g[n].min_num);
     error_flag_g = -1;
+
     return SUCCEED;
 }
 
