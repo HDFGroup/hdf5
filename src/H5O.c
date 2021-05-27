@@ -1843,7 +1843,7 @@ H5O__close_check_common(hid_t object_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O__close_api_common() */
+} /* H5O__close_check_common() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Oclose
