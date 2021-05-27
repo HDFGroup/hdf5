@@ -318,14 +318,6 @@ set (test_CLEANFILES
     tvlstr.h5
     tvlstr2.h5
     twriteorder.dat
-    flush.h5
-    flush-swmr.h5
-    noflush.h5
-    noflush-swmr.h5
-    flush_extend.h5
-    flush_extend-swmr.h5
-    noflush_extend.h5
-    noflush_extend-swmr.h5
     enum1.h5
     titerate.h5
     ttsafe.h5
