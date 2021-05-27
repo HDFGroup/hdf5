@@ -1349,7 +1349,6 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                   bytes_read);
 #endif
 
-
     /*
      * This gives us zeroes beyond end of physical MPI file.
      */
