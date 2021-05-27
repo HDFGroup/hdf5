@@ -640,7 +640,6 @@ else ()
   )
 endif ()
 set_tests_properties (H5TEST-flush2 PROPERTIES
-    FIXTURES_REQUIRED clear_flush
     DEPENDS H5TEST-flush1
 )
 

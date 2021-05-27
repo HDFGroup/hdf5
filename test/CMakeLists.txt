@@ -358,6 +358,7 @@ set (H5_TESTS
     timer
     cmpd_dtransform
     event_set # multiple source
+    vfd_swmr
 )
 
 macro (ADD_H5_EXE file)
