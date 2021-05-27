@@ -160,6 +160,14 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_b
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_used, void *op_data);
 //! <!-- [H5D_gather_func_t_snip] -->
 
+//! <!-- [H5D_chunk_iter_op_t_snip] -->
+/**
+ * Define the operator function pointer for H5Dchunk_iter()
+ */
+//! <!-- [H5D_chunk_iter_op_t_snip] -->
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes,
+                                   void *op_data);
+
 /********************/
 /* Public Variables */
 /********************/
@@ -625,6 +633,51 @@ H5_DLL herr_t H5Dget_num_chunks(hid_t dset_id, hid_t fspace_id, hsize_t *nchunks
  */
 H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, unsigned *filter_mask,
                                          haddr_t *addr, hsize_t *size);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
+ * \brief Iterate over all chunks
+ *
+ * \dset_id
+ * \param[in]  cb       User callback function, called for every chunk.
+ * \param[in]  op_data  User-defined pointer to data required by op
+ *
+ * \return \herr_t
+ *
+ * \details H5Dget_chunk_iter iterates over all chunks in the dataset, calling the
+ *          user supplied callback with the details of the chunk and the supplied
+ *          \p op_data.
+ *
+ *          Callback information:
+ *            H5D_chunk_iter_op_t is defined as:
+ *
+ *              typedef int (*H5D_chunk_iter_op_t)(
+ *                const hsize_t *offset,
+ *                uint32_t filter_mask,
+ *                haddr_t addr,
+ *                uint32_t nbytes,
+ *                void *op_data);
+ *
+ *          H5D_chunk_iter_op_t parameters:
+ *              hsize_t *offset;        IN/OUT: Array of starting logical coordinates of chunk.
+ *              uint32_t filter_mask;   IN: Filter mask of chunk.
+ *              haddr_t addr;           IN: Offset in file of chunk data.
+ *              uint32_t nbytes;        IN: Size in number of bytes of chunk data in file.
+ *              void *op_data;          IN/OUT: Pointer to any user-defined data
+ *                                      associated with the operation.
+ *
+ *          The return values from an operator are:
+ *              Zero (H5_ITER_CONT) causes the iterator to continue, returning zero when all
+ *                  elements have been processed.
+ *              Positive (H5_ITER_STOP) causes the iterator to immediately return that positive
+ *                  value, indicating short-circuit success.
+ *              Negative (H5_ITER_ERROR) causes the iterator to immediately return that value,
+ *                  indicating failure.
+ *
+ */
+H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data);
 
 /**
  * --------------------------------------------------------------------------
