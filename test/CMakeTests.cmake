@@ -18,7 +18,6 @@
 
 # make test dir
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST")
-file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flush")
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/testfiles")
 file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/testfiles/plist_files")
 
@@ -319,14 +318,6 @@ set (test_CLEANFILES
     tvlstr.h5
     tvlstr2.h5
     twriteorder.dat
-    flush.h5
-    flush-swmr.h5
-    noflush.h5
-    noflush-swmr.h5
-    flush_extend.h5
-    flush_extend-swmr.h5
-    noflush_extend.h5
-    noflush_extend-swmr.h5
     enum1.h5
     titerate.h5
     ttsafe.h5
@@ -604,7 +595,7 @@ add_test (NAME H5TEST-flush-clear-objects
         noflush_extend.h5
         noflush_extend-swmr.h5
     WORKING_DIRECTORY
-        ${HDF5_TEST_BINARY_DIR}/H5TEST/flush
+        ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 set_tests_properties (H5TEST-flush-clear-objects PROPERTIES FIXTURES_SETUP clear_flush)
 if (HDF5_ENABLE_USING_MEMCHECKER)
@@ -617,14 +608,14 @@ else ()
       -D "TEST_EXPECT=0"
       -D "TEST_SKIP_COMPARE=TRUE"
       -D "TEST_OUTPUT=flush1.txt"
-      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST/flush"
+      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-flush1 PROPERTIES
     FIXTURES_REQUIRED clear_flush
     ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST/flush
+    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 )
 if (HDF5_ENABLE_USING_MEMCHECKER)
   add_test (NAME H5TEST-flush2 COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:flush2>)
@@ -636,14 +627,12 @@ else ()
       -D "TEST_EXPECT=0"
       -D "TEST_SKIP_COMPARE=TRUE"
       -D "TEST_OUTPUT=flush2.txt"
-      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST/flush"
+      -D "TEST_FOLDER=${HDF5_TEST_BINARY_DIR}/H5TEST"
       -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
   )
 endif ()
 set_tests_properties (H5TEST-flush2 PROPERTIES
     FIXTURES_REQUIRED clear_flush
-    ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST;HDF5TestExpress=${HDF_TEST_EXPRESS}"
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST/flush
     DEPENDS H5TEST-flush1
 )
 
