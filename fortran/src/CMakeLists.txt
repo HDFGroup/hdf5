@@ -235,7 +235,7 @@ add_custom_command (TARGET H5_buildiface POST_BUILD
 )
 if (NOT ONLY_SHARED_LIBS)
   add_custom_command (TARGET H5_buildiface POST_BUILD
-      BYPRODUCTS H5_gen.F90
+      BYPRODUCTS ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E copy_if_different ${HDF5_F90_BINARY_DIR}/H5_gen.F90 ${HDF5_F90_BINARY_DIR}/static/H5_gen.F90
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/static
@@ -250,7 +250,7 @@ endif ()
 
 if (BUILD_SHARED_LIBS)
   add_custom_command (TARGET H5_buildiface POST_BUILD
-      BYPRODUCTS H5_gen.F90
+      BYPRODUCTS ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
       COMMAND    ${CMAKE_COMMAND}
       ARGS       -E copy_if_different ${HDF5_F90_BINARY_DIR}/H5_gen.F90 ${HDF5_F90_BINARY_DIR}/shared/H5_gen.F90
       WORKING_DIRECTORY ${HDF5_F90_BINARY_DIR}/shared
