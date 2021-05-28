@@ -1224,8 +1224,6 @@ AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
 AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
-AC_CHECK_HEADERS([stdint.h], [C9x=yes])
-AC_CHECK_HEADERS([stdbool.h])
 AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
@@ -1390,11 +1388,7 @@ AC_CHECK_SIZEOF([off_t])
 
 if test "X$C9x" = "Xyes"; then
   cat >>confdefs.h <<\EOF
-#ifdef HAVE_STDBOOL_H
-#include <stdbool.h> /* for bool definition */
-#else
-#define bool _Bool
-#endif
+#include <stdbool.h>
 EOF
 AC_CHECK_SIZEOF([bool])
 fi
@@ -1911,10 +1905,8 @@ if test "X$THREADSAFE" = "Xyes"; then
     AC_CACHE_VAL([hdf5_cv_system_scope_threads],
       [AC_RUN_IFELSE(
         [AC_LANG_PROGRAM([
-            #if STDC_HEADERS
             #include <stdlib.h>
             #include <pthread.h>
-            #endif
         ],[
               pthread_attr_t attribute;
               int ret;
