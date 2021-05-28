@@ -1405,6 +1405,7 @@
 ./test/vfd_swmr_check_compat.c
 ./test/vfd_swmr_common.c
 ./test/vfd_swmr_common.h
+./test/vfd_swmr_dsetops_writer.c
 ./test/vfd_swmr_generator.c
 ./test/vfd_swmr_group_writer.c
 ./test/vfd_swmr_reader.c
