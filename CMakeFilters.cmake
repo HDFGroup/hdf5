@@ -10,6 +10,7 @@
 # help@hdfgroup.org.
 #
 option (USE_LIBAEC "Use AEC library as SZip Filter" OFF)
+option (USE_LIBAEC_STATIC "Use static AEC library " OFF)
 
 include (ExternalProject)
 include (FetchContent)
@@ -110,11 +111,19 @@ option (HDF5_ENABLE_SZIP_SUPPORT "Use SZip Filter" OFF)
 if (HDF5_ENABLE_SZIP_SUPPORT)
   option (HDF5_ENABLE_SZIP_ENCODING "Use SZip Encoding" OFF)
   if (NOT SZIP_USE_EXTERNAL)
-    find_package (SZIP NAMES ${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
-    if (NOT SZIP_FOUND)
-      find_package (SZIP) # Legacy find
+    if (USE_LIBAEC)
+      set(libaec_USE_STATIC_LIBS ${USE_LIBAEC_STATIC})
+      find_package (libaec 1.0.5 CONFIG)
       if (SZIP_FOUND)
         set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${SZIP_LIBRARIES})
+      endif ()
+    else ()
+      find_package (SZIP NAMES ${SZIP_PACKAGE_NAME}${HDF_PACKAGE_EXT} COMPONENTS static shared)
+      if (NOT SZIP_FOUND)
+        find_package (SZIP) # Legacy find
+        if (SZIP_FOUND)
+          set (LINK_COMP_LIBS ${LINK_COMP_LIBS} ${SZIP_LIBRARIES})
+        endif ()
       endif ()
     endif ()
   endif ()
