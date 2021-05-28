@@ -1345,7 +1345,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  size_i = %lld\n", FUNC, file->mpi_rank, (long)mpi_off,
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld\n", FUNC, file->mpi_rank, (long)mpi_off,
                   bytes_read);
 #endif
 
@@ -1563,7 +1563,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  size_i = %lld\n", FUNC, file->mpi_rank, (long)mpi_off,
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", FUNC, file->mpi_rank, (long)mpi_off,
                   bytes_written);
 #endif
 
