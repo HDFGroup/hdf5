@@ -1562,8 +1562,8 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", FUNC, file->mpi_rank, (long)mpi_off,
-                  bytes_written);
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", FUNC, file->mpi_rank,
+                  (long)mpi_off, bytes_written);
 #endif
 
     /* Each process will keep track of its perceived EOF value locally, and
