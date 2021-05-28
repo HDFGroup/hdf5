@@ -1470,6 +1470,12 @@ H5FD_mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUS
     if (bytes_read < 0 || bytes_read > io_size)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
 
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_debug_r_flag)
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld\n", FUNC, file->mpi_rank, (long)mpi_off,
+                  bytes_read);
+#endif
+
     /*
      * This gives us zeroes beyond end of physical MPI file.
      */
@@ -1658,6 +1664,12 @@ H5FD_mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     /* Check for write failure */
     if (bytes_written != io_size)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_debug_w_flag)
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", FUNC, file->mpi_rank,
+                  (long)mpi_off, bytes_written);
+#endif
 
     /* Each process will keep track of its perceived EOF value locally, and
      * ultimately we will reduce this value to the maximum amongst all
