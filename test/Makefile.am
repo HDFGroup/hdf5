@@ -109,6 +109,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     vfd_swmr_vlstr_reader vfd_swmr_vlstr_writer \
     vfd_swmr_zoo_reader vfd_swmr_zoo_writer \
     vfd_swmr_attrdset_reader vfd_swmr_attrdset_writer \
+	vfd_swmr_check_compat \
     swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
     mirror_vfd
 if HAVE_SHARED_CONDITIONAL
