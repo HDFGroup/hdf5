@@ -50,12 +50,12 @@
 
 /* Free-space section types for file */
 /* (values stored in free space data structures in file) */
-#define H5MF_FSPACE_SECT_SIMPLE                                                                              \
-    0 /* For non-paged aggregation: section is a range of actual bytes in file                               \
-       */
-#define H5MF_FSPACE_SECT_SMALL                                                                               \
-    1 /* For paged aggregation: "small" meta/raw data section which is < fsp_size) */
-#define H5MF_FSPACE_SECT_LARGE 2 /* For paged aggregation: "large" Section which is >= fsp_size) */
+/* For non-paged aggregation: section is a range of actual bytes in file */
+#define H5MF_FSPACE_SECT_SIMPLE 0
+/* For paged aggregation: "small" meta/raw data section which is < fsp_size) */
+#define H5MF_FSPACE_SECT_SMALL 1
+/* For paged aggregation: "large" Section which is >= fsp_size) */
+#define H5MF_FSPACE_SECT_LARGE 2
 
 /* Get section class type based on size */
 #define H5MF_SECT_CLASS_TYPE(F, S)                                                                           \
@@ -168,9 +168,9 @@ typedef struct H5MF_fs_t {
 /*****************************/
 
 /* H5MF single section inherits serializable properties from H5FS_section_class_t */
-H5_DLLVAR H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1];
-H5_DLLVAR H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1];
-H5_DLLVAR H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1];
+H5_DLLVAR const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1];
+H5_DLLVAR const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1];
+H5_DLLVAR const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1];
 
 /******************************/
 /* Package Private Prototypes */
@@ -191,6 +191,7 @@ H5_DLL herr_t               H5MF__sect_free(H5FS_section_info_t *sect);
 /* Block aggregator routines */
 H5_DLL htri_t H5MF__aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, H5FD_mem_t type, haddr_t abs_blk_end,
                                     hsize_t extra_requested);
+H5_DLL htri_t H5MF__aggrs_try_shrink_eoa(H5F_t *f);
 H5_DLL htri_t H5MF__aggr_can_absorb(const H5F_t *f, const H5F_blk_aggr_t *aggr,
                                     const H5MF_free_section_t *sect, H5MF_shrink_type_t *shrink);
 H5_DLL herr_t H5MF__aggr_absorb(const H5F_t *f, H5F_blk_aggr_t *aggr, H5MF_free_section_t *sect,

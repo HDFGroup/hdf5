@@ -466,6 +466,8 @@ main(int argc, char **argv)
 
     AddTest("edpl", test_plist_ed, NULL, "encode/decode Property Lists", NULL);
 
+    AddTest("extlink", external_links, NULL, "test external links", NULL);
+
     if ((mpi_size < 2) && MAINPROCESS) {
         HDprintf("File Image Ops daisy chain test needs at least 2 processes.\n");
         HDprintf("File Image Ops daisy chain test will be skipped \n");

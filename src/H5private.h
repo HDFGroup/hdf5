@@ -370,7 +370,6 @@
  */
 #define SUCCEED 0
 #define FAIL    (-1)
-#define UFAIL   (unsigned)(-1)
 
 /* The HDF5 library uses the symbol `ERR` frequently.  So do
  * header files for libraries such as curses(3), terminfo(3), etc.
@@ -2961,6 +2960,7 @@ H5_DLL int H5CX_term_package(void);
 H5_DLL int H5D_term_package(void);
 H5_DLL int H5D_top_term_package(void);
 H5_DLL int H5E_term_package(void);
+H5_DLL int H5ES_term_package(void);
 H5_DLL int H5F_term_package(void);
 H5_DLL int H5FD_term_package(void);
 H5_DLL int H5FL_term_package(void);

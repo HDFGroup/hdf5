@@ -28,6 +28,8 @@
 
 #ifdef H5_HAVE_MIRROR_VFD
 
+#include "H5FDmirror_priv.h" /* Private header for the mirror VFD */
+
 /* For future consideration, IP address and port number might be
  * environment variables?
  */
@@ -61,8 +63,8 @@ static unsigned int g_verbosity = DEFAULT_VERBOSITY;
 #define LOGPRINT(lvl, ...)                                                                                   \
     do {                                                                                                     \
         if ((lvl) <= g_verbosity) {                                                                          \
-            fprintf(g_log_stream, __VA_ARGS__);                                                              \
-            fflush(g_log_stream);                                                                            \
+            HDfprintf(g_log_stream, __VA_ARGS__);                                                            \
+            HDfflush(g_log_stream);                                                                          \
         }                                                                                                    \
     } while (0)
 
@@ -148,7 +150,7 @@ _populate_filepath(const char *dirname, const char *_basename, hid_t fapl_id, ch
     }
 
     if (HDsnprintf(_path, H5FD_SPLITTER_PATH_MAX, "%s%s%s", dirname,
-                   (dirname[strlen(dirname)] == '/') ? "" : "/", /* slash iff needed */
+                   (dirname[HDstrlen(dirname)] == '/') ? "" : "/", /* slash iff needed */
                    _basename) > H5FD_SPLITTER_PATH_MAX) {
         TEST_ERROR;
     }
@@ -2339,7 +2341,7 @@ test_vanishing_datasets(void)
         TEST_ERROR;
     }
     if (group_info.nlinks > 0) {
-        HDfprintf(stderr, "links in rw file: %d\n", group_info.nlinks);
+        HDfprintf(stderr, "links in rw file: %" PRIuHSIZE "\n", group_info.nlinks);
         HDfflush(stderr);
         TEST_ERROR;
     }
@@ -2354,7 +2356,7 @@ test_vanishing_datasets(void)
         TEST_ERROR;
     }
     if (group_info.nlinks > 0) {
-        HDfprintf(stderr, "links in wo file: %d\n", group_info.nlinks);
+        HDfprintf(stderr, "links in wo file: %" PRIuHSIZE "\n", group_info.nlinks);
         HDfflush(stderr);
         TEST_ERROR;
     }

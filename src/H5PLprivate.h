@@ -44,6 +44,18 @@ typedef union H5PL_key_t {
     } vol;
 } H5PL_key_t;
 
+/* Enum dictating the type of plugins to process
+ * when iterating through available plugins
+ */
+typedef enum {
+    H5PL_ITER_TYPE_FILTER,
+    H5PL_ITER_TYPE_VOL,
+    H5PL_ITER_TYPE_ALL,
+} H5PL_iterate_type_t;
+
+/* Callback function for iterating through the available plugins */
+typedef herr_t (*H5PL_iterate_t)(H5PL_type_t plugin_type, const void *plugin_info, void *op_data);
+
 /*****************************/
 /* Library-private Variables */
 /*****************************/
@@ -54,5 +66,6 @@ typedef union H5PL_key_t {
 
 /* Internal API routines */
 H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, const H5PL_key_t *key);
+H5_DLL herr_t      H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data);
 
 #endif /* H5PLprivate_H */

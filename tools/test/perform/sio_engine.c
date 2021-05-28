@@ -80,7 +80,7 @@ static int clean_file_g = -1; /*whether to cleanup temporary test     */
 /*0 is no cleanup; 1 is do cleanup      */
 
 /* the different types of file descriptors we can expect */
-typedef union _file_descr {
+typedef union {
     int   posixfd; /* POSIX file handle*/
     hid_t h5fd;    /* HDF5 file        */
 } file_descr;
@@ -783,7 +783,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 
     /* Allocate data verification buffer */
     if (NULL == (buffer2 = (char *)malloc(linear_buf_size))) {
-        HDfprintf(stderr, "malloc for data verification buffer size (%Zu) failed\n", linear_buf_size);
+        HDfprintf(stderr, "malloc for data verification buffer size (%zu) failed\n", linear_buf_size);
         GOTOERROR(FAIL);
     } /* end if */
 

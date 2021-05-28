@@ -62,6 +62,8 @@ static herr_t H5PL__insert_at(const char *path, unsigned int idx);
 static herr_t H5PL__make_space_at(unsigned int idx);
 static herr_t H5PL__replace_at(const char *path, unsigned int idx);
 static herr_t H5PL__expand_path_table(void);
+static herr_t H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type_t iter_type,
+                                                    H5PL_iterate_t iter_op, void *op_data);
 static herr_t H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *found,
                                         const char *dir, const void **plugin_info);
 
@@ -546,7 +548,220 @@ H5PL__get_path(unsigned int idx)
     return H5PL_paths_g[idx];
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__replace_path() */
+} /* end H5PL__get_path() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__path_table_iterate
+ *
+ * Purpose:     Iterates over all the plugins in the plugin path table and
+ *              calls the specified callback function on each plugin found.
+ *
+ * Return:      H5_ITER_CONT if all plugins are processed successfully
+ *              H5_ITER_STOP if short-circuit success occurs while
+ *                  processing plugins
+ *              H5_ITER_ERROR if an error occurs while processing plugins
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PL__path_table_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data)
+{
+    unsigned int u;
+    herr_t       ret_value = H5_ITER_CONT;
+
+    FUNC_ENTER_PACKAGE
+
+    for (u = 0; (u < H5PL_num_paths_g) && (ret_value == H5_ITER_CONT); u++)
+        ret_value = H5PL__path_table_iterate_process_path(H5PL_paths_g[u], iter_type, iter_op, op_data);
+
+    if (ret_value < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_BADITER, H5_ITER_ERROR, "can't iterate over plugins in plugin path '%s'",
+                    H5PL_paths_g[u]);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5PL__path_table_iterate() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL__path_table_iterate_process_path
+ *
+ * Purpose:     Iterates over all the plugins within a single plugin path
+ *              entry in the plugin path table and calls the specified
+ *              callback function on each plugin found. Two function
+ *              definitions are for Unix and Windows.
+ *
+ * Return:      H5_ITER_CONT if all plugins are processed successfully
+ *              H5_ITER_STOP if short-circuit success occurs while
+ *                  processing plugins
+ *              H5_ITER_ERROR if an error occurs while processing plugins
+ *
+ *-------------------------------------------------------------------------
+ */
+#ifndef H5_HAVE_WIN32_API
+static herr_t
+H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type_t iter_type,
+                                      H5PL_iterate_t iter_op, void *op_data)
+{
+    H5PL_type_t    plugin_type;
+    const void *   plugin_info = NULL;
+    hbool_t        plugin_loaded;
+    char *         path      = NULL;
+    DIR *          dirp      = NULL; /* Directory stream */
+    struct dirent *dp        = NULL; /* Directory entry */
+    herr_t         ret_value = H5_ITER_CONT;
+
+    FUNC_ENTER_STATIC
+
+    HDassert(plugin_path);
+    HDassert(iter_op);
+
+    /* Open the directory */
+    if (!(dirp = HDopendir(plugin_path)))
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, H5_ITER_ERROR, "can't open directory: %s", plugin_path)
+
+    /* Iterate through all entries in the directory */
+    while (NULL != (dp = HDreaddir(dirp))) {
+        /* The library we are looking for should be called libxxx.so... on Unix
+         * or libxxx.xxx.dylib on Mac.
+         */
+#ifndef __CYGWIN__
+        if (!HDstrncmp(dp->d_name, "lib", (size_t)3) &&
+            (HDstrstr(dp->d_name, ".so") || HDstrstr(dp->d_name, ".dylib"))) {
+#else
+        if (!HDstrncmp(dp->d_name, "cyg", (size_t)3) && HDstrstr(dp->d_name, ".dll")) {
+#endif
+
+            hbool_t   plugin_matches;
+            h5_stat_t my_stat;
+            size_t    len;
+
+            /* Allocate & initialize the path name */
+            len = HDstrlen(plugin_path) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(dp->d_name) + 1 /*\0*/ +
+                  4; /* Extra "+4" to quiet GCC warning - 2019/07/05, QAK */
+
+            if (NULL == (path = (char *)H5MM_calloc(len)))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path")
+
+            HDsnprintf(path, len, "%s/%s", plugin_path, dp->d_name);
+
+            /* Get info for directory entry */
+            if (HDstat(path, &my_stat) == -1)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5_ITER_ERROR, "can't stat file %s -- error was: %s", path,
+                            HDstrerror(errno))
+
+            /* If it is a directory, skip it */
+            if (S_ISDIR(my_stat.st_mode))
+                continue;
+
+            /* Attempt to open the dynamic library */
+            plugin_type   = H5PL_TYPE_ERROR;
+            plugin_info   = NULL;
+            plugin_loaded = FALSE;
+            if (H5PL__open(path, H5PL_TYPE_NONE, NULL, &plugin_loaded, &plugin_type, &plugin_info) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, H5_ITER_ERROR, "failed to open plugin '%s'", path);
+
+            /* Determine if we should process this plugin */
+            plugin_matches = (iter_type == H5PL_ITER_TYPE_ALL) ||
+                             ((iter_type == H5PL_ITER_TYPE_FILTER) && (plugin_type == H5PL_TYPE_FILTER)) ||
+                             ((iter_type == H5PL_ITER_TYPE_VOL) && (plugin_type == H5PL_TYPE_VOL));
+
+            /* If the plugin was successfully loaded, call supplied callback function on plugin */
+            if (plugin_loaded && plugin_matches && (ret_value = iter_op(plugin_type, plugin_info, op_data)))
+                break;
+
+            path = (char *)H5MM_xfree(path);
+        } /* end if */
+    }     /* end while */
+
+    if (ret_value < 0)
+        HERROR(H5E_PLUGIN, H5E_CALLBACK, "callback operator function returned failure");
+
+done:
+    if (dirp)
+        if (HDclosedir(dirp) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CLOSEERROR, H5_ITER_ERROR, "can't close directory: %s",
+                        HDstrerror(errno))
+
+    path = (char *)H5MM_xfree(path);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__path_table_iterate_process_path() */
+#else  /* H5_HAVE_WIN32_API */
+static herr_t
+H5PL__path_table_iterate_process_path(const char *plugin_path, H5PL_iterate_type_t iter_type,
+                                      H5PL_iterate_t iter_op, void *op_data)
+{
+    WIN32_FIND_DATAA fdFile;
+    HANDLE           hFind = INVALID_HANDLE_VALUE;
+    H5PL_type_t      plugin_type;
+    const void *     plugin_info = NULL;
+    hbool_t          plugin_loaded;
+    char *           path = NULL;
+    char             service[2048];
+    herr_t           ret_value = H5_ITER_CONT;
+
+    FUNC_ENTER_STATIC
+
+    /* Check args - Just assert on package functions */
+    HDassert(plugin_path);
+    HDassert(iter_op);
+
+    /* Specify a file mask. *.* = We want everything! */
+    HDsprintf(service, "%s\\*.dll", plugin_path);
+    if ((hFind = FindFirstFileA(service, &fdFile)) == INVALID_HANDLE_VALUE)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_OPENERROR, H5_ITER_ERROR, "can't open directory")
+
+    /* Loop over all the files */
+    do {
+        /* Ignore '.' and '..' */
+        if (HDstrcmp(fdFile.cFileName, ".") != 0 && HDstrcmp(fdFile.cFileName, "..") != 0) {
+            hbool_t plugin_matches;
+            size_t  len;
+
+            /* Allocate & initialize the path name */
+            len = HDstrlen(plugin_path) + HDstrlen(H5PL_PATH_SEPARATOR) + HDstrlen(fdFile.cFileName) + 1;
+
+            if (NULL == (path = (char *)H5MM_calloc(len)))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTALLOC, H5_ITER_ERROR, "can't allocate memory for path")
+
+            HDsnprintf(path, len, "%s\\%s", plugin_path, fdFile.cFileName);
+
+            /* Ignore directories */
+            if (fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+                continue;
+
+            /* Attempt to open the dynamic library */
+            plugin_type   = H5PL_TYPE_ERROR;
+            plugin_info   = NULL;
+            plugin_loaded = FALSE;
+            if (H5PL__open(path, H5PL_TYPE_NONE, NULL, &plugin_loaded, &plugin_type, &plugin_info) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, H5_ITER_ERROR, "failed to open plugin '%s'", path);
+
+            /* Determine if we should process this plugin */
+            plugin_matches = (iter_type == H5PL_ITER_TYPE_ALL) ||
+                             ((iter_type == H5PL_ITER_TYPE_FILTER) && (plugin_type == H5PL_TYPE_FILTER)) ||
+                             ((iter_type == H5PL_ITER_TYPE_VOL) && (plugin_type == H5PL_TYPE_VOL));
+
+            /* If the plugin was successfully loaded, call supplied callback function on plugin */
+            if (plugin_loaded && plugin_matches && (ret_value = iter_op(plugin_type, plugin_info, op_data)))
+                break;
+
+            path = (char *)H5MM_xfree(path);
+        }
+    } while (FindNextFileA(hFind, &fdFile));
+
+    if (ret_value < 0)
+        HERROR(H5E_PLUGIN, H5E_CALLBACK, "callback operator function returned failure");
+
+done:
+    if (hFind != INVALID_HANDLE_VALUE)
+        FindClose(hFind);
+
+    path = (char *)H5MM_xfree(path);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL__path_table_iterate_process_path() */
+#endif /* H5_HAVE_WIN32_API */
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__find_plugin_in_path_table
@@ -669,11 +884,13 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
                             HDstrerror(errno))
 
             /* If it is a directory, skip it */
-            if (S_ISDIR(my_stat.st_mode))
+            if (S_ISDIR(my_stat.st_mode)) {
+                path = (char *)H5MM_xfree(path);
                 continue;
+            }
 
-            /* attempt to open the dynamic library as a filter library */
-            if (H5PL__open(path, search_params->type, search_params->key, found, plugin_info) < 0)
+            /* attempt to open the dynamic library */
+            if (H5PL__open(path, search_params->type, search_params->key, found, NULL, plugin_info) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
             if (*found)
                 HGOTO_DONE(SUCCEED)
@@ -739,8 +956,8 @@ H5PL__find_plugin_in_path(const H5PL_search_params_t *search_params, hbool_t *fo
             if (fdFile.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
                 continue;
 
-            /* attempt to open the dynamic library as a filter library */
-            if (H5PL__open(path, search_params->type, search_params->key, found, plugin_info) < 0)
+            /* attempt to open the dynamic library */
+            if (H5PL__open(path, search_params->type, search_params->key, found, NULL, plugin_info) < 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "search in directory failed")
             if (*found)
                 HGOTO_DONE(SUCCEED)

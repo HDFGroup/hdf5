@@ -104,12 +104,12 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5PLget_loading_state(unsigned int *plugin_control_mask)
+H5PLget_loading_state(unsigned *plugin_control_mask /*out*/)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE1("e", "*Iu", plugin_control_mask);
+    H5TRACE1("e", "x", plugin_control_mask);
 
     if (NULL == plugin_control_mask)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plugin_control_mask parameter cannot be NULL")

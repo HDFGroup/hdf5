@@ -2575,7 +2575,7 @@ test_h5s_chunk(void)
     for (i = 0; i < CHUNK_DATA_NX; i++) {
         for (j = 0; j < CHUNK_DATA_NY; j++) {
             /* Check if the two values are within 0.001% range. */
-            if (!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], (double)chunk_data_flt[i][j], (double)0.00001F))
+            if (!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], (double)chunk_data_flt[i][j], 0.00001))
                 TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n",
                               (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j,
                               (double)chunk_data_flt[i][j]);

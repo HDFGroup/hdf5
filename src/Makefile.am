@@ -55,6 +55,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5E.c H5Edeprec.c H5Eint.c \
         H5EA.c H5EAcache.c H5EAdbg.c H5EAdblkpage.c H5EAdblock.c H5EAhdr.c \
         H5EAiblock.c H5EAint.c H5EAsblock.c H5EAstat.c H5EAtest.c \
+        H5ES.c H5ESevent.c H5ESint.c H5ESlist.c \
         H5F.c H5Faccum.c H5Fcwfs.c H5Fdbg.c H5Fdeprec.c H5Fefc.c H5Ffake.c \
         H5Fint.c H5Fio.c H5Fmount.c H5Fquery.c H5Fsfile.c H5Fspace.c \
         H5Fsuper.c H5Fsuper_cache.c H5Ftest.c \
@@ -154,7 +155,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5queu
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5Mpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
-        H5Rpublic.h H5Spublic.h H5Tpublic.h \
+        H5Rpublic.h H5Spublic.h H5Tpublic.h H5TSpublic.h \
         H5VLconnector.h H5VLconnector_passthru.h \
         H5VLnative.h H5VLpassthru.h H5VLpublic.h \
         H5Zpublic.h
@@ -202,11 +203,6 @@ $(top_srcdir)/src/H5version.h: $(top_srcdir)/src/H5vers.txt
 # Assignment overflow macro generation
 $(top_srcdir)/src/H5overflow.h: $(top_srcdir)/src/H5overflow.txt
 	perl $(top_srcdir)/bin/make_overflow $?
-
-# doxygen support
-if BUILD_DOXYGEN_CONDITIONAL
-doxygen: doxygen-doc
-endif
 
 # Add TRACE macros to library source files.  This is done via the trace script
 # in the hdf5/bin directory.  If the file contains HDF5 API macros, a "clean"

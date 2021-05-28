@@ -517,11 +517,11 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     int32_t aggregate_max_pins             = 0;
     double  hit_rate;
     double  prefetch_use_rate;
-    double  average_successful_search_depth                   = 0.0f;
-    double  average_failed_search_depth                       = 0.0f;
-    double  average_entries_skipped_per_calls_to_msic         = 0.0f;
-    double  average_dirty_pf_entries_skipped_per_call_to_msic = 0.0f;
-    double  average_entries_scanned_per_calls_to_msic         = 0.0f;
+    double  average_successful_search_depth                   = 0.0;
+    double  average_failed_search_depth                       = 0.0;
+    double  average_entries_skipped_per_calls_to_msic         = 0.0;
+    double  average_dirty_pf_entries_skipped_per_call_to_msic = 0.0;
+    double  average_entries_scanned_per_calls_to_msic         = 0.0;
 #endif                          /* H5C_COLLECT_CACHE_STATS */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -580,9 +580,9 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     }  /* end for */
 
     if ((total_hits > 0) || (total_misses > 0))
-        hit_rate = (double)100.0f * ((double)(total_hits)) / ((double)(total_hits + total_misses));
+        hit_rate = 100.0 * ((double)(total_hits)) / ((double)(total_hits + total_misses));
     else
-        hit_rate = 0.0f;
+        hit_rate = 0.0;
 
     if (cache_ptr->successful_ht_searches > 0)
         average_successful_search_depth = ((double)(cache_ptr->total_successful_ht_search_depth)) /
@@ -718,10 +718,9 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
               (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]));
 
     if (cache_ptr->prefetches > 0)
-        prefetch_use_rate =
-            (double)100.0f * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
+        prefetch_use_rate = 100.0 * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
     else
-        prefetch_use_rate = 0.0f;
+        prefetch_use_rate = 0.0;
 
     HDfprintf(stdout, "%s  prefetched entry use rate          = %lf\n", cache_ptr->prefix, prefetch_use_rate);
 
@@ -746,10 +745,10 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
                       ((cache_ptr->class_table_ptr))[i]->name);
 
             if ((cache_ptr->hits[i] > 0) || (cache_ptr->misses[i] > 0))
-                hit_rate = (double)100.0f * ((double)(cache_ptr->hits[i])) /
+                hit_rate = 100.0 * ((double)(cache_ptr->hits[i])) /
                            ((double)(cache_ptr->hits[i] + cache_ptr->misses[i]));
             else
-                hit_rate = 0.0f;
+                hit_rate = 0.0;
 
             HDfprintf(stdout, "%s    hits / misses / hit_rate       = %ld / %ld / %f\n", cache_ptr->prefix,
                       (long)(cache_ptr->hits[i]), (long)(cache_ptr->misses[i]), hit_rate);

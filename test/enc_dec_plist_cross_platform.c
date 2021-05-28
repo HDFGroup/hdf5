@@ -156,70 +156,71 @@ error:
     return 1;
 }
 
-static hid_t
-read_and_decode_plist_file(const char *filename_prefix, unsigned config, char *filename, size_t filename_len)
-{
-    int         fd;
-    size_t      size;
-    const char *testfile;
-    void *      buf   = NULL;
-    hid_t       plist = H5I_INVALID_HID;
-
-    /* Generate filename from prefix and configuration word */
-    if (HDsnprintf(filename, filename_len, "%s%s%s", filename_prefix, config & CONFIG_64 ? "64" : "32",
-                   config & CONFIG_LE ? "le" : "be") < 0)
-        TEST_ERROR
-
-    /* Read file 1 */
-    testfile = H5_get_srcdir_filename(filename);
-    if ((fd = HDopen(testfile, O_RDONLY)) < 0)
-        TEST_ERROR
-    size = (size_t)HDlseek(fd, 0, SEEK_END);
-    HDlseek(fd, 0, SEEK_SET);
-    buf = HDmalloc(size);
-    if (HDread(fd, buf, size) < 0)
-        TEST_ERROR
-    HDclose(fd);
-
-    /* Decode property lists */
-    if ((plist = H5Pdecode(buf)) < 0)
-        FAIL_STACK_ERROR
-error:
-    if (buf != NULL)
-        HDfree(buf);
-    return plist;
-}
-
 static int
 test_plists(const char *filename_prefix)
 {
-    int      i;
-    unsigned config[2];
-    hid_t    plist[2];
-    char     filename[2][1024];
+    unsigned    config_1, config_2;
+    int         fd_1, fd_2;
+    size_t      size_1 = 0, size_2 = 0;
+    void *      buf_1 = NULL, *buf_2 = NULL;
+    hid_t       plist_1, plist_2;
+    char        filename[1024];
+    const char *testfile;
 
     /* Iterate over all combinations of configurations */
-    for (config[0] = 0; config[0] < (NCONFIG - 1); config[0]++) {
-        for (config[1] = config[0] + 1; config[1] < NCONFIG; config[1]++) {
-            for (i = 0; i < 2; i++) {
-                plist[i] =
-                    read_and_decode_plist_file(filename_prefix, config[i], filename[i], sizeof(filename[i]));
-                if (plist[i] == H5I_INVALID_HID)
-                    goto error;
-            }
+    for (config_1 = 0; config_1 < (NCONFIG - 1); config_1++)
+        for (config_2 = config_1 + 1; config_2 < NCONFIG; config_2++) {
+            /* Generate filename for file 1 */
+            if (HDsnprintf(filename, sizeof(filename), "%s%s%s", filename_prefix,
+                           config_1 & CONFIG_64 ? "64" : "32", config_1 & CONFIG_LE ? "le" : "be") < 0)
+                TEST_ERROR
+
+            /* Read file 1 */
+            testfile = H5_get_srcdir_filename(filename);
+            if ((fd_1 = HDopen(testfile, O_RDONLY)) < 0)
+                TEST_ERROR
+            size_1 = (size_t)HDlseek(fd_1, (HDoff_t)0, SEEK_END);
+            HDlseek(fd_1, (HDoff_t)0, SEEK_SET);
+            buf_1 = (void *)HDmalloc(size_1);
+            if (HDread(fd_1, buf_1, size_1) < 0)
+                TEST_ERROR
+            HDclose(fd_1);
+
+            /* Generate filename for file 2 */
+            if (HDsnprintf(filename, sizeof(filename), "%s%s%s", filename_prefix,
+                           config_2 & CONFIG_64 ? "64" : "32", config_2 & CONFIG_LE ? "le" : "be") < 0)
+                TEST_ERROR
+
+            /* Read file 1 */
+            testfile = H5_get_srcdir_filename(filename);
+            if ((fd_2 = HDopen(testfile, O_RDONLY)) < 0)
+                TEST_ERROR
+            size_2 = (size_t)HDlseek(fd_2, (HDoff_t)0, SEEK_END);
+            HDlseek(fd_2, (HDoff_t)0, SEEK_SET);
+            buf_2 = (void *)HDmalloc(size_2);
+            if (HDread(fd_2, buf_2, size_2) < 0)
+                TEST_ERROR
+            HDclose(fd_2);
+
+            /* Decode property lists */
+            if ((plist_1 = H5Pdecode(buf_1)) < 0)
+                FAIL_STACK_ERROR
+            if ((plist_2 = H5Pdecode(buf_2)) < 0)
+                FAIL_STACK_ERROR
 
             /* Compare decoded property lists */
-            if (!H5Pequal(plist[0], plist[1]))
-                FAIL_PRINTF_ERROR("PLIST encoding/decoding comparison failed, "
-                                  "%s != %s\n",
-                                  filename[0], filename[1])
+            if (!H5Pequal(plist_1, plist_2))
+                FAIL_PUTS_ERROR("PLIST encoding/decoding comparison failed\n")
 
-            for (i = 0; i < 2; i++) {
-                if ((H5Pclose(plist[i])) < 0)
-                    FAIL_STACK_ERROR
-            }
-        }
-    }
+            /* Close */
+            if ((H5Pclose(plist_1)) < 0)
+                FAIL_STACK_ERROR
+            if ((H5Pclose(plist_2)) < 0)
+                FAIL_STACK_ERROR
+
+            HDfree(buf_1);
+            HDfree(buf_2);
+        } /* end for */
 
     return 1;
 

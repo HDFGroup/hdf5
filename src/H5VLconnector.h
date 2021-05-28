@@ -82,7 +82,8 @@ typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
     H5VL_DATASET_FLUSH,      /* H5Dflush                            */
     H5VL_DATASET_REFRESH,    /* H5Drefresh                          */
-    H5VL_DATASET_WAIT        /* H5Dwait                             */
+    H5VL_DATASET_WAIT,       /* H5Dwait                             */
+    H5VL_DATASET_CHUNK_ITER  /* H5Dchunk_iter                       */
 } H5VL_dataset_specific_t;
 
 /* Typedef for VOL connector dataset optional VOL operations */
@@ -410,7 +411,7 @@ typedef struct H5VL_object_class_t {
 } H5VL_object_class_t;
 
 /* Asynchronous request 'notify' callback */
-typedef herr_t (*H5VL_request_notify_t)(void *ctx, H5ES_status_t status);
+typedef herr_t (*H5VL_request_notify_t)(void *ctx, H5VL_request_status_t status);
 
 /* "Levels" for 'get connector class' introspection callback */
 typedef enum H5VL_get_conn_lvl_t {
@@ -426,14 +427,14 @@ struct H5VL_class_t;
 /* Container/connector introspection routines */
 typedef struct H5VL_introspect_class_t {
     herr_t (*get_conn_cls)(void *obj, H5VL_get_conn_lvl_t lvl, const struct H5VL_class_t **conn_cls);
-    herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, hbool_t *supported);
+    herr_t (*opt_query)(void *obj, H5VL_subclass_t cls, int opt_type, uint64_t *flags);
 } H5VL_introspect_class_t;
 
 /* Async request operation routines */
 typedef struct H5VL_request_class_t {
-    herr_t (*wait)(void *req, uint64_t timeout, H5ES_status_t *status);
+    herr_t (*wait)(void *req, uint64_t timeout, H5VL_request_status_t *status);
     herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
-    herr_t (*cancel)(void *req);
+    herr_t (*cancel)(void *req, H5VL_request_status_t *status);
     herr_t (*specific)(void *req, H5VL_request_specific_t specific_type, va_list arguments);
     herr_t (*optional)(void *req, H5VL_request_optional_t opt_type, va_list arguments);
     herr_t (*free)(void *req);

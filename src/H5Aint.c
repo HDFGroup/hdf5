@@ -83,6 +83,7 @@ typedef struct {
 /* Local Prototypes */
 /********************/
 
+static herr_t H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request);
 static herr_t H5A__compact_build_table_cb(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
                                           unsigned *oh_flags_ptr, void *_udata /*in,out*/);
 static herr_t H5A__dense_build_table_cb(const H5A_t *attr, void *_udata);
@@ -97,6 +98,9 @@ static herr_t H5A__iterate_common(hid_t loc_id, H5_index_t idx_type, H5_iter_ord
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Format version bounds for attribute */
 const unsigned H5O_attr_ver_bounds[] = {
@@ -115,8 +119,162 @@ const unsigned H5O_attr_ver_bounds[] = {
 /* Local Variables */
 /*******************/
 
+/* Declare the free lists of H5A_t */
+H5FL_DEFINE(H5A_t);
+
+/* Declare the free lists for H5A_shared_t's */
+H5FL_DEFINE(H5A_shared_t);
+
+/* Declare a free list to manage blocks of type conversion data */
+H5FL_BLK_DEFINE(attr_buf);
+
 typedef H5A_t *H5A_t_ptr;
-H5FL_SEQ_DEFINE(H5A_t_ptr);
+H5FL_SEQ_DEFINE_STATIC(H5A_t_ptr);
+
+/* Attribute ID class */
+static const H5I_class_t H5I_ATTR_CLS[1] = {{
+    H5I_ATTR,                 /* ID class value */
+    0,                        /* Class flags */
+    0,                        /* # of reserved IDs for class */
+    (H5I_free_t)H5A__close_cb /* Callback routine for closing objects of this class */
+}};
+
+/* Flag indicating "top" of interface has been initialized */
+static hbool_t H5A_top_package_initialize_s = FALSE;
+
+/*-------------------------------------------------------------------------
+ * Function: H5A_init
+ *
+ * Purpose:  Initialize the interface from some other layer.
+ *
+ * Return:   Success:    non-negative
+ *
+ *           Failure:    negative
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5A_init(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+    /* FUNC_ENTER() does all the work */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A_init() */
+
+/*--------------------------------------------------------------------------
+NAME
+   H5A__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5A__init_package()
+
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+
+--------------------------------------------------------------------------*/
+herr_t
+H5A__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /*
+     * Create attribute ID type.
+     */
+    if (H5I_register_type(H5I_ATTR_CLS) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTINIT, FAIL, "unable to initialize interface")
+
+    /* Mark "top" of interface as initialized, too */
+    H5A_top_package_initialize_s = TRUE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5A__init_package() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5A_top_term_package
+ PURPOSE
+    Terminate various H5A objects
+ USAGE
+    void H5A_top_term_package()
+ RETURNS
+ DESCRIPTION
+    Release IDs for the atom group, deferring full interface shutdown
+    until later (in H5A_term_package).
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5A_top_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (H5A_top_package_initialize_s) {
+        if (H5I_nmembers(H5I_ATTR) > 0) {
+            (void)H5I_clear_type(H5I_ATTR, FALSE, FALSE);
+            n++; /*H5I*/
+        }        /* end if */
+
+        /* Mark closed */
+        if (0 == n)
+            H5A_top_package_initialize_s = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* H5A_top_term_package() */
+
+/*--------------------------------------------------------------------------
+ NAME
+    H5A_term_package
+ PURPOSE
+    Terminate various H5A objects
+ USAGE
+    void H5A_term_package()
+ RETURNS
+ DESCRIPTION
+    Release any other resources allocated.
+ GLOBAL VARIABLES
+ COMMENTS, BUGS, ASSUMPTIONS
+     Can't report errors...
+
+     Finishes shutting down the interface, after H5A_top_term_package()
+     is called
+ EXAMPLES
+ REVISION LOG
+--------------------------------------------------------------------------*/
+int
+H5A_term_package(void)
+{
+    int n = 0;
+
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    if (H5_PKG_INIT_VAR) {
+        /* Sanity checks */
+        HDassert(0 == H5I_nmembers(H5I_ATTR));
+        HDassert(FALSE == H5A_top_package_initialize_s);
+
+        /* Destroy the attribute object id group */
+        n += (H5I_dec_type_ref(H5I_ATTR) > 0);
+
+        /* Mark closed */
+        if (0 == n)
+            H5_PKG_INIT_VAR = FALSE;
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(n)
+} /* H5A_term_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5A__create
@@ -136,7 +294,7 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type, cons
     H5A_t *  attr = NULL;      /* Attribute created */
     hssize_t snelmts;          /* elements in attribute */
     size_t   nelmts;           /* elements in attribute */
-    htri_t   exists;           /* Whether attribute exists */
+    hbool_t  exists;           /* Whether attribute exists */
     H5A_t *  ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE_TAG(loc->oloc->addr)
@@ -152,9 +310,10 @@ H5A__create(const H5G_loc_t *loc, const char *attr_name, const H5T_t *type, cons
      *  name, but it's going to be hard to unwind all the special cases on
      *  failure, so just check first, for now - QAK)
      */
-    if ((exists = H5O__attr_exists(loc->oloc, attr_name)) < 0)
+    exists = FALSE;
+    if (H5O__attr_exists(loc->oloc, attr_name, &exists) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_NOTFOUND, NULL, "error checking attributes")
-    else if (exists > 0)
+    if (exists)
         HGOTO_ERROR(H5E_ATTR, H5E_ALREADYEXISTS, NULL, "attribute already exists")
 
     /* Check if the dataspace has an extent set (or is NULL) */
@@ -356,12 +515,12 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5A__open_common(const H5G_loc_t *loc, H5A_t *attr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(loc);
@@ -1134,18 +1293,18 @@ H5A__shared_free(H5A_t *attr)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5A__close_cb(H5VL_object_t *attr_vol_obj)
+static herr_t
+H5A__close_cb(H5VL_object_t *attr_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(attr_vol_obj);
 
     /* Close the attribute */
-    if ((ret_value = H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) < 0)
+    if ((ret_value = H5VL_attr_close(attr_vol_obj, H5P_DATASET_XFER_DEFAULT, request)) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CLOSEERROR, FAIL, "problem closing attribute")
 
     /* Free the VOL object */
@@ -1309,16 +1468,21 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name)
+herr_t
+H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name, hbool_t *attr_exists)
 {
-    H5G_loc_t  obj_loc;           /* Location used to open group */
-    H5G_name_t obj_path;          /* Opened object group hier. path */
-    H5O_loc_t  obj_oloc;          /* Opened object object location */
-    hbool_t    loc_found = FALSE; /* Entry at 'obj_name' found */
-    htri_t     ret_value = FAIL;  /* Return value */
+    H5G_loc_t  obj_loc;             /* Location used to open group */
+    H5G_name_t obj_path;            /* Opened object group hier. path */
+    H5O_loc_t  obj_oloc;            /* Opened object object location */
+    hbool_t    loc_found = FALSE;   /* Entry at 'obj_name' found */
+    herr_t     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(obj_name);
+    HDassert(attr_name);
+    HDassert(attr_exists);
 
     /* Set up opened group location to fill in */
     obj_loc.oloc = &obj_oloc;
@@ -1331,7 +1495,7 @@ H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name)
     loc_found = TRUE;
 
     /* Check if the attribute exists */
-    if ((ret_value = H5O__attr_exists(obj_loc.oloc, attr_name)) < 0)
+    if (H5O__attr_exists(obj_loc.oloc, attr_name, attr_exists) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
 
 done:

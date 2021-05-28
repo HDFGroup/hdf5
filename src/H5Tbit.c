@@ -228,10 +228,7 @@ done:
  * Purpose:     Return a small bit sequence as a number.  Bit vector starts
  *              at OFFSET and is SIZE bits long.
  *
- * Return:      Success:    The bit sequence interpretted as an unsigned
- *                          integer.
- *
- *              Failure:    0
+ * Return:      The bit sequence interpretted as an unsigned integer
  *
  *-------------------------------------------------------------------------
  */
@@ -264,14 +261,13 @@ H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
         case H5T_ORDER_NONE:
         case H5T_ORDER_MIXED:
         default:
-            /* Unknown endianness. Bail out. */
-            HGOTO_DONE(UFAIL)
+            /* This function can't return errors */
+            HDassert(0 && "unknown byte order");
     }
 
     /* Set return value */
     ret_value = val;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__bit_get_d() */
 
@@ -388,7 +384,7 @@ H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value)
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5T__bit_find(uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hbool_t value)
+H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hbool_t value)
 {
     ssize_t base = (ssize_t)offset;
     ssize_t idx, i;

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *              Tuesday, January  8, 2008
  *
  * Purpose:	Routines for aggregating free space allocations
@@ -892,7 +892,7 @@ done:
     } /* H5MF__aggr_free() */
 
     /*-------------------------------------------------------------------------
-     * Function:    H5MF_aggrs_try_shrink_eoa
+     * Function:    H5MF__aggrs_try_shrink_eoa
      *
      * Purpose:     Check the metadata & small block aggregators to see if
      *		EOA shrink is possible; if so, shrink each aggregator
@@ -904,13 +904,13 @@ done:
      *
      *-------------------------------------------------------------------------
      */
-    htri_t H5MF_aggrs_try_shrink_eoa(H5F_t * f)
+    htri_t H5MF__aggrs_try_shrink_eoa(H5F_t * f)
     {
         htri_t ma_status;        /* Whether the metadata aggregator can shrink the EOA */
         htri_t sda_status;       /* Whether the small data aggregator can shrink the EOA */
         htri_t ret_value = FAIL; /* Return value */
 
-        FUNC_ENTER_NOAPI(FAIL)
+        FUNC_ENTER_PACKAGE
 
         /* Check args */
         HDassert(f);
@@ -932,4 +932,4 @@ done:
 
 done:
         FUNC_LEAVE_NOAPI(ret_value)
-    } /* end H5MF_aggrs_try_shrink_eoa() */
+    } /* end H5MF__aggrs_try_shrink_eoa() */

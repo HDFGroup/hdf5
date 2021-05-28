@@ -41,11 +41,13 @@ typedef struct H5T_t H5T_t;
 #define H5T_GET_SHARED(T)           ((T)->shared)
 #define H5T_GET_MEMBER_OFFSET(T, I) ((T)->u.compnd.memb[I].offset)
 #define H5T_GET_MEMBER_SIZE(T, I)   ((T)->u.compnd.memb[I].shared->size)
+#define H5T_GET_FORCE_CONV(T)       ((T)->shared->force_conv)
 #else /* H5T_MODULE */
 #define H5T_GET_SIZE(T)             (H5T_get_size(T))
 #define H5T_GET_SHARED(T)           (H5T_get_shared(T))
 #define H5T_GET_MEMBER_OFFSET(T, I) (H5T_get_member_offset((T), (I)))
 #define H5T_GET_MEMBER_SIZE(T, I)   (H5T_get_member_size((T), (I)))
+#define H5T_GET_FORCE_CONV(T)       (H5T_get_force_conv(T))
 #endif /* H5T_MODULE */
 
 /* Forward references of package typedefs (declared in H5Tpkg.h) */
@@ -117,6 +119,7 @@ H5_DLL H5T_t *     H5T_get_super(const H5T_t *dt);
 H5_DLL H5T_class_t H5T_get_class(const H5T_t *dt, htri_t internal);
 H5_DLL htri_t      H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api);
 H5_DLL size_t      H5T_get_size(const H5T_t *dt);
+H5_DLL hbool_t     H5T_get_force_conv(const H5T_t *dt);
 H5_DLL int         H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset);
 H5_DLL herr_t      H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
 H5_DLL H5T_t *           H5T_decode(size_t buf_size, const unsigned char *buf);

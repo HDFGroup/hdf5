@@ -286,8 +286,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
+herr_t
+H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, hbool_t *found, void *udata)
 {
     H5B_t *        bt = NULL;
     H5UC_t *       rc_shared;           /* Ref-counted shared info */
@@ -295,7 +295,7 @@ H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
     H5B_cache_ud_t cache_udata;         /* User-data for metadata cache callback */
     unsigned       idx = 0, lt = 0, rt; /* Final, left & right key indices */
     int            cmp       = 1;       /* Key comparison value */
-    htri_t         ret_value = FAIL;    /* Return value */
+    herr_t         ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -337,21 +337,22 @@ H5B_find(H5F_t *f, const H5B_class_t *type, haddr_t addr, void *udata)
 
     /* Check if not found */
     if (cmp)
-        HGOTO_DONE(FALSE)
-
-    /*
-     * Follow the link to the subtree or to the data node.
-     */
-    HDassert(idx < bt->nchildren);
-
-    if (bt->level > 0) {
-        if ((ret_value = H5B_find(f, type, bt->child[idx], udata)) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't lookup key in subtree")
-    } /* end if */
+        *found = FALSE;
     else {
-        if ((ret_value = (type->found)(f, bt->child[idx], H5B_NKEY(bt, shared, idx), udata)) < 0)
-            HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't lookup key in leaf node")
-    } /* end else */
+        /*
+         * Follow the link to the subtree or to the data node.
+         */
+        HDassert(idx < bt->nchildren);
+
+        if (bt->level > 0) {
+            if ((ret_value = H5B_find(f, type, bt->child[idx], found, udata)) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't lookup key in subtree")
+        } /* end if */
+        else {
+            if ((ret_value = (type->found)(f, bt->child[idx], H5B_NKEY(bt, shared, idx), found, udata)) < 0)
+                HGOTO_ERROR(H5E_BTREE, H5E_NOTFOUND, FAIL, "can't lookup key in leaf node")
+        } /* end else */
+    }     /* end else */
 
 done:
     if (bt && H5AC_unprotect(f, H5AC_BT, addr, bt, H5AC__NO_FLAGS_SET) < 0)
