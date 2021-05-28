@@ -713,8 +713,10 @@ H5FA_iterate(H5FA_t *fa, H5FA_operator_t op, void *udata)
             HGOTO_ERROR(H5E_FARRAY, H5E_CANTGET, H5_ITER_ERROR, "unable to delete fixed array")
 
         /* Invoke callback */
-        if ((ret_value = (*op)(u, elmt, udata)) < 0)
-            HGOTO_DONE(ret_value)
+        if ((ret_value = (*op)(u, elmt, udata)) < 0) {
+            HERROR(H5E_FARRAY, H5E_BADITER, "iteration callback error");
+            break;
+        }
     }
 
 done:
