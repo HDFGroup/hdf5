@@ -1196,12 +1196,6 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if ((hsize_t)size_i != size)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from size to size_i")
 
-#ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_debug_r_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  size_i = %d\n", FUNC, file->mpi_rank, (long)mpi_off,
-                  size_i);
-#endif
-
     /* Only look for MPI views for raw data transfers */
     if (type == H5FD_MEM_DRAW) {
         H5FD_mpio_xfer_t xfer_mode; /* I/O transfer mode */
@@ -1350,6 +1344,12 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if (bytes_read < 0 || bytes_read > io_size)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
 
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_debug_r_flag)
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld\n", FUNC, file->mpi_rank, (long)mpi_off,
+                  bytes_read);
+#endif
+
     /*
      * This gives us zeroes beyond end of physical MPI file.
      */
@@ -1436,12 +1436,6 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     if (H5FD_mpi_haddr_to_MPIOff(addr, &mpi_off) < 0)
         HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
     size_i = (int)size;
-
-#ifdef H5FDmpio_DEBUG
-    if (H5FD_mpio_debug_w_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  size_i = %d\n", FUNC, file->mpi_rank, (long)mpi_off,
-                  size_i);
-#endif
 
     /* Get the transfer mode from the API context */
     if (H5CX_get_io_xfer_mode(&xfer_mode) < 0)
@@ -1566,6 +1560,12 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     /* Check for write failure */
     if (bytes_written != io_size || bytes_written < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "file write failed")
+
+#ifdef H5FDmpio_DEBUG
+    if (H5FD_mpio_debug_w_flag)
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", FUNC, file->mpi_rank,
+                  (long)mpi_off, bytes_written);
+#endif
 
     /* Each process will keep track of its perceived EOF value locally, and
      * ultimately we will reduce this value to the maximum amongst all
