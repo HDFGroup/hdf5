@@ -41,10 +41,6 @@
 #endif /* H5_HAVE_WIN32_API */
 #endif /* H5_HAVE_THREADSAFE */
 
-/*
- * Include ANSI-C header files.
- */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -56,7 +52,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /*
  * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
@@ -71,14 +66,7 @@
 #include <pwd.h>
 #endif
 
-/*
- * C9x integer types
- */
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
 #include <stdint.h>
-#endif
-#endif
 
 /*
  * The `struct stat' data type for stat() and fstat(). This is a Posix file
