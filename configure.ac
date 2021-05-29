@@ -1365,16 +1365,15 @@ CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
-## Posix.1g types (C9x)
+## Write the confdefs.h header for checking sizes
 cat >>confdefs.h <<\EOF
-#include <sys/types.h>
-EOF
-
-if test "X$C9x" = "Xyes"; then
-  cat >>confdefs.h <<\EOF
+#include <stdbool.h>
 #include <stdint.h>
+#ifdef HAVE_UNISTD_H
+#include <sys/types.h>
+#endif
+#include <time.h>
 EOF
-fi
 
 AC_CHECK_SIZEOF(        [int8_t])
 AC_CHECK_SIZEOF(       [uint8_t])
@@ -1404,30 +1403,12 @@ AC_CHECK_SIZEOF([uint_least64_t])
 AC_CHECK_SIZEOF(  [int_fast64_t])
 AC_CHECK_SIZEOF( [uint_fast64_t])
 
+AC_CHECK_SIZEOF([bool])
+AC_CHECK_SIZEOF([off_t])
+AC_CHECK_SIZEOF([ptrdiff_t])
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([ssize_t])
-AC_CHECK_SIZEOF([ptrdiff_t])
-
-cat >>confdefs.h <<\EOF
-#include <sys/types.h> /*for off_t definition*/
-EOF
-AC_CHECK_SIZEOF([off_t])
-
-if test "X$C9x" = "Xyes"; then
-  cat >>confdefs.h <<\EOF
-#include <stdbool.h>
-EOF
-AC_CHECK_SIZEOF([bool])
-fi
-
-AC_CHECK_SIZEOF(time_t, [], [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-])
+AC_CHECK_SIZEOF([time_t])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
