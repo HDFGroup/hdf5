@@ -110,8 +110,8 @@ test_classes()
         // PredType::NATIVE_DOUBLE should be in H5T_FLOAT class
         tcls = PredType::NATIVE_DOUBLE.getClass();
         if (H5T_FLOAT != tcls) {
-            verify_val(tcls, H5T_FLOAT, "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__,
-                       __FILE__);
+            verify_val(static_cast<long>(tcls), static_cast<long>(H5T_FLOAT),
+                       "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__, __FILE__);
         }
         PASSED();
     } // end of try block
@@ -727,7 +727,7 @@ test_named()
         Attribute attr1 = itype.createAttribute("attr1", PredType::NATIVE_UCHAR, space);
         for (hsize_t i = 0; i < ds_size[0]; i++) {
             for (hsize_t j = 0; j < ds_size[1]; j++) {
-                attr_data[i][j] = (unsigned)(i * ds_size[1] + j);
+                attr_data[i][j] = static_cast<unsigned>(i * ds_size[1] + j);
             }
         }
         attr1.write(PredType::NATIVE_UINT, attr_data);
@@ -989,7 +989,8 @@ test_encode_decode()
         // Create an IntType instance from the decoded pointer and verify it
         IntType *  decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
         H5T_sign_t int_sign = decoded_int_ptr->getSign();
-        verify_val(int_sign, H5T_SGN_NONE, "DataType::decode", __LINE__, __FILE__);
+        verify_val(static_cast<long>(int_sign), static_cast<long>(H5T_SGN_NONE), "DataType::decode", __LINE__,
+                   __FILE__);
         verify_val(inttyp == *decoded_int_ptr, true, "DataType::decode", __LINE__, __FILE__);
 
         delete decoded_int_ptr;
