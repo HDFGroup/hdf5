@@ -898,6 +898,7 @@
 ./src/H5L.c
 ./src/H5Ldeprec.c
 ./src/H5Lexternal.c
+./src/H5Lint.c
 ./src/H5Lmodule.h
 ./src/H5Lpkg.h
 ./src/H5Lprivate.h
