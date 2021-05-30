@@ -254,7 +254,7 @@ typedef uint64_t hsize_t;
  * \internal Defined as a (minimum) 64-bit integer type. Use of hssize_t
  * should be discouraged in new code.
  */
-typedef int64_t  hssize_t;
+typedef int64_t hssize_t;
 #define PRIdHSIZE          PRId64
 #define PRIiHSIZE          PRIi64
 #define PRIoHSIZE          PRIo64
