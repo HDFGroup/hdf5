@@ -48,87 +48,18 @@ string (REGEX MATCH "H5_FC_GLOBAL_\\(.*,.*\\) +(.*)" RESULT ${CONTENTS})
 set (H5_FC_FUNC_ "H5_FC_FUNC_(name,NAME) ${CMAKE_MATCH_1}")
 
 #test code source
-set (SIZEOF_CODE
-  "
-       PROGRAM main
-       i = sizeof(x)
-       END PROGRAM
-  "
-)
-set (C_SIZEOF_CODE
-  "
-       PROGRAM main
-         USE ISO_C_BINDING
-         INTEGER(C_INT) :: a
-         INTEGER(C_SIZE_T) :: result
-         result = c_sizeof(a)
-       END PROGRAM
-  "
-)
-set (STORAGE_SIZE_CODE
-  "
-       PROGRAM main
-         INTEGER :: a
-         INTEGER :: result
-         result = storage_size(a)
-       END PROGRAM
-  "
-)
-set (ISO_FORTRAN_ENV_CODE
-  "
-       PROGRAM main
-         USE, INTRINSIC :: ISO_FORTRAN_ENV
-       END PROGRAM
-  "
-)
-set (REALISNOTDOUBLE_CODE
-  "
-       MODULE type_mod
-         INTERFACE h5t
-           MODULE PROCEDURE h5t_real
-           MODULE PROCEDURE h5t_dble
-         END INTERFACE
-       CONTAINS
-         SUBROUTINE h5t_real(r)
-           REAL :: r
-         END SUBROUTINE h5t_real
-         SUBROUTINE h5t_dble(d)
-           DOUBLE PRECISION :: d
-         END SUBROUTINE h5t_dble
-       END MODULE type_mod
-       PROGRAM main
-         USE type_mod
-         REAL :: r
-         DOUBLE PRECISION :: d
-         CALL h5t(r)
-         CALL h5t(d)
-       END PROGRAM main
-  "
-)
-set (ISO_C_BINDING_CODE
-  "
-       PROGRAM main
-            USE iso_c_binding
-            IMPLICIT NONE
-            TYPE(C_PTR) :: ptr
-            TYPE(C_FUNPTR) :: funptr
-            INTEGER(C_INT64_T) :: c_int64_type
-            CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
-            ptr = C_LOC(ichr(1:1))
-       END PROGRAM
-  "
-)
+
+# Read source line beginning at the line matching Input:"START" and ending at the line matching Input:"END"
+macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
+  file (READ "${HDF5_SOURCE_DIR}/m4/aclocal_fc.f90" SOURCE_MASTER)
+  string (REGEX MATCH "${SOURCE_START}[\\\t\\\n\\\r[].+]*${SOURCE_END}" SOURCE_CODE ${SOURCE_MASTER})
+  set (RETURN_VAR "${SOURCE_CODE}")
+endmacro ()
 
 if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
   if (HDF5_REQUIRED_LIBRARIES)
     set (CMAKE_REQUIRED_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}")
   endif ()
-  check_fortran_source_compiles (${SIZEOF_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_SIZEOF SRC_EXT f90)
-  check_fortran_source_compiles (${C_SIZEOF_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_C_SIZEOF SRC_EXT f90)
-  check_fortran_source_compiles (${STORAGE_SIZE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_STORAGE_SIZE SRC_EXT f90)
-  check_fortran_source_compiles (${ISO_FORTRAN_ENV_CODE} ${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV SRC_EXT f90)
-  check_fortran_source_compiles (${REALISNOTDOUBLE_CODE} ${HDF_PREFIX}_FORTRAN_DEFAULT_REAL_NOT_DOUBLE SRC_EXT f90)
-  check_fortran_source_compiles (${ISO_C_BINDING_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_ISO_C_BINDING SRC_EXT f90)
 else ()
   #-----------------------------------------------------------------------------
   # The provided CMake Fortran macros don't provide a general check function
@@ -178,36 +109,95 @@ else ()
             "${OUTPUT}\n\n")
       endif ()
   endmacro ()
+endif ()
 
-  #-----------------------------------------------------------------------------
-  # Configure Checks which require Fortran compilation must go in here
-  # not in the main ConfigureChecks.cmake files, because if the user has
-  # no Fortran compiler, problems arise.
-  #
-  # Be careful with leading spaces here, do not remove them.
-  #-----------------------------------------------------------------------------
-
-  # Check for Non-standard extension intrinsic function SIZEOF
+# Check for Non-standard extension intrinsic function SIZEOF
+READ_SOURCE("PROGRAM PROG_FC_SIZEOF" "END PROGRAM PROG_FC_SIZEOF" SOURCE_CODE)
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  check_fortran_source_compiles (${SOURCE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_SIZEOF SRC_EXT f90)
+else ()
   set (${HDF_PREFIX}_FORTRAN_HAVE_SIZEOF FALSE)
-  CHECK_FORTRAN_FEATURE(sizeof_code ${SIZEOF_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_SIZEOF)
+  CHECK_FORTRAN_FEATURE(sizeof_code ${SOURCE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_SIZEOF)
+endif ()
 
-  # Check for F2008 standard intrinsic function C_SIZEOF
+# Check for F2008 standard intrinsic function C_SIZEOF
+READ_SOURCE("PROGRAM PROG_FC_C_SIZEOF" "END PROGRAM PROG_FC_C_SIZEOF" SOURCE_CODE)
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  check_fortran_source_compiles (${SOURCE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_C_SIZEOF SRC_EXT f90)
+else ()
   set (${HDF_PREFIX}_FORTRAN_HAVE_C_SIZEOF FALSE)
-  CHECK_FORTRAN_FEATURE(c_sizeof_code ${C_SIZEOF_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_C_SIZEOF)
+  CHECK_FORTRAN_FEATURE(c_sizeof_code ${SOURCE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_C_SIZEOF)
+endif ()
 
-  # Check for F2008 standard intrinsic function STORAGE_SIZE
-  CHECK_FORTRAN_FEATURE(storage_size_code ${STORAGE_SIZE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_STORAGE_SIZE)
+# Check for F2008 standard intrinsic function STORAGE_SIZE
+READ_SOURCE("PROGRAM PROG_FC_STORAGE_SIZE" "END PROGRAM PROG_FC_STORAGE_SIZE" SOURCE_CODE)
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  check_fortran_source_compiles (${SOURCE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_STORAGE_SIZE SRC_EXT f90)
+else ()
+  CHECK_FORTRAN_FEATURE(storage_size_code ${SOURCE_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_STORAGE_SIZE)
+endif ()
 
-  # Check for F2008 standard intrinsic module "ISO_FORTRAN_ENV"
+# Check for F2008 standard intrinsic module "ISO_FORTRAN_ENV"
+READ_SOURCE("PROGRAM PROG_FC_ISO_FORTRAN_ENV" "END PROGRAM PROG_FC_ISO_FORTRAN_ENV" SOURCE_CODE)
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  check_fortran_source_compiles (${SOURCE_CODE} ${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV SRC_EXT f90)
+else ()
   set (${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV FALSE)
-  CHECK_FORTRAN_FEATURE(iso_fortran_env_code ${ISO_FORTRAN_ENV_CODE} ${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV)
+  CHECK_FORTRAN_FEATURE(iso_fortran_env_code ${SOURCE_CODE} ${HDF_PREFIX}_HAVE_ISO_FORTRAN_ENV)
+endif ()
 
+#READ_SOURCE("PROGRAM PROG_FC_REALISNOTDOUBLE" "END PROGRAM PROG_FC_REALISNOTDOUBLE" REALISNOTDOUBLE_CODE)
+set (REALISNOTDOUBLE_CODE
+  "
+       MODULE type_mod
+         INTERFACE h5t
+           MODULE PROCEDURE h5t_real
+           MODULE PROCEDURE h5t_dble
+         END INTERFACE
+       CONTAINS
+         SUBROUTINE h5t_real(r)
+           REAL :: r
+         END SUBROUTINE h5t_real
+         SUBROUTINE h5t_dble(d)
+           DOUBLE PRECISION :: d
+         END SUBROUTINE h5t_dble
+       END MODULE type_mod
+       PROGRAM main
+         USE type_mod
+         REAL :: r
+         DOUBLE PRECISION :: d
+         CALL h5t(r)
+         CALL h5t(d)
+       END PROGRAM main
+  "
+)
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  check_fortran_source_compiles (${REALISNOTDOUBLE_CODE} ${HDF_PREFIX}_FORTRAN_DEFAULT_REAL_NOT_DOUBLE SRC_EXT f90)
+else ()
   set (${HDF_PREFIX}_FORTRAN_DEFAULT_REAL_NOT_DOUBLE FALSE)
   CHECK_FORTRAN_FEATURE(realisnotdouble_code ${REALISNOTDOUBLE_CODE} ${HDF_PREFIX}_FORTRAN_DEFAULT_REAL_NOT_DOUBLE)
+endif ()
 
-  #-----------------------------------------------------------------------------
-  # Checks if the ISO_C_BINDING module meets all the requirements
-  #-----------------------------------------------------------------------------
+#-----------------------------------------------------------------------------
+# Checks if the ISO_C_BINDING module meets all the requirements
+#-----------------------------------------------------------------------------
+#READ_SOURCE("PROGRAM PROG_FC_ISO_C_BINDING" "END PROGRAM PROG_FC_ISO_C_BINDING" ISO_C_BINDING_CODE)
+set (ISO_C_BINDING_CODE
+  "
+       PROGRAM main
+            USE iso_c_binding
+            IMPLICIT NONE
+            TYPE(C_PTR) :: ptr
+            TYPE(C_FUNPTR) :: funptr
+            INTEGER(C_INT64_T) :: c_int64_type
+            CHARACTER(LEN=80, KIND=c_char), TARGET :: ichr
+            ptr = C_LOC(ichr(1:1))
+       END PROGRAM
+  "
+)
+if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
+  check_fortran_source_compiles (${ISO_C_BINDING_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_ISO_C_BINDING SRC_EXT f90)
+else ()
   set (${HDF_PREFIX}_FORTRAN_HAVE_ISO_C_BINDING FALSE)
   CHECK_FORTRAN_FEATURE(iso_c_binding_code ${ISO_C_BINDING_CODE} ${HDF_PREFIX}_FORTRAN_HAVE_ISO_C_BINDING)
 endif ()
