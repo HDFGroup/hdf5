@@ -32,11 +32,9 @@ macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
 endmacro ()
 
 set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  if (HDF5_REQUIRED_LIBRARIES)
-    set (CMAKE_REQUIRED_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}")
-  endif ()
-else ()
+if (HDF5_REQUIRED_LIBRARIES)
+  set (CMAKE_REQUIRED_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}")
+endif ()
 # The provided CMake Fortran macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
@@ -81,7 +79,6 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
         set(${RETURN_VAR} ${COMPILE_RESULT_VAR})
     endif ()
 endmacro ()
-endif ()
 #-----------------------------------------------------------------------------
 #  Check to see C_LONG_DOUBLE is available
 
@@ -192,16 +189,12 @@ set (PROG_SRC_CODE
       END PROGRAM FC_AVAIL_KINDS
   "
 )
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_fortran_source_runs (${PROG_SRC_CODE} FC_AVAIL_KINDS_RESULT SRC_EXT f90)
-else ()
 FORTRAN_RUN ("REAL and INTEGER KINDs"
     "${PROG_SRC_CODE}"
     XX
     YY
     FC_AVAIL_KINDS_RESULT
 )
-endif ()
 
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
@@ -266,11 +259,7 @@ foreach (KIND ${VAR})
        END
    "
   )
-  if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-    check_fortran_source_runs (${PROG_SRC_${KIND}} VALIDINTKINDS_RESULT_${KIND} SRC_EXT f90)
-  else ()
-    FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND})
-  endif ()
+  FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND})
   file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validIntKinds.out" PROG_OUTPUT1)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
@@ -315,11 +304,7 @@ foreach (KIND ${VAR} )
        END
   "
   )
-  if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-    check_fortran_source_runs (${PROG_SRC2_${KIND}} VALIDREALKINDS_RESULT_${KIND} SRC_EXT f90)
-  else ()
-    FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND})
-  endif ()
+  FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND})
   file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.out" PROG_OUTPUT1)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
@@ -370,11 +355,7 @@ set (PROG_SRC3
        END
   "
 )
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_fortran_source_runs (${PROG_SRC3} PAC_SIZEOF_NATIVE_KINDS_RESULT SRC_EXT f90)
-else ()
-  FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT)
-endif ()
+FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT)
 file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT)
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  sizeof INTEGER
