@@ -1599,12 +1599,11 @@ H5A__compact_build_table(H5F_t *f, H5O_t *oh, H5_index_t idx_type, H5_iter_order
     atable->nattrs = 0;
 
     /* Set up user data for iteration */
-    udata.f         = f;
-    udata.atable    = atable;
-    udata.curr_attr = 0;
-    udata.bogus_crt_idx =
-        (hbool_t)((oh->version == H5O_VERSION_1 || !(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)) ? TRUE
-                                                                                                  : FALSE);
+    udata.f             = f;
+    udata.atable        = atable;
+    udata.curr_attr     = 0;
+    udata.bogus_crt_idx = (hbool_t)(
+        (oh->version == H5O_VERSION_1 || !(oh->flags & H5O_HDR_ATTR_CRT_ORDER_TRACKED)) ? TRUE : FALSE);
 
     /* Iterate over existing attributes, checking for attribute with same name */
     op.op_type  = H5O_MESG_OP_LIB;

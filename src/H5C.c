@@ -2826,10 +2826,9 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
                 break;
 
             case H5C_flash_incr__add_space:
-                cache_ptr->flash_size_increase_possible = TRUE;
-                cache_ptr->flash_size_increase_threshold =
-                    (size_t)(((double)(cache_ptr->max_cache_size)) *
-                             ((cache_ptr->resize_ctl).flash_threshold));
+                cache_ptr->flash_size_increase_possible  = TRUE;
+                cache_ptr->flash_size_increase_threshold = (size_t)(
+                    ((double)(cache_ptr->max_cache_size)) * ((cache_ptr->resize_ctl).flash_threshold));
                 break;
 
             default: /* should be unreachable */
@@ -4491,9 +4490,8 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
                     break;
 
                 case H5C_flash_incr__add_space:
-                    cache_ptr->flash_size_increase_threshold =
-                        (size_t)(((double)(cache_ptr->max_cache_size)) *
-                                 ((cache_ptr->resize_ctl).flash_threshold));
+                    cache_ptr->flash_size_increase_threshold = (size_t)(
+                        ((double)(cache_ptr->max_cache_size)) * ((cache_ptr->resize_ctl).flash_threshold));
                     break;
 
                 default: /* should be unreachable */
@@ -5214,9 +5212,8 @@ H5C__flash_increase_cache_size(H5C_t *cache_ptr, size_t old_entry_size, size_t n
                 break;
 
             case H5C_flash_incr__add_space:
-                cache_ptr->flash_size_increase_threshold =
-                    (size_t)(((double)(cache_ptr->max_cache_size)) *
-                             ((cache_ptr->resize_ctl).flash_threshold));
+                cache_ptr->flash_size_increase_threshold = (size_t)(
+                    ((double)(cache_ptr->max_cache_size)) * ((cache_ptr->resize_ctl).flash_threshold));
                 break;
 
             default: /* should be unreachable */
