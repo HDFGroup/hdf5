@@ -49,6 +49,14 @@ New Features
 
     Configuration:
     -------------
+    - A C++11-compliant compiler is now required to build the C++ wrappers
+
+      CMAKE_CXX_STANDARD is now set to 11 when building with CMake and 
+      -std=c++11 is added when building with clang/gcc via the Autotools.
+
+      (DER - 2021/05/27)
+
+
     - CMake will now run the shell script tests in test/ by default
 
       The test directory includes several shell script tests that previously
