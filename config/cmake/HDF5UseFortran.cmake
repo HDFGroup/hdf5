@@ -258,9 +258,9 @@ foreach (KIND ${VAR} )
   else ()
     FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND})
   endif ()
-  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.out" PROG_OUTPUT1)
-  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
-  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
+  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.out" PROG_OUTPUT2)
+  string (REGEX REPLACE "\n" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
+  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
 endforeach ()
 
 if (pack_real_sizeof STREQUAL "")
@@ -313,7 +313,7 @@ if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
 else ()
   FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT)
 endif ()
-file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT)
+file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT3)
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  sizeof INTEGER
 # dnl    -- LINE 2 --  kind of INTEGER
@@ -323,14 +323,14 @@ file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT)
 # dnl    -- LINE 6 --  kind of DOUBLE PRECISION
 
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+string (REGEX REPLACE "\n" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
 
-list (GET PROG_OUTPUT 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
-list (GET PROG_OUTPUT 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
-list (GET PROG_OUTPUT 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
-list (GET PROG_OUTPUT 3 PAC_FORTRAN_NATIVE_REAL_KIND)
-list (GET PROG_OUTPUT 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
-list (GET PROG_OUTPUT 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+list (GET PROG_OUTPUT3 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
+list (GET PROG_OUTPUT3 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
+list (GET PROG_OUTPUT3 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
+list (GET PROG_OUTPUT3 3 PAC_FORTRAN_NATIVE_REAL_KIND)
+list (GET PROG_OUTPUT3 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
+list (GET PROG_OUTPUT3 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
 
 if (NOT PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
    message (FATAL_ERROR "Failed to find SIZEOF NATIVE INTEGER KINDs for Fortran")
@@ -372,13 +372,13 @@ endif ()
 
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
 
-string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS})
-string (REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR}/)")
+string (REGEX REPLACE "{" "" OUT_VAR1 ${PAC_FC_ALL_REAL_KINDS})
+string (REGEX REPLACE "}" "" OUT_VAR1 ${OUT_VAR1})
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR1}/)")
 
-string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
-string (REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR}/)")
+string (REGEX REPLACE "{" "" OUT_VAR2 ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
+string (REGEX REPLACE "}" "" OUT_VAR2 ${OUT_VAR2})
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR2}/)")
 
 ENABLE_LANGUAGE (C)
 
@@ -475,29 +475,32 @@ set (PROG_SRC
 )
 
 if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_c_source_runs (${PROG_SRC} PROG_OUTPUT)
+  check_c_source_runs (${PROG_SRC} PROG_OUTPUT4)
 else ()
-  C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
+  C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT4)
+endif ()
+if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+  message (VERBOSE "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 endif ()
 
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  long double decimal precision
 # dnl    -- LINE 2 --  __float128 decimal precision
+if (NOT PROG_OUTPUT4 STREQUAL "")
+  # Convert the string to a list of strings by replacing the carriage return with a semicolon
+  string (REGEX REPLACE "\n" ";" PROG_OUTPUT4 "${PROG_OUTPUT4}")
 
-# Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+  list (GET PROG_OUTPUT4 0 LDBL_DIG)
+  list (GET PROG_OUTPUT4 1 FLT128_DIG)
 
-list (GET PROG_OUTPUT 0 LDBL_DIG)
-list (GET PROG_OUTPUT 1 FLT128_DIG)
-
-if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
-  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
-else ()
-  set(${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
+  if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
+    set (${HDF_PREFIX}_HAVE_FLOAT128 0)
+    set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+    set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
+  else ()
+    set(${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
+  endif ()
 endif ()
-
 
 # Setting definition if there is a 16 byte fortran integer
 string (FIND ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF} "16" pos)
