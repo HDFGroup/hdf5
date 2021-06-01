@@ -198,7 +198,7 @@ foreach (KIND ${VAR})
           USE ISO_C_BINDING
           IMPLICIT NONE
           INTEGER (KIND=${KIND}) a
-          OPEN(8,FILE='pac_validIntKinds.out',FORM='formatted')
+          OPEN(8,FILE='pac_validIntKinds.${KIND}.out',FORM='formatted')
           WRITE(8,'(I0)') ${FC_SIZEOF_A}
           CLOSE(8)
        END
@@ -209,7 +209,7 @@ foreach (KIND ${VAR})
   else ()
     FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND})
   endif ()
-  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validIntKinds.out" PROG_OUTPUT1)
+  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validIntKinds.${KIND}.out" PROG_OUTPUT1)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
@@ -247,7 +247,7 @@ foreach (KIND ${VAR} )
           USE ISO_C_BINDING
           IMPLICIT NONE
           REAL (KIND=${KIND}) a
-          OPEN(8,FILE='pac_validRealKinds.out',FORM='formatted')
+          OPEN(8,FILE='pac_validRealKinds.${KIND}.out',FORM='formatted')
           WRITE(8,'(I0)') ${FC_SIZEOF_A}
           CLOSE(8)
        END
@@ -258,7 +258,7 @@ foreach (KIND ${VAR} )
   else ()
     FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND})
   endif ()
-  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.out" PROG_OUTPUT2)
+  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.${KIND}.out" PROG_OUTPUT2)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
 endforeach ()
