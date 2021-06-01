@@ -26,9 +26,6 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
-/* Define if C++ compiler recognizes offsetof */
-#cmakedefine H5_CXX_HAVE_OFFSETOF @CXX_HAVE_OFFSETOF@
-
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
@@ -198,9 +195,6 @@
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-#cmakedefine H5_HAVE_INTTYPES_H @H5_HAVE_INTTYPES_H@
-
 /* Define to 1 if you have the `ioctl' function. */
 #cmakedefine H5_HAVE_IOCTL @H5_HAVE_IOCTL@
 
@@ -343,17 +337,8 @@
 /* Define if `struct stat' has the `st_blocks' field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
 
-/* Define to 1 if you have the <stdbool.h> header file. */
-#cmakedefine H5_HAVE_STDBOOL_H @H5_HAVE_STDBOOL_H@
-
 /* Define to 1 if you have the <stddef.h> header file. */
 #cmakedefine H5_HAVE_STDDEF_H @H5_HAVE_STDDEF_H@
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#cmakedefine H5_HAVE_STDINT_H @H5_HAVE_STDINT_H@
-
-/* Define to 1 if you have the <stdint.h> header file for Cplusplus. */
-#cmakedefine H5_HAVE_STDINT_H_CXX @H5_HAVE_STDINT_H_CXX@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
@@ -697,9 +682,6 @@
 
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 @H5_SIZEOF___INT64@
-
-/* Define to 1 if you have the ANSI C header files. */
-#cmakedefine H5_STDC_HEADERS @H5_STDC_HEADERS@
 
 /* Define if strict file format checks are enabled */
 #cmakedefine H5_STRICT_FORMAT_CHECKS @H5_STRICT_FORMAT_CHECKS@

@@ -2277,8 +2277,9 @@ test_random_rank4(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disable_
     /* Generate initial dataset size, 1-10, unless using fixed array index or
      * scalar_iter is 0 */
     for (i = 0; i < 4; i++) {
-        dims[i] = (hsize_t)(
-            index_type != RANK4_INDEX_FARRAY ? (0 == scalar_iter ? 1 : ((HDrandom() % 10) + 1)) : 10);
+        dims[i] =
+            (hsize_t)(index_type != RANK4_INDEX_FARRAY ? (0 == scalar_iter ? 1 : ((HDrandom() % 10) + 1))
+                                                       : 10);
         dim_log[0][i] = dims[i];
     } /* end for */
 
@@ -2503,8 +2504,9 @@ test_random_rank4_vl(hid_t fapl, hid_t dcpl, hbool_t do_fillvalue, hbool_t disab
     /* Generate initial dataset size, 1-10, unless using fixed array index or
      * scalar_iter is 0 */
     for (i = 0; i < 4; i++) {
-        dims[i] = (hsize_t)(
-            index_type != RANK4_INDEX_FARRAY ? (0 == scalar_iter ? 1 : ((HDrandom() % 10) + 1)) : 10);
+        dims[i] =
+            (hsize_t)(index_type != RANK4_INDEX_FARRAY ? (0 == scalar_iter ? 1 : ((HDrandom() % 10) + 1))
+                                                       : 10);
         dim_log[0][i] = dims[i];
     } /* end for */
 

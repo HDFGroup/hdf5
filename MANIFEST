@@ -40,7 +40,6 @@
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
 
-./m4/aclocal_cxx.m4
 ./m4/aclocal_fc.m4
 ./m4/aclocal_fc.f90
 ./m4/ax_check_class.m4
@@ -172,6 +171,7 @@
 ./config/gnu-warnings/cxx-4.8
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
+./config/gnu-warnings/cxx-9
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
 ./config/gnu-warnings/cxx-noerror-5
@@ -902,6 +902,7 @@
 ./src/H5Ldeprec.c
 ./src/H5Ldevelop.h
 ./src/H5Lexternal.c
+./src/H5Lint.c
 ./src/H5Lmodule.h
 ./src/H5Lpkg.h
 ./src/H5Lprivate.h
@@ -3554,7 +3555,6 @@
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/fileCompareTest.cmake
 ./config/cmake/FindHDFS.cmake
-./config/cmake/H5cxx_config.h.in
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
 ./config/cmake/hdf5-config-version.cmake.in
@@ -3589,11 +3589,9 @@
 ./config/cmake_ext_mod/hdf.bmp
 ./config/cmake_ext_mod/hdf.icns
 ./config/cmake_ext_mod/hdf.ico
-./config/cmake_ext_mod/HDFCXXTests.cpp
 ./config/cmake_ext_mod/HDFLibMacros.cmake
 ./config/cmake_ext_mod/HDFMacros.cmake
 ./config/cmake_ext_mod/HDFTests.c
-./config/cmake_ext_mod/HDFUseCXX.cmake
 ./config/cmake_ext_mod/HDFUseFortran.cmake
 ./config/cmake_ext_mod/NSIS.InstallOptions.ini.in
 ./config/cmake_ext_mod/NSIS.template.in

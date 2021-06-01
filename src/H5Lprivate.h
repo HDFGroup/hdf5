@@ -80,6 +80,7 @@ H5_DLL herr_t H5L_iterate(H5G_loc_t *loc, const char *group_name, H5_index_t idx
 /* User-defined link functions */
 H5_DLL herr_t H5L_register(const H5L_class_t *cls);
 H5_DLL herr_t H5L_unregister(H5L_type_t id);
+H5_DLL herr_t H5L_is_registered(H5L_type_t id, hbool_t *is_registered);
 H5_DLL const H5L_class_t *H5L_find_class(H5L_type_t id);
 
 #endif /* H5Lprivate_H */
