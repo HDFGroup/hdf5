@@ -260,6 +260,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # gcc 9
     if test $cxx_vers_major -ge 9; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 9)"
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-9)"
     fi
 
     #################
