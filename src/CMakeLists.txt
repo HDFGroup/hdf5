@@ -403,6 +403,7 @@ set (H5L_SOURCES
     ${HDF5_SRC_DIR}/H5L.c
     ${HDF5_SRC_DIR}/H5Ldeprec.c
     ${HDF5_SRC_DIR}/H5Lexternal.c
+    ${HDF5_SRC_DIR}/H5Lint.c
 )
 set (H5L_HDRS
     ${HDF5_SRC_DIR}/H5Lpublic.h

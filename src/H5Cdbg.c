@@ -381,7 +381,7 @@ H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn)
     list_len = (int)H5SL_count(cache_ptr->coll_write_list);
 
     HDfprintf(stdout, "\n\nDumping MDC coll write list from %d:%s.\n", aux_ptr->mpi_rank, calling_fcn);
-    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
+    HDfprintf(stdout, "	slist len = %" PRIu32 ".\n", cache_ptr->slist_len);
 
     if (list_len > 0) {
 
@@ -983,8 +983,8 @@ H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t du
     HDassert(cache_ptr);
     HDassert(entry_ptr);
 
-    HDfprintf(stderr, "%*s%s: entry_ptr = (%a, '%s', %a, %t, %u, %u/%u)\n", indent, "", prefix,
-              entry_ptr->addr, entry_ptr->type->name,
+    HDfprintf(stderr, "%*s%s: entry_ptr = (%" PRIxHADDR ", '%s', %" PRIxHADDR ", %d, %u, %u/%u)\n", indent,
+              "", prefix, entry_ptr->addr, entry_ptr->type->name,
               entry_ptr->tag_info ? entry_ptr->tag_info->tag : HADDR_UNDEF, entry_ptr->is_dirty,
               entry_ptr->flush_dep_nparents, entry_ptr->flush_dep_nchildren,
               entry_ptr->flush_dep_ndirty_children);
