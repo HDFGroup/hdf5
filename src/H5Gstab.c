@@ -150,11 +150,10 @@ H5G__stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint)
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Insert name into the heap */
-    if (UFAIL == (name_offset = H5HL_insert(f, heap, (size_t)1, "")))
+    if (H5HL_insert(f, heap, (size_t)1, "", &name_offset) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert name into heap")
 
-    /*
-     * B-tree's won't work if the first name isn't at the beginning
+    /* B-trees won't work if the first name isn't at the beginning
      * of the heap.
      */
     HDassert(0 == name_offset);
@@ -302,7 +301,7 @@ H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_ln
     H5O_stab_t stab;                /* Symbol table message		*/
     herr_t     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
@@ -317,7 +316,7 @@ H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_ln
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name")
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__stab_insert() */
 
 /*-------------------------------------------------------------------------
@@ -507,7 +506,7 @@ H5G__stab_iterate(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t skip, hs
     H5G_link_table_t ltable    = {0, NULL}; /* Link table */
     herr_t           ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(oloc->addr)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(oloc);
@@ -574,7 +573,7 @@ done:
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__stab_iterate() */
 
 /*-------------------------------------------------------------------------
@@ -833,20 +832,21 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk)
+herr_t
+H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
 {
-    H5HL_t *          heap = NULL;      /* Pointer to local heap */
-    H5G_bt_lkp_t      bt_udata;         /* Data to pass through B-tree	*/
-    H5G_stab_fnd_ud_t udata;            /* 'User data' to give to callback */
-    H5O_stab_t        stab;             /* Symbol table message		*/
-    htri_t            ret_value = FAIL; /* Return value */
+    H5HL_t *          heap = NULL;         /* Pointer to local heap */
+    H5G_bt_lkp_t      bt_udata;            /* Data to pass through B-tree	*/
+    H5G_stab_fnd_ud_t udata;               /* 'User data' to give to callback */
+    H5O_stab_t        stab;                /* Symbol table message		*/
+    herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
     HDassert(name && *name);
+    HDassert(found);
     HDassert(lnk);
 
     /* Retrieve the symbol table message for the group */
@@ -869,7 +869,7 @@ H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk)
     bt_udata.op_data     = &udata;
 
     /* Search the B-tree */
-    if ((ret_value = H5B_find(grp_oloc->file, H5B_SNODE, stab.btree_addr, &bt_udata)) < 0)
+    if (H5B_find(grp_oloc->file, H5B_SNODE, stab.btree_addr, found, &bt_udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "not found")
 
 done:

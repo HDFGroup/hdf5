@@ -430,17 +430,18 @@ H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
         }
 
         case H5VL_ATTR_EXISTS: {
-            const char *attr_name = HDva_arg(arguments, const char *);
-            htri_t *    ret       = HDva_arg(arguments, htri_t *);
+            const char *attr_name   = HDva_arg(arguments, const char *);
+            hbool_t *   attr_exists = HDva_arg(arguments, hbool_t *);
 
             if (loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Aexists */
                 /* Check if the attribute exists */
-                if ((*ret = H5O__attr_exists(loc.oloc, attr_name)) < 0)
+                if (H5O__attr_exists(loc.oloc, attr_name, attr_exists) < 0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
             }                                                   /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Aexists_by_name */
                 /* Check if the attribute exists */
-                if ((*ret = H5A__exists_by_name(loc, loc_params->loc_data.loc_by_name.name, attr_name)) < 0)
+                if (H5A__exists_by_name(loc, loc_params->loc_data.loc_by_name.name, attr_name, attr_exists) <
+                    0)
                     HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to determine if attribute exists")
             } /* end else-if */
             else

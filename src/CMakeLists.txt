@@ -174,6 +174,10 @@ IDE_GENERATED_PROPERTIES ("H5EA" "${H5EA_HDRS}" "${H5EA_SOURCES}" )
 
 
 set (H5ES_SOURCES
+    ${HDF5_SRC_DIR}/H5ES.c
+    ${HDF5_SRC_DIR}/H5ESevent.c
+    ${HDF5_SRC_DIR}/H5ESint.c
+    ${HDF5_SRC_DIR}/H5ESlist.c
 )
 set (H5ES_HDRS
     ${HDF5_SRC_DIR}/H5ESpublic.h
@@ -399,6 +403,7 @@ set (H5L_SOURCES
     ${HDF5_SRC_DIR}/H5L.c
     ${HDF5_SRC_DIR}/H5Ldeprec.c
     ${HDF5_SRC_DIR}/H5Lexternal.c
+    ${HDF5_SRC_DIR}/H5Lint.c
 )
 set (H5L_HDRS
     ${HDF5_SRC_DIR}/H5Lpublic.h
@@ -732,6 +737,7 @@ set (H5_MODULE_HEADERS
     ${HDF5_SRC_DIR}/H5Dmodule.h
     ${HDF5_SRC_DIR}/H5Emodule.h
     ${HDF5_SRC_DIR}/H5EAmodule.h
+    ${HDF5_SRC_DIR}/H5ESmodule.h
     ${HDF5_SRC_DIR}/H5Fmodule.h
     ${HDF5_SRC_DIR}/H5FAmodule.h
     ${HDF5_SRC_DIR}/H5FDdrvr_module.h
@@ -773,6 +779,7 @@ set (common_SRCS
     ${H5D_SOURCES}
     ${H5E_SOURCES}
     ${H5EA_SOURCES}
+    ${H5ES_SOURCES}
     ${H5F_SOURCES}
     ${H5FA_SOURCES}
     ${H5FD_SOURCES}
@@ -884,6 +891,9 @@ set (H5_PRIVATE_HEADERS
 
     ${HDF5_SRC_DIR}/H5EApkg.h
     ${HDF5_SRC_DIR}/H5EAprivate.h
+
+    ${HDF5_SRC_DIR}/H5ESpkg.h
+    ${HDF5_SRC_DIR}/H5ESprivate.h
 
     ${HDF5_SRC_DIR}/H5Fpkg.h
     ${HDF5_SRC_DIR}/H5Fprivate.h
@@ -1355,11 +1365,11 @@ set (_PKG_CONFIG_REQUIRES_PRIVATE)
 
 configure_file (
     ${HDF_CONFIG_DIR}/libhdf5.pc.in
-    ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}-${HDF5_PACKAGE_VERSION}.pc
+    ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}.pc
     @ONLY
 )
 install (
-    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}-${HDF5_PACKAGE_VERSION}.pc
+    FILES ${HDF5_BINARY_DIR}/CMakeFiles/${HDF5_LIB_CORENAME}.pc
     DESTINATION ${HDF5_INSTALL_LIB_DIR}/pkgconfig
     COMPONENT libraries
 )

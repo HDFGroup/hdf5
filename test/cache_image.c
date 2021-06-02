@@ -15,7 +15,7 @@
  *              7/13/15
  *
  *              This file contains tests specific to the cache image
- *        feature implemented in H5C.c
+ *              feature implemented in H5C.c
  */
 #include "cache_common.h"
 #include "genall5.h"
@@ -389,8 +389,6 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
         }
     }
 
-    return;
-
 } /* create_datasets() */
 
 /*-------------------------------------------------------------------------
@@ -461,8 +459,6 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    return;
 
 } /* delete_datasets() */
 
@@ -852,8 +848,6 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
 
-    return;
-
 } /* open_hdf5_file() */
 
 /*-------------------------------------------------------------------------
@@ -964,8 +958,6 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    return;
 
 } /* attempt_swmr_open_hdf5_file() */
 
@@ -1203,8 +1195,6 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
             failure_mssg = "H5Sclose(memspace_id) failed.";
         }
     }
-
-    return;
 
 } /* verify_datasets() */
 
@@ -7882,8 +7872,8 @@ main(void)
     HDprintf("=========================================\n");
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                                HDstrcmp(env_h5_drvr, "family") != 0);
 
     nerrs += check_cache_image_ctl_flow_1(single_file_vfd);
     nerrs += check_cache_image_ctl_flow_2(single_file_vfd);

@@ -260,15 +260,15 @@ set(mirror_vfd_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/genall5.c
 )
 
-set(vfd_swmr_zoo_reader_SOURCES
-    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_zoo_reader.c
-    ${HDF5_TEST_SOURCE_DIR}/genall5.c
-)
+#set(vfd_swmr_zoo_reader_SOURCES
+#    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_zoo_reader.c
+#    ${HDF5_TEST_SOURCE_DIR}/genall5.c
+#)
 
-set(vfd_swmr_zoo_writer_SOURCES
-    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_zoo_writer.c
-    ${HDF5_TEST_SOURCE_DIR}/genall5.c
-)
+#set(vfd_swmr_zoo_writer_SOURCES
+#    ${HDF5_TEST_SOURCE_DIR}/vfd_swmr_zoo_writer.c
+#    ${HDF5_TEST_SOURCE_DIR}/genall5.c
+#)
 
 set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe.h
@@ -352,6 +352,9 @@ set (H5_TESTS
     thread_id # special link
     vol
     timer
+    cmpd_dtransform
+    event_set
+    vfd_swmr
 )
 
 macro (ADD_H5_EXE file)
@@ -546,6 +549,12 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_mirror_vfd_FORMAT mirror_vfd)
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_event_set_FORMAT event_set)
+endif ()
 
 ##############################################################################
 ###           A D D I T I O N A L   T E S T S                              ###
@@ -632,20 +641,20 @@ foreach (h5_test ${H5_VDS_SWMR_TESTS})
   ADD_H5_VDS_EXE(${h5_test})
 endforeach ()
 
-set (H5_VFD_SWMR_TESTS
-    vfd_swmr_addrem_writer
-    vfd_swmr_bigset_writer
-    vfd_swmr_generator
-    vfd_swmr_group_writer
-    vfd_swmr_reader
-    vfd_swmr_remove_reader
-    vfd_swmr_remove_writer
-    vfd_swmr_sparse_reader
-    vfd_swmr_sparse_writer
-    vfd_swmr_vlstr_reader
-    vfd_swmr_vlstr_writer
-    vfd_swmr_writer
-)
+#set (H5_VFD_SWMR_TESTS
+#    vfd_swmr_addrem_writer
+#    vfd_swmr_bigset_writer
+#    vfd_swmr_generator
+#    vfd_swmr_group_writer
+#    vfd_swmr_reader
+#    vfd_swmr_remove_reader
+#    vfd_swmr_remove_writer
+#    vfd_swmr_sparse_reader
+#    vfd_swmr_sparse_writer
+#    vfd_swmr_vlstr_reader
+#    vfd_swmr_vlstr_writer
+#    vfd_swmr_writer
+#)
 
 foreach (h5_test ${H5_VFD_SWMR_TESTS})
   ADD_H5_EXE(${h5_test})

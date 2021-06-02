@@ -76,15 +76,16 @@
 /* Static function declarations */
 static herr_t     H5E__set_default_auto(H5E_t *stk);
 static H5E_cls_t *H5E__register_class(const char *cls_name, const char *lib_name, const char *version);
-static herr_t     H5E__unregister_class(H5E_cls_t *cls);
+static herr_t     H5E__unregister_class(H5E_cls_t *cls, void **request);
 static ssize_t    H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size);
 static int        H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata);
-static herr_t     H5E__close_msg(H5E_msg_t *err);
+static herr_t     H5E__close_msg(H5E_msg_t *err, void **request);
 static H5E_msg_t *H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg);
 static H5E_t *    H5E__get_current_stack(void);
 static herr_t     H5E__set_current_stack(H5E_t *estack);
-static herr_t     H5E__close_stack(H5E_t *err_stack);
+static herr_t     H5E__close_stack(H5E_t *err_stack, void **request);
 static ssize_t    H5E__get_num(const H5E_t *err_stack);
+static herr_t     H5E__print2(hid_t err_stack, FILE *stream);
 static herr_t     H5E__append_stack(H5E_t *dst_estack, const H5E_t *src_stack);
 
 /*********************/
@@ -245,6 +246,20 @@ H5E_term_package(void)
         nstk = H5I_nmembers(H5I_ERROR_STACK);
 
         if ((ncls + nmsg + nstk) > 0) {
+            /* Clear the default error stack. Note that
+             * the following H5I_clear_type calls do not
+             * force the clears and will not be able to
+             * clear any error message IDs that are still
+             * in use by the default error stack unless we
+             * clear that stack manually.
+             *
+             * Error message IDs will typically still be
+             * in use by the default error stack when the
+             * application does H5E_BEGIN/END_TRY cleanup
+             * at the very end.
+             */
+            H5E_clear_stack(NULL);
+
             /* Clear any outstanding error stacks */
             if (nstk > 0)
                 (void)H5I_clear_type(H5I_ERROR_STACK, FALSE, FALSE);
@@ -312,10 +327,10 @@ H5E__set_default_auto(H5E_t *stk)
 #endif /* H5_USE_16_API_DEFAULT */
 
     stk->auto_op.func1 = stk->auto_op.func1_default = (H5E_auto1_t)H5Eprint1;
-    stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5Eprint2;
+    stk->auto_op.func2 = stk->auto_op.func2_default = (H5E_auto2_t)H5E__print2;
     stk->auto_op.is_default                         = TRUE;
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
-    stk->auto_op.func2 = (H5E_auto2_t)H5Eprint2;
+    stk->auto_op.func2 = (H5E_auto2_t)H5E__print2;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     stk->auto_data = NULL;
@@ -541,7 +556,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__unregister_class(H5E_cls_t *cls)
+H5E__unregister_class(H5E_cls_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -661,7 +676,7 @@ H5E__close_msg_cb(void *obj_ptr, hid_t obj_id, void *udata)
 
     /* Close the message if it is in the class being closed */
     if (err_msg->cls == cls) {
-        if (H5E__close_msg(err_msg) < 0)
+        if (H5E__close_msg(err_msg, NULL) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, H5_ITER_ERROR, "unable to close error message")
         if (NULL == H5I_remove(obj_id))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTREMOVE, H5_ITER_ERROR, "unable to remove error message")
@@ -716,7 +731,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__close_msg(H5E_msg_t *err)
+H5E__close_msg(H5E_msg_t *err, void H5_ATTR_UNUSED **request)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -817,7 +832,7 @@ H5E__create_msg(H5E_cls_t *cls, H5E_type_t msg_type, const char *msg_str)
 
 done:
     if (!ret_value)
-        if (msg && H5E__close_msg(msg) < 0)
+        if (msg && H5E__close_msg(msg, NULL) < 0)
             HDONE_ERROR(H5E_ERROR, H5E_CANTCLOSEOBJ, NULL, "unable to close error message")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1164,7 +1179,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5E__close_stack(H5E_t *estack)
+H5E__close_stack(H5E_t *estack, void H5_ATTR_UNUSED **request)
 {
     FUNC_ENTER_STATIC_NOERR
 
@@ -1433,12 +1448,36 @@ done:
 herr_t
 H5Eprint2(hid_t err_stack, FILE *stream)
 {
-    H5E_t *estack;              /* Error stack to operate on */
     herr_t ret_value = SUCCEED; /* Return value */
 
     /* Don't clear the error stack! :-) */
     FUNC_ENTER_API_NOCLEAR(FAIL)
     /*NO TRACE*/
+
+    /* Print error stack */
+    if ((ret_value = H5E__print2(err_stack, stream)) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Eprint2() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5E__print2
+ *
+ * Purpose:     Internal helper routine for H5Eprint2.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5E__print2(hid_t err_stack, FILE *stream)
+{
+    H5E_t *estack;              /* Error stack to operate on */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
 
     /* Need to check for errors */
     if (err_stack == H5E_DEFAULT) {
@@ -1459,8 +1498,8 @@ H5Eprint2(hid_t err_stack, FILE *stream)
         HGOTO_ERROR(H5E_ERROR, H5E_CANTLIST, FAIL, "can't display error stack")
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Eprint2() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5E__print2() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Ewalk2
@@ -1532,7 +1571,8 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func /*out*/, void **client_data /*ou
     H5E_auto_op_t op;                  /* Error stack function */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API_NOCLEAR(FAIL)
     H5TRACE3("e", "ixx", estack_id, func, client_data);
 
     if (estack_id == H5E_DEFAULT) {
@@ -1540,8 +1580,13 @@ H5Eget_auto2(hid_t estack_id, H5E_auto2_t *func /*out*/, void **client_data /*ou
                                                        non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
-    else if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
+    else {
+        /* Only clear the error stack if it's not the default stack */
+        H5E_clear_stack(NULL);
+
+        if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
+    } /* end else */
 
     /* Get the automatic error reporting information */
     if (H5E__get_auto(estack, &op, client_data) < 0)
@@ -1598,8 +1643,13 @@ H5Eset_auto2(hid_t estack_id, H5E_auto2_t func, void *client_data)
                                                        non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
-    else if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
+    else {
+        /* Only clear the error stack if it's not the default stack */
+        H5E_clear_stack(NULL);
+
+        if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
+    } /* end else */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     /* Get the automatic error reporting information */
@@ -1646,7 +1696,8 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
     H5E_t *estack;              /* Error stack to operate on */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API(FAIL)
+    /* Don't clear the error stack! :-) */
+    FUNC_ENTER_API_NOCLEAR(FAIL)
     H5TRACE2("e", "i*Iu", estack_id, is_stack);
 
     if (estack_id == H5E_DEFAULT) {
@@ -1654,8 +1705,13 @@ H5Eauto_is_v2(hid_t estack_id, unsigned *is_stack)
                                                        non-threaded case */
             HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, FAIL, "can't get current error stack")
     } /* end if */
-    else if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
+    else {
+        /* Only clear the error stack if it's not the default stack */
+        H5E_clear_stack(NULL);
+
+        if (NULL == (estack = (H5E_t *)H5I_object_verify(estack_id, H5I_ERROR_STACK)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a error stack ID")
+    } /* end else */
 
     /* Check if the error stack reporting function is the "newer" stack type */
     if (is_stack)

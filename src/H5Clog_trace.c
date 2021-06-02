@@ -113,32 +113,32 @@ static herr_t H5C__trace_write_remove_entry_log_msg(void *udata, const H5C_cache
 /* Note that there's no cache set up call since that's the
  * place where this struct is wired into the cache.
  */
-static H5C_log_class_t H5C_trace_log_class_g = {"trace",
-                                                H5C__trace_tear_down_logging,
-                                                NULL, /* start logging */
-                                                NULL, /* stop logging */
-                                                NULL, /* write start message */
-                                                NULL, /* write stop message */
-                                                NULL, /* write create cache message */
-                                                NULL, /* write destroy cache message */
-                                                NULL, /* write evict cache message */
-                                                H5C__trace_write_expunge_entry_log_msg,
-                                                H5C__trace_write_flush_cache_log_msg,
-                                                H5C__trace_write_insert_entry_log_msg,
-                                                H5C__trace_write_mark_entry_dirty_log_msg,
-                                                H5C__trace_write_mark_entry_clean_log_msg,
-                                                H5C__trace_write_mark_unserialized_entry_log_msg,
-                                                H5C__trace_write_mark_serialized_entry_log_msg,
-                                                H5C__trace_write_move_entry_log_msg,
-                                                H5C__trace_write_pin_entry_log_msg,
-                                                H5C__trace_write_create_fd_log_msg,
-                                                H5C__trace_write_protect_entry_log_msg,
-                                                H5C__trace_write_resize_entry_log_msg,
-                                                H5C__trace_write_unpin_entry_log_msg,
-                                                H5C__trace_write_destroy_fd_log_msg,
-                                                H5C__trace_write_unprotect_entry_log_msg,
-                                                H5C__trace_write_set_cache_config_log_msg,
-                                                H5C__trace_write_remove_entry_log_msg};
+static const H5C_log_class_t H5C_trace_log_class_g = {"trace",
+                                                      H5C__trace_tear_down_logging,
+                                                      NULL, /* start logging */
+                                                      NULL, /* stop logging */
+                                                      NULL, /* write start message */
+                                                      NULL, /* write stop message */
+                                                      NULL, /* write create cache message */
+                                                      NULL, /* write destroy cache message */
+                                                      NULL, /* write evict cache message */
+                                                      H5C__trace_write_expunge_entry_log_msg,
+                                                      H5C__trace_write_flush_cache_log_msg,
+                                                      H5C__trace_write_insert_entry_log_msg,
+                                                      H5C__trace_write_mark_entry_dirty_log_msg,
+                                                      H5C__trace_write_mark_entry_clean_log_msg,
+                                                      H5C__trace_write_mark_unserialized_entry_log_msg,
+                                                      H5C__trace_write_mark_serialized_entry_log_msg,
+                                                      H5C__trace_write_move_entry_log_msg,
+                                                      H5C__trace_write_pin_entry_log_msg,
+                                                      H5C__trace_write_create_fd_log_msg,
+                                                      H5C__trace_write_protect_entry_log_msg,
+                                                      H5C__trace_write_resize_entry_log_msg,
+                                                      H5C__trace_write_unpin_entry_log_msg,
+                                                      H5C__trace_write_destroy_fd_log_msg,
+                                                      H5C__trace_write_unprotect_entry_log_msg,
+                                                      H5C__trace_write_set_cache_config_log_msg,
+                                                      H5C__trace_write_remove_entry_log_msg};
 
 /*-------------------------------------------------------------------------
  * Function:    H5C__trace_write_log_message

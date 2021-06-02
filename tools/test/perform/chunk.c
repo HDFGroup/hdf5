@@ -24,12 +24,10 @@
 #undef NDEBUG
 #include "hdf5.h"
 
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /* Solaris Studio defines attribute, but for the attributes we need */
 #if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus || defined(__SUNPRO_C)
@@ -55,20 +53,20 @@
 #define RM_CACHE_STRT 25
 #define RM_CACHE_END  25
 #define RM_CACHE_DELT 5
-#define RM_START      (double)0.50F
-#define RM_END        (double)5.00F
-#define RM_DELTA      (double)0.50F
-#define RM_W0         0.0F
+#define RM_START      0.50
+#define RM_END        5.00
+#define RM_DELTA      0.50
+#define RM_W0         0.0
 #define RM_NRDCC      521
 
 /* Diagonal test */
 #define DIAG_CACHE_STRT 25
 #define DIAG_CACHE_END  25
 #define DIAG_CACHE_DELT 5
-#define DIAG_START      (double)0.50F
-#define DIAG_END        (double)5.00F
-#define DIAG_DELTA      (double)0.50F
-/* #define DIAG_W0		0.65F */
+#define DIAG_START      0.50
+#define DIAG_END        5.00
+#define DIAG_DELTA      0.50
+/* #define DIAG_W0		0.65 */
 /* #define DIAG_NRDCC		521 */
 
 static size_t nio_g;

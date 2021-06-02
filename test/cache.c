@@ -8060,19 +8060,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
         if ((check[i].entry_num != i) || (check[i].entry_type < 0) ||
             (check[i].entry_type >= NUMBER_OF_ENTRY_TYPES) || (check[i].entry_index < 0) ||
             (check[i].entry_index > max_indices[check[i].entry_type]) ||
-#ifndef H5_HAVE_STDBOOL_H
-            /* Check for nonsense values if hbool_t is an integral
-             * type instead of a real Boolean.
-             */
-            ((check[i].in_cache != TRUE) && (check[i].in_cache != FALSE)) ||
-            ((check[i].at_main_addr != TRUE) && (check[i].at_main_addr != FALSE)) ||
-            ((check[i].is_dirty != TRUE) && (check[i].is_dirty != FALSE)) ||
-            ((check[i].is_protected != TRUE) && (check[i].is_protected != FALSE)) ||
-            ((check[i].is_pinned != TRUE) && (check[i].is_pinned != FALSE)) ||
-            ((check[i].expected_deserialized != TRUE) && (check[i].expected_deserialized != FALSE)) ||
-            ((check[i].expected_serialized != TRUE) && (check[i].expected_serialized != FALSE)) ||
-            ((check[i].expected_destroyed != TRUE) && (check[i].expected_destroyed != FALSE)) ||
-#endif /* H5_HAVE_STDBOOL_H */
             (check[i].expected_size <= (size_t)0)) {
 
             pass = FALSE;
@@ -26392,7 +26379,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
         }
-        else if (!H5_DBL_ABS_EQUAL(hit_rate, (double)0.0f)) { /* i.e. hit_rate != 0.0 */
+        else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.0)) { /* i.e. hit_rate != 0.0 */
 
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate returned unexpected hit rate 1.\n";
@@ -26423,7 +26410,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
         }
-        else if (!H5_DBL_ABS_EQUAL(hit_rate, (double)0.0f)) { /* i.e. hit_rate != 0.0 */
+        else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.0)) { /* i.e. hit_rate != 0.0 */
 
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate returned unexpected hit rate 2.\n";
@@ -26464,7 +26451,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
         }
-        else if (!H5_DBL_ABS_EQUAL(hit_rate, (double)0.5f)) { /* i.e. hit_rate != 0.5 */
+        else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.5)) { /* i.e. hit_rate != 0.5 */
 
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate returned unexpected hit rate 3.\n";
@@ -26537,7 +26524,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate failed.\n";
         }
-        else if (!H5_DBL_ABS_EQUAL(hit_rate, (double)0.5F)) { /* i.e. hit_rate != 0.5 */
+        else if (!H5_DBL_ABS_EQUAL(hit_rate, 0.5)) { /* i.e. hit_rate != 0.5 */
 
             pass         = FALSE;
             failure_mssg = "H5C_get_cache_hit_rate returned unexpected hit rate 4.\n";

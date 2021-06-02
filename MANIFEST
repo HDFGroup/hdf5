@@ -743,6 +743,13 @@
 ./src/H5EAsblock.c
 ./src/H5EAstat.c
 ./src/H5EAtest.c
+./src/H5ES.c
+./src/H5ESevent.c
+./src/H5ESint.c
+./src/H5ESlist.c
+./src/H5ESmodule.h
+./src/H5ESpkg.h
+./src/H5ESprivate.h
 ./src/H5ESpublic.h
 ./src/H5F.c
 ./src/H5Faccum.c
@@ -908,6 +915,7 @@
 ./src/H5L.c
 ./src/H5Ldeprec.c
 ./src/H5Lexternal.c
+./src/H5Lint.c
 ./src/H5Lmodule.h
 ./src/H5Lpkg.h
 ./src/H5Lprivate.h
@@ -1166,6 +1174,7 @@
 ./test/cache_tagging.c
 ./test/chunk_info.c
 ./test/cmpd_dset.c
+./test/cmpd_dtransform.c
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
 ./test/cross_read.c
@@ -1184,6 +1193,7 @@
 ./test/enum.c
 ./test/err_compat.c
 ./test/error_test.c
+./test/event_set.c
 ./test/evict_on_close.c
 ./test/extend.c
 ./test/external.c
@@ -1218,9 +1228,9 @@
 ./test/freespace.c
 ./test/fsm_aggr_nopersist.h5
 ./test/fsm_aggr_persist.h5
+./test/gen_bad_compound.c
 ./test/gen_bad_offset.c
 ./test/gen_bad_ohdr.c
-./test/gen_bad_compound.c
 ./test/gen_bogus.c
 ./test/gen_bounds.c
 ./test/gen_cross.c
@@ -1393,8 +1403,10 @@
 ./test/vfd_swmr_addrem_writer.c
 ./test/vfd_swmr_attrdset_writer.c
 ./test/vfd_swmr_bigset_writer.c
+./test/vfd_swmr_check_compat.c
 ./test/vfd_swmr_common.c
 ./test/vfd_swmr_common.h
+./test/vfd_swmr_dsetops_writer.c
 ./test/vfd_swmr_generator.c
 ./test/vfd_swmr_group_writer.c
 ./test/vfd_swmr_reader.c
@@ -2055,6 +2067,9 @@
 ./tools/testfiles/tfill.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tfletcher32.ddl
+./tools/testfiles/tfloatsattrs.ddl
+./tools/testfiles/tfloatsattrs.h5
+./tools/testfiles/tfloatsattrs.wddl
 ./tools/testfiles/tfvalues.h5
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
@@ -2092,7 +2107,10 @@
 ./tools/testfiles/tintsnodata.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
+./tools/testfiles/tldouble.ddl
 ./tools/testfiles/tldouble.h5
+./tools/testfiles/tldouble_scalar.ddl
+./tools/testfiles/tldouble_scalar.h5
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
 ./tools/testfiles/tloop-1.ddl
@@ -2199,6 +2217,8 @@
 ./tools/testfiles/twithddl.exp
 ./tools/testfiles/twithddlfile.ddl
 ./tools/testfiles/twithddlfile.exp
+./tools/testfiles/tCVE_2018_11206_fill_old.h5
+./tools/testfiles/tCVE_2018_11206_fill_new.h5
 
 # h5dump test error files
 ./tools/test/h5dump/errfiles/filter_fail.err
@@ -2626,6 +2646,7 @@
 ./tools/test/h5diff/testfiles/h5diff_80.txt
 ./tools/test/h5diff/testfiles/h5diff_800.txt
 ./tools/test/h5diff/testfiles/h5diff_801.txt
+./tools/test/h5diff/testfiles/h5diff_830.txt
 ./tools/test/h5diff/testfiles/h5diff_90.txt
 ./tools/test/h5diff/testfiles/h5diff_100.txt
 ./tools/test/h5diff/testfiles/h5diff_101.txt
@@ -2796,6 +2817,7 @@
 #test files for h5repack
 ./tools/test/h5repack/testfiles/README
 ./tools/test/h5repack/testfiles/bounds_latest_latest.h5
+./tools/test/h5repack/testfiles/h5copy_extlinks_src.h5
 ./tools/test/h5repack/testfiles/h5repack_aggr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr.h5
 ./tools/test/h5repack/testfiles/h5repack_attr_refs.h5
@@ -2861,6 +2883,8 @@
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
+./tools/test/h5repack/testfiles/h5repack_CVE-2018-17432.h5
+./tools/test/h5repack/testfiles/h5repack_CVE-2018-14460.h5
 ./tools/test/h5repack/testfiles/GS.h5repack_paged_nopersist.h5.ddl
 ./tools/test/h5repack/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
 ./tools/test/h5repack/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl
@@ -2874,6 +2898,31 @@
 ./tools/test/h5repack/testfiles/4_vds.h5-vds_compa-v.ddl
 ./tools/test/h5repack/testfiles/attrregion.tattrreg.h5.ddl
 ./tools/test/h5repack/testfiles/dataregion.tdatareg.h5.ddl
+./tools/test/h5repack/testfiles/textlink-base.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlink-merge.textlink.h5.tst
+./tools/test/h5repack/testfiles/textlink-mergeprune.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlink-prune.textlink.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-base.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-merge.textlinkfar.h5.tst
+./tools/test/h5repack/testfiles/textlinkfar-mergeprune.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinkfar-prune.textlinkfar.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-base.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-merge.textlinksrc.h5.tst
+./tools/test/h5repack/testfiles/textlinksrc-mergeprune.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinksrc-prune.textlinksrc.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-base.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-merge.textlinktar.h5.tst
+./tools/test/h5repack/testfiles/textlinktar-mergeprune.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/textlinktar-prune.textlinktar.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-base.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-merge.tsoftlinks.h5.tst
+./tools/test/h5repack/testfiles/tsoftlinks-mergeprune.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/tsoftlinks-prune.tsoftlinks.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-base.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-merge.h5copy_extlinks_src.h5.tst
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-mergeprune.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_src-prune.h5copy_extlinks_src.h5.ddl
+./tools/test/h5repack/testfiles/h5copy_extlinks_trg.h5
 
 # jam utility and tests
 ./tools/src/h5jam/Makefile.am

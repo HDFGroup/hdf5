@@ -98,17 +98,19 @@ typedef struct {
 
 /* all the above, ready to go to the hrepack call */
 typedef struct {
-    pack_opttbl_t *op_tbl;                           /*table with all -c and -f options */
-    int            all_layout;                       /*apply the layout to all objects */
-    int            all_filter;                       /*apply the filter to all objects */
+    pack_opttbl_t *op_tbl;                           /* table with all -c and -f options */
+    int            all_layout;                       /* apply the layout to all objects */
+    int            all_filter;                       /* apply the filter to all objects */
     filter_info_t  filter_g[H5_REPACK_MAX_NFILTERS]; /*global filter array for the ALL case */
-    int            n_filter_g;                       /*number of global filters */
-    chunk_info_t   chunk_g;                          /*global chunk INFO for the ALL case */
-    H5D_layout_t   layout_g;                         /*global layout information for the ALL case */
-    int            verbose;                          /*verbose mode */
-    hsize_t        min_comp;                         /*minimum size to compress, in bytes */
-    int            use_native;                       /*use a native type in write */
-    hbool_t        latest;                           /*pack file with the latest file format */
+    int            n_filter_g;                       /* number of global filters */
+    chunk_info_t   chunk_g;                          /* global chunk INFO for the ALL case */
+    H5D_layout_t   layout_g;                         /* global layout information for the ALL case */
+    int            verbose;                          /* verbose mode */
+    hbool_t        merge;                            /* Merge external file. */
+    hbool_t        prune;                            /* Don't follow external file. */
+    hsize_t        min_comp;                         /* minimum size to compress, in bytes */
+    int            use_native;                       /* use a native type in write */
+    hbool_t        latest;                           /* pack file with the latest file format */
     H5F_libver_t   low_bound;                        /* The file's low bound as in H5Fset_libver_bounds() */
     H5F_libver_t   high_bound;                       /* The file's high bound as in H5Fset_libver_bounds() */
     hid_t          fin_fapl;                         /* FAPL to use for opening the input file */
@@ -193,13 +195,13 @@ void init_packobject(pack_info_t *obj);
  *-------------------------------------------------------------------------
  */
 
-int apply_filters(const char *name,    /* object name from traverse list */
-                  int         rank,    /* rank of dataset */
-                  hsize_t *   dims,    /* dimensions of dataset */
-                  size_t      msize,   /* size of type */
-                  hid_t       dcpl_id, /* dataset creation property list */
-                  pack_opt_t *options, /* repack options */
-                  int *       has_filter);    /* (OUT) object NAME has a filter */
+int apply_filters(const char *   name,    /* object name from traverse list */
+                  int            rank,    /* rank of dataset */
+                  const hsize_t *dims,    /* dimensions of dataset */
+                  size_t         msize,   /* size of type */
+                  hid_t          dcpl_id, /* dataset creation property list */
+                  pack_opt_t *   options, /* repack options */
+                  int *          has_filter);       /* (OUT) object NAME has a filter */
 
 /*-------------------------------------------------------------------------
  * options table

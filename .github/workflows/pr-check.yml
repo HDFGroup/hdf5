@@ -31,7 +31,7 @@ jobs:
             os: ubuntu-latest
             build_type: "Release"
             cpp: ON
-            fortran: OFF
+            fortran: ON
             java: ON
             ts: OFF
             hl: ON

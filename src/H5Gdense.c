@@ -486,13 +486,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, H5O_link_t *lnk)
+herr_t
+H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, hbool_t *found, H5O_link_t *lnk)
 {
-    H5G_bt2_ud_common_t udata;            /* User data for v2 B-tree link lookup */
-    H5HF_t *            fheap     = NULL; /* Fractal heap handle */
-    H5B2_t *            bt2_name  = NULL; /* v2 B-tree handle for name index */
-    htri_t              ret_value = FAIL; /* Return value */
+    H5G_bt2_ud_common_t udata;               /* User data for v2 B-tree link lookup */
+    H5HF_t *            fheap     = NULL;    /* Fractal heap handle */
+    H5B2_t *            bt2_name  = NULL;    /* v2 B-tree handle for name index */
+    herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -502,6 +502,7 @@ H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, H5O_link
     HDassert(f);
     HDassert(linfo);
     HDassert(name && *name);
+    HDassert(found);
     HDassert(lnk);
 
     /* Open the fractal heap */
@@ -521,7 +522,7 @@ H5G__dense_lookup(H5F_t *f, const H5O_linfo_t *linfo, const char *name, H5O_link
     udata.found_op_data = lnk;
 
     /* Find & copy the named link in the 'name' index */
-    if ((ret_value = H5B2_find(bt2_name, &udata, NULL, NULL)) < 0)
+    if (H5B2_find(bt2_name, &udata, found, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to locate link in name index")
 
 done:

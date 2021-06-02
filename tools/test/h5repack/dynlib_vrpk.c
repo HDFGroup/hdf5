@@ -27,13 +27,13 @@ static size_t H5Z_filter_dynlib4(unsigned int flags, size_t cd_nelmts, const uns
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DYNLIB4[1] = {{
-    H5Z_CLASS_T_VERS,               /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIB4,             /* Filter id number        */
-    1, 1,                           /* Encoding and decoding enabled   */
-    "dynlib4",                      /* Filter name for debugging    */
-    NULL,                           /* The "can apply" callback        */
-    NULL,                           /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlib4, /* The actual filter function    */
+    H5Z_CLASS_T_VERS,   /* H5Z_class_t version             */
+    H5Z_FILTER_DYNLIB4, /* Filter id number        */
+    1, 1,               /* Encoding and decoding enabled   */
+    "dynlib4",          /* Filter name for debugging    */
+    NULL,               /* The "can apply" callback        */
+    NULL,               /* The "set local" callback        */
+    H5Z_filter_dynlib4, /* The actual filter function    */
 }};
 
 H5PL_type_t

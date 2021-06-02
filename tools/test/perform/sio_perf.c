@@ -65,8 +65,7 @@
 #define SIO_HDF5  0x4
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes, t)                                                                                 \
-    (H5_DBL_ABS_EQUAL(t, (double)0.0F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
+#define MB_PER_SEC(bytes, t) (H5_DBL_ABS_EQUAL(t, 0.0) ? 0.0 : ((((double)bytes) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE 1
@@ -292,7 +291,7 @@ struct options {
     size_t      page_size;
 };
 
-typedef struct _minmax {
+typedef struct {
     double min;
     double max;
     double sum;
@@ -872,9 +871,9 @@ report_parameters(struct options *opts)
     HDfprintf(output, "\n");
 
     if (opts->page_size) {
-        HDfprintf(output, "Page Aggregation Enabled. Page size = %ld\n", opts->page_size);
+        HDfprintf(output, "Page Aggregation Enabled. Page size = %zu\n", opts->page_size);
         if (opts->page_buffer_size)
-            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %ld\n", opts->page_buffer_size);
+            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %zu\n", opts->page_buffer_size);
         else
             HDfprintf(output, "Page Buffering Disabled\n");
     }

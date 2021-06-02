@@ -1421,9 +1421,9 @@ test_reference_group(void)
 
     /* Create bottom dataset */
     did = H5Dcreate2(gid, DSETNAME2, H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    assert(did > 0);
+    HDassert(did > 0);
     ret = H5Dclose(did);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     ret = H5Gclose(gid);
     CHECK(ret, FAIL, "H5Gclose");

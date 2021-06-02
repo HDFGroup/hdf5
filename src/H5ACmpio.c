@@ -772,7 +772,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
     else {
         aux_ptr->dirty_bytes += entry_ptr->size;
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-        aux_ptr->unprotect_dirty_bytes += entry_size;
+        aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
         aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
     }  /* end else */
@@ -970,7 +970,7 @@ H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr)
     aux_ptr->dirty_bytes += entry_ptr->size;
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-    aux_ptr->insert_dirty_bytes += size;
+    aux_ptr->insert_dirty_bytes += entry_ptr->size;
     aux_ptr->insert_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 

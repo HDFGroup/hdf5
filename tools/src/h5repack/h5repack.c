@@ -225,9 +225,9 @@ hid_t
 copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt,
                     pack_opt_t *options)
 {
-    named_dt_t *dt     = *named_dt_head_p; /* Stack pointer */
-    named_dt_t *dt_ret = NULL;             /* Datatype to return */
-    H5O_info2_t oinfo;                     /* Object info of input dtype */
+    named_dt_t *dt     = NULL; /* Stack pointer */
+    named_dt_t *dt_ret = NULL; /* Datatype to return */
+    H5O_info2_t oinfo;         /* Object info of input dtype */
     int         token_cmp;
     hid_t       ret_value = H5I_INVALID_HID;
 
@@ -235,15 +235,13 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
         H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "H5Oget_info failed");
 
     if (*named_dt_head_p) {
-        if (H5Otoken_cmp(type_in, &dt->obj_token, &oinfo.token, &token_cmp) < 0)
-            H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to compare object tokens");
-
-        /* Stack already exists, search for the datatype */
-        while (dt && token_cmp) {
-            dt = dt->next;
-
+        /* Search the stack for the datatype. */
+        for (dt = *named_dt_head_p; dt != NULL; dt = dt->next) {
             if (H5Otoken_cmp(type_in, &dt->obj_token, &oinfo.token, &token_cmp) < 0)
                 H5TOOLS_GOTO_ERROR(H5I_INVALID_HID, "failed to compare object tokens");
+
+            if (token_cmp == 0)
+                break; // found it!
         }
 
         dt_ret = dt;
@@ -718,7 +716,7 @@ check_options(pack_opt_t *options)
     }
 
     if (options->ublock_filename == NULL && options->ublock_size != 0)
-        H5TOOLS_GOTO_ERROR((-1), "file name missing for user block", options->ublock_filename);
+        H5TOOLS_GOTO_ERROR((-1), "file name missing for user block");
 
     /*------------------------------------------------------------------------
      * Verify alignment options; threshold is zero default but alignment not

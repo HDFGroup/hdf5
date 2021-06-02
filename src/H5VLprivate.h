@@ -37,6 +37,7 @@ typedef struct H5VL_t {
 typedef struct H5VL_object_t {
     void *  data;      /* Pointer to connector-managed data for this object    */
     H5VL_t *connector; /* Pointer to VOL connector struct                      */
+    size_t  rc;        /* Reference count                                      */
 } H5VL_object_t;
 
 /* Internal structure to hold the connector ID & info for FAPLs */
@@ -60,14 +61,17 @@ typedef enum H5VL_get_connector_kind_t {
 /******************************/
 
 /* Utility functions */
-H5_DLL herr_t H5VL_init_phase1(void);
-H5_DLL herr_t H5VL_init_phase2(void);
-H5_DLL herr_t H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_class_t *cls2);
-H5_DLL herr_t H5VL_conn_copy(H5VL_connector_prop_t *value);
-H5_DLL herr_t H5VL_conn_free(const H5VL_connector_prop_t *info);
+H5_DLL herr_t  H5VL_init_phase1(void);
+H5_DLL herr_t  H5VL_init_phase2(void);
+H5_DLL herr_t  H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_class_t *cls2);
+H5_DLL herr_t  H5VL_conn_copy(H5VL_connector_prop_t *value);
+H5_DLL int64_t H5VL_conn_inc_rc(H5VL_t *connector);
+H5_DLL int64_t H5VL_conn_dec_rc(H5VL_t *connector);
+H5_DLL herr_t  H5VL_conn_free(const H5VL_connector_prop_t *info);
 
 /* Functions that deal with VOL connectors */
-H5_DLL hid_t H5VL_register_connector(const void *cls, hbool_t app_ref, hid_t vipl_id);
+union H5PL_key_t;
+H5_DLL herr_t H5VL_check_plugin_load(const H5VL_class_t *cls, const union H5PL_key_t *key, hbool_t *success);
 
 /* NOTE:    The object and ID functions below deal in VOL objects (i.e.;
  *          H5VL_object_t). Similar non-VOL calls exist in H5Iprivate.h. Use
@@ -85,7 +89,9 @@ H5_DLL void *H5VL_object_data(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_unwrap(const H5VL_object_t *vol_obj);
 H5_DLL void *H5VL_object_verify(hid_t id, H5I_type_t obj_type);
 H5_DLL H5VL_object_t *H5VL_vol_object(hid_t id);
+H5_DLL H5VL_object_t *H5VL_create_object(void *object, H5VL_t *vol_connector);
 H5_DLL H5VL_object_t *H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id);
+H5_DLL hsize_t        H5VL_object_inc_rc(H5VL_object_t *obj);
 H5_DLL herr_t         H5VL_free_object(H5VL_object_t *obj);
 H5_DLL herr_t         H5VL_object_is_native(const H5VL_object_t *obj, hbool_t *is_native);
 H5_DLL herr_t         H5VL_file_is_same(const H5VL_object_t *vol_obj1, const H5VL_object_t *vol_obj2,
@@ -193,7 +199,7 @@ H5_DLL herr_t H5VL_datatype_close(const H5VL_object_t *vol_obj, hid_t dxpl_id, v
 /* File functions */
 H5_DLL void * H5VL_file_create(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
                                hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req);
-H5_DLL void * H5VL_file_open(const H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
+H5_DLL void * H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned flags,
                              hid_t fapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req,
                             ...);
@@ -252,12 +258,13 @@ H5_DLL herr_t H5VL_object_optional(const H5VL_object_t *vol_obj, H5VL_object_opt
 H5_DLL herr_t H5VL_introspect_get_conn_cls(const H5VL_object_t *vol_obj, H5VL_get_conn_lvl_t lvl,
                                            const H5VL_class_t **conn_cls);
 H5_DLL herr_t H5VL_introspect_opt_query(const H5VL_object_t *vol_obj, H5VL_subclass_t subcls, int opt_type,
-                                        hbool_t *supported);
+                                        uint64_t *flags);
 
 /* Asynchronous functions */
-H5_DLL herr_t H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5ES_status_t *status);
+H5_DLL herr_t H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout,
+                                H5VL_request_status_t *status);
 H5_DLL herr_t H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx);
-H5_DLL herr_t H5VL_request_cancel(const H5VL_object_t *vol_obj);
+H5_DLL herr_t H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status);
 H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...);
 H5_DLL herr_t H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_request_optional_t opt_type, ...);
 H5_DLL herr_t H5VL_request_free(const H5VL_object_t *vol_obj);

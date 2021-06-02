@@ -31,7 +31,7 @@ static h5tools_vol_info_t vol_info_g;
 /* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_t ros3_fa_g = {
     1,     /* Structure Version */
-    false, /* Authenticate?     */
+    FALSE, /* Authenticate?     */
     "",    /* AWS Region        */
     "",    /* Access Key ID     */
     "",    /* Secret Access Key */
@@ -80,39 +80,8 @@ struct handler_t {
  */
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
-static const char *        s_opts   = "hn*peyBHirVa:c:d:f:g:k:l:t:w:xD:uX:o*b*F:s:S:A*q:z:m:RE*CM:O*N:vG:";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},
-                                       {"hel", no_arg, 'h'},
-                                       {"contents", optional_arg, 'n'},
-                                       {"properties", no_arg, 'p'},
-                                       {"superblock", no_arg, 'B'},
-                                       {"boot-block", no_arg, 'B'},
-                                       {"boot-bloc", no_arg, 'B'},
-                                       {"boot-blo", no_arg, 'B'},
-                                       {"boot-bl", no_arg, 'B'},
-                                       {"boot-b", no_arg, 'B'},
-                                       {"boot", no_arg, 'B'},
-                                       {"boo", no_arg, 'B'},
-                                       {"bo", no_arg, 'B'},
-                                       {"header", no_arg, 'H'},
-                                       {"heade", no_arg, 'H'},
-                                       {"head", no_arg, 'H'},
-                                       {"hea", no_arg, 'H'},
-                                       {"object-ids", no_arg, 'i'},
-                                       {"object-id", no_arg, 'i'},
-                                       {"object-i", no_arg, 'i'},
-                                       {"object", no_arg, 'i'},
-                                       {"objec", no_arg, 'i'},
-                                       {"obje", no_arg, 'i'},
-                                       {"obj", no_arg, 'i'},
-                                       {"ob", no_arg, 'i'},
-                                       {"version", no_arg, 'V'},
-                                       {"versio", no_arg, 'V'},
-                                       {"versi", no_arg, 'V'},
-                                       {"vers", no_arg, 'V'},
-                                       {"ver", no_arg, 'V'},
-                                       {"ve", no_arg, 'V'},
-                                       {"attribute", require_arg, 'a'},
+static const char *        s_opts   = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HM:N:O*RS:VX:";
+static struct long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                        {"attribut", require_arg, 'a'},
                                        {"attribu", require_arg, 'a'},
                                        {"attrib", require_arg, 'a'},
@@ -120,10 +89,7 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"attr", require_arg, 'a'},
                                        {"att", require_arg, 'a'},
                                        {"at", require_arg, 'a'},
-                                       {"block", require_arg, 'k'},
-                                       {"bloc", require_arg, 'k'},
-                                       {"blo", require_arg, 'k'},
-                                       {"bl", require_arg, 'k'},
+                                       {"binary", optional_arg, 'b'},
                                        {"count", require_arg, 'c'},
                                        {"coun", require_arg, 'c'},
                                        {"cou", require_arg, 'c'},
@@ -131,10 +97,7 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"dataset", require_arg, 'd'},
                                        {"datase", require_arg, 'd'},
                                        {"datas", require_arg, 'd'},
-                                       {"datatype", require_arg, 't'},
-                                       {"datatyp", require_arg, 't'},
-                                       {"dataty", require_arg, 't'},
-                                       {"datat", require_arg, 't'},
+                                       {"escape", no_arg, 'e'},
                                        {"filedriver", require_arg, 'f'},
                                        {"filedrive", require_arg, 'f'},
                                        {"filedriv", require_arg, 'f'},
@@ -148,24 +111,44 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"grou", require_arg, 'g'},
                                        {"gro", require_arg, 'g'},
                                        {"gr", require_arg, 'g'},
-                                       {"output", optional_arg, 'o'},
-                                       {"outpu", optional_arg, 'o'},
-                                       {"outp", optional_arg, 'o'},
-                                       {"out", optional_arg, 'o'},
-                                       {"ou", optional_arg, 'o'},
+                                       {"help", no_arg, 'h'},
+                                       {"hel", no_arg, 'h'},
+                                       {"object-ids", no_arg, 'i'},
+                                       {"object-id", no_arg, 'i'},
+                                       {"object-i", no_arg, 'i'},
+                                       {"object", no_arg, 'i'},
+                                       {"objec", no_arg, 'i'},
+                                       {"obje", no_arg, 'i'},
+                                       {"obj", no_arg, 'i'},
+                                       {"ob", no_arg, 'i'},
+                                       {"block", require_arg, 'k'},
+                                       {"bloc", require_arg, 'k'},
+                                       {"blo", require_arg, 'k'},
+                                       {"bl", require_arg, 'k'},
                                        {"soft-link", require_arg, 'l'},
                                        {"soft-lin", require_arg, 'l'},
                                        {"soft-li", require_arg, 'l'},
                                        {"soft-l", require_arg, 'l'},
                                        {"soft", require_arg, 'l'},
                                        {"sof", require_arg, 'l'},
+                                       {"format", require_arg, 'm'},
+                                       {"contents", optional_arg, 'n'},
+                                       {"output", optional_arg, 'o'},
+                                       {"outpu", optional_arg, 'o'},
+                                       {"outp", optional_arg, 'o'},
+                                       {"out", optional_arg, 'o'},
+                                       {"ou", optional_arg, 'o'},
+                                       {"properties", no_arg, 'p'},
+                                       {"sort_by", require_arg, 'q'},
+                                       {"string", no_arg, 'r'},
+                                       {"strin", no_arg, 'r'},
                                        {"start", require_arg, 's'},
                                        {"star", require_arg, 's'},
                                        {"sta", require_arg, 's'},
-                                       {"stride", require_arg, 'S'},
-                                       {"strid", require_arg, 'S'},
-                                       {"string", no_arg, 'r'},
-                                       {"strin", no_arg, 'r'},
+                                       {"datatype", require_arg, 't'},
+                                       {"datatyp", require_arg, 't'},
+                                       {"dataty", require_arg, 't'},
+                                       {"datat", require_arg, 't'},
                                        {"use-dtd", no_arg, 'u'},
                                        {"use-dt", no_arg, 'u'},
                                        {"use-d", no_arg, 'u'},
@@ -173,33 +156,50 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"use", no_arg, 'u'},
                                        {"us", no_arg, 'u'},
                                        {"u", no_arg, 'u'},
+                                       {"vds-view-first-missing", no_arg, 'v'},
                                        {"width", require_arg, 'w'},
                                        {"widt", require_arg, 'w'},
                                        {"wid", require_arg, 'w'},
                                        {"wi", require_arg, 'w'},
+                                       {"xml", no_arg, 'x'},
+                                       {"xm", no_arg, 'x'},
+                                       {"noindex", no_arg, 'y'},
+                                       {"sort_order", require_arg, 'z'},
+                                       {"onlyattr", optional_arg, 'A'},
+                                       {"superblock", no_arg, 'B'},
+                                       {"boot-block", no_arg, 'B'},
+                                       {"boot-bloc", no_arg, 'B'},
+                                       {"boot-blo", no_arg, 'B'},
+                                       {"boot-bl", no_arg, 'B'},
+                                       {"boot-b", no_arg, 'B'},
+                                       {"boot", no_arg, 'B'},
+                                       {"boo", no_arg, 'B'},
+                                       {"bo", no_arg, 'B'},
+                                       {"no-compact-subset", no_arg, 'C'},
                                        {"xml-dtd", require_arg, 'D'},
                                        {"xml-dt", require_arg, 'D'},
                                        {"xml-d", require_arg, 'D'},
+                                       {"enable-error-stack", optional_arg, 'E'},
+                                       {"form", require_arg, 'F'},
+                                       {"vds-gap-size", require_arg, 'G'},
+                                       {"header", no_arg, 'H'},
+                                       {"heade", no_arg, 'H'},
+                                       {"head", no_arg, 'H'},
+                                       {"hea", no_arg, 'H'},
+                                       {"packed-bits", require_arg, 'M'},
+                                       {"any_path", require_arg, 'N'},
+                                       {"ddl", optional_arg, 'O'},
+                                       {"region", no_arg, 'R'},
+                                       {"stride", require_arg, 'S'},
+                                       {"strid", require_arg, 'S'},
+                                       {"version", no_arg, 'V'},
+                                       {"versio", no_arg, 'V'},
+                                       {"versi", no_arg, 'V'},
+                                       {"vers", no_arg, 'V'},
+                                       {"ver", no_arg, 'V'},
+                                       {"ve", no_arg, 'V'},
                                        {"xml-ns", require_arg, 'X'},
                                        {"xml-n", require_arg, 'X'},
-                                       {"xml", no_arg, 'x'},
-                                       {"xm", no_arg, 'x'},
-                                       {"onlyattr", optional_arg, 'A'},
-                                       {"escape", no_arg, 'e'},
-                                       {"noindex", no_arg, 'y'},
-                                       {"binary", optional_arg, 'b'},
-                                       {"form", require_arg, 'F'},
-                                       {"sort_by", require_arg, 'q'},
-                                       {"sort_order", require_arg, 'z'},
-                                       {"format", require_arg, 'm'},
-                                       {"region", no_arg, 'R'},
-                                       {"enable-error-stack", optional_arg, 'E'},
-                                       {"packed-bits", require_arg, 'M'},
-                                       {"no-compact-subset", no_arg, 'C'},
-                                       {"ddl", optional_arg, 'O'},
-                                       {"any_path", require_arg, 'N'},
-                                       {"vds-view-first-missing", no_arg, 'v'},
-                                       {"vds-gap-size", require_arg, 'G'},
                                        {"s3-cred", require_arg, '$'},
                                        {"hdfs-attrs", require_arg, '#'},
                                        {"vol-value", require_arg, '1'},
@@ -256,7 +256,7 @@ usage(const char *prog)
                    "                          <cred> :: \"(<aws-region>,<access-id>,<access-key>)\"\n");
     PRINTVALSTREAM(rawoutstream,
                    "                          If absent or <cred> -> \"(,,)\", no authentication.\n");
-    PRINTVALSTREAM(rawoutstream, "                          Has no effect is filedriver is not `ros3'.\n");
+    PRINTVALSTREAM(rawoutstream, "                          Has no effect if filedriver is not \"ros3\".\n");
     PRINTVALSTREAM(rawoutstream,
                    "     --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.\n");
     PRINTVALSTREAM(rawoutstream, "                          For use with \"--filedriver=hdfs\"\n");
@@ -338,7 +338,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "     -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML\n");
     PRINTVALSTREAM(rawoutstream, "                          \":\": no namespace, default: \"hdf5:\"\n");
     PRINTVALSTREAM(rawoutstream,
-                   "                          E.g., to dump a file called `-f', use h5dump -- -f\n");
+                   "                          E.g., to dump a file called \"-f\", use h5dump -- -f\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "--------------- Subsetting Options ---------------\n");
     PRINTVALSTREAM(rawoutstream, " Subsetting is available by using the following options with a dataset\n");
@@ -1132,7 +1132,7 @@ parse_start:
 
             case 'M':
                 if (!last_was_dset) {
-                    error_msg("option `-%c' can only be used after --dataset option\n", opt);
+                    error_msg("option \"-%c\" can only be used after --dataset option\n", opt);
                     goto error;
                 }
                 if (parse_mask_list(opt_arg) != SUCCEED) {
@@ -1205,7 +1205,7 @@ parse_start:
                 struct subset_t *s;
 
                 if (!last_was_dset) {
-                    error_msg("option `-%c' can only be used after --dataset option\n", opt);
+                    error_msg("option \"-%c\" can only be used after --dataset option\n", opt);
                     goto error;
                 }
 
@@ -1529,7 +1529,7 @@ main(int argc, const char *argv[])
                 }
             }
             else {
-                if (useschema_g && HDstrcmp(xmlnsprefix, "")) {
+                if (useschema_g && HDstrcmp(xmlnsprefix, "") != 0) {
                     error_msg(
                         "Cannot set Schema URL for a qualified namespace--use -X or -U option with -D \n");
                     h5tools_setstatus(EXIT_FAILURE);

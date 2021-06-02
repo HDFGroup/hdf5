@@ -566,6 +566,7 @@ H5_DLL herr_t  H5D__get_chunk_info(const H5D_t *dset, const H5S_t *space, hsize_
                                    unsigned *filter_mask, haddr_t *offset, hsize_t *size);
 H5_DLL herr_t  H5D__get_chunk_info_by_coord(const H5D_t *dset, const hsize_t *coord, unsigned *filter_mask,
                                             haddr_t *addr, hsize_t *size);
+H5_DLL herr_t  H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data);
 H5_DLL haddr_t H5D__get_offset(const H5D_t *dset);
 H5_DLL herr_t  H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t  H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id,
@@ -632,7 +633,8 @@ H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL hbool_t H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset);
 H5_DLL herr_t  H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata);
 H5_DLL herr_t  H5D__chunk_allocated(const H5D_t *dset, hsize_t *nbytes);
-H5_DLL herr_t  H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[]);
+H5_DLL herr_t  H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite,
+                                   const hsize_t old_dim[]);
 H5_DLL herr_t  H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
                                      H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t *scaled);
 H5_DLL herr_t  H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[]);

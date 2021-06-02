@@ -150,13 +150,15 @@ if test -z "$srcdir"; then
 fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
-# supports SWMR. ??? DO I NEED TO MODIFY THIS ????
-./swmr_check_compat_vfd
+# supports SWMR and/or if we are using parallel HDF5, which does not
+# currently support SWMR.
+./vfd_swmr_check_compat
 rc=$?
 if [ $rc -ne 0 ] ; then
     echo
-    echo "The VFD specified by the HDF5_DRIVER environment variable"
-    echo "does not support VFD SWMR."
+    echo "Either the VFD specified by the HDF5_DRIVER environment variable"
+    echo "does not support VFD SWMR or parallel HDF5 was configured, which"
+    echo "currently does not support SWMR."
     echo
     echo "VFD SWMR acceptance tests skipped"
     echo
