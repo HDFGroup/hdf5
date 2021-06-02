@@ -24,7 +24,7 @@
 #include "H5Tpkg.h"     /* Datatypes				*/
 
 /* Static local functions */
-static herr_t H5T_set_precision(const H5T_t *dt, size_t prec);
+static herr_t H5T__set_precision(const H5T_t *dt, size_t prec);
 
 /*-------------------------------------------------------------------------
  * Function:	H5Tget_precision
@@ -153,7 +153,7 @@ H5Tset_precision(hid_t type_id, size_t prec)
         HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL, "operation not defined for specified datatype")
 
     /* Do the work */
-    if (H5T_set_precision(dt, prec) < 0)
+    if (H5T__set_precision(dt, prec) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision")
 
 done:
@@ -161,7 +161,7 @@ done:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	H5T_set_precision
+ * Function:	H5T__set_precision
  *
  * Purpose:	Sets the precision of a datatype.  The precision is
  *		the number of significant bits which, unless padding is
@@ -186,12 +186,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T_set_precision(const H5T_t *dt, size_t prec)
+H5T__set_precision(const H5T_t *dt, size_t prec)
 {
     size_t offset, size;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(dt);
@@ -202,7 +202,7 @@ H5T_set_precision(const H5T_t *dt, size_t prec)
     HDassert(!(H5T_ENUM == dt->shared->type && 0 == dt->shared->u.enumer.nmembs));
 
     if (dt->shared->parent) {
-        if (H5T_set_precision(dt->shared->parent, prec) < 0)
+        if (H5T__set_precision(dt->shared->parent, prec) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "unable to set precision for base type")
 
         /* Adjust size of datatype appropriately */

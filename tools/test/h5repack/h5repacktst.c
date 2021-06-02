@@ -3292,8 +3292,6 @@ make_layout2(hid_t loc_id)
     if (make_dset(loc_id, CHUNKED_S_FIX, s_sid, chunked_dcpl, s_buf[0]) < 0)
         goto error;
 
-    HDfree(s_buf);
-
     ret_value = 0;
 
 error:
@@ -3820,7 +3818,7 @@ out:
  *
  * Purpose: write datasets in LOC_ID
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 12, 2003
  *
@@ -4657,7 +4655,7 @@ out:
  *
  * Purpose: write attributes in LOC_ID (dataset, group, named datatype)
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 12, 2003
  *
@@ -5795,7 +5793,7 @@ out:
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 12, 2003
  *
@@ -5828,7 +5826,7 @@ out:
  *
  * Purpose: utility function to create and write a dataset in LOC_ID
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 12, 2003
  *
@@ -5870,7 +5868,7 @@ out:
  *
  * Purpose: utility function to write an attribute in LOC_ID
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 12, 2003
  *

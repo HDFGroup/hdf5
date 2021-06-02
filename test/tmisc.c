@@ -2521,17 +2521,17 @@ test_misc13(void)
 static void
 test_misc14(void)
 {
-    hid_t  file_id;       /* File ID */
-    hid_t  fapl;          /* File access property list ID */
-    hid_t  DataSpace;     /* Dataspace ID */
-    hid_t  Dataset1;      /* Dataset ID #1 */
-    hid_t  Dataset2;      /* Dataset ID #2 */
-    hid_t  Dataset3;      /* Dataset ID #3 */
-    double data1 = 5.0F;  /* Data to write for dataset #1 */
-    double data2 = 10.0F; /* Data to write for dataset #2 */
-    double data3 = 15.0F; /* Data to write for dataset #3 */
-    double rdata;         /* Data read in */
-    herr_t ret;           /* Generic return value */
+    hid_t  file_id;      /* File ID */
+    hid_t  fapl;         /* File access property list ID */
+    hid_t  DataSpace;    /* Dataspace ID */
+    hid_t  Dataset1;     /* Dataset ID #1 */
+    hid_t  Dataset2;     /* Dataset ID #2 */
+    hid_t  Dataset3;     /* Dataset ID #3 */
+    double data1 = 5.0;  /* Data to write for dataset #1 */
+    double data2 = 10.0; /* Data to write for dataset #2 */
+    double data3 = 15.0; /* Data to write for dataset #3 */
+    double rdata;        /* Data read in */
+    herr_t ret;          /* Generic return value */
 
     /* Test creating two datasets and deleting the second */
 
@@ -5905,6 +5905,119 @@ test_misc35(void)
 
 } /* end test_misc35() */
 
+/* Context to pass to 'atclose' callbacks */
+static int test_misc36_context;
+
+/* 'atclose' callbacks for test_misc36 */
+static void
+test_misc36_cb1(void *_ctx)
+{
+    int *   ctx = (int *)_ctx; /* Set up context pointer */
+    hbool_t is_terminating;    /* Flag indicating the library is terminating */
+    herr_t  ret;               /* Return value */
+
+    /* Check whether the library thinks it's terminating */
+    is_terminating = FALSE;
+    ret            = H5is_library_terminating(&is_terminating);
+    CHECK(ret, FAIL, "H5is_library_terminating");
+    VERIFY(is_terminating, TRUE, "H5is_library_terminating");
+
+    /* Verify correct ordering for 'atclose' callbacks */
+    if (0 != *ctx)
+        HDabort();
+
+    /* Update context value */
+    *ctx = 1;
+}
+
+static void
+test_misc36_cb2(void *_ctx)
+{
+    int *   ctx = (int *)_ctx; /* Set up context pointer */
+    hbool_t is_terminating;    /* Flag indicating the library is terminating */
+    herr_t  ret;               /* Return value */
+
+    /* Check whether the library thinks it's terminating */
+    is_terminating = FALSE;
+    ret            = H5is_library_terminating(&is_terminating);
+    CHECK(ret, FAIL, "H5is_library_terminating");
+    VERIFY(is_terminating, TRUE, "H5is_library_terminating");
+
+    /* Verify correct ordering for 'atclose' callbacks */
+    if (1 != *ctx)
+        HDabort();
+
+    /* Update context value */
+    *ctx = 2;
+}
+
+/****************************************************************
+**
+**  test_misc36(): Exercise H5atclose and H5is_library_terminating
+**
+****************************************************************/
+static void
+test_misc36(void)
+{
+    hbool_t is_terminating; /* Flag indicating the library is terminating */
+    herr_t  ret;            /* Return value */
+
+    /* Output message about test being performed */
+    MESSAGE(5, ("H5atclose and H5is_library_terminating API calls"));
+
+    /* Check whether the library thinks it's terminating */
+    is_terminating = TRUE;
+    ret            = H5is_library_terminating(&is_terminating);
+    CHECK(ret, FAIL, "H5is_library_terminating");
+    VERIFY(is_terminating, FALSE, "H5is_library_terminating");
+
+    /* Shut the library down */
+    test_misc36_context = 0;
+    H5close();
+
+    /* Check whether the library thinks it's terminating */
+    is_terminating = TRUE;
+    ret            = H5is_library_terminating(&is_terminating);
+    CHECK(ret, FAIL, "H5is_library_terminating");
+    VERIFY(is_terminating, FALSE, "H5is_library_terminating");
+
+    /* Check the close context was not changed */
+    VERIFY(test_misc36_context, 0, "H5atclose");
+
+    /* Restart the library */
+    H5open();
+
+    /* Check whether the library thinks it's terminating */
+    is_terminating = TRUE;
+    ret            = H5is_library_terminating(&is_terminating);
+    CHECK(ret, FAIL, "H5is_library_terminating");
+    VERIFY(is_terminating, FALSE, "H5is_library_terminating");
+
+    /* Register the 'atclose' callbacks */
+    /* (Note that these will be called in reverse order, which is checked) */
+    ret = H5atclose(&test_misc36_cb2, &test_misc36_context);
+    CHECK(ret, FAIL, "H5atclose");
+    ret = H5atclose(&test_misc36_cb1, &test_misc36_context);
+    CHECK(ret, FAIL, "H5atclose");
+
+    /* Shut the library down */
+    test_misc36_context = 0;
+    H5close();
+
+    /* Check the close context was changed correctly */
+    VERIFY(test_misc36_context, 2, "H5atclose");
+
+    /* Restart the library */
+    H5open();
+
+    /* Close the library again */
+    test_misc36_context = 0;
+    H5close();
+
+    /* Check the close context was not changed */
+    VERIFY(test_misc36_context, 0, "H5atclose");
+} /* end test_misc36() */
+
 /****************************************************************
 **
 **  test_misc(): Main misc. test routine.
@@ -5956,6 +6069,7 @@ test_misc(void)
     test_misc33();  /* Test to verify that H5HL_offset_into() returns error if offset exceeds heap block */
     test_misc34();  /* Test behavior of 0 and NULL in H5MM API calls */
     test_misc35();  /* Test behavior of free-list & allocation statistics API calls */
+    test_misc36();  /* Exercise H5atclose and H5is_library_terminating */
 
 } /* test_misc() */
 

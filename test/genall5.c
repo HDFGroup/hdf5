@@ -19,7 +19,6 @@
  *        of the same name.
  */
 
-#include <err.h>
 #include "cache_common.h"
 #include "vfd_swmr_common.h" /* for below_speed_limit() */
 #include "genall5.h"
@@ -2756,12 +2755,12 @@ out:
     if (!ok) {
         /* Currently not used: this step makes sure the operation doesn't take too long.
          * Any test that sets config.msgival or lastmsgtime to 0 will skip this step */
-        if (strcmp(failure_mssg, last_failure_mssg) != 0 &&
+        if (HDstrcmp(failure_mssg, last_failure_mssg) != 0 &&
             ((config.msgival.tv_sec || config.msgival.tv_nsec)) &&
             (lastmsgtime->tv_sec || lastmsgtime->tv_nsec)) {
             if (below_speed_limit(lastmsgtime, &config.msgival)) {
                 last_failure_mssg = failure_mssg;
-                warnx("%s: %s", __func__, failure_mssg);
+                HDfprintf(stderr, "%s: %s", __func__, failure_mssg);
             }
         }
     }

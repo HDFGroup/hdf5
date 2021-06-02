@@ -24,6 +24,7 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Mpkg.h"      /* Maps                                     */
 #include "H5Eprivate.h"  /* Error handling                           */
+#include "H5ESprivate.h" /* Event Sets                               */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
@@ -38,8 +39,20 @@
 /********************/
 /* Local Prototypes */
 /********************/
+static herr_t H5M__close_cb(H5VL_object_t *map_vol_obj, void **request);
 
-static herr_t H5M__close_cb(H5VL_object_t *map_vol_obj);
+#ifdef H5_HAVE_MAP_API
+static hid_t  H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id,
+                                     hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id, void **token_ptr,
+                                     H5VL_object_t **_vol_obj_ptr);
+static hid_t  H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token_ptr,
+                                   H5VL_object_t **_vol_obj_ptr);
+static herr_t H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
+                                  const void *value, hid_t dxpl_id, void **token_ptr,
+                                  H5VL_object_t **_vol_obj_ptr);
+static herr_t H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
+                                  void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
+#endif /*  H5_HAVE_MAP_API */
 
 /*********************/
 /* Package Variables */
@@ -196,7 +209,7 @@ H5M_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5M__close_cb(H5VL_object_t *map_vol_obj)
+H5M__close_cb(H5VL_object_t *map_vol_obj, void **request)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -206,7 +219,7 @@ H5M__close_cb(H5VL_object_t *map_vol_obj)
     HDassert(map_vol_obj);
 
     /* Close the map */
-    if (H5VL_optional(map_vol_obj, H5VL_MAP_CLOSE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+    if (H5VL_optional(map_vol_obj, H5VL_MAP_CLOSE, H5P_DATASET_XFER_DEFAULT, request) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CLOSEERROR, FAIL, "unable to close map");
 
     /* Free the VOL object */
@@ -218,6 +231,70 @@ done:
 } /* end H5M__close_cb() */
 
 #ifdef H5_HAVE_MAP_API
+
+/*-------------------------------------------------------------------------
+ * Function:    H5M__create_api_common
+ *
+ * Purpose:     This is the common function for creating the HDF5 map.
+ *
+ * Return:      Success:    The object ID of the new map.
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5M__create_api_common(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id,
+                       hid_t mcpl_id, hid_t mapl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+{
+    void *          map         = NULL; /* New map's info */
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;                     /* Location parameters */
+    hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
+
+    /* Get link creation property list */
+    if (H5P_DEFAULT == lcpl_id)
+        lcpl_id = H5P_LINK_CREATE_DEFAULT;
+    else if (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "lcpl_id is not a link creation property list")
+
+    /* Get map creation property list */
+    if (H5P_DEFAULT == mcpl_id)
+        mcpl_id = H5P_MAP_CREATE_DEFAULT;
+    else if (TRUE != H5P_isa_class(mcpl_id, H5P_MAP_CREATE))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "mcpl_id is not a map create property list ID")
+
+    /* Set up object access arguments */
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_MACC, TRUE, &mapl_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
+
+    /* Create the map */
+    if (H5VL_optional(*vol_obj_ptr, H5VL_MAP_CREATE, H5P_DATASET_XFER_DEFAULT, token_ptr, &loc_params, name,
+                      lcpl_id, key_type_id, val_type_id, mcpl_id, mapl_id, &map) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTINIT, H5I_INVALID_HID, "unable to create map")
+
+    /* Get an ID for the map */
+    if ((ret_value = H5VL_register(H5I_MAP, map, (*vol_obj_ptr)->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register map handle")
+
+done:
+    /* Cleanup on failure */
+    if (H5I_INVALID_HID == ret_value)
+        if (map && H5VL_optional(*vol_obj_ptr, H5VL_MAP_CLOSE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release map")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5M__create_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Mcreate
@@ -240,61 +317,68 @@ hid_t
 H5Mcreate(hid_t loc_id, const char *name, hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id, hid_t mcpl_id,
           hid_t mapl_id)
 {
-    void *            map     = NULL; /* New map's info */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
-    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE7("i", "i*siiiii", loc_id, name, key_type_id, val_type_id, lcpl_id, mcpl_id, mapl_id);
 
-    /* Check arguments */
-    if (!name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
-    if (!*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
-
-    /* Get link creation property list */
-    if (H5P_DEFAULT == lcpl_id)
-        lcpl_id = H5P_LINK_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(lcpl_id, H5P_LINK_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "lcpl_id is not a link creation property list")
-
-    /* Get map creation property list */
-    if (H5P_DEFAULT == mcpl_id)
-        mcpl_id = H5P_MAP_CREATE_DEFAULT;
-    else if (TRUE != H5P_isa_class(mcpl_id, H5P_MAP_CREATE))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "mcpl_id is not a map create property list ID")
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&mapl_id, H5P_CLS_MACC, loc_id, TRUE) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
-
-    /* Get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
-
-    /* Set location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
-
-    /* Create the map */
-    if (H5VL_optional(vol_obj, H5VL_MAP_CREATE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, name,
-                      lcpl_id, key_type_id, val_type_id, mcpl_id, mapl_id, &map) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTINIT, H5I_INVALID_HID, "unable to create map")
-
-    /* Get an atom for the map */
-    if ((ret_value = H5VL_register(H5I_MAP, map, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize map handle")
+    /* Create the map synchronously */
+    if ((ret_value = H5M__create_api_common(loc_id, name, key_type_id, val_type_id, lcpl_id, mcpl_id, mapl_id,
+                                            NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create map synchronously")
 
 done:
-    /* Cleanup on failure */
-    if (H5I_INVALID_HID == ret_value)
-        if (map && H5VL_optional(vol_obj, H5VL_MAP_CLOSE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release map")
-
     FUNC_LEAVE_API(ret_value)
 } /* end H5Mcreate() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Mcreate_async
+ *
+ * Purpose:     Asynchronous version of H5Mcreate
+ *
+ * Return:      Success:    The object ID of the new map.
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Mcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name,
+                hid_t key_type_id, hid_t val_type_id, hid_t lcpl_id, hid_t mcpl_id, hid_t mapl_id,
+                hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE11("i", "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name, key_type_id, val_type_id,
+              lcpl_id, mcpl_id, mapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;
+
+    /* Create the map asynchronously */
+    if ((ret_value = H5M__create_api_common(loc_id, name, key_type_id, val_type_id, lcpl_id, mcpl_id, mapl_id,
+                                            token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create map asynchronously")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE11(FUNC, "*s*sIui*siiiiii", app_file, app_func, app_line, loc_id, name, key_type_id, val_type_id, lcpl_id, mcpl_id, mapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HDONE_ERROR(H5E_MAP, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on map ID")
+            HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Mcreate_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Mcreate_anon
@@ -368,6 +452,58 @@ done:
 } /* end H5Mcreate_anon() */
 
 /*------------------------------------------------------------------------
+ * Function:    H5M__open_api_common
+ *
+ * Purpose:     This is the common function for opening the HDF5 map.
+ *
+ * Return:      Success:    Object ID of the map
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+static hid_t
+H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token_ptr,
+                     H5VL_object_t **_vol_obj_ptr)
+{
+    void *          map         = NULL; /* map object from VOL connector */
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    H5VL_loc_params_t loc_params;                     /* Location parameters */
+    hid_t             ret_value = H5I_INVALID_HID;    /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check args */
+    if (!name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
+    if (!*name)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
+
+    /* Set up object access arguments */
+    if (H5VL_setup_acc_args(loc_id, H5P_CLS_MACC, FALSE, &mapl_id, vol_obj_ptr, &loc_params) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
+
+    /* Open the map */
+    if (H5VL_optional(*vol_obj_ptr, H5VL_MAP_OPEN, H5P_DATASET_XFER_DEFAULT, token_ptr, &loc_params, name,
+                      mapl_id, &map) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open map")
+
+    /* Register an ID for the map */
+    if ((ret_value = H5VL_register(H5I_MAP, map, (*vol_obj_ptr)->connector, TRUE)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register map ID")
+
+done:
+    /* Cleanup on failure */
+    if (H5I_INVALID_HID == ret_value)
+        if (map && H5VL_optional(*vol_obj_ptr, H5VL_MAP_CLOSE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CLOSEERROR, H5I_INVALID_HID, "unable to release map")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5M__open_api_common() */
+
+/*------------------------------------------------------------------------
  * Function:    H5Mopen
  *
  * Purpose:     Finds a map named NAME at LOC_ID, opens it, and returns
@@ -385,40 +521,16 @@ done:
 hid_t
 H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id)
 {
-    void *            map     = NULL; /* map object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
-    hid_t             ret_value = H5I_INVALID_HID; /* Return value */
+    void *         map       = NULL;            /* map object from VOL connector */
+    H5VL_object_t *vol_obj   = NULL;            /* object of loc_id */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "i*si", loc_id, name, mapl_id);
 
-    /* Check args */
-    if (!name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be NULL")
-    if (!*name)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "name parameter cannot be an empty string")
-
-    /* Verify access property list and set up collective metadata if appropriate */
-    if (H5CX_set_apl(&mapl_id, H5P_CLS_MACC, loc_id, FALSE) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
-
-    /* get the location object */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
-
-    /* Set the location parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(loc_id);
-
-    /* Open the map */
-    if (H5VL_optional(vol_obj, H5VL_MAP_OPEN, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params, name,
-                      mapl_id, &map) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open map")
-
-    /* Register an atom for the map */
-    if ((ret_value = H5VL_register(H5I_MAP, map, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTREGISTER, H5I_INVALID_HID, "can't register map atom")
+    /* Open the map synchronously */
+    if ((ret_value = H5M__open_api_common(loc_id, name, mapl_id, NULL, NULL)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTCREATE, H5I_INVALID_HID, "unable to open map synchronously")
 
 done:
     /* Cleanup on failure */
@@ -428,6 +540,52 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Mopen() */
+
+/*------------------------------------------------------------------------
+ * Function:    H5Mopen_async
+ *
+ * Purpose:     Asynchronous version of H5Mopen
+ *
+ * Return:      Success:    Object ID of the map
+ *
+ *              Failure:    H5I_INVALID_HID
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5Mopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id, const char *name,
+              hid_t mapl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_API(H5I_INVALID_HID)
+    H5TRACE7("i", "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, mapl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;
+
+    /* Open the map asynchronously */
+    if ((ret_value = H5M__open_api_common(loc_id, name, mapl_id, token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTCREATE, H5I_INVALID_HID, "unable to open map asynchronously")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, mapl_id, es_id)) < 0) {
+            /* clang-format on */
+            if (H5I_dec_app_ref_always_close(ret_value) < 0)
+                HDONE_ERROR(H5E_MAP, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on map ID")
+            HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
+        } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Mopen_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Mclose
@@ -461,6 +619,67 @@ H5Mclose(hid_t map_id)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Mclose() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Mclose_async
+ *
+ * Purpose:     Asynchronous version of H5Mclose
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Mclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id, hid_t es_id)
+{
+    void *         token     = NULL;            /* Request token for async operation            */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
+    H5VL_object_t *vol_obj   = NULL;            /* VOL object of dset_id */
+    H5VL_t *       connector = NULL;            /* VOL connector */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, map_id, es_id);
+
+    /* Check args */
+    if (H5I_MAP != H5I_get_type(map_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a map ID")
+
+    /* Get map object's connector */
+    if (NULL == (vol_obj = H5VL_vol_object(map_id)))
+        HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "can't get VOL object for map")
+
+    /* Prepare for possible asynchronous operation */
+    if (H5ES_NONE != es_id) {
+        /* Increase connector's refcount, so it doesn't get closed if closing
+         * the dataset closes the file */
+        connector = vol_obj->connector;
+        H5VL_conn_inc_rc(connector);
+
+        /* Point at token for operation to set up */
+        token_ptr = &token;
+    } /* end if */
+
+    /* Decrement the counter on the map.  It will be freed if the count
+     * reaches zero.
+     */
+    if (H5I_dec_app_ref_always_close_async(map_id, token_ptr) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTDEC, FAIL, "can't decrement count on dataset ID")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, map_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    if (connector && H5VL_conn_dec_rc(connector) < 0)
+        HDONE_ERROR(H5E_MAP, H5E_CANTDEC, FAIL, "can't decrement ref count on connector")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Mclose_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Mget_key_type
@@ -618,13 +837,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Mget_count(hid_t map_id, hsize_t *count, hid_t dxpl_id)
+H5Mget_count(hid_t map_id, hsize_t *count /*out*/, hid_t dxpl_id)
 {
     H5VL_object_t *vol_obj;             /* Map structure    */
     herr_t         ret_value = SUCCEED; /* Return value         */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
-    H5TRACE3("e", "i*hi", map_id, count, dxpl_id);
+    H5TRACE3("e", "ixi", map_id, count, dxpl_id);
 
     /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
@@ -648,6 +867,54 @@ done:
 } /* end H5Mget_count() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5M__put_api_common
+ *
+ * Purpose:     This is the common function for putting value to map.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5M__put_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id,
+                    const void *value, hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+{
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    herr_t ret_value = SUCCEED;                       /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check arguments */
+    if (key_mem_type_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid key memory datatype ID")
+    if (val_mem_type_id < 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid value memory datatype ID")
+
+    /* Get map pointer */
+    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "map_id is not a map ID")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id)
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+
+    /* Set the key/value pair */
+    if (H5VL_optional(*vol_obj_ptr, H5VL_MAP_PUT, dxpl_id, token_ptr, key_mem_type_id, key, val_mem_type_id,
+                      value) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, FAIL, "unable to put key/value pair")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5M__put_api_common() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Mput
  *
  * Purpose:     H5Mput adds a key-value pair to the Map specified by
@@ -667,11 +934,83 @@ herr_t
 H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value,
        hid_t dxpl_id)
 {
-    H5VL_object_t *vol_obj   = NULL;
-    herr_t         ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "ii*xi*xi", map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id);
+
+    /* Add key-value pair to the map synchronously */
+    if ((ret_value = H5M__put_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, NULL,
+                                         NULL)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTPUT, FAIL, "unable to put value to map synchronously")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Mput() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Mput_async
+ *
+ * Purpose:     Asynchronous version of H5Mput
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Mput_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id,
+             hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, const void *value, hid_t dxpl_id,
+             hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE10("e", "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key,
+              val_mem_type_id, value, dxpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;
+
+    /* Add key-value pair to the map asynchronously */
+    if ((ret_value = H5M__put_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id,
+                                         token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTPUT, FAIL, "unable to put value to map asynchronously")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Mput_async() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5M__get_api_common
+ *
+ * Purpose:     This is common function for getting value from the map.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value,
+                    hid_t dxpl_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr)
+{
+    H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
+    H5VL_object_t **vol_obj_ptr =
+        (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
+    herr_t ret_value = SUCCEED;                       /* Return value */
+
+    FUNC_ENTER_STATIC
 
     /* Check arguments */
     if (key_mem_type_id < 0)
@@ -680,7 +1019,7 @@ H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid value memory datatype ID")
 
     /* Get map pointer */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
+    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "map_id is not a map ID")
 
     /* Get the default dataset transfer property list if the user didn't provide one */
@@ -692,14 +1031,14 @@ H5Mput(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
 
-    /* Set the key/value pair */
-    if (H5VL_optional(vol_obj, H5VL_MAP_PUT, dxpl_id, H5_REQUEST_NULL, key_mem_type_id, key, val_mem_type_id,
-                      value) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTSET, FAIL, "unable to put key/value pair")
+    /* Get the value for the key */
+    if (H5VL_optional(*vol_obj_ptr, H5VL_MAP_GET_VAL, dxpl_id, token_ptr, key_mem_type_id, key,
+                      val_mem_type_id, value) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "unable to get value from map")
 
 done:
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Mput() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5M__get_api_common() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Mget
@@ -724,39 +1063,63 @@ herr_t
 H5Mget(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value,
        hid_t dxpl_id)
 {
-    H5VL_object_t *vol_obj   = NULL;
-    herr_t         ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "ii*xi*xi", map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id);
 
-    /* Check arguments */
-    if (key_mem_type_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid key memory datatype ID")
-    if (val_mem_type_id < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid value memory datatype ID")
-
-    /* Get map pointer */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(map_id, H5I_MAP)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "map_id is not a map ID")
-
-    /* Get the default dataset transfer property list if the user didn't provide one */
-    if (H5P_DEFAULT == dxpl_id)
-        dxpl_id = H5P_DATASET_XFER_DEFAULT;
-    else if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not xfer parms")
-
-    /* Set DXPL for operation */
-    H5CX_set_dxpl(dxpl_id);
-
-    /* Get the value for the key */
-    if (H5VL_optional(vol_obj, H5VL_MAP_GET_VAL, dxpl_id, H5_REQUEST_NULL, key_mem_type_id, key,
-                      val_mem_type_id, value) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "unable to get value from map")
+    /* Get key-value pair from the map synchronously */
+    if ((ret_value = H5M__get_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, NULL,
+                                         NULL)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "unable to get value from map synchronously")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Mget() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Mget_async
+ *
+ * Purpose:     Asynchronous version of H5Mget
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Mget_async(const char *app_file, const char *app_func, unsigned app_line, hid_t map_id,
+             hid_t key_mem_type_id, const void *key, hid_t val_mem_type_id, void *value, hid_t dxpl_id,
+             hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE10("e", "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key,
+              val_mem_type_id, value, dxpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token;
+
+    /* Get key-value pair from the map asynchronously */
+    if ((ret_value = H5M__get_api_common(map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id,
+                                         token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_MAP, H5E_CANTGET, FAIL, "unable to get value from map asynchronously")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE10(FUNC, "*s*sIuii*xi*xii", app_file, app_func, app_line, map_id, key_mem_type_id, key, val_mem_type_id, value, dxpl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_MAP, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Mget_async() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Mexists
@@ -873,7 +1236,7 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
     /* Iterate over keys */
     if ((ret_value = H5VL_optional(vol_obj, H5VL_MAP_SPECIFIC, dxpl_id, H5_REQUEST_NULL, &loc_params,
                                    H5VL_MAP_ITER, idx, key_mem_type_id, op, op_data)) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_BADITER, ret_value, "unable to ierate over keys")
+        HGOTO_ERROR(H5E_MAP, H5E_BADITER, ret_value, "unable to iterate over keys")
 
 done:
     FUNC_LEAVE_API(ret_value)

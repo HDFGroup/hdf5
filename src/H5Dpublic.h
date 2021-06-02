@@ -28,9 +28,9 @@
 /*****************/
 
 /* Macros used to "unset" chunk cache configuration parameters */
-#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT ((size_t)-1)
-#define H5D_CHUNK_CACHE_NBYTES_DEFAULT ((size_t)-1)
-#define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0f)
+#define H5D_CHUNK_CACHE_NSLOTS_DEFAULT SIZE_MAX
+#define H5D_CHUNK_CACHE_NBYTES_DEFAULT SIZE_MAX
+#define H5D_CHUNK_CACHE_W0_DEFAULT     (-1.0)
 
 /* Bit flags for the H5Pset_chunk_opts() and H5Pget_chunk_opts() */
 #define H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS (0x0002u)
@@ -46,11 +46,11 @@
 typedef enum H5D_layout_t {
     H5D_LAYOUT_ERROR = -1,
 
-    H5D_COMPACT    = 0, /**< raw data is very small		     */
-    H5D_CONTIGUOUS = 1, /**< the default				     */
-    H5D_CHUNKED    = 2, /**< slow and fancy			     */
-    H5D_VIRTUAL    = 3, /**< actual data is stored in other datasets     */
-    H5D_NLAYOUTS   = 4  /**< this one must be last!		     */
+    H5D_COMPACT    = 0, /**< raw data is very small */
+    H5D_CONTIGUOUS = 1, /**< the default */
+    H5D_CHUNKED    = 2, /**< slow and fancy */
+    H5D_VIRTUAL    = 3, /**< actual data is stored in other datasets */
+    H5D_NLAYOUTS   = 4  /**< this one must be last! */
 } H5D_layout_t;
 //! <!-- [H5D_layout_t_snip] -->
 
@@ -160,6 +160,14 @@ typedef herr_t (*H5D_scatter_func_t)(const void **src_buf /*out*/, size_t *src_b
 typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_used, void *op_data);
 //! <!-- [H5D_gather_func_t_snip] -->
 
+//! <!-- [H5D_chunk_iter_op_t_snip] -->
+/**
+ * Define the operator function pointer for H5Dchunk_iter()
+ */
+//! <!-- [H5D_chunk_iter_op_t_snip] -->
+typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes,
+                                   void *op_data);
+
 /********************/
 /* Public Variables */
 /********************/
@@ -238,6 +246,15 @@ extern "C" {
  */
 H5_DLL hid_t H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id,
                         hid_t dcpl_id, hid_t dapl_id);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dcreate}
+ */
+H5_DLL hid_t H5Dcreate_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                             const char *name, hid_t type_id, hid_t space_id, hid_t lcpl_id, hid_t dcpl_id,
+                             hid_t dapl_id, hid_t es_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -336,6 +353,14 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
 
 /**
  * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dopen}
+ */
+H5_DLL hid_t H5Dopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t loc_id,
+                           const char *name, hid_t dapl_id, hid_t es_id);
+
+/**
+ * --------------------------------------------------------------------------
  *\ingroup H5D
  *
  * \brief Returns an identifier for a copy of the dataspace for a dataset
@@ -356,6 +381,14 @@ H5_DLL hid_t H5Dopen2(hid_t loc_id, const char *name, hid_t dapl_id);
  *
  */
 H5_DLL hid_t H5Dget_space(hid_t dset_id);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dget_space}
+ */
+H5_DLL hid_t H5Dget_space_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                                hid_t es_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -605,6 +638,51 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * --------------------------------------------------------------------------
  * \ingroup H5D
  *
+ * \brief Iterate over all chunks
+ *
+ * \dset_id
+ * \param[in]  cb       User callback function, called for every chunk.
+ * \param[in]  op_data  User-defined pointer to data required by op
+ *
+ * \return \herr_t
+ *
+ * \details H5Dget_chunk_iter iterates over all chunks in the dataset, calling the
+ *          user supplied callback with the details of the chunk and the supplied
+ *          \p op_data.
+ *
+ *          Callback information:
+ *            H5D_chunk_iter_op_t is defined as:
+ *
+ *              typedef int (*H5D_chunk_iter_op_t)(
+ *                const hsize_t *offset,
+ *                uint32_t filter_mask,
+ *                haddr_t addr,
+ *                uint32_t nbytes,
+ *                void *op_data);
+ *
+ *          H5D_chunk_iter_op_t parameters:
+ *              hsize_t *offset;        IN/OUT: Array of starting logical coordinates of chunk.
+ *              uint32_t filter_mask;   IN: Filter mask of chunk.
+ *              haddr_t addr;           IN: Offset in file of chunk data.
+ *              uint32_t nbytes;        IN: Size in number of bytes of chunk data in file.
+ *              void *op_data;          IN/OUT: Pointer to any user-defined data
+ *                                      associated with the operation.
+ *
+ *          The return values from an operator are:
+ *              Zero (H5_ITER_CONT) causes the iterator to continue, returning zero when all
+ *                  elements have been processed.
+ *              Positive (H5_ITER_STOP) causes the iterator to immediately return that positive
+ *                  value, indicating short-circuit success.
+ *              Negative (H5_ITER_ERROR) causes the iterator to immediately return that value,
+ *                  indicating failure.
+ *
+ */
+H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup H5D
+ *
  * \brief Retrieves information about a chunk specified by its index
  *
  * \dset_id
@@ -766,6 +844,16 @@ H5_DLL haddr_t H5Dget_offset(hid_t dset_id);
  */
 H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                       hid_t dxpl_id, void *buf /*out*/);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dread}
+ */
+H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                            hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+                            void *buf /*out*/, hid_t es_id);
+
 /**
  * --------------------------------------------------------------------------
  * \ingroup H5D
@@ -876,6 +964,15 @@ H5_DLL herr_t H5Dread(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_
  */
 H5_DLL herr_t H5Dwrite(hid_t dset_id, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                        hid_t dxpl_id, const void *buf);
+
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dwrite}
+ */
+H5_DLL herr_t H5Dwrite_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                             hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
+                             const void *buf, hid_t es_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -1213,6 +1310,14 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
 
 /**
  * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dset_extent}
+ */
+H5_DLL herr_t H5Dset_extent_async(const char *app_file, const char *app_func, unsigned app_line,
+                                  hid_t dset_id, const hsize_t size[], hid_t es_id);
+
+/**
+ * --------------------------------------------------------------------------
  * \ingroup H5D
  *
  * \brief Flushes all buffers associated with a dataset to disk
@@ -1233,6 +1338,8 @@ H5_DLL herr_t H5Dset_extent(hid_t dset_id, const hsize_t size[]);
  *
  */
 H5_DLL herr_t H5Dflush(hid_t dset_id);
+
+H5_DLL herr_t H5Dwait(hid_t dset_id);
 
 /**
  * --------------------------------------------------------------------------
@@ -1431,10 +1538,42 @@ H5_DLL herr_t H5Dgather(hid_t src_space_id, const void *src_buf, hid_t type_id, 
  */
 H5_DLL herr_t H5Dclose(hid_t dset_id);
 
+/**
+ * --------------------------------------------------------------------------
+ * \ingroup ASYNC
+ * \async_variant_of{H5Dclose}
+ */
+H5_DLL herr_t H5Dclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                             hid_t es_id);
+
 /* Internal API routines */
 H5_DLL herr_t H5Ddebug(hid_t dset_id);
 H5_DLL herr_t H5Dformat_convert(hid_t dset_id);
 H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
+
+/* API Wrappers for async routines */
+/* (Must be defined _after_ the function prototype) */
+/* (And must only defined when included in application code, not the library) */
+#ifndef H5D_MODULE
+#define H5Dcreate_async(...)     H5Dcreate_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dopen_async(...)       H5Dopen_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dget_space_async(...)  H5Dget_space_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dread_async(...)       H5Dread_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dwrite_async(...)      H5Dwrite_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dset_extent_async(...) H5Dset_extent_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5Dclose_async(...)      H5Dclose_async(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ *      be passed in by language wrapper or library layer on top of HDF5.
+ */
+#define H5Dcreate_async_wrap     H5_NO_EXPAND(H5Dcreate_async)
+#define H5Dopen_async_wrap       H5_NO_EXPAND(H5Dopen_async)
+#define H5Dget_space_async_wrap  H5_NO_EXPAND(H5Dget_space_async)
+#define H5Dread_async_wrap       H5_NO_EXPAND(H5Dread_async)
+#define H5Dwrite_async_wrap      H5_NO_EXPAND(H5Dwrite_async)
+#define H5Dset_extent_async_wrap H5_NO_EXPAND(H5Dset_extent_async)
+#define H5Dclose_async_wrap      H5_NO_EXPAND(H5Dclose_async)
+#endif /* H5D_MODULE */
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

@@ -115,6 +115,8 @@
 #define FILE85     "tgrpnullspace.h5"
 #define FILE86     "err_attr_dspace.h5"
 #define FILE87     "tintsnodata.h5"
+#define FILE88     "tldouble_scalar.h5"
+#define FILE89     "tfloatsattrs.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -153,13 +155,13 @@ static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const un
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
-    H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIBUD,             /* Filter id number        */
-    1, 1,                            /* Encoding and decoding enabled   */
-    "dynlibud",                      /* Filter name for debugging    */
-    NULL,                            /* The "can apply" callback        */
-    NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlibud, /* The actual filter function    */
+    H5Z_CLASS_T_VERS,    /* H5Z_class_t version             */
+    H5Z_FILTER_DYNLIBUD, /* Filter id number        */
+    1, 1,                /* Encoding and decoding enabled   */
+    "dynlibud",          /* Filter name for debugging    */
+    NULL,                /* The "can apply" callback        */
+    NULL,                /* The "set local" callback        */
+    H5Z_filter_dynlibud, /* The actual filter function    */
 }};
 
 /* A UD link traversal function.  Shouldn't actually be called. */
@@ -394,6 +396,15 @@ typedef struct s1_t {
 #define F83_DIM      5
 #define F83_RANK     1
 #define F83_ARRAYDIM 3
+
+/* "FILE89" macros */
+#define F89_XDIM        8
+#define F89_DATASETF32  "DS32BITS"
+#define F89_YDIM32      32
+#define F89_DATASETF64  "DS64BITS"
+#define F89_YDIM64      64
+#define F89_DATASETF128 "DS128BITS"
+#define F89_YDIM128     128
 
 static void
 gent_group(void)
@@ -2106,7 +2117,7 @@ gent_objref(void)
     uint32_t *  tu32;                       /* Temporary pointer to uint32 data */
     int         i;                          /* counting variables */
     const char *write_comment     = "Foo!"; /* Comments for group */
-    hbool_t     supports_comments = FALSE;
+    uint64_t    supports_comments = 0;
 
     /* Allocate write & read buffers */
     wbuf = (hobj_ref_t *)HDmalloc(sizeof(hobj_ref_t) * SPACE1_DIM1);
@@ -2126,7 +2137,7 @@ gent_objref(void)
     H5VLquery_optional(fid1, H5VL_SUBCLS_OBJECT, H5VL_NATIVE_OBJECT_SET_COMMENT, &supports_comments);
 
     /* Set group's comment */
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment(group, write_comment);
 
     /* Create a dataset (inside Group1) */
@@ -3677,9 +3688,9 @@ gent_empty(void)
 static void
 gent_group_comments(void)
 {
-    hid_t   fid               = H5I_INVALID_HID;
-    hid_t   group             = H5I_INVALID_HID;
-    hbool_t supports_comments = FALSE;
+    hid_t    fid               = H5I_INVALID_HID;
+    hid_t    group             = H5I_INVALID_HID;
+    uint64_t supports_comments = 0;
 
     fid = H5Fcreate(FILE33, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -3688,69 +3699,69 @@ gent_group_comments(void)
 
     /* / */
     group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g1", "Comment for group /g1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g2", "Comment for group /g2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g3", "Comment for group /g3", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g1 */
     group = H5Gcreate2(fid, "/g1/g1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g1/g1.1", "Comment for group /g1/g1.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g1/g1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g1/g1.2", "Comment for group /g1/g1.2", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g2 */
     group = H5Gcreate2(fid, "/g2/g2.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g2/g2.1", "Comment for group /g2/g2.1", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g3 */
     group = H5Gcreate2(fid, "/g3/g3.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g3/g3.1", "Comment for group /g3/g3.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g3/g3.2", "Comment for group /g3/g3.2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g3/g3.3", "Comment for group /g3/g3.3", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g3/g3.4", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g3/g3.4", "Comment for group /g3/g3.4", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /g2/g2.1 */
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.1", "Comment for group /g2/g2.1/g2.1.1", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.2", "Comment for group /g2/g2.1/g2.1.2", H5P_DEFAULT);
     H5Gclose(group);
     group = H5Gcreate2(fid, "/g2/g2.1/g2.1.3", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(group, "/g2/g2.1/g2.1.3", "Comment for group /g2/g2.1/g2.1.3", H5P_DEFAULT);
     H5Gclose(group);
 
     /* /glongcomment */
     group = H5Gcreate2(fid, "/glongcomment", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    if (supports_comments)
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED)
         H5Oset_comment_by_name(
             group, "/glongcomment",
             "Comment for group /glongcomment with a really, really, really long, long, long comment",
@@ -4008,7 +4019,7 @@ gent_char(void)
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 28, 2003
  *
@@ -4435,7 +4446,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 28, 2003
  *
@@ -4871,7 +4882,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, /* for saving reference to da
  *
  * Return: void
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 19, 2003
  *
@@ -4940,7 +4951,7 @@ gent_attr_all(void)
  *
  * Purpose: utility function to write an attribute
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 19, 2003
  *
@@ -4978,7 +4989,7 @@ write_attr(hid_t loc_id, int rank, hsize_t *dims, const char *attr_name, hid_t t
  *
  * Return:
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 27, 2003
  *
@@ -5449,7 +5460,7 @@ gent_filters(void)
     int                       buf1[DIM1][DIM2];
     int                       i, j, n;
     int H5_ATTR_NDEBUG_UNUSED ret;
-    hbool_t                   supports_comments = FALSE;
+    uint64_t                  supports_comments = 0;
 
     for (i = n = 0; i < DIM1; i++) {
         for (j = 0; j < DIM2; j++) {
@@ -5481,7 +5492,7 @@ gent_filters(void)
     ret = make_dset(fid, "compact", sid, H5T_NATIVE_INT, dcpl, buf1);
     HDassert(ret >= 0);
 
-    if (supports_comments) {
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED) {
         ret = H5Oset_comment_by_name(fid, "compact", "This is a dataset with compact storage", H5P_DEFAULT);
         HDassert(ret >= 0);
     }
@@ -5492,7 +5503,7 @@ gent_filters(void)
     ret = make_dset(fid, "contiguous", sid, H5T_NATIVE_INT, dcpl, buf1);
     HDassert(ret >= 0);
 
-    if (supports_comments) {
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED) {
         ret = H5Oset_comment_by_name(fid, "contiguous", "This is a dataset with contiguous storage",
                                      H5P_DEFAULT);
         HDassert(ret >= 0);
@@ -5507,7 +5518,7 @@ gent_filters(void)
     ret = make_dset(fid, "chunked", sid, H5T_NATIVE_INT, dcpl, buf1);
     HDassert(ret >= 0);
 
-    if (supports_comments) {
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED) {
         ret = H5Oset_comment_by_name(fid, "chunked", "This is a dataset with chunked storage", H5P_DEFAULT);
         HDassert(ret >= 0);
     }
@@ -5723,7 +5734,7 @@ gent_filters(void)
     ret = H5Tcommit2(fid, "mytype", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     HDassert(ret >= 0);
 
-    if (supports_comments) {
+    if (supports_comments & H5VL_OPT_QUERY_SUPPORTED) {
         ret = H5Oset_comment_by_name(fid, "mytype", "This is a commited datatype", H5P_DEFAULT);
         HDassert(ret >= 0);
     }
@@ -6336,6 +6347,57 @@ error:
 }
 
 /*-------------------------------------------------------------------------
+ * Function: gent_ldouble_scalar
+ *
+ * Purpose: make file with a long double scalar dataset
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+gent_ldouble_scalar(void)
+{
+    hid_t       fid;
+    hid_t       did;
+    hid_t       tid;
+    hid_t       sid;
+    hsize_t     dims[1] = {6};
+    long double buf[6]  = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+
+    if ((fid = H5Fcreate(FILE88, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if ((sid = H5Screate(H5S_SCALAR)) < 0)
+        goto error;
+
+    if ((tid = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid) == 0)
+        goto error;
+
+    if ((did = H5Dcreate2(fid, "dset", tid, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        goto error;
+
+    if (H5Dwrite(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        goto error;
+
+    if (H5Sclose(sid) < 0)
+        goto error;
+    if (H5Tclose(tid) < 0)
+        goto error;
+    if (H5Dclose(did) < 0)
+        goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    return 0;
+
+error:
+    HDprintf("error !\n");
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    gent_binary
  *
  * Purpose:     Generate a file to be used in the binary output test
@@ -6499,7 +6561,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6685,7 +6746,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6945,7 +7005,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -10160,6 +10219,152 @@ gent_intsattrs(void)
     HDfree(asetdbl);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gent_floatsattrs
+ *
+ * Purpose:     Generate a file to be used in the h5dump tests.
+ *   Three datasets of 4, 8 and 16 bytes of float types are created.
+ *   Fill them with raw data such that no bit will be all zero in a dataset.
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_floatsattrs(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   tid     = H5I_INVALID_HID;
+    hid_t   attr    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   aspace  = H5I_INVALID_HID;
+    hsize_t dims[2], adims[1];
+
+    float **      dset32  = NULL;
+    double **     dset64  = NULL;
+    long double **dset128 = NULL;
+
+    float *      aset32  = NULL;
+    double *     aset64  = NULL;
+    long double *aset128 = NULL;
+
+    float       val32bits;
+    double      val64bits;
+    long double val128bits;
+
+    unsigned int i, j;
+
+    /* Create arrays */
+    H5TEST_ALLOCATE_2D_ARRAY(dset32, float, F89_XDIM, F89_YDIM32);
+    H5TEST_ALLOCATE_2D_ARRAY(dset64, double, F89_XDIM, F89_YDIM64);
+    H5TEST_ALLOCATE_2D_ARRAY(dset128, long double, F89_XDIM, F89_YDIM128);
+
+    aset32  = HDcalloc(F89_XDIM * F89_YDIM32, sizeof(float));
+    aset64  = HDcalloc(F89_XDIM * F89_YDIM64, sizeof(double));
+    aset128 = HDcalloc(F89_XDIM * F89_YDIM128, sizeof(long double));
+
+    fid = H5Fcreate(FILE89, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid) == 0)
+        goto error;
+
+    /* Dataset of 32 bits float */
+    dims[0] = F89_XDIM;
+    dims[1] = F89_YDIM32;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F89_DATASETF32, H5T_IEEE_F32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val32bits = (float)F89_YDIM32;
+    for (i = 0; i < dims[0]; i++) {
+        dset32[i][0]        = val32bits;
+        aset32[i * dims[1]] = dset32[i][0];
+        for (j = 1; j < dims[1]; j++) {
+            dset32[i][j]            = (float)(j * dims[0] + i) / (float)F89_YDIM32;
+            aset32[i * dims[1] + j] = dset32[i][j];
+        }
+        val32bits -= (float)1;
+    }
+
+    H5Dwrite(dataset, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset32[0]);
+    /* Attribute of 32 bits float */
+    adims[0] = F89_XDIM * F89_YDIM32;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F89_DATASETF32, H5T_IEEE_F32LE, aspace, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, H5T_IEEE_F32LE, aset32);
+    H5Aclose(attr);
+    H5Sclose(aspace);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 64 bits double */
+    dims[0] = F89_XDIM;
+    dims[1] = F89_YDIM64;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F89_DATASETF64, H5T_IEEE_F64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val64bits = (double)F89_YDIM64;
+    for (i = 0; i < dims[0]; i++) {
+        dset64[i][0]        = val64bits;
+        aset64[i * dims[1]] = dset64[i][0];
+        for (j = 1; j < dims[1]; j++) {
+            dset64[i][j]            = (double)(j * dims[0] + i) / (double)F89_YDIM64;
+            aset64[i * dims[1] + j] = dset64[i][j];
+        }
+        val64bits -= (double)1;
+    }
+
+    H5Dwrite(dataset, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset64[0]);
+    /* Attribute of 64 bits double */
+    adims[0] = F89_XDIM * F89_YDIM64;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F89_DATASETF64, H5T_IEEE_F64LE, aspace, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, H5T_IEEE_F64LE, aset64);
+    H5Aclose(attr);
+    H5Sclose(aspace);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 128 bits long double */
+    dims[0] = F89_XDIM;
+    dims[1] = F89_YDIM128;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F89_DATASETF128, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val128bits = (long double)F89_YDIM128;
+    for (i = 0; i < dims[0]; i++) {
+        dset128[i][0]        = val128bits;
+        aset128[i * dims[1]] = dset128[i][0];
+        for (j = 1; j < dims[1]; j++) {
+            dset128[i][j]            = (long double)(j * dims[0] + i) / (long double)F89_YDIM128;
+            aset128[i * dims[1] + j] = dset128[i][j];
+        }
+        val128bits -= (long double)1;
+    }
+
+    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset128[0]);
+    /* Attribute of 128 bits long double */
+    adims[0] = F89_XDIM * F89_YDIM128;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F89_DATASETF128, tid, aspace, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, tid, aset128);
+    H5Aclose(attr);
+    H5Sclose(aspace);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+error:
+    H5Fclose(fid);
+
+    HDfree(dset32);
+    HDfree(dset64);
+    HDfree(dset128);
+
+    HDfree(aset32);
+    HDfree(aset64);
+    HDfree(aset128);
+}
+
 static void
 gent_bitnopaquefields(void)
 {
@@ -10872,7 +11077,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
         return (0);
 
     /* Assignment to eliminate unused parameter warning. */
-    cd_values = cd_values;
+    (void)cd_values;
 
     if (flags & H5Z_FLAG_REVERSE) { /*read*/
         /* Subtract the original value with MULTIPLIER */
@@ -11089,6 +11294,7 @@ main(void)
     gent_aindices();
     gent_longlinks();
     gent_ldouble();
+    gent_ldouble_scalar();
     gent_binary();
     gent_bigdims();
     gent_hyperslab();
@@ -11112,6 +11318,7 @@ main(void)
     gent_compound_ints();
     gent_intattrscalars();
     gent_intsattrs();
+    gent_floatsattrs();
     gent_bitnopaquefields();
     gent_nodata();
 

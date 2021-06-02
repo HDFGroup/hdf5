@@ -70,10 +70,6 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Library Private Variables */
 /*****************************/
 
-/* HDF5 API Entered variable */
-/* (move to H5.c when new FUNC_ENTER macros in actual use -QAK) */
-hbool_t H5_api_entered_g = FALSE;
-
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
 #ifdef H5_HAVE_THREADSAFE
@@ -365,6 +361,11 @@ H5_term_library(void)
         /* Try to organize these so the "higher" level components get shut
          * down before "lower" level components that they might rely on. -QAK
          */
+
+        /* Close the event sets first, so that all asynchronous operations
+         *  complete before anything else attempts to shut down.
+         */
+        pending += DOWN(ES);
 
         /* Close down the user-facing interfaces, after the event sets */
         if (pending == 0) {

@@ -497,7 +497,7 @@ gen_err_refcount(const char *fname)
            attribute message */
     if ((fd = HDopen(fname, O_RDWR, 0633)) >= 0) {
         HDlseek(fd, 4520 + 24, SEEK_SET);
-        HDwrite(fd, &val, 2);
+        (void)HDwrite(fd, &val, 2);
         HDclose(fd);
     }
 

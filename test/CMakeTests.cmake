@@ -318,14 +318,6 @@ set (test_CLEANFILES
     tvlstr.h5
     tvlstr2.h5
     twriteorder.dat
-    flush.h5
-    flush-swmr.h5
-    noflush.h5
-    noflush-swmr.h5
-    flush_extend.h5
-    flush_extend-swmr.h5
-    noflush_extend.h5
-    noflush_extend-swmr.h5
     enum1.h5
     titerate.h5
     ttsafe.h5
@@ -409,6 +401,7 @@ set (test_CLEANFILES
     splitter.log
     mirror_rw/*
     mirror_wo/*
+    event_set_*.h5
 )
 
 # Remove any output file left over from previous test run
@@ -869,7 +862,7 @@ if (BUILD_SHARED_LIBS)
 ##############################################################################
 endif ()
 
-option (TEST_SHELL_SCRIPTS "Enable shell script tests" OFF)
+option (TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()

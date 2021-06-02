@@ -26,13 +26,11 @@
 
 #ifdef H5_HAVE_PARALLEL
 
-#ifdef H5_STDC_HEADERS
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 #ifdef H5_HAVE_UNISTD_H
 #include <sys/types.h>
@@ -313,7 +311,7 @@ main(int argc, char **argv)
         VRFY((ret >= 0), "H5Dwrite dataset1 succeeded", !H5FATAL);
 
         if (ret < 0)
-            HDfprintf(stderr, "node %d, read error, loc = %Ld: %s\n", mynod, mynod * opt_block,
+            HDfprintf(stderr, "node %d, read error, loc = %" PRId64 ": %s\n", mynod, mynod * opt_block,
                       strerror(myerrno));
 
         /* if the user wanted to check correctness, compare the write
@@ -427,7 +425,8 @@ parse_args(int argc, char **argv)
                 if (NULL != (p = (char *)HDstrchr(optarg, '/')))
                     opt_threshold = (hsize_t)HDatoi(p + 1);
             }
-                HDfprintf(stdout, "alignment/threshold=%Hu/%Hu\n", opt_alignment, opt_threshold);
+                HDfprintf(stdout, "alignment/threshold=%" PRIuHSIZE "/%" PRIuHSIZE "\n", opt_alignment,
+                          opt_threshold);
                 break;
             case '2': /* use 2-files, i.e., split file driver */
                 opt_split_vfd = 1;

@@ -1103,7 +1103,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
 
                 /* Iterate over all elements, calling memcmp() for each */
                 for (elmt = 0; elmt < nelmts; elmt++) {
-                    if (HDmemcmp(memb1, memb2, memb_size))
+                    if (HDmemcmp(memb1, memb2, memb_size) != 0)
                         TEST_ERROR
 
                     /* Update member pointers */
@@ -1325,7 +1325,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
         else
             TEST_ERROR
     } /* end else */
-    else if (HDmemcmp(buf1, buf2, (elmt_size * nelmts)))
+    else if (HDmemcmp(buf1, buf2, (elmt_size * nelmts)) != 0)
         TEST_ERROR
 
     /* Data should be the same. :-) */
@@ -1596,7 +1596,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if (H5Lget_name_by_idx(gid2, ".", H5_INDEX_NAME, H5_ITER_INC, idx, objname2,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR
-            if (HDstrcmp(objname, objname2))
+            if (HDstrcmp(objname, objname2) != 0)
                 TEST_ERROR
 
             /* Get link info */
@@ -1710,7 +1710,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         TEST_ERROR
 
                     /* Compare link data */
-                    if (HDmemcmp(linkval, linkval2, linfo.u.val_size))
+                    if (HDmemcmp(linkval, linkval2, linfo.u.val_size) != 0)
                         TEST_ERROR
                 } /* end else-if */
                 else {
@@ -2936,7 +2936,7 @@ test_copy_dataset_compound(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t
     HDmemset(buf, 0, sizeof(buf));
     for (i = 0; i < DIM_SIZE_1; i++) {
         buf[i].a = i;
-        buf[i].d = (double)1.0F / (double)(i + 1);
+        buf[i].d = 1.0 / (double)(i + 1);
     } /* end for */
 
     /* Initialize the filenames */
@@ -4499,7 +4499,7 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
 
 #ifndef H5_HAVE_FILTER_DEFLATE
     SKIPPED();
-    puts("    Deflation filter not available");
+    HDputs("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++)
@@ -4924,7 +4924,7 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
 
 #ifndef H5_HAVE_FILTER_DEFLATE
     SKIPPED();
-    puts("    Deflation filter not available");
+    HDputs("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++)
@@ -7030,7 +7030,7 @@ compare_attribute_compound_vlstr(hid_t loc, hid_t loc2)
         FAIL_STACK_ERROR
     if (HDstrlen(rbuf.v) != HDstrlen(rbuf2.v))
         FAIL_STACK_ERROR
-    if (HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v)))
+    if (HDmemcmp(rbuf.v, rbuf2.v, HDstrlen(rbuf.v)) != 0)
         FAIL_STACK_ERROR
 
     /* Reclaim vlen buffer */
@@ -7278,7 +7278,7 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
 
 #ifndef H5_HAVE_FILTER_DEFLATE
     SKIPPED();
-    puts("    Deflation filter not available");
+    HDputs("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
     /* set initial data values */
     for (i = 0; i < DIM_SIZE_1; i++) {
@@ -11700,9 +11700,9 @@ test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
         TEST_ERROR
 
     /* Verify that the references contain only "0" bytes */
-    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)))
+    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
         TEST_ERROR
-    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)))
+    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
         TEST_ERROR
 
     /* Close datasets */
@@ -11745,9 +11745,9 @@ test_copy_null_ref(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
         TEST_ERROR
 
     /* Verify that the references contain only "0" bytes */
-    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)))
+    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
         TEST_ERROR
-    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)))
+    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
         TEST_ERROR
 
     /* Close */
@@ -11907,9 +11907,9 @@ test_copy_null_ref_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TEST_ERROR
 
     /* Verify that the references contain only "0" bytes */
-    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)))
+    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
         TEST_ERROR
-    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)))
+    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
         TEST_ERROR
 
     /* Create destination file */
@@ -11952,9 +11952,9 @@ test_copy_null_ref_open(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t ds
         TEST_ERROR
 
     /* Verify that the references contain only "0" bytes */
-    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)))
+    if (HDmemcmp(obj_buf, zeros, sizeof(obj_buf)) != 0)
         TEST_ERROR
-    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)))
+    if (HDmemcmp(reg_buf, zeros, sizeof(reg_buf)) != 0)
         TEST_ERROR
 
     /* Close */

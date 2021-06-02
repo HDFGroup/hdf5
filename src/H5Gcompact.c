@@ -52,7 +52,7 @@ typedef struct {
 
     /* upward */
     H5O_link_t *lnk;   /* Link struct to fill in */
-    hbool_t     found; /* Flag to indicate that the object was found */
+    hbool_t *   found; /* Pointer to flag to indicate that the object was found */
 } H5G_iter_lkp_t;
 
 /* Private macros */
@@ -450,7 +450,7 @@ H5G__compact_lookup_cb(const void *_mesg, unsigned H5_ATTR_UNUSED idx, void *_ud
         } /* end if */
 
         /* Indicate that the correct link was found */
-        udata->found = TRUE;
+        *udata->found = TRUE;
 
         /* Stop iteration now */
         HGOTO_DONE(H5_ITER_STOP)
@@ -472,32 +472,30 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-htri_t
-H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, H5O_link_t *lnk)
+herr_t
+H5G__compact_lookup(const H5O_loc_t *oloc, const char *name, hbool_t *found, H5O_link_t *lnk)
 {
-    H5G_iter_lkp_t      udata;            /* User data for iteration callback */
-    H5O_mesg_operator_t op;               /* Message operator */
-    htri_t              ret_value = FAIL; /* Return value */
+    H5G_iter_lkp_t      udata;               /* User data for iteration callback */
+    H5O_mesg_operator_t op;                  /* Message operator */
+    herr_t              ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* check arguments */
-    HDassert(lnk && oloc->file);
     HDassert(name && *name);
+    HDassert(found);
+    HDassert(lnk && oloc->file);
 
     /* Set up user data for iteration */
     udata.name  = name;
     udata.lnk   = lnk;
-    udata.found = FALSE;
+    udata.found = found;
 
     /* Iterate through the link messages, adding them to the table */
     op.op_type  = H5O_MESG_OP_APP;
     op.u.app_op = H5G__compact_lookup_cb;
     if (H5O_msg_iterate(oloc, H5O_LINK_ID, &op, &udata) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over link messages")
-
-    /* Determine if we found the link we were looking for */
-    ret_value = (htri_t)udata.found;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

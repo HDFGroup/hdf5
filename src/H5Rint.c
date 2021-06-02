@@ -89,7 +89,6 @@
     } while (0)
 
 /* Debug */
-//#define H5R_DEBUG
 #ifdef H5R_DEBUG
 #define H5R_LOG_DEBUG(...)                                                                                   \
     do {                                                                                                     \
@@ -192,7 +191,7 @@ H5R__init_package(void)
  RETURNS
     void
  DESCRIPTION
-    Release IDs for the atom group, deferring full interface shutdown
+    Release IDs for the ID group, deferring full interface shutdown
     until later (in H5R_term_package).
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -225,7 +224,7 @@ H5R_top_term_package(void)
  RETURNS
     void
  DESCRIPTION
-    Release the atom group and any other resources allocated.
+    Release the ID group and any other resources allocated.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
      Can't report errors...
@@ -547,7 +546,7 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     void *                new_file = NULL; /* File object opened */
     H5VL_connector_prop_t connector_prop;  /* Property for VOL connector ID & info     */
     H5VL_object_t *       vol_obj = NULL;  /* VOL object for file */
-    hbool_t               supported;       /* Whether 'post open' operation is supported by VOL connector */
+    uint64_t              supported;       /* Whether 'post open' operation is supported by VOL connector */
     hid_t                 ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_PACKAGE
@@ -579,17 +578,17 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 
     /* Get an ID for the file */
     if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize file handle")
+        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
     /* Get the file object */
     if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
 
     /* Make the 'post open' callback */
-    supported = FALSE;
+    supported = 0;
     if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
-    if (supported)
+    if (supported & H5VL_OPT_QUERY_SUPPORTED)
         if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_POST_OPEN, H5P_DATASET_XFER_DEFAULT,
                                H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5I_INVALID_HID,
@@ -747,8 +746,10 @@ H5R__copy(const H5R_ref_priv_t *src_ref, H5R_ref_priv_t *dst_ref)
         dst_ref->info.obj.filename = NULL;
 
         /* Set location ID and hold reference to it */
-        if (H5R__set_loc_id(dst_ref, src_ref->loc_id, TRUE, TRUE) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, FAIL, "cannot set reference location ID")
+        dst_ref->loc_id = src_ref->loc_id;
+        if (H5I_inc_ref(dst_ref->loc_id, TRUE) < 0)
+            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINC, FAIL, "incrementing location ID failed")
+        dst_ref->app_ref = TRUE;
     }
 
 done:
@@ -807,7 +808,7 @@ H5R__set_obj_token(H5R_ref_priv_t *ref, const H5O_token_t *obj_token, size_t tok
     HDassert(token_size);
     HDassert(token_size <= H5O_MAX_TOKEN_SIZE);
 
-    H5MM_memcpy(&ref->info.obj.token, obj_token, sizeof(H5O_token_t));
+    H5MM_memcpy(&ref->info.obj.token, obj_token, token_size);
     HDassert(token_size <= 255);
     ref->token_size = (uint8_t)token_size;
 
@@ -1040,12 +1041,13 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
 
     FUNC_ENTER_PACKAGE
 
+    /* Sanity checks */
     HDassert(buf);
     HDassert(nbytes);
     HDassert(ref);
-    buf_size = *nbytes;
 
     /* Don't decode if buffer size isn't big enough */
+    buf_size = *nbytes;
     if (buf_size < H5R_ENCODE_HEADER_SIZE)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
@@ -1106,6 +1108,7 @@ H5R__decode(const unsigned char *buf, size_t *nbytes, H5R_ref_priv_t *ref)
     H5R_LOG_DEBUG("Decoded reference, filename=%s, obj_addr=%s, encode size=%u", ref->info.obj.filename,
                   H5R__print_token(ref->info.obj.token), ref->encode_size);
 
+    /* Set output info */
     *nbytes = decode_size;
 
 done:
@@ -1465,122 +1468,6 @@ done:
 } /* end H5R__decode_heap() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5R__free_heap
- *
- * Purpose:     Remove data previously inserted into heap (native only).
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5R__free_heap(H5F_t *f, const unsigned char *buf, size_t nbytes)
-{
-    H5HG_t         hobjid;
-    const uint8_t *p = (const uint8_t *)buf;
-    size_t         buf_size;
-    herr_t         ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    HDassert(f);
-    HDassert(buf);
-
-    buf_size = H5HG_HEAP_ID_SIZE(f);
-    /* Don't decode if buffer size isn't big enough */
-    if (nbytes < buf_size)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
-
-    /* Get the heap information */
-    H5F_addr_decode(f, &p, &(hobjid.addr));
-    if (!H5F_addr_defined(hobjid.addr) || hobjid.addr == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Undefined reference pointer")
-    UINT32DECODE(p, hobjid.idx);
-
-    /* Free heap object */
-    if (hobjid.addr > 0) {
-        /* Free heap object */
-        if (H5HG_remove(f, &hobjid) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_WRITEERROR, FAIL, "Unable to remove heap object")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5R__free_heap() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5R__decode_token_compat
- *
- * Purpose:     Decode an object token. (native only)
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref_type,
-                         const unsigned char *buf, H5O_token_t *obj_token)
-{
-    hid_t                 file_id      = H5I_INVALID_HID; /* File ID for region reference */
-    H5VL_object_t *       vol_obj_file = NULL;
-    H5VL_file_cont_info_t cont_info    = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
-    herr_t                ret_value    = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-#ifndef NDEBUG
-    {
-        hbool_t is_native = FALSE; /* Whether the src file is using the native VOL connector */
-
-        /* Check if using native VOL connector */
-        if (H5VL_object_is_native(vol_obj, &is_native) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
-
-        /* Must use native VOL connector for this operation */
-        HDassert(is_native);
-    }
-#endif /* NDEBUG */
-
-    /* Get the file for the object */
-    if ((file_id = H5F_get_file_id(vol_obj, type, FALSE)) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-    /* Retrieve VOL object */
-    if (NULL == (vol_obj_file = H5VL_vol_object(file_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-
-    /* Get container info */
-    if (H5VL_file_get((const H5VL_object_t *)vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT,
-                      H5_REQUEST_NULL, &cont_info) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get container info")
-
-    if (ref_type == H5R_OBJECT1) {
-        size_t buf_size = H5R_OBJ_REF_BUF_SIZE;
-
-        /* Get object address */
-        if (H5R__decode_token_obj_compat(buf, &buf_size, obj_token, cont_info.token_size) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object token")
-    } /* end if */
-    else {
-        size_t buf_size = H5R_DSET_REG_REF_BUF_SIZE;
-        H5F_t *f        = NULL;
-
-        /* Retrieve file from VOL object */
-        if (NULL == (f = (H5F_t *)H5VL_object_data((const H5VL_object_t *)vol_obj_file)))
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid VOL object")
-
-        /* Get object address */
-        if (H5R__decode_token_region_compat(f, buf, &buf_size, obj_token, cont_info.token_size, NULL) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "unable to get object address")
-    } /* end else */
-
-done:
-    if (file_id != H5I_INVALID_HID && H5I_dec_ref(file_id) < 0)
-        HDONE_ERROR(H5E_REFERENCE, H5E_CANTDEC, FAIL, "unable to decrement refcount on file")
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5R__decode_token_compat() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5R__encode_token_obj_compat
  *
  * Purpose:     Encode an object token. (native only)
@@ -1643,82 +1530,6 @@ H5R__decode_token_obj_compat(const unsigned char *buf, size_t *nbytes, H5O_token
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5R__decode_token_obj_compat() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5R__encode_token_region_compat
- *
- * Purpose:     Encode dataset selection and insert data into heap
- *              (native only).
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token, size_t token_size, H5S_t *space,
-                                unsigned char *buf, size_t *nalloc)
-{
-    size_t         buf_size;
-    unsigned char *data      = NULL;
-    herr_t         ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
-
-    HDassert(f);
-    HDassert(obj_token);
-    HDassert(token_size);
-    HDassert(space);
-    HDassert(nalloc);
-
-    /* Get required buffer size */
-    if (H5R__encode_heap(f, NULL, &buf_size, NULL, (size_t)0) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-
-    if (buf && *nalloc >= buf_size) {
-        ssize_t  data_size;
-        uint8_t *p;
-
-        /* Pass the correct encoding version for the selection depending on the
-         * file libver bounds, this is later retrieved in H5S hyper encode */
-        H5CX_set_libver_bounds(f);
-
-        /* Zero the heap ID out, may leak heap space if user is re-using
-         * reference and doesn't have garbage collection turned on
-         */
-        HDmemset(buf, 0, buf_size);
-
-        /* Get the amount of space required to serialize the selection */
-        if ((data_size = H5S_SELECT_SERIAL_SIZE(space)) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, FAIL,
-                        "Invalid amount of space for serializing selection")
-
-        /* Increase buffer size to allow for the dataset token */
-        data_size += (hssize_t)token_size;
-
-        /* Allocate the space to store the serialized information */
-        H5_CHECK_OVERFLOW(data_size, hssize_t, size_t);
-        if (NULL == (data = (uint8_t *)H5MM_malloc((size_t)data_size)))
-            HGOTO_ERROR(H5E_REFERENCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-
-        /* Serialize information for dataset OID into heap buffer */
-        p = (uint8_t *)data;
-        H5MM_memcpy(p, obj_token, token_size);
-        p += token_size;
-
-        /* Serialize the selection into heap buffer */
-        if (H5S_SELECT_SERIALIZE(space, &p) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTCOPY, FAIL, "Unable to serialize selection")
-
-        /* Write to heap */
-        if (H5R__encode_heap(f, buf, nalloc, data, (size_t)data_size) < 0)
-            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
-    }
-    *nalloc = buf_size;
-
-done:
-    H5MM_free(data);
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5R__encode_token_region_compat() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5R__decode_token_region_compat
