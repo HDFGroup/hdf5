@@ -29,10 +29,6 @@
 #include <sys/stat.h>
 #include <string.h>
 
-#ifdef H5_HAVE_IO_H
-#include <io.h>
-#endif
-
 #ifdef H5_HAVE_UNISTD_H
 #include <sys/types.h>
 #include <unistd.h>
