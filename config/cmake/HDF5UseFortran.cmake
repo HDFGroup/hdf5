@@ -382,9 +382,6 @@ set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: 
 
 ENABLE_LANGUAGE (C)
 
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  include (CheckCSourceRuns)
-else ()
 #-----------------------------------------------------------------------------
 # The provided CMake C macros don't provide a general compile/run function
 # so this one is used.
@@ -421,7 +418,7 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
     #endif ()
 
     if (${COMPILE_RESULT_VAR})
-      if (${RUN_RESULT_VAR} MATCHES 1)
+      if (${RUN_RESULT_VAR} MATCHES 0)
         set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
           message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
@@ -443,63 +440,51 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
         message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
     endif ()
 endmacro ()
-endif ()
 
 set (PROG_SRC
     "
-#include <float.h>
-#include <stdio.h>
-#define CHECK_FLOAT128 ${${HDF_PREFIX}_SIZEOF___FLOAT128}
-#if CHECK_FLOAT128!=0
-# if ${${HDF_PREFIX}_HAVE_QUADMATH_H}!=0
-#include <quadmath.h>
-# endif
-# ifdef FLT128_DIG
-#define C_FLT128_DIG FLT128_DIG
-# else
-#define C_FLT128_DIG 0
-# endif
-#else
-#define C_FLT128_DIG 0
-#endif
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define C_LDBL_DIG DECIMAL_DIG
-#else
-#define C_LDBL_DIG LDBL_DIG
-#endif
-   int main() {
-       printf(\"%d\\\\n%d\\\\n\", C_LDBL_DIG, C_FLT128_DIG)\\\;
-       return 1\\\;
-   }
+#include <float.h>\n\
+#include <stdio.h>\n\
+#define CHECK_FLOAT128 H5_SIZEOF___FLOAT128\n\
+#if CHECK_FLOAT128!=0\n\
+#if H5_HAVE_QUADMATH_H!=0\n\
+#include <quadmath.h>\n\
+#endif\n\
+#ifdef FLT128_DIG\n\
+#define C_FLT128_DIG FLT128_DIG\n\
+#else\n\
+#define C_FLT128_DIG 0\n\
+#endif\n\
+#else\n\
+#define C_FLT128_DIG 0\n\
+#endif\n\
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L\n\
+#define C_LDBL_DIG DECIMAL_DIG\n\
+#else\n\
+#define C_LDBL_DIG LDBL_DIG\n\
+#endif\n\nint main() {\nFILE *pFile = fopen(\"pac_Cconftest.out\",\"w\")\\\;\nfprintf(pFile, \"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\nreturn 0\\\;\n}\n
      "
 )
 
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_c_source_runs (${PROG_SRC} PROG_OUTPUT4)
-else ()
-  C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT4)
-endif ()
+C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES)
+file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_Cconftest.out" PROG_OUTPUT4)
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
   message (VERBOSE "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 endif ()
+  message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
 # dnl The output from the above program will be:
-# dnl    -- LINE 1 --  long double decimal precision
-# dnl    -- LINE 2 --  __float128 decimal precision
-if (NOT PROG_OUTPUT4 STREQUAL "")
-  # Convert the string to a list of strings by replacing the carriage return with a semicolon
-  string (REGEX REPLACE "\n" ";" PROG_OUTPUT4 "${PROG_OUTPUT4}")
+# dnl  -- long double decimal precision  --  __float128 decimal precision
 
-  list (GET PROG_OUTPUT4 0 LDBL_DIG)
-  list (GET PROG_OUTPUT4 1 FLT128_DIG)
+list (GET PROG_OUTPUT4 0 LDBL_DIG)
+list (GET PROG_OUTPUT4 1 FLT128_DIG)
 
-  if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
-    set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-    set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-    set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
-  else ()
-    set(${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
-  endif ()
+if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
+  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
+  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
+else ()
+  set(${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
 endif ()
 
 # Setting definition if there is a 16 byte fortran integer
