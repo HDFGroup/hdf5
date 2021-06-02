@@ -1655,21 +1655,6 @@ main(int argc, char *argv[])
     if (!rawoutstream)
         rawoutstream = stdout;
 
-#if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
-#if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
-    /*
-     * Make sure unaligned access generates SIGBUS and doesn't print warning
-     * messages so that we can detect alignment constraints on the DEC Alpha.
-     */
-    int nvpairs[2];
-    nvpairs[0] = SSIN_UACPROC;
-    nvpairs[1] = UAC_NOPRINT | UAC_SIGBUS;
-    if (setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0) < 0) {
-        fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n", HDstrerror(errno));
-    }
-#endif
-#endif
-
 #if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
     /* verify the SIGBUS and SIGSEGV handlers work properly */
     if (verify_signal_handlers(SIGBUS, sigbus_handler) != 0) {
