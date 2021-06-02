@@ -47,13 +47,13 @@ static herr_t H5VL__native_term(void);
 
 /* Native VOL connector class struct */
 static const H5VL_class_t H5VL_native_cls_g = {
-    H5VL_VERSION,        /* VOL class struct version */
-    H5VL_NATIVE_VALUE,   /* value        */
-    H5VL_NATIVE_NAME,    /* name         */
-    H5VL_NATIVE_VERSION, /* connector version */
-    0,                   /* capability flags */
-    NULL,                /* initialize   */
-    H5VL__native_term,   /* terminate    */
+    H5VL_VERSION,               /* VOL class struct version */
+    H5VL_NATIVE_VALUE,          /* value        */
+    H5VL_NATIVE_NAME,           /* name         */
+    H5VL_NATIVE_VERSION,        /* connector version */
+    H5VL_CAP_FLAG_NATIVE_FILES, /* capability flags */
+    NULL,                       /* initialize   */
+    H5VL__native_term,          /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* info size    */
@@ -139,8 +139,9 @@ static const H5VL_class_t H5VL_native_cls_g = {
     },
     {
         /* introspect_cls */
-        H5VL__native_introspect_get_conn_cls, /* get_conn_cls */
-        H5VL__native_introspect_opt_query,    /* opt_query    */
+        H5VL__native_introspect_get_conn_cls,  /* get_conn_cls */
+        H5VL__native_introspect_get_cap_flags, /* get_cap_flags */
+        H5VL__native_introspect_opt_query,     /* opt_query    */
     },
     {
         /* request_cls */
@@ -243,6 +244,32 @@ H5VL__native_introspect_get_conn_cls(void H5_ATTR_UNUSED *obj, H5VL_get_conn_lvl
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5VL__native_introspect_get_conn_cls() */
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VL__native_introspect_get_cap_flags
+ *
+ * Purpose:     Query the capability flags for this connector.
+ *
+ * Note:        This routine is in this file so that it can return the field
+ *              from the staticly declared class struct.
+ *
+ * Returns:     SUCCEED (Can't fail)
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VL__native_introspect_get_cap_flags(const void H5_ATTR_UNUSED *info, unsigned *cap_flags)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity check */
+    HDassert(cap_flags);
+
+    /* Set the flags from the connector's field */
+    *cap_flags = H5VL_native_cls_g.cap_flags;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__native_introspect_get_cap_flags() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_native_get_file_addr_len

@@ -21,8 +21,8 @@
  */
 
 /* See H5private.h for how to include headers */
-#undef NDEBUG
 #include "hdf5.h"
+#include "hdf5dev.h"
 
 #include <assert.h>
 #include <stdio.h>

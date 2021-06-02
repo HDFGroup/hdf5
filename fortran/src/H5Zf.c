@@ -20,6 +20,7 @@
  */
 
 #include "H5f90.h"
+#include "hdf5dev.h"
 
 /****if* H5Zf/h5zunregister_c
  * NAME

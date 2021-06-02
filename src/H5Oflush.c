@@ -48,7 +48,7 @@
 /* Local Prototypes */
 /********************/
 static herr_t H5O__oh_tag(const H5O_loc_t *oloc, haddr_t *tag);
-static herr_t H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc);
+static herr_t H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid);
 
 /*************/
 /* Functions */
@@ -193,7 +193,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
+H5O_refresh_metadata(H5O_loc_t *oloc, hid_t oid)
 {
     H5VL_object_t *vol_obj   = NULL;    /* VOL object associated with the ID */
     hbool_t        objs_incr = FALSE;   /* Whether the object count in the file was incremented */
@@ -202,7 +202,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
     FUNC_ENTER_NOAPI(FAIL)
 
     /* If the file is opened with write access, no need to perform refresh actions. */
-    if (!(H5F_INTENT(oloc.file) & H5F_ACC_RDWR)) {
+    if (!(H5F_INTENT(oloc->file) & H5F_ACC_RDWR)) {
         H5G_loc_t    obj_loc;
         H5O_loc_t    obj_oloc;
         H5G_name_t   obj_path;
@@ -217,7 +217,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         /* "Fake" another open object in the file, so that it doesn't get closed
          *  if this object is the only thing holding the file open.
          */
-        H5F_incr_nopen_objs(oloc.file);
+        H5F_incr_nopen_objs(oloc->file);
         objs_incr = TRUE;
 
         /* Save important datatype state */
@@ -239,11 +239,11 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
         connector->nrefs++;
 
         /* Close object & evict its metadata */
-        if ((H5O__refresh_metadata_close(oid, oloc, &obj_loc)) < 0)
+        if (H5O__refresh_metadata_close(oloc, &obj_loc, oid) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Re-open the object, re-fetching its metadata */
-        if ((H5O_refresh_metadata_reopen(oid, &obj_loc, connector, FALSE)) < 0)
+        if (H5O_refresh_metadata_reopen(oid, &obj_loc, connector, FALSE) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
         /* Restore the number of references on the VOL connector */
@@ -258,7 +258,7 @@ H5O_refresh_metadata(hid_t oid, H5O_loc_t oloc)
 
 done:
     if (objs_incr)
-        H5F_decr_nopen_objs(oloc.file);
+        H5F_decr_nopen_objs(oloc->file);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5O_refresh_metadata() */
@@ -283,8 +283,9 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
+H5O__refresh_metadata_close(H5O_loc_t *oloc, H5G_loc_t *obj_loc, hid_t oid)
 {
+    H5F_t * file;                /* Local copy of the object's file pointer */
     haddr_t tag       = 0;       /* Tag for object */
     hbool_t corked    = FALSE;   /* Whether object's metadata is corked */
     herr_t  ret_value = SUCCEED; /* Return value */
@@ -305,28 +306,32 @@ H5O__refresh_metadata_close(hid_t oid, H5O_loc_t oloc, H5G_loc_t *obj_loc)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTOPENOBJ, FAIL, "unable to prepare refresh for dataset")
 
     /* Retrieve tag for object */
-    if (H5O__oh_tag(&oloc, &tag) < 0)
+    if (H5O__oh_tag(oloc, &tag) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to get object header address")
 
     /* Get cork status of the object with tag */
-    if (H5AC_cork(oloc.file, tag, H5AC__GET_CORKED, &corked) < 0)
+    if (H5AC_cork(oloc->file, tag, H5AC__GET_CORKED, &corked) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to retrieve an object's cork status")
 
+    /* Hold a copy of the object's file pointer, since closing the object will
+     * invalidate the file pointer in the oloc.
+     */
+    file = oloc->file;
     /* Close the object */
     if (H5I_dec_ref(oid) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, FAIL, "unable to close object")
 
     /* Flush metadata based on tag value of the object */
-    if (H5F_flush_tagged_metadata(oloc.file, tag) < 0)
+    if (H5F_flush_tagged_metadata(file, tag) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush tagged metadata")
 
     /* Evict the object's tagged metadata */
-    if (H5F_evict_tagged_metadata(oloc.file, tag) < 0)
+    if (H5F_evict_tagged_metadata(file, tag) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to evict metadata")
 
     /* Re-cork object with tag */
     if (corked)
-        if (H5AC_cork(oloc.file, tag, H5AC__SET_CORK, &corked) < 0)
+        if (H5AC_cork(file, tag, H5AC__SET_CORK, &corked) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_SYSTEM, FAIL, "unable to cork the object")
 
 done:

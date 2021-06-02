@@ -1598,6 +1598,9 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDunlink
 #define HDunlink(S) unlink(S)
 #endif /* HDunlink */
+#ifndef HDunsetenv
+#define HDunsetenv(S) unsetenv(S)
+#endif /* HDsetenv */
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
 #endif /* HDutime */

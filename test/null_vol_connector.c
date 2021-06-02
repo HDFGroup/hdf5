@@ -19,7 +19,7 @@
 #include "hdf5.h"
 
 /* For HDF5 plugin functionality */
-#include "H5PLextern.h"
+#include "hdf5dev.h"
 
 /* This connector's header */
 #include "null_vol_connector.h"
