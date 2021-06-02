@@ -1239,15 +1239,15 @@ esac
 ## Windows
 case "`uname`" in
   CYGWIN*)
-    AC_CHECK_HEADERS([io.h sys/timeb.h])
+    AC_CHECK_HEADERS([sys/timeb.h])
     UNAME_CYGWIN="yes"
     ;;
   MINGW*)
-    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
+    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     AC_HAVE_LIBRARY([ws2_32])
     ;;
   *)
-    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
+    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     ;;
 esac
 

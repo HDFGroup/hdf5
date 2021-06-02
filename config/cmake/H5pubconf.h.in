@@ -201,9 +201,6 @@
 /* Define to 1 if you have the `ioctl' function. */
 #cmakedefine H5_HAVE_IOCTL @H5_HAVE_IOCTL@
 
-/* Define to 1 if you have the <io.h> header file. */
-#cmakedefine H5_HAVE_IO_H @H5_HAVE_IO_H@
-
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #cmakedefine H5_HAVE_LIBCRYPTO @H5_HAVE_LIBCRYPTO@
 
