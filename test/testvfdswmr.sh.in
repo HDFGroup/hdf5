@@ -53,7 +53,7 @@ fi
 ##Default setting
 BIGSET_n=25                         # -n option: # of iterations
 BIGSET_few_s=20                     # -s option: # of datasets (for few_big test)
-BIGSET_many_s=500                   # -s option: # of datasets (for many_small test)
+BIGSET_many_s=200                   # -s option: # of datasets (for many_small test)
 GROUP_n=40                          # -n option: # of groups (for group test)
 GROUP_attr_n=1                      # -n option: # of groups (for group attribute test)
 GROUP_op_n=1                        # -n option: # of groups (for group attribute test)
@@ -61,7 +61,7 @@ GROUP_op_n=1                        # -n option: # of groups (for group attribut
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # Setting for exhaustive run
     BIGSET_n=50
     BIGSET_few_s=40
-    BIGSET_many_s=1000
+    BIGSET_many_s=400
     GROUP_n=400
     GROUP_attr_n=2
     GROUP_op_n=2                       
@@ -1032,8 +1032,7 @@ for options in ${os_grp_op_list[*]}; do
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 done
 
-
-
+# bigset test for smaller chunks
 for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	if [ ${do_many_small:-no} = no ]; then
 		continue
@@ -1041,7 +1040,7 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 	#
 	# Test many small datasets of one and two dimensions.
 	#
-	# Perform 50 iterations on 1000 extensible datasets configured with
+	# Perform 25 iterations on 200 extensible datasets configured with
 	# 16x16 chunks of 32-bit unsigned integer elements,
 	# expanding each dataset by a chunk in one dimension (up to 50x1
 	# 16x16 chunks) on each iteration.
@@ -1051,19 +1050,18 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 	#
 	echo launch vfd_swmr_bigset_writer many small, options $options
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
-	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -r 16 -c 16 -q &
+	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -r 16 -c 16 -q -l 6 &
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_bigset_reader \
-	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_many_s -r 16 -c 16 -q -W &
+	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_many_s -r 16 -c 16 -q -l 6 &
 	pid_reader=$!
 
-	# Wait for the reader to finish before signalling the
-	# writer to quit: the writer holds the file open so that the
+	# Wait for the reader to finish before the
+	# writer quits: the writer holds the file open so that the
 	# reader will find the shadow file when it opens
 	# the .h5 file.
 	wait $pid_reader
-	kill -USR1 $(cat vfd_swmr_bigset_writer.pid)
 	wait $pid_writer
 
 	# Collect exit code of the reader
@@ -1083,11 +1081,12 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 	rm -f vfd_swmr_bigset_reader.*.{out,rc}
 done
 
+# bigset test for bigger chunks
 for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	#
 	# Test a few big datasets of one and two dimensions.
 	#
-	# Perform 50 iterations on 5 extensible datasets configured with
+	# Perform 25 iterations on 20 extensible datasets configured with
 	# 256x256 chunks of 32-bit unsigned integer elements,
 	# expanding each dataset by a chunk in one dimension (up to 50x1
 	# 256x256 chunks) on each iteration.
@@ -1100,19 +1099,18 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 	fi
 	echo launch vfd_swmr_bigset_writer few big, options $options
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
-	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_few_s -r 256 -c 256 -q &
+	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_few_s -r 256 -c 256 -q -l 3 &
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_bigset_reader \
-	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_few_s -r 256 -c 256 -q -W &
+	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_few_s -r 256 -c 256 -q -l 3 &
 	pid_reader=$!
 
-	# Wait for the reader to finish before signalling the
-	# writer to quit: the writer holds the file open so that the
+	# Wait for the reader to finish before the
+	# writer quits: the writer holds the file open so that the
 	# reader will find the shadow file when it opens
 	# the .h5 file.
 	wait $pid_reader
-	kill -USR1 $(cat vfd_swmr_bigset_writer.pid)
 	wait $pid_writer
 
 	# Collect exit code of the reader
