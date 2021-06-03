@@ -49,6 +49,14 @@ New Features
 
     Configuration:
     -------------
+    - Adds C++ Autotools configuration file for Intel
+
+      * Checks for icpc as the compiler
+      * Sets std=c++11
+      * Copies most non-warning flags from intel-flags
+      
+      (DER - 2021/06/02)
+
     - Adds C++ Autotools configuration file for PGI
 
       * Checks for pgc++ as the compiler name (was: pgCC)

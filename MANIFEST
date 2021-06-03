@@ -135,6 +135,7 @@
 ./config/cygwin
 ./config/ibm-aix
 ./config/ibm-flags
+./config/intel-cxxflags
 ./config/intel-fflags
 ./config/intel-flags
 ./config/libhdf5.pc.in
