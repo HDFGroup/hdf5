@@ -5487,7 +5487,8 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
     herr_t            ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE9("e", "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id);
+    H5TRACE9("e", "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id,
+             es_id);
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
@@ -6065,7 +6066,8 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     herr_t            ret_value       = SUCCEED;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE9("e", "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id);
+    H5TRACE9("e", "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id,
+             es_id);
 
     /* Check arguments */
     /* name is verified in H5VL_setup_name_args() */
