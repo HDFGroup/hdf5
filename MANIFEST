@@ -146,6 +146,7 @@
 ./config/lt_vers.am
 ./config/Makefile.am.blank
 ./config/netbsd
+./config/pgi-cxxflags
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
