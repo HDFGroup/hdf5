@@ -54,7 +54,7 @@ New Features
       * Checks for icpc as the compiler
       * Sets std=c++11
       * Copies most non-warning flags from intel-flags
-      
+
       (DER - 2021/06/02)
 
     - Adds C++ Autotools configuration file for PGI
@@ -77,7 +77,7 @@ New Features
 
     - A C++11-compliant compiler is now required to build the C++ wrappers
 
-      CMAKE_CXX_STANDARD is now set to 11 when building with CMake and 
+      CMAKE_CXX_STANDARD is now set to 11 when building with CMake and
       -std=c++11 is added when building with clang/gcc via the Autotools.
 
       (DER - 2021/05/27)
@@ -1047,6 +1047,22 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Refactor CMake configure for Fortran
+
+      The Fortran configure tests for KINDs reused a single output file that was
+      read to form the Integer and Real Kinds defines. However, if config was run
+      more then once, the CMake completed variable prevented the tests from executing
+      again and the last value saved in the file was used to create the define.
+      Creating separate files for each KIND solved the issue.
+
+      In addition the test for H5_PAC_C_MAX_REAL_PRECISION was not pulling in
+      defines for proper operation and did not define H5_PAC_C_MAX_REAL_PRECISION
+      correctly for a zero value. This was fixed by supplying the required defines.
+      In addition it was moved from the Fortran specific HDF5UseFortran.camke file
+      to the C centric ConfigureChecks.cmake file.
+
+      (ADB - 2021/06/03)
+
     - Remove arbitrary warning flag groups from CMake builds
 
       The arbitrary groups were created to reduce the quantity of warnings being
