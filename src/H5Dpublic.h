@@ -641,6 +641,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * \brief Iterate over all chunks
  *
  * \dset_id
+ * \param[in] dxpl_id       Identifier of a transfer property list
  * \param[in]  cb       User callback function, called for every chunk.
  * \param[in]  op_data  User-defined pointer to data required by op
  *
@@ -677,7 +678,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *                  indicating failure.
  *
  */
-H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, H5D_chunk_iter_op_t cb, void *op_data);
+H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb, void *op_data);
 
 /**
  * --------------------------------------------------------------------------
@@ -1338,8 +1339,6 @@ H5_DLL herr_t H5Dset_extent_async(const char *app_file, const char *app_func, un
  *
  */
 H5_DLL herr_t H5Dflush(hid_t dset_id);
-
-H5_DLL herr_t H5Dwait(hid_t dset_id);
 
 /**
  * --------------------------------------------------------------------------

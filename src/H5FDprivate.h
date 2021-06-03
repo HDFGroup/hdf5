@@ -18,8 +18,9 @@
 #ifndef H5FDprivate_H
 #define H5FDprivate_H
 
-/* Include package's public header */
+/* Include package's public headers */
 #include "H5FDpublic.h"
+#include "H5FDdevelop.h"
 
 /* Private headers needed by this file */
 #include "H5Pprivate.h" /* Property lists            */

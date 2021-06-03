@@ -15,7 +15,7 @@
 
 #include <stdlib.h>
 #include <stdio.h>
-#include "H5PLextern.h"
+#include "hdf5dev.h"
 
 #define H5Z_FILTER_DYNLIB4 260
 

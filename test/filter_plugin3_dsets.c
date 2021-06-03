@@ -18,7 +18,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "H5PLextern.h"
+#include "hdf5dev.h"
 
 #define FILTER3_ID 259
 

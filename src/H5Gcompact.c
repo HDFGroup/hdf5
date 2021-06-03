@@ -200,20 +200,20 @@ done:
  *
  * Purpose:     Returns the name of objects in the group by giving index.
  *
- * Return:	Success:        Non-negative, length of name
- *		Failure:	Negative
+ * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *	        Sep  6, 2005
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+herr_t
 H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5_index_t idx_type,
-                             H5_iter_order_t order, hsize_t idx, char *name, size_t size)
+                             H5_iter_order_t order, hsize_t idx, char *name, size_t name_size,
+                             size_t *name_len)
 {
     H5G_link_table_t ltable    = {0, NULL}; /* Link table */
-    ssize_t          ret_value = -1;        /* Return value */
+    herr_t           ret_value = SUCCEED;   /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -229,13 +229,13 @@ H5G__compact_get_name_by_idx(const H5O_loc_t *oloc, const H5O_linfo_t *linfo, H5
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "index out of bound")
 
     /* Get the length of the name */
-    ret_value = (ssize_t)HDstrlen(ltable.lnks[idx].name);
+    *name_len = HDstrlen(ltable.lnks[idx].name);
 
     /* Copy the name into the user's buffer, if given */
     if (name) {
-        HDstrncpy(name, ltable.lnks[idx].name, MIN((size_t)(ret_value + 1), size));
-        if ((size_t)ret_value >= size)
-            name[size - 1] = '\0';
+        HDstrncpy(name, ltable.lnks[idx].name, MIN((*name_len + 1), name_size));
+        if (*name_len >= name_size)
+            name[name_size - 1] = '\0';
     } /* end if */
 
 done:

@@ -1676,7 +1676,7 @@ test_basic_query(hid_t fapl)
 
     /* iterate over all chunks */
     cptr = &(chunk_infos[0]);
-    if (H5Dchunk_iter(dset, &iter_cb, &cptr) < 0)
+    if (H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb, &cptr) < 0)
         TEST_ERROR;
 
     VERIFY(cptr, &(chunk_infos[2]), "Iterator did not iterate all chunks");
@@ -1690,7 +1690,7 @@ test_basic_query(hid_t fapl)
 
     /* iterate and stop after one iteration */
     cptr = &(chunk_infos[0]);
-    if (H5Dchunk_iter(dset, &iter_cb_stop, &cptr) < 0)
+    if (H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb_stop, &cptr) < 0)
         TEST_ERROR;
     VERIFY(cptr, &(chunk_infos[1]), "Verification of halted iterator failed\n");
 
@@ -1698,7 +1698,7 @@ test_basic_query(hid_t fapl)
     cptr = &(chunk_infos[0]);
     H5E_BEGIN_TRY
     {
-        ret = H5Dchunk_iter(dset, &iter_cb_fail, &cptr);
+        ret = H5Dchunk_iter(dset, H5P_DEFAULT, &iter_cb_fail, &cptr);
     }
     H5E_END_TRY;
     if (ret >= 0)

@@ -43,14 +43,7 @@ typedef struct H5ES_event_t {
     H5VL_object_t *      request;     /* Request token for event */
     struct H5ES_event_t *prev, *next; /* Previous and next event nodes */
 
-    /* Useful info for debugging and error reporting */
-    const char *api_name; /* Name of API routine for event */
-    const char *api_args; /* Arguments to API routine */
-    const char *app_file; /* Name of source file from application */
-    const char *app_func; /* Name of source function from application */
-    unsigned    app_line; /* Line # of source file from application */
-    uint64_t    ev_count; /* This event is the n'th operation in the event set */
-    uint64_t    ev_time;  /* Timestamp for this event (in ms from UNIX epoch) */
+    H5ES_op_info_t op_info; /* Useful info about operation */
 } H5ES_event_t;
 
 /* Typedef for lists of event set operations */
@@ -61,7 +54,11 @@ typedef struct H5ES_event_list_t {
 
 /* Typedef for event set objects */
 struct H5ES_t {
-    uint64_t op_counter; /* Count of operations inserted into this set */
+    uint64_t                   op_counter; /* Count of operations inserted into this set */
+    H5ES_event_insert_func_t   ins_func;   /* Callback to invoke for operation inserts */
+    void *                     ins_ctx;    /* Context for callback to invoke for operation inserts */
+    H5ES_event_complete_func_t comp_func;  /* Callback to invoke for operation completions */
+    void *                     comp_ctx;   /* Context for callback to invoke for operation inserts */
 
     /* Active events */
     H5ES_event_list_t active; /* List of active events in set */
@@ -82,10 +79,11 @@ typedef int (*H5ES_list_iter_func_t)(H5ES_event_t *ev, void *ctx);
 /* Package Private Prototypes */
 /******************************/
 H5_DLL H5ES_t *H5ES__create(void);
+H5_DLL herr_t  H5ES__insert_request(H5ES_t *es, H5VL_t *connector, void *token);
 H5_DLL herr_t  H5ES__wait(H5ES_t *es, uint64_t timeout, size_t *num_in_progress, hbool_t *op_failed);
+H5_DLL herr_t  H5ES__cancel(H5ES_t *es, size_t *num_not_canceled, hbool_t *op_failed);
 H5_DLL herr_t  H5ES__get_err_info(H5ES_t *es, size_t num_err_info, H5ES_err_info_t err_info[],
                                   size_t *num_cleared);
-H5_DLL herr_t  H5ES__close(H5ES_t *es);
 
 /* Event list operations */
 H5_DLL void   H5ES__list_append(H5ES_event_list_t *el, H5ES_event_t *ev);

@@ -200,14 +200,14 @@ H5_DLL herr_t H5A__iterate(const H5G_loc_t *loc, const char *obj_name, H5_index_
 #ifndef H5_NO_DEPRECATED_SYMBOLS
 H5_DLL herr_t H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_data);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-H5_DLL herr_t  H5A__delete_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_name);
-H5_DLL herr_t  H5A__delete_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
-                                  H5_iter_order_t order, hsize_t n);
-H5_DLL herr_t  H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
-                                   hbool_t *attr_exists);
-H5_DLL herr_t  H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf);
-H5_DLL herr_t  H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf);
-H5_DLL ssize_t H5A__get_name(H5A_t *attr, size_t buf_size, char *buf);
+H5_DLL herr_t H5A__delete_by_name(const H5G_loc_t *loc, const char *obj_name, const char *attr_name);
+H5_DLL herr_t H5A__delete_by_idx(const H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type,
+                                 H5_iter_order_t order, hsize_t n);
+H5_DLL herr_t H5A__exists_by_name(H5G_loc_t loc, const char *obj_name, const char *attr_name,
+                                  hbool_t *attr_exists);
+H5_DLL herr_t H5A__write(H5A_t *attr, const H5T_t *mem_type, const void *buf);
+H5_DLL herr_t H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf);
+H5_DLL herr_t H5A__get_name(H5A_t *attr, size_t buf_size, char *buf, size_t *attr_name_len);
 
 /* Attribute "dense" storage routines */
 H5_DLL herr_t H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo);

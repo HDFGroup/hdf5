@@ -24,6 +24,7 @@
  */
 
 #include "hdf5.h"
+#include "hdf5dev.h"
 #include <stdlib.h>
 #include <string.h>
 

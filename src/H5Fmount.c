@@ -83,7 +83,7 @@ done:
 } /* end H5F__close_mounts() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__mount
+ * Function:	H5F_mount
  *
  * Purpose:	Mount file CHILD onto the group specified by LOC and NAME,
  *		using mount properties in PLIST.  CHILD must not already be
@@ -97,7 +97,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED plist_id)
+H5F_mount(const H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED plist_id)
 {
     H5G_t *    mount_point = NULL;  /*mount point group		*/
     H5F_t *    ancestor    = NULL;  /*ancestor files		*/
@@ -110,7 +110,7 @@ H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED 
     H5G_loc_t  root_loc;            /* Group location of root of file to mount */
     herr_t     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(loc);
     HDassert(name && *name);
@@ -157,10 +157,9 @@ H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t H5_ATTR_UNUSED 
     HDassert(mp_loc.oloc);
     mp_loc.path = H5G_nameof(mount_point);
     HDassert(mp_loc.path);
-    for (ancestor = parent; ancestor; ancestor = ancestor->parent) {
+    for (ancestor = parent; ancestor; ancestor = ancestor->parent)
         if (ancestor->shared == child->shared)
             HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "mount would introduce a cycle")
-    }
 
     /* Make certain that the parent & child files have the same "file close degree" */
     if (parent->shared->fc_degree != child->shared->fc_degree)
@@ -240,10 +239,10 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__mount() */
+} /* end H5F_mount() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F__unmount
+ * Function:	H5F_unmount
  *
  * Purpose:	Unmount the child which is mounted at the group specified by
  *		LOC and NAME or fail if nothing is mounted there.  Neither
@@ -261,7 +260,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__unmount(H5G_loc_t *loc, const char *name)
+H5F_unmount(const H5G_loc_t *loc, const char *name)
 {
     H5G_t *    child_group = NULL;   /* Child's group in parent mtab	*/
     H5F_t *    child       = NULL;   /*mounted file			*/
@@ -275,7 +274,7 @@ H5F__unmount(H5G_loc_t *loc, const char *name)
     int        child_idx;            /* Index of child in parent's mtab */
     herr_t     ret_value = SUCCEED;  /*return value			*/
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(loc);
     HDassert(name && *name);
@@ -291,7 +290,7 @@ H5F__unmount(H5G_loc_t *loc, const char *name)
      * then we must have found the mount point.
      */
     if (H5G_loc_find(loc, name, &mp_loc /*out*/) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "group not found")
+        HGOTO_ERROR(H5E_FILE, H5E_NOTFOUND, FAIL, "group not found")
     mp_loc_setup = TRUE;
     child        = mp_loc.oloc->file;
     mnt_oloc     = H5G_oloc(child->shared->root_grp);
@@ -364,7 +363,7 @@ H5F__unmount(H5G_loc_t *loc, const char *name)
     /* Search the open IDs replace names to reflect unmount operation */
     if (H5G_name_replace(NULL, H5G_NAME_UNMOUNT, mp_loc.oloc->file, mp_loc.path->full_path_r,
                          root_loc.oloc->file, root_loc.path->full_path_r) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to replace name")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to replace name")
 
     /* Eliminate the mount point from the table */
     HDmemmove(parent->shared->mtab.child + (unsigned)child_idx,
@@ -376,7 +375,7 @@ H5F__unmount(H5G_loc_t *loc, const char *name)
 
     /* Unmount the child file from the parent file */
     if (H5G_unmount(child_group) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to reset group mounted flag")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "unable to reset group mounted flag")
     if (H5G_close(child_group) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEOBJ, FAIL, "unable to close unmounted group")
 
@@ -391,7 +390,7 @@ done:
         H5G_loc_free(&mp_loc);
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F__unmount() */
+} /* end H5F_unmount() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5F_is_mount

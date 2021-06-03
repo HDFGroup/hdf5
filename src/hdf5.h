@@ -38,7 +38,6 @@
 #include "H5Rpublic.h"  /* References                               */
 #include "H5Spublic.h"  /* Dataspaces                               */
 #include "H5Tpublic.h"  /* Datatypes                                */
-#include "H5TSpublic.h" /* Thread-safety                            */
 #include "H5VLpublic.h" /* Virtual Object Layer                     */
 #include "H5Zpublic.h"  /* Data filters                             */
 
