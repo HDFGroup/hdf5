@@ -2180,7 +2180,7 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
          */
         if (size_str < *len - 1) {
             if (size_str + size_str_to_add < *len - 1) {
-                HDstrncat(buf, str_to_add, size_str_to_add);
+                HDstrcat(buf, str_to_add);
             }
             else {
                 HDstrncat(buf, str_to_add, (*len - 1) - size_str);
