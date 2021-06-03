@@ -28,19 +28,7 @@ HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
         minor: Inappropriate type
 
 ********* Print error stack in customized way *********
-    error #000: (file name) in H5VL_vol_object(): line (number)
-        major: Invalid arguments to routine
-        minor: Inappropriate type
-    error #001: (file name) in H5VL_setup_acc_args(): line (number)
-        major: Invalid arguments to routine
-        minor: Inappropriate type
-    error #002: (file name) in H5D__create_api_common(): line (number)
-        major: Dataset
-        minor: Can't set value
-    error #003: (file name) in H5Dcreate2(): line (number)
-        major: Dataset
-        minor: Unable to create file
-    error #004: (file name) in H5Eget_auto(1 or 2)(): line (number)
+    error #000: (file name) in H5Eget_auto(1 or 2)(): line (number)
         major: Error API
         minor: Can't get value
 
