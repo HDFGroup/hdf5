@@ -949,7 +949,7 @@ diff_can_type(hid_t f_tid1, hid_t f_tid2, int rank1, int rank2, hsize_t *dims1, 
     int         i;
     int         ret_value = 1;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /*-------------------------------------------------------------------------
      * check for the same class
      *-------------------------------------------------------------------------

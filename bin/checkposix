@@ -44,7 +44,7 @@ foreach $arg (@ARGV) {
     #
     # If a user specifies one file, process it no matter what so people
     # can inspect files we normally skip (like H5system.c).
-    if($#ARGV gt 0 and $filename =~ /H5FDmulti|H5FDstdio|H5VLpassthru|H5system|H5detect|H5make_libsettings/) {
+    if($#ARGV gt 0 and $filename =~ /H5FDmulti|H5FDstdio|H5system|H5detect|H5make_libsettings/) {
         print "$filename is exempt from using Standard library macro wrappers\n";
         next;
     }
@@ -84,7 +84,7 @@ foreach $arg (@ARGV) {
         # Now find all function calls on this line which don't start with 'H'
         while (($name)=/\b([a-z_A-GI-Z]\w*)\s*\(/) {
             $_ = $';
-              
+
             # Ignore C statements that look sort of like function
             # calls.
             next if $name =~ /^(if|for|offsetof|return|sizeof|switch|while|void)$/;
@@ -141,7 +141,7 @@ foreach $arg (@ARGV) {
             }
 
             # TESTING (not comprehensive - just noise reduction)
-            
+
             # Test macros and functions (testhdf5.h)
             next if $name =~ /^(AddTest|TestErrPrintf|TestSummary|TestCleanup|TestShutdown)$/;
             next if $name =~ /^(CHECK|CHECK_PTR|CHECK_PTR_NULL|CHECK_PTR_EQ|CHECK_I)$/;

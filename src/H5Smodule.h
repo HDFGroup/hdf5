@@ -29,4 +29,31 @@
 #define H5_MY_PKG_ERR  H5E_DATASPACE
 #define H5_MY_PKG_INIT YES
 
+/**\defgroup H5S H5S
+ * \brief Dataspace Interface
+ *
+ * \details The Dataspace Interface provides functions for creating and
+ *          working with dataspaces.
+ *
+ *          A dataspace has two roles:
+ *
+ *          \li It contains the spatial information (logical layout) of a
+ *              dataset stored in a file.
+ *          \li It describes an application’s data buffers and data elements
+ *              participating in I/O. In other words, it can be used to
+ *              select a portion or subset of a dataset.
+ *
+ *          The spatial information of a dataset in a file includes the
+ *          rank and dimensions of the dataset, which are a permanent part
+ *          of the dataset definition. It can have dimensions that are fixed
+ *          (unchanging) or unlimited, which means they can grow in size
+ *          (or are extendible).
+ *
+ *          A dataspace can consist of:
+ *          \li  no elements (NULL)
+ *          \li  a single element (scalar), or
+ *          \li  a simple array.
+ *
+ */
+
 #endif /* H5Smodule_H */

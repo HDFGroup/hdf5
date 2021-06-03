@@ -3,7 +3,6 @@
 # circumstances, so ask the compiler to treat them as errors:
 #
 -Wbad-function-cast
--Wdeclaration-after-statement
 -Wimplicit-function-declaration
 -Wmissing-declarations
 -Wmissing-prototypes
@@ -29,9 +28,6 @@
 #       -Werror=unused-variable
 #
 -Wunused-variable
-#
-#     H5VLpassthru.c
-#       -Werror=unused-parameter
 #
 -Wunused-parameter
 #
