@@ -2663,6 +2663,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                   (function_times.elapsed - *returning));
     } /* end if */
 
+error:
     HDva_end(ap);
     if (returning)
         HDfprintf(out, ";\n");
