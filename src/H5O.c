@@ -1230,14 +1230,13 @@ H5Oget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
                           hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    void *         token     = NULL;            /* Request token for async operation */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation */
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    /* clang-format off */
-    H5TRACE9("e", "*s*sIui*sxIuii", app_file, app_func, app_line, loc_id, name, oinfo, fields, lapl_id, es_id);
-    /* clang-format on */
+    H5TRACE9("e", "*s*sIui*sxIuii", app_file, app_func, app_line, loc_id, name, oinfo, fields, lapl_id,
+             es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)

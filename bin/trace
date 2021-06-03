@@ -354,10 +354,32 @@ sub rewrite_func ($$$$$) {
     $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(FUNC, \"";
     $trace .= join("", @arg_str) . "\"";
     $argtrace .= join("", @arg_str) . "\"";
-    my $len = 4 + length $trace;        # Add 4, for indenting the line
-    for (@arg_name) {
-      # Wrap lines that will be longer than the limit, after ');' is added
-      if ($len + length >= ($max_trace_macro_line_len - 2)) {
+
+    # Add 4 for indenting the line
+    my $len = 4 + length($trace);
+
+    for my $i (0 .. $#arg_name) {
+      # Handle wrapping
+
+      # Be VERY careful here! clang-format and this script MUST agree
+      # on which lines get wrapped or there will be churn as each tries
+      # to undo the other's output.
+      #
+      # TWO cases must be handled:
+      # 1) The argument is that last one and ');' will be appended
+      # 2) The argument is NOT the last one and ',' will be appended
+      #
+      # NB: clang-format does NOT consider terminal newlines when
+      #     counting columns for the ColumnLimit
+      #
+      # The extra '2' added after $len includes the ', ' that would be
+      # added BEFORE the argument.
+      #
+      my $adjust = ($i + 1 == scalar(@arg_str)) ? 2 : 1;
+      my $len_if_added = $len + 2 + length($arg_name[$i]) + $adjust;
+
+      # Wrap lines that will be longer than the limit
+      if ($len_if_added > $max_trace_macro_line_len) {
         # Wrap line, with indention
         $trace .= ",\n             ";
         $len = 13;              # Set to 13, for indention
@@ -373,9 +395,11 @@ sub rewrite_func ($$$$$) {
       }
 
       # Append argument
-      $trace .= "$_";
-      $argtrace .= ", $_";
-      $len += length;     # Add length of appended argument name
+      $trace .= "$arg_name[$i]";
+      $argtrace .= ", $arg_name[$i]";
+
+      # Add length of appended argument name
+      $len += length($arg_name[$i]);
     }
 
     # Append final ');' for macro
