@@ -360,7 +360,6 @@
  */
 #define SUCCEED 0
 #define FAIL    (-1)
-#define UFAIL   (unsigned)(-1)
 
 /* The HDF5 library uses the symbol `ERR` frequently.  So do
  * header files for libraries such as curses(3), terminfo(3), etc.

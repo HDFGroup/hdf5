@@ -2752,6 +2752,8 @@
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_version_test.ddl
 ./tools/test/h5repack/testfiles/h5repack_layout.h5-plugin_zero.ddl
+./tools/test/h5repack/testfiles/h5repack_CVE-2018-17432.h5
+./tools/test/h5repack/testfiles/h5repack_CVE-2018-14460.h5
 ./tools/test/h5repack/testfiles/GS.h5repack_paged_nopersist.h5.ddl
 ./tools/test/h5repack/testfiles/S.h5repack_fsm_aggr_persist.h5.ddl
 ./tools/test/h5repack/testfiles/SP.h5repack_fsm_aggr_nopersist.h5.ddl

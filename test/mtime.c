@@ -117,7 +117,7 @@ main(void)
         HDputs("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
     }
-    else if (HDfabs(HDdifftime(now, oi1.ctime)) > (double)60.0F) {
+    else if (HDfabs(HDdifftime(now, oi1.ctime)) > 60.0) {
         H5_FAILED();
         tm = HDlocaltime(&(oi1.ctime));
         HDstrftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);

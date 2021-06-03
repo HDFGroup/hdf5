@@ -708,10 +708,8 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize
     } /* end for */
 
     /* Get the "down" sizes for each dimension */
-    if (H5VM_array_down(ndims, layout->chunks, layout->down_chunks) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
-    if (H5VM_array_down(ndims, layout->max_chunks, layout->max_down_chunks) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
+    H5VM_array_down(ndims, layout->chunks, layout->down_chunks);
+    H5VM_array_down(ndims, layout->max_chunks, layout->max_down_chunks);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

@@ -619,7 +619,7 @@ main(int argc, char *argv[])
          * Debug shared message master table.
          */
 
-        status = H5SM_table_debug(f, addr, stdout, 0, VCOL, (unsigned)UFAIL, (unsigned)UFAIL);
+        status = H5SM_table_debug(f, addr, stdout, 0, VCOL, UINT_MAX, UINT_MAX);
     }
     else if (!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*

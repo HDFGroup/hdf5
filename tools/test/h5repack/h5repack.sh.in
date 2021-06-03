@@ -124,6 +124,9 @@ $SRC_H5REPACK_TESTFILES/h5repack_paged_nopersist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_paged_persist.h5
 ########h5diff/testfile########
 $SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
+########test#HDFFV-10590########
+$SRC_H5REPACK_TESTFILES/h5repack_CVE-2018-17432.h5
+$SRC_H5REPACK_TESTFILES/h5repack_CVE-2018-14460.h5
 ########tools/testfiles#for#external#links########
 $SRC_TOOLS_TESTFILES/tsoftlinks.h5
 $SRC_TOOLS_TESTFILES/textlinkfar.h5
@@ -1674,6 +1677,14 @@ TOOLTEST HDFFV-5932 h5repack_attr_refs.h5
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools
 TOOLTEST HDFFV-7840 h5diff_attr1.h5
+
+# test HDFFV-10590
+arg="h5repack_CVE-2018-17432.h5 h5repack_CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6"
+TOOLTEST_FAIL $arg
+
+# test HDFFV-11223
+arg="h5repack_CVE-2018-14460.h5 h5repack_CVE-2018-14460_out.h5"
+TOOLTEST_FAIL $arg
 
 # tests for metadata block size option
 TOOLTEST_META meta_short h5repack_layout.h5 -M 8192

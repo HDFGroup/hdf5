@@ -540,8 +540,8 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g  = 0;
 /* (+/- Inf for all floating-point types) */
 float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0f;
 float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0f;
-double H5T_NATIVE_DOUBLE_POS_INF_g = (double)0.0f;
-double H5T_NATIVE_DOUBLE_NEG_INF_g = (double)0.0f;
+double H5T_NATIVE_DOUBLE_POS_INF_g = 0.0;
+double H5T_NATIVE_DOUBLE_NEG_INF_g = 0.0;
 
 /* Declare the free list for H5T_t's and H5T_shared_t's */
 H5FL_DEFINE(H5T_t);
