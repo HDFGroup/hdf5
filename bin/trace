@@ -357,7 +357,6 @@ sub rewrite_func ($$$$$) {
 
     # Add 4 for indenting the line
     my $len = 4 + length($trace);
-    my $trace_len = length($trace);
 
     for my $i (0 .. $#arg_name) {
       # Handle wrapping
