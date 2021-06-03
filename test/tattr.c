@@ -508,13 +508,13 @@ test_attr_basic_read(hid_t fapl)
 static void
 test_attr_flush(hid_t fapl)
 {
-    hid_t fil,               /* File ID */
-        att,                 /* Attribute ID */
-        spc,                 /* Dataspace ID */
-        set;                 /* Dataset ID */
-    double wdata = 3.14159F; /* Data to write */
-    double rdata;            /* Data read in */
-    herr_t ret;              /* Generic return value        */
+    hid_t fil,              /* File ID */
+        att,                /* Attribute ID */
+        spc,                /* Dataspace ID */
+        set;                /* Dataset ID */
+    double wdata = 3.14159; /* Data to write */
+    double rdata;           /* Data read in */
+    herr_t ret;             /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Flushing\n"));
@@ -534,8 +534,8 @@ test_attr_flush(hid_t fapl)
     ret = H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if (!H5_DBL_ABS_EQUAL(rdata, (double)0.0f))
-        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, (double)0.0F);
+    if (!H5_DBL_ABS_EQUAL(rdata, 0.0))
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, 0.0);
 
     ret = H5Fflush(fil, H5F_SCOPE_GLOBAL);
     CHECK(ret, FAIL, "H5Fflush");
@@ -543,8 +543,8 @@ test_attr_flush(hid_t fapl)
     ret = H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if (!H5_DBL_ABS_EQUAL(rdata, (double)0.0f))
-        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, (double)0.0F);
+    if (!H5_DBL_ABS_EQUAL(rdata, 0.0))
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, 0.0);
 
     ret = H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
     CHECK(ret, FAIL, "H5Awrite");

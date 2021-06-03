@@ -822,7 +822,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     char     file_name[64];           /* Filename buffer */
     size_t   alloc_incr;              /* Buffer allocation increment */
     size_t   min_incr  = 65536;       /* Minimum buffer increment */
-    double   buf_prcnt = 0.1f;        /* Percentage of buffer size to set
+    double   buf_prcnt = 0.1;         /* Percentage of buffer size to set
                                           as increment */
     static long                 file_name_counter;
     H5FD_file_image_callbacks_t callbacks = {&image_malloc, &image_memcpy, &image_realloc, &image_free,

@@ -2676,5 +2676,5 @@ error:
     if (H5_debug_g.ttimes)
         return function_times.elapsed;
     else
-        return (double)0.0F;
+        return 0.0;
 } /* end H5_trace() */
