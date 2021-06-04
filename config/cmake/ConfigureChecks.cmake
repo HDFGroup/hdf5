@@ -28,18 +28,6 @@ if (HDF5_STRICT_FORMAT_CHECKS)
 endif ()
 MARK_AS_ADVANCED (HDF5_STRICT_FORMAT_CHECKS)
 
-#-----------------------------------------------------------------------------
-# Option for --enable-threadsafe
-#-----------------------------------------------------------------------------
-# Recursive RW locks are not supported on Windows (yet)
-if (NOT WINDOWS)
-  option (HDF5_USE_RECURSIVE_RW_LOCKS "Whether to use recursive RW locks for thread-safety" OFF)
-  if (HDF5_USE_RECURSIVE_RW_LOCKS)
-    set (${HDF_PREFIX}_USE_RECURSIVE_RW_LOCKS 1)
-  endif ()
-  MARK_AS_ADVANCED (HDF5_USE_RECURSIVE_RW_LOCKS)
-endif ()
-
 # ----------------------------------------------------------------------
 # Decide whether the data accuracy has higher priority during data
 # conversions.  If not, some hard conversions will still be prefered even
@@ -96,14 +84,6 @@ elseif (HDF5_IGNORE_DISABLED_FILE_LOCKS)
   set (HDF5_FILE_LOCKING_SETTING "yes")
 else ()
   set (HDF5_FILE_LOCKING_SETTING "no")
-endif ()
-
-#-----------------------------------------------------------------------------
-#  Are we going to use HSIZE_T
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_HSIZET "Enable datasets larger than memory" ON)
-if (HDF5_ENABLE_HSIZET)
-  set (${HDF_PREFIX}_HAVE_LARGE_HSIZET 1)
 endif ()
 
 # so far we have no check for this
@@ -233,17 +213,20 @@ endif()
 # Check if C has __float128 extension
 #-----------------------------------------------------------------------------
 
-CHECK_TYPE_SIZE("__float128" ${HDF_PREFIX}_SIZEOF___FLOAT128)
-if (${${HDF_PREFIX}_SIZEOF___FLOAT128})
+HDF_CHECK_TYPE_SIZE(__float128 _SIZEOF___FLOAT128)
+if (${_SIZEOF___FLOAT128})
   set (${HDF_PREFIX}_HAVE_FLOAT128 1)
+  set (${HDF_PREFIX}_SIZEOF___FLOAT128 ${_SIZEOF___FLOAT128})
 else ()
   set (${HDF_PREFIX}_HAVE_FLOAT128 0)
   set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
 endif ()
 
-CHECK_TYPE_SIZE("_Quad" ${HDF_PREFIX}_SIZEOF__QUAD)
-if (NOT ${${HDF_PREFIX}_SIZEOF__QUAD})
+HDF_CHECK_TYPE_SIZE(_Quad _SIZEOF__QUAD)
+if (NOT ${_SIZEOF__QUAD})
   set (${HDF_PREFIX}_SIZEOF__QUAD 0)
+else ()
+  set (${HDF_PREFIX}_SIZEOF__QUAD ${_SIZEOF__QUAD})
 endif ()
 
 #-----------------------------------------------------------------------------
