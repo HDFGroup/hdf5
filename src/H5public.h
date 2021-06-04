@@ -43,6 +43,10 @@
 #include <stdarg.h> /* For variadic functions in H5VLpublic.h   */
 
 #include <stdint.h>   /* For C9x types */
+
+#ifdef __cplusplus
+#define __STDC_FORMAT_MACROS
+#endif
 #include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
 
 #ifdef H5_HAVE_STDDEF_H
