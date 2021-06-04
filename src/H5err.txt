@@ -105,7 +105,7 @@ SECTION, PIPELINE, I/O pipeline errors
 SECTION, SYSTEM, System level errors
 SECTION, PLUGIN, Plugin errors
 SECTION, MAP, Map related errors
-SECTION, ASYNC, Asynchronous I/O errors
+SECTION, ASYNC, Asynchronous operation errors
 SECTION, NONE, No error
 
 # Minor errors
@@ -139,6 +139,7 @@ MINOR, FILEACC, H5E_NOTHDF5, Not an HDF5 file
 MINOR, FILEACC, H5E_BADFILE, Bad file ID accessed
 MINOR, FILEACC, H5E_TRUNCATED, File has been truncated
 MINOR, FILEACC, H5E_MOUNT, File mount error
+MINOR, FILEACC, H5E_UNMOUNT, File unmount error
 MINOR, FILEACC, H5E_CANTDELETEFILE, Unable to delete file
 MINOR, FILEACC, H5E_CANTLOCKFILE, Unable to lock file
 MINOR, FILEACC, H5E_CANTUNLOCKFILE, Unable to unlock file
@@ -290,6 +291,7 @@ MINOR, MAP, H5E_CANTPUT, Can't put value
 
 # Asynchronous operation errors
 MINOR, ASYNC, H5E_CANTWAIT, Can't wait on operation
+MINOR, ASYNC, H5E_CANTCANCEL, Can't cancel operation
 
 # No error, for backward compatibility */
 MINOR, NONE, H5E_NONE_MINOR, No error
