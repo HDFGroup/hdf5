@@ -13,7 +13,6 @@
 
 #include "hdf5.h"
 #include "H5private.h"
-#include "hdf5dev.h"
 
 /*
  * The output functions need a temporary buffer to hold a piece of the

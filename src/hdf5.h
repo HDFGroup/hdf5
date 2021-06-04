@@ -41,6 +41,9 @@
 #include "H5VLpublic.h" /* Virtual Object Layer                     */
 #include "H5Zpublic.h"  /* Data filters                             */
 
+/* "developer-oriented" headers (for VFD, VOL, etc. authors) */
+#include "hdf5dev.h"
+
 /* Predefined file drivers */
 #include "H5FDcore.h"     /* Files stored entirely in memory          */
 #include "H5FDdirect.h"   /* Linux direct I/O                         */

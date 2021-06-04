@@ -29,7 +29,6 @@
 #include <sys/stat.h>
 
 #include "hdf5.h"
-#include "hdf5dev.h"
 
 #ifdef H5_HAVE_FLOCK
 /* Needed for lock type definitions (e.g., LOCK_EX) */

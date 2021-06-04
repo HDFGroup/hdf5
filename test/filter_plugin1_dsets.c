@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
-#include "hdf5dev.h"
+#include "hdf5.h"
 
 #define FILTER1_ID 257
 

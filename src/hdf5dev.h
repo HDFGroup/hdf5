@@ -17,9 +17,6 @@
 #ifndef _HDF5DEV_H
 #define _HDF5DEV_H
 
-/* Include general purpose application developer interfaces */
-#include "hdf5.h"
-
 /* Application developer headers for various interfaces */
 #include "H5ESdevelop.h" /* Event Sets */
 #include "H5FDdevelop.h" /* File drivers */
