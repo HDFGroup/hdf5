@@ -51,6 +51,11 @@
 #include <stdint.h> /* For C9x types (when included from C++) */
 #endif
 #endif
+
+#ifdef __cplusplus
+#define __STDC_FORMAT_MACROS
+#endif
+
 #ifdef H5_HAVE_INTTYPES_H
 #include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
 #endif
