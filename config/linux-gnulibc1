@@ -199,6 +199,10 @@ if test -z "$CXX"; then
   CXX_BASENAME=g++
 fi
 
+# Figure out Intel CXX compiler flags
+# Do this ahead of GNU to avoid icpc being detected as g++
+. $srcdir/config/intel-cxxflags
+
 # Figure out GNU CXX compiler flags
 . $srcdir/config/gnu-cxxflags
 
