@@ -258,9 +258,15 @@ foreach (KIND ${VAR} )
   else ()
     FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND})
   endif ()
+<<<<<<< Upstream, based on branch 'develop' of https://github.com/byrnHDF/hdf5.git
   file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.${KIND}.out" PROG_OUTPUT2)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
+=======
+  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.${KIND}.out" PROG_OUTPUT1)
+  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
+  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
+>>>>>>> 9041351 Fixes issue with ccmake that prevents building Fortran (#723)
 endforeach ()
 
 if (pack_real_sizeof STREQUAL "")
