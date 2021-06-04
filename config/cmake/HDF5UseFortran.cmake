@@ -129,74 +129,12 @@ endif ()
 # Determine the available KINDs for REALs and INTEGERs
 #-----------------------------------------------------------------------------
 
-#READ_SOURCE ("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" SOURCE_CODE)
-set (PROG_SRC_CODE
-  "
-       PROGRAM FC_AVAIL_KINDS
-          IMPLICIT NONE
-          INTEGER :: ik, jk, k, max_decimal_prec
-          INTEGER :: num_rkinds = 1, num_ikinds = 1
-          INTEGER, DIMENSION(1:10) :: list_ikinds = -1
-          INTEGER, DIMENSION(1:10) :: list_rkinds = -1
-
-          OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
-
-          ! Find integer KINDs
-          list_ikinds(num_ikinds)=SELECTED_INT_KIND(1)
-          DO ik = 2, 36
-            k = SELECTED_INT_KIND(ik)
-            IF(k.LT.0) EXIT
-            IF(k.GT.list_ikinds(num_ikinds))THEN
-               num_ikinds = num_ikinds + 1
-               list_ikinds(num_ikinds) = k
-            ENDIF
-          ENDDO
-
-          DO k = 1, num_ikinds
-             WRITE(8,'(I0)', ADVANCE='NO') list_ikinds(k)
-             IF(k.NE.num_ikinds)THEN
-                WRITE(8,'(A)',ADVANCE='NO') ','
-             ELSE
-                WRITE(8,'()')
-             ENDIF
-          ENDDO
-
-          ! Find real KINDs
-          list_rkinds(num_rkinds)=SELECTED_REAL_KIND(1)
-          max_decimal_prec = 1
-
-          prec: DO ik = 2, 36
-             exp: DO jk = 1, 17000
-                k = SELECTED_REAL_KIND(ik,jk)
-                IF(k.LT.0) EXIT exp
-                IF(k.GT.list_rkinds(num_rkinds))THEN
-                   num_rkinds = num_rkinds + 1
-                   list_rkinds(num_rkinds) = k
-                ENDIF
-                max_decimal_prec = ik
-             ENDDO exp
-          ENDDO prec
-
-          DO k = 1, num_rkinds
-             WRITE(8,'(I0)', ADVANCE='NO') list_rkinds(k)
-             IF(k.NE.num_rkinds)THEN
-                WRITE(8,'(A)',ADVANCE='NO') ','
-             ELSE
-                WRITE(8,'()')
-             ENDIF
-          ENDDO
-
-         WRITE(8,'(I0)') max_decimal_prec
-         WRITE(8,'(I0)') num_ikinds
-         WRITE(8,'(I0)') num_rkinds
-      END PROGRAM FC_AVAIL_KINDS
-  "
-)
+READ_SOURCE ("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" SOURCE_CODE)
 if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_fortran_source_runs (${PROG_SRC_CODE} FC_AVAIL_KINDS_RESULT SRC_EXT f90)
+  check_fortran_source_runs (${SOURCE_CODE} FC_AVAIL_KINDS_RESULT SRC_EXT f90)
 else ()
 FORTRAN_RUN ("REAL and INTEGER KINDs"
-    "${PROG_SRC_CODE}"
+    "${SOURCE_CODE}"
     XX
     YY
     FC_AVAIL_KINDS_RESULT
@@ -260,7 +198,7 @@ foreach (KIND ${VAR})
           USE ISO_C_BINDING
           IMPLICIT NONE
           INTEGER (KIND=${KIND}) a
-          OPEN(8,FILE='pac_validIntKinds.out',FORM='formatted')
+          OPEN(8,FILE='pac_validIntKinds.${KIND}.out',FORM='formatted')
           WRITE(8,'(I0)') ${FC_SIZEOF_A}
           CLOSE(8)
        END
@@ -271,7 +209,7 @@ foreach (KIND ${VAR})
   else ()
     FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND})
   endif ()
-  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validIntKinds.out" PROG_OUTPUT1)
+  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validIntKinds.${KIND}.out" PROG_OUTPUT1)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
@@ -309,7 +247,7 @@ foreach (KIND ${VAR} )
           USE ISO_C_BINDING
           IMPLICIT NONE
           REAL (KIND=${KIND}) a
-          OPEN(8,FILE='pac_validRealKinds.out',FORM='formatted')
+          OPEN(8,FILE='pac_validRealKinds.${KIND}.out',FORM='formatted')
           WRITE(8,'(I0)') ${FC_SIZEOF_A}
           CLOSE(8)
        END
@@ -320,7 +258,7 @@ foreach (KIND ${VAR} )
   else ()
     FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND})
   endif ()
-  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.out" PROG_OUTPUT1)
+  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.${KIND}.out" PROG_OUTPUT1)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
