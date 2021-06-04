@@ -26,9 +26,6 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
-/* Define if C++ compiler recognizes offsetof */
-#cmakedefine H5_CXX_HAVE_OFFSETOF @CXX_HAVE_OFFSETOF@
-
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
