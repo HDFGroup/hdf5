@@ -60,8 +60,9 @@
 #define H5_MULTI_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
 #define H5_MULTI_GCC_DIAG_PRAGMA(x)     H5_MULTI_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
-#define H5_MULTI_GCC_DIAG_OFF(x) H5_MULTI_GCC_DIAG_PRAGMA(push) H5_MULTI_GCC_DIAG_PRAGMA(ignored H5_MULTI_GCC_DIAG_JOINSTR("-W", x))
-#define H5_MULTI_GCC_DIAG_ON(x)  H5_MULTI_GCC_DIAG_PRAGMA(pop)
+#define H5_MULTI_GCC_DIAG_OFF(x)                                                                             \
+    H5_MULTI_GCC_DIAG_PRAGMA(push) H5_MULTI_GCC_DIAG_PRAGMA(ignored H5_MULTI_GCC_DIAG_JOINSTR("-W", x))
+#define H5_MULTI_GCC_DIAG_ON(x) H5_MULTI_GCC_DIAG_PRAGMA(pop)
 #else
 #define H5_MULTI_GCC_DIAG_OFF(x)
 #define H5_MULTI_GCC_DIAG_ON(x)
