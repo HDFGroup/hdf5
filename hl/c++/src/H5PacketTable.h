@@ -33,7 +33,7 @@ class H5_HLCPPDLL PacketTable {
     /* Null constructor
      * Sets table_id to "invalid"
      */
-    PacketTable() : table_id{H5I_INVALID_HID}
+    PacketTable() : table_id(H5I_INVALID_HID)
     {
     }
 
