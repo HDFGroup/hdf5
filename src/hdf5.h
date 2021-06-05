@@ -41,8 +41,20 @@
 #include "H5VLpublic.h" /* Virtual Object Layer                     */
 #include "H5Zpublic.h"  /* Data filters                             */
 
-/* "developer-oriented" headers (for VFD, VOL, etc. authors) */
-#include "hdf5dev.h"
+/* Application developer headers for various interfaces */
+#include "H5ESdevelop.h" /* Event Sets */
+#include "H5FDdevelop.h" /* File drivers */
+#include "H5Idevelop.h"  /* ID management */
+#include "H5Ldevelop.h"  /* Links */
+#include "H5PLextern.h"  /* Plugins */
+#include "H5Tdevelop.h"  /* Datatypes */
+#include "H5TSdevelop.h" /* Threadsafety */
+#include "H5Zdevelop.h"  /* Data filters */
+
+/* Virtual object layer (VOL) connector developer support */
+#include "H5VLconnector.h"          /* VOL connector author routines */
+#include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
+#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
 
 /* Predefined file drivers */
 #include "H5FDcore.h"     /* Files stored entirely in memory          */
