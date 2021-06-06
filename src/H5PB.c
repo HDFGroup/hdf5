@@ -105,7 +105,6 @@ static herr_t H5PB__write_meta(H5F_shared_t *, H5FD_mem_t, haddr_t, size_t, cons
 
 static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t, size_t, const void *);
 
-static void H5PB_log_access_by_size_counts(const H5PB_t *);
 
 /*********************/
 /* Package Variables */
@@ -283,10 +282,10 @@ H5PB_get_stats(const H5PB_t *pb_ptr, unsigned accesses[2], unsigned hits[2], uns
 herr_t
 H5PB_print_stats(const H5PB_t *pb_ptr)
 {
-    double ave_succ_search_depth       = 0.0L;
-    double ave_failed_search_depth     = 0.0L;
-    double ave_delayed_write           = 0.0L;
-    double ave_delayed_write_ins_depth = 0.0L;
+    double ave_succ_search_depth       = 0.0;
+    double ave_failed_search_depth     = 0.0;
+    double ave_delayed_write           = 0.0;
+    double ave_delayed_write_ins_depth = 0.0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -295,48 +294,48 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
 
     HDfprintf(stdout, "\n\nPage Buffer Statistics (raw/meta/mpmde): \n\n");
 
-    HDfprintf(stdout, "bypasses   = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "bypasses   = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->bypasses[0] + pb_ptr->bypasses[1] + pb_ptr->bypasses[2]), pb_ptr->bypasses[0],
               pb_ptr->bypasses[1], pb_ptr->bypasses[2]);
 
-    HDfprintf(stdout, "acesses    = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "acesses    = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->accesses[0] + pb_ptr->accesses[1] + pb_ptr->accesses[2]), pb_ptr->accesses[0],
               pb_ptr->accesses[1], pb_ptr->accesses[2]);
 
-    HDfprintf(stdout, "hits       = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "hits       = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->hits[0] + pb_ptr->hits[1] + pb_ptr->hits[2]), pb_ptr->hits[0], pb_ptr->hits[1],
               pb_ptr->hits[2]);
 
-    HDfprintf(stdout, "misses     = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "misses     = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->misses[0] + pb_ptr->misses[1] + pb_ptr->misses[2]), pb_ptr->misses[0],
               pb_ptr->misses[1], pb_ptr->misses[2]);
 
-    HDfprintf(stdout, "loads      = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "loads      = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->loads[0] + pb_ptr->loads[1] + pb_ptr->loads[2]), pb_ptr->loads[0], pb_ptr->loads[1],
               pb_ptr->loads[2]);
 
-    HDfprintf(stdout, "insertions = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "insertions = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->insertions[0] + pb_ptr->insertions[1] + pb_ptr->insertions[2]), pb_ptr->insertions[0],
               pb_ptr->insertions[1], pb_ptr->insertions[2]);
 
-    HDfprintf(stdout, "flushes    = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "flushes    = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->flushes[0] + pb_ptr->flushes[1] + pb_ptr->flushes[2]), pb_ptr->flushes[0],
               pb_ptr->flushes[1], pb_ptr->flushes[2]);
 
-    HDfprintf(stdout, "evictions  = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "evictions  = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->evictions[0] + pb_ptr->evictions[1] + pb_ptr->evictions[2]), pb_ptr->evictions[0],
               pb_ptr->evictions[1], pb_ptr->evictions[2]);
 
-    HDfprintf(stdout, "clears     = %lld (%lld/%lld/%lld)\n",
+    HDfprintf(stdout, "clears     = %" PRIi64 " (%" PRIi64 "/%" PRIi64 "/%" PRIi64 ")\n",
               (pb_ptr->clears[0] + pb_ptr->clears[1] + pb_ptr->clears[2]), pb_ptr->clears[0],
               pb_ptr->clears[1], pb_ptr->clears[2]);
 
-    HDfprintf(stdout, "max LRU len / size = %lld / %lld\n", pb_ptr->max_lru_len, pb_ptr->max_lru_size);
+    HDfprintf(stdout, "max LRU len / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_lru_len, pb_ptr->max_lru_size);
 
-    HDfprintf(stdout, "LRU make space md/rd/tl skips = %lld/%lld/%lld\n", pb_ptr->lru_md_skips,
+    HDfprintf(stdout, "LRU make space md/rd/tl skips = %" PRIi64 "/%" PRIi64 "/%" PRIi64 "\n", pb_ptr->lru_md_skips,
               pb_ptr->lru_rd_skips, pb_ptr->lru_tl_skips);
 
-    HDfprintf(stdout, "hash table insertions / deletions = %lld / %lld\n", pb_ptr->total_ht_insertions,
+    HDfprintf(stdout, "hash table insertions / deletions = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->total_ht_insertions,
               pb_ptr->total_ht_deletions);
 
     if (pb_ptr->successful_ht_searches > 0) {
@@ -344,7 +343,7 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
         ave_succ_search_depth =
             (double)(pb_ptr->total_successful_ht_search_depth) / (double)(pb_ptr->successful_ht_searches);
     }
-    HDfprintf(stdout, "successful ht searches / ave depth = %lld / %llf\n", pb_ptr->successful_ht_searches,
+    HDfprintf(stdout, "successful ht searches / ave depth = %" PRIi64 " / %g\n", pb_ptr->successful_ht_searches,
               ave_succ_search_depth);
 
     if (pb_ptr->failed_ht_searches > 0) {
@@ -352,18 +351,18 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
         ave_failed_search_depth =
             (double)(pb_ptr->total_failed_ht_search_depth) / (double)(pb_ptr->failed_ht_searches);
     }
-    HDfprintf(stdout, "failed ht searches / ave depth = %lld / %llf\n", pb_ptr->failed_ht_searches,
+    HDfprintf(stdout, "failed ht searches / ave depth = %" PRIi64 " / %g\n", pb_ptr->failed_ht_searches,
               ave_failed_search_depth);
 
-    HDfprintf(stdout, "max index length / size = %lld / %lld\n", pb_ptr->max_index_len,
+    HDfprintf(stdout, "max index length / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_index_len,
               pb_ptr->max_index_size);
 
-    HDfprintf(stdout, "max rd / md / mpmde entries = %lld / %lld / %lld\n", pb_ptr->max_rd_pages,
+    HDfprintf(stdout, "max rd / md / mpmde entries = %" PRIi64 " / %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_rd_pages,
               pb_ptr->max_md_pages, pb_ptr->max_mpmde_count);
 
-    HDfprintf(stdout, "tick list max len / size = %lld / %lld\n", pb_ptr->max_tl_len, pb_ptr->max_tl_size);
+    HDfprintf(stdout, "tick list max len / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_tl_len, pb_ptr->max_tl_size);
 
-    HDfprintf(stdout, "delayed write list max len / size = %lld / %lld\n", pb_ptr->max_dwl_len,
+    HDfprintf(stdout, "delayed write list max len / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_dwl_len,
               pb_ptr->max_dwl_size);
 
     if (pb_ptr->delayed_writes > 0) {
@@ -373,11 +372,10 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
             (double)(pb_ptr->total_dwl_ins_depth) / (double)(pb_ptr->delayed_writes);
     }
 
-    HDfprintf(stdout, "delayed writes / ave delay / ave ins depth = %lld / %llf / %llf\n",
+    HDfprintf(stdout, "delayed writes / ave delay / ave ins depth = %" PRIi64 " / %g / %g\n",
               pb_ptr->delayed_writes, ave_delayed_write, ave_delayed_write_ins_depth);
 
-    HDfprintf(stdout, "metadata read / write splits = %lld / %lld.\n", pb_ptr->md_read_splits,
-              pb_ptr->md_write_splits);
+    HDfprintf(stdout, "metadata read / write splits = %" PRIi64 " / %" PRIi64 ".\n", pb_ptr->md_read_splits, pb_ptr->md_write_splits);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 
@@ -688,8 +686,6 @@ H5PB_dest(H5F_shared_t *shared)
 
         pb_ptr = shared->pb_ptr;
 
-        H5PB_log_access_by_size_counts(pb_ptr);
-
         HDassert(pb_ptr->magic == H5PB__H5PB_T_MAGIC);
 
         /* the current implementation if very inefficient, and will
@@ -887,16 +883,6 @@ H5PB_count_meta_access_by_size(H5PB_t *pb, size_t size)
             break;
     }
     pb->access_size_count[i]++;
-}
-
-static void
-H5PB_log_access_by_size_counts(const H5PB_t *pb)
-{
-    const size_t nslots = NELMTS(pb->access_size_count);
-    size_t       i, lo, hi;
-
-    for (lo = 0, hi = pb->page_size, i = 0; i < nslots - 1; i++, lo = hi + 1, hi *= 2) {
-    }
 }
 
 /*-------------------------------------------------------------------------

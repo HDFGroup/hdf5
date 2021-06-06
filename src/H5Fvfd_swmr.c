@@ -387,7 +387,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, H5FD_vfd_swmr_
     haddr_t          md_addr;             /* Address in the metadata file */
     uint32_t         i;                   /* Local index variable */
     herr_t           ret_value = SUCCEED; /* Return value */
-    hbool_t          queue_was_nonempty;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -471,8 +470,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, H5FD_vfd_swmr_
     if (H5F__vfd_swmr_construct_write_md_hdr(shared, num_entries) < 0)
 
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to construct & write header to md")
-
-    queue_was_nonempty = !TAILQ_EMPTY(&shared->shadow_defrees);
 
     /*
      * Release time out entries from the delayed list by scanning the
@@ -1357,7 +1354,7 @@ H5F_dump_eot_queue(void)
     for (curr = TAILQ_FIRST(&eot_queue_g), i = 0; curr != NULL; curr = TAILQ_NEXT(curr, link), i++) {
         HDfprintf(stderr, "%d: %s tick_num %" PRIu64 ", end_of_tick %jd.%09ld, vfd_swmr_file %p\n", i,
                   curr->vfd_swmr_writer ? "writer" : "not writer", curr->tick_num, curr->end_of_tick.tv_sec,
-                  curr->end_of_tick.tv_nsec, curr->vfd_swmr_file);
+                  curr->end_of_tick.tv_nsec, (void *)curr->vfd_swmr_file);
     }
 
     if (i == 0)
@@ -1795,9 +1792,6 @@ done:
 static herr_t
 H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
 {
-    int             result;
-    struct timespec req;
-    struct timespec rem;
     uint64_t        tick_in_nsec;
     H5F_shared_t *  shared;
     herr_t          ret_value = SUCCEED; /* Return value */
