@@ -1792,9 +1792,9 @@ done:
 static herr_t
 H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
 {
-    uint64_t        tick_in_nsec;
-    H5F_shared_t *  shared;
-    herr_t          ret_value = SUCCEED; /* Return value */
+    uint64_t      tick_in_nsec;
+    H5F_shared_t *shared;
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 

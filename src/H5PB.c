@@ -105,7 +105,6 @@ static herr_t H5PB__write_meta(H5F_shared_t *, H5FD_mem_t, haddr_t, size_t, cons
 
 static herr_t H5PB__write_raw(H5F_shared_t *, H5FD_mem_t, haddr_t, size_t, const void *);
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -330,21 +329,22 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
               (pb_ptr->clears[0] + pb_ptr->clears[1] + pb_ptr->clears[2]), pb_ptr->clears[0],
               pb_ptr->clears[1], pb_ptr->clears[2]);
 
-    HDfprintf(stdout, "max LRU len / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_lru_len, pb_ptr->max_lru_size);
+    HDfprintf(stdout, "max LRU len / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_lru_len,
+              pb_ptr->max_lru_size);
 
-    HDfprintf(stdout, "LRU make space md/rd/tl skips = %" PRIi64 "/%" PRIi64 "/%" PRIi64 "\n", pb_ptr->lru_md_skips,
-              pb_ptr->lru_rd_skips, pb_ptr->lru_tl_skips);
+    HDfprintf(stdout, "LRU make space md/rd/tl skips = %" PRIi64 "/%" PRIi64 "/%" PRIi64 "\n",
+              pb_ptr->lru_md_skips, pb_ptr->lru_rd_skips, pb_ptr->lru_tl_skips);
 
-    HDfprintf(stdout, "hash table insertions / deletions = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->total_ht_insertions,
-              pb_ptr->total_ht_deletions);
+    HDfprintf(stdout, "hash table insertions / deletions = %" PRIi64 " / %" PRIi64 "\n",
+              pb_ptr->total_ht_insertions, pb_ptr->total_ht_deletions);
 
     if (pb_ptr->successful_ht_searches > 0) {
 
         ave_succ_search_depth =
             (double)(pb_ptr->total_successful_ht_search_depth) / (double)(pb_ptr->successful_ht_searches);
     }
-    HDfprintf(stdout, "successful ht searches / ave depth = %" PRIi64 " / %g\n", pb_ptr->successful_ht_searches,
-              ave_succ_search_depth);
+    HDfprintf(stdout, "successful ht searches / ave depth = %" PRIi64 " / %g\n",
+              pb_ptr->successful_ht_searches, ave_succ_search_depth);
 
     if (pb_ptr->failed_ht_searches > 0) {
 
@@ -357,10 +357,11 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
     HDfprintf(stdout, "max index length / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_index_len,
               pb_ptr->max_index_size);
 
-    HDfprintf(stdout, "max rd / md / mpmde entries = %" PRIi64 " / %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_rd_pages,
-              pb_ptr->max_md_pages, pb_ptr->max_mpmde_count);
+    HDfprintf(stdout, "max rd / md / mpmde entries = %" PRIi64 " / %" PRIi64 " / %" PRIi64 "\n",
+              pb_ptr->max_rd_pages, pb_ptr->max_md_pages, pb_ptr->max_mpmde_count);
 
-    HDfprintf(stdout, "tick list max len / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_tl_len, pb_ptr->max_tl_size);
+    HDfprintf(stdout, "tick list max len / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_tl_len,
+              pb_ptr->max_tl_size);
 
     HDfprintf(stdout, "delayed write list max len / size = %" PRIi64 " / %" PRIi64 "\n", pb_ptr->max_dwl_len,
               pb_ptr->max_dwl_size);
@@ -375,7 +376,8 @@ H5PB_print_stats(const H5PB_t *pb_ptr)
     HDfprintf(stdout, "delayed writes / ave delay / ave ins depth = %" PRIi64 " / %g / %g\n",
               pb_ptr->delayed_writes, ave_delayed_write, ave_delayed_write_ins_depth);
 
-    HDfprintf(stdout, "metadata read / write splits = %" PRIi64 " / %" PRIi64 ".\n", pb_ptr->md_read_splits, pb_ptr->md_write_splits);
+    HDfprintf(stdout, "metadata read / write splits = %" PRIi64 " / %" PRIi64 ".\n", pb_ptr->md_read_splits,
+              pb_ptr->md_write_splits);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 
