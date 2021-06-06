@@ -41,12 +41,11 @@
 #include "H5VLpublic.h" /* Virtual Object Layer                     */
 #include "H5Zpublic.h"  /* Data filters                             */
 
-/* Application developer headers for various interfaces */
+/* Plugin/component developer headers */
 #include "H5ESdevelop.h" /* Event Sets */
 #include "H5FDdevelop.h" /* File drivers */
 #include "H5Idevelop.h"  /* ID management */
 #include "H5Ldevelop.h"  /* Links */
-#include "H5PLextern.h"  /* Plugins */
 #include "H5Tdevelop.h"  /* Datatypes */
 #include "H5TSdevelop.h" /* Threadsafety */
 #include "H5Zdevelop.h"  /* Data filters */

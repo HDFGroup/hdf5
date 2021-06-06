@@ -18,7 +18,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include "hdf5.h"
+#include "H5PLextern.h"
 
 #define FILTER4_ID   260
 #define SUFFIX_LEN   8
