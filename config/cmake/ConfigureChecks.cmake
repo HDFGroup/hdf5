@@ -230,6 +230,110 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
+# The provided CMake C macros don't provide a general compile/run function
+# so this one is used.
+#-----------------------------------------------------------------------------
+macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "Detecting C ${FUNCTION_NAME}")
+    endif ()
+    file (WRITE
+        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
+        ${SOURCE_CODE}
+    )
+    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
+        ${CMAKE_BINARY_DIR}
+        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
+        COMPILE_DEFINITIONS "-D_SIZEOF___FLOAT128=${H5_SIZEOF___FLOAT128};-D_HAVE_QUADMATH_H=${H5_HAVE_QUADMATH_H}"
+        COMPILE_OUTPUT_VARIABLE COMPILEOUT
+        RUN_OUTPUT_VARIABLE OUTPUT_VAR
+    )
+
+    set (${RETURN_VAR} ${OUTPUT_VAR})
+
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+      message (VERBOSE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
+      message (VERBOSE "Test COMPILE_OUTPUT ${COMPILEOUT} ")
+      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+      message (VERBOSE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
+      message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
+    endif ()
+
+    if (${COMPILE_RESULT_VAR})
+      if (${RUN_RESULT_VAR} MATCHES 0)
+        set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
+        endif ()
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
+            "Determining if the C ${FUNCTION_NAME} exists passed with the following output:\n"
+            "${OUTPUT_VAR}\n\n"
+        )
+      else ()
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
+        endif ()
+        set (${RUN_RESULT_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
+            "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
+            "${OUTPUT_VAR}\n\n")
+      endif ()
+    else ()
+        message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
+    endif ()
+endmacro ()
+
+set (PROG_SRC
+    "
+#include <float.h>\n\
+#include <stdio.h>\n\
+#define CHECK_FLOAT128 _SIZEOF___FLOAT128\n\
+#if CHECK_FLOAT128!=0\n\
+#if _HAVE_QUADMATH_H!=0\n\
+#include <quadmath.h>\n\
+#endif\n\
+#ifdef FLT128_DIG\n\
+#define C_FLT128_DIG FLT128_DIG\n\
+#else\n\
+#define C_FLT128_DIG 0\n\
+#endif\n\
+#else\n\
+#define C_FLT128_DIG 0\n\
+#endif\n\
+#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L\n\
+#define C_LDBL_DIG DECIMAL_DIG\n\
+#else\n\
+#define C_LDBL_DIG LDBL_DIG\n\
+#endif\n\nint main() {\nFILE *pFile = fopen(\"pac_Cconftest.out\",\"w\")\\\;\nfprintf(pFile, \"\\%d\\\;\\%d\\\;\", C_LDBL_DIG, C_FLT128_DIG)\\\;\n\nreturn 0\\\;\n}\n
+     "
+)
+
+C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES)
+file (READ "${CMAKE_BINARY_DIR}/pac_Cconftest.out" PROG_OUTPUT4)
+message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
+
+# dnl The output from the above program will be:
+# dnl  -- long double decimal precision  --  __float128 decimal precision
+
+list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
+list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
+
+if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
+  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
+  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
+  set (_PAC_C_MAX_REAL_PRECISION ${H5_LDBL_DIG})
+else ()
+  set (_PAC_C_MAX_REAL_PRECISION ${H5_FLT128_DIG})
+endif ()
+if (NOT ${_PAC_C_MAX_REAL_PRECISION})
+  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION 0)
+else ()
+  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${_PAC_C_MAX_REAL_PRECISION})
+endif ()
+message (STATUS "maximum decimal precision for C var - ${${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION}")
+
+#-----------------------------------------------------------------------------
 # Macro to determine the various conversion capabilities
 #-----------------------------------------------------------------------------
 macro (H5ConversionTests TEST msg)
