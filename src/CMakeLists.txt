@@ -254,6 +254,7 @@ set (H5FD_SOURCES
 
 set (H5FD_HDRS
     ${HDF5_SRC_DIR}/H5FDcore.h
+    ${HDF5_SRC_DIR}/H5FDdevelop.h
     ${HDF5_SRC_DIR}/H5FDdirect.h
     ${HDF5_SRC_DIR}/H5FDfamily.h
     ${HDF5_SRC_DIR}/H5FDhdfs.h
@@ -394,6 +395,7 @@ set (H5I_SOURCES
     ${HDF5_SRC_DIR}/H5Itest.c
 )
 set (H5I_HDRS
+    ${HDF5_SRC_DIR}/H5Idevelop.h
     ${HDF5_SRC_DIR}/H5Ipublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5I" "${H5I_HDRS}" "${H5I_SOURCES}" )
@@ -406,6 +408,7 @@ set (H5L_SOURCES
     ${HDF5_SRC_DIR}/H5Lint.c
 )
 set (H5L_HDRS
+    ${HDF5_SRC_DIR}/H5Ldevelop.h
     ${HDF5_SRC_DIR}/H5Lpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5L" "${H5L_HDRS}" "${H5L_SOURCES}" )
@@ -641,6 +644,7 @@ set (H5T_SOURCES
 )
 
 set (H5T_HDRS
+    ${HDF5_SRC_DIR}/H5Tdevelop.h
     ${HDF5_SRC_DIR}/H5Tpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5T" "${H5T_HDRS}" "${H5T_SOURCES}" )
@@ -650,7 +654,7 @@ set (H5TS_SOURCES
     ${HDF5_SRC_DIR}/H5TS.c
 )
 set (H5TS_HDRS
-    ${HDF5_SRC_DIR}/H5TSpublic.h
+    ${HDF5_SRC_DIR}/H5TSdevelop.h
 )
 IDE_GENERATED_PROPERTIES ("H5TS" "${H5TS_HDRS}" "${H5TS_SOURCES}" )
 
@@ -722,6 +726,7 @@ endif ()
 
 
 set (H5Z_HDRS
+    ${HDF5_SRC_DIR}/H5Zdevelop.h
     ${HDF5_SRC_DIR}/H5Zpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5Z" "${H5Z_HDRS}" "${H5Z_SOURCES}" )

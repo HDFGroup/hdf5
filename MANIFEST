@@ -790,6 +790,7 @@
 ./src/H5FD.c
 ./src/H5FDcore.c
 ./src/H5FDcore.h
+./src/H5FDdevelop.h
 ./src/H5FDdirect.c
 ./src/H5FDdirect.h
 ./src/H5FDdrvr_module.h
@@ -908,6 +909,7 @@
 ./src/H5HPprivate.h
 ./src/H5I.c
 ./src/H5Idbg.c
+./src/H5Idevelop.h
 ./src/H5Iint.c
 ./src/H5Imodule.h
 ./src/H5Ipkg.h
@@ -916,6 +918,7 @@
 ./src/H5Itest.c
 ./src/H5L.c
 ./src/H5Ldeprec.c
+./src/H5Ldevelop.h
 ./src/H5Lexternal.c
 ./src/H5Lint.c
 ./src/H5Lmodule.h
@@ -1071,6 +1074,7 @@
 ./src/H5Tcset.c
 ./src/H5Tdbg.c
 ./src/H5Tdeprec.c
+./src/H5Tdevelop.h
 ./src/H5Tenum.c
 ./src/H5Tfields.c
 ./src/H5Tfixed.c
@@ -1091,8 +1095,8 @@
 ./src/H5Tvisit.c
 ./src/H5Tvlen.c
 ./src/H5TS.c
+./src/H5TSdevelop.h
 ./src/H5TSprivate.h
-./src/H5TSpublic.h
 ./src/H5UC.c
 ./src/H5UCprivate.h
 ./src/H5VL.c
@@ -1125,6 +1129,7 @@
 ./src/H5WBprivate.h
 ./src/H5Z.c
 ./src/H5Zdeflate.c
+./src/H5Zdevelop.h
 ./src/H5Zfletcher32.c
 ./src/H5Zmodule.h
 ./src/H5Znbit.c
@@ -1137,10 +1142,10 @@
 ./src/H5Ztrans.c
 ./src/H5queue.h
 ./src/H5retry_private.h
-./src/H5win32defs.h
 ./src/Makefile.am
 ./src/hdf5.h
 ./src/libhdf5.settings.in
+./src/H5win32defs.h
 ./src/uthash.h
 
 ./test/AtomicWriterReader.txt

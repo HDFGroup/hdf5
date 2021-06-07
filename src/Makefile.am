@@ -112,8 +112,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5VLnative_attr.c H5VLnative_blob.c H5VLnative_dataset.c \
         H5VLnative_datatype.c H5VLnative_file.c H5VLnative_group.c \
         H5VLnative_link.c H5VLnative_introspect.c H5VLnative_object.c \
-        H5VLnative_token.c \
-        H5VLpassthru.c \
+        H5VLnative_token.c H5VLpassthru.c \
         H5VM.c H5WB.c H5Z.c  \
         H5Zdeflate.c H5Zfletcher32.c H5Znbit.c H5Zshuffle.c H5Zscaleoffset.c \
         H5Zszip.c H5Ztrans.c
@@ -144,7 +143,7 @@ if ROS3_VFD_CONDITIONAL
 endif
 
 # Public headers
-include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5queue.h H5version.h \
+include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5version.h \
         H5Apublic.h H5ACpublic.h \
         H5Cpublic.h H5Dpublic.h \
         H5Epubgen.h H5Epublic.h H5ESpublic.h H5Fpublic.h \
@@ -155,10 +154,14 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5queu
         H5Gpublic.h  H5Ipublic.h H5Lpublic.h \
         H5Mpublic.h H5MMpublic.h H5Opublic.h H5Ppublic.h \
         H5PLextern.h H5PLpublic.h \
-        H5Rpublic.h H5Spublic.h H5Tpublic.h H5TSpublic.h \
+        H5Rpublic.h H5Spublic.h H5Tpublic.h \
         H5VLconnector.h H5VLconnector_passthru.h \
         H5VLnative.h H5VLpassthru.h H5VLpublic.h \
         H5Zpublic.h
+
+# Public component author headers
+include_HEADERS += H5FDdevelop.h H5Idevelop.h H5Ldevelop.h \
+        H5Tdevelop.h H5TSdevelop.h H5Zdevelop.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)
