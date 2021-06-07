@@ -85,7 +85,7 @@
     if (HDF5_ENABLE_USING_MEMCHECKER)
       add_test (NAME H5LS-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5ls${tgt_file_ext}> ${ARGN})
       set_tests_properties (H5LS-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles/vds")
-      if (${resultcode} EQUAL 1)
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
     else ()
@@ -112,7 +112,7 @@
           ENVIRONMENT "HDF5_VDS_PREFIX=\${ORIGIN}"
           WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles"
       )
-      if (${resultcode} EQUAL 1)
+      if ("${resultcode}" STREQUAL "1")
         set_tests_properties (H5LS_PREFIX-${resultfile} PROPERTIES WILL_FAIL "true")
       endif ()
     else ()
