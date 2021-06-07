@@ -29,7 +29,7 @@
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
-/* Define if `dev_t' is a scalar */
+/* Define if dev_t is a scalar */
 #cmakedefine H5_DEV_T_IS_SCALAR @H5_DEV_T_IS_SCALAR@
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
@@ -85,6 +85,9 @@
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
 
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#cmakedefine H5_HAVE_ARPA_INET_H @H5_HAVE_ARPA_INET_H@
+
 /* Define to 1 if you have the `asprintf' function. */
 #cmakedefine H5_HAVE_ASPRINTF @H5_HAVE_ASPRINTF@
 
@@ -97,9 +100,6 @@
 
 /* Define if the compiler understands the __func__ keyword */
 #cmakedefine H5_HAVE_C99_FUNC @H5_HAVE_C99_FUNC@
-
-/* Define to 1 if you have the <arpa/inet.h> header file. */
-#cmakedefine H5_HAVE_ARPA_INET_H @H5_HAVE_ARPA_INET_H@
 
 /* Define to 1 if you have the `clock_gettime' function. */
 #cmakedefine H5_HAVE_CLOCK_GETTIME @H5_HAVE_CLOCK_GETTIME@
@@ -249,7 +249,7 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine H5_HAVE_MEMORY_H @H5_HAVE_MEMORY_H@
 
-/* Define if we can build the Mirror VFD */
+/* Define whether the Mirror virtual file driver (VFD) will be compiled */
 #cmakedefine H5_HAVE_MIRROR_VFD @H5_HAVE_MIRROR_VFD@
 
 /* Define if we have MPE support */
@@ -258,10 +258,10 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #cmakedefine H5_HAVE_MPE_H @H5_HAVE_MPE_H@
 
-/* Define if MPI_Comm_c2f and MPI_Comm_f2c exists */
+/* Define if MPI_Comm_c2f and MPI_Comm_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Comm @H5_HAVE_MPI_MULTI_LANG_Comm@
 
-/* Define if MPI_Info_c2f and MPI_Info_f2c exists */
+/* Define if MPI_Info_c2f and MPI_Info_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Info @H5_HAVE_MPI_MULTI_LANG_Info@
 
 /* Define to 1 if you have the <netdb.h> header file. */
@@ -450,7 +450,7 @@
 /* Define if the compiler understands __inline__ */
 #cmakedefine H5_HAVE___INLINE__ @H5_HAVE___INLINE__@
 
-/* Define if the library will ignore file locks when disabled */                 
+/* Define if the library will ignore file locks when disabled */
 #cmakedefine H5_IGNORE_DISABLED_FILE_LOCKS @H5_IGNORE_DISABLED_FILE_LOCKS@
 
 /* Define if the high-level library headers should be included in hdf5.h */
