@@ -17,8 +17,8 @@
 #ifndef H5PLextern_H
 #define H5PLextern_H
 
-/* Include package's public header */
-#include "H5PLpublic.h"
+/* Include HDF5 header */
+#include "hdf5.h"
 
 /* plugins always export */
 #if defined(_MSC_VER) /* MSVC Compiler Case */

@@ -36,7 +36,7 @@
 #include <string.h>
 
 /* Public HDF5 file */
-#include "hdf5dev.h"
+#include "hdf5.h"
 
 /* This connector's header */
 #include "H5VLpassthru.h"

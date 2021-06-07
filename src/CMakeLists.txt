@@ -16,7 +16,6 @@ set (H5_SOURCES
 
 set (H5_HDRS
     ${HDF5_SRC_DIR}/hdf5.h
-    ${HDF5_SRC_DIR}/hdf5dev.h
     ${HDF5_SRC_DIR}/H5api_adpt.h
     ${HDF5_SRC_DIR}/H5public.h
     #${HDF5_SRC_DIR}/H5version.h
