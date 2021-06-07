@@ -463,6 +463,19 @@ New Features
 
     Library:
     --------
+    - gcc warning suppression macros were moved out of H5public.h
+
+      The HDF5 library uses a set of macros to suppress warnings on gcc.
+      These warnings were originally located in H5public.h so that the
+      multi VFD (which only uses public headers) could also make use of them
+      but internal macros should not be publicly exposed like this.
+
+      These macros have now been moved to H5private.h. Pending future multi
+      VFD refactoring, the macros have been duplicated in H5FDmulti.c to
+      suppress the format string warnings there.
+
+        (DER - 2021/06/03)
+
     - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
 
       The size_hint value is ultimately stored in a uint32_t struct field,
