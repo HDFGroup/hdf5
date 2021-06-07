@@ -21,7 +21,6 @@
 #include "h5tools_ref.h"
 #include "h5tools_utils.h"
 #include "H5private.h"
-#include "hdf5dev.h"
 
 #ifdef H5_TOOLS_DEBUG
 /* global debug variables */

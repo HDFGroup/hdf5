@@ -21,7 +21,6 @@
 
 #include "H5f90.h"
 #include "H5fort_type_defines.h"
-#include "hdf5dev.h"
 
 int IntKinds_SizeOf[] = H5_FORTRAN_INTEGER_KINDS_SIZEOF;
 
