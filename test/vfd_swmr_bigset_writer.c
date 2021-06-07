@@ -84,10 +84,10 @@
 #define MAX_READ_LEN_IN_SECONDS 2
 #define TICK_LEN                4
 #define MAX_LAG                 7
-#define ROWS                  256
-#define COLS                  512
+#define ROWS                    256
+#define COLS                    512
 #define RANK                    2
-#define NUM_ATTEMPTS          100
+#define NUM_ATTEMPTS            100
 
 typedef struct _base {
     hsize_t row, col;
@@ -113,13 +113,13 @@ typedef struct _sources {
 #define MANY_FILES 4
 
 typedef struct {
-    hid_t *         dataset;
-    sources_t *     sources;
-    hid_t           file[MANY_FILES];
-    hid_t           dapl, filetype, memspace, one_by_one_sid, quadrant_dcpl;
-    unsigned        ndatasets;
-    const char *    filename[MANY_FILES];
-    char            progname[PATH_MAX];
+    hid_t      *dataset;
+    sources_t  *sources;
+    hid_t      file[MANY_FILES];
+    hid_t      dapl, filetype, memspace, one_by_one_sid, quadrant_dcpl;
+    unsigned   ndatasets;
+    const char *filename[MANY_FILES];
+    char       progname[PATH_MAX];
     struct {
         quadrant_t ul, ur, bl, br, src;
     } quadrants;
@@ -141,10 +141,10 @@ typedef struct {
 typedef struct {
     const char *fifo_writer_to_reader;  /* Name of fifo for writer to reader */
     const char *fifo_reader_to_writer;  /* Name of fifo for reader to writer */
-    int fd_writer_to_reader;            /* File ID for fifo from writer to reader */
-    int fd_reader_to_writer;            /* File ID for fifo from reader to writer */
-    int notify;                         /* Value to notify between writer and reader */
-    int verify;                         /* Value to verify between writer and reader */
+    int        fd_writer_to_reader;     /* File ID for fifo from writer to reader */
+    int        fd_reader_to_writer;     /* File ID for fifo from reader to writer */
+    int        notify;                  /* Value to notify between writer and reader */
+    int        verify;                  /* Value to verify between writer and reader */
 } np_state_t;
 
 typedef struct {
@@ -154,12 +154,12 @@ typedef struct {
 
 /* Initializations for np_state_t */
 #define NP_INITIALIZER (np_state_t) {		                        \
-	  .fifo_writer_to_reader = "./fifo_bigset_writer_to_reader"     \
-	, .fifo_reader_to_writer = "./fifo_bigset_reader_to_writer"     \
-	, .fd_writer_to_reader = -1                                     \
-	, .fd_reader_to_writer = -1                                     \
-        , .notify = 0                                                   \
-        , .verify = 0                                                   \
+	.fifo_writer_to_reader = "./fifo_bigset_writer_to_reader",      \
+	.fifo_reader_to_writer = "./fifo_bigset_reader_to_writer",      \
+	.fd_writer_to_reader = -1,                                      \
+	.fd_reader_to_writer = -1,                                      \
+        .notify = 0,                                                    \
+        .verify = 0                                                     \
 }
 
 static inline state_t
@@ -380,7 +380,7 @@ state_init(state_t *s, int argc, char **argv)
                     s->cols = (unsigned)tmp;
                 else if (ch == 'l') {
                     /* Translate the tick number to time represented by the timespec struct */
-                    float time = (float)(((unsigned)tmp * TICK_LEN) / 10.0);
+                    float    time = (float)(((unsigned)tmp * TICK_LEN) / 10.0);
                     unsigned sec = (unsigned)time;
                     unsigned nsec = (unsigned)((time - sec) * 10 * 1000 * 1000);
 
@@ -723,13 +723,13 @@ np_init(np_state_t *np, bool writer)
     if (writer) {
         /* If the named pipes are present at the start of the test, remove them */
         if (HDaccess(np->fifo_writer_to_reader, F_OK) == 0)
-            if(HDremove(np->fifo_writer_to_reader) != 0) {
+            if (HDremove(np->fifo_writer_to_reader) != 0) {
                 fprintf(stderr, "HDremove fifo_writer_to_reader failed\n");
                 TEST_ERROR;
             }
 
         if (HDaccess(np->fifo_reader_to_writer, F_OK) == 0)
-            if(HDremove(np->fifo_reader_to_writer) != 0) {
+            if (HDremove(np->fifo_reader_to_writer) != 0) {
                 fprintf(stderr, "HDremove fifo_reader_to_writer failed\n");
                 TEST_ERROR;
             }
@@ -827,8 +827,8 @@ error:
 static int
 notify_and_wait_for_reader(state_t *s, np_state_t *np)
 {
-    int notify;
-    unsigned int i;
+    int             notify;
+    unsigned int    i;
     struct timespec last = {0, 0};
 
     /* Get the time when finishing zoo creation */
@@ -845,7 +845,7 @@ notify_and_wait_for_reader(state_t *s, np_state_t *np)
 
     /* During the wait, writer makes repeated HDF5 API calls so as to trigger
      * EOT at approximately the correct time */
-    for(i = 0; i < MAX_LAG + 1; i++) {
+    for (i = 0; i < MAX_LAG + 1; i++) {
         decisleep(TICK_LEN);
 
         H5E_BEGIN_TRY {
@@ -921,9 +921,8 @@ notify_reader(np_state_t *np, unsigned step)
 
     /* Notify the reader by sending the timestamp and the number of chunks written */
     if (HDwrite(np->fd_writer_to_reader, &last, sizeof(last)) < 0) {
-        H5_FAILED(); AT();
         fprintf(stderr, "HDwrite failed");
-        goto error;
+        TEST_ERROR;
     }
 
     return 0;
@@ -1083,10 +1082,10 @@ error:
 static bool
 open_extensible_dset(state_t *s)
 {
-    hsize_t                      dims[RANK], maxdims[RANK];
-    char                         dname[sizeof("/dataset-9999999999")];
-    hid_t                        dset_id, filespace, dtype;
-    unsigned int                 which, i;
+    hsize_t      dims[RANK], maxdims[RANK];
+    char         dname[sizeof("/dataset-9999999999")];
+    hid_t        dset_id, filespace, dtype;
+    unsigned int which, i;
 
     for (which = 0; which < s->ndatasets; which++) {
         esnprintf(dname, sizeof(dname), "/dataset-%d", which);
@@ -1204,7 +1203,7 @@ static bool
 set_or_verify_matrix(mat_t *mat, unsigned int which, base_t base, bool do_set)
 {
     unsigned row, col;
-    bool ret = true;
+    bool     ret = true;
 
     for (row = 0; row < mat->rows; row++) {
         for (col = 0; col < mat->cols; col++) {
@@ -1288,7 +1287,7 @@ error:
 static bool
 repeat_verify_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, base_t base)
 {
-    hid_t dset_id = s->dataset[which];
+    hid_t    dset_id = s->dataset[which];
     unsigned i;
 
     /* If the chunk data isn't good after reading it NUM_ATTEMPTS times, report it as a failure */
@@ -1503,9 +1502,9 @@ error:
 static bool
 verify_dsets(state_t s, np_state_t *np, mat_t *mat)
 {
-    unsigned *nextstep = NULL;
-    unsigned  finished_step = 0;
-    unsigned which;
+    unsigned        *nextstep = NULL;
+    unsigned        finished_step = 0;
+    unsigned        which;
     exchange_info_t last;
 
     if (!(nextstep = HDcalloc(s.ndatasets, sizeof(*nextstep)))) {
@@ -1596,10 +1595,10 @@ error:
 static bool
 write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *mat)
 {
-    hid_t   ds = H5I_INVALID_HID, filespace = H5I_INVALID_HID;
+    hid_t   dset_id = H5I_INVALID_HID, filespace = H5I_INVALID_HID;
     hsize_t size[RANK];
     base_t  base, last;
-    char dname[sizeof("/dataset-9999999999")];
+    char    dname[sizeof("/dataset-9999999999")];
 
     esnprintf(dname, sizeof(dname), "/dataset-%d", which);
 
@@ -1610,10 +1609,10 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
         TEST_ERROR;
     }
 
-    ds = s->dataset[which];
+    dset_id = s->dataset[which];
 
     if (s->asteps != 0 && step % s->asteps == 0) {
-        if (!add_dset_attribute(s, ds, s->one_by_one_sid, which, step)) {
+        if (!add_dset_attribute(s, dset_id, s->one_by_one_sid, which, step)) {
             fprintf(stderr, "add_dset_attribute failed\n");
             TEST_ERROR;
         }
@@ -1624,8 +1623,7 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
         size[1]  = s->chunk_dims[1] * (1 + step);
         last.row = s->chunk_dims[0] * step;
         last.col = s->chunk_dims[1] * step;
-    }
-    else {
+    } else {
         size[0]  = s->chunk_dims[0];
         size[1]  = s->chunk_dims[1] * (1 + step);
         last.row = 0;
@@ -1657,12 +1655,12 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
             fprintf(stderr, "H5Dset_extent failed\n");
             TEST_ERROR;
         }
-    } else if (H5Dset_extent(ds, size) < 0) {
+    } else if (H5Dset_extent(dset_id, size) < 0) {
         fprintf(stderr, "H5Dset_extent failed\n");
         TEST_ERROR;
     }
 
-    if ((filespace = H5Dget_space(ds)) < 0) {
+    if ((filespace = H5Dget_space(dset_id)) < 0) {
         fprintf(stderr, "H5Dget_space failed\n");
         TEST_ERROR;
     }
@@ -1738,7 +1736,7 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
         }
 
         /* After finishing writing all the chunks, end the tick */
-        if(s.use_vfd_swmr && step == (s.nsteps - 1)) {
+        if (s.use_vfd_swmr && step == (s.nsteps - 1)) {
            unsigned long i;
 
            if (s.vds != vds_multi)
@@ -1771,12 +1769,12 @@ error:
 int
 main(int argc, char **argv)
 {
-    mat_t *  mat;
-    hid_t    fcpl = H5I_INVALID_HID;
-    unsigned which;
-    state_t  s;
+    mat_t      *mat;
+    hid_t      fcpl = H5I_INVALID_HID;
+    unsigned   which;
+    state_t    s;
     np_state_t np;
-    size_t   i;
+    size_t     i;
 
     if (!state_init(&s, argc, argv)) {
         fprintf(stderr, "state_init failed\n");
@@ -1831,7 +1829,7 @@ main(int argc, char **argv)
     }
 
     /* Initiailze named pipes */
-    if(s.use_named_pipe && !np_init(&np, s.writer)) {
+    if (s.use_named_pipe && !np_init(&np, s.writer)) {
         fprintf(stderr, "np_init() failed\n");
         TEST_ERROR;
     }
@@ -1854,7 +1852,7 @@ main(int argc, char **argv)
         }
 
         /* Call H5Fvfd_swmr_end_tick to end the tick.  No communication with the reader in this step */
-        if(s.use_vfd_swmr && s.use_named_pipe) {
+        if (s.use_vfd_swmr && s.use_named_pipe) {
            unsigned long j;
 
            if (s.vds != vds_multi) {
@@ -1931,7 +1929,7 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if(s.use_named_pipe && !np_close(&np, s.writer)) {
+    if (s.use_named_pipe && !np_close(&np, s.writer)) {
         fprintf(stderr, "np_close() failed\n");
         TEST_ERROR;
     }
@@ -1959,7 +1957,7 @@ error:
     if (s.use_named_pipe && np.fd_reader_to_writer >= 0)
         HDclose(np.fd_reader_to_writer);
 
-    if(s.use_named_pipe && !s.writer) {
+    if (s.use_named_pipe && !s.writer) {
         HDremove(np.fifo_writer_to_reader);
         HDremove(np.fifo_reader_to_writer);
     }
