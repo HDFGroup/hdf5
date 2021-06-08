@@ -25,7 +25,7 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *        s_opts   = "hVrv:qn:d:p:NcelxE:S";
+static const char *        s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
 static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"version", no_arg, 'V'},
                                        {"report", no_arg, 'r'},
@@ -40,6 +40,7 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
                                        {"follow-symlinks", no_arg, 'l'},
                                        {"no-dangling-links", no_arg, 'x'},
                                        {"exclude-path", require_arg, 'E'},
+                                       {"exclude-attribute", require_arg, 'A'},
                                        {"enable-error-stack", no_arg, 'S'},
                                        {NULL, 0, '\0'}};
 
@@ -47,7 +48,6 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},
  * Function: check_options
  *
  * Purpose: parse command line input
- *
  *-------------------------------------------------------------------------
  */
 static void
@@ -60,7 +60,7 @@ check_options(diff_opt_t *opts)
     /* check between -d , -p, --use-system-epsilon.
      * These options are mutually exclusive.
      */
-    if ((opts->d + opts->p + opts->use_system_epsilon) > 1) {
+    if ((opts->delta_bool + opts->percent_bool + opts->use_system_epsilon) > 1) {
         HDprintf("%s error: -d, -p and --use-system-epsilon options are mutually-exclusive;\n", PROGRAMNAME);
         HDprintf("use no more than one.\n");
         HDprintf("Try '-h' or '--help' option for more information or see the %s entry in the 'HDF5 "
@@ -71,10 +71,125 @@ check_options(diff_opt_t *opts)
 }
 
 /*-------------------------------------------------------------------------
+ * Function:    parse_hsize_list
+ *
+ * Purpose:     Parse a list of comma or space separated integers and return
+ *              them in a list. The string being passed into this function
+ *              should be at the start of the list you want to parse. You are
+ *              responsible for freeing the array returned from here.
+ *
+ *              Lists in the so-called "terse" syntax are separated by
+ *              semicolons (;). The lists themselves can be separated by
+ *              either commas (,) or white spaces.
+ *
+ * Return:      <none>
+ *-------------------------------------------------------------------------
+ */
+static void
+parse_hsize_list(const char *h_list, subset_d *d)
+{
+    hsize_t *    p_list;
+    const char * ptr;
+    unsigned int size_count = 0;
+    unsigned int i          = 0;
+    unsigned int last_digit = 0;
+
+    if (!h_list || !*h_list || *h_list == ';')
+        return;
+
+    H5TOOLS_START_DEBUG(" - h_list:%s", h_list);
+    /* count how many integers do we have */
+    for (ptr = h_list; ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
+        if (HDisdigit(*ptr)) {
+            if (!last_digit)
+                /* the last read character wasn't a digit */
+                size_count++;
+
+            last_digit = 1;
+        }
+        else
+            last_digit = 0;
+
+    if (size_count == 0) {
+        /* there aren't any integers to read */
+        H5TOOLS_ENDDEBUG("No integers to read");
+        return;
+    }
+    H5TOOLS_DEBUG("Number integers to read=%ld", size_count);
+
+    /* allocate an array for the integers in the list */
+    if ((p_list = (hsize_t *)HDcalloc(size_count, sizeof(hsize_t))) == NULL)
+        H5TOOLS_INFO("Unable to allocate space for subset data");
+
+    for (ptr = h_list; i < size_count && ptr && *ptr && *ptr != ';' && *ptr != ']'; ptr++)
+        if (HDisdigit(*ptr)) {
+            /* we should have an integer now */
+            p_list[i++] = (hsize_t)HDstrtoull(ptr, NULL, 0);
+
+            while (HDisdigit(*ptr))
+                /* scroll to end of integer */
+                ptr++;
+        }
+    d->data = p_list;
+    d->len  = size_count;
+    H5TOOLS_ENDDEBUG(" ");
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    parse_subset_params
+ *
+ * Purpose:     Parse the so-called "terse" syntax for specifying subsetting parameters.
+ *
+ * Return:      Success:    struct subset_t object
+ *              Failure:    NULL
+ *-------------------------------------------------------------------------
+ */
+static struct subset_t *
+parse_subset_params(const char *dset)
+{
+    struct subset_t *s = NULL;
+    char *           brace;
+
+    H5TOOLS_START_DEBUG(" - dset:%s", dset);
+    if ((brace = HDstrrchr(dset, '[')) != NULL) {
+        *brace++ = '\0';
+
+        s = (struct subset_t *)HDcalloc(1, sizeof(struct subset_t));
+        parse_hsize_list(brace, &s->start);
+
+        while (*brace && *brace != ';')
+            brace++;
+
+        if (*brace)
+            brace++;
+
+        parse_hsize_list(brace, &s->stride);
+
+        while (*brace && *brace != ';')
+            brace++;
+
+        if (*brace)
+            brace++;
+
+        parse_hsize_list(brace, &s->count);
+
+        while (*brace && *brace != ';')
+            brace++;
+
+        if (*brace)
+            brace++;
+
+        parse_hsize_list(brace, &s->block);
+    }
+    H5TOOLS_ENDDEBUG(" ");
+
+    return s;
+}
+
+/*-------------------------------------------------------------------------
  * Function: parse_command_line
  *
  * Purpose: parse command line input
- *
  *-------------------------------------------------------------------------
  */
 
@@ -85,9 +200,11 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     int                       i;
     int                       opt;
     struct exclude_path_list *exclude_head, *exclude_prev, *exclude_node;
+    struct exclude_path_list *exclude_attr_head, *exclude_attr_prev, *exclude_attr_node;
 
+    H5TOOLS_START_DEBUG(" ");
     /* process the command-line */
-    memset(opts, 0, sizeof(diff_opt_t));
+    HDmemset(opts, 0, sizeof(diff_opt_t));
 
     /* assume equal contents initially */
     opts->contents = 1;
@@ -96,7 +213,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     opts->do_nans = 1;
 
     /* not Listing objects that are not comparable */
-    opts->m_list_not_cmp = 0;
+    opts->mode_list_not_cmp = 0;
 
     /* initially no not-comparable. */
     /**this is bad in mixing option with results**/
@@ -104,6 +221,9 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
 
     /* init for exclude-path option */
     exclude_head = NULL;
+
+    /* init for exclude-attribute option */
+    exclude_attr_head = NULL;
 
     /* parse command line options */
     while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
@@ -124,45 +244,39 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 break;
 
             case 'v':
-                opts->m_verbose = 1;
-                /* This for loop is for handling style like
-                 * -v, -v1, --verbose, --verbose=1.
-                 */
+                opts->mode_verbose = 1;
                 for (i = 1; i < argc; i++) {
                     /*
-                     * short opt
+                     * special check for short opt
                      */
-                    if (!strcmp(argv[i], "-v")) { /* no arg */
-                        opt_ind--;
-                        opts->m_verbose_level = 0;
+                    if (!strcmp(argv[i], "-v")) {
+                        if (opt_arg != NULL)
+                            opt_ind--;
+                        opts->mode_verbose_level = 0;
                         break;
                     }
                     else if (!strncmp(argv[i], "-v", (size_t)2)) {
-                        opts->m_verbose_level = atoi(&argv[i][2]);
+                        if (opt_arg != NULL)
+                            opt_ind--;
+                        opts->mode_verbose_level = atoi(&argv[i][2]);
                         break;
                     }
-
-                    /*
-                     * long opt
-                     */
-                    if (!strcmp(argv[i], "--verbose")) { /* no arg */
-                        opts->m_verbose_level = 0;
-                        break;
-                    }
-                    else if (!strncmp(argv[i], "--verbose", (size_t)9) && argv[i][9] == '=') {
-                        opts->m_verbose_level = atoi(&argv[i][10]);
-                        break;
+                    else {
+                        if (opt_arg != NULL)
+                            opts->mode_verbose_level = HDatoi(opt_arg);
+                        else
+                            opts->mode_verbose_level = 0;
                     }
                 }
                 break;
 
             case 'q':
                 /* use quiet mode; supress the message "0 differences found" */
-                opts->m_quiet = 1;
+                opts->mode_quiet = 1;
                 break;
 
             case 'r':
-                opts->m_report = 1;
+                opts->mode_report = 1;
                 break;
 
             case 'l':
@@ -188,7 +302,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 }
 
                 /* init */
-                exclude_node->obj_path = (char *)opt_arg;
+                exclude_node->obj_path = opt_arg;
                 exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
                 exclude_prev           = exclude_head;
 
@@ -205,37 +319,62 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 }
                 break;
 
+            case 'A':
+                opts->exclude_attr_path = 1;
+
+                /* create linked list of excluding objects */
+                if ((exclude_attr_node =
+                         (struct exclude_path_list *)HDmalloc(sizeof(struct exclude_path_list))) == NULL) {
+                    HDprintf("Error: lack of memory!\n");
+                    h5diff_exit(EXIT_FAILURE);
+                }
+
+                /* init */
+                exclude_attr_node->obj_path = opt_arg;
+                exclude_attr_node->obj_type = H5TRAV_TYPE_UNKNOWN;
+                exclude_attr_prev           = exclude_attr_head;
+
+                if (NULL == exclude_attr_head) {
+                    exclude_attr_head       = exclude_attr_node;
+                    exclude_attr_head->next = NULL;
+                }
+                else {
+                    while (NULL != exclude_attr_prev->next)
+                        exclude_attr_prev = exclude_attr_prev->next;
+
+                    exclude_attr_node->next = NULL;
+                    exclude_attr_prev->next = exclude_attr_node;
+                }
+                break;
+
             case 'd':
-                opts->d = 1;
+                opts->delta_bool = 1;
 
                 if (check_d_input(opt_arg) == -1) {
                     HDprintf("<-d %s> is not a valid option\n", opt_arg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->delta = atof(opt_arg);
-
-                /* -d 0 is the same as default */
-                if (H5_DBL_ABS_EQUAL(opts->delta, (double)0.0F))
-                    opts->d = 0;
+                opts->delta = HDatof(opt_arg);
+                /* do not check against default, the DBL_EPSILON is being replaced by user */
                 break;
 
             case 'p':
-                opts->p = 1;
+                opts->percent_bool = 1;
                 if (check_p_input(opt_arg) == -1) {
                     HDprintf("<-p %s> is not a valid option\n", opt_arg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->percent = atof(opt_arg);
+                opts->percent = HDatof(opt_arg);
 
                 /* -p 0 is the same as default */
                 if (H5_DBL_ABS_EQUAL(opts->percent, (double)0.0F))
-                    opts->p = 0;
+                    opts->percent_bool = 0;
                 break;
 
             case 'n':
-                opts->n = 1;
+                opts->count_bool = 1;
                 if (check_n_input(opt_arg) == -1) {
                     HDprintf("<-n %s> is not a valid option\n", opt_arg);
                     usage();
@@ -249,7 +388,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 break;
 
             case 'c':
-                opts->m_list_not_cmp = 1;
+                opts->mode_list_not_cmp = 1;
                 break;
 
             case 'e':
@@ -265,6 +404,10 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     if (opts->exclude_path)
         opts->exclude = exclude_head;
 
+    /* if exclude-attribute option is used, keep the exclude attr list */
+    if (opts->exclude_attr_path)
+        opts->exclude_attr = exclude_attr_head;
+
     /* check for file names to be processed */
     if (argc <= opt_ind || argv[opt_ind + 1] == NULL) {
         error_msg("missing file names\n");
@@ -275,11 +418,15 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     *fname1   = argv[opt_ind];
     *fname2   = argv[opt_ind + 1];
     *objname1 = argv[opt_ind + 2];
+    H5TOOLS_DEBUG("file1 = %s", *fname1);
+    H5TOOLS_DEBUG("file2 = %s", *fname2);
 
     if (*objname1 == NULL) {
         *objname2 = NULL;
+        H5TOOLS_ENDDEBUG("No obj names");
         return;
     }
+    H5TOOLS_DEBUG("objname1 = %s", *objname1);
 
     if (argv[opt_ind + 3] != NULL) {
         *objname2 = argv[opt_ind + 3];
@@ -287,33 +434,43 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     else {
         *objname2 = *objname1;
     }
+    H5TOOLS_DEBUG("objname2 = %s", *objname2);
+
+    /*
+     * TRILABS_227 is complete except for an issue with printing indices
+     * the following calls will enable subsetting
+     */
+    opts->sset[0] = parse_subset_params(*objname1);
+
+    opts->sset[1] = parse_subset_params(*objname2);
+
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
  * Function: print_info
  *
  * Purpose: print several information messages after h5diff call
- *
  *-------------------------------------------------------------------------
  */
 void
 print_info(diff_opt_t *opts)
 {
-    if (opts->m_quiet || opts->err_stat)
+    if (opts->mode_quiet || opts->err_stat)
         return;
 
     if (opts->cmn_objs == 0) {
         HDprintf("No common objects found. Files are not comparable.\n");
-        if (!opts->m_verbose)
+        if (!opts->mode_verbose)
             HDprintf("Use -v for a list of objects.\n");
     }
 
     if (opts->not_cmp == 1) {
-        if (opts->m_list_not_cmp == 0) {
+        if (opts->mode_list_not_cmp == 0) {
             HDprintf("--------------------------------\n");
             HDprintf("Some objects are not comparable\n");
             HDprintf("--------------------------------\n");
-            if (opts->m_verbose)
+            if (opts->mode_verbose)
                 HDprintf("Use -c for a list of objects without details of differences.\n");
             else
                 HDprintf("Use -c for a list of objects.\n");
@@ -327,15 +484,6 @@ print_info(diff_opt_t *opts)
  * Purpose: check for valid input
  *
  * Return: 1 for ok, -1 for fail
- *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -362,13 +510,6 @@ check_n_input(const char *str)
  * Purpose: check for a valid p option input
  *
  * Return: 1 for ok, -1 for fail
- *
- * Date: May 9, 2003
- *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -377,13 +518,13 @@ check_p_input(const char *str)
     double x;
 
     /*
-    the atof return value on a hexadecimal input is different
-    on some systems; we do a character check for this
-    */
+     * the atof return value on a hexadecimal input is different
+     * on some systems; we do a character check for this
+     */
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = atof(str);
+    x = HDatof(str);
     if (x < 0)
         return -1;
 
@@ -396,13 +537,6 @@ check_p_input(const char *str)
  * Purpose: check for a valid d option input
  *
  * Return: 1 for ok, -1 for fail
- *
- * Date: November 11, 2007
- *
- * Comments:
- *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static int
@@ -411,13 +545,13 @@ check_d_input(const char *str)
     double x;
 
     /*
-    the atof return value on a hexadecimal input is different
-    on some systems; we do a character check for this
-    */
+     * the atof return value on a hexadecimal input is different
+     * on some systems; we do a character check for this
+     */
     if (HDstrlen(str) > 2 && str[0] == '0' && str[1] == 'x')
         return -1;
 
-    x = atof(str);
+    x = HDatof(str);
     if (x < 0)
         return -1;
 
@@ -430,7 +564,6 @@ check_d_input(const char *str)
  * Purpose: print a usage message
  *
  * Return: void
- *
  *-------------------------------------------------------------------------
  */
 
@@ -458,10 +591,11 @@ usage(void)
                    "         Verbose mode with level. Print differences and list of objects.\n");
     PRINTVALSTREAM(rawoutstream, "         Level of detail depends on value of N:\n");
     PRINTVALSTREAM(rawoutstream, "          0 : Identical to '-v' or '--verbose'.\n");
-    PRINTVALSTREAM(rawoutstream, "          1 : All level 0 information plus one-line attribute\n");
-    PRINTVALSTREAM(rawoutstream, "              status summary.\n");
-    PRINTVALSTREAM(rawoutstream, "          2 : All level 1 information plus extended attribute\n");
-    PRINTVALSTREAM(rawoutstream, "              status report.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "          1 : All level 0 information plus one-line attribute status summary.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "          2 : All level 1 information plus extended attribute status report.\n");
+    PRINTVALSTREAM(rawoutstream, "          3 : All level 2 information plus file names.\n");
     PRINTVALSTREAM(rawoutstream, "   -q, --quiet\n");
     PRINTVALSTREAM(rawoutstream, "         Quiet mode. Do not produce output.\n");
     PRINTVALSTREAM(rawoutstream, "   --enable-error-stack\n");
@@ -574,7 +708,18 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "         excluded.\n");
     PRINTVALSTREAM(rawoutstream, "         This option can be used repeatedly to exclude multiple paths.\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-
+    PRINTVALSTREAM(rawoutstream, "   --exclude-attribute \"path/to/object/with/attribute\"\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "         Exclude attributes on the specified path to an object when comparing files or groups.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         If there are multiple paths to an object, only the specified path(s)\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "         will be excluded; the comparison will include any path not explicitly\n");
+    PRINTVALSTREAM(rawoutstream, "         excluded.\n");
+    PRINTVALSTREAM(rawoutstream, "         This option can be used repeatedly to exclude multiple paths.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Modes of output:\n");
     PRINTVALSTREAM(rawoutstream,
                    "  Default mode: print the number of differences found and where they occured\n");
@@ -614,7 +759,30 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "      (The option --follow-symlinks overrides the default behavior when\n");
     PRINTVALSTREAM(rawoutstream, "       symbolic links are compared.).\n");
     PRINTVALSTREAM(rawoutstream, "\n");
-
+    /*
+     * TRILABS_227 is complete except for an issue with printing indices
+     * the following will be needed for subsetting
+     */
+    PRINTVALSTREAM(rawoutstream, " Subsetting options:\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  Subsetting is available by using the fcompact form of subsetting, as follows:\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  It is not required to use all parameters, but until the last parameter value used,\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  all of the semicolons (;) are required, even when a parameter value is not specified. Example:\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START;;COUNT;BLOCK]\n");
+    PRINTVALSTREAM(rawoutstream, "    obj1 /foo/mydataset[START]\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  each dimension. START is optional and will default to 0 in each dimension.\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  Each of START, STRIDE, COUNT, and BLOCK must be a comma-separated list of integers with\n");
+    PRINTVALSTREAM(rawoutstream, "  one integer for each dimension of the dataset.\n");
+    PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, " Exit code:\n");
     PRINTVALSTREAM(rawoutstream, "  0 if no differences, 1 if differences found, 2 if error\n");
     PRINTVALSTREAM(rawoutstream, "\n");

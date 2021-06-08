@@ -12,13 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, November 20, 1998
  *
  * Purpose:     Test support stuff.
  */
-#ifndef _H5TEST_H
-#define _H5TEST_H
+#ifndef H5TEST_H
+#define H5TEST_H
 
 /*
  * Include required headers.  This file tests internal library functions,
@@ -111,10 +111,10 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
         HDfflush(stdout);                                                                                    \
     }
 #define PASSED()                                                                                             \
-    {                                                                                                        \
+    do {                                                                                                     \
         HDputs(" PASSED");                                                                                   \
         HDfflush(stdout);                                                                                    \
-    }
+    } while (0)
 #define H5_FAILED()                                                                                          \
     {                                                                                                        \
         HDputs("*FAILED*");                                                                                  \
@@ -171,6 +171,64 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 
 /* Flags for h5_fileaccess_flags() */
 #define H5_FILEACCESS_VFD 0x01
+
+/* Macros to create and fill 2D arrays with a single heap allocation.
+ * These can be used to replace large stack and global arrays which raise
+ * warnings.
+ *
+ * The macros make a single heap allocation large enough to hold all the
+ * pointers and the data elements. The first part of the allocation holds
+ * the pointers, and the second part holds the data as a contiguous block
+ * in row-major order.
+ *
+ * To pass the data block to calls like H5Dread(), pass a pointer to the
+ * first array element as the data pointer (e.g., array[0] in a 2D array).
+ *
+ * The fill macro just fills the array with an increasing count value.
+ *
+ * Usage:
+ *
+ * int **array;
+ *
+ * H5TEST_ALLOCATE_2D_ARRAY(array, int, 5, 10);
+ *
+ * H5TEST_FILL_2D_ARRAY(array, int, 5, 10);
+ *
+ * (do stuff)
+ *
+ * HDfree(array);
+ */
+#define H5TEST_ALLOCATE_2D_ARRAY(ARR, TYPE, DIMS_I, DIMS_J)                                                  \
+    do {                                                                                                     \
+        /* Prefix with h5taa to avoid shadow warnings */                                                     \
+        size_t h5taa_pointers_size = 0;                                                                      \
+        size_t h5taa_data_size     = 0;                                                                      \
+        int    h5taa_i;                                                                                      \
+                                                                                                             \
+        h5taa_pointers_size = (DIMS_I) * sizeof(TYPE *);                                                     \
+        h5taa_data_size     = (DIMS_I) * (DIMS_J) * sizeof(TYPE);                                            \
+                                                                                                             \
+        ARR = (TYPE **)HDmalloc(h5taa_pointers_size + h5taa_data_size);                                      \
+                                                                                                             \
+        ARR[0] = (TYPE *)(ARR + (DIMS_I));                                                                   \
+                                                                                                             \
+        for (h5taa_i = 1; h5taa_i < (DIMS_I); h5taa_i++)                                                     \
+            ARR[h5taa_i] = ARR[h5taa_i - 1] + (DIMS_J);                                                      \
+    } while (0)
+
+#define H5TEST_FILL_2D_ARRAY(ARR, TYPE, DIMS_I, DIMS_J)                                                      \
+    do {                                                                                                     \
+        /* Prefix with h5tfa to avoid shadow warnings */                                                     \
+        int  h5tfa_i     = 0;                                                                                \
+        int  h5tfa_j     = 0;                                                                                \
+        TYPE h5tfa_count = 0;                                                                                \
+                                                                                                             \
+        for (h5tfa_i = 0; h5tfa_i < (DIMS_I); h5tfa_i++)                                                     \
+            for (h5tfa_j = 0; h5tfa_j < (DIMS_J); h5tfa_j++) {                                               \
+                ARR[h5tfa_i][h5tfa_j] = h5tfa_count;                                                         \
+                h5tfa_count++;                                                                               \
+            }                                                                                                \
+    } while (0)
 
 /*
  * The methods to compare the equality of floating-point values:

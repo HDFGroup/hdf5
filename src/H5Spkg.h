@@ -12,19 +12,19 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Thursday, September 28, 2000
+ * Programmer:    Quincey Koziol
+ *        Thursday, September 28, 2000
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5S package.  Source files outside the H5S package should
- *		include H5Sprivate.h instead.
+ * Purpose:    This file contains declarations which are visible only within
+ *        the H5S package.  Source files outside the H5S package should
+ *        include H5Sprivate.h instead.
  */
 #ifndef H5S_PACKAGE
 #error "Do not include this file outside the H5S package!"
 #endif
 
-#ifndef _H5Spkg_H
-#define _H5Spkg_H
+#ifndef H5Spkg_H
+#define H5Spkg_H
 
 /* Get package's private header */
 #include "H5Sprivate.h"
@@ -95,6 +95,10 @@ struct H5S_pnt_node_t {
 /* Information about point selection list */
 typedef struct {
     H5S_pnt_node_t *head; /* Pointer to head of point list */
+    hsize_t last_idx; /* Index of the point after the last returned from H5S__get_select_elem_pointlist() */
+    H5S_pnt_node_t *last_idx_pnt; /* Point after the last returned from H5S__get_select_elem_pointlist().
+                                   * If we ever add a way to remove points or add points in the middle of
+                                   * the pointlist we will need to invalidate these fields. */
 } H5S_pnt_list_t;
 
 /* Information about new-style hyperslab spans */
@@ -285,4 +289,4 @@ H5_DLL htri_t H5S_select_shape_same_test(hid_t sid1, hid_t sid2);
 H5_DLL htri_t H5S_get_rebuild_status_test(hid_t space_id);
 #endif /* H5S_TESTING */
 
-#endif /*_H5Spkg_H*/
+#endif /*H5Spkg_H*/

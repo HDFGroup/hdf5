@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5HFpublic_H
-#define _H5HFpublic_H
+#ifndef H5HFpublic_H
+#define H5HFpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -48,4 +48,4 @@ extern "C" {
 }
 #endif
 
-#endif /* _H5HFpublic_H */
+#endif /* H5HFpublic_H */

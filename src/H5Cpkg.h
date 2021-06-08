@@ -33,9 +33,8 @@
 #error "Do not include this file outside the H5C package!"
 #endif
 
-#ifndef _H5Cpkg_H
-#define _H5Cpkg_H
-
+#ifndef H5Cpkg_H
+#define H5Cpkg_H
 
 /* Get package's private header */
 #include "H5Cprivate.h"
@@ -3563,5 +3562,5 @@ if ( (cache_ptr)->index_size !=                                             \
 #endif /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
 
 
-#endif /* _H5Cpkg_H */
+#endif /* H5Cpkg_H */
 /* clang-format on */

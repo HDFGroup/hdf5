@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5CppDoc_H
-#define __H5CppDoc_H
+#ifndef H5CppDoc_H
+#define H5CppDoc_H
 
 //-------------------------------------------------------------------------
 // The following section will be used to generate the 'Mainpage'
@@ -53,10 +53,7 @@
  * <br />
  * \section install_sec Installation
  *
- * The HDF5 C++ API is included with the HDF5 source code and can
- * be obtained from
- * <a href="https://support.hdfgroup.org/HDF5/release/obtainsrc.html">
- * https://support.hdfgroup.org/HDF5/release/obtainsrc.html</a>.
+ * The HDF5 C++ API is included with the HDF5 source code.
  *
  * Please refer to the release_docs/INSTALL file under the top directory
  * of the HDF5 source code for information about installing, building,
@@ -95,4 +92,4 @@
 ///        This example shows how to work with groups.
 ///\example     h5group.cpp
 
-#endif // __H5CppDoc_H
+#endif // H5CppDoc_H

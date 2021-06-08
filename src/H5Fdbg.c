@@ -72,9 +72,10 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
               "File name (after resolving symlinks):", H5F_ACTUAL_NAME(f));
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "File access flags", f->shared->flags);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "File open reference count:", f->shared->nrefs);
-    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (abs)\n", indent, "", fwidth,
               "Address of super block:", f->shared->sblock->base_addr);
-    HDfprintf(stream, "%*s%-*s %Hu bytes\n", indent, "", fwidth, "Size of userblock:", userblock_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " bytes\n", indent, "", fwidth,
+              "Size of userblock:", userblock_size);
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Superblock version number:", f->shared->sblock->super_vers);
@@ -97,16 +98,16 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
               "Symbol table internal node 1/2 rank:", f->shared->sblock->btree_k[H5B_SNODE_ID]);
     HDfprintf(stream, "%*s%-*s 0x%02x\n", indent, "", fwidth,
               "File status flags:", (unsigned)(f->shared->sblock->status_flags));
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
               "Superblock extension address:", f->shared->sblock->ext_addr);
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
               "Shared object header message table address:", f->shared->sohm_addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Shared object header message version number:", (unsigned)f->shared->sohm_vers);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Number of shared object header message indexes:", (unsigned)f->shared->sohm_nindexes);
 
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
               "Address of driver information block:", f->shared->sblock->driver_addr);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,

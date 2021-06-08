@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5CompType_H
-#define __H5CompType_H
+#ifndef H5CompType_H
+#define H5CompType_H
 
 namespace H5 {
 
@@ -40,7 +40,7 @@ class H5_DLLCPP CompType : public DataType {
     // Gets the compound datatype of the specified dataset
     CompType(const DataSet &dataset); // H5Dget_type
 
-    // Copy constructor - makes a copy of original object
+    // Copy constructor - same as the original CompType.
     CompType(const CompType &original);
 
     // Constructors that open a compound datatype, given a location.
@@ -128,4 +128,4 @@ class H5_DLLCPP CompType : public DataType {
 }; // end of CompType
 } // namespace H5
 
-#endif // __H5CompType_H
+#endif // H5CompType_H

@@ -599,7 +599,10 @@ test_direct(void)
     if (H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    }
     H5E_END_TRY;
     if (file < 0) {
         H5Pclose(fapl);
@@ -797,13 +800,19 @@ test_family_opens(char *fname, hid_t fa_pl)
     /* Case 1: reopen file with 1st member file name and default property list */
     HDsnprintf(first_name, sizeof(first_name), fname, 0);
 
-    H5E_BEGIN_TRY { file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
 
     /* Case 2: reopen file with correct name template but default property list */
-    H5E_BEGIN_TRY { file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -812,7 +821,10 @@ test_family_opens(char *fname, hid_t fa_pl)
     if (H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fopen(fname, H5F_ACC_RDWR, fa_pl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -828,7 +840,10 @@ test_family_opens(char *fname, hid_t fa_pl)
     if (H5Pset_fapl_family(fa_pl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -1168,7 +1183,10 @@ test_multi_opens(char *fname)
     HDsnprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
-    H5E_BEGIN_TRY { fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     return (fid >= 0 ? FAIL : SUCCEED);

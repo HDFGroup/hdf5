@@ -23,8 +23,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5ACprivate_H
-#define _H5ACprivate_H
+#ifndef H5ACprivate_H
+#define H5ACprivate_H
 
 #include "H5ACpublic.h" /*public prototypes            */
 
@@ -338,4 +338,4 @@ H5_DLL herr_t H5AC_open_trace_file(H5AC_t *cache_ptr, const char *trace_file_nam
 H5_DLL herr_t H5AC_add_candidate(H5AC_t *cache_ptr, haddr_t addr);
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* !_H5ACprivate_H */
+#endif /* H5ACprivate_H */

@@ -13,11 +13,11 @@
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5HFman.c
- *			Feb 24 2006
- *			Quincey Koziol
+ * Created:        H5HFman.c
+ *            Feb 24 2006
+ *            Quincey Koziol
  *
- * Purpose:		"Managed" object routines for fractal heaps.
+ * Purpose:        "Managed" object routines for fractal heaps.
  *
  *-------------------------------------------------------------------------
  */
@@ -31,12 +31,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5HFpkg.h"     /* Fractal heaps			*/
-#include "H5MFprivate.h" /* File memory management		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5VMprivate.h" /* Vectors and arrays 			*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Eprivate.h"  /* Error handling              */
+#include "H5HFpkg.h"     /* Fractal heaps            */
+#include "H5MFprivate.h" /* File memory management        */
+#include "H5MMprivate.h" /* Memory management            */
+#include "H5VMprivate.h" /* Vectors and arrays             */
 
 /****************/
 /* Local Macros */
@@ -82,14 +82,14 @@ static herr_t H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_insert
+ * Function:    H5HF_man_insert
  *
- * Purpose:	Insert an object in a managed direct block
+ * Purpose:    Insert an object in a managed direct block
  *
- * Return:	SUCCEED/FAIL
+ * Return:    SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Mar 13 2006
+ * Programmer:    Quincey Koziol
+ *        Mar 13 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -209,15 +209,15 @@ done:
 } /* end H5HF_man_insert() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_op_real
+ * Function:    H5HF_man_op_real
  *
- * Purpose:	Internal routine to perform an operation on a managed heap
+ * Purpose:    Internal routine to perform an operation on a managed heap
  *              object
  *
- * Return:	SUCCEED/FAIL
+ * Return:    SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Mar 17 2006
+ * Programmer:    Quincey Koziol
+ *        Mar 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -225,16 +225,16 @@ static herr_t
 H5HF_man_op_real(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id, H5HF_operator_t op, void *op_data,
                  unsigned op_flags)
 {
-    H5HF_direct_t *dblock = NULL;       /* Pointer to direct block to query */
-    H5AC_protect_t dblock_access;       /* Access method for direct block */
-    haddr_t        dblock_addr;         /* Direct block address */
-    size_t         dblock_size;         /* Direct block size */
-    unsigned       dblock_cache_flags;  /* Flags for unprotecting direct block */
-    hsize_t        obj_off;             /* Object's offset in heap */
-    size_t         obj_len;             /* Object's length in heap */
-    size_t         blk_off;             /* Offset of object in block */
-    uint8_t *      p;                   /* Temporary pointer to obj info in block */
-    herr_t         ret_value = SUCCEED; /* Return value */
+    H5HF_direct_t *dblock = NULL;             /* Pointer to direct block to query */
+    H5AC_protect_t dblock_access;             /* Access method for direct block */
+    haddr_t        dblock_addr = HADDR_UNDEF; /* Direct block address */
+    size_t         dblock_size;               /* Direct block size */
+    unsigned       dblock_cache_flags = 0;    /* Flags for unprotecting direct block */
+    hsize_t        obj_off;                   /* Object's offset in heap */
+    size_t         obj_len;                   /* Object's length in heap */
+    size_t         blk_off;                   /* Offset of object in block */
+    uint8_t *      p;                         /* Temporary pointer to obj info in block */
+    herr_t         ret_value = SUCCEED;       /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -359,14 +359,14 @@ done:
 } /* end H5HF_man_op_real() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_read
+ * Function:    H5HF_man_read
  *
- * Purpose:	Read an object from a managed heap
+ * Purpose:    Read an object from a managed heap
  *
- * Return:	SUCCEED/FAIL
+ * Return:    SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Mar 17 2006
+ * Programmer:    Quincey Koziol
+ *        Mar 17 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -393,14 +393,14 @@ done:
 } /* end H5HF_man_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_write
+ * Function:    H5HF_man_write
  *
- * Purpose:	Write an object to a managed heap
+ * Purpose:    Write an object to a managed heap
  *
- * Return:	SUCCEED/FAIL
+ * Return:    SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Dec 18 2006
+ * Programmer:    Quincey Koziol
+ *        Dec 18 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -428,14 +428,14 @@ done:
 } /* end H5HF_man_write() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_op
+ * Function:    H5HF_man_op
  *
- * Purpose:	Operate directly on an object from a managed heap
+ * Purpose:    Operate directly on an object from a managed heap
  *
- * Return:	SUCCEED/FAIL
+ * Return:    SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		Sept 11 2006
+ * Programmer:    Quincey Koziol
+ *        Sept 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -462,23 +462,23 @@ done:
 } /* end H5HF_man_op() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_man_remove
+ * Function:    H5HF_man_remove
  *
- * Purpose:	Remove an object from a managed heap
+ * Purpose:    Remove an object from a managed heap
  *
- * Return:	SUCCEED/FAIL
+ * Return:    SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		May 15 2006
+ * Programmer:    Quincey Koziol
+ *        May 15 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5HF_man_remove(H5HF_hdr_t *hdr, hid_t dxpl_id, const uint8_t *id)
 {
-    H5HF_free_section_t *sec_node = NULL;     /* Pointer to free space section for block */
-    H5HF_indirect_t *    iblock   = NULL;     /* Pointer to indirect block */
-    hbool_t              did_protect;         /* Whether we protected the indirect block or not */
+    H5HF_free_section_t *sec_node    = NULL;  /* Pointer to free space section for block */
+    H5HF_indirect_t *    iblock      = NULL;  /* Pointer to indirect block */
+    hbool_t              did_protect = FALSE; /* Whether we protected the indirect block or not */
     hsize_t              obj_off;             /* Object's offset in heap */
     size_t               obj_len;             /* Object's length in heap */
     size_t               dblock_size;         /* Direct block size */

@@ -21,8 +21,8 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5MFprivate_H
-#define _H5MFprivate_H
+#ifndef H5MFprivate_H
+#define H5MFprivate_H
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h"  /* File access				*/
@@ -79,4 +79,4 @@ H5_DLL herr_t H5MF_sects_debug(H5F_t *f, hid_t dxpl_id, haddr_t addr, FILE *stre
 #endif /* NOT_YET */
 #endif /* H5MF_DEBUGGING */
 
-#endif /* end _H5MFprivate_H */
+#endif /* end H5MFprivate_H */

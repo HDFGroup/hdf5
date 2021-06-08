@@ -12,13 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              Wednesday, March 17, 2010
  *
  * Purpose:     srcdir querying support.
  */
-#ifndef _H5SRCDIR_H
-#define _H5SRCDIR_H
+#ifndef H5SRCDIR_H
+#define H5SRCDIR_H
 
 /* Include the header file with the correct relative path for the srcdir string */
 #include "H5srcdir_str.h"
@@ -66,5 +66,7 @@ H5_get_srcdir_filename(const char *filename)
         else
             return (NULL);
     } /* end else */
+
 } /* end H5_get_srcdir_filename() */
-#endif /* _H5SRCDIR_H */
+
+#endif /* H5SRCDIR_H */

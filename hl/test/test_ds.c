@@ -11,8 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
 #include "h5hltest.h"
 #include "H5srcdir.h"
 #include "H5DSpublic.h"
@@ -3742,7 +3740,10 @@ match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor_data)
     return ret;
 
 out:
-    H5E_BEGIN_TRY { H5Sclose(sid); }
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+    }
     H5E_END_TRY;
     return FAIL;
 }

@@ -38,6 +38,8 @@
 ### enable Fortran builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FORTRAN:BOOL=ON")
 
+### enable FILTERS builds
+#set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FILTERS:BOOL=ON")
 
 #############################################################################################
 ### enable parallel program builds

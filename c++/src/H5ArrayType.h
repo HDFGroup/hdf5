@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5ArrayType_H
-#define __H5ArrayType_H
+#ifndef H5ArrayType_H
+#define H5ArrayType_H
 
 namespace H5 {
 
@@ -21,19 +21,19 @@ namespace H5 {
     \brief Class ArrayType inherits from DataType and provides wrappers for
      the HDF5's Array Datatypes.
 */
-//  Inheritance: DataType -> H5Object -> H5Location -> IdComponent
+// Inheritance: DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP ArrayType : public DataType {
   public:
     // Constructor that creates a new array data type based on the
     // specified base type.
     ArrayType(const DataType &base_type, int ndims, const hsize_t *dims);
 
+    // Assignment operator
+    ArrayType &operator=(const ArrayType &rhs);
+
     // Constructors that open an array datatype, given a location.
     ArrayType(const H5Location &loc, const char *name);
     ArrayType(const H5Location &loc, const H5std_string &name);
-
-    // Assignment operator
-    ArrayType &operator=(const ArrayType &rhs);
 
     // Returns an ArrayType object via DataType* by decoding the
     // binary object description of this type.
@@ -54,7 +54,7 @@ class H5_DLLCPP ArrayType : public DataType {
         return ("ArrayType");
     }
 
-    // Copy constructor: makes copy of the original object.
+    // Copy constructor: same as the original ArrayType.
     ArrayType(const ArrayType &original);
 
     // Constructor that takes an existing id
@@ -69,4 +69,4 @@ class H5_DLLCPP ArrayType : public DataType {
 }; // end of ArrayType
 } // namespace H5
 
-#endif // __H5ArrayType_H
+#endif // H5ArrayType_H

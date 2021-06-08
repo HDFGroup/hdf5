@@ -12,11 +12,11 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Bill Wendling <wendling@ncsa.uiuc.edu>
+ * Programmer:  Bill Wendling
  *              Monday, 19. February 2001
  */
-#ifndef H5TOOLS_STR_H__
-#define H5TOOLS_STR_H__
+#ifndef H5TOOLS_STR_H
+#define H5TOOLS_STR_H
 
 typedef struct h5tools_str_t {
     char * s;      /*allocate string       */
@@ -31,13 +31,12 @@ H5TOOLS_DLL char * h5tools_str_reset(h5tools_str_t *str);
 H5TOOLS_DLL char * h5tools_str_trunc(h5tools_str_t *str, size_t size);
 H5TOOLS_DLL char * h5tools_str_fmt(h5tools_str_t *str, size_t start, const char *fmt);
 H5TOOLS_DLL char * h5tools_str_prefix(h5tools_str_t *str, const h5tool_format_t *info, hsize_t elmtno,
-                                      unsigned ndims, h5tools_context_t *ctx);
+                                      h5tools_context_t *ctx);
 /*
  * new functions needed to display region reference data
  */
 H5TOOLS_DLL char *h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info, hsize_t elmtno,
-                                            hsize_t *ptdata, unsigned ndims, hsize_t max_idx[],
-                                            h5tools_context_t *ctx);
+                                            const hsize_t *ptdata, h5tools_context_t *ctx);
 H5TOOLS_DLL void  h5tools_str_dump_space_slabs(h5tools_str_t *, hid_t, const h5tool_format_t *,
                                                h5tools_context_t *ctx);
 H5TOOLS_DLL void  h5tools_str_dump_space_blocks(h5tools_str_t *, hid_t, const h5tool_format_t *);
@@ -47,4 +46,4 @@ H5TOOLS_DLL char *h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *
                                      hid_t type, void *vp, h5tools_context_t *ctx);
 H5TOOLS_DLL char *h5tools_str_replace(const char *string, const char *substr, const char *replacement);
 
-#endif /* H5TOOLS_STR_H__ */
+#endif /* H5TOOLS_STR_H */

@@ -17,21 +17,27 @@ jobs:
     strategy:
 #      fail-fast: false
       matrix:
-        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Autotools GCC"]
+        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Autotools GCC", "Windows TS MSVC", "Ubuntu TS GCC", "TS Debug GCC", "macOS TS Clang", "TS Autotools GCC"]
         include:
           - name: "Windows Latest MSVC"
             artifact: "Windows-MSVC.tar.xz"
             os: windows-latest
             build_type: "Release"
             toolchain: ""
+            cpp: ON
             fortran: OFF
+            ts: OFF
+            hl: ON
+            parallel: OFF
             generator: "-G \"Visual Studio 16 2019\" -A x64"
           - name: "Ubuntu Latest GCC"
             artifact: "Linux.tar.xz"
             os: ubuntu-latest
             build_type: "Release"
             cpp: ON
-            fortran: OFF
+            fortran: ON
+            ts: OFF
+            hl: ON
             parallel: OFF
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
@@ -41,6 +47,8 @@ jobs:
             build_type: "Release"
             cpp: ON
             fortran: OFF
+            ts: OFF
+            hl: ON
             parallel: OFF
             toolchain: "config/toolchain/clang.cmake"
             generator: "-G Ninja"
@@ -50,15 +58,75 @@ jobs:
             build_type: "Debug"
             cpp: ON
             fortran: OFF
+            ts: OFF
+            hl: ON
             parallel: OFF
             toolchain: "config/toolchain/GCC.cmake"
             generator: "-G Ninja"
           - name: "Ubuntu Autotools GCC"
-            artifact: "Linux.tar.xz"
+            artifact: "LinuxA.tar.xz"
             os: ubuntu-latest
             build_type: "Release"
             cpp: enable
             fortran: enable
+            ts: disable
+            hl: enable
+            parallel: disable
+            toolchain: ""
+            generator: "autogen"
+#  Threadsafe runs
+          - name: "Windows TS MSVC"
+            artifact: "Windows-MSVCTS.tar.xz"
+            os: windows-2016
+            build_type: "Release"
+            toolchain: ""
+            cpp: OFF
+            fortran: OFF
+            ts: ON
+            hl: OFF
+            parallel: OFF
+            generator: "-G \"Visual Studio 15 2017 Win64\""
+          - name: "Ubuntu TS GCC"
+            artifact: "LinuxTS.tar.xz"
+            os: ubuntu-latest
+            build_type: "Release"
+            cpp: OFF
+            fortran: OFF
+            ts: ON
+            hl: OFF
+            parallel: OFF
+            toolchain: "config/toolchain/GCC.cmake"
+            generator: "-G Ninja"
+          - name: "macOS TS Clang"
+            artifact: "macOSTS.tar.xz"
+            os: macos-latest
+            build_type: "Release"
+            cpp: OFF
+            fortran: OFF
+            ts: ON
+            hl: OFF
+            parallel: OFF
+            toolchain: "config/toolchain/clang.cmake"
+            generator: "-G Ninja"
+          - name: "TS Debug GCC"
+            artifact: "LinuxTSDBG.tar.xz"
+            os: ubuntu-latest
+            build_type: "Debug"
+            cpp: OFF
+            fortran: OFF
+            ts: ON
+            hl: OFF
+            parallel: OFF
+            toolchain: "config/toolchain/GCC.cmake"
+            generator: "-G Ninja"
+          - name: "TS Autotools GCC"
+            artifact: "LinuxATS.tar.xz"
+            os: ubuntu-latest
+            build_type: "Release"
+            cpp: disable
+            fortran: disable
+            ts: enable
+            hl: disable
             parallel: disable
             toolchain: ""
             generator: "autogen"
@@ -105,9 +173,10 @@ jobs:
     - name: Autotools Configure 
       if: matrix.generator == 'autogen'
       run: |
+        sh ./bin/chkmanifest
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
-        $GITHUB_WORKSPACE/configure --enable-shared --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --enable-java
+        $GITHUB_WORKSPACE/configure --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran
       shell: bash
 
     - name: Configure
@@ -115,7 +184,7 @@ jobs:
       run: |
         mkdir "${{ runner.workspace }}/build"
         cd "${{ runner.workspace }}/build"
-        cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=ON $GITHUB_WORKSPACE
+        cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=${{ matrix.ts }} -DHDF5_BUILD_HL_LIB:BOOL=${{ matrix.hl }} -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} $GITHUB_WORKSPACE
       shell: bash
 
     - name: Autotools Build

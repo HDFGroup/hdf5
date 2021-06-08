@@ -31,7 +31,9 @@ namespace H5 {
 // Function:    VarLenType default constructor
 ///\brief       Default constructor: Creates a stub variable-length datatype.
 //--------------------------------------------------------------------------
-VarLenType::VarLenType() : DataType() {}
+VarLenType::VarLenType() : DataType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType overloaded constructor
@@ -40,14 +42,18 @@ VarLenType::VarLenType() : DataType() {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const hid_t existing_id) : DataType(existing_id) {}
+VarLenType::VarLenType(const hid_t existing_id) : DataType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType copy constructor
 ///\brief       Copy constructor: makes a copy of the original VarLenType object.
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-VarLenType::VarLenType(const VarLenType &original) : DataType(original) {}
+VarLenType::VarLenType(const VarLenType &original) : DataType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    VarLenType overloaded constructor
@@ -133,6 +139,8 @@ VarLenType::decode() const
 ///\brief       Properly terminates access to this datatype.
 // Programmer   Binh-Minh Ribler - May, 2004
 //--------------------------------------------------------------------------
-VarLenType::~VarLenType() {}
+VarLenType::~VarLenType()
+{
+}
 
 } // namespace H5

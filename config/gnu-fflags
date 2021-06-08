@@ -100,10 +100,19 @@ if test "X-gfortran" = "X-$f9x_vendor"; then
     #########
 
     if test $f9x_vers_major -ge 5 -o $f9x_vers_major -eq 4 -a $f9x_vers_minor -ge 5; then
-        DEBUG_FCFLAGS=$DEBUG_OPT_FCFLAGS "-fcheck=all"
+        DEBUG_FCFLAGS="-fcheck=all"
     else
-        DEBUG_FCFLAGS=$DEBUG_OPT_FCFLAGS "-fbounds-check"
+        DEBUG_FCFLAGS="-fbounds-check"
     fi
+
+    ########################
+    # Enhanced Diagnostics #
+    ########################
+
+    if test $f9x_vers_major -ge 10; then
+        NO_DIAGS_FCFLAGS="-fdiagnostics-urls=never -fno-diagnostics-color"
+    fi
+    DIAGS_FCFLAGS=
 
     ###########
     # Symbols #

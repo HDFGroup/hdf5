@@ -17,8 +17,9 @@
  * fill this file with lots of gunk...
  */
 
-#ifndef _HDF5_HL_H
-#define _HDF5_HL_H
+#ifndef HDF5_HL_H
+#define HDF5_HL_H
+
 #include "hdf5.h"       /* hdf5 main library */
 #include "H5DOpublic.h" /* dataset optimization */
 #include "H5DSpublic.h" /* dimension scales */
@@ -27,4 +28,4 @@
 #include "H5TBpublic.h" /* table */
 #include "H5PTpublic.h" /* table */
 
-#endif /*H5_INCLUDE_HL*/
+#endif /*HDF5_HL_H*/

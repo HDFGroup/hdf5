@@ -22,13 +22,12 @@ include $(top_srcdir)/config/commence.am
 # Include src and tools/lib directories
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
+#test programs
+TEST_PROG=h5tools_test_utils
+
+check_PROGRAMS=$(TEST_PROG)
+
 # All programs depend on the hdf5 and h5tools libraries
-LDADD=$(LIBH5TOOLS) $(LIBHDF5)
-
-
-# main target
-bin_PROGRAMS=h5tools_test_utils
-# check_PROGRAMS=$(TEST_PROG)
-
+LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am

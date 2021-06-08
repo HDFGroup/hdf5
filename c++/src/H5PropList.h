@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5PropList_H
-#define __H5PropList_H
+#ifndef H5PropList_H
+#define H5PropList_H
 
 namespace H5 {
 
@@ -106,7 +106,7 @@ class H5_DLLCPP PropList : public IdComponent {
     // Default constructor: creates a stub PropList object.
     PropList();
 
-    // Copy constructor: creates a copy of a PropList object.
+    // Copy constructor: same as the original PropList.
     PropList(const PropList &original);
 
     // Gets the property list id.
@@ -140,4 +140,4 @@ class H5_DLLCPP PropList : public IdComponent {
 }; // end of PropList
 } // namespace H5
 
-#endif // __H5PropList_H
+#endif // H5PropList_H

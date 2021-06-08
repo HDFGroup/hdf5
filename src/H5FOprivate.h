@@ -14,8 +14,8 @@
 /*
  * This file contains library private information about the H5FO module
  */
-#ifndef _H5FOprivate_H
-#define _H5FOprivate_H
+#ifndef H5FOprivate_H
+#define H5FOprivate_H
 
 #ifdef LATER
 #include "H5FOpublic.h"
@@ -47,4 +47,4 @@ H5_DLL herr_t  H5FO_top_decr(const H5F_t *f, haddr_t addr);
 H5_DLL hsize_t H5FO_top_count(const H5F_t *f, haddr_t addr);
 H5_DLL herr_t  H5FO_top_dest(H5F_t *f);
 
-#endif /* _H5FOprivate_H */
+#endif /* H5FOprivate_H */

@@ -349,7 +349,7 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
     H5O_info_t oinfo;
     size_t     idx = info->nused - 1;
 
-    if (info->paths[idx].path && HDstrcmp(info->paths[idx].path, "."))
+    if (info->paths[idx].path && HDstrcmp(info->paths[idx].path, ".") != 0)
         H5Oget_info_by_name(loc_id, info->paths[idx].path, &oinfo, H5P_DEFAULT);
     else
         H5Oget_info(loc_id, &oinfo);

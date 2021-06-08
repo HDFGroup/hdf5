@@ -14,8 +14,8 @@
 /*
  *  Header file for error values, etc.
  */
-#ifndef H5TOOLS_ERROR_H_
-#define H5TOOLS_ERROR_H_
+#ifndef H5TOOLS_ERROR_H
+#define H5TOOLS_ERROR_H
 
 #include "H5Epublic.h"
 #include "H5Eprivate.h" /* Error handling       */
@@ -103,11 +103,13 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
  */
 #define H5TOOLS_PUSH_ERROR(estack_id, err_cls, maj_err_id, min_err_id, ...)                                  \
     do {                                                                                                     \
-        if (estack_id >= 0 && err_cls >= 0)                                                                  \
-            H5Epush2(estack_id, __FILE__, FUNC, __LINE__, err_cls, maj_err_id, min_err_id, __VA_ARGS__);     \
-        else {                                                                                               \
-            HDfprintf(stderr, __VA_ARGS__);                                                                  \
-            HDfprintf(stderr, "\n");                                                                         \
+        if (enable_error_stack > 0) {                                                                        \
+            if (estack_id >= 0 && err_cls >= 0)                                                              \
+                H5Epush2(estack_id, __FILE__, FUNC, __LINE__, err_cls, maj_err_id, min_err_id, __VA_ARGS__); \
+            else {                                                                                           \
+                HDfprintf(stderr, __VA_ARGS__);                                                              \
+                HDfprintf(stderr, "\n");                                                                     \
+            }                                                                                                \
         }                                                                                                    \
     } while (0)
 
@@ -248,4 +250,4 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
         H5_LEAVE(ret_val)                                                                                    \
     } while (0)
 
-#endif /* H5TOOLS_ERROR_H_ */
+#endif /* H5TOOLS_ERROR_H */

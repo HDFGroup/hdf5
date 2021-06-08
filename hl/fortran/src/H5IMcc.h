@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5IMCC_H
-#define _H5IMCC_H
+#ifndef H5IMCC_H
+#define H5IMCC_H
 
 #include "H5LTprivate.h"
 #include "H5IMprivate.h"

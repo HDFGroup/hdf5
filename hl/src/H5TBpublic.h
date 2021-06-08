@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5TBpublic_H
-#define _H5TBpublic_H
+#ifndef H5TBpublic_H
+#define H5TBpublic_H
 
 #ifdef __cplusplus
 extern "C" {

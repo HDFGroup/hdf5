@@ -15,8 +15,8 @@
 /* Add new types to H5overflow.txt file */
 
 
-#ifndef _H5overflow_H
-#define _H5overflow_H
+#ifndef H5overflow_H
+#define H5overflow_H
 
 
 /* Each type in this file is tested for assignment to the other types,

@@ -286,7 +286,7 @@ H5B2_test_debug(FILE *stream, const H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSE
 
     HDassert(record);
 
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Record:", *(const hsize_t *)record);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Record:", *(const hsize_t *)record);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5B2_test_debug() */

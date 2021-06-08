@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
  */
 
@@ -22,7 +22,7 @@
 #define H5G_TESTING
 
 #include "h5test.h"
-#include "H5Gpkg.h" /* Groups				*/
+#include "H5Gpkg.h" /* Groups                */
 
 const char *FILENAME[] = {"stab", NULL};
 
@@ -76,15 +76,15 @@ const char *FILENAME[] = {"stab", NULL};
 #define CORRUPT_STAB_DSET     "DS1"
 
 /*-------------------------------------------------------------------------
- * Function:	test_misc
+ * Function:    test_misc
  *
- * Purpose:	Test miscellaneous group stuff.
+ * Purpose:    Test miscellaneous group stuff.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	number of errors
+ *        Failure:    number of errors
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
  *
  *-------------------------------------------------------------------------
@@ -134,7 +134,7 @@ test_misc(hid_t fapl, hbool_t new_format)
         TEST_ERROR
     if (HDstrcmp(comment, "hello world")) {
         H5_FAILED();
-        puts("    Read the wrong comment string from the group.");
+        HDputs("    Read the wrong comment string from the group.");
         HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
         TEST_ERROR
     }
@@ -146,12 +146,18 @@ test_misc(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Check that creating groups with no-op names isn't allowed */
-    H5E_BEGIN_TRY { g1 = H5Gcreate2(fid, "/", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        g1 = H5Gcreate2(fid, "/", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (g1 >= 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { g1 = H5Gcreate2(fid, "./././", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        g1 = H5Gcreate2(fid, "./././", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (g1 >= 0)
         TEST_ERROR
@@ -180,9 +186,9 @@ error:
  *
  * Return:      Success:	0
  *
- * 		Failure:	number of errors
+ *         Failure:    number of errors
  *
- * Programmer:  Robb Matzke <matzke@llnl.gov> 2002-03-28
+ * Programmer:  Robb Matzke 2002-03-28
  *
  * Modifications:
  *-------------------------------------------------------------------------
@@ -263,9 +269,9 @@ error:
  *
  * Purpose:     Creates a really large directory.
  *
- * Return:      Success:	0
+ * Return:      Success:    0
  *
- * 		Failure:	number of errors
+ *         Failure:    number of errors
  *
  * Programmer:  Robb Matzke
  *              robb@maya.nuance.com
@@ -1271,10 +1277,10 @@ old_api(hid_t fapl)
     PASSED();
 #else  /* H5_NO_DEPRECATED_SYMBOLS */
     /* Shut compiler up */
-    fapl = fapl;
+    (void)fapl;
 
     SKIPPED();
-    puts("    Deprecated API symbols not enabled");
+    HDputs("    Deprecated API symbols not enabled");
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
     return 0;
@@ -1356,7 +1362,10 @@ corrupt_stab_msg(void)
         TEST_ERROR
 
     /* Verify that an error is thrown when we try to access the dataset */
-    H5E_BEGIN_TRY { did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (did >= 0)
         TEST_ERROR
@@ -1383,15 +1392,15 @@ error:
 } /* end old_api() */
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Test groups
+ * Purpose:    Test groups
  *
- * Return:	Success:	zero
+ * Return:    Success:    zero
  *
- *		Failure:	non-zero
+ *        Failure:    non-zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
  *
  * Modifications:
@@ -1446,7 +1455,7 @@ main(void)
     if (nerrors)
         goto error;
 
-    puts("All symbol table tests passed.");
+    HDputs("All symbol table tests passed.");
 
     /* Cleanup */
     if (GetTestCleanup()) {
@@ -1458,6 +1467,6 @@ main(void)
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
     return 1;
 }

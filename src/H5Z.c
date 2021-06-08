@@ -159,7 +159,7 @@ H5Z_term_interface(void)
 
                     /* Print the statistics */
                     HDfprintf(H5DEBUG(Z),
-                              "   %s%-15s %10Hd %10Hd %8.2f %8.2f %8.2f "
+                              "   %s%-15s %10" PRIdHSIZE " %10" PRIdHSIZE " %8.2f %8.2f %8.2f "
                               "%10s\n",
                               dir ? "<" : ">", comment, H5Z_stat_table_g[i].stats[dir].total,
                               H5Z_stat_table_g[i].stats[dir].errors,

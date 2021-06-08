@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5FileAccPropList_H
-#define __H5FileAccPropList_H
+#ifndef H5FileAccPropList_H
+#define H5FileAccPropList_H
 
 namespace H5 {
 
@@ -130,7 +130,7 @@ class H5_DLLCPP FileAccPropList : public PropList {
         return ("FileAccPropList");
     }
 
-    // Copy constructor: creates a copy of a FileAccPropList object.
+    // Copy constructor: same as the original FileAccPropList.
     FileAccPropList(const FileAccPropList &original);
 
     // Creates a copy of an existing file access property list
@@ -156,4 +156,4 @@ class H5_DLLCPP FileAccPropList : public PropList {
 }; // end of FileAccPropList
 } // namespace H5
 
-#endif // __H5FileAccPropList_H
+#endif // H5FileAccPropList_H

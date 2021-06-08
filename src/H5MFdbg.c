@@ -106,11 +106,14 @@ H5MF_sects_debug_cb(H5FS_section_info_t *_sect, void *_udata)
     /* Print generic section information */
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
               "Section type:", (sect->sect_info.type == H5MF_FSPACE_SECT_SIMPLE ? "simple" : "unknown"));
-    HDfprintf(udata->stream, "%*s%-*s %a\n", udata->indent, "", udata->fwidth,
-              "Section address:", sect->sect_info.addr);
-    HDfprintf(udata->stream, "%*s%-*s %Hu\n", udata->indent, "", udata->fwidth,
+    HDfprintf(udata->stream,
+              "%*s%-*s %" PRIuHADDR \n ", udata->indent, "
+                                       ", udata->fwidth,
+                                       "Section address:",
+              sect->sect_info.addr);
+    HDfprintf(udata->stream, "%*s%-*s %" PRIuHSIZE "\n", udata->indent, "", udata->fwidth,
               "Section size:", sect->sect_info.size);
-    HDfprintf(udata->stream, "%*s%-*s %Hu\n", udata->indent, "", udata->fwidth,
+    HDfprintf(udata->stream, "%*s%-*s %" PRIuHADDR "\n", udata->indent, "", udata->fwidth,
               "End of section:", (haddr_t)((sect->sect_info.addr + sect->sect_info.size) - 1));
     HDfprintf(udata->stream, "%*s%-*s %s\n", udata->indent, "", udata->fwidth,
               "Section state:", (sect->sect_info.state == H5FS_SECT_LIVE ? "live" : "serialized"));
@@ -164,14 +167,14 @@ H5MF_sects_dump(H5F_t *f, hid_t dxpl_id, FILE *stream)
     if (HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, H5FD_MEM_DEFAULT)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %a\n", FUNC, eoa);
+    HDfprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %" PRIuHADDR "\n", FUNC, eoa);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* Retrieve metadata aggregator info, if available */
     H5MF_aggr_query(f, &(f->shared->meta_aggr), &ma_addr, &ma_size);
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: ma_addr = %a, ma_size = %Hu, end of ma = %a\n", FUNC, ma_addr, ma_size,
-              (haddr_t)((ma_addr + ma_size) - 1));
+    HDfprintf(stderr, "%s: ma_addr = %" PRIuHADDR ", ma_size = %" PRIuHSIZE ", end of ma = %" PRIuHADDR "\n",
+              FUNC, ma_addr, ma_size, (haddr_t)((ma_addr + ma_size) - 1));
 #endif /* H5MF_ALLOC_DEBUG */
 
     /* Retrieve 'small data' aggregator info, if available */
@@ -191,7 +194,7 @@ H5MF_sects_dump(H5F_t *f, hid_t dxpl_id, FILE *stream)
             /* Retrieve the 'eoa' for this file memory type */
             if (HADDR_UNDEF == (eoa = H5FD_get_eoa(f->shared->lf, type)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
-            HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3), "eoa:", eoa);
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3), "eoa:", eoa);
 
             /* Print header for sections */
             HDfprintf(stream, "%*sSections:\n", indent + 3, "");

@@ -260,43 +260,45 @@ check_stats(const H5HF_t *fh, const fheap_heap_state_t *state)
     if (H5HF_stat_info(fh, &heap_stats) < 0)
         FAIL_STACK_ERROR
     if (heap_stats.man_nobjs != state->man_nobjs) {
-        HDfprintf(stdout, "heap_stats.man_nobjs = %Hu, state->man_nobjs = %Zu\n", heap_stats.man_nobjs,
-                  state->man_nobjs);
+        HDfprintf(stdout, "heap_stats.man_nobjs = %" PRIuHSIZE ", state->man_nobjs = %zu\n",
+                  heap_stats.man_nobjs, state->man_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_size != state->man_size) {
-        HDfprintf(stdout, "heap_stats.man_size = %Hu, state->man_size = %Hu\n", heap_stats.man_size,
-                  state->man_size);
+        HDfprintf(stdout, "heap_stats.man_size = %" PRIuHSIZE ", state->man_size = %" PRIuHSIZE "\n",
+                  heap_stats.man_size, state->man_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_alloc_size != state->man_alloc_size) {
-        HDfprintf(stdout, "heap_stats.man_alloc_size = %Hu, state->man_alloc_size = %Hu\n",
+        HDfprintf(stdout,
+                  "heap_stats.man_alloc_size = %" PRIuHSIZE ", state->man_alloc_size = %" PRIuHSIZE "\n",
                   heap_stats.man_alloc_size, state->man_alloc_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.man_free_space != state->man_free_space) {
-        HDfprintf(stdout, "heap_stats.man_free_space = %Hu, state->man_free_space = %Hu\n",
+        HDfprintf(stdout,
+                  "heap_stats.man_free_space = %" PRIuHSIZE ", state->man_free_space = %" PRIuHSIZE "\n",
                   heap_stats.man_free_space, state->man_free_space);
         TEST_ERROR
     } /* end if */
     if (heap_stats.huge_nobjs != state->huge_nobjs) {
-        HDfprintf(stdout, "heap_stats.huge_nobjs = %Hu, state->huge_nobjs = %Zu\n", heap_stats.huge_nobjs,
-                  state->huge_nobjs);
+        HDfprintf(stdout, "heap_stats.huge_nobjs = %" PRIuHSIZE ", state->huge_nobjs = %zu\n",
+                  heap_stats.huge_nobjs, state->huge_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.huge_size != state->huge_size) {
-        HDfprintf(stdout, "heap_stats.huge_size = %Hu, state->huge_size = %Hu\n", heap_stats.huge_size,
-                  state->huge_size);
+        HDfprintf(stdout, "heap_stats.huge_size = %" PRIuHSIZE ", state->huge_size = %" PRIuHSIZE "\n",
+                  heap_stats.huge_size, state->huge_size);
         TEST_ERROR
     } /* end if */
     if (heap_stats.tiny_nobjs != state->tiny_nobjs) {
-        HDfprintf(stdout, "heap_stats.tiny_nobjs = %Hu, state->tiny_nobjs = %Zu\n", heap_stats.tiny_nobjs,
-                  state->tiny_nobjs);
+        HDfprintf(stdout, "heap_stats.tiny_nobjs = %" PRIuHSIZE ", state->tiny_nobjs = %zu\n",
+                  heap_stats.tiny_nobjs, state->tiny_nobjs);
         TEST_ERROR
     } /* end if */
     if (heap_stats.tiny_size != state->tiny_size) {
-        HDfprintf(stdout, "heap_stats.tiny_size = %Hu, state->tiny_size = %Hu\n", heap_stats.tiny_size,
-                  state->tiny_size);
+        HDfprintf(stdout, "heap_stats.tiny_size = %" PRIuHSIZE ", state->tiny_size = %" PRIuHSIZE "\n",
+                  heap_stats.tiny_size, state->tiny_size);
         TEST_ERROR
     } /* end if */
 
@@ -1858,7 +1860,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
     HDmemset(&state, 0, sizeof(fheap_heap_state_t));
     if (check_stats(fh, &state))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     /* Query the type of address mapping */
     TESTING("query heap creation parameters");
@@ -1890,7 +1892,7 @@ test_create(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1988,7 +1990,7 @@ test_reopen(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UNUSED
         FAIL_STACK_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -2120,7 +2122,7 @@ test_open_twice(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_UN
         FAIL_STACK_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2229,7 +2231,10 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
     fh2 = NULL;
 
     /* Try re-opening the heap again (should fail, as heap will be deleted) */
-    H5E_BEGIN_TRY { fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr); }
+    H5E_BEGIN_TRY
+    {
+        fh2 = H5HF_open(f, H5P_DATASET_XFER_DEFAULT, fh_addr);
+    }
     H5E_END_TRY;
     if (fh2) {
         /* Close opened heap */
@@ -2258,7 +2263,7 @@ test_delete_open(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t H5_ATTR_U
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2418,7 +2423,10 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
     tmp_cparam.id_len = 3;
 
     /* Create absolute heap */
-    H5E_BEGIN_TRY { fh = H5HF_create(f, dxpl, &tmp_cparam); }
+    H5E_BEGIN_TRY
+    {
+        fh = H5HF_create(f, dxpl, &tmp_cparam);
+    }
     H5E_END_TRY;
     if (NULL != fh)
         FAIL_STACK_ERROR
@@ -2579,7 +2587,10 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
     tmp_cparam.id_len = H5HF_MAX_ID_LEN + 1;
 
     /* Create absolute heap */
-    H5E_BEGIN_TRY { fh = H5HF_create(f, dxpl, &tmp_cparam); }
+    H5E_BEGIN_TRY
+    {
+        fh = H5HF_create(f, dxpl, &tmp_cparam);
+    }
     H5E_END_TRY;
     if (NULL != fh)
         FAIL_STACK_ERROR
@@ -2589,7 +2600,7 @@ test_id_limits(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2704,7 +2715,7 @@ test_filtered_create(hid_t fapl, H5HF_create_t *cparam)
     H5O_msg_reset(H5O_PLINE_ID, &test_cparam.pline);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2836,7 +2847,7 @@ test_size(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -2963,7 +2974,7 @@ test_reopen_hdr(hid_t fapl, H5HF_create_t *cparam)
         FAIL_STACK_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3044,7 +3055,10 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     TESTING("inserting 'weird' sized objects into absolute heap");
 
     /* Attempt to insert 0-sized object into heap */
-    H5E_BEGIN_TRY { ret = H5HF_insert(fh, dxpl, (size_t)0, shared_wobj_g, heap_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_insert(fh, dxpl, (size_t)0, shared_wobj_g, heap_id);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3072,7 +3086,7 @@ test_man_insert_weird(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         FAIL_STACK_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3172,7 +3186,7 @@ test_man_insert_first(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3264,7 +3278,7 @@ test_man_insert_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3359,7 +3373,7 @@ test_man_insert_root_mult(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3462,7 +3476,7 @@ test_man_insert_force_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3565,7 +3579,7 @@ test_man_insert_fill_second(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3674,7 +3688,7 @@ test_man_insert_third_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3767,7 +3781,7 @@ test_man_fill_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3867,7 +3881,7 @@ test_man_start_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -3964,7 +3978,7 @@ test_man_fill_second_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4072,7 +4086,7 @@ test_man_start_third_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4167,7 +4181,7 @@ test_man_fill_fourth_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4260,7 +4274,7 @@ test_man_fill_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4358,7 +4372,7 @@ test_man_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4465,7 +4479,7 @@ test_man_second_direct_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhe
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4564,7 +4578,7 @@ test_man_fill_first_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4671,7 +4685,7 @@ test_man_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4776,7 +4790,7 @@ test_man_fill_second_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4877,7 +4891,7 @@ test_man_fill_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fheap_te
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -4983,7 +4997,7 @@ test_man_start_2nd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5082,7 +5096,7 @@ test_man_recursive_indirect_two_deep(hid_t fapl, H5HF_create_t *cparam, fheap_te
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5189,7 +5203,7 @@ test_man_start_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5297,7 +5311,7 @@ test_man_fill_first_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5402,7 +5416,7 @@ test_man_fill_3rd_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5507,7 +5521,7 @@ test_man_fill_all_3rd_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5619,7 +5633,7 @@ test_man_start_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5737,7 +5751,7 @@ test_man_fill_first_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fh
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5846,7 +5860,7 @@ test_man_fill_4th_recursive_indirect_row(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -5955,7 +5969,7 @@ test_man_fill_all_4th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fhea
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -6088,7 +6102,7 @@ test_man_start_5th_recursive_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_t
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -6190,7 +6204,10 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         heap_id[u] = HDrandom() + 1;
 
     /* Try removing bogus heap ID from empty heap */
-    H5E_BEGIN_TRY { ret = H5HF_remove(fh, dxpl, heap_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_remove(fh, dxpl, heap_id);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         FAIL_STACK_ERROR
@@ -6216,14 +6233,20 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
     } /* end while */
 
     /* Try removing bogus heap ID from heap w/objects */
-    H5E_BEGIN_TRY { ret = H5HF_remove(fh, dxpl, heap_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_remove(fh, dxpl, heap_id);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
     H5Eclear2(H5E_DEFAULT);
 
     /* Try reading bogus heap ID from heap w/objects */
-    H5E_BEGIN_TRY { ret = H5HF_read(fh, dxpl, heap_id, shared_robj_g); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_read(fh, dxpl, heap_id, shared_robj_g);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -6238,7 +6261,7 @@ test_man_remove_bogus(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpa
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -6396,7 +6419,7 @@ test_man_remove_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -6582,7 +6605,7 @@ test_man_remove_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpara
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -6744,7 +6767,7 @@ test_man_remove_one_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -6981,7 +7004,7 @@ test_man_remove_two_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7278,7 +7301,7 @@ test_man_remove_three_larger(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7387,7 +7410,7 @@ test_man_incr_insert_remove(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7461,7 +7484,7 @@ test_man_remove_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7550,7 +7573,7 @@ test_man_remove_two_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7621,7 +7644,7 @@ test_man_remove_first_row(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7694,7 +7717,7 @@ test_man_remove_first_two_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_par
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7771,7 +7794,7 @@ test_man_remove_first_four_rows(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7842,7 +7865,7 @@ test_man_remove_all_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7917,7 +7940,7 @@ test_man_remove_2nd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -7996,7 +8019,7 @@ test_man_remove_3rd_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_param
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -8081,7 +8104,7 @@ test_man_skip_start_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t 
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -8180,7 +8203,7 @@ test_man_skip_start_block_add_back(hid_t fapl, H5HF_create_t *cparam, fheap_test
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -8291,7 +8314,7 @@ test_man_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_t
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -8386,7 +8409,7 @@ test_man_skip_2nd_block(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *t
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -8530,7 +8553,7 @@ test_man_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_tes
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -8699,7 +8722,7 @@ test_man_fill_one_partial_skip_2nd_block_add_skipped(hid_t fapl, H5HF_create_t *
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -8830,7 +8853,7 @@ test_man_fill_row_skip_add_skipped(hid_t fapl, H5HF_create_t *cparam, fheap_test
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -8960,7 +8983,7 @@ test_man_skip_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -9085,7 +9108,7 @@ test_man_fill_direct_skip_indirect_start_block_add_skipped(hid_t fapl, H5HF_crea
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -9217,7 +9240,7 @@ test_man_fill_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H5HF_
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -9364,7 +9387,7 @@ test_man_fill_2nd_direct_less_one_wrap_start_block_add_skipped(hid_t fapl, H5HF_
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -9542,7 +9565,7 @@ test_man_fill_direct_skip_2nd_indirect_skip_2nd_block_add_skipped(hid_t fapl, H5
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -9697,7 +9720,7 @@ test_man_fill_direct_skip_indirect_two_rows_add_skipped(hid_t fapl, H5HF_create_
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -9883,7 +9906,7 @@ test_man_fill_direct_skip_indirect_two_rows_skip_indirect_row_add_skipped(hid_t 
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -10013,7 +10036,7 @@ test_man_fill_2nd_direct_skip_start_block_add_skipped(hid_t fapl, H5HF_create_t 
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -10156,7 +10179,7 @@ test_man_fill_2nd_direct_skip_2nd_indirect_start_block_add_skipped(hid_t fapl, H
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -10312,7 +10335,7 @@ test_man_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_block_add_skipped(h
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -10479,7 +10502,7 @@ test_man_fill_2nd_direct_fill_direct_skip2_3rd_indirect_start_block_add_skipped(
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -10646,7 +10669,7 @@ test_man_fill_3rd_direct_less_one_fill_direct_wrap_start_block_add_skipped(hid_t
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -10820,7 +10843,7 @@ test_man_fill_1st_row_3rd_direct_fill_2nd_direct_less_one_wrap_start_block_add_s
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -10985,7 +11008,7 @@ test_man_fill_3rd_direct_fill_direct_skip_start_block_add_skipped(hid_t fapl, H5
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -11169,7 +11192,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_start_blo
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -11390,7 +11413,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_two_rows_
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -11595,7 +11618,7 @@ test_man_fill_3rd_direct_fill_2nd_direct_fill_direct_skip_3rd_indirect_wrap_star
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -11836,7 +11859,7 @@ test_man_fill_4th_direct_less_one_fill_2nd_direct_fill_direct_skip_3rd_indirect_
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -11973,7 +11996,7 @@ test_man_frag_simple(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -12143,7 +12166,7 @@ test_man_frag_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -12258,7 +12281,7 @@ test_man_frag_2nd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -12379,7 +12402,7 @@ test_man_frag_3rd_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -12535,7 +12558,7 @@ test_huge_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -12768,7 +12791,7 @@ test_huge_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -13076,7 +13099,7 @@ test_huge_insert_three(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tp
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -13503,7 +13526,7 @@ test_huge_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -13721,7 +13744,7 @@ test_filtered_huge(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam
     H5MM_xfree(heap_id);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -13875,7 +13898,7 @@ test_tiny_insert_one(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -14108,7 +14131,7 @@ test_tiny_insert_two(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -14714,7 +14737,7 @@ test_tiny_insert_mix(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tpar
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -14903,7 +14926,7 @@ test_filtered_man_root_direct(hid_t fapl, H5HF_create_t *cparam, fheap_test_para
     H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -15215,7 +15238,7 @@ test_filtered_man_root_indirect(hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     H5O_msg_reset(H5O_PLINE_ID, &tmp_cparam.pline); /* Release the I/O pipeline filter information */
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -15423,7 +15446,7 @@ test_random(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_test_pa
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -15648,7 +15671,7 @@ test_random_pow2(hsize_t size_limit, hid_t fapl, H5HF_create_t *cparam, fheap_te
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -15781,7 +15804,10 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
         FAIL_STACK_ERROR
 
     /* Verify that writing to 'huge' objects works for un-filtered heaps */
-    H5E_BEGIN_TRY { ret = H5HF_write(fh, dxpl, huge_heap_id, &id_changed, shared_wobj_g); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_write(fh, dxpl, huge_heap_id, &id_changed, shared_wobj_g);
+    }
     H5E_END_TRY;
     HDassert(!id_changed);
     if (tparam->comp == FHEAP_TEST_COMPRESS) {
@@ -15794,7 +15820,10 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     } /* end else */
 
     /* Verify that writing to 'tiny' objects return failure (for now) */
-    H5E_BEGIN_TRY { ret = H5HF_write(fh, dxpl, tiny_heap_id, &id_changed, shared_wobj_g); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5HF_write(fh, dxpl, tiny_heap_id, &id_changed, shared_wobj_g);
+    }
     H5E_END_TRY;
     HDassert(!id_changed);
     if (ret >= 0)
@@ -15930,7 +15959,7 @@ test_write(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     H5MM_xfree(rewrite_obj);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 
@@ -16099,7 +16128,7 @@ test_bug1(hid_t fapl, H5HF_create_t *cparam, fheap_test_param_t *tparam)
     H5MM_xfree(keep_ids.offs);
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return (0);
 

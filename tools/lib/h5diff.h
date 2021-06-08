@@ -11,28 +11,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5DIFF_H__
-#define H5DIFF_H__
+#ifndef H5DIFF_H
+#define H5DIFF_H
 
 #include "hdf5.h"
+#include "h5tools.h"
 #include "h5trav.h"
-
-/*
- * Debug printf macros. The prefix allows output filtering by test scripts.
- */
-#ifdef H5DIFF_DEBUG
-#define h5difftrace(x)                   HDfprintf(stderr, "h5diff debug: " x)
-#define h5diffdebug2(x1, x2)             HDfprintf(stderr, "h5diff debug: " x1, x2)
-#define h5diffdebug3(x1, x2, x3)         HDfprintf(stderr, "h5diff debug: " x1, x2, x3)
-#define h5diffdebug4(x1, x2, x3, x4)     HDfprintf(stderr, "h5diff debug: " x1, x2, x3, x4)
-#define h5diffdebug5(x1, x2, x3, x4, x5) HDfprintf(stderr, "h5diff debug: " x1, x2, x3, x4, x5)
-#else
-#define h5difftrace(x)
-#define h5diffdebug2(x1, x2)
-#define h5diffdebug3(x1, x2, x3)
-#define h5diffdebug4(x1, x2, x3, x4)
-#define h5diffdebug5(x1, x2, x3, x4, x5)
-#endif
 
 #define MAX_FILENAME 1024
 
@@ -52,7 +36,7 @@ typedef struct {
  */
 /* linked list to keep exclude path list */
 struct exclude_path_list {
-    char *                    obj_path;
+    const char *              obj_path;
     h5trav_type_t             obj_type;
     struct exclude_path_list *next;
 };
@@ -65,27 +49,46 @@ typedef enum {
 } diff_err_t;
 
 typedef struct {
-    int                       m_quiet;         /* quiet mode: no output at all */
-    int                       m_report;        /* report mode: print the data */
-    int                       m_verbose;       /* verbose mode: print the data, list of objcets, warnings */
-    int                       m_verbose_level; /* control verbose details */
-    int                       d;               /* delta, absolute value to compare */
-    double                    delta;           /* delta value */
-    int                       p;               /* relative error to compare*/
+    int                       mode_quiet;   /* quiet mode: no output at all */
+    int                       mode_report;  /* report mode: print the data */
+    int                       mode_verbose; /* verbose mode: print the data, list of objcets, warnings */
+    int                       mode_verbose_level; /* control verbose details */
+    int                       mode_list_not_cmp;  /* list not comparable messages */
+    int                       print_header;       /* print header */
+    int                       print_percentage;   /* print percentage */
+    int                       print_dims;         /* print dimension index */
+    int                       delta_bool;         /* delta, absolute value to compare */
+    double                    delta;              /* delta value */
     int                       use_system_epsilon; /* flag to use system epsilon (1 or 0) */
+    int                       percent_bool;       /* relative error to compare*/
     double                    percent;            /* relative error value */
-    int                       n;                  /* count, compare up to count */
-    hsize_t                   count;              /* count value */
     hbool_t                   follow_links;       /* follow symbolic links */
     int                       no_dangle_links;    /* return error when find dangling link */
-    diff_err_t                err_stat;       /* an error ocurred (2, error, 1, differences, 0, no error) */
-    int                       cmn_objs;       /* do we have common objects */
-    int                       not_cmp;        /* are the objects comparable */
-    int                       contents;       /* equal contents */
-    int                       do_nans;        /* consider Nans while diffing floats */
-    int                       m_list_not_cmp; /* list not comparable messages */
-    int                       exclude_path;   /* exclude path to an object */
-    struct exclude_path_list *exclude;        /* keep exclude path list */
+    int                       cmn_objs;           /* do we have common objects */
+    int                       not_cmp;            /* are the objects comparable */
+    int                       contents;           /* equal contents */
+    int                       do_nans;            /* consider Nans while diffing floats */
+    int                       exclude_path;       /* exclude path to an object */
+    int                       exclude_attr_path;  /* exclude path to an object */
+    struct exclude_path_list *exclude;            /* keep exclude path list */
+    struct exclude_path_list *exclude_attr;       /* keep exclude attribute list */
+    int                       count_bool;         /* count, compare up to count */
+    hsize_t                   count;              /* count value */
+    diff_err_t                err_stat;  /* an error ocurred (2, error, 1, differences, 0, no error) */
+    hsize_t                   nelmts;    /* total number of elements */
+    hsize_t                   hs_nelmts; /* number of elements to read at a time*/
+    int                       rank;      /* dimensionality */
+    size_t                    m_size;    /* m_size for diff */
+    hid_t                     m_tid;     /* m_tid for diff */
+    hsize_t                   dims[H5S_MAX_RANK];      /* dimensions of object */
+    hsize_t                   p_min_idx[H5S_MAX_RANK]; /* min selected index */
+    hsize_t                   p_max_idx[H5S_MAX_RANK]; /* max selected index */
+    hsize_t                   acc[H5S_MAX_RANK];       /* accumulator position */
+    hsize_t                   pos[H5S_MAX_RANK];       /* matrix position */
+    hsize_t                   sm_pos[H5S_MAX_RANK];    /* stripmine position */
+    char *                    obj_name[2];             /* name for object */
+    struct subset_t *         sset[2];                 /* subsetting parameters */
+    hbool_t                   custom_vol[2];           /* Using a custom input, output VOL? */
 } diff_opt_t;
 
 /*-------------------------------------------------------------------------
@@ -126,16 +129,12 @@ hsize_t diff_datasetid(hid_t dset1_id, hid_t dset2_id, const char *obj1_name, co
 hsize_t diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id, const char *grp2,
                    trav_info_t *info2, trav_table_t *table, diff_opt_t *opts);
 
-hsize_t diff_array(void *_mem1, void *_mem2, hsize_t nelmts, hsize_t hyper_start, int rank, hsize_t *dims,
-                   diff_opt_t *opts, const char *name1, const char *name2, hid_t m_type, hid_t container1_id,
-                   hid_t container2_id); /* dataset where the reference came from*/
+hsize_t diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_t container2_id);
 
-int diff_can_type(hid_t f_type1, /* file data type */
-                  hid_t f_type2, /* file data type */
-                  int rank1, int rank2, hsize_t *dims1, hsize_t *dims2, hsize_t *maxdim1, hsize_t *maxdim2,
-                  const char *obj1_name, const char *obj2_name, diff_opt_t *opts, int is_compound);
+int diff_can_type(hid_t f_type1, hid_t f_type2, int rank1, int rank2, hsize_t *dims1, hsize_t *dims2,
+                  hsize_t *maxdim1, hsize_t *maxdim2, diff_opt_t *opts, int is_compound);
 
-hsize_t diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *attr1_name, const char *attr2_name,
+hsize_t diff_attr_data(hid_t attr1_id, hid_t attr2_id, const char *name1, const char *name2,
                        const char *path1, const char *path2, diff_opt_t *opts);
 
 hsize_t diff_attr(hid_t loc1_id, hid_t loc2_id, const char *path1, const char *path2, diff_opt_t *opts);
@@ -160,4 +159,4 @@ int  print_objname(diff_opt_t *opts, hsize_t nfound);
 void do_print_objname(const char *OBJ, const char *path1, const char *path2, diff_opt_t *opts);
 void do_print_attrname(const char *attr, const char *path1, const char *path2);
 
-#endif /* H5DIFF_H__ */
+#endif /* H5DIFF_H */

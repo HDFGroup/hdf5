@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef _H5private_H
-#define _H5private_H
+#ifndef H5private_H
+#define H5private_H
 
 #include "H5public.h" /* Include Public Definitions    */
 
@@ -306,6 +306,14 @@
 #define SUCCEED 0
 #define FAIL    (-1)
 #define UFAIL   (unsigned)(-1)
+
+/* The HDF5 library uses the symbol `ERR` frequently.  So do
+ * header files for libraries such as curses(3), terminfo(3), etc.
+ * Remove its definition here to avoid clashes with HDF5.
+ */
+#ifdef ERR
+#undef ERR
+#endif
 
 /* number of members in an array */
 #ifndef NELMTS
@@ -2217,4 +2225,4 @@ H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *marker,
                              size_t buf_offset, size_t buf_size);
 
-#endif /* _H5private_H */
+#endif /* H5private_H */

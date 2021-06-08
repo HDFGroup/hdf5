@@ -31,29 +31,31 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *        s_opts   = "hVvf:l:m:e:nLc:d:s:u:b:M:t:a:i:o:q:z:E";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},
-                                       {"version", no_arg, 'V'},
-                                       {"verbose", no_arg, 'v'},
-                                       {"filter", require_arg, 'f'},
-                                       {"layout", require_arg, 'l'},
-                                       {"minimum", require_arg, 'm'},
-                                       {"file", require_arg, 'e'},
-                                       {"native", no_arg, 'n'},
-                                       {"latest", no_arg, 'L'},
+static const char *        s_opts   = "a:b:c:d:e:f:hi:l:m:no:q:s:t:u:vz:ELM:VXW";
+static struct long_options l_opts[] = {{"alignment", require_arg, 'a'},
+                                       {"block", require_arg, 'b'},
                                        {"compact", require_arg, 'c'},
                                        {"indexed", require_arg, 'd'},
-                                       {"ssize", require_arg, 's'},
-                                       {"ublock", require_arg, 'u'},
-                                       {"block", require_arg, 'b'},
-                                       {"metadata_block_size", require_arg, 'M'},
-                                       {"threshold", require_arg, 't'},
-                                       {"alignment", require_arg, 'a'},
-                                       {"infile", require_arg, 'i'},  /* for backward compability */
+                                       {"file", require_arg, 'e'},
+                                       {"filter", require_arg, 'f'},
+                                       {"help", no_arg, 'h'},
+                                       {"infile", require_arg, 'i'}, /* for backward compability */
+                                       {"layout", require_arg, 'l'},
+                                       {"minimum", require_arg, 'm'},
+                                       {"native", no_arg, 'n'},
                                        {"outfile", require_arg, 'o'}, /* for backward compability */
                                        {"sort_by", require_arg, 'q'},
+                                       {"ssize", require_arg, 's'},
+                                       {"threshold", require_arg, 't'},
+                                       {"ublock", require_arg, 'u'},
+                                       {"verbose", no_arg, 'v'},
                                        {"sort_order", require_arg, 'z'},
                                        {"enable-error-stack", no_arg, 'E'},
+                                       {"latest", no_arg, 'L'},
+                                       {"metadata_block_size", require_arg, 'M'},
+                                       {"version", no_arg, 'V'},
+                                       {"merge", no_arg, 'X'},
+                                       {"prune", no_arg, 'W'},
                                        {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
@@ -81,6 +83,12 @@ usage(const char *prog)
                    "   --enable-error-stack    Prints messages from the HDF5 error stack as they\n");
     PRINTVALSTREAM(rawoutstream, "                           occur\n");
     PRINTVALSTREAM(rawoutstream, "   -L, --latest            Use latest version of file format\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --merge                 Follow external soft link recursively and merge data\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --prune                 Do not follow external soft links and remove link\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "   --merge --prune         Follow external link, merge data and remove dangling link\n");
     PRINTVALSTREAM(rawoutstream, "   -c L1, --compact=L1     Maximum number of links in header messages\n");
     PRINTVALSTREAM(rawoutstream,
                    "   -d L2, --indexed=L2     Minimum number of links in the indexed format\n");
@@ -153,6 +161,7 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "            Required values: filter_number, filter_flag, cd_value_count, value1\n");
     PRINTVALSTREAM(rawoutstream, "            Optional values: value2 to valueN\n");
+    PRINTVALSTREAM(rawoutstream, "            filter_flag: 1 is OPTIONAL or 0 is MANDATORY\n");
     PRINTVALSTREAM(rawoutstream, "        NONE (no parameter)\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "    LAYT - is a string with the format:\n");
@@ -252,7 +261,7 @@ read_info(const char *filename, pack_opt_t *options)
             break;
 
         /* Info indicator must be for layout or filter */
-        if (HDstrcmp(stype, "-l") && HDstrcmp(stype, "-f")) {
+        if (HDstrcmp(stype, "-l") != 0 && HDstrcmp(stype, "-f") != 0) {
             error_msg("bad file format for %s", filename);
             h5tools_setstatus(EXIT_FAILURE);
             ret_value = EXIT_FAILURE;
@@ -451,6 +460,14 @@ parse_command_line(int argc, const char **argv, pack_opt_t *options)
                 options->latest = TRUE;
                 break;
 
+            case 'X':
+                options->merge = TRUE;
+                break;
+
+            case 'W':
+                options->prune = TRUE;
+                break;
+
             case 'c':
                 options->grp_compact = HDatoi(opt_arg);
                 if (options->grp_compact > 0)
@@ -520,7 +537,7 @@ parse_command_line(int argc, const char **argv, pack_opt_t *options)
 
             case 'q':
                 if (H5_INDEX_UNKNOWN == (sort_by = set_sort_by(opt_arg))) {
-                    error_msg(" failed to set sort by form <%s>\n", opt_arg);
+                    error_msg("failed to set sort by form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -529,7 +546,7 @@ parse_command_line(int argc, const char **argv, pack_opt_t *options)
 
             case 'z':
                 if (H5_ITER_UNKNOWN == (sort_order = set_sort_order(opt_arg))) {
-                    error_msg(" failed to set sort order form <%s>\n", opt_arg);
+                    error_msg("failed to set sort order form <%s>\n", opt_arg);
                     h5tools_setstatus(EXIT_FAILURE);
                     ret_value = -1;
                     goto done;
@@ -589,28 +606,16 @@ done:
 int
 main(int argc, const char **argv)
 {
-    pack_opt_t  options; /*the global options */
-    H5E_auto2_t func;
-    H5E_auto2_t tools_func;
-    void *      edata;
-    void *      tools_edata;
-    int         parse_ret;
+    pack_opt_t options; /*the global options */
+    int        parse_ret;
 
     HDmemset(&options, 0, sizeof(pack_opt_t));
-
-    h5tools_setprogname(PROGRAMNAME);
-    h5tools_setstatus(EXIT_SUCCESS);
-
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
 
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
 
     /* update hyperslab buffer size from H5TOOLS_BUFSIZE env if exist */
     if (h5tools_getenv_update_hyperslab_bufsize() < 0) {
@@ -641,10 +646,8 @@ main(int argc, const char **argv)
         goto done;
     }
 
-    if (enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-    }
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
     /* pack it */
     if (h5repack(infile, outfile, &options) < 0) {
@@ -656,6 +659,11 @@ main(int argc, const char **argv)
     h5tools_setstatus(EXIT_SUCCESS);
 
 done:
+    if (options.fin_fapl >= 0 && options.fin_fapl != H5P_DEFAULT)
+        H5Pclose(options.fin_fapl);
+    if (options.fout_fapl >= 0 && options.fout_fapl != H5P_DEFAULT)
+        H5Pclose(options.fout_fapl);
+
     /* free tables */
     h5repack_end(&options);
 

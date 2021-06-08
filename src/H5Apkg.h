@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5A package!"
 #endif
 
-#ifndef _H5Apkg_H
-#define _H5Apkg_H
+#ifndef H5Apkg_H
+#define H5Apkg_H
 
 /*
  * Define this to enable debugging.
@@ -257,4 +257,4 @@ H5_DLL htri_t H5A_is_shared_test(hid_t aid);
 H5_DLL herr_t H5A_get_shared_rc_test(hid_t attr_id, hsize_t *ref_count);
 #endif /* H5A_TESTING */
 
-#endif /* _H5Apkg_H */
+#endif /* H5Apkg_H */

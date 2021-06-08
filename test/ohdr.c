@@ -281,7 +281,10 @@ test_ohdr_cache(char *filename, hid_t fapl)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     return FAIL;
@@ -538,7 +541,10 @@ test_unknown(unsigned bogus_id, char *filename, hid_t fapl)
 
     /* Attempt to open the dataset with the unknown header message, and "fail if unknown and open for write"
      * flag */
-    H5E_BEGIN_TRY { did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(loc_bogus, "Dataset2", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (did >= 0) {
         H5Dclose(did);
@@ -844,7 +850,10 @@ main(void)
             FAIL_STACK_ERROR
 
         /* Attempt to lock the message twice */
-        H5E_BEGIN_TRY { ret = H5O_msg_lock(&oh_loc, H5O_MTIME_ID, H5P_DATASET_XFER_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5O_msg_lock(&oh_loc, H5O_MTIME_ID, H5P_DATASET_XFER_DEFAULT);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -866,7 +875,10 @@ main(void)
             FAIL_STACK_ERROR
 
         /* Attempt to unlock the message twice */
-        H5E_BEGIN_TRY { ret = H5O_msg_unlock(&oh_loc, H5O_MTIME_ID, H5P_DATASET_XFER_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5O_msg_unlock(&oh_loc, H5O_MTIME_ID, H5P_DATASET_XFER_DEFAULT);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -969,7 +981,10 @@ main(void)
 
 error:
     HDputs("*** TESTS FAILED ***");
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     return 1;

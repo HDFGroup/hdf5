@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Group_H
-#define __H5Group_H
+#ifndef Group_H
+#define Group_H
 
 namespace H5 {
 
@@ -47,7 +47,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
     // default constructor
     Group();
 
-    // Copy constructor: makes a copy of the original object
+    // Copy constructor: same as the original Group.
     Group(const Group &original);
 
     // Gets the group id.
@@ -80,4 +80,4 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 }; // end of Group
 } // namespace H5
 
-#endif // __H5Group_H
+#endif // Group_H

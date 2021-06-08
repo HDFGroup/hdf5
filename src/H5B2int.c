@@ -170,15 +170,15 @@ H5B2_split1(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *cur
             unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal, unsigned *internal_flags_ptr,
             unsigned idx)
 {
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
-    uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
-    uint8_t *           left_native, *right_native;             /* Pointers to childs' native records */
-    H5B2_node_ptr_t *   left_node_ptrs = NULL,
-                    *right_node_ptrs   = NULL; /* Pointers to childs' node pointer info */
-    uint16_t mid_record;                       /* Index of "middle" record in current node */
-    uint16_t old_node_nrec;                    /* Number of records in internal node split */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
+    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
+    H5B2_node_ptr_t *left_node_ptrs  = NULL,
+                    *right_node_ptrs = NULL; /* Pointers to childs' node pointer info */
+    uint16_t mid_record;                     /* Index of "middle" record in current node */
+    uint16_t old_node_nrec;                  /* Number of records in internal node split */
     unsigned left_child_flags  = H5AC__NO_FLAGS_SET,
              right_child_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
     herr_t ret_value           = SUCCEED;            /* Return value */
@@ -450,13 +450,13 @@ done:
 static herr_t
 H5B2_redistribute2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_internal_t *internal, unsigned idx)
 {
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
-    uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
-    uint8_t *           left_native, *right_native;             /* Pointers to childs' native records */
-    H5B2_node_ptr_t *   left_node_ptrs = NULL,
-                    *right_node_ptrs   = NULL;          /* Pointers to childs' node pointer info */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
+    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
+    H5B2_node_ptr_t *left_node_ptrs  = NULL,
+                    *right_node_ptrs = NULL;            /* Pointers to childs' node pointer info */
     hssize_t left_moved_nrec = 0, right_moved_nrec = 0; /* Number of records moved, for internal redistrib */
     unsigned left_child_flags  = H5AC__NO_FLAGS_SET,
              right_child_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
@@ -709,20 +709,20 @@ H5B2_redistribute3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_internal
                    unsigned *internal_flags_ptr, unsigned idx)
 {
     H5B2_node_ptr_t *left_node_ptrs      = NULL,
-                    *right_node_ptrs     = NULL;                /* Pointers to childs' node pointer info */
-    H5B2_node_ptr_t *   middle_node_ptrs = NULL;                /* Pointers to childs' node pointer info */
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    haddr_t             middle_addr;                            /* Address of middle child node */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
-    void *              middle_child = NULL;                    /* Pointers to middle child node */
-    uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
-    uint16_t *          middle_nrec;                            /* Pointers to middle child # of records */
-    uint8_t *           left_native, *right_native;             /* Pointers to childs' native records */
-    uint8_t *           middle_native;                  /* Pointers to middle child's native records */
-    hssize_t left_moved_nrec = 0, right_moved_nrec = 0; /* Number of records moved, for internal split */
-    hssize_t middle_moved_nrec  = 0;                    /* Number of records moved, for internal split */
-    unsigned left_child_flags   = H5AC__NO_FLAGS_SET,
+                    *right_node_ptrs     = NULL;                 /* Pointers to childs' node pointer info */
+    H5B2_node_ptr_t *   middle_node_ptrs = NULL;                 /* Pointers to childs' node pointer info */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    haddr_t   middle_addr = HADDR_UNDEF;                         /* Address of middle child node */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    void *    middle_child = NULL;                               /* Pointers to middle child node */
+    uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
+    uint16_t *middle_nrec;                                       /* Pointers to middle child # of records */
+    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
+    uint8_t * middle_native;                             /* Pointers to middle child's native records */
+    hssize_t  left_moved_nrec = 0, right_moved_nrec = 0; /* Number of records moved, for internal split */
+    hssize_t  middle_moved_nrec = 0;                     /* Number of records moved, for internal split */
+    unsigned  left_child_flags  = H5AC__NO_FLAGS_SET,
              right_child_flags  = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
     unsigned middle_child_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
     herr_t   ret_value          = SUCCEED;            /* Return value */
@@ -1107,16 +1107,16 @@ H5B2_merge2(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *cur
             unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal, unsigned *internal_flags_ptr,
             unsigned idx)
 {
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to left & right child nodes */
-    uint16_t *          left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
-    uint8_t *           left_native, *right_native; /* Pointers to left & right children's native records */
-    H5B2_node_ptr_t *   left_node_ptrs = NULL,
-                    *right_node_ptrs   = NULL; /* Pointers to childs' node pointer info */
-    unsigned left_child_flags          = H5AC__NO_FLAGS_SET,
-             right_child_flags         = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
-    herr_t ret_value                   = SUCCEED;            /* Return value */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to left & right child nodes */
+    uint16_t *left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
+    uint8_t * left_native, *right_native; /* Pointers to left & right children's native records */
+    H5B2_node_ptr_t *left_node_ptrs  = NULL,
+                    *right_node_ptrs = NULL; /* Pointers to childs' node pointer info */
+    unsigned left_child_flags        = H5AC__NO_FLAGS_SET,
+             right_child_flags       = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
+    herr_t ret_value                 = SUCCEED;            /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1273,19 +1273,19 @@ H5B2_merge3(H5B2_hdr_t *hdr, hid_t dxpl_id, unsigned depth, H5B2_node_ptr_t *cur
             unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal, unsigned *internal_flags_ptr,
             unsigned idx)
 {
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    haddr_t             middle_addr;                            /* Address of middle child node */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to left & right child nodes */
-    void *              middle_child = NULL;                    /* Pointer to middle child node */
-    uint16_t *          left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
-    uint16_t *          middle_nrec;                /* Pointer to middle child # of records */
-    uint8_t *           left_native, *right_native; /* Pointers to left & right children's native records */
-    uint8_t *           middle_native;              /* Pointer to middle child's native records */
-    H5B2_node_ptr_t *   left_node_ptrs = NULL,
-                    *right_node_ptrs   = NULL; /* Pointers to childs' node pointer info */
-    H5B2_node_ptr_t *middle_node_ptrs  = NULL; /* Pointer to child's node pointer info */
-    hsize_t          middle_moved_nrec;        /* Number of records moved, for internal split */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    haddr_t   middle_addr = HADDR_UNDEF;                         /* Address of middle child node */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to left & right child nodes */
+    void *    middle_child = NULL;                               /* Pointer to middle child node */
+    uint16_t *left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
+    uint16_t *middle_nrec;                /* Pointer to middle child # of records */
+    uint8_t * left_native, *right_native; /* Pointers to left & right children's native records */
+    uint8_t * middle_native;              /* Pointer to middle child's native records */
+    H5B2_node_ptr_t *left_node_ptrs   = NULL,
+                    *right_node_ptrs  = NULL; /* Pointers to childs' node pointer info */
+    H5B2_node_ptr_t *middle_node_ptrs = NULL; /* Pointer to child's node pointer info */
+    hsize_t          middle_moved_nrec;       /* Number of records moved, for internal split */
     unsigned         left_child_flags = H5AC__NO_FLAGS_SET,
              right_child_flags        = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
     unsigned middle_child_flags       = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */

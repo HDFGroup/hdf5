@@ -153,7 +153,10 @@ test_h5s_basic(void)
      * Check to be sure we can't create a simple data space that has too many
      * dimensions.
      */
-    H5E_BEGIN_TRY { sid1 = H5Screate_simple(H5S_MAX_RANK + 1, dims3, NULL); }
+    H5E_BEGIN_TRY
+    {
+        sid1 = H5Screate_simple(H5S_MAX_RANK + 1, dims3, NULL);
+    }
     H5E_END_TRY;
     VERIFY(sid1, FAIL, "H5Screate_simple");
 
@@ -225,43 +228,70 @@ test_h5s_basic(void)
     CHECK(dset1, FAIL, "H5Dcreate2");
 
     /* Try some writes with the bad dataspace (sid1) */
-    H5E_BEGIN_TRY { ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, &n); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, &n);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dwrite");
 
-    H5E_BEGIN_TRY { ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &n); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &n);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dwrite");
 
-    H5E_BEGIN_TRY { ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, sid1, H5P_DEFAULT, &n); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dset1, H5T_NATIVE_INT, sid1, sid1, H5P_DEFAULT, &n);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dwrite");
 
     /* Try to iterate using the bad dataspace */
-    H5E_BEGIN_TRY { ret = H5Diterate(&n, H5T_NATIVE_INT, sid1, NULL, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Diterate(&n, H5T_NATIVE_INT, sid1, NULL, NULL);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Diterate");
 
     /* Try to fill using the bad dataspace */
-    H5E_BEGIN_TRY { ret = H5Dfill(NULL, H5T_NATIVE_INT, &n, H5T_NATIVE_INT, sid1); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dfill(NULL, H5T_NATIVE_INT, &n, H5T_NATIVE_INT, sid1);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dfill");
 
     /* Now use the bad dataspace as the space for an attribute */
-    H5E_BEGIN_TRY { aid1 = H5Acreate2(dset1, BASICATTR, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        aid1 = H5Acreate2(dset1, BASICATTR, H5T_NATIVE_INT, sid1, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     VERIFY(aid1, FAIL, "H5Acreate2");
 
     /* Make sure that dataspace reads using the bad dataspace fail */
-    H5E_BEGIN_TRY { ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, &n); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, H5S_ALL, H5P_DEFAULT, &n);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dread");
 
-    H5E_BEGIN_TRY { ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &n); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &n);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dread");
 
-    H5E_BEGIN_TRY { ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, sid1, H5P_DEFAULT, &n); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dset1, H5T_NATIVE_INT, sid1, sid1, H5P_DEFAULT, &n);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Dread");
 
@@ -678,7 +708,10 @@ test_h5s_zero_dim(void)
         ret = H5Sselect_hyperslab(sid1, H5S_SELECT_SET, start, NULL, count, NULL);
         CHECK(ret, FAIL, "H5Sselect_hyperslab");
 
-        H5E_BEGIN_TRY { ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, wdata); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, wdata);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Dwrite");
 
@@ -694,7 +727,10 @@ test_h5s_zero_dim(void)
         ret         = H5Sselect_elements(sid1, H5S_SELECT_SET, (size_t)1, (const hsize_t *)coord);
         CHECK(ret, FAIL, "H5Sselect_elements");
 
-        H5E_BEGIN_TRY { ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &val); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, sid1, H5P_DEFAULT, &val);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Dwrite");
 
@@ -791,7 +827,10 @@ test_h5s_zero_dim(void)
         /* Now extend the first dimension size of the dataset to SPACE1_DIM1*3 past the maximal size.
          * It is supposed to fail. */
         extend_dims[0] = SPACE1_DIM1 * 3;
-        H5E_BEGIN_TRY { ret = H5Dset_extent(dset1, extend_dims); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dset_extent(dset1, extend_dims);
+        }
         H5E_END_TRY;
         VERIFY(ret, FAIL, "H5Dset_extent");
 
@@ -1172,7 +1211,10 @@ test_h5s_encode(void)
         sbuf = (unsigned char *)HDcalloc((size_t)1, sbuf_size);
 
     /* Try decoding bogus buffer */
-    H5E_BEGIN_TRY { ret = H5Sdecode(sbuf); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sdecode(sbuf);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Sdecode");
 
@@ -1338,7 +1380,10 @@ test_h5s_encode_exceed32(void)
     }
 
     /* H5Sencode should fail because block exceeds (2^32 - 1) */
-    H5E_BEGIN_TRY { ret = H5Sencode(sid, hyper_buf, &hyper_buf_size); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sencode(sid, hyper_buf, &hyper_buf_size);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sencode");
 
@@ -1364,7 +1409,10 @@ test_h5s_encode_exceed32(void)
         pt_buf = (unsigned char *)HDcalloc((size_t)1, pt_buf_size);
 
     /* H5Sencode should fail because coord[2] exceeds (2^32 - 1) */
-    H5E_BEGIN_TRY { ret = H5Sencode(sid, pt_buf, &pt_buf_size); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Sencode(sid, pt_buf, &pt_buf_size);
+    }
     H5E_END_TRY
     VERIFY(ret, FAIL, "H5Sencode");
 
@@ -1405,7 +1453,10 @@ test_h5s_scalar_write(void)
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Verify a non-zero rank fails with a NULL dimension. */
-    H5E_BEGIN_TRY { sid1 = H5Screate_simple(SPACE1_RANK, NULL, NULL); }
+    H5E_BEGIN_TRY
+    {
+        sid1 = H5Screate_simple(SPACE1_RANK, NULL, NULL);
+    }
     H5E_END_TRY
     VERIFY(sid1, FAIL, "H5Screate_simple");
 

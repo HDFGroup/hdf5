@@ -194,44 +194,48 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
     if (sp == 1 && argv[opt_ind][0] == '-' && argv[opt_ind][1] == '-') {
         /* long command line option */
-        const char *arg = &argv[opt_ind][2];
-        int         i;
+        int        i;
+        const char ch      = '=';
+        char *     arg     = HDstrdup(&argv[opt_ind][2]);
+        size_t     arg_len = 0;
+
+        opt_arg = strchr(&argv[opt_ind][2], ch);
+        arg_len = HDstrlen(&argv[opt_ind][2]);
+        if (opt_arg) {
+            arg_len -= HDstrlen(opt_arg);
+            opt_arg++; /* skip the equal sign */
+        }
+        arg[arg_len] = 0;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
-            size_t len = HDstrlen(l_opts[i].name);
-
-            if (HDstrncmp(arg, l_opts[i].name, len) == 0) {
+            if (HDstrcmp(arg, l_opts[i].name) == 0) {
                 /* we've found a matching long command line flag */
                 opt_opt = l_opts[i].shortval;
 
                 if (l_opts[i].has_arg != no_arg) {
-                    if (arg[len] == '=') {
-                        opt_arg = &arg[len + 1];
-                    }
-                    else if (l_opts[i].has_arg != optional_arg) {
-                        if (opt_ind < (argc - 1))
-                            if (argv[opt_ind + 1][0] != '-')
-                                opt_arg = argv[++opt_ind];
-                    }
-                    else if (l_opts[i].has_arg == require_arg) {
-                        if (opt_err)
-                            HDfprintf(rawerrorstream, "%s: option required for \"--%s\" flag\n", argv[0],
-                                      arg);
+                    if (opt_arg == NULL) {
+                        if (l_opts[i].has_arg != optional_arg) {
+                            if (opt_ind < (argc - 1))
+                                if (argv[opt_ind + 1][0] != '-')
+                                    opt_arg = argv[++opt_ind];
+                        }
+                        else if (l_opts[i].has_arg == require_arg) {
+                            if (opt_err)
+                                HDfprintf(rawerrorstream, "%s: option required for \"--%s\" flag\n", argv[0],
+                                          arg);
 
-                        opt_opt = '?';
+                            opt_opt = '?';
+                        }
                     }
-                    else
-                        opt_arg = NULL;
                 }
                 else {
-                    if (arg[len] == '=') {
+                    if (opt_arg) {
                         if (opt_err)
                             HDfprintf(rawerrorstream, "%s: no option required for \"%s\" flag\n", argv[0],
                                       arg);
 
                         opt_opt = '?';
                     }
-                    opt_arg = NULL;
                 }
                 break;
             }
@@ -247,6 +251,8 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         opt_ind++;
         sp = 1;
+
+        HDfree(arg);
     }
     else {
         register char *cp; /* pointer into current token */
@@ -377,8 +383,6 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
  *
  * Programmer: Jacob Smith
  *             2017-11-10
- *
- * Changes: None.
  *
  *****************************************************************************
  */
@@ -1040,6 +1044,53 @@ done:
     return ret_value;
 }
 
+#ifdef H5_HAVE_ROS3_VFD
+/*----------------------------------------------------------------------------
+ *
+ * Function: h5tools_parse_ros3_fapl_tuple
+ *
+ * Purpose:  A convenience function that parses a string containing a tuple
+ *           of S3 VFD credential information and then passes the result to
+ *           `h5tools_populate_ros3_fapl()` in order to setup a valid
+ *           configuration for the S3 VFD.
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ *----------------------------------------------------------------------------
+ */
+herr_t
+h5tools_parse_ros3_fapl_tuple(const char *tuple_str, int delim, H5FD_ros3_fapl_t *fapl_config_out)
+{
+    const char *ccred[3];
+    unsigned    nelems     = 0;
+    char *      s3cred_src = NULL;
+    char **     s3cred     = NULL;
+    herr_t      ret_value  = SUCCEED;
+
+    /* Attempt to parse S3 credentials tuple */
+    if (parse_tuple(tuple_str, delim, &s3cred_src, &nelems, &s3cred) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to parse S3 VFD info tuple");
+
+    /* Sanity-check tuple count */
+    if (nelems != 3)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid S3 VFD credentials");
+
+    ccred[0] = (const char *)s3cred[0];
+    ccred[1] = (const char *)s3cred[1];
+    ccred[2] = (const char *)s3cred[2];
+
+    if (0 == h5tools_populate_ros3_fapl(fapl_config_out, ccred))
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to populate S3 VFD FAPL config");
+
+done:
+    if (s3cred)
+        HDfree(s3cred);
+    if (s3cred_src)
+        HDfree(s3cred_src);
+
+    return ret_value;
+}
+
 /*----------------------------------------------------------------------------
  *
  * Function: h5tools_populate_ros3_fapl()
@@ -1068,7 +1119,7 @@ done:
  *
  * Return:
  *
- *     0 (failure) if...
+ *     FAIL if...
  *         * Read-Only S3 VFD is not enabled.
  *         * NULL fapl pointer: (NULL, {...} )
  *         * Warning: In all cases below, fapl will be set as "default"
@@ -1085,7 +1136,7 @@ done:
  *                 * (&fa, {"...", "",    "...")
  *             * Any string would overflow allowed space in fapl definition.
  *     or
- *     1 (success)
+ *     SUCCEED
  *         * Sets components in fapl_t pointer, copying strings as appropriate.
  *         * "Default" fapl (valid version, authenticate->False, empty strings)
  *             * `values` pointer is NULL
@@ -1102,173 +1153,113 @@ done:
  *
  *----------------------------------------------------------------------------
  */
-#ifdef H5_HAVE_ROS3_VFD
-int
+herr_t
 h5tools_populate_ros3_fapl(H5FD_ros3_fapl_t *fa, const char **values)
 {
-    int show_progress = 0; /* set to 1 for debugging */
-    int ret_value     = 1; /* 1 for success, 0 for failure           */
-                           /* e.g.? if (!populate()) { then failed } */
+    herr_t ret_value = SUCCEED;
 
-    if (show_progress) {
-        HDprintf("called h5tools_populate_ros3_fapl\n");
-    }
+    if (fa == NULL)
+        H5TOOLS_GOTO_ERROR(FAIL, "fa cannot be NULL");
 
-    if (fa == NULL) {
-        if (show_progress) {
-            HDprintf("  ERROR: null pointer to fapl_t\n");
-        }
-        ret_value = 0;
-        goto done;
-    }
-
-    if (show_progress) {
-        HDprintf("  preset fapl with default values\n");
-    }
     fa->version       = H5FD_CURR_ROS3_FAPL_T_VERSION;
     fa->authenticate  = FALSE;
     *(fa->aws_region) = '\0';
     *(fa->secret_id)  = '\0';
     *(fa->secret_key) = '\0';
 
-    /* sanity-check supplied values
-     */
+    /* Sanity checks */
     if (values != NULL) {
-        if (values[0] == NULL) {
-            if (show_progress) {
-                HDprintf("  ERROR: aws_region value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
-        }
-        if (values[1] == NULL) {
-            if (show_progress) {
-                HDprintf("  ERROR: secret_id value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
-        }
-        if (values[2] == NULL) {
-            if (show_progress) {
-                HDprintf("  ERROR: secret_key value cannot be NULL\n");
-            }
-            ret_value = 0;
-            goto done;
-        }
+        if (values[0] == NULL || values[1] == NULL || values[2] == NULL)
+            H5TOOLS_GOTO_ERROR(FAIL, "values data cannot be NULL");
 
         /* if region and ID are supplied (key optional), write to fapl...
          * fail if value would overflow
          */
         if (*values[0] != '\0' && *values[1] != '\0') {
-            if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN) {
-                if (show_progress) {
-                    HDprintf("  ERROR: aws_region value too long\n");
-                }
-                ret_value = 0;
-                goto done;
-            }
+            if (HDstrlen(values[0]) > H5FD_ROS3_MAX_REGION_LEN)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't exceed max region length");
             HDmemcpy(fa->aws_region, values[0], (HDstrlen(values[0]) + 1));
-            if (show_progress) {
-                HDprintf("  aws_region set\n");
-            }
 
-            if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN) {
-                if (show_progress) {
-                    HDprintf("  ERROR: secret_id value too long\n");
-                }
-                ret_value = 0;
-                goto done;
-            }
+            if (HDstrlen(values[1]) > H5FD_ROS3_MAX_SECRET_ID_LEN)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't exceed max secret ID length");
             HDmemcpy(fa->secret_id, values[1], (HDstrlen(values[1]) + 1));
-            if (show_progress) {
-                HDprintf("  secret_id set\n");
-            }
 
-            if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN) {
-                if (show_progress) {
-                    HDprintf("  ERROR: secret_key value too long\n");
-                }
-                ret_value = 0;
-                goto done;
-            }
+            if (HDstrlen(values[2]) > H5FD_ROS3_MAX_SECRET_KEY_LEN)
+                H5TOOLS_GOTO_ERROR(FAIL, "can't exceed max secret key length");
             HDmemcpy(fa->secret_key, values[2], (HDstrlen(values[2]) + 1));
-            if (show_progress) {
-                HDprintf("  secret_key set\n");
-            }
 
             fa->authenticate = TRUE;
-            if (show_progress) {
-                HDprintf("  set to authenticate\n");
-            }
         }
-        else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0') {
-            if (show_progress) {
-                HDprintf("  ERROR: invalid assortment of empty/non-empty values\n");
-            }
-            ret_value = 0;
-            goto done;
-        }
-    } /* values != NULL */
+        else if (*values[0] != '\0' || *values[1] != '\0' || *values[2] != '\0')
+            H5TOOLS_GOTO_ERROR(FAIL, "all values cannot be empty strings");
+    }
 
 done:
     return ret_value;
-
 } /* h5tools_populate_ros3_fapl */
 #endif /* H5_HAVE_ROS3_VFD */
 
-/*-----------------------------------------------------------------------------
- *
- * Function: h5tools_set_configured_fapl
- *
- * Purpose: prepare fapl_id with the given property list, according to
- *          VFD prototype.
- *
- * Return: 0 on failure, 1 on success
- *
- * Programmer: Jacob Smith
- *             2018-05-21
- *
- * Changes: None.
- *
- *-----------------------------------------------------------------------------
- */
-int
-h5tools_set_configured_fapl(hid_t fapl_id, const char vfd_name[], void *fapl_t_ptr)
-{
-    int ret_value = 1;
-
-    if (fapl_id < 0) {
-        return 0;
-    }
-
-    if (!strcmp("", vfd_name)) {
-        goto done;
-
-#ifdef H5_HAVE_ROS3_VFD
-    }
-    else if (!strcmp("ros3", vfd_name)) {
-        if ((fapl_id == H5P_DEFAULT) || (fapl_t_ptr == NULL) ||
-            (FAIL == H5Pset_fapl_ros3(fapl_id, (H5FD_ros3_fapl_t *)fapl_t_ptr))) {
-            ret_value = 0;
-            goto done;
-        }
-#endif /* H5_HAVE_ROS3_VFD */
-
 #ifdef H5_HAVE_LIBHDFS
+/*----------------------------------------------------------------------------
+ *
+ * Function: h5tools_parse_hdfs_fapl_tuple
+ *
+ * Purpose:  A convenience function that parses a string containing a tuple
+ *           of HDFS VFD configuration information.
+ *
+ * Return:   SUCCEED/FAIL
+ *
+ *----------------------------------------------------------------------------
+ */
+herr_t
+h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int delim, H5FD_hdfs_fapl_t *fapl_config_out)
+{
+    unsigned long k         = 0;
+    unsigned      nelems    = 0;
+    char *        props_src = NULL;
+    char **       props     = NULL;
+    herr_t        ret_value = SUCCEED;
+
+    /* Attempt to parse HDFS configuration tuple */
+    if (parse_tuple(tuple_str, delim, &props_src, &nelems, &props) < 0)
+        H5TOOLS_GOTO_ERROR(FAIL, "failed to parse HDFS VFD configuration tuple");
+
+    /* Sanity-check tuple count */
+    if (nelems != 5)
+        H5TOOLS_GOTO_ERROR(FAIL, "invalid HDFS VFD configuration");
+
+    /* Populate fapl configuration structure with given properties.
+     * WARNING: No error-checking is done on length of input strings...
+     *          Silent overflow is possible, albeit unlikely.
+     */
+    if (HDstrncmp(props[0], "", 1)) {
+        HDstrncpy(fapl_config_out->namenode_name, (const char *)props[0], HDstrlen(props[0]));
     }
-    else if (!strcmp("hdfs", vfd_name)) {
-        if ((fapl_id == H5P_DEFAULT) || (fapl_t_ptr == NULL) ||
-            (FAIL == H5Pset_fapl_hdfs(fapl_id, (H5FD_hdfs_fapl_t *)fapl_t_ptr))) {
-            ret_value = 0;
-            goto done;
-        }
-#endif /* H5_HAVE_LIBHDFS */
+    if (HDstrncmp(props[1], "", 1)) {
+        k = strtoul((const char *)props[1], NULL, 0);
+        if (errno == ERANGE)
+            H5TOOLS_GOTO_ERROR(FAIL, "supposed port number wasn't");
+        fapl_config_out->namenode_port = (int32_t)k;
     }
-    else {
-        ret_value = 0; /* unrecognized fapl type "name" */
+    if (HDstrncmp(props[2], "", 1)) {
+        HDstrncpy(fapl_config_out->kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
+    }
+    if (HDstrncmp(props[3], "", 1)) {
+        HDstrncpy(fapl_config_out->user_name, (const char *)props[3], HDstrlen(props[3]));
+    }
+    if (HDstrncmp(props[4], "", 1)) {
+        k = HDstrtoul((const char *)props[4], NULL, 0);
+        if (errno == ERANGE)
+            H5TOOLS_GOTO_ERROR(FAIL, "supposed buffersize number wasn't");
+        fapl_config_out->stream_buffer_size = (int32_t)k;
     }
 
 done:
-    return ret_value;
+    if (props)
+        HDfree(props);
+    if (props_src)
+        HDfree(props_src);
 
-} /* h5tools_set_configured_fapl() */
+    return ret_value;
+}
+#endif /* H5_HAVE_LIBHDFS */

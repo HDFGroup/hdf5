@@ -19,12 +19,10 @@
  *
  * Purpose:     Public include file for cache functions.
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Cpublic_H
-#define _H5Cpublic_H
+#ifndef H5Cpublic_H
+#define H5Cpublic_H
 
 /* Public headers needed by this file */
 #include "H5public.h"
@@ -33,15 +31,34 @@
 extern "C" {
 #endif
 
-enum H5C_cache_incr_mode { H5C_incr__off, H5C_incr__threshold };
+enum H5C_cache_incr_mode {
+    H5C_incr__off,
+    /**<Automatic cache size increase is disabled, and the remaining increment fields are ignored.*/
 
-enum H5C_cache_flash_incr_mode { H5C_flash_incr__off, H5C_flash_incr__add_space };
+    H5C_incr__threshold
+    /**<Automatic cache size increase is enabled using the hit rate threshold algorithm.*/
+};
+
+enum H5C_cache_flash_incr_mode {
+    H5C_flash_incr__off,
+    /**<Flash cache size increase is disabled.*/
+
+    H5C_flash_incr__add_space
+    /**<Flash cache size increase is enabled using the add space algorithm.*/
+};
 
 enum H5C_cache_decr_mode {
     H5C_decr__off,
+    /**<Automatic cache size decrease is disabled.*/
+
     H5C_decr__threshold,
+    /**<Automatic cache size decrease is enabled  using the hit rate threshold algorithm.*/
+
     H5C_decr__age_out,
+    /**<Automatic cache size decrease is enabled using the ageout algorithm. */
+
     H5C_decr__age_out_with_threshold
+    /**<Automatic cache size decrease is enabled using the ageout with hit rate threshold algorithm.*/
 };
 
 #ifdef __cplusplus

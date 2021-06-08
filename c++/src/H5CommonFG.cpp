@@ -1301,14 +1301,18 @@ CommonFG::getObjTypeByIdx(hsize_t idx, H5std_string &type_name) const
 ///\brief       Default constructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CommonFG::CommonFG() {}
+CommonFG::CommonFG()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    CommonFG destructor
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-CommonFG::~CommonFG() {}
+CommonFG::~CommonFG()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    f_DataType_setId - friend

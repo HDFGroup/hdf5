@@ -303,7 +303,10 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             VERIFY(status1 < 0, "H5Dwrite() should have failed");
 
             /* extend dimensions of dataset */
-            H5E_BEGIN_TRY { status1 = H5Dset_extent(dset_id[i], dims4); }
+            H5E_BEGIN_TRY
+            {
+                status1 = H5Dset_extent(dset_id[i], dims4);
+            }
             H5E_END_TRY;
 
             VERIFY(status1 < 0, "H5Dset_extent() should have failed");
@@ -445,7 +448,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             FAIL_PUTS_ERROR("H5Dclose() failed");
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HL_TESTING2("close file images");
 

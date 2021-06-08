@@ -37,7 +37,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub floating-point datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType() {}
+FloatType::FloatType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FloatType overloaded constructor
@@ -60,14 +62,18 @@ FloatType::FloatType(const PredType &pred_type) : AtomType()
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType(const hid_t existing_id) : AtomType(existing_id) {}
+FloatType::FloatType(const hid_t existing_id) : AtomType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FloatType copy constructor
 ///\brief       Copy constructor: makes a copy of the original FloatType object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType(const FloatType &original) : AtomType(original) {}
+FloatType::FloatType(const FloatType &original) : AtomType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -338,6 +344,8 @@ FloatType::setInpad(H5T_pad_t inpad) const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::~FloatType() {}
+FloatType::~FloatType()
+{
+}
 
 } // namespace H5

@@ -12,13 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Thursday, July 23, 1998
  *
  * Purpose:     Support functions for the various tools.
  */
-#ifndef H5TOOLS_H__
-#define H5TOOLS_H__
+#ifndef H5TOOLS_H
+#define H5TOOLS_H
 
 #include "hdf5.h"
 #include "h5tools_error.h"
@@ -521,19 +521,55 @@ typedef struct h5tools_context_t {
     int              display_char;  /* */
 } h5tools_context_t;
 
+/* VFD info structs used to set the file access property
+ * lists in the tools.
+ */
+
+typedef struct h5tools_vfd_info_t {
+
+    /* Pointer to information to be passed to the driver for its setup */
+    const void *info;
+
+    /* Name of the VFD */
+    const char *name;
+} h5tools_vfd_info_t;
+
+/* This enum should match the entries in the above 'drivernames'
+ * since they are indices into the 'drivernames' array. */
+typedef enum {
+    SEC2_VFD_IDX = 0,
+    DIRECT_VFD_IDX,
+    LOG_VFD_IDX,
+    WINDOWS_VFD_IDX,
+    STDIO_VFD_IDX,
+    CORE_VFD_IDX,
+    FAMILY_VFD_IDX,
+    SPLIT_VFD_IDX,
+    MULTI_VFD_IDX,
+    MPIO_VFD_IDX,
+    ROS3_VFD_IDX,
+    HDFS_VFD_IDX,
+} driver_idx;
+
 /* The following include, h5tools_str.h, must be after the
  * above stucts are defined. There is a dependency in the following
  * include that hasn't been identified yet. */
 
 #include "h5tools_str.h"
 
-H5TOOLS_DLLVAR h5tool_format_t             h5tools_dataformat;
-H5TOOLS_DLLVAR const h5tools_dump_header_t h5tools_standardformat;
-H5TOOLS_DLLVAR const h5tools_dump_header_t *h5tools_dump_header_format;
-
 #ifdef __cplusplus
 extern "C" {
 #endif
+
+H5TOOLS_DLLVAR const char *drivernames[];
+
+H5TOOLS_DLLVAR h5tool_format_t             h5tools_dataformat;
+H5TOOLS_DLLVAR const h5tools_dump_header_t h5tools_standardformat;
+H5TOOLS_DLLVAR const h5tools_dump_header_t *h5tools_dump_header_format;
+H5TOOLS_DLLVAR H5E_auto2_t                  lib_func;
+H5TOOLS_DLLVAR H5E_auto2_t                  tools_func;
+H5TOOLS_DLLVAR void *                       lib_edata;
+H5TOOLS_DLLVAR void *                       tools_edata;
 
 H5TOOLS_DLLVAR unsigned           packed_bits_num;    /* number of packed bits to display */
 H5TOOLS_DLLVAR unsigned           packed_data_offset; /* offset of packed bits to display */
@@ -566,21 +602,27 @@ H5TOOLS_DLLVAR int enable_error_stack; /* re-enable error stack; disable=0 enabl
 #define H5_TOOLS_UNKNOWN   "UNKNOWN"
 
 /* Definitions of useful routines */
-H5TOOLS_DLL void    h5tools_init(void);
-H5TOOLS_DLL void    h5tools_close(void);
-H5TOOLS_DLL int     h5tools_set_data_output_file(const char *fname, int is_bin);
-H5TOOLS_DLL int     h5tools_set_attr_output_file(const char *fname, int is_bin);
-H5TOOLS_DLL int     h5tools_set_input_file(const char *fname, int is_bin);
-H5TOOLS_DLL int     h5tools_set_output_file(const char *fname, int is_bin);
-H5TOOLS_DLL int     h5tools_set_error_file(const char *fname, int is_bin);
-H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, const char *driver,
-                                  char *drivername, size_t drivername_len);
+H5TOOLS_DLL void h5tools_init(void);
+H5TOOLS_DLL void h5tools_close(void);
+
+H5TOOLS_DLL void h5tools_error_report(void);
+H5TOOLS_DLL int  h5tools_set_data_output_file(const char *fname, int is_bin);
+H5TOOLS_DLL int  h5tools_set_attr_output_file(const char *fname, int is_bin);
+H5TOOLS_DLL int  h5tools_set_input_file(const char *fname, int is_bin);
+H5TOOLS_DLL int  h5tools_set_output_file(const char *fname, int is_bin);
+H5TOOLS_DLL int  h5tools_set_error_file(const char *fname, int is_bin);
+
+H5TOOLS_DLL hid_t   h5tools_get_fapl(hid_t prev_fapl_id, h5tools_vfd_info_t *vfd_info);
+H5TOOLS_DLL herr_t  h5tools_get_vfd_name(hid_t fapl_id, char *drivername, size_t drivername_size);
+H5TOOLS_DLL hid_t   h5tools_fopen(const char *fname, unsigned flags, hid_t fapl, hbool_t use_specific_driver,
+                                  char *drivername, size_t drivername_size);
 H5TOOLS_DLL hid_t   h5tools_get_little_endian_type(hid_t type);
 H5TOOLS_DLL hid_t   h5tools_get_big_endian_type(hid_t type);
 H5TOOLS_DLL htri_t  h5tools_detect_vlen(hid_t tid);
 H5TOOLS_DLL htri_t  h5tools_detect_vlen_str(hid_t tid);
 H5TOOLS_DLL hbool_t h5tools_is_obj_same(hid_t loc_id1, const char *name1, hid_t loc_id2, const char *name2);
-H5TOOLS_DLL void    init_acc_pos(h5tools_context_t *ctx, hsize_t *dims);
+H5TOOLS_DLL void init_acc_pos(unsigned ndims, hsize_t *dims, hsize_t *acc, hsize_t *pos, hsize_t *p_min_idx);
+H5TOOLS_DLL hsize_t calc_acc_pos(unsigned ndims, hsize_t elemtno, hsize_t *acc, hsize_t *pos);
 H5TOOLS_DLL hbool_t h5tools_is_zero(const void *_mem, size_t size);
 H5TOOLS_DLL int     h5tools_canreadf(const char *name, hid_t dcpl_id);
 H5TOOLS_DLL int     h5tools_can_encode(H5Z_filter_t filtn);
@@ -607,15 +649,12 @@ H5TOOLS_DLL hbool_t h5tools_render_element(FILE *stream, const h5tool_format_t *
                                            h5tools_str_t *buffer, hsize_t *curr_pos, size_t ncols,
                                            hsize_t local_elmt_counter, hsize_t elmt_counter);
 H5TOOLS_DLL hbool_t h5tools_render_region_element(FILE *stream, const h5tool_format_t *info,
-                                                  h5tools_context_t *ctx,    /*in,out*/
-                                                  h5tools_str_t *    buffer, /*string into which to render */
-                                                  hsize_t *          curr_pos, /*total data element position*/
-                                                  size_t ncols, hsize_t *ptdata,
-                                                  hsize_t local_elmt_counter, /*element counter*/
-                                                  hsize_t elmt_counter);
+                                                  h5tools_context_t *ctx, h5tools_str_t *buffer,
+                                                  hsize_t *curr_pos, size_t ncols, hsize_t *ptdata,
+                                                  hsize_t local_elmt_counter, hsize_t elmt_counter);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif /* H5TOOLS_H__ */
+#endif /* H5TOOLS_H */

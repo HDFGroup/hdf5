@@ -17,17 +17,17 @@
  * Purpose:     Messages related to data layout.
  */
 
-#define H5D_PACKAGE /*suppress error about including H5Dpkg	  */
-#define H5O_PACKAGE /*suppress error about including H5Opkg	  */
+#define H5D_PACKAGE /*suppress error about including H5Dpkg      */
+#define H5O_PACKAGE /*suppress error about including H5Opkg      */
 
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Dpkg.h"      /* Dataset functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Dpkg.h"      /* Dataset functions            */
+#include "H5Eprivate.h"  /* Error handling              */
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5MFprivate.h" /* File space management		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5Opkg.h"      /* Object headers			*/
-#include "H5Pprivate.h"  /* Property lists			*/
+#include "H5MFprivate.h" /* File space management        */
+#include "H5MMprivate.h" /* Memory management            */
+#include "H5Opkg.h"      /* Object headers            */
+#include "H5Pprivate.h"  /* Property lists            */
 
 /* Local macros */
 
@@ -56,16 +56,16 @@ const H5O_msg_class_t H5O_MSG_LAYOUT[1] = {{
     H5O_layout_copy,      /*copy the native value         */
     H5O_layout_size,      /*size of message on disk       */
     H5O_layout_reset,     /*reset method                  */
-    H5O_layout_free,      /*free the struct		*/
-    H5O_layout_delete,    /* file delete method		*/
-    NULL,                 /* link method			*/
-    NULL,                 /*set share method		*/
-    NULL,                 /*can share method		*/
+    H5O_layout_free,      /*free the struct        */
+    H5O_layout_delete,    /* file delete method        */
+    NULL,                 /* link method            */
+    NULL,                 /*set share method        */
+    NULL,                 /*can share method        */
     NULL,                 /* pre copy native value to file */
     H5O_layout_copy_file, /* copy native value to file    */
     NULL,                 /* post copy native value to file */
-    NULL,                 /* get creation index		*/
-    NULL,                 /* set creation index		*/
+    NULL,                 /* get creation index        */
+    NULL,                 /* set creation index        */
     H5O_layout_debug      /*debug the message             */
 }};
 
@@ -89,13 +89,13 @@ H5FL_DEFINE(H5O_layout_t);
  */
 static void *
 H5O_layout_decode(H5F_t *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H5_ATTR_UNUSED *open_oh,
-                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
-                  size_t p_size, const uint8_t *p)
+                  unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
+                  const uint8_t *p)
 {
-    H5O_layout_t *mesg = NULL;
-    unsigned      u;
+    H5O_layout_t * mesg = NULL;
+    unsigned       u;
     const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
-    void *        ret_value = NULL; /* Return value */
+    void *         ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -278,12 +278,12 @@ done:
  *      We write out version 3 messages by default now.
  *
  * Modifications:
- * 	Robb Matzke, 1998-07-20
- *	Rearranged the message to add a version number at the beginning.
+ *     Robb Matzke, 1998-07-20
+ *    Rearranged the message to add a version number at the beginning.
  *
- *	Raymond Lu, 2002-2-26
- *	Added version number 2 case depends on if space has been allocated
- *	at the moment when layout header message is updated.
+ *    Raymond Lu, 2002-2-26
+ *    Added version number 2 case depends on if space has been allocated
+ *    at the moment when layout header message is updated.
  *
  *      Quincey Koziol, 2004-5-21
  *      Added version number 3 case to straighten out problems with contiguous
@@ -484,13 +484,13 @@ H5O_layout_reset(void *_mesg)
 } /* end H5O_layout_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_layout_free
+ * Function:    H5O_layout_free
  *
- * Purpose:	Free's the message
+ * Purpose:    Free's the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, March 11, 2000
  *
  *-------------------------------------------------------------------------
@@ -732,14 +732,15 @@ H5O_layout_debug(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, const vo
 
         case H5D_CONTIGUOUS:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Contiguous");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Data address:", mesg->storage.u.contig.addr);
-            HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Data Size:", mesg->storage.u.contig.size);
+            HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+                      "Data Size:", mesg->storage.u.contig.size);
             break;
 
         case H5D_COMPACT:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Compact");
-            HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                       "Data Size:", mesg->storage.u.compact.size);
             break;
 

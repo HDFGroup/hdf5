@@ -1784,8 +1784,8 @@ H5O_merge_null(H5F_t *f, hid_t dxpl_id, H5O_t *oh)
                 for (v = 0, curr_msg2 = &oh->mesg[0]; v < oh->nmesgs; v++, curr_msg2++) {
                     if (u != v && H5O_NULL_ID == curr_msg2->type->id &&
                         curr_msg->chunkno == curr_msg2->chunkno) {
-                        ssize_t adj_raw;      /* Amount to adjust raw message pointer */
-                        size_t  adj_raw_size; /* Amount to adjust raw message size */
+                        ssize_t adj_raw      = 0; /* Amount to adjust raw message pointer */
+                        size_t  adj_raw_size = 0; /* Amount to adjust raw message size */
 
                         /* Check for second message after first message */
                         if ((curr_msg->raw + curr_msg->raw_size) ==

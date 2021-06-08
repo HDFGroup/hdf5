@@ -26,20 +26,13 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
-/* Define if building universal (internal helper macro) */
-#cmakedefine H5_AC_APPLE_UNIVERSAL_BUILD @H5_AC_APPLE_UNIVERSAL_BUILD@
-
-/* Define if the memory buffers being written to disk should be cleared before
-   writing. */
-#cmakedefine H5_CLEAR_MEMORY @H5_CLEAR_MEMORY@
-
 /* Define if C++ compiler recognizes offsetof */
 #cmakedefine H5_CXX_HAVE_OFFSETOF @CXX_HAVE_OFFSETOF@
 
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
-/* Define if `dev_t' is a scalar */
+/* Define if dev_t is a scalar */
 #cmakedefine H5_DEV_T_IS_SCALAR @H5_DEV_T_IS_SCALAR@
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
@@ -247,10 +240,10 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #cmakedefine H5_HAVE_MPE_H @H5_HAVE_MPE_H@
 
-/* Define if MPI_Comm_c2f and MPI_Comm_f2c exists */
+/* Define if MPI_Comm_c2f and MPI_Comm_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Comm @H5_HAVE_MPI_MULTI_LANG_Comm@
 
-/* Define if MPI_Info_c2f and MPI_Info_f2c exists */
+/* Define if MPI_Info_c2f and MPI_Info_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Info @H5_HAVE_MPI_MULTI_LANG_Info@
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
@@ -546,6 +539,7 @@
 #cmakedefine H5_SIZEOF_INT_LEAST8_T @H5_SIZEOF_INT_LEAST8_T@
 
 #if !defined(__APPLE__)
+
 /* The size of `size_t', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_SIZE_T @H5_SIZEOF_SIZE_T@
 
@@ -555,8 +549,17 @@
 /* The size of `long', as computed by sizeof. */
 #cmakedefine H5_SIZEOF_LONG @H5_SIZEOF_LONG@
 
+/* The size of `long double', as computed by sizeof. */
+#cmakedefine H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
+
 #else
-   # if defined(__LP64__) && __LP64__
+
+  /* On Apple, to support Universal Binaries (where multiple CPU
+     architectures exist in one library/executable), we can't assume
+     the machine doing the compiling has the same endianness or type
+     sizes as all the various architectures (PowerPC, Intel, ARM). */
+
+  # if defined(__LP64__) && __LP64__
   #define H5_SIZEOF_LONG 8
   #define H5_SIZEOF_SIZE_T 8
   #define H5_SIZEOF_SSIZE_T 8
@@ -566,10 +569,15 @@
   #define H5_SIZEOF_SSIZE_T 4
   # endif
 
-#endif
+  # if defined(__i386__) || defined(__x86_64__)
+  #define H5_SIZEOF_LONG_DOUBLE 16
+  # elif defined(__aarch64__)
+  #define H5_SIZEOF_LONG_DOUBLE 8
+  # else
+  #cmakedefine H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
+  # endif
 
-/* The size of `long double', as computed by sizeof. */
-#cmakedefine H5_SIZEOF_LONG_DOUBLE @H5_SIZEOF_LONG_DOUBLE@
+#endif
 
 /* Define size of long long and/or __int64 bit integer type only if the type
    exists.  */

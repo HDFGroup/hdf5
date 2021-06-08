@@ -179,7 +179,7 @@ main(void)
 
     h5_fixname(FILENAME[1], fapl, name, sizeof name);
     if (check_file(name, fapl, FALSE))
-        PASSED()
+        PASSED();
     else {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
         SKIPPED();
@@ -199,7 +199,7 @@ main(void)
 
     h5_fixname(FILENAME[2], fapl, name, sizeof name);
     if (check_file(name, fapl, TRUE))
-        PASSED()
+        PASSED();
     else {
 #if defined H5_HAVE_WIN32_API && !defined(hdf5_EXPORTS)
         SKIPPED();

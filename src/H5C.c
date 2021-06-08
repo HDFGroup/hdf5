@@ -3183,12 +3183,12 @@ done:
         hbool_t            first_flush;
         hbool_t            have_write_permitted = FALSE;
         hbool_t            read_only            = FALSE;
-        hbool_t            write_permitted;
+        hbool_t            write_permitted      = FALSE;
         herr_t             result;
         size_t             empty_space;
         void *             thing;
         H5C_cache_entry_t *entry_ptr;
-        void *             ret_value; /* Return value */
+        void *             ret_value = NULL; /* Return value */
 
         FUNC_ENTER_NOAPI(NULL)
 

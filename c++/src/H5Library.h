@@ -12,15 +12,15 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Library_H
-#define __H5Library_H
+#ifndef H5Library_H
+#define H5Library_H
 
 namespace H5 {
 
 /*! \class H5Library
     \brief Class H5Library operates the HDF5 library globably.
 
-    It is not neccessary to construct an instance of H5Library to use the
+    It is not necessary to construct an instance of H5Library to use the
     methods.
 */
 class H5_DLLCPP H5Library {
@@ -57,6 +57,7 @@ class H5_DLLCPP H5Library {
     static void termH5cpp(void);
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
+
   private:
     // Default constructor - no instance ever created from outsiders
     H5Library();
@@ -68,4 +69,4 @@ class H5_DLLCPP H5Library {
 }; // end of H5Library
 } // namespace H5
 
-#endif // __H5Library_H
+#endif // H5Library_H

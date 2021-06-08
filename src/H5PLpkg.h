@@ -15,8 +15,8 @@
 #error "Do not include this file outside the H5PL package!"
 #endif
 
-#ifndef _H5PLpkg_H
-#define _H5PLpkg_H
+#ifndef H5PLpkg_H
+#define H5PLpkg_H
 
 /* Include private header file */
 #include "H5PLprivate.h" /* Filter functions                */
@@ -41,4 +41,4 @@
 /* Package Private Prototypes */
 /******************************/
 
-#endif /* _H5PLpkg_H */
+#endif /* H5PLpkg_H */

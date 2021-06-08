@@ -12,13 +12,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Exception_H
-#define __H5Exception_H
+#ifndef H5Exception_H
+#define H5Exception_H
 
 #include <string>
 
 namespace H5 {
-
 #ifdef H5_NO_STD
 #define H5std_string ::string
 #else
@@ -169,4 +168,4 @@ class H5_DLLCPP IdComponentException : public Exception {
 }; // end of IdComponentException
 } // namespace H5
 
-#endif // __H5Exception_H
+#endif // H5Exception_H

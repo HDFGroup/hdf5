@@ -15,8 +15,8 @@
  *              Thursday, April 16, 1998
  */
 
-#ifndef _H5Zprivate_H
-#define _H5Zprivate_H
+#ifndef H5Zprivate_H
+#define H5Zprivate_H
 
 /* Include package's public header */
 #include "H5Zpublic.h"

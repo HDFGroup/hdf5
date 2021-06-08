@@ -1,6 +1,7 @@
 HDF5 version 1.8.23-1 currently under development
 ================================================================================
 
+
 INTRODUCTION
 ============
 
@@ -35,7 +36,7 @@ CONTENTS
 
 - New Features
 - Support for New Platforms, Languages, and Compilers
-- Bug Fixes since HDF5-1.8.21
+- Bug Fixes since HDF5-1.8.22
 - Supported Platforms
 - Supported Configuration Features Summary
 - More Tested Platforms
@@ -48,457 +49,275 @@ New Features
 
     Configuration:
     -------------
-    - CMake option to build the HDF filter plugins project as an external project
+    - CMake no longer builds the C++ library by default
 
-        The HDF filter plugins project is a collection of registered compression
-        filters that can be dynamically loaded when needed to access data stored
-        in a hdf5 file. This CMake-only option allows the plugins to be built and
-        distributed with the hdf5 library and tools. Like the options for szip and
-        zlib, either a tgz file or a git repository can be specified for the source.
+      HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
+      Autotools build defaults.
 
-        The option was refactored to use the CMake FetchContent process. This allows
-        more control over the filter targets, but required external project command
-        options to be moved to a CMake include file, HDF5PluginCache.cmake. Also
-        enabled the filter examples to be used as tests for operation of the
-        filter plugins.
+      (DER - 2021/04/20)
 
-        (ADB - 2020/12/10, OESS-98)
+    - Add CMake variable HDF5_LIB_INFIX
 
-    - CMake option to use MSVC naming conventions with MinGW
+      This infix is added to all library names after 'hdf5'.
+      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+      This name is used in packages on debian based systems.
+      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
 
-        HDF5_MSVC_NAMING_CONVENTION option enable to use MSVC naming conventions
-        when using a MinGW toolchain
+      (barcode - 2021/03/22)
 
-        (xan - 2020/10/30)
+    - On macOS, Universal Binaries can now be built, allowing native execution on
+      both Intel and Apple Silicon (ARM) based Macs.
 
-    - CMake option to statically link gcc libs with MinGW
+      To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-        HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
-        with the MinGW toolchain
+      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
 
-        (xan - 2020/10/30)
+    - Added a configure-time option to control certain compiler warnings
+      diagnostics
 
-    - CMake option to build the HDF filter plugins project as an external project
+      A new configure-time option was added that allows some compiler warnings
+      diagnostics to have the default operation. This is mainly intended for
+      library developers and currently only works for gcc 10 and above. The
+      diagnostics flags apply to C, C++ and Fortran compilers and will appear
+      in "H5 C Flags", H5 C++ Flags" and H5 Fortran Flags, respectively. They
+      will NOT be exported to h5cc, etc.
 
-        The HDF filter plugins project is a collection of registered compression
-        filters that can be dynamically loaded when needed to access data stored
-        in a hdf5 file. This CMake-only option allows the plugins to be built and
-        distributed with the hdf5 library and tools. Like the options for szip and
-        zlib, either a tgz file or a git repository can be specified for the source.
+      The default is OFF, which will disable the warnings URL and color attributes
+      for the warnings output. ON will not add the flags and allow default behavior.
 
-        The necessary options are (see the INSTALL_CMake.txt file):
-          HDF5_ENABLE_PLUGIN_SUPPORT
-          PLUGIN_TGZ_NAME or PLUGIN_GIT_URL
-        There are more options necessary for various filters and the plugin project
-        documents should be referenced.
+      Autotools:    --enable-diags
 
-        (ADB - 2020/10/16, OESS-98)
+      CMake:        HDF5_ENABLE_BUILD_DIAGS
 
-    - Added CMake option to format source files
+      (ADB - 2021/02/05, HDFFV-11213)
 
-        HDF5_ENABLE_FORMATTERS option will enable creation of targets using the
-        pattern - HDF5_*_SRC_FORMAT - where * corresponds to the source folder
-        or tool folder. All sources can be formatted by executing the format target;
-        make format
+    - FreeBSD Autotools configuration now defaults to 'cc' and 'c++' compilers
 
-        (ADB - 2020/09/24)
+      On FreeBSD, the autotools defaulted to 'gcc' as the C compiler and did
+      not process C++ options. Since FreeBSD 10, the default compiler has
+      been clang (via 'cc').
 
-    - CMake option to link the generated Fortran MOD files into the include
-      directory.
+      The default compilers have been set to 'cc' for C and 'c++' for C++,
+      which will pick up clang and clang++ respectively on FreeBSD 10+.
+      Additionally, clang options are now set correctly for both C and C++
+      and g++ options will now be set if that compiler is being used (an
+      omission from the former functionality).
 
-      The Fortran generation of MOD files by a Fortran compile can produce
-      different binary files between SHARED and STATIC compiles with different
-      compilers and/or different platforms. Note that it has been found that
-      different versions of Fortran compilers will produce incompatible MOD
-      files. Currently, CMake will locate these MOD files in subfolders of
-      the include directory and add that path to the Fortran library target
-      in the CMake config file, which can be used by the CMake find library
-      process. For other build systems using the binary from a CMake install,
-      a new CMake configuration can be used to copy the pre-chosen version
-      of the Fortran MOD files into the install include directory.
+      (DER - 2021/02/16, HDFFV-11193)
 
-      The default will depend on the configuration of
-      BUILD_STATIC_LIBS and BUILD_SHARED_LIBS:
-            YES                   YES         Default to SHARED
-            YES                   NO          Default to STATIC
-            NO                    YES         Default to SHARED
-            NO                    NO          Default to SHARED
-      The defaults can be overriden by setting the config option
-         HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
+    - Fixed POSIX problems when building w/ gcc on Solaris
 
-      (ADB - 2020/07/9, HDFFV-11116)
+      When building on Solaris using gcc, the POSIX symbols were not
+      being set correctly, which could lead to issues like clock_gettime()
+      not being found.
 
-    - CMake option to use AEC (open source SZip) library instead of SZip
+      The standard is now set to gnu99 when building with gcc on Solaris,
+      which allows POSIX things to be #defined and linked correctly. This
+      differs slightly from the gcc norm, where we set the standard to c99
+      and manually set POSIX #define symbols.
 
-      The open source AEC library is a replacement library for SZip. In
-      order to use it for hdf5 the libaec CMake source was changed to add
-      "-fPIC" and exclude test files. Autotools does not build the
-      compression libraries within hdf5 builds. New option USE_LIBAEC is
-      required to compensate for the different files produced by AEC build.
+      (DER - 2021/02/16, HDFFV-11191)
 
-      (ADB - 2020/04/22, OESS-65)
+    - Added a configure-time option to consider certain compiler warnings
+      as errors
 
-    - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
+      A new configure-time option was added that converts some compiler warnings
+      to errors. This is mainly intended for library developers and currently
+      only works for gcc and clang. The warnings that are considered errors
+      will appear in the generated libhdf5.settings file. These warnings apply
+      to C and C++ code and will appear in "H5 C Flags" and H5 C++ Flags",
+      respectively. They will NOT be exported to h5cc, etc.
 
-      Some handcrafted tests in HDFTests.c has been removed and the CMake
-      CHECK_STRUCT_HAS_MEMBER module has been used.
+      The default is OFF. Building with this option may fail when compiling
+      on operating systems and with compiler versions not commonly used by
+      the library developers. Compilation may also fail when headers not
+      under the control of the library developers (e.g., mpi.h, hdfs.h) raise
+      warnings.
 
-      (ADB - 2020/03/24, TRILAB-24)
+      Autotools:    --enable-warnings-as-errors
 
-    - Both build systems use same set of warnings flags
+      CMake:        HDF5_ENABLE_WARNINGS_AS_ERRORS
 
-      GNU C, C++ and gfortran warnings flags were moved to files in a config
-      sub-folder named gnu-warnings. Flags that only are available for a specific
-      version of the compiler are in files named with that version.
-      Clang C warnings flags were moved to files in a config sub-folder
-      named clang-warnings.
-      Intel C, Fortran warnings flags were moved to files in a config sub-folder
-      named intel-warnings.
+      (DER - 2021/02/16, HDFFV-11189)
 
-      There are flags in named "error-xxx" files with warnings that may
-      be promoted to errors. Some source files may still need fixes.
 
-      There are also pairs of files named "developer-xxx" and "no-developer-xxx"
-      that are chosen by the CMake option:HDF5_ENABLE_DEV_WARNINGS or the
-      configure option:--enable-developer-warnings.
+    Library:
+    --------
+    - H5Epush_ret() now requires a trailing semi-colon
 
-      In addition, CMake no longer applies these warnings for examples.
+        H5Epush_ret() is a function-like macro that has been changed to
+        contain a `do {} while(0)` loop. Consequently, a trailing semi-colon
+        is now required to end the `while` statement. Previously, a trailing
+        semi would work, but was not mandatory. This change was made to allow
+        clang-format to correctly format the source code.
 
-      (ADB - 2020/03/24, TRILAB-192)
+        (SAM - 2021/03/03)
 
-    - Update CMake minimum version to 3.12
 
-      Updated CMake minimum version to 3.12 and added version checks
-      for Windows features.
+    Fortran Library:
+    ----------------
+    -
 
-      (ADB - 2020/02/05, TRILABS-142)
+    C++ Library:
+    ------------
+    -
 
-    - Fixed CMake include properties for Fortran libraries
 
-      Corrected the library properties for Fortran to use the
-      correct path for the Fortran module files.
-
-      (ADB - 2020/02/04, HDFFV-11012)
-
-    - Added common warnings files for gnu and intel
-
-      Added warnings files to use one common set of flags
-      during configure for both autotools and CMake build
-      systems. The initial implementation only affects a
-      general set of flags for gnu and intel compilers.
-
-      (ADB - 2020/01/17)
-
-    - Added new options to CMake for control of testing
-
-      Added CMake options (default ON);
-          HDF5_TEST_SERIAL AND/OR HDF5_TEST_PARALLEL
-          combined with:
-            HDF5_TEST_TOOLS
-            HDF5_TEST_EXAMPLES
-            HDF5_TEST_FORTRAN
-            HDF5_TEST_CPP
-
-      (ADB - 2020/01/15, HDFFV-11001)
-
-    - Added Clang sanitizers to CMake for analyzer support if compiler is clang.
-
-      Added CMake code and files to execute the Clang sanitizers if
-      HDF5_ENABLE_SANITIZERS is enabled and the USE_SANITIZER option
-      is set to one of the following:
-          Address
-          Memory
-          MemoryWithOrigins
-          Undefined
-          Thread
-          Leak
-          'Address;Undefined'
-
-      (ADB - 2019/12/12, TRILAB-135)
-
-    - Update CMake for VS2019 support
-
-      CMake added support for VS2019 in version 3.15. Changes to the CMake
-      generator setting required changes to scripts. Also updated version
-      references in CMake files as necessary.
-
-      (ADB - 2019/11/18, HDFFV-10962)
-
-    - Add options to enable or disable building tools and tests
-
-      Configure options --enable-tests and --enable-tools were added for
-      autotools configure.  These options are enabled by default, and can be
-      disabled with either --disable-tests (or tools) or --enable-tests=no
-      (or --enable-tools=no).  Build time is reduced ~20% when tools are
-      disabled, 35% when tests are disabled, 45% when both are disabled.
-      Reenabling them after the initial build requires running configure
-      again with the option(s) enabled.
-
-      (DAP - 2019/07/24, HDFFV-9976)
-
-    - Update CMake tests to use FIXTURES
-
-      CMake test fixtures allow setup/cleanup tests and other dependency
-      requirements as properties for tests. This is more flexible for
-      modern CMake code.
-
-      (ADB - 2019/07/23, HDFFV-10529)
-
-    - Windows PDB files are always installed
-
-      There are build configuration or flag settings for Windows that may not
-      generate PDB files. If those files are not generated then the install
-      utility will fail because those PDB files are not found. An optional
-      variable, DISABLE_PDB_FILES, was added to not install PDB files.
-
-      (ADB - 2019/07/17, HDFFV-10424)
-
-    - Add mingw CMake support with a toolchain file
-
-      There has been a number of mingw issues that has been linked under
-      HDFFV-10845. It has been decided to implement the CMake cross-compiling
-      technique of toolchain files. We will use a linux platform with the mingw
-      compiler stack for testing. Only the C language is fully supported, and
-      the error tests are skipped. The C++ language works for static but shared
-      builds has a shared library issue with the mingw Standard Exception Handling
-      library, which is not available on Windows. Fortran has a common cross-compile
-      problem with the fortran configure tests.
-
-      (ADB - 2019/07/12, HDFFV-10845, HDFFV-10595)
-
-    - Windows PDB files are installed incorrectly
-
-      For static builds, the PDB files for windows should be installed next
-      to the static libraries in the lib folder. Also the debug versions of
-      libraries and PDB files are now correctly built using the default
-      CMAKE_DEBUG_POSTFIX setting.
-
-      (ADB - 2019/07/09, HDFFV-10581)
-
-    - Add option to build only shared libs
-
-      A request was made to prevent building static libraries and only build
-      shared.  A new option was added to CMake, ONLY_SHARED_LIBS, which will
-      skip building static libraries. Certain utility functions will build with
-      static libs but are not published. Tests are adjusted to use the correct
-      libraries depending on SHARED/STATIC settings.
-
-      (ADB - 2019/06/12, HDFFV-10805)
-
-    - Add toolchain and cross-compile support
-
-      Added info on using a toolchain file to INSTALL_CMAKE.txt. A
-      toolchain file is also used in cross-compiling, which requires
-      CMAKE_CROSSCOMPILING_EMULATOR to be set. To help with cross-compiling
-      the fortran configure process, the HDF5UseFortran.cmake file macros
-      were improved. Fixed a Fortran configure file issue that incorrectly
-      used #cmakedefine instead of #define.
-
-      (ADB - 2018/10/04, HDFFV-10594)
-
-    - Add warning flags for Intel compilers
-
-      Identified Intel compiler specific warnings flags that should be used
-      instead of GNU flags.
-
-      (ADB - 2018/10/04, TRILABS-21)
-
-    - Add default rpath to targets
-
-      Default rpaths should be set in shared executables and
-      libraries to allow the use of loading dependent libraries
-      without requiring LD_LIBRARY_PATH to be set. The default
-      path should be relative using @rpath on osx and $ORIGIN
-      on linux. Windows is not affected.
-
-      (ADB - 2018/09/26, HDFFV-10594)
-
-
-    Library
-    -------
-    - Add S3 and HDFS VFDs to HDF5 maintenance
-
-      Fix windows requirements and java tests. Windows requires CMake 3.13.
-            Install openssl library (with dev files);
-            from "Shining Light Productions". msi package preferred.
-
-            PATH should have been updated with the installation dir.
-            set ENV variable OPENSSL_ROOT_DIR to the installation dir.
-            set ENV variable OPENSSL_CONF to the cfg file, likely %OPENSSL_ROOT_DIR%\bin\openssl.cfg
-            Install libcurl library (with dev files);
-            download the latest released version using git: https://github.com/curl/curl.git
-
-            Open a Visual Studio Command prompt
-            change to the libcurl root folder
-            run the "buildconf.bat" batch file
-            change to the winbuild directory
-            nmake /f Makefile.vc mode=dll MACHINE=x64
-            copy libcurl-vc-x64-release-dll-ipv6-sspi-winssl dir to C:\curl (installation dir)
-            set ENV variable CURL_ROOT to C:\curl (installation dir)
-            update PATH ENV variable to %CURL_ROOT%\bin (installation bin dir).
-            the aws credentials file should be in %USERPROFILE%\.aws folder
-            set the ENV variable "HDF5_ROS3_TEST_BUCKET_URL=https://s3.us-east-2.amazonaws.com/hdf5ros3"
-
-      (ADB - 2019/09/12, HDFFV-10854)
-
-    - Allow pre-generated H5Tinit.c and H5make_libsettings.c to be used.
-
-      Rather than always running H5detect and generating H5Tinit.c and
-      H5make_libsettings.c, supply a location for those files.
-
-      (ADB - 2018/09/18, HDFFV-10332)
-
-
-    Parallel Library
+    Parallel Library:
     ----------------
     - None
 
 
-    Tools
-    -----
-    - None
+    Tools:
+    ------
+    - h5repack added help text for user-defined filters.
+
+        Added help text line that states the valid values of the filter flag
+        for user-defined filters;
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
+
+        (ADB - 2021/02/16, HDFFV-11099)
+
+    - h5repack added options to control how external links are handled.
+
+      Currently h5repack preserves external links and cannot copy and merge
+      data from the external files. Two options, merge and prune, were added to
+      control how to merge data from an external link into the resulting file.
+       --merge             Follow external soft link recursively and merge data.
+       --prune             Do not follow external soft links and remove link.
+       --merge --prune     Follow external link, merge data and remove dangling link.
+
+      (ADB - 2021/02/16, HDFFV-9984)
 
 
-    High-Level APIs
+    High-Level APIs:
     ---------------
     - None
 
 
-    Fortran API
-    -----------
-    - Corrected INTERFACE INTENT(IN) to INTENT(OUT) for buf_size in h5fget_file_image_f.
-
-      (MSB - 2020/2/18, HDFFV-11029)
-
-
-    C++ API
-    -------
-    - None
-
-    High-Level APIs
-    ---------------
+    Documentation
+    -------------
     - None
 
 
 Support for New Platforms, Languages, and Compilers
 ===================================================
+    - None
 
 
 
-Bug Fixes since HDF5-1.8.21
+Bug Fixes since HDF5-1.8.22
 ===========================
 
     Configuration
     -------------
-    - Correct option for default API version
+    - Remove arbitrary warning flag groups from CMake builds
 
-      CMake options for default API version are not mutually exclusive.
-      Change the multiple BOOL options to a single STRING option with the
-      strings; v16, v18.
+      The arbitrary groups were created to reduce the quantity of warnings being
+      reported that overwhelmed testing report systems. Considerable work has
+      been accomplished to reduce the warning count and these arbitrary groups
+      are no longer needed.
+      Also the default for all warnings, HDF5_ENABLE_ALL_WARNINGS, is now ON.
 
-      (ADB - 2019/08/12, HDFFV-10879)
+      Visual Studio warnings C4100, C4706, and C4127 have been moved to
+      developer warnings, HDF5_ENABLE_DEV_WARNINGS, and are disabled for normal builds.
+
+      (ADB - 2021/03/22, HDFFV-11228)
+
+    - Reclassify CMake messages, to allow new modes and --log-level option
+
+      CMake message commands have a mode argument. By default, STATUS mode
+      was chosen for any non-error message. CMake version 3.15 added additional
+      modes, NOTICE, VERBOSE, DEBUG and TRACE. All message commands with a mode
+      of STATUS were reviewed and most were reclassified as VERBOSE. The new
+      mode was protected by a check for a CMake version of at least 3.15. If CMake
+      version 3.17 or above is used, the user can use the command line option
+      of "--log-level" to further restrict which message commands are displayed.
+
+      (ADB - 2021/02/16, HDFFV-11144)
+
+    - Fixes Autotools determination of the stat struct having an st_blocks field
+
+      A missing parenthesis in an autoconf macro prevented building the test
+      code used to determine if the stat struct contains the st_blocks field.
+      Now that the test functions correctly, the H5_HAVE_STAT_ST_BLOCKS #define
+      found in H5pubconf.h will be defined correctly on both the Autotools and
+      CMake. This #define is only used in the tests and does not affect the
+      HDF5 C library.
+
+      (DER - 2021/02/16, HDFFV-11201)
 
 
     Library
     -------
-    - Explicitly declared dlopen to use RTLD_LOCAL
-
-      dlopen documentation states that if neither RTLD_GLOBAL nor
-      RTLD_LOCAL are specified, then the default behavior is unspecified.
-      The default on linux is usually RTLD_LOCAL while macos will default
-      to RTLD_GLOBAL.
-
-      (ADB - 2020/08/12, HDFFV-11127)
-
-    - Fixed issues CVE-2018-13870 and CVE-2018-13869
-
-      When a buffer overflow occurred because a name length was corrupted
-      and became very large, h5dump crashed on memory access violation.
-
-      A check for reading past the end of the buffer was added to multiple
-      locations to prevent the crashes and h5dump now simply fails with an
-      error message when this error condition occurs.
-
-      (BMR - 2020/7/31, HDFFV-11120 and HDFFV-11121)
-
-    - Fixed the segmentation fault when reading attributes with multiple threads
-
-      It was reported that the reading of attributes with variable length string
-      datatype will crash with segmentation fault particularly when the number of
-      threads is high (>16 threads).  The problem was due to the file pointer that
-      was set in the variable length string datatype for the attribute.  That file
-      pointer was already closed when the attribute was accessed.
-
-      The problem was fixed by setting the file pointer to the current opened file pointer
-      when the attribute was accessed.  Similar patch up was done before when reading
-      dataset with variable length string datatype.
-
-      (VC - 2020/07/13, HDFFV-11080)
-
-    - Fixed CVE-2018-17435
-
-      The tool h52gif produced a segfault when the size of an attribute
-      message was corrupted and caused a buffer overflow.
-
-      The problem was fixed by verifying the attribute message's size
-      against the buffer size before accessing the buffer.  h52gif was
-      also fixed to display the failure instead of silently exiting
-      after the segfault was eliminated.
-
-      (BMR - 2020/6/19, HDFFV-10591)
-
-    - Fixed user-created data access properties not existing in the property list
-      returned by H5Dget_access_plist. Thanks to Steven Varga for submitting a
-      reproducer and a patch.
-
-      (CJH - 2019/12/09, HDFFV-10934)
-
-    - Fixed a bug that could cause an error or cause fill values to be
-      incorrectly read from a dataset that was written to using H5Dwrite_chunk
-      if the dataset was not closed after writing.
-
-      (NAF - 2019/03/06, HDFFV-10716)
-
-    - Fixed a potential invalid memory access and failure that could occur when
-      decoding an unknown object header message (from a future version of the
-      library).
-
-      (NAF - 2019/01/07)
-
-    - Allow H5detect and H5make_libsettings to take a file as an argument.
-
-      Rather than only writing to stdout, add a command argument to name
-      the file that H5detect and H5make_libsettings will use for output.
-      Without an argument, stdout is still used, so backwards compatibility
-      is maintained.
-
-      (ADB - 2018/09/05, HDFFV-9059)
-
-
-    - Inappropriate linking with deprecated MPI C++ libraries
-
-      HDF5 does not define *_SKIP_MPICXX in the public headers, so applications
-      can inadvertently wind up linking to the deprecated MPI C++ wrappers.
-
-      MPICH_SKIP_MPICXX and OMPI_SKIP_MPICXX have both been defined in H5public.h
-      so this should no longer be an issue. HDF5 makes no use of the deprecated
-      MPI C++ wrappers.
-
-      (DER - 2019/09/17, HDFFV-10893)
-
-
-    Parallel Library
-    ----------------
     - None
 
 
     Performance
-    -------------
+    -----------
     - None
 
 
     Tools
     -----
+    - Changed how h5dump and h5ls identify long double.
+
+        Long double support is not consistent across platforms. Tools will always
+        identify long double as 128-bit [little/big]-endian float nn-bit precision.
+        New test file created for datasets with attributes for float, double and
+        long double. In addition any unknown integer or float datatype will now
+        also show the number of bits for precision.
+        These files are also used in the java tests.
+
+        (ADB - 2021/03/24, HDFFV-11229)
+
+    - Fixed tools argument parsing.
+
+        Tools parsing used the length of the option from the long array to match
+        the option from the command line. This incorrectly matched a shorter long
+        name option that happened to be a subset of another long option.
+        Changed to match whole names.
+
+        (ADB - 2021/02/16, HDFFV-11106)
+
+    - The tools library was updated by standardizing the error stack process.
+
+      General sequence is:
+          h5tools_setprogname(PROGRAMNAME);
+          h5tools_setstatus(EXIT_SUCCESS);
+          h5tools_init();
+          ... process the command-line (check for error-stack enable) ...
+          h5tools_error_report();
+          ... (do work) ...
+          h5diff_exit(ret);
+
+      (ADB - 2021/02/16, HDFFV-11066)
+
+    - h5diff fixed a command line parsing error.
+
+      h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
+      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+
+      (ADB - 2021/02/16, HDFFV-10897)
+
+    - h5diff added a command line option to ignore attributes.
+
+      h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
+      Adding the exclude-attribute argument will only eclude attributes, with the supplied path,
+      from comparision.
+
+      (ADB - 2021/02/16, HDFFV-5935)
+
+    - h5diff added another level to the verbose argument to print filenames.
+
+      Added verbose level 3 that is level 2 plus the filenames. The levels are:
+          0 : Identical to '-v' or '--verbose'
+          1 : All level 0 information plus one-line attribute status summary
+          2 : All level 1 information plus extended attribute status report
+          3 : All level 2 information plus file names
+
+      (ADB - 2021/02/16, HDFFV-10005)
+
     - h5repack was fixed to repack the reference attributes properly.
       The code line that checks if the update of reference inside a compound
       datatype is misplaced outside the code block loop that carries out the
@@ -507,28 +326,13 @@ Bug Fixes since HDF5-1.8.21
       repacking. The fix is to move the corresponding code line to the correct
       code block.
 
-      (KY -2020/02/05, HDFFV-11014)
-
-
-    - h5repack was fixed to repack datasets with external storage
-      to other types of storage.
-
-      New test added to repack files and verify the correct data using h5diff.
-
-      (JS - 2019/09/25, HDFFV-10408)
-      (ADB - 2019/10/02, HDFFV-10918)
+      (KY -2021/02/16, HDFFV-11014)
 
 
     Fortran API
     -----------
-    - Added symbolic links libhdf5_hl_fortran.so to libhdf5hl_fortran.so and
-      libhdf5_hl_fortran.a to libhdf5hl_fortran.a in hdf5/lib directory for
-      autotools installs.  These were added to match the name of the files
-      installed by CMmake and the general pattern of hl lib files.  We will
-      change the names of the installed lib files to the matching name in
-      the next major release.
+    - None
 
-      (LRK - 2019/05/09, HDFFV-10596)
 
     C++ API
     -------
@@ -554,7 +358,7 @@ Supported Platforms
 
     Linux 2.6.32-573.18.1.el6     IBM XL C/C++ V13.1
     #1 SMP ppc64 GNU/Linux        IBM XL Fortran V15.1
-    (ostrich)                     
+    (ostrich)
 
     Linux 3.10.0-327.10.1.el7     GNU C (gcc), Fortran (gfortran), C++ (g++)
     #1 SMP x86_64 GNU/Linux       compilers:
@@ -679,15 +483,21 @@ The following platforms are not supported but have been tested for this release.
     # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
     (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
 
-    Fedora32 5.8.18-200.fc32.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     GNU Fortran (GCC) 10.2.1 20201016 (Red Hat 10.2.1-6)
-                                     clang version 10.0.1 (Fedora 10.0.1-3.fc32)
+    Fedora33 5.10.10-200.fc33.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+                                     clang version 11.0.0 (Fedora 11.0.0-2.fc33)
                                      (cmake and autotools)
 
-    Ubuntu20.10 -5.8.0-29-generic-x86_64
-    #31-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+    Ubuntu20.10 5.8.0-41-generic-x86_64
+    #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
                                      GNU Fortran (GCC) 10.2.0-13ubuntu1
+                                     (cmake and autotools)
+
+    SUSE15sp2 5.3.18-22-default
+    #1 SMP x86_64  GNU/Linux         GNU gcc (SUSE Linux) 7.5.0
+                                     GNU Fortran (SUSE Linux) 7.5.0
+                                     clang version 7.0.1 (tags/RELEASE_701/final 349238)
                                      (cmake and autotools)
 
     Mac OS X El Capitan 10.11.6   Apple LLVM version 7.3.0 (clang-703.0.29)
@@ -704,6 +514,16 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+    HDF5-1.8.22 binaries can replace the previous HDF5 version to run with
+    applications compiled and linked with HDF5-1.8.21 and possibly HDF5 versions
+    as early as 1.8.15.  However, HDF5 checks versions in lib files against
+    versions in header files used to compile the application and will cause the
+    application to abort when they do not match.  An environment variable
+    HDF5_DISABLE_VERSION_CHECK can be set to 2 to skip the check, to 1 to warn
+    but not abort, or to 0 for the default behavior, aborting when the HDF5
+    version in the lib files does not match the version in the header files.
+    LRK - 2020/02/02
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.

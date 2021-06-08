@@ -247,7 +247,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 else {
                     haddr_t addr = HDva_arg(ap, haddr_t);
 
-                    HDfprintf(out, "%a", addr);
+                    HDfprintf(out, "%" PRIuHADDR, addr);
                 } /* end else */
                 break;
 
@@ -1000,7 +1000,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                                 if (H5S_UNLIMITED == p[i])
                                     HDfprintf(out, "%sH5S_UNLIMITED", (i ? ", " : ""));
                                 else
-                                    HDfprintf(out, "%s%Hu", (i ? ", " : ""), p[i]);
+                                    HDfprintf(out, "%s%" PRIuHSIZE, (i ? ", " : ""), p[i]);
                             } /* end for */
                             HDfprintf(out, "}");
                         } /* end if */
@@ -1014,7 +1014,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                     if (H5S_UNLIMITED == hsize)
                         HDfprintf(out, "H5S_UNLIMITED");
                     else {
-                        HDfprintf(out, "%Hu", hsize);
+                        HDfprintf(out, "%" PRIuHSIZE, hsize);
                         asize[argno] = (hssize_t)hsize;
                     } /* end else */
                 }     /* end else */
@@ -1031,7 +1031,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
 
                                     HDfprintf(out, " {");
                                     for (i = 0; i < asize[asize_idx]; i++)
-                                        HDfprintf(out, "%s%Hd", (i ? ", " : ""), p[i]);
+                                        HDfprintf(out, "%s%" PRIdHSIZE, (i ? ", " : ""), p[i]);
                                     HDfprintf(out, "}");
                                 } /* end if */
                             }     /* end if */
@@ -1041,7 +1041,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                         else {
                             hssize_t hssize = HDva_arg(ap, hssize_t);
 
-                            HDfprintf(out, "%Hd", hssize);
+                            HDfprintf(out, "%" PRIdHSIZE, hssize);
                             asize[argno] = (hssize_t)hssize;
                         } /* end else */
                         break;

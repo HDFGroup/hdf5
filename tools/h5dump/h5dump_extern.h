@@ -10,8 +10,8 @@
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_EXTERN_H__
-#define H5DUMP_EXTERN_H__
+#ifndef H5DUMP_EXTERN_H
+#define H5DUMP_EXTERN_H
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -50,30 +50,33 @@ typedef struct h5dump_table_list_t {
 
 extern h5dump_table_list_t table_list;
 extern table_t *           group_table, *dset_table, *type_table;
-extern unsigned            dump_indent; /*how far in to indent the line         */
 
-extern int         unamedtype; /* shared datatype with no name */
-extern hbool_t     hit_elink;  /* whether we have traversed an external link */
+extern unsigned    dump_indent; /* how far in to indent the line */
+extern int         unamedtype;  /* shared datatype with no name */
+extern hbool_t     hit_elink;   /* whether we have traversed an external link */
 extern size_t      prefix_len;
 extern char *      prefix;
 extern const char *fp_format;
 
 /* things to display or which are set via command line parameters */
-extern int display_all;
-extern int display_oid;
-extern int display_data;
-extern int display_attr_data;
-extern int display_char; /*print 1-byte numbers as ASCII */
-extern int usingdasho;
-extern int display_bb;             /*superblock */
-extern int display_dcpl;           /*dcpl */
-extern int display_fi;             /*file index */
-extern int display_ai;             /*array index */
-extern int display_escape;         /*escape non printable characters */
-extern int display_region;         /*print region reference data */
-extern int disable_compact_subset; /* disable compact form of subset notation */
-extern int display_packed_bits;    /*print 1-8 byte numbers as packed bits*/
-extern int include_attrs;          /* Display attributes */
+typedef struct {
+    int display_all;
+    int display_oid;
+    int display_data;
+    int display_attr_data;
+    int display_char; /* print 1-byte numbers as ASCII */
+    int usingdasho;
+    int display_bb;             /* superblock */
+    int display_dcpl;           /* dcpl */
+    int display_fi;             /* file index */
+    int display_ai;             /* array index */
+    int display_escape;         /* escape non printable characters */
+    int display_region;         /* print region reference data */
+    int disable_compact_subset; /* disable compact form of subset notation */
+    int display_packed_bits;    /* print 1-8 byte numbers as packed bits */
+    int include_attrs;          /* Display attributes */
+} dump_opt_t;
+extern dump_opt_t dump_opts;
 
 #define PACKED_BITS_MAX      8                     /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX 8 * sizeof(long long) /* Maximum bits size of integer types of packed-bits */
@@ -104,4 +107,4 @@ ssize_t table_list_visited(unsigned long file_no);
 }
 #endif
 
-#endif /* !H5DUMP_EXTERN_H__ */
+#endif /* H5DUMP_EXTERN_H */

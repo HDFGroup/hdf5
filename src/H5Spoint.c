@@ -18,14 +18,14 @@
  * Purpose:     Point selection dataspace I/O functions.
  */
 
-#define H5S_PACKAGE /*suppress error about including H5Spkg	  */
+#define H5S_PACKAGE /*suppress error about including H5Spkg      */
 
-#include "H5private.h"   /* Generic Functions			  */
-#include "H5Eprivate.h"  /* Error handling		  */
-#include "H5FLprivate.h" /* Free Lists	  */
-#include "H5Iprivate.h"  /* ID Functions		  */
-#include "H5MMprivate.h" /* Memory Management functions		  */
-#include "H5Spkg.h"      /* Dataspace functions			  */
+#include "H5private.h"   /* Generic Functions              */
+#include "H5Eprivate.h"  /* Error handling          */
+#include "H5FLprivate.h" /* Free Lists      */
+#include "H5Iprivate.h"  /* ID Functions          */
+#include "H5MMprivate.h" /* Memory Management functions          */
+#include "H5Spkg.h"      /* Dataspace functions              */
 #include "H5VMprivate.h" /* Vector functions */
 
 /* Static function prototypes */
@@ -618,6 +618,10 @@ H5S_point_copy(H5S_t *dst, const H5S_t *src, hbool_t H5_ATTR_UNUSED share_select
         curr = curr->next;
     } /* end while */
 
+    /* Clear cached iteration point */
+    dst->select.sel_info.pnt_lst->last_idx     = 0;
+    dst->select.sel_info.pnt_lst->last_idx_pnt = NULL;
+
 done:
     if (ret_value < 0 && dst->select.sel_info.pnt_lst) {
         /* Traverse the (incomplete?) dst list, freeing all memory */
@@ -956,8 +960,9 @@ done:
 static herr_t
 H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoints, hsize_t *buf)
 {
-    H5S_pnt_node_t *node; /* Point node */
-    unsigned        rank; /* Dataspace rank */
+    const hsize_t   endpoint = startpoint + numpoints; /* Index of last point in iteration */
+    H5S_pnt_node_t *node;                              /* Point node */
+    unsigned        rank;                              /* Dataspace rank */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -967,14 +972,20 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
     /* Get the dataspace extent rank */
     rank = space->extent.rank;
 
-    /* Get the head of the point list */
-    node = space->select.sel_info.pnt_lst->head;
+    /* Check for cached point at the correct index */
+    if (space->select.sel_info.pnt_lst->last_idx_pnt &&
+        startpoint == space->select.sel_info.pnt_lst->last_idx)
+        node = space->select.sel_info.pnt_lst->last_idx_pnt;
+    else {
+        /* Get the head of the point list */
+        node = space->select.sel_info.pnt_lst->head;
 
-    /* Iterate to the first point to return */
-    while (node != NULL && startpoint > 0) {
-        startpoint--;
-        node = node->next;
-    } /* end while */
+        /* Iterate to the first point to return */
+        while (node != NULL && startpoint > 0) {
+            startpoint--;
+            node = node->next;
+        } /* end while */
+    }     /* end else */
 
     /* Iterate through the node, copying each point's information */
     while (node != NULL && numpoints > 0) {
@@ -983,6 +994,10 @@ H5S_get_select_elem_pointlist(H5S_t *space, hsize_t startpoint, hsize_t numpoint
         numpoints--;
         node = node->next;
     } /* end while */
+
+    /* Cached next point in iteration */
+    space->select.sel_info.pnt_lst->last_idx     = endpoint;
+    space->select.sel_info.pnt_lst->last_idx_pnt = node;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* H5S_get_select_elem_pointlist() */
@@ -1493,6 +1508,10 @@ H5S_point_project_simple(const H5S_t *base_space, H5S_t *new_space, hsize_t *off
             base_node = base_node->next;
         } /* end while */
     }     /* end else */
+
+    /* Clear cached iteration point */
+    new_space->select.sel_info.pnt_lst->last_idx     = 0;
+    new_space->select.sel_info.pnt_lst->last_idx_pnt = NULL;
 
     /* Number of elements selected will be the same */
     new_space->select.num_elem = base_space->select.num_elem;

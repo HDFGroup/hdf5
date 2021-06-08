@@ -42,11 +42,11 @@
 
 ./.clang-format
 ./.github/CODEOWNERS  _DO_NOT_DISTRIBUTE_
+./.github/workflows/clang-format-fix.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/clang-format-check.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/main.yml  _DO_NOT_DISTRIBUTE_
 ./.github/workflows/pr-check.yml  _DO_NOT_DISTRIBUTE_
 
-./bin/COPYING
 ./bin/bbrelease       _DO_NOT_DISTRIBUTE_
 ./bin/buildhdf5
 ./bin/pkgscrpts/build_and_package_hdf5_binaries.sh  _DO_NOT_DISTRIBUTE_
@@ -97,6 +97,7 @@
 ./bin/runtest                       _DO_NOT_DISTRIBUTE_
 ./bin/snapshot
 ./bin/snapshot_version              _DO_NOT_DISTRIBUTE_
+./bin/switch_maint_mode             _DO_NOT_DISTRIBUTE_
 ./bin/test-driver
 ./bin/pkgscrpts/testbinaries.sh     _DO_NOT_DISTRIBUTE_
 ./bin/timekeeper                    _DO_NOT_DISTRIBUTE_
@@ -114,7 +115,6 @@
 ./bin/batch/ray_ctestS.lsf.in.cmake
 ./bin/batch/raybsub
 
-./config/COPYING
 ./config/BlankForm
 ./config/apple
 ./config/cce-fflags
@@ -131,6 +131,7 @@
 ./config/ibm-flags
 ./config/intel-fflags
 ./config/intel-flags
+./config/libhdf5.pc.in
 ./config/linux-gnu
 ./config/linux-gnuaout
 ./config/linux-gnueabihf
@@ -150,6 +151,7 @@
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
+./config/clang-warnings/noerror-general
 ./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
@@ -158,14 +160,19 @@
 ./config/gnu-warnings/7
 ./config/gnu-warnings/8
 ./config/gnu-warnings/9
+./config/gnu-warnings/9.3
 ./config/gnu-warnings/cxx-general
+./config/gnu-warnings/cxx-4.8
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
+./config/gnu-warnings/cxx-noerror-5
+./config/gnu-warnings/cxx-noerror-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
+./config/gnu-warnings/developer-10
 ./config/gnu-warnings/developer-general
 ./config/gnu-warnings/error-5
 ./config/gnu-warnings/error-8
@@ -179,10 +186,70 @@
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
+./config/gnu-warnings/noerror-5
+./config/gnu-warnings/noerror-8
+./config/gnu-warnings/noerror-general
 ./config/intel-warnings/ifort-general
 ./config/intel-warnings/general
 
 ./config/site-specific/BlankForm
+
+./doxygen/aliases
+./doxygen/Doxyfile.in
+./doxygen/dox/About.dox
+./doxygen/dox/Cookbook.dox
+./doxygen/dox/DDLBNF110.dox
+./doxygen/dox/FileFormatSpec.dox
+./doxygen/dox/GettingStarted.dox
+./doxygen/dox/H5AC_cache_config_t.dox
+./doxygen/dox/H5Acreate.dox
+./doxygen/dox/H5Aiterate.dox
+./doxygen/dox/MetadataCachingInHDF5.dox
+./doxygen/dox/OtherSpecs.dox
+./doxygen/dox/Overview.dox
+./doxygen/dox/ReferenceManual.dox
+./doxygen/dox/Specifications.dox
+./doxygen/dox/TechnicalNotes.dox
+./doxygen/dox/api-compat-macros.dox
+./doxygen/dox/rm-template.dox
+./doxygen/examples/FF-IH_FileGroup.gif
+./doxygen/examples/FF-IH_FileObject.gif
+./doxygen/examples/FileFormatSpecChunkDiagram.jpg
+./doxygen/examples/H5Pset_metadata_read_attempts.c
+./doxygen/examples/H5Pset_object_flush_cb.c
+./doxygen/examples/H5.format.1.0.html
+./doxygen/examples/H5.format.1.1.html
+./doxygen/examples/H5.format.2.0.html
+./doxygen/examples/H5.format.html
+./doxygen/examples/H5A_examples.c
+./doxygen/examples/H5D_examples.c
+./doxygen/examples/H5Fclose.c
+./doxygen/examples/H5Fcreate.c
+./doxygen/examples/H5F_examples.c
+./doxygen/examples/H5Pget_metadata_read_attempts.1.c
+./doxygen/examples/H5Pget_metadata_read_attempts.2.c
+./doxygen/examples/H5Pget_metadata_read_attempts.3.c
+./doxygen/examples/H5Pget_object_flush_cb.c
+./doxygen/examples/ImageSpec.html
+./doxygen/examples/PaletteExample1.gif
+./doxygen/examples/Palettes.fm.anc.gif
+./doxygen/examples/TableSpec.html
+./doxygen/examples/ThreadSafeLibrary.html
+./doxygen/examples/VFL.html
+./doxygen/examples/hello_hdf5.c
+./doxygen/hdf5_footer.html
+./doxygen/hdf5_header.html
+./doxygen/hdf5_navtree_hacks.js
+./doxygen/hdf5doxy.css
+./doxygen/hdf5doxy_layout.xml
+./doxygen/img/FF-IH_FileGroup.gif
+./doxygen/img/FF-IH_FileObject.gif
+./doxygen/img/FileFormatSpecChunkDiagram.jpg
+./doxygen/img/HDFG-logo.png
+./doxygen/img/PaletteExample1.gif
+./doxygen/img/Palettes.fm.anc.gif
+./doxygen/img/ftv2node.png
+./doxygen/img/ftv2pnode.png
 
 ./examples/Attributes.txt
 ./examples/Makefile.am
@@ -224,7 +291,6 @@
 #
 #------------------------------------------------------------------------------
 
-./fortran/COPYING
 ./fortran/Makefile.am
 ./fortran/Makefile.in
 
@@ -383,7 +449,6 @@
 #
 #------------------------------------------------------------------------------
 
-./c++/COPYING
 ./c++/Makefile.am
 ./c++/Makefile.in
 
@@ -519,7 +584,6 @@
 #
 #------------------------------------------------------------------------------
 
-./release_docs/COPYING
 ./release_docs/HISTORY-1_0-1_8_0_rc3.txt
 ./release_docs/HISTORY-1_8.txt
 ./release_docs/INSTALL
@@ -538,7 +602,6 @@
 ./src/hdf5.lnt        _DO_NOT_DISTRIBUTE_
 ./src/hdf5-win.lnt      _DO_NOT_DISTRIBUTE_
 ./src/hdf5-lin.lnt      _DO_NOT_DISTRIBUTE_
-./src/COPYING
 ./src/H5.c
 ./src/H5checksum.c
 ./src/H5dbg.c
@@ -905,7 +968,6 @@
 ./src/libhdf5.settings.in
 ./src/H5win32defs.h
 
-./test/COPYING
 ./test/H5srcdir.h
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
@@ -1083,7 +1145,6 @@
 ./test/testfiles/error_test_2
 ./test/testfiles/links_env.out
 
-./testpar/COPYING
 ./testpar/Makefile.am
 ./testpar/Makefile.in
 ./testpar/t_cache.c
@@ -1108,7 +1169,6 @@
 ./testpar/testphdf5.c
 ./testpar/testphdf5.h
 
-./tools/COPYING
 ./tools/Makefile.am
 ./tools/Makefile.in
 
@@ -1484,6 +1544,9 @@
 ./tools/testfiles/tfill.ddl
 ./tools/testfiles/tfilters.h5
 ./tools/testfiles/tfletcher32.ddl
+./tools/testfiles/tfloatsattrs.ddl
+./tools/testfiles/tfloatsattrs.h5
+./tools/testfiles/tfloatsattrs.wddl
 ./tools/testfiles/tfvalues.h5
 ./tools/testfiles/tgroup-1.ddl
 ./tools/testfiles/tgroup-2.ddl
@@ -1519,7 +1582,10 @@
 ./tools/testfiles/tintsattrs.h5
 ./tools/testfiles/tlarge_objname.ddl
 ./tools/testfiles/tlarge_objname.h5
+./tools/testfiles/tldouble.ddl
 ./tools/testfiles/tldouble.h5
+./tools/testfiles/tldouble_scalar.ddl
+./tools/testfiles/tldouble_scalar.h5
 ./tools/testfiles/tlonglinks.ddl
 ./tools/testfiles/tlonglinks.h5
 ./tools/testfiles/tloop-1.ddl
@@ -1970,6 +2036,7 @@
 ./tools/h5diff/testfiles/h5diff_80.txt
 ./tools/h5diff/testfiles/h5diff_800.txt
 ./tools/h5diff/testfiles/h5diff_801.txt
+./tools/h5diff/testfiles/h5diff_830.txt
 ./tools/h5diff/testfiles/h5diff_90.txt
 ./tools/h5diff/testfiles/h5diff_100.txt
 ./tools/h5diff/testfiles/h5diff_101.txt
@@ -2121,11 +2188,14 @@
 ./tools/h5diff/testfiles/h5diff_8639.txt
 ./tools/h5diff/testfiles/tudfilter.h5
 ./tools/h5diff/testfiles/tudfilter2.h5
+./tools/h5diff/testfiles/h5diff_eps.txt
+./tools/h5diff/testfiles/h5diff_eps1.h5
+./tools/h5diff/testfiles/h5diff_eps2.h5
 ./tools/h5diff/testfiles/h5diff_ud.txt
 ./tools/h5diff/testfiles/h5diff_udfail.err
 ./tools/h5diff/testfiles/h5diff_udfail.txt
-./tools/h5diff/testfiles/diff_strings1.h5
-./tools/h5diff/testfiles/diff_strings2.h5
+./tools/h5diff/testfiles/h5diff_strings1.h5
+./tools/h5diff/testfiles/h5diff_strings2.h5
 ./tools/h5diff/testfiles/h5diff_vlstr.txt
 
 #test files for h5repack
@@ -2244,7 +2314,6 @@
 ./tools/testfiles/h5mkgrp_single_p.ls
 ./tools/testfiles/h5mkgrp_single_l.ls
 
-./tools/perform/COPYING
 ./tools/perform/Makefile.am
 ./tools/perform/Makefile.in
 ./tools/perform/build_h5perf_alone.sh
@@ -2268,7 +2337,6 @@
 ./tools/perform/zip_perf.c
 
 # high level libraries
-./hl/COPYING
 ./hl/Makefile.am
 ./hl/Makefile.in
 ./hl/examples/Makefile.am
@@ -2297,7 +2365,6 @@
 ./hl/examples/ptExampleFL.c
 ./hl/examples/run-hl-ex.sh
 ./hl/examples/run-hlc-ex.sh.in
-./hl/src/COPYING
 ./hl/src/Makefile.am
 ./hl/src/Makefile.in
 ./hl/src/H5DO.c
@@ -2324,7 +2391,6 @@
 ./hl/src/H5TBprivate.h
 ./hl/src/H5TBpublic.h
 ./hl/src/hdf5_hl.h
-./hl/test/COPYING
 ./hl/test/H5srcdir_str.h.in
 ./hl/test/Makefile.am
 ./hl/test/Makefile.in
@@ -2358,7 +2424,6 @@
 ./hl/test/usa.wri
 
 # tools
-./hl/tools/COPYING
 ./hl/tools/Makefile.am
 ./hl/tools/Makefile.in
 ./hl/tools/gif2h5/Makefile.am
@@ -2379,7 +2444,6 @@
 ./hl/tools/gif2h5/testfiles/h52giftst.h5
 
 # hl fortran
-./hl/fortran/COPYING
 ./hl/fortran/Makefile.am
 ./hl/fortran/Makefile.in
 ./hl/fortran/examples/Makefile.am
@@ -2408,7 +2472,6 @@
 ./hl/fortran/test/tsttable.f90
 
 # hl c++
-./hl/c++/COPYING
 ./hl/c++/Makefile.am
 ./hl/c++/Makefile.in
 ./hl/c++/examples/Makefile.am
@@ -2452,7 +2515,6 @@
 ./config/cmake/HDF5PluginCache.cmake
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/libh5cc.in
-./config/cmake/libhdf5.pc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake
 ./config/cmake/patch.xml

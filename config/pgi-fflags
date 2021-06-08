@@ -67,6 +67,7 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
 
     # General
     FC_BASENAME=pgf90
+    Fortran_COMPILER_ID=PGI
     F9XSUFFIXFLAG=""
     FSEARCH_DIRS=""
     # Uncomment the following to add something specific for FCFLAGS.
@@ -81,15 +82,24 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     #else
     #    PROD_FCFLAGS="-O2 -s"
     #fi
-    PROD_FCFLAGS="-fast -s -Mnoframe"
+    PROD_FCFLAGS="-fast -Mnoframe"
 
     # Debug
-    DEBUG_FCFLAGS="-g -Mbounds -Mchkptr -Mdclchk"
+    DEBUG_FCFLAGS="-Mbounds -Mchkptr -Mdclchk"
 
-    # Profile
-    PROFILE_FCFLAGS="-g -Mprof=func,line"
+    # Symbols
+    SYMBOLS_FCFLAGS="-g"
+    NO_SYMBOLS_FCFLAGS="-s"
+
+    # Profiling
+    PROFILE_FCFLAGS="-Mprof=func,line"
     # Use this for profiling with gprof
-    #PROFILE_FCFLAGS="-g -pg"
+    #PROFILE_FCFLAGS="-pg"
+
+    # Optimization
+    HIGH_OPT_FCFLAGS=
+    DEBUG_OPT_FCFLAGS=
+    NO_OPT_FCFLAGS=
 
     # Flags are set
     f9x_flags_set=yes

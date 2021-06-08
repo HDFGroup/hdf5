@@ -96,30 +96,28 @@ typedef struct iter_t {
     int            local;                           /* Flag to indicate iteration over the object*/
 } iter_t;
 
-static const char *drivername = "";
+static const char *drivername = NULL;
 
 #ifdef H5_HAVE_ROS3_VFD
-/* default "anonymous" s3 configuration
- */
+/* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_t ros3_fa = {
-    1,     /* fapl version      */
-    FALSE, /* authenticate      */
-    "",    /* aws region        */
-    "",    /* access key id     */
-    "",    /* secret access key */
+    1,     /* Structure Version */
+    FALSE, /* Authenticate?     */
+    "",    /* AWS Region        */
+    "",    /* Access Key ID     */
+    "",    /* Secret Access Key */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS
-/* default HDFS access configuration
- */
+/* "Default" HDFS configuration */
 static H5FD_hdfs_fapl_t hdfs_fa = {
-    1,           /* fapl version          */
-    "localhost", /* namenode name         */
-    0,           /* namenode port         */
-    "",          /* kerberos ticket cache */
-    "",          /* user name             */
-    2048,        /* stream buffer size    */
+    1,           /* Structure Version     */
+    "localhost", /* Namenode Name         */
+    0,           /* Namenode Port         */
+    "",          /* Kerberos ticket cache */
+    "",          /* User name             */
+    2048,        /* Stream buffer size    */
 };
 #endif /* H5_HAVE_LIBHDFS */
 
@@ -954,101 +952,32 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'w':
-#ifndef H5_HAVE_ROS3_VFD
+#ifdef H5_HAVE_ROS3_VFD
+                if (h5tools_parse_ros3_fapl_tuple(opt_arg, ',', &ros3_fa) < 0) {
+                    error_msg("failed to parse S3 VFD credential info\n");
+                    goto error;
+                }
+
+                drivername = drivernames[ROS3_VFD_IDX];
+#else
                 error_msg("Read-Only S3 VFD not enabled.\n");
                 goto error;
-#else
-            {
-                char *      cred_str = NULL;
-                unsigned    nelems   = 0;
-                char **     cred     = NULL;
-                char const *ccred[3];
-
-                if (FAIL == parse_tuple((const char *)opt_arg, ',', &cred_str, &nelems, &cred)) {
-                    error_msg("Unable to parse s3 credential\n");
-                    goto error;
-                }
-                if (nelems != 3) {
-                    error_msg("s3 credential must have three elements\n");
-                    goto error;
-                }
-                ccred[0] = (const char *)cred[0];
-                ccred[1] = (const char *)cred[1];
-                ccred[2] = (const char *)cred[2];
-                if (0 == h5tools_populate_ros3_fapl(&ros3_fa, ccred)) {
-                    error_msg("Unable to set ros3 fapl config\n");
-                    goto error;
-                }
-                HDfree(cred);
-                HDfree(cred_str);
-            } /* parse s3-cred block */
-                drivername = "ros3";
+#endif
                 break;
-#endif /* H5_HAVE_ROS3_VFD */
 
             case 'H':
-#ifndef H5_HAVE_LIBHDFS
-                error_msg("HDFS VFD is not enabled.\n");
-                goto error;
+#ifdef H5_HAVE_LIBHDFS
+                if (h5tools_parse_hdfs_fapl_tuple(opt_arg, ',', &hdfs_fa) < 0) {
+                    error_msg("failed to parse HDFS VFD configuration info\n");
+                    goto error;
+                }
+
+                drivername = drivernames[HDFS_VFD_IDX];
 #else
-            {
-                unsigned      nelems    = 0;
-                char *        props_src = NULL;
-                char **       props     = NULL;
-                unsigned long k         = 0;
-                if (FAIL == parse_tuple((const char *)opt_arg, ',', &props_src, &nelems, &props)) {
-                    error_msg("unable to parse hdfs properties tuple\n");
-                    goto error;
-                }
-                /* sanity-check tuple count
-                 */
-                if (nelems != 5) {
-                    char str[64] = "";
-                    HDsprintf(str,
-                              "expected 5 elements in hdfs properties tuple "
-                              "but found %u\n",
-                              nelems);
-                    HDfree(props);
-                    HDfree(props_src);
-                    error_msg(str);
-                    goto error;
-                }
-                /* Populate fapl configuration structure with given
-                 * properties.
-                 * TODO/WARNING: No error-checking is done on length of
-                 *         input strings... Silent overflow is possible,
-                 *         albeit unlikely.
-                 */
-                if (HDstrncmp(props[0], "", 1)) {
-                    HDstrncpy(hdfs_fa.namenode_name, (const char *)props[0], HDstrlen(props[0]));
-                }
-                if (HDstrncmp(props[1], "", 1)) {
-                    k = strtoul((const char *)props[1], NULL, 0);
-                    if (errno == ERANGE) {
-                        error_msg("supposed port number wasn't.\n");
-                        goto error;
-                    }
-                    hdfs_fa.namenode_port = (int32_t)k;
-                }
-                if (HDstrncmp(props[2], "", 1)) {
-                    HDstrncpy(hdfs_fa.kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
-                }
-                if (HDstrncmp(props[3], "", 1)) {
-                    HDstrncpy(hdfs_fa.user_name, (const char *)props[3], HDstrlen(props[3]));
-                }
-                if (strncmp(props[4], "", 1)) {
-                    k = HDstrtoul((const char *)props[4], NULL, 0);
-                    if (errno == ERANGE) {
-                        error_msg("supposed buffersize number wasn't.\n");
-                        goto error;
-                    }
-                    hdfs_fa.stream_buffer_size = (int32_t)k;
-                }
-                HDfree(props);
-                HDfree(props_src);
-                drivername = "hdfs";
-            } break;
-#endif /* H5_HAVE_LIBHDFS */
+                error_msg("HDFS VFD not enabled.\n");
+                goto error;
+#endif
+                break;
 
             default:
                 usage(h5tools_getprogname());
@@ -1662,75 +1591,55 @@ int
 main(int argc, const char *argv[])
 {
     iter_t            iter;
-    const char *      fname = NULL;
-    hid_t             fid   = H5I_INVALID_HID;
-    H5E_auto2_t       func;
-    H5E_auto2_t       tools_func;
-    void *            edata;
-    void *            tools_edata;
+    const char *      fname   = NULL;
+    hid_t             fid     = H5I_INVALID_HID;
     struct handler_t *hand    = NULL;
     hid_t             fapl_id = H5P_DEFAULT;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
-
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     HDmemset(&iter, 0, sizeof(iter));
 
     if (parse_command_line(argc, argv, &hand) < 0)
         goto done;
 
-    /* if drivername is not null, probably need to set the fapl */
-    if (HDstrcmp(drivername, "")) {
-        void *conf_fa = NULL;
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
-        if (!HDstrcmp(drivername, "ros3")) {
-#ifndef H5_HAVE_ROS3_VFD
-            error_msg("Read-Only S3 VFD not enabled.\n\n");
-            goto done;
+    if (drivername) {
+        h5tools_vfd_info_t vfd_info;
+
+        vfd_info.info = NULL;
+        vfd_info.name = drivername;
+
+        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
+#ifdef H5_HAVE_ROS3_VFD
+            vfd_info.info = (void *)&ros3_fa;
 #else
-            conf_fa = (void *)&ros3_fa;
-#endif /* H5_HAVE_ROS3_VFD */
+            error_msg("Read-Only S3 VFD not enabled.\n");
+            goto done;
+#endif
         }
-        else if (!HDstrcmp(drivername, "hdfs")) {
-#ifndef H5_HAVE_LIBHDFS
-            error_msg("HDFS VFD not enabled.\n\n");
-            goto done;
+        else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
+#ifdef H5_HAVE_LIBHDFS
+            vfd_info.info = (void *)&hdfs_fa;
 #else
-            conf_fa = (void *)&hdfs_fa;
-#endif /* H5_HAVE_LIBHDFS */
+            error_msg("HDFS VFD not enabled.\n");
+            goto done;
+#endif
         }
 
-        if (conf_fa != NULL) {
-            HDassert(fapl_id == H5P_DEFAULT);
-            fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-            if (fapl_id < 0) {
-                error_msg("Unable to create fapl entry\n");
-                goto done;
-            }
-            if (1 > h5tools_set_configured_fapl(fapl_id, drivername, conf_fa)) {
-                error_msg("Unable to set fapl\n");
-                goto done;
-            }
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &vfd_info)) < 0) {
+            error_msg("Unable to create FAPL for file access\n");
+            goto done;
         }
-    } /* drivername set */
+    }
 
     fname = argv[opt_ind];
-
-    if (enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-    }
 
     /* Check for filename given */
     if (fname) {
@@ -1739,7 +1648,8 @@ main(int argc, const char *argv[])
 
         HDprintf("Filename: %s\n", fname);
 
-        fid = H5Fopen(fname, H5F_ACC_RDONLY, H5P_DEFAULT);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0);
+
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);
             h5tools_setstatus(EXIT_FAILURE);
@@ -1820,8 +1730,6 @@ done:
         error_msg("unable to close file \"%s\"\n", fname);
         h5tools_setstatus(EXIT_FAILURE);
     } /* end if */
-
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     leave(h5tools_getstatus());
 } /* end main() */

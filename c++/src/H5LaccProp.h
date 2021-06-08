@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5LinkAccPropList_H
-#define __H5LinkAccPropList_H
+#ifndef H5LinkAccPropList_H
+#define H5LinkAccPropList_H
 
 namespace H5 {
 
@@ -38,7 +38,7 @@ class H5_DLLCPP LinkAccPropList : public PropList {
         return ("LinkAccPropList");
     }
 
-    // Copy constructor: creates a copy of a LinkAccPropList object.
+    // Copy constructor: same as the original LinkAccPropList.
     LinkAccPropList(const LinkAccPropList &original);
 
     // Creates a copy of an existing link access property list
@@ -71,4 +71,4 @@ class H5_DLLCPP LinkAccPropList : public PropList {
 }; // end of LinkAccPropList
 } // namespace H5
 
-#endif // __H5LinkAccPropList_H
+#endif // H5LinkAccPropList_H

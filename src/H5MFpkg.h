@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5MF package!"
 #endif
 
-#ifndef _H5MFpkg_H
-#define _H5MFpkg_H
+#ifndef H5MFpkg_H
+#define H5MFpkg_H
 
 /* Get package's private header */
 #include "H5MFprivate.h"
@@ -164,4 +164,4 @@ H5_DLL herr_t  H5MF_aggr_query(const H5F_t *f, const H5F_blk_aggr_t *aggr, haddr
 #ifdef H5MF_TESTING
 #endif /* H5MF_TESTING */
 
-#endif /* _H5MFpkg_H */
+#endif /* H5MFpkg_H */

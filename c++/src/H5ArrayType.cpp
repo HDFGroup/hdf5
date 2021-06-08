@@ -32,7 +32,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub ArrayType
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-ArrayType::ArrayType() : DataType() {}
+ArrayType::ArrayType() : DataType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    ArrayType overloaded constructor
@@ -41,14 +43,18 @@ ArrayType::ArrayType() : DataType() {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-ArrayType::ArrayType(const hid_t existing_id) : DataType(existing_id) {}
+ArrayType::ArrayType(const hid_t existing_id) : DataType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    ArrayType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-ArrayType::ArrayType(const ArrayType &original) : DataType(original) {}
+ArrayType::ArrayType(const ArrayType &original) : DataType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    ArrayType overloaded constructor
@@ -209,6 +215,8 @@ ArrayType::getArrayDims(hsize_t *dims) const
 ///\brief       Properly terminates access to this array datatype.
 // Programmer   Binh-Minh Ribler - May 2004
 //--------------------------------------------------------------------------
-ArrayType::~ArrayType() {}
+ArrayType::~ArrayType()
+{
+}
 
 } // namespace H5

@@ -365,9 +365,9 @@ H5FD_log_fapl_get(H5FD_t *_file)
 static void *
 H5FD_log_fapl_copy(const void *_old_fa)
 {
-    const H5FD_log_fapl_t *old_fa = (const H5FD_log_fapl_t *)_old_fa;
-    H5FD_log_fapl_t *      new_fa = NULL; /* New FAPL info */
-    void *                 ret_value;     /* Return value */
+    const H5FD_log_fapl_t *old_fa    = (const H5FD_log_fapl_t *)_old_fa;
+    H5FD_log_fapl_t *      new_fa    = NULL; /* New FAPL info */
+    void *                 ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -458,7 +458,7 @@ H5FD_log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     struct timeval stat_timeval_diff;
 #endif /* H5_HAVE_GETTIMEOFDAY */
     h5_stat_t sb;
-    H5FD_t *  ret_value; /* Return value */
+    H5FD_t *  ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -720,15 +720,17 @@ H5FD_log_close(H5FD_t *_file)
             addr      = 1;
             while (addr < file->eoa) {
                 if (file->nwrite[addr] != last_val) {
-                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) written to %3d times\n", last_addr,
-                              (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                    HDfprintf(file->logfp,
+                              "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n",
+                              last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
                     last_val  = file->nwrite[addr];
                     last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) written to %3d times\n", last_addr,
-                      (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+            HDfprintf(file->logfp,
+                      "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n",
+                      last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
         } /* end if */
 
         /* Dump the read I/O information */
@@ -739,15 +741,17 @@ H5FD_log_close(H5FD_t *_file)
             addr      = 1;
             while (addr < file->eoa) {
                 if (file->nread[addr] != last_val) {
-                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) read from %3d times\n", last_addr,
-                              (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+                    HDfprintf(file->logfp,
+                              "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n",
+                              last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
                     last_val  = file->nread[addr];
                     last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) read from %3d times\n", last_addr,
-                      (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
+            HDfprintf(file->logfp,
+                      "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n",
+                      last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
         } /* end if */
 
         /* Dump the I/O flavor information */
@@ -758,15 +762,16 @@ H5FD_log_close(H5FD_t *_file)
             addr      = 1;
             while (addr < file->eoa) {
                 if (file->flavor[addr] != last_val) {
-                    HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) flavor is %s\n", last_addr,
-                              (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
+                    HDfprintf(file->logfp,
+                              "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) flavor is %s\n",
+                              last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
                     last_val  = file->flavor[addr];
                     last_addr = addr;
                 } /* end if */
                 addr++;
             } /* end while */
-            HDfprintf(file->logfp, "\tAddr %10a-%10a (%10lu bytes) flavor is %s\n", last_addr, (addr - 1),
-                      (unsigned long)(addr - last_addr), flavors[last_val]);
+            HDfprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) flavor is %s\n",
+                      last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
         } /* end if */
 
         /* Free the logging information */
@@ -935,8 +940,9 @@ H5FD_log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hsi
         } /* end if */
 
         if (file->fa.flags & H5FD_LOG_ALLOC)
-            HDfprintf(file->logfp, "%10a-%10a (%10Hu bytes) (%s) Allocated\n", addr, (addr + size) - 1, size,
-                      flavors[type]);
+            HDfprintf(file->logfp,
+                      "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n", addr,
+                      (haddr_t)((addr + size) - 1), size, flavors[type]);
     } /* end if */
 
     /* Set return value */
@@ -1198,8 +1204,8 @@ H5FD_log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hadd
             HDoff_t myoffset = HDlseek(file->fd, (HDoff_t)0, SEEK_CUR);
 
             if (file->fa.flags & H5FD_LOG_LOC_READ)
-                HDfprintf(file->logfp, "Error! Reading: %10a-%10a (%10Zu bytes)\n", orig_addr,
-                          (orig_addr + orig_size) - 1, orig_size);
+                HDfprintf(file->logfp, "Error! Reading: %10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes)\n",
+                          orig_addr, (orig_addr + orig_size) - 1, orig_size);
 
             HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL,
                         "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
@@ -1438,8 +1444,8 @@ H5FD_log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     if (file->fa.flags & H5FD_LOG_NUM_WRITE)
         file->total_write_ops++;
     if (file->fa.flags & H5FD_LOG_LOC_WRITE) {
-        HDfprintf(file->logfp, "%10a-%10a (%10Zu bytes) (%s) Written", orig_addr, (orig_addr + orig_size) - 1,
-                  orig_size, flavors[type]);
+        HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10zu bytes) (%s) Written", orig_addr,
+                  (orig_addr + orig_size) - 1, orig_size, flavors[type]);
 
         /* Check if this is the first write into a "default" section, grabbed by the metadata agregation
          * algorithm */

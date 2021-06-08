@@ -36,17 +36,52 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign])
 AM_SILENT_RULES([yes])
 
-## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
-## for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
-## is *not* included here, these files will be rebuilt if out of date.
-## This is a problem because if users try to build on a machine with
-## the wrong versions of autoconf and automake, these files will be
-## rebuilt with the wrong versions and bad things can happen.
-## Also, CVS doesn't preserve dependencies between timestamps, so
-## Makefiles will often think rebuilding needs to occur when it doesn't.
-## Developers should './configure --enable-maintainer-mode' to turn on
-## rebuild rules.
-AM_MAINTAINER_MODE
+## AM_MAINTAINER_MODE determines the behavior of "rebuild rules" that contain
+## dependencies for Makefile.in files, configure, src/H5config.h, etc. If
+## AM_MAINTAINER_MODE is enabled, these files will be rebuilt if out of date.
+## When disabled, the autotools build files can get out of sync and the build
+## system will not complain or try to regenerate downstream files.
+##
+## The AM_MAINTAINER_MODE macro also determines whether the
+## --(enable|disable)-maintainer-mode configure option is available. When the
+## macro is present, with or without a parameter, the option will be added
+## to the generated configure script.
+##
+## In summary:
+##
+##  AM_MAINTAINER_MODE([enable])
+##      - Build dependencies ON by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE([disable])
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  No AM_MAINTAINER_MODE macro
+##      - Build dependencies ON by default
+##      - No configure option to control build dependencies
+##
+## The biggest concern for us is that version control systems like git
+## usually don't preserve dependencies between timestamps, so the build
+## system will often think that upstream build files like Makefile.am are
+## dirty and that rebuilding needs to occur when it doesn't. This is a problem
+## in release branches where we provide the autotools-generated files. Users
+## who don't have autoconf, automake, etc. will then have difficulty building
+## release branches checked out from git.
+##
+## By default, maintainer mode is enabled in development branches and disabled
+## in release branches.
+##
+## NOTE: In 1.8, we have maintainer mode turned OFF at all times. This is
+##       because we have the generated files committed in this branch.
+##       The lack of consistent timestamps from git and bin/reconfigure's
+##       demand for ancient and particular versions of the autotools makes
+##       maintainer mode unusable in 1.8.x.
+AM_MAINTAINER_MODE([disable])
 
 ## ----------------------------------------------------------------------
 ## Set prefix default (install directory) to a directory in the build area.
@@ -100,14 +135,10 @@ AC_SUBST([CPPFLAGS])
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
 ##
-## H5_ECFLAGS (and company) are for warnings that should be treated as errors.
-##
 AC_SUBST([H5_CFLAGS])
-AC_SUBST([H5_ECFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
 AC_SUBST([H5_CXXFLAGS])
-AC_SUBST([H5_ECXXFLAGS])
 AC_SUBST([H5_LDFLAGS])
 
 ## AM_CFLAGS (and company) are for CFLAGS that should be used on HDF5,
@@ -129,6 +160,7 @@ CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
 CPPFLAGS="${CPPFLAGS}"
 LDFLAGS="${LDFLAGS}"
+AR_FLAGS="${AR_FLAGS}"
 
 ## Configure may need to alter any of the *FLAGS variables in order for
 ## various checks to work correctly. Save the user's value here so it
@@ -311,7 +343,7 @@ AC_MSG_CHECKING([for clang sanitizer checks])
 AC_ARG_ENABLE([sanitize-checks],
               [AS_HELP_STRING([--enable-sanitize-checks=address],
                               [(clang/clang++ compilers only) Enable sanitize checks.
-                               Address is useful for detecting issues dealing with 
+                               Address is useful for detecting issues dealing with
                                memory. See AddressSanitizer in config/sanitizer/README.md
                                for more information.
                                [default=none]
@@ -326,7 +358,7 @@ fi
 if test "X$CC_BASENAME" = "Xclang"; then
   AC_SUBST([CLANG_SANITIZE_CHECKS])
 
-  # There are several sanitizer tools.  At present we are testing 
+  # There are several sanitizer tools.  At present we are testing
   # and describing only -fsanitizer=address with autotools.
   case "X-$CLANG_SANITIZE_CHECKS" in
     X-no|X-none)
@@ -343,8 +375,8 @@ if test "X$CC_BASENAME" = "Xclang"; then
   # The clang compiler doesn't support some of them; they should be
   # checked before adding them to the list in the help message.
   # The sanitizers/sanitizers.cmake file lists these options:
-  # address, memory, memoryWithOrigins, undefined, thread, leak, 
-  # 'address;undefined'.  Which and which combinations of these are 
+  # address, memory, memoryWithOrigins, undefined, thread, leak,
+  # 'address;undefined'.  Which and which combinations of these are
   #  supported varies by compiler version, but unsupported options
   # or combinations will result in configure errors reported in config.log.
   # Comma separated lists of sanitize options wil be entered intact in
@@ -435,7 +467,7 @@ AC_ARG_ENABLE([fortran2003],
               [HDF_FORTRAN2003=$enableval])
 
 ## ----------------------------------------------------------------------
-## Check to make sure --enable-fortran is present if --enable-fortran2003 
+## Check to make sure --enable-fortran is present if --enable-fortran2003
 ## was specified
 
 if test "X$HDF_FORTRAN2003" = "Xyes" && test "X$HDF_FORTRAN" = "Xno"; then
@@ -453,7 +485,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   AC_SUBST([FC]) HDF_FORTRAN=yes
   AC_SUBST([HAVE_FORTRAN_2003])
-		
+
   HDF5_INTERFACES="$HDF5_INTERFACES fortran"
 
   ## --------------------------------------------------------------------
@@ -502,14 +534,14 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
 
   ## Check to see if -r8 was specified to determine if we need to
   ## compile the DOUBLE PRECISION interfaces.
-  PAC_PROG_FC_DEFAULT_REALisDBLE	
+  PAC_PROG_FC_DEFAULT_REALisDBLE
 
   if test "X$HDF_FORTRAN2003" = "Xyes"; then
 
     ## Checking if the compiler supports the required Fortran 2003 features and
     ## disable Fortran 2003 if it does not.
     PAC_PROG_FC_HAVE_F2003_REQUIREMENTS
- 
+
     if test "X$HAVE_F2003_REQUIREMENTS" = "Xno"; then
       AC_MSG_ERROR([Fortran compiler lacks required Fortran 2003 features; unsupported Fortran 2003 compiler, remove --enable-fortran2003])
     else
@@ -625,6 +657,12 @@ if test -z "$AR"; then
   AC_CHECK_PROGS([AR], [ar xar], [:], [$PATH])
 fi
 AC_SUBST([AR])
+
+# Set the default ar flags to cr
+# The Automake default is to use cru and the 'u' causes ar
+# to emit warnings on some platforms.
+AR_FLAGS=cr
+
 
 ## Export the AR macro so that it will be placed in the libtool file
 ## correctly.
@@ -760,7 +798,10 @@ AC_ARG_ENABLE([tests],
               [HDF5_TESTS=$enableval])
 
 if test "X$HDF5_TESTS" = "Xno"; then
+  AC_MSG_RESULT([yes])
   echo "Building HDF5 tests is disabled"
+else
+  AC_MSG_RESULT([no])
 fi
 
 ## ----------------------------------------------------------------------
@@ -781,7 +822,10 @@ AC_ARG_ENABLE([tools],
               [HDF5_TOOLS=$enableval])
 
 if test "X$HDF5_TOOLS" = "Xno"; then
+  AC_MSG_RESULT([yes])
   echo "Building HDF5 tools is disabled"
+else
+  AC_MSG_RESULT([no])
 fi
 
 ## ----------------------------------------------------------------------
@@ -799,6 +843,11 @@ LT_INIT([dlopen,win32-dll])
 ##   This check needs to occur after libtool is initialized because
 ##   we check a libtool cache value and may issue a warning based
 ##   on its result.
+AC_SUBST([STATIC_EXEC])
+
+## Default is no
+STATIC_EXEC=no
+
 AC_MSG_CHECKING([if we should install only statically linked executables])
 AC_ARG_ENABLE([static_exec],
               [AS_HELP_STRING([--enable-static-exec],
@@ -858,32 +907,6 @@ case "X-$RPATH" in
     AC_MSG_ERROR([\'$enableval\' is not a valid rpath type])
     ;;
 esac
-
-## ----------------------------------------------------------------------
-## pmake will throw an error if variables are undefined in a Makefile.
-## These errors can be changed to warnings using the -V flag.
-##
-AC_SUBST([AM_MAKEFLAGS]) AM_MAKEFLAGS=""
-
-## Don't run test if MAKE is defined but is the empty string
-if test -n "${MAKE-make}"; then 
-
-  AC_MSG_CHECKING([whether make will build with undefined variables])
-
-  cat >maketest <<EOF
-foo: \$(UNDEFINED) \$(UNDEFINED2)
-	@echo \$(UNDEFINED3) works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    AC_MSG_RESULT([yes])
-  else
-    AC_MSG_RESULT([no, setting -V flag])
-    AM_MAKEFLAGS="\-V"
-  fi
-
-  rm maketest
-fi
 
 ## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
@@ -1044,16 +1067,18 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
     ## correctly. This was later updated to 200112L so that
     ## posix_memalign() is visible for the direct VFD code on Linux
-    ## systems.
+    ## systems. Even later, this was changed to 200809L to support
+    ## pread/pwrite in VFDs.
     ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200809L $H5_CPPFLAGS"
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
+
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
@@ -1395,7 +1420,6 @@ case "X-$withval" in
       AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"
     fi
 
-
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
@@ -1406,8 +1430,8 @@ case "X-$withval" in
                    [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
       if test -n "$HAVE_SZLIB"; then
         AC_CHECK_HEADERS([szlib.h],
-                     [HAVE_SZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
+                         [HAVE_SZLIB_H="yes"],
+                         [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
       else
         AC_MSG_RESULT([Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled.])
       fi
@@ -1495,6 +1519,10 @@ AC_ARG_ENABLE([threadsafe],
                               [default=no]])],
               [THREADSAFE=$enableval])
 
+## The high-level, C++, Fortran and Java interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
+
 ## --enable-threadsafe is incompatible with --enable-hl unless
 ## --enable-unsupported has been specified on the configure line.
 ##
@@ -1548,25 +1576,24 @@ if test "X$THREADSAFE" = "Xyes"; then
     ## be preceded by a comma.
     ##
     ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "yes", though this only has an effect when
+    ## default is "check", though this only has an effect when
     ## --enable-threadsafe is specified.
     AC_SUBST([HAVE_PTHREAD]) HAVE_PTHREAD=yes
     AC_ARG_WITH([pthread],
                 [AS_HELP_STRING([--with-pthread=DIR],
-                                [Specify alternative path to Pthreads library when thread-safe capability is built])],,
-                [withval=yes])
+                                [Specify alternative path to Pthreads library when
+                                thread-safe capability is built.])],,
+                [withval=check])
 
     case "$withval" in
-      yes)
+      check | yes)
         AC_CHECK_HEADERS([pthread.h],, [unset HAVE_PTHREAD])
         if test "x$HAVE_PTHREAD" = "xyes"; then
           AC_CHECK_LIB([pthread], [pthread_self],, [unset HAVE_PTHREAD])
         fi
         ;;
       no)
-        AC_MSG_CHECKING([for pthread])
-        AC_MSG_RESULT([suppressed])
-        unset HAVE_PTHREAD
+        AC_MSG_ERROR([Must use Pthreads with thread safety])
         ;;
       *)
         case "$withval" in
@@ -1606,6 +1633,44 @@ if test "X$THREADSAFE" = "Xyes"; then
         fi
         ;;
     esac
+
+    ## ----------------------------------------------------------------------
+    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+    ## is supported on this system
+    ##
+    ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
+    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+    ## supported a priori. POSIX.1-2001 requires that a conformant
+    ## system need only support one of SYSTEM or PROCESS scopes.
+    ##
+    ## For cross-compiling, we've added a pessimistic 'no'. You can
+    ## hand-hack the config file if you know otherwise.
+    AC_MSG_CHECKING([Pthreads supports system scope])
+    AC_CACHE_VAL([hdf5_cv_system_scope_threads],
+      [AC_RUN_IFELSE(
+        [AC_LANG_PROGRAM([
+            #if STDC_HEADERS
+            #include <stdlib.h>
+            #include <pthread.h>
+            #endif
+        ],[
+              pthread_attr_t attribute;
+              int ret;
+
+              pthread_attr_init(&attribute);
+              ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+              exit(ret==0 ? 0 : 1);
+        ])]
+      , [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no], [hdf5_cv_system_scope_threads=no])])
+
+    if test ${hdf5_cv_system_scope_threads} = "yes"; then
+      AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
+                [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
+      AC_MSG_RESULT([yes])
+    else
+      AC_MSG_RESULT([no])
+      AC_MSG_NOTICE([Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM).])
+    fi
 fi
 
 ## ----------------------------------------------------------------------
@@ -1650,10 +1715,10 @@ esac
 
 
 ## ----------------------------------------------------------------------
-## Does the struct stat have the st_blocks field?  This field is not Posix.
+## Does the struct stat have the st_blocks field? This field is not POSIX.
 ##
 AC_MSG_CHECKING([for st_blocks in struct stat])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM[[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
   #include <sys/stat.h>]],[[struct stat sb; sb.st_blocks=0;]])],
   [AC_DEFINE([HAVE_STAT_ST_BLOCKS], [1],
           [Define if struct stat has the st_blocks field])
@@ -1788,7 +1853,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
 AC_MSG_CHECKING([how to print long long])
 AC_CACHE_VAL([hdf5_cv_printf_ll], [
 
-for hdf5_cv_printf_ll in l ll L q unknown; do
+for hdf5_cv_printf_ll in ll l L q unknown; do
    AC_RUN_IFELSE(
         [AC_LANG_PROGRAM([
             #include <stdio.h>
@@ -1808,35 +1873,49 @@ AC_DEFINE_UNQUOTED([PRINTF_LL_WIDTH], ["$hdf5_cv_printf_ll"],
                    [Width for printf() for type `long long' or `__int64', use `ll'])
 
 ## ----------------------------------------------------------------------
-## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-## is supported on this system
+## Check if the compiler should include build diagnostics
 ##
-AC_MSG_CHECKING([Threads support system scope])
-AC_CACHE_VAL([hdf5_cv_system_scope_threads],
-  [AC_TRY_RUN([
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <pthread.h>
-    #endif
+AC_MSG_CHECKING([enable build diagnostics])
+AC_ARG_ENABLE([diags],
+              [AS_HELP_STRING([--enable-diags=(yes|no|<custom>)],
+                              [Allow default enhanced diagnostics to the build.
+                               This is independent of the build mode and optimization
+                               level.
+                               [default=no]
+                               ])],
+              [DIAGS=$enableval])
 
-    int main(void)
-    {
-      pthread_attr_t attribute;
-      int ret;
-
-      pthread_attr_init(&attribute);
-      ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-      exit(ret==0 ? 0 : 1);
-    }
-  ], [hdf5_cv_system_scope_threads=yes], [hdf5_cv_system_scope_threads=no],)])
-
-if test ${hdf5_cv_system_scope_threads} = "yes"; then
-  AC_DEFINE([SYSTEM_SCOPE_THREADS], [1],
-            [Define if your system supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM) call.])
-  AC_MSG_RESULT([yes])
-else
-  AC_MSG_RESULT([no])
+## Set default
+if test "X-$DIAGS" = X- ; then
+  DIAGS=no
 fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([DIAGS])
+
+case "X-$DIAGS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS_FCFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_DIAGS_FCFLAGS"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS"
+    DIAGS="custom ($DIAGS)"
+    AC_MSG_RESULT([$DIAGS])
+    ;;
+esac
+
 
 ## ----------------------------------------------------------------------
 ## Check if the compiler should include symbols
@@ -1926,6 +2005,45 @@ case "X-$DEV_WARNINGS" in
     ;;
   *)
     AC_MSG_ERROR([Unrecognized value: $DEV_WARNINGS])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if we should consider certain compiler warnings as errors
+##
+## These should NOT be on by default as the risk of breakage is high
+## when compiling HDF5 on new (or new versions) of platforms and
+## compilers. It can also cause failures when header files we have no
+## control over (e.g. MPI, HDFS) raise warnings.
+##
+AC_MSG_CHECKING([enable warnings as errors])
+AC_ARG_ENABLE([warnings-as-errors],
+              [AS_HELP_STRING([--enable-warnings-as-errors],
+                              [Determines whether certain warnings will be
+                               considered errors. This is mainly for use
+                               by HDF5 library developers.
+                               [default=no]
+                               ])],
+              [WARNINGS_AS_ERRORS=$enableval])
+
+## Set default
+if test "X-$WARNINGS_AS_ERRORS" = X- ; then
+  WARNINGS_AS_ERRORS=no
+fi
+
+case "X-$WARNINGS_AS_ERRORS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $H5_NECFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $H5_NECXXFLAGS"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $WARNINGS_AS_ERRORS])
     ;;
 esac
 
@@ -2053,16 +2171,16 @@ AC_ARG_ENABLE([debug],
                                also specify a comma-separated list of
                                package names without the leading H5 or
                                the word no. The default is most packages
-			       if production is disabled; no if it is enabled.
+                if production is disabled; no if it is enabled.
                                ])],
               [DEBUG_PKG=$enableval])
 
 ## Default to no if production is enabled
 if test "X-$DEBUG_PKG" = X- ; then
     if test "$enable_production" = yes ; then
-	DEBUG_PKG=no
+    DEBUG_PKG=no
     else
-	DEBUG_PKG=yes
+    DEBUG_PKG=yes
     fi
 fi
 
@@ -2101,19 +2219,31 @@ fi
 AC_MSG_CHECKING([whether function stack tracking is enabled])
 AC_ARG_ENABLE([codestack],
               [AS_HELP_STRING([--enable-codestack],
-                              [Enable the function stack tracing (for developer debugging).])],
+                              [Enable the function stack tracing (for developer debugging).
+                               [default=no]
+                              ])],
               [CODESTACK=$enableval])
+
+## Set the default level.
+if test "X-$CODESTACK" = X- ; then
+  CODESTACK=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([CODESTACK])
 
 case "X-$CODESTACK" in
   X-yes)
-      CODESTACK=yes
       AC_MSG_RESULT([yes])
       AC_DEFINE([HAVE_CODESTACK], [1],
                 [Define if the function stack tracing code is to be compiled in])
     ;;
-  *)
-      CODESTACK=no
+  X-no)
       AC_MSG_RESULT([no])
+    ;;
+  *)
+      AC_MSG_ERROR([Unrecognized value: $CODESTACK])
     ;;
 esac
 
@@ -2769,12 +2899,12 @@ else
                 unsigned char       s[16];
                 unsigned char       s2[8];
                 int                 ret = 1;
-                
+
                 if(sizeof(long double) == 16 && sizeof(long) == 8) {
-                    /*make sure the long double type has 16 bytes in size and 
+                    /*make sure the long double type has 16 bytes in size and
                      * 11 bits of exponent.  If it is,
-                     *the bit sequence should be like below.  It's not 
-                     *a decent way to check but this info isn't available. */   
+                     *the bit sequence should be like below.  It's not
+                     *a decent way to check but this info isn't available. */
                     memcpy(s, &ld, 16);
                     if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
                         s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
@@ -2808,8 +2938,8 @@ else
                         if(s2[0]==0x00 && s2[1]==0x47 && s2[2]==0x33 && s2[3]==0xce &&
                            s2[4]==0x17 && s2[5]==0xaf && s2[6]==0x22 && s2[7]==0x7f)
                             ret = 0;
-                    }    
-                }   
+                    }
+                }
                 exit(ret);
         ]])]
     , [hdf5_cv_ldouble_to_long_special=yes], [hdf5_cv_ldouble_to_long_special=no],)])
@@ -2846,17 +2976,17 @@ else
                 unsigned long       ull;
                 unsigned char       s[16];
                 int                 flag=0, ret=1;
-            
+
                 /*Determine if long double has 16 byte in size, 11 bit exponent, and
-                 *the bias is 0x3ff */ 
-                if(sizeof(long double) == 16) { 
+                 *the bias is 0x3ff */
+                if(sizeof(long double) == 16) {
                     ld = 1.0L;
                     memcpy(s, &ld, 16);
                     if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-                        s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00) 
-                        flag = 1; 
+                        s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00)
+                        flag = 1;
                 }
-                 
+
                 if(flag==1 && sizeof(long)==8) {
                     ll = 0x003fffffffffffffL;
                     ld = (long double)ll;
@@ -2872,7 +3002,7 @@ else
                         s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
                         s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
                         ret = 0;
-                }        
+                }
                 if(flag==1 && sizeof(unsigned long)==8) {
                     ull = 0xffffffffffffffffUL;
                     ld = (long double)ull;
@@ -2890,7 +3020,7 @@ else
                         s[8]==0xbf && s[9]==0xf0 && s[10]==0x00 && s[11]==0x00 &&
                         s[12]==0x00 && s[13]==0x00 && s[14]==0x00 && s[15]==0x00)
                         ret = 0;
-                }        
+                }
                 exit(ret);
         ]])]
     , [hdf5_cv_long_to_ldouble_special=yes], [hdf5_cv_long_to_ldouble_special=no],)])
@@ -2931,19 +3061,19 @@ else
             unsigned long long  ull;
             unsigned char       s[16];
             int                 ret = 0;
-            
+
             if(sizeof(long double) == 16) {
-                /*make sure the long double type is the same as the failing type 
+                /*make sure the long double type is the same as the failing type
                  *which has 16 bytes in size and 11 bits of exponent.  If it is,
-                 *the bit sequence should be like below.  It's not 
-                 *a decent way to check but this info isn't available. */   
+                 *the bit sequence should be like below.  It's not
+                 *a decent way to check but this info isn't available. */
                 memcpy(s, &ld, 16);
                 if(s[0]==0x43 && s[1]==0x51 && s[2]==0xcc && s[3]==0xf3 &&
                     s[4]==0x85 && s[5]==0xeb && s[6]==0xc8 && s[7]==0xa0 &&
                     s[8]==0xbf && s[9]==0xcc && s[10]==0x2a && s[11]==0x3c) {
 
                     /*slightly adjust the bit sequence (s[8]=0xdf).  The converted
-                     *values will go wild on Mac OS 10.4 and IRIX64 6.5.*/ 
+                     *values will go wild on Mac OS 10.4 and IRIX64 6.5.*/
                     s[0]=0x43; s[1]=0x51; s[2]=0xcc; s[3]=0xf3;
                     s[4]=0x85; s[5]=0xeb; s[6]=0xc8; s[7]=0xa0;
                     s[8]=0xdf; s[9]=0xcc; s[10]=0x2a; s[11]=0x3c;
@@ -2952,11 +3082,11 @@ else
                     memcpy(&ld, s, 16);
                     ll = (long long)ld;
                     ull = (unsigned long long)ld;
-                    
+
                     if(ll != 20041683600089728 || ull != 20041683600089728)
                         ret = 1;
-                }    
-            }    
+                }
+            }
     done:
             exit(ret);
         }
@@ -2996,17 +3126,17 @@ else
             unsigned long long  ull;
             unsigned char       s[16];
             int                 flag=0, ret=0;
-        
+
             /*Determine if long double has 16 byte in size, 11 bit exponent, and
-             *the bias is 0x3ff */ 
-            if(sizeof(long double) == 16) { 
+             *the bias is 0x3ff */
+            if(sizeof(long double) == 16) {
                 ld = 1.0L;
                 memcpy(s, &ld, 16);
                 if(s[0]==0x3f && s[1]==0xf0 && s[2]==0x00 && s[3]==0x00 &&
-                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00) 
-                    flag = 1; 
+                    s[4]==0x00 && s[5]==0x00 && s[6]==0x00 && s[7]==0x00)
+                    flag = 1;
             }
-             
+
             if(flag==1 && sizeof(long long)==8) {
                 ll = 0x01ffffffffffffffLL;
                 ld = (long double)ll;
@@ -3016,7 +3146,7 @@ else
                     s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
                     s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
                     ret = 1;
-            }        
+            }
             if(flag==1 && sizeof(unsigned long long)==8) {
                 ull = 0x01ffffffffffffffULL;
                 ld = (long double)ull;
@@ -3025,7 +3155,7 @@ else
                     s[4]!=0xff || s[5]!=0xff || s[6]!=0xff || s[7]!=0xff ||
                     s[8]!=0xf0 || s[9]!=0x00 || s[10]!=0x00 || s[11]!=0x00)
                     ret = 1;
-            }        
+            }
     done:
             exit(ret);
         }
@@ -3127,7 +3257,7 @@ CXX_NOFLAGS=`echo $CXX | sed 's/ -.*//'`
 if `echo $CXX_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
   CXX_VERSION="$CXX"
 else
-  CXX_VERSION="$FC";
+  CXX_VERSION="$CXX";
   for x in `echo $PATH | sed -e 's/:/ /g'`; do
     if test -x $x/$CXX_NOFLAGS; then
       CXX_VERSION="$x/$CXX"

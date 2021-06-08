@@ -30,8 +30,8 @@
 #error "Do not include this file outside the H5AC package!"
 #endif
 
-#ifndef _H5ACpkg_H
-#define _H5ACpkg_H
+#ifndef H5ACpkg_H
+#define H5ACpkg_H
 
 /* Get package's private header */
 #include "H5ACprivate.h" /* Metadata cache			*/
@@ -377,4 +377,4 @@ typedef struct H5AC_aux_t {
 
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5ACpkg_H */
+#endif /* H5ACpkg_H */

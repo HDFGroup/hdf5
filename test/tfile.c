@@ -219,25 +219,46 @@ test_file_create(void)
     CHECK(tmpl1, FAIL, "H5Pcreate");
 
     /* Try setting some bad userblock sizes */
-    H5E_BEGIN_TRY { ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE1); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE1);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_userblock");
-    H5E_BEGIN_TRY { ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE2);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_userblock");
-    H5E_BEGIN_TRY { ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE3); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE3);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_userblock");
-    H5E_BEGIN_TRY { ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE4); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE4);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_userblock");
-    H5E_BEGIN_TRY { ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE5); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE5);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_userblock");
-    H5E_BEGIN_TRY { ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE6); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE6);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_userblock");
-    H5E_BEGIN_TRY { ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE7); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_userblock(tmpl1, BAD_USERBLOCK_SIZE7);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Pset_userblock");
 
@@ -1192,7 +1213,10 @@ test_get_file_id(void)
     plist = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(plist, FAIL, "H5Pcreate");
 
-    H5E_BEGIN_TRY { fid2 = H5Iget_file_id(plist); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Iget_file_id(plist);
+    }
     H5E_END_TRY;
     VERIFY(fid2, FAIL, "H5Iget_file_id");
 
@@ -1436,7 +1460,10 @@ test_file_perm2(void)
     CHECK(filero, FAIL, "H5Fopen");
 
     /* Create a group with the read-only file handle (should fail) */
-    H5E_BEGIN_TRY { group = H5Gcreate2(filero, "MY_GROUP", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        group = H5Gcreate2(filero, "MY_GROUP", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(group, FAIL, "H5Gcreate2");
 
@@ -1449,7 +1476,10 @@ test_file_perm2(void)
     VERIFY(dset, FAIL, "H5Dcreate2");
 
     /* Create an attribute with the read-only file handle (should fail) */
-    H5E_BEGIN_TRY { attr = H5Acreate2(filero, "MY_ATTR", H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        attr = H5Acreate2(filero, "MY_ATTR", H5T_NATIVE_INT, dspace, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(attr, FAIL, "H5Acreate2");
 
@@ -1457,7 +1487,10 @@ test_file_perm2(void)
     CHECK(type, FAIL, "H5Tcopy");
 
     /* Commit a datatype with the read-only file handle (should fail) */
-    H5E_BEGIN_TRY { ret = H5Tcommit2(filero, "MY_DTYPE", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tcommit2(filero, "MY_DTYPE", type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Tcommit2");
 
@@ -1690,22 +1723,34 @@ test_file_open_dot(void)
     CHECK(sid, FAIL, "H5Screate");
 
     /* Create a dataset with no name using the file ID */
-    H5E_BEGIN_TRY { did = H5Dcreate2(fid, ".", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(fid, ".", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(did, FAIL, "H5Dcreate2");
 
     /* Create a dataset with no name using the group ID */
-    H5E_BEGIN_TRY { did = H5Dcreate2(gid, ".", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dcreate2(gid, ".", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(did, FAIL, "H5Dcreate2");
 
     /* Open a dataset with no name using the file ID */
-    H5E_BEGIN_TRY { did = H5Dopen2(fid, ".", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, ".", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(did, FAIL, "H5Dopen2");
 
     /* Open a dataset with no name using the group ID */
-    H5E_BEGIN_TRY { did = H5Dopen2(gid, ".", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(gid, ".", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(did, FAIL, "H5Dopen2");
 
@@ -1714,32 +1759,50 @@ test_file_open_dot(void)
     CHECK(tid, FAIL, "H5Tcopy");
 
     /* Create a named datatype with no name using the file ID */
-    H5E_BEGIN_TRY { ret = H5Tcommit2(fid, ".", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tcommit2(fid, ".", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Tcommit2");
 
     /* Create a named datatype with no name using the group ID */
-    H5E_BEGIN_TRY { ret = H5Tcommit2(gid, ".", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tcommit2(gid, ".", tid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Tcommit2");
 
     /* Open a named datatype with no name using the file ID */
-    H5E_BEGIN_TRY { tid2 = H5Topen2(fid, ".", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tid2 = H5Topen2(fid, ".", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tid2, FAIL, "H5Topen2");
 
     /* Open a named datatype with no name using the group ID */
-    H5E_BEGIN_TRY { tid2 = H5Topen2(gid, ".", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        tid2 = H5Topen2(gid, ".", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(tid2, FAIL, "H5Topen2");
 
     /* Create a group with no name using the file ID */
-    H5E_BEGIN_TRY { gid2 = H5Gcreate2(fid, ".", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid2 = H5Gcreate2(fid, ".", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(gid2, FAIL, "H5Gcreate2");
 
     /* Create a group with no name using the group ID */
-    H5E_BEGIN_TRY { gid2 = H5Gcreate2(gid, ".", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid2 = H5Gcreate2(gid, ".", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     VERIFY(gid2, FAIL, "H5Gcreate2");
 
@@ -1905,7 +1968,10 @@ test_file_getname(void)
 
     /* Try get file name from data space.  Supposed to fail because
      * it's illegal operation. */
-    H5E_BEGIN_TRY { name_len = H5Fget_name(space_id, name, (size_t)TESTA_NAME_BUF_SIZE); }
+    H5E_BEGIN_TRY
+    {
+        name_len = H5Fget_name(space_id, name, (size_t)TESTA_NAME_BUF_SIZE);
+    }
     H5E_END_TRY;
     VERIFY(name_len, FAIL, "H5Fget_name");
 
@@ -2809,7 +2875,10 @@ test_userblock_alignment(void)
     CHECK(ret, FAIL, "H5Pset_alignment");
 
     /* Create a file with FAPL & FCPL */
-    H5E_BEGIN_TRY { fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
+    }
     H5E_END_TRY;
     VERIFY(fid, FAIL, "H5Fcreate");
 
@@ -2839,7 +2908,10 @@ test_userblock_alignment(void)
     CHECK(ret, FAIL, "H5Pset_alignment");
 
     /* Create a file with FAPL & FCPL */
-    H5E_BEGIN_TRY { fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fcreate(FILE1, H5F_ACC_TRUNC, fcpl, fapl);
+    }
     H5E_END_TRY;
     VERIFY(fid, FAIL, "H5Fcreate");
 
@@ -3099,7 +3171,10 @@ test_libver_macros2(void)
     ret = H5Gunlink(file, "Group");
     CHECK(ret, FAIL, "H5Gunlink");
 
-    H5E_BEGIN_TRY { grp = H5Gopen(file, "Group"); }
+    H5E_BEGIN_TRY
+    {
+        grp = H5Gopen(file, "Group");
+    }
     H5E_END_TRY;
     VERIFY(grp, FAIL, "H5Gopen");
 #endif

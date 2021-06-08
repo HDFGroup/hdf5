@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5F package!"
 #endif
 
-#ifndef _H5Fpkg_H
-#define _H5Fpkg_H
+#ifndef H5Fpkg_H
+#define H5Fpkg_H
 
 /* Get package's private header */
 #include "H5Fprivate.h"
@@ -330,4 +330,4 @@ H5_DLL herr_t H5F_check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F_get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 #endif /* H5F_TESTING */
 
-#endif /* _H5Fpkg_H */
+#endif /* H5Fpkg_H */

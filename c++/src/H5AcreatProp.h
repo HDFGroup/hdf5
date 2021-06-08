@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5AttrCreatPropList_H
-#define __H5AttrCreatPropList_H
+#ifndef H5AttrCreatPropList_H
+#define H5AttrCreatPropList_H
 
 namespace H5 {
 
@@ -63,4 +63,4 @@ class H5_DLLCPP AttrCreatPropList : public StrCreatPropList {
 
 } // namespace H5
 
-#endif // __H5AttrCreatPropList_H
+#endif // H5AttrCreatPropList_H

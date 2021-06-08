@@ -766,7 +766,7 @@ test_trivial(const hid_t dxpl_id_simple)
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n");
         }
 
-    PASSED()
+    PASSED();
 
     TESTING("data transform, trivial transform, with type conversion")
     if (H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFintread) < 0)
@@ -777,7 +777,7 @@ test_trivial(const hid_t dxpl_id_simple)
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n")
         }
 
-    PASSED()
+    PASSED();
 
     return 0;
 error:
@@ -804,7 +804,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
     if (HDstrcmp(c_to_f, ptrgetTest) != 0)
         FAIL_PUTS_ERROR("    ERROR: Data transform failed to match what was set\n")
 
-    PASSED()
+    PASSED();
 
     HDfree(ptrgetTest);
     ptrgetTest = NULL;
@@ -823,7 +823,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n")
         }
 
-    PASSED()
+    PASSED();
 
     TESTING("H5Pget_data_transform, after resetting transform property")
 
@@ -834,7 +834,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
     if (HDstrcmp(simple, ptrgetTest) != 0)
         FAIL_PUTS_ERROR("    ERROR: Data transform failed to match what was set\n")
 
-    PASSED()
+    PASSED();
 
     HDfree(ptrgetTest);
     ptrgetTest = NULL;
@@ -870,7 +870,7 @@ test_set(void)
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     if (H5Pget_data_transform(dxpl_id, ptrgetTest, HDstrlen(str) + 1) < 0)
-        PASSED()
+        PASSED();
     else
         FAIL_PUTS_ERROR("    ERROR: Data transform get before set succeeded (it shouldn't have)\n");
 
@@ -914,7 +914,10 @@ test_set(void)
 error:
     if (ptrgetTest)
         HDfree(ptrgetTest);
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY
 
     return -1;

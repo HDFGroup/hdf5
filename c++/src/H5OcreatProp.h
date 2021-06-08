@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5ObjCreatPropList_H
-#define __H5ObjCreatPropList_H
+#ifndef H5ObjCreatPropList_H
+#define H5ObjCreatPropList_H
 
 namespace H5 {
 
@@ -49,7 +49,7 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
         return ("ObjCreatPropList");
     }
 
-    // Copy constructor: creates a copy of a ObjCreatPropList object.
+    // Copy constructor: same as the original ObjCreatPropList.
     ObjCreatPropList(const ObjCreatPropList &original);
 
     // Creates a copy of an existing object creation property list
@@ -75,4 +75,4 @@ class H5_DLLCPP ObjCreatPropList : public PropList {
 }; // end of ObjCreatPropList
 } // namespace H5
 
-#endif // __H5ObjCreatPropList_H
+#endif // H5ObjCreatPropList_H

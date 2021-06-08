@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5B2private_H
-#define _H5B2private_H
+#ifndef H5B2private_H
+#define H5B2private_H
 
 /* Include package's public header */
 #include "H5B2public.h"
@@ -150,4 +150,4 @@ H5_DLL herr_t  H5B2_delete(H5F_t *f, hid_t dxpl_id, haddr_t addr, void *ctx_udat
 /* Statistics routines */
 H5_DLL herr_t H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info);
 
-#endif /* _H5B2private_H */
+#endif /* H5B2private_H */

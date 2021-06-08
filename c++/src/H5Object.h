@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Object_H
-#define __H5Object_H
+#ifndef H5Object_H
+#define H5Object_H
 
 namespace H5 {
 
@@ -97,4 +97,4 @@ class H5_DLLCPP H5Object : public H5Location {
 }; // end of H5Object
 } // namespace H5
 
-#endif // __H5Object_H
+#endif // H5Object_H

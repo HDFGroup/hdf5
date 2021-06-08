@@ -689,6 +689,7 @@ OPTIMIZATION
 PROFILING
 DEV_WARNINGS
 SYMBOLS
+DIAGS
 HAVE_PTHREAD
 BUILD_SHARED_SZIP_CONDITIONAL_FALSE
 BUILD_SHARED_SZIP_CONDITIONAL_TRUE
@@ -698,7 +699,6 @@ USE_FILTER_DEFLATE
 NOT_UNAME_CYGWIN_FALSE
 NOT_UNAME_CYGWIN_TRUE
 UNAME_CYGWIN
-AM_MAKEFLAGS
 LT_STATIC_EXEC
 USE_PLUGINS_CONDITIONAL_FALSE
 USE_PLUGINS_CONDITIONAL_TRUE
@@ -815,11 +815,9 @@ AM_CXXFLAGS
 AM_FCFLAGS
 AM_CFLAGS
 H5_LDFLAGS
-H5_ECXXFLAGS
 H5_CXXFLAGS
 H5_FCFLAGS
 H5_CPPFLAGS
-H5_ECFLAGS
 H5_CFLAGS
 CPPFLAGS
 host_os
@@ -929,8 +927,10 @@ with_zlib
 with_szlib
 enable_threadsafe
 with_pthread
+enable_diags
 enable_symbols
 enable_developer_warnings
+enable_warnings_as_errors
 enable_profiling
 enable_optimization
 enable_debug
@@ -1625,6 +1625,10 @@ Optional Features:
   --enable-threadsafe     Enable thread-safe capability. Not compatible with
                           the high-level library, Fortran, or C++ wrappers.
                           [default=no]
+  --enable-diags=(yes|no|<custom>)
+                          Allow default enhanced diagnostics to the build.
+                          This is independent of the build mode and
+                          optimization level. [default=no]
   --enable-symbols=(yes|no|<custom>)
                           Add debug symbols to the library (e.g.: build with
                           -g). This is independent of the build mode and
@@ -1636,6 +1640,10 @@ Optional Features:
                           emitted. These are usually performance suggestions
                           (e.g. -Wsuggest-attribute) and do not flag poor code
                           quality. [default=no]
+  --enable-warnings-as-errors
+                          Determines whether certain warnings will be
+                          considered errors. This is mainly for use by HDF5
+                          library developers. [default=no]
   --enable-profiling=(yes|no|<custom>)
                           Enable profiling flags (e.g.: -pg). This can be set
                           independently from the build mode. The custom
@@ -1663,7 +1671,7 @@ Optional Features:
                           is most packages if production is disabled; no if it
                           is enabled.
   --enable-codestack      Enable the function stack tracing (for developer
-                          debugging).
+                          debugging). [default=no]
   --enable-metadata-trace-file
                           Enable metadata trace file collection.
   --enable-trace          Enable API tracing capability. Default=no if debug
@@ -1726,7 +1734,7 @@ Optional Packages:
   --with-szlib=DIR        Use szlib library for external szlib I/O filter
                           [default=no]
   --with-pthread=DIR      Specify alternative path to Pthreads library when
-                          thread-safe capability is built
+                          thread-safe capability is built.
   --with-mpe=DIR          Use MPE instrumentation [default=no]
   --with-libhdfs=DIR      Provide libhdfs library to enable HDFS virtual file
                           driver (VFD) [default=no]
@@ -3764,16 +3772,51 @@ fi
 AM_BACKSLASH='\'
 
 
-## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
-## for Makefiles, configure, src/H5config.h, etc.  If AM_MAINTAINER_MODE
-## is *not* included here, these files will be rebuilt if out of date.
-## This is a problem because if users try to build on a machine with
-## the wrong versions of autoconf and automake, these files will be
-## rebuilt with the wrong versions and bad things can happen.
-## Also, CVS doesn't preserve dependencies between timestamps, so
-## Makefiles will often think rebuilding needs to occur when it doesn't.
-## Developers should './configure --enable-maintainer-mode' to turn on
-## rebuild rules.
+## AM_MAINTAINER_MODE determines the behavior of "rebuild rules" that contain
+## dependencies for Makefile.in files, configure, src/H5config.h, etc. If
+## AM_MAINTAINER_MODE is enabled, these files will be rebuilt if out of date.
+## When disabled, the autotools build files can get out of sync and the build
+## system will not complain or try to regenerate downstream files.
+##
+## The AM_MAINTAINER_MODE macro also determines whether the
+## --(enable|disable)-maintainer-mode configure option is available. When the
+## macro is present, with or without a parameter, the option will be added
+## to the generated configure script.
+##
+## In summary:
+##
+##  AM_MAINTAINER_MODE([enable])
+##      - Build dependencies ON by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE([disable])
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  No AM_MAINTAINER_MODE macro
+##      - Build dependencies ON by default
+##      - No configure option to control build dependencies
+##
+## The biggest concern for us is that version control systems like git
+## usually don't preserve dependencies between timestamps, so the build
+## system will often think that upstream build files like Makefile.am are
+## dirty and that rebuilding needs to occur when it doesn't. This is a problem
+## in release branches where we provide the autotools-generated files. Users
+## who don't have autoconf, automake, etc. will then have difficulty building
+## release branches checked out from git.
+##
+## By default, maintainer mode is enabled in development branches and disabled
+## in release branches.
+##
+## NOTE: In 1.8, we have maintainer mode turned OFF at all times. This is
+##       because we have the generated files committed in this branch.
+##       The lack of consistent timestamps from git and bin/reconfigure's
+##       demand for ancient and particular versions of the autotools makes
+##       maintainer mode unusable in 1.8.x.
 
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether to enable maintainer-specific portions of Makefiles" >&5
 $as_echo_n "checking whether to enable maintainer-specific portions of Makefiles... " >&6; }
@@ -3905,10 +3948,6 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
 ##
-## H5_ECFLAGS (and company) are for warnings that should be treated as errors.
-##
-
-
 
 
 
@@ -3934,6 +3973,7 @@ CXXFLAGS="${CXXFLAGS}"
 FCFLAGS="${FCFLAGS}"
 CPPFLAGS="${CPPFLAGS}"
 LDFLAGS="${LDFLAGS}"
+AR_FLAGS="${AR_FLAGS}"
 
 ## Configure may need to alter any of the *FLAGS variables in order for
 ## various checks to work correctly. Save the user's value here so it
@@ -7624,6 +7664,12 @@ test -n "$AR" || AR=":"
 fi
 
 
+# Set the default ar flags to cr
+# The Automake default is to use cru and the 'u' causes ar
+# to emit warnings on some platforms.
+AR_FLAGS=cr
+
+
 ## Export the AR macro so that it will be placed in the libtool file
 ## correctly.
 export AR
@@ -7846,7 +7892,12 @@ fi
 
 
 if test "X$HDF5_TESTS" = "Xno"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
   echo "Building HDF5 tests is disabled"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
 ## ----------------------------------------------------------------------
@@ -7869,7 +7920,12 @@ fi
 
 
 if test "X$HDF5_TOOLS" = "Xno"; then
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
   echo "Building HDF5 tools is disabled"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
 ## ----------------------------------------------------------------------
@@ -22401,6 +22457,11 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
 ##   This check needs to occur after libtool is initialized because
 ##   we check a libtool cache value and may issue a warning based
 ##   on its result.
+
+
+## Default is no
+STATIC_EXEC=no
+
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if we should install only statically linked executables" >&5
 $as_echo_n "checking if we should install only statically linked executables... " >&6; }
 # Check whether --enable-static_exec was given.
@@ -22473,35 +22534,6 @@ $as_echo "error" >&6; }
     as_fn_error $? "\'$enableval\' is not a valid rpath type" "$LINENO" 5
     ;;
 esac
-
-## ----------------------------------------------------------------------
-## pmake will throw an error if variables are undefined in a Makefile.
-## These errors can be changed to warnings using the -V flag.
-##
- AM_MAKEFLAGS=""
-
-## Don't run test if MAKE is defined but is the empty string
-if test -n "${MAKE-make}"; then
-
-  { $as_echo "$as_me:${as_lineno-$LINENO}: checking whether make will build with undefined variables" >&5
-$as_echo_n "checking whether make will build with undefined variables... " >&6; }
-
-  cat >maketest <<EOF
-foo: \$(UNDEFINED) \$(UNDEFINED2)
-	@echo \$(UNDEFINED3) works
-EOF
-
-  if (${MAKE-make} -f maketest foo) >/dev/null 2>&1; then
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
-$as_echo "yes" >&6; }
-  else
-    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no, setting -V flag" >&5
-$as_echo "no, setting -V flag" >&6; }
-    AM_MAKEFLAGS="\-V"
-  fi
-
-  rm maketest
-fi
 
 ## ----------------------------------------------------------------------
 ## Production flags?  Save the value in $CONFIG_MODE so we have it for
@@ -23260,16 +23292,18 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## functionality so clock_gettime and CLOCK_MONOTONIC are defined
     ## correctly. This was later updated to 200112L so that
     ## posix_memalign() is visible for the direct VFD code on Linux
-    ## systems.
+    ## systems. Even later, this was changed to 200809L to support
+    ## pread/pwrite in VFDs.
     ##
     ## POSIX feature information can be found in the gcc manual at:
     ## http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200112L $H5_CPPFLAGS"
+    H5_CPPFLAGS="-D_POSIX_C_SOURCE=200809L $H5_CPPFLAGS"
 
     ## Need to add this so that O_DIRECT is visible for the direct
     ## VFD on Linux systems.
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
+
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
@@ -25679,7 +25713,6 @@ $as_echo "suppressed" >&6; }
       AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"
     fi
 
-
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
@@ -25976,6 +26009,10 @@ if test "${enable_threadsafe+set}" = set; then :
 fi
 
 
+## The high-level, C++, Fortran and Java interfaces are not compatible
+## with the thread-safety option because the lock is not hoisted
+## into the higher-level API calls.
+
 ## --enable-threadsafe is incompatible with --enable-hl unless
 ## --enable-unsupported has been specified on the configure line.
 ##
@@ -26034,7 +26071,7 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
     ## be preceded by a comma.
     ##
     ## Thread-safety in HDF5 only uses Pthreads via configure, so the
-    ## default is "yes", though this only has an effect when
+    ## default is "check", though this only has an effect when
     ## --enable-threadsafe is specified.
      HAVE_PTHREAD=yes
 
@@ -26042,12 +26079,12 @@ $as_echo "#define HAVE_THREADSAFE 1" >>confdefs.h
 if test "${with_pthread+set}" = set; then :
   withval=$with_pthread;
 else
-  withval=yes
+  withval=check
 fi
 
 
     case "$withval" in
-      yes)
+      check | yes)
         for ac_header in pthread.h
 do :
   ac_fn_c_check_header_mongrel "$LINENO" "pthread.h" "ac_cv_header_pthread_h" "$ac_includes_default"
@@ -26121,11 +26158,7 @@ fi
         fi
         ;;
       no)
-        { $as_echo "$as_me:${as_lineno-$LINENO}: checking for pthread" >&5
-$as_echo_n "checking for pthread... " >&6; }
-        { $as_echo "$as_me:${as_lineno-$LINENO}: result: suppressed" >&5
-$as_echo "suppressed" >&6; }
-        unset HAVE_PTHREAD
+        as_fn_error $? "Must use Pthreads with thread safety" "$LINENO" 5
         ;;
       *)
         case "$withval" in
@@ -26298,6 +26331,82 @@ fi
         fi
         ;;
     esac
+
+    ## ----------------------------------------------------------------------
+    ## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
+    ## is supported on this system
+    ##
+    ## Unfortunately, this probably needs to be an AC_RUN_IFELSE since
+    ## it's impossible to determine if PTHREAD_SCOPE_SYSTEM is
+    ## supported a priori. POSIX.1-2001 requires that a conformant
+    ## system need only support one of SYSTEM or PROCESS scopes.
+    ##
+    ## For cross-compiling, we've added a pessimistic 'no'. You can
+    ## hand-hack the config file if you know otherwise.
+    { $as_echo "$as_me:${as_lineno-$LINENO}: checking Pthreads supports system scope" >&5
+$as_echo_n "checking Pthreads supports system scope... " >&6; }
+    if ${hdf5_cv_system_scope_threads+:} false; then :
+  $as_echo_n "(cached) " >&6
+else
+  if test "$cross_compiling" = yes; then :
+  hdf5_cv_system_scope_threads=no
+else
+  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+/* end confdefs.h.  */
+
+            #if STDC_HEADERS
+            #include <stdlib.h>
+            #include <pthread.h>
+            #endif
+
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+
+              pthread_attr_t attribute;
+              int ret;
+
+              pthread_attr_init(&attribute);
+              ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
+              exit(ret==0 ? 0 : 1);
+
+  ;
+  return 0;
+}
+
+_ACEOF
+if ac_fn_c_try_run "$LINENO"; then :
+  hdf5_cv_system_scope_threads=yes
+else
+  hdf5_cv_system_scope_threads=no
+fi
+rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
+  conftest.$ac_objext conftest.beam conftest.$ac_ext
+fi
+
+fi
+
+
+    if test ${hdf5_cv_system_scope_threads} = "yes"; then
+
+$as_echo "#define SYSTEM_SCOPE_THREADS 1" >>confdefs.h
+
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    else
+      { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+      { $as_echo "$as_me:${as_lineno-$LINENO}: Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)." >&5
+$as_echo "$as_me: Always 'no' if cross-compiling. Edit the config file if your platform supports pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)." >&6;}
+    fi
 fi
 
 ## ----------------------------------------------------------------------
@@ -26403,13 +26512,14 @@ esac
 
 
 ## ----------------------------------------------------------------------
-## Does the struct stat have the st_blocks field?  This field is not Posix.
+## Does the struct stat have the st_blocks field? This field is not POSIX.
 ##
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking for st_blocks in struct stat" >&5
 $as_echo_n "checking for st_blocks in struct stat... " >&6; }
 cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 /* end confdefs.h.  */
 
+  #include <sys/stat.h>
 #ifdef FC_DUMMY_MAIN
 #ifndef FC_DUMMY_MAIN_EQ_F77
 #  ifdef __cplusplus
@@ -26421,11 +26531,10 @@ cat confdefs.h - <<_ACEOF >conftest.$ac_ext
 int
 main ()
 {
-
+struct stat sb; sb.st_blocks=0;
   ;
   return 0;
-}[
-  #include <sys/stat.h>],[struct stat sb; sb.st_blocks=0;])
+}
 _ACEOF
 if ac_fn_c_try_compile "$LINENO"; then :
 
@@ -27073,7 +27182,7 @@ if ${hdf5_cv_printf_ll+:} false; then :
 else
 
 
-for hdf5_cv_printf_ll in l ll L q unknown; do
+for hdf5_cv_printf_ll in ll l L q unknown; do
    if test "$cross_compiling" = yes; then :
   continue
 else
@@ -27126,61 +27235,50 @@ _ACEOF
 
 
 ## ----------------------------------------------------------------------
-## Check if pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM)
-## is supported on this system
+## Check if the compiler should include build diagnostics
 ##
-{ $as_echo "$as_me:${as_lineno-$LINENO}: checking Threads support system scope" >&5
-$as_echo_n "checking Threads support system scope... " >&6; }
-if ${hdf5_cv_system_scope_threads+:} false; then :
-  $as_echo_n "(cached) " >&6
-else
-  if test "$cross_compiling" = yes; then :
-  { { $as_echo "$as_me:${as_lineno-$LINENO}: error: in \`$ac_pwd':" >&5
-$as_echo "$as_me: error: in \`$ac_pwd':" >&2;}
-as_fn_error $? "cannot run test program while cross compiling
-See \`config.log' for more details" "$LINENO" 5; }
-else
-  cat confdefs.h - <<_ACEOF >conftest.$ac_ext
-/* end confdefs.h.  */
-
-    #if STDC_HEADERS
-    #include <stdlib.h>
-    #include <pthread.h>
-    #endif
-
-    int main(void)
-    {
-      pthread_attr_t attribute;
-      int ret;
-
-      pthread_attr_init(&attribute);
-      ret=pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-      exit(ret==0 ? 0 : 1);
-    }
-
-_ACEOF
-if ac_fn_c_try_run "$LINENO"; then :
-  hdf5_cv_system_scope_threads=yes
-else
-  hdf5_cv_system_scope_threads=no
-fi
-rm -f core *.core core.conftest.* gmon.out bb.out conftest$ac_exeext \
-  conftest.$ac_objext conftest.beam conftest.$ac_ext
-fi
-
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking enable build diagnostics" >&5
+$as_echo_n "checking enable build diagnostics... " >&6; }
+# Check whether --enable-diags was given.
+if test "${enable_diags+set}" = set; then :
+  enableval=$enable_diags; DIAGS=$enableval
 fi
 
 
-if test ${hdf5_cv_system_scope_threads} = "yes"; then
+## Set default
+if test "X-$DIAGS" = X- ; then
+  DIAGS=no
+fi
 
-$as_echo "#define SYSTEM_SCOPE_THREADS 1" >>confdefs.h
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
 
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+
+case "X-$DIAGS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
-else
-  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_DIAGS_FCFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
-fi
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS"
+    DIAGS="custom ($DIAGS)"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: $DIAGS" >&5
+$as_echo "$DIAGS" >&6; }
+    ;;
+esac
+
 
 ## ----------------------------------------------------------------------
 ## Check if the compiler should include symbols
@@ -27269,6 +27367,45 @@ $as_echo "no" >&6; }
     ;;
   *)
     as_fn_error $? "Unrecognized value: $DEV_WARNINGS" "$LINENO" 5
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if we should consider certain compiler warnings as errors
+##
+## These should NOT be on by default as the risk of breakage is high
+## when compiling HDF5 on new (or new versions) of platforms and
+## compilers. It can also cause failures when header files we have no
+## control over (e.g. MPI, HDFS) raise warnings.
+##
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking enable warnings as errors" >&5
+$as_echo_n "checking enable warnings as errors... " >&6; }
+# Check whether --enable-warnings-as-errors was given.
+if test "${enable_warnings_as_errors+set}" = set; then :
+  enableval=$enable_warnings_as_errors; WARNINGS_AS_ERRORS=$enableval
+fi
+
+
+## Set default
+if test "X-$WARNINGS_AS_ERRORS" = X- ; then
+  WARNINGS_AS_ERRORS=no
+fi
+
+case "X-$WARNINGS_AS_ERRORS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $H5_NECFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $H5_NECXXFLAGS"
+    { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
+    ;;
+  *)
+    as_fn_error $? "Unrecognized value: $WARNINGS_AS_ERRORS" "$LINENO" 5
     ;;
 esac
 
@@ -27391,9 +27528,9 @@ fi
 ## Default to no if production is enabled
 if test "X-$DEBUG_PKG" = X- ; then
     if test "$enable_production" = yes ; then
-	DEBUG_PKG=no
+    DEBUG_PKG=no
     else
-	DEBUG_PKG=yes
+    DEBUG_PKG=yes
     fi
 fi
 
@@ -27441,19 +27578,29 @@ if test "${enable_codestack+set}" = set; then :
 fi
 
 
+## Set the default level.
+if test "X-$CODESTACK" = X- ; then
+  CODESTACK=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+
+
 case "X-$CODESTACK" in
   X-yes)
-      CODESTACK=yes
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
 $as_echo "yes" >&6; }
 
 $as_echo "#define HAVE_CODESTACK 1" >>confdefs.h
 
     ;;
-  *)
-      CODESTACK=no
+  X-no)
       { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
 $as_echo "no" >&6; }
+    ;;
+  *)
+      as_fn_error $? "Unrecognized value: $CODESTACK" "$LINENO" 5
     ;;
 esac
 
@@ -29471,7 +29618,7 @@ CXX_NOFLAGS=`echo $CXX | sed 's/ -.*//'`
 if `echo $CXX_NOFLAGS | grep ^/ >/dev/null 2>&1`; then
   CXX_VERSION="$CXX"
 else
-  CXX_VERSION="$FC";
+  CXX_VERSION="$CXX";
   for x in `echo $PATH | sed -e 's/:/ /g'`; do
     if test -x $x/$CXX_NOFLAGS; then
       CXX_VERSION="$x/$CXX"

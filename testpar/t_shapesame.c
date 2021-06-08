@@ -2010,8 +2010,8 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
     }
 
     if ((MAINPROCESS) && (tests_skipped > 0)) {
-        HDfprintf(stdout, "    %lld of %lld subtests skipped to expedite testing.\n", tests_skipped,
-                  total_tests);
+        HDfprintf(stdout, "    %" PRId64 " of %" PRId64 " subtests skipped to expedite testing.\n",
+                  tests_skipped, total_tests);
     }
 
     return;
@@ -3934,16 +3934,16 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
             } /* end of switch(sstest_type) */
 #if CONTIG_HS_DR_PIO_TEST__DEBUG
             if ((MAINPROCESS) && (tests_skipped > 0)) {
-                HDfprintf(stdout, "     run/skipped/total = %lld/%lld/%lld.\n", tests_run, tests_skipped,
-                          total_tests);
+                HDfprintf(stdout, "     run/skipped/total = %" PRId64 "/%" PRId64 "/%" PRId64 ".\n",
+                          tests_run, tests_skipped, total_tests);
             }
 #endif /* CONTIG_HS_DR_PIO_TEST__DEBUG */
         }
     }
 
     if ((MAINPROCESS) && (tests_skipped > 0)) {
-        HDfprintf(stdout, "     %lld of %lld subtests skipped to expedite testing.\n", tests_skipped,
-                  total_tests);
+        HDfprintf(stdout, "     %" PRId64 " of %" PRId64 " subtests skipped to expedite testing.\n",
+                  tests_skipped, total_tests);
     }
 
     return;

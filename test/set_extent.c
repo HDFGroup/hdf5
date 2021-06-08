@@ -317,7 +317,10 @@ do_ranks(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(dcpl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
     H5E_END_TRY
 
     return -1;
@@ -1968,7 +1971,10 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
      *-------------------------------------------------------------------------
      */
 
-    H5E_BEGIN_TRY { ret = H5Dset_extent(did, dims_e); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(did, dims_e);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)
@@ -2014,7 +2020,10 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
      *-------------------------------------------------------------------------
      */
 
-    H5E_BEGIN_TRY { ret = H5Dset_extent(did, dims_s); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(did, dims_s);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)

@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Robb Matzke <matzke@llnl.gov>
+ * Programmer:    Robb Matzke
  *        Tuesday, December  9, 1997
  *
  * Purpose:    Tests the dataset interface (H5D)
@@ -293,7 +293,10 @@ test_create(hid_t file)
      * cannot be created with this function.  Temporarily turn off error
      * reporting.
      */
-    H5E_BEGIN_TRY { dataset = H5Dopen2(file, "does_not_exist", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        dataset = H5Dopen2(file, "does_not_exist", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (dataset >= 0) {
         H5_FAILED();
@@ -1172,7 +1175,10 @@ test_conv_buffer(hid_t fid)
     if (H5Pset_buffer(xfer_list, size, NULL, NULL) < 0)
         goto error;
 
-    H5E_BEGIN_TRY { status = H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, xfer_list, cfrR); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Dread(dataset, ctype2, H5S_ALL, H5S_ALL, xfer_list, cfrR);
+    }
     H5E_END_TRY;
     if (status >= 0) {
         H5_FAILED();
@@ -1703,7 +1709,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY { status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check); }
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR;
@@ -1718,7 +1727,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY { status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check); }
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR;
@@ -1764,7 +1776,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY { status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check); }
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR;
@@ -1779,7 +1794,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY { status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check); }
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR;
@@ -1822,7 +1840,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY { status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check); }
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR;
@@ -1838,7 +1859,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
             TEST_ERROR;
 
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY { status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check); }
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR;
@@ -1883,7 +1907,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
     if (corrupted) {
         /* Default behavior is failure when data is corrupted. */
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY { status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check); }
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR;
@@ -1898,7 +1925,10 @@ test_filter_internal(hid_t fid, const char *name, hid_t dcpl, int if_fletcher32,
         if (H5Pset_filter_callback(write_dxpl, filter_cb_fail, NULL) < 0)
             TEST_ERROR;
         /* (Use the "write" DXPL in order to make certain corruption is seen) */
-        H5E_BEGIN_TRY { status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check); }
+        H5E_BEGIN_TRY
+        {
+            status = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, write_dxpl, check);
+        }
         H5E_END_TRY;
         if (status >= 0)
             TEST_ERROR;
@@ -2039,7 +2069,10 @@ test_filter_noencoder(const char *dset_name)
      * allocation.
      */
     dims = 20; /* Dataset is originally of size 10 */
-    H5E_BEGIN_TRY { err = H5Dset_extent(dset_id, &dims); }
+    H5E_BEGIN_TRY
+    {
+        err = H5Dset_extent(dset_id, &dims);
+    }
     H5E_END_TRY
 
     if (err >= 0)
@@ -2048,7 +2081,10 @@ test_filter_noencoder(const char *dset_name)
     /* Attempt to write to the dataset.  This should fail because
      * the filter does not have an encoder.
      */
-    H5E_BEGIN_TRY { err = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, test_ints); }
+    H5E_BEGIN_TRY
+    {
+        err = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, test_ints);
+    }
     H5E_END_TRY
 
     if (err >= 0)
@@ -2141,7 +2177,10 @@ test_get_filter_info(void)
 
     /* Verify that get_filter_info throws an error when given a bad filter */
     /* (Depends on 1.6 compatibility flag) */
-    H5E_BEGIN_TRY { err = H5Zget_filter_info(-1, &flags); }
+    H5E_BEGIN_TRY
+    {
+        err = H5Zget_filter_info(-1, &flags);
+    }
     H5E_END_TRY;
     if (err >= 0)
         TEST_ERROR
@@ -2690,7 +2729,10 @@ test_missing_filter(hid_t file)
     } /* end if */
 
     /* Read data (should fail, since deflate filter is missing) */
-    H5E_BEGIN_TRY { ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dread(dsid, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, check);
+    }
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
@@ -3760,7 +3802,7 @@ test_nbit_compound_2(hid_t file)
             power               = HDpow(2.0F, (double)(precision[1] - 1));
             orig_data[i][j].a.c = (char)(((long long)HDrandom() % (long long)power) << offset[1]);
             power               = HDpow(2.0F, (double)(precision[2] - 1));
-            orig_data[i][j].a.s = (short)(-((long long)HDrandom() % (long long)power) << offset[2]);
+            orig_data[i][j].a.s = (short)(-(((long long)HDrandom() % (long long)power) << offset[2]));
             orig_data[i][j].a.f = float_val[i][j];
 
             power             = HDpow(2.0F, (double)precision[3]);
@@ -3776,7 +3818,7 @@ test_nbit_compound_2(hid_t file)
                 for (n = 0; n < (size_t)array_dims[1]; n++) {
                     power = HDpow(2.0F, (double)(precision[0] - 1));
                     orig_data[i][j].d[m][n].i =
-                        (int)(-((long long)HDrandom() % (long long)power) << offset[0]);
+                        (int)(-(((long long)HDrandom() % (long long)power) << offset[0]));
                     power = HDpow(2.0F, (double)(precision[1] - 1));
                     orig_data[i][j].d[m][n].c =
                         (char)(((long long)HDrandom() % (long long)power) << offset[1]);
@@ -4265,7 +4307,7 @@ test_nbit_int_size(hid_t file)
     if ((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1 * DSET_DIM2 * (precision / 8) ||
         dset_size > DSET_DIM1 * DSET_DIM2 * (precision / 8) + 1 * KB) {
         H5_FAILED();
-        HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n", __LINE__, dset_size);
+        HDfprintf(stdout, "    Line %d: wrong dataset size: %" PRIuHSIZE "\n", __LINE__, dset_size);
         goto error;
     } /* end if */
 
@@ -4459,7 +4501,7 @@ test_nbit_flt_size(hid_t file)
     if ((dset_size = H5Dget_storage_size(dataset)) < DSET_DIM1 * DSET_DIM2 * (precision / 8) ||
         dset_size > DSET_DIM1 * DSET_DIM2 * (precision / 8) + 1 * KB) {
         H5_FAILED();
-        HDfprintf(stdout, "    Line %d: wrong dataset size: %Hu\n", __LINE__, dset_size);
+        HDfprintf(stdout, "    Line %d: wrong dataset size: %" PRIuHSIZE "\n", __LINE__, dset_size);
         goto error;
     } /* end if */
 
@@ -5865,7 +5907,10 @@ test_can_apply_szip(hid_t
 
         /* Set (invalid at property set time) szip parameters */
         szip_pixels_per_block = 3;
-        H5E_BEGIN_TRY { ret = H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block);
+        }
         H5E_END_TRY;
         if (ret >= 0) {
             H5_FAILED();
@@ -5875,7 +5920,10 @@ test_can_apply_szip(hid_t
 
         /* Set (invalid at property set time) szip parameters */
         szip_pixels_per_block = 512;
-        H5E_BEGIN_TRY { ret = H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Pset_szip(dcpl, szip_options_mask, szip_pixels_per_block);
+        }
         H5E_END_TRY;
         if (ret >= 0) {
             H5_FAILED();
@@ -6628,7 +6676,10 @@ test_filter_delete(hid_t file)
     } /* end if */
 
     /* try to delete the deflate filter again */
-    H5E_BEGIN_TRY { ret = H5Premove_filter(dcpl1, H5Z_FILTER_DEFLATE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Premove_filter(dcpl1, H5Z_FILTER_DEFLATE);
+    }
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
@@ -6892,7 +6943,10 @@ test_zero_dims(hid_t file)
     } /* end if */
 
     /* Try creating chunked dataset with zero-sized chunk dimensions */
-    H5E_BEGIN_TRY { ret = H5Pset_chunk(dcpl, 1, &dsize); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_chunk(dcpl, 1, &dsize);
+    }
     H5E_END_TRY;
     if (ret > 0)
         FAIL_PUTS_ERROR("set zero-sized chunk dimensions")
@@ -7409,7 +7463,10 @@ test_deprec(hid_t file)
      * dataset can only be created once.  Temporarily turn off error
      * reporting.
      */
-    H5E_BEGIN_TRY { dataset = H5Dcreate1(file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        dataset = H5Dcreate1(file, DSET_DEFAULT_NAME, H5T_NATIVE_DOUBLE, space, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (dataset >= 0) {
         H5_FAILED();
@@ -7431,7 +7488,10 @@ test_deprec(hid_t file)
      * cannot be created with this function.  Temporarily turn off error
      * reporting.
      */
-    H5E_BEGIN_TRY { dataset = H5Dopen1(file, "does_not_exist"); }
+    H5E_BEGIN_TRY
+    {
+        dataset = H5Dopen1(file, "does_not_exist");
+    }
     H5E_END_TRY;
     if (dataset >= 0) {
         H5_FAILED();
@@ -7606,7 +7666,10 @@ test_huge_chunks(hid_t fapl)
 
     /* Try to set too large of a chunk for 1-D dataset (# of elements) */
     chunk_dim = TOO_HUGE_CHUNK_DIM;
-    H5E_BEGIN_TRY { ret = H5Pset_chunk(dcpl, 1, &chunk_dim); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_chunk(dcpl, 1, &chunk_dim);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         FAIL_PUTS_ERROR("    Set chunk size with too large of chunk dimensions.")
@@ -7615,7 +7678,10 @@ test_huge_chunks(hid_t fapl)
     chunk_dim2[0] = TOO_HUGE_CHUNK_DIM2_0;
     chunk_dim2[1] = TOO_HUGE_CHUNK_DIM2_1;
     chunk_dim2[2] = TOO_HUGE_CHUNK_DIM2_2;
-    H5E_BEGIN_TRY { ret = H5Pset_chunk(dcpl, 3, chunk_dim2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_chunk(dcpl, 3, chunk_dim2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         FAIL_PUTS_ERROR("    Set chunk size with too large of chunk dimensions.")
@@ -9127,7 +9193,10 @@ test_scatter(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Sclose(sid); }
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+    }
     H5E_END_TRY;
     return -1;
 } /* end test_scatter() */
@@ -9491,7 +9560,10 @@ test_gather(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Sclose(sid); }
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+    }
     H5E_END_TRY;
     return -1;
 } /* end test_gather() */
@@ -9595,14 +9667,20 @@ test_scatter_error(void)
      */
     scatter_info.src_buf = src_buf;
     scatter_info.size    = 6;
-    H5E_BEGIN_TRY { ret = H5Dscatter(NULL, NULL, H5T_NATIVE_INT, sid, dst_buf); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dscatter(NULL, NULL, H5T_NATIVE_INT, sid, dst_buf);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
 
     scatter_info.src_buf = src_buf;
     scatter_info.size    = 6;
-    H5E_BEGIN_TRY { ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, sid, sid, dst_buf); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dscatter((H5D_scatter_func_t)scatter_cb, &scatter_info, sid, sid, dst_buf);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -9715,7 +9793,10 @@ test_scatter_error(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Sclose(sid); }
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+    }
     H5E_END_TRY;
     return -1;
 } /* end test_scatter_error() */
@@ -9817,14 +9898,20 @@ test_gather_error(void)
 
     gather_info.expect_dst_buf = expect_dst_buf;
     gather_info.last_call      = FALSE;
-    H5E_BEGIN_TRY { ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 0, dst_buf, gather_cb, &gather_info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 0, dst_buf, gather_cb, &gather_info);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
 
     gather_info.expect_dst_buf = expect_dst_buf;
     gather_info.last_call      = FALSE;
-    H5E_BEGIN_TRY { ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 1, dst_buf, gather_cb, &gather_info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dgather(sid, src_buf, H5T_NATIVE_INT, 1, dst_buf, gather_cb, &gather_info);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -9872,7 +9959,10 @@ test_gather_error(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Sclose(sid); }
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(sid);
+    }
     H5E_END_TRY;
     return -1;
 } /* end test_gather_error() */

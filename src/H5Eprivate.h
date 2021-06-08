@@ -14,8 +14,8 @@
 /*
  *  Header file for error values, etc.
  */
-#ifndef _H5Eprivate_H
-#define _H5Eprivate_H
+#ifndef H5Eprivate_H
+#define H5Eprivate_H
 
 #include "H5Epublic.h"
 
@@ -179,4 +179,4 @@ extern int  H5E_mpi_error_str_len;
     }
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5Eprivate_H */
+#endif /* H5Eprivate_H */

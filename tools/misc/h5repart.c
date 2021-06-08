@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Wednesday, May 13, 1998
  *
  * Purpose:    Repartitions a file family.  This program can be used to
@@ -106,7 +106,7 @@ static off_t
 get_size(const char *progname, int *argno, int argc, char *argv[])
 {
     off_t retval = -1;
-    char *suffix;
+    char *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
         retval = HDstrtol(argv[*argno] + 2, &suffix, 10);
@@ -486,7 +486,10 @@ main(int argc, char *argv[])
      * driver when the new file is opened.  If the original file is a sec2 file and the
      * new file can only be a sec2 file, reopen the new file should fail.  There's
      * nothing to do in this case. */
-    H5E_BEGIN_TRY { file = H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(dst_gen_name, H5F_ACC_RDWR, fapl);
+    }
     H5E_END_TRY;
 
     if (file >= 0) {

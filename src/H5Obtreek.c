@@ -79,8 +79,8 @@ H5O_btreek_decode(H5F_t H5_ATTR_UNUSED *f, hid_t H5_ATTR_UNUSED dxpl_id, H5O_t H
                   unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags,
                   size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
 {
-    H5O_btreek_t *mesg;      /* Native message */
-    void *        ret_value; /* Return value */
+    H5O_btreek_t *mesg;             /* Native message */
+    void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -159,9 +159,9 @@ H5O_btreek_encode(H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared
 static void *
 H5O_btreek_copy(const void *_mesg, void *_dest)
 {
-    const H5O_btreek_t *mesg = (const H5O_btreek_t *)_mesg;
-    H5O_btreek_t *      dest = (H5O_btreek_t *)_dest;
-    void *              ret_value;
+    const H5O_btreek_t *mesg      = (const H5O_btreek_t *)_mesg;
+    H5O_btreek_t *      dest      = (H5O_btreek_t *)_dest;
+    void *              ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -200,7 +200,7 @@ static size_t
 H5O_btreek_size(const H5F_t H5_ATTR_UNUSED *f, hbool_t H5_ATTR_UNUSED disable_shared,
                 const void H5_ATTR_UNUSED *_mesg)
 {
-    size_t ret_value;
+    size_t ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 

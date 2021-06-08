@@ -14,8 +14,8 @@
  * This file contains private information about the H5PL module
  */
 
-#ifndef _H5PLprivate_H
-#define _H5PLprivate_H
+#ifndef H5PLprivate_H
+#define H5PLprivate_H
 
 /* Include package's public header */
 #include "H5PLpublic.h"
@@ -42,4 +42,4 @@
 /* Internal API routines */
 H5_DLL const void *H5PL_load(H5PL_type_t plugin_type, int type_id);
 
-#endif /* _H5PLprivate_H */
+#endif /* H5PLprivate_H */

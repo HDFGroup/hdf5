@@ -167,7 +167,10 @@ do_copy_refobjs(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                 H5TOOLS_GOTO_ERROR((-1), "HDcalloc failed");
                             } /* end if */
                             for (u = 0; u < nelmts; u++) {
-                                H5E_BEGIN_TRY { refobj_id = H5Rdereference(dset_in, H5R_OBJECT, &buf[u]); }
+                                H5E_BEGIN_TRY
+                                {
+                                    refobj_id = H5Rdereference(dset_in, H5R_OBJECT, &buf[u]);
+                                }
                                 H5E_END_TRY;
                                 if (refobj_id < 0)
                                     continue;

@@ -1,0 +1,198 @@
+ALIASES += THG="The HDF Group"
+
+################################################################################
+# Styling
+################################################################################
+
+ALIASES += Bold{1}="<b>\1</b>"
+ALIASES += Emph{1}="<em>\1</em>"
+ALIASES += Code{1}="<tt>\1</tt>"
+
+################################################################################
+# Return values
+################################################################################
+
+ALIASES += success{1}="\Bold{Success:} \1"
+ALIASES += failure{1}="\Bold{Failure:} \1"
+
+ALIASES += herr_t="Returns a non-negative value if successful; otherwise returns a negative value."
+ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
+ALIASES += hid_ti{1}="Returns an \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
+ALIASES += hid_tv{1}="Returns an \1 identifier if successful; otherwise returns a negative value. "
+ALIASES += htri_t="Returns zero (false), a positive (true) or a negative (failure) value."
+
+################################################################################
+# General
+################################################################################
+
+ALIASES += idx_type="\param[in] idx_type Index type"
+ALIASES += idx_type{1}="\param[in] \1 Index type"
+
+ALIASES += order="\param[in] order Iteration order"
+ALIASES += order{1}="\param[in] \1 Iteration order"
+
+ALIASES += op="\param[in] op Callback function"
+ALIASES += op{1}="\param[in] \1 Callback function"
+
+ALIASES += op_data="\param[in,out] op_data User-defined callback function context"
+ALIASES += op_data{1}="\param[in,out] \1 User-defined callback function context"
+
+ALIASES += op_data_in="\param[in] op_data User-defined callback function context"
+ALIASES += op_data_in{1}="\param[in] \1 User-defined callback function context"
+
+################################################################################
+# Attributes
+################################################################################
+
+ALIASES += attr_id="\param[in] attr_id Attribute identifier"
+ALIASES += attr_id{1}="\param[in] \1 Attribute identifier"
+
+################################################################################
+# Dataset
+################################################################################
+
+ALIASES += dset_id="\param[in] dset_id Dataset identifier"
+ALIASES += dset_id{1}="\param[in] \1 Dataset identifier"
+
+################################################################################
+# Dataspaces
+################################################################################
+
+ALIASES += space_id="\param[in] space_id Dataspace identifier"
+ALIASES += space_id{1}="\param[in] \1 Dataspace identifier"
+
+################################################################################
+# Dataypes
+################################################################################
+
+ALIASES += type_id="\param[in] type_id Datatype identifier"
+ALIASES += type_id{1}="\param[in] \1 Datatype identifier"
+
+ALIASES += file_type_id{1}="\param[in] \1 Datatype (in-file) identifier"
+ALIASES += mem_type_id{1}="\param[in] \1 Datatype (in-memory) identifier"
+
+################################################################################
+# Errors
+################################################################################
+
+ALIASES += estack_id="\param[in] estack_id Error stack identifier"
+ALIASES += estack_id{1}="\param[in] \1 Error stack identifier"
+
+################################################################################
+# Files
+################################################################################
+
+ALIASES += file_id="\param[in] file_id File identifier"
+ALIASES += file_id{1}="\param[in] \1 File identifier"
+
+ALIASES += fapl_id="\param[in] fapl_id File access property list identifier"
+ALIASES += fapl_id{1}="\param[in] \1 File access property list identifier"
+
+ALIASES += fcpl_id="\param[in] fcpl_id File creation property list identifier"
+ALIASES += fcpl_id{1}="\param[in] \1 File creation property list identifier"
+
+################################################################################
+# Groups
+################################################################################
+
+ALIASES += group_id="\param[in] group_id Group identifier"
+ALIASES += group_id{1}="\param[in] \1 Group identifier"
+
+################################################################################
+# Locations
+################################################################################
+
+ALIASES += loc_id="\param[in] loc_id Location identifier"
+ALIASES += loc_id{1}="\param[in] \1 Location identifier"
+
+ALIASES += fgdt_loc_id="\loc_id. The identifier may be that of a file, group, dataset, or named datatype."
+ALIASES += fgdt_loc_id{1}="\loc_id{\1}. The identifier may be that of a file, group, dataset, or named datatype."
+
+ALIASES += fgdta_loc_id="\loc_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+ALIASES += fgdta_loc_id{1}="\loc_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+
+ALIASES += fg_loc_id="\loc_id. The identifier may be that of a file or group."
+ALIASES += fg_loc_id{1}="\loc_id{\1}. The identifier may be that of a file or group."
+
+################################################################################
+# Property lists
+################################################################################
+
+ALIASES += aapl_id="\param[in] aapl_id Attribute access property list identifier"
+ALIASES += aapl_id{1}="\param[in] \1 Attribute access property list identifier"
+
+ALIASES += acpl_id="\param[in] acpl_id Attribute creation property list identifier"
+ALIASES += acpl_id{1}="\param[in] \1 Attribute creation property list identifier"
+
+ALIASES += dapl_id="\param[in] dapl_id Dataset access property list identifier"
+ALIASES += dapl_id{1}="\param[in] \1 Dataset access property list identifier"
+
+ALIASES += dcpl_id="\param[in] dcpl_id Dataset creation property list identifier"
+ALIASES += dcpl_id{1}="\param[in] \1 Dataset creation property list identifier"
+
+ALIASES += dxpl_id="\param[in] dxpl_id Dataset transfer property list identifier"
+ALIASES += dxpl_id{1}="\param[in] \1 Dataset transfer property list identifier"
+
+ALIASES += gapl_id="\param[in] gapl_id Group access property list identifier"
+ALIASES += gapl_id{1}="\param[in] \1 Group access property list identifier"
+
+ALIASES += gcpl_id="\param[in] gcpl_id Group creation property list identifier"
+ALIASES += gcpl_id{1}="\param[in] \1 Group creation property list identifier"
+
+ALIASES += lapl_id="\param[in] lapl_id Link access property list identifier"
+ALIASES += lapl_id{1}="\param[in] \1 Link access property list identifier"
+
+ALIASES += lcpl_id="\param[in] lcpl_id Link creation property list identifier"
+ALIASES += lcpl_id{1}="\param[in] \1 Link creation property list identifier"
+
+ALIASES += vipl_id="\param[in] vipl_id VOL initialization property list identifier"
+ALIASES += vipl_id{1}="\param[in] \1 vipl_id VOL initialization property list identifier"
+
+ALIASES += plist_id="\param[in] plist_id Property list identifier"
+ALIASES += plist_id{1}="\param[in] \1 Property list identifier"
+
+ALIASES += plistcls_id="\param[in] plistcls_id Property list class identifier"
+ALIASES += plistcls_id{1}="\param[in] \1 Property list class identifier"
+
+################################################################################
+# Objects
+################################################################################
+
+ALIASES += obj_id="\param[in] obj_id Object identifier"
+ALIASES += obj_id{1}="\param[in] \1 Object identifier"
+ALIASES += loc_obj_id{1}="\param[in] \1 Location identifier of object"
+
+ALIASES += fgdta_obj_id="\obj_id. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+ALIASES += fgdta_obj_id{1}="\obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+ALIASES += fgdta_loc_obj_id{1}="\loc_obj_id{\1}. The identifier may be that of a file, group, dataset, named datatype, or attribute."
+
+################################################################################
+# Others
+################################################################################
+
+ALIASES += estack_id="\param[in] estack_id Error stack identifier"
+ALIASES += estack_id{1}="\param[in] \1 Error stack identifier"
+ALIASES += cpp_c_api_note="\attention \Bold{C++ Developers using HDF5 C-API functions beware:}\n Several functions in this C-API take function pointers or callbacks as arguments. Examples include H5Pset_elink_cb(), H5Pset_type_conv_cb(), H5Tconvert(), and H5Ewalk2(). Application code must ensure that those callback functions return normally such to allow the HDF5 to manage its resources and maintain a consistent state. For instance, those functions must not use the C \c setjmp / \c longjmp mechanism to leave those callback functions. Within the context of C++, any exceptions thrown within the callback function must be caught, such as with a \Code{catch(…)} statement. Any exception state can be placed within the provided user data function call arguments, and may be thrown again once the calling function has returned. Exceptions raised and not handled inside the callback are not supported as it might leave the HDF5 library in an inconsistent state. Similarly, using C++20 coroutines cannot be used as callbacks, since they do not support plain return statements. If a callback function yields execution to another C++20 coroutine calling HDF5 functions as well, this may lead to undefined behavior."
+ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_coll_metadata_write() \li H5Pset_all_coll_metadata_ops() \li H5Pset_coll_metadata_write() \li \ref maybe_metadata_reads"
+
+################################################################################
+# The Usual Suspects
+################################################################################
+
+ALIASES += click4more="(Click on a enumerator, field, or type for more information.)"
+ALIASES += csets="<table><tr><td>#H5T_CSET_ASCII</td><td>US ASCII</td></tr><tr><td>#H5T_CSET_UTF8</td><td>UTF-8 Unicode encoding</td></tr></table>"
+ALIASES += datatype_class=" \li #H5T_INTEGER \li #H5T_FLOAT \li #H5T_STRING \li #H5T_BITFIELD \li #H5T_OPAQUE \li #H5T_COMPOUND \li #H5T_REFERENCE \li #H5T_ENUM \li #H5T_VLEN \li #H5T_ARRAY"
+ALIASES += file_access="<table><tr><td>#H5F_ACC_RDWR</td><td>File was opened with read/write access.</td></tr><tr><td>#H5F_ACC_RDONLY</td><td>File was opened with read-only access.</td></tr><tr><td>#H5F_ACC_SWMR_WRITE</td><td>File was opened with read/write access for a single-writer/multiple-reader (SWMR) scenario. Note that the writer process must also open the file with the #H5F_ACC_RDWR flag.</td></tr><tr><td>#H5F_ACC_SWMR_READ</td><td>File was opened with read-only access for a single-writer/multiple-reader (SWMR) scenario. Note that the reader process must also open the file with the #H5F_ACC_RDONLY flag.</td></tr></table>"
+ALIASES += id_types="<table><tr><td>#H5I_FILE</td><td>File</td></tr><tr><td>#H5I_GROUP</td><td>Group</td></tr><tr><td>#H5I_DATATYPE</td><td>Datatype</td></tr><tr><td>#H5I_DATASPACE</td><td>Dataspace</td></tr><tr><td>#H5I_DATASET</td><td>Dataset</td></tr><tr><td>#H5I_ATTR</td><td>Attribute</td></tr></table>"
+ALIASES += indexes="<table><tr><td>#H5_INDEX_NAME</td><td>Lexicographic order on name</td></tr><tr><td>#H5_INDEX_CRT_ORDER</td><td>Index on creation order</td></tr></table>"
+ALIASES += link_types="<table><tr><td>#H5L_TYPE_HARD</td><td>Hard link</td></tr><tr><td>#H5L_TYPE_SOFT</td><td>Soft link</td></tr><tr><td>#H5L_TYPE_EXTERNAL</td><td>External link</td></tr><tr><td>#H5L_TYPE_ERROR</td><td>Error</td></tr></table>"
+ALIASES += mem_types="<table><tr><td>#H5FD_MEM_DEFAULT</td><td>The default file memory allocation type</td></tr><tr><td>#H5FD_MEM_SUPER</td><td>File memory allocated for Superblock</td></tr><tr><td>#H5FD_MEM_BTREE</td><td>File memory allocated for B-tree</td></tr><tr><td>#H5FD_MEM_DRAW</td><td>File memory allocated for raw data</td></tr><tr><td>#H5FD_MEM_GHEAP</td><td>File memory allocated for Global Heap</td></tr><tr><td>#H5FD_MEM_LHEAP</td><td>File memory allocated for Local Heap</td></tr><tr><td>#H5FD_MEM_OHDR</td><td>File memory allocated for Object Header</td></tr></table>"
+ALIASES += norm_type="<table><tr><td>#H5T_NORM_IMPLIED</td><td>0</td><td>MSB of mantissa is not stored, always 1</td></tr><tr><td>#H5T_NORM_MSBSET</td><td>1</td><td>MSB of mantissa is always 1</td></tr><tr><td>#H5T_NORM_NONE</td><td>2</td><td>Mantissa is not normalized</td></tr></table>"
+ALIASES += obj_types="<table><tr><td>#H5F_OBJ_FILE</td><td>Files only</td></tr><tr><td>#H5F_OBJ_DATASET</td><td>Datasets only</td></tr><tr><td>#H5F_OBJ_GROUP</td><td>Groups only</td></tr><tr><td>#H5F_OBJ_DATATYPE</td><td>Named datatypes only</td></tr><tr><td>#H5F_OBJ_ATTR</td><td>Attributes only</td></tr><tr><td>#H5F_OBJ_ALL</td><td>All of the above</td></tr></tr><tr><td>#H5F_OBJ_LOCAL</td><td>Restrict search to objects opened through current file identifier.</td></tr></table> \attention #H5F_OBJ_LOCAL does not stand alone; it is effective only when used in combination with one or more of the preceding types. For example, #H5F_OBJ_DATASET | #H5F_OBJ_GROUP | #H5F_OBJ_LOCAL would count all datasets and groups opened through the current file identifier."
+ALIASES += orders="<table><tr><td>#H5_ITER_INC</td><td>Increasing order</td></tr><tr><td>#H5_ITER_DEC</td><td>Decreasing order</td></tr><tr><td>#H5_ITER_NATIVE</td><td>Fastest available order</td></tr></table>"
+ALIASES += padding_type="<table><tr><td>#H5T_PAD_ZERO</td><td>0</td><td>Set background to zeros</td></tr><tr><td>#H5T_PAD_ONE</td><td>1</td><td>Set background to ones</td></tr><tr><td>#H5T_PAD_BACKGROUND</td><td>2</td><td>Leave background alone</td></tr></table>"
+ALIASES += scopes="<table><tr><td>#H5F_SCOPE_GLOBAL</td><td>Flushes the entire virtual file</td></tr><tr><td>#H5F_SCOPE_LOCAL</td><td>Flushes only the specified file</td></tr></table>"
+ALIASES += sign_prop="<table><tr><td>#H5T_SGN_NONE</td><td>0</td><td>Unsigned integer type</td></tr><tr><td>#H5T_SGN_2</td><td>1</td><td>Two's complement signed integer type</td></tr></table>"
+ALIASES += storage_type="<table><tr><td>#H5G_STORAGE_TYPE_COMPACT</td><td>Compact storage</td></tr><tr><td>#H5G_STORAGE_TYPE_DENSE</td><td>Indexed storage</td></tr><tr><td>#H5G_STORAGE_TYPE_SYMBOL_TABLE</td><td>Symbol tables, the original HDF5 structure</td></tr></table>"
+ALIASES += str_pad_type="<table><tr><td>#H5T_STR_NULLTERM</td><td>0</td><td>Null terminate (as C does)</td></tr><tr><td>#H5T_STR_NULLPAD</td><td>1</td><td>Pad with zeros</td></tr><tr><td>#H5T_STR_SPACEPAD</td><td>2</td><td>Pad with spaces (as FORTRAN does)</td></tr></table>"
+ALIASES += obj_info_fields="<table><tr><th>Flag</th><th>Purpose</th></tr><tr><td>#H5O_INFO_BASIC</td><td>Fill in the fileno, addr, type, and rc fields</td></tr><tr> <td>#H5O_INFO_TIME</td><td>Fill in the atime, mtime, ctime, and btime fields</td></tr><tr> <td>#H5O_INFO_NUM_ATTRS</td> <td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_HDR</td><td>Fill in the num_attrs field</td></tr><tr><td>#H5O_INFO_META_SIZE</td><td>Fill in the meta_size field</td></tr><tr><td>#H5O_INFO_ALL</td><td>#H5O_INFO_BASIC | #H5O_INFO_TIME | #H5O_INFO_NUM_ATTRS | #H5O_INFO_HDR | #H5O_INFO_META_SIZE</td></tr></table>"

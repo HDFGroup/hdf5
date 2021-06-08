@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DSCreatPropList_H
-#define __H5DSCreatPropList_H
+#ifndef H5DSCreatPropList_H
+#define H5DSCreatPropList_H
 
 namespace H5 {
 
@@ -126,7 +126,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
         return ("DSetCreatPropList");
     }
 
-    // Copy constructor: creates a copy of a DSetCreatPropList object.
+    // Copy constructor - same as the original DSetCreatPropList.
     DSetCreatPropList(const DSetCreatPropList &orig);
 
     // Creates a copy of an existing dataset creation property list
@@ -152,4 +152,4 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
 }; // end of DSetCreatPropList
 } // namespace H5
 
-#endif // __H5DSCreatPropList_H
+#endif // H5DSCreatPropList_H

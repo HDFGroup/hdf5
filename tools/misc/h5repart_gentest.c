@@ -12,7 +12,7 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu<slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              June 1, 2005
  *
  * Purpose:     Generate a family file of 1024 bytes for each member
@@ -37,29 +37,29 @@ main(void)
 
     /* Set property list and file name for FAMILY driver */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
-        perror("H5Pcreate");
-        exit(EXIT_FAILURE);
+        HDperror("H5Pcreate");
+        HDexit(EXIT_FAILURE);
     }
 
     if (H5Pset_fapl_family(fapl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0) {
-        perror("H5Pset_fapl_family");
-        exit(EXIT_FAILURE);
+        HDperror("H5Pset_fapl_family");
+        HDexit(EXIT_FAILURE);
     }
 
     if ((file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
-        perror("H5Fcreate");
-        exit(EXIT_FAILURE);
+        HDperror("H5Fcreate");
+        HDexit(EXIT_FAILURE);
     }
 
     /* Create and write dataset */
     if ((space = H5Screate_simple(2, dims, NULL)) < 0) {
-        perror("H5Screate_simple");
-        exit(EXIT_FAILURE);
+        HDperror("H5Screate_simple");
+        HDexit(EXIT_FAILURE);
     }
 
     if ((dset = H5Dcreate2(file, dname, H5T_NATIVE_INT, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
-        perror("H5Dcreate2");
-        exit(EXIT_FAILURE);
+        HDperror("H5Dcreate2");
+        HDexit(EXIT_FAILURE);
     }
 
     for (i = 0; i < FAMILY_NUMBER; i++)
@@ -67,32 +67,32 @@ main(void)
             buf[i][j] = i * 10000 + j;
 
     if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
-        perror("H5Dwrite");
-        exit(EXIT_FAILURE);
+        HDperror("H5Dwrite");
+        HDexit(EXIT_FAILURE);
     }
 
     if (H5Sclose(space) < 0) {
-        perror("H5Sclose");
-        exit(EXIT_FAILURE);
+        HDperror("H5Sclose");
+        HDexit(EXIT_FAILURE);
     }
 
     if (H5Dclose(dset) < 0) {
-        perror("H5Dclose");
-        exit(EXIT_FAILURE);
+        HDperror("H5Dclose");
+        HDexit(EXIT_FAILURE);
     }
 
     if (H5Pclose(fapl) < 0) {
-        perror("H5Pclose");
-        exit(EXIT_FAILURE);
+        HDperror("H5Pclose");
+        HDexit(EXIT_FAILURE);
     }
 
     if (H5Fclose(file) < 0) {
-        perror("H5Fclose");
-        exit(EXIT_FAILURE);
+        HDperror("H5Fclose");
+        HDexit(EXIT_FAILURE);
     }
 
-    puts(" PASSED");
-    fflush(stdout);
+    HDputs(" PASSED");
+    HDfflush(stdout);
 
-    return 0;
+    return EXIT_SUCCESS;
 }

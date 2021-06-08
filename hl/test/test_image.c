@@ -11,10 +11,6 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <limits.h>
-#include <stdlib.h>
-#include <string.h>
-
 #include "h5hltest.h"
 #include "H5srcdir.h"
 #include "H5LTpublic.h"
@@ -305,7 +301,10 @@ out:
         HDfree(buf1_out);
     if (buf2_out)
         HDfree(buf2_out);
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     H5_FAILED();
     return FAIL;
@@ -492,7 +491,10 @@ out:
     if (image_data)
         HDfree(image_data);
 
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
 
     H5_FAILED();
@@ -724,7 +726,10 @@ out:
     if (image_data)
         HDfree(image_data);
 
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     if (f)
         HDfclose(f);

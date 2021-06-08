@@ -53,19 +53,35 @@ if test "XL" = "$cc_vendor"; then
 
     # Turn off shared lib option.  It causes some test suite to fail.
     enable_shared="${enable_shared:-no}"
+    
     # Make sure this is applied to other API compile options such as C++.
     AM_CFLAGS="$AM_CFLAGS"
+
     # -qflag=w:w makes the lowest level of reported compile issues to be "warning"
     # instead of "information". This suppresses a very large number of messages
     # concerning the portability of __inline__.
     H5_CFLAGS="-qlanglvl=stdc99 -qflag=w:w $H5_CFLAGS"
-    DEBUG_CFLAGS="-g -qfullpath"
-    DEBUG_CPPFLAGS=
+
+    # Produciton
+    PROD_CFLAGS=
+
+    # Debug
+    # NDEBUG is handled explicitly in configure
+    DEBUG_CFLAGS="-qfullpath"
+
+    # Symbols
+    SYMBOLS_CFLAGS="-g"
+    NO_SYMBOLS_CFLAGS=
+
+    # Profiling
+    PROFILE_CFLAGS="-pg"
+
+    # Optimization
     # -O causes test/dtypes to fail badly. Turn it off for now.
-    PROD_CFLAGS=""
-    PROD_CPPFLAGS=
-    PROFILE_CFLAGS="-g -qfullpath -pg"
-    PROFILE_CPPFLAGS=
+    HIGH_OPT_CFLAGS=
+    DEBUG_OPT_CFLAGS=
+    NO_OPT_CFLAGS=
+
     # Flags are set
     cc_flags_set=yes
 fi
@@ -104,3 +120,4 @@ if test X != X$CXX; then
 
     fi
 fi
+

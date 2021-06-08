@@ -119,8 +119,10 @@ $SRC_H5DIFF_TESTFILES/h5diff_attr_v_level2.h5
 $SRC_H5DIFF_TESTFILES/h5diff_enum_invalid_values.h5
 $SRC_H5DIFF_TESTFILES/non_comparables1.h5
 $SRC_H5DIFF_TESTFILES/non_comparables2.h5
-$SRC_H5DIFF_TESTFILES/diff_strings1.h5
-$SRC_H5DIFF_TESTFILES/diff_strings2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_strings1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_strings2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_eps1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_eps2.h5
 $SRC_TOOLS_TESTFILES/tvlstr.h5
 "
 
@@ -309,10 +311,12 @@ $SRC_H5DIFF_TESTFILES/h5diff_708.txt
 $SRC_H5DIFF_TESTFILES/h5diff_709.txt
 $SRC_H5DIFF_TESTFILES/h5diff_710.txt
 $SRC_H5DIFF_TESTFILES/h5diff_80.txt
+$SRC_H5DIFF_TESTFILES/h5diff_830.txt
 $SRC_H5DIFF_TESTFILES/h5diff_90.txt
 $SRC_H5DIFF_TESTFILES/h5diff_8625.txt
 $SRC_H5DIFF_TESTFILES/h5diff_8639.txt
 $SRC_H5DIFF_TESTFILES/h5diff_vlstr.txt
+$SRC_H5DIFF_TESTFILES/h5diff_eps.txt
 "
 
 #
@@ -435,18 +439,20 @@ TOOLTEST() {
     # Run test.
     TESTING $H5DIFF $@
     (
-    #echo "#############################"
-    #echo "Expected output for '$H5DIFF $@'"
-    #echo "#############################"
-    cd $TESTDIR
-    eval $RUNCMD $H5DIFF_BIN "$@"
+        #echo "#############################"
+        #echo "Expected output for '$H5DIFF $@'"
+        #echo "#############################"
+        cd $TESTDIR
+        eval $RUNCMD $H5DIFF_BIN "$@"
     ) >$actual 2>$actual_err
     EXIT_CODE=$?
+
     # save actual and actual_err in case they are needed later.
     cp $actual $actual_sav
     STDOUT_FILTER $actual
     cp $actual_err $actual_err_sav
     STDERR_FILTER $actual_err
+
     # don't add exit code check in pmode, as it causes failure. (exit code
     # is from mpirun not tool)
     # if any problem occurs relate to an exit code, it will be caught in
@@ -480,22 +486,23 @@ TOOLTEST() {
         # is done by serial mode.
         grep -v "EXIT CODE:" $expect_sorted > $expect_sorted.noexit
         mv $expect_sorted.noexit $expect_sorted
-    if $CMP $expect_sorted $actual_sorted; then
-        echo " PASSED"
-    else
-        echo "*FAILED*"
-        nerrors="`expr $nerrors + 1`"
-        if test yes = "$verbose"; then
-        echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
-        $DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
-        echo "====The actual output ($actual_sav)"
-        sed 's/^/    /' < $actual_sav
-        echo "====The actual stderr ($actual_err_sav)"
-        sed 's/^/    /' < $actual_err_sav
-        echo "====End of actual stderr ($actual_err_sav)"
-        echo ""
+
+        if $CMP $expect_sorted $actual_sorted; then
+            echo " PASSED"
+        else
+            echo "*FAILED*"
+            nerrors="`expr $nerrors + 1`"
+            if test yes = "$verbose"; then
+            echo "====Expected result ($expect_sorted) differs from actual result ($actual_sorted)"
+            $DIFF $expect_sorted $actual_sorted |sed 's/^/    /'
+            echo "====The actual output ($actual_sav)"
+            sed 's/^/    /' < $actual_sav
+            echo "====The actual stderr ($actual_err_sav)"
+            sed 's/^/    /' < $actual_err_sav
+            echo "====End of actual stderr ($actual_err_sav)"
+            echo ""
+            fi
         fi
-    fi
     fi
 
     # Clean up output file
@@ -647,7 +654,7 @@ TOOLTEST h5diff_56.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset6a dset6b
 TOOLTEST h5diff_57.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset7a dset7b
 
 # 5.8 (region reference)
-TOOLTEST h5diff_58.txt -v h5diff_dset1.h5 h5diff_dset2.h5 refreg
+TOOLTEST h5diff_58.txt -v2 h5diff_dset1.h5 h5diff_dset2.h5 refreg
 
 # test for both dset and attr with same type but with different size
 # ( HDDFV-7942 )
@@ -655,10 +662,10 @@ TOOLTEST h5diff_59.txt -v h5diff_dtypes.h5 h5diff_dtypes.h5 dset11a dset11b
 
 # Strings
 # ( HDFFV-10128 )
-TOOLTEST h5diff_60.txt -v diff_strings1.h5 diff_strings2.h5 string1 string1
-TOOLTEST h5diff_61.txt -v diff_strings1.h5 diff_strings2.h5 string2 string2
-TOOLTEST h5diff_62.txt -v diff_strings1.h5 diff_strings2.h5 string3 string3
-TOOLTEST h5diff_63.txt -v diff_strings1.h5 diff_strings2.h5 string4 string4
+TOOLTEST h5diff_60.txt -v h5diff_strings1.h5 h5diff_strings2.h5 string1 string1
+TOOLTEST h5diff_61.txt -v h5diff_strings1.h5 h5diff_strings2.h5 string2 string2
+TOOLTEST h5diff_62.txt -v h5diff_strings1.h5 h5diff_strings2.h5 string3 string3
+TOOLTEST h5diff_63.txt -v h5diff_strings1.h5 h5diff_strings2.h5 string4 string4
 
 # ##############################################################################
 # # Error messages
@@ -700,6 +707,9 @@ TOOLTEST h5diff_609.txt -d 200 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dse
 
 # 6.10: number smaller than smallest difference
 TOOLTEST h5diff_610.txt -d 1 h5diff_basic1.h5 h5diff_basic2.h5 g1/dset3 g1/dset4
+
+# eps: number smaller than epsilon
+TOOLTEST h5diff_eps.txt -v3 -d 1e-16 h5diff_eps1.h5 h5diff_eps2.h5
 
 
 # ##############################################################################
@@ -1121,6 +1131,10 @@ TOOLTEST h5diff_644.txt -v --use-system-epsilon -d 5 h5diff_basic1.h5 h5diff_bas
 TOOLTEST h5diff_645.txt -v -p 0.05 --use-system-epsilon h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 TOOLTEST h5diff_646.txt -v --use-system-epsilon -p 0.05 h5diff_basic1.h5 h5diff_basic2.h5 /g1/dset3 /g1/dset4
 
+# ##############################################################################
+# # dataset subsets
+# ##############################################################################
+#TRILABS_227 TOOLTEST h5diff_830.txt --enable-error-stack -v h5diff_dset1.h5 h5diff_dset2.h5 /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;]
 
 # ##############################################################################
 # # END

@@ -11,8 +11,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5DSpublic_H
-#define _H5DSpublic_H
+#ifndef H5DSpublic_H
+#define H5DSpublic_H
 
 #define DIMENSION_SCALE_CLASS "DIMENSION_SCALE"
 #define DIMENSION_LIST        "DIMENSION_LIST"
