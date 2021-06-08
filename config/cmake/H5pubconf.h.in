@@ -509,10 +509,10 @@
 #define H5_PACKAGE_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
 /* Determine the maximum decimal precision in C */
-#cmakedefine H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
+#define H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
 
 /* Define Fortran Maximum Real Decimal Precision */
-#cmakedefine H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
+#define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #cmakedefine H5_PRINTF_LL_WIDTH @H5_PRINTF_LL_WIDTH@
