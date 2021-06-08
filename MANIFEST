@@ -895,7 +895,6 @@
 ./src/H5HGpkg.h
 ./src/H5HGprivate.h
 ./src/H5HGquery.c
-./src/H5HGtrap.c
 ./src/H5HL.c
 ./src/H5HLcache.c
 ./src/H5HLdbg.c

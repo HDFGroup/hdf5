@@ -359,7 +359,6 @@ set (H5HG_SOURCES
     ${HDF5_SRC_DIR}/H5HGcache.c
     ${HDF5_SRC_DIR}/H5HGdbg.c
     ${HDF5_SRC_DIR}/H5HGquery.c
-    ${HDF5_SRC_DIR}/H5HGtrap.c
 )
 
 set (H5HG_HDRS

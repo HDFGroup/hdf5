@@ -17,8 +17,6 @@
 
 #include "H5Cpkg.h"
 #include "H5Fpkg.h"
-// #include "H5Iprivate.h"
-#include "H5HGprivate.h"
 #include "H5VLprivate.h"
 
 #include "testhdf5.h"
@@ -117,16 +115,6 @@ usage(const char *progname)
     fprintf(stderr, "  -q: be quiet: few/no progress messages\n");
     fprintf(stderr, "  -t (oob|null): select out-of-bounds or NULL test\n");
     exit(EXIT_FAILURE);
-}
-
-bool
-H5HG_trap(const char *reason)
-{
-    if (strcmp(reason, "out of bounds") == 0) {
-        caught_out_of_bounds = true;
-        return false;
-    }
-    return true;
 }
 
 int

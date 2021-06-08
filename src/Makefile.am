@@ -74,7 +74,7 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
         H5HF.c H5HFbtree2.c H5HFcache.c H5HFdbg.c H5HFdblock.c H5HFdtable.c \
         H5HFhdr.c H5HFhuge.c H5HFiblock.c H5HFiter.c H5HFman.c H5HFsection.c \
         H5HFspace.c H5HFstat.c H5HFtest.c H5HFtiny.c \
-        H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c H5HGtrap.c \
+        H5HG.c H5HGcache.c H5HGdbg.c H5HGquery.c \
         H5HL.c H5HLcache.c H5HLdbg.c H5HLint.c H5HLprfx.c H5HLdblk.c \
         H5HP.c \
         H5I.c H5Idbg.c H5Iint.c H5Itest.c \
