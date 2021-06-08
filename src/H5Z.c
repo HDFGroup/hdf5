@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -137,8 +137,15 @@ H5Z_term_package(void)
         if (H5DEBUG(Z)) {
             for (i = 0; i < H5Z_table_used_g; i++) {
                 for (dir = 0; dir < 2; dir++) {
+                    struct {
+                        char *user;
+                        char *system;
+                        char *elapsed;
+                    } timestrs = {H5_timer_get_time_string(H5Z_stat_table_g[i].stats[dir].times.user),
+                                  H5_timer_get_time_string(H5Z_stat_table_g[i].stats[dir].times.system),
+                                  H5_timer_get_time_string(H5Z_stat_table_g[i].stats[dir].times.elapsed)};
                     if (0 == H5Z_stat_table_g[i].stats[dir].total)
-                        continue;
+                        goto next;
 
                     if (0 == nprint++) {
                         /* Print column headers */
@@ -163,12 +170,14 @@ H5Z_term_package(void)
                                  H5Z_stat_table_g[i].stats[dir].times.elapsed);
 
                     /* Print the statistics */
-                    HDfprintf(H5DEBUG(Z), "   %s%-15s %10Hd %10Hd %8T %8T %8T %10s\n", (dir ? "<" : ">"),
-                              comment, H5Z_stat_table_g[i].stats[dir].total,
-                              H5Z_stat_table_g[i].stats[dir].errors,
-                              H5Z_stat_table_g[i].stats[dir].times.user,
-                              H5Z_stat_table_g[i].stats[dir].times.system,
-                              H5Z_stat_table_g[i].stats[dir].times.elapsed, bandwidth);
+                    HDfprintf(H5DEBUG(Z), "   %s%-15s %10" PRIdHSIZE " %10" PRIdHSIZE " %8s %8s %8s %10s\n",
+                              (dir ? "<" : ">"), comment, H5Z_stat_table_g[i].stats[dir].total,
+                              H5Z_stat_table_g[i].stats[dir].errors, timestrs.user, timestrs.system,
+                              timestrs.elapsed, bandwidth);
+next:
+                    HDfree(timestrs.user);
+                    HDfree(timestrs.system);
+                    HDfree(timestrs.elapsed);
                 } /* end for */
             }     /* end for */
         }         /* end if */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -88,7 +88,9 @@ const DSetAccPropList &DSetAccPropList::DEFAULT = *getConstant();
 ///\brief       Default constructor: creates a stub dataset creation property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList() : LinkAccPropList(H5P_DATASET_ACCESS) {}
+DSetAccPropList::DSetAccPropList() : LinkAccPropList(H5P_DATASET_ACCESS)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList copy constructor
@@ -96,7 +98,9 @@ DSetAccPropList::DSetAccPropList() : LinkAccPropList(H5P_DATASET_ACCESS) {}
 ///             DSetAccPropList object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList(const DSetAccPropList &orig) : LinkAccPropList(orig) {}
+DSetAccPropList::DSetAccPropList(const DSetAccPropList &orig) : LinkAccPropList(orig)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList overloaded constructor
@@ -104,7 +108,9 @@ DSetAccPropList::DSetAccPropList(const DSetAccPropList &orig) : LinkAccPropList(
 ///             existing dataset creation property list.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList(const hid_t plist_id) : LinkAccPropList(plist_id) {}
+DSetAccPropList::DSetAccPropList(const hid_t plist_id) : LinkAccPropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList::setChunkCache
@@ -159,6 +165,8 @@ DSetAccPropList::getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double 
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetAccPropList::~DSetAccPropList() {}
+DSetAccPropList::~DSetAccPropList()
+{
+}
 
 } // namespace H5

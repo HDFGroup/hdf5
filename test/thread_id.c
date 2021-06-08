@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -73,7 +73,7 @@ pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *at
     if (attr != NULL)
         return EINVAL;
 
-    memset(barrier, 0, sizeof(*barrier));
+    HDmemset(barrier, 0, sizeof(*barrier));
 
     barrier->count = count;
 
@@ -96,7 +96,7 @@ barrier_lock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_lock(&barrier->mtx)) != 0) {
-        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__, strerror(rc));
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__, HDstrerror(rc));
     }
 }
 
@@ -106,7 +106,7 @@ barrier_unlock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_unlock(&barrier->mtx)) != 0) {
-        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__, strerror(rc));
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__, HDstrerror(rc));
     }
 }
 
@@ -203,16 +203,16 @@ atomic_printf(const char *fmt, ...)
     va_list ap;
     ssize_t nprinted, nwritten;
 
-    va_start(ap, fmt);
-    nprinted = vsnprintf(buf, sizeof(buf), fmt, ap);
-    va_end(ap);
+    HDva_start(ap, fmt);
+    nprinted = HDvsnprintf(buf, sizeof(buf), fmt, ap);
+    HDva_end(ap);
 
     if (nprinted == -1)
         my_err(EXIT_FAILURE, "%s.%d: vsnprintf", __func__, __LINE__);
     else if (nprinted >= (ssize_t)sizeof(buf))
         my_errx(EXIT_FAILURE, "%s.%d: vsnprintf overflowed", __func__, __LINE__);
 
-    nwritten = write(STDOUT_FILENO, buf, (size_t)nprinted);
+    nwritten = HDwrite(STDOUT_FILENO, buf, (size_t)nprinted);
     if (nwritten < nprinted) {
         my_errx(EXIT_FAILURE, "%s.%d: write error or short write", __func__, __LINE__);
     }

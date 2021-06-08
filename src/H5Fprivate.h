@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
  * This file contains macros & information for file access
  */
 
-#ifndef _H5Fprivate_H
-#define _H5Fprivate_H
+#ifndef H5Fprivate_H
+#define H5Fprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5F_t H5F_t;
@@ -647,11 +647,11 @@ typedef struct H5F_t H5F_t;
 #define HDF5_BTREE_SNODE_IK_DEF 16
 #define HDF5_BTREE_CHUNK_IK_DEF                                                                              \
     32                                  /* Note! this value is assumed                                       \
-                                            to be 32 for version 0                                           \
-                                            of the superblock and                                            \
-                                            if it is changed, the code                                       \
-                                            must compensate. -QAK                                            \
-                                         */
+                                           to be 32 for version 0                                            \
+                                           of the superblock and                                             \
+                                           if it is changed, the code                                        \
+                                           must compensate. -QAK                                             \
+                                        */
 #define HDF5_BTREE_IK_MAX_ENTRIES 65536 /* 2^16 - 2 bytes for storing entries (children) */
 /* See format specification on version 1 B-trees */
 
@@ -970,4 +970,4 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *hea
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5Fprivate_H */
+#endif /* H5Fprivate_H */

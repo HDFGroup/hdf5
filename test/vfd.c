@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -99,7 +99,7 @@ static int splitter_create_single_file_at(const char *filename, hid_t fapl_id,
                                           const struct splitter_dataset_def *data);
 static int splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def *data);
 static int run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                             hbool_t provide_logfile_path, hid_t sub_fapl_ids[2]);
+                             hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2]);
 static int splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id);
 static int splitter_tentative_open_test(hid_t child_fapl_id);
 static int file_exists(const char *filename, hid_t fapl_id);
@@ -636,7 +636,10 @@ test_direct(void)
     if (H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    }
     H5E_END_TRY;
     if (file < 0) {
         H5Pclose(fapl);
@@ -836,13 +839,19 @@ test_family_opens(char *fname, hid_t fa_pl)
     /* Case 1: reopen file with 1st member file name and default property list */
     HDsnprintf(first_name, sizeof(first_name), fname, 0);
 
-    H5E_BEGIN_TRY { file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
 
     /* Case 2: reopen file with correct name template but default property list */
-    H5E_BEGIN_TRY { file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -851,7 +860,10 @@ test_family_opens(char *fname, hid_t fa_pl)
     if (H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fopen(fname, H5F_ACC_RDWR, fa_pl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -867,7 +879,10 @@ test_family_opens(char *fname, hid_t fa_pl)
     if (H5Pset_fapl_family(fa_pl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -1341,7 +1356,10 @@ test_multi_opens(char *fname)
     HDsnprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
-    H5E_BEGIN_TRY { fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     return (fid >= 0 ? FAIL : SUCCEED);
@@ -2201,9 +2219,9 @@ test_ros3(void)
     /* need a macro to compare instances of H5FD_ros3_fapl_t */
     if ((test_ros3_fa.version != ros3_fa_0.version) ||
         (test_ros3_fa.authenticate != ros3_fa_0.authenticate) ||
-        (strcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
-        (strcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
-        (strcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
+        (HDstrcmp(test_ros3_fa.aws_region, ros3_fa_0.aws_region) != 0) ||
+        (HDstrcmp(test_ros3_fa.secret_id, ros3_fa_0.secret_id) != 0) ||
+        (HDstrcmp(test_ros3_fa.secret_key, ros3_fa_0.secret_key) != 0))
         TEST_ERROR;
 
     h5_fixname(FILENAME[10], fapl_id, filename, sizeof(filename));
@@ -2252,7 +2270,7 @@ error:
         AT();                                                                                                \
         HDfprintf(stderr, mesg);                                                                             \
         H5Eprint2(H5E_DEFAULT, stderr);                                                                      \
-        fflush(stderr);                                                                                      \
+        HDfflush(stderr);                                                                                    \
         ret_value = -1;                                                                                      \
         goto done;                                                                                           \
     }
@@ -2306,7 +2324,7 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
         }
     }
     if ((HDstrlen(info->wo_path) != HDstrlen(fetched_info->wo_path)) ||
-        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX)) {
+        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
         HDfprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, fetched_info->wo_path);
@@ -2338,7 +2356,7 @@ done:
  */
 static int
 run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                  hbool_t provide_logfile_path, hid_t sub_fapl_ids[2])
+                  hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2])
 {
     hid_t                       file_id     = H5I_INVALID_HID;
     hid_t                       fapl_id     = H5I_INVALID_HID;
@@ -2464,7 +2482,7 @@ run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_err
     }
 
     /* Verify existence of logfile if appropriate */
-    logfile = fopen(vfd_config->log_file_path, "r");
+    logfile = HDfopen(vfd_config->log_file_path, "r");
     if ((TRUE == provide_logfile_path && NULL == logfile) ||
         (FALSE == provide_logfile_path && NULL != logfile)) {
         SPLITTER_TEST_FAULT("no logfile when one was expected\n");
@@ -2485,7 +2503,7 @@ done:
     }
 
     if (logfile != NULL)
-        fclose(logfile);
+        HDfclose(logfile);
 
     HDfree(vfd_config);
     HDfree(filename_rw);
@@ -2531,7 +2549,10 @@ driver_is_splitter_compatible(hid_t fapl_id)
     HDstrncpy(vfd_config->wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
     vfd_config->log_file_path[0] = '\0';
 
-    H5E_BEGIN_TRY { ret = H5Pset_fapl_splitter(split_fapl_id, vfd_config); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_fapl_splitter(split_fapl_id, vfd_config);
+    }
     H5E_END_TRY;
     if (SUCCEED == ret) {
         ret_value = -1;
@@ -2547,7 +2568,10 @@ driver_is_splitter_compatible(hid_t fapl_id)
     return ret_value;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(split_fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(split_fapl_id);
+    }
     H5E_END_TRY;
 
     HDfree(vfd_config);
@@ -2608,7 +2632,10 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
      * Should fail.
      */
 
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open on nonexistent files unexpectedly successful\n");
@@ -2621,7 +2648,10 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     if (splitter_create_single_file_at(vfd_config->wo_path, vfd_config->wo_fapl_id, data) < 0) {
         SPLITTER_TEST_FAULT("can't write W/O file\n");
     }
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open with extant W/O file unexpectedly successful\n");
@@ -2635,7 +2665,10 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     if (splitter_create_single_file_at(filename_rw, vfd_config->rw_fapl_id, data) < 0) {
         SPLITTER_TEST_FAULT("can't create R/W file\n");
     }
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open with extant R/W file unexpectedly successful\n");
@@ -2870,7 +2903,10 @@ splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def 
 
 done:
     if (ret_value < 0) {
-        H5E_BEGIN_TRY { H5Dclose(dset_id); }
+        H5E_BEGIN_TRY
+        {
+            H5Dclose(dset_id);
+        }
         H5E_END_TRY;
     }
     return ret_value;
@@ -2968,7 +3004,10 @@ splitter_tentative_open_test(hid_t child_fapl_id)
      * Should fail.
      */
 
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with both nonexistent files unexpectedly succeeded\n");
@@ -2989,7 +3028,10 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_duplicate_file_by_bytes(filename_tmp, vfd_config->wo_path) < 0) {
         SPLITTER_TEST_FAULT("Can't create W/O file copy.\n");
     }
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with nonexistent R/W file unexpectedly succeeded\n");
@@ -3014,7 +3056,10 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_duplicate_file_by_bytes(filename_tmp, filename_rw) < 0) {
         SPLITTER_TEST_FAULT("Can't create R/W file copy.\n");
     }
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with nonexistent W/O unexpectedly succeeded\n");
@@ -3180,7 +3225,10 @@ file_exists(const char *filename, hid_t fapl_id)
     hid_t file_id   = H5I_INVALID_HID;
     int   ret_value = 0;
 
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id != H5I_INVALID_HID) {
         ret_value = 1;
@@ -3192,7 +3240,10 @@ file_exists(const char *filename, hid_t fapl_id)
     return ret_value;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+    }
     H5E_END_TRY;
     return ret_value;
 } /* end file_exists() */

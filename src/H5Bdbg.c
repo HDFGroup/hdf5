@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -95,13 +95,13 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
               ((shared->type->id) == H5B_SNODE_ID
                    ? "H5B_SNODE_ID"
                    : ((shared->type->id) == H5B_CHUNK_ID ? "H5B_CHUNK_ID" : "Unknown!")));
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Size of node:", shared->sizeof_rnode);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Size of raw (disk) key:", shared->sizeof_rkey);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of node:", shared->sizeof_rnode);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Size of raw (disk) key:", shared->sizeof_rkey);
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
               "Dirty flag:", bt->cache_info.is_dirty ? "True" : "False");
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Level:", bt->level);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Address of left sibling:", bt->left);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Address of right sibling:", bt->right);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of left sibling:", bt->left);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of right sibling:", bt->right);
     HDfprintf(stream, "%*s%-*s %u (%u)\n", indent, "", fwidth, "Number of children (max):", bt->nchildren,
               shared->two_k);
 
@@ -110,7 +110,8 @@ H5B_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, const H5
      */
     for (u = 0; u < bt->nchildren; u++) {
         HDfprintf(stream, "%*sChild %d...\n", indent, "", u);
-        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3), "Address:", bt->child[u]);
+        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
+                  "Address:", bt->child[u]);
 
         /* If there is a key debugging routine, use it to display the left & right keys */
         if (type->debug_key) {

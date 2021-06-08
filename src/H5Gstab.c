@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -150,11 +150,10 @@ H5G__stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint)
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Insert name into the heap */
-    if (UFAIL == (name_offset = H5HL_insert(f, heap, (size_t)1, "")))
+    if (H5HL_insert(f, heap, (size_t)1, "", &name_offset) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert name into heap")
 
-    /*
-     * B-tree's won't work if the first name isn't at the beginning
+    /* B-trees won't work if the first name isn't at the beginning
      * of the heap.
      */
     HDassert(0 == name_offset);

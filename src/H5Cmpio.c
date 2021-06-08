@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,7 +18,7 @@
  *              Quincey Koziol
  *
  * Purpose:     Functions in this file implement support for parallel I/O for
- *		generic cache code.
+ *              generic cache code.
  *
  *-------------------------------------------------------------------------
  */
@@ -28,7 +28,7 @@
 /****************/
 
 #include "H5Cmodule.h" /* This source code file is part of the H5C module */
-#define H5F_FRIEND     /*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND     /*suppress error about including H5Fpkg      */
 
 /***********/
 /* Headers */
@@ -154,10 +154,6 @@ static herr_t H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned 
  * Programmer:  John Mainzer
  *              3/17/10
  *
- * Changes:     Updated sanity checks to allow for the possibility that
- *              the slist is disabled.
- *                                               JRM -- 8/3/20
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -176,11 +172,9 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     unsigned           entries_to_clear[H5C_RING_NTYPES];
     haddr_t            addr;
     H5C_cache_entry_t *entry_ptr = NULL;
-
 #if H5C_DO_SANITY_CHECKS
     haddr_t last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
-
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
     char tbl_buf[1024];
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
@@ -743,13 +737,14 @@ H5C_mark_entries_as_clean(H5F_t *f, unsigned ce_array_len, haddr_t *ce_array_ptr
 
         if (entry_ptr == NULL) {
 #if H5C_DO_SANITY_CHECKS
-            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry[%u] = %a not in cache.\n", u, addr);
+            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry[%u] = %" PRIuHADDR " not in cache.\n", u,
+                      addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not in cache?!?!?")
         } /* end if */
         else if (!entry_ptr->is_dirty) {
 #if H5C_DO_SANITY_CHECKS
-            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry %a is not dirty!?!\n", addr);
+            HDfprintf(stdout, "H5C_mark_entries_as_clean: entry %" PRIuHADDR " is not dirty!?!\n", addr);
 #endif /* H5C_DO_SANITY_CHECKS */
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Listed entry not dirty?!?!?")
         } /* end else-if */

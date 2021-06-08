@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -284,9 +284,9 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
     HDassert(calling_fcn != NULL);
 
     HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
-    HDfprintf(stdout, " slist enabled = %d.\n", (int)(cache_ptr->slist_enabled));
-    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
-    HDfprintf(stdout, "	slist size = %lld.\n", (long long)(cache_ptr->slist_size));
+    HDfprintf(stdout, " slist %s.\n", cache_ptr->slist_enabled ? "enabled" : "disabled");
+    HDfprintf(stdout, "	slist len = %" PRIu32 ".\n", cache_ptr->slist_len);
+    HDfprintf(stdout, "	slist size = %zu.\n", cache_ptr->slist_size);
 
     if (cache_ptr->slist_len > 0) {
 
@@ -317,7 +317,7 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
                       (int)(entry_ptr->is_protected), (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty),
                       entry_ptr->type->name);
 
-            HDfprintf(stdout, "		node_ptr = %p, item = %p\n", node_ptr, H5SL_item(node_ptr));
+            HDfprintf(stdout, "		node_ptr = %p, item = %p\n", (void *)node_ptr, H5SL_item(node_ptr));
 
             /* increment node_ptr before we delete its target */
 
@@ -429,11 +429,11 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     int32_t aggregate_max_pins             = 0;
     double  hit_rate;
     double  prefetch_use_rate;
-    double  average_successful_search_depth                   = 0.0f;
-    double  average_failed_search_depth                       = 0.0f;
-    double  average_entries_skipped_per_calls_to_msic         = 0.0f;
-    double  average_dirty_pf_entries_skipped_per_call_to_msic = 0.0f;
-    double  average_entries_scanned_per_calls_to_msic         = 0.0f;
+    double  average_successful_search_depth                   = 0.0;
+    double  average_failed_search_depth                       = 0.0;
+    double  average_entries_skipped_per_calls_to_msic         = 0.0;
+    double  average_dirty_pf_entries_skipped_per_call_to_msic = 0.0;
+    double  average_entries_scanned_per_calls_to_msic         = 0.0;
 #endif                          /* H5C_COLLECT_CACHE_STATS */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -492,9 +492,9 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     }  /* end for */
 
     if ((total_hits > 0) || (total_misses > 0))
-        hit_rate = (double)100.0f * ((double)(total_hits)) / ((double)(total_hits + total_misses));
+        hit_rate = 100.0 * ((double)(total_hits)) / ((double)(total_hits + total_misses));
     else
-        hit_rate = 0.0f;
+        hit_rate = 0.0;
 
     if (cache_ptr->successful_ht_searches > 0)
         average_successful_search_depth = ((double)(cache_ptr->total_successful_ht_search_depth)) /
@@ -617,8 +617,8 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
               (long long)(cache_ptr->slist_scan_restarts), (long long)(cache_ptr->LRU_scan_restarts),
               (long long)(cache_ptr->index_scan_restarts));
 
-    HDfprintf(stdout, "%s  cache image creations/reads/loads/size = %d / %d /%d / %Hu\n", cache_ptr->prefix,
-              cache_ptr->images_created, cache_ptr->images_read, cache_ptr->images_loaded,
+    HDfprintf(stdout, "%s  cache image creations/reads/loads/size = %d / %d /%d / %" PRIuHSIZE "\n",
+              cache_ptr->prefix, cache_ptr->images_created, cache_ptr->images_read, cache_ptr->images_loaded,
               cache_ptr->last_image_size);
 
     HDfprintf(stdout, "%s  prefetches / dirty prefetches      = %lld / %lld\n", cache_ptr->prefix,
@@ -630,10 +630,9 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
               (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]));
 
     if (cache_ptr->prefetches > 0)
-        prefetch_use_rate =
-            (double)100.0f * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
+        prefetch_use_rate = 100.0 * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
     else
-        prefetch_use_rate = 0.0f;
+        prefetch_use_rate = 0.0;
 
     HDfprintf(stdout, "%s  prefetched entry use rate          = %lf\n", cache_ptr->prefix, prefetch_use_rate);
 
@@ -658,10 +657,10 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
                       ((cache_ptr->class_table_ptr))[i]->name);
 
             if ((cache_ptr->hits[i] > 0) || (cache_ptr->misses[i] > 0))
-                hit_rate = (double)100.0f * ((double)(cache_ptr->hits[i])) /
+                hit_rate = 100.0 * ((double)(cache_ptr->hits[i])) /
                            ((double)(cache_ptr->hits[i] + cache_ptr->misses[i]));
             else
-                hit_rate = 0.0f;
+                hit_rate = 0.0;
 
             HDfprintf(stdout, "%s    hits / misses / hit_rate       = %ld / %ld / %f\n", cache_ptr->prefix,
                       (long)(cache_ptr->hits[i]), (long)(cache_ptr->misses[i]), hit_rate);
@@ -832,8 +831,6 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 #endif /* H5C_COLLECT_CACHE_STATS */
-
-    return;
 } /* H5C_stats__reset() */
 
 extern void H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t dump_parents,

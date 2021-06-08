@@ -144,9 +144,9 @@ test_timer_system_user(void)
     /* The system and user times may not be present on some systems.  They
      * will be -1.0 if they are not.
      */
-    if (timer.initial.system < (double)0.0f || timer.initial.user < (double)0.0f) {
+    if (timer.initial.system < 0.0 || timer.initial.user < 0.0) {
         SKIPPED();
-        printf("NOTE: No suitable way to get system/user times on this platform.\n");
+        HDprintf("NOTE: No suitable way to get system/user times on this platform.\n");
         return 0;
     }
 
@@ -165,7 +165,7 @@ test_timer_system_user(void)
         TEST_ERROR;
 
     /* System and user times should be non-negative. */
-    if (times.system < (double)0.0f || times.user < (double)0.0f)
+    if (times.system < 0.0 || times.user < 0.0)
         TEST_ERROR;
 
     PASSED();
@@ -224,7 +224,7 @@ test_timer_elapsed(void)
         TEST_ERROR;
 
     /* Elapsed time should be non-negative. */
-    if (times.elapsed < (double)0.0f)
+    if (times.elapsed < 0.0)
         TEST_ERROR;
 
     PASSED();
@@ -260,11 +260,11 @@ test_timer_functionality(void)
 
     /* Times should be initialized to zero */
     err = H5_timer_get_times(timer, &times);
-    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, (double)0.0f))
+    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, 0.0))
         TEST_ERROR;
 
     err = H5_timer_get_total_times(timer, &times);
-    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, (double)0.0f))
+    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, 0.0))
         TEST_ERROR;
 
     /********************
@@ -289,11 +289,11 @@ test_timer_functionality(void)
 
     /* Times should be positive and non-negative */
     err = H5_timer_get_times(timer, &times);
-    if (err < 0 || times.elapsed < (double)0.0f)
+    if (err < 0 || times.elapsed < 0.0)
         TEST_ERROR;
 
     err = H5_timer_get_total_times(timer, &times);
-    if (err < 0 || times.elapsed < (double)0.0f)
+    if (err < 0 || times.elapsed < 0.0)
         TEST_ERROR;
 
     /**********************
@@ -306,11 +306,11 @@ test_timer_functionality(void)
         TEST_ERROR;
 
     err = H5_timer_get_times(timer, &times);
-    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, (double)0.0f))
+    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, 0.0))
         TEST_ERROR;
 
     err = H5_timer_get_total_times(timer, &times);
-    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, (double)0.0f))
+    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, 0.0))
         TEST_ERROR;
 
     /* Timer state should flip */
@@ -326,12 +326,12 @@ test_timer_functionality(void)
 
     /* Times should be non-negative */
     err = H5_timer_get_times(timer, &times);
-    if (err < 0 || times.elapsed < (double)0.0f)
+    if (err < 0 || times.elapsed < 0.0)
         TEST_ERROR;
     prev_etime = times.elapsed;
 
     err = H5_timer_get_total_times(timer, &times);
-    if (err < 0 || times.elapsed < (double)0.0f)
+    if (err < 0 || times.elapsed < 0.0)
         TEST_ERROR;
     prev_total_etime = times.elapsed;
 
@@ -383,7 +383,7 @@ main(void)
 
     h5_reset();
 
-    printf("Testing platform-independent timer functionality.\n");
+    HDprintf("Testing platform-independent timer functionality.\n");
 
     nerrors += test_time_formatting() < 0 ? 1 : 0;
     nerrors += test_timer_system_user() < 0 ? 1 : 0;
@@ -391,11 +391,12 @@ main(void)
     nerrors += test_timer_functionality() < 0 ? 1 : 0;
 
     if (nerrors) {
-        printf("***** %d platform-independent timer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
+        HDprintf("***** %d platform-independent timer TEST%s FAILED! *****\n", nerrors,
+                 nerrors > 1 ? "S" : "");
         return 1;
     }
     else {
-        printf("All platform-independent timer tests passed.\n");
+        HDprintf("All platform-independent timer tests passed.\n");
         return 0;
     }
 }

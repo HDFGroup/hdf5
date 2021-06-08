@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -969,7 +969,10 @@ H5G__get_objinfo(const H5G_loc_t *loc, const char *name, hbool_t follow_link, H5
 
         /* Get information about link to the object. If this fails, e.g.
          * because the object is ".", just treat the object as a hard link. */
-        H5E_BEGIN_TRY { ret = H5L_get_info(loc, name, &linfo); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5L_get_info(loc, name, &linfo);
+        }
         H5E_END_TRY
 
         if (ret >= 0 && linfo.type != H5L_TYPE_HARD) {

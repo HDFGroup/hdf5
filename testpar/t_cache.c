@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1251,7 +1251,7 @@ reset_server_counters(void)
         success = FALSE;
         nerrors++;
         if (verbose) {
-            HDfprintf(stdout, "%d:%s: actual/total reads mismatch (%ld/%ld).\n", world_mpi_rank, FUNC,
+            HDfprintf(stdout, "%d:%s: actual/total reads mismatch (%ld/%d).\n", world_mpi_rank, FUNC,
                       actual_total_reads, total_reads);
         }
     }
@@ -1261,7 +1261,7 @@ reset_server_counters(void)
         success = FALSE;
         nerrors++;
         if (verbose) {
-            HDfprintf(stdout, "%d:%s: actual/total writes mismatch (%ld/%ld).\n", world_mpi_rank, FUNC,
+            HDfprintf(stdout, "%d:%s: actual/total writes mismatch (%ld/%d).\n", world_mpi_rank, FUNC,
                       actual_total_writes, total_writes);
         }
     }
@@ -1465,7 +1465,8 @@ serve_read_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, FUNC,
+                          target_addr);
             }
         }
         else if (data[target_index].len != mssg_ptr->len) {
@@ -1473,7 +1474,7 @@ serve_read_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: data[i].len = %Zu != mssg->len = %d.\n", world_mpi_rank, FUNC,
+                HDfprintf(stdout, "%d:%s: data[i].len = %zu != mssg->len = %d.\n", world_mpi_rank, FUNC,
                           data[target_index].len, mssg_ptr->len);
             }
         }
@@ -1482,7 +1483,9 @@ serve_read_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: proc %d read invalid entry. idx/base_addr = %d/%a.\n",
+                HDfprintf(stdout,
+                          "%d:%s: proc %d read invalid entry. "
+                          "idx/base_addr = %d/%" PRIuHADDR ".\n",
                           world_mpi_rank, FUNC, mssg_ptr->src, target_index, data[target_index].base_addr);
             }
         }
@@ -1651,7 +1654,8 @@ serve_write_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, FUNC,
+                          target_addr);
             }
         }
         else if (data[target_index].len != mssg_ptr->len) {
@@ -1659,7 +1663,7 @@ serve_write_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: data[i].len = %Zu != mssg->len = %d.\n", world_mpi_rank, FUNC,
+                HDfprintf(stdout, "%d:%s: data[i].len = %zu != mssg->len = %d.\n", world_mpi_rank, FUNC,
                           data[target_index].len, mssg_ptr->len);
             }
         }
@@ -1788,11 +1792,11 @@ serve_total_writes_request(struct mssg_t *mssg_ptr)
 
         if (success) {
 
-            HDfprintf(stdout, "%d request total writes %ld.\n", (int)(mssg_ptr->src), total_writes);
+            HDfprintf(stdout, "%d request total writes %d.\n", (int)(mssg_ptr->src), total_writes);
         }
         else {
 
-            HDfprintf(stdout, "%d request total writes %ld -- FAILED.\n", (int)(mssg_ptr->src), total_writes);
+            HDfprintf(stdout, "%d request total writes %d -- FAILED.\n", (int)(mssg_ptr->src), total_writes);
         }
     }
 
@@ -1858,11 +1862,11 @@ serve_total_reads_request(struct mssg_t *mssg_ptr)
 
         if (success) {
 
-            HDfprintf(stdout, "%d request total reads %ld.\n", (int)(mssg_ptr->src), total_reads);
+            HDfprintf(stdout, "%d request total reads %d.\n", (int)(mssg_ptr->src), total_reads);
         }
         else {
 
-            HDfprintf(stdout, "%d request total reads %ld -- FAILED.\n", (int)(mssg_ptr->src), total_reads);
+            HDfprintf(stdout, "%d request total reads %d -- FAILED.\n", (int)(mssg_ptr->src), total_reads);
         }
     }
 
@@ -1917,7 +1921,8 @@ serve_entry_writes_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, FUNC,
+                          target_addr);
             }
         }
         else {
@@ -2005,7 +2010,8 @@ serve_entry_reads_request(struct mssg_t *mssg_ptr)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: addr lookup failed for %a.\n", world_mpi_rank, FUNC, target_addr);
+                HDfprintf(stdout, "%d:%s: addr lookup failed for %" PRIuHADDR ".\n", world_mpi_rank, FUNC,
+                          target_addr);
             }
         }
         else {
@@ -2489,10 +2495,10 @@ datum_notify(H5C_notify_action_t action, void *thing)
                 HDfprintf(stdout,
                 "%d:%s: mssg.base_addr != entry_ptr->base_addr.\n",
                 world_mpi_rank, FUNC);
-                HDfprintf(stdout, "%d:%s: mssg.base_addr = %a.\n",
+                HDfprintf(stdout, "%d:%s: mssg.base_addr = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC, mssg.base_addr);
                 HDfprintf(stdout,
-                                  "%d:%s: entry_ptr->base_addr = %a.\n",
+                    "%d:%s: entry_ptr->base_addr = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC,
                                    entry_ptr->base_addr);
                     }
@@ -2502,7 +2508,7 @@ datum_notify(H5C_notify_action_t action, void *thing)
                 HDfprintf(stdout,
                                   "%d:%s: mssg.len != entry_ptr->len.\n",
                     world_mpi_rank, FUNC);
-                HDfprintf(stdout, "%d:%s: mssg.len = %a.\n",
+                HDfprintf(stdout, "%d:%s: mssg.len = %" PRIuHADDR ".\n",
                     world_mpi_rank, FUNC, mssg.len);
                     }
 
@@ -4297,8 +4303,8 @@ verify_entry_reads(haddr_t addr, int expected_entry_reads)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: rep/exp entry 0x%llx reads mismatch (%ld/%ld).\n", world_mpi_rank,
-                          FUNC, (long long)addr, reported_entry_reads, expected_entry_reads);
+                HDfprintf(stdout, "%d:%s: rep/exp entry 0x%" PRIxHADDR " reads mismatch (%d/%d).\n",
+                          world_mpi_rank, FUNC, addr, reported_entry_reads, expected_entry_reads);
             }
         }
     }
@@ -4394,7 +4400,7 @@ verify_entry_writes(haddr_t addr, int expected_entry_writes)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: rep/exp entry 0x%llx writes mismatch (%ld/%ld).\n", world_mpi_rank,
+                HDfprintf(stdout, "%d:%s: rep/exp entry 0x%llx writes mismatch (%d/%d).\n", world_mpi_rank,
                           FUNC, (long long)addr, reported_entry_writes, expected_entry_writes);
             }
         }
@@ -4486,8 +4492,8 @@ verify_total_reads(int expected_total_reads)
             nerrors++;
             success = FALSE;
             if (verbose) {
-                HDfprintf(stdout, "%d:%s: reported/expected total reads mismatch (%ld/%ld).\n",
-                          world_mpi_rank, FUNC, reported_total_reads, expected_total_reads);
+                HDfprintf(stdout, "%d:%s: reported/expected total reads mismatch (%ld/%d).\n", world_mpi_rank,
+                          FUNC, reported_total_reads, expected_total_reads);
             }
         }
     }
@@ -6514,15 +6520,15 @@ trace_file_check(int metadata_write_strategy)
                         HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank,
                                   FUNC, i);
                         if (expected_line_len == 0) {
-                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC,
+                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC,
                                       "<EMPTY>", expected_line_len);
-                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, buffer,
+                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC, buffer,
                                       actual_line_len);
                         }
                         if (actual_line_len == 0) {
-                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC,
+                            HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC,
                                       (*expected_output)[i], expected_line_len);
-                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC,
+                            HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC,
                                       "<EMPTY>", actual_line_len);
                         }
                     }
@@ -6538,9 +6544,9 @@ trace_file_check(int metadata_write_strategy)
                     if (verbose) {
                         HDfprintf(stdout, "%d:%s: Unexpected data in trace file line %d.\n", world_mpi_rank,
                                   FUNC, i);
-                        HDfprintf(stdout, "%d:%s: expected = \"%s\" %d\n", world_mpi_rank, FUNC,
+                        HDfprintf(stdout, "%d:%s: expected = \"%s\" %zu\n", world_mpi_rank, FUNC,
                                   (*expected_output)[i], expected_line_len);
-                        HDfprintf(stdout, "%d:%s: actual   = \"%s\" %d\n", world_mpi_rank, FUNC, buffer,
+                        HDfprintf(stdout, "%d:%s: actual   = \"%s\" %zu\n", world_mpi_rank, FUNC, buffer,
                                   actual_line_len);
                     }
                 }
@@ -6868,9 +6874,9 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("%d:Failed to turn off atexit processing. Continue.\n", mpi_rank);
-    };
+
     H5open();
 
     express_test = do_express_test();
@@ -6887,9 +6893,8 @@ main(int argc, char **argv)
     }
 
 #ifdef H5_HAVE_MPE
-    if (MAINPROCESS) {
+    if (MAINPROCESS)
         HDprintf("    Tests compiled for MPE.\n");
-    }
     virt_num_data_entries = MPE_VIRT_NUM_DATA_ENTIES;
 #endif /* H5_HAVE_MPE */
 
@@ -6902,11 +6907,8 @@ main(int argc, char **argv)
     }
 
     if (mpi_size < 3) {
-
-        if (MAINPROCESS) {
-
+        if (MAINPROCESS)
             HDprintf("    Need at least 3 processes.  Exiting.\n");
-        }
         goto finish;
     }
 
@@ -6924,17 +6926,14 @@ main(int argc, char **argv)
     /* setup file access property list with the world communicator */
     if (FAIL == (fapl = H5Pcreate(H5P_FILE_ACCESS))) {
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pcreate() failed 1.\n", world_mpi_rank, FUNC);
-        }
     }
 
     if (H5Pset_fapl_mpio(fapl, world_mpi_comm, MPI_INFO_NULL) < 0) {
-
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 1.\n", world_mpi_rank, FUNC);
-        }
     }
 
     /* fix the file names */
@@ -6942,9 +6941,8 @@ main(int argc, char **argv)
         if (h5_fixname(FILENAME[u], fapl, filenames[u], sizeof(filenames[u])) == NULL) {
 
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: h5_fixname() failed.\n", world_mpi_rank, FUNC);
-            }
             break;
         }
     }
@@ -6952,9 +6950,8 @@ main(int argc, char **argv)
     /* close the fapl before we set it up again */
     if (H5Pclose(fapl) < 0) {
         nerrors++;
-        if (verbose) {
+        if (verbose)
             HDfprintf(stdout, "%d:%s: H5Pclose() failed.\n", world_mpi_rank, FUNC);
-        }
     }
 
     /* now create the fapl again, excluding the server process. */
@@ -6963,32 +6960,25 @@ main(int argc, char **argv)
         /* setup file access property list */
         if (FAIL == (fapl = H5Pcreate(H5P_FILE_ACCESS))) {
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: H5Pcreate() failed 2.\n", world_mpi_rank, FUNC);
-            }
         }
 
         if (H5Pset_fapl_mpio(fapl, file_mpi_comm, MPI_INFO_NULL) < 0) {
-
             nerrors++;
-            if (verbose) {
+            if (verbose)
                 HDfprintf(stdout, "%d:%s: H5Pset_fapl_mpio() failed 2.\n", world_mpi_rank, FUNC);
-            }
         }
     }
 
     setup_rand();
 
     max_nerrors = get_max_nerrors();
-
     if (max_nerrors != 0) {
 
         /* errors in setup -- no point in continuing */
-
-        if (world_mpi_rank == 0) {
-
+        if (world_mpi_rank == 0)
             HDfprintf(stdout, "Errors in test initialization.  Exiting.\n");
-        }
         goto finish;
     }
 

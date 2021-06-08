@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -41,9 +41,9 @@
         nerrors++;                                                                                           \
         if (nerrors <= GHEAP_REPEATED_ERR_LIM) {                                                             \
             H5_FAILED();                                                                                     \
-            puts(MSG);                                                                                       \
+            HDputs(MSG);                                                                                     \
             if (nerrors == GHEAP_REPEATED_ERR_LIM)                                                           \
-                puts("    Suppressing further errors...");                                                   \
+                HDputs("    Suppressing further errors...");                                                 \
         } /* end if */                                                                                       \
     }     /* end GHEAP_REPEATED_ERR */
 
@@ -128,7 +128,7 @@ test_1(hid_t fapl)
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (HDmemcmp(in, out, size)) {
+        else if (HDmemcmp(in, out, size) != 0) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;
@@ -148,7 +148,10 @@ test_1(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -225,7 +228,7 @@ test_2(hid_t fapl)
             HDputs("    Unable to read object");
             nerrors++;
         }
-        else if (memcmp(in, out, size)) {
+        else if (HDmemcmp(in, out, size) != 0) {
             H5_FAILED();
             HDputs("    Value read doesn't match value written");
             nerrors++;
@@ -245,7 +248,10 @@ test_2(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -332,7 +338,10 @@ test_3(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -425,7 +434,10 @@ test_4(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -541,7 +553,10 @@ test_ooo_indices(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
     if (obj)
         HDfree(obj);
@@ -596,7 +611,10 @@ main(void)
     HDexit(EXIT_SUCCESS);
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

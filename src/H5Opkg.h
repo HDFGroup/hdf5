@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
 #error "Do not include this file outside the H5O package!"
 #endif
 
-#ifndef _H5Opkg_H
-#define _H5Opkg_H
+#ifndef H5Opkg_H
+#define H5Opkg_H
 
 /* Get package's private header */
 #include "H5Oprivate.h" /* Object headers		  	*/
@@ -647,4 +647,4 @@ H5_DLL herr_t H5O_assert(const H5O_t *oh);
 #endif /* H5O_DEBUG */
 H5_DLL herr_t H5O_debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5Opkg_H */
+#endif /* H5Opkg_H */

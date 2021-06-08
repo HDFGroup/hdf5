@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -459,8 +459,8 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     (cache_ptr->resize_ctl).max_increment       = H5C__DEF_AR_MAX_INCREMENT;
 
     (cache_ptr->resize_ctl).flash_incr_mode = H5C_flash_incr__off;
-    (cache_ptr->resize_ctl).flash_multiple  = 1.0f;
-    (cache_ptr->resize_ctl).flash_threshold = 0.25f;
+    (cache_ptr->resize_ctl).flash_multiple  = 1.0;
+    (cache_ptr->resize_ctl).flash_threshold = 0.25;
 
     (cache_ptr->resize_ctl).decr_mode              = H5C_decr__off;
     (cache_ptr->resize_ctl).upper_hr_threshold     = H5C__DEF_AR_UPPER_THRESHHOLD;
@@ -596,18 +596,18 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             HDfprintf(stdout, "%sAuto cache resize -- hit rate (%lf) out of bounds low (%6.5lf).\n",
                       cache_ptr->prefix, hit_rate, (cache_ptr->resize_ctl).lower_hr_threshold);
 
-            HDfprintf(stdout, "%scache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%scache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
                       old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
         case flash_increase:
             HDassert(old_max_cache_size < new_max_cache_size);
 
-            HDfprintf(stdout, "%sflash cache resize(%d) -- size threshold = %Zu.\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%sflash cache resize(%d) -- size threshold = %zu.\n", cache_ptr->prefix,
                       (int)((cache_ptr->resize_ctl).flash_incr_mode),
                       cache_ptr->flash_size_increase_threshold);
 
-            HDfprintf(stdout, "%s cache size increased from (%Zu/%Zu) to (%Zu/%Zu).\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%s cache size increased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
                       old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
@@ -648,7 +648,7 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
                               cache_ptr->prefix, hit_rate);
             }
 
-            HDfprintf(stdout, "%s    cache size decreased from (%Zu/%Zu) to (%Zu/%Zu).\n", cache_ptr->prefix,
+            HDfprintf(stdout, "%s    cache size decreased from (%zu/%zu) to (%zu/%zu).\n", cache_ptr->prefix,
                       old_max_cache_size, old_min_clean_size, new_max_cache_size, new_min_clean_size);
             break;
 
@@ -686,9 +686,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             HDfprintf(stdout, "%sAuto cache resize -- unknown status code.\n", cache_ptr->prefix);
             break;
     }
-
-    return;
-
 } /* H5C_def_auto_resize_rpt_fcn() */
 
 /*-------------------------------------------------------------------------
@@ -908,7 +905,7 @@ H5C_dest(H5F_t *f)
 
     if (cache_ptr->get_entry_ptr_from_addr_counter > 0) {
 
-        HDfprintf(stdout, "*** %ld calls to H5C_get_entry_ptr_from_add(). ***\n",
+        HDfprintf(stdout, "*** %" PRId64 " calls to H5C_get_entry_ptr_from_add(). ***\n",
                   cache_ptr->get_entry_ptr_from_addr_counter);
     }
 #endif /* H5C_DO_SANITY_CHECKS */
@@ -973,8 +970,7 @@ H5C_evict(H5F_t *f)
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache")
 
-    /* Disable the slist,
-     */
+    /* Disable the slist */
     if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
 
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist disabled failed")
@@ -987,8 +983,8 @@ done:
  * Function:    H5C_expunge_entry
  *
  * Purpose:     Use this function to tell the cache to expunge an entry
- *         from the cache without writing it to disk even if it is
- *         dirty.  The entry may not be either pinned or protected.
+ *              from the cache without writing it to disk even if it is
+ *              dirty.  The entry may not be either pinned or protected.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1759,7 +1755,7 @@ done:
  * Function:    H5C_mark_entry_unserialized
  *
  * Purpose:    Mark a pinned or protected entry as unserialized.  The target
- *        entry MUST be either pinned or protected, and MAY be both.
+ *             entry MUST be either pinned or protected, and MAY be both.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1805,7 +1801,7 @@ done:
  * Function:    H5C_mark_entry_serialized
  *
  * Purpose:    Mark a pinned entry as serialized.  The target entry MUST be
- *        pinned.
+ *             pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2140,7 +2136,7 @@ done:
  * Function:    H5C_pin_protected_entry()
  *
  * Purpose:    Pin a protected cache entry.  The entry must be protected
- *         at the time of call, and must be unpinned.
+ *             at the time of call, and must be unpinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2226,8 +2222,8 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
 #ifdef H5_HAVE_PARALLEL
     hbool_t coll_access = FALSE; /* whether access to the cache entry is done collectively */
 #endif                           /* H5_HAVE_PARALLEL */
-    hbool_t            write_permitted;
-    hbool_t            was_loaded = FALSE; /* Whether the entry was loaded as a result of the protect */
+    hbool_t            write_permitted = FALSE;
+    hbool_t            was_loaded      = FALSE; /* Whether the entry was loaded as a result of the protect */
     size_t             empty_space;
     void *             thing;
     H5C_cache_entry_t *entry_ptr;
@@ -2722,7 +2718,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             break;
 
         case H5C_incr__threshold:
-            if ((config_ptr->lower_hr_threshold <= (double)0.0f) || (config_ptr->increment <= (double)1.0f) ||
+            if ((config_ptr->lower_hr_threshold <= 0.0) || (config_ptr->increment <= 1.0) ||
                 ((config_ptr->apply_max_increment) && (config_ptr->max_increment <= 0)))
                 cache_ptr->size_increase_possible = FALSE;
             break;
@@ -2742,21 +2738,21 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             break;
 
         case H5C_decr__threshold:
-            if ((config_ptr->upper_hr_threshold >= (double)1.0f) || (config_ptr->decrement >= (double)1.0f) ||
+            if ((config_ptr->upper_hr_threshold >= 1.0) || (config_ptr->decrement >= 1.0) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
         case H5C_decr__age_out:
-            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= (double)1.0f)) ||
+            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= 1.0)) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
         case H5C_decr__age_out_with_threshold:
-            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= (double)1.0f)) ||
+            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= 1.0)) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)) ||
-                (config_ptr->upper_hr_threshold >= (double)1.0f))
+                (config_ptr->upper_hr_threshold >= 1.0))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
@@ -3069,15 +3065,15 @@ done:
  * Function:    H5C_unpin_entry()
  *
  * Purpose:    Unpin a cache entry.  The entry can be either protected or
- *         unprotected at the time of call, but must be pinned.
+ *             unprotected at the time of call, but must be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
  *              3/22/06
  *
- * Changes:    Added extreme sanity checks on entry and exit.
-                                JRM -- 4/26/14
+ * Changes:     Added extreme sanity checks on entry and exit.
+ *                                      JRM -- 4/26/14
  *
  *-------------------------------------------------------------------------
  */
@@ -3694,7 +3690,7 @@ done:
      * Function:    H5C_validate_resize_config()
      *
      * Purpose:    Run a sanity check on the specified sections of the
-     *        provided instance of struct H5C_auto_size_ctl_t.
+     *             provided instance of struct H5C_auto_size_ctl_t.
      *
      *        Do nothing and return SUCCEED if no errors are detected,
      *        and flag an error and return FAIL otherwise.
@@ -3734,8 +3730,7 @@ done:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "initial_size must be in the interval [min_size, max_size]")
 
-            if ((config_ptr->min_clean_fraction < (double)0.0f) ||
-                (config_ptr->min_clean_fraction > (double)1.0f))
+            if ((config_ptr->min_clean_fraction < 0.0) || (config_ptr->min_clean_fraction > 1.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "min_clean_fraction must be in the interval [0.0, 1.0]")
 
@@ -3751,12 +3746,11 @@ done:
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode")
 
             if (config_ptr->incr_mode == H5C_incr__threshold) {
-                if ((config_ptr->lower_hr_threshold < (double)0.0f) ||
-                    (config_ptr->lower_hr_threshold > (double)1.0f))
+                if ((config_ptr->lower_hr_threshold < 0.0) || (config_ptr->lower_hr_threshold > 1.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "lower_hr_threshold must be in the range [0.0, 1.0]")
 
-                if (config_ptr->increment < (double)1.0f)
+                if (config_ptr->increment < 1.0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "increment must be greater than or equal to 1.0")
 
@@ -3771,12 +3765,10 @@ done:
                     break;
 
                 case H5C_flash_incr__add_space:
-                    if ((config_ptr->flash_multiple < (double)0.1f) ||
-                        (config_ptr->flash_multiple > (double)10.0f))
+                    if ((config_ptr->flash_multiple < 0.1) || (config_ptr->flash_multiple > 10.0))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                     "flash_multiple must be in the range [0.1, 10.0]")
-                    if ((config_ptr->flash_threshold < (double)0.1f) ||
-                        (config_ptr->flash_threshold > (double)1.0f))
+                    if ((config_ptr->flash_threshold < 0.1) || (config_ptr->flash_threshold > 1.0))
                         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                     "flash_threshold must be in the range [0.1, 1.0]")
                     break;
@@ -3797,10 +3789,10 @@ done:
             }
 
             if (config_ptr->decr_mode == H5C_decr__threshold) {
-                if (config_ptr->upper_hr_threshold > (double)1.0f)
+                if (config_ptr->upper_hr_threshold > 1.0)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "upper_hr_threshold must be <= 1.0")
 
-                if ((config_ptr->decrement > (double)1.0f) || (config_ptr->decrement < (double)0.0f))
+                if ((config_ptr->decrement > 1.0) || (config_ptr->decrement < 0.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "decrement must be in the interval [0.0, 1.0]")
 
                 /* no need to check max_decrement as it is a size_t
@@ -3816,8 +3808,8 @@ done:
                 if (config_ptr->epochs_before_eviction > H5C__MAX_EPOCH_MARKERS)
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction too big")
 
-                if ((config_ptr->apply_empty_reserve) && ((config_ptr->empty_reserve > (double)1.0f) ||
-                                                          (config_ptr->empty_reserve < (double)0.0f)))
+                if ((config_ptr->apply_empty_reserve) &&
+                    ((config_ptr->empty_reserve > 1.0) || (config_ptr->empty_reserve < 0.0)))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "empty_reserve must be in the interval [0.0, 1.0]")
 
@@ -3827,8 +3819,7 @@ done:
             } /* H5C_decr__age_out || H5C_decr__age_out_with_threshold */
 
             if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold) {
-                if ((config_ptr->upper_hr_threshold > (double)1.0f) ||
-                    (config_ptr->upper_hr_threshold < (double)0.0f))
+                if ((config_ptr->upper_hr_threshold > 1.0) || (config_ptr->upper_hr_threshold < 0.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "upper_hr_threshold must be in the interval [0.0, 1.0]")
             } /* H5C_decr__age_out_with_threshold */
@@ -3849,11 +3840,11 @@ done:
     /*-------------------------------------------------------------------------
      * Function:    H5C_create_flush_dependency()
      *
-     * Purpose:    Initiates a parent<->child entry flush dependency.  The parent
+     * Purpose:     Initiates a parent<->child entry flush dependency.  The parent
      *              entry must be pinned or protected at the time of call, and must
      *              have all dependencies removed before the cache can shut down.
      *
-     * Note:    Flush dependencies in the cache indicate that a child entry
+     * Note:        Flush dependencies in the cache indicate that a child entry
      *              must be flushed to the file before its parent.  (This is
      *              currently used to implement Single-Writer/Multiple-Reader (SWMR)
      *              I/O access for data structures in the file).

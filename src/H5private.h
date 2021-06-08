@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,8 +21,8 @@
  *
  */
 
-#ifndef _H5private_H
-#define _H5private_H
+#ifndef H5private_H
+#define H5private_H
 
 #include "H5public.h" /* Include Public Definitions    */
 
@@ -187,23 +187,6 @@
 
 #endif /*H5_HAVE_WIN32_API*/
 
-/* Various ways that inline functions can be declared */
-#if defined(H5_HAVE___INLINE__)
-/* GNU (alternative form) */
-#define H5_INLINE __inline__
-#elif defined(H5_HAVE___INLINE)
-/* Visual Studio */
-#define H5_INLINE __inline
-#elif defined(H5_HAVE_INLINE)
-/* GNU, C++
- * Use "inline" as a last resort on the off-chance that there will
- * be C++ problems.
- */
-#define H5_INLINE inline
-#else
-#define H5_INLINE
-#endif /* inline choices */
-
 #ifndef F_OK
 #define F_OK 00
 #define W_OK 02
@@ -295,23 +278,14 @@
  * Note that Solaris Studio supports attribute, but does not support the
  * attributes we use.
  *
+ * When using H5_ATTR_FALLTHROUGH, you should also include a comment that
+ * says FALLTHROUGH to reduce warnings on compilers that don't use
+ * attributes but do respect fall-through comments.
+ *
  * H5_ATTR_CONST is redefined in tools/h5repack/dynlib_rpk.c to quiet
  * gcc warnings (it has to use the public API and can't include this
  * file). Be sure to update that file if the #ifdefs change here.
  */
-#ifdef __cplusplus
-#define H5_ATTR_FORMAT(X, Y, Z) /*void*/
-#define H5_ATTR_UNUSED          /*void*/
-#define H5_ATTR_DEPRECATED_USED /*void*/
-#define H5_ATTR_NDEBUG_UNUSED   /*void*/
-#define H5_ATTR_DEBUG_API_USED  /*void*/
-#define H5_ATTR_PARALLEL_UNUSED /*void*/
-#define H5_ATTR_PARALLEL_USED   /*void*/
-#define H5_ATTR_NORETURN        /*void*/
-#define H5_ATTR_CONST           /*void*/
-#define H5_ATTR_PURE            /*void*/
-#define H5_ATTR_FALLTHROUGH     /*void*/
-#else                           /* __cplusplus */
 #if defined(H5_HAVE_ATTRIBUTE) && !defined(__SUNPRO_C)
 #define H5_ATTR_FORMAT(X, Y, Z) __attribute__((format(X, Y, Z)))
 #define H5_ATTR_UNUSED          __attribute__((unused))
@@ -358,7 +332,6 @@
 #define H5_ATTR_PURE            /*void*/
 #define H5_ATTR_FALLTHROUGH     /*void*/
 #endif
-#endif /* __cplusplus */
 
 /*
  * Networking headers used by the mirror VFD and related tests and utilities.
@@ -387,7 +360,6 @@
  */
 #define SUCCEED 0
 #define FAIL    (-1)
-#define UFAIL   (unsigned)(-1)
 
 /* The HDF5 library uses the symbol `ERR` frequently.  So do
  * header files for libraries such as curses(3), terminfo(3), etc.
@@ -907,10 +879,12 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfork
 #define HDfork() fork()
 #endif /* HDfork */
+#ifndef HDfprintf
+#define HDfprintf fprintf
+#endif
 #ifndef HDfpathconf
 #define HDfpathconf(F, N) fpathconf(F, N)
 #endif /* HDfpathconf */
-H5_DLL int HDfprintf(FILE *stream, const char *fmt, ...);
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
 #endif /* HDfputc */
@@ -1243,7 +1217,7 @@ typedef off_t       h5_stat_size_t;
 #define HDpread(F, B, C, O) pread(F, B, C, O)
 #endif /* HDpread */
 #ifndef HDprintf
-#define HDprintf(...) HDfprintf(stdout, __VA_ARGS__)
+#define HDprintf printf
 #endif /* HDprintf */
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)
@@ -1455,6 +1429,9 @@ H5_DLL void HDsrand(unsigned int seed);
 #ifndef HDstrcspn
 #define HDstrcspn(X, Y) strcspn(X, Y)
 #endif /* HDstrcspn */
+#ifndef HDstrdup
+#define HDstrdup(S) strdup(S)
+#endif /* HDstrdup */
 #ifndef HDstrerror
 #define HDstrerror(N) strerror(N)
 #endif /* HDstrerror */
@@ -1596,6 +1573,13 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
 #endif /* HDutime */
+#ifndef HDvasprintf
+#ifdef H5_HAVE_VASPRINTF
+#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
+#else
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+#endif /* H5_HAVE_VASPRINTF */
+#endif /* HDvasprintf */
 #ifndef HDva_arg
 #define HDva_arg(A, T) va_arg(A, T)
 #endif /* HDva_arg */
@@ -1608,9 +1592,6 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDva_start
 #define HDva_start(A, P) va_start(A, P)
 #endif /* HDva_start */
-#ifndef HDvasprintf
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#endif /* HDvasprintf */
 #ifndef HDvfprintf
 #define HDvfprintf(F, FMT, A) vfprintf(F, FMT, A)
 #endif /* HDvfprintf */
@@ -1638,18 +1619,6 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
 #endif /* HDwrite */
-
-/*
- * And now for a couple non-Posix functions...  Watch out for systems that
- * define these in terms of macros.
- */
-#if !defined strdup && !defined H5_HAVE_STRDUP
-extern char *                   strdup(const char *s);
-#endif
-
-#ifndef HDstrdup
-#define HDstrdup(S) strdup(S)
-#endif /* HDstrdup */
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */
@@ -2830,4 +2799,4 @@ H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_b
 H5_DLL herr_t H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *marker,
                              size_t buf_offset, size_t buf_size);
 
-#endif /* _H5private_H */
+#endif /* H5private_H */

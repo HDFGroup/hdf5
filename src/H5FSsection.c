@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1115,8 +1115,8 @@ H5FS__sect_merge(H5FS_t *fspace, H5FS_section_info_t **sect, void *op_data)
     /* Loop until no more merging */
     if (fspace->sinfo->merge_list) {
         do {
-            H5SL_node_t *         less_sect_node;    /* Skip list node for section less than new section */
-            H5SL_node_t *         greater_sect_node; /* Skip list node for section greater than new section */
+            H5SL_node_t *less_sect_node;             /* Skip list node for section less than new section */
+            H5SL_node_t *greater_sect_node = NULL;   /* Skip list node for section greater than new section */
             H5FS_section_info_t * tmp_sect;          /* Temporary free space section */
             H5FS_section_class_t *tmp_sect_cls;      /* Temporary section's class */
             hbool_t greater_sect_node_valid = FALSE; /* Indicate if 'greater than' section node is valid */

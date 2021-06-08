@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -85,7 +85,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
     /* Only MAINPROCESS should create the file.  Others just wait. */
     if (MAINPROCESS) {
         nchunks = chunk_factor * mpi_size;
-        dims[0] = nchunks * CHUNK_SIZE;
+        dims[0] = (hsize_t)(nchunks * CHUNK_SIZE);
         /* Create the data space with unlimited dimensions. */
         dataspace = H5Screate_simple(1, dims, maxdims);
         VRFY((dataspace >= 0), "");
@@ -118,7 +118,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
             count[0]  = 1;
             stride[0] = 1;
             block[0]  = chunk_dims[0];
-            offset[0] = (nchunks - 2) * chunk_dims[0];
+            offset[0] = (hsize_t)(nchunks - 2) * chunk_dims[0];
 
             hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
             VRFY((hrc >= 0), "");
@@ -223,7 +223,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
     dataspace = H5Dget_space(*dataset);
     VRFY((dataspace >= 0), "");
 
-    size[0] = nchunks * CHUNK_SIZE;
+    size[0] = (hsize_t)nchunks * CHUNK_SIZE;
 
     switch (action) {
 
@@ -235,7 +235,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
             stride[0] = 1;
             block[0]  = chunk_dims[0];
             for (i = 0; i < nchunks / mpi_size; i++) {
-                offset[0] = (i * mpi_size + mpi_rank) * chunk_dims[0];
+                offset[0] = (hsize_t)(i * mpi_size + mpi_rank) * chunk_dims[0];
 
                 hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
                 VRFY((hrc >= 0), "");
@@ -364,7 +364,7 @@ verify_data(const char *filename, int chunk_factor, write_type write_pattern, in
         /* reset buffer values */
         HDmemset(buffer, -1, CHUNK_SIZE);
 
-        offset[0] = i * chunk_dims[0];
+        offset[0] = (hsize_t)i * chunk_dims[0];
 
         hrc = H5Sselect_hyperslab(dataspace, H5S_SELECT_SET, offset, stride, count, block);
         VRFY((hrc >= 0), "");

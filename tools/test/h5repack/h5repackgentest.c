@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -72,8 +72,8 @@ struct external_def {
  * Returns 0 on success, -1 on failure.
  */
 static int
-__make_dataset(hid_t file_id, const char *dset_name, hid_t mem_type_id, hid_t space_id, hid_t dcpl_id,
-               void *wdata)
+make_dataset(hid_t file_id, const char *dset_name, hid_t mem_type_id, hid_t space_id, hid_t dcpl_id,
+             void *wdata)
 {
     hid_t dset_id   = H5I_INVALID_HID;
     int   ret_value = 0;
@@ -90,7 +90,7 @@ done:
         (void)H5Dclose(dset_id);
 
     return ret_value;
-} /* end __make_dataset() */
+} /* end make_dataset() */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Helper function to populate the DCPL external storage list.
@@ -101,8 +101,8 @@ done:
  * Returns 0 on success, -1 on failure.
  */
 static int
-__set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_file, unsigned n_elts_total,
-                         hsize_t elt_size)
+set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_file, unsigned n_elts_total,
+                       hsize_t elt_size)
 {
     char     name[MAX_NAME_SIZE];
     unsigned n_external_files = 0;
@@ -123,7 +123,7 @@ __set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_f
             return -1;
     }
     return 0;
-} /* end __set_dcpl_external_list() */
+} /* end set_dcpl_external_list() */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Generalized utility function to write a file with the specified data and
@@ -132,8 +132,8 @@ __set_dcpl_external_list(hid_t dcpl, const char *filename, unsigned n_elts_per_f
  * Returns 0 on success, -1 on failure.
  */
 static int
-__make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize_t rank, hsize_t *dims,
-            void *wdata)
+make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize_t rank, hsize_t *dims,
+          void *wdata)
 {
     char  filename[MAX_NAME_SIZE];
     hid_t file_id   = H5I_INVALID_HID;
@@ -149,8 +149,8 @@ __make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize
         if (dcpl_id == H5I_INVALID_HID)
             H5REPACKGENTEST_OOPS;
 
-        if (__set_dcpl_external_list(dcpl_id, basename, ext->n_elts_per_file, ext->n_elts_total,
-                                     ext->type_size) < 0)
+        if (set_dcpl_external_list(dcpl_id, basename, ext->n_elts_per_file, ext->n_elts_total,
+                                   ext->type_size) < 0)
             H5REPACKGENTEST_OOPS;
     }
 
@@ -162,13 +162,13 @@ __make_file(const char *basename, struct external_def *ext, hid_t type_id, hsize
     if (file_id == H5I_INVALID_HID)
         H5REPACKGENTEST_OOPS;
 
-    if (__make_dataset(file_id, "dset", type_id, space_id, dcpl_id, wdata) < 0)
+    if (make_dataset(file_id, "dset", type_id, space_id, dcpl_id, wdata) < 0)
         H5REPACKGENTEST_OOPS;
 
 done:
     H5REPACKGENTEST_COMMON_CLEANUP(dcpl_id, file_id, space_id);
     return ret_value;
-} /* end __make_file() */
+} /* end make_file() */
 
 /* - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -
  * Returns 0 on success, -1 on failure.
@@ -190,7 +190,7 @@ generate_int32le_1d(hbool_t external)
     }
 
     def_ptr = (TRUE == external) ? (&def) : NULL;
-    if (__make_file(FILE_INT32LE_1, def_ptr, H5T_STD_I32LE, 1, dims, wdata) < 0)
+    if (make_file(FILE_INT32LE_1, def_ptr, H5T_STD_I32LE, 1, dims, wdata) < 0)
         ret_value = -1;
 
     return ret_value;
@@ -216,7 +216,7 @@ generate_int32le_2d(hbool_t external)
     }
 
     def_ptr = (TRUE == external) ? (&def) : NULL;
-    if (__make_file(FILE_INT32LE_2, def_ptr, H5T_STD_I32LE, 2, dims, wdata) < 0)
+    if (make_file(FILE_INT32LE_2, def_ptr, H5T_STD_I32LE, 2, dims, wdata) < 0)
         ret_value = -1;
 
     return ret_value;
@@ -249,7 +249,7 @@ generate_int32le_3d(hbool_t external)
     }
 
     def_ptr = (TRUE == external) ? (&def) : NULL;
-    if (__make_file(FILE_INT32LE_3, def_ptr, H5T_STD_I32LE, 3, dims, wdata) < 0)
+    if (make_file(FILE_INT32LE_3, def_ptr, H5T_STD_I32LE, 3, dims, wdata) < 0)
         ret_value = -1;
 
     return ret_value;
@@ -282,7 +282,7 @@ generate_uint8be(hbool_t external)
     }
 
     def_ptr = (TRUE == external) ? (&def) : NULL;
-    if (__make_file(FILE_UINT8BE, def_ptr, H5T_STD_U8BE, 3, dims, wdata) < 0)
+    if (make_file(FILE_UINT8BE, def_ptr, H5T_STD_U8BE, 3, dims, wdata) < 0)
         ret_value = -1;
 
     return ret_value;
@@ -312,7 +312,7 @@ generate_f32le(hbool_t external)
     }
 
     def_ptr = (TRUE == external) ? (&def) : NULL;
-    if (__make_file(FILE_F32LE, def_ptr, H5T_IEEE_F32LE, 2, dims, wdata) < 0)
+    if (make_file(FILE_F32LE, def_ptr, H5T_IEEE_F32LE, 2, dims, wdata) < 0)
         ret_value = -1;
 
     return ret_value;

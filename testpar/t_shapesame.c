@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1701,21 +1701,6 @@ contig_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Programmer:    JRM -- 9/18/09
  *
- * Modifications:
- *
- *        JRM -- 9/16/10
- *        Added express_test parameter.  Use it to control whether
- *        we set up the chunks so that no chunk is shared between
- *        processes, and also whether we set an alignment when we
- *        create the test file.
- *
- *        JRM -- 8/11/11
- *        Refactored function heavily & broke it into six functions.
- *        Added the skips_ptr, max_skips, total_tests_ptr,
- *        tests_run_ptr, and tests_skiped_ptr parameters to support
- *        skipping portions of the test according to the express
- *        test value.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -1905,20 +1890,6 @@ contig_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
  *
  * Programmer:    JRM -- 9/18/09
  *
- * Modifications:
- *
- *          Modified function to take a sample of the run times
- *        of the different tests, and skip some of them if
- *        run times are too long.
- *
- *        We need to do this because Lustre runns very slowly
- *        if two or more processes are banging on the same
- *        block of memory.
- *                        JRM -- 9/10/10
- *              Break this one big test into 4 smaller tests according
- *              to {independent,collective}x{contigous,chunked} datasets.
- *        AKC -- 2010/01/14
- *
  *-------------------------------------------------------------------------
  */
 
@@ -2038,8 +2009,8 @@ contig_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
     }
 
     if ((MAINPROCESS) && (tests_skipped > 0)) {
-        HDfprintf(stdout, "    %lld of %lld subtests skipped to expedite testing.\n", tests_skipped,
-                  total_tests);
+        HDfprintf(stdout, "    %" PRId64 " of %" PRId64 " subtests skipped to expedite testing.\n",
+                  tests_skipped, total_tests);
     }
 
     return;
@@ -3671,14 +3642,6 @@ ckrbrd_hs_dr_pio_test__m2d_s2l(struct hs_dr_pio_test_vars_t *tv_ptr)
  *
  * Programmer:    JRM -- 10/10/09
  *
- * Modifications:
- *
- *        JRM -- 9/16/10
- *        Added the express_test parameter.  Use it to control
- *        whether we set an alignment, and whether we allocate
- *        chunks such that no two processes will normally touch
- *        the same chunk.
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3854,20 +3817,6 @@ ckrbrd_hs_dr_pio_test__run_test(const int test_num, const int edge_size, const i
  *
  * Programmer:    JRM -- 9/18/09
  *
- * Modifications:
- *
- *          Modified function to take a sample of the run times
- *        of the different tests, and skip some of them if
- *        run times are too long.
- *
- *        We need to do this because Lustre runns very slowly
- *        if two or more processes are banging on the same
- *        block of memory.
- *                        JRM -- 9/10/10
- *          Break this one big test into 4 smaller tests according
- *          to {independent,collective}x{contigous,chunked} datasets.
- *        AKC -- 2010/01/17
- *
  *-------------------------------------------------------------------------
  */
 
@@ -3983,16 +3932,16 @@ ckrbrd_hs_dr_pio_test(ShapeSameTestMethods sstest_type)
             } /* end of switch(sstest_type) */
 #if CONTIG_HS_DR_PIO_TEST__DEBUG
             if ((MAINPROCESS) && (tests_skipped > 0)) {
-                HDfprintf(stdout, "     run/skipped/total = %lld/%lld/%lld.\n", tests_run, tests_skipped,
-                          total_tests);
+                HDfprintf(stdout, "     run/skipped/total = %" PRId64 "/%" PRId64 "/%" PRId64 ".\n",
+                          tests_run, tests_skipped, total_tests);
             }
 #endif /* CONTIG_HS_DR_PIO_TEST__DEBUG */
         }
     }
 
     if ((MAINPROCESS) && (tests_skipped > 0)) {
-        HDfprintf(stdout, "     %lld of %lld subtests skipped to expedite testing.\n", tests_skipped,
-                  total_tests);
+        HDfprintf(stdout, "     %" PRId64 " of %" PRId64 " subtests skipped to expedite testing.\n",
+                  tests_skipped, total_tests);
     }
 
     return;

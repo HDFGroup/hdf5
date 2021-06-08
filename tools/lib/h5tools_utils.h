@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,8 +17,8 @@
  *
  * Purpose:     Support functions for the various tools.
  */
-#ifndef H5TOOLS_UTILS_H__
-#define H5TOOLS_UTILS_H__
+#ifndef H5TOOLS_UTILS_H
+#define H5TOOLS_UTILS_H
 
 #include "hdf5.h"
 
@@ -190,4 +190,4 @@ H5TOOLS_DLL herr_t h5tools_parse_hdfs_fapl_tuple(const char *tuple_str, int deli
 }
 #endif
 
-#endif /* H5TOOLS_UTILS_H__ */
+#endif /* H5TOOLS_UTILS_H */

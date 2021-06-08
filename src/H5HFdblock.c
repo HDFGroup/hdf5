@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -396,7 +396,7 @@ H5HF__man_dblock_new(H5HF_hdr_t *hdr, size_t request, H5HF_free_section_t **ret_
         if (min_dblock_size > next_size) {
             HDfprintf(
                 stderr,
-                "%s: Skipping direct block sizes not supported, min_dblock_size = %Zu, next_size = %Zu\n",
+                "%s: Skipping direct block sizes not supported, min_dblock_size = %zu, next_size = %zu\n",
                 FUNC, min_dblock_size, next_size);
             HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "skipping direct block sizes not supported yet")
         } /* end if */

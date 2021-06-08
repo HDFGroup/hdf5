@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -61,11 +61,9 @@
 #include "h5test.h"
 
 /* This test uses many POSIX things that are not available on
- * Windows. We're using a check for fork(2) here as a proxy for
- * all POSIX/Unix/Linux things until this test can be made
- * more platform-independent.
+ * Windows.
  */
-#ifdef H5_HAVE_FORK
+#ifdef H5_HAVE_UNISTD_H
 
 #define DATAFILE "twriteorder.dat"
 /* #define READERS_MAX      10 */ /* max number of readers */
@@ -141,21 +139,21 @@ parse_option(int argc, char *const argv[])
                 HDexit(EXIT_SUCCESS);
                 break;
             case 'b': /* number of planes to write/read */
-                if ((blocksize_g = atoi(optarg)) <= 0) {
+                if ((blocksize_g = HDatoi(optarg)) <= 0) {
                     HDfprintf(stderr, "bad blocksize %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
                 break;
             case 'n': /* number of planes to write/read */
-                if ((nlinkedblock_g = atoi(optarg)) < 2) {
+                if ((nlinkedblock_g = HDatoi(optarg)) < 2) {
                     HDfprintf(stderr, "bad number of linked blocks %s, must be greater than 1.\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
                 };
                 break;
             case 'p': /* number of planes to write/read */
-                if ((part_size_g = atoi(optarg)) <= 0) {
+                if ((part_size_g = HDatoi(optarg)) <= 0) {
                     HDfprintf(stderr, "bad partition size %s, must be a positive integer\n", optarg);
                     usage(progname_g);
                     Hgoto_error(-1);
@@ -404,7 +402,7 @@ main(int argc, char *argv[])
             Hgoto_error(1);
         };
     };
-    mypid = getpid();
+    mypid = HDgetpid();
 
     /* ============= */
     /* launch reader */
@@ -440,7 +438,7 @@ main(int argc, char *argv[])
     /* If readwrite, collect exit code of child process */
     /* ================================================ */
     if (launch_g == UC_READWRITE) {
-        if ((tmppid = waitpid(childpid, &child_status, child_wait_option)) < 0) {
+        if ((tmppid = HDwaitpid(childpid, &child_status, child_wait_option)) < 0) {
             HDperror("waitpid");
             Hgoto_error(1);
         }
@@ -468,7 +466,7 @@ done:
     return ret_value;
 }
 
-#else /* H5_HAVE_FORK */
+#else /* H5_HAVE_UNISTD_H */
 
 int
 main(void)
@@ -477,4 +475,4 @@ main(void)
     return EXIT_SUCCESS;
 } /* end main() */
 
-#endif /* H5_HAVE_FORK */
+#endif /* H5_HAVE_UNISTD_H */

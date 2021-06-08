@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -443,12 +443,16 @@ H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t ini
 #if H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T
         if (size_hint > 4294967295UL)
             oh->flags |= H5O_HDR_CHUNK0_8;
-        else
-#endif /* H5_SIZEOF_SIZE_T > H5_SIZEOF_INT32_T */
-            if (size_hint > 65535)
+        else if (size_hint > 65535)
             oh->flags |= H5O_HDR_CHUNK0_4;
         else if (size_hint > 255)
             oh->flags |= H5O_HDR_CHUNK0_2;
+#else
+        if (size_hint > 65535)
+            oh->flags |= H5O_HDR_CHUNK0_4;
+        else if (size_hint > 255)
+            oh->flags |= H5O_HDR_CHUNK0_2;
+#endif
     }
     else {
         /* Reset unused time fields */
@@ -560,7 +564,7 @@ H5O_open(H5O_loc_t *loc)
 
 #ifdef H5O_DEBUG
     if (H5DEBUG(O))
-        HDfprintf(H5DEBUG(O), "> %a\n", loc->addr);
+        HDfprintf(H5DEBUG(O), "> %" PRIuHADDR "\n", loc->addr);
 #endif
 
     /* Turn off the variable for holding file or increment open-lock counters */
@@ -791,10 +795,10 @@ H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/)
 #ifdef H5O_DEBUG
     if (H5DEBUG(O)) {
         if (H5F_FILE_ID(loc->file) < 0 && 1 == H5F_NREFS(loc->file))
-            HDfprintf(H5DEBUG(O), "< %a auto %lu remaining\n", loc->addr,
+            HDfprintf(H5DEBUG(O), "< %" PRIuHADDR " auto %lu remaining\n", loc->addr,
                       (unsigned long)H5F_NOPEN_OBJS(loc->file));
         else
-            HDfprintf(H5DEBUG(O), "< %a\n", loc->addr);
+            HDfprintf(H5DEBUG(O), "< %" PRIuHADDR "\n", loc->addr);
     }
 #endif
 

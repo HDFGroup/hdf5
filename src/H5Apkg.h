@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5A package!"
 #endif
 
-#ifndef _H5Apkg_H
-#define _H5Apkg_H
+#ifndef H5Apkg_H
+#define H5Apkg_H
 
 /*
  * Define this to enable debugging.
@@ -267,4 +267,4 @@ H5_DLL htri_t H5A__is_shared_test(hid_t aid);
 H5_DLL herr_t H5A__get_shared_rc_test(hid_t attr_id, hsize_t *ref_count);
 #endif /* H5A_TESTING */
 
-#endif /* _H5Apkg_H */
+#endif /* H5Apkg_H */

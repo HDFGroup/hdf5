@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -160,7 +160,8 @@ H5IMmake_image_24bit(hid_t loc_id, const char *dset_name, hsize_t width, hsize_t
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_palette(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data)
+find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+             H5_ATTR_UNUSED void *op_data)
 {
     int ret = H5_ITER_CONT;
 
@@ -169,9 +170,9 @@ find_palette(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_d
         return -1;
 
     /* Shut compiler up */
-    loc_id  = loc_id;
-    ainfo   = ainfo;
-    op_data = op_data;
+    (void)loc_id;
+    (void)ainfo;
+    (void)op_data;
 
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,

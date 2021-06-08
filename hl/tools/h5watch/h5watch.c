@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,7 +43,7 @@ static unsigned g_retry = DEFAULT_RETRY;  /* # of times to try opening the file 
 static hbool_t  g_display_hex    = FALSE; /* display data in hexadecimal format : LATER */
 static hbool_t  g_user_interrupt = FALSE; /* Flag to indicate that user interrupted execution */
 
-static herr_t doprint(hid_t did, hsize_t *start, hsize_t *block, int rank);
+static herr_t doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank);
 static herr_t slicendump(hid_t did, hsize_t *prev_dims, hsize_t *cur_dims, hsize_t *start, hsize_t *block,
                          int rank, int subrank);
 static herr_t monitor_dataset(hid_t fid, char *dsetname);
@@ -95,7 +95,7 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel", no
  *-------------------------------------------------------------------------
  */
 static herr_t
-doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
+doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
 {
     h5tools_context_t ctx;                           /* print context  */
     h5tool_format_t   info;                          /* Format info for the tools library */
@@ -182,7 +182,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     info.dset_format     = "DSET-%s ";
     info.dset_hidefileno = 0;
 
-    info.obj_format     = "-%lu:" H5_PRINTF_HADDR_FMT;
+    info.obj_format     = "-%lu:%" PRIuHADDR;
     info.obj_hidefileno = 0;
 
     info.dset_blockformat_pre = "%sBlk%lu: ";
@@ -340,7 +340,8 @@ monitor_dataset(hid_t fid, char *dsetname)
         if (i != ndims) {
             /* Printing changes in dimension sizes */
             for (u = 0; u < ndims; u++) {
-                HDfprintf(stdout, "dimension %u: %Hu->%Hu", (unsigned)u, prev_dims[u], cur_dims[u]);
+                HDfprintf(stdout, "dimension %d: %" PRIuHSIZE "->%" PRIuHSIZE "", u, prev_dims[u],
+                          cur_dims[u]);
                 if (cur_dims[u] > prev_dims[u])
                     HDfprintf(stdout, " (increases)\n");
                 else if (cur_dims[u] < prev_dims[u])

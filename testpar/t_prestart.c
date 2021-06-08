@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -32,7 +32,7 @@ main(int argc, char **argv)
     hid_t     fapl, sid, mem_dataspace;
     herr_t    ret;
     char      filename[1024];
-    int       mpi_size, mpi_rank, ndims, i, j;
+    int       mpi_size, mpi_rank, ndims;
     MPI_Comm  comm = MPI_COMM_WORLD;
     MPI_Info  info = MPI_INFO_NULL;
     hsize_t   dims[RANK];
@@ -40,6 +40,7 @@ main(int argc, char **argv)
     hsize_t   count[RANK];
     hsize_t   stride[RANK];
     hsize_t   block[RANK];
+    hsize_t   i, j;
     DATATYPE *data_array = NULL, *dataptr; /* data buffer */
 
     MPI_Init(&argc, &argv);
@@ -70,21 +71,21 @@ main(int argc, char **argv)
 
     ndims = H5Sget_simple_extent_dims(sid, dims, NULL);
     VRFY((ndims == 2), "H5Sget_simple_extent_dims succeeded");
-    VRFY(dims[0] == ROW_FACTOR * mpi_size, "Wrong dataset dimensions");
-    VRFY(dims[1] == COL_FACTOR * mpi_size, "Wrong dataset dimensions");
+    VRFY(dims[0] == (hsize_t)(ROW_FACTOR * mpi_size), "Wrong dataset dimensions");
+    VRFY(dims[1] == (hsize_t)(COL_FACTOR * mpi_size), "Wrong dataset dimensions");
 
     /* allocate memory for data buffer */
     data_array = (DATATYPE *)HDmalloc(dims[0] * dims[1] * sizeof(DATATYPE));
     VRFY((data_array != NULL), "data_array HDmalloc succeeded");
 
     /* Each process takes a slabs of rows. */
-    block[0]  = dims[0] / mpi_size;
+    block[0]  = dims[0] / (hsize_t)mpi_size;
     block[1]  = dims[1];
     stride[0] = block[0];
     stride[1] = block[1];
     count[0]  = 1;
     count[1]  = 1;
-    start[0]  = mpi_rank * block[0];
+    start[0]  = (hsize_t)mpi_rank * block[0];
     start[1]  = 0;
 
     ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
@@ -104,8 +105,8 @@ main(int argc, char **argv)
         for (j = 0; j < block[1]; j++) {
             if (*dataptr != mpi_rank + 1) {
                 HDprintf("Dataset Verify failed at [%lu][%lu](row %lu, col %lu): expect %d, got %d\n",
-                         (unsigned long)i, (unsigned long)j, (unsigned long)(i + start[0]),
-                         (unsigned long)(j + start[1]), mpi_rank + 1, *(dataptr));
+                         (unsigned long)i, (unsigned long)j, (unsigned long)((hsize_t)i + start[0]),
+                         (unsigned long)((hsize_t)j + start[1]), mpi_rank + 1, *(dataptr));
                 nerrors++;
             }
             dataptr++;

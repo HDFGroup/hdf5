@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -22,8 +22,8 @@
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5HFprivate_H
-#define _H5HFprivate_H
+#ifndef H5HFprivate_H
+#define H5HFprivate_H
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h" /* File access				*/
@@ -125,4 +125,4 @@ H5_DLL herr_t H5HF_id_print(H5HF_t *fh, const void *id, FILE *stream, int indent
 H5_DLL herr_t H5HF_sects_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth);
 #endif /* H5HF_DEBUGGING */
 
-#endif /* _H5HFprivate_H */
+#endif /* H5HFprivate_H */

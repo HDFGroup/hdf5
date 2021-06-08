@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,29 +21,29 @@
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Oprivate_H
-#define _H5Oprivate_H
+#ifndef H5Oprivate_H
+#define H5Oprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5O_t      H5O_t;
 typedef struct H5O_fill_t H5O_fill_t;
 
 /* Include the public header file for this API */
-#include "H5Opublic.h" /* Object header functions              */
+#include "H5Opublic.h" /* Object header functions             */
 
 /* Public headers needed by this file */
-#include "H5Dpublic.h" /* Dataset functions                    */
-#include "H5Lpublic.h" /* Link functions                       */
+#include "H5Dpublic.h" /* Dataset functions                   */
+#include "H5Lpublic.h" /* Link functions                      */
 #include "H5Spublic.h" /* Dataspace functions			*/
 
 /* Private headers needed by this file */
-#include "H5private.h"   /* Generic Functions                    */
-#include "H5ACprivate.h" /* Metadata cache                       */
+#include "H5private.h"   /* Generic Functions                   */
+#include "H5ACprivate.h" /* Metadata cache                      */
 #include "H5Fprivate.h"  /* File access				*/
-#include "H5HGprivate.h" /* Global Heaps                         */
+#include "H5HGprivate.h" /* Global Heaps                        */
 #include "H5SLprivate.h" /* Skip lists				*/
 #include "H5Tprivate.h"  /* Datatype functions			*/
-#include "H5Zprivate.h"  /* I/O pipeline filters			*/
+#include "H5Zprivate.h"  /* I/O pipeline filters		*/
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
@@ -1016,4 +1016,4 @@ H5_DLL herr_t H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline);
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
 
-#endif /* _H5Oprivate_H */
+#endif /* H5Oprivate_H */

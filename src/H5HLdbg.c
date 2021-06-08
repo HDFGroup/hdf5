@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -64,10 +64,9 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
         H5E_THROW(H5E_CANTPROTECT, "unable to load/protect local heap");
 
     HDfprintf(stream, "%*sLocal Heap...\n", indent, "");
-    HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
-              "Header size (in bytes):", (unsigned long)h->prfx_size);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Address of heap data:", h->dblk_addr);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Data bytes allocated for heap:", h->dblk_size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size (in bytes):", h->prfx_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Address of heap data:", h->dblk_addr);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Data bytes allocated for heap:", h->dblk_size);
 
     /* Traverse the free list and check that all free blocks fall within
      * the heap and that no two free blocks point to the same region of
@@ -81,7 +80,7 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
         char temp_str[32];
 
         HDsnprintf(temp_str, sizeof(temp_str), "Block #%d:", free_block);
-        HDfprintf(stream, "%*s%-*s %8Zu, %8Zu\n", indent + 3, "", MAX(0, fwidth - 9), temp_str,
+        HDfprintf(stream, "%*s%-*s %8zu, %8zu\n", indent + 3, "", MAX(0, fwidth - 9), temp_str,
                   freelist->offset, freelist->size);
         if ((freelist->offset + freelist->size) > h->dblk_size)
             HDfprintf(stream, "***THAT FREE BLOCK IS OUT OF BOUNDS!\n");
@@ -103,7 +102,7 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL,
 
     if (h->dblk_size)
         HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of heap used:",
-                  ((double)100.0f * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
+                  (100.0 * (double)(h->dblk_size - amount_free) / (double)h->dblk_size));
 
     /* Print the data in a VMS-style octal dump */
     H5_buffer_dump(stream, indent, h->dblk_image, marker, (size_t)0, h->dblk_size);

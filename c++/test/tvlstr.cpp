@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,11 +18,7 @@
    EXTERNAL ROUTINES/VARIABLES:
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -865,7 +861,7 @@ read_scalar_dset(H5File &file, DataType &type, DataSpace &space, char *name, cha
         dset.read(&data_read, type, space, space);
         dset.close();
 
-        if (HDstrcmp(data, data_read))
+        if (HDstrcmp(data, data_read) != 0)
             TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
         HDfree(data_read);

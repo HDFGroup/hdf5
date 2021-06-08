@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5SL module
  */
-#ifndef _H5SLprivate_H
-#define _H5SLprivate_H
+#ifndef H5SLprivate_H
+#define H5SLprivate_H
 
 /**************************************/
 /* Public headers needed by this file */
@@ -91,4 +91,4 @@ H5_DLL herr_t       H5SL_close(H5SL_t *slist);
 H5_DLL herr_t       H5SL_destroy(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 H5_DLL int          H5SL_term_interface(void);
 
-#endif /* _H5SLprivate_H */
+#endif /* H5SLprivate_H */

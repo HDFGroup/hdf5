@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -540,8 +540,8 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g  = 0;
 /* (+/- Inf for all floating-point types) */
 float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0f;
 float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0f;
-double H5T_NATIVE_DOUBLE_POS_INF_g = (double)0.0f;
-double H5T_NATIVE_DOUBLE_NEG_INF_g = (double)0.0f;
+double H5T_NATIVE_DOUBLE_POS_INF_g = 0.0;
+double H5T_NATIVE_DOUBLE_NEG_INF_g = 0.0;
 
 /* Declare the free list for H5T_t's and H5T_shared_t's */
 H5FL_DEFINE(H5T_t);
@@ -2669,7 +2669,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
         for (i = H5T_g.nsoft - 1; i >= 0; --i) {
             soft = H5T_g.soft + i;
             HDassert(soft);
-            if (name && *name && HDstrcmp(name, soft->name))
+            if (name && *name && HDstrcmp(name, soft->name) != 0)
                 continue;
             if (src && src->shared->type != soft->src)
                 continue;
@@ -2691,7 +2691,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 
         /* Not a match */
         if (((H5T_PERS_SOFT == pers && path->is_hard) || (H5T_PERS_HARD == pers && !path->is_hard)) ||
-            (name && *name && HDstrcmp(name, path->name)) || (src && H5T_cmp(src, path->src, FALSE)) ||
+            (name && *name && HDstrcmp(name, path->name) != 0) || (src && H5T_cmp(src, path->src, FALSE)) ||
             (dst && H5T_cmp(dst, path->dst, FALSE)) || (func && func != path->conv.u.app_func)) {
             /*
              * Notify all other functions to recalculate private data since some

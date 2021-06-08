@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -166,8 +166,6 @@ h5_clean_files(const char *base_name[], hid_t fapl)
 
     /* Close the FAPL used to access the file */
     H5Pclose(fapl);
-
-    return;
 } /* end h5_clean_files() */
 
 /*-------------------------------------------------------------------------
@@ -244,7 +242,6 @@ h5_delete_test_file(const char *base_name, hid_t fapl)
         HDremove(filename);
     } /* end driver selection tree */
 
-    return;
 } /* end h5_delete_test_file() */
 H5_GCC_DIAG_ON("format-nonliteral")
 
@@ -277,7 +274,6 @@ h5_delete_all_test_files(const char *base_name[], hid_t fapl)
         h5_delete_test_file(base_name[i], fapl);
     } /* end for */
 
-    return;
 } /* end h5_delete_all_test_files() */
 
 /*-------------------------------------------------------------------------
@@ -336,8 +332,6 @@ h5_test_shutdown(void)
 
     /* Restore the original error reporting routine */
     h5_restore_err();
-
-    return;
 } /* end h5_test_shutdown() */
 
 /*-------------------------------------------------------------------------
@@ -444,8 +438,6 @@ h5_test_init(void)
     HDassert(err_func == NULL);
     H5Eget_auto2(H5E_DEFAULT, &err_func, NULL);
     H5Eset_auto2(H5E_DEFAULT, h5_errors, NULL);
-
-    return;
 } /* end h5_test_init() */
 
 /*-------------------------------------------------------------------------
@@ -1624,7 +1616,10 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
         if (h5_fixname(base_name[i], fapl, filename, sizeof(filename)) == NULL)
             continue;
 
-        H5E_BEGIN_TRY { file = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            file = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY
         if (file < 0) {
             i++;
@@ -1645,7 +1640,10 @@ h5_verify_cached_stabs(const char *base_name[], hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file);
+    }
     H5E_END_TRY;
 
     return -1;
@@ -1960,7 +1958,8 @@ h5_compare_file_bytes(char *f1name, char *f2name)
     f2size = HDftell(f2ptr);
 
     if (f1size != f2size) {
-        HDfprintf(stderr, "Files differ in size, %llu vs. %llu\n", f1size, f2size);
+        HDfprintf(stderr, "Files differ in size, %" PRIuHSIZE " vs. %" PRIuHSIZE "\n", (hsize_t)f1size,
+                  (hsize_t)f2size);
         ret_value = -1;
         goto done;
     }
@@ -1978,7 +1977,7 @@ h5_compare_file_bytes(char *f1name, char *f2name)
             goto done;
         }
         if (f1char != f2char) {
-            HDfprintf(stderr, "Mismatch @ 0x%llX: 0x%X != 0x%X\n", ii, f1char, f2char);
+            HDfprintf(stderr, "Mismatch @ 0x%" PRIXHSIZE ": 0x%X != 0x%X\n", (hsize_t)ii, f1char, f2char);
             ret_value = -1;
             goto done;
         }

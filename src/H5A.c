@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1101,7 +1101,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "new attribute name cannot be an empty string")
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_name, new_name)) {
+    if (HDstrcmp(old_name, new_name) != 0) {
         H5G_loc_t loc; /* Object location */
 
         if (H5G_loc(loc_id, &loc) < 0)
@@ -1153,7 +1153,7 @@ H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no new attribute name")
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_attr_name, new_attr_name)) {
+    if (HDstrcmp(old_attr_name, new_attr_name) != 0) {
         H5G_loc_t loc; /* Object location */
 
         /* Verify access property list and set up collective metadata if appropriate */

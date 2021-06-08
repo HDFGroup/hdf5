@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2066,13 +2066,14 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_swmr_write_big
  *
- * Purpose:    	A SWMR test: verifies that writing "large" metadata to a file
- *		opened with SWMR_WRITE will flush the existing metadata in the
- *		accumulator to disk first before writing the "large" metadata
- *	 	to disk.
- *		This test will fork and exec a reader "accum_swmr_reader" which
- *		opens the same file with SWMR_READ and verifies that the correct
- *		metadata is read from disk.
+ * Purpose:     A SWMR test: verifies that writing "large" metadata to a file
+ *              opened with SWMR_WRITE will flush the existing metadata in the
+ *              accumulator to disk first before writing the "large" metadata
+ *              to disk.
+ *
+ *              This test will fork and exec a reader "accum_swmr_reader" which
+ *              opens the same file with SWMR_READ and verifies that the correct
+ *              metadata is read from disk.
  *
  * Return:      Success: 0
  *              Failure: 1
@@ -2084,33 +2085,30 @@ error:
 unsigned
 test_swmr_write_big(hbool_t newest_format)
 {
+
     hid_t    fid   = -1;                 /* File ID */
     hid_t    fapl  = -1;                 /* File access property list */
     H5F_t *  rf    = NULL;               /* File pointer */
     uint8_t *wbuf2 = NULL, *rbuf = NULL; /* Buffers for reading & writing */
     uint8_t  wbuf[1024];                 /* Buffer for reading & writing */
     unsigned u;                          /* Local index variable */
-#ifdef H5_HAVE_UNISTD_H
-    pid_t pid;      /* Process ID */
-#endif              /* H5_HAVE_UNISTD_H */
-    int     status; /* Status returned from child process */
-    char *  new_argv[]     = {NULL};
-    char *  driver         = NULL;  /* VFD string (from env variable) */
-    hbool_t api_ctx_pushed = FALSE; /* Whether API context pushed */
+    hbool_t  process_success = FALSE;
+    char *   driver          = NULL;  /* VFD string (from env variable) */
+    hbool_t  api_ctx_pushed  = FALSE; /* Whether API context pushed */
 
     if (newest_format)
         TESTING("SWMR write of large metadata: with latest format")
     else
         TESTING("SWMR write of large metadata: with non-latest-format")
 
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#if !defined(H5_HAVE_UNISTD_H) && !defined(H5_HAVE_WIN32_API)
 
+    /* Not a Windows or POSIX system */
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped: Not a Windows or POSIX system.");
     return 0;
 
-#else /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
-
+#else
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
@@ -2219,51 +2217,94 @@ test_swmr_write_big(hbool_t newest_format)
     if (HDmemcmp(wbuf2, rbuf, (size_t)BIG_BUF_SIZE) != 0)
         TEST_ERROR;
 
-    /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
-    if ((pid = HDfork()) < 0) {
-        HDperror("fork");
-        FAIL_STACK_ERROR;
+#if defined(H5_HAVE_WIN32_API)
+    {
+        STARTUPINFO         si;
+        PROCESS_INFORMATION pi;
+        DWORD               exit_code = EXIT_FAILURE;
+
+        ZeroMemory(&si, sizeof(si));
+        si.cb = sizeof(si);
+        ZeroMemory(&pi, sizeof(pi));
+
+        if (0 == CreateProcess(NULL, SWMR_READER, NULL, NULL, FALSE, 0, NULL, NULL, &si, &pi)) {
+            HDprintf("CreateProcess failed (%d).\n", GetLastError());
+            FAIL_STACK_ERROR;
+        }
+
+        (void)WaitForSingleObject(pi.hProcess, INFINITE);
+
+        if (FALSE == GetExitCodeProcess(pi.hProcess, &exit_code) || EXIT_FAILURE == exit_code)
+            process_success = FALSE;
+        else
+            process_success = TRUE;
+
+        CloseHandle(pi.hProcess);
+        CloseHandle(pi.hThread);
     }
-    else if (0 == pid) { /* Child process */
-        /* Run the reader */
-        status = HDexecv(SWMR_READER, new_argv);
-        HDprintf("errno from execv = %s\n", strerror(errno));
+#else  /* defined(H5_HAVE_WIN32_API) */
+    {
+        pid_t pid;    /* Process ID */
+        int   status; /* Status returned from child process */
+
+        /* Fork child process to verify that the data at [1024, 2014] does get written to disk */
+        if ((pid = HDfork()) < 0) {
+            HDperror("fork");
+            FAIL_STACK_ERROR;
+        }
+        else if (0 == pid) { /* Child process */
+            /* By convention, argv[0] tells the name of program invoked.
+             *
+             * execv on NetBSD 8 will actually return EFAULT if there is a
+             * NULL at argv[0], so we follow the convention unconditionally.
+             */
+            char        swmr_reader[] = SWMR_READER;
+            char *const new_argv[]    = {swmr_reader, NULL};
+            /* Run the reader */
+            status = HDexecv(SWMR_READER, new_argv);
+            HDprintf("errno from execv = %s\n", HDstrerror(errno));
+            FAIL_STACK_ERROR;
+        } /* end if */
+
+        /* Parent process -- wait for the child process to complete */
+        while (pid != HDwaitpid(pid, &status, 0))
+            /*void*/;
+
+        /* Check if child process terminates normally and its return value */
+        if (WIFEXITED(status) && !WEXITSTATUS(status))
+            process_success = TRUE;
+    }
+#endif /* defined(H5_HAVE_WIN32_API) */
+
+    /* Check if the process terminated correctly */
+    if (!process_success)
+        FAIL_PUTS_ERROR("child process exited abnormally")
+
+    /* Flush the accumulator */
+    if (accum_reset(rf) < 0)
         FAIL_STACK_ERROR;
-    } /* end if */
 
-    /* Parent process -- wait for the child process to complete */
-    while (pid != HDwaitpid(pid, &status, 0))
-        /*void*/;
+    /* Close and remove the file */
+    if (H5Fclose(fid) < 0)
+        FAIL_STACK_ERROR;
 
-    /* Check if child process terminates normally and its return value */
-    if (WIFEXITED(status) && !WEXITSTATUS(status)) {
-        /* Flush the accumulator */
-        if (accum_reset(rf) < 0)
-            FAIL_STACK_ERROR;
+    /* Close the property list */
+    if (H5Pclose(fapl) < 0)
+        FAIL_STACK_ERROR;
 
-        /* Close and remove the file */
-        if (H5Fclose(fid) < 0)
-            FAIL_STACK_ERROR;
+    /* Pop API context */
+    if (api_ctx_pushed && H5CX_pop() < 0)
+        FAIL_STACK_ERROR
+    api_ctx_pushed = FALSE;
 
-        /* Close the property list */
-        if (H5Pclose(fapl) < 0)
-            FAIL_STACK_ERROR;
+    /* Release memory */
+    if (wbuf2)
+        HDfree(wbuf2);
+    if (rbuf)
+        HDfree(rbuf);
 
-        /* Pop API context */
-        if (api_ctx_pushed && H5CX_pop() < 0)
-            FAIL_STACK_ERROR
-        api_ctx_pushed = FALSE;
-
-        HDremove(SWMR_FILENAME);
-
-        /* Release memory */
-        if (wbuf2)
-            HDfree(wbuf2);
-        if (rbuf)
-            HDfree(rbuf);
-        PASSED();
-        return 0;
-    } /* end if */
+    PASSED();
+    return 0;
 
 error:
     /* Closing and remove the file */
@@ -2273,7 +2314,6 @@ error:
         H5CX_pop();
 
     H5Pclose(fapl);
-    HDremove(SWMR_FILENAME);
 
     /* Release memory */
     if (wbuf2)
@@ -2283,7 +2323,7 @@ error:
 
     return 1;
 
-#endif
+#endif /* !defined(H5_HAVE_UNISTD_H) && !defined(H5_HAVE_WIN32_API) */
 
 } /* end test_swmr_write_big() */
 
@@ -2316,16 +2356,18 @@ accum_printf(const H5F_t *f)
         HDprintf("=====================================================\n");
         HDprintf(" accumulator allocated size == %zu\n", accum->alloc_size);
         HDprintf(" accumulated data size      == %zu\n", accum->size);
-        HDfprintf(stdout, " accumulator dirty?         == %t\n", accum->dirty);
+        HDfprintf(stdout, " accumulator dirty?         == %s\n", accum->dirty ? "TRUE" : "FALSE");
         HDprintf("=====================================================\n");
-        HDfprintf(stdout, " start of accumulated data, loc = %a\n", accum->loc);
+        HDfprintf(stdout, " start of accumulated data, loc = %" PRIuHADDR "\n", accum->loc);
         if (accum->dirty) {
-            HDfprintf(stdout, " start of dirty region, loc = %a\n", (haddr_t)(accum->loc + accum->dirty_off));
-            HDfprintf(stdout, " end of dirty region,   loc = %a\n",
+            HDfprintf(stdout, " start of dirty region, loc = %" PRIuHADDR "\n",
+                      (haddr_t)(accum->loc + accum->dirty_off));
+            HDfprintf(stdout, " end of dirty region,   loc = %" PRIuHADDR "\n",
                       (haddr_t)(accum->loc + accum->dirty_off + accum->dirty_len));
         } /* end if */
-        HDfprintf(stdout, " end of accumulated data,   loc = %a\n", (haddr_t)(accum->loc + accum->size));
-        HDfprintf(stdout, " end of accumulator allocation,   loc = %a\n",
+        HDfprintf(stdout, " end of accumulated data,   loc = %" PRIuHADDR "\n",
+                  (haddr_t)(accum->loc + accum->size));
+        HDfprintf(stdout, " end of accumulator allocation,   loc = %" PRIuHADDR "\n",
                   (haddr_t)(accum->loc + accum->alloc_size));
         HDprintf("=====================================================\n");
     }

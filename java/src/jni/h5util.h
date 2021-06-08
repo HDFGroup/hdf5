@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,11 +42,10 @@ extern char * h5str_append(h5str_t *str, const char *cstr);
 extern size_t h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_buf,
                             size_t out_buf_offset);
 extern size_t h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *in_buf,
-                            size_t in_buf_len, int expand_data);
+                            int expand_data);
 extern void   h5str_array_free(char **strs, size_t len);
 extern int    h5str_dump_simple_dset(JNIEnv *env, FILE *stream, hid_t dset, int binary_order);
-extern int    h5str_dump_region_blocks_data(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
-extern int    h5str_dump_region_points_data(JNIEnv *env, h5str_t *str, hid_t region, hid_t region_obj);
+extern int    h5str_dump_simple_mem(JNIEnv *env, FILE *stream, hid_t attr, int binary_order);
 
 extern htri_t H5Tdetect_variable_str(hid_t tid);
 
@@ -105,9 +104,16 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Gget_1obj_1info_1max(JNIEnv *, jcla
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5export_dataset
- * Signature: (Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;I)V
+ * Signature: (Ljava/lang/String;JLjava/lang/String;I)V
  */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *, jclass, jstring, jstring, jstring,
-                                                             jint);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1dataset(JNIEnv *, jclass, jstring, jlong, jstring, jint);
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5export_attribute
+ * Signature: (Ljava/lang/String;JLjava/lang/String;I)V
+ */
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5export_1attribute(JNIEnv *, jclass, jstring, jlong, jstring,
+                                                               jint);
 
 #endif /* H5UTIL_H__ */

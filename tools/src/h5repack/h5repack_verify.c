@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -378,9 +378,11 @@ h5repack_cmp_pl(const char *fname1, hid_t fname1_fapl, const char *fname2, hid_t
      *-------------------------------------------------------------------------
      */
     /* Open the files */
-    if ((fid1 = h5tools_fopen(fname1, H5F_ACC_RDONLY, fname1_fapl, TRUE, NULL, 0)) < 0)
+    if ((fid1 = h5tools_fopen(fname1, H5F_ACC_RDONLY, fname1_fapl,
+                              (fname1_fapl == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname1, H5FOPENERROR);
-    if ((fid2 = h5tools_fopen(fname2, H5F_ACC_RDONLY, fname2_fapl, TRUE, NULL, 0)) < 0)
+    if ((fid2 = h5tools_fopen(fname2, H5F_ACC_RDONLY, fname2_fapl,
+                              (fname2_fapl == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fname2, H5FOPENERROR);
 
     /*-------------------------------------------------------------------------

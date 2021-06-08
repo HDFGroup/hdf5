@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -27,7 +27,7 @@
 #define F_FORMAT "%-15g %-15g %-15g\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT "%-15Lf %-15Lf %-15Lf\n"
+#define LD_FORMAT "%-15Lg %-15Lg %-15Lg\n"
 #endif
 
 #define I_FORMAT    "%-15d %-15d %-15d\n"
@@ -42,7 +42,7 @@
 #define F_FORMAT_P "%-15.10g %-15.10g %-15.10g %-14.10g\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P "%-15.10Lf %-15.10Lf %-15.10Lf %-14.10Lf\n"
+#define LD_FORMAT_P "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
 #endif
 
 #define I_FORMAT_P   "%-15d %-15d %-15d %-14f\n"
@@ -59,7 +59,7 @@
 #define F_FORMAT_P_NOTCOMP "%-15.10g %-15.10g %-15.10g not comparable\n"
 
 #if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P_NOTCOMP "%-15.10Lf %-15.10Lf %-15.10Lf not comparable\n"
+#define LD_FORMAT_P_NOTCOMP "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
 #endif
 
 #define I_FORMAT_P_NOTCOMP   "%-15d %-15d %-15d not comparable\n"
@@ -225,7 +225,7 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
     mcomp_t        members;
     H5T_class_t    type_class;
 
-    H5TOOLS_START_DEBUG(" - rank:%d hs_nelmts:%ld errstat:%d", opts->rank, opts->hs_nelmts, opts->err_stat);
+    H5TOOLS_START_DEBUG(" - rank:%d hs_nelmts:%lld errstat:%d", opts->rank, opts->hs_nelmts, opts->err_stat);
     opts->print_header = 1; /* enable print header  */
 
     /* get the size. */
@@ -411,7 +411,7 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
             HDmemset(&members, 0, sizeof(mcomp_t));
             get_member_types(opts->m_tid, &members);
             for (i = 0; i < opts->hs_nelmts; i++) {
-                H5TOOLS_DEBUG("opts->pos[%ld]:%ld - nelmts:%ld", i, opts->pos[i], opts->hs_nelmts);
+                H5TOOLS_DEBUG("opts->pos[%lld]:%lld - nelmts:%lld", i, opts->pos[i], opts->hs_nelmts);
                 nfound += diff_datum(mem1 + i * size, mem2 + i * size, i, opts, container1_id, container2_id,
                                      &members);
                 if (opts->count_bool && nfound >= opts->count)
@@ -419,7 +419,7 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
             } /* i */
             close_member_types(&members);
     } /* switch */
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
@@ -472,12 +472,10 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
     size_t         size = 0;
     hbool_t        iszero1;
     hbool_t        iszero2;
-    hsize_t        nfound = 0; /* differences found */
-    double         per;
-    hbool_t        both_zero;
+    hsize_t        nfound    = 0; /* differences found */
     diff_err_t     ret_value = opts->err_stat;
 
-    H5TOOLS_START_DEBUG("ph:%d elemtno:%d - errstat:%d", opts->print_header, elemtno, opts->err_stat);
+    H5TOOLS_START_DEBUG("ph:%d elemtno:%lld - errstat:%d", opts->print_header, elemtno, opts->err_stat);
 
     type_size  = H5Tget_size(opts->m_tid);
     type_class = H5Tget_class(opts->m_tid);
@@ -595,8 +593,8 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
                  *       of length of strings.
                  *       For now mimic the previous way.
                  */
-                H5TOOLS_DEBUG("string size:%d", size1);
-                H5TOOLS_DEBUG("string size:%d", size2);
+                H5TOOLS_DEBUG("string size:%ld", size1);
+                H5TOOLS_DEBUG("string size:%ld", size2);
                 if (size1 != size2) {
                     H5TOOLS_DEBUG("string sizes difference");
                     nfound++;
@@ -727,7 +725,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
             H5TOOLS_DEBUG("H5T_ARRAY ph=%d", opts->print_header);
 
             arr_opts = *opts;
-            H5TOOLS_DEBUG("Check opts: hs_nelmts:%ld to %ld rank:%d to %ld", opts->hs_nelmts,
+            H5TOOLS_DEBUG("Check opts: hs_nelmts:%lld to %lld rank:%d to %d", opts->hs_nelmts,
                           arr_opts.hs_nelmts, opts->rank, arr_opts.rank);
             /* get the array's base datatype for each element */
             arr_opts.m_tid = H5Tget_super(opts->m_tid);
@@ -1066,7 +1064,7 @@ diff_datum(void *_mem1, void *_mem2, hsize_t elemtno, diff_opt_t *opts, hid_t co
 done:
     opts->err_stat = opts->err_stat | ret_value;
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
     return nfound;
 }
 
@@ -1158,7 +1156,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
     hsize_t  nfound_p  = 0; /* point differences found */
     hsize_t  ret_value = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     ndims1 = H5Sget_simple_extent_ndims(region1_id);
     ndims2 = H5Sget_simple_extent_ndims(region2_id);
@@ -1177,8 +1175,8 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
         npoints2 = H5Sget_select_elem_npoints(region2_id);
     }
     H5E_END_TRY;
-    H5TOOLS_DEBUG("blocks: 1=%ld-2=%ld", nblocks1, nblocks2);
-    H5TOOLS_DEBUG("points: 1=%ld-2=%ld", npoints1, npoints2);
+    H5TOOLS_DEBUG("blocks: 1=%lld-2=%lld", nblocks1, nblocks2);
+    H5TOOLS_DEBUG("points: 1=%lld-2=%lld", npoints1, npoints2);
 
     if (nblocks1 != nblocks2 || npoints1 != npoints2 || ndims1 != ndims2) {
         opts->not_cmp = 1;
@@ -1334,7 +1332,7 @@ diff_region(hid_t obj1_id, hid_t obj2_id, hid_t region1_id, hid_t region2_id, di
     ret_value = nfound_p + nfound_b;
 
 done:
-    H5TOOLS_ENDDEBUG(" with diffs:%d", ret_value);
+    H5TOOLS_ENDDEBUG(" with diffs:%lld", ret_value);
     return ret_value;
 }
 
@@ -1371,7 +1369,7 @@ character_compare(char *mem1, char *mem2, hsize_t elemtno, size_t u, diff_opt_t 
         }
         nfound++;
     }
-    H5TOOLS_ENDDEBUG(": %d", nfound);
+    H5TOOLS_ENDDEBUG(": %lld", nfound);
     return nfound;
 }
 
@@ -1442,7 +1440,7 @@ character_compare_opt(unsigned char *mem1, unsigned char *mem2, hsize_t elemtno,
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(": %d zero:%d", nfound, both_zero);
+    H5TOOLS_ENDDEBUG(": %lld zero:%d", nfound, both_zero);
     return nfound;
 }
 
@@ -1623,7 +1621,7 @@ diff_float_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         }
     }
 
-    H5TOOLS_ENDDEBUG(": %d zero:%d", nfound, both_zero);
+    H5TOOLS_ENDDEBUG(": %lld zero:%d", nfound, both_zero);
     return nfound;
 }
 
@@ -1794,7 +1792,7 @@ diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
             nfound++;
         }
     }
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -1969,7 +1967,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2058,7 +2056,7 @@ diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2146,7 +2144,7 @@ diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2234,7 +2232,7 @@ diff_short_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2326,7 +2324,7 @@ diff_ushort_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2414,7 +2412,7 @@ diff_int_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, dif
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2502,7 +2500,7 @@ diff_uint_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, di
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2590,7 +2588,7 @@ diff_long_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, di
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2680,7 +2678,7 @@ diff_ulong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         nfound++;
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2773,7 +2771,7 @@ diff_llong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, d
         }
     }
 
-    H5TOOLS_ENDDEBUG(":%d - errstat:%d", nfound, opts->err_stat);
+    H5TOOLS_ENDDEBUG(":%lld - errstat:%d", nfound, opts->err_stat);
 
     return nfound;
 }
@@ -2873,7 +2871,7 @@ diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
         }
     }
 
-    H5TOOLS_ENDDEBUG(": %d zero:%d", nfound, both_zero);
+    H5TOOLS_ENDDEBUG(": %lld zero:%d", nfound, both_zero);
     return nfound;
 }
 
@@ -2892,7 +2890,7 @@ ull2float(unsigned long long ull_value, float *f_value)
     size_t         dst_size;
     int            ret_value = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "H5Pcreate failed");
 
@@ -2910,13 +2908,16 @@ ull2float(unsigned long long ull_value, float *f_value)
     HDmemcpy(f_value, buf, dst_size);
 
 done:
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY;
 
     if (buf)
         HDfree(buf);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -3118,79 +3119,87 @@ print_header(diff_opt_t *opts)
 static void
 print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
 {
-    int i, j;
-
-    H5TOOLS_START_DEBUG(" -- idx:%ld", idx);
+    H5TOOLS_START_DEBUG(" -- idx:%lld", idx);
 
     if (print_data(opts)) {
+        hsize_t curr_pos = idx;
         /* print header */
         if (opts->print_header == 1) {
             opts->print_header = 0;
-
             print_header(opts);
         } /* end print header */
 
         H5TOOLS_DEBUG("rank=%d", opts->rank);
         if (opts->rank > 0) {
-            hsize_t curr_pos = idx;
-
             parallel_print("[ ");
-            H5TOOLS_DEBUG("do calc_acc_pos[%ld] nelmts:%d - errstat:%d", i, opts->hs_nelmts, opts->err_stat);
-
+            H5TOOLS_DEBUG("do calc_acc_pos[%lld] nelmts:%lld - errstat:%d", idx, opts->hs_nelmts,
+                          opts->err_stat);
             if (opts->sset[0] != NULL) {
                 /* Subsetting is used - calculate total position */
-                hsize_t elmnt_cnt = 1;
-                hsize_t dim_cnt   = 0;   /* previous dim size */
-                hsize_t str_cnt   = 0;   /* previous dim stride */
-                hsize_t curr_idx  = idx; /* calculated running position */
-                hsize_t str_idx   = 0;
-                hsize_t blk_idx   = 0;
-                hsize_t cnt_idx   = 0;
-                hsize_t hs_idx    = 0;
-                j                 = opts->rank - 1;
-                do {
-                    cnt_idx = opts->sset[0]->count.data[j]; /* Count value for current dim */
-                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - count:%ld", j,
-                                  curr_pos, curr_idx, cnt_idx);
-                    blk_idx = opts->sset[0]->block.data[j]; /* Block value for current dim */
-                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - block:%ld", j,
-                                  curr_pos, curr_idx, blk_idx);
-                    hs_idx = cnt_idx * blk_idx; /* hyperslab area value for current dim */
-                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - hs:%ld", j, curr_pos,
-                                  curr_idx, hs_idx);
-                    str_idx = opts->sset[0]->stride.data[j]; /* Stride value for current dim */
-                    H5TOOLS_DEBUG("... sset loop:%d with curr_pos:%ld (curr_idx:%ld) - stride:%ld", j,
-                                  curr_pos, curr_idx, str_idx);
-                    elmnt_cnt *= opts->dims[j]; /* Total number of elements in dimension */
-                    H5TOOLS_DEBUG("... sset loop:%d with elmnt_cnt:%ld", j, elmnt_cnt);
-                    if (str_idx > blk_idx)
-                        curr_idx += dim_cnt * (str_idx - blk_idx); /* */
-                    else if (curr_idx >= hs_idx)
-                        curr_idx += dim_cnt * str_cnt;
-                    H5TOOLS_DEBUG("... sset loop:%d with idx:%ld (curr_idx:%ld) - stride:%ld", j, idx,
-                                  curr_idx, str_idx);
-                    dim_cnt = elmnt_cnt; /* */
-                    if (str_idx > blk_idx)
-                        str_cnt = str_idx - blk_idx; /* */
-                    else
-                        str_cnt = str_idx; /* */
-                    H5TOOLS_DEBUG("... sset loop:%d with dim_cnt:%ld - str_cnt:%ld", j, dim_cnt, str_cnt);
-                    j--;
-                } while (curr_idx >= elmnt_cnt && j >= 0);
-                curr_pos = curr_idx; /* New current position */
-                H5TOOLS_DEBUG("pos loop:%d,%d with  elmnt_cnt:%ld - curr_pos:%ld", i, j, elmnt_cnt, curr_pos);
-            } /* if (opts->sset[0] != NULL) */
+                hsize_t curr_idx = 0; /* current pos in the selection space for each dimension */
+
+                curr_pos = 0; /* current position in full space */
+                if (curr_idx < idx) {
+                    int     j;
+                    hsize_t count;
+                    hsize_t block;
+                    hsize_t stride;
+                    hsize_t tmp                 = 0;
+                    hsize_t k0                  = 0; /* whole location beyond current dimension */
+                    hsize_t k1                  = 0; /* partial location within dimension */
+                    hsize_t dim_size            = 0; /* previous dim size */
+                    hsize_t prev_dim_size       = 0; /* previous dim size */
+                    hsize_t total_dim_size      = 1; /* current dim size */
+                    hsize_t prev_total_dim_size = 1; /* current dim size */
+
+                    prev_dim_size  = 1;
+                    total_dim_size = 1;
+                    curr_idx       = idx;
+                    /* begin with fastest changing dimension */
+                    for (int i = 0; i < opts->rank; i++) {
+                        j = opts->rank - i - 1;
+                        prev_total_dim_size *= prev_dim_size;
+                        dim_size = opts->dims[j];
+                        H5TOOLS_DEBUG("j=%d, dim_size=%lld, prev_dim_size=%lld, total_dim_size=%lld, "
+                                      "prev_total_dim_size=%lld",
+                                      j, dim_size, prev_dim_size, total_dim_size, prev_total_dim_size);
+                        count  = opts->sset[0]->count.data[j];
+                        block  = opts->sset[0]->block.data[j];
+                        stride = opts->sset[0]->stride.data[j];
+                        H5TOOLS_DEBUG("stride=%lld, count=%lld, block=%lld", stride, count, block);
+                        tmp = count * block;
+                        k0  = curr_idx / tmp;
+                        k1  = curr_idx % tmp;
+                        curr_pos += k1 * stride * prev_total_dim_size;
+                        H5TOOLS_DEBUG("curr_idx=%lld, k0=%lld, k1=%lld, curr_pos=%lld", curr_idx, k0, k1,
+                                      curr_pos);
+                        if (k0 > 0)
+                            curr_idx = k0 * total_dim_size;
+                        H5TOOLS_DEBUG("curr_idx=%lld, tmp=%lld", curr_idx, tmp);
+                        total_dim_size *= dim_size;
+                        /* if last calculation exists within in current dimension */
+                        if (k0 == 0)
+                            break;
+                        H5TOOLS_DEBUG("j=%d, curr_pos=%lld", j, curr_pos);
+                        prev_dim_size = dim_size;
+                    }
+                    /* check if there is a final calculation needed for slowest changing dimension */
+                    if (k0 > 0)
+                        curr_pos += k0 * stride * prev_total_dim_size;
+                    H5TOOLS_DEBUG("4:curr_idx=%lld, curr_pos=%lld", curr_idx, curr_pos);
+                }
+            }
             /*
              * Calculate the number of elements represented by a unit change in a
              * certain index position.
              */
             calc_acc_pos((unsigned)opts->rank, curr_pos, opts->acc, opts->pos);
 
-            for (i = 0; i < opts->rank; i++) {
-                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%ld opts->sm_pos=%ld", i, opts->pos[i],
+            for (int i = 0; i < opts->rank; i++) {
+                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%lld opts->sm_pos=%lld", i, opts->pos[i],
                               opts->sm_pos[i]);
                 opts->pos[i] += (unsigned long)opts->sm_pos[i];
-                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%ld", i, opts->pos[i]);
+                H5TOOLS_DEBUG("pos loop:%d with opts->pos=%lld", i, opts->pos[i]);
                 parallel_print(HSIZE_T_FORMAT, (unsigned long long)opts->pos[i]);
                 parallel_print(" ");
             }
@@ -3209,7 +3218,7 @@ print_pos(diff_opt_t *opts, hsize_t idx, size_t u)
         parallel_print(SPACES);
     }
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -3291,8 +3300,6 @@ get_member_types(hid_t tid, mcomp_t *members)
             get_member_types(members->ids[u], members->m[u]);
         }
     }
-
-    return;
 }
 
 /*-------------------------------------------------------------------------

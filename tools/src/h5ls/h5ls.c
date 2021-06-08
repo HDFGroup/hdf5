@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -95,8 +95,8 @@ static h5tool_format_t ls_dataformat = {
 
     0, /*skip_first */
 
-    0,                           /*obj_hidefileno */
-    "-%lu:" H5_PRINTF_HADDR_FMT, /*obj_format */
+    0,                  /*obj_hidefileno */
+    "-%lu:%" PRIuHADDR, /*obj_format */
 
     0,            /*dset_hidefileno */
     "DSET-%s ",   /*dset_format */
@@ -426,11 +426,6 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
         else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE) {
             h5tools_str_append(buffer, "native double");
         }
-#if H5_SIZEOF_LONG_DOUBLE != 0
-        else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE) {
-            h5tools_str_append(buffer, "native long double");
-        }
-#endif
         else if (H5Tequal(type, H5T_NATIVE_INT8) == TRUE) {
             h5tools_str_append(buffer, "native int8_t");
         }
@@ -963,7 +958,7 @@ print_enum_type(h5tools_str_t *buffer, hid_t type, int ind)
                 /*On SGI Altix(cobalt), wrong values were printed out with "value+i*dst_size"
                  *strangely, unless use another pointer "copy".*/
                 copy = value + i * dst_size;
-                h5tools_str_append(buffer, "%" H5_PRINTF_LL_WIDTH "d", *((long long *)((void *)copy)));
+                h5tools_str_append(buffer, "%lld", *((long long *)((void *)copy)));
             }
         }
 
@@ -1309,7 +1304,7 @@ dump_dataset_values(hid_t dset)
     h5tool_format_t * info       = &ls_dataformat;
     unsigned char *   region_buf = NULL;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     f_type = H5Dget_type(dset);
     space  = H5Dget_space(dset);
@@ -1449,7 +1444,7 @@ done:
 
     PRINTVALSTREAM(rawoutstream, "\n");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -1478,7 +1473,7 @@ dump_attribute_values(hid_t attr)
     h5tool_format_t * info       = &ls_dataformat;
     unsigned char *   region_buf = NULL;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     f_type = H5Aget_type(attr);
     space  = H5Aget_space(attr);
@@ -1625,7 +1620,7 @@ done:
 
     PRINTVALSTREAM(rawoutstream, "\n");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -1654,7 +1649,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t * info = &ls_dataformat;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1733,7 +1728,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
         H5TOOLS_DEBUG("Attribute open failed");
         h5tools_str_close(&buffer);
     }
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return 0;
 }
@@ -1974,7 +1969,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                                    HSIZE_T_FORMAT " logical byte%s, " HSIZE_T_FORMAT " allocated byte%s",
                                    total, 1 == total ? "" : "s", used, 1 == used ? "" : "s");
                 if (used > 0) {
-                    utilization = ((double)total * (double)100.0f) / (double)used;
+                    utilization = ((double)total * 100.0) / (double)used;
                     h5tools_str_append(&buffer, ", %1.2f%% utilization", utilization);
                 }
         }
@@ -2079,7 +2074,7 @@ list_obj(const char *name, const H5O_info_t *oinfo, const char *first_seen, void
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t * info = &ls_dataformat;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2221,7 +2216,7 @@ done:
     }
     h5tools_str_close(&buffer);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return 0;
 } /* end list_obj() */
@@ -2622,7 +2617,7 @@ int
 main(int argc, const char *argv[])
 {
     hid_t       file_id = H5I_INVALID_HID;
-    char *      fname = NULL, *oname = NULL, *x;
+    char *      fname = NULL, *oname = NULL, *x = NULL;
     const char *s = NULL;
     char *      rest;
     int         argno;
@@ -3036,7 +3031,7 @@ main(int argc, const char *argv[])
         symlink_list.objs                        = NULL;
 
         /* Check for root group as object name */
-        if (HDstrcmp(oname, root_name)) {
+        if (HDstrcmp(oname, root_name) != 0) {
             /* Check the type of link given */
             if (H5Lget_info(file_id, oname, &li, H5P_DEFAULT) < 0) {
                 hsize_t           curr_pos = 0; /* total data element position   */

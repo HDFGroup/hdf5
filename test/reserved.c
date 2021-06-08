@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -65,7 +65,10 @@ rsrv_heap(void)
      * should throw an error.
      */
     for (i = 0; i < 200; i++) {
-        H5E_BEGIN_TRY { dataspace_id = H5Screate_simple(1, dims, dims); }
+        H5E_BEGIN_TRY
+        {
+            dataspace_id = H5Screate_simple(1, dims, dims);
+        }
         H5E_END_TRY
 
         HDsprintf(dset_name, "Dset %d", i);
@@ -80,7 +83,10 @@ rsrv_heap(void)
         if (dataset_id < 0)
             break;
 
-        H5E_BEGIN_TRY { H5Dwrite(dataset_id, H5T_NATIVE_INT, dataspace_id, dataspace_id, H5P_DEFAULT, &i); }
+        H5E_BEGIN_TRY
+        {
+            H5Dwrite(dataset_id, H5T_NATIVE_INT, dataspace_id, dataspace_id, H5P_DEFAULT, &i);
+        }
         H5E_END_TRY
 
         if (H5Dclose(dataset_id) < 0)

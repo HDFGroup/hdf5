@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -306,7 +306,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -351,7 +351,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -548,8 +548,8 @@ test_fapl_config_validation(void)
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -613,7 +613,10 @@ error:
      ***********/
 
     if (fapl_id < 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     return 1;
@@ -687,7 +690,10 @@ test_ros3_fapl(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        (void)H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -823,8 +829,8 @@ test_vfd_open(void)
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -855,7 +861,10 @@ test_vfd_open(void)
         else if (T.which_fapl == FAPL_ROS3_ANON)
             _fapl_id = fapl_id;
 
-        H5E_BEGIN_TRY { fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr); }
+        H5E_BEGIN_TRY
+        {
+            fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr);
+        }
         H5E_END_TRY;
         if (NULL != fd)
             JSVERIFY(1, 0, T.message); /* wrapper to print message and fail */
@@ -896,11 +905,17 @@ error:
         (void)H5FDclose(fd);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (fapl_file_access >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_file_access); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_file_access);
+        }
         H5E_END_TRY;
     }
     if (curl_ready == TRUE) {
@@ -957,15 +972,15 @@ test_eof_eoa(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1031,7 +1046,10 @@ error:
     if (TRUE == curl_ready)
         curl_global_cleanup();
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1065,15 +1083,15 @@ test_H5FDread_without_eoa_set_fails(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1126,7 +1144,10 @@ error:
         (void)H5FDclose(file_shakespeare);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1236,15 +1257,15 @@ test_read(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1326,7 +1347,10 @@ error:
     if (file_raven)
         (void)H5FDclose(file_raven);
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1377,8 +1401,8 @@ test_noops_and_autofails(void)
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1445,7 +1469,10 @@ error:
      ***********/
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file) {
@@ -1503,15 +1530,15 @@ test_cmp(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1576,7 +1603,10 @@ error:
     if (TRUE == curl_ready)
         curl_global_cleanup();
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1624,15 +1654,15 @@ test_H5F_integration(void)
 
     if (s3_test_credentials_loaded == 0) {
         SKIPPED();
-        puts("    s3 credentials are not loaded");
-        fflush(stdout);
+        HDputs("    s3 credentials are not loaded");
+        HDfflush(stdout);
         return 0;
     }
 
     if (FALSE == s3_test_bucket_defined) {
         SKIPPED();
-        puts("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
-        fflush(stdout);
+        HDputs("    environment variable HDF5_ROS3_TEST_BUCKET_URL not defined");
+        HDfflush(stdout);
         return 0;
     }
 
@@ -1679,10 +1709,13 @@ error:
      * CLEANUP *
      ***********/
     HDprintf("\nerror!");
-    fflush(stdout);
+    HDfflush(stdout);
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file > 0)

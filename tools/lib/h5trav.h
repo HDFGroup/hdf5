@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef H5TRAV_H__
-#define H5TRAV_H__
+#ifndef H5TRAV_H
+#define H5TRAV_H
 
 #include "hdf5.h"
 
@@ -186,6 +186,7 @@ H5TOOLS_DLL void trav_table_init(trav_table_t **table);
 
 H5TOOLS_DLL void trav_table_free(trav_table_t *table);
 
-H5TOOLS_DLL void trav_table_addflags(unsigned *flags, char *objname, h5trav_type_t type, trav_table_t *table);
+H5TOOLS_DLL void trav_table_addflags(const unsigned *flags, char *objname, h5trav_type_t type,
+                                     trav_table_t *table);
 
-#endif /* H5TRAV_H__ */
+#endif /* H5TRAV_H */

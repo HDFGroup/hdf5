@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -245,8 +245,8 @@ main(int argc, char *argv[])
     haddr_t     extra[10];
     uint8_t     sig[H5F_SIGNATURE_LEN];
     size_t      u;
-    H5E_auto2_t func;
-    void *      edata;
+    H5E_auto2_t func           = NULL;
+    void *      edata          = NULL;
     hbool_t     api_ctx_pushed = FALSE; /* Whether API context pushed */
     herr_t      status         = SUCCEED;
     int         exit_value     = 0;
@@ -337,7 +337,7 @@ main(int argc, char *argv[])
     /*
      * Read the signature at the specified file position.
      */
-    HDfprintf(stdout, "Reading signature at address %a (rel)\n", addr);
+    HDfprintf(stdout, "Reading signature at address %" PRIuHADDR " (rel)\n", addr);
     if (H5F_block_read(f, H5FD_MEM_SUPER, addr, sizeof(sig), sig) < 0) {
         HDfprintf(stderr, "cannot read signature\n");
         exit_value = 3;
@@ -619,7 +619,7 @@ main(int argc, char *argv[])
          * Debug shared message master table.
          */
 
-        status = H5SM_table_debug(f, addr, stdout, 0, VCOL, (unsigned)UFAIL, (unsigned)UFAIL);
+        status = H5SM_table_debug(f, addr, stdout, 0, VCOL, UINT_MAX, UINT_MAX);
     }
     else if (!HDmemcmp(sig, H5SM_LIST_MAGIC, (size_t)H5_SIZEOF_MAGIC)) {
         /*

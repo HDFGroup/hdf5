@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -40,7 +40,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub floating-point datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType() {}
+FloatType::FloatType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FloatType overloaded constructor
@@ -63,14 +65,18 @@ FloatType::FloatType(const PredType &pred_type) : AtomType()
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType(const hid_t existing_id) : AtomType(existing_id) {}
+FloatType::FloatType(const hid_t existing_id) : AtomType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FloatType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::FloatType(const FloatType &original) : AtomType(original) {}
+FloatType::FloatType(const FloatType &original) : AtomType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FloatType overloaded constructor
@@ -342,6 +348,8 @@ FloatType::setInpad(H5T_pad_t inpad) const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FloatType::~FloatType() {}
+FloatType::~FloatType()
+{
+}
 
 } // namespace H5

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1634,7 +1634,7 @@ H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts, size_t rdcc_nslots, 
     H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Check arguments */
-    if (rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
+    if (rdcc_w0 < 0.0 || rdcc_w0 > 1.0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
 
@@ -4304,9 +4304,9 @@ herr_t
 H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location, size_t *location_size,
                        hbool_t *start_on_access)
 {
-    H5P_genplist_t *plist;               /* Property list pointer */
-    char *          location_ptr;        /* Pointer to location string */
-    herr_t          ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;                  /* Property list pointer */
+    char *          location_ptr = NULL;    /* Pointer to location string */
+    herr_t          ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*b*s*z*b", plist_id, is_enabled, location, location_size, start_on_access);

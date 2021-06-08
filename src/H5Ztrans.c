@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -90,8 +90,7 @@ static void       H5Z__do_op(H5Z_node *tree);
 static hbool_t    H5Z__op_is_numbs(H5Z_node *_tree);
 static hbool_t    H5Z__op_is_numbs2(H5Z_node *_tree);
 static hid_t      H5Z__xform_find_type(const H5T_t *type);
-static herr_t     H5Z__xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_type,
-                                       H5Z_result *res);
+static herr_t     H5Z__xform_eval_full(H5Z_node *tree, size_t array_size, hid_t array_type, H5Z_result *res);
 static void       H5Z__xform_destroy_parse_tree(H5Z_node *tree);
 static void *     H5Z__xform_parse(const char *expression, H5Z_datval_ptrs *dat_val_pointers);
 static void *     H5Z__xform_copy_tree(H5Z_node *tree, H5Z_datval_ptrs *dat_val_pointers,

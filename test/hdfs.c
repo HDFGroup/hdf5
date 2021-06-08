@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -230,9 +230,10 @@
  */
 #define JSERR_STR(expected, actual, reason)                                                                  \
     {                                                                                                        \
+        const char *_reason = reason;                                                                        \
         JSFAILED_AT()                                                                                        \
-        if ((reason) != NULL) {                                                                              \
-            HDprintf("%s\n", (reason));                                                                      \
+        if (_reason != NULL) {                                                                               \
+            HDprintf("%s\n", _reason);                                                                       \
         }                                                                                                    \
         else {                                                                                               \
             HDprintf("!!! Expected:\n%s\n!!!Actual:\n%s\n", (expected), (actual));                           \
@@ -302,7 +303,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(expected, actual, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -347,7 +348,7 @@
  *----------------------------------------------------------------------------
  */
 #define JSVERIFY_STR(actual, expected, reason)                                                               \
-    if (strcmp((actual), (expected)) != 0) {                                                                 \
+    if (HDstrcmp((actual), (expected)) != 0) {                                                               \
         JSERR_STR((expected), (actual), (reason));                                                           \
         goto error;                                                                                          \
     } /* JSVERIFY_STR */
@@ -413,8 +414,8 @@ test_fapl_config_validation(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl configuration validation");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -563,9 +564,10 @@ test_fapl_config_validation(void)
             JSVERIFY(config.version, fa_fetch.version, "version number mismatch")
             JSVERIFY(config.namenode_port, fa_fetch.namenode_port, "namenode port mismatch")
             JSVERIFY(config.stream_buffer_size, fa_fetch.stream_buffer_size, "streambuffer size mismatch")
-            JSVERIFY_STR(config.namenode_name, fa_fetch.namenode_name, NULL)
-            JSVERIFY_STR(config.user_name, fa_fetch.user_name, NULL)
-            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache, NULL)
+            JSVERIFY_STR(config.namenode_name, fa_fetch.namenode_name, "node name mismatch")
+            JSVERIFY_STR(config.user_name, fa_fetch.user_name, "user name mismatch")
+            JSVERIFY_STR(config.kerberos_ticket_cache, fa_fetch.kerberos_ticket_cache,
+                         "kerberos ticket cache mismatch")
         }
 
         /*-----------------------------
@@ -586,7 +588,10 @@ error:
      ***********/
 
     if (fapl_id < 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     return 1;
@@ -619,8 +624,8 @@ test_hdfs_fapl(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS fapl ");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -669,7 +674,10 @@ test_hdfs_fapl(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        (void)H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -702,8 +710,8 @@ test_vfd_open(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD-level open");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -854,7 +862,10 @@ test_vfd_open(void)
         HDfprintf(stderr, "testing: %s\n", T.message);
 #endif /* HDFS_TEST_DEBUG */
 
-        H5E_BEGIN_TRY { fd = H5FDopen(T.url, T.flags, fapl_id, T.maxaddr); }
+        H5E_BEGIN_TRY
+        {
+            fd = H5FDopen(T.url, T.flags, fapl_id, T.maxaddr);
+        }
         H5E_END_TRY;
         if (NULL != fd) {
             if (TRUE == T.might_use_other_driver && H5FD_HDFS != fd->driver_id) {
@@ -955,8 +966,8 @@ test_eof_eoa(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS eof/eoa gets and sets");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -995,7 +1006,7 @@ test_eof_eoa(void)
 
     /* verify as found
      */
-    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), NULL)
+    JSVERIFY(5458199, H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), "EOF mismatch")
     JSVERIFY(H5FDget_eof(fd_shakespeare, H5FD_MEM_DEFAULT), H5FDget_eof(fd_shakespeare, H5FD_MEM_DRAW),
              "mismatch between DEFAULT and RAW memory types")
     JSVERIFY(0, H5FDget_eoa(fd_shakespeare, H5FD_MEM_DEFAULT), "EoA should be unset by H5FDopen")
@@ -1035,7 +1046,10 @@ error:
         (void)H5FDclose(fd_shakespeare);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1065,8 +1079,8 @@ test_H5FDread_without_eoa_set_fails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read-eoa temporal coupling library limitation");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1132,7 +1146,10 @@ error:
         (void)H5FDclose(file_shakespeare);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1164,8 +1181,8 @@ test_read(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD read/range-gets");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1271,7 +1288,7 @@ test_read(void)
                           HADDR_UNDEF); /* Demonstrate success with "automatic" value */
     FAIL_IF(NULL == file_raven)
 
-    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), NULL)
+    JSVERIFY(6464, H5FDget_eof(file_raven, H5FD_MEM_DEFAULT), "EOF mismatch")
 
     /*********
      * TESTS *
@@ -1336,7 +1353,10 @@ error:
         (void)H5FDclose(file_raven);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1375,8 +1395,8 @@ test_noops_and_autofails(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS VFD always-fail and no-op routines");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1431,8 +1451,8 @@ test_noops_and_autofails(void)
     /* no-op calls to `lock()` and `unlock()`
      */
     JSVERIFY(SUCCEED, H5FDlock(file, TRUE), "lock always succeeds; has no effect")
-    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), NULL)
-    JSVERIFY(SUCCEED, H5FDunlock(file), NULL)
+    JSVERIFY(SUCCEED, H5FDlock(file, FALSE), "lock issue")
+    JSVERIFY(SUCCEED, H5FDunlock(file), "unlock issue")
     /* Lock/unlock with null file or similar error crashes tests.
      * HDassert in calling heirarchy, `H5FD[un]lock()` and `H5FD_[un]lock()`
      */
@@ -1457,7 +1477,10 @@ error:
      ***********/
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file != NULL) {
@@ -1527,8 +1550,8 @@ test_H5F_integration(void)
 #ifndef H5_HAVE_LIBHDFS
     TESTING("HDFS file access through HD5F library (H5F API)");
     SKIPPED();
-    puts("    HDFS VFD is not enabled");
-    fflush(stdout);
+    HDputs("    HDFS VFD is not enabled");
+    HDfflush(stdout);
     return 0;
 
 #else
@@ -1596,11 +1619,14 @@ error:
 
 #if HDFS_TEST_DEBUG
     HDprintf("\nerror!");
-    fflush(stdout);
+    HDfflush(stdout);
 #endif /* HDFS_TEST_DEBUG */
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file > 0) {

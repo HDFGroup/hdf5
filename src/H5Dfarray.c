@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -415,8 +415,8 @@ H5D__farray_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const void 
     HDassert(elmt);
 
     /* Print element */
-    HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, temp_str, *(const haddr_t *)elmt);
+    HDsprintf(temp_str, "Element #%" PRIuHSIZE ":", idx);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, temp_str, *(const haddr_t *)elmt);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__farray_debug() */
@@ -675,9 +675,9 @@ H5D__farray_filt_debug(FILE *stream, int indent, int fwidth, hsize_t idx, const 
     HDassert(elmt);
 
     /* Print element */
-    HDsprintf(temp_str, "Element #%llu:", (unsigned long long)idx);
-    HDfprintf(stream, "%*s%-*s {%a, %u, %0x}\n", indent, "", fwidth, temp_str, elmt->addr, elmt->nbytes,
-              elmt->filter_mask);
+    HDsprintf(temp_str, "Element #%" PRIuHSIZE ":", idx);
+    HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %u, %0x}\n", indent, "", fwidth, temp_str, elmt->addr,
+              elmt->nbytes, elmt->filter_mask);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__farray_filt_debug() */
@@ -1591,7 +1591,7 @@ H5D__farray_idx_dump(const H5O_storage_chunk_t *storage, FILE *stream)
     HDassert(storage);
     HDassert(stream);
 
-    HDfprintf(stream, "    Address: %a\n", storage->idx_addr);
+    HDfprintf(stream, "    Address: %" PRIuHADDR "\n", storage->idx_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5D__farray_idx_dump() */

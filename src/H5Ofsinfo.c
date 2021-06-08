@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,10 +25,10 @@
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions    */
-#include "H5Eprivate.h"  /* Error handling    */
+#include "H5Eprivate.h"  /* Error handling       */
 #include "H5Fpkg.h"      /* File access          */
-#include "H5FLprivate.h" /* Free lists              */
-#include "H5Opkg.h"      /* Object headers    */
+#include "H5FLprivate.h" /* Free lists           */
+#include "H5Opkg.h"      /* Object headers       */
 
 /* PRIVATE PROTOTYPES */
 static void * H5O_fsinfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
@@ -119,7 +119,6 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
 
         /* Map version 0 (deprecated) to version 1 message */
         switch (strategy) {
-
             case H5F_FILE_SPACE_ALL_PERSIST:
                 fsinfo->strategy  = H5F_FSPACE_STRATEGY_FSM_AGGR;
                 fsinfo->persist   = TRUE;
@@ -166,10 +165,9 @@ H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUS
                         &(fsinfo->eoa_pre_fsm_fsalloc)); /* EOA before free-space header and section info */
 
         /* Decode addresses of free space managers, if persisting */
-        if (fsinfo->persist) {
+        if (fsinfo->persist)
             for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
                 H5F_addr_decode(f, &p, &(fsinfo->fs_addr[ptype - 1]));
-        } /* end if */
 
         fsinfo->mapped = FALSE;
     }
@@ -371,22 +369,24 @@ H5O__fsinfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
             HDfprintf(stream, "%s\n", "unknown");
     } /* end switch */
 
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth, "Free-space persist:", fsinfo->persist);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Free-space persist:", fsinfo->persist ? "TRUE" : "FALSE");
 
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Free-space section threshold:", fsinfo->threshold);
 
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "File space page size:", fsinfo->page_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+              "File space page size:", fsinfo->page_size);
 
-    HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "Page end metadata threshold:", fsinfo->pgend_meta_thres);
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "eoa_pre_fsm_fsalloc:", fsinfo->eoa_pre_fsm_fsalloc);
 
     if (fsinfo->persist) {
         for (ptype = H5F_MEM_PAGE_SUPER; ptype < H5F_MEM_PAGE_NTYPES; ptype++)
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Free space manager address:", fsinfo->fs_addr[ptype - 1]);
     } /* end if */
 

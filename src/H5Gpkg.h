@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5G package!"
 #endif
 
-#ifndef _H5Gpkg_H
-#define _H5Gpkg_H
+#ifndef H5Gpkg_H
+#define H5Gpkg_H
 
 /* Get package's private header */
 #include "H5Gprivate.h"
@@ -486,4 +486,4 @@ H5_DLL herr_t H5G__verify_cached_stab_test(H5O_loc_t *grp_oloc, H5G_entry_t *ent
 H5_DLL herr_t H5G__verify_cached_stabs_test(hid_t gid);
 #endif /* H5G_TESTING */
 
-#endif /* _H5Gpkg_H */
+#endif /* H5Gpkg_H */

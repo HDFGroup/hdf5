@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1267,8 +1267,8 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         rangebytesstr = (char *)H5MM_malloc(sizeof(char) * (S3COMMS_MAX_RANGE_STRING_SIZE + 1));
         if (rangebytesstr == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc range format string.");
-        ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE),
-                         "bytes=" H5_PRINTF_HADDR_FMT "-" H5_PRINTF_HADDR_FMT, offset, offset + len - 1);
+        ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE), "bytes=%" PRIuHADDR "-%" PRIuHADDR,
+                         offset, offset + len - 1);
         if (ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
@@ -1276,8 +1276,7 @@ H5FD_s3comms_s3r_read(s3r_t *handle, haddr_t offset, size_t len, void *dest)
         rangebytesstr = (char *)H5MM_malloc(sizeof(char) * (S3COMMS_MAX_RANGE_STRING_SIZE + 1));
         if (rangebytesstr == NULL)
             HGOTO_ERROR(H5E_ARGS, H5E_CANTALLOC, FAIL, "could not malloc range format string.");
-        ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE), "bytes=" H5_PRINTF_HADDR_FMT "-",
-                         offset);
+        ret = HDsnprintf(rangebytesstr, (S3COMMS_MAX_RANGE_STRING_SIZE), "bytes=%" PRIuHADDR "-", offset);
         if (ret <= 0 || ret >= S3COMMS_MAX_RANGE_STRING_SIZE)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unable to format HTTP Range value");
     }
@@ -1952,7 +1951,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
         for (buffer_i = 0; buffer_i < 128; buffer_i++)
             buffer[buffer_i] = 0;
 
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = HDfgets(line_buffer, 128, file);
         if (line_buffer == NULL) /* reached end of file */
             goto done;
     } while (HDstrncmp(line_buffer, profile_line, HDstrlen(profile_line)));
@@ -1964,7 +1963,7 @@ H5FD__s3comms_load_aws_creds_from_file(FILE *file, const char *profile_name, cha
             buffer[buffer_i] = 0;
 
         /* collect a line from file */
-        line_buffer = fgets(line_buffer, 128, file);
+        line_buffer = HDfgets(line_buffer, 128, file);
         if (line_buffer == NULL)
             goto done; /* end of file */
 
@@ -2063,9 +2062,9 @@ H5FD_s3comms_load_aws_profile(const char *profile_name, char *key_id_out, char *
 #endif
 
 #ifdef H5_HAVE_WIN32_API
-    ret = HDsnprintf(awspath, 117, "%s/.aws/", getenv("USERPROFILE"));
+    ret = HDsnprintf(awspath, 117, "%s/.aws/", HDgetenv("USERPROFILE"));
 #else
-    ret = HDsnprintf(awspath, 117, "%s/.aws/", getenv("HOME"));
+    ret = HDsnprintf(awspath, 117, "%s/.aws/", HDgetenv("HOME"));
 #endif
     if (ret < 0 || (size_t)ret >= 117)
         HGOTO_ERROR(H5E_ARGS, H5E_CANTCOPY, FAIL, "unable to format home-aws path")

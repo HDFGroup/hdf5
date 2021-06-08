@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -91,7 +91,7 @@ H5_buffer_dump(FILE *stream, int indent, const uint8_t *buf, const uint8_t *mark
     for (u = 0; u < buf_size; u += 16) {
         uint8_t c;
 
-        HDfprintf(stream, "%*s %8d: ", indent, "", u + buf_offset);
+        HDfprintf(stream, "%*s %8zu: ", indent, "", u + buf_offset);
 
         /* Print the hex values */
         for (v = 0; v < 16; v++) {

@@ -6,25 +6,25 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol
- *		Thursday, September 28, 2000
+ * Programmer:    Quincey Koziol
+ *        Thursday, September 28, 2000
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5S package.  Source files outside the H5S package should
- *		include H5Sprivate.h instead.
+ * Purpose:    This file contains declarations which are visible only within
+ *        the H5S package.  Source files outside the H5S package should
+ *        include H5Sprivate.h instead.
  */
 #if !(defined H5S_FRIEND || defined H5S_MODULE)
 #error "Do not include this file outside the H5S package!"
 #endif
 
-#ifndef _H5Spkg_H
-#define _H5Spkg_H
+#ifndef H5Spkg_H
+#define H5Spkg_H
 
 /* Get package's private header */
 #include "H5Sprivate.h"
@@ -62,6 +62,7 @@
 #define H5S_SELECT_INFO_ENC_SIZE_8    0x08 /* 8 bytes: 64 bits */
 #define H5S_SELECT_INFO_ENC_SIZE_BITS (H5S_SELECT_INFO_ENC_SIZE_4 | H5S_SELECT_INFO_ENC_SIZE_8)
 
+#define H5S_UINT16_MAX 0x0000FFFF       /* 2^16 - 1 = 65,535                            */
 #define H5S_UINT32_MAX 0xFFFFFFFF       /* 2^32 - 1 = 4,294,967,295                     */
 #define H5S_UINT64_MAX ((hsize_t)(-1L)) /* 2^64 - 1 = 18,446,744,073,709,551,615 */
 
@@ -412,4 +413,4 @@ H5_DLL herr_t H5S__get_diminfo_status_test(hid_t space_id, H5S_diminfo_valid_t *
 H5_DLL htri_t H5S__internal_consistency_test(hid_t space_id);
 #endif /* H5S_TESTING */
 
-#endif /*_H5Spkg_H*/
+#endif /*H5Spkg_H*/

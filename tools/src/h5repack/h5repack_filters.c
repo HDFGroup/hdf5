@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -236,13 +236,13 @@ aux_assign_obj(const char * name,        /* object name from traverse list */
  */
 
 int
-apply_filters(const char *name,    /* object name from traverse list */
-              int         rank,    /* rank of dataset */
-              hsize_t *   dims,    /* dimensions of dataset */
-              size_t      msize,   /* size of type */
-              hid_t       dcpl_id, /* dataset creation property list */
-              pack_opt_t *options, /* repack options */
-              int *       has_filter)     /* (OUT) object NAME has a filter */
+apply_filters(const char *   name,    /* object name from traverse list */
+              int            rank,    /* rank of dataset */
+              const hsize_t *dims,    /* dimensions of dataset */
+              size_t         msize,   /* size of type */
+              hid_t          dcpl_id, /* dataset creation property list */
+              pack_opt_t *   options, /* repack options */
+              int *          has_filter)        /* (OUT) object NAME has a filter */
 {
     int          nfilters;   /* number of filters in DCPL */
     hsize_t      chsize[64]; /* chunk size in elements */

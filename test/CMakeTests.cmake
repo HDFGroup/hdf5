@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -938,8 +938,7 @@ if (ENABLE_EXTENDED_TESTS)
 
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")
-  find_package (Perl)
-  if (PERL_FOUND)
+  if (H5_PERL_FOUND)
     add_test (
         NAME H5TEST-testflushrefresh-clear-objects
         COMMAND ${CMAKE_COMMAND} -E remove flushrefresh.h5
@@ -965,9 +964,9 @@ if (ENABLE_EXTENDED_TESTS)
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test
     )
+  else ()
+    message (STATUS "Cannot execute TEST flushrefresh - perl not found")
   endif ()
-else ()
-  message (STATUS "Cannot execute TEST flushrefresh - perl not found")
 endif ()
 
 ##############################################################################

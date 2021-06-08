@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -602,7 +602,10 @@ test_value_dsnt_exist(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Tclose(datatype_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(datatype_id);
+    }
     H5E_END_TRY;
     return 1;
 }
@@ -661,7 +664,10 @@ test_funcs(void)
     if (H5Tget_super(type) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { ret = H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tset_pad(type, H5T_PAD_ZERO, H5T_PAD_ONE);
+    }
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
@@ -669,7 +675,10 @@ test_funcs(void)
         goto error;
     } /* end if */
 
-    H5E_BEGIN_TRY { size = H5Tget_ebias(type); }
+    H5E_BEGIN_TRY
+    {
+        size = H5Tget_ebias(type);
+    }
     H5E_END_TRY;
     if (size > 0) {
         H5_FAILED();
@@ -677,7 +686,10 @@ test_funcs(void)
         goto error;
     } /* end if */
 
-    H5E_BEGIN_TRY { inpad = H5Tget_inpad(type); }
+    H5E_BEGIN_TRY
+    {
+        inpad = H5Tget_inpad(type);
+    }
     H5E_END_TRY;
     if (inpad > -1) {
         H5_FAILED();
@@ -685,7 +697,10 @@ test_funcs(void)
         goto error;
     } /* end if */
 
-    H5E_BEGIN_TRY { cset = H5Tget_cset(type); }
+    H5E_BEGIN_TRY
+    {
+        cset = H5Tget_cset(type);
+    }
     H5E_END_TRY;
     if (cset > -1) {
         H5_FAILED();
@@ -694,7 +709,10 @@ test_funcs(void)
     } /* end if */
 
     size = 16;
-    H5E_BEGIN_TRY { ret = H5Tset_offset(type, (size_t)size); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tset_offset(type, (size_t)size);
+    }
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
@@ -702,7 +720,10 @@ test_funcs(void)
         goto error;
     } /* end if */
 
-    H5E_BEGIN_TRY { ret = H5Tset_order(type, H5T_ORDER_BE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Tset_order(type, H5T_ORDER_BE);
+    }
     H5E_END_TRY;
     if (ret >= 0) {
         H5_FAILED();
@@ -717,7 +738,10 @@ test_funcs(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Tclose(type); }
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(type);
+    }
     H5E_END_TRY;
     return 1;
 }
@@ -768,11 +792,11 @@ main(void)
 
     if (nerrors)
         goto error;
-    puts("All enum tests passed.");
+    HDputs("All enum tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
 
 error:
-    puts("*** ENUM TESTS FAILED ***");
+    HDputs("*** ENUM TESTS FAILED ***");
     return 1;
 }

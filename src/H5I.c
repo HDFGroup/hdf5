@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -218,13 +218,13 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
                 /* Found a free type ID */
                 new_type = (H5I_type_t)i;
                 done     = TRUE;
-            } /* end if */
-        }     /* end for */
+            }
+        }
 
         /* Verify that we found a type to give out */
         if (done == FALSE)
             HGOTO_ERROR(H5E_ATOM, H5E_NOSPACE, H5I_BADID, "Maximum number of ID types exceeded")
-    } /* end else */
+    }
 
     /* Allocate new ID class */
     if (NULL == (cls = H5FL_CALLOC(H5I_class_t)))
@@ -352,8 +352,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    James Laird
- *        Nathaniel Furrer
+ * Programmer:  James Laird
+ *              Nathaniel Furrer
  *              Friday, April 23, 2004
  *
  *-------------------------------------------------------------------------
@@ -385,7 +385,7 @@ H5Inmembers(H5I_type_t type, hsize_t *num_members)
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCOUNT, FAIL, "can't compute number of members")
 
         H5_CHECKED_ASSIGN(*num_members, hsize_t, members, int64_t);
-    } /* end if */
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -631,7 +631,10 @@ H5I__destroy_type(H5I_type_t type)
         HGOTO_ERROR(H5E_ATOM, H5E_BADGROUP, FAIL, "invalid type")
 
     /* Close/clear/destroy all IDs for this type */
-    H5E_BEGIN_TRY { H5I_clear_type(type, TRUE, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        H5I_clear_type(type, TRUE, FALSE);
+    }
     H5E_END_TRY /*don't care about errors*/
 
         /* Check if we should release the ID class */
@@ -1347,7 +1350,7 @@ done:
 int
 H5Iinc_ref(hid_t id)
 {
-    int ret_value; /* Return value */
+    int ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE1("Is", "i", id);
@@ -1414,7 +1417,7 @@ done:
 int
 H5Iget_ref(hid_t id)
 {
-    int ret_value; /* Return value */
+    int ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE1("Is", "i", id);
@@ -1476,7 +1479,7 @@ done:
 int
 H5Iinc_type_ref(H5I_type_t type)
 {
-    int ret_value; /* Return value */
+    int ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE1("Is", "It", type);
@@ -1634,7 +1637,7 @@ done:
 int
 H5Iget_type_ref(H5I_type_t type)
 {
-    int ret_value; /* Return value */
+    int ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE1("Is", "It", type);
@@ -1773,8 +1776,8 @@ H5I__search_cb(void *obj, hid_t id, void *_udata)
 void *
 H5Isearch(H5I_type_t type, H5I_search_func_t func, void *key)
 {
-    H5I_search_ud_t udata;     /* Context for iteration */
-    void *          ret_value; /* Return value */
+    H5I_search_ud_t udata;            /* Context for iteration */
+    void *          ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API(NULL)
     H5TRACE3("*x", "Itx*x", type, func, key);

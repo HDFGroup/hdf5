@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -128,12 +128,6 @@ zero_dim_dset(void)
 /*
  * Example of using PHDF5 to create ndatasets datasets.  Each process write
  * a slab of array to the file.
- *
- * Changes:    Updated function to use a dynamically calculated size,
- *        instead of the old SIZE #define.  This should allow it
- *        to function with an arbitrary number of processors.
- *
- *                        JRM - 8/11/04
  */
 void
 multiple_dset_write(void)
@@ -161,7 +155,7 @@ multiple_dset_write(void)
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    outme = HDmalloc((size_t)(size * size * sizeof(double)));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
@@ -216,12 +210,6 @@ multiple_dset_write(void)
 }
 
 /* Example of using PHDF5 to create, write, and read compact dataset.
- *
- * Changes:    Updated function to use a dynamically calculated size,
- *        instead of the old SIZE #define.  This should allow it
- *        to function with an arbitrary number of processors.
- *
- *                        JRM - 8/11/04
  */
 void
 compact_dataset(void)
@@ -241,15 +229,15 @@ compact_dataset(void)
     size = get_size();
 
     for (i = 0; i < DIM; i++)
-        file_dims[i] = size;
+        file_dims[i] = (hsize_t)size;
 
     MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
-    outme = HDmalloc((size_t)(size * size * sizeof(double)));
+    outme = HDmalloc((size_t)((size_t)size * (size_t)size * sizeof(double)));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
-    inme = HDmalloc((size_t)(size * size * sizeof(double)));
+    inme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for inme");
 
     filename = GetTestParameters();
@@ -351,14 +339,6 @@ compact_dataset(void)
 /*
  * Example of using PHDF5 to create, write, and read dataset and attribute
  * of Null dataspace.
- *
- * Changes:    Removed the assert that mpi_size <= the SIZE #define.
- *        As best I can tell, this assert isn't needed here,
- *        and in any case, the SIZE #define is being removed
- *        in an update of the functions in this file to run
- *        with an arbitrary number of processes.
- *
- *                                         JRM - 8/24/04
  */
 void
 null_dataset(void)
@@ -463,14 +443,6 @@ null_dataset(void)
  * Actual data is _not_ written to these datasets.  Dataspaces are exact
  * sizes(2GB, 4GB, etc.), but the metadata for the file pushes the file over
  * the boundary of interest.
- *
- * Changes:    Removed the assert that mpi_size <= the SIZE #define.
- *        As best I can tell, this assert isn't needed here,
- *        and in any case, the SIZE #define is being removed
- *        in an update of the functions in this file to run
- *        with an arbitrary number of processes.
- *
- *                                         JRM - 8/11/04
  */
 void
 big_dataset(void)
@@ -592,16 +564,6 @@ big_dataset(void)
 /* Example of using PHDF5 to read a partial written dataset.   The dataset does
  * not have actual data written to the entire raw data area and relies on the
  * default fill value of zeros to work correctly.
- *
- * Changes:    Removed the assert that mpi_size <= the SIZE #define.
- *        As best I can tell, this assert isn't needed here,
- *        and in any case, the SIZE #define is being removed
- *        in an update of the functions in this file to run
- *        with an arbitrary number of processes.
- *
- *        Also added code to free dynamically allocated buffers.
- *
- *                                         JRM - 8/11/04
  */
 void
 dataset_fillvalue(void)
@@ -728,7 +690,7 @@ dataset_fillvalue(void)
      * Each process writes 1 row of data. Thus last row is not written.
      */
     /* Create hyperslabs in memory and file dataspaces */
-    req_start[0] = mpi_rank;
+    req_start[0] = (hsize_t)mpi_rank;
     ret          = H5Sselect_hyperslab(filespace, H5S_SELECT_SET, req_start, NULL, req_count, NULL);
     VRFY((ret >= 0), "H5Sselect_hyperslab succeeded on memory dataspace");
     ret = H5Sselect_hyperslab(memspace, H5S_SELECT_SET, req_start, NULL, req_count, NULL);
@@ -854,12 +816,6 @@ collective_group_write_independent_group_read(void)
 
 /* Write multiple groups with a chunked dataset in each group collectively.
  * These groups and datasets are for testing independent read later.
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/16/04
  */
 void
 collective_group_write(void)
@@ -889,7 +845,7 @@ collective_group_write(void)
     chunk_size[0] = (hsize_t)(size / 2);
     chunk_size[1] = (hsize_t)(size / 2);
 
-    outme = HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     plist = create_faccess_plist(MPI_COMM_WORLD, MPI_INFO_NULL, facc_type);
@@ -991,16 +947,6 @@ independent_group_read(void)
 }
 
 /* Open and read datasets and compare data
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *        Also added code to verify the results of dynamic memory
- *        allocations, and to free dynamically allocated memeory
- *        when we are done with it.
- *
- *                                              JRM - 8/16/04
  */
 static void
 group_dataset_read(hid_t fid, int mpi_rank, int m)
@@ -1013,10 +959,10 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
 
     size = get_size();
 
-    indata = (DATATYPE *)HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    indata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((indata != NULL), "HDmalloc succeeded for indata");
 
-    outdata = (DATATYPE *)HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    outdata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outdata != NULL), "HDmalloc succeeded for outdata");
 
     /* open every group under root group. */
@@ -1033,9 +979,8 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
 
     /* this is the original value */
     for (i = 0; i < size; i++)
-        for (j = 0; j < size; j++) {
+        for (j = 0; j < size; j++)
             outdata[(i * size) + j] = (i + j) * 1000 + mpi_rank;
-        }
 
     /* compare the original value(outdata) to the value in file(indata).*/
     ret = check_value(indata, outdata, size);
@@ -1074,11 +1019,6 @@ group_dataset_read(hid_t fid, int mpi_rank, int m)
  *      + means the group has attribute(s).
  *      ' means the datasets in the groups have attribute(s).
  *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/16/04
  */
 void
 multiple_group_write(void)
@@ -1162,12 +1102,6 @@ multiple_group_write(void)
 /*
  * In a group, creates NDATASETS datasets.  Each process writes a hyperslab
  * of a data array to the file.
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/16/04
  */
 static void
 write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
@@ -1183,7 +1117,7 @@ write_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     size = get_size();
 
-    outme = HDmalloc((size_t)(size * size * sizeof(double)));
+    outme = HDmalloc((size_t)size * (size_t)size * sizeof(double));
     VRFY((outme != NULL), "HDmalloc succeeded for outme");
 
     for (n = 0; n < NDATASET; n++) {
@@ -1241,12 +1175,6 @@ create_group_recursive(hid_t memspace, hid_t filespace, hid_t gid, int counter)
 /*
  * This function is to verify the data from multiple group testing.  It opens
  * every dataset in every group and check their correctness.
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/11/04
  */
 void
 multiple_group_read(void)
@@ -1321,12 +1249,6 @@ multiple_group_read(void)
 /*
  * This function opens all the datasets in a certain, checks the data using
  * dataset_vrfy function.
- *
- * Changes:     Updated function to use a dynamically calculated size,
- *              instead of the old SIZE #define.  This should allow it
- *              to function with an arbitrary number of processors.
- *
- *                                              JRM - 8/11/04
  */
 static int
 read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
@@ -1341,10 +1263,10 @@ read_dataset(hid_t memspace, hid_t filespace, hid_t gid)
 
     size = get_size();
 
-    indata = (DATATYPE *)HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    indata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((indata != NULL), "HDmalloc succeeded for indata");
 
-    outdata = (DATATYPE *)HDmalloc((size_t)(size * size * sizeof(DATATYPE)));
+    outdata = (DATATYPE *)HDmalloc((size_t)size * (size_t)size * sizeof(DATATYPE));
     VRFY((outdata != NULL), "HDmalloc succeeded for outdata");
 
     for (n = 0; n < NDATASET; n++) {
@@ -1477,12 +1399,6 @@ read_attribute(hid_t obj_id, int this_type, int num)
 
 /* This functions compares the original data with the read-in data for its
  * hyperslab part only by process ID.
- *
- * Changes:    Modified function to use a passed in size parameter
- *        instead of the old SIZE #define.  This should let us
- *        run with an arbitrary number of processes.
- *
- *                    JRM - 8/16/04
  */
 static int
 check_value(DATATYPE *indata, DATATYPE *outdata, int size)
@@ -1497,8 +1413,8 @@ check_value(DATATYPE *indata, DATATYPE *outdata, int size)
 
     get_slab(chunk_origin, chunk_dims, count, NULL, size);
 
-    indata += chunk_origin[0] * size;
-    outdata += chunk_origin[0] * size;
+    indata += chunk_origin[0] * (hsize_t)size;
+    outdata += chunk_origin[0] * (hsize_t)size;
     for (i = chunk_origin[0]; i < (chunk_origin[0] + chunk_dims[0]); i++)
         for (j = chunk_origin[1]; j < (chunk_origin[1] + chunk_dims[1]); j++) {
             if (*indata != *outdata)
@@ -1515,12 +1431,6 @@ check_value(DATATYPE *indata, DATATYPE *outdata, int size)
 }
 
 /* Decide the portion of data chunk in dataset by process ID.
- *
- * Changes:    Modified function to use a passed in size parameter
- *        instead of the old SIZE #define.  This should let us
- *        run with an arbitrary number of processes.
- *
- *                    JRM - 8/11/04
  */
 
 static void
@@ -1532,15 +1442,15 @@ get_slab(hsize_t chunk_origin[], hsize_t chunk_dims[], hsize_t count[], hsize_t 
     MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
 
     if (chunk_origin != NULL) {
-        chunk_origin[0] = mpi_rank * (size / mpi_size);
+        chunk_origin[0] = (hsize_t)mpi_rank * (hsize_t)(size / mpi_size);
         chunk_origin[1] = 0;
     }
     if (chunk_dims != NULL) {
-        chunk_dims[0] = size / mpi_size;
-        chunk_dims[1] = size;
+        chunk_dims[0] = (hsize_t)(size / mpi_size);
+        chunk_dims[1] = (hsize_t)size;
     }
     if (file_dims != NULL)
-        file_dims[0] = file_dims[1] = size;
+        file_dims[0] = file_dims[1] = (hsize_t)size;
     if (count != NULL)
         count[0] = count[1] = 1;
 }
@@ -1562,8 +1472,6 @@ get_slab(hsize_t chunk_origin[], hsize_t chunk_dims[], hsize_t count[], hsize_t 
  * This function reproduces this situation.  At present the test hangs
  * on failure.
  *                                         JRM - 9/13/04
- *
- * Changes:    None.
  */
 
 #define N 4
@@ -1807,10 +1715,6 @@ io_mode_confusion(void)
  * cache clients will have to construct on disk images on demand.
  *
  *                        JRM -- 10/13/10
- *
- * Changes:
- *    Break it into two parts, a writer to write the file and a reader
- *    the correctness of the writer. AKC -- 2010/10/27
  */
 
 #define NUM_DATA_SETS   4

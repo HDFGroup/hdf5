@@ -11,7 +11,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -53,10 +53,9 @@ int_f
 h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
 /******/
 {
-    int    ret_value = -1;
-    hid_t  c_type_id;
-    size_t tmp_val;
-    int    i;
+    int   ret_value = -1;
+    hid_t c_type_id;
+    int   i;
 
     /* Fortran INTEGER may not be the same as C; do all checking to find
        an appropriate size
@@ -148,8 +147,7 @@ h5init_types_c(hid_t_f *types, hid_t_f *floatingtypes, hid_t_f *integertypes)
 
     if ((c_type_id = H5Tcopy(H5T_FORTRAN_S1)) < 0)
         return ret_value;
-    tmp_val = 1;
-    if (H5Tset_size(c_type_id, tmp_val) < 0)
+    if (H5Tset_size(c_type_id, 1) < 0)
         return ret_value;
     if (H5Tset_strpad(c_type_id, H5T_STR_SPACEPAD) < 0)
         return ret_value;
@@ -386,6 +384,7 @@ h5close_types_c(hid_t_f *types, int_f *lentypes, hid_t_f *floatingtypes, int_f *
     ret_value = 0;
     return ret_value;
 }
+
 /****if* H5_f/h5init_flags_c
  * NAME
  *  h5init_flags_c
@@ -440,7 +439,6 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
                int_f *h5t_flags, int_f *h5z_flags, int_f *h5_generic_flags, haddr_t_f *h5_haddr_generic_flags)
 /******/
 {
-    int ret_value = -1;
     /*
      *  H5D flags
      */
@@ -676,14 +674,12 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     /*
      *  H5R flags
      */
-
     h5r_flags[0] = (int_f)H5R_OBJECT;
     h5r_flags[1] = (int_f)H5R_DATASET_REGION;
 
     /*
      *  H5S flags
      */
-
     h5s_hid_flags[0] = (hid_t_f)H5S_ALL;
 
     h5s_hsize_flags[0] = (hsize_t_f)H5S_UNLIMITED;
@@ -709,6 +705,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5s_flags[15] = (int_f)H5S_SEL_POINTS;
     h5s_flags[16] = (int_f)H5S_SEL_HYPERSLABS;
     h5s_flags[17] = (int_f)H5S_SEL_ALL;
+
     /*
      *  H5T flags
      */
@@ -747,6 +744,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
     h5t_flags[32] = (int_f)H5T_ARRAY;
     h5t_flags[33] = (int_f)H5T_DIR_ASCEND;
     h5t_flags[34] = (int_f)H5T_DIR_DESCEND;
+
     /*
      *  H5Z flags
      */
@@ -792,8 +790,7 @@ h5init_flags_c(int_f *h5d_flags, size_t_f *h5d_size_flags, int_f *h5e_flags, hid
 
     h5_haddr_generic_flags[0] = (haddr_t_f)HADDR_UNDEF; /* undefined address */
 
-    ret_value = 0;
-    return ret_value;
+    return 0;
 }
 
 int_f

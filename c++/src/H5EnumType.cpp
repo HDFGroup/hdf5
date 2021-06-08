@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -41,7 +41,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType() : DataType() {}
+EnumType::EnumType() : DataType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -50,14 +52,18 @@ EnumType::EnumType() : DataType() {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(const hid_t existing_id) : DataType(existing_id) {}
+EnumType::EnumType(const hid_t existing_id) : DataType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(const EnumType &original) : DataType(original) {}
+EnumType::EnumType(const EnumType &original) : DataType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -69,7 +75,9 @@ EnumType::EnumType(const EnumType &original) : DataType(original) {}
 //              the enum datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size) {}
+EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -335,6 +343,8 @@ EnumType::getMemberValue(unsigned memb_no, void *value) const
 ///\brief       Properly terminates access to this enum datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::~EnumType() {}
+EnumType::~EnumType()
+{
+}
 
 } // namespace H5

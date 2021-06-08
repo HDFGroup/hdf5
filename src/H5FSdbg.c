@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -121,12 +121,13 @@ H5FS_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
               (fspace->client == H5FS_CLIENT_FHEAP_ID
                    ? "Fractal heap"
                    : (fspace->client == H5FS_CLIENT_FILE_ID ? "File" : "Unknown")));
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Total free space tracked:", fspace->tot_space);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+              "Total free space tracked:", fspace->tot_space);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Total number of free space sections tracked:", fspace->tot_sect_count);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Number of serializable free space sections tracked:", fspace->serial_sect_count);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Number of ghost free space sections tracked:", fspace->ghost_sect_count);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Number of free space section classes:", (unsigned)fspace->nclasses);
@@ -134,11 +135,13 @@ H5FS_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth)
     HDfprintf(stream, "%*s%-*s %u%%\n", indent, "", fwidth, "Expand percent:", fspace->expand_percent);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "# of bits for section address space:", fspace->max_sect_addr);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Maximum section size:", fspace->max_sect_size);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Serialized sections address:", fspace->sect_addr);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+              "Maximum section size:", fspace->max_sect_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+              "Serialized sections address:", fspace->sect_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Serialized sections size used:", fspace->sect_size);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Serialized sections size allocated:", fspace->alloc_sect_size);
 
 done:

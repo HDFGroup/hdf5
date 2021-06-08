@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -351,7 +351,7 @@ trav_fileinfo_add(trav_info_t *info, hid_t loc_id)
     H5O_info_t oinfo;
     size_t     idx = info->nused - 1;
 
-    if (info->paths[idx].path && HDstrcmp(info->paths[idx].path, "."))
+    if (info->paths[idx].path && HDstrcmp(info->paths[idx].path, ".") != 0)
         H5Oget_info_by_name2(loc_id, info->paths[idx].path, &oinfo, H5O_INFO_BASIC, H5P_DEFAULT);
     else
         H5Oget_info2(loc_id, &oinfo, H5O_INFO_BASIC);
@@ -718,7 +718,7 @@ trav_table_addlink(trav_table_t *table, haddr_t objno, const char *path)
  *-------------------------------------------------------------------------
  */
 void
-trav_table_addflags(unsigned *flags, char *name, h5trav_type_t type, trav_table_t *table)
+trav_table_addflags(const unsigned *flags, char *name, h5trav_type_t type, trav_table_t *table)
 {
     size_t new_obj;
 

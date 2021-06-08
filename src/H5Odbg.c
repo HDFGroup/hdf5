@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -68,12 +68,12 @@
 #ifdef H5O_DEBUG
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_assert
+ * Function:    H5O_assert
  *
- * Purpose:	Sanity check the information for an object header data
+ * Purpose:     Sanity check the information for an object header data
  *              structure.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
  *		Oct 17 2006
@@ -263,11 +263,11 @@ done:
 } /* end H5O_debug_id() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O_debug_real
+ * Function:    H5O_debug_real
  *
- * Purpose:	Prints debugging info about an object header.
+ * Purpose:     Prints debugging info about an object header.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
  *		Aug  6 1997
@@ -295,7 +295,8 @@ H5O_debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int 
     /* debug */
     HDfprintf(stream, "%*sObject Header...\n", indent, "");
 
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth, "Dirty:", oh->cache_info.is_dirty);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Dirty:", oh->cache_info.is_dirty ? "TRUE" : "FALSE");
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Version:", oh->version);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Header size (in bytes):", (unsigned)H5O_SIZEOF_HDR(oh));
@@ -344,9 +345,9 @@ H5O_debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int 
         } /* end if */
     }     /* end if */
 
-    HDfprintf(stream, "%*s%-*s %Zu (%Zu)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu (%zu)\n", indent, "", fwidth,
               "Number of messages (allocated):", oh->nmesgs, oh->alloc_nmesgs);
-    HDfprintf(stream, "%*s%-*s %Zu (%Zu)\n", indent, "", fwidth, "Number of chunks (allocated):", oh->nchunks,
+    HDfprintf(stream, "%*s%-*s %zu (%zu)\n", indent, "", fwidth, "Number of chunks (allocated):", oh->nchunks,
               oh->alloc_nchunks);
 
     /* debug each chunk */
@@ -355,7 +356,8 @@ H5O_debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int 
 
         HDfprintf(stream, "%*sChunk %d...\n", indent, "", i);
 
-        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", MAX(0, fwidth - 3), "Address:", oh->chunk[i].addr);
+        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", MAX(0, fwidth - 3),
+                  "Address:", oh->chunk[i].addr);
 
         /* Decrement chunk 0's size by the object header prefix size */
         if (0 == i) {
@@ -370,9 +372,9 @@ H5O_debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int 
         chunk_total += chunk_size;
         gap_total += oh->chunk[i].gap;
 
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3), "Size in bytes:", chunk_size);
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3), "Size in bytes:", chunk_size);
 
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", MAX(0, fwidth - 3), "Gap:", oh->chunk[i].gap);
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", MAX(0, fwidth - 3), "Gap:", oh->chunk[i].gap);
     } /* end for */
 
     /* debug each message */
@@ -401,7 +403,8 @@ H5O_debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int 
         HDfprintf(stream, "%*s%-*s 0x%04x `%s' (%d)\n", indent + 3, "", MAX(0, fwidth - 3),
                   "Message ID (sequence number):", (unsigned)(oh->mesg[i].type->id), oh->mesg[i].type->name,
                   sequence[oh->mesg[i].type->id]++);
-        HDfprintf(stream, "%*s%-*s %t\n", indent + 3, "", MAX(0, fwidth - 3), "Dirty:", oh->mesg[i].dirty);
+        HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", MAX(0, fwidth - 3),
+                  "Dirty:", oh->mesg[i].dirty ? "TRUE" : "FALSE");
         HDfprintf(stream, "%*s%-*s ", indent + 3, "", MAX(0, fwidth - 3), "Message flags:");
         if (oh->mesg[i].flags) {
             hbool_t flag_printed = FALSE;
@@ -461,7 +464,7 @@ H5O_debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int 
         chunkno = oh->mesg[i].chunkno;
         if (chunkno >= oh->nchunks)
             HDfprintf(stream, "*** BAD CHUNK NUMBER\n");
-        HDfprintf(stream, "%*s%-*s (%Zu, %Zu) bytes\n", indent + 3, "", MAX(0, fwidth - 3),
+        HDfprintf(stream, "%*s%-*s (%zu, %zu) bytes\n", indent + 3, "", MAX(0, fwidth - 3),
                   "Raw message data (offset, size) in chunk:",
                   (size_t)(oh->mesg[i].raw - oh->chunk[chunkno].image), oh->mesg[i].raw_size);
 

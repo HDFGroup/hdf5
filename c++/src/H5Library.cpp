@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -281,14 +281,18 @@ H5Library::setFreeListLimits(int reg_global_lim, int reg_list_lim, int arr_globa
 ///\brief       Default constructor: Creates a stub H5Library object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Library::H5Library() {}
+H5Library::H5Library()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    H5Library destructor
 ///\brief       Noop destructor
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Library::~H5Library() {}
+H5Library::~H5Library()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 } // namespace H5

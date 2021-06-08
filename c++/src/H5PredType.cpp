@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -27,6 +27,7 @@
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
+#include "H5private.h"
 
 namespace H5 {
 
@@ -41,14 +42,19 @@ namespace H5 {
 //              the provided HDF5 predefined datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType::PredType(const hid_t predtype_id) : AtomType(predtype_id) { id = H5Tcopy(predtype_id); }
+PredType::PredType(const hid_t predtype_id) : AtomType(predtype_id)
+{
+    id = H5Tcopy(predtype_id);
+}
 
 //--------------------------------------------------------------------------
 // Function:    PredType default constructor
 ///\brief       Default constructor: Creates a stub predefined datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType::PredType() : AtomType() {}
+PredType::PredType() : AtomType()
+{
+}
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -57,7 +63,9 @@ PredType::PredType() : AtomType() {}
 ///\param       original - IN: PredType instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType::PredType(const PredType &original) : AtomType(original) {}
+PredType::PredType(const PredType &original) : AtomType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    PredType::operator=
@@ -82,7 +90,7 @@ PredType::operator=(const PredType &rhs)
 // These dummy functions do not inherit from DataType - they'll
 // throw an DataTypeIException if invoked.
 void
-PredType::commit(H5Location &loc, const char *name)
+PredType::commit(H5_ATTR_UNUSED H5Location &loc, H5_ATTR_UNUSED const char *name)
 {
     throw DataTypeIException("PredType::commit",
                              "Error: Attempted to commit a predefined datatype.  Invalid operation!");
@@ -108,7 +116,9 @@ PredType::committed()
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-PredType::~PredType() {}
+PredType::~PredType()
+{
+}
 
 /*****************************************************************************
         The following section is regarding the global constants PredType,

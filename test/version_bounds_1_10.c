@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -66,7 +66,10 @@ test_sel_check(hid_t fid, const char *dset_name, int should_open, int should_acc
     hdset_reg_ref_t ref_rbuf[1]; /* The buffer for the reference */
 
     /* Open and read the referenced dataset */
-    H5E_BEGIN_TRY { did = H5Dopen2(fid, dset_name, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, dset_name, H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     if (should_open && (H5I_INVALID_HID == did))
@@ -79,7 +82,10 @@ test_sel_check(hid_t fid, const char *dset_name, int should_open, int should_acc
             TEST_ERROR
 
         /* Open access to the region reference from the dataset's dataspace */
-        H5E_BEGIN_TRY { sid = H5Rget_region(did, H5R_DATASET_REGION, &ref_rbuf[0]); }
+        H5E_BEGIN_TRY
+        {
+            sid = H5Rget_region(did, H5R_DATASET_REGION, &ref_rbuf[0]);
+        }
         H5E_END_TRY;
 
         if (should_access && (H5I_INVALID_HID == sid))
@@ -200,7 +206,10 @@ test_sel_bounds(const char *filename)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
 
     return FAIL;
@@ -217,7 +226,10 @@ test_ref_check(hid_t fid, const char *dset_name, hbool_t should_open)
 {
     hid_t did = H5I_INVALID_HID; /* Dataset ID */
 
-    H5E_BEGIN_TRY { did = H5Dopen2(fid, dset_name, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, dset_name, H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     if (should_open && (H5I_INVALID_HID == did))
@@ -294,7 +306,10 @@ test_ref_bounds(const char *filename)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
 
     return FAIL;

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -513,7 +513,7 @@ test_mpio_1wMr(char *filename, int special_request)
      * ==================================================*/
     irank = 0;
     for (i = 0; i < DIMSIZE; i++)
-        writedata[i] = irank * DIMSIZE + i;
+        writedata[i] = (uint8_t)(irank * DIMSIZE + i);
     mpi_off = irank * DIMSIZE;
 
     /* Only one process writes */

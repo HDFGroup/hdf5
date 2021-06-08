@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -218,7 +218,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     cls_ptr = maj_ptr->cls;
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
+    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -346,7 +346,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         HGOTO_DONE(FAIL)
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
+    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -650,11 +650,7 @@ herr_t
 H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id, hid_t maj_id,
                  hid_t min_id, const char *fmt, ...)
 {
-    va_list ap; /* Varargs info */
-#ifndef H5_HAVE_VASPRINTF
-    int tmp_len;                  /* Current size of description buffer */
-    int desc_len;                 /* Actual length of description when formatted */
-#endif                            /* H5_HAVE_VASPRINTF */
+    va_list ap;                   /* Varargs info */
     char *  tmp        = NULL;    /* Buffer to place formatted description in */
     hbool_t va_started = FALSE;   /* Whether the variable argument list is open */
     herr_t  ret_value  = SUCCEED; /* Return value */
@@ -683,31 +679,9 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
     HDva_start(ap, fmt);
     va_started = TRUE;
 
-#ifdef H5_HAVE_VASPRINTF
     /* Use the vasprintf() routine, since it does what we're trying to do below */
     if (HDvasprintf(&tmp, fmt, ap) < 0)
         HGOTO_DONE(FAIL)
-#else  /* H5_HAVE_VASPRINTF */
-    /* Allocate space for the formatted description buffer */
-    tmp_len = 128;
-    if (NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
-        HGOTO_DONE(FAIL)
-
-    /* If the description doesn't fit into the initial buffer size, allocate more space and try again */
-    while ((desc_len = HDvsnprintf(tmp, (size_t)tmp_len, fmt, ap)) > (tmp_len - 1)) {
-        /* shutdown & restart the va_list */
-        HDva_end(ap);
-        HDva_start(ap, fmt);
-
-        /* Release the previous description, it's too small */
-        H5MM_xfree(tmp);
-
-        /* Allocate a description of the appropriate length */
-        tmp_len = desc_len + 1;
-        if (NULL == (tmp = H5MM_malloc((size_t)tmp_len)))
-            HGOTO_DONE(FAIL)
-    } /* end while */
-#endif /* H5_HAVE_VASPRINTF */
 
     /* Push the error on the stack */
     if (H5E__push_stack(estack, file, func, line, cls_id, maj_id, min_id, tmp) < 0)
@@ -716,16 +690,11 @@ H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned lin
 done:
     if (va_started)
         HDva_end(ap);
-#ifdef H5_HAVE_VASPRINTF
     /* Memory was allocated with HDvasprintf so it needs to be freed
      * with HDfree
      */
     if (tmp)
         HDfree(tmp);
-#else  /* H5_HAVE_VASPRINTF */
-    if (tmp)
-        H5MM_xfree(tmp);
-#endif /* H5_HAVE_VASPRINTF */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5E_printf_stack() */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -697,8 +697,10 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new
 
 #ifdef H5S_DEBUG
             if (H5DEBUG(S)) {
-                HDfprintf(H5DEBUG(S), "%s: start=%Hd  stride=%Hu  count=%Hu  block=%Hu  xtent=%Hu", FUNC,
-                          d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
+                HDfprintf(H5DEBUG(S),
+                          "%s: start=%" PRIdHSIZE "  stride=%" PRIuHSIZE "  count=%" PRIuHSIZE
+                          "  block=%" PRIuHSIZE "  xtent=%" PRIuHSIZE,
+                          FUNC, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
                 if (u == 0)
                     HDfprintf(H5DEBUG(S), "  rank=%u\n", rank);
                 else
@@ -729,8 +731,10 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new
 
 #ifdef H5S_DEBUG
             if (H5DEBUG(S)) {
-                HDfprintf(H5DEBUG(S), "%s: start=%Hd  stride=%Hu  count=%Hu  block=%Hu  xtent=%Hu", FUNC,
-                          d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
+                HDfprintf(H5DEBUG(S),
+                          "%s: start=%" PRIdHSIZE "  stride=%" PRIuHSIZE "  count=%" PRIuHSIZE
+                          "  block=%" PRIuHSIZE "  xtent=%" PRIuHSIZE,
+                          FUNC, d[u].start, d[u].strid, d[u].count, d[u].block, d[u].xtent);
                 if (u == 0)
                     HDfprintf(H5DEBUG(S), "  rank=%u\n", rank);
                 else
@@ -754,7 +758,8 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new
 #ifdef H5S_DEBUG
     if (H5DEBUG(S)) {
         i = ((int)rank) - 1;
-        HDfprintf(H5DEBUG(S), " offset[%2d]=%Hu; max_xtent[%2d]=%Hu\n", i, offset[i], i, max_xtent[i]);
+        HDfprintf(H5DEBUG(S), " offset[%2d]=%" PRIuHSIZE "; max_xtent[%2d]=%" PRIuHSIZE "\n", i, offset[i], i,
+                  max_xtent[i]);
     }
 #endif
     for (i = ((int)rank) - 2; i >= 0; --i) {
@@ -762,7 +767,8 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new
         max_xtent[i] = max_xtent[i + 1] * d[i].xtent;
 #ifdef H5S_DEBUG
         if (H5DEBUG(S))
-            HDfprintf(H5DEBUG(S), " offset[%2d]=%Hu; max_xtent[%2d]=%Hu\n", i, offset[i], i, max_xtent[i]);
+            HDfprintf(H5DEBUG(S), " offset[%2d]=%" PRIuHSIZE "; max_xtent[%2d]=%" PRIuHSIZE "\n", i,
+                      offset[i], i, max_xtent[i]);
 #endif
     } /* end for */
 
@@ -777,9 +783,9 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new
  *******************************************************/
 #ifdef H5S_DEBUG
     if (H5DEBUG(S)) {
-        HDfprintf(H5DEBUG(S), "%s: Making contig type %Zu MPI_BYTEs\n", FUNC, elmt_size);
+        HDfprintf(H5DEBUG(S), "%s: Making contig type %zu MPI_BYTEs\n", FUNC, elmt_size);
         for (i = ((int)rank) - 1; i >= 0; --i)
-            HDfprintf(H5DEBUG(S), "d[%d].xtent=%Hu \n", i, d[i].xtent);
+            HDfprintf(H5DEBUG(S), "d[%d].xtent=%" PRIuHSIZE "\n", i, d[i].xtent);
     }
 #endif
 
@@ -809,7 +815,8 @@ H5S__mpio_reg_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *new
         if (H5DEBUG(S))
             HDfprintf(H5DEBUG(S),
                       "%s: Dimension i=%d \n"
-                      "start=%Hd count=%Hu block=%Hu stride=%Hu, xtent=%Hu max_xtent=%d\n",
+                      "start=%" PRIdHSIZE " count=%" PRIuHSIZE " block=%" PRIuHSIZE " stride=%" PRIuHSIZE
+                      ", xtent=%" PRIuHSIZE " max_xtent=%" PRIuHSIZE "\n",
                       FUNC, i, d[i].start, d[i].count, d[i].block, d[i].strid, d[i].xtent, max_xtent[i]);
 #endif
 
@@ -950,7 +957,8 @@ done:
 
 #ifdef H5S_DEBUG
     if (H5DEBUG(S))
-        HDfprintf(H5DEBUG(S), "Leave %s, count=%ld  is_derived_type=%t\n", FUNC, *count, *is_derived_type);
+        HDfprintf(H5DEBUG(S), "Leave %s, count=%d  is_derived_type=%s\n", FUNC, *count,
+                  (*is_derived_type) ? "TRUE" : "FALSE");
 #endif
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__mpio_reg_hyper_type() */
@@ -1006,8 +1014,7 @@ H5S__mpio_span_hyper_type(const H5S_t *space, size_t elmt_size, MPI_Datatype *ne
     elmt_type_is_derived = TRUE;
 
     /* Compute 'down' sizes for each dimension */
-    if (H5VM_array_down(space->extent.rank, space->extent.size, down) < 0)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_CANTGETSIZE, FAIL, "couldn't compute 'down' dimension sizes")
+    H5VM_array_down(space->extent.rank, space->extent.size, down);
 
     /* Acquire an operation generation value for creating MPI datatypes */
     op_gen = H5S__hyper_get_op_gen();

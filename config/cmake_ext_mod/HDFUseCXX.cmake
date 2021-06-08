@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -103,11 +103,6 @@ endmacro ()
 #-----------------------------------------------------------------------------
 if (CMAKE_CXX_COMPILER_LOADED)
   foreach (cxx_test
-      OLD_HEADER_FILENAME
-      HDF_NO_NAMESPACE
-      HDF_NO_STD
-      BOOL_NOTDEFINED
-      NO_STATIC_CAST
       CXX_HAVE_OFFSETOF
   )
     HDF_CXX_FUNCTION_TEST (${cxx_test})

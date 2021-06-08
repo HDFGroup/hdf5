@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -135,8 +135,8 @@ static int EOFCode;
 
 /*************************************************************/
 int
-hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap, byte *gmap, byte *bmap, byte *pc2ncmap,
-            int numcols, int colorstyle, int BitsPerPixel)
+hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, const byte *rmap, const byte *gmap,
+            const byte *bmap, const byte *pc2ncmap, int numcols, int colorstyle, int BitsPerPixel)
 {
     int   InitCodeSize;
     int   i;
@@ -152,12 +152,12 @@ hdfWriteGIF(FILE *fp, byte *pic, int ptype, int w, int h, byte *rmap, byte *gmap
     }
 
     /* Shut compiler up... */
-    ptype      = ptype;
-    rmap       = rmap;
-    gmap       = gmap;
-    bmap       = bmap;
-    numcols    = numcols;
-    colorstyle = colorstyle;
+    (void)ptype;
+    (void)rmap;
+    (void)gmap;
+    (void)bmap;
+    (void)numcols;
+    (void)colorstyle;
 
     for (i = 0; i < 256; i++) {
         pc2nc[i] = pc2ncmap[i];

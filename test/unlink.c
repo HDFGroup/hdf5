@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -117,7 +117,10 @@ test_one(hid_t file)
     TESTING("unlink without a name");
     if ((grp = H5Gcreate2(work, "foo", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
-    H5E_BEGIN_TRY { status = H5Ldelete(grp, ".", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Ldelete(grp, ".", H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0)
         FAIL_PUTS_ERROR("    Unlinking object w/o a name should have failed.")
@@ -287,7 +290,10 @@ test_symlink(hid_t file)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Gclose(work); }
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(work);
+    }
     H5E_END_TRY;
     return 1;
 } /* end test_symlink() */
@@ -507,7 +513,7 @@ check_new_move(hid_t fapl)
     /* Check soft links */
     if (H5Lget_val(file, "group2/soft", linkval, sizeof(linkval), H5P_DEFAULT) < 0)
         FAIL_STACK_ERROR
-    if (HDstrcmp(linkval, "/group1/group_move"))
+    if (HDstrcmp(linkval, "/group1/group_move") != 0)
         FAIL_PUTS_ERROR("    Soft link test failed. Wrong link value")
 
     /* Cleanup */
@@ -572,7 +578,7 @@ test_filespace(hid_t fapl)
     size_t rdcc_nbytes;
     double rdcc_w0;
 
-    puts("Testing file space gets reused:");
+    HDputs("Testing file space gets reused:");
 
     /* Open file */
     h5_fixname(FILENAME[4], fapl, filename, sizeof filename);
@@ -1285,7 +1291,10 @@ test_filespace(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create another group with same name */
-    H5E_BEGIN_TRY { group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        group = H5Gcreate2(file, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (group >= 0) {
         H5Gclose(group);
@@ -1332,7 +1341,10 @@ test_filespace(hid_t fapl)
         FAIL_STACK_ERROR
 
     /* Create another named datatype with same name */
-    H5E_BEGIN_TRY { status = H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        status = H5Tcommit2(file, TYPENAME, type, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (status >= 0)
         TEST_ERROR
@@ -1786,12 +1798,18 @@ error:
         /* Close any open groups */
         for (n = 0; n < ngroups; n++)
             if (gids[n]) {
-                H5E_BEGIN_TRY { H5Gclose(gids[n]); }
+                H5E_BEGIN_TRY
+                {
+                    H5Gclose(gids[n]);
+                }
                 H5E_END_TRY;
             } /* end if */
         HDfree(gids);
     } /* end if */
-    H5E_BEGIN_TRY { H5Gclose(rootid); }
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(rootid);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -1872,12 +1890,18 @@ error:
         /* Close any open groups */
         for (n = 0; n < ngroups; n++)
             if (gids[n]) {
-                H5E_BEGIN_TRY { H5Gclose(gids[n]); }
+                H5E_BEGIN_TRY
+                {
+                    H5Gclose(gids[n]);
+                }
                 H5E_END_TRY;
             } /* end if */
         HDfree(gids);
     } /* end if */
-    H5E_BEGIN_TRY { H5Gclose(rootid); }
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(rootid);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -2244,12 +2268,18 @@ error:
         /* Close any open groups */
         for (n = 0; n < ngroups; n++)
             if (gids[n]) {
-                H5E_BEGIN_TRY { H5Gclose(gids[n]); }
+                H5E_BEGIN_TRY
+                {
+                    H5Gclose(gids[n]);
+                }
                 H5E_END_TRY;
             } /* end if */
         HDfree(gids);
     } /* end if */
-    H5E_BEGIN_TRY { H5Gclose(rootid); }
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(rootid);
+    }
     H5E_END_TRY;
 
     return 1;

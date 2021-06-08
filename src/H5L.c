@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -2760,16 +2760,16 @@ done:
 } /* end H5L__exists_inter_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5L_exists_tolerant
+ * Function:    H5L_exists_tolerant
  *
- * Purpose:	Returns whether a link exists in a group
+ * Purpose:     Returns whether a link exists in a group
  *
- * Note:	Same as H5L_exists, except that missing links are reported
- *		as 'FALSE' instead of causing failures
+ * Note:        Same as H5L_exists, except that missing links are reported
+ *              as 'FALSE' instead of causing failures
  *
- * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
+ * Return:      Non-negative (TRUE/FALSE) on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, December 31 2015
  *
  *-------------------------------------------------------------------------

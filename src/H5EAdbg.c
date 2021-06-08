@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -111,10 +111,10 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Header size:", hdr->size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Header size:", hdr->size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Raw Element Size:", (unsigned)hdr->cparam.raw_elmt_size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "Native Element Size (on this platform):", hdr->cparam.cls->nat_elmt_size);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Log2(Max. # of elements in array):", (unsigned)hdr->cparam.max_nelmts_bits);
@@ -126,15 +126,16 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
               (unsigned)hdr->cparam.sup_blk_min_data_ptrs);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "Log2(Max. # of elements in data block page):",
               (unsigned)hdr->cparam.max_dblk_page_nelmts_bits);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Highest element index stored (+1):", hdr->stats.stored.max_idx_set);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Number of super blocks created:", hdr->stats.stored.nsuper_blks);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Number of data blocks created:", hdr->stats.stored.ndata_blks);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
               "Number of elements 'realized':", hdr->stats.stored.nelmts);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Index Block Address:", hdr->idx_blk_addr);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
+              "Index Block Address:", hdr->idx_blk_addr);
 
     CATCH
     if (dbg_ctx && cls->dst_dbg_ctx(dbg_ctx) < 0)
@@ -198,10 +199,10 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Index Block size:", iblock->size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Index Block size:", iblock->size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "# of data block addresses in index block:", iblock->ndblk_addrs);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "# of super block addresses in index block:", iblock->nsblk_addrs);
 
     /* Check if there are any elements in index block */
@@ -229,7 +230,7 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
         for (u = 0; u < iblock->ndblk_addrs; u++) {
             /* Print address */
             HDsprintf(temp_str, "Address #%u:", u);
-            HDfprintf(stream, "%*s%-*s %a\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                       iblock->dblk_addrs[u]);
         } /* end for */
     }     /* end if */
@@ -244,7 +245,7 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
         for (u = 0; u < iblock->nsblk_addrs; u++) {
             /* Print address */
             HDsprintf(temp_str, "Address #%u:", u);
-            HDfprintf(stream, "%*s%-*s %a\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                       iblock->sblk_addrs[u]);
         } /* end for */
     }     /* end if */
@@ -312,10 +313,10 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Super Block size:", sblock->size);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Super Block size:", sblock->size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "# of data block addresses in super block:", sblock->ndblks);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
               "# of elements in data blocks from this super block:", sblock->dblk_nelmts);
 
     /* Check if there are any data block addresses in super block */
@@ -328,7 +329,7 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
         for (u = 0; u < sblock->ndblks; u++) {
             /* Print address */
             HDsprintf(temp_str, "Address #%u:", u);
-            HDfprintf(stream, "%*s%-*s %a\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", (indent + 3), "", MAX(0, (fwidth - 3)), temp_str,
                       sblock->dblk_addrs[u]);
         } /* end for */
     }     /* end if */
@@ -390,15 +391,15 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
     /* Protect data block */
     /* (Note: setting parent of data block to 'hdr' for this operation should be OK -QAK) */
     if (NULL == (dblock = H5EA__dblock_protect(hdr, hdr, addr, dblk_nelmts, H5AC__READ_ONLY_FLAG)))
-        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %llu",
-                  (unsigned long long)addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block, address = %" PRIuHADDR,
+                  addr)
 
     /* Print opening message */
     HDfprintf(stream, "%*sExtensible Array data Block...\n", indent, "");
 
     /* Print the values */
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Array class ID:", hdr->cparam.cls->name);
-    HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth, "Data Block size:", dblock->size);
+    HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth, "Data Block size:", dblock->size);
 
     /* Print the elements in the index block */
     HDfprintf(stream, "%*sElements:\n", indent, "");

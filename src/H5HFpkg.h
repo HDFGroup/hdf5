@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5HF package!"
 #endif
 
-#ifndef _H5HFpkg_H
-#define _H5HFpkg_H
+#ifndef H5HFpkg_H
+#define H5HFpkg_H
 
 /* Get package's private header */
 #include "H5HFprivate.h"
@@ -794,4 +794,4 @@ H5_DLL herr_t   H5HF_get_tiny_info_test(const H5HF_t *fh, size_t *max_len, hbool
 H5_DLL herr_t   H5HF_get_huge_info_test(const H5HF_t *fh, hsize_t *next_id, hbool_t *ids_direct);
 #endif /* H5HF_TESTING */
 
-#endif /* _H5HFpkg_H */
+#endif /* H5HFpkg_H */

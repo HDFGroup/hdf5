@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -822,7 +822,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     char     file_name[64];           /* Filename buffer */
     size_t   alloc_incr;              /* Buffer allocation increment */
     size_t   min_incr  = 65536;       /* Minimum buffer increment */
-    double   buf_prcnt = 0.1f;        /* Percentage of buffer size to set
+    double   buf_prcnt = 0.1;         /* Percentage of buffer size to set
                                           as increment */
     static long                 file_name_counter;
     H5FD_file_image_callbacks_t callbacks = {&image_malloc, &image_memcpy, &image_realloc, &image_free,
@@ -907,7 +907,10 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     return file_id;
 
 out:
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
     return -1;
 } /* end H5LTopen_file_image() */
@@ -1297,7 +1300,8 @@ out:
  */
 
 static herr_t
-find_dataset(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_data)
+find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5L_info_t *linfo,
+             void *op_data)
 {
     /* Define a default zero value for return. This will cause the iterator to continue if
      * the dataset is not found yet.
@@ -1309,8 +1313,8 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info_t *linfo, void *op_d
         return ret;
 
     /* Shut the compiler up */
-    loc_id = loc_id;
-    linfo  = linfo;
+    (void)loc_id;
+    (void)linfo;
 
     /* Define a positive value for return value if the dataset was found. This will
      * cause the iterator to immediately return that positive value,
@@ -1841,7 +1845,8 @@ H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data)
+find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+          void *op_data)
 {
     int ret = H5_ITER_CONT;
 
@@ -1850,8 +1855,8 @@ find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data
         return H5_ITER_CONT;
 
     /* Shut compiler up */
-    loc_id = loc_id;
-    ainfo  = ainfo;
+    (void)loc_id;
+    (void)ainfo;
 
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,

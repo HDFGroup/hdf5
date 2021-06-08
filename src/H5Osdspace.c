@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -106,12 +106,13 @@ H5FL_ARR_EXTERN(hsize_t);
 --------------------------------------------------------------------------*/
 static void *
 H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                    unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                    unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5S_extent_t *sdim = NULL; /* New extent dimensionality structure */
-    unsigned      flags, version;
-    unsigned      i;                /* Local counting variable */
-    void *        ret_value = NULL; /* Return value */
+    H5S_extent_t * sdim = NULL; /* New extent dimensionality structure */
+    unsigned       flags, version;
+    unsigned       i;                          /* Local counting variable */
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void *         ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -158,6 +159,13 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
 
     /* Decode dimension sizes */
     if (sdim->rank > 0) {
+        /* Ensure that rank doesn't cause reading passed buffer's end,
+           due to possible data corruption */
+        uint8_t sizeof_size = H5F_SIZEOF_SIZE(f);
+        if (p + (sizeof_size * sdim->rank - 1) > p_end) {
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "rank might cause reading passed buffer's end")
+        }
+
         if (NULL == (sdim->size = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
@@ -167,6 +175,11 @@ H5O__sdspace_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UN
         if (flags & H5S_VALID_MAX) {
             if (NULL == (sdim->max = (hsize_t *)H5FL_ARR_MALLOC(hsize_t, (size_t)sdim->rank)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
+
+            /* Ensure that rank doesn't cause reading passed buffer's end */
+            if (p + (sizeof_size * sdim->rank - 1) > p_end)
+                HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "rank might cause reading passed buffer's end")
+
             for (i = 0; i < sdim->rank; i++)
                 H5F_DECODE_LENGTH(f, p, sdim->max[i]);
         } /* end if */
@@ -507,7 +520,7 @@ H5O__sdspace_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int 
 
         HDfprintf(stream, "%*s%-*s {", indent, "", fwidth, "Dim Size:");
         for (u = 0; u < sdim->rank; u++)
-            HDfprintf(stream, "%s%Hu", u ? ", " : "", sdim->size[u]);
+            HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->size[u]);
         HDfprintf(stream, "}\n");
 
         HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Dim Max:");
@@ -517,7 +530,7 @@ H5O__sdspace_debug(H5F_t H5_ATTR_UNUSED *f, const void *mesg, FILE *stream, int 
                 if (H5S_UNLIMITED == sdim->max[u])
                     HDfprintf(stream, "%sUNLIM", u ? ", " : "");
                 else
-                    HDfprintf(stream, "%s%Hu", u ? ", " : "", sdim->max[u]);
+                    HDfprintf(stream, "%s%" PRIuHSIZE, u ? ", " : "", sdim->max[u]);
             } /* end for */
             HDfprintf(stream, "}\n");
         } /* end if */

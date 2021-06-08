@@ -8,7 +8,7 @@
 #
 # (Remember to update both bin/format_source and bin/format_source_patch)
 
-find . -type d \( -path ./config \) -prune \
+find . \( -type d -path ./config -prune -and -not -path ./config \) \
     -or \( \( \! \( \
         -name H5LTanalyze.c \
         -or -name H5LTparse.c \

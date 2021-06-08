@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -548,17 +548,18 @@ H5O__linfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Track creation order of links:", linfo->track_corder);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Index creation order of links:", linfo->index_corder);
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Number of links:", linfo->nlinks);
-    HDfprintf(stream, "%*s%-*s %Hd\n", indent, "", fwidth, "Max. creation order value:", linfo->max_corder);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Track creation order of links:", linfo->track_corder ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Index creation order of links:", linfo->index_corder ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Number of links:", linfo->nlinks);
+    HDfprintf(stream, "%*s%-*s %" PRId64 "\n", indent, "", fwidth,
+              "Max. creation order value:", linfo->max_corder);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage fractal heap address:", linfo->fheap_addr);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage name index v2 B-tree address:", linfo->name_bt2_addr);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' link storage creation order index v2 B-tree address:", linfo->corder_bt2_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

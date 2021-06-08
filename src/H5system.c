@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,6 +25,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
@@ -65,387 +66,35 @@
 /* Track whether tzset routine was called */
 static hbool_t H5_ntzset = FALSE;
 
-/*-------------------------------------------------------------------------
- * Function:  HDfprintf
- *
- * Purpose:  Prints the optional arguments under the control of the format
- *    string FMT to the stream STREAM.  This function takes the
- *    same format as fprintf(3c) with a few added features:
- *
- *    The conversion modifier `H' refers to the size of an
- *    `hsize_t' or `hssize_t' type.  For instance, "0x%018Hx"
- *    prints an `hsize_t' value as a hex number right justified and
- *    zero filled in an 18-character field.
- *
- *    The conversion 'a' refers to an haddr_t type.
- *
- *    The conversion 't' refers to an htri_t type.
- *
- * Return:  Success:  Number of characters printed
- *
- *    Failure:  -1
- *
- * Programmer:  Robb Matzke
- *              Thursday, April  9, 1998
- *
- *-------------------------------------------------------------------------
+#ifndef H5_HAVE_VASPRINTF
+/* HDvasprintf provides vasprintf-like function on targets where it is
+ * unavailable.
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
- *      This pragma only needs to surround the fprintf() calls with
- *      format_templ in the code below, but early (4.4.7, at least) gcc only
- *      allows diagnostic pragmas to be toggled outside of functions.
- */
-H5_GCC_DIAG_OFF("format-nonliteral")
 int
-HDfprintf(FILE *stream, const char *fmt, ...)
+HDvasprintf(char **bufp, const char *fmt, va_list _ap)
 {
-    int         n = 0, nout = 0;
-    int         fwidth, prec;
-    int         zerofill;
-    int         leftjust;
-    int         plussign;
-    int         ldspace;
-    int         prefix;
-    char        modifier[8];
-    int         conv;
-    char *      rest, format_templ[128];
-    int         len;
-    const char *s;
-    va_list     ap;
+    char * buf;   /* buffer to receive formatted string */
+    size_t bufsz; /* size of buffer to allocate */
 
-    HDassert(stream);
-    HDassert(fmt);
+    for (bufsz = 32; (buf = HDmalloc(bufsz)) != NULL;) {
+        int     ret;
+        va_list ap;
 
-    HDva_start(ap, fmt);
-    while (*fmt) {
-        fwidth = prec = 0;
-        zerofill      = 0;
-        leftjust      = 0;
-        plussign      = 0;
-        prefix        = 0;
-        ldspace       = 0;
-        modifier[0]   = '\0';
-
-        if ('%' == fmt[0] && '%' == fmt[1]) {
-            HDputc('%', stream);
-            fmt += 2;
-            nout++;
+        HDva_copy(ap, _ap);
+        ret = HDvsnprintf(buf, bufsz, fmt, ap);
+        va_end(ap);
+        if (ret >= 0 && (size_t)ret < bufsz) {
+            *bufp = buf;
+            return ret;
         }
-        else if ('%' == fmt[0]) {
-            s = fmt + 1;
-
-            /* Flags */
-            while (HDstrchr("-+ #", *s)) {
-                switch (*s) {
-                    case '-':
-                        leftjust = 1;
-                        break;
-
-                    case '+':
-                        plussign = 1;
-                        break;
-
-                    case ' ':
-                        ldspace = 1;
-                        break;
-
-                    case '#':
-                        prefix = 1;
-                        break;
-
-                    default:
-                        HDassert(0 && "Unknown format flag");
-                } /* end switch */ /*lint !e744 Switch statement doesn't _need_ default */
-                s++;
-            } /* end while */
-
-            /* Field width */
-            if (HDisdigit(*s)) {
-                zerofill = ('0' == *s);
-                fwidth   = (int)HDstrtol(s, &rest, 10);
-                s        = rest;
-            } /* end if */
-            else if ('*' == *s) {
-                fwidth = HDva_arg(ap, int);
-                if (fwidth < 0) {
-                    leftjust = 1;
-                    fwidth   = -fwidth;
-                }
-                s++;
-            }
-
-            /* Precision */
-            if ('.' == *s) {
-                s++;
-                if (HDisdigit(*s)) {
-                    prec = (int)HDstrtol(s, &rest, 10);
-                    s    = rest;
-                }
-                else if ('*' == *s) {
-                    prec = HDva_arg(ap, int);
-                    s++;
-                }
-                if (prec < 1)
-                    prec = 1;
-            }
-
-            /* Extra type modifiers */
-            if (HDstrchr("zZHhlqLI", *s)) {
-                switch (*s) {
-                    /*lint --e{506} Don't issue warnings about constant value booleans */
-                    /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true */
-                    case 'H':
-                        if (sizeof(hsize_t) < sizeof(long))
-                            modifier[0] = '\0';
-                        else if (sizeof(hsize_t) == sizeof(long)) {
-                            HDstrncpy(modifier, "l", sizeof(modifier));
-                            modifier[sizeof(modifier) - 1] = '\0';
-                        } /* end if */
-                        else {
-                            HDstrncpy(modifier, H5_PRINTF_LL_WIDTH, sizeof(modifier));
-                            modifier[sizeof(modifier) - 1] = '\0';
-                        } /* end else */
-                        break;
-
-                    case 'Z':
-                    case 'z':
-                        if (sizeof(size_t) < sizeof(long))
-                            modifier[0] = '\0';
-                        else if (sizeof(size_t) == sizeof(long)) {
-                            HDstrncpy(modifier, "l", sizeof(modifier));
-                            modifier[sizeof(modifier) - 1] = '\0';
-                        } /* end if */
-                        else {
-                            HDstrncpy(modifier, H5_PRINTF_LL_WIDTH, sizeof(modifier));
-                            modifier[sizeof(modifier) - 1] = '\0';
-                        } /* end else */
-                        break;
-
-                    default:
-                        /* Handle 'I64' modifier for Microsoft's "__int64" type */
-                        if (*s == 'I' && *(s + 1) == '6' && *(s + 2) == '4') {
-                            modifier[0] = *s;
-                            modifier[1] = *(s + 1);
-                            modifier[2] = *(s + 2);
-                            modifier[3] = '\0';
-                            s += 2; /* Increment over 'I6', the '4' is taken care of below */
-                        }           /* end if */
-                        else {
-                            /* Handle 'll' for long long types */
-                            if (*s == 'l' && *(s + 1) == 'l') {
-                                modifier[0] = *s;
-                                modifier[1] = *s;
-                                modifier[2] = '\0';
-                                s++; /* Increment over first 'l', second is taken care of below */
-                            }        /* end if */
-                            else {
-                                modifier[0] = *s;
-                                modifier[1] = '\0';
-                            } /* end else */
-                        }     /* end else */
-                        break;
-                }
-                s++;
-            }
-
-            /* Conversion */
-            conv = *s++;
-
-            /* Create the format template */
-            len = 0;
-            len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)), "%%%s%s%s%s%s",
-                              (leftjust ? "-" : ""), (plussign ? "+" : ""), (ldspace ? " " : ""),
-                              (prefix ? "#" : ""), (zerofill ? "0" : ""));
-            if (fwidth > 0)
-                len +=
-                    HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%d", fwidth);
-            if (prec > 0)
-                len +=
-                    HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), ".%d", prec);
-            if (*modifier)
-                len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%s",
-                                  modifier);
-            HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)), "%c", conv);
-
-            /* Conversion */
-            switch (conv) {
-                case 'd':
-                case 'i':
-                    if (!HDstrcmp(modifier, "h")) {
-                        short x = (short)HDva_arg(ap, int);
-                        n       = fprintf(stream, format_templ, x);
-                    }
-                    else if (!*modifier) {
-                        int x = HDva_arg(ap, int);
-                        n     = fprintf(stream, format_templ, x);
-                    }
-                    else if (!HDstrcmp(modifier, "l")) {
-                        long x = HDva_arg(ap, long);
-                        n      = fprintf(stream, format_templ, x);
-                    }
-                    else {
-                        int64_t x = HDva_arg(ap, int64_t);
-                        n         = fprintf(stream, format_templ, x);
-                    }
-                    break;
-
-                case 'o':
-                case 'u':
-                case 'x':
-                case 'X':
-                    if (!HDstrcmp(modifier, "h")) {
-                        unsigned short x = (unsigned short)HDva_arg(ap, unsigned int);
-                        n                = fprintf(stream, format_templ, x);
-                    }
-                    else if (!*modifier) {
-                        unsigned int x = HDva_arg(ap, unsigned int);
-                        n              = fprintf(stream, format_templ, x);
-                    }
-                    else if (!HDstrcmp(modifier, "l")) {
-                        unsigned long x = HDva_arg(ap, unsigned long);
-                        n               = fprintf(stream, format_templ, x);
-                    }
-                    else {
-                        uint64_t x = HDva_arg(ap, uint64_t);
-                        n          = fprintf(stream, format_templ, x);
-                    }
-                    break;
-
-                case 'f':
-                case 'e':
-                case 'E':
-                case 'g':
-                case 'G':
-                    if (!HDstrcmp(modifier, "h")) {
-                        float x = (float)HDva_arg(ap, double);
-                        n       = fprintf(stream, format_templ, (double)x);
-                    }
-                    else if (!*modifier || !HDstrcmp(modifier, "l")) {
-                        double x = HDva_arg(ap, double);
-                        n        = fprintf(stream, format_templ, x);
-                    }
-                    else {
-                        /*
-                         * Some compilers complain when `long double' and
-                         * `double' are the same thing.
-                         */
-#if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-                        long double x = HDva_arg(ap, long double);
-                        n             = fprintf(stream, format_templ, x);
-#else
-                        double x = HDva_arg(ap, double);
-                        n        = fprintf(stream, format_templ, x);
-#endif
-                    }
-                    break;
-
-                case 'a': {
-                    haddr_t x = HDva_arg(ap, haddr_t);
-
-                    if (H5F_addr_defined(x)) {
-                        len = 0;
-                        len += HDsnprintf(format_templ, (sizeof(format_templ) - (size_t)(len + 1)),
-                                          "%%%s%s%s%s%s", (leftjust ? "-" : ""), (plussign ? "+" : ""),
-                                          (ldspace ? " " : ""), (prefix ? "#" : ""), (zerofill ? "0" : ""));
-                        if (fwidth > 0)
-                            len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)),
-                                              "%d", fwidth);
-
-                        /*lint --e{506} Don't issue warnings about constant value booleans */
-                        /*lint --e{774} Don't issue warnings boolean within 'if' always evaluates false/true
-                         */
-                        if (sizeof(x) == H5_SIZEOF_INT) {
-                            HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
-                            len++;
-                        } /* end if */
-                        else if (sizeof(x) == H5_SIZEOF_LONG) {
-                            HDstrncat(format_templ, "lu", (sizeof(format_templ) - (size_t)(len + 1)));
-                            len++;
-                        } /* end if */
-                        else if (sizeof(x) == H5_SIZEOF_LONG_LONG) {
-                            HDstrncat(format_templ, H5_PRINTF_LL_WIDTH,
-                                      (sizeof(format_templ) - (size_t)(len + 1)));
-                            len += (int)sizeof(H5_PRINTF_LL_WIDTH);
-                            HDstrncat(format_templ, "u", (sizeof(format_templ) - (size_t)(len + 1)));
-                            len++;
-                        }
-                        n = fprintf(stream, format_templ, x);
-                    }
-                    else {
-                        len = 0;
-                        HDstrncpy(format_templ, "%", (sizeof(format_templ) - (size_t)(len + 1)));
-                        len++;
-                        if (leftjust) {
-                            HDstrncat(format_templ, "-", (sizeof(format_templ) - (size_t)(len + 1)));
-                            len++;
-                        } /* end if */
-                        if (fwidth)
-                            len += HDsnprintf(format_templ + len, (sizeof(format_templ) - (size_t)(len + 1)),
-                                              "%d", fwidth);
-                        HDstrncat(format_templ, "s", (sizeof(format_templ) - (size_t)(len + 1)));
-                        n = fprintf(stream, format_templ, "UNDEF");
-                    }
-                } break;
-
-                case 'c': {
-                    char x = (char)HDva_arg(ap, int);
-                    n      = fprintf(stream, format_templ, x);
-                } break;
-
-                case 's':
-                case 'p': {
-                    char *x = HDva_arg(ap, char *);
-                    n       = fprintf(stream, format_templ, x);
-                } break;
-
-                case 'n':
-                    format_templ[HDstrlen(format_templ) - 1] = 'u';
-                    n                                        = fprintf(stream, format_templ, nout);
-                    break;
-
-                case 't': {
-                    htri_t tri_var = HDva_arg(ap, htri_t);
-
-                    if (tri_var > 0)
-                        n = fprintf(stream, "TRUE");
-                    else if (!tri_var)
-                        n = fprintf(stream, "FALSE");
-                    else
-                        n = fprintf(stream, "FAIL(%d)", (int)tri_var);
-                } break;
-
-                case 'T': /* Elapsed time, in seconds */
-                {
-                    double seconds     = HDva_arg(ap, double);
-                    char * time_string = H5_timer_get_time_string(seconds);
-
-                    if (time_string) {
-                        n = fprintf(stream, format_templ, time_string);
-                        HDfree(time_string);
-                    } /* end if */
-                    else
-                        n = fprintf(stream, format_templ, "(error)");
-                } break;
-
-                default:
-                    HDfputs(format_templ, stream);
-                    n = (int)HDstrlen(format_templ);
-                    break;
-            }
-            nout += n;
-            fmt = s;
-        }
-        else {
-            HDputc(*fmt, stream);
-            fmt++;
-            nout++;
-        }
+        HDfree(buf);
+        if (ret < 0)
+            return ret;
+        bufsz = (size_t)ret + 1;
     }
-    HDva_end(ap);
-    return nout;
-} /* end HDfprintf() */
-H5_GCC_DIAG_ON("format-nonliteral")
+    return -1;
+}
+#endif /* H5_HAVE_VASPRINTF */
 
 /*-------------------------------------------------------------------------
  * Function:  HDstrtoll
@@ -698,8 +347,8 @@ H5_make_time(struct tm *tm)
      * VS 2015 is removed, with _get_timezone replacing it.
      */
     long timezone = 0;
-#endif                /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
-    time_t ret_value; /* Return value */
+#endif                    /* defined(H5_HAVE_VISUAL_STUDIO) && (_MSC_VER >= 1900) */
+    time_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -924,38 +573,12 @@ Wgetlogin(void)
 {
 
 #ifdef H5_HAVE_WINSOCK2_H
-    long bufferCount = WloginBuffer_count;
-    if (GetUserName(Wlogin_buffer, &bufferCount) == 0)
+    DWORD bufferCount = WloginBuffer_count;
+    if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
         return (Wlogin_buffer);
     else
 #endif /* H5_HAVE_WINSOCK2_H */
         return NULL;
-}
-
-int
-c99_snprintf(char *str, size_t size, const char *format, ...)
-{
-    int     count;
-    va_list ap;
-
-    HDva_start(ap, format);
-    count = c99_vsnprintf(str, size, format, ap);
-    HDva_end(ap);
-
-    return count;
-}
-
-int
-c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
-{
-    int count = -1;
-
-    if (size != 0)
-        count = _vsnprintf_s(str, size, _TRUNCATE, format, ap);
-    if (count == -1)
-        count = _vscprintf(format, ap);
-
-    return count;
 }
 
 /*-------------------------------------------------------------------------
@@ -969,110 +592,45 @@ c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
  *-------------------------------------------------------------------------
  */
 int
-Wflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
+Wflock(int fd, int operation)
 {
 
-/* This is a no-op while we implement a Win32 VFD */
-#if 0
-int
-Wflock(int fd, int operation) {
-
-    HANDLE          hFile;
-    DWORD           dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
-    DWORD           dwReserved = 0;
-                    /* MAXDWORD for entire file */
-    DWORD           nNumberOfBytesToLockLow = MAXDWORD;
-    DWORD           nNumberOfBytesToLockHigh = MAXDWORD;
-                    /* Must initialize OVERLAPPED struct */
-    OVERLAPPED      overlapped = {0};
+    HANDLE hFile;
+    DWORD  dwFlags    = LOCKFILE_FAIL_IMMEDIATELY;
+    DWORD  dwReserved = 0;
+    /* MAXDWORD locks the entire file */
+    DWORD nNumberOfBytesToLockLow  = MAXDWORD;
+    DWORD nNumberOfBytesToLockHigh = MAXDWORD;
+    /* Must initialize OVERLAPPED struct */
+    OVERLAPPED overlapped = {0};
 
     /* Get Windows HANDLE */
-    hFile = _get_osfhandle(fd);
+    if (INVALID_HANDLE_VALUE == (hFile = (HANDLE)_get_osfhandle(fd)))
+        return -1;
 
     /* Convert to Windows flags */
-    if(operation & LOCK_EX)
+    if (operation & LOCK_EX)
         dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
 
     /* Lock or unlock */
-    if(operation & LOCK_UN)
-        if(0 == UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
+    if (operation & LOCK_UN) {
+        if (0 ==
+            UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh, &overlapped)) {
+            /* Attempting to unlock an already unlocked file will fail and this can happen
+             * in H5Fstart_swmr_write(). For now, just ignore the "error" (error code: 0x9e / 158).
+             */
+            if (GetLastError() != 158)
+                return -1;
+        }
+    }
+    else {
+        if (0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh,
+                            &overlapped))
             return -1;
-    else
-        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
-            return -1;
-#endif /* 0 */
+    }
+
     return 0;
 } /* end Wflock() */
-
-/*--------------------------------------------------------------------------
- * Function:    Wnanosleep
- *
- * Purpose:     Sleep for a given # of nanoseconds (Windows version)
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Dana Robinson
- *              Fall 2016
- *--------------------------------------------------------------------------
- */
-int
-Wnanosleep(const struct timespec *req, struct timespec *rem)
-{
-    /* XXX: Currently just a placeholder */
-    return 0;
-
-} /* end Wnanosleep() */
-
-/*-------------------------------------------------------------------------
- * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
- *
- * Purpose:     Wrapper function for round functions for use with VS2012
- *              and earlier.
- *
- * Return:      The rounded value that was passed in.
- *
- * Programmer:  Dana Robinson
- *              December 2016
- *
- *-------------------------------------------------------------------------
- */
-long long
-Wllround(double arg)
-{
-    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long long
-Wllroundf(float arg)
-{
-    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-long
-Wlround(double arg)
-{
-    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long
-Wlroundf(float arg)
-{
-    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-double
-Wround(double arg)
-{
-    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
-}
-
-float
-Wroundf(float arg)
-{
-    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
 
 /*-------------------------------------------------------------------------
  * Function:     H5_get_utf16_str
@@ -1088,7 +646,7 @@ Wroundf(float arg)
  *
  *-------------------------------------------------------------------------
  */
-const wchar_t *
+wchar_t *
 H5_get_utf16_str(const char *s)
 {
     int      nwchars = -1;   /* Length of the UTF-16 buffer */
@@ -1184,7 +742,7 @@ int
 Wremove_utf8(const char *path)
 {
     wchar_t *wpath = NULL; /* UTF-16 version of the path */
-    int      ret;
+    int      ret   = -1;
 
     /* Convert the input UTF-8 path to UTF-16 */
     if (NULL == (wpath = H5_get_utf16_str(path)))
@@ -1337,7 +895,7 @@ done:
 herr_t
 H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/)
 {
-    size_t path1_len;           /* length of path1 */
+    size_t path1_len = 0;       /* length of path1 */
     size_t path2_len;           /* length of path2 */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1403,6 +961,9 @@ done:
  *
  * Purpose:     Sleep for a given # of nanoseconds
  *
+ *              Note that commodity hardware is probably going to have a
+ *              resolution of milliseconds, not nanoseconds.
+ *
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
@@ -1412,15 +973,26 @@ done:
 void
 H5_nanosleep(uint64_t nanosec)
 {
-    struct timespec sleeptime; /* Struct to hold time to sleep */
-
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Set up time to sleep */
-    sleeptime.tv_sec  = 0;
-    sleeptime.tv_nsec = (long)nanosec;
+#ifdef H5_HAVE_WIN32_API
 
-    HDnanosleep(&sleeptime, NULL);
+    /* On Windows, Sleep() is in milliseconds. Passing 0 to Sleep()
+     * causes the thread to relinquish the rest of its time slice.
+     */
+    Sleep(nanosec / (1000 * 1000));
+
+#else
+    {
+        struct timespec sleeptime; /* Struct to hold time to sleep */
+
+        /* Set up time to sleep */
+        sleeptime.tv_sec  = 0;
+        sleeptime.tv_nsec = (long)nanosec;
+
+        HDnanosleep(&sleeptime, NULL);
+    }
+#endif
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5_nanosleep() */

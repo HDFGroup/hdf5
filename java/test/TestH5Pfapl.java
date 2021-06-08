@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -47,17 +46,17 @@ public class TestH5Pfapl {
     private static final int DIM_Y = 6;
     private static final int DIMF_X = 12;
     private static final int DIMF_Y = 18;
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5did = -1;
-    long H5Fdsid = -1;
-    long H5Fdid = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did = HDF5Constants.H5I_INVALID_HID;
+    long H5Fdsid = HDF5Constants.H5I_INVALID_HID;
+    long H5Fdid = HDF5Constants.H5I_INVALID_HID;
     long[] H5dims = { DIM_X, DIM_Y };
-    long fapl_id = -1;
-    long plapl_id = -1;
-    long dapl_id = -1;
-    long plist_id = -1;
-    long btplist_id = -1;
+    long fapl_id = HDF5Constants.H5I_INVALID_HID;
+    long plapl_id = HDF5Constants.H5I_INVALID_HID;
+    long dapl_id = HDF5Constants.H5I_INVALID_HID;
+    long plist_id = HDF5Constants.H5I_INVALID_HID;
+    long btplist_id = HDF5Constants.H5I_INVALID_HID;
     long[] H5Fdims = { DIMF_X, DIMF_Y };
     double windchillF[][] =
     {{36.0, 31.0, 25.0, 19.0, 13.0, 7.0, 1.0, -5.0, -11.0, -16.0, -22.0, -28.0, -34.0, -40.0, -46.0, -52.0, -57.0, -63.0},
@@ -130,7 +129,7 @@ public class TestH5Pfapl {
     }
 
     private final long _createDataset(long fid, long dsid, String name, long dapl) {
-        long did = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
         try {
             did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_STD_I32BE, dsid,
                     HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, dapl);
@@ -385,7 +384,7 @@ public class TestH5Pfapl {
 
     @Test
     public void testH5Pget_elink_fapl() {
-        long ret_val_id = -1;
+        long ret_val_id = HDF5Constants.H5I_INVALID_HID;
         try {
             ret_val_id = H5.H5Pget_elink_fapl(plapl_id);
             assertTrue("H5Pget_elink_fapl", ret_val_id >= 0);
@@ -403,7 +402,7 @@ public class TestH5Pfapl {
 
     @Test
     public void testH5P_elink_fapl() {
-        long ret_val_id = -1;
+        long ret_val_id = HDF5Constants.H5I_INVALID_HID;
         try {
             H5.H5Pset_elink_fapl(plapl_id, fapl_id );
             ret_val_id = H5.H5Pget_elink_fapl(plapl_id);
@@ -421,7 +420,7 @@ public class TestH5Pfapl {
 
     @Test
     public void testH5P_elink_file_cache_size() {
-        long elink_fapl_id = -1;
+        long elink_fapl_id = HDF5Constants.H5I_INVALID_HID;
         int efc_size = 0;
         try {
             H5.H5Pset_elink_fapl(plapl_id, fapl_id );

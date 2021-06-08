@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5FS package!"
 #endif
 
-#ifndef _H5FSpkg_H
-#define _H5FSpkg_H
+#ifndef H5FSpkg_H
+#define H5FSpkg_H
 
 /* Uncomment this macro to enable debugging output for free space manager */
 /* #define H5FS_DEBUG */
@@ -240,4 +240,4 @@ H5_DLL herr_t H5FS__get_cparam_test(const H5FS_t *fh, H5FS_create_t *cparam);
 H5_DLL int    H5FS__cmp_cparam_test(const H5FS_create_t *cparam1, const H5FS_create_t *cparam2);
 #endif /* H5FS_TESTING */
 
-#endif /* _H5FSpkg_H */
+#endif /* H5FSpkg_H */

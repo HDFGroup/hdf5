@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -176,7 +176,10 @@ test_dangle_group(H5F_close_degree_t degree)
         TEST_ERROR;
 
     /* Try creating duplicate group */
-    H5E_BEGIN_TRY { gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gid >= 0)
         TEST_ERROR
@@ -660,7 +663,7 @@ main(void)
     int nerrors = 0;
 
     /* Run tests w/weak file close */
-    puts("Testing dangling objects with weak file close:");
+    HDputs("Testing dangling objects with weak file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_WEAK);
     nerrors += test_dangle_group(H5F_CLOSE_WEAK);
     nerrors += test_dangle_datatype1(H5F_CLOSE_WEAK);
@@ -668,7 +671,7 @@ main(void)
     nerrors += test_dangle_attribute(H5F_CLOSE_WEAK);
 
     /* Run tests w/semi file close */
-    puts("Testing dangling objects with semi file close:");
+    HDputs("Testing dangling objects with semi file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_SEMI);
     nerrors += test_dangle_group(H5F_CLOSE_SEMI);
     nerrors += test_dangle_datatype1(H5F_CLOSE_SEMI);
@@ -676,7 +679,7 @@ main(void)
     nerrors += test_dangle_attribute(H5F_CLOSE_SEMI);
 
     /* Run tests w/strong file close */
-    puts("Testing dangling objects with strong file close:");
+    HDputs("Testing dangling objects with strong file close:");
     nerrors += test_dangle_dataset(H5F_CLOSE_STRONG);
     nerrors += test_dangle_group(H5F_CLOSE_STRONG);
     nerrors += test_dangle_datatype1(H5F_CLOSE_STRONG);
@@ -689,11 +692,11 @@ main(void)
     /* Check for errors */
     if (nerrors)
         goto error;
-    puts("All dangling ID tests passed.");
+    HDputs("All dangling ID tests passed.");
 
     return 0;
 
 error:
-    puts("***** DANGLING ID TESTS FAILED *****");
+    HDputs("***** DANGLING ID TESTS FAILED *****");
     return 1;
 }

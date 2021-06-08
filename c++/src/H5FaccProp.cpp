@@ -6,16 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 #include <string>
 
 using std::cerr;
@@ -96,7 +92,9 @@ const FileAccPropList &FileAccPropList::DEFAULT = *getConstant();
 ///\brief       Creates a file access property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileAccPropList::FileAccPropList() : PropList(H5P_FILE_ACCESS) {}
+FileAccPropList::FileAccPropList() : PropList(H5P_FILE_ACCESS)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FileAccPropList copy constructor
@@ -104,7 +102,9 @@ FileAccPropList::FileAccPropList() : PropList(H5P_FILE_ACCESS) {}
 ///\param       original - IN: FileAccPropList instance to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileAccPropList::FileAccPropList(const FileAccPropList &original) : PropList(original) {}
+FileAccPropList::FileAccPropList(const FileAccPropList &original) : PropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FileAccPropList overloaded constructor
@@ -112,7 +112,9 @@ FileAccPropList::FileAccPropList(const FileAccPropList &original) : PropList(ori
 ///             existing one.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileAccPropList::FileAccPropList(const hid_t plist_id) : PropList(plist_id) {}
+FileAccPropList::FileAccPropList(const hid_t plist_id) : PropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    FileAccPropList::setStdio
@@ -802,6 +804,8 @@ FileAccPropList::getLibverBounds(H5F_libver_t &libver_low, H5F_libver_t &libver_
 ///\brief       Noop destructor
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-FileAccPropList::~FileAccPropList() {}
+FileAccPropList::~FileAccPropList()
+{
+}
 
 } // namespace H5

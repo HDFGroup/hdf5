@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -3916,9 +3916,8 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("%d:Failed to turn off atexit processing. Continue.\n", mpi_rank);
-    };
 
     H5open();
 
@@ -3930,11 +3929,8 @@ main(int argc, char **argv)
     }
 
     if (mpi_size < 2) {
-
-        if (mpi_rank == 0) {
-
+        if (mpi_rank == 0)
             HDprintf("    Need at least 2 processes.  Exiting.\n");
-        }
         goto finish;
     }
 

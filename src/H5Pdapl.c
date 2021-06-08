@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -768,7 +768,7 @@ H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double
 
     /* Check arguments.  Note that we allow negative values - they are
      * considered to "unset" the property. */
-    if (rdcc_w0 > (double)1.0f)
+    if (rdcc_w0 > 1.0)
         HGOTO_ERROR(
             H5E_ARGS, H5E_BADVALUE, FAIL,
             "raw data cache w0 value must be between 0.0 and 1.0 inclusive, or H5D_CHUNK_CACHE_W0_DEFAULT");
@@ -865,8 +865,8 @@ done:
 static herr_t
 H5P__encode_chunk_cache_nslots(const void *value, void **_pp, size_t *size)
 {
-    uint64_t  enc_value; /* Property value to encode */
-    uint8_t **pp = (uint8_t **)_pp;
+    uint64_t  enc_value = 0; /* Property value to encode */
+    uint8_t **pp        = (uint8_t **)_pp;
     unsigned  enc_size; /* Size of encoded property */
 
     FUNC_ENTER_STATIC_NOERR
@@ -965,8 +965,8 @@ H5P__decode_chunk_cache_nslots(const void **_pp, void *_value)
 static herr_t
 H5P__encode_chunk_cache_nbytes(const void *value, void **_pp, size_t *size)
 {
-    uint64_t  enc_value; /* Property value to encode */
-    uint8_t **pp = (uint8_t **)_pp;
+    uint64_t  enc_value = 0; /* Property value to encode */
+    uint8_t **pp        = (uint8_t **)_pp;
     unsigned  enc_size; /* Size of encoded property */
 
     FUNC_ENTER_STATIC_NOERR

@@ -7,13 +7,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5Object_H
-#define __H5Object_H
+#ifndef H5Object_H
+#define H5Object_H
 
 namespace H5 {
 
@@ -106,7 +106,7 @@ class H5_DLLCPP H5Object : public H5Location {
     void removeAttr(const H5std_string &name) const;
 
     // Returns an identifier.
-    virtual hid_t getId() const = 0;
+    virtual hid_t getId() const H5_OVERRIDE = 0;
 
     // Gets the name of this HDF5 object, i.e., Group, DataSet, or
     // DataType.
@@ -122,14 +122,14 @@ class H5_DLLCPP H5Object : public H5Location {
 
     // Sets the identifier of this object to a new value. - this one
     // doesn't increment reference count
-    virtual void p_setId(const hid_t new_id) = 0;
+    virtual void p_setId(const hid_t new_id) H5_OVERRIDE = 0;
 
     // Noop destructor.
-    virtual ~H5Object();
+    virtual ~H5Object() H5_OVERRIDE;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
 }; // end of H5Object
 } // namespace H5
 
-#endif // __H5Object_H
+#endif // H5Object_H

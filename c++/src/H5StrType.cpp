@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -32,6 +32,7 @@
 #include "H5StrType.h"
 #include "H5DataSet.h"
 #include "H5PredType.h"
+#include "H5private.h"
 
 namespace H5 {
 
@@ -40,7 +41,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub string datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrType::StrType() : AtomType() {}
+StrType::StrType() : AtomType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    StrType overloaded constructor
@@ -102,7 +105,7 @@ StrType::StrType(const PredType &pred_type, const size_t &size) : AtomType()
 //              This constructor replaced the previous one.
 // Programmer   Binh-Minh Ribler - Nov 28, 2005
 //--------------------------------------------------------------------------
-StrType::StrType(const int dummy, const size_t &size) : AtomType()
+StrType::StrType(H5_ATTR_UNUSED const int dummy, const size_t &size) : AtomType()
 {
     // use DataType::copy to make a copy of the string predefined type
     // then set its length
@@ -117,14 +120,18 @@ StrType::StrType(const int dummy, const size_t &size) : AtomType()
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrType::StrType(const hid_t existing_id) : AtomType(existing_id) {}
+StrType::StrType(const hid_t existing_id) : AtomType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    StrType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrType::StrType(const StrType &original) : AtomType(original) {}
+StrType::StrType(const StrType &original) : AtomType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    StrType overloaded constructor
@@ -301,6 +308,8 @@ StrType::setStrpad(H5T_str_t strpad) const
 ///\brief       Properly terminates access to this string datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-StrType::~StrType() {}
+StrType::~StrType()
+{
+}
 
 } // namespace H5

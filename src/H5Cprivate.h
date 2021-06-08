@@ -6,31 +6,31 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
  *
- * Created:        H5Cprivate.h
+ * Created:   H5Cprivate.h
  *            6/3/04
  *            John Mainzer
  *
- * Purpose:        Constants and typedefs available to the rest of the
- *             library.
+ * Purpose:   Constants and typedefs available to the rest of the
+ *            library.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5Cprivate_H
-#define _H5Cprivate_H
+#ifndef H5Cprivate_H
+#define H5Cprivate_H
 
-#include "H5Cpublic.h" /* public prototypes                */
+#include "H5Cpublic.h" /* public prototypes            */
 
 /* Private headers needed by this header */
 #include "H5private.h"  /* Generic Functions            */
-#include "H5Fprivate.h" /* File access                */
+#include "H5Fprivate.h" /* File access                  */
 
 /**************************/
 /* Library Private Macros */
@@ -115,20 +115,20 @@
 #define H5C__CURR_CACHE_IMAGE_CTL_VER     1
 
 /* Default configuration settings */
-#define H5C__DEF_AR_UPPER_THRESHHOLD 0.9999f
-#define H5C__DEF_AR_LOWER_THRESHHOLD 0.9f
+#define H5C__DEF_AR_UPPER_THRESHHOLD 0.9999
+#define H5C__DEF_AR_LOWER_THRESHHOLD 0.9
 #define H5C__DEF_AR_MAX_SIZE         ((size_t)(16 * 1024 * 1024))
 #define H5C__DEF_AR_INIT_SIZE        ((size_t)(1 * 1024 * 1024))
 #define H5C__DEF_AR_MIN_SIZE         ((size_t)(1 * 1024 * 1024))
-#define H5C__DEF_AR_MIN_CLEAN_FRAC   0.5f
-#define H5C__DEF_AR_INCREMENT        2.0f
+#define H5C__DEF_AR_MIN_CLEAN_FRAC   0.5
+#define H5C__DEF_AR_INCREMENT        2.0
 #define H5C__DEF_AR_MAX_INCREMENT    ((size_t)(2 * 1024 * 1024))
-#define H5C__DEF_AR_FLASH_MULTIPLE   1.0f
-#define H5C__DEV_AR_FLASH_THRESHOLD  0.25f
-#define H5C__DEF_AR_DECREMENT        0.9f
+#define H5C__DEF_AR_FLASH_MULTIPLE   1.0
+#define H5C__DEV_AR_FLASH_THRESHOLD  0.25
+#define H5C__DEF_AR_DECREMENT        0.9
 #define H5C__DEF_AR_MAX_DECREMENT    ((size_t)(1 * 1024 * 1024))
 #define H5C__DEF_AR_EPCHS_B4_EVICT   3
-#define H5C__DEF_AR_EMPTY_RESERVE    0.05f
+#define H5C__DEF_AR_EMPTY_RESERVE    0.05
 #define H5C__MIN_AR_EPOCH_LENGTH     100
 #define H5C__DEF_AR_EPOCH_LENGTH     50000
 #define H5C__MAX_AR_EPOCH_LENGTH     1000000
@@ -2321,4 +2321,4 @@ H5_DLL herr_t  H5C_verify_entry_type(H5C_t *cache_ptr, haddr_t addr, const H5C_c
 H5_DLL herr_t  H5C_validate_index_list(H5C_t *cache_ptr);
 #endif /* NDEBUG */
 
-#endif /* !_H5Cprivate_H */
+#endif /* H5Cprivate_H */

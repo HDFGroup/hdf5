@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,6 +14,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
@@ -54,6 +55,9 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -713,9 +717,6 @@ H5__debug_mask(const char *s)
             s++;
         } /* end if-else */
     }     /* end while */
-
-    return;
-
 } /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL
@@ -879,7 +880,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             HDstrncat(lib_str, "-", (size_t)1);
             HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
         } /* end if */
-        if (HDstrcmp(lib_str, H5_lib_vers_info_g)) {
+        if (HDstrcmp(lib_str, H5_lib_vers_info_g) != 0) {
             HDfputs("Warning!  Library version information error.\n"
                     "The HDF5 library version information are not "
                     "consistent in its source code.\nThis is NOT a fatal error "

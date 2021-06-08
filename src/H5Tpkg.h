@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5T package!"
 #endif
 
-#ifndef _H5Tpkg_H
-#define _H5Tpkg_H
+#ifndef H5Tpkg_H
+#define H5Tpkg_H
 
 /*
  * Define this to enable debugging.
@@ -808,7 +808,8 @@ H5_DLL herr_t   H5T__bit_shift(uint8_t *buf, ssize_t shift_dist, size_t offset, 
 H5_DLL void     H5T__bit_set(uint8_t *buf, size_t offset, size_t size, hbool_t value);
 H5_DLL uint64_t H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size);
 H5_DLL void     H5T__bit_set_d(uint8_t *buf, size_t offset, size_t size, uint64_t val);
-H5_DLL ssize_t  H5T__bit_find(uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction, hbool_t value);
+H5_DLL ssize_t  H5T__bit_find(const uint8_t *buf, size_t offset, size_t size, H5T_sdir_t direction,
+                              hbool_t value);
 H5_DLL hbool_t  H5T__bit_inc(uint8_t *buf, size_t start, size_t size);
 H5_DLL hbool_t  H5T__bit_dec(uint8_t *buf, size_t start, size_t size);
 H5_DLL void     H5T__bit_neg(uint8_t *buf, size_t start, size_t size);
@@ -841,4 +842,4 @@ H5_DLL herr_t H5T__sort_name(const H5T_t *dt, int *map);
 /* Debugging functions */
 H5_DLL herr_t H5T__print_stats(H5T_path_t *path, int *nprint /*in,out*/);
 
-#endif /* _H5Tpkg_H */
+#endif /* H5Tpkg_H */

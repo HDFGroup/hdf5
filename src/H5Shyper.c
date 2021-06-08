@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1102,10 +1102,10 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span; /* Current hyperslab span node */
-        H5S_hyper_span_t **ispan;     /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;   /* Absolute hyperslab span position */
-        int                curr_dim;  /* Temporary rank holder */
+        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
+        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
         ndims    = iter->rank;
@@ -1294,10 +1294,10 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span; /* Current hyperslab span node */
-        H5S_hyper_span_t **ispan;     /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;   /* Absolute hyperslab span position */
-        int                curr_dim;  /* Temporary rank holder */
+        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
+        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
         ndims    = iter->rank;

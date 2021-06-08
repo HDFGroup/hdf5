@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1233,9 +1233,9 @@ dump_fcpl(hid_t fid)
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "%s %s\n", "FREE_SPACE_PERSIST", fs_persist ? "TRUE" : "FALSE");
     indentation(dump_indent + COL);
-    PRINTSTREAM(rawoutstream, "%s %Hu\n", "FREE_SPACE_SECTION_THRESHOLD", fs_threshold);
+    PRINTSTREAM(rawoutstream, "%s %" PRIuHSIZE "\n", "FREE_SPACE_SECTION_THRESHOLD", fs_threshold);
     indentation(dump_indent + COL);
-    PRINTSTREAM(rawoutstream, "%s %Hu\n", "FILE_SPACE_PAGE_SIZE", fsp_size);
+    PRINTSTREAM(rawoutstream, "%s %" PRIuHSIZE "\n", "FILE_SPACE_PAGE_SIZE", fsp_size);
 
     /*-------------------------------------------------------------------------
      * USER_BLOCK
@@ -1244,7 +1244,7 @@ dump_fcpl(hid_t fid)
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "USER_BLOCK %s\n", BEGIN);
     indentation(dump_indent + COL + COL);
-    PRINTSTREAM(rawoutstream, "%s %Hu\n", "USERBLOCK_SIZE", userblock);
+    PRINTSTREAM(rawoutstream, "%s %" PRIuHSIZE "\n", "USERBLOCK_SIZE", userblock);
     indentation(dump_indent + COL);
     PRINTSTREAM(rawoutstream, "%s\n", END);
 

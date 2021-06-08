@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -121,7 +121,10 @@ check_data_i(const char *dsetname, hid_t fid)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+    }
     H5E_END_TRY;
     return 1;
 } /* end check_data_i() */
@@ -156,9 +159,9 @@ check_data_f(const char *dsetname, hid_t fid)
     /* Input (last row is different) */
     for (i = 0; i < NX; i++)
         for (j = 0; j < NY; j++)
-            data_in[i][j] = ((double)(i + j + 1)) / (double)3.0F;
+            data_in[i][j] = ((double)(i + j + 1)) / 3.0;
     for (i = 0; i < NY; i++)
-        data_in[NX][i] = -2.2F;
+        data_in[NX][i] = -2.2;
     /* Output */
     HDmemset(data_out, 0, (NX + 1) * NY * sizeof(double));
 
@@ -171,7 +174,7 @@ check_data_f(const char *dsetname, hid_t fid)
     /* Check results */
     for (i = 0; i < (NX + 1); i++)
         for (j = 0; j < NY; j++)
-            if (!H5_DBL_REL_EQUAL(data_out[i][j], data_in[i][j], (double)0.001F))
+            if (!H5_DBL_REL_EQUAL(data_out[i][j], data_in[i][j], 0.001))
                 if (!nerrors++) {
                     H5_FAILED();
                     HDprintf("element [%d][%d] is %g but should have been %g\n", (int)i, (int)j,
@@ -192,7 +195,10 @@ check_data_f(const char *dsetname, hid_t fid)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Dclose(did); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(did);
+    }
     H5E_END_TRY;
     return 1;
 } /* end check_data_f() */
@@ -321,7 +327,10 @@ check_file(char *filename)
     return nerrors;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     return nerrors;
 } /* end check_file() */

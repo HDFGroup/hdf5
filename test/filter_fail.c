@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -167,11 +167,14 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
     }
     else {
         /* Data writing should fail */
-        H5E_BEGIN_TRY { ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, points); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dwrite(dataset, H5T_NATIVE_INT, H5S_ALL, sid, H5P_DEFAULT, points);
+        }
         H5E_END_TRY;
         if (ret >= 0) {
             H5_FAILED();
-            puts("    Data writing is supposed to fail because the chunk can't be written to file.");
+            HDputs("    Data writing is supposed to fail because the chunk can't be written to file.");
             TEST_ERROR
         }
     }
@@ -185,11 +188,14 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
     /* Close dataset.  If the chunk cache is enabled, the flushing of chunks should fail
      * during H5Dclose.  If it is diabled, H5Dwrite should fail but H5Dclose should succeed. */
     if (cache_enabled) {
-        H5E_BEGIN_TRY { ret = H5Dclose(dataset); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Dclose(dataset);
+        }
         H5E_END_TRY;
         if (ret >= 0) {
             H5_FAILED();
-            puts("    Dataset is supposed to fail because the chunk can't be flushed to file.");
+            HDputs("    Dataset is supposed to fail because the chunk can't be flushed to file.");
             TEST_ERROR
         }
     }
