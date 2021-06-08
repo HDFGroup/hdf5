@@ -448,6 +448,7 @@ H5O__copy_api_common(hid_t src_loc_id, const char *src_name, hid_t dst_loc_id, c
     /* Set the LCPL for the API context */
     H5CX_set_lcpl(lcpl_id);
 
+    /* Setup and check args */
     if (H5VL_setup_loc_args(src_loc_id, &vol_obj1, &loc_params1) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
@@ -621,8 +622,7 @@ H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t **_vol_obj_p
 
     FUNC_ENTER_STATIC
 
-    /* Check args */
-
+    /* Setup and check args */
     if (H5VL_setup_loc_args(obj_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
@@ -723,8 +723,7 @@ H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t **_vol_obj_pt
 
     FUNC_ENTER_STATIC
 
-    /* Check args */
-
+    /* Setup and check args */
     if (H5VL_setup_loc_args(oid, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
 

@@ -81,6 +81,7 @@ static int    H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name /*out*/);
 static char * H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
 static H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
+static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking);
 static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
                                      char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
