@@ -10726,7 +10726,18 @@ public class H5 implements java.io.Serializable {
      * @exception IllegalArgumentException
      *                - an input array is invalid.
      **/
-    public synchronized static native long H5Ropen_object(byte[] ref_ptr, long rapl_id, long oapl_id)
+    public static long H5Ropen_object(byte[] ref_ptr, long rapl_id, long oapl_id)
+            throws HDF5LibraryException, NullPointerException, IllegalArgumentException {
+        long id = _H5Ropen_object(ref_ptr, rapl_id, oapl_id);
+        if (id > 0) {
+            log.trace("OPEN_IDS: H5Ropen_object add {}", id);
+            OPEN_IDS.add(id);
+            log.trace("OPEN_IDS: {}", OPEN_IDS.size());
+        }
+        return id;
+    }
+
+    private synchronized static native long _H5Ropen_object(byte[] ref_ptr, long rapl_id, long oapl_id)
             throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     /**
@@ -10754,7 +10765,18 @@ public class H5 implements java.io.Serializable {
      * @exception IllegalArgumentException
      *                - an input array is invalid.
      **/
-    public synchronized static native long H5Ropen_region(byte[] ref_ptr, long rapl_id, long oapl_id)
+    public static long H5Ropen_region(byte[] ref_ptr, long rapl_id, long oapl_id)
+            throws HDF5LibraryException, NullPointerException, IllegalArgumentException {
+        long id = _H5Ropen_region(ref_ptr, rapl_id, oapl_id);
+        if (id > 0) {
+            log.trace("OPEN_IDS: H5Ropen_region add {}", id);
+            OPEN_IDS.add(id);
+            log.trace("OPEN_IDS: {}", OPEN_IDS.size());
+        }
+        return id;
+    }
+
+    private synchronized static native long _H5Ropen_region(byte[] ref_ptr, long rapl_id, long oapl_id)
             throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     /**
@@ -10782,7 +10804,18 @@ public class H5 implements java.io.Serializable {
      * @exception IllegalArgumentException
      *                - an input array is invalid.
      **/
-    public synchronized static native long H5Ropen_attr(byte[] ref_ptr, long rapl_id, long aapl_id)
+    public static long H5Ropen_attr(byte[] ref_ptr, long rapl_id, long aapl_id)
+            throws HDF5LibraryException, NullPointerException, IllegalArgumentException {
+        long id = _H5Ropen_attr(ref_ptr, rapl_id, aapl_id);
+        if (id > 0) {
+            log.trace("OPEN_IDS: H5Ropen_attr add {}", id);
+            OPEN_IDS.add(id);
+            log.trace("OPEN_IDS: {}", OPEN_IDS.size());
+        }
+        return id;
+    }
+
+    private synchronized static native long _H5Ropen_attr(byte[] ref_ptr, long rapl_id, long aapl_id)
             throws HDF5LibraryException, NullPointerException, IllegalArgumentException;
 
     // Get type //
