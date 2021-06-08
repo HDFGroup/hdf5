@@ -41,8 +41,28 @@
 #include "H5VMprivate.h" /* Vector Functions                         */
 
 /* Includes needed to set default file driver */
-#include "H5FDsec2.h"  /* POSIX unbuffered I/O                     */
+#include "H5FDsec2.h" /* POSIX unbuffered I/O                     */
+#include "H5FDcore.h"
+#include "H5FDlog.h"
+#include "H5FDfamily.h"
+#include "H5FDmulti.h"
 #include "H5FDstdio.h" /* Standard C buffered I/O                  */
+#include "H5FDsplitter.h"
+#ifdef H5_HAVE_PARALLEL
+#include "H5FDmpio.h"
+#endif
+#ifdef H5_HAVE_DIRECT
+#include "H5FDdirect.h"
+#endif
+#ifdef H5_HAVE_MIRROR_VFD
+#include "H5FDmirror.h"
+#endif
+#ifdef H5_HAVE_LIBHDFS
+#include "H5FDhdfs.h"
+#endif
+#ifdef H5_HAVE_ROS3_VFD
+#include "H5FDros3.h"
+#endif
 #ifdef H5_HAVE_WINDOWS
 #include "H5FDwindows.h" /* Win32 I/O                                */
 #endif
@@ -113,7 +133,7 @@
 #define H5F_ACS_FILE_DRV_SIZE sizeof(H5FD_driver_prop_t)
 #define H5F_ACS_FILE_DRV_DEF                                                                                 \
     {                                                                                                        \
-        H5_DEFAULT_VFD, NULL                                                                                 \
+        H5_DEFAULT_VFD, NULL, NULL                                                                           \
     }
 #define H5F_ACS_FILE_DRV_CRT   H5P__facc_file_driver_create
 #define H5F_ACS_FILE_DRV_SET   H5P__facc_file_driver_set
@@ -122,15 +142,6 @@
 #define H5F_ACS_FILE_DRV_COPY  H5P__facc_file_driver_copy
 #define H5F_ACS_FILE_DRV_CMP   H5P__facc_file_driver_cmp
 #define H5F_ACS_FILE_DRV_CLOSE H5P__facc_file_driver_close
-/* Definition for file driver info string */
-#define H5F_ACS_FILE_DRV_INFO_STR_SIZE  sizeof(const char *)
-#define H5F_ACS_FILE_DRV_INFO_STR_DEF   NULL
-#define H5F_ACS_FILE_DRV_INFO_STR_SET   H5P__facc_file_driver_info_str_set
-#define H5F_ACS_FILE_DRV_INFO_STR_GET   H5P__facc_file_driver_info_str_get
-#define H5F_ACS_FILE_DRV_INFO_STR_DEL   H5P__facc_file_driver_info_str_del
-#define H5F_ACS_FILE_DRV_INFO_STR_COPY  H5P__facc_file_driver_info_str_copy
-#define H5F_ACS_FILE_DRV_INFO_STR_CMP   H5P__facc_file_driver_info_str_cmp
-#define H5F_ACS_FILE_DRV_INFO_STR_CLOSE H5P__facc_file_driver_info_str_close
 /* Definition for file close degree */
 #define H5F_CLOSE_DEGREE_SIZE sizeof(H5F_close_degree_t)
 #define H5F_CLOSE_DEGREE_DEF  H5F_CLOSE_DEFAULT
@@ -345,14 +356,6 @@ static herr_t H5P__facc_file_driver_copy(const char *name, size_t size, void *va
 static int    H5P__facc_file_driver_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__facc_file_driver_close(const char *name, size_t size, void *value);
 
-/* File driver info string property callbacks */
-static herr_t H5P__facc_file_driver_info_str_set(hid_t prop_id, const char *name, size_t size, void *value);
-static herr_t H5P__facc_file_driver_info_str_get(hid_t prop_id, const char *name, size_t size, void *value);
-static herr_t H5P__facc_file_driver_info_str_del(hid_t prop_id, const char *name, size_t size, void *value);
-static herr_t H5P__facc_file_driver_info_str_copy(const char *name, size_t size, void *value);
-static int    H5P__facc_file_driver_info_str_cmp(const void *value1, const void *value2, size_t size);
-static herr_t H5P__facc_file_driver_info_str_close(const char *name, size_t size, void *value);
-
 /* File image info property callbacks */
 static herr_t H5P__file_image_info_copy(void *value);
 static herr_t H5P__file_image_info_free(void *value);
@@ -415,6 +418,9 @@ static int    H5P__facc_mpi_info_cmp(const void *value1, const void *value2, siz
 static herr_t H5P__facc_mpi_info_close(const char *name, size_t size, void *value);
 #endif /* H5_HAVE_PARALLEL */
 
+/* Internal routines */
+static inline herr_t H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver_id);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -447,7 +453,6 @@ const H5P_libclass_t H5P_CLS_FACC[1] = {{
 /*******************/
 
 /* Property value defaults */
-static const char *              H5F_def_file_drv_info_str_g = H5F_ACS_FILE_DRV_INFO_STR_DEF;
 static const H5AC_cache_config_t H5F_def_mdc_initCacheCfg_g =
     H5F_ACS_META_CACHE_INIT_CONFIG_DEF; /* Default metadata cache settings */
 static const size_t H5F_def_rdcc_nslots_g =
@@ -612,14 +617,6 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
                            H5F_ACS_FILE_DRV_CRT, H5F_ACS_FILE_DRV_SET, H5F_ACS_FILE_DRV_GET, NULL, NULL,
                            H5F_ACS_FILE_DRV_DEL, H5F_ACS_FILE_DRV_COPY, H5F_ACS_FILE_DRV_CMP,
                            H5F_ACS_FILE_DRV_CLOSE) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
-
-    /* Register the file driver info string */
-    if (H5P__register_real(pclass, H5F_ACS_FILE_DRV_INFO_STR_NAME, H5F_ACS_FILE_DRV_INFO_STR_SIZE,
-                           &H5F_def_file_drv_info_str_g, NULL, H5F_ACS_FILE_DRV_INFO_STR_SET,
-                           H5F_ACS_FILE_DRV_INFO_STR_GET, NULL, NULL, H5F_ACS_FILE_DRV_INFO_STR_DEL,
-                           H5F_ACS_FILE_DRV_INFO_STR_COPY, H5F_ACS_FILE_DRV_INFO_STR_CMP,
-                           H5F_ACS_FILE_DRV_INFO_STR_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file close degree */
@@ -835,6 +832,208 @@ done:
 } /* end H5P__facc_reg_prop() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5P__facc_set_def_driver
+ *
+ * Purpose:     Parses a string that contains the name of the default VFL
+ *              driver for the default FAPL.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P__facc_set_def_driver(void)
+{
+    const char *driver_env_var;
+    hbool_t     driver_ref_inc = FALSE;
+    hid_t       driver_id      = H5I_INVALID_HID; /* VFL driver ID */
+    herr_t      ret_value      = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Check if VFL driver environment variable is set */
+    driver_env_var = HDgetenv("HDF5_DRIVER");
+
+    /* Only parse VFL driver string if it's set */
+    if (driver_env_var && *driver_env_var) {
+        H5FD_driver_prop_t driver_prop;
+        H5P_genplist_t *   def_fapl;     /* Default file access property list */
+        H5P_genclass_t *   def_fapclass; /* Default file access property class */
+        const char *       driver_config_env_var;
+        htri_t             driver_is_registered;
+
+        /* Check to see if the driver is already registered */
+        if ((driver_is_registered = H5FD_is_driver_registered_by_name(driver_env_var, &driver_id)) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFL driver is already registered")
+        if (driver_is_registered) {
+            HDassert(driver_id >= 0);
+
+            if (H5I_inc_ref(driver_id, TRUE) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINC, FAIL, "unable to increment ref count on VFD")
+            driver_ref_inc = TRUE;
+        } /* end else-if */
+        else {
+            /* Check for VFL drivers that ship with the library */
+            if (H5P__facc_set_def_driver_check_predefined(driver_env_var, &driver_id) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check for predefined VFL driver name")
+            else if (driver_id > 0) {
+                if (H5I_inc_ref(driver_id, TRUE) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINC, FAIL, "can't increment VFL driver refcount")
+                driver_ref_inc = TRUE;
+            }
+            else {
+                /* Register the VFL driver */
+                if ((driver_id = H5FD_register_driver_by_name(driver_env_var, TRUE)) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "can't register VFL driver")
+                driver_ref_inc = TRUE;
+            } /* end else */
+        }     /* end else */
+
+        /* Retrieve driver configuration string from environment variable, if set. */
+        driver_config_env_var = HDgetenv("HDF5_DRIVER_CONFIG");
+
+        driver_prop.driver_id         = driver_id;
+        driver_prop.driver_info       = NULL;
+        driver_prop.driver_config_str = driver_config_env_var;
+
+        /* Get default file access pclass */
+        if (NULL == (def_fapclass = (H5P_genclass_t *)H5I_object(H5P_FILE_ACCESS)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADID, FAIL,
+                        "can't find object for default file access property class ID")
+
+        /* Set new default VFL driver for default file access pclass */
+        if (H5P__class_set(def_fapclass, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL,
+                        "can't set default VFL driver for default file access property list class")
+
+        /* Get default file access plist */
+        if (NULL == (def_fapl = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
+            HGOTO_ERROR(H5E_VFL, H5E_BADID, FAIL, "can't find object for default fapl ID")
+
+        /* Set new default VFL driver for default FAPL */
+        if (H5P_set_driver(def_fapl, driver_prop.driver_id, driver_prop.driver_info,
+                           driver_prop.driver_config_str) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "can't set default VFL driver for default FAPL")
+    }
+
+done:
+    /* Clean up on error */
+    if (ret_value < 0) {
+        if (driver_id >= 0 && driver_ref_inc && H5I_dec_app_ref(driver_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "unable to unregister VFL driver")
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_set_def_driver() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P__facc_set_def_driver_check_predefined
+ *
+ * Purpose:     Checks a given driver name against a list of predefined
+ *              names for VFL drivers that are internal to HDF5. If a name
+ *              is matched, the ID for that driver is returned through
+ *              `driver_id`. Otherwise, `driver_id` is set to
+ *              H5I_INVALID_HID.
+ *
+ * Return:      Non-negative on sucess/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static inline herr_t
+H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver_id)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    HDassert(driver_name);
+    HDassert(driver_id);
+
+    if (!HDstrcmp(driver_name, "sec2")) {
+        if ((*driver_id = H5FD_SEC2) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize sec2 VFD")
+    }
+    else if (!HDstrcmp(driver_name, "core") || !HDstrcmp(driver_name, "core_paged")) {
+        if ((*driver_id = H5FD_CORE) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize core VFD")
+    }
+    else if (!HDstrcmp(driver_name, "log")) {
+        if ((*driver_id = H5FD_LOG) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize log VFD")
+    }
+    else if (!HDstrcmp(driver_name, "family")) {
+        if ((*driver_id = H5FD_FAMILY) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize family VFD")
+    }
+    else if (!HDstrcmp(driver_name, "multi") || !HDstrcmp(driver_name, "split")) {
+        if ((*driver_id = H5FD_MULTI) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize multi VFD")
+    }
+    else if (!HDstrcmp(driver_name, "stdio")) {
+        if ((*driver_id = H5FD_STDIO) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize stdio VFD")
+    }
+    else if (!HDstrcmp(driver_name, "splitter")) {
+        if ((*driver_id = H5FD_SPLITTER) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize splitter VFD")
+    }
+    else if (!HDstrcmp(driver_name, "mpio")) {
+#ifdef H5_HAVE_PARALLEL
+        if ((*driver_id = H5FD_MPIO) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize MPI I/O VFD")
+#else
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "MPI-I/O VFD is not enabled")
+#endif
+    }
+    else if (!HDstrcmp(driver_name, "direct")) {
+#ifdef H5_HAVE_DIRECT
+        if ((*driver_id = H5FD_DIRECT) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize Direct I/O VFD")
+#else
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Direct I/O VFD is not enabled")
+#endif
+    }
+    else if (!HDstrcmp(driver_name, "mirror")) {
+#ifdef H5_HAVE_MIRROR_VFD
+        if ((*driver_id = H5FD_MIRROR) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize mirror VFD")
+#else
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Mirror VFD is not enabled")
+#endif
+    }
+    else if (!HDstrcmp(driver_name, "hdfs")) {
+#ifdef H5_HAVE_LIBHDFS
+        if ((*driver_id = H5FD_HDFS) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize HDFS VFD")
+#else
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "HDFS VFD is not enabled")
+#endif
+    }
+    else if (!HDstrcmp(driver_name, "ros3")) {
+#ifdef H5_HAVE_ROS3_VFD
+        if ((*driver_id = H5FD_ROS3) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize ROS3 VFD")
+#else
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "ROS3 VFD is not enabled")
+#endif
+    }
+    else if (!HDstrcmp(driver_name, "windows")) {
+#ifdef H5_HAVE_WINDOWS
+        if ((*driver_id = H5FD_WINDOWS) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, FAIL, "couldn't initialize Windows VFD")
+#else
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "Windows VFD is not enabled")
+#endif
+    }
+    else {
+        *driver_id = H5I_INVALID_HID;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P__facc_set_def_driver_check_predefined() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Pset_alignment
  *
  * Purpose:    Sets the alignment properties of a file access property list
@@ -925,42 +1124,52 @@ done:
 } /* end H5Pget_alignment() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_set_driver
+ * Function:   H5P_set_driver
  *
- * Purpose:    Set the file driver (DRIVER_ID) for a file access
- *        property list (PLIST_ID) and supply an optional
- *        struct containing the driver-specific properites
- *        (DRIVER_INFO).  The driver properties will be copied into the
- *        property list and the reference count on the driver will be
- *        incremented, allowing the caller to close the driver ID but
- *        still use the property list.
+ * Purpose:    Set the file driver (NEW_DRIVER_ID) for a file access
+ *             property list (PLIST). A struct (NEW_DRIVER_INFO) or string
+ *             (NEW_DRIVER_CONFIG_STR) containing the driver-specific
+ *             properties can optionally be supplied. The driver properties
+ *             (struct or string) will be copied into the property list and
+ *             the reference count on the driver will be incremented,
+ *             allowing the caller to close the driver ID but still use the
+ *             property list.
  *
- * Return:    Success:    Non-negative
- *        Failure:    Negative
+ * Note:       Only one of either NEW_DRIVER_INFO or NEW_DRIVER_CONFIG_STR
+ *             should be specified, but not both.
+ *
+ * Return:     Non-negative on success/Negative on failure
  *
  * Programmer:    Robb Matzke
- *              Tuesday, August  3, 1999
+ *                Tuesday, August 3, 1999
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_driver_info)
+H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_driver_info,
+               const char *new_driver_config_str)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* If VFD configuration information is supplied, ensure that either binary
+     * configuration data or a configuration string is supplied, but not both.
+     */
+    HDassert(!new_driver_info || !new_driver_config_str);
+
     if (NULL == H5I_object_verify(new_driver_id, H5I_VFL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
     if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID, info & config. string */
 
         /* Prepare the driver property */
-        driver_prop.driver_id   = new_driver_id;
-        driver_prop.driver_info = new_driver_info;
+        driver_prop.driver_id         = new_driver_id;
+        driver_prop.driver_info       = new_driver_info;
+        driver_prop.driver_config_str = new_driver_config_str;
 
-        /* Set the driver ID & info property */
+        /* Set the driver ID, info & config. string property */
         if (H5P_set(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID & info")
     } /* end if */
@@ -1006,12 +1215,58 @@ H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
     /* Set the driver */
-    if (H5P_set_driver(plist, new_driver_id, new_driver_info) < 0)
+    if (H5P_set_driver(plist, new_driver_id, new_driver_info, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_driver() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_set_driver_by_name
+ *
+ * Purpose:     Set the file driver name (DRIVER_NAME) for a file access
+ *              property list (PLIST) and supply an optional string
+ *              containing the driver-specific properties (DRIVER_CONFIG).
+ *              The driver properties string will be copied into the
+ *              property list.
+ *
+ *              If the file driver specified by DRIVER_NAME is not
+ *              currently registered, an attempt will be made to load the
+ *              driver as a plugin.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_driver_by_name(H5P_genplist_t *plist, const char *driver_name, const char *driver_config,
+                       hbool_t app_ref)
+{
+    hid_t  new_driver_id = H5I_INVALID_HID;
+    herr_t ret_value     = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(plist);
+    assert(driver_name);
+
+    /* Register the driver */
+    if ((new_driver_id = H5FD_register_driver_by_name(driver_name, app_ref)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register VFD")
+
+    /* Set the driver */
+    if (H5P_set_driver(plist, new_driver_id, NULL, driver_config) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
+
+done:
+    if (ret_value < 0) {
+        if (new_driver_id >= 0 && H5I_dec_app_ref(new_driver_id) < 0)
+            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement count on VFD ID")
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_set_driver_by_name() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_driver_by_name
@@ -1033,9 +1288,8 @@ done:
 herr_t
 H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, const char *driver_config)
 {
-    H5P_genplist_t *plist; /* Property list pointer */
-    hid_t           new_driver_id = H5I_INVALID_HID;
-    herr_t          ret_value     = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*s", plist_id, driver_name, driver_config);
@@ -1048,20 +1302,49 @@ H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, const char *drive
     if (!*driver_name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "driver_name parameter cannot be an empty string")
 
+    /* Set the driver */
+    if (H5P_set_driver_by_name(plist, driver_name, driver_config, TRUE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_driver_by_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_set_driver_by_value
+ *
+ * Purpose:     Set the file driver value (DRIVER_VALUE) for a file access
+ *              property list (PLIST) and supply an optional string
+ *              containing the driver-specific properties (DRIVER_CONFIG).
+ *              The driver properties string will be copied into the
+ *              property list.
+ *
+ *              If the file driver specified by DRIVER_VALUE is not
+ *              currently registered, an attempt will be made to load the
+ *              driver as a plugin.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_set_driver_by_value(H5P_genplist_t *plist, H5FD_class_value_t driver_value, const char *driver_config,
+                        hbool_t app_ref)
+{
+    hid_t  new_driver_id = H5I_INVALID_HID;
+    herr_t ret_value     = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    assert(plist);
+    assert(driver_value >= 0);
+
     /* Register the driver */
-    if ((new_driver_id = H5FD_register_driver_by_name(driver_name, TRUE)) < 0)
+    if ((new_driver_id = H5FD_register_driver_by_value(driver_value, app_ref)) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register VFD")
 
-    /* Set the driver info string on the property list */
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        if (H5P_set(plist, H5F_ACS_FILE_DRV_INFO_STR_NAME, &driver_config) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info string")
-    } /* end if */
-    else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
     /* Set the driver */
-    if (H5P_set_driver(plist, new_driver_id, NULL) < 0)
+    if (H5P_set_driver(plist, new_driver_id, NULL, driver_config) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
 
 done:
@@ -1070,8 +1353,8 @@ done:
             HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement count on VFD ID")
     }
 
-    FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_driver_by_name() */
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_set_driver_by_value() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_driver_by_value
@@ -1093,9 +1376,8 @@ done:
 herr_t
 H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_value, const char *driver_config)
 {
-    H5P_genplist_t *plist; /* Property list pointer */
-    hid_t           new_driver_id = H5I_INVALID_HID;
-    herr_t          ret_value     = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iDV*s", plist_id, driver_value, driver_config);
@@ -1106,30 +1388,13 @@ H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_value, const ch
     if (driver_value < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "negative VFD value is disallowed")
 
-    /* Register the driver */
-    if ((new_driver_id = H5FD_register_driver_by_value(driver_value, TRUE)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTREGISTER, FAIL, "unable to register VFD")
-
-    /* Set the driver info string on the property list */
-    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        if (H5P_set(plist, H5F_ACS_FILE_DRV_INFO_STR_NAME, &driver_config) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info string")
-    } /* end if */
-    else
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
     /* Set the driver */
-    if (H5P_set_driver(plist, new_driver_id, NULL) < 0)
+    if (H5P_set_driver_by_value(plist, driver_value, driver_config, TRUE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
 
 done:
-    if (ret_value < 0) {
-        if (new_driver_id >= 0 && H5I_dec_app_ref(new_driver_id) < 0)
-            HDONE_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement count on VFD ID")
-    }
-
     FUNC_LEAVE_API(ret_value)
-} /* end H5Pset_driver_by_name() */
+} /* end H5Pset_driver_by_value() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P_peek_driver
@@ -1158,7 +1423,7 @@ H5P_peek_driver(H5P_genplist_t *plist)
 
     /* Get the current driver ID */
     if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID, info & configuration string */
 
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
@@ -1242,7 +1507,7 @@ H5P_peek_driver_info(H5P_genplist_t *plist)
 
     /* Get the current driver info */
     if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID, info & configuration string */
 
         if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
@@ -1295,6 +1560,42 @@ done:
 } /* end H5Pget_driver_info() */
 
 /*-------------------------------------------------------------------------
+ * Function:   H5P_peek_driver_config_str
+ *
+ * Purpose:    Returns a pointer directly to the file driver configuration
+ *             string of a file access property list.
+ *
+ * Return:     Success: Ptr to *uncopied* driver configuration string, if
+ *                      any.
+ *
+ *             Failure: NULL. NULL is also returned if the driver has not
+ *                      been configured with a driver configuration string.
+ *
+ *-------------------------------------------------------------------------
+ */
+const char *
+H5P_peek_driver_config_str(H5P_genplist_t *plist)
+{
+    const char *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Get the current driver configuration string */
+    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID, info & configuration string */
+
+        if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver configuration string")
+        ret_value = driver_prop.driver_config_str;
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, NULL, "not a file access property list")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_peek_driver_config_str() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5Pget_driver_config_str
  *
  * Purpose:     Retrieves a string representation of the configuration for
@@ -1315,9 +1616,9 @@ done:
 ssize_t
 H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size)
 {
-    H5P_genplist_t *plist;             /* Property list pointer */
-    char *          config_str = NULL;
-    ssize_t         ret_value = -1;
+    H5P_genplist_t *plist; /* Property list pointer */
+    const char *    config_str = NULL;
+    ssize_t         ret_value  = -1;
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "i*sz", fapl_id, config_buf, buf_size);
@@ -1331,10 +1632,7 @@ H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size)
         HGOTO_ERROR(H5E_ID, H5E_BADID, (-1), "can't find object for ID")
 
     /* Retrieve configuration string property */
-    if (H5P_peek(plist, H5F_ACS_FILE_DRV_INFO_STR_NAME, &config_str) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, (-1), "can't get driver configuration string property")
-
-    if (config_str) {
+    if ((config_str = H5P_peek_driver_config_str(plist))) {
         size_t config_str_len = HDstrlen(config_str);
 
         if (config_buf) {
@@ -1359,7 +1657,7 @@ done:
  *
  * Note:        This is an "in-place" copy, since this routine gets called
  *              after the top-level copy has been performed and this routine
- *        finishes the "deep" part of the copy.
+ *              finishes the "deep" part of the copy.
  *
  * Return:      Success:        Non-negative
  *              Failure:        Negative
@@ -1410,6 +1708,15 @@ H5P__file_driver_copy(void *value)
                 /* Set the driver info for the copy */
                 info->driver_info = new_pl;
             } /* end if */
+
+            /* Copy driver configuration string, if it exists */
+            if (info->driver_config_str) {
+                char *new_config_str = NULL;
+
+                if (NULL == (new_config_str = H5MM_strdup(info->driver_config_str)))
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "driver configuration string copy failed")
+                info->driver_config_str = new_config_str;
+            } /* end if */
         }     /* end if */
     }         /* end if */
 
@@ -1440,13 +1747,15 @@ H5P__file_driver_free(void *value)
     if (value) {
         H5FD_driver_prop_t *info = (H5FD_driver_prop_t *)value; /* Driver ID & info struct */
 
-        /* Copy the driver & info, if there is one */
         if (info->driver_id > 0) {
 
             /* Free the driver info, if it exists */
             if (info->driver_info)
                 if (H5FD_free_driver_info(info->driver_id, info->driver_info) < 0)
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
+
+            /* Free the driver configuration string, if it exists */
+            H5MM_xfree_const(info->driver_config_str);
 
             /* Decrement reference count for driver */
             if (H5I_dec_ref(info->driver_id) < 0)
@@ -1667,6 +1976,16 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR
             HGOTO_DONE(cmp_value);
     } /* end if */
 
+    /* Compare driver configuration strings */
+    if (info1->driver_config_str == NULL && info2->driver_config_str != NULL)
+        HGOTO_DONE(-1);
+    if (info1->driver_config_str != NULL && info2->driver_config_str == NULL)
+        HGOTO_DONE(1);
+    if (info1->driver_config_str) {
+        if (0 != (cmp_value = HDstrcmp(info1->driver_config_str, info2->driver_config_str)))
+            HGOTO_DONE(cmp_value);
+    }
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_cmp() */
@@ -1698,158 +2017,6 @@ H5P__facc_file_driver_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUS
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_close() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__facc_file_driver_info_str_set
- *
- * Purpose:     Copies a file driver info string when it's set for a
- *              property list
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__facc_file_driver_info_str_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-                                   size_t H5_ATTR_UNUSED size, void *value)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity check */
-    HDassert(value);
-
-    /* Copy the info string */
-    *(char **)value = H5MM_xstrdup(*(const char **)value);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__facc_file_driver_info_str_set() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__facc_file_driver_info_str_get
- *
- * Purpose:     Copies a file driver info string when it's retrieved from a
- *              property list
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__facc_file_driver_info_str_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-                                   size_t H5_ATTR_UNUSED size, void *value)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    /* Sanity check */
-    HDassert(value);
-
-    /* Copy the info string */
-    *(char **)value = H5MM_xstrdup(*(const char **)value);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__facc_file_driver_info_str_get() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__facc_file_driver_info_str_del
- *
- * Purpose:     Frees memory used to store the driver info string property
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__facc_file_driver_info_str_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-                                   size_t H5_ATTR_UNUSED size, void *value)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    HDassert(value);
-
-    H5MM_xfree(*(void **)value);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__facc_file_driver_info_str_del() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__facc_file_driver_info_str_copy
- *
- * Purpose:     Copy callback for the file driver info string property.
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__facc_file_driver_info_str_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    HDassert(value);
-
-    *(char **)value = H5MM_xstrdup(*(const char **)value);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__facc_file_driver_info_str_copy() */
-
-/*-------------------------------------------------------------------------
- * Function:       H5P__facc_file_driver_info_str_cmp
- *
- * Purpose:        Callback routine which is called whenever the file
- *                 driver info string property in the file access property
- *                 list is compared.
- *
- * Return:         positive if VALUE1 is greater than VALUE2, negative if
- *                 VALUE2 is greater than VALUE1 and zero if VALUE1 and
- *                 VALUE2 are equal.
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5P__facc_file_driver_info_str_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
-{
-    const char *info_str1 = *(const char *const *)_info1;
-    const char *info_str2 = *(const char *const *)_info2;
-    int         ret_value = 0;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    if (NULL == info_str1 && NULL != info_str2)
-        HGOTO_DONE(1);
-    if (NULL != info_str1 && NULL == info_str2)
-        HGOTO_DONE(-1);
-    if (NULL != info_str1 && NULL != info_str2)
-        ret_value = HDstrcmp(info_str1, info_str2);
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__facc_file_driver_info_str_cmp() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5P__facc_file_driver_info_str_close
- *
- * Purpose:     Close callback for the file driver info string property.
- *
- * Return:      Success:        Non-negative
- *              Failure:        Negative
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5P__facc_file_driver_info_str_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
-{
-    FUNC_ENTER_STATIC_NOERR
-
-    HDassert(value);
-
-    H5MM_xfree(*(void **)value);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P__facc_file_driver_info_str_close() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_family_offset

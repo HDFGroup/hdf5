@@ -8849,8 +8849,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         TEST_ERROR
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
-                                HDstrcmp(env_h5_drvr, "family") != 0);
+    single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
     if (single_file_vfd) {
         /* Make a copy of the file in memory, in order to speed up deletion testing */
 
@@ -10135,6 +10134,11 @@ main(void)
     h5_reset();
     fapl        = h5_fileaccess();
     ExpressMode = GetTestExpress();
+
+    /* For the Direct I/O driver, skip intensive tests due to poor performance */
+    if (!HDstrcmp(envval, "direct"))
+        ExpressMode = 2;
+
     if (ExpressMode > 1)
         HDprintf("***Express test mode on.  Some tests may be skipped\n");
 

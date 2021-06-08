@@ -485,11 +485,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, hbool_t *
         if (cls->value == key->vfd.u.value)
             *success = TRUE;
     } /* end else */
-#if 0
-    /* Driver is a match, but might not be a compatible version */
-    if (*success && cls->version != H5FD_VERSION)
-        *success = FALSE;
-#endif
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_check_plugin_load() */
@@ -548,8 +544,8 @@ hid_t
 H5FD_register_driver_by_name(const char *name, hbool_t app_ref)
 {
     htri_t driver_is_registered = FALSE;
-    hid_t  driver_id = H5I_INVALID_HID;
-    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t  driver_id            = H5I_INVALID_HID;
+    hid_t  ret_value            = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -602,8 +598,8 @@ hid_t
 H5FD_register_driver_by_value(H5FD_class_value_t value, hbool_t app_ref)
 {
     htri_t driver_is_registered = FALSE;
-    hid_t  driver_id = H5I_INVALID_HID;
-    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t  driver_id            = H5I_INVALID_HID;
+    hid_t  ret_value            = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -722,3 +718,81 @@ H5FD_is_driver_registered_by_value(H5FD_class_value_t driver_value, hid_t *regis
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_is_driver_registered_by_value() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_get_driver_id_by_name
+ *
+ * Purpose:     Retrieves the ID for a registered VFL driver.
+ *
+ * Return:      Positive if the VFL driver has been registered
+ *              Negative on error (if the driver is not a valid driver or
+ *                  is not registered)
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5FD_get_driver_id_by_name(const char *name, hbool_t is_api)
+{
+    H5FD_get_driver_ud_t op_data;
+    hid_t                ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+
+    /* Set up op data for iteration */
+    op_data.key.kind   = H5FD_GET_DRIVER_BY_NAME;
+    op_data.key.u.name = name;
+    op_data.found_id   = H5I_INVALID_HID;
+
+    /* Find driver with specified name */
+    if (H5I_iterate(H5I_VFL, H5FD__get_driver_cb, &op_data, FALSE) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VFL drivers")
+
+    /* Found a driver with that name */
+    if (op_data.found_id != H5I_INVALID_HID) {
+        ret_value = op_data.found_id;
+        if (H5I_inc_ref(ret_value, is_api) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFL driver")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_get_driver_id_by_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_get_driver_id_by_value
+ *
+ * Purpose:     Retrieves the ID for a registered VFL driver.
+ *
+ * Return:      Positive if the VFL driver has been registered
+ *              Negative on error (if the driver is not a valid driver or
+ *                  is not registered)
+ *
+ *-------------------------------------------------------------------------
+ */
+hid_t
+H5FD_get_driver_id_by_value(H5FD_class_value_t value, hbool_t is_api)
+{
+    H5FD_get_driver_ud_t op_data;
+    hid_t                ret_value = H5I_INVALID_HID; /* Return value */
+
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+
+    /* Set up op data for iteration */
+    op_data.key.kind    = H5FD_GET_DRIVER_BY_VALUE;
+    op_data.key.u.value = value;
+    op_data.found_id    = H5I_INVALID_HID;
+
+    /* Find driver with specified value */
+    if (H5I_iterate(H5I_VFL, H5FD__get_driver_cb, &op_data, FALSE) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADITER, H5I_INVALID_HID, "can't iterate over VFL drivers")
+
+    /* Found a driver with that value */
+    if (op_data.found_id != H5I_INVALID_HID) {
+        ret_value = op_data.found_id;
+        if (H5I_inc_ref(ret_value, is_api) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VFL driver")
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_get_driver_id_by_value() */

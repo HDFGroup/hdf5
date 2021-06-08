@@ -566,12 +566,11 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_SDATA_BLOCK_SIZE_NAME                                                                        \
     "sdata_block_size" /* Minimum "small data" allocation block size (when aggregating "small" raw data      \
                           allocations) */
-#define H5F_ACS_GARBG_COLCT_REF_NAME   "gc_ref"             /* Garbage-collect references */
-#define H5F_ACS_FILE_DRV_NAME          "vfd_info"           /* File driver ID & info */
-#define H5F_ACS_FILE_DRV_INFO_STR_NAME "vfd_info_str"       /* File driver info string */
-#define H5F_ACS_VOL_CONN_NAME          "vol_connector_info" /* VOL connector ID & info */
-#define H5F_ACS_CLOSE_DEGREE_NAME      "close_degree"       /* File close degree */
-#define H5F_ACS_FAMILY_OFFSET_NAME     "family_offset" /* Offset position in file for family file driver */
+#define H5F_ACS_GARBG_COLCT_REF_NAME "gc_ref"             /* Garbage-collect references */
+#define H5F_ACS_FILE_DRV_NAME        "vfd_info"           /* File driver ID & info */
+#define H5F_ACS_VOL_CONN_NAME        "vol_connector_info" /* VOL connector ID & info */
+#define H5F_ACS_CLOSE_DEGREE_NAME    "close_degree"       /* File close degree */
+#define H5F_ACS_FAMILY_OFFSET_NAME   "family_offset"      /* Offset position in file for family file driver */
 #define H5F_ACS_FAMILY_NEWSIZE_NAME                                                                          \
     "family_newsize" /* New member size of family driver.  (private property only used by h5repart) */
 #define H5F_ACS_FAMILY_TO_SINGLE_NAME                                                                        \

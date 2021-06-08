@@ -256,13 +256,6 @@
  */
 typedef int H5FD_class_value_t;
 
-/* A free list is a singly-linked list of address/size pairs. */
-typedef struct H5FD_free_t {
-    haddr_t             addr;
-    hsize_t             size;
-    struct H5FD_free_t *next;
-} H5FD_free_t;
-
 /* Types of allocation requests: see H5Fpublic.h  */
 typedef enum H5F_mem_t H5FD_mem_t;
 
@@ -387,7 +380,6 @@ extern "C" {
 #endif
 
 /* Function prototypes */
-
 /* Allows querying a VFD ID for features before the file is opened */
 H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/);
 

@@ -9897,7 +9897,7 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
        would report FALSE, causing problems */
     base_driver       = H5Pget_driver(fapl);
     op_data.base_fapl = (base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI ||
-                         base_driver == H5FD_MPIO || base_driver == H5FD_CORE)
+                         base_driver == H5FD_MPIO || base_driver == H5FD_CORE || base_driver == H5FD_DIRECT)
                             ? H5P_DEFAULT
                             : fapl;
     op_data.fam_size = ELINK_CB_FAM_SIZE;
@@ -10071,8 +10071,11 @@ external_reset_register(void)
     if (H5Fclose(file) < 0)
         TEST_ERROR
 
-    if (HDremove(filename) != 0)
-        TEST_ERROR
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(filename, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 
     PASSED();
     return SUCCEED;
@@ -16629,11 +16632,14 @@ link_filters(hid_t fapl, hbool_t new_format)
         /* Close file, get file size */
         if (H5Fclose(fid) < 0)
             TEST_ERROR
-        filesize_filtered = h5_get_file_size(filename, fapl);
 
-        /* Check that the file size is smaller with the filter */
-        if ((double)filesize_filtered > ((double)filesize_unfiltered * FILTER_FILESIZE_MAX_FRACTION))
-            TEST_ERROR
+        if (h5_using_default_driver(NULL)) {
+            filesize_filtered = h5_get_file_size(filename, fapl);
+
+            /* Check that the file size is smaller with the filter */
+            if ((double)filesize_filtered > ((double)filesize_unfiltered * FILTER_FILESIZE_MAX_FRACTION))
+                TEST_ERROR
+        }
 
         /* Close */
         if (H5Pclose(fcpl) < 0)
@@ -22544,6 +22550,7 @@ main(void)
     unsigned    minimize_dset_oh;
     unsigned    efc;         /* Whether to use the external file cache */
     const char *env_h5_drvr; /* File Driver value from environment */
+    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
 
     env_h5_drvr = HDgetenv("HDF5_DRIVER");
     if (env_h5_drvr == NULL)
@@ -22611,88 +22618,100 @@ main(void)
             nerrors += test_deprec(my_fapl, new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-            /* tests for external link */
-            /* Test external file cache first, so it sees the default efc setting on the fapl
-             */
-            nerrors += external_file_cache(my_fapl, new_format) < 0 ? 1 : 0;
+            /* Skip external link tests for splitter VFD, which has external link-related bugs */
+            if (HDstrcmp(env_h5_drvr, "splitter")) {
 
-            /* This test cannot run with the EFC because it assumes that an
-             * intermediate file is not held open
-             */
-            nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
+                /* tests for external link */
+                /* Test external file cache first, so it sees the default efc setting on the fapl
+                 */
+                nerrors += external_file_cache(my_fapl, new_format) < 0 ? 1 : 0;
 
-            /* This test cannot run with the EFC because the EFC cannot currently
-             * reopen a cached file with a different intent
-             */
-            nerrors += external_set_elink_acc_flags(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+                /* This test cannot run with the EFC because it assumes that an
+                 * intermediate file is not held open
+                 */
+                nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
 
-            /* Try external link tests both with and without the external file cache */
-            for (efc = FALSE; efc <= TRUE; efc++) {
-                if (efc) {
-                    if (H5Pset_elink_file_cache_size(my_fapl, 8) < 0)
-                        TEST_ERROR
-                    HDprintf("\n---Testing with external file cache---\n");
-                } /* end if */
-                else {
-                    if (H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
-                        TEST_ERROR
-                    HDprintf("\n---Testing without external file cache---\n");
-                } /* end else */
+                /* This test cannot run with the EFC because the EFC cannot currently
+                 * reopen a cached file with a different intent
+                 */
+                nerrors += external_set_elink_acc_flags(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
 
-                nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
+                /* Try external link tests both with and without the external file cache */
+                for (efc = FALSE; efc <= TRUE; efc++) {
+                    if (efc) {
+                        if (H5Pset_elink_file_cache_size(my_fapl, 8) < 0)
+                            TEST_ERROR
+                        HDprintf("\n---Testing with external file cache---\n");
+                    } /* end if */
+                    else {
+                        if (H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
+                            TEST_ERROR
+                        HDprintf("\n---Testing without external file cache---\n");
+                    } /* end else */
+
+                    nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-                nerrors += external_link_root_deprec(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_root_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-                nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_self(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_self(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-                nerrors += external_link_query_deprec(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_query_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-                nerrors += external_link_unlink_compact(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_closing(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_unlink_compact(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_closing(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-                nerrors += external_link_closing_deprec(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_closing_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-                nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
-                nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
 
-                nerrors += external_link_prefix(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_abs_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_rel_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_cwd(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_abstar(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
-                nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;
+                    if (!driver_uses_modified_filename) {
+                        nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
+                    }
+
+                    nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
+
+                    nerrors += external_link_prefix(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_abs_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_rel_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_cwd(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_abstar(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
+
+                    if (!driver_uses_modified_filename) {
+                        nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
+                    }
+
+                    nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
+                    nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;
 #ifdef H5_HAVE_WINDOW_PATH
-                nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win3(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win7(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win3(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win7(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
-                nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
-            } /* with/without external file cache */
+                    nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
+                } /* with/without external file cache */
+            }
 
             /* These tests assume that external links are a form of UD links,
              * so assume that everything that passed for external links

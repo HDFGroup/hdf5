@@ -51,7 +51,7 @@
 const char *FILENAME[] = {"sec2_file",            /*0*/
                           "core_file",            /*1*/
                           "family_file",          /*2*/
-                          "new_family_v16_",      /*3*/
+                          "new_family_v16",       /*3*/
                           "multi_file",           /*4*/
                           "direct_file",          /*5*/
                           "log_file",             /*6*/
@@ -68,7 +68,7 @@ const char *FILENAME[] = {"sec2_file",            /*0*/
 
 #define LOG_FILENAME "log_vfd_out.log"
 
-#define COMPAT_BASENAME       "family_v16_"
+#define COMPAT_BASENAME       "family_v16"
 #define MULTI_COMPAT_BASENAME "multi_file_v16"
 #define SPLITTER_DATASET_NAME "dataset"
 
@@ -3925,7 +3925,18 @@ error:
 int
 main(void)
 {
-    int nerrors = 0;
+    char *env_h5_drvr = NULL;
+    int   nerrors     = 0;
+
+    /* Don't run VFD tests when HDF5_DRIVER is set. These tests expect a
+     * specific VFD to be set and HDF5_DRIVER being set can interfere
+     * with that.
+     */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if (env_h5_drvr) {
+        HDprintf(" -- SKIPPED VFD tests because HDF5_DRIVER is set -- \n");
+        HDexit(EXIT_SUCCESS);
+    }
 
     h5_reset();
 

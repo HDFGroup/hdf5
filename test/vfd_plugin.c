@@ -280,10 +280,10 @@ error:
 static herr_t
 test_get_config_str(void)
 {
-    const char * const config_str     = "{name: sec2}";
-    ssize_t            config_str_len = 0;
-    hid_t              fapl_id        = H5I_INVALID_HID;
-    char               config_str_buf[128];
+    const char *const config_str     = "{name: sec2}";
+    ssize_t           config_str_len = 0;
+    hid_t             fapl_id        = H5I_INVALID_HID;
+    char              config_str_buf[128];
 
     TESTING("Retrieval of VFD configuration string");
 
@@ -311,6 +311,33 @@ test_get_config_str(void)
         TEST_ERROR;
 
     if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    /* Set default driver and driver configuration using environment variables */
+    if (HDsetenv("HDF5_DRIVER", "sec2", 1) < 0)
+        TEST_ERROR;
+    if (HDsetenv("HDF5_DRIVER_CONFIG", config_str, 1) < 0)
+        TEST_ERROR;
+
+    /* Close and re-open HDF5 to have it parse the environment variables */
+    if (H5close() < 0)
+        TEST_ERROR;
+    if (H5open() < 0)
+        TEST_ERROR;
+
+    /* Retrieve configuration string from default FAPL */
+    HDmemset(config_str_buf, 0, 128);
+    if ((config_str_len = H5Pget_driver_config_str(H5P_FILE_ACCESS_DEFAULT, config_str_buf, 128)) < 0)
+        TEST_ERROR;
+    if (HDstrlen(config_str) != config_str_len)
+        TEST_ERROR;
+    if (HDstrncmp(config_str_buf, config_str, 128))
+        TEST_ERROR;
+
+    /* Unset environment variables */
+    if (HDsetenv("HDF5_DRIVER", "", 1) < 0)
+        TEST_ERROR;
+    if (HDsetenv("HDF5_DRIVER_CONFIG", "", 1) < 0)
         TEST_ERROR;
 
     PASSED();

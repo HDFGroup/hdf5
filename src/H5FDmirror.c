@@ -1337,7 +1337,7 @@ H5Pset_fapl_mirror(hid_t fapl_id, H5FD_mirror_fapl_t *fa)
     if (H5FD_MIRROR_CURR_FAPL_T_VERSION != fa->version)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "unknown fapl_t version");
 
-    ret_value = H5P_set_driver(plist, H5FD_MIRROR, (const void *)fa);
+    ret_value = H5P_set_driver(plist, H5FD_MIRROR, (const void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

@@ -738,7 +738,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filter_error(const char *fname)
+test_filter_error(const char *fname, hid_t fapl)
 {
     const char *pathname = H5_get_srcdir_filename(fname); /* Corrected test file name */
     hid_t       file     = -1;
@@ -748,7 +748,7 @@ test_filter_error(const char *fname)
     HDfprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
 
     /* Open the file */
-    if ((file = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if ((file = H5Fopen(pathname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
 
     /* Open the regular dataset */
@@ -785,8 +785,14 @@ main(void)
     hid_t       fapl      = -1;
     hid_t       estack_id = -1;
     char        filename[1024];
+    const char *env_h5_drvr; /* File driver value from environment */
     const char *FUNC_main = "main";
     int         i;
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     HDfprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
 
@@ -877,7 +883,15 @@ main(void)
      * the test file was pre-generated.
      */
     h5_fixname(DATAFILE, H5P_DEFAULT, filename, sizeof filename);
-    if (test_filter_error(filename) < 0)
+    if (!h5_using_default_driver(env_h5_drvr) && HDstrcmp(env_h5_drvr, "stdio")) {
+        /* If not using the library's default VFD or the stdio VFD, force
+         * the library's default VFD here. The test file was pre-generated
+         * and can cause issues with many VFDs.
+         */
+        if (H5Pset_driver(fapl, H5_DEFAULT_VFD, NULL) < 0)
+            TEST_ERROR;
+    }
+    if (test_filter_error(filename, fapl) < 0)
         TEST_ERROR;
 
     h5_clean_files(FILENAME, fapl);

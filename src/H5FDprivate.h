@@ -81,10 +81,11 @@ typedef struct {
         }                                                                                                    \
     }
 
-/* Define structure to hold driver ID & info for FAPLs */
+/* Define structure to hold driver ID, info & configuration string for FAPLs */
 typedef struct {
-    hid_t       driver_id;   /* Driver's ID */
-    const void *driver_info; /* Driver info, for open callbacks */
+    hid_t       driver_id;         /* Driver's ID */
+    const void *driver_info;       /* Driver info, for open callbacks */
+    const char *driver_config_str; /* Driver configuration string */
 } H5FD_driver_prop_t;
 
 /* Which kind of VFD field to use for searching */
@@ -117,7 +118,9 @@ H5_DLL hid_t         H5FD_register(const void *cls, size_t size, hbool_t app_ref
 H5_DLL hid_t         H5FD_register_driver_by_name(const char *name, hbool_t app_ref);
 H5_DLL hid_t         H5FD_register_driver_by_value(H5FD_class_value_t value, hbool_t app_ref);
 H5_DLL htri_t        H5FD_is_driver_registered_by_name(const char *driver_name, hid_t *registered_id);
-H5_DLL htri_t        H5FD_is_driver_registered_by_value(H5FD_class_value_t driver_value, hid_t *registered_id);
+H5_DLL htri_t H5FD_is_driver_registered_by_value(H5FD_class_value_t driver_value, hid_t *registered_id);
+H5_DLL hid_t  H5FD_get_driver_id_by_name(const char *name, hbool_t is_api);
+H5_DLL hid_t  H5FD_get_driver_id_by_value(H5FD_class_value_t value, hbool_t is_api);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 H5_DLL herr_t  H5FD_close(H5FD_t *file);
 H5_DLL int     H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2);

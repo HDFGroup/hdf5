@@ -207,5 +207,7 @@ error:
     HDfflush(stderr);
     HDprintf("*** ERROR ***\n");
     HDprintf("THERE WAS A REAL ERROR IN t_pflush1.\n");
+    HDfflush(stdout);
+
     HD_exit(EXIT_FAILURE);
 } /* end main() */

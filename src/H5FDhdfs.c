@@ -625,7 +625,7 @@ H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
     if (FAIL == H5FD__hdfs_validate_config(fa))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid hdfs config")
 
-    ret_value = H5P_set_driver(plist, H5FD_HDFS, (void *)fa);
+    ret_value = H5P_set_driver(plist, H5FD_HDFS, (void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
