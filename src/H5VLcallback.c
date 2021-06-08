@@ -3527,7 +3527,7 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
     H5P_genplist_t *                 fapl_plist;
     H5P_genplist_t *                 fapl_plist_copy;
     hbool_t                          is_accessible = FALSE; /* Whether file is accessible */
-    ssize_t                          num_errors = 0;
+    ssize_t                          num_errors    = 0;
     herr_t                           status;
     hid_t                            connector_id = H5I_INVALID_HID;
     hid_t                            fapl_id      = H5I_INVALID_HID;

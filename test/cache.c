@@ -35888,6 +35888,11 @@ main(void)
     HDprintf("        express_test = %d\n", express_test);
     HDprintf("=========================================\n");
 
+    if (!h5_using_default_driver(NULL)) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        HDexit(EXIT_SUCCESS);
+    }
+
     if (create_entry_arrays() < 0) {
 
         HDprintf("ERROR: Unable to create entries arrays. Aborting.\n");

@@ -31,7 +31,7 @@ const char *outfile = NULL;
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *           s_opts   = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:vz:EG:LM:P:S:T:VXWY:Z:1:2:3:4:5:6:7:8:9:0:";
+static const char *s_opts = "a:b:c:d:e:f:hi:j:k:l:m:no:q:s:t:u:vz:EG:LM:P:S:T:VXWY:Z:1:2:3:4:5:6:7:8:9:0:";
 static struct h5_long_options l_opts[] = {{"alignment", require_arg, 'a'},
                                           {"block", require_arg, 'b'},
                                           {"compact", require_arg, 'c'},

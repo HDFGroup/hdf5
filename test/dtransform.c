@@ -199,6 +199,8 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             COMPARE(TYPE, array, COMPARE_DATA, 2)                                                            \
         }                                                                                                    \
                                                                                                              \
+        if (H5Dclose(dset_nn) < 0)                                                                           \
+            TEST_ERROR;                                                                                      \
         if (H5Dclose(dset) < 0)                                                                              \
             TEST_ERROR;                                                                                      \
         if (H5Sclose(dataspace) < 0)                                                                         \
