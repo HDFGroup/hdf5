@@ -32,7 +32,7 @@
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
-/* Define if `dev_t' is a scalar */
+/* Define if dev_t is a scalar */
 #cmakedefine H5_DEV_T_IS_SCALAR @H5_DEV_T_IS_SCALAR@
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
@@ -240,10 +240,10 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #cmakedefine H5_HAVE_MPE_H @H5_HAVE_MPE_H@
 
-/* Define if MPI_Comm_c2f and MPI_Comm_f2c exists */
+/* Define if MPI_Comm_c2f and MPI_Comm_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Comm @H5_HAVE_MPI_MULTI_LANG_Comm@
 
-/* Define if MPI_Info_c2f and MPI_Info_f2c exists */
+/* Define if MPI_Info_c2f and MPI_Info_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Info @H5_HAVE_MPI_MULTI_LANG_Info@
 
 /* Define to 1 if you have the <openssl/evp.h> header file. */
