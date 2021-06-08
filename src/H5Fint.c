@@ -415,14 +415,15 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         efc_size = H5F__efc_max_nfiles(f->shared->efc);
     if (H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set elink file cache size")
-    if (f->shared->pb_ptr != NULL) {
-        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &(f->shared->pb_ptr->max_size)) < 0)
+    if (f->shared->page_buf != NULL) {
+        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &(f->shared->page_buf->max_size)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set page buffer size")
-        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &(f->shared->pb_ptr->min_meta_perc)) <
-            0)
+        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME,
+                    &(f->shared->page_buf->min_meta_perc)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
                         "can't set minimum metadata fraction of page buffer")
-        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->pb_ptr->min_raw_perc)) < 0)
+        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->page_buf->min_raw_perc)) <
+            0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
                         "can't set minimum raw data fraction of page buffer")
     } /* end if */

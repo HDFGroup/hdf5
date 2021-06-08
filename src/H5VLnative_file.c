@@ -655,11 +655,11 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
         /* H5Freset_page_buffering_stats */
         case H5VL_NATIVE_FILE_RESET_PAGE_BUFFERING_STATS: {
             /* Sanity check */
-            if (NULL == f->shared->pb_ptr)
+            if (NULL == f->shared->page_buf)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
 
             /* Reset the statistics */
-            if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+            if (H5PB_reset_stats(f->shared->page_buf) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't reset stats for page buffering")
 
             break;
@@ -674,11 +674,11 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
             unsigned *bypasses  = HDva_arg(arguments, unsigned *);
 
             /* Sanity check */
-            if (NULL == f->shared->pb_ptr)
+            if (NULL == f->shared->page_buf)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page buffering not enabled on file")
 
             /* Get the statistics */
-            if (H5PB_get_stats(f->shared->pb_ptr, accesses, hits, misses, evictions, bypasses) < 0)
+            if (H5PB_get_stats(f->shared->page_buf, accesses, hits, misses, evictions, bypasses) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve stats for page buffering")
 
             break;

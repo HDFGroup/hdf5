@@ -629,7 +629,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
 
     HDassert(shared->vfd_swmr);
     HDassert(shared->vfd_swmr_writer);
-    HDassert(shared->pb_ptr);
+    HDassert(shared->page_buf);
 
     /* since we are about to flush the page buffer, force and end of
      * tick so as to avoid attempts to flush entries on the page buffer
@@ -639,7 +639,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "H5F_vfd_swmr_writer_end_of_tick() failed.")
 
-    while (shared->pb_ptr->dwl_len > 0) {
+    while (shared->page_buf->dwl_len > 0) {
 
         if (H5F__vfd_swmr_writer__wait_a_tick(f) < 0)
 
@@ -757,7 +757,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(shared);
-    HDassert(shared->pb_ptr);
+    HDassert(shared->page_buf);
     HDassert(shared->vfd_swmr_writer);
 
     if (!vfd_swmr_writer_may_increase_tick_to(shared->tick_num + 1, wait_for_reader))
@@ -996,7 +996,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(shared->pb_ptr);
+    HDassert(shared->page_buf);
     HDassert(shared->vfd_swmr);
     HDassert(!shared->vfd_swmr_writer);
     HDassert(file);
@@ -1166,7 +1166,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
             entries_removed++;
         }
         for (i = 0; i < nchanges; i++) {
-            haddr_t page_addr = (haddr_t)(change[i].pgno * shared->pb_ptr->page_size);
+            haddr_t page_addr = (haddr_t)(change[i].pgno * shared->page_buf->page_size);
             if (H5PB_remove_entry(shared, page_addr) < 0) {
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "remove page buffer entry failed");
             }

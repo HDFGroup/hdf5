@@ -353,11 +353,11 @@ open_file(char *filename, hid_t fapl, hsize_t page_size, size_t page_buffer_size
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr == NULL)
+    if (f->shared->page_buf == NULL)
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->page_size != page_size)
+    if (f->shared->page_buf->page_size != page_size)
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->max_size != page_buffer_size)
+    if (f->shared->page_buf->max_size != page_buffer_size)
         FAIL_STACK_ERROR;
 
     if ((grp_id = H5Gopen2(file_id, "GROUP", H5P_DEFAULT)) < 0)
@@ -1200,7 +1200,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
      * Get the number of pages inserted, and verify that it is the
      * expected value.
      */
-    base_page_cnt = f->shared->pb_ptr->curr_pages;
+    base_page_cnt = f->shared->page_buf->curr_pages;
     if (base_page_cnt != 2)
         TEST_ERROR;
 
@@ -1228,8 +1228,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
 
     page_count++;
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
 
     /* update elements 300 - 450, with values 300 -  - this will
@@ -1242,8 +1242,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
 
     page_count += 2;
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
 
     /* update elements 100 - 300, this will go to disk but also update
@@ -1254,8 +1254,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 100), sizeof(int) * 200, data) < 0)
         FAIL_STACK_ERROR;
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
 
     /* Update elements 225-300 - this will update an existing page in the PB */
@@ -1266,8 +1266,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 450), sizeof(int) * 150, data) < 0)
         FAIL_STACK_ERROR;
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
 
     /* Do a full page write to block 600-800 - should bypass the PB */
@@ -1277,8 +1277,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 600), sizeof(int) * 200, data) < 0)
         FAIL_STACK_ERROR;
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
 
     /* read elements 800 - 1200, this should not affect the PB, and should
@@ -1295,8 +1295,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
         }
     }
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
 
     /* read elements 1200 - 1201, this should read -1 and bring in an
@@ -1314,8 +1314,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     }
     page_count++;
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         TEST_ERROR;
 
     /* read elements 175 - 225, this should use the PB existing pages */
@@ -1332,8 +1332,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
         }
     }
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         TEST_ERROR;
 
     /* read elements 0 - 800 using the VFD.
@@ -1372,8 +1372,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     if (H5F_block_read(f, H5FD_MEM_DRAW, addr, sizeof(int) * 800, data) < 0)
         FAIL_STACK_ERROR;
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         TEST_ERROR;
 
     for (i = 0; i < 800; i++) {
@@ -1396,8 +1396,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
 
     page_count -= 2;
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         TEST_ERROR;
 
     /* read elements 0 - 1000.. this should go to disk then update the
@@ -1425,8 +1425,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
         i++;
     }
 
-    if ((f->shared->pb_ptr->curr_pages != page_count + base_page_cnt) &&
-        ((vfd_swmr_mode) && (f->shared->pb_ptr->curr_pages != base_page_cnt)))
+    if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
+        ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -1541,7 +1541,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* there should be no raw data pages in the page buffer -- verify this */
-    if (f->shared->pb_ptr->curr_rd_pages != 0)
+    if (f->shared->page_buf->curr_rd_pages != 0)
         FAIL_STACK_ERROR;
 
     /* update the first 100 elements to have values 0-99 - this will be
@@ -1557,7 +1557,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     search_addr = addr;
     if ((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_rd_pages != 1)
+    if (f->shared->page_buf->curr_rd_pages != 1)
         FAIL_STACK_ERROR;
 
     /* update elements 300 - 450, with values 300 - 449 - this will
@@ -1579,13 +1579,13 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     search_addr = addr + sizeof(int) * 400;
     if ((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_rd_pages != 2)
+    if (f->shared->page_buf->curr_rd_pages != 2)
         FAIL_STACK_ERROR;
 
     /* at this point, the page buffer entries created at file open should
      * have been evicted.
      */
-    if (f->shared->pb_ptr->curr_md_pages != 0)
+    if (f->shared->page_buf->curr_md_pages != 0)
         FAIL_STACK_ERROR;
 
     /* update elements 300-301, this will update page addr + 200 in
@@ -1605,9 +1605,9 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     search_addr = addr + sizeof(int) * 400;
     if ((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_rd_pages != 2)
+    if (f->shared->page_buf->curr_rd_pages != 2)
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_pages != 2)
+    if (f->shared->page_buf->curr_pages != 2)
         FAIL_STACK_ERROR;
 
     /* read elements 1200 - 1201, this should read -1, bring in page
@@ -1632,9 +1632,9 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     search_addr = addr + sizeof(int) * 1200;
     if ((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_rd_pages != 2)
+    if (f->shared->page_buf->curr_rd_pages != 2)
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_pages != 2)
+    if (f->shared->page_buf->curr_pages != 2)
         FAIL_STACK_ERROR;
 
     /* read elements 350 - 450, this should load page addr + 400 and move
@@ -1659,9 +1659,9 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     search_addr = addr + sizeof(int) * 400;
     if ((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_rd_pages != 2)
+    if (f->shared->page_buf->curr_rd_pages != 2)
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_pages != 2)
+    if (f->shared->page_buf->curr_pages != 2)
         FAIL_STACK_ERROR;
 
     /* update elements 400 - 1400 to value 0, this will overwrite and
@@ -1677,9 +1677,9 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
     search_addr = addr + sizeof(int) * 200;
     if ((H5PB_page_exists(f->shared, search_addr, &page_exists) < 0) || (!page_exists))
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_rd_pages != 1)
+    if (f->shared->page_buf->curr_rd_pages != 1)
         FAIL_STACK_ERROR;
-    if (f->shared->pb_ptr->curr_pages != 1)
+    if (f->shared->page_buf->curr_pages != 1)
         FAIL_STACK_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -1759,7 +1759,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     int64_t base_meta_cnt = 0;
     int     i;
     int     num_elements = 1000;
-    H5PB_t *pb_ptr;
+    H5PB_t *page_buf;
     haddr_t meta_addr = HADDR_UNDEF;
     haddr_t raw_addr  = HADDR_UNDEF;
     int *   data      = NULL;
@@ -1806,10 +1806,10 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
      */
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(f->shared->page_buf);
 
-    base_raw_cnt  = f->shared->pb_ptr->curr_rd_pages;
-    base_meta_cnt = f->shared->pb_ptr->curr_md_pages;
+    base_raw_cnt  = f->shared->page_buf->curr_rd_pages;
+    base_meta_cnt = f->shared->page_buf->curr_md_pages;
 
     if (base_raw_cnt != 0)
         TEST_ERROR;
@@ -1817,12 +1817,12 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (base_meta_cnt != 2)
         TEST_ERROR;
 
-    pb_ptr = f->shared->pb_ptr;
+    page_buf = f->shared->page_buf;
 
-    if (pb_ptr->min_md_pages != 5)
+    if (page_buf->min_md_pages != 5)
         TEST_ERROR;
 
-    if (pb_ptr->min_rd_pages != 0)
+    if (page_buf->min_rd_pages != 0)
         TEST_ERROR;
 
     if (HADDR_UNDEF == (meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, sizeof(int) * (size_t)num_elements)))
@@ -1852,10 +1852,10 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 800), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != base_meta_cnt)
+    if (f->shared->page_buf->curr_pages != base_meta_cnt)
         FAIL_STACK_ERROR;
 
-    if (pb_ptr->curr_rd_pages != 0)
+    if (page_buf->curr_rd_pages != 0)
         TEST_ERROR;
 
     /* write all meta data, this would end up in page buffer */
@@ -1874,13 +1874,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_read(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 800), sizeof(int) * 50, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (pb_ptr->curr_md_pages != 5)
+    if (page_buf->curr_md_pages != 5)
         TEST_ERROR;
 
-    if (pb_ptr->curr_rd_pages != 0)
+    if (page_buf->curr_rd_pages != 0)
         TEST_ERROR;
 
     /* write and read more raw data and make sure that they don't end up in
@@ -1901,13 +1901,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_read(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 900), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (pb_ptr->curr_md_pages != 5)
+    if (page_buf->curr_md_pages != 5)
         TEST_ERROR;
 
-    if (pb_ptr->curr_rd_pages != 0)
+    if (page_buf->curr_rd_pages != 0)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -1932,10 +1932,10 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
      */
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(f->shared->page_buf);
 
-    base_raw_cnt  = f->shared->pb_ptr->curr_rd_pages;
-    base_meta_cnt = f->shared->pb_ptr->curr_md_pages;
+    base_raw_cnt  = f->shared->page_buf->curr_rd_pages;
+    base_meta_cnt = f->shared->page_buf->curr_md_pages;
 
     if (base_raw_cnt != 0)
         TEST_ERROR;
@@ -1943,11 +1943,11 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (base_meta_cnt != 0)
         TEST_ERROR;
 
-    pb_ptr = f->shared->pb_ptr;
+    page_buf = f->shared->page_buf;
 
-    if (pb_ptr->min_md_pages != 0)
+    if (page_buf->min_md_pages != 0)
         TEST_ERROR;
-    if (pb_ptr->min_rd_pages != 5)
+    if (page_buf->min_rd_pages != 5)
         FAIL_STACK_ERROR;
 
     if (HADDR_UNDEF == (meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, sizeof(int) * (size_t)num_elements)))
@@ -1978,9 +1978,9 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 800), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 0)
+    if (f->shared->page_buf->curr_pages != 0)
         FAIL_STACK_ERROR;
-    if (pb_ptr->curr_md_pages != 0)
+    if (page_buf->curr_md_pages != 0)
         TEST_ERROR;
 
     /* write/read all raw data, this would end up in page buffer */
@@ -1999,13 +1999,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_read(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 800), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (pb_ptr->curr_rd_pages != 5)
+    if (page_buf->curr_rd_pages != 5)
         TEST_ERROR;
 
-    if (pb_ptr->curr_md_pages != 0)
+    if (page_buf->curr_md_pages != 0)
         TEST_ERROR;
 
     /* write and read more meta data and make sure that they don't end up in
@@ -2026,13 +2026,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_read(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 900), sizeof(int) * 50, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (pb_ptr->curr_rd_pages != 5)
+    if (page_buf->curr_rd_pages != 5)
         TEST_ERROR;
 
-    if (pb_ptr->curr_md_pages != 0)
+    if (page_buf->curr_md_pages != 0)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -2062,8 +2062,8 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
      * metadata entry counts.
      */
 
-    base_raw_cnt  = f->shared->pb_ptr->curr_rd_pages;
-    base_meta_cnt = f->shared->pb_ptr->curr_md_pages;
+    base_raw_cnt  = f->shared->page_buf->curr_rd_pages;
+    base_meta_cnt = f->shared->page_buf->curr_md_pages;
 
     if (base_raw_cnt != 0)
         TEST_ERROR;
@@ -2071,12 +2071,12 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (base_meta_cnt != 2)
         TEST_ERROR;
 
-    pb_ptr = f->shared->pb_ptr;
+    page_buf = f->shared->page_buf;
 
-    if (pb_ptr->min_md_pages != 2)
+    if (page_buf->min_md_pages != 2)
         TEST_ERROR;
 
-    if (pb_ptr->min_rd_pages != 2)
+    if (page_buf->min_rd_pages != 2)
         TEST_ERROR;
 
     if (HADDR_UNDEF == (meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, sizeof(int) * (size_t)num_elements)))
@@ -2114,10 +2114,10 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 800), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 5 - base_meta_cnt)
+    if (f->shared->page_buf->curr_rd_pages != 5 - base_meta_cnt)
         TEST_ERROR;
 
     /* add 3 meta entries evicting 1 raw entry */
@@ -2130,13 +2130,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 400), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 3)
+    if (f->shared->page_buf->curr_md_pages != 3)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 2)
+    if (f->shared->page_buf->curr_rd_pages != 2)
         TEST_ERROR;
 
     /* adding more meta entires should replace meta entries since raw data
@@ -2148,10 +2148,10 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 800), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 3)
+    if (f->shared->page_buf->curr_md_pages != 3)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 2)
+    if (f->shared->page_buf->curr_rd_pages != 2)
         TEST_ERROR;
 
     /* bring existing raw entires up the LRU */
@@ -2164,10 +2164,10 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_read(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 350), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 2)
+    if (f->shared->page_buf->curr_md_pages != 2)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 3)
+    if (f->shared->page_buf->curr_rd_pages != 3)
         TEST_ERROR;
 
     /* read a metadata entry to force the flush of the metadata entries
@@ -2187,10 +2187,10 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_read(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 550), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 2)
+    if (f->shared->page_buf->curr_md_pages != 2)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 3)
+    if (f->shared->page_buf->curr_rd_pages != 3)
         TEST_ERROR;
 
     /* adding 2 meta entries should replace 2 entires at the bottom
@@ -2202,10 +2202,10 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_read(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 242), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 2)
+    if (f->shared->page_buf->curr_md_pages != 2)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 3)
+    if (f->shared->page_buf->curr_rd_pages != 3)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -2225,11 +2225,11 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
 
-    pb_ptr = f->shared->pb_ptr;
+    page_buf = f->shared->page_buf;
 
-    if (pb_ptr->min_md_pages != 1)
+    if (page_buf->min_md_pages != 1)
         TEST_ERROR;
-    if (pb_ptr->min_rd_pages != 0)
+    if (page_buf->min_rd_pages != 0)
         TEST_ERROR;
 
     if (HADDR_UNDEF == (meta_addr = H5MF_alloc(f, H5FD_MEM_SUPER, sizeof(int) * (size_t)num_elements)))
@@ -2267,13 +2267,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 800), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 1)
+    if (f->shared->page_buf->curr_md_pages != 1)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 4)
+    if (f->shared->page_buf->curr_rd_pages != 4)
         TEST_ERROR;
 
     /* add 2 meta entries evicting 2 raw entries */
@@ -2283,13 +2283,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 200), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 3)
+    if (f->shared->page_buf->curr_md_pages != 3)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 2)
+    if (f->shared->page_buf->curr_rd_pages != 2)
         TEST_ERROR;
 
     /* bring the rest of the raw entries up the LRU */
@@ -2306,13 +2306,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 100), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 1)
+    if (f->shared->page_buf->curr_md_pages != 1)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 4)
+    if (f->shared->page_buf->curr_rd_pages != 4)
         TEST_ERROR;
 
     /* write one more raw entry which should replace another raw entry
@@ -2321,13 +2321,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_DRAW, raw_addr + (sizeof(int) * 300), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 1)
+    if (f->shared->page_buf->curr_md_pages != 1)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 4)
+    if (f->shared->page_buf->curr_rd_pages != 4)
         TEST_ERROR;
 
     /* write a metadata entry that should replace the metadata entry
@@ -2336,13 +2336,13 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5F_block_write(f, H5FD_MEM_SUPER, meta_addr + (sizeof(int) * 500), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_pages != 5)
+    if (f->shared->page_buf->curr_pages != 5)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->curr_md_pages != 1)
+    if (f->shared->page_buf->curr_md_pages != 1)
         TEST_ERROR;
 
-    if (f->shared->pb_ptr->curr_rd_pages != 4)
+    if (f->shared->page_buf->curr_rd_pages != 4)
         TEST_ERROR;
 
     if (H5Fclose(file_id) < 0)
@@ -2465,10 +2465,10 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
      */
     HDassert(f);
     HDassert(f->shared);
-    HDassert(f->shared->pb_ptr);
+    HDassert(f->shared->page_buf);
 
-    base_raw_cnt  = f->shared->pb_ptr->curr_rd_pages;
-    base_meta_cnt = f->shared->pb_ptr->curr_md_pages;
+    base_raw_cnt  = f->shared->page_buf->curr_rd_pages;
+    base_meta_cnt = f->shared->page_buf->curr_md_pages;
 
     if (base_raw_cnt != 0)
         TEST_ERROR;
@@ -2575,47 +2575,48 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     /* was 9, 16, 0 -- review this */
-    if ((f->shared->pb_ptr->accesses[0] != 10) || (f->shared->pb_ptr->accesses[1] != 16) ||
-        (f->shared->pb_ptr->accesses[2] != 0)) {
+    if ((f->shared->page_buf->accesses[0] != 10) || (f->shared->page_buf->accesses[1] != 16) ||
+        (f->shared->page_buf->accesses[2] != 0)) {
 
-        HDfprintf(stderr, "accesses[] = {%d, %d, %d}. {10, 16, 0} expected\n", f->shared->pb_ptr->accesses[0],
-                  f->shared->pb_ptr->accesses[1], f->shared->pb_ptr->accesses[2]);
+        HDfprintf(stderr, "accesses[] = {%d, %d, %d}. {10, 16, 0} expected\n",
+                  f->shared->page_buf->accesses[0], f->shared->page_buf->accesses[1],
+                  f->shared->page_buf->accesses[2]);
         TEST_ERROR;
     }
 
     /* was 2, 1, 1 -- review this */
-    if ((f->shared->pb_ptr->bypasses[0] != 0) || (f->shared->pb_ptr->bypasses[1] != 1) ||
-        (f->shared->pb_ptr->bypasses[2] != 1)) {
+    if ((f->shared->page_buf->bypasses[0] != 0) || (f->shared->page_buf->bypasses[1] != 1) ||
+        (f->shared->page_buf->bypasses[2] != 1)) {
 
-        HDfprintf(stderr, "bypasses[] = {%d, %d, %d}. {0, 1, 1} expected\n", f->shared->pb_ptr->bypasses[0],
-                  f->shared->pb_ptr->bypasses[1], f->shared->pb_ptr->bypasses[2]);
+        HDfprintf(stderr, "bypasses[] = {%d, %d, %d}. {0, 1, 1} expected\n", f->shared->page_buf->bypasses[0],
+                  f->shared->page_buf->bypasses[1], f->shared->page_buf->bypasses[2]);
         TEST_ERROR;
     }
 
-    if ((f->shared->pb_ptr->hits[0] != 0) || (f->shared->pb_ptr->hits[1] != 4) ||
-        (f->shared->pb_ptr->hits[2] != 0)) {
+    if ((f->shared->page_buf->hits[0] != 0) || (f->shared->page_buf->hits[1] != 4) ||
+        (f->shared->page_buf->hits[2] != 0)) {
 
-        HDfprintf(stderr, "hits[] = {%d, %d, %d}. {0, 4, 0} expected\n", f->shared->pb_ptr->hits[0],
-                  f->shared->pb_ptr->hits[1], f->shared->pb_ptr->hits[2]);
+        HDfprintf(stderr, "hits[] = {%d, %d, %d}. {0, 4, 0} expected\n", f->shared->page_buf->hits[0],
+                  f->shared->page_buf->hits[1], f->shared->page_buf->hits[2]);
         TEST_ERROR;
     }
 
     /* was 9, 16. 0 -- review this */
-    if ((f->shared->pb_ptr->misses[0] != 10) || (f->shared->pb_ptr->misses[1] != 16) ||
-        (f->shared->pb_ptr->misses[2] != 0)) {
+    if ((f->shared->page_buf->misses[0] != 10) || (f->shared->page_buf->misses[1] != 16) ||
+        (f->shared->page_buf->misses[2] != 0)) {
 
-        HDfprintf(stderr, "misses[] = {%d, %d, %d}. {10, 16, 0} expected\n", f->shared->pb_ptr->misses[0],
-                  f->shared->pb_ptr->misses[1], f->shared->pb_ptr->misses[2]);
+        HDfprintf(stderr, "misses[] = {%d, %d, %d}. {10, 16, 0} expected\n", f->shared->page_buf->misses[0],
+                  f->shared->page_buf->misses[1], f->shared->page_buf->misses[2]);
         TEST_ERROR;
     }
 
     /* was 7, 9, 0 -- review this */
-    if ((f->shared->pb_ptr->evictions[0] != 9) || (f->shared->pb_ptr->evictions[1] != 9) ||
-        (f->shared->pb_ptr->evictions[2] != 0)) {
+    if ((f->shared->page_buf->evictions[0] != 9) || (f->shared->page_buf->evictions[1] != 9) ||
+        (f->shared->page_buf->evictions[2] != 0)) {
 
         HDfprintf(stderr, "evictions[] = {%d, %d, %d}. {%d, %d, 0} expected\n",
-                  f->shared->pb_ptr->evictions[0], f->shared->pb_ptr->evictions[1],
-                  f->shared->pb_ptr->evictions[2], 7, 9);
+                  f->shared->page_buf->evictions[0], f->shared->page_buf->evictions[1],
+                  f->shared->page_buf->evictions[2], 7, 9);
         TEST_ERROR;
     }
 
@@ -3264,7 +3265,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
      * Get the number of pages inserted, and verify that it is the
      * expected value.
      */
-    base_page_cnt = f->shared->pb_ptr->curr_pages;
+    base_page_cnt = f->shared->page_buf->curr_pages;
     if (base_page_cnt != 1)
         TEST_ERROR;
 
@@ -3355,7 +3356,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 1;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
@@ -3389,13 +3390,14 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 0) || (f->shared->pb_ptr->md_write_splits != 0))
+    if ((f->shared->page_buf->md_read_splits != 0) || (f->shared->page_buf->md_write_splits != 0))
         TEST_ERROR;
 
-    if ((f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 4) ||
-        (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 3) || (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 1) ||
-        (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 1) ||
-        (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 1))
+    if ((f->shared->page_buf->accesses[H5PB__STATS_MD] != 4) ||
+        (f->shared->page_buf->hits[H5PB__STATS_MD] != 3) ||
+        (f->shared->page_buf->misses[H5PB__STATS_MD] != 1) ||
+        (f->shared->page_buf->loads[H5PB__STATS_MD] != 1) ||
+        (f->shared->page_buf->insertions[H5PB__STATS_MD] != 1))
         TEST_ERROR;
 
     /* 2) splittable md entry that is page aligned and exactly two
@@ -3430,7 +3432,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 3;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
@@ -3464,25 +3466,25 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 0) || (f->shared->pb_ptr->md_write_splits != 0))
+    if ((f->shared->page_buf->md_read_splits != 0) || (f->shared->page_buf->md_write_splits != 0))
         TEST_ERROR;
 
     if (vfd_swmr_mode) {
-        if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MPMDE] != 4) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MPMDE] != 3) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MPMDE] != 1) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MPMDE] != 1))
+        if ((f->shared->page_buf->bypasses[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MPMDE] != 4) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MPMDE] != 3) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MPMDE] != 1) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MPMDE] != 1))
             TEST_ERROR;
     }
     else {
-        if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MPMDE] != 4) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MPMDE] != 2) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MPMDE] != 0))
+        if ((f->shared->page_buf->bypasses[H5PB__STATS_MPMDE] != 4) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MPMDE] != 2) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MPMDE] != 0))
             TEST_ERROR;
     }
 
@@ -3506,7 +3508,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 5;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
@@ -3540,14 +3542,15 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 2) || (f->shared->pb_ptr->md_write_splits != 2))
+    if ((f->shared->page_buf->md_read_splits != 2) || (f->shared->page_buf->md_write_splits != 2))
         TEST_ERROR;
 
-    if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MD] != 0) ||
-        (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 8) ||
-        (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 6) || (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 2) ||
-        (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 2) ||
-        (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 2))
+    if ((f->shared->page_buf->bypasses[H5PB__STATS_MD] != 0) ||
+        (f->shared->page_buf->accesses[H5PB__STATS_MD] != 8) ||
+        (f->shared->page_buf->hits[H5PB__STATS_MD] != 6) ||
+        (f->shared->page_buf->misses[H5PB__STATS_MD] != 2) ||
+        (f->shared->page_buf->loads[H5PB__STATS_MD] != 2) ||
+        (f->shared->page_buf->insertions[H5PB__STATS_MD] != 2))
         TEST_ERROR;
 
     /* 4) splittable md entry that is exactly one page and one byte
@@ -3572,19 +3575,19 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 7;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->md_write_splits != 1)
+    if (f->shared->page_buf->md_write_splits != 1)
         TEST_ERROR;
 
     if (H5F_block_read(f, H5FD_MEM_SUPER, start_addr, test_len, read_buf) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->md_read_splits != 1)
+    if (f->shared->page_buf->md_read_splits != 1)
         TEST_ERROR;
 
     for (i = 0; i < (int)test_len; i++) {
@@ -3612,14 +3615,15 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 2) || (f->shared->pb_ptr->md_write_splits != 2))
+    if ((f->shared->page_buf->md_read_splits != 2) || (f->shared->page_buf->md_write_splits != 2))
         TEST_ERROR;
 
-    if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MD] != 0) ||
-        (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 8) ||
-        (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 6) || (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 2) ||
-        (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 2) ||
-        (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 2))
+    if ((f->shared->page_buf->bypasses[H5PB__STATS_MD] != 0) ||
+        (f->shared->page_buf->accesses[H5PB__STATS_MD] != 8) ||
+        (f->shared->page_buf->hits[H5PB__STATS_MD] != 6) ||
+        (f->shared->page_buf->misses[H5PB__STATS_MD] != 2) ||
+        (f->shared->page_buf->loads[H5PB__STATS_MD] != 2) ||
+        (f->shared->page_buf->insertions[H5PB__STATS_MD] != 2))
         TEST_ERROR;
 
     /* 5) splittable md entry that is exactly one page and two bytes
@@ -3643,7 +3647,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 9;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
@@ -3677,14 +3681,15 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 2) || (f->shared->pb_ptr->md_write_splits != 2))
+    if ((f->shared->page_buf->md_read_splits != 2) || (f->shared->page_buf->md_write_splits != 2))
         TEST_ERROR;
 
-    if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MD] != 0) ||
-        (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 12) ||
-        (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 9) || (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 3) ||
-        (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 3) ||
-        (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 3))
+    if ((f->shared->page_buf->bypasses[H5PB__STATS_MD] != 0) ||
+        (f->shared->page_buf->accesses[H5PB__STATS_MD] != 12) ||
+        (f->shared->page_buf->hits[H5PB__STATS_MD] != 9) ||
+        (f->shared->page_buf->misses[H5PB__STATS_MD] != 3) ||
+        (f->shared->page_buf->loads[H5PB__STATS_MD] != 3) ||
+        (f->shared->page_buf->insertions[H5PB__STATS_MD] != 3))
         TEST_ERROR;
 
     /* 6) splittable md entry that is two bytes long, and starts one
@@ -3708,7 +3713,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 11;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
@@ -3742,14 +3747,15 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 2) || (f->shared->pb_ptr->md_write_splits != 2))
+    if ((f->shared->page_buf->md_read_splits != 2) || (f->shared->page_buf->md_write_splits != 2))
         TEST_ERROR;
 
-    if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MD] != 0) ||
-        (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 8) ||
-        (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 6) || (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 2) ||
-        (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 2) ||
-        (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 2))
+    if ((f->shared->page_buf->bypasses[H5PB__STATS_MD] != 0) ||
+        (f->shared->page_buf->accesses[H5PB__STATS_MD] != 8) ||
+        (f->shared->page_buf->hits[H5PB__STATS_MD] != 6) ||
+        (f->shared->page_buf->misses[H5PB__STATS_MD] != 2) ||
+        (f->shared->page_buf->loads[H5PB__STATS_MD] != 2) ||
+        (f->shared->page_buf->insertions[H5PB__STATS_MD] != 2))
         TEST_ERROR;
 
     /* 7) splittable md entry that is page aligned and is exactly two
@@ -3791,7 +3797,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 13;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
@@ -3825,31 +3831,31 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 2) || (f->shared->pb_ptr->md_write_splits != 2))
+    if ((f->shared->page_buf->md_read_splits != 2) || (f->shared->page_buf->md_write_splits != 2))
         TEST_ERROR;
 
     if (vfd_swmr_mode) {
-        if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MPMDE] != 4) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 4) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MPMDE] != 3) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 3) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MPMDE] != 1) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 1) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 1) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MPMDE] != 1) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 1))
+        if ((f->shared->page_buf->bypasses[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MPMDE] != 4) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MD] != 4) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MPMDE] != 3) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MD] != 3) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MPMDE] != 1) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MD] != 1) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MD] != 1) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MPMDE] != 1) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MD] != 1))
             TEST_ERROR;
     }
     else {
-        if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MPMDE] != 4) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 4) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 3) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MPMDE] != 2) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 1) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 1) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 1))
+        if ((f->shared->page_buf->bypasses[H5PB__STATS_MPMDE] != 4) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MD] != 4) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MD] != 3) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MPMDE] != 2) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MD] != 1) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MD] != 1) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MD] != 1))
             TEST_ERROR;
     }
 
@@ -3893,19 +3899,19 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 15;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->md_write_splits != 1)
+    if (f->shared->page_buf->md_write_splits != 1)
         TEST_ERROR;
 
     if (H5F_block_read(f, H5FD_MEM_SUPER, start_addr, test_len, read_buf) < 0)
         FAIL_STACK_ERROR;
 
-    if (f->shared->pb_ptr->md_read_splits != 1)
+    if (f->shared->page_buf->md_read_splits != 1)
         TEST_ERROR;
 
     for (i = 0; i < (int)test_len; i++) {
@@ -3933,31 +3939,31 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 2) || (f->shared->pb_ptr->md_write_splits != 2))
+    if ((f->shared->page_buf->md_read_splits != 2) || (f->shared->page_buf->md_write_splits != 2))
         TEST_ERROR;
 
     if (vfd_swmr_mode) {
-        if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MPMDE] != 4) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 4) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MPMDE] != 3) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 3) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MPMDE] != 1) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 1) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 1) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MPMDE] != 1) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 1))
+        if ((f->shared->page_buf->bypasses[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MPMDE] != 4) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MD] != 4) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MPMDE] != 3) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MD] != 3) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MPMDE] != 1) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MD] != 1) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MD] != 1) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MPMDE] != 1) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MD] != 1))
             TEST_ERROR;
     }
     else {
-        if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MPMDE] != 4) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 4) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 3) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MPMDE] != 2) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 1) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 1) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 1))
+        if ((f->shared->page_buf->bypasses[H5PB__STATS_MPMDE] != 4) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MD] != 4) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MD] != 3) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MPMDE] != 2) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MD] != 1) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MD] != 1) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MD] != 1))
             TEST_ERROR;
     }
 
@@ -3998,7 +4004,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     for (i = 0; i < (int)test_len; i++)
         write_buf[i] = 17;
 
-    if (H5PB_reset_stats(f->shared->pb_ptr) < 0)
+    if (H5PB_reset_stats(f->shared->page_buf) < 0)
         FAIL_STACK_ERROR;
 
     if (H5F_block_write(f, H5FD_MEM_SUPER, start_addr, test_len, write_buf) < 0)
@@ -4032,31 +4038,31 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
         }
     }
 
-    if ((f->shared->pb_ptr->md_read_splits != 2) || (f->shared->pb_ptr->md_write_splits != 2))
+    if ((f->shared->page_buf->md_read_splits != 2) || (f->shared->page_buf->md_write_splits != 2))
         TEST_ERROR;
 
     if (vfd_swmr_mode) {
-        if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MPMDE] != 4) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 8) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MPMDE] != 3) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 6) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MPMDE] != 1) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 2) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MPMDE] != 0) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 2) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MPMDE] != 1) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 2))
+        if ((f->shared->page_buf->bypasses[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MPMDE] != 4) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MD] != 8) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MPMDE] != 3) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MD] != 6) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MPMDE] != 1) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MD] != 2) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MPMDE] != 0) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MD] != 2) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MPMDE] != 1) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MD] != 2))
             TEST_ERROR;
     }
     else {
-        if ((f->shared->pb_ptr->bypasses[H5PB__STATS_MPMDE] != 4) ||
-            (f->shared->pb_ptr->accesses[H5PB__STATS_MD] != 8) ||
-            (f->shared->pb_ptr->hits[H5PB__STATS_MD] != 6) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MPMDE] != 2) ||
-            (f->shared->pb_ptr->misses[H5PB__STATS_MD] != 2) ||
-            (f->shared->pb_ptr->loads[H5PB__STATS_MD] != 2) ||
-            (f->shared->pb_ptr->insertions[H5PB__STATS_MD] != 2))
+        if ((f->shared->page_buf->bypasses[H5PB__STATS_MPMDE] != 4) ||
+            (f->shared->page_buf->accesses[H5PB__STATS_MD] != 8) ||
+            (f->shared->page_buf->hits[H5PB__STATS_MD] != 6) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MPMDE] != 2) ||
+            (f->shared->page_buf->misses[H5PB__STATS_MD] != 2) ||
+            (f->shared->page_buf->loads[H5PB__STATS_MD] != 2) ||
+            (f->shared->page_buf->insertions[H5PB__STATS_MD] != 2))
             TEST_ERROR;
     }
 
