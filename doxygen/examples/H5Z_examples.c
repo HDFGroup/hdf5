@@ -91,8 +91,7 @@ fail_avail:;
     //! <!-- [update] -->
     {
         // N/A
-    }
-    //! <!-- [update] -->
+    } //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {

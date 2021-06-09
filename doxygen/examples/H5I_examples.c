@@ -27,7 +27,7 @@ main(void)
         printf("%d\n", H5Iget_type(dcpl));
 
         H5Pclose(dcpl);
-    fail_dcpl:;
+fail_dcpl:;
     }
     //! <!-- [create] -->
 
@@ -50,7 +50,7 @@ main(void)
         assert(H5Iget_file_id(dcpl) == H5I_INVALID_HID);
 
         H5Pclose(dcpl);
-    fail_dcpl:;
+fail_dcpl:;
     }
     //! <!-- [read] -->
 
@@ -58,7 +58,7 @@ main(void)
     {
         __label__ fail_rc, fail_dcpl;
         hid_t dcpl;
-        int rc;
+        int   rc;
 
         // create an ID of a pre-defined ID type
         if ((dcpl = H5Pcreate(H5P_DATASET_XFER)) == H5I_INVALID_HID) {
@@ -80,9 +80,9 @@ main(void)
         }
         printf("Reference count: %d\n", rc);
 
-    fail_rc:
+fail_rc:
         H5Pclose(dcpl);
-    fail_dcpl:;
+fail_dcpl:;
     }
     //! <!-- [update] -->
 
@@ -90,7 +90,7 @@ main(void)
     {
         __label__ fail_dcpl;
         hid_t dcpl;
-        int rc;
+        int   rc;
 
         // create an ID of a pre-defined ID type
         if ((dcpl = H5Pcreate(H5P_DATASET_XFER)) == H5I_INVALID_HID) {
@@ -112,9 +112,9 @@ main(void)
         // the associated item, and calling H5Pclose would create an error
         goto fail_dcpl;
 
-    fail_rc:
+fail_rc:
         H5Pclose(dcpl);
-    fail_dcpl:;
+fail_dcpl:;
     }
     //! <!-- [delete] -->
 
@@ -129,18 +129,18 @@ main(void)
     {
         __label__ fail_id, fail_obj, fail_register;
         H5I_type_t type;
-        int* obj;
-        hid_t obj_id;
+        int *      obj;
+        hid_t      obj_id;
 
         // register a new ID type
-        if((type = H5Iregister_type(128, 1024, &free_func)) < 0) {
+        if ((type = H5Iregister_type(128, 1024, &free_func)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_register;
         }
         printf("New identifier type ID: %d\n", type);
 
         // create a new object
-        if ((obj = H5allocate_memory(10*sizeof(int), 0)) == NULL) {
+        if ((obj = H5allocate_memory(10 * sizeof(int), 0)) == NULL) {
             ret_val = EXIT_FAILURE;
             goto fail_obj;
         }
@@ -152,11 +152,11 @@ main(void)
         }
         printf("New object identifier: %ld\n", obj_id);
 
-    fail_id:
+fail_id:
         H5Iclear_type(type, 1);
-    fail_obj:
+fail_obj:
         H5Idestroy_type(type);
-    fail_register:;
+fail_register:;
     }
     //! <!-- [create_ud] -->
 
@@ -164,10 +164,10 @@ main(void)
     {
         __label__ fail_query, fail_register;
         H5I_type_t type;
-        hsize_t count;
+        hsize_t    count;
 
         // register a new ID type
-        if((type = H5Iregister_type(128, 1024, NULL)) < 0) {
+        if ((type = H5Iregister_type(128, 1024, NULL)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_register;
         }
@@ -180,9 +180,9 @@ main(void)
         }
         printf("%llu FOO identifiers in use\n", count);
 
-    fail_query:
+fail_query:
         H5Idestroy_type(type);
-    fail_register:;
+fail_register:;
     }
     //! <!-- [read_ud] -->
 
@@ -190,11 +190,11 @@ main(void)
     {
         __label__ fail_id, fail_register;
         H5I_type_t type;
-        int obj = 42;
-        hid_t obj_id;
+        int        obj = 42;
+        hid_t      obj_id;
 
         // register a new ID type
-        if((type = H5Iregister_type(128, 1024, NULL)) < 0) {
+        if ((type = H5Iregister_type(128, 1024, NULL)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_register;
         }
@@ -212,9 +212,9 @@ main(void)
 
         // force the deletion of all IDs regardless of reference count
         H5Iclear_type(type, 1);
-    fail_id:
+fail_id:
         H5Idestroy_type(type);
-    fail_register:;
+fail_register:;
     }
     //! <!-- [update_ud] -->
 
@@ -224,7 +224,7 @@ main(void)
         H5I_type_t type;
 
         // register a new ID type
-        if((type = H5Iregister_type(128, 1024, NULL)) < 0) {
+        if ((type = H5Iregister_type(128, 1024, NULL)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_register;
         }
@@ -234,7 +234,7 @@ main(void)
         // the type to be destroyed
         assert(H5Idec_type_ref(type) == 0);
 
-    fail_register:;
+fail_register:;
     }
     //! <!-- [delete_ud] -->
 
