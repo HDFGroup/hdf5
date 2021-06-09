@@ -31,15 +31,14 @@
 
 /**\defgroup H5I H5I
  *
- * Use the functions in this module to manage HDF5 identifiers and identifier
+ * Use the functions in this module to manage identifiers defined by the HDF5
+ * library. See \ref H5IUD for user-defined identifiers and identifier
  * types.
  *
  * HDF5 identifiers are usually created as a "side-effect" of creating HDF5
  * entities such as groups, datasets, attributes, or property lists.
- * Developers may find it convenient to define their own identifier types
- * for application objects of interest.
  *
- * Notice that identifiers (of type \ref hid_t) are run-time auxiliaries and
+ * \note Identifiers (of type \ref hid_t) are run-time auxiliaries and
  * not persisted in the file.
  *
  * <table>
@@ -58,6 +57,33 @@
  *   </td>
  *   <td>
  *   \snippet H5I_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
+ * \defgroup H5IUD User-defined ID Types
+ * \ingroup H5I
+ *
+ * The \ref H5I module contains function to define new types of identifiers.
+ * IDs of type \ref hid_t can then be associated with the new identifier types and
+ * user objects.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5I_examples.c create_ud
+ *   </td>
+ *   <td>
+ *   \snippet H5I_examples.c read_ud
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5I_examples.c update_ud
+ *   </td>
+ *   <td>
+ *   \snippet H5I_examples.c delete_ud
  *   </td>
  * </tr>
  * </table>

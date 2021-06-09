@@ -90,8 +90,9 @@ fail_avail:;
 
     //! <!-- [update] -->
     {
-        // experts only!
-    } //! <!-- [update] -->
+        // N/A
+    }
+    //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {

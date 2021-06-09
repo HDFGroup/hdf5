@@ -872,6 +872,7 @@ FILE_PATTERNS          = H5*public.h \
                          H5VLconnector.h \
                          H5VLconnector_passthru.h \
                          H5VLnative.h \
+                         H5Zdevelop.h \
                          H5version.h \
                          *.dox
 
