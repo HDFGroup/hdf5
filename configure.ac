@@ -776,20 +776,6 @@ if test "X$HDF_CXX" = "Xyes"; then
   ## Change to the C++ language
   AC_LANG_PUSH(C++)
 
-  ## Checking if C++ needs old style header files in includes
-  PAC_PROG_CXX_HEADERS
-
-  ## Checking if C++ can handle namespaces
-  PAC_PROG_CXX_NAMESPACE
-
-  ## if C++ can handle static cast
-  PAC_PROG_CXX_STATIC_CAST
-
-  ## Checking if C++ has offsetof extension,
-  ## note: this test has to be the last of the C++ tests because it sets a definition
-  ## which would be used in the other tests, causing them to fail.
-  PAC_PROG_CXX_OFFSETOF
-
 else
   AC_MSG_RESULT([no])
   CXX="no"
@@ -1268,15 +1254,15 @@ esac
 ## Windows
 case "`uname`" in
   CYGWIN*)
-    AC_CHECK_HEADERS([io.h sys/timeb.h])
+    AC_CHECK_HEADERS([sys/timeb.h])
     UNAME_CYGWIN="yes"
     ;;
   MINGW*)
-    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
+    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     AC_HAVE_LIBRARY([ws2_32])
     ;;
   *)
-    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
+    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     ;;
 esac
 
@@ -1367,16 +1353,15 @@ CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
-## Posix.1g types (C9x)
+## Write the confdefs.h header for checking sizes
 cat >>confdefs.h <<\EOF
-#include <sys/types.h>
-EOF
-
-if test "X$C9x" = "Xyes"; then
-  cat >>confdefs.h <<\EOF
+#include <stdbool.h>
 #include <stdint.h>
+#ifdef HAVE_UNISTD_H
+#include <sys/types.h>
+#endif
+#include <time.h>
 EOF
-fi
 
 AC_CHECK_SIZEOF(        [int8_t])
 AC_CHECK_SIZEOF(       [uint8_t])
@@ -1406,30 +1391,12 @@ AC_CHECK_SIZEOF([uint_least64_t])
 AC_CHECK_SIZEOF(  [int_fast64_t])
 AC_CHECK_SIZEOF( [uint_fast64_t])
 
+AC_CHECK_SIZEOF([bool])
+AC_CHECK_SIZEOF([off_t])
+AC_CHECK_SIZEOF([ptrdiff_t])
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([ssize_t])
-AC_CHECK_SIZEOF([ptrdiff_t])
-
-cat >>confdefs.h <<\EOF
-#include <sys/types.h> /*for off_t definition*/
-EOF
-AC_CHECK_SIZEOF([off_t])
-
-if test "X$C9x" = "Xyes"; then
-  cat >>confdefs.h <<\EOF
-#include <stdbool.h>
-EOF
-AC_CHECK_SIZEOF([bool])
-fi
-
-AC_CHECK_SIZEOF(time_t, [], [
-#ifdef HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-#ifdef HAVE_TIME_H
-#include <time.h>
-#endif
-])
+AC_CHECK_SIZEOF([time_t])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE

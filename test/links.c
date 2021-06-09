@@ -3507,6 +3507,7 @@ done:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
             case H5I_SPACE_SEL_ITER:
+            case H5I_EVENTSET:
             case H5I_NTYPES:
             default:
                 return FAIL;
@@ -3597,6 +3598,7 @@ done:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
             case H5I_SPACE_SEL_ITER:
+            case H5I_EVENTSET:
             case H5I_NTYPES:
             default:
                 return FAIL;
@@ -13785,6 +13787,7 @@ done:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
             case H5I_SPACE_SEL_ITER:
+            case H5I_EVENTSET:
             case H5I_NTYPES:
             default:
                 return FAIL;
@@ -13876,6 +13879,7 @@ done:
             case H5I_ERROR_MSG:
             case H5I_ERROR_STACK:
             case H5I_SPACE_SEL_ITER:
+            case H5I_EVENTSET:
             case H5I_NTYPES:
             default:
                 return FAIL;
@@ -16683,7 +16687,7 @@ obj_exists(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Hard links */
-    /* Verify that H5Oexists_by_name() fails for non-existent link in root group */
+    /* Verify that H5Oexists_by_name() returns false for non-existent link in root group */
     H5E_BEGIN_TRY
     {
         status = H5Oexists_by_name(fid, "foo", H5P_DEFAULT);
@@ -16702,7 +16706,7 @@ obj_exists(hid_t fapl, hbool_t new_format)
     if (TRUE != H5Oexists_by_name(fid, "group", H5P_DEFAULT))
         TEST_ERROR
 
-    /* Verify that H5Oexists_by_name() fails for non-existent link in non-root group */
+    /* Verify that H5Oexists_by_name() returns false for non-existent object in non-root group */
     H5E_BEGIN_TRY
     {
         status = H5Oexists_by_name(fid, "group/foo", H5P_DEFAULT);

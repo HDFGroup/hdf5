@@ -66,50 +66,45 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     #esac
 
     # General
-    H5_CFLAGS="$H5_CFLAGS $arch -c99 -Minform=inform"
+    H5_CFLAGS="$H5_CFLAGS $arch -c99 -Minform=warn"
 
-    # Production
-    case "$cc_vendor-$cc_version" in
-      pgcc-10.6*)
-        PROD_CFLAGS=
-        ;;
-      pgcc-9.*)
-        PROD_CFLAGS=
-        ;;
-      *)
-        PROD_CFLAGS="-fast"
-        ;;
-    esac
+    ##############
+    # Production #
+    ##############
 
-    # Debug
     # NDEBUG is handled explicitly by the configure script
+    PROD_CFLAGS="-fast"
+
+    #########
+    # Debug #
+    #########
+
+    # NDEBUG is handled explicitly by the configure script
+    # -g is handled by the symbols flags
     DEBUG_CFLAGS="-Mbounds"
 
-    # Symbols
+    ###########
+    # Symbols #
+    ###########
+
     SYMBOLS_CFLAGS="-g"
     NO_SYMBOLS_CFLAGS="-s"
 
-    # Profiling
+    #############
+    # Profiling #
+    #############
+
     PROFILE_CFLAGS="-Mprof=func,line"
     # Use this for profiling with gprof
     #PROFILE_CFLAGS="-pg"
 
-    # Optimization
-    case "$cc_vendor-$cc_version" in
-      # Tweak down compiler optimizations for v10.6, it has a bug
-      pgcc-10.6*)
-        HIGH_OPT_CFLAGS="-O1"
-        ;;
-      # Tweak down compiler optimizations for v9.x
-      pgcc-9.*)
-        HIGH_OPT_CFLAGS="-O1"
-        ;;
-      *)
-        HIGH_OPT_CFLAGS=
-        ;;
-    esac
-    DEBUG_OPT_CFLAGS=
-    NO_OPT_CFLAGS=
+    ################
+    # Optimization #
+    ################
+
+    HIGH_OPT_CFLAGS="-O4"
+    DEBUG_OPT_CFLAGS="-gopt -O2"
+    NO_OPT_CFLAGS="-O0"
 
     # Flags are set
     cc_flags_set=yes

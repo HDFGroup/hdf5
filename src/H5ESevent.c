@@ -139,14 +139,14 @@ H5ES__event_free(H5ES_event_t *ev)
     /* Sanity check */
     HDassert(ev);
 
-    if (ev->api_name)
-        H5MM_xfree_const(ev->api_name);
-    if (ev->api_args)
-        H5MM_xfree_const(ev->api_args);
-    if (ev->app_file)
-        H5MM_xfree_const(ev->app_file);
-    if (ev->app_func)
-        H5MM_xfree_const(ev->app_func);
+    /* The 'app_func_name', 'app_file_name', and 'api_name' strings are statically allocated (by the compiler)
+     * and are not allocated, so there's no need to free them.
+     */
+    ev->op_info.api_name = NULL;
+    if (ev->op_info.api_args)
+        H5MM_xfree_const(ev->op_info.api_args);
+    ev->op_info.app_file_name = NULL;
+    ev->op_info.app_func_name = NULL;
     if (ev->request) {
         /* Free the request */
         if (H5VL_request_free(ev->request) < 0)

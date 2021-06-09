@@ -22,7 +22,7 @@
 
 /*
  * Include required headers.  This file tests internal library functions,
- * so we include the private headers here.
+ * so we include the private headers here, along with developer routines.
  */
 #include "hdf5.h"
 #include "H5private.h"

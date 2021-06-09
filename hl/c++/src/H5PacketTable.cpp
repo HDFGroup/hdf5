@@ -28,19 +28,24 @@
 /* PacketTable superclass       */
 /********************************/
 
+/* Null constructor
+ * Sets table_id to "invalid"
+ */
+PacketTable::PacketTable() : table_id{H5I_INVALID_HID}
+{
+}
+
 /* "Open" Constructor
  * Opens an existing packet table, which can contain either fixed-length or
  * variable-length packets.
  */
-PacketTable::PacketTable(hid_t fileID, const char *name)
+PacketTable::PacketTable(hid_t fileID, const char *name) : table_id{H5PTopen(fileID, name)}
 {
-    table_id = H5PTopen(fileID, name);
 }
 
 /* "Open" Constructor - will be deprecated because of char* name */
-PacketTable::PacketTable(hid_t fileID, char *name)
+PacketTable::PacketTable(hid_t fileID, char *name) : table_id{H5PTopen(fileID, name)}
 {
-    table_id = H5PTopen(fileID, name);
 }
 
 /* Destructor
@@ -271,7 +276,7 @@ FL_PacketTable::GetPackets(hsize_t startIndex, hsize_t endIndex, void *data)
     if (startIndex > endIndex)
         return -1;
 
-    return H5PTread_packets(table_id, startIndex, (size_t)(endIndex - startIndex + 1), data);
+    return H5PTread_packets(table_id, startIndex, static_cast<size_t>(endIndex - startIndex + 1), data);
 }
 
 /* GetNextPacket (single packet)
