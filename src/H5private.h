@@ -127,21 +127,6 @@
 #endif
 
 /*
- * System information. These are needed on the DEC Alpha to turn off fixing
- * of unaligned accesses by the operating system during detection of
- * alignment constraints in H5detect.c:main().
- */
-#ifdef H5_HAVE_SYS_SYSINFO_H
-#include <sys/sysinfo.h>
-#endif
-#ifdef H5_HAVE_SYS_PROC_H
-#include <sys/proc.h>
-#endif
-#ifdef H5_HAVE_IO_H
-#include <io.h>
-#endif
-
-/*
  * Dynamic library handling.  These are needed for dynamically loading I/O
  * filters and VFDs.
  */
@@ -182,6 +167,7 @@
 
 #include <windows.h>
 #include <direct.h> /* For _getcwd() */
+#include <io.h>     /* POSIX I/O */
 
 #endif /*H5_HAVE_WIN32_API*/
 
