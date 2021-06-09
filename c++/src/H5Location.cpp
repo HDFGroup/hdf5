@@ -351,7 +351,7 @@ H5Location::getComment(const char *name, size_t buf_size) const
     H5std_string comment;
 
     // Preliminary call to get the comment's length
-    ssize_t comment_len = H5Oget_comment_by_name(getId(), name, NULL, (size_t)0, H5P_DEFAULT);
+    ssize_t comment_len = H5Oget_comment_by_name(getId(), name, NULL, 0, H5P_DEFAULT);
 
     // If H5Oget_comment_by_name returns a negative value, raise an exception
     if (comment_len < 0) {

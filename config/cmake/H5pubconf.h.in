@@ -26,9 +26,6 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
-/* Define if C++ compiler recognizes offsetof */
-#cmakedefine H5_CXX_HAVE_OFFSETOF @CXX_HAVE_OFFSETOF@
-
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
@@ -200,9 +197,6 @@
 
 /* Define to 1 if you have the `ioctl' function. */
 #cmakedefine H5_HAVE_IOCTL @H5_HAVE_IOCTL@
-
-/* Define to 1 if you have the <io.h> header file. */
-#cmakedefine H5_HAVE_IO_H @H5_HAVE_IO_H@
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #cmakedefine H5_HAVE_LIBCRYPTO @H5_HAVE_LIBCRYPTO@

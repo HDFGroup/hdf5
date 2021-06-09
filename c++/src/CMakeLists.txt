@@ -2,13 +2,6 @@ cmake_minimum_required (VERSION 3.12)
 project (HDF5_CPP_SRC CXX)
 
 #-----------------------------------------------------------------------------
-# Generate configure file
-#-----------------------------------------------------------------------------
-configure_file (${HDF_RESOURCES_DIR}/H5cxx_config.h.in
-                ${HDF5_SRC_BINARY_DIR}/H5cxx_pubconf.h
-)
-
-#-----------------------------------------------------------------------------
 # Define cpp Library
 #-----------------------------------------------------------------------------
 set (CPP_SOURCES

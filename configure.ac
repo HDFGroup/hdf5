@@ -776,20 +776,6 @@ if test "X$HDF_CXX" = "Xyes"; then
   ## Change to the C++ language
   AC_LANG_PUSH(C++)
 
-  ## Checking if C++ needs old style header files in includes
-  PAC_PROG_CXX_HEADERS
-
-  ## Checking if C++ can handle namespaces
-  PAC_PROG_CXX_NAMESPACE
-
-  ## if C++ can handle static cast
-  PAC_PROG_CXX_STATIC_CAST
-
-  ## Checking if C++ has offsetof extension,
-  ## note: this test has to be the last of the C++ tests because it sets a definition
-  ## which would be used in the other tests, causing them to fail.
-  PAC_PROG_CXX_OFFSETOF
-
 else
   AC_MSG_RESULT([no])
   CXX="no"
@@ -1266,15 +1252,15 @@ esac
 ## Windows
 case "`uname`" in
   CYGWIN*)
-    AC_CHECK_HEADERS([io.h sys/timeb.h])
+    AC_CHECK_HEADERS([sys/timeb.h])
     UNAME_CYGWIN="yes"
     ;;
   MINGW*)
-    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
+    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     AC_HAVE_LIBRARY([ws2_32])
     ;;
   *)
-    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
+    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     ;;
 esac
 
