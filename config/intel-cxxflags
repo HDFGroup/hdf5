@@ -16,6 +16,20 @@
 # if the compiler is not Intel; otherwise `cxx_flags_set' is set to `yes'
 #
 
+#
+# Prepend `$srcdir/config/intel-warnings/` to the filename suffix(es) given as
+# subroutine argument(s), remove comments starting with # and ending
+# at EOL, replace spans of whitespace (including newlines) with spaces,
+# and re-emit the file(s) thus filtered on the standard output stream.
+#
+load_intel_arguments()
+{
+    set -- $(for arg; do
+        sed 's,#.*$,,' $srcdir/config/intel-warnings/${arg}
+    done)
+    IFS=' ' echo "$*"
+}
+
 # Get the compiler version in a way that works for icpc
 # icpc unless a compiler version is already known
 #
@@ -88,14 +102,13 @@ if test "X-icpc" = "X-$cxx_vendor"; then
     # Symbols #
     ###########
 
-    SYMBOLS_CXXFLAGS="-g"
     NO_SYMBOLS_CXXFLAGS="-Wl,-s"
+    SYMBOLS_CXXFLAGS="-g"
 
     #############
     # Profiling #
     #############
 
-    # Use this for profiling with gprof
     PROFILE_CXXFLAGS="-p"
 
     ################
@@ -110,18 +123,49 @@ if test "X-icpc" = "X-$cxx_vendor"; then
     # Warnings #
     ############
 
+# First load the C warnings then add CXX warnings (if needed)
+
+    ###########
+    # General #
+    ###########
+
+    # Add various general warning flags in intel-warnings.
+    H5_CXXFLAGS="$H5_CXXFLAGS $(load_intel_arguments general)"
+
+    ######################
+    # Developer warnings #
+    ######################
+
+    #NO_DEVELOPER_WARNING_CXXFLAGS=$(load_intel_arguments no-developer-general)
+    #DEVELOPER_WARNING_CXXFLAGS=$(load_intel_arguments developer-general)
+
     #############################
     # Version-specific warnings #
     #############################
+
+    # intel == 8.0
+    if test $cc_vers_major -eq 8 -a $cc_vers_minor -eq 0; then
+        # v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
+        HIGH_OPT_CFLAGS="-O2"
+    fi
+
+    # intel == 10
+    if test $cc_vers_major -eq 10; then
+        HIGH_OPT_CFLAGS="-O1"
+    fi
+
+    # intel >= 15
+    if test $cc_vers_major -ge 15; then
+        H5_CXXFLAGS="$H5_CXXFLAGS $(load_intel_arguments 15)"
+    fi
 
     #################
     # Flags are set #
     #################
     cxx_flags_set=yes
-
 fi
 
-# Clear cc info if no flags set
+# Clear cxx info if no flags set
 if test "X-$cxx_flags_set" = "X-"; then
     cxx_vendor=
     cxx_version=
