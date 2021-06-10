@@ -88,7 +88,7 @@ fail_dcpl:;
 
     //! <!-- [delete] -->
     {
-        __label__ fail_dcpl;
+        __label__ fail_rc, fail_dcpl;
         hid_t dcpl;
         int   rc;
 

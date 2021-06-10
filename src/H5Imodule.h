@@ -35,8 +35,16 @@
  * library. See \ref H5IUD for user-defined identifiers and identifier
  * types.
  *
- * HDF5 identifiers are usually created as a "side-effect" of creating HDF5
+ * HDF5 identifiers are usually created as a side-effect of creating HDF5
  * entities such as groups, datasets, attributes, or property lists.
+ *
+ * Identifiers defined by the HDF5 library can be used to retrieve information
+ * such as path names and reference counts, and their validity can be checked.
+ *
+ * Identifiers can be updated by manipulating their reference counts.
+ *
+ * Unused identifiers should be reclaimed by closing the associated item, e.g.,
+ * HDF5 object, or decrementing the reference count to 0.
  *
  * \note Identifiers (of type \ref hid_t) are run-time auxiliaries and
  * not persisted in the file.
@@ -64,9 +72,22 @@
  * \defgroup H5IUD User-defined ID Types
  * \ingroup H5I
  *
- * The \ref H5I module contains function to define new types of identifiers.
- * IDs of type \ref hid_t can then be associated with the new identifier types and
- * user objects.
+ * The \ref H5I module contains functions to define new identifier types.
+ * For convenience, handles of type \ref hid_t can then be associated with the
+ * new identifier types and user objects.
+ *
+ * New identifier types can be created by registering a new identifier type
+ * with the HDF5 library. Once a new identifier type has bee registered,
+ * it can be used to generate identifiers for user objects.
+ *
+ * User-defined identifier types can be searched and iterated.
+ *
+ * Like library-defined identifiers, user-defined identifiers \Emph{and}
+ * identifier types are reference counted, and the reference counts can be
+ * manipulated accordingly.
+ *
+ * User-defined identifiers no longer in use should be deleted or reclaimed,
+ * and identifier types should be destroyed if they are no longer required.
  *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
