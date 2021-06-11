@@ -183,7 +183,6 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # Warnings #
     ############
 
-# First load the C warnings then add CXX warnings (if needed)
 
     ###########
     # General #
@@ -199,6 +198,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
         # Developer warnings #
         ######################
 
+        # Use the C warnings as CXX warnings are the same
         NO_DEVELOPER_WARNING_CXXFLAGS=$(load_gnu_arguments no-developer-general)
         DEVELOPER_WARNING_CXXFLAGS=$(load_gnu_arguments developer-general)
 
@@ -210,6 +210,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
 
     # GCC 4.8 through the end of GCC 4 series
     if test $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 8; then
+        # Use the C warnings as CXX warnings are the same
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.8-4.last)"
     fi
 
@@ -220,13 +221,13 @@ if test "X-g++" = "X-$cxx_vendor"; then
     # gcc >= 4.8
     if test $cxx_vers_major -ge 5 -o $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 8; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-4.8)"
+        # Use the C warnings as CXX warnings are the same
         DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.8)"
         NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.8)"
     fi
 
     # gcc >= 4.9
     if test $cxx_vers_major -ge 5 -o $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 9; then
-        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 4.9)"
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-4.9)"
     fi
 
@@ -239,28 +240,43 @@ if test "X-g++" = "X-$cxx_vendor"; then
 
     # gcc >= 6
     if test $cxx_vers_major -ge 6; then
+        # Use the C warnings as CXX warnings are the same
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 6)"
     fi
 
     # gcc >= 7
     if test $cxx_vers_major -ge 7; then
+        # Use the C warnings as CXX warnings are the same
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 7)"
         DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-7)"
     fi
 
     # gcc 8
     if test $cxx_vers_major -ge 8; then
+        # Use the C warnings as CXX warnings are the same
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 8)"
         #H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_gnu_arguments error-8)"
         #H5_NECXXFLAGS="$H5_NECXXFLAGS $(load_gnu_arguments noerror-8)"
+        # Use the C warnings as CXX warnings are the same
         DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-8)"
         NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-8)"
     fi
 
     # gcc 9
     if test $cxx_vers_major -ge 9; then
-        H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments 9)"
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-9)"
+    fi
+
+    # gcc >= 9.3
+    if test $cc_vers_major -ge 10 -o $cc_vers_major -eq 9 -a $cc_vers_minor -ge 3; then
+        # do not use C warnings, $(load_gnu_arguments 9.3), no cxx warnings
+        # H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-9.3)"
+    fi
+
+    # gcc >= 10
+    if test $cc_vers_major -ge 10; then
+        # Use the C warnings as CXX warnings are the same
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-10)"
     fi
 
     #################
