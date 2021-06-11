@@ -858,7 +858,7 @@ write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *
             dbgf(2, "Random writes %u to dataset\n", step);
 
             newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
-            printf("Random step is %u\n", newstep);
+            dbgf(2, "Random step is %u\n", newstep);
             result = dsets_action(RANDOM_WRITE, s, ds, newstep);
 
             if (s->use_np && !np_writer(result, step, s, np, config)) {
@@ -1176,7 +1176,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             dbgf(2, "Verify random writes %u to dataset\n", step);
 
             newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
-            printf("Random step is %u\n", newstep);
+            dbgf(2, "Random step is %u\n", newstep);
 
             if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
                 printf("np_confirm_verify_notify() verify/notify not in sync failed\n");

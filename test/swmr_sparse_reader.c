@@ -232,7 +232,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
         unsigned long  file_u;        /* Attribute sequence number (writer's "u") */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* Fill in "nrecords" field.  Note that this depends on the writer
          * using the same algorithm and "nrecords" */
