@@ -156,7 +156,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
         hsize_t        remove_size; /* Size to reduce dataset dimension by */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* Shrink the dataset's dataspace */
         remove_size = (hsize_t)HDrandom() % MAX_REMOVE_SIZE + 1;

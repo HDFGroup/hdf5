@@ -27,17 +27,9 @@ srcdir=@srcdir@
 ## test parameters
 ###############################################################################
 
-Nreaders=5              # number of readers to launch
-Nrdrs_spa=3             # number of sparse readers to launch
-Nrecords=400000         # number of records to write
-Nrecs_rem=40000         # number of times to shrink
-Nrecs_spa=20000         # number of records to write in the sparse test
-Nsecs_add=5             # number of seconds per read interval
-Nsecs_rem=3             # number of seconds per read interval
-Nsecs_addrem=8          # number of seconds per read interval
 nerrors=0
 nsofterrors=0		# soft errors are expected to occur some of the time
-			# on a couple of nondeterministic tests.
+			        # on a couple of nondeterministic tests.
 
 ###############################################################################
 ## test parameters for vfd_swmr_bigset_writer.c and vfd_swmr_group_writer.c
@@ -46,35 +38,16 @@ nsofterrors=0		# soft errors are expected to occur some of the time
 ## 1:  Default run.
 ## 2+: Quick run
 ###############################################################################
+#
 if [[ -z $HDF5TestExpress ]]; then    # Set to default when not set
     HDF5TestExpress=1
 fi
-##
-##Default setting
-BIGSET_n=25                         # -n option: # of iterations
-BIGSET_few_s=20                     # -s option: # of datasets (for few_big test)
-BIGSET_many_s=500                   # -s option: # of datasets (for many_small test)
-GROUP_n=40                          # -n option: # of groups (for group test)
-GROUP_attr_n=1                      # -n option: # of groups (for group attribute test)
-GROUP_op_n=1                        # -n option: # of groups (for group attribute test)
-
-if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # Setting for exhaustive run
-    BIGSET_n=50
-    BIGSET_few_s=40
-    BIGSET_many_s=1000
-    GROUP_n=400
-    GROUP_attr_n=2
-    GROUP_op_n=2                       
-elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # Setting for quick run
-    BIGSET_n=10
-    BIGSET_few_s=10
-    BIGSET_many_s=100
-    GROUP_n=20
-fi
 
 ###############################################################################
-## definitions for message file to coordinate test runs
+## For legacy tests:
+##  definitions for message file to coordinate test runs
 ###############################################################################
+#
 WRITER_MESSAGE=VFD_SWMR_WRITER_MESSAGE  # The message file created by writer that the open is complete
                                         # This should be the same as the define in "./swmr_common.h"
 MESSAGE_TIMEOUT=300                     # Message timeout length in secs
@@ -83,30 +56,26 @@ MESSAGE_TIMEOUT=300                     # Message timeout length in secs
 ###############################################################################
 ## For attrdset test: definitions for fifo files to coordinate test runs
 ###############################################################################
+#
 ATTRDSET_FIFO_WRITER_TO_READER=fifo_attrdset_writer_to_reader
 ATTRDSET_FIFO_READER_TO_WRITER=fifo_attrdset_reader_to_writer
 
 ###############################################################################
 ## For dsetops test: definitions for fifo files to coordinate test runs
 ###############################################################################
+#
 DSETOPS_FIFO_WRITER_TO_READER=fifo_dsetops_writer_to_reader
 DSETOPS_FIFO_READER_TO_WRITER=fifo_dsetops_reader_to_writer
 
 ###############################################################################
 ## short hands and function definitions
 ###############################################################################
+#
 DPRINT=:              # Set to "echo Debug:" for debugging printing,
                         # else ":" for noop.
 IFDEBUG=:             # Set to null to turn on debugging, else ":" for noop.
 
-# Print a line-line message left justified in a field of 70 characters
-# beginning with the word "Testing".
-#
-TESTING() {
-   SPACES="                                                               "
-   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
-}
-
+# For legacy tests:
 # To wait for the writer message file or till the maximum # of seconds is reached
 # $1 is the message file to wait for
 # This performs similar function as the routine h5_wait_message() in test/h5test.c
@@ -165,9 +134,14 @@ if [ $rc -ne 0 ] ; then
     exit 0
 fi
 
-all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo groups attrdset dsetops"
-all_tests="${all_tests} groups_attrs os_groups_attrs groups_ops os_groups_ops few_big many_small"
+all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo"
+all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small attrdset"
 tests=${all_tests}
+
+# For exhaustive run, add: os_groups_attrs, os_groups_ops, dsetops
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
+    all_tests="${all_tests} os_groups_attrs os_groups_ops dsetops"
+fi
 
 if [ $# -gt 0 ]; then
 	tests=
@@ -211,13 +185,38 @@ mkdir vfd_swmr_test
 cd vfd_swmr_test
 
 
-
+###############################################################################
+#
+# Legacy SWMR tests
+#
+###############################################################################
+#
+#
+# Default setting
+Nreaders=5              # number of readers to launch
+Nrdrs_spa=3             # number of sparse readers to launch
+Nrecords=200000         # number of records to write
+Nrecs_rem=40000         # number of times to shrink
+Nrecs_spa=20000         # number of records to write in the sparse test
+Nsecs_add=5             # number of seconds per read interval
+Nsecs_rem=3             # number of seconds per read interval
+Nsecs_addrem=8          # number of seconds per read interval
+compress_list=("")      # No filter for default and quick runs
+#
+#
+# Setting for exhaustive run
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then      
+    Nrecords=400000                         # Increase the number of records to write
+    compress_list=("" "-c 5")               # Enable filter
+fi
+#
+#
 # Loop over index types
 for index_type in "-i ea" "-i b2" 
 do
     # Try without compression, only; uncomment "-c 5" to try with compression.
 
-    for compress in "" "-c 5"
+    for compress in "${compress_list[@]}";
     do
         echo
         echo "** Loop testing parameters: $index_type $compress"
@@ -261,7 +260,7 @@ do
 		echo launch the vfd_swmr_writer
 		seed="" # Put -r <random seed> command here
 		catch_out_err_and_rc vfd_swmr_writer \
-		    ../vfd_swmr_writer -o $Nrecords $seed &
+		    ../vfd_swmr_writer -q -o $Nrecords $seed &
 		pid_writer=$!
 		$DPRINT pid_writer=$pid_writer
 
@@ -270,14 +269,14 @@ do
 		#
 		# Launch the Readers
 		#declare -a seeds=(<seed1> <seed2> <seed3> ... )
-		echo launch $Nreaders vfd_swmr_readers
+		echo launch $Nreaders vfd_swmr_readers ......may take some time......
 		pid_readers=""
 		n=0
 		while [ $n -lt $Nreaders ]; do
 		    #seed="-r ${seeds[$n]}"
 		    seed=""
 		    catch_out_err_and_rc vfd_swmr_reader.$n \
-			../vfd_swmr_reader $Nsecs_add $seed &
+			../vfd_swmr_reader -q $Nsecs_add $seed &
 		    pid_readers="$pid_readers $!"
 		    n=`expr $n + 1`
 		done
@@ -328,7 +327,7 @@ do
 		echo launch the vfd_swmr_remove_writer
 		seed="" # Put -r <random seed> command here
 		catch_out_err_and_rc vfd_swmr_writer \
-		    ../vfd_swmr_remove_writer -o $Nrecs_rem $seed &
+		    ../vfd_swmr_remove_writer -q -o $Nrecs_rem $seed &
 		pid_writer=$!
 		$DPRINT pid_writer=$pid_writer
 
@@ -339,12 +338,12 @@ do
 		#declare -a seeds=(<seed1> <seed2> <seed3> ... )
 		n=0
 		pid_readers=""
-		echo launch $Nreaders swmr_remove_readers
+		echo launch $Nreaders swmr_remove_readers ......may take some time ......
 		while [ $n -lt $Nreaders ]; do
 		    #seed="-r ${seeds[$n]}"
 		    seed=""
 		    catch_out_err_and_rc vfd_swmr_reader.$n \
-			../vfd_swmr_remove_reader $Nsecs_rem $seed &
+			../vfd_swmr_remove_reader -q $Nsecs_rem $seed &
 		    pid_readers="$pid_readers $!"
 		    n=`expr $n + 1`
 		done
@@ -396,7 +395,7 @@ do
 		# Launch the Writer (not in parallel - just to rebuild the datasets)
 		echo launch the vfd_swmr_writer
 		seed="" # Put -r <random seed> command here
-		../vfd_swmr_writer -W $Nrecords $seed
+		../vfd_swmr_writer -q -W $Nrecords $seed
 		if test $? -ne 0; then
 		    echo writer had error
 		    nerrors=`expr $nerrors + 1`
@@ -409,7 +408,7 @@ do
 		echo launch the vfd_swmr_addrem_writer
 		seed="" # Put -r <random seed> command here
 		catch_out_err_and_rc vfd_swmr_writer \
-		    ../vfd_swmr_addrem_writer $Nrecords $seed &
+		    ../vfd_swmr_addrem_writer -q $Nrecords $seed &
 		pid_writer=$!
 		$DPRINT pid_writer=$pid_writer
 
@@ -420,12 +419,12 @@ do
 		#declare -a seeds=(<seed1> <seed2> <seed3> ... )
 		n=0
 		pid_readers=""
-		echo launch $Nreaders vfd_swmr_remove_readers
+		echo launch $Nreaders vfd_swmr_remove_readers ...... may take some time ......
 		while [ $n -lt $Nreaders ]; do
 		    #seed="-r ${seeds[$n]}"
 		    seed=""
 		    catch_out_err_and_rc vfd_swmr_reader.$n \
-			../vfd_swmr_remove_reader $Nsecs_addrem $seed &
+			../vfd_swmr_remove_reader -q $Nsecs_addrem $seed &
 		    pid_readers="$pid_readers $!"
 		    n=`expr $n + 1`
 		done
@@ -483,7 +482,7 @@ do
 		# Launch the Sparse writer
 		echo launch the vfd_swmr_sparse_writer
 		catch_out_err_and_rc vfd_swmr_writer nice -n 20 \
-		    ../vfd_swmr_sparse_writer $Nrecs_spa &
+		    ../vfd_swmr_sparse_writer -q $Nrecs_spa &
 		pid_writer=$!
 		$DPRINT pid_writer=$pid_writer
 
@@ -493,7 +492,7 @@ do
 		# Launch the Sparse readers
 		n=0
 		pid_readers=""
-		echo launch $Nrdrs_spa vfd_swmr_sparse_readers
+		echo launch $Nrdrs_spa vfd_swmr_sparse_readers ..... may take some time ......
 		while [ $n -lt $Nrdrs_spa ]; do
 		    # The sparse reader spits out a LOT of data so it's set to 'quiet'
 		    catch_out_err_and_rc vfd_swmr_reader.$n \
@@ -540,8 +539,14 @@ do
     done
 done
 
+###############################################################################
+#
+# "vlstr_null" and "vlstr_oob" tests
 #
 # Test variable-length strings, expecting errors.
+#
+###############################################################################
+#
 #
 for ty in null oob; do
 
@@ -555,7 +560,7 @@ for ty in null oob; do
 		echo "## VL string 2 - expect out-of-bounds access"
 	fi
 
-	echo launch vfd_swmr_vlstr_writer
+	echo launch vfd_swmr_vlstr_writer ..... may take some time ......
 	catch_out_err_and_rc vfd_swmr_vlstr_writer \
 	    ../vfd_swmr_vlstr_writer -n 500 -q -t ${ty} &
 	pid_writer=$!
@@ -591,9 +596,15 @@ for ty in null oob; do
 	rm -f vfd_swmr_vlstr_reader.*.{out,rc}
 done
 
+###############################################################################
+#
+# "zoo" tests
 #
 # Make sure that a "zoo"---the variety of HDF5 object types---can be
 # read and written by VFD SWMR.
+#
+###############################################################################
+#
 #
 if [ ${do_zoo:-no} = yes ]; then
 	rm -f ./shared_tick_num
@@ -632,110 +643,34 @@ if [ ${do_zoo:-no} = yes ]; then
 	rm -f vfd_swmr_zoo_reader.*.{out,rc}
 fi
 
-# attrdset test
-for options in "-p -g -a 10 -v -m -d 10 -c 3 -u 5" "-k -a 20 -v -m -d 5"; do
-    #
-    # Test a few big datasets of one and two dimensions.
-    #
-    if [ ${do_attrdset:-no} = no ]; then
-        continue
-    fi
 
-    # Clean up any existing fifo files from previous runs
-    if [ -e ./$ATTRDSET_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
-        rm -f ./$ATTRDSET_FIFO_WRITER_TO_READER
-    fi
-    if [ -e ./$ATTRDSET_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
-        rm -f ./$ATTRDSET_FIFO_READER_TO_WRITER
-    fi
-
-    echo launch vfd_swmr_attrdset_writer attrdset, options $options
-    catch_out_err_and_rc vfd_swmr_attrdset_writer \
-        ../vfd_swmr_attrdset_writer $options &
-    pid_writer=$!
-
-    catch_out_err_and_rc vfd_swmr_attrdset_reader \
-        ../vfd_swmr_attrdset_reader $options &
-    pid_reader=$!
-
-    # Wait for the reader to finish before signaling the
-    # writer to quit: the writer holds the file open so that the
-    # reader will find the shadow file when it opens
-    # the .h5 file.
-    wait $pid_reader
-    wait $pid_writer
-
-    # Collect exit code of the reader
-    if [ $(cat vfd_swmr_attrdset_reader.rc) -ne 0 ]; then
-        echo reader had error
-        nerrors=$((nerrors + 1))
-    fi
-
-    # Collect exit code of the writer
-    if [ $(cat vfd_swmr_attrdset_writer.rc) -ne 0 ]; then
-        echo writer had error
-        nerrors=$((nerrors + 1))
-    fi
-
-    # Clean up output files
-    rm -f vfd_swmr_attrdset_writer.{out,rc}
-    rm -f vfd_swmr_attrdset_reader.*.{out,rc}
-done
-
-# dsetops test
-for options in "-p -e 20 -t" "-g -m 5 -n 2 -s 10 -w 7" "-k -m 10 -n 5 -r 5 -l 10"; do
-	#
-	#
-	if [ ${do_dsetops:-no} = no ]; then
-		continue
-	fi
-    # Clean up any existing fifo files from previous runs
-    if [ -e ./$DSETOPS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
-        rm -f ./$DSETOPS_FIFO_WRITER_TO_READER
-    fi
-    if [ -e ./$DSETOPS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
-        rm -f ./$DSETOPS_FIFO_READER_TO_WRITER
-    fi
-    #
-	echo launch vfd_swmr_dsetops_writer dsetops, options $options
-	catch_out_err_and_rc vfd_swmr_dsetops_writer \
-	    ../vfd_swmr_dsetops_writer $options &
-	pid_writer=$!
-
-	catch_out_err_and_rc vfd_swmr_dsetops_reader \
-	    ../vfd_swmr_dsetops_reader $options &
-	pid_reader=$!
-
-	# Wait for the reader to finish before signaling the
-	# writer to quit: the writer holds the file open so that the
-	# reader will find the shadow file when it opens
-	# the .h5 file.
-	wait $pid_reader
-	wait $pid_writer
-
-	# Collect exit code of the reader
-	if [ $(cat vfd_swmr_dsetops_reader.rc) -ne 0 ]; then
-		echo reader had error
-		nerrors=$((nerrors + 1))
-	fi
-
-	# Collect exit code of the writer
-	if [ $(cat vfd_swmr_dsetops_writer.rc) -ne 0 ]; then
-	    echo writer had error
-	    nerrors=$((nerrors + 1))
-	fi
-
-	# Clean up output files
-	rm -f vfd_swmr_dsetops_writer.{out,rc}
-	rm -f vfd_swmr_dsetops_reader.*.{out,rc}
-done
-
+###############################################################################
 #
-# Make sure that we can create GROUP_n groups (20, 40, or 400 depending on the HDF5TestExpress level)
+# "groups" test
+#
+# Make sure that we can create GROUP_n groups 
+# (10, 20, or 400 depending on the HDF5TestExpress level)
 # while a reader waits for each to appear.
 #
+###############################################################################
+#
+#
+# Default setting
+#
+GROUP_n=20                          # -n option: # of groups (for "groups" test)
+#
+#
+# Setting for exhaustive and quick runs
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
+    GROUP_n=400                         
+elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # quick run
+    GROUP_n=10
+fi
+#
+#
 if [ ${do_groups:-no} = yes ]; then
-	echo launch vfd_swmr_group_writer
+	echo launch vfd_swmr_group_writer ......may take some time......
 	catch_out_err_and_rc vfd_swmr_group_writer \
 	    ../vfd_swmr_group_writer -q -c 10 -n $GROUP_n &
 	pid_writer=$!
@@ -768,17 +703,37 @@ if [ ${do_groups:-no} = yes ]; then
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 fi
 
+###############################################################################
+#
+# "groups_attrs" test
+#
 # The group attribute test takes longer. 
-# So for standard run and quick run, we
-# shorten the number of tests. The standard
-# run covers all the features we need to 
-# test. The quick run doesn't cover the
-# attribute storage change between dense and 
-# compact.
-# The exhaustive run tries to test a feature
-# per test from scratch.
-# 
+# So for standard run and quick run, we shorten the number of tests. 
+# The standard run covers all the features we need to test.
+# The quick run doesn't cover the attribute storage change 
+# between dense and compact.
+# The exhaustive run tries to test a feature per test from scratch.
+#
+###############################################################################
+#
+#
+# Default setting
+#
+GROUP_attr_n=1                      # -n option: # of groups (for group attribute test)
 grp_attr_list=(
+                "dense-del-to-compact"
+                "modify"
+                "remove-vstr"
+                "modify-vstr"
+                "del-ohr-block"
+               )
+#
+#
+# Setting for exhaustive and quick runs
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then        # exhaustive run
+    GROUP_attr_n=2                         
+    grp_attr_list=(
                 "compact"
                 "dense"
                 "compact-del"
@@ -792,33 +747,22 @@ grp_attr_list=(
                 "add-ohr-block"
                 "del-ohr-block"
                )
-grp_sub_attr_list=(
-                "dense-del-to-compact"
-                "modify"
-                "remove-vstr"
-                "modify-vstr"
-                "del-ohr-block"
-               )
-
-grp_short_sub_attr_list=(
+elif [[ "$HDF5TestExpress" -gt 1 ]] ; then      # quick run
+    grp_attr_list=(
                 "dense"
                 "modify"
                 "remove-vstr"
                 "modify-vstr"
                 "del-ohr-block"
                )
-
-if [[ "$HDF5TestExpress" -eq 1 ]] ; then       #Setting for standard run
-    grp_attr_list=("${grp_sub_attr_list[@]}")
-elif [[ "$HDF5TestExpress" -gt 1 ]] ; then     #Setting for quick run
-    grp_attr_list=("${grp_short_sub_attr_list[@]}")
 fi
-
+#
+#
 for options in ${grp_attr_list[*]}; do
 	if [ ${do_groups_attrs:-no} = no ]; then
 		continue
 	fi
-	echo launch vfd_swmr_group attribute: $options
+	echo launch vfd_swmr_group attribute: $options ......may take some time......
 	catch_out_err_and_rc vfd_swmr_group_writer \
 	    ../vfd_swmr_group_writer -q -c 1 -n $GROUP_attr_n -a 1 -A $options &
 	pid_writer=$!
@@ -851,6 +795,12 @@ for options in ${grp_attr_list[*]}; do
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 done
 
+###############################################################################
+#
+# "os_groups_attrs" test
+#
+# Only for exhaustive run
+#
 # The following tests are for add/del/modify attributes for
 # groups created with the old-style. 
 # Check https://portal.hdfgroup.org/display/HDF5/Groups for 
@@ -859,6 +809,9 @@ done
 # and deletion tests. Other test names have the same meaning 
 # as those of the new-style group tests.
 # 
+###############################################################################
+#
+#
 os_grp_attr_list=(
                 "compact"
                 "compact-del"
@@ -868,22 +821,14 @@ os_grp_attr_list=(
                 "modify-vstr"
                 "add-ohr-block"
                 "del-ohr-block"
- )
-os_grp_sub_attr_list=(
-                "modify"
-                "remove-vstr"
-                "modify-vstr"
-                "del-ohr-block"
-               )
-if [[ "$HDF5TestExpress" -gt 0 ]] ; then       #Setting for standard run
-    os_grp_attr_list=("${os_grp_sub_attr_list[@]}")
-fi
-
+                )
+#
+#
 for options in ${os_grp_attr_list[*]}; do
 	if [ ${do_os_groups_attrs:-no} = no ]; then
 		continue
 	fi
-	echo launch vfd_swmr_group attribute with old-style group: $options
+	echo launch vfd_swmr_group attribute with old-style group: $options  ......may take some time......
 	catch_out_err_and_rc vfd_swmr_group_writer \
 	    ../vfd_swmr_group_writer -q -G -c 1 -n $GROUP_attr_n -a 1 -A $options &
 	pid_writer=$!
@@ -916,11 +861,34 @@ for options in ${os_grp_attr_list[*]}; do
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 done
 
+###############################################################################
+#
+# "groups_ops" tests
+#
 # The group operation test takes longer. 
-# So for the quick run, we
-# shorten the number of tests. 
+# So for the quick run, we shorten the number of tests. 
 # The essential features are covered. 
+#
+###############################################################################
+#
+#
+# Default setting
+#
+GROUP_op_n=1                      # -n option: # of groups (for group operation test)
 grp_op_list=(
+                "grp-creation"
+                "grp-deletion"
+                "grp-move"
+                "grp-compact-t-dense"
+                "grp-dense-t-compact"
+               )
+#
+#
+# Setting for exhaustive and quick run
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then    # exhaustive run
+    GROUP_op_n=2                     
+    grp_op_list=(
                 "grp-creation"
                 "grp-deletion"
                 "grp-move"
@@ -929,21 +897,19 @@ grp_op_list=(
                 "grp-compact-t-dense"
                 "grp-dense-t-compact"
                )
-grp_sub_op_list=(
+elif [[ "$HDF5TestExpress" -gt 1 ]] ; then  # quick run
+    grp_op_list=(
                 "grp-move"
                 "grp-dense-t-compact"
                )
-
-
-if [[ "$HDF5TestExpress" -gt 1 ]] ; then       #Setting for express run
-    grp_op_list=("${grp_sub_op_list[@]}")
 fi
-
+#
+#
 for options in ${grp_op_list[*]}; do
 	if [ ${do_groups_ops:-no} = no ]; then
 		continue
 	fi
-	echo launch vfd_swmr_group operations: $options
+	echo launch vfd_swmr_group operations: $options  ......may take some time......
 	catch_out_err_and_rc vfd_swmr_group_writer \
 	    ../vfd_swmr_group_writer -q -c 1 -n $GROUP_op_n -O $options &
 	pid_writer=$!
@@ -976,7 +942,17 @@ for options in ${grp_op_list[*]}; do
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 done
 
+###############################################################################
+#
+# Setting for "os_groups_ops" test
+#
+# Only for exhaustive run
+#
 # Test the group operations for old-style
+# 
+###############################################################################
+#
+#
 os_grp_op_list=(
                 "grp-creation"
                 "grp-deletion"
@@ -984,22 +960,13 @@ os_grp_op_list=(
                 "grp-ins-links"
                 "grp-del-links"
                )
-os_grp_sub_op_list=(
-                "grp-move"
-                "grp-ins-links"
-                "grp-del-links"
-               )
-
-
-if [[ "$HDF5TestExpress" -gt 1 ]] ; then       #Setting for express run
-    os_grp_op_list=("${os_grp_sub_op_list[@]}")
-fi
-
+#
+#
 for options in ${os_grp_op_list[*]}; do
 	if [ ${do_os_groups_ops:-no} = no ]; then
 		continue
 	fi
-	echo launch vfd_swmr_group operations with old-style group: $options
+	echo launch vfd_swmr_group operations with old-style group: $options  ......may take some time......
 	catch_out_err_and_rc vfd_swmr_group_writer \
 	    ../vfd_swmr_group_writer -q -G -c 1 -n $GROUP_op_n -O $options &
 	pid_writer=$!
@@ -1033,7 +1000,33 @@ for options in ${os_grp_op_list[*]}; do
 done
 
 
-
+###############################################################################
+#
+# Setting for bigset (few_big and many_small) tests
+#
+###############################################################################
+#
+#
+# Default setting
+#
+BIGSET_n=25                         # -n option: # of iterations
+BIGSET_few_s=10                     # -s option: # of datasets (for few_big test)
+BIGSET_many_s=100                   # -s option: # of datasets (for many_small test)
+#
+#
+# Setting for exhaustive and quick runs
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
+    BIGSET_n=50
+    BIGSET_few_s=40
+    BIGSET_many_s=1000
+elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # quick run
+    BIGSET_n=10
+    BIGSET_few_s=3
+    BIGSET_many_s=50
+fi
+#
+#
 for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	if [ ${do_many_small:-no} = no ]; then
 		continue
@@ -1098,7 +1091,7 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 	if [ ${do_few_big:-no} = no ]; then
 		continue
 	fi
-	echo launch vfd_swmr_bigset_writer few big, options $options
+	echo launch vfd_swmr_bigset_writer few big, options $options ......may take some time......
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
 	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_few_s -r 256 -c 256 -q &
 	pid_writer=$!
@@ -1130,6 +1123,132 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 	# Clean up output files
 	rm -f vfd_swmr_bigset_writer.{out,rc}
 	rm -f vfd_swmr_bigset_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# "attrdset" test
+#
+###############################################################################
+#
+#
+# Default setting
+#
+attrdset_list=(
+                "-g -a 8 -v -m -d 8 -c 3 -u 5 -q"
+               )
+#
+#
+# Setting for exhaustive
+#
+if [[ "$HDF5TestExpress" -eq 0 ]] ; then        # exhaustive run
+    attrdset_list=(
+                "-p -g -a 10 -v -m -d 10 -c 3 -u 5 -q"
+                "-k -a 20 -v -m -d 5 -q"
+               )
+fi
+#
+#
+for options in "${attrdset_list[@]}"; do
+    if [ ${do_attrdset:-no} = no ]; then
+        continue
+    fi
+
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$ATTRDSET_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$ATTRDSET_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$ATTRDSET_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$ATTRDSET_FIFO_READER_TO_WRITER
+    fi
+
+    echo launch vfd_swmr_attrdset_writer attrdset, options $options ......may take some time......
+    catch_out_err_and_rc vfd_swmr_attrdset_writer \
+        ../vfd_swmr_attrdset_writer $options &
+    pid_writer=$!
+
+    catch_out_err_and_rc vfd_swmr_attrdset_reader \
+        ../vfd_swmr_attrdset_reader $options &
+    pid_reader=$!
+
+    # Wait for the reader to finish before signaling the
+    # writer to quit: the writer holds the file open so that the
+    # reader will find the shadow file when it opens
+    # the .h5 file.
+    wait $pid_reader
+    wait $pid_writer
+
+    # Collect exit code of the reader
+    if [ $(cat vfd_swmr_attrdset_reader.rc) -ne 0 ]; then
+        echo reader had error
+        nerrors=$((nerrors + 1))
+    fi
+
+    # Collect exit code of the writer
+    if [ $(cat vfd_swmr_attrdset_writer.rc) -ne 0 ]; then
+        echo writer had error
+        nerrors=$((nerrors + 1))
+    fi
+
+    # Clean up output files
+    rm -f vfd_swmr_attrdset_writer.{out,rc}
+    rm -f vfd_swmr_attrdset_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# "dsetops" test
+#
+# Only for exhaustive run
+#
+###############################################################################
+#
+#
+for options in "-p -e 20 -t -q" "-g -m 5 -n 2 -s 10 -w 7 -q" "-k -m 10 -n 5 -r 5 -l 10 -q"; do
+	#
+	#
+	if [ ${do_dsetops:-no} = no ]; then
+		continue
+	fi
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$DSETOPS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$DSETOPS_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$DSETOPS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$DSETOPS_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_dsetops_writer dsetops, options $options ......may take some time......
+	catch_out_err_and_rc vfd_swmr_dsetops_writer \
+	    ../vfd_swmr_dsetops_writer $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_dsetops_reader \
+	    ../vfd_swmr_dsetops_reader $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_dsetops_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_dsetops_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_dsetops_writer.{out,rc}
+	rm -f vfd_swmr_dsetops_reader.*.{out,rc}
 done
 
 ###############################################################################

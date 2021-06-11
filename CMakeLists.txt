@@ -1130,7 +1130,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
       endif ()
     endif ()
 
-    include (${HDF_RESOURCES_EXT_DIR}/HDFUseCXX.cmake)
     include (${HDF_RESOURCES_DIR}/HDFCXXCompilerFlags.cmake)
 
     add_subdirectory (c++)
