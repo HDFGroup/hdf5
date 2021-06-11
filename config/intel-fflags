@@ -58,11 +58,16 @@ fi
 
 # Common Intel flags for various situations
 if test "X-ifort" = "X-$f9x_vendor"; then
-    # Insert section about version specific problems from compiler flags here,
-    # if necessary.
+
+    FC_BASENAME=ifort
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
+
+    ###############################
+    # Architecture-specific flags #
+    ###############################
 
     arch=
-    # Architecture-specific flags
     # Nothing currently. (Uncomment code below and modify to add any)
     #case "$host_os-$host_cpu" in
     #    *-i686)
@@ -78,31 +83,55 @@ if test "X-ifort" = "X-$f9x_vendor"; then
     #        ;;
     #esac
 
-    # General
-    FC_BASENAME=ifort
-    F9XSUFFIXFLAG=""
-    FSEARCH_DIRS=""
-    H5_FCFLAGS="$H5_FCFLAGS -stand:f03 -free"
-    H5_FCFLAGS="$H5_FCFLAGS $(load_intel_arguments ifort-general)"
+    ##############
+    # Production #
+    ##############
 
-    # Production
     PROD_FCFLAGS=
 
-    # Debug
+    #########
+    # Debug #
+    #########
+
     DEBUG_FCFLAGS="-check all"
 
-    # Symbols
-    SYMBOLS_FCFLAGS="-g"
-    NO_SYMBOLS_FCFLAGS=
+    ###########
+    # Symbols #
+    ###########
 
-    # Profiling
-    # Use this for profiling with gprof
+    NO_SYMBOLS_FCFLAGS=
+    SYMBOLS_FCFLAGS="-g"
+
+    #############
+    # Profiling #
+    #############
+
     PROFILE_FCFLAGS="-p"
 
-    # Optimization
+    ################
+    # Optimization #
+    ################
+
     HIGH_OPT_FCFLAGS="-O3"
     DEBUG_OPT_FCFLAGS=
     NO_OPT_FCFLAGS=
+
+
+    ############
+    # Warnings #
+    ############
+
+    ###########
+    # General #
+    ###########
+
+    H5_FCFLAGS="$H5_FCFLAGS -stand:f03 -free"
+    H5_FCFLAGS="$H5_FCFLAGS $(load_intel_arguments ifort-general)"
+
+    #############################
+    # Version-specific warnings #
+    #############################
+
 
     #################
     # Flags are set #
@@ -115,5 +144,4 @@ if test "X-$f9x_flags_set" = "X-"; then
   f9x_vendor=
   f9x_version=
 fi
-
 
