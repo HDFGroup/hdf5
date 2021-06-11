@@ -35,14 +35,14 @@
 /*****************/
 
 /* Flags for object copy (H5Ocopy) */
-#define H5O_COPY_SHALLOW_HIERARCHY_FLAG     (0x0001u) /* Copy only immediate members */
-#define H5O_COPY_EXPAND_SOFT_LINK_FLAG      (0x0002u) /* Expand soft links into new objects */
-#define H5O_COPY_EXPAND_EXT_LINK_FLAG       (0x0004u) /* Expand external links into new objects */
-#define H5O_COPY_EXPAND_REFERENCE_FLAG      (0x0008u) /* Copy objects that are pointed by references */
-#define H5O_COPY_WITHOUT_ATTR_FLAG          (0x0010u) /* Copy object without copying attributes */
-#define H5O_COPY_PRESERVE_NULL_FLAG         (0x0020u) /* Copy NULL messages (empty space) */
-#define H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG (0x0040u) /* Merge committed datatypes in dest file */
-#define H5O_COPY_ALL                        (0x007Fu) /* All object copying flags (for internal checking) */
+#define H5O_COPY_SHALLOW_HIERARCHY_FLAG     (0x0001u) /**< Copy only immediate members */
+#define H5O_COPY_EXPAND_SOFT_LINK_FLAG      (0x0002u) /**< Expand soft links into new objects */
+#define H5O_COPY_EXPAND_EXT_LINK_FLAG       (0x0004u) /**< Expand external links into new objects */
+#define H5O_COPY_EXPAND_REFERENCE_FLAG      (0x0008u) /**< Copy objects that are pointed by references */
+#define H5O_COPY_WITHOUT_ATTR_FLAG          (0x0010u) /**< Copy object without copying attributes */
+#define H5O_COPY_PRESERVE_NULL_FLAG         (0x0020u) /**< Copy NULL messages (empty space) */
+#define H5O_COPY_MERGE_COMMITTED_DTYPE_FLAG (0x0040u) /**< Merge committed datatypes in dest file */
+#define H5O_COPY_ALL                        (0x007Fu) /**< All object copying flags (for internal checking) */
 
 /* Flags for shared message indexes.
  * Pass these flags in using the mesg_type_flags parameter in
@@ -51,22 +51,22 @@
  * but we need to assign each kind of message to a different bit so that
  * one index can hold multiple types.)
  */
-#define H5O_SHMESG_NONE_FLAG    0x0000                  /* No shared messages */
-#define H5O_SHMESG_SDSPACE_FLAG ((unsigned)1 << 0x0001) /* Simple Dataspace Message.  */
-#define H5O_SHMESG_DTYPE_FLAG   ((unsigned)1 << 0x0003) /* Datatype Message.  */
-#define H5O_SHMESG_FILL_FLAG    ((unsigned)1 << 0x0005) /* Fill Value Message. */
-#define H5O_SHMESG_PLINE_FLAG   ((unsigned)1 << 0x000b) /* Filter pipeline message.  */
-#define H5O_SHMESG_ATTR_FLAG    ((unsigned)1 << 0x000c) /* Attribute Message.  */
+#define H5O_SHMESG_NONE_FLAG    0x0000                  /**< No shared messages */
+#define H5O_SHMESG_SDSPACE_FLAG ((unsigned)1 << 0x0001) /**< Simple Dataspace Message.  */
+#define H5O_SHMESG_DTYPE_FLAG   ((unsigned)1 << 0x0003) /**< Datatype Message.  */
+#define H5O_SHMESG_FILL_FLAG    ((unsigned)1 << 0x0005) /**< Fill Value Message. */
+#define H5O_SHMESG_PLINE_FLAG   ((unsigned)1 << 0x000b) /**< Filter pipeline message.  */
+#define H5O_SHMESG_ATTR_FLAG    ((unsigned)1 << 0x000c) /**< Attribute Message.  */
 #define H5O_SHMESG_ALL_FLAG                                                                                  \
     (H5O_SHMESG_SDSPACE_FLAG | H5O_SHMESG_DTYPE_FLAG | H5O_SHMESG_FILL_FLAG | H5O_SHMESG_PLINE_FLAG |        \
      H5O_SHMESG_ATTR_FLAG)
 
 /* Object header status flag definitions */
-#define H5O_HDR_CHUNK0_SIZE             0x03 /* 2-bit field indicating # of bytes to store the size of chunk 0's data */
-#define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x04 /* Attribute creation order is tracked */
-#define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x08 /* Attribute creation order has index */
-#define H5O_HDR_ATTR_STORE_PHASE_CHANGE 0x10 /* Non-default attribute storage phase change values stored */
-#define H5O_HDR_STORE_TIMES             0x20 /* Store access, modification, change & birth times for object */
+#define H5O_HDR_CHUNK0_SIZE             0x03 /**< 2-bit field indicating # of bytes to store the size of chunk 0's data */
+#define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x04 /**< Attribute creation order is tracked */
+#define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x08 /**< Attribute creation order has index */
+#define H5O_HDR_ATTR_STORE_PHASE_CHANGE 0x10 /**< Non-default attribute storage phase change values stored */
+#define H5O_HDR_STORE_TIMES             0x20 /**< Store access, modification, change & birth times for object */
 #define H5O_HDR_ALL_FLAGS                                                                                    \
     (H5O_HDR_CHUNK0_SIZE | H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED |                 \
      H5O_HDR_ATTR_STORE_PHASE_CHANGE | H5O_HDR_STORE_TIMES)
@@ -81,9 +81,9 @@
  * Theses flags determine which fields will be filled in in the H5O_info_t
  * struct.
  */
-#define H5O_INFO_BASIC     0x0001u /* Fill in the fileno, addr, type, and rc fields */
-#define H5O_INFO_TIME      0x0002u /* Fill in the atime, mtime, ctime, and btime fields */
-#define H5O_INFO_NUM_ATTRS 0x0004u /* Fill in the num_attrs field */
+#define H5O_INFO_BASIC     0x0001u /**< Fill in the fileno, addr, type, and rc fields */
+#define H5O_INFO_TIME      0x0002u /**< Fill in the atime, mtime, ctime, and btime fields */
+#define H5O_INFO_NUM_ATTRS 0x0004u /**< Fill in the num_attrs field */
 #define H5O_INFO_ALL       (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS)
 
 //! <!-- [H5O_native_info_fields_snip] -->
@@ -91,8 +91,8 @@
  * Flags for H5Oget_native_info().  Theses flags determine which fields will be
  * filled in in the \ref H5O_native_info_t struct.
  */
-#define H5O_NATIVE_INFO_HDR       0x0008u /* Fill in the hdr field */
-#define H5O_NATIVE_INFO_META_SIZE 0x0010u /* Fill in the meta_size field */
+#define H5O_NATIVE_INFO_HDR       0x0008u /**< Fill in the hdr field */
+#define H5O_NATIVE_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field */
 #define H5O_NATIVE_INFO_ALL       (H5O_NATIVE_INFO_HDR | H5O_NATIVE_INFO_META_SIZE)
 //! <!-- [H5O_native_info_fields_snip] -->
 
@@ -146,15 +146,15 @@ typedef struct H5O_hdr_info_t {
  * (For H5Oget_info(), H5Oget_info_by_name(), H5Oget_info_by_idx() version 3)
  */
 typedef struct H5O_info2_t {
-    unsigned long fileno;    /* File number that object is located in */
-    H5O_token_t   token;     /* Token representing the object        */
-    H5O_type_t    type;      /* Basic object type (group, dataset, etc.) */
-    unsigned      rc;        /* Reference count of object            */
-    time_t        atime;     /* Access time                          */
-    time_t        mtime;     /* Modification time                    */
-    time_t        ctime;     /* Change time                          */
-    time_t        btime;     /* Birth time                           */
-    hsize_t       num_attrs; /* # of attributes attached to object   */
+    unsigned long fileno;    /**< File number that object is located in */
+    H5O_token_t   token;     /**< Token representing the object        */
+    H5O_type_t    type;      /**< Basic object type (group, dataset, etc.) */
+    unsigned      rc;        /**< Reference count of object            */
+    time_t        atime;     /**< Access time                          */
+    time_t        mtime;     /**< Modification time                    */
+    time_t        ctime;     /**< Change time                          */
+    time_t        btime;     /**< Birth time                           */
+    hsize_t       num_attrs; /** Number of attributes attached to object   */
 } H5O_info2_t;
 //! <!-- [H5O_info2_t_snip] -->
 
@@ -1579,26 +1579,11 @@ H5_DLL herr_t H5Oclose_async(const char *app_file, const char *app_func, unsigne
  *       files. After that, the OS is responsible for ensuring that
  *       the data is actually flushed to disk.
  *
- * \par See Also:
- *      - H5Dflush()
- *      - H5Drefresh()
- *      - H5Oflush()
- *      - H5Grefresh()
- *      - H5Oflush()
- *      - H5Orefresh()
- *      - H5Tflush()
- *      - H5Trefresh()
- * \par
- *      - \c H5DOappend()
- *      - H5Fstart_swmr_write()
- *      - H5Pget_append_flush()
- *      - H5Pget_object_flush_cb()
- *      - H5Pset_append_flush()
- *      - H5Pset_object_flush_cb()
- * \par
- *      - H5Oare_mdc_flushes_disabled()
- *      - H5Odisable_mdc_flushes()
- *      - H5Oenable_mdc_flushes()
+ * \see H5Dflush(), H5Drefresh(), H5Oflush(), H5Grefresh(), H5Oflush(),
+ *      H5Orefresh(), H5Tflush(), H5Trefresh()
+ * \see H5DOappend(), H5Fstart_swmr_write(), H5Pget_append_flush(),
+ *      H5Pget_object_flush_cb(), H5Pset_append_flush(), H5Pset_object_flush_cb()
+ * \see H5Oare_mdc_flushes_disabled(), H5Odisable_mdc_flushes(), H5Oenable_mdc_flushes()
  *
  * \since 1.10.0
  *
@@ -1670,21 +1655,17 @@ H5_DLL herr_t H5Orefresh_async(const char *app_file, const char *app_func, unsig
  *          HDF5 object level (datasets, groups, committed datatypes)
  *          and the entire metadata cache level.
  *
- * \note HDF5 objects include datasets, groups, and committed datatypes.
- *       Only #hid_t identifiers that represent these objects can be passed to the function.
- * \note Passing in a #hid_t identifier that represents any other HDF5 entity is
- *       considered an error.
- * \note It is an error to pass an HDF5 file identifier
- *       (obtained from H5Fopen() or H5Fcreate())
- *       to this function.
- * \note Misuse of this function can cause the cache to exhaust
- *       available memory.
- * \note Objects can be returned to the default automatic flush behavior
- *       with H5Oenable_mdc_flushes().
- * \note Flush prevention only pertains to new or dirty metadata entries.
- *       Clean entries can be evicted from the cache.
- * \note Calling this function on an object that has already had flushes
- *       disabled will return an error.
+ * \note HDF5 objects include datasets, groups, and committed datatypes.  Only
+ *       #hid_t identifiers that represent these objects can be passed to the
+ *       function.  Passing in a #hid_t identifier that represents any other
+ *       HDF5 entity is considered an error.  It is an error to pass an HDF5
+ *       file identifier (obtained from H5Fopen() or H5Fcreate()) to this
+ *       function.  Misuse of this function can cause the cache to exhaust
+ *       available memory.  Objects can be returned to the default automatic
+ *       flush behavior with H5Oenable_mdc_flushes().  Flush prevention only
+ *       pertains to new or dirty metadata entries.  Clean entries can be
+ *       evicted from the cache.  Calling this function on an object that has
+ *       already had flushes disabled will return an error.
  *
  * \since 1.10.0
  *
@@ -1714,28 +1695,18 @@ H5_DLL herr_t H5Odisable_mdc_flushes(hid_t object_id);
  *          metadata cache level.
  *
  *
- * \note HDF5 objects include datasets, groups, and committed datatypes.
- *       Only #hid_t identifiers that represent these objects can be
- *       passed to the function.
- *
- * \note Passing in a #hid_t identifier that represents any other HDF5 entity
- *       is considered an error.
- *
- * \note It is an error to pass an HDF5 file identifier
- *       (obtained from H5Fopen() or H5Fcreate())
- *       to this function.
- *
- * \note Using this function on an object that has not had flushes disabled
- *       is considered an error. The state of an object can be determined
- *       with H5Oare_mdc_flushes_disabled().
- *
- * \note An object will be returned to the default flush algorithm when it is closed.
- *
- * \note All objects will be returned to the default flush algorithm when
- *       the file is closed.
- *
- * \note An object’s entries will not necessarily be flushed as a result of
- *       calling this function.
+ * \note HDF5 objects include datasets, groups, and committed datatypes.  Only
+ *       #hid_t identifiers that represent these objects can be passed to the
+ *       function.  Passing in a #hid_t identifier that represents any other
+ *       HDF5 entity is considered an error.  It is an error to pass an HDF5
+ *       file identifier (obtained from H5Fopen() or H5Fcreate()) to this
+ *       function.  Using this function on an object that has not had flushes
+ *       disabled is considered an error. The state of an object can be
+ *       determined with H5Oare_mdc_flushes_disabled().  An object will be
+ *       returned to the default flush algorithm when it is closed.  All objects
+ *       will be returned to the default flush algorithm when the file is
+ *       closed.  An object’s entries will not necessarily be flushed as a
+ *       result of calling this function.
  *
  * \since 1.10.0
  *
@@ -1908,8 +1879,8 @@ H5_DLLVAR const H5O_token_t H5O_TOKEN_UNDEF_g;
 /* Macros */
 
 /* Deprecated flags for earlier versions of H5Oget_info* */
-#define H5O_INFO_HDR       0x0008u /* Fill in the hdr field */
-#define H5O_INFO_META_SIZE 0x0010u /* Fill in the meta_size field */
+#define H5O_INFO_HDR       0x0008u /**< Fill in the hdr field */
+#define H5O_INFO_META_SIZE 0x0010u /**< Fill in the meta_size field */
 #undef H5O_INFO_ALL
 #define H5O_INFO_ALL (H5O_INFO_BASIC | H5O_INFO_TIME | H5O_INFO_NUM_ATTRS | H5O_INFO_HDR | H5O_INFO_META_SIZE)
 
@@ -1942,7 +1913,7 @@ typedef struct H5O_info1_t {
     time_t         mtime;     /**< Modification time            */
     time_t         ctime;     /**< Change time                  */
     time_t         btime;     /**< Birth time                   */
-    hsize_t        num_attrs; /**< # of attributes attached to object */
+    hsize_t        num_attrs; /**< Number of attributes attached to object */
     H5O_hdr_info_t hdr;       /**< Object header information */
     /* Extra metadata storage for obj & attributes */
     struct {
