@@ -82,22 +82,36 @@ if test "X-icc" = "X-$cc_vendor"; then
     # Default to C99 standard.
     H5_CFLAGS="$H5_CFLAGS $arch -std=c99"
 
-    # Production
+    ##############
+    # Production #
+    ##############
+    
     PROD_CFLAGS=
 
-    # Debug
+    #########
+    # Debug #
+    #########
+
     # NDEBUG is handled explicitly in configure
     DEBUG_CFLAGS=
 
-    # Symbols
-    SYMBOLS_CFLAGS="-g"
-    NO_SYMBOLS_CFLAGS="-Wl,-s"
+    ###########
+    # Symbols #
+    ###########
 
-    # Profiling
-    # Use this for profiling with gprof
+    NO_SYMBOLS_CFLAGS="-Wl,-s"
+    SYMBOLS_CFLAGS="-g"
+
+    #############
+    # Profiling #
+    #############
+
     PROFILE_CFLAGS="-p"
 
-    # Optimization
+    ################
+    # Optimization #
+    ################
+
     HIGH_OPT_CFLAGS="-O3"
     DEBUG_OPT_CFLAGS="-O0"
     NO_OPT_CFLAGS="-O0"
@@ -110,32 +124,40 @@ if test "X-icc" = "X-$cc_vendor"; then
     # General #
     ###########
 
+    # Add various general warning flags in intel-warnings.
     H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general)"
+
+    ######################
+    # Developer warnings #
+    ######################
+
+    #NO_DEVELOPER_WARNING_CFLAGS=$(load_intel_arguments no-developer-general)
+    #DEVELOPER_WARNING_CFLAGS=$(load_intel_arguments developer-general)
 
     #############################
     # Version-specific warnings #
     #############################
 
-case "$cc_vendor-$cc_version" in
-    icc-1[5-6]*)
-        H5_CFLAGS="$H5_CFLAGS -Wcomment -Wdeprecated -Wextra-tokens -Wformat -Wformat-security -Wmain -Wmissing-declarations -Wmissing-prototypes -Wp64 -Wpointer-arith -Wreturn-type -Wshadow -Wstrict-prototypes -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function -Wunused-variable -Wwrite-strings"
-        ;;
-    icc-10*)
-        HIGH_OPT_CFLAGS="-O1"
-        ;;
-    icc-8.0*)
+    # intel == 8.0
+    if test $cc_vers_major -eq 8 -a $cc_vers_minor -eq 0; then
         # v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
         HIGH_OPT_CFLAGS="-O2"
-        ;;
-    icc-*)
-        ;;
-esac
+    fi
+
+    # intel == 10
+    if test $cc_vers_major -eq 10; then
+        HIGH_OPT_CFLAGS="-O1"
+    fi
+
+    # intel >= 15
+    if test $cc_vers_major -ge 15; then
+        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments 15)"
+    fi
 
     #################
     # Flags are set #
     #################
     cc_flags_set=yes
-
 fi
 
 # Clear cc info if no flags set
@@ -143,3 +165,4 @@ if test "X-$cc_flags_set" = "X-"; then
     cc_vendor=
     cc_version=
 fi
+

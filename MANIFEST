@@ -198,6 +198,9 @@
 ./config/gnu-warnings/noerror-5
 ./config/gnu-warnings/noerror-8
 ./config/gnu-warnings/noerror-general
+./config/intel-warnings/15
+./config/intel-warnings/18
+./config/intel-warnings/developer-general
 ./config/intel-warnings/ifort-general
 ./config/intel-warnings/general
 
