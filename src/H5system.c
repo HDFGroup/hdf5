@@ -964,17 +964,31 @@ done:
  *
  * Purpose:     Sleep for a given # of nanoseconds
  *
+ *              Note that commodity hardware is probably going to have a
+ *              resolution of milliseconds, not nanoseconds.
+ *
  * Return:      void
  *--------------------------------------------------------------------------
  */
 void
 H5_nanosleep(uint64_t nanosec)
 {
-#ifndef H5_HAVE_WIN32_API
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+#ifdef H5_HAVE_WIN32_API
+    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
+    DWORD ignore;
+
+    /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
+     * don't care about the return value since the second parameter
+     * (bAlertable) is FALSE, so it will always be zero.
+     */
+    ignore = SleepEx(dwMilliseconds, FALSE);
+
+#else
+
     const uint64_t  nanosec_per_sec = 1000 * 1000 * 1000;
     struct timespec sleeptime; /* Struct to hold time to sleep */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Set up time to sleep
      *
@@ -997,22 +1011,9 @@ H5_nanosleep(uint64_t nanosec)
         if (errno != EINTR)
             break;
     }
+#endif
 
     FUNC_LEAVE_NOAPI_VOID
-#else
-    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
-    DWORD ignore;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
-     * don't care about the return value since the second parameter
-     * (bAlertable) is FALSE, so it will always be zero.
-     */
-    ignore = SleepEx(dwMilliseconds, FALSE);
-
-    FUNC_LEAVE_NOAPI_VOID
-#endif /* H5_HAVE_WIN32_API */
 } /* end H5_nanosleep() */
 
 #ifdef H5_HAVE_WIN32_API
