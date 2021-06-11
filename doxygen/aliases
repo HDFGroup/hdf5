@@ -16,6 +16,7 @@ ALIASES += success{1}="\Bold{Success:} \1"
 ALIASES += failure{1}="\Bold{Failure:} \1"
 
 ALIASES += herr_t="Returns a non-negative value if successful; otherwise returns a negative value."
+ALIASES += herr_t_iter="\li Zero causes the iterator to continue, returning zero when the iteration is complete. \li A positive value causes the iterator to immediately return that positive value, indicating short-circuit success. \li A negative value causes the iterator to immediately return that value, indicating failure."
 ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
 ALIASES += hid_ti{1}="Returns an \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
 ALIASES += hid_tv{1}="Returns an \1 identifier if successful; otherwise returns a negative value. "
