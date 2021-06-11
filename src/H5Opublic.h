@@ -62,12 +62,14 @@
      H5O_SHMESG_ATTR_FLAG)
 
 /* Object header status flag definitions */
-#define H5O_HDR_CHUNK0_SIZE 0x03 /**< 2-bit field indicating # of bytes to store the size of chunk 0's data  \
+#define H5O_HDR_CHUNK0_SIZE                                                                                  \
+    0x03 /**< 2-bit field indicating # of bytes to store the size of chunk 0's data                          \
+          */
+#define H5O_HDR_ATTR_CRT_ORDER_TRACKED 0x04 /**< Attribute creation order is tracked */
+#define H5O_HDR_ATTR_CRT_ORDER_INDEXED 0x08 /**< Attribute creation order has index */
+#define H5O_HDR_ATTR_STORE_PHASE_CHANGE                                                                      \
+    0x10                         /**< Non-default attribute storage phase change values stored               \
                                   */
-#define H5O_HDR_ATTR_CRT_ORDER_TRACKED  0x04 /**< Attribute creation order is tracked */
-#define H5O_HDR_ATTR_CRT_ORDER_INDEXED  0x08 /**< Attribute creation order has index */
-#define H5O_HDR_ATTR_STORE_PHASE_CHANGE 0x10 /**< Non-default attribute storage phase change values stored   \
-                                              */
 #define H5O_HDR_STORE_TIMES 0x20 /**< Store access, modification, change & birth times for object */
 #define H5O_HDR_ALL_FLAGS                                                                                    \
     (H5O_HDR_CHUNK0_SIZE | H5O_HDR_ATTR_CRT_ORDER_TRACKED | H5O_HDR_ATTR_CRT_ORDER_INDEXED |                 \
@@ -170,7 +172,7 @@ typedef struct H5O_native_info_t {
     struct {
         H5_ih_info_t obj;  /**< v1/v2 B-tree & local/fractal heap for groups, B-tree for chunked datasets */
         H5_ih_info_t attr; /**< v2 B-tree & heap for attributes */
-    } meta_size; /**< Extra metadata storage for obj & attributes */
+    } meta_size;           /**< Extra metadata storage for obj & attributes */
 } H5O_native_info_t;
 //! <!-- [H5O_native_info_t_snip] -->
 

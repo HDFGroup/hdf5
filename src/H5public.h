@@ -199,7 +199,7 @@ typedef bool hbool_t;
  * }
  * \endcode
  */
-typedef int  htri_t;
+typedef int htri_t;
 
 /* The signed version of size_t
  *
