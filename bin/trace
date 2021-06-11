@@ -44,7 +44,6 @@ $Source = "";
                "H5D_vds_view_t"             => "Dv",
                "H5FD_mpio_xfer_t"           => "Dt",
                "H5FD_splitter_vfd_config_t" => "Dr",
-               "H5D_chunk_iter_op_t"        => "x",
                "herr_t"                     => "e",
                "H5E_direction_t"            => "Ed",
                "H5E_error_t"                => "Ee",
