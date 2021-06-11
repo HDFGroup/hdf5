@@ -30,7 +30,7 @@ set (H5P_VFD_TESTS
     t_pflush2
 )
 
-if (DIRECT_VFD)
+if (H5_HAVE_DIRECT)
   set (VFD_LIST ${VFD_LIST} direct)
 endif ()
 
