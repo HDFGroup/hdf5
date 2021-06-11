@@ -45,7 +45,6 @@ typedef __int64         h5_stat_size_t;
 #define HDlseek(F, O, W)   _lseeki64(F, O, W)
 #define HDlstat(S, B)      _lstati64(S, B)
 #define HDmkdir(S, M)      _mkdir(S)
-#define HDnanosleep(N, O)  Wnanosleep(N, O)
 #define HDoff_t            __int64
 
 /* Note that the variadic HDopen macro is using a VC++ extension
