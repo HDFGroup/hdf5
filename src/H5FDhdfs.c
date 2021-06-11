@@ -20,8 +20,10 @@
  *             File System (HDFS).
  */
 
+#ifdef H5_HAVE_LIBHDFS
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
+#endif
 
 #include "H5private.h"   /* Generic Functions        */
 #include "H5Eprivate.h"  /* Error handling           */

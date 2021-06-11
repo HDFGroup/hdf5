@@ -2365,14 +2365,21 @@ xml_dump_named_datatype(hid_t type, const char *name)
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t * outputformat = &xml_dataformat;
     h5tool_format_t   string_dataformat;
-    char *            tmp;
-    char *            dtxid;
-    char *            parentxid;
-    char *            t_tmp;
-    char *            t_prefix;
-    char *            t_name;
+    char *            tmp       = NULL;
+    char *            dtxid     = NULL;
+    char *            parentxid = NULL;
+    char *            t_tmp     = NULL;
+    char *            t_prefix  = NULL;
+    char *            t_name    = NULL;
 
     tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    if (tmp == NULL) {
+        indentation(dump_indent);
+        error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
+
     HDstrcpy(tmp, prefix);
     HDstrcat(tmp, "/");
     HDstrcat(tmp, name);
@@ -2627,6 +2634,13 @@ xml_dump_group(hid_t gid, const char *name)
     }
     else {
         tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+        if (tmp == NULL) {
+            indentation(dump_indent);
+            error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
+            h5tools_setstatus(EXIT_FAILURE);
+            return;
+        }
+
         HDstrcpy(tmp, prefix);
         par = HDstrdup(tmp);
         cp  = HDstrrchr(par, '/');
@@ -3146,8 +3160,11 @@ xml_print_strs(hid_t did, int source)
     }
 
     bp = (char *)buf;
-    if (!is_vlstr)
+    if (!is_vlstr) {
         onestring = (char *)HDcalloc(tsiz, sizeof(char));
+        if (onestring == NULL)
+            goto error;
+    }
 
     /* setup */
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -3768,6 +3785,14 @@ xml_dump_dataset(hid_t did, const char *name, struct subset_t H5_ATTR_UNUSED *ss
     char *pstr = (char *)HDmalloc((size_t)100);
 
     tmp = (char *)HDmalloc(HDstrlen(prefix) + HDstrlen(name) + 2);
+    if (tmp == NULL) {
+        error_msg("buffer allocation failed\n");
+        h5tools_setstatus(EXIT_FAILURE);
+        HDfree(rstr);
+        HDfree(pstr);
+        return;
+    }
+
     HDstrcpy(tmp, prefix);
     HDstrcat(tmp, "/");
     HDstrcat(tmp, name);
