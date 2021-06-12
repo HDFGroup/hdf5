@@ -61,8 +61,8 @@
 /********************/
 
 static herr_t H5AC__check_if_write_permitted(const H5F_t *f, hbool_t *write_permitted_ptr);
-static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
-                                            H5C_auto_size_ctl_t *int_conf_ptr);
+static herr_t H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr,
+                                            H5C_auto_size_ctl_t *      int_conf_ptr);
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
@@ -94,29 +94,27 @@ hbool_t H5_coll_api_sanity_check_g = false;
  */
 
 static const H5AC_class_t *const H5AC_class_s[] = {
-    H5AC_BT,               /* ( 0) B-tree nodes                     */
-    H5AC_SNODE,            /* ( 1) symbol table nodes               */
-    H5AC_LHEAP_PRFX,       /* ( 2) local heap prefix                */
-    H5AC_LHEAP_DBLK,       /* ( 3) local heap data block            */
-    H5AC_GHEAP,            /* ( 4) global heap                      */
-    H5AC_OHDR,             /* ( 5) object header                    */
-    H5AC_OHDR_CHK,         /* ( 6) object header chunk              */
-    H5AC_BT2_HDR,          /* ( 7) v2 B-tree header                 */
-    H5AC_BT2_INT,          /* ( 8) v2 B-tree internal node          */
-    H5AC_BT2_LEAF,         /* ( 9) v2 B-tree leaf node              */
-    H5AC_FHEAP_HDR,        /* (10) fractal heap header              */
-    H5AC_FHEAP_DBLOCK,     /* (11) fractal heap direct block        */
-    H5AC_FHEAP_IBLOCK,     /* (12) fractal heap indirect block      */
-    H5AC_FSPACE_HDR,       /* (13) free space header                */
-    H5AC_FSPACE_SINFO,     /* (14) free space sections              */
-    H5AC_SOHM_TABLE,       /* (15) shared object header message     */
-                           /*      master table                     */
-    H5AC_SOHM_LIST,        /* (16) shared message index stored as   */
-                           /*      a list                           */
-    H5AC_EARRAY_HDR,       /* (17) extensible array header          */
-    H5AC_EARRAY_IBLOCK,    /* (18) extensible array index block     */
-    H5AC_EARRAY_SBLOCK,    /* (19) extensible array super block     */
-    H5AC_EARRAY_DBLOCK,    /* (20) extensible array data block      */
+    H5AC_BT,               /* ( 0) B-tree nodes                    */
+    H5AC_SNODE,            /* ( 1) symbol table nodes              */
+    H5AC_LHEAP_PRFX,       /* ( 2) local heap prefix               */
+    H5AC_LHEAP_DBLK,       /* ( 3) local heap data block           */
+    H5AC_GHEAP,            /* ( 4) global heap                     */
+    H5AC_OHDR,             /* ( 5) object header                   */
+    H5AC_OHDR_CHK,         /* ( 6) object header chunk             */
+    H5AC_BT2_HDR,          /* ( 7) v2 B-tree header                */
+    H5AC_BT2_INT,          /* ( 8) v2 B-tree internal node         */
+    H5AC_BT2_LEAF,         /* ( 9) v2 B-tree leaf node             */
+    H5AC_FHEAP_HDR,        /* (10) fractal heap header             */
+    H5AC_FHEAP_DBLOCK,     /* (11) fractal heap direct block       */
+    H5AC_FHEAP_IBLOCK,     /* (12) fractal heap indirect block     */
+    H5AC_FSPACE_HDR,       /* (13) free space header               */
+    H5AC_FSPACE_SINFO,     /* (14) free space sections             */
+    H5AC_SOHM_TABLE,       /* (15) shared object header message master table */
+    H5AC_SOHM_LIST,        /* (16) shared message index stored as a list */
+    H5AC_EARRAY_HDR,       /* (17) extensible array header         */
+    H5AC_EARRAY_IBLOCK,    /* (18) extensible array index block    */
+    H5AC_EARRAY_SBLOCK,    /* (19) extensible array super block    */
+    H5AC_EARRAY_DBLOCK,    /* (20) extensible array data block     */
     H5AC_EARRAY_DBLK_PAGE, /* (21) extensible array data block page */
     H5AC_FARRAY_HDR,       /* (22) fixed array header              */
     H5AC_FARRAY_DBLOCK,    /* (23) fixed array data block          */
@@ -1688,14 +1686,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr, size_t *cur_size_ptr,
-                    uint32_t *cur_num_entries_ptr)
+H5AC_get_cache_size(const H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+                    size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_cache_size((H5C_t *)cache_ptr, max_size_ptr, min_clean_size_ptr, cur_size_ptr,
+    if (H5C_get_cache_size((const H5C_t *)cache_ptr, max_size_ptr, min_clean_size_ptr, cur_size_ptr,
                            cur_num_entries_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_size() failed")
 
@@ -1742,13 +1740,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_hit_rate(H5AC_t *cache_ptr, double *hit_rate_ptr)
+H5AC_get_cache_hit_rate(const H5AC_t *cache_ptr, double *hit_rate_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_cache_hit_rate((H5C_t *)cache_ptr, hit_rate_ptr) < 0)
+    if (H5C_get_cache_hit_rate((const H5C_t *)cache_ptr, hit_rate_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_hit_rate() failed")
 
 done:
@@ -1794,7 +1792,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config_ptr)
+H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, const H5AC_cache_config_t *config_ptr)
 {
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED; /* Return value */
@@ -1895,7 +1893,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_validate_config(H5AC_cache_config_t *config_ptr)
+H5AC_validate_config(const H5AC_cache_config_t *config_ptr)
 {
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED; /* Return value */
@@ -2076,7 +2074,7 @@ H5AC__check_if_write_permitted(const H5F_t
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr, H5C_auto_size_ctl_t *int_conf_ptr)
+H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr, H5C_auto_size_ctl_t *int_conf_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2637,13 +2635,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len)
+H5AC_get_mdc_image_info(const H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_mdc_image_info((H5C_t *)cache_ptr, image_addr, image_len) < 0)
+    if (H5C_get_mdc_image_info((const H5C_t *)cache_ptr, image_addr, image_len) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
 
 done:

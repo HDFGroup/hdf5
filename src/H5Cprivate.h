@@ -2381,10 +2381,10 @@ herr_t H5C_verify_tag(int id, haddr_t tag);
 H5_DLL herr_t  H5C_flush_to_min_clean(H5F_t *f);
 H5_DLL herr_t  H5C_get_cache_auto_resize_config(const H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_ptr);
 H5_DLL herr_t  H5C_get_cache_image_config(const H5C_t *cache_ptr, H5C_cache_image_ctl_t *config_ptr);
-H5_DLL herr_t  H5C_get_cache_size(H5C_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+H5_DLL herr_t  H5C_get_cache_size(const H5C_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
                                   size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr);
-H5_DLL herr_t  H5C_get_cache_flush_in_progress(H5C_t *cache_ptr, hbool_t *flush_in_progress_ptr);
-H5_DLL herr_t  H5C_get_cache_hit_rate(H5C_t *cache_ptr, double *hit_rate_ptr);
+H5_DLL herr_t  H5C_get_cache_flush_in_progress(const H5C_t *cache_ptr, hbool_t *flush_in_progress_ptr);
+H5_DLL herr_t  H5C_get_cache_hit_rate(const H5C_t *cache_ptr, double *hit_rate_ptr);
 H5_DLL int     H5C_get_curr_io_client_type(H5C_t *cache_ptr);
 H5_DLL hbool_t H5C_get_curr_read_speculative(H5C_t *cache_ptr);
 H5_DLL herr_t  H5C_get_entry_status(const H5F_t *f, haddr_t addr, size_t *size_ptr, hbool_t *in_cache_ptr,
@@ -2431,7 +2431,7 @@ H5_DLL herr_t   H5C_unsettle_ring(H5F_t *f, H5C_ring_t ring);
 H5_DLL herr_t   H5C_remove_entry(void *thing);
 H5_DLL herr_t   H5C_cache_image_status(H5F_t *f, hbool_t *load_ci_ptr, hbool_t *write_ci_ptr);
 H5_DLL hbool_t  H5C_cache_image_pending(const H5C_t *cache_ptr);
-H5_DLL herr_t   H5C_get_mdc_image_info(H5C_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len);
+H5_DLL herr_t   H5C_get_mdc_image_info(const H5C_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len);
 
 /* Logging functions */
 H5_DLL herr_t H5C_start_logging(H5C_t *cache);

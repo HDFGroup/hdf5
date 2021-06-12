@@ -3689,6 +3689,7 @@ done:
 #endif /* H5C_DO_EXTREME_SANITY_CHECKS */
 
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5C_unprotect() */
 
 /*-------------------------------------------------------------------------
@@ -4645,9 +4646,8 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
                     break;
 
                 case H5C_flash_incr__add_space:
-                    cache_ptr->flash_size_increase_threshold =
-                        (size_t)(((double)(cache_ptr->max_cache_size)) *
-                                 ((cache_ptr->resize_ctl).flash_threshold));
+                    cache_ptr->flash_size_increase_threshold = (size_t)(
+                        ((double)(cache_ptr->max_cache_size)) * ((cache_ptr->resize_ctl).flash_threshold));
                     break;
 
                 default: /* should be unreachable */
@@ -4658,9 +4658,9 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
     }
 
     if ((cache_ptr->resize_ctl).rpt_fcn != NULL) {
-        (*((cache_ptr->resize_ctl).rpt_fcn))(cache_ptr, H5C__CURR_AUTO_RESIZE_RPT_FCN_VER, hit_rate,
-                                             status, old_max_cache_size, new_max_cache_size,
-                                             old_min_clean_size, new_min_clean_size);
+        (*((cache_ptr->resize_ctl).rpt_fcn))(cache_ptr, H5C__CURR_AUTO_RESIZE_RPT_FCN_VER, hit_rate, status,
+                                             old_max_cache_size, new_max_cache_size, old_min_clean_size,
+                                             new_min_clean_size);
     }
 
     if (H5C_reset_cache_hit_rate_stats(cache_ptr) < 0)
@@ -5835,6 +5835,7 @@ H5C_flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "dirty pinned entry flush failed")
 
                     if (cache_ptr->slist_changed) {
+
                         /* The slist has been modified by something
                          * other than the simple removal of the
                          * of the flushed entry after the flush.
@@ -5845,16 +5846,20 @@ H5C_flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                         restart_slist_scan       = TRUE;
                         cache_ptr->slist_changed = FALSE;
                         H5C__UPDATE_STATS_FOR_SLIST_SCAN_RESTART(cache_ptr);
+
                     } /* end if */
                 }     /* end else-if */
                 else {
+
                     if (H5C__flush_single_entry(f, entry_ptr,
                                                 (cooked_flags | H5C__DURING_FLUSH_FLAG |
                                                  H5C__FLUSH_INVALIDATE_FLAG |
                                                  H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG)) < 0)
+
                         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "dirty entry flush destroy failed")
 
                     if (cache_ptr->slist_changed) {
+
                         /* The slist has been modified by something
                          * other than the simple removal of the
                          * of the flushed entry after the flush.
@@ -5881,12 +5886,14 @@ H5C_flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
          */
 
         if (node_ptr == NULL) {
+
             HDassert(cache_ptr->slist_len ==
                      (uint32_t)((int32_t)initial_slist_len + cache_ptr->slist_len_increase));
+
             HDassert(cache_ptr->slist_size ==
                      (size_t)((ssize_t)initial_slist_size + cache_ptr->slist_size_increase));
         } /* end if */
-#endif        /* H5C_DO_SANITY_CHECKS */
+#endif    /* H5C_DO_SANITY_CHECKS */
 
         /* Since we are doing a destroy, we must make a pass through
          * the hash table and try to flush - destroy all entries that
@@ -5908,7 +5915,9 @@ H5C_flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
         cache_ptr->entries_relocated_counter = 0;
 
         next_entry_ptr = cache_ptr->il_head;
+
         while (next_entry_ptr != NULL) {
+
             entry_ptr = next_entry_ptr;
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
             HDassert(entry_ptr->ring >= ring);
@@ -5920,15 +5929,20 @@ H5C_flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
                  (entry_ptr->flush_me_last && cache_ptr->num_last_entries >= cache_ptr->slist_len)) &&
                 entry_ptr->flush_dep_nchildren == 0 && entry_ptr->ring == ring) {
                 if (entry_ptr->is_protected) {
+
                     /* we have major problems -- but lets flush and
                      * destroy everything we can before we flag an
                      * error.
                      */
                     protected_entries++;
-                    if (!entry_ptr->in_slist)
+
+                    if (!entry_ptr->in_slist) {
+
                         HDassert(!(entry_ptr->is_dirty));
+                    }
                 } /* end if */
                 else if (!(entry_ptr->is_pinned)) {
+
                     /* if *entry_ptr is dirty, it is possible
                      * that one or more other entries may be
                      * either removed from the cache, loaded
@@ -7196,16 +7210,10 @@ size_t      init_len;
     HDassert(type);
     HDassert(H5F_addr_defined(addr));
     HDassert(type->get_initial_load_size);
-
-    if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) {
-
+    if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
         HDassert(type->get_final_load_size);
-    }
-    else {
-
+    else
         HDassert(NULL == type->get_final_load_size);
-    }
-
     HDassert(type->deserialize);
 
     /* Can't see how skip reads could be usefully combined with
@@ -7228,39 +7236,28 @@ init_len = len;
 #endif
 
     /* Check for possible speculative read off the end of the file */
-    if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG) {
-
+    if (type->flags & H5C__CLASS_SPECULATIVE_LOAD_FLAG)
         if (H5C__verify_len_eoa(f, type, addr, &len, FALSE) < 0)
-
             HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "invalid len with respect to EOA")
-    }
 
     /* Allocate the buffer for reading the on-disk entry image */
     if (NULL == (image = (uint8_t *)H5MM_malloc(len + H5C_IMAGE_EXTRA_SPACE)))
-
         HGOTO_ERROR(H5E_CACHE, H5E_CANTALLOC, NULL, "memory allocation failed for on disk image buffer")
-
 #if H5C_DO_MEMORY_SANITY_CHECKS
     H5MM_memcpy(image + len, H5C_IMAGE_SANITY_VALUE, H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
 
 #ifdef H5_HAVE_PARALLEL
     if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-
         if ((mpi_rank = H5F_mpi_get_rank(f)) < 0)
-
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "Can't get MPI rank")
-
         if ((comm = H5F_mpi_get_comm(f)) == MPI_COMM_NULL)
-
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "get_comm request failed")
-
-    } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+    }  /* end if */
+#endif /* H5_HAVE_PARALLEL */
 
     /* Get the on-disk entry image */
     if (0 == (type->flags & H5C__CLASS_SKIP_READS)) {
-
         unsigned tries;             /* The # of retries                     */
         htri_t   chk_ret;           /* return from verify_chksum callback   */
         size_t   actual_len = len;  /* The actual length, after speculative */
@@ -7311,12 +7308,10 @@ init_len = len;
              * communicator
              */
             if (coll_access) {
-
                 int buf_size;
 
                 H5_CHECKED_ASSIGN(buf_size, int, len, size_t);
                 if (MPI_SUCCESS != (mpi_code = MPI_Bcast(image, buf_size, MPI_BYTE, 0, comm)))
-
                     HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
             } /* end if */
 #endif            /* H5_HAVE_PARALLEL */
@@ -7409,22 +7404,18 @@ init_len = len;
 #endif /* JRM */
 #ifdef H5_HAVE_PARALLEL
                         }
-                        /* If the collective metadata read optimization is
-                         * turned on, Bcast the metadata read from process
-                         * 0 to all ranks in the file communicator
-                         */
+                        /* If the collective metadata read optimization is turned on,
+                         * Bcast the metadata read from process 0 to all ranks in the file
+                         * communicator */
                         if (coll_access) {
-
                             int buf_size;
 
                             H5_CHECKED_ASSIGN(buf_size, int, actual_len - len, size_t);
-
                             if (MPI_SUCCESS !=
                                 (mpi_code = MPI_Bcast(image + len, buf_size, MPI_BYTE, 0, comm)))
-
                                 HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
                         } /* end if */
-#endif                        /* H5_HAVE_PARALLEL */
+#endif                    /* H5_HAVE_PARALLEL */
                     }     /* end if */
                 }         /* end if (actual_len != len) */
                 else {
@@ -7444,9 +7435,7 @@ init_len = len;
 
             /* Verify the checksum for the metadata image */
             if ((chk_ret = type->verify_chksum(image, actual_len, udata)) < 0)
-
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "failure from verify_chksum callback")
-
             if (chk_ret == TRUE)
                 break;
         }
@@ -8024,7 +8013,7 @@ done:
  */
 #if H5C_DO_EXTREME_SANITY_CHECKS
 static herr_t
-H5C_validate_pinned_entry_list(H5C_t * cache_ptr)
+H5C_validate_pinned_entry_list(H5C_t *cache_ptr)
 {
     int32_t            len       = 0;
     size_t             size      = 0;
@@ -8108,12 +8097,12 @@ done:
  */
 #if H5C_DO_EXTREME_SANITY_CHECKS
 static herr_t
-H5C_validate_protected_entry_list(H5C_t * cache_ptr)
+H5C_validate_protected_entry_list(H5C_t *cache_ptr)
 {
-    herr_t             ret_value = SUCCEED; /* Return value */
     int32_t            len       = 0;
     size_t             size      = 0;
     H5C_cache_entry_t *entry_ptr = NULL;
+    herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
 
