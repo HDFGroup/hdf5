@@ -1574,8 +1574,9 @@ H5F__dest(H5F_t *f, hbool_t flush)
             HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "vfd swmr prep for flush or close failed")
 
         if ((f->shared->vfd_swmr) && (!f->shared->vfd_swmr_writer))
-            HDfprintf(stdout, "The maximum jump in ticks is %llu; The maximum expected lag configured is %u\n",
-                f->shared->max_jump_ticks, f->shared->vfd_swmr_config.max_lag);
+            HDfprintf(stdout,
+                      "The maximum jump in ticks is %llu; The maximum expected lag configured is %u\n",
+                      f->shared->max_jump_ticks, f->shared->vfd_swmr_config.max_lag);
 
         /* Shutdown the page buffer cache */
         if (H5PB_dest(f->shared) < 0)

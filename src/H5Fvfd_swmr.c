@@ -203,7 +203,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         HDassert(!shared->vfd_swmr_config.writer);
 
         shared->vfd_swmr_writer = FALSE;
-        shared->max_jump_ticks = 0;
+        shared->max_jump_ticks  = 0;
 
         HDassert(shared->mdf_idx == NULL);
 
