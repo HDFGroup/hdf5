@@ -170,7 +170,7 @@ main(int argc, char **argv)
             continue;
         }
         nconverted = HDsscanf(content[which], "content %d seq %d %96s", &scanned_content.which,
-                            &scanned_content.seq, scanned_content.tail);
+                              &scanned_content.seq, scanned_content.tail);
         if (nconverted != 3) {
             dbgf(2, ": couldn't scan\n");
             continue;

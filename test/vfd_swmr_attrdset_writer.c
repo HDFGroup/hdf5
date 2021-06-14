@@ -186,31 +186,31 @@ static void
 usage(const char *progname)
 {
     HDfprintf(stderr,
-            "usage: %s -a nattrs [-p] [-g] [-k] [-v] [-m]\n"
-            "    [-d dattrs] [-u nticks] [-c csteps] [-S] [-N]\n"
-            "\n"
-            "-p:	           create a dataset with compact layout\n"
-            "-g:	           create a dataset with contiguous layout\n"
-            "-k:	           create datasets with chunked layout for the 5 indexing types\n"
-            "-m:	           modify attributes to all datasets after addition\n"
-            "-v:	           add variable length attribute to datasets\n"
-            "                   (default is H5T_NATIVE_UINT32)\n"
-            "-a nattrs:	   add `nattrs` attributes to all datasets\n"
-            "-d dattrs:	   delete `dattrs` attributes to all datasets after addition\n"
-            "-u nticks:         `nticks` ticks for the reader to wait before verification\n"
-            "                   (default is 4)\n"
-            "-c csteps:         `csteps` steps communication interval between reader and writer\n"
-            "                   (default is 1)\n"
-            "-S:	           do not use VFD SWMR\n"
-            "-N:	           do not use named pipes for test synchronization\n"
-            "-b:	           write data in big-endian byte order if no -v option\n"
-            "                   (default is H5T_NATIVE_UINT32)\n\n"
-            "Note:\n"
-            "1. Require to specify at least -p, -g or -k option\n"
-            "2. -c <csteps> option cannot exceed -a <nattrs> option\n"
-            "3. -d <dattrs> option cannot exceed -a <nattrs> option\n"
-            "\n",
-            progname);
+              "usage: %s -a nattrs [-p] [-g] [-k] [-v] [-m]\n"
+              "    [-d dattrs] [-u nticks] [-c csteps] [-S] [-N]\n"
+              "\n"
+              "-p:	           create a dataset with compact layout\n"
+              "-g:	           create a dataset with contiguous layout\n"
+              "-k:	           create datasets with chunked layout for the 5 indexing types\n"
+              "-m:	           modify attributes to all datasets after addition\n"
+              "-v:	           add variable length attribute to datasets\n"
+              "                   (default is H5T_NATIVE_UINT32)\n"
+              "-a nattrs:	   add `nattrs` attributes to all datasets\n"
+              "-d dattrs:	   delete `dattrs` attributes to all datasets after addition\n"
+              "-u nticks:         `nticks` ticks for the reader to wait before verification\n"
+              "                   (default is 4)\n"
+              "-c csteps:         `csteps` steps communication interval between reader and writer\n"
+              "                   (default is 1)\n"
+              "-S:	           do not use VFD SWMR\n"
+              "-N:	           do not use named pipes for test synchronization\n"
+              "-b:	           write data in big-endian byte order if no -v option\n"
+              "                   (default is H5T_NATIVE_UINT32)\n\n"
+              "Note:\n"
+              "1. Require to specify at least -p, -g or -k option\n"
+              "2. -c <csteps> option cannot exceed -a <nattrs> option\n"
+              "3. -d <dattrs> option cannot exceed -a <nattrs> option\n"
+              "\n",
+              progname);
     HDexit(EXIT_FAILURE);
 } /* usage() */
 

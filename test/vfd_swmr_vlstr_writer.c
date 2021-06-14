@@ -247,18 +247,19 @@ main(int argc, char **argv)
         switch (step) {
             case CREATE:
                 (void)HDsnprintf(name[which], sizeof(name[which]), "dset-%d", which);
-                (void)HDsnprintf(content[which], sizeof(content[which]), "content %d seq %d short", which, seq);
+                (void)HDsnprintf(content[which], sizeof(content[which]), "content %d seq %d short", which,
+                                 seq);
                 dset[which] = create_vl_dset(fid, type, space, name[which]);
                 write_vl_dset(dset[which], type, space, content[which]);
                 break;
             case LENGTHEN:
                 (void)HDsnprintf(content[which], sizeof(content[which]),
-                               "content %d seq %d long long long long long long long long", which, seq);
+                                 "content %d seq %d long long long long long long long long", which, seq);
                 write_vl_dset(dset[which], type, space, content[which]);
                 break;
             case SHORTEN:
                 (void)HDsnprintf(content[which], sizeof(content[which]),
-                               "content %d seq %d medium medium medium", which, seq);
+                                 "content %d seq %d medium medium medium", which, seq);
                 write_vl_dset(dset[which], type, space, content[which]);
                 break;
             case DELETE:

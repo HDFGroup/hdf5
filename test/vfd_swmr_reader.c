@@ -154,7 +154,7 @@ check_dataset(hid_t fid, hbool_t verbose, FILE *verbose_file, const char *sym_na
                           (intmax_t)tv.tv_sec, (intmax_t)tv.tv_usec, sym_name, snpoints, record->rec_id);
             } /* end if */
             HDfprintf(stderr, "%s.%d: record value %" PRIu64 " != %" PRIuHSIZE "\n", __func__, __LINE__,
-                    record->rec_id, start[1]);
+                      record->rec_id, start[1]);
             goto error;
         } /* end if */
     }     /* end if */

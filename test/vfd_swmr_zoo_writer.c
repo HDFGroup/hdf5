@@ -86,7 +86,7 @@ usage(const char *progname)
     HDfprintf(stderr, "  -e: print error stacks\n");
     HDfprintf(stderr, "  -l tick_num: expected maximal number of ticks from \n");
     HDfprintf(stderr,
-            "     the writer's finishing zoo creation or deletion to the reader's finishing validation\n");
+              "     the writer's finishing zoo creation or deletion to the reader's finishing validation\n");
     HDfprintf(stderr, "  -N: do not use named pipes\n");
     HDfprintf(stderr, "  -q: be quiet: few/no progress messages\n");
     HDfprintf(stderr, "  -v: be verbose: most progress messages\n");
