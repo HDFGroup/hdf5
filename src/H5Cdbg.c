@@ -404,7 +404,7 @@ H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn)
 
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
-            HDfprintf(stdout, "%s%d       0x%016" PRIxHADDR "  %4%zu    %d/%d       %d    %s\n",
+            HDfprintf(stdout, "%s%d       0x%016" PRIxHADDR "  %4zu    %d/%d       %d    %s\n",
                       cache_ptr->prefix, i, entry_ptr->addr, entry_ptr->size, (int)(entry_ptr->is_protected),
                       (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty), entry_ptr->type->name);
 
