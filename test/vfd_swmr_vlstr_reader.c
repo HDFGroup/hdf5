@@ -51,12 +51,12 @@ read_vl_dset(hid_t dset, hid_t type, char **data)
 static void
 usage(const char *progname)
 {
-    fprintf(stderr, "usage: %s [-W] [-V] [-t (oob|null)] \n", progname);
-    fprintf(stderr, "\n  -S: do not use VFD SWMR\n");
-    fprintf(stderr, "  -n: number of test steps to perform\n");
-    fprintf(stderr, "  -q: be quiet: few/no progress messages\n");
-    fprintf(stderr, "  -t (oob|null): select out-of-bounds or NULL test\n");
-    exit(EXIT_FAILURE);
+    HDfprintf(stderr, "usage: %s [-W] [-V] [-t (oob|null)] \n", progname);
+    HDfprintf(stderr, "\n  -S: do not use VFD SWMR\n");
+    HDfprintf(stderr, "  -n: number of test steps to perform\n");
+    HDfprintf(stderr, "  -q: be quiet: few/no progress messages\n");
+    HDfprintf(stderr, "  -t (oob|null): select out-of-bounds or NULL test\n");
+    HDexit(EXIT_FAILURE);
 }
 
 int
@@ -75,7 +75,7 @@ main(int argc, char **argv)
     testsel_t             sel                  = TEST_NONE;
     H5F_vfd_swmr_config_t config;
 
-    assert(H5T_C_S1 != badhid);
+    HDassert(H5T_C_S1 != badhid);
 
     while ((ch = getopt(argc, argv, "Sn:qt:")) != -1) {
         switch (ch) {
@@ -84,7 +84,7 @@ main(int argc, char **argv)
                 break;
             case 'n':
                 errno = 0;
-                tmp   = strtoul(optarg, &end, 0);
+                tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0')
                     errx(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", optarg);
                 else if (errno != 0)
@@ -97,9 +97,9 @@ main(int argc, char **argv)
                 verbosity = 1;
                 break;
             case 't':
-                if (strcmp(optarg, "oob") == 0)
+                if (HDstrcmp(optarg, "oob") == 0)
                     sel = TEST_OOB;
-                else if (strcmp(optarg, "null") == 0)
+                else if (HDstrcmp(optarg, "null") == 0)
                     sel = TEST_NULL;
                 else
                     usage(argv[0]);
@@ -156,7 +156,7 @@ main(int argc, char **argv)
         } scanned_content;
 
         dbgf(2, "iteration %d which %d", i, which);
-        (void)snprintf(name[which], sizeof(name[which]), "dset-%d", which);
+        (void)HDsnprintf(name[which], sizeof(name[which]), "dset-%d", which);
         es          = disable_estack();
         dset[which] = H5Dopen2(fid, name[which], H5P_DEFAULT);
         restore_estack(es);
@@ -169,7 +169,7 @@ main(int argc, char **argv)
             dbgf(2, ": couldn't read\n");
             continue;
         }
-        nconverted = sscanf(content[which], "content %d seq %d %96s", &scanned_content.which,
+        nconverted = HDsscanf(content[which], "content %d seq %d %96s", &scanned_content.which,
                             &scanned_content.seq, scanned_content.tail);
         if (nconverted != 3) {
             dbgf(2, ": couldn't scan\n");
@@ -181,10 +181,10 @@ main(int argc, char **argv)
     }
 
     if (caught_out_of_bounds)
-        fprintf(stderr, "caught out of bounds\n");
+        HDfprintf(stderr, "caught out of bounds\n");
 
     if (read_null)
-        fprintf(stderr, "read NULL\n");
+        HDfprintf(stderr, "read NULL\n");
 
     if (H5Pclose(fapl) < 0)
         errx(EXIT_FAILURE, "H5Pclose(fapl)");
