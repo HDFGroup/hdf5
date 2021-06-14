@@ -6703,7 +6703,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 
         if ((entry_ptr->is_dirty) || (entry_ptr->flush_marker))
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry failed sanity checks")
-    }  /* end else */
+    } /* end else */
 #endif /* H5C_DO_SANITY_CHECKS */
 
     if (entry_ptr->is_protected) {
@@ -6813,8 +6813,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 
                 H5C__SET_PB_WRITE_HINTS(cache_ptr, entry_ptr->type)
 
-                if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) <
-                    0) {
+                if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0) {
 
                     H5C__RESET_PB_WRITE_HINTS(cache_ptr)
 
@@ -7316,7 +7315,7 @@ size_t      init_len;
     int      mpi_rank = 0;             /* MPI process rank               */
     MPI_Comm comm     = MPI_COMM_NULL; /* File MPI Communicator          */
     int      mpi_code;                 /* MPI error code                 */
-#endif                                 /* H5_HAVE_PARALLEL */
+#endif                                     /* H5_HAVE_PARALLEL */
     void *ret_value = NULL;            /* Return value                   */
 
     FUNC_ENTER_STATIC
@@ -7477,48 +7476,48 @@ init_len = len;
                                         "can't read image")
 #else  /* JRM */
 
-                        /* the original version of this code re-read
-                         * the entire buffer.  At some point, someone
-                         * reworked this code to avoid re-reading the
-                         * initial portion of the buffer.
-                         *
-                         * In addition to being of questionable utility,
-                         * this optimization changed the invarient that
-                         * that metadata is read and written atomically.
-                         * While this didn't cause immediate problems,
-                         * the page buffer in VFD SWMR depends on this
-                         * invarient in its management of multi-page
-                         * metadata entries.
-                         *
-                         * To repair this issue, I have reverted to
-                         * the original algorithm for managing the
-                         * speculative load case.  Note that I have
-                         * done so crudely -- before merge, we should
-                         * remove the infrastructure that supports the
-                         * optimization.
-                         *
-                         * We should also verify my impression that the
-                         * that the optimization is of no measurable
-                         * value.  If it is, we will put it back, but
-                         * disable it in the VFD SWMR case.
-                         *
-                         * While this issue was detected in the global
-                         * heap case, note that the super bloc, the
-                         * local heap, and the fractal heap also use
-                         * speculative loads.
-                         *
-                         *                          JRM -- 3/24/20
-                         */
+                    /* the original version of this code re-read
+                     * the entire buffer.  At some point, someone
+                     * reworked this code to avoid re-reading the
+                     * initial portion of the buffer.
+                     *
+                     * In addition to being of questionable utility,
+                     * this optimization changed the invarient that
+                     * that metadata is read and written atomically.
+                     * While this didn't cause immediate problems,
+                     * the page buffer in VFD SWMR depends on this
+                     * invarient in its management of multi-page
+                     * metadata entries.
+                     *
+                     * To repair this issue, I have reverted to
+                     * the original algorithm for managing the
+                     * speculative load case.  Note that I have
+                     * done so crudely -- before merge, we should
+                     * remove the infrastructure that supports the
+                     * optimization.
+                     *
+                     * We should also verify my impression that the
+                     * that the optimization is of no measurable
+                     * value.  If it is, we will put it back, but
+                     * disable it in the VFD SWMR case.
+                     *
+                     * While this issue was detected in the global
+                     * heap case, note that the super bloc, the
+                     * local heap, and the fractal heap also use
+                     * speculative loads.
+                     *
+                     *                          JRM -- 3/24/20
+                     */
 
-                        H5C__SET_PB_READ_HINTS(f->shared->cache, type, FALSE);
+                    H5C__SET_PB_READ_HINTS(f->shared->cache, type, FALSE);
 
-                        if (H5F_block_read(f, type->mem_type, addr, actual_len, image) < 0) {
+                    if (H5F_block_read(f, type->mem_type, addr, actual_len, image) < 0) {
 
-                            H5C__RESET_PB_READ_HINTS(f->shared->cache)
-
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
-                        }
                         H5C__RESET_PB_READ_HINTS(f->shared->cache)
+
+                        HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+                    }
+                    H5C__RESET_PB_READ_HINTS(f->shared->cache)
 #endif /* JRM */
 #ifdef H5_HAVE_PARALLEL
                         }
@@ -7575,17 +7574,18 @@ init_len = len;
         H5FD_vfd_swmr_dump_status(f->shared->lf, page);
 #endif /* JRM */
             HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL,
-                        "incorrect metadata checksum after all read attempts addr %" PRIuHADDR " size %zu",
+                        "incorrect metadata checksum after all read attempts addr %" PRIuHADDR
+                        " size %zu",
                         addr, len);
         }
 
-        /* Calculate and track the # of retries */
-        if ((tries = h5_retry_tries(&retry)) > 1) { /* Does not track 0 retry */
+    /* Calculate and track the # of retries */
+    if ((tries = h5_retry_tries(&retry)) > 1) { /* Does not track 0 retry */
 
-            if (H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, tries - 1) < 0)
+        if (H5F_track_metadata_read_retries(f, (unsigned)type->mem_type, tries - 1) < 0)
 
-                HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "cannot track read tries = %u ", tries)
-        }
+            HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, NULL, "cannot track read tries = %u ", tries)
+    }
 
         /* Set the final length (in case it wasn't set earlier) */
         len = actual_len;
@@ -9263,8 +9263,8 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 
     /* Call client's pre-serialize callback, if there's one */
     if (entry_ptr->type->pre_serialize &&
-        (entry_ptr->type->pre_serialize)(f, (void *)entry_ptr, entry_ptr->addr, entry_ptr->size, &new_addr,
-                                         &new_len, &serialize_flags) < 0)
+        (entry_ptr->type->pre_serialize)(f, (void *)entry_ptr, entry_ptr->addr, entry_ptr->size,
+                                         &new_addr, &new_len, &serialize_flags) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to pre-serialize entry")
 
     /* Check for any flags set in the pre-serialize callback */
