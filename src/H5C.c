@@ -11,6 +11,9 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* TEMPORARY (during VFD SWMR sync with develop - reduces churn) */
+/* clang-format off */
+
 /*-------------------------------------------------------------------------
  *
  * Created:     H5C.c
@@ -9555,3 +9558,6 @@ H5C_remove_entry(void *_entry)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C__remove_entry() */
+
+/* TEMPORARY (during VFD SWMR sync with develop - reduces churn) */
+/* clang-format on */
