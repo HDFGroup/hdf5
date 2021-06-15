@@ -281,6 +281,18 @@ H5FL_SEQ_DEFINE_STATIC(H5C_cache_entry_ptr_t);
  *
  *              Missing entries?
  *
+ *
+ *              JRM -- 4/20/20
+ *              Added initialization for the slist_enabled field.  Recall
+ *              that the slist is used to flush metadata cache entries
+ *              in (roughly) increasing address order.  While this is
+ *              needed at flush and close, it is not used elsewhere.
+ *              The slist_enabled field exists to allow us to construct
+ *              the slist when needed, and leave it empty otherwise -- thus
+ *              avoiding the overhead of maintaining it.
+ *
+ *                                               JRM -- 4/29/20
+ *
  *-------------------------------------------------------------------------
  */
 H5C_t *
@@ -379,6 +391,7 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     cache_ptr->num_objs_corked = 0;
 
     /* slist field initializations */
+    cache_ptr->slist_enabled = !H5C__SLIST_OPT_ENABLED;
     cache_ptr->slist_changed = FALSE;
     cache_ptr->slist_len     = 0;
     cache_ptr->slist_size    = (size_t)0;
@@ -825,6 +838,20 @@ done:
  * Programmer:  John Mainzer
  *        6/2/04
  *
+ * Modifications:
+ *
+ *              JRM -- 5/15/20
+ *
+ *              Updated the function to enable the slist prior to the
+ *              call to H5C__flush_invalidate_cache().
+ *
+ *              Arguably, it shouldn't be necessary to re-enable the
+ *              slist after the call to H5C__flush_invalidate_cache(), as
+ *              the metadata cache should be discarded.  However, in the
+ *              test code, we make multiple calls to H5C_dest().  Thus
+ *              we re-enable the slist on failure if it and the cache
+ *              still exist.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -845,6 +872,11 @@ H5C_dest(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't display cache image stats")
 #endif /* H5AC_DUMP_IMAGE_STATS_ON_CLOSE */
 
+    /* Enable the slist, as it is needed in the flush */
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
     /* Flush and invalidate all cache entries */
     if (H5C__flush_invalidate_cache(f, H5C__NO_FLAGS_SET) < 0)
 
@@ -859,6 +891,10 @@ H5C_dest(H5F_t *f)
     }
 
     if (cache_ptr->slist_ptr != NULL) {
+
+        HDassert(cache_ptr->slist_len == 0);
+        HDassert(cache_ptr->slist_size == 0);
+
         H5SL_close(cache_ptr->slist_ptr);
 
         cache_ptr->slist_ptr = NULL;
@@ -894,7 +930,18 @@ H5C_dest(H5F_t *f)
     cache_ptr = H5FL_FREE(H5C_t, cache_ptr);
 
 done:
+
+    if ((ret_value < 0) && (cache_ptr) && (cache_ptr->slist_ptr)) {
+
+        /* need this for test code -- see change note for details */
+
+        if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist on flush dest failure failed")
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
+
 } /* H5C_dest() */
 
 /*-------------------------------------------------------------------------
@@ -906,6 +953,14 @@ done:
  *
  * Programmer:  Vailin Choi
  *        Dec 2013
+ *
+ * Modifications:
+ *
+ *              JRM -- 5/5/20
+ *
+ *              Added code to enable the skip list prior to the call
+ *              to H5C__flush_invalidate_cache(), and disable it
+ *              afterwards.
  *
  *-------------------------------------------------------------------------
  */
@@ -919,9 +974,20 @@ H5C_evict(H5F_t *f)
     /* Sanity check */
     HDassert(f);
 
+    /* Enable the slist, as it is needed in the flush */
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
     /* Flush and invalidate all cache entries except the pinned entries */
     if (H5C__flush_invalidate_cache(f, H5C__EVICT_ALLOW_LAST_PINS_FLAG) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to evict entries in the cache")
+
+    /* Disable the slist */
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist disabled failed")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3252,6 +3318,174 @@ done:
 } /* H5C_set_evictions_enabled() */
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5C_set_slist_enabled()
+ *
+ * Purpose:     Enable or disable the slist as directed.
+ *
+ *              The slist (skip list) is an address ordered list of
+ *              dirty entries in the metadata cache.  However, this
+ *              list is only needed during flush and close, where we
+ *              use it to write entries in more or less increasing
+ *              address order.
+ *
+ *              This function sets up and enables further operations
+ *              on the slist, or disable the slist.  This in turn
+ *              allows us to avoid the overhead of maintaining the
+ *              slist when it is not needed.
+ *
+ *
+ *              If the slist_enabled parameter is TRUE, the function
+ *
+ *              1) Verifies that the slist is empty.
+ *
+ *              2) Scans the index list, and inserts all dirty entries
+ *                 into the slist.
+ *
+ *              3) Sets cache_ptr->slist_enabled = TRUE.
+ *
+ *              Note that the clear_slist parameter is ignored if
+ *              the slist_enabed parameter is TRUE.
+ *
+ *
+ *              If the slist_enabled_parameter is FALSE, the function
+ *              shuts down the slist.
+ *
+ *              Normally the slist will be empty at this point, however
+ *              that need not be the case if H5C_flush_cache() has been
+ *              called with the H5C__FLUSH_MARKED_ENTRIES_FLAG.
+ *
+ *              Thus shutdown proceeds as follows:
+ *
+ *              1) Test to see if the slist is empty.  If it is, proceed
+ *                 to step 3.
+ *
+ *              2) Test to see if the clear_slist parameter is TRUE.
+ *
+ *                 If it is, remove all entries from the slist.
+ *
+ *                 If it isn't, throw an error.
+ *
+ *              3) set cache_ptr->slist_enabled = FALSE.
+ *
+ * Return:      SUCCEED on success, and FAIL on failure.
+ *
+ * Programmer:  John Mainzer
+ *              5/1/20
+ *
+ * Modifications:
+ *
+ *              None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5C_set_slist_enabled(H5C_t *cache_ptr, hbool_t slist_enabled, hbool_t clear_slist)
+{
+    H5C_cache_entry_t *entry_ptr;
+    herr_t             ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    if ((cache_ptr == NULL) || (cache_ptr->magic != H5C__H5C_T_MAGIC))
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Bad cache_ptr on entry")
+
+#if H5C__SLIST_OPT_ENABLED
+
+    if (slist_enabled) {
+
+        if (cache_ptr->slist_enabled) {
+
+            HDassert(FALSE);
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist already enabled?")
+        }
+
+        if ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)) {
+
+            HDassert(FALSE);
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty (1)?")
+        }
+
+        /* set cache_ptr->slist_enabled to TRUE so that the slist
+         * mainenance macros will be enabled.
+         */
+        cache_ptr->slist_enabled = TRUE;
+
+        /* scan the index list and insert all dirty entries in the slist */
+        entry_ptr = cache_ptr->il_head;
+
+        while (entry_ptr != NULL) {
+
+            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
+
+            if (entry_ptr->is_dirty) {
+
+                H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
+            }
+
+            entry_ptr = entry_ptr->il_next;
+        }
+
+        /* we don't maintain a dirty index len, so we can't do a cross
+         * check against it.  Note that there is no point in cross checking
+         * against the dirty LRU size, as the dirty LRU may not be maintained,
+         * and in any case, there is no requirement that all dirty entries
+         * will reside on the dirty LRU.
+         */
+        HDassert(cache_ptr->dirty_index_size == cache_ptr->slist_size);
+    }
+    else { /* take down the skip list */
+
+        if (!cache_ptr->slist_enabled) {
+
+            HDassert(FALSE);
+            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist already disabled?")
+        }
+
+        if ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)) {
+
+            if (clear_slist) {
+
+                H5SL_node_t *node_ptr;
+
+                node_ptr = H5SL_first(cache_ptr->slist_ptr);
+
+                while (node_ptr != NULL) {
+
+                    entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
+
+                    H5C__REMOVE_ENTRY_FROM_SLIST(cache_ptr, entry_ptr, FALSE);
+
+                    node_ptr = H5SL_first(cache_ptr->slist_ptr);
+                }
+            }
+            else {
+
+                HDassert(FALSE);
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist not empty (2)?")
+            }
+        }
+
+        cache_ptr->slist_enabled = FALSE;
+
+        HDassert(0 == cache_ptr->slist_len);
+        HDassert(0 == cache_ptr->slist_size);
+    }
+
+#else /* H5C__SLIST_OPT_ENABLED is FALSE */
+
+    HDassert(cache_ptr->slist_enabled);
+
+#endif /* H5C__SLIST_OPT_ENABLED is FALSE */
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5C_set_slist_enabled() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5C_set_vfd_swmr_reader()
  *
  * Purpose:     Set cache_ptr->vfd_swmr_reader and cache_ptr->page_size to
@@ -3430,6 +3664,10 @@ done:
  *
  *              Missing entries?
  *
+ *
+ *              JRM -- 5/8/20
+ *              Updated for the possibility that the slist will be
+ *              disabled.
  *
  *-------------------------------------------------------------------------
  */
@@ -3680,6 +3918,7 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
 
             if (!entry_ptr->in_slist) {
 
+                /* this is a no-op if cache_ptr->slist_enabled is FALSE */
                 H5C__INSERT_ENTRY_IN_SLIST(cache_ptr, entry_ptr, FAIL)
             }
         } /* end if */
@@ -3724,7 +3963,8 @@ H5C_unprotect(H5F_t *f, haddr_t addr, void *thing, unsigned flags)
             /* Delete the entry from the skip list on destroy */
             flush_flags |= H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG;
 
-            HDassert(((!was_clean) || dirtied) == entry_ptr->in_slist);
+            HDassert((!cache_ptr->slist_enabled) || (((!was_clean) || dirtied) == (entry_ptr->in_slist)));
+
             if (H5C__flush_single_entry(f, entry_ptr, flush_flags) < 0)
 
                 HGOTO_ERROR(H5E_CACHE, H5E_CANTUNPROTECT, FAIL, "Can't flush entry")
@@ -5547,6 +5787,16 @@ done:
  *
  *                                           ??? -- ??/??/??
  *
+ *              Added sanity checks to verify that the skip list is
+ *              enabled on entry.  On the face of it, it would make
+ *              sense to enable the slist on entry, and disable it
+ *              on exit, as this function is not called repeatedly.
+ *              However, since this function can be called from
+ *              H5C_flush_cache(), this would create cases in the test
+ *              code where we would have to check the flags to determine
+ *              whether we must setup and take down the slist.
+ *
+ *                                           JRM -- 5/5/20
  *
  *-------------------------------------------------------------------------
  */
@@ -5565,6 +5815,7 @@ H5C__flush_invalidate_cache(H5F_t *f, unsigned flags)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
+    HDassert(cache_ptr->slist_enabled);
 
 #if H5C_DO_SANITY_CHECKS
     {
@@ -5720,6 +5971,12 @@ done:
  *
  *                                           ??? -- ??/??/??
  *
+ *              A recent optimization turns off the slist unless a flush
+ *              is in progress.  This should not effect this function, as
+ *              it is only called during a flush.  Added an assertion to
+ *              verify this.
+ *
+ *                                           JRM -- 5/6/20
  *
  *-------------------------------------------------------------------------
  */
@@ -5752,6 +6009,7 @@ H5C__flush_invalidate_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->slist_enabled);
     HDassert(cache_ptr->slist_ptr);
     HDassert(ring > H5C_RING_UNDEFINED);
     HDassert(ring < H5C_RING_NTYPES);
@@ -6234,6 +6492,14 @@ done:
  * Programmer:  John Mainzer
  *              9/1/15
  *
+ * Changes:     A recent optimization turns off the slist unless a flush
+ *              is in progress.  This should not effect this function, as
+ *              it is only called during a flush.  Added an assertion to
+ *              verify this.
+ *
+ *                                             JRM -- 5/6/20
+ *
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -6260,6 +6526,7 @@ H5C__flush_ring(H5F_t *f, H5C_ring_t ring, unsigned flags)
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
+    HDassert(cache_ptr->slist_enabled);
     HDassert(cache_ptr->slist_ptr);
     HDassert((flags & H5C__FLUSH_INVALIDATE_FLAG) == 0);
     HDassert(ring > H5C_RING_UNDEFINED);
@@ -6600,6 +6867,13 @@ done:
  *
  *                                           JRM -- 3/20/20
  *
+ *              JRM -- 5/8/20
+ *              Updated sanity checks for the possibility that the slist
+ *              is disabled.
+ *
+ *              Also updated main comment to conform more closely with
+ *              the current state of the code.
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -6674,8 +6948,9 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
      * Set suppress_image_entry_writes to TRUE if indicated by the
      * image_ctl flags.
      */
-    if (cache_ptr->close_warning_received && cache_ptr->image_ctl.generate_image &&
-        cache_ptr->num_entries_in_image > 0 && cache_ptr->image_entries) {
+    if ((cache_ptr->close_warning_received) && (cache_ptr->image_ctl.generate_image) &&
+        (cache_ptr->num_entries_in_image > 0) && (cache_ptr->image_entries != NULL)) {
+
         /* Sanity checks */
         HDassert(entry_ptr->image_up_to_date || !(entry_ptr->include_in_image));
         HDassert(entry_ptr->image_ptr || !(entry_ptr->include_in_image));
@@ -6694,19 +6969,38 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 
     /* run initial sanity checks */
 #if H5C_DO_SANITY_CHECKS
-    if (entry_ptr->in_slist) {
-        HDassert(entry_ptr->is_dirty);
+    if (cache_ptr->slist_enabled) {
 
-        if ((entry_ptr->flush_marker) && (!entry_ptr->is_dirty))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry in slist failed sanity checks")
-    } /* end if */
-    else {
-        HDassert(!entry_ptr->is_dirty);
-        HDassert(!entry_ptr->flush_marker);
+        if (entry_ptr->in_slist) {
 
-        if ((entry_ptr->is_dirty) || (entry_ptr->flush_marker))
-            HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry failed sanity checks")
-    } /* end else */
+            HDassert(entry_ptr->is_dirty);
+
+            if ((entry_ptr->flush_marker) && (!entry_ptr->is_dirty))
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry in slist failed sanity checks")
+        } /* end if */
+        else {
+
+            HDassert(!entry_ptr->is_dirty);
+            HDassert(!entry_ptr->flush_marker);
+
+            if ((entry_ptr->is_dirty) || (entry_ptr->flush_marker))
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "entry failed sanity checks")
+
+        } /* end else */
+    }
+    else { /* slist is disabled */
+
+        HDassert(!entry_ptr->in_slist);
+
+        if (!entry_ptr->is_dirty) {
+
+            if (entry_ptr->flush_marker)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "flush marked clean entry?")
+        }
+    }
 #endif /* H5C_DO_SANITY_CHECKS */
 
     if (entry_ptr->is_protected) {
@@ -6948,7 +7242,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
 
         HDassert(clear_only || write_entry);
         HDassert(entry_ptr->is_dirty);
-        HDassert(entry_ptr->in_slist);
+        HDassert((!cache_ptr->slist_enabled) || (entry_ptr->in_slist));
 
         /* We are either doing a flush or a clear.
          *
@@ -8301,17 +8595,18 @@ done:
 static hbool_t
 H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
 {
-    hbool_t            in_slist  = FALSE;
-    H5SL_node_t *      node_ptr  = NULL;
-    H5C_cache_entry_t *entry_ptr = NULL;
+    H5SL_node_t *node_ptr;
+    hbool_t      in_slist;
 
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->slist_ptr);
 
     node_ptr = H5SL_first(cache_ptr->slist_ptr);
-
+    in_slist = FALSE;
     while ((node_ptr != NULL) && (!in_slist)) {
+        H5C_cache_entry_t *entry_ptr;
+
         entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
 
         HDassert(entry_ptr);
@@ -8340,6 +8635,15 @@ H5C__entry_in_skip_list(H5C_t *cache_ptr, H5C_cache_entry_t *target_ptr)
  * Programmer:  Mike McGreevy
  *              November 3, 2010
  *
+ * Changes:     Modified function to setup the slist before calling
+ *              H%C_flush_cache(), and take it down afterwards.  Note
+ *              that the slist need not be empty after the call to
+ *              H5C_flush_cache() since we are only flushing marked
+ *              entries.  Thus must set the clear_slist parameter
+ *              of H5C_set_slist_enabled to TRUE.
+ *
+ *                                              JRM -- 5/6/20
+ *
  *-------------------------------------------------------------------------
  */
 
@@ -8353,10 +8657,23 @@ H5C__flush_marked_entries(H5F_t *f)
     /* Assertions */
     HDassert(f != NULL);
 
+    /* Enable the slist, as it is needed in the flush */
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
     /* Flush all marked entries */
     if (H5C_flush_cache(f, H5C__FLUSH_MARKED_ENTRIES_FLAG | H5C__FLUSH_IGNORE_PROTECTED_FLAG) < 0)
 
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush cache")
+
+    /* Disable the slist.  Set the clear_slist parameter to TRUE
+     * since we called H5C_flush_cache() with the
+     * H5C__FLUSH_MARKED_ENTRIES_FLAG.
+     */
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
 
 done:
 
@@ -9233,6 +9550,10 @@ done:
  *
  *                                            JRM -- 12/14/18
  *
+ *              Updated sanity checks for the possibility that the skip
+ *              list is disabled.
+ *                                        JRM 5/16/20
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -9265,9 +9586,10 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
     old_addr = entry_ptr->addr;
 
     /* Call client's pre-serialize callback, if there's one */
-    if (entry_ptr->type->pre_serialize &&
-        (entry_ptr->type->pre_serialize)(f, (void *)entry_ptr, entry_ptr->addr, entry_ptr->size,
-                                         &new_addr, &new_len, &serialize_flags) < 0)
+    if ((entry_ptr->type->pre_serialize) &&
+        ((entry_ptr->type->pre_serialize)(f, (void *)entry_ptr, entry_ptr->addr, entry_ptr->size, &new_addr,
+                                          &new_len, &serialize_flags) < 0))
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to pre-serialize entry")
 
     /* Check for any flags set in the pre-serialize callback */
@@ -9346,10 +9668,13 @@ H5C__generate_image(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t *entry_ptr)
 
             /* As we haven't updated the cache data structures for
              * for the flush or flush destroy yet, the entry should
-             * be in the slist.  Thus update it for the size change.
+             * be in the slist if the slist is enabled.  Since
+             * H5C__UPDATE_SLIST_FOR_SIZE_CHANGE() is a no-op if the
+             * slist is enabled, call it un-conditionally.
              */
             HDassert(entry_ptr->is_dirty);
-            HDassert(entry_ptr->in_slist);
+            HDassert((entry_ptr->in_slist) || (!cache_ptr->slist_enabled));
+
             H5C__UPDATE_SLIST_FOR_SIZE_CHANGE(cache_ptr, entry_ptr->size, new_len);
 
             /* Finally, update the entry for its new size */

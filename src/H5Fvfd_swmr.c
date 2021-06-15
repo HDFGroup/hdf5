@@ -789,9 +789,17 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
 
     if (shared->cache) {
 
+        if (H5AC_prep_for_file_flush(f) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed")
+
         if (H5AC_flush(f) < 0)
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush metadata cache to the page buffer")
+
+        if (H5AC_secure_from_file_flush(f) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed")
     }
 
     if (H5FD_truncate(shared->lf, FALSE) < 0)
@@ -802,9 +810,17 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     /* 2) If it exists, flush the metadata cache to the page buffer. */
     if (shared->cache) {
 
+        if (H5AC_prep_for_file_flush(f) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed")
+
         if (H5AC_flush(f) < 0)
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush metadata cache to the page buffer")
+
+        if (H5AC_secure_from_file_flush(f) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed")
     }
 
     /* 3) If this is the first tick (i.e. tick == 1), create the

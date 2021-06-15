@@ -310,8 +310,7 @@ error:
     }
     H5E_END_TRY;
     return (1);
-
-} /* create_file() */
+} /* create_file */
 
 /*-------------------------------------------------------------------------
  * Function:    open_file()
@@ -450,7 +449,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
             /* Set memb_addr aligned */
             for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
                 memb_addr[mt] = ((memb_addr[mt] + pagesize - 1) / pagesize) * pagesize;
-        }
+        } /* end else */
 
         /* Set multi driver with new FAPLs */
         if (H5Pset_fapl_multi(fapl, memb_map, memb_fapl_arr, (const char *const *)memb_name, memb_addr,
@@ -459,8 +458,9 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
 
         /* Free memb_name */
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-            free(memb_name[mt]);
-    }
+            HDfree(memb_name[mt]);
+
+    } /* end if */
 
     return 0;
 
@@ -534,7 +534,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     /* Test setting a page buffer with a size smaller than a single
      * page size - should fail
      */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
         TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, 512) < 0)
@@ -568,7 +568,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Test setting a page buffer with a size equal to a single page size */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
         TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, 512) < 0)
@@ -586,7 +586,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     /* Test setting a page buffer with a size slightly larger than a
      * single page size
      */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
         TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, 512) < 0)
@@ -605,7 +605,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Test setting a large page buffer size and page size */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
         TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, 4194304) < 0)
@@ -624,7 +624,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Test setting a 512 byte page buffer size and page size */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
         TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, 512) < 0)
@@ -1236,12 +1236,9 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
        bring two more pages into the page buffer. */
     for (i = 0; i < 150; i++)
         data[i] = i + 300;
-
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 300), sizeof(int) * 150, data) < 0)
         FAIL_STACK_ERROR;
-
     page_count += 2;
-
     if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
         ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
@@ -1250,10 +1247,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
        existing pages in the page buffer. */
     for (i = 0; i < 200; i++)
         data[i] = i + 100;
-
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 100), sizeof(int) * 200, data) < 0)
         FAIL_STACK_ERROR;
-
     if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
         ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
@@ -1262,10 +1257,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     /* Changes: 450 - 600; 150 */
     for (i = 0; i < 150; i++)
         data[i] = i + 450;
-
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 450), sizeof(int) * 150, data) < 0)
         FAIL_STACK_ERROR;
-
     if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
         ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
@@ -1273,10 +1266,8 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     /* Do a full page write to block 600-800 - should bypass the PB */
     for (i = 0; i < 200; i++)
         data[i] = i + 600;
-
     if (H5F_block_write(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 600), sizeof(int) * 200, data) < 0)
         FAIL_STACK_ERROR;
-
     if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
         ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
@@ -1286,7 +1277,6 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
      */
     if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 800), sizeof(int) * 400, data) < 0)
         FAIL_STACK_ERROR;
-
     for (i = 0; i < 400; i++) {
         if (data[i] != -1) {
             HDfprintf(stderr, "Read different values than written\n");
@@ -1294,7 +1284,6 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
             FAIL_STACK_ERROR;
         }
     }
-
     if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
         ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         FAIL_STACK_ERROR;
@@ -1304,7 +1293,6 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
      */
     if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 1200), sizeof(int) * 1, data) < 0)
         FAIL_STACK_ERROR;
-
     for (i = 0; i < 1; i++) {
         if (data[i] != -1) {
             HDfprintf(stderr, "Read different values than written\n");
@@ -1313,7 +1301,6 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
         }
     }
     page_count++;
-
     if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
         ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         TEST_ERROR;
@@ -1323,7 +1310,6 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     /* read elements 175 - 225, this should use the PB existing pages */
     if (H5F_block_read(f, H5FD_MEM_DRAW, addr + (sizeof(int) * 350), sizeof(int) * 100, data) < 0)
         FAIL_STACK_ERROR;
-
     for (i = 0; i < 100; i++) {
         if (data[i] != i + 350) {
             HDfprintf(stderr, "Read different values than written\n");
@@ -1331,7 +1317,6 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
             TEST_ERROR;
         }
     }
-
     if ((f->shared->page_buf->curr_pages != page_count + base_page_cnt) &&
         ((vfd_swmr_mode) && (f->shared->page_buf->curr_pages != base_page_cnt)))
         TEST_ERROR;
@@ -1346,7 +1331,6 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
      */
     if (H5FD_read(f->shared->lf, H5FD_MEM_DRAW, addr, sizeof(int) * 800, data) < 0)
         FAIL_STACK_ERROR;
-
     i = 0;
     while (i < 800) {
         if ((vfd_swmr_mode) || (i >= 100 && i < 300) || i >= 600) {
@@ -2070,7 +2054,6 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
 
     if (base_meta_cnt != 2)
         TEST_ERROR;
-
     page_buf = f->shared->page_buf;
 
     if (page_buf->min_md_pages != 2)
@@ -2212,19 +2195,15 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
 
     HDprintf("\tMinimum metadata threshold = 20%%\n");
-
     /* keep 5 pages at max in the page buffer and 1 meta page minimum */
     if (H5Pset_page_buffer_size(fapl, sizeof(int) * 1000, 39, 0) < 0)
         TEST_ERROR;
-
     /* create the file */
     if ((file_id = H5Fcreate(filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
         FAIL_STACK_ERROR;
-
     /* Get a pointer to the internal file object */
     if (NULL == (f = (H5F_t *)H5VL_object(file_id)))
         FAIL_STACK_ERROR;
-
     page_buf = f->shared->page_buf;
 
     if (page_buf->min_md_pages != 1)
@@ -2361,19 +2340,19 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
     return 0;
 
 error:
+
     H5E_BEGIN_TRY
     {
-        if (fapl != H5I_INVALID_HID)
-            H5Pclose(fapl);
-        if (fcpl != H5I_INVALID_HID)
-            H5Pclose(fcpl);
-        if (file_id != H5I_INVALID_HID)
-            H5Fclose(file_id);
-        if (data != NULL)
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(file_id);
+        if (data)
             HDfree(data);
     }
     H5E_END_TRY;
+
     return 1;
+
 } /* test_min_threshold */
 
 /*-------------------------------------------------------------------------
@@ -2442,7 +2421,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         TEST_ERROR;
 
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
         TEST_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, sizeof(int) * 200) < 0)
@@ -2670,7 +2649,6 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
 
         if (H5Freset_page_buffering_stats(file_id) < 0)
             FAIL_STACK_ERROR;
-
         if (H5Fget_page_buffering_stats(file_id, accesses, hits, misses, evictions, bypasses) < 0)
             FAIL_STACK_ERROR;
 
@@ -2694,7 +2672,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
             TEST_ERROR;
         if (evictions[1] != 0)
             TEST_ERROR;
-    }
+    } /* end block */
 
     if (H5Fclose(file_id) < 0)
         FAIL_STACK_ERROR;
@@ -2710,13 +2688,10 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
 error:
     H5E_BEGIN_TRY
     {
-        if (fapl != H5I_INVALID_HID)
-            H5Pclose(fapl);
-        if (fcpl != H5I_INVALID_HID)
-            H5Pclose(fcpl);
-        if (file_id != H5I_INVALID_HID)
-            H5Fclose(file_id);
-        if (data != NULL)
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(file_id);
+        if (data)
             HDfree(data);
     }
     H5E_END_TRY;
@@ -2768,7 +2743,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
         FAIL_STACK_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, 4096) < 0)
@@ -2793,7 +2768,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         FAIL_STACK_ERROR;
 
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, 1) < 0)
+    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, 0, (hsize_t)1) < 0)
         FAIL_STACK_ERROR;
 
     if (H5Pset_file_space_page_size(fcpl, 4096) < 0)
@@ -2833,12 +2808,9 @@ error:
 
     H5E_BEGIN_TRY
     {
-        if (fapl != H5I_INVALID_HID)
-            H5Pclose(fapl);
-        if (fcpl != H5I_INVALID_HID)
-            H5Pclose(fcpl);
-        if (file_id != H5I_INVALID_HID)
-            H5Fclose(file_id);
+        H5Pclose(fapl);
+        H5Pclose(fcpl);
+        H5Fclose(file_id);
     }
     H5E_END_TRY;
 
@@ -4147,12 +4119,12 @@ main(void)
         HDputs("Skip page buffering test because paged aggregation is disabled for multi/split drivers");
         HDputs("Furthermore, VFD SWMR is not (yet) expected to work with multi/split drivers");
         HDexit(EXIT_SUCCESS);
-    }
+    } /* end if */
 
     if ((fapl = h5_fileaccess()) < 0) {
         nerrors++;
         PUTS_ERROR("Can't get VFD-dependent fapl")
-    }
+    } /* end if */
 
     /* Push API context */
     if (H5CX_push() < 0)

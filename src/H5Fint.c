@@ -2311,6 +2311,11 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     /* Sanity check arguments */
     HDassert(f);
 
+    /* Inform the metadata cache that we are about to flush */
+    if (H5AC_prep_for_file_flush(f) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed")
+
     /* Flush the entire metadata cache */
     if (H5AC_flush(f) < 0)
         /* Push error, but keep going*/
@@ -2342,6 +2347,11 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
         /* Reset the "flushing the file" flag */
         H5CX_set_mpi_file_flushing(FALSE);
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Inform the metadata cache that we are done with the flush */
+    if (H5AC_secure_from_file_flush(f) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed")
 
     /* Flush out the metadata accumulator */
     if (H5F__accum_flush(f->shared) < 0)

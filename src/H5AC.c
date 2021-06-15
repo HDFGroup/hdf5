@@ -43,7 +43,6 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
-#include "H5FDprivate.h" /* File drivers                             */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5SLprivate.h" /* Skip Lists                               */
@@ -357,19 +356,14 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if (NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create candidate entry list")
 
-        if (aux_ptr != NULL)
-            if (aux_ptr->mpi_rank == 0)
-                f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
-                                              (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
-                                              TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
-            else
-                f->shared->cache =
-                    H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                               H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
+        if (aux_ptr->mpi_rank == 0)
+            f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
+                                          (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
+                                          TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
         else
             f->shared->cache =
                 H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, NULL);
+                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
     } /* end if */
     else {
 #endif /* H5_HAVE_PARALLEL */
@@ -469,6 +463,14 @@ done:
  * Programmer:  Robb Matzke
  *              Jul  9 1997
  *
+ * Changes:
+ *
+ *             In the parallel case, added code to setup the MDC slist
+ *             before the call to H5AC__flush_entries() and take it down
+ *             afterwards.
+ *
+ *                                            JRM -- 7/29/20
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -520,19 +522,46 @@ H5AC_dest(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
-    if (aux_ptr)
+
+    if (aux_ptr) {
+
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    /* If the file was opened R/W, attempt to flush all entries
-     * from rank 0 & Bcast clean list to other ranks.
-     *
-     * Must not flush in the R/O case, as this will trigger the
-     * free space manager settle routines.
-     */
-    if (H5F_ACC_RDWR & H5F_INTENT(f))
-        if (H5AC__flush_entries(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+        /* If the file was opened R/W, attempt to flush all entries
+         * from rank 0 & Bcast clean list to other ranks.
+         *
+         * Must not flush in the R/O case, as this will trigger the
+         * free space manager settle routines.
+         *
+         * Must also enable the skip list before the call to
+         * H5AC__flush_entries() and disable it afterwards, as the
+         * skip list will be disabled after the previous flush.
+         *
+         * Note that H5C_dest() does slist setup and take down as well.
+         * Unfortunately, we can't do the setup and take down just once,
+         * as H5C_dest() is called directly in the test code.
+         *
+         * Fortunately, the cache should be clean or close to it at this
+         * point, so the overhead should be minimal.
+         */
+        if (H5F_ACC_RDWR & H5F_INTENT(f)) {
+
+            /* enable and load the slist */
+            if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
+            if (H5AC__flush_entries(f) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+
+            /* disable the slist -- should be empty */
+            if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
+        }
+    }
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
@@ -1209,6 +1238,107 @@ done:
 } /* H5AC_prep_for_file_close() */
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_prep_for_file_flush
+ *
+ * Purpose:     This function should be called just prior to the first
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to handly any setup required prior to
+ *              metadata cache flush.
+ *
+ *              Initially, this means setting up the slist prior to the
+ *              flush.  We do this in a seperate call because
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid
+ *              the overhead of setting up and taking down the skip list
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_prep_for_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_prep_for_file_flush() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_secure_from_file_flush
+ *
+ * Purpose:     This function should be called just after the last
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to perform any necessary cleanup after the
+ *              metadata cache flush.
+ *
+ *              The objective of the call is to allow the metadata cache
+ *              to do any necessary necessary cleanup work after a cache
+ *              flush.
+ *
+ *              Initially, this means taking down the slist after the
+ *              flush.  We do this in a seperate call because
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid
+ *              the overhead of setting up and taking down the skip list
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_secure_from_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_secure_from_file_flush() */
+
+/*-------------------------------------------------------------------------
+ *
  * Function:    H5AC_create_flush_dependency()
  *
  * Purpose:     Create a flush dependency between two entries in the metadata
