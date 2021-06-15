@@ -78,14 +78,17 @@ if test "X-icc" = "X-$cc_vendor"; then
     #        ;;
     #esac
 
-    # General
+    ###########
+    # General #
+    ###########
+
     # Default to C99 standard.
     H5_CFLAGS="$H5_CFLAGS $arch -std=c99"
 
     ##############
     # Production #
     ##############
-    
+
     PROD_CFLAGS=
 
     #########
@@ -154,6 +157,16 @@ if test "X-icc" = "X-$cc_vendor"; then
         H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments 15)"
     fi
 
+    # intel >= 18
+    if test $cc_vers_major -ge 18; then
+        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments 18)"
+    fi
+
+    # intel <= 19
+    if test $cc_vers_major -le 19; then
+        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general-19)"
+    fi
+
     #################
     # Flags are set #
     #################
@@ -165,4 +178,3 @@ if test "X-$cc_flags_set" = "X-"; then
     cc_vendor=
     cc_version=
 fi
-

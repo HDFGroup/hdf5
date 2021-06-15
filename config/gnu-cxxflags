@@ -271,7 +271,7 @@ if test "X-g++" = "X-$cxx_vendor"; then
         # no cxx warnings, do NOT use C warnings
 
     # gcc >= 10
-    if test $cc_vers_major -ge 10; then
+    if test $cxx_vers_major -ge 10; then
         # Use the C warnings as CXX warnings are the same
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-10)"
     fi
