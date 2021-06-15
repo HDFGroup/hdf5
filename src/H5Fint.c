@@ -1575,7 +1575,8 @@ H5F__dest(H5F_t *f, hbool_t flush)
 
         if ((f->shared->vfd_swmr) && (!f->shared->vfd_swmr_writer))
             HDfprintf(stdout,
-                      "The maximum jump in ticks is %" PRIu64 "; The maximum expected lag configured is %" PRIu32 "\n",
+                      "The maximum jump in ticks is %" PRIu64
+                      "; The maximum expected lag configured is %" PRIu32 "\n",
                       f->shared->max_jump_ticks, f->shared->vfd_swmr_config.max_lag);
 
         /* Shutdown the page buffer cache */
