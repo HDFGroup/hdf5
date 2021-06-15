@@ -163,6 +163,7 @@ if test "X-icc" = "X-$cc_vendor"; then
     fi
 
     # intel <= 19
+    # this file has warnings only available before oneapi versions
     if test $cc_vers_major -le 19; then
         H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general-19)"
     fi
