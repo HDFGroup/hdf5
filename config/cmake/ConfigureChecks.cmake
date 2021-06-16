@@ -310,7 +310,7 @@ set (PROG_SRC
 )
 
 C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_RES)
-file (READ "${CMAKE_BINARY_DIR}/pac_Cconftest.out" PROG_OUTPUT4)
+file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_Cconftest.out" PROG_OUTPUT4)
 message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 
 # dnl The output from the above program will be:
