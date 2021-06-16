@@ -4989,7 +4989,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
          * order of offset in the file.
          */
         if (need_addr_sort)
-            HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
+            HDqsort(chunk_disp_array, (size_t)blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
 
         /* MSC - should use this if MPI_type_create_hindexed block is working:
          * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE,
@@ -7478,14 +7478,13 @@ H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
     const H5D_chunk_iter_ud_t *data      = (H5D_chunk_iter_ud_t *)udata;
     int                        ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_STATIC_NOERR
 
     /* Check for callback failure and pass along return value */
     if ((ret_value = (data->op)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
                                 chunk_rec->nbytes, data->op_data)) < 0)
         HERROR(H5E_DATASET, H5E_CANTNEXT, "iteration operator failed");
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_iter_cb */
 

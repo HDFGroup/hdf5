@@ -4492,7 +4492,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     int     mile_stone = 1;
     int32_t type;
     int32_t idx;
-    int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
+    int32_t local_max_index[NUMBER_OF_ENTRY_TYPES] = {0};
 
     if (verbose)
         HDfprintf(stdout, "%s: entering.\n", FUNC);

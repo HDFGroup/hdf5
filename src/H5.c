@@ -960,12 +960,9 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
          * Check only the first sizeof(lib_str) char.  Assume the information
          * will fit within this size or enough significance.
          */
-        HDsnprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d", H5_VERS_MAJOR, H5_VERS_MINOR,
-                   H5_VERS_RELEASE);
-        if (*substr) {
-            HDstrncat(lib_str, "-", (size_t)1);
-            HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
-        } /* end if */
+        HDsnprintf(lib_str, sizeof(lib_str), "HDF5 library version: %d.%d.%d%s%s", H5_VERS_MAJOR,
+                   H5_VERS_MINOR, H5_VERS_RELEASE, (*substr ? "-" : ""), substr);
+
         if (HDstrcmp(lib_str, H5_lib_vers_info_g) != 0) {
             HDfputs("Warning!  Library version information error.\n"
                     "The HDF5 library version information are not "
