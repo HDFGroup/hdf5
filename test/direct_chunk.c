@@ -23,7 +23,9 @@
 #define FILE_NAME "direct_chunk.h5"
 
 /* Datasets for Direct Write tests */
+#ifdef H5_HAVE_FILTER_DEFLATE
 #define DATASETNAME1 "direct_write"
+#endif
 #define DATASETNAME2 "skip_one_filter"
 #define DATASETNAME3 "skip_two_filters"
 #define DATASETNAME4 "data_conv"
@@ -31,9 +33,11 @@
 #define DATASETNAME6 "invalid_argue"
 #define DATASETNAME7 "overwrite_chunk"
 /* Datasets for Direct Read tests */
+#ifdef H5_HAVE_FILTER_DEFLATE
 #define DATASETNAME8  "disabled_chunk_cache"
 #define DATASETNAME9  "flush_chunk_cache"
 #define DATASETNAME10 "read_w_valid_cache"
+#endif
 #define DATASETNAME11 "unallocated_chunk"
 #define DATASETNAME12 "unfiltered_data"
 
@@ -43,7 +47,9 @@
 #define CHUNK_NX 4
 #define CHUNK_NY 4
 
+#ifdef H5_HAVE_FILTER_DEFLATE
 #define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * 1.001) + 12.0)
+#endif
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS1 305

@@ -482,10 +482,10 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     unsigned flt_msk      = 0;                            /* Filter mask */
     unsigned read_flt_msk = 0;                            /* Filter mask after direct read */
     int      fillvalue    = -1;                           /* Fill value */
-    int      aggression   = 9;                            /* Compression aggression setting */
     hsize_t  offset[2]    = {0, 0};                       /* Offset coordinates of a chunk */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    const Bytef *z_src = (const Bytef *)(direct_buf);
+    int          aggression = 9; /* Compression aggression setting */
+    const Bytef *z_src      = (const Bytef *)(direct_buf);
     Bytef *      z_dst; /* Destination buffer */
     uLongf       z_dst_nbytes = (uLongf)DEFLATE_SIZE_ADJUST(CHK_SIZE);
     uLong        z_src_nbytes = (uLong)CHK_SIZE;
@@ -568,7 +568,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     }
 #else
     /* Allocate input (non-compressed) buffer */
-    inbuf = HDcalloc(1, CHK_SIZE);
+    if (NULL == (inbuf = HDcalloc(1, CHK_SIZE)))
+        TEST_ERROR
     HDmemcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
