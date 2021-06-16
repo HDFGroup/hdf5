@@ -1404,6 +1404,8 @@
 ./test/vfd_swmr.c
 ./test/vfd_swmr_addrem_writer.c
 ./test/vfd_swmr_attrdset_writer.c
+./test/vfd_swmr_dsetops_writer.c
+./test/vfd_swmr_dsetchks_writer.c
 ./test/vfd_swmr_bigset_writer.c
 ./test/vfd_swmr_check_compat.c
 ./test/vfd_swmr_common.c
