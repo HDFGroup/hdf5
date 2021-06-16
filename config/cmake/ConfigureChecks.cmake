@@ -233,6 +233,7 @@ endif ()
 # The provided CMake C macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
+set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
 macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
     if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
       message (VERBOSE "Detecting C ${FUNCTION_NAME}")
