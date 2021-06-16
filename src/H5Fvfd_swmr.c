@@ -203,6 +203,7 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         HDassert(!shared->vfd_swmr_config.writer);
 
         shared->vfd_swmr_writer = FALSE;
+        shared->max_jump_ticks  = 0;
 
         HDassert(shared->mdf_idx == NULL);
 
@@ -1186,6 +1187,8 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
             "used/len = %" PRIu32 "/ %" PRIu32 " ---\n",
             shared->mdf_idx_entries_used, shared->mdf_idx_len);
 #endif /* JRM */
+        shared->max_jump_ticks = MAX(shared->max_jump_ticks, (tmp_tick_num - shared->tick_num));
+
         /* At this point, we should have evicted or refreshed all stale
          * page buffer and metadata cache entries.
          *
