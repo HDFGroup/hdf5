@@ -153,31 +153,31 @@ reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size)
 static herr_t
 test_get_chunk_info_highest18(hid_t fapl)
 {
-    char         filename[FILENAME_BUF_SIZE];
-    hid_t        chunkfile     = -1;       /* File ID */
-    hid_t        dspace        = -1;       /* Dataspace ID */
-    hid_t        dset          = -1;       /* Dataset ID */
-    hid_t        cparms        = -1;       /* Creation plist */
-    hsize_t      dims[2]       = {NX, NY}; /* Dataset dimensions */
-    hsize_t      maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
-    hsize_t      chunk_dims[2] = {CHUNK_NX, CHUNK_NY};             /* Chunk dimensions */
-    int          direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];       /* Data in chunks */
-    int          out_buf[NX][NY];                                  /* Buffer to read data in */
-    size_t       buf_size     = CHUNK_NX * CHUNK_NY * sizeof(int); /* Buffer size of a chk */
-    unsigned     filter_mask  = 0;                                 /* Filter mask */
-    unsigned     read_flt_msk = 0;                                 /* Filter mask after direct read */
-    int          fillvalue    = -1;                                /* Fill value */
+    char     filename[FILENAME_BUF_SIZE];
+    hid_t    chunkfile     = -1;       /* File ID */
+    hid_t    dspace        = -1;       /* Dataspace ID */
+    hid_t    dset          = -1;       /* Dataset ID */
+    hid_t    cparms        = -1;       /* Creation plist */
+    hsize_t  dims[2]       = {NX, NY}; /* Dataset dimensions */
+    hsize_t  maxdims[2]    = {H5S_UNLIMITED, H5S_UNLIMITED};
+    hsize_t  chunk_dims[2] = {CHUNK_NX, CHUNK_NY};             /* Chunk dimensions */
+    int      direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY];       /* Data in chunks */
+    int      out_buf[NX][NY];                                  /* Buffer to read data in */
+    size_t   buf_size     = CHUNK_NX * CHUNK_NY * sizeof(int); /* Buffer size of a chk */
+    unsigned filter_mask  = 0;                                 /* Filter mask */
+    unsigned read_flt_msk = 0;                                 /* Filter mask after direct read */
+    int      fillvalue    = -1;                                /* Fill value */
 #ifdef H5_HAVE_FILTER_DEFLATE
-    int aggression   = 9; /* Compression aggression setting */
+    int aggression = 9; /* Compression aggression setting */
 #endif
-    H5F_libver_t low, high;                                        /* File format bounds */
-    hsize_t      offset[2];                                        /* Offset coordinates of a chunk */
-    hsize_t      out_offset[2] = {0, 0};                           /* Buffer to get offset coordinates */
-    hsize_t      size          = 0;                                /* Size of an allocated/written chunk */
-    hsize_t      nchunks       = 0;                                /* Number of chunks */
-    haddr_t      addr          = 0;                                /* Address of an allocated/written chunk */
-    hsize_t      index         = 0;                                /* Index of a chunk */
-    int          n; /* Used on buffer, to avoid conversion warning */
+    H5F_libver_t low, high;              /* File format bounds */
+    hsize_t      offset[2];              /* Offset coordinates of a chunk */
+    hsize_t      out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
+    hsize_t      size          = 0;      /* Size of an allocated/written chunk */
+    hsize_t      nchunks       = 0;      /* Number of chunks */
+    haddr_t      addr          = 0;      /* Address of an allocated/written chunk */
+    hsize_t      index         = 0;      /* Index of a chunk */
+    int          n;                      /* Used on buffer, to avoid conversion warning */
     hsize_t      i, j;
     herr_t       ret;
 

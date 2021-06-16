@@ -22,8 +22,10 @@
  *     Relies on "s3comms" utility layer to implement the AWS REST API.
  */
 
+#ifdef H5_HAVE_ROS3_VFD
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
+#endif
 
 #include "H5private.h"   /* Generic Functions        */
 #include "H5Eprivate.h"  /* Error handling           */
