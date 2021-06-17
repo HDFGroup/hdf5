@@ -446,7 +446,7 @@
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      if (${resultcode} EQUAL 2)
+      if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -1549,7 +1549,7 @@ ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
 # ##############################################################################
 # # dataset subsets
 # ##############################################################################
-#TRILABS_227 ADD_H5_TEST (h5diff_830 1 --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;])
+ADD_H5_TEST (h5diff_830 1 --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;])
 
 # ##############################################################################
 # # VDS tests

@@ -72,8 +72,7 @@ DSetMemXferPropList::getConstant()
 void
 DSetMemXferPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
@@ -176,7 +175,7 @@ DSetMemXferPropList::getBuffer(void **tconv, void **bkg) const
 void
 DSetMemXferPropList::setPreserve(bool status) const
 {
-    herr_t ret_value = H5Pset_preserve(id, (hbool_t)status);
+    herr_t ret_value = H5Pset_preserve(id, static_cast<hbool_t>(status));
     if (ret_value < 0) {
         throw PropListIException("DSetMemXferPropList::setPreserve", "H5Pset_preserve failed");
     }
@@ -315,7 +314,7 @@ DSetMemXferPropList::getDataTransform() const
     H5std_string expression;
 
     // Preliminary call to get the expression's length
-    ssize_t exp_len = H5Pget_data_transform(id, NULL, (size_t)0);
+    ssize_t exp_len = H5Pget_data_transform(id, NULL, 0);
 
     // If H5Pget_data_transform returns a negative value, raise an exception
     if (exp_len < 0) {

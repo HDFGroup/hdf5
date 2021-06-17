@@ -1246,7 +1246,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 
     if (sbuf_size > 0) {
         sbuf = (unsigned char *)HDcalloc((size_t)1, sbuf_size);
-        CHECK(sbuf, NULL, "HDcalloc");
+        CHECK_PTR(sbuf, "HDcalloc");
     }
 
     /* Try decoding bogus buffer */
@@ -1308,7 +1308,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 
     if (null_size > 0) {
         null_sbuf = (unsigned char *)HDcalloc((size_t)1, null_size);
-        CHECK(null_sbuf, NULL, "HDcalloc");
+        CHECK_PTR(null_sbuf, "HDcalloc");
     }
 
     /* Encode the null dataspace in the buffer */
@@ -1344,7 +1344,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 
     if (scalar_size > 0) {
         scalar_buf = (unsigned char *)HDcalloc((size_t)1, scalar_size);
-        CHECK(scalar_buf, NULL, "HDcalloc");
+        CHECK_PTR(scalar_buf, "HDcalloc");
     }
 
     /* Encode the scalar dataspace in the buffer */
@@ -1438,7 +1438,7 @@ test_h5s_encode1(void)
 
     if (sbuf_size > 0) {
         sbuf = (unsigned char *)HDcalloc((size_t)1, sbuf_size);
-        CHECK(sbuf, NULL, "HDcalloc");
+        CHECK_PTR(sbuf, "HDcalloc");
     }
 
     /* Try decoding bogus buffer */
@@ -1500,7 +1500,7 @@ test_h5s_encode1(void)
 
     if (null_size > 0) {
         null_sbuf = (unsigned char *)HDcalloc((size_t)1, null_size);
-        CHECK(null_sbuf, NULL, "HDcalloc");
+        CHECK_PTR(null_sbuf, "HDcalloc");
     }
 
     /* Encode the null dataspace in the buffer */
@@ -1536,7 +1536,7 @@ test_h5s_encode1(void)
 
     if (scalar_size > 0) {
         scalar_buf = (unsigned char *)HDcalloc((size_t)1, scalar_size);
-        CHECK(scalar_buf, NULL, "HDcalloc");
+        CHECK_PTR(scalar_buf, "HDcalloc");
     }
 
     /* Encode the scalar dataspace in the buffer */
@@ -1623,7 +1623,7 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, 
 
         /* Allocate the buffer for encoding */
         buf = (char *)HDmalloc(buf_size);
-        CHECK(buf, NULL, "H5Dmalloc");
+        CHECK_PTR(buf, "H5Dmalloc");
 
         /* Encode according to the setting in in_fapl */
         ret = H5Sencode2(in_sid, buf, &buf_size, in_fapl);
@@ -2149,7 +2149,7 @@ test_h5s_encode_length(void)
     /* Allocate the buffer */
     if (sbuf_size > 0) {
         sbuf = (unsigned char *)HDcalloc((size_t)1, sbuf_size);
-        CHECK(sbuf, NULL, "H5Sencode2");
+        CHECK_PTR(sbuf, "H5Sencode2");
     }
 
     /* Encode the dataspace */
@@ -2575,7 +2575,7 @@ test_h5s_chunk(void)
     for (i = 0; i < CHUNK_DATA_NX; i++) {
         for (j = 0; j < CHUNK_DATA_NY; j++) {
             /* Check if the two values are within 0.001% range. */
-            if (!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], (double)chunk_data_flt[i][j], (double)0.00001F))
+            if (!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], (double)chunk_data_flt[i][j], 0.00001))
                 TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n",
                               (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j,
                               (double)chunk_data_flt[i][j]);
@@ -3304,7 +3304,7 @@ test_versionbounds(void)
 
     /* Its version should be H5O_SDSPACE_VERSION_1 */
     spacep = (H5S_t *)H5I_object(space);
-    CHECK(spacep, NULL, "H5I_object");
+    CHECK_PTR(spacep, "H5I_object");
     VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
 
     /* Set high bound to V18 */
@@ -3325,7 +3325,7 @@ test_versionbounds(void)
         dset_space = H5Dget_space(dset);
         CHECK(dset_space, FAIL, "H5Dget_space");
         spacep = (H5S_t *)H5I_object(dset_space);
-        CHECK(spacep, NULL, "H5I_object");
+        CHECK_PTR(spacep, "H5I_object");
 
         /* Dataspace version should remain as H5O_SDSPACE_VERSION_1 */
         VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
@@ -3362,7 +3362,7 @@ test_versionbounds(void)
     dset_space = H5Dget_space(dset);
     CHECK(dset_space, FAIL, "H5Dget_space");
     spacep = (H5S_t *)H5I_object(dset_space);
-    CHECK(spacep, NULL, "H5I_object");
+    CHECK_PTR(spacep, "H5I_object");
 
     /* Verify the dataspace version */
     VERIFY(spacep->extent.version, H5O_sdspace_ver_bounds[low], "upgraded dataspace version");

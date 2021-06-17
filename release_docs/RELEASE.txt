@@ -49,6 +49,85 @@ New Features
 
     Configuration:
     -------------
+    - Adds C++ Autotools configuration file for Intel
+
+      * Checks for icpc as the compiler
+      * Sets std=c++11
+      * Copies most non-warning flags from intel-flags
+
+      (DER - 2021/06/02)
+
+    - Adds C++ Autotools configuration file for PGI
+
+      * Checks for pgc++ as the compiler name (was: pgCC)
+      * Sets -std=c++11
+      * Other options basically match new C options (below)
+
+      (DER - 2021/06/02)
+
+    - Updates PGI C options
+
+      * -Minform set to warn (was: inform) to suppress spurious messages
+      * Sets -gopt -O2 as debug options
+      * Sets -O4 as 'high optimization' option
+      * Sets -O0 as 'no optimization' option
+      * Removes specific settings for PGI 9 and 10
+
+      (DER - 2021/06/02)
+
+    - A C++11-compliant compiler is now required to build the C++ wrappers
+
+      CMAKE_CXX_STANDARD is now set to 11 when building with CMake and
+      -std=c++11 is added when building with clang/gcc via the Autotools.
+
+      (DER - 2021/05/27)
+
+    - CMake will now run the shell script tests in test/ by default
+
+      The test directory includes several shell script tests that previously
+      were not run by CMake. These are now run by default. TEST_SHELL_SCRIPTS
+      has been set to ON and SH_PROGRAM has been set to bash (some test
+      scripts use bash-isms). Platforms without bash (e.g., Windows) will
+      ignore the script tests.
+
+      (DER - 2021/05/23)
+
+    - Removed unused HDF5_ENABLE_HSIZET option from CMake
+
+      This has been unused for some time and has no effect.
+
+      (DER - 2021/05/23)
+
+    - CMake no longer builds the C++ library by default
+
+      HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
+      Autotools build defaults.
+
+      (DER - 2021/04/20)
+
+    - Removal of pre-VS2015 work-arounds
+
+      HDF5 now requires Visual Studio 2015 or greater, so old work-around
+      code and definitions have been removed, including:
+
+      * <inttypes.h>
+      * snprintf and vsnprintf
+      * llround, llroundf, lround, lroundf, round, roundf
+      * strtoll and strtoull
+      * va_copy
+      * struct timespec
+
+      (DER - 2021/03/22)
+
+    - Add CMake variable HDF5_LIB_INFIX
+
+      This infix is added to all library names after 'hdf5'.
+      e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+      This name is used in packages on debian based systems.
+      (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
+
+      (barcode - 2021/03/22)
+
     - On macOS, Universal Binaries can now be built, allowing native execution on
       both Intel and Apple Silicon (ARM) based Macs.
 
@@ -384,6 +463,105 @@ New Features
 
     Library:
     --------
+    - gcc warning suppression macros were moved out of H5public.h
+
+      The HDF5 library uses a set of macros to suppress warnings on gcc.
+      These warnings were originally located in H5public.h so that the
+      multi VFD (which only uses public headers) could also make use of them
+      but internal macros should not be publicly exposed like this.
+
+      These macros have now been moved to H5private.h. Pending future multi
+      VFD refactoring, the macros have been duplicated in H5FDmulti.c to
+      suppress the format string warnings there.
+
+        (DER - 2021/06/03)
+
+    - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
+
+      The size_hint value is ultimately stored in a uint32_t struct field,
+      so specifying a value larger than this on a 64-bit machine can cause
+      undefined behavior including crashing the system.
+
+      The documentation for this API call was also incorrect, stating that
+      passing a negative value would cause the library to use a default
+      value. Instead, passing a "negative" value actually passes a very large
+      value, which is probably not what the user intends and can cause
+      crashes on 64-bit systems.
+
+      The Doxygen documentation has been updated and passing values larger
+      than UINT32_MAX for size_hint will now produce a normal HDF5 error.
+
+        (DER - 2021/04/29, HDFFV-11241)
+
+
+    - H5Pset_fapl_log() no longer crashes when passed an invalid fapl ID
+
+      When passed an invalid fapl ID, H5Pset_fapl_log() would usually
+      segfault when attempting to free an uninitialized pointer in the error
+      handling code. This behavior is more common in release builds or
+      when the memory sanitization checks were not selected as a build
+      option.
+
+      The pointer is now correctly initialized and the API call now
+      produces a normal HDF5 error when fed an invalid fapl ID.
+
+        (DER - 2021/04/28, HDFFV-11240)
+
+    - Fixes a segfault when H5Pset_mdc_log_options() is called multiple times
+
+      The call incorrectly attempts to free an internal copy of the previous
+      log location string, which causes a segfault. This only happens
+      when the call is invoked multiple times on the same property list.
+      On the first call to a given fapl, the log location is set to NULL so
+      the segfault does not occur.
+
+      The string is now handled properly and the segfault no longer occurs.
+
+        (DER - 2021/04/27, HDFFV-11239)
+
+    - HSYS_GOTO_ERROR now emits the results of GetLastError() on Windows
+
+      HSYS_GOTO_ERROR is an internal macro that is used to produce error
+      messages when system calls fail. These strings include errno and the
+      the associated strerror() value, which are not particularly useful
+      when a Win32 API call fails.
+
+      On Windows, this macro has been updated to include the result of
+      GetLastError(). When a system call fails on Windows, usually only
+      one of errno and GetLastError() will be useful, however we emit both
+      for the user to parse. The Windows error message is not emitted as
+      it would be awkward to free the FormatMessage() buffer given the
+      existing HDF5 error framework. Users will have to look up the error
+      codes in MSDN.
+
+      The format string on Windows has been changed from:
+
+          "%s, errno = %d, error message = '%s'"
+
+      to:
+
+          "%s, errno = %d, error message = '%s', Win32 GetLastError() = %"PRIu32""
+
+      for those inclined to parse it for error values.
+
+        (DER - 2021/03/21)
+
+    - File locking now works on Windows
+
+      Since version 1.10.0, the HDF5 library has used a file locking scheme
+      to help enforce one reader at a time accessing an HDF5 file, which can
+      be helpful when setting up readers and writers to use the single-
+      writer/multiple-readers (SWMR) access pattern.
+
+      In the past, this was only functional on POSIX systems where flock() or
+      fcntl() were present. Windows used a no-op stub that always succeeded.
+
+      HDF5 now uses LockFileEx() and UnlockFileEx() to lock the file using the
+      same scheme as POSIX systems. We lock the entire file when we set up the
+      locks (by passing DWORDMAX as both size parameters to LockFileEx()).
+
+        (DER - 2021/03/19, HDFFV-10191)
+
     - H5Epush_ret() now requires a trailing semicolon
 
         H5Epush_ret() is a function-like macro that has been changed to
@@ -392,7 +570,7 @@ New Features
         semi would work, but was not mandatory. This change was made to allow
         clang-format to correctly format the source code.
 
-        (SAM - 2021/03-03)
+        (SAM - 2021/03/03)
 
     - Improved performance of H5Sget_select_elem_pointlist
 
@@ -707,7 +885,18 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
-    - Fixed CVE-2018-17435
+    - Fixed CVE-2018-14460
+
+        The tool h5repack produced a segfault when the rank in dataspace
+        message was corrupted, causing invalid read while decoding the
+        dimension sizes.
+
+        The problem was fixed by ensuring that decoding the dimension sizes
+        and max values will not go beyong the end of the buffer.
+
+        (BMR - 2021/05/12, HDFFV-11223)
+
+    - Fixed CVE-2018-11206
 
         The tool h5dump produced a segfault when the size of a fill value
         message was corrupted and caused a buffer overflow.
@@ -778,8 +967,8 @@ Bug Fixes since HDF5-1.12.0 release
         H5S_NO_CLASS is an internal class value that should not have been
         exposed via a public API call.
 
-        In debug builds of the library, this can cause assert() functions to trip. In
-        non-debug builds, it will produce normal library errors.
+        In debug builds of the library, this can cause assert() function to
+        trip. In non-debug builds, it will produce normal library errors.
 
         The new library behavior is for H5Sset_extent_none() to convert
         the dataspace into one of type H5S_NULL, which is better handled
@@ -871,6 +1060,35 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Refactor CMake configure for Fortran
+
+      The Fortran configure tests for KINDs reused a single output file that was
+      read to form the Integer and Real Kinds defines. However, if config was run
+      more then once, the CMake completed variable prevented the tests from executing
+      again and the last value saved in the file was used to create the define.
+      Creating separate files for each KIND solved the issue.
+
+      In addition the test for H5_PAC_C_MAX_REAL_PRECISION was not pulling in
+      defines for proper operation and did not define H5_PAC_C_MAX_REAL_PRECISION
+      correctly for a zero value. This was fixed by supplying the required defines.
+      In addition it was moved from the Fortran specific HDF5UseFortran.camke file
+      to the C centric ConfigureChecks.cmake file.
+
+      (ADB - 2021/06/03)
+
+    - Remove arbitrary warning flag groups from CMake builds
+
+      The arbitrary groups were created to reduce the quantity of warnings being
+      reported that overwhelmed testing report systems. Considerable work has
+      been accomplished to reduce the warning count and these arbitrary groups
+      are no longer needed.
+      Also the default for all warnings, HDF5_ENABLE_ALL_WARNINGS, is now ON.
+
+      Visual Studio warnings C4100, C4706, and C4127 have been moved to
+      developer warnings, HDF5_ENABLE_DEV_WARNINGS, and are disabled for normal builds.
+
+      (ADB - 2021/03/22, HDFFV-11228)
+
     - Reclassify CMake messages, to allow new modes and --log-level option
 
       CMake message commands have a mode argument. By default, STATUS mode
@@ -897,6 +1115,17 @@ Bug Fixes since HDF5-1.12.0 release
 
     Tools
     -----
+    - Changed how h5dump and h5ls identify long double.
+
+        Long double support is not consistent across platforms. Tools will always
+        identify long double as 128-bit [little/big]-endian float nn-bit precision.
+        New test file created for datasets with attributes for float, double and
+        long double. In addition any unknown integer or float datatype will now
+        also show the number of bits for precision.
+        These files are also used in the java tests.
+
+        (ADB - 2021/03/24, HDFFV-11229)
+
     - Fixed tools argument parsing.
 
         Tools parsing used the length of the option from the long array to match
@@ -1006,7 +1235,12 @@ Bug Fixes since HDF5-1.12.0 release
 
     C++ APIs
     --------
-    -
+    - Added DataSet::operator=
+
+        Some compilers complain if the copy constructor is given explicitly
+        but the assignment operator is implicitly set to default.
+
+        (2021/05/19)
 
 
     Testing
@@ -1145,15 +1379,22 @@ The following platforms are not supported but have been tested for this release.
     #1 SMP ppc64 GNU/Linux           IBM XL C/C++ for Linux, V13.1
     (ostrich)                        and IBM XL Fortran for Linux, V15.1
 
-    Fedora33 5.10.10-200.fc33.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
-                                     GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
+    Fedora33 5.11.18-200.fc33.x86_64
+    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.3.1 20210422 (Red Hat 10.3.1-1)
+                                     GNU Fortran (GCC) 10.3.1 20210422 (Red Hat 10.3.1-1)
                                      clang version 11.0.0 (Fedora 11.0.0-2.fc33)
                                      (cmake and autotools)
 
-    Ubuntu20.10 5.8.0-41-generic-x86_64
-    #46-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+    Ubuntu20.04 5.8.0-53-generic-x86_64
+    #60~20.04-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 9.3.0-17ubuntu1
+                                     GNU Fortran (GCC) 9.3.0-17ubuntu1
+                                     clang version 10.0.0-4ubuntu1
+                                     (cmake and autotools)
+
+    Ubuntu20.10 5.8.0-53-generic-x86_64
+    #60-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
                                      GNU Fortran (GCC) 10.2.0-13ubuntu1
+                                     Ubuntu clang version 11.0.0-2
                                      (cmake and autotools)
 
     SUSE15sp2 5.3.18-22-default

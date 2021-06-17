@@ -26,13 +26,10 @@
 /* Define if using a Windows compiler (i.e. Visual Studio) */
 #cmakedefine H5_HAVE_VISUAL_STUDIO @H5_HAVE_VISUAL_STUDIO@
 
-/* Define if C++ compiler recognizes offsetof */
-#cmakedefine H5_CXX_HAVE_OFFSETOF @CXX_HAVE_OFFSETOF@
-
 /* Define the default plugins path to compile */
 #cmakedefine H5_DEFAULT_PLUGINDIR "@H5_DEFAULT_PLUGINDIR@"
 
-/* Define if `dev_t' is a scalar */
+/* Define if dev_t is a scalar */
 #cmakedefine H5_DEV_T_IS_SCALAR @H5_DEV_T_IS_SCALAR@
 
 /* Define to dummy `main' function (if any) required to link to the Fortran
@@ -88,6 +85,9 @@
 /* Define to 1 if you have the `alarm' function. */
 #cmakedefine H5_HAVE_ALARM @H5_HAVE_ALARM@
 
+/* Define to 1 if you have the <arpa/inet.h> header file. */
+#cmakedefine H5_HAVE_ARPA_INET_H @H5_HAVE_ARPA_INET_H@
+
 /* Define to 1 if you have the `asprintf' function. */
 #cmakedefine H5_HAVE_ASPRINTF @H5_HAVE_ASPRINTF@
 
@@ -100,9 +100,6 @@
 
 /* Define if the compiler understands the __func__ keyword */
 #cmakedefine H5_HAVE_C99_FUNC @H5_HAVE_C99_FUNC@
-
-/* Define to 1 if you have the <arpa/inet.h> header file. */
-#cmakedefine H5_HAVE_ARPA_INET_H @H5_HAVE_ARPA_INET_H@
 
 /* Define to 1 if you have the `clock_gettime' function. */
 #cmakedefine H5_HAVE_CLOCK_GETTIME @H5_HAVE_CLOCK_GETTIME@
@@ -198,14 +195,8 @@
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-#cmakedefine H5_HAVE_INTTYPES_H @H5_HAVE_INTTYPES_H@
-
 /* Define to 1 if you have the `ioctl' function. */
 #cmakedefine H5_HAVE_IOCTL @H5_HAVE_IOCTL@
-
-/* Define to 1 if you have the <io.h> header file. */
-#cmakedefine H5_HAVE_IO_H @H5_HAVE_IO_H@
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #cmakedefine H5_HAVE_LIBCRYPTO @H5_HAVE_LIBCRYPTO@
@@ -243,20 +234,8 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
 
-/* Define to 1 if you have the `llround' function. */
-#cmakedefine H5_HAVE_LLROUND @H5_HAVE_LLROUND@
-
-/* Define to 1 if you have the `llroundf' function. */
-#cmakedefine H5_HAVE_LLROUNDF @H5_HAVE_LLROUNDF@
-
 /* Define to 1 if you have the `longjmp' function. */
 #cmakedefine H5_HAVE_LONGJMP @H5_HAVE_LONGJMP@
-
-/* Define to 1 if you have the `lround' function. */
-#cmakedefine H5_HAVE_LROUND @H5_HAVE_LROUND@
-
-/* Define to 1 if you have the `lroundf' function. */
-#cmakedefine H5_HAVE_LROUNDF @H5_HAVE_LROUNDF@
 
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
@@ -270,7 +249,7 @@
 /* Define to 1 if you have the <memory.h> header file. */
 #cmakedefine H5_HAVE_MEMORY_H @H5_HAVE_MEMORY_H@
 
-/* Define if we can build the Mirror VFD */
+/* Define whether the Mirror virtual file driver (VFD) will be compiled */
 #cmakedefine H5_HAVE_MIRROR_VFD @H5_HAVE_MIRROR_VFD@
 
 /* Define if we have MPE support */
@@ -279,10 +258,10 @@
 /* Define to 1 if you have the <mpe.h> header file. */
 #cmakedefine H5_HAVE_MPE_H @H5_HAVE_MPE_H@
 
-/* Define if MPI_Comm_c2f and MPI_Comm_f2c exists */
+/* Define if MPI_Comm_c2f and MPI_Comm_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Comm @H5_HAVE_MPI_MULTI_LANG_Comm@
 
-/* Define if MPI_Info_c2f and MPI_Info_f2c exists */
+/* Define if MPI_Info_c2f and MPI_Info_f2c exist */
 #cmakedefine H5_HAVE_MPI_MULTI_LANG_Info @H5_HAVE_MPI_MULTI_LANG_Info@
 
 /* Define to 1 if you have the <netdb.h> header file. */
@@ -322,12 +301,6 @@
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
 
-/* Define to 1 if you have the `round' function. */
-#cmakedefine H5_HAVE_ROUND @H5_HAVE_ROUND@
-
-/* Define to 1 if you have the `roundf' function. */
-#cmakedefine H5_HAVE_ROUNDF @H5_HAVE_ROUNDF@
-
 /* Define to 1 if you have the `setjmp' function. */
 #cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
 
@@ -361,17 +334,8 @@
 /* Define if `struct stat' has the `st_blocks' field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
 
-/* Define to 1 if you have the <stdbool.h> header file. */
-#cmakedefine H5_HAVE_STDBOOL_H @H5_HAVE_STDBOOL_H@
-
 /* Define to 1 if you have the <stddef.h> header file. */
 #cmakedefine H5_HAVE_STDDEF_H @H5_HAVE_STDDEF_H@
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#cmakedefine H5_HAVE_STDINT_H @H5_HAVE_STDINT_H@
-
-/* Define to 1 if you have the <stdint.h> header file for Cplusplus. */
-#cmakedefine H5_HAVE_STDINT_H_CXX @H5_HAVE_STDINT_H_CXX@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
@@ -486,7 +450,7 @@
 /* Define if the compiler understands __inline__ */
 #cmakedefine H5_HAVE___INLINE__ @H5_HAVE___INLINE__@
 
-/* Define if the library will ignore file locks when disabled */                 
+/* Define if the library will ignore file locks when disabled */
 #cmakedefine H5_IGNORE_DISABLED_FILE_LOCKS @H5_IGNORE_DISABLED_FILE_LOCKS@
 
 /* Define if the high-level library headers should be included in hdf5.h */
@@ -545,10 +509,10 @@
 #define H5_PACKAGE_VERSION "@HDF5_PACKAGE_VERSION_STRING@"
 
 /* Determine the maximum decimal precision in C */
-#cmakedefine H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
+#define H5_PAC_C_MAX_REAL_PRECISION @H5_PAC_C_MAX_REAL_PRECISION@
 
 /* Define Fortran Maximum Real Decimal Precision */
-#cmakedefine H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
+#define H5_PAC_FC_MAX_REAL_PRECISION @H5_PAC_FC_MAX_REAL_PRECISION@
 
 /* Width for printf() for type `long long' or `__int64', use `ll' */
 #cmakedefine H5_PRINTF_LL_WIDTH @H5_PRINTF_LL_WIDTH@
@@ -778,17 +742,8 @@
 /* Define for large files, on AIX-style hosts. */
 #cmakedefine H5__LARGE_FILES
 
-/* Define to empty if `const' does not conform to ANSI C. */
-#cmakedefine H5_const
-
 /* Define to `long int' if <sys/types.h> does not define. */
 #cmakedefine H5_off_t
-
-/* Define to `long' if <sys/types.h> does not define. */
-#cmakedefine H5_ptrdiff_t
-
-/* Define to `unsigned long' if <sys/types.h> does not define. */
-#cmakedefine H5_size_t
 
 /* Define to `long' if <sys/types.h> does not define. */
 #cmakedefine H5_ssize_t

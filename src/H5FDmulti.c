@@ -35,23 +35,36 @@
 #define TRUE 1
 #endif
 
-/* Imported from H5private.h */
-/* Macros for enabling/disabling particular GCC warnings */
-/* (see the following web-sites for more info:
+/* Windows doesn't like some POSIX names and redefines them with an
+ * underscore
+ */
+#ifdef _WIN32
+#define my_strdup _strdup
+#else
+#define my_strdup strdup
+#endif
+
+/* Macros for enabling/disabling particular GCC warnings
+ *
+ * These are (renamed) duplicates of macros in H5private.h. If you make changes
+ * here, be sure to update those as well.
+ *
+ * (see the following web-sites for more info:
  *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
  *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
  */
 /* These pragmas are only implemented usefully in gcc 4.6+ */
 #if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
-#define H5_GCC_DIAG_JOINSTR(x, y) x y
-#define H5_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
-#define H5_GCC_DIAG_PRAGMA(x)     H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
+#define H5_MULTI_GCC_DIAG_JOINSTR(x, y) x y
+#define H5_MULTI_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
+#define H5_MULTI_GCC_DIAG_PRAGMA(x)     H5_MULTI_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
 
-#define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR("-W", x))
-#define H5_GCC_DIAG_ON(x)  H5_GCC_DIAG_PRAGMA(pop)
+#define H5_MULTI_GCC_DIAG_OFF(x)                                                                             \
+    H5_MULTI_GCC_DIAG_PRAGMA(push) H5_MULTI_GCC_DIAG_PRAGMA(ignored H5_MULTI_GCC_DIAG_JOINSTR("-W", x))
+#define H5_MULTI_GCC_DIAG_ON(x) H5_MULTI_GCC_DIAG_PRAGMA(pop)
 #else
-#define H5_GCC_DIAG_OFF(x)
-#define H5_GCC_DIAG_ON(x)
+#define H5_MULTI_GCC_DIAG_OFF(x)
+#define H5_MULTI_GCC_DIAG_ON(x)
 #endif
 
 /* Loop through all mapped files */
@@ -122,9 +135,8 @@ typedef struct H5FD_multi_dxpl_t {
 } H5FD_multi_dxpl_t;
 
 /* Private functions */
-static char *my_strdup(const char *s);
-static int   compute_next(H5FD_multi_t *file);
-static int   open_members(H5FD_multi_t *file);
+static int compute_next(H5FD_multi_t *file);
+static int open_members(H5FD_multi_t *file);
 
 /* Callback prototypes */
 static herr_t  H5FD_multi_term(void);
@@ -153,72 +165,44 @@ static herr_t  H5FD_multi_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD_multi_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD_multi_unlock(H5FD_t *_file);
+static herr_t  H5FD_multi_delete(const char *filename, hid_t fapl_id);
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
-    "multi",                   /*name            */
-    HADDR_MAX,                 /*maxaddr        */
-    H5F_CLOSE_WEAK,            /* fc_degree        */
-    H5FD_multi_term,           /*terminate             */
-    H5FD_multi_sb_size,        /*sb_size        */
-    H5FD_multi_sb_encode,      /*sb_encode        */
-    H5FD_multi_sb_decode,      /*sb_decode        */
-    sizeof(H5FD_multi_fapl_t), /*fapl_size        */
-    H5FD_multi_fapl_get,       /*fapl_get        */
-    H5FD_multi_fapl_copy,      /*fapl_copy        */
-    H5FD_multi_fapl_free,      /*fapl_free        */
-    0,                         /*dxpl_size        */
-    NULL,                      /*dxpl_copy        */
-    NULL,                      /*dxpl_free        */
-    H5FD_multi_open,           /*open            */
-    H5FD_multi_close,          /*close            */
-    H5FD_multi_cmp,            /*cmp            */
-    H5FD_multi_query,          /*query            */
-    H5FD_multi_get_type_map,   /*get_type_map        */
-    H5FD_multi_alloc,          /*alloc            */
-    H5FD_multi_free,           /*free            */
-    H5FD_multi_get_eoa,        /*get_eoa        */
-    H5FD_multi_set_eoa,        /*set_eoa        */
-    H5FD_multi_get_eof,        /*get_eof        */
-    H5FD_multi_get_handle,     /*get_handle            */
-    H5FD_multi_read,           /*read            */
-    H5FD_multi_write,          /*write            */
-    H5FD_multi_flush,          /*flush            */
-    H5FD_multi_truncate,       /*truncate        */
-    H5FD_multi_lock,           /*lock                  */
-    H5FD_multi_unlock,         /*unlock                */
-    H5FD_FLMAP_DEFAULT         /*fl_map        */
+    "multi",                   /* name              */
+    HADDR_MAX,                 /* maxaddr           */
+    H5F_CLOSE_WEAK,            /* fc_degree         */
+    H5FD_multi_term,           /* terminate         */
+    H5FD_multi_sb_size,        /* sb_size           */
+    H5FD_multi_sb_encode,      /* sb_encode         */
+    H5FD_multi_sb_decode,      /* sb_decode         */
+    sizeof(H5FD_multi_fapl_t), /* fapl_size         */
+    H5FD_multi_fapl_get,       /* fapl_get          */
+    H5FD_multi_fapl_copy,      /* fapl_copy         */
+    H5FD_multi_fapl_free,      /* fapl_free         */
+    0,                         /* dxpl_size         */
+    NULL,                      /* dxpl_copy         */
+    NULL,                      /* dxpl_free         */
+    H5FD_multi_open,           /* open              */
+    H5FD_multi_close,          /* close             */
+    H5FD_multi_cmp,            /* cmp               */
+    H5FD_multi_query,          /* query             */
+    H5FD_multi_get_type_map,   /* get_type_map      */
+    H5FD_multi_alloc,          /* alloc             */
+    H5FD_multi_free,           /* free              */
+    H5FD_multi_get_eoa,        /* get_eoa           */
+    H5FD_multi_set_eoa,        /* set_eoa           */
+    H5FD_multi_get_eof,        /* get_eof           */
+    H5FD_multi_get_handle,     /* get_handle        */
+    H5FD_multi_read,           /* read              */
+    H5FD_multi_write,          /* write             */
+    H5FD_multi_flush,          /* flush             */
+    H5FD_multi_truncate,       /* truncate          */
+    H5FD_multi_lock,           /* lock              */
+    H5FD_multi_unlock,         /* unlock            */
+    H5FD_multi_delete,         /* del               */
+    H5FD_FLMAP_DEFAULT         /* fl_map            */
 };
-
-/*-------------------------------------------------------------------------
- * Function:    my_strdup
- *
- * Purpose:    Private version of strdup()
- *
- * Return:    Success:    Ptr to new copy of string
- *
- *            Failure:    NULL
- *
- * Programmer:    Robb Matzke
- *              Friday, August 13, 1999
- *
- *-------------------------------------------------------------------------
- */
-static char *
-my_strdup(const char *s)
-{
-    char * x;
-    size_t str_len;
-
-    if (!s)
-        return NULL;
-    str_len = strlen(s) + 1;
-    if (NULL == (x = (char *)malloc(str_len)))
-        return NULL;
-    memcpy(x, s, str_len);
-
-    return x;
-}
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_multi_init
@@ -1991,19 +1975,20 @@ compute_next(H5FD_multi_t *file)
  *
  *-------------------------------------------------------------------------
  */
-/* Disable warning for "format not a string literal" here -QAK */
-/*
+/* Disable warning for "format not a string literal" here
+ *
  *      This pragma only needs to surround the snprintf() call with
  *      tmp in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_MULTI_GCC_DIAG_OFF("format-nonliteral")
 static int
 open_members(H5FD_multi_t *file)
 {
     char               tmp[H5FD_MULT_MAX_FILE_NAME_LEN];
     int                nerrors = 0;
-    static const char *func    = "(H5FD_multi)open_members"; /* Function Name for error reporting */
+    int                nchars;
+    static const char *func = "(H5FD_multi)open_members"; /* Function Name for error reporting */
 
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
@@ -2012,11 +1997,11 @@ open_members(H5FD_multi_t *file)
         if (file->memb[mt])
             continue; /*already open*/
         assert(file->fa.memb_name[mt]);
-        /* Note: This truncates the user's filename down to only sizeof(tmp)
-         *      characters. -QK & JK, 2013/01/17
-         */
-        sprintf(tmp, file->fa.memb_name[mt], file->name);
-        tmp[sizeof(tmp) - 1] = '\0';
+
+        nchars = snprintf(tmp, sizeof(tmp), file->fa.memb_name[mt], file->name);
+        if (nchars < 0 || nchars >= (int)sizeof(tmp))
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE,
+                        "filename is too long and would be truncated", -1);
 
         H5E_BEGIN_TRY
         {
@@ -2034,7 +2019,54 @@ open_members(H5FD_multi_t *file)
 
     return 0;
 }
-H5_GCC_DIAG_ON("format-nonliteral")
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_multi_delete
+ *
+ * Purpose:     Delete a file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_delete(const char *filename, hid_t fapl_id)
+{
+    char                     full_filename[H5FD_MULT_MAX_FILE_NAME_LEN];
+    int                      nchars;
+    const H5FD_multi_fapl_t *fa;
+    static const char *      func = "H5FD_multi_delete"; /* Function Name for error reporting    */
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    assert(filename);
+
+    /* Quiet compiler */
+    (void)fapl_id;
+
+    /* Get the driver info */
+    fa = (const H5FD_multi_fapl_t *)H5Pget_driver_info(fapl_id);
+    assert(fa);
+
+    /* Delete each member file using the underlying fapl */
+    UNIQUE_MEMBERS (fa->memb_map, mt) {
+        assert(fa->memb_name[mt]);
+        assert(fa->memb_fapl[mt] >= 0);
+
+        nchars = snprintf(full_filename, sizeof(full_filename), fa->memb_name[mt], filename);
+        if (nchars < 0 || nchars >= (int)sizeof(full_filename))
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE,
+                        "filename is too long and would be truncated", -1);
+
+        if (H5FDdelete(full_filename, fa->memb_fapl[mt]) < 0)
+            H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_BADVALUE, "error deleting member files", -1);
+    }
+    END_MEMBERS;
+
+    return 0;
+} /* end H5FD_multi_delete() */
+H5_MULTI_GCC_DIAG_ON("format-nonliteral")
 
 #ifdef H5private_H
 /*

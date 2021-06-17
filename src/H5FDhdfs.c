@@ -20,8 +20,10 @@
  *             File System (HDFS).
  */
 
+#ifdef H5_HAVE_LIBHDFS
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
+#endif
 
 #include "H5private.h"   /* Generic Functions        */
 #include "H5Eprivate.h"  /* Error handling           */
@@ -309,6 +311,7 @@ static const H5FD_class_t H5FD_hdfs_g = {
     H5FD__hdfs_truncate,      /* truncate             */
     NULL,                     /* lock                 */
     NULL,                     /* unlock               */
+    NULL,                     /* del                  */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 

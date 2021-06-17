@@ -78,21 +78,21 @@ JNIEXPORT jbyteArray JNICALL Java_hdf_hdf5lib_H5_H5Rcopy(JNIEnv *, jclass, jbyte
  * Method:    H5Ropen_object
  * Signature: ([BJJ)J
  */
-JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Ropen_1object(JNIEnv *, jclass, jbyteArray, jlong, jlong);
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Ropen_1object(JNIEnv *, jclass, jbyteArray, jlong, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Ropen_region
  * Signature: ([BJJ)J
  */
-JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Ropen_1region(JNIEnv *, jclass, jbyteArray, jlong, jlong);
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Ropen_1region(JNIEnv *, jclass, jbyteArray, jlong, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5
  * Method:    H5Ropen_attr
  * Signature: ([BJJ)J
  */
-JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5_H5Ropen_1attr(JNIEnv *, jclass, jbyteArray, jlong, jlong);
+JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_H5__1H5Ropen_1attr(JNIEnv *, jclass, jbyteArray, jlong, jlong);
 
 /*
  * Class:     hdf_hdf5lib_H5

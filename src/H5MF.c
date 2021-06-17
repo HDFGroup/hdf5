@@ -1442,13 +1442,13 @@ done:
 htri_t
 H5MF_try_shrink(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
 {
-    H5MF_free_section_t * node = NULL;               /* Free space section pointer */
-    H5MF_sect_ud_t        udata;                     /* User data for callback */
-    H5FS_section_class_t *sect_cls;                  /* Section class */
-    H5AC_ring_t           orig_ring = H5AC_RING_INV; /* Original ring value */
-    H5AC_ring_t           fsm_ring  = H5AC_RING_INV; /* Ring of FSM */
-    H5F_mem_page_t        fs_type;                   /* Free space type */
-    htri_t                ret_value = FALSE;         /* Return value */
+    H5MF_free_section_t *       node = NULL;               /* Free space section pointer */
+    H5MF_sect_ud_t              udata;                     /* User data for callback */
+    const H5FS_section_class_t *sect_cls;                  /* Section class */
+    H5AC_ring_t                 orig_ring = H5AC_RING_INV; /* Original ring value */
+    H5AC_ring_t                 fsm_ring  = H5AC_RING_INV; /* Ring of FSM */
+    H5F_mem_page_t              fs_type;                   /* Free space type */
+    htri_t                      ret_value = FALSE;         /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
@@ -2323,15 +2323,15 @@ done:
  * Purpose: 	To retrieve free-space section information for
  *              paged or non-paged aggregation
  *
- * Return:      Success:    Number of free sections
- *              Failure:    -1
+ * Return:	SUCCEED/FAIL
  *
  * Programmer:  Vailin Choi; Dec 2012
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
-H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t *sect_info)
+herr_t
+H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t *sect_info,
+                       size_t *sect_count)
 {
     H5AC_ring_t         orig_ring   = H5AC_RING_INV; /* Original ring value */
     H5AC_ring_t         curr_ring   = H5AC_RING_INV; /* Current ring value */
@@ -2340,9 +2340,9 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
     H5MF_sect_iter_ud_t sect_udata;                  /* User data for callback */
     H5F_mem_page_t      start_type, end_type;        /* Memory types to iterate over */
     H5F_mem_page_t      ty;                          /* Memory type for iteration */
-    ssize_t             ret_value = -1;              /* Return value */
+    herr_t              ret_value = SUCCEED;         /* Return value */
 
-    FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, (-1))
+    FUNC_ENTER_NOAPI_TAG(H5AC__FREESPACE_TAG, FAIL)
 
     /* check args */
     HDassert(f);
@@ -2404,7 +2404,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
 
         if (!f->shared->fs_man[ty] && H5F_addr_defined(f->shared->fs_addr[ty])) {
             if (H5MF__open_fstype(f, ty) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, (-1), "can't open the free space manager")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL, "can't open the free space manager")
             HDassert(f->shared->fs_man[ty]);
             fs_started = TRUE;
         } /* end if */
@@ -2412,7 +2412,7 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
         /* Check if there's free space sections of this type */
         if (f->shared->fs_man[ty])
             if (H5MF__get_free_sects(f, f->shared->fs_man[ty], &sect_udata, &nums) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, (-1),
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTRELEASE, FAIL,
                             "can't get section info for the free space manager")
 
         /* Increment total # of sections */
@@ -2421,13 +2421,13 @@ H5MF_get_free_sections(H5F_t *f, H5FD_mem_t type, size_t nsects, H5F_sect_info_t
         /* Close the free space manager of this type, if we started it here */
         if (fs_started)
             if (H5MF__close_fstype(f, ty) < 0)
-                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCLOSEOBJ, (-1), "can't close file free space")
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCLOSEOBJ, FAIL, "can't close file free space")
         if ((H5F_PAGED_AGGR(f)) && (type != H5FD_MEM_DEFAULT))
             ty = (H5F_mem_page_t)(ty + H5FD_MEM_NTYPES - 2);
     } /* end for */
 
-    /* Set return value */
-    ret_value = (ssize_t)total_sects;
+    /* Set value to return */
+    *sect_count = total_sects;
 
 done:
     /* Reset the ring in the API context */

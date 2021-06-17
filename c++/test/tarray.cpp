@@ -83,7 +83,8 @@ test_array_compound_array()
         for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
             wdata[idxi][idxj].i = static_cast<int>(idxi * 10 + idxj);
             for (idxk = 0; idxk < ARRAY1_DIM1; idxk++) {
-                float temp                = idxi * 10.0 + idxj * 2.5 + idxk;
+                float temp = static_cast<float>(idxi) * 10.0F + static_cast<float>(idxj) * 2.5F +
+                             static_cast<float>(idxk);
                 wdata[idxi][idxj].f[idxk] = temp;
             }
         } // end for
@@ -178,9 +179,9 @@ test_array_compound_array()
         // Check the array dimensions
         for (ii = 0; ii < ndims; ii++)
             if (rdims1[ii] != tdims1[ii]) {
-                TestErrPrintf(
-                    "Array dimension information doesn't match!, rdims1[%d]=%lld, tdims1[%d]=%lld\n", ii,
-                    rdims1[ii], ii, tdims1[ii]);
+                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%" PRIuHSIZE
+                              ", tdims1[%d]=%" PRIuHSIZE "\n",
+                              ii, rdims1[ii], ii, tdims1[ii]);
                 continue;
             } // end if
 
@@ -197,9 +198,9 @@ test_array_compound_array()
         // Check the array dimensions
         for (ii = 0; ii < ndims; ii++)
             if (rdims1[ii] != tdims1[ii]) {
-                TestErrPrintf(
-                    "Array dimension information doesn't match!, rdims1[%d]=%lld, tdims1[%d]=%lld\n", ii,
-                    rdims1[ii], ii, tdims1[ii]);
+                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%" PRIuHSIZE
+                              ", tdims1[%d]=%" PRIuHSIZE "\n",
+                              ii, rdims1[ii], ii, tdims1[ii]);
                 continue;
             } // end if
 
@@ -242,15 +243,15 @@ test_array_compound_array()
         verify_val(ndims, ARRAY1_RANK, "f2_atype_check.getArrayNDims", __LINE__, __FILE__);
 
         // Get the array dimensions
-        HDmemset(rdims1, 0, H5S_MAX_RANK);
+        HDmemset(rdims1, 0, sizeof(rdims1));
         f2_atype_check.getArrayDims(rdims1);
 
         // Check the array dimensions
         for (ii = 0; ii < ndims; ii++)
             if (rdims1[ii] != tdims1[ii]) {
-                TestErrPrintf(
-                    "Array dimension information doesn't match!, rdims1[%d]=%lld, tdims1[%d]=%lld\n", ii,
-                    rdims1[ii], ii, tdims1[ii]);
+                TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%" PRIuHSIZE
+                              ", tdims1[%d]=%" PRIuHSIZE "\n",
+                              ii, rdims1[ii], ii, tdims1[ii]);
                 continue;
             } // end if
 
@@ -265,8 +266,9 @@ test_array_compound_array()
         for (idxi = 0; idxi < SPACE1_DIM1; idxi++) {
             for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
                 if (wdata[idxi][idxj].i != rdata[idxi][idxj].i) {
-                    TestErrPrintf("Array data information doesn't match!, wdata[%lld][%lld].i=%d, "
-                                  "rdata[%lld][%lld].i=%d\n",
+                    TestErrPrintf("Array data information doesn't match!, wdata[%" PRIuHSIZE "][%" PRIuHSIZE
+                                  "].i=%d, "
+                                  "rdata[%" PRIuHSIZE "][%" PRIuHSIZE "].i=%d\n",
                                   idxi, idxj, wdata[idxi][idxj].i, idxi, idxj, rdata[idxi][idxj].i);
                     continue;
                 } // end if
@@ -288,7 +290,7 @@ test_array_compound_array()
 /*
  * Helper routine to demonstrate the issue in HDFFV-9562
  */
-H5::DataType
+static H5::DataType
 getArr()
 {
     hsize_t *dims = new hsize_t;
@@ -388,10 +390,11 @@ test_array_info()
         for (idxj = 0; idxj < ARRAY1_DIM1; idxj++) {
             wdata[idxi][idxj].i = static_cast<int>(idxi * 10 + idxj);
             for (idxk = 0; idxk < ARRAY1_DIM1; idxk++) {
-                float temp                = idxi * 10.0 + idxj * 2.5 + idxk;
+                float temp = static_cast<float>(idxi) * 10.0F + static_cast<float>(idxj) * 2.5F +
+                             static_cast<float>(idxk);
                 wdata[idxi][idxj].f[idxk] = temp;
             }
-        } // end for
+        }
 
     try {
         // Create File
@@ -457,11 +460,11 @@ test_array_info()
             // Check the array dimensions
             for (ii = 0; ii < ndims; ii++)
                 if (rdims1[ii] != tdims1[ii]) {
-                    TestErrPrintf(
-                        "Array dimension information doesn't match!, rdims1[%d]=%llu, tdims1[%d]=z%llu\n", ii,
-                        rdims1[ii], ii, tdims1[ii]);
+                    TestErrPrintf("Array dimension information doesn't match!, rdims1[%d]=%" PRIuHSIZE
+                                  ", tdims1[%d]=%" PRIuHSIZE "\n",
+                                  ii, rdims1[ii], ii, tdims1[ii]);
                     continue;
-                } // end if
+                }
         }
 
         // Close all

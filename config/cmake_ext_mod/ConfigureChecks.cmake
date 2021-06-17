@@ -120,21 +120,11 @@ CHECK_INCLUDE_FILE_CONCAT ("features.h"      ${HDF_PREFIX}_HAVE_FEATURES_H)
 CHECK_INCLUDE_FILE_CONCAT ("dirent.h"        ${HDF_PREFIX}_HAVE_DIRENT_H)
 CHECK_INCLUDE_FILE_CONCAT ("setjmp.h"        ${HDF_PREFIX}_HAVE_SETJMP_H)
 CHECK_INCLUDE_FILE_CONCAT ("stddef.h"        ${HDF_PREFIX}_HAVE_STDDEF_H)
-CHECK_INCLUDE_FILE_CONCAT ("stdint.h"        ${HDF_PREFIX}_HAVE_STDINT_H)
 CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        ${HDF_PREFIX}_HAVE_UNISTD_H)
 
 # Windows
-CHECK_INCLUDE_FILE_CONCAT ("io.h"            ${HDF_PREFIX}_HAVE_IO_H)
 if (NOT CYGWIN)
   CHECK_INCLUDE_FILE_CONCAT ("winsock2.h"      ${HDF_PREFIX}_HAVE_WINSOCK2_H)
-endif ()
-
-if (CMAKE_SYSTEM_NAME MATCHES "OSF")
-  CHECK_INCLUDE_FILE_CONCAT ("sys/sysinfo.h" ${HDF_PREFIX}_HAVE_SYS_SYSINFO_H)
-  CHECK_INCLUDE_FILE_CONCAT ("sys/proc.h"    ${HDF_PREFIX}_HAVE_SYS_PROC_H)
-else ()
-  set (${HDF_PREFIX}_HAVE_SYS_SYSINFO_H "" CACHE INTERNAL "" FORCE)
-  set (${HDF_PREFIX}_HAVE_SYS_PROC_H    "" CACHE INTERNAL "" FORCE)
 endif ()
 
 CHECK_INCLUDE_FILE_CONCAT ("globus/common.h" ${HDF_PREFIX}_HAVE_GLOBUS_COMMON_H)
@@ -146,12 +136,9 @@ CHECK_INCLUDE_FILE_CONCAT ("strings.h"       ${HDF_PREFIX}_HAVE_STRINGS_H)
 CHECK_INCLUDE_FILE_CONCAT ("stdlib.h"        ${HDF_PREFIX}_HAVE_STDLIB_H)
 CHECK_INCLUDE_FILE_CONCAT ("memory.h"        ${HDF_PREFIX}_HAVE_MEMORY_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         ${HDF_PREFIX}_HAVE_DLFCN_H)
-CHECK_INCLUDE_FILE_CONCAT ("inttypes.h"      ${HDF_PREFIX}_HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    ${HDF_PREFIX}_HAVE_NETINET_IN_H)
 CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
 CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
-# _Bool type support
-CHECK_INCLUDE_FILE_CONCAT (stdbool.h    ${HDF_PREFIX}_HAVE_STDBOOL_H)
 
 ## Check for non-standard extenstion quadmath.h
 
@@ -236,11 +223,6 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
     endif ()
   endif ()
 endmacro ()
-
-#-----------------------------------------------------------------------------
-# Check for these functions before the time headers are checked
-#-----------------------------------------------------------------------------
-HDF_FUNCTION_TEST (STDC_HEADERS)
 
 #-----------------------------------------------------------------------------
 #  Check for large file support
@@ -394,15 +376,13 @@ HDF_CHECK_TYPE_SIZE (uint_least64_t ${HDF_PREFIX}_SIZEOF_UINT_LEAST64_T)
 HDF_CHECK_TYPE_SIZE (int_fast64_t   ${HDF_PREFIX}_SIZEOF_INT_FAST64_T)
 HDF_CHECK_TYPE_SIZE (uint_fast64_t  ${HDF_PREFIX}_SIZEOF_UINT_FAST64_T)
 
-if (NOT APPLE)
-  HDF_CHECK_TYPE_SIZE (size_t       ${HDF_PREFIX}_SIZEOF_SIZE_T)
-  HDF_CHECK_TYPE_SIZE (ssize_t      ${HDF_PREFIX}_SIZEOF_SSIZE_T)
-  if (NOT ${HDF_PREFIX}_SIZEOF_SSIZE_T)
-    set (${HDF_PREFIX}_SIZEOF_SSIZE_T 0)
-  endif ()
-  if (MINGW OR NOT WINDOWS)
-    HDF_CHECK_TYPE_SIZE (ptrdiff_t    ${HDF_PREFIX}_SIZEOF_PTRDIFF_T)
-  endif ()
+HDF_CHECK_TYPE_SIZE (size_t       ${HDF_PREFIX}_SIZEOF_SIZE_T)
+HDF_CHECK_TYPE_SIZE (ssize_t      ${HDF_PREFIX}_SIZEOF_SSIZE_T)
+if (NOT ${HDF_PREFIX}_SIZEOF_SSIZE_T)
+  set (${HDF_PREFIX}_SIZEOF_SSIZE_T 0)
+endif ()
+if (MINGW OR NOT WINDOWS)
+  HDF_CHECK_TYPE_SIZE (ptrdiff_t    ${HDF_PREFIX}_SIZEOF_PTRDIFF_T)
 endif ()
 
 HDF_CHECK_TYPE_SIZE (off_t          ${HDF_PREFIX}_SIZEOF_OFF_T)
@@ -416,13 +396,9 @@ HDF_CHECK_TYPE_SIZE (time_t          ${HDF_PREFIX}_SIZEOF_TIME_T)
 # Extra C99 types
 #-----------------------------------------------------------------------------
 
-# _Bool type support
-if (HAVE_STDBOOL_H)
-  set (CMAKE_EXTRA_INCLUDE_FILES stdbool.h)
-  HDF_CHECK_TYPE_SIZE (bool         ${HDF_PREFIX}_SIZEOF_BOOL)
-else ()
-  HDF_CHECK_TYPE_SIZE (_Bool        ${HDF_PREFIX}_SIZEOF_BOOL)
-endif ()
+# Size of bool
+set (CMAKE_EXTRA_INCLUDE_FILES stdbool.h)
+HDF_CHECK_TYPE_SIZE (_Bool        ${HDF_PREFIX}_SIZEOF_BOOL)
 
 if (MINGW OR NOT WINDOWS)
   #-----------------------------------------------------------------------------
@@ -500,18 +476,12 @@ CHECK_FUNCTION_EXISTS (frexpl            ${HDF_PREFIX}_HAVE_FREXPL)
 
 CHECK_FUNCTION_EXISTS (gethostname       ${HDF_PREFIX}_HAVE_GETHOSTNAME)
 CHECK_FUNCTION_EXISTS (getrusage         ${HDF_PREFIX}_HAVE_GETRUSAGE)
-CHECK_FUNCTION_EXISTS (llround           ${HDF_PREFIX}_HAVE_LLROUND)
-CHECK_FUNCTION_EXISTS (llroundf          ${HDF_PREFIX}_HAVE_LLROUNDF)
-CHECK_FUNCTION_EXISTS (lround            ${HDF_PREFIX}_HAVE_LROUND)
-CHECK_FUNCTION_EXISTS (lroundf           ${HDF_PREFIX}_HAVE_LROUNDF)
 CHECK_FUNCTION_EXISTS (lstat             ${HDF_PREFIX}_HAVE_LSTAT)
 
 CHECK_FUNCTION_EXISTS (pread             ${HDF_PREFIX}_HAVE_PREAD)
 CHECK_FUNCTION_EXISTS (pwrite            ${HDF_PREFIX}_HAVE_PWRITE)
 CHECK_FUNCTION_EXISTS (rand_r            ${HDF_PREFIX}_HAVE_RAND_R)
 CHECK_FUNCTION_EXISTS (random            ${HDF_PREFIX}_HAVE_RANDOM)
-CHECK_FUNCTION_EXISTS (round             ${HDF_PREFIX}_HAVE_ROUND)
-CHECK_FUNCTION_EXISTS (roundf            ${HDF_PREFIX}_HAVE_ROUNDF)
 CHECK_FUNCTION_EXISTS (setsysinfo        ${HDF_PREFIX}_HAVE_SETSYSINFO)
 
 CHECK_FUNCTION_EXISTS (signal            ${HDF_PREFIX}_HAVE_SIGNAL)
@@ -560,7 +530,6 @@ if (MINGW OR NOT WINDOWS)
   foreach (other_test
       HAVE_ATTRIBUTE
       HAVE_C99_FUNC
-#      STDC_HEADERS
       HAVE_FUNCTION
       HAVE_C99_DESIGNATED_INITIALIZER
       SYSTEM_SCOPE_THREADS

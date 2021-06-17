@@ -154,19 +154,12 @@ static herr_t H5C__flush_candidates_in_ring(H5F_t *f, H5C_ring_t ring, unsigned 
  * Programmer:  John Mainzer
  *              3/17/10
  *
- * Changes:     Updated sanity checks to allow for the possibility that
- *              the slist is disabled.
- *                                               JRM -- 8/3/20
- *
  *-------------------------------------------------------------------------
  */
 herr_t
 H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, haddr_t *candidates_list_ptr,
                          int mpi_rank, int mpi_size)
 {
-    int                i;
-    int                m;
-    unsigned           n;
     unsigned           first_entry_to_flush;
     unsigned           last_entry_to_flush;
     unsigned           total_entries_to_clear     = 0;
@@ -176,15 +169,13 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     unsigned           entries_to_clear[H5C_RING_NTYPES];
     haddr_t            addr;
     H5C_cache_entry_t *entry_ptr = NULL;
-
 #if H5C_DO_SANITY_CHECKS
     haddr_t last_addr;
 #endif /* H5C_DO_SANITY_CHECKS */
-
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
     char tbl_buf[1024];
 #endif /* H5C_APPLY_CANDIDATE_LIST__DEBUG */
-
+    unsigned m, n;
     unsigned u;                   /* Local index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
@@ -226,9 +217,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     } /* end if */
 
     n = num_candidates / (unsigned)mpi_size;
-    if (num_candidates % (unsigned)mpi_size > INT_MAX)
-        HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "m overflow")
-    m = (int)(num_candidates % (unsigned)mpi_size);
+    m = num_candidates % (unsigned)mpi_size;
 
     if (NULL ==
         (candidate_assignment_table = (unsigned *)H5MM_malloc(sizeof(unsigned) * (size_t)(mpi_size + 1))))
@@ -239,31 +228,31 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     candidate_assignment_table[mpi_size] = num_candidates;
 
     if (m == 0) { /* mpi_size is an even divisor of num_candidates */
-        for (i = 1; i < mpi_size; i++)
-            candidate_assignment_table[i] = candidate_assignment_table[i - 1] + n;
+        for (u = 1; u < (unsigned)mpi_size; u++)
+            candidate_assignment_table[u] = candidate_assignment_table[u - 1] + n;
     } /* end if */
     else {
-        for (i = 1; i <= m; i++)
-            candidate_assignment_table[i] = candidate_assignment_table[i - 1] + n + 1;
+        for (u = 1; u <= m; u++)
+            candidate_assignment_table[u] = candidate_assignment_table[u - 1] + n + 1;
 
         if (num_candidates < (unsigned)mpi_size) {
-            for (i = m + 1; i < mpi_size; i++)
-                candidate_assignment_table[i] = num_candidates;
+            for (u = m + 1; u < (unsigned)mpi_size; u++)
+                candidate_assignment_table[u] = num_candidates;
         } /* end if */
         else {
-            for (i = m + 1; i < mpi_size; i++)
-                candidate_assignment_table[i] = candidate_assignment_table[i - 1] + n;
+            for (u = m + 1; u < (unsigned)mpi_size; u++)
+                candidate_assignment_table[u] = candidate_assignment_table[u - 1] + n;
         } /* end else */
     }     /* end else */
     HDassert((candidate_assignment_table[mpi_size - 1] + n) == num_candidates);
 
 #if H5C_DO_SANITY_CHECKS
     /* Verify that the candidate assignment table has the expected form */
-    for (i = 1; i < mpi_size - 1; i++) {
+    for (u = 1; u < (unsigned)(mpi_size - 1); u++) {
         unsigned a, b;
 
-        a = candidate_assignment_table[i] - candidate_assignment_table[i - 1];
-        b = candidate_assignment_table[i + 1] - candidate_assignment_table[i];
+        a = candidate_assignment_table[u] - candidate_assignment_table[u - 1];
+        b = candidate_assignment_table[u + 1] - candidate_assignment_table[u];
 
         HDassert(n + 1 >= a);
         HDassert(a >= b);
@@ -275,11 +264,11 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     last_entry_to_flush  = candidate_assignment_table[mpi_rank + 1] - 1;
 
 #if H5C_APPLY_CANDIDATE_LIST__DEBUG
-    for (i = 0; i < 1024; i++)
-        tbl_buf[i] = '\0';
+    for (u = 0; u < 1024; u++)
+        tbl_buf[u] = '\0';
     HDsprintf(&(tbl_buf[0]), "candidate assignment table = ");
-    for (i = 0; i <= mpi_size; i++)
-        HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " %u", candidate_assignment_table[i]);
+    for (u = 0; u <= (unsigned)mpi_size; u++)
+        HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), " %u", candidate_assignment_table[u]);
     HDsprintf(&(tbl_buf[HDstrlen(tbl_buf)]), "\n");
     HDfprintf(stdout, "%s", tbl_buf);
 
@@ -354,9 +343,9 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
 #if H5C_DO_SANITY_CHECKS
     m = 0;
     n = 0;
-    for (i = 0; i < H5C_RING_NTYPES; i++) {
-        m += (int)entries_to_flush[i];
-        n += entries_to_clear[i];
+    for (u = 0; u < H5C_RING_NTYPES; u++) {
+        m += entries_to_flush[u];
+        n += entries_to_clear[u];
     } /* end if */
 
     HDassert((unsigned)m == total_entries_to_flush);
@@ -930,7 +919,9 @@ H5C_clear_coll_entries(H5C_t *cache_ptr, hbool_t partial)
         entry_ptr = prev_ptr;
     } /* end while */
 
+#ifdef H5C_DO_SANITY_CHECKS
 done:
+#endif /* H5C_DO_SANITY_CHECKS */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_clear_coll_entries */
 
@@ -957,10 +948,8 @@ H5C__collective_write(H5F_t *f)
     int *            length_array = NULL;
     MPI_Aint *       buf_array    = NULL;
     MPI_Aint *       offset_array = NULL;
-    MPI_Datatype     btype;
-    hbool_t          btype_created = FALSE;
-    MPI_Datatype     ftype;
-    hbool_t          ftype_created = FALSE;
+    MPI_Datatype     btype        = MPI_BYTE;
+    MPI_Datatype     ftype        = MPI_BYTE;
     int              mpi_code;
     char             unused = 0; /* Unused, except for non-NULL pointer value */
     size_t           buf_count;
@@ -1032,7 +1021,6 @@ H5C__collective_write(H5F_t *f)
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Type_create_hindexed(count, length_array, buf_array, MPI_BYTE, &btype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-        btype_created = TRUE;
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&btype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
@@ -1040,7 +1028,6 @@ H5C__collective_write(H5F_t *f)
         if (MPI_SUCCESS !=
             (mpi_code = MPI_Type_create_hindexed(count, length_array, offset_array, MPI_BYTE, &ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-        ftype_created = TRUE;
         if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&ftype)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
@@ -1048,10 +1035,6 @@ H5C__collective_write(H5F_t *f)
         buf_count = 1;
     } /* end if */
     else {
-        /* Pass trivial buf type, file type to the file driver */
-        btype = MPI_BYTE;
-        ftype = MPI_BYTE;
-
         /* Set non-NULL pointer for I/O operation */
         base_buf = &unused;
 
@@ -1074,9 +1057,9 @@ done:
     offset_array = (MPI_Aint *)H5MM_xfree(offset_array);
 
     /* Free MPI Types */
-    if (btype_created && MPI_SUCCESS != (mpi_code = MPI_Type_free(&btype)))
+    if (MPI_BYTE != btype && MPI_SUCCESS != (mpi_code = MPI_Type_free(&btype)))
         HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if (ftype_created && MPI_SUCCESS != (mpi_code = MPI_Type_free(&ftype)))
+    if (MPI_BYTE != ftype && MPI_SUCCESS != (mpi_code = MPI_Type_free(&ftype)))
         HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
 
     /* Reset transfer mode in API context, if changed */

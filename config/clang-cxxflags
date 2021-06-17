@@ -113,19 +113,7 @@ if test "X-clang" = "X-$cxx_vendor" -o "X-Apple LLVM" = "X-$cxx_vendor"; then
             ;;
     esac
 
-    case "$host_os-$host_cpu" in
-        # cygwin needs the "-std=c99" flag removed, so make
-        # a specific case for Cygwin without the flag and a default
-        # case to add the flag everywhere else
-        cygwin-*)
-            ;;
-
-        *)
-            H5_CXXFLAGS="$H5_CXXFLAGS -std=c++11"
-            ;;
-    esac
-
-    H5_CXXFLAGS="$H5_CXXFLAGS $arch"
+    H5_CXXFLAGS="$H5_CXXFLAGS $arch -std=c++11"
 
     ##############
     # Production #

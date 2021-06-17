@@ -111,6 +111,7 @@ typedef struct H5E_t H5E_t;
 /* Retrieve the error code description string and push it onto the error
  * stack.
  */
+#ifndef H5_HAVE_WIN32_API
 #define HSYS_DONE_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
@@ -129,6 +130,35 @@ typedef struct H5E_t H5E_t;
         HGOTO_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
                     HDstrerror(myerrno));                                                                    \
     }
+#else /* H5_HAVE_WIN32_API */
+/* On Windows we also emit the result of GetLastError(). This call returns a DWORD, which is always a
+ * 32-bit unsigned type. Note that on Windows, either errno or GetLastError() (but probably not both) will
+ * be useful depending on whether a C/POSIX or Win32 call failed. The other value will likely be zero,
+ * though I wouldn't count on that.
+ */
+#define HSYS_DONE_ERROR(majorcode, minorcode, retcode, str)                                                  \
+    {                                                                                                        \
+        int   myerrno   = errno;                                                                             \
+        DWORD win_error = GetLastError();                                                                    \
+        /* Other projects may rely on the description format to get the errno and any changes should be      \
+         * considered as an API change                                                                       \
+         */                                                                                                  \
+        HDONE_ERROR(majorcode, minorcode, retcode,                                                           \
+                    "%s, errno = %d, error message = '%s', Win32 GetLastError() = %" PRIu32 "", str,         \
+                    myerrno, HDstrerror(myerrno), win_error);                                                \
+    }
+#define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
+    {                                                                                                        \
+        int   myerrno   = errno;                                                                             \
+        DWORD win_error = GetLastError();                                                                    \
+        /* Other projects may rely on the description format to get the errno and any changes should be      \
+         * considered as an API change                                                                       \
+         */                                                                                                  \
+        HGOTO_ERROR(majorcode, minorcode, retcode,                                                           \
+                    "%s, errno = %d, error message = '%s', Win32 GetLastError() = %" PRIu32 "", str,         \
+                    myerrno, HDstrerror(myerrno), win_error);                                                \
+    }
+#endif /* H5_HAVE_WIN32_API */
 
 #ifdef H5_HAVE_PARALLEL
 /*
@@ -138,69 +168,17 @@ typedef struct H5E_t H5E_t;
 extern char H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
 extern int  H5E_mpi_error_str_len;
 
-#define HMPI_ERROR(mpierr)                                                                                   \
-    {                                                                                                        \
-        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
-        HERROR(H5E_INTERNAL, H5E_MPIERRSTR, "%s", H5E_mpi_error_str);                                        \
-    }
 #define HMPI_DONE_ERROR(retcode, str, mpierr)                                                                \
     {                                                                                                        \
-        HMPI_ERROR(mpierr);                                                                                  \
-        HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                                                    \
+        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
+        HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str); \
     }
 #define HMPI_GOTO_ERROR(retcode, str, mpierr)                                                                \
     {                                                                                                        \
-        HMPI_ERROR(mpierr);                                                                                  \
-        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                                                    \
+        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str); \
     }
 #endif /* H5_HAVE_PARALLEL */
-
-/******************************************************************************/
-/* Revisions to Error Macros, to go with Revisions to FUNC_ENTER/LEAVE Macros */
-/******************************************************************************/
-
-/*
- * H5E_PRINTF macro, used to facilitate error reporting between a BEGIN_FUNC()
- * and an END_FUNC() within a function body.  The arguments are the minor
- * error number, a description of the error (as a printf-like format string),
- * and an optional set of arguments for the printf format arguments.
- */
-#define H5E_PRINTF(...)                                                                                      \
-    H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, H5_MY_PKG_ERR, __VA_ARGS__)
-
-/*
- * H5_LEAVE macro, used to facilitate control flow between a
- * BEGIN_FUNC() and an END_FUNC() within a function body.  The argument is
- * the return value.
- * The return value is assigned to a variable `ret_value' and control branches
- * to the `catch_except' label, if we're not already past it.
- */
-#define H5_LEAVE(v)                                                                                          \
-    {                                                                                                        \
-        ret_value = v;                                                                                       \
-        if (!past_catch)                                                                                     \
-            goto catch_except;                                                                               \
-    }
-
-/*
- * H5E_THROW macro, used to facilitate error reporting between a
- * FUNC_ENTER() and a FUNC_LEAVE() within a function body.  The arguments are
- * the minor error number, and an error string.
- * The return value is assigned to a variable `ret_value' and control branches
- * to the `catch_except' label, if we're not already past it.
- */
-#define H5E_THROW(...)                                                                                       \
-    {                                                                                                        \
-        H5E_PRINTF(__VA_ARGS__);                                                                             \
-        H5_LEAVE(fail_value)                                                                                 \
-    }
-
-/* Macro for "catching" flow of control when an error occurs.  Note that the
- *      H5_LEAVE macro won't jump back here once it's past this point.
- */
-#define CATCH                                                                                                \
-catch_except:;                                                                                               \
-    past_catch = TRUE;
 
 /* Library-private functions defined in H5E package */
 H5_DLL herr_t H5E_init(void);

@@ -755,6 +755,7 @@ typedef struct H5F_t H5F_t;
 /* Forward declarations (for prototypes & type definitions) */
 struct H5B_class_t;
 struct H5UC_t;
+struct H5G_loc_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
 struct H5VL_class_t;
@@ -907,7 +908,9 @@ H5_DLL haddr_t H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
 H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
-/* Functions that check file mounting information */
+/* File mounting routines */
+H5_DLL herr_t  H5F_mount(const struct H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
+H5_DLL herr_t  H5F_unmount(const struct H5G_loc_t *loc, const char *name);
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
 H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 H5_DLL herr_t  H5F_traverse_mount(struct H5O_loc_t *oloc /*in,out*/);
@@ -955,14 +958,11 @@ H5_DLL herr_t H5F_eoa_dirty(H5F_t *f);
 
 /* Parallel I/O (i.e. MPI) related routines */
 #ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t   H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle);
 H5_DLL int      H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int      H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int      H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
-H5_DLL herr_t   H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag);
-H5_DLL herr_t   H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag);
 #endif /* H5_HAVE_PARALLEL */
 
 /* External file cache routines */

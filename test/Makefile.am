@@ -150,7 +150,6 @@ ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
                ttsafe_acreate.c ttsafe_attr_vlen.c
 cache_image_SOURCES=cache_image.c genall5.c
 mirror_vfd_SOURCES=mirror_vfd.c genall5.c
-event_set_SOURCES=event_set.c
 
 # Additional target for running timing test
 timings _timings: testmeta
@@ -176,7 +175,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     zero_chunk.h5 chunk_single.h5 swmr_non_latest.h5 \
     earray_hdr_fd.h5 farray_hdr_fd.h5 bt2_hdr_fd.h5 \
     storage_size.h5 dls_01_strings.h5 power2up.h5 version_bounds.h5 \
-    alloc_0sized.h5 \
+    alloc_0sized.h5 h5s_block.h5 h5s_plist.h5 \
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
@@ -217,7 +216,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
-    trefer.c trefer_deprec.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
+    trefer.c trefer_deprec.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c tunicode.c \
     tvlstr.c tvltypes.c
 
 # Sources for Use Cases

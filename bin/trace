@@ -53,11 +53,14 @@ $Source = "";
                "H5D_scatter_func_t"         => "DS",
                "H5FD_mpio_xfer_t"           => "Dt",
                "H5D_vds_view_t"             => "Dv",
+               "H5D_chunk_iter_op_t"        => "x",
                "herr_t"                     => "e",
                "H5E_auto1_t"                => "Ea",
                "H5E_auto2_t"                => "EA",
+               "H5ES_event_complete_func_t" => "EC",
                "H5E_direction_t"            => "Ed",
                "H5E_error_t"                => "Ee",
+               "H5ES_event_insert_func_t"   => "EI",
                "H5ES_status_t"              => "Es",
                "H5E_type_t"                 => "Et",
                "H5FD_class_t"               => "FC",
@@ -158,7 +161,7 @@ $Source = "";
                "H5VL_file_specific_t"       => "Vh",
                "H5VL_group_get_t"           => "Vi",
                "H5VL_group_specific_t"      => "Vj",
-               "H5VL_link_create_type_t"    => "Vk",
+               "H5VL_link_create_t"         => "Vk",
                "H5VL_link_get_t"            => "Vl",
                "H5VL_get_conn_lvl_t"        => "VL",
                "H5VL_link_specific_t"       => "Vm",
@@ -282,8 +285,8 @@ my $file_api = 0;
 my $file_args = 0;
 my $total_api = 0;
 my $total_args = 0;
-sub rewrite_func ($$$$$$$$) {
-  my ($file, $begin, $type, $aftertype, $name, $args, $close, $body) = @_;
+sub rewrite_func ($$$$$) {
+  my ($file, $type, $name, $args, $body) = @_;
   my ($arg, $trace, $argtrace);
   my (@arg_name, @arg_str, @arg_type);
   local $_;
@@ -351,10 +354,32 @@ sub rewrite_func ($$$$$$$$) {
     $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(FUNC, \"";
     $trace .= join("", @arg_str) . "\"";
     $argtrace .= join("", @arg_str) . "\"";
-    my $len = 4 + length $trace;        # Add 4, for indenting the line
-    for (@arg_name) {
-      # Wrap lines that will be longer than the limit, after ');' is added
-      if ($len + length >= ($max_trace_macro_line_len - 2)) {
+
+    # Add 4 for indenting the line
+    my $len = 4 + length($trace);
+
+    for my $i (0 .. $#arg_name) {
+      # Handle wrapping
+
+      # Be VERY careful here! clang-format and this script MUST agree
+      # on which lines get wrapped or there will be churn as each tries
+      # to undo the other's output.
+      #
+      # TWO cases must be handled:
+      # 1) The argument is that last one and ');' will be appended
+      # 2) The argument is NOT the last one and ',' will be appended
+      #
+      # NB: clang-format does NOT consider terminal newlines when
+      #     counting columns for the ColumnLimit
+      #
+      # The extra '2' added after $len includes the ', ' that would be
+      # added BEFORE the argument.
+      #
+      my $adjust = ($i + 1 == scalar(@arg_str)) ? 2 : 1;
+      my $len_if_added = $len + 2 + length($arg_name[$i]) + $adjust;
+
+      # Wrap lines that will be longer than the limit
+      if ($len_if_added > $max_trace_macro_line_len) {
         # Wrap line, with indention
         $trace .= ",\n             ";
         $len = 13;              # Set to 13, for indention
@@ -370,9 +395,11 @@ sub rewrite_func ($$$$$$$$) {
       }
 
       # Append argument
-      $trace .= "$_";
-      $argtrace .= ", $_";
-      $len += length;     # Add length of appended argument name
+      $trace .= "$arg_name[$i]";
+      $argtrace .= ", $arg_name[$i]";
+
+      # Add length of appended argument name
+      $len += length($arg_name[$i]);
     }
 
     # Append final ');' for macro
@@ -458,7 +485,7 @@ sub rewrite_func ($$$$$$$$) {
   }
 
  error:
-  return "\n$begin$type$aftertype$name($orig_args)$close$body";
+  return "\n$type\n$name($orig_args)\n$body";
 }
 
 ##############################################################################
@@ -480,25 +507,12 @@ for $file (@ARGV) {
     # Make a copy of the original data
     my $original = $Source;
 
-    # Check which style of function declaration is used in this file
-    if ( $Source =~ /BEGIN_FUNC/ ) {
-        # Make modifications
-        $Source =~ s/\n(BEGIN_FUNC.*?\n)                      #begin
-                        ([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)  #type
-                        (.*?\n)                               #aftertype
-                         (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
-                         \s*\((.*?)\)\s*                      #args
-                         (\))                                 #close
-                         (\n.*?\nEND_FUNC\([^\n]*)            #body
-                         /rewrite_func($file,$1,$2,$4,$5,$6,$7,$8)/segx;
-    } else {
-        # Make modifications
-        $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
-                         (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
-                         \s*\((.*?)\)\s*                      #args
-                         (\{.*?\n\}[^\n]*)                    #body
-                         /rewrite_func($file,"",$1,"\n",$3,$4,"\n",$5)/segx;
-    }
+    # Make modifications
+    $Source =~ s/\n([A-Za-z]\w*(\s+[A-Za-z]\w*)*\s*\**)\n #type
+                     (H5[A-Z]{0,2}_?[a-zA-Z0-9_]\w*)      #name
+                     \s*\((.*?)\)\s*                      #args
+                     (\{.*?\n\}[^\n]*)                    #body
+                     /rewrite_func($file,$1,$3,$4,$5)/segx;
 
 # If the source changed then print out the new version
     if ($original ne $Source) {

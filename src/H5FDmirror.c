@@ -15,11 +15,11 @@
  *          a remote host.
  */
 
-#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
-
 #include "H5private.h" /* Generic Functions        */
 
 #ifdef H5_HAVE_MIRROR_VFD
+
+#include "H5FDdrvr_module.h" /* This source code file is part of the H5FD driver module */
 
 #include "H5Eprivate.h"      /* Error handling           */
 #include "H5Fprivate.h"      /* File access              */
@@ -191,6 +191,7 @@ static const H5FD_class_t H5FD_mirror_g = {
     H5FD__mirror_truncate,  /* truncate             */
     H5FD__mirror_lock,      /* lock                 */
     H5FD__mirror_unlock,    /* unlock               */
+    NULL,                   /* del                  */
     H5FD_FLMAP_DICHOTOMY    /* fl_map               */
 };
 

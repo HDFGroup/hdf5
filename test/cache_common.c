@@ -1487,12 +1487,6 @@ add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, hb
     HDassert((0 <= type) && (type < NUMBER_OF_ENTRY_TYPES));
     HDassert((0 <= idx) && (idx <= max_indices[type]));
     HDassert(new_size <= VARIABLE_ENTRY_SIZE);
-#ifndef H5_HAVE_STDBOOL_H
-    /* Check for TRUE or FALSE if we're using an integer type instead
-     * of a real Boolean type.
-     */
-    HDassert((flag == TRUE) || (flag == FALSE));
-#endif /* H5_HAVE_STDBOOL_H */
 
     if (pass) {
 
@@ -1692,12 +1686,6 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
     HDassert((0 <= op_ptr->type) && (op_ptr->type < NUMBER_OF_ENTRY_TYPES));
     HDassert((0 <= op_ptr->idx) && (op_ptr->idx <= max_indices[op_ptr->type]));
     HDassert(flags_ptr != NULL);
-#ifndef H5_HAVE_STDBOOL_H
-    /* Check for TRUE or FALSE if we're using an integer type instead
-     * of a real Boolean type.
-     */
-    HDassert((op_ptr->flag == FALSE) || (op_ptr->flag == TRUE));
-#endif /* H5_HAVE_STDBOOL_H */
 
     if (pass) {
 
@@ -2757,7 +2745,6 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
 
     if (pass) {
         H5C_t *cache_ptr;
-        herr_t result = 0;
 
         HDassert(file_ptr);
 
@@ -4505,7 +4492,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     int     mile_stone = 1;
     int32_t type;
     int32_t idx;
-    int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
+    int32_t local_max_index[NUMBER_OF_ENTRY_TYPES] = {0};
 
     if (verbose)
         HDfprintf(stdout, "%s: entering.\n", FUNC);

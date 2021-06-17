@@ -26,7 +26,7 @@ set (VFD_H5DUMP_LIST
     family
 )
 
-if (DIRECT_VFD)
+if (H5_HAVE_DIRECT)
   set (VFD_H5DUMP_LIST ${VFD_H5DUMP_LIST} direct)
 endif ()
 

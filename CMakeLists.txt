@@ -71,6 +71,13 @@ mark_as_advanced (HDF5_EXTERNAL_LIB_PREFIX)
 #   If the parent project needs to install hdf libraries, but avoid
 #   name conflicts with system versions, then a prefix may be added
 #   to ensure that the correct versions configured are used.
+set (HDF5_LIB_INFIX "" CACHE STRING "Use infix for custom library naming.")
+mark_as_advanced (HDF5_LIB_INFIX)
+# HDF5_LIB_INFIX :
+#   This infix is added to all library names after 'hdf5'.
+#   e.g. the infix '_openmpi' results in the library name 'libhdf5_openmpi.so'
+#   This name is used in packages on debian based systems.
+#   (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
 #
 # HDF5_INSTALL_BIN_DIR, HDF5_INSTALL_LIB_DIR, HDF5_INSTALL_INCLUDE_DIR, HDF5_INSTALL_DATA_DIR :
 #   Customize the 'bin', 'lib', 'include', and 'share' installation directories.
@@ -130,20 +137,20 @@ mark_as_advanced (ALLOW_UNSUPPORTED)
 #-----------------------------------------------------------------------------
 # Set the core names of all the libraries
 #-----------------------------------------------------------------------------
-set (HDF5_LIB_CORENAME              "hdf5")
-set (HDF5_TEST_LIB_CORENAME         "hdf5_test")
-set (HDF5_CPP_LIB_CORENAME          "hdf5_cpp")
-set (HDF5_HL_LIB_CORENAME           "hdf5_hl")
-set (HDF5_HL_CPP_LIB_CORENAME       "hdf5_hl_cpp")
-set (HDF5_TOOLS_LIB_CORENAME        "hdf5_tools")
-set (HDF5_UTILS_LIB_CORENAME        "hdf5_utils")
-set (HDF5_F90_LIB_CORENAME          "hdf5_fortran")
-set (HDF5_F90_C_LIB_CORENAME        "hdf5_f90cstub")
-set (HDF5_F90_TEST_LIB_CORENAME     "hdf5_test_fortran")
-set (HDF5_F90_C_TEST_LIB_CORENAME   "hdf5_test_f90cstub")
-set (HDF5_HL_F90_LIB_CORENAME       "hdf5_hl_fortran")
-set (HDF5_HL_F90_C_LIB_CORENAME     "hdf5_hl_f90cstub")
-set (HDF5_JAVA_JNI_LIB_CORENAME     "hdf5_java")
+set (HDF5_LIB_CORENAME              "hdf5${HDF5_LIB_INFIX}")
+set (HDF5_TEST_LIB_CORENAME         "hdf5${HDF5_LIB_INFIX}_test")
+set (HDF5_CPP_LIB_CORENAME          "hdf5${HDF5_LIB_INFIX}_cpp")
+set (HDF5_HL_LIB_CORENAME           "hdf5${HDF5_LIB_INFIX}_hl")
+set (HDF5_HL_CPP_LIB_CORENAME       "hdf5${HDF5_LIB_INFIX}_hl_cpp")
+set (HDF5_TOOLS_LIB_CORENAME        "hdf5${HDF5_LIB_INFIX}_tools")
+set (HDF5_UTILS_LIB_CORENAME        "hdf5${HDF5_LIB_INFIX}_utils")
+set (HDF5_F90_LIB_CORENAME          "hdf5${HDF5_LIB_INFIX}_fortran")
+set (HDF5_F90_C_LIB_CORENAME        "hdf5${HDF5_LIB_INFIX}_f90cstub")
+set (HDF5_F90_TEST_LIB_CORENAME     "hdf5${HDF5_LIB_INFIX}_test_fortran")
+set (HDF5_F90_C_TEST_LIB_CORENAME   "hdf5${HDF5_LIB_INFIX}_test_f90cstub")
+set (HDF5_HL_F90_LIB_CORENAME       "hdf5${HDF5_LIB_INFIX}_hl_fortran")
+set (HDF5_HL_F90_C_LIB_CORENAME     "hdf5${HDF5_LIB_INFIX}_hl_f90cstub")
+set (HDF5_JAVA_JNI_LIB_CORENAME     "hdf5${HDF5_LIB_INFIX}_java")
 set (HDF5_JAVA_HDF5_LIB_CORENAME    "jarhdf5")
 set (HDF5_JAVA_TEST_LIB_CORENAME    "jartest5")
 
@@ -501,6 +508,14 @@ else ()
 endif ()
 
 #-----------------------------------------------------------------------------
+# perl is used in some optional src and tests, check availability
+find_package (Perl)
+if (PERL_FOUND)
+  set (H5_PERL_FOUND YES)
+endif ()
+#-----------------------------------------------------------------------------
+
+#-----------------------------------------------------------------------------
 # Option to Build Static executables
 #-----------------------------------------------------------------------------
 option (BUILD_STATIC_EXECS "Build Static Executables" OFF)
@@ -511,12 +526,18 @@ if (BUILD_STATIC_EXECS)
   endif ()
 endif ()
 
+option (HDF5_ENABLE_ANALYZER_TOOLS "enable the use of Clang tools" OFF)
+mark_as_advanced (HDF5_ENABLE_ANALYZER_TOOLS)
 if (HDF5_ENABLE_ANALYZER_TOOLS)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/tools.cmake)
 endif ()
+option (HDF5_ENABLE_SANITIZERS "execute the Clang sanitizer" OFF)
+mark_as_advanced (HDF5_ENABLE_SANITIZERS)
 if (HDF5_ENABLE_SANITIZERS)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/sanitizers.cmake)
 endif ()
+option (HDF5_ENABLE_FORMATTERS "format source files" OFF)
+mark_as_advanced (HDF5_ENABLE_FORMATTERS)
 if (HDF5_ENABLE_FORMATTERS)
   include (${HDF5_SOURCE_DIR}/config/sanitizer/formatting.cmake)
 endif ()
@@ -1091,7 +1112,7 @@ endif ()
 # Option to build HDF5 C++ Library
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
-  option (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" ON)
+  option (HDF5_BUILD_CPP_LIB  "Build HDF5 C++ Library" OFF)
   if (HDF5_BUILD_CPP_LIB)
     # check for unsupported options
     if (HDF5_ENABLE_PARALLEL)
@@ -1104,7 +1125,6 @@ if (EXISTS "${HDF5_SOURCE_DIR}/c++" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/c++")
       endif ()
     endif ()
 
-    include (${HDF_RESOURCES_EXT_DIR}/HDFUseCXX.cmake)
     include (${HDF_RESOURCES_DIR}/HDFCXXCompilerFlags.cmake)
 
     add_subdirectory (c++)

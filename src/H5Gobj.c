@@ -767,13 +767,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+herr_t
 H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
-                        char *name, size_t size)
+                        char *name, size_t name_size, size_t *name_len)
 {
-    H5O_linfo_t linfo;          /* Link info message */
-    htri_t      linfo_exists;   /* Whether the link info message exists */
-    ssize_t     ret_value = -1; /* Return value */
+    H5O_linfo_t linfo;               /* Link info message */
+    htri_t      linfo_exists;        /* Whether the link info message exists */
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_TAG(oloc->addr, FAIL)
 
@@ -785,22 +785,21 @@ H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_orde
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't check for link info message")
     if (linfo_exists) {
         /* Check for creation order tracking, if creation order index lookup requested */
-        if (idx_type == H5_INDEX_CRT_ORDER) {
+        if (idx_type == H5_INDEX_CRT_ORDER)
             /* Check if creation order is tracked */
             if (!linfo.track_corder)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "creation order not tracked for links in group")
-        } /* end if */
 
         /* Check for dense link storage */
         if (H5F_addr_defined(linfo.fheap_addr)) {
             /* Get the object's name from the dense link storage */
-            if ((ret_value = H5G__dense_get_name_by_idx(oloc->file, &linfo, idx_type, order, n, name, size)) <
-                0)
+            if (H5G__dense_get_name_by_idx(oloc->file, &linfo, idx_type, order, n, name, name_size,
+                                           name_len) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
         } /* end if */
         else {
             /* Get the object's name from the link messages */
-            if ((ret_value = H5G__compact_get_name_by_idx(oloc, &linfo, idx_type, order, n, name, size)) < 0)
+            if (H5G__compact_get_name_by_idx(oloc, &linfo, idx_type, order, n, name, name_size, name_len) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
         } /* end else */
     }     /* end if */
@@ -810,7 +809,7 @@ H5G_obj_get_name_by_idx(const H5O_loc_t *oloc, H5_index_t idx_type, H5_iter_orde
             HGOTO_ERROR(H5E_SYM, H5E_BADVALUE, FAIL, "no creation order index to query")
 
         /* Get the object's name from the symbol table */
-        if ((ret_value = H5G__stab_get_name_by_idx(oloc, order, n, name, size)) < 0)
+        if (H5G__stab_get_name_by_idx(oloc, order, n, name, name_size, name_len) < 0)
             HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "can't locate name")
     } /* end else */
 

@@ -460,6 +460,9 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
  *              Interestingly, getenv *is* available in the Windows
  *              POSIX layer, just not setenv.
  *
+ * Note:        Passing an empty string ("") for the value will remove
+ *              the variable from the environment (like unsetenv(3))
+ *
  * Return:      Success:    0
  *              Failure:    non-zero error code
  *
@@ -471,14 +474,14 @@ Wgettimeofday(struct timeval *tv, struct timezone *tz)
 int
 Wsetenv(const char *name, const char *value, int overwrite)
 {
-    size_t  bufsize;
-    errno_t err;
-
     /* If we're not overwriting, check if the environment variable exists.
      * If it does (i.e.: the required buffer size to store the variable's
      * value is non-zero), then return an error code.
      */
     if (!overwrite) {
+        size_t  bufsize;
+        errno_t err;
+
         err = getenv_s(&bufsize, NULL, 0, name);
         if (err || bufsize)
             return (int)err;
@@ -573,38 +576,12 @@ Wgetlogin(void)
 {
 
 #ifdef H5_HAVE_WINSOCK2_H
-    long bufferCount = WloginBuffer_count;
-    if (GetUserName(Wlogin_buffer, &bufferCount) == 0)
+    DWORD bufferCount = WloginBuffer_count;
+    if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
         return (Wlogin_buffer);
     else
 #endif /* H5_HAVE_WINSOCK2_H */
         return NULL;
-}
-
-int
-c99_snprintf(char *str, size_t size, const char *format, ...)
-{
-    int     count;
-    va_list ap;
-
-    HDva_start(ap, format);
-    count = c99_vsnprintf(str, size, format, ap);
-    HDva_end(ap);
-
-    return count;
-}
-
-int
-c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
-{
-    int count = -1;
-
-    if (size != 0)
-        count = _vsnprintf_s(str, size, _TRUNCATE, format, ap);
-    if (count == -1)
-        count = _vscprintf(format, ap);
-
-    return count;
 }
 
 /*-------------------------------------------------------------------------
@@ -618,91 +595,45 @@ c99_vsnprintf(char *str, size_t size, const char *format, va_list ap)
  *-------------------------------------------------------------------------
  */
 int
-Wflock(int H5_ATTR_UNUSED fd, int H5_ATTR_UNUSED operation)
+Wflock(int fd, int operation)
 {
 
-/* This is a no-op while we implement a Win32 VFD */
-#if 0
-int
-Wflock(int fd, int operation) {
-
-    HANDLE          hFile;
-    DWORD           dwFlags = LOCKFILE_FAIL_IMMEDIATELY;
-    DWORD           dwReserved = 0;
-                    /* MAXDWORD for entire file */
-    DWORD           nNumberOfBytesToLockLow = MAXDWORD;
-    DWORD           nNumberOfBytesToLockHigh = MAXDWORD;
-                    /* Must initialize OVERLAPPED struct */
-    OVERLAPPED      overlapped = {0};
+    HANDLE hFile;
+    DWORD  dwFlags    = LOCKFILE_FAIL_IMMEDIATELY;
+    DWORD  dwReserved = 0;
+    /* MAXDWORD locks the entire file */
+    DWORD nNumberOfBytesToLockLow  = MAXDWORD;
+    DWORD nNumberOfBytesToLockHigh = MAXDWORD;
+    /* Must initialize OVERLAPPED struct */
+    OVERLAPPED overlapped = {0};
 
     /* Get Windows HANDLE */
-    hFile = _get_osfhandle(fd);
+    if (INVALID_HANDLE_VALUE == (hFile = (HANDLE)_get_osfhandle(fd)))
+        return -1;
 
     /* Convert to Windows flags */
-    if(operation & LOCK_EX)
+    if (operation & LOCK_EX)
         dwFlags |= LOCKFILE_EXCLUSIVE_LOCK;
 
     /* Lock or unlock */
-    if(operation & LOCK_UN)
-        if(0 == UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
+    if (operation & LOCK_UN) {
+        if (0 ==
+            UnlockFileEx(hFile, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh, &overlapped)) {
+            /* Attempting to unlock an already unlocked file will fail and this can happen
+             * in H5Fstart_swmr_write(). For now, just ignore the "error" (error code: 0x9e / 158).
+             */
+            if (GetLastError() != 158)
+                return -1;
+        }
+    }
+    else {
+        if (0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow, nNumberOfBytesToLockHigh,
+                            &overlapped))
             return -1;
-    else
-        if(0 == LockFileEx(hFile, dwFlags, dwReserved, nNumberOfBytesToLockLow,
-                            nNumberOfBytesToLockHigh, &overlapped))
-            return -1;
-#endif /* 0 */
+    }
+
     return 0;
 } /* end Wflock() */
-
-/*-------------------------------------------------------------------------
- * Function:    Wllround, Wllroundf, Wlround, Wlroundf, Wround, Wroundf
- *
- * Purpose:     Wrapper function for round functions for use with VS2012
- *              and earlier.
- *
- * Return:      The rounded value that was passed in.
- *
- * Programmer:  Dana Robinson
- *              December 2016
- *
- *-------------------------------------------------------------------------
- */
-long long
-Wllround(double arg)
-{
-    return (long long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long long
-Wllroundf(float arg)
-{
-    return (long long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-long
-Wlround(double arg)
-{
-    return (long)(arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5));
-}
-
-long
-Wlroundf(float arg)
-{
-    return (long)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
-
-double
-Wround(double arg)
-{
-    return arg < 0.0 ? HDceil(arg - 0.5) : HDfloor(arg + 0.5);
-}
-
-float
-Wroundf(float arg)
-{
-    return (float)(arg < 0.0F ? HDceil(arg - 0.5F) : HDfloor(arg + 0.5F));
-}
 
 /*-------------------------------------------------------------------------
  * Function:     H5_get_utf16_str
@@ -1036,10 +967,7 @@ done:
  *              Note that commodity hardware is probably going to have a
  *              resolution of milliseconds, not nanoseconds.
  *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              October 01, 2016
+ * Return:      void
  *--------------------------------------------------------------------------
  */
 void
@@ -1048,21 +976,40 @@ H5_nanosleep(uint64_t nanosec)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5_HAVE_WIN32_API
+    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
+    DWORD ignore;
 
-    /* On Windows, Sleep() is in milliseconds. Passing 0 to Sleep()
-     * causes the thread to relinquish the rest of its time slice.
+    /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
+     * don't care about the return value since the second parameter
+     * (bAlertable) is FALSE, so it will always be zero.
      */
-    Sleep(nanosec / (1000 * 1000));
+    ignore = SleepEx(dwMilliseconds, FALSE);
 
 #else
-    {
-        struct timespec sleeptime; /* Struct to hold time to sleep */
 
-        /* Set up time to sleep */
-        sleeptime.tv_sec  = 0;
-        sleeptime.tv_nsec = (long)nanosec;
+    const uint64_t  nanosec_per_sec = 1000 * 1000 * 1000;
+    struct timespec sleeptime; /* Struct to hold time to sleep */
 
-        HDnanosleep(&sleeptime, NULL);
+    /* Set up time to sleep
+     *
+     * Assuming ILP32 or LP64 or wider architecture, (long)operand
+     * satisfies 0 <= operand < nanosec_per_sec < LONG_MAX.
+     *
+     * It's harder to be sure that we don't overflow time_t.
+     */
+    sleeptime.tv_sec  = (time_t)(nanosec / nanosec_per_sec);
+    sleeptime.tv_nsec = (long)(nanosec % nanosec_per_sec);
+
+    /* Sleep for up to `sleeptime` and, in the event of an interruption,
+     * save the unslept time back to `sleeptime`.
+     */
+    while (HDnanosleep(&sleeptime, &sleeptime) == -1) {
+        /* If we were just interrupted, sleep for the remaining time.
+         * Otherwise, the error was essentially impossible, so just stop
+         * sleeping.
+         */
+        if (errno != EINTR)
+            break;
     }
 #endif
 

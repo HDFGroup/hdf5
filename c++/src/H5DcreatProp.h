@@ -123,12 +123,12 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
     // Maps elements of a virtual dataset to elements of the source dataset.
     void setVirtual(const DataSpace &vspace, const char *src_fname, const char *src_dsname,
                     const DataSpace &sspace) const;
-    void setVirtual(const DataSpace &vspace, const H5std_string &src_fname, const H5std_string &src_dsname,
+    void setVirtual(const DataSpace &vspace, const H5std_string src_fname, const H5std_string src_dsname,
                     const DataSpace &sspace) const;
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("DSetCreatPropList");
     }
@@ -141,7 +141,7 @@ class H5_DLLCPP DSetCreatPropList : public ObjCreatPropList {
     DSetCreatPropList(const hid_t plist_id);
 
     // Noop destructor.
-    virtual ~DSetCreatPropList();
+    virtual ~DSetCreatPropList() H5_OVERRIDE;
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
