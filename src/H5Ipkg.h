@@ -77,6 +77,22 @@ typedef struct H5I_type_info_t {
     H5SL_t *           ids;        /* Pointer to skip list that stores IDs */
 } H5I_type_info_t;
 
+/*****************************/
+/* Package Private Variables */
+/*****************************/
+
+/* Array of pointers to ID types */
+H5_DLLVAR H5I_type_info_t *H5I_type_info_array_g[H5I_MAX_NUM_TYPES];
+
+/* Variable to keep track of the number of types allocated.  Its value is the
+ * next type ID to be handed out, so it is always one greater than the number
+ * of types.
+ * Starts at 1 instead of 0 because it makes trace output look nicer.  If more
+ * types (or IDs within a type) are needed, adjust TYPE_BITS in H5Ipkg.h
+ * and/or increase size of hid_t
+ */
+H5_DLLVAR int H5I_next_type_g;
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/

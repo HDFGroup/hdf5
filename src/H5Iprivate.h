@@ -41,7 +41,7 @@
 /****************************/
 
 typedef struct H5I_class_t {
-    H5I_type_t type_id;   /* Class "value" for the type */
+    H5I_type_t type;      /* Class "value" for the type */
     unsigned   flags;     /* Class behavior flags */
     unsigned   reserved;  /* Number of reserved IDs for this type */
                           /* [A specific number of type entries may be

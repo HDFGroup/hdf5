@@ -104,7 +104,7 @@ static int            H5I__id_dump_cb(void *_item, void *_key, void *_udata);
 hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /* Array of pointers to atomic types */
-static H5I_type_info_t *H5I_type_info_array_g[H5I_MAX_NUM_TYPES];
+H5I_type_info_t *H5I_type_info_array_g[H5I_MAX_NUM_TYPES];
 
 /* Variable to keep track of the number of types allocated.  Its value is the */
 /* next type ID to be handed out, so it is always one greater than the number */
@@ -112,7 +112,7 @@ static H5I_type_info_t *H5I_type_info_array_g[H5I_MAX_NUM_TYPES];
 /* Starts at 1 instead of 0 because it makes trace output look nicer.  If more */
 /* types (or IDs within a type) are needed, adjust TYPE_BITS in H5Ipkg.h       */
 /* and/or increase size of hid_t */
-static int H5I_next_type_g = (int)H5I_NTYPES;
+int H5I_next_type_g = (int)H5I_NTYPES;
 
 /* Declare a free list to manage the H5I_id_info_t struct */
 H5FL_DEFINE_STATIC(H5I_id_info_t);
@@ -232,7 +232,7 @@ H5Iregister_type(size_t H5_ATTR_DEBUG_API_USED hash_size, unsigned reserved, H5I
         HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, H5I_BADID, "ID class allocation failed")
 
     /* Initialize class fields */
-    cls->type_id   = new_type;
+    cls->type   = new_type;
     cls->flags     = H5I_CLASS_IS_APPLICATION;
     cls->reserved  = reserved;
     cls->free_func = free_func;
@@ -274,18 +274,18 @@ H5I_register_type(const H5I_class_t *cls)
 
     /* Sanity check */
     HDassert(cls);
-    HDassert(cls->type_id > 0 && (int)cls->type_id < H5I_MAX_NUM_TYPES);
+    HDassert(cls->type > 0 && (int)cls->type < H5I_MAX_NUM_TYPES);
 
     /* Initialize the type */
-    if (NULL == H5I_type_info_array_g[cls->type_id]) {
+    if (NULL == H5I_type_info_array_g[cls->type]) {
         /* Allocate the type information for new type */
         if (NULL == (type_ptr = (H5I_type_info_t *)H5FL_CALLOC(H5I_type_info_t)))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTALLOC, FAIL, "ID type allocation failed")
-        H5I_type_info_array_g[cls->type_id] = type_ptr;
+        H5I_type_info_array_g[cls->type] = type_ptr;
     } /* end if */
     else {
         /* Get the pointer to the existing type */
-        type_ptr = H5I_type_info_array_g[cls->type_id];
+        type_ptr = H5I_type_info_array_g[cls->type];
     } /* end else */
 
     /* Initialize the ID type structure for new types */
@@ -541,7 +541,7 @@ H5I__clear_type_cb(void *_id, void H5_ATTR_UNUSED *key, void *_udata)
                     HDfprintf(H5DEBUG(I),
                               "H5I: free type=%d obj=0x%08lx "
                               "failure ignored\n",
-                              (int)udata->type_ptr->cls->type_id, (unsigned long)(id->object));
+                              (int)udata->type_ptr->cls->type, (unsigned long)(id->object));
                 } /* end if */
 #endif            /*H5I_DEBUG*/
 
@@ -2059,105 +2059,3 @@ H5I_get_file_id(hid_t obj_id, H5I_type_t type)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5I_get_file_id() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5I__id_dump_cb
- *
- * Purpose:     Dump the contents of an ID to stderr for debugging.
- *
- * Return:      H5_ITER_CONT (always)
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
-{
-    H5I_id_info_t *item = (H5I_id_info_t *)_item; /* Pointer to the ID node */
-    H5I_type_t     type = *(H5I_type_t *)_udata;  /* User data */
-    H5G_name_t *   path = NULL;                   /* Path to file object */
-
-    FUNC_ENTER_STATIC_NOERR
-
-    HDfprintf(stderr, "         id = %lu\n", (unsigned long)(item->id));
-    HDfprintf(stderr, "         count = %u\n", item->count);
-    HDfprintf(stderr, "         obj   = 0x%08lx\n", (unsigned long)(item->object));
-
-    /* Get the group location, so we get get the name */
-    switch (type) {
-        case H5I_GROUP: {
-            path = H5G_nameof((const H5G_t *)item->object);
-            break;
-        }
-        case H5I_DATASET: {
-            path = H5D_nameof((const H5D_t *)item->object);
-            break;
-        }
-        case H5I_DATATYPE: {
-            path = H5T_nameof((const H5T_t *)item->object);
-            break;
-        }
-        case H5I_UNINIT:
-        case H5I_BADID:
-        case H5I_FILE:
-        case H5I_DATASPACE:
-        case H5I_ATTR:
-        case H5I_REFERENCE:
-        case H5I_VFL:
-        case H5I_GENPROP_CLS:
-        case H5I_GENPROP_LST:
-        case H5I_ERROR_CLASS:
-        case H5I_ERROR_MSG:
-        case H5I_ERROR_STACK:
-        case H5I_NTYPES:
-        default:
-            break; /* Other types of IDs are not stored in files */
-    }
-
-    if (path) {
-        if (path->user_path_r)
-            HDfprintf(stderr, "                user_path = %s\n", H5RS_get_str(path->user_path_r));
-        if (path->full_path_r)
-            HDfprintf(stderr, "                full_path = %s\n", H5RS_get_str(path->full_path_r));
-    }
-
-    FUNC_LEAVE_NOAPI(H5_ITER_CONT)
-} /* end H5I__id_dump_cb() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5I_dump_ids_for_type
- *
- * Purpose:     Dump the contents of a type to stderr for debugging.
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5I_dump_ids_for_type(H5I_type_t type)
-{
-    H5I_type_info_t *type_ptr = NULL;
-
-    FUNC_ENTER_NOAPI_NOERR
-
-    HDfprintf(stderr, "Dumping ID type %d\n", (int)type);
-    type_ptr = H5I_type_info_array_g[type];
-
-    if (type_ptr) {
-
-        /* Header */
-        HDfprintf(stderr, "     init_count = %u\n", type_ptr->init_count);
-        HDfprintf(stderr, "     reserved   = %u\n", type_ptr->cls->reserved);
-        HDfprintf(stderr, "     id_count   = %llu\n", (unsigned long long)type_ptr->id_count);
-        HDfprintf(stderr, "     nextid        = %llu\n", (unsigned long long)type_ptr->nextid);
-
-        /* List */
-        if (type_ptr->id_count > 0) {
-            HDfprintf(stderr, "     List:\n");
-            H5SL_iterate(type_ptr->ids, H5I__id_dump_cb, &type);
-        }
-    }
-    else
-        HDfprintf(stderr, "Global type info/tracking pointer for that type is NULL\n");
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5I_dump_ids_for_type() */
