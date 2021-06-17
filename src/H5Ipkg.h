@@ -29,14 +29,14 @@
 /* Get package's private header */
 #include "H5Iprivate.h"
 
-/* Other private headers needed by this file */
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /**************************/
 /* Package Private Macros */
 /**************************/
 
 /*
- * Number of bits to use for ID Type in each atom. Increase if more types
+ * Number of bits to use for ID Type in each ID. Increase if more types
  * are needed (though this will decrease the number of available IDs per
  * type). This is the only number that must be changed since all other bit
  * field sizes and masks are calculated from TYPE_BITS.
@@ -47,18 +47,35 @@
 #define H5I_MAX_NUM_TYPES TYPE_MASK
 
 /*
- * Number of bits to use for the Atom index in each atom (assumes 8-bit
+ * Number of bits to use for the ID index in each ID (assumes 8-bit
  * bytes). We don't use the sign bit.
  */
 #define ID_BITS ((sizeof(hid_t) * 8) - (TYPE_BITS + 1))
 #define ID_MASK (((hid_t)1 << ID_BITS) - 1)
 
-/* Map an atom to an ID type number */
+/* Map an ID to an ID type number */
 #define H5I_TYPE(a) ((H5I_type_t)(((hid_t)(a) >> ID_BITS) & TYPE_MASK))
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
+
+/* ID information structure used */
+typedef struct H5I_id_info_t {
+    hid_t       id;        /* ID for this info */
+    unsigned    count;     /* Ref. count for this ID */
+    unsigned    app_count; /* Ref. count of application visible IDs */
+    const void *object;    /* Pointer associated with the ID */
+} H5I_id_info_t;
+
+/* Type information structure used */
+typedef struct H5I_type_info_t {
+    const H5I_class_t *cls;        /* Pointer to ID class */
+    unsigned           init_count; /* # of times this type has been initialized */
+    uint64_t           id_count;   /* Current number of IDs held */
+    uint64_t           nextid;     /* ID to use for the next ID */
+    H5SL_t *           ids;        /* Pointer to skip list that stores IDs */
+} H5I_type_info_t;
 
 /******************************/
 /* Package Private Prototypes */
