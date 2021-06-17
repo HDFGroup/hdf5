@@ -97,7 +97,7 @@ char VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
  *-------------------------------------------------------------------------
  */
 symbol_info_t *
-choose_dataset(unsigned *levelp, unsigned *offsetp)
+choose_dataset(unsigned *levelp, unsigned *offsetp, hbool_t verbose)
 {
     static unsigned ncalls = 0;
     unsigned        level;  /* The level of the dataset */
@@ -110,7 +110,7 @@ choose_dataset(unsigned *levelp, unsigned *offsetp)
     offset = (unsigned)(HDrandom() % (int)symbol_count[level]);
 
     ++ncalls;
-    if ((ncalls % 1000) == 0) {
+    if ((ncalls % 1000) == 0 && verbose) {
         fprintf(stderr, "%s: call %u chose level %u offset %u\n", __func__, ncalls, level, offset);
     }
     if (levelp != NULL)

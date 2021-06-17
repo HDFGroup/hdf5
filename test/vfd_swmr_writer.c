@@ -187,7 +187,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
         hid_t          file_sid; /* Dataset's space ID */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* Set the record's ID (equal to its position) */
         record.rec_id = symbol->nrecords;

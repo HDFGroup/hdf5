@@ -215,7 +215,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
         symbol_info_t *symbol; /* Symbol to write record to */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* Decide whether to shrink or expand, and by how much */
         count[1] = (hsize_t)HDrandom() % (MAX_SIZE_CHANGE * 2) + 1;

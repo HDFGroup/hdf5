@@ -408,6 +408,7 @@ struct H5F_shared_t {
                                             * not
                                             */
     uint64_t        tick_num;              /* Number of the current tick */
+    uint64_t        max_jump_ticks;        /* Max # of jumps in tick number */
     struct timespec end_of_tick;           /* End time of the current tick */
 
     lower_defree_queue_t lower_defrees; /* Records of lower-file space

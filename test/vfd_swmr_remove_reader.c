@@ -277,7 +277,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
             symbol_info_t *sym; /* Symbol to use */
 
             /* Determine the symbol, within all symbols */
-            if (NULL == (sym = choose_dataset(NULL, NULL)))
+            if (NULL == (sym = choose_dataset(NULL, NULL, verbose)))
                 goto error;
             sym_rand[v] = sym;
 
