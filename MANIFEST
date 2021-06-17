@@ -879,6 +879,8 @@
 ./src/H5HP.c
 ./src/H5HPprivate.h
 ./src/H5I.c
+./src/H5Idbg.c
+./src/H5Iint.c
 ./src/H5Imodule.h
 ./src/H5Ipkg.h
 ./src/H5Iprivate.h
