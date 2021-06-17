@@ -56,7 +56,6 @@ if test X = "X$f9x_flags_set"; then
     fi
 fi
 
-# Common Intel flags for various situations
 if test "X-ifort" = "X-$f9x_vendor"; then
 
     FC_BASENAME=ifort
@@ -115,7 +114,6 @@ if test "X-ifort" = "X-$f9x_vendor"; then
     HIGH_OPT_FCFLAGS="-O3"
     DEBUG_OPT_FCFLAGS=
     NO_OPT_FCFLAGS=
-
 
     ############
     # Warnings #
