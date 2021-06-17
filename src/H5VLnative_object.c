@@ -15,9 +15,16 @@
  *
  */
 
-#define H5O_FRIEND /* Suppress error about including H5Opkg    */
-#define H5F_FRIEND /* Suppress error about including H5Fpkg    */
+/****************/
+/* Module Setup */
+/****************/
 
+#define H5F_FRIEND /* Suppress error about including H5Fpkg    */
+#define H5O_FRIEND /* Suppress error about including H5Opkg    */
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files (pkg needed for id_exists)         */
@@ -28,6 +35,30 @@
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_object_open

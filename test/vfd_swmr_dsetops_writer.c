@@ -169,42 +169,42 @@ static const hid_t badhid = H5I_INVALID_HID;
 static void
 usage(const char *progname)
 {
-    fprintf(stderr,
-            "usage: %s \n"
-            "           [-p] [-e elmts] [-o]\n"
-            "           [-g] [-k] [-m rows] [-n cols]\n"
-            "           [-s swrites] [-r rwrites] [-l lwrites] [-w writes]\n"
-            "           [-u nticks] [-c csteps] [-S] [-N] [-q] [-b]\n"
-            "\n"
-            "-p:              create a dataset with compact layout\n"
-            "-e elmts:        # of <elmts> for the compact dataset\n"
-            "                 (default is 16380)\n"
-            "-t:              perform write to the compact dataset\n"
-            "-g:              create a dataset with contiguous layout\n"
-            "-k:              create 5 datasets with chunked layout for the 5 indexing types\n"
-            "-m rows:         # of <rows> rows for the contiguous and/or chunked datasets\n"
-            "-n cols:         # of <cols> columns for the contiguous and/or chunked datasets\n"
-            "-s swrites:      perform sequential writes to all datasets\n"
-            "-r rwrites:      perform random writes to all datasets\n"
-            "-l lwrites:      perform hyperslab writes to all datasets\n"
-            "                 # of rows to write: every other element is selected per row\n"
-            "-w wwrites:      perform raw data modifications to all datasets\n"
-            "-u nticks:       `nticks` ticks for the reader to wait before verification\n"
-            "                 (default is 4)\n"
-            "-c csteps:       `csteps` steps communication interval between reader and writer\n"
-            "                 (default is 1)\n"
-            "-S:              do not use VFD SWMR\n"
-            "-N:              do not use named pipes for test synchronization\n"
-            "-q:              silence printouts, few messages\n"
-            "-b:              write data in big-endian byte order\n"
-            "                 (default is H5T_NATIVE_UINT32)\n\n"
-            "Note:\n"
-            "1. Require to specify at least -p, -g or -k option\n"
-            "2. -c <csteps> option cannot exceed -s <swrites> or -r <rwrites>\n"
-            "   or -l <lwrites> or -w <wwrites> option\n"
-            "\n",
-            progname);
-    exit(EXIT_FAILURE);
+    HDfprintf(stderr,
+              "usage: %s \n"
+              "           [-p] [-e elmts] [-o]\n"
+              "           [-g] [-k] [-m rows] [-n cols]\n"
+              "           [-s swrites] [-r rwrites] [-l lwrites] [-w writes]\n"
+              "           [-u nticks] [-c csteps] [-S] [-N] [-q] [-b]\n"
+              "\n"
+              "-p:              create a dataset with compact layout\n"
+              "-e elmts:        # of <elmts> for the compact dataset\n"
+              "                 (default is 16380)\n"
+              "-t:              perform write to the compact dataset\n"
+              "-g:              create a dataset with contiguous layout\n"
+              "-k:              create 5 datasets with chunked layout for the 5 indexing types\n"
+              "-m rows:         # of <rows> rows for the contiguous and/or chunked datasets\n"
+              "-n cols:         # of <cols> columns for the contiguous and/or chunked datasets\n"
+              "-s swrites:      perform sequential writes to all datasets\n"
+              "-r rwrites:      perform random writes to all datasets\n"
+              "-l lwrites:      perform hyperslab writes to all datasets\n"
+              "                 # of rows to write: every other element is selected per row\n"
+              "-w wwrites:      perform raw data modifications to all datasets\n"
+              "-u nticks:       `nticks` ticks for the reader to wait before verification\n"
+              "                 (default is 4)\n"
+              "-c csteps:       `csteps` steps communication interval between reader and writer\n"
+              "                 (default is 1)\n"
+              "-S:              do not use VFD SWMR\n"
+              "-N:              do not use named pipes for test synchronization\n"
+              "-q:              silence printouts, few messages\n"
+              "-b:              write data in big-endian byte order\n"
+              "                 (default is H5T_NATIVE_UINT32)\n\n"
+              "Note:\n"
+              "1. Require to specify at least -p, -g or -k option\n"
+              "2. -c <csteps> option cannot exceed -s <swrites> or -r <rwrites>\n"
+              "   or -l <lwrites> or -w <wwrites> option\n"
+              "\n",
+              progname);
+    HDexit(EXIT_FAILURE);
 } /* usage() */
 
 /*
@@ -221,7 +221,7 @@ state_init(state_t *s, int argc, char **argv)
     *s = ALL_HID_INITIALIZER;
 
     if (H5_basename(argv[0], &tfile) < 0) {
-        printf("H5_basename failed\n");
+        HDprintf("H5_basename failed\n");
         TEST_ERROR;
     }
 
@@ -272,17 +272,17 @@ state_init(state_t *s, int argc, char **argv)
             case 'u': /* ticks for raeder to wait before verification */
             case 'c': /* communication interval */
                 errno = 0;
-                tmp   = strtoul(optarg, &end, 0);
+                tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0') {
-                    printf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
                     TEST_ERROR;
                 }
                 else if (errno != 0) {
-                    printf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
+                    HDprintf("couldn't parse `-%c` argument `%s`\n", ch, optarg);
                     TEST_ERROR;
                 }
                 else if (tmp > UINT_MAX) {
-                    printf("`-%c` argument `%lu` too large\n", ch, tmp);
+                    HDprintf("`-%c` argument `%lu` too large\n", ch, tmp);
                     TEST_ERROR;
                 }
 
@@ -318,44 +318,44 @@ state_init(state_t *s, int argc, char **argv)
 
     /* Require to specify at least -p or -g or -k option */
     if (!s->compact && !s->contig && !s->chunked) {
-        printf("Require to specify at least -p or -g or -k option\n");
+        HDprintf("Require to specify at least -p or -g or -k option\n");
         usage(s->progname);
         goto error;
     }
 
     /* -e <elmts> */
     if (s->compact_elmts > MAX_COMPACT_ELMS) {
-        printf("size of compact dataset cannot exceed 16380 elements\n");
+        HDprintf("size of compact dataset cannot exceed 16380 elements\n");
         TEST_ERROR;
     }
 
     /* -c <csteps> cannot be zero */
     if (!s->csteps) {
-        printf("communication interval cannot be zero\n");
+        HDprintf("communication interval cannot be zero\n");
         TEST_ERROR;
     }
 
     /* -c <csteps> and -s <swrites> options */
     if (s->swrites && s->csteps > s->swrites) {
-        printf("communication interval with sequential writes is out of bounds\n");
+        HDprintf("communication interval with sequential writes is out of bounds\n");
         TEST_ERROR;
     }
 
     /* -c <csteps> and -r <rwrites> options */
     if (s->rwrites && s->csteps > s->rwrites) {
-        printf("communication interval with random writes is out of bounds\n");
+        HDprintf("communication interval with random writes is out of bounds\n");
         TEST_ERROR;
     }
 
     /* -c <csteps> and -l <lwrites> options */
     if (s->lwrites && s->csteps > s->lwrites) {
-        printf("communication interval with hyperslab writes is out of bounds\n");
+        HDprintf("communication interval with hyperslab writes is out of bounds\n");
         TEST_ERROR;
     }
 
     /* -c <csteps> and -w <wwrites> options */
     if (s->wwrites && s->csteps > s->wwrites) {
-        printf("communication interval with raw data modification is out of bounds\n");
+        HDprintf("communication interval with raw data modification is out of bounds\n");
         TEST_ERROR;
     }
 
@@ -382,12 +382,12 @@ create_dsets(const state_t *s, dsets_state_t *ds)
 
     /* Create the named datatype that will be used by compact and contiguous datasets */
     if ((dtid = H5Tcopy(s->filetype)) < 0) {
-        printf("H5Tcopy failed\n");
+        HDprintf("H5Tcopy failed\n");
         TEST_ERROR;
     }
 
     if (H5Tcommit2(s->file, "named_dtype", dtid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT) < 0) {
-        printf("H5Tcommit2 failed\n");
+        HDprintf("H5Tcommit2 failed\n");
         TEST_ERROR;
     }
 
@@ -396,11 +396,11 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         hsize_t dims[1];
 
         if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
-            printf("H5Pcreate failed\n");
+            HDprintf("H5Pcreate failed\n");
             TEST_ERROR;
         }
         if (H5Pset_layout(dcpl, H5D_COMPACT) < 0) {
-            printf("H5Pset_layout failed\n");
+            HDprintf("H5Pset_layout failed\n");
             TEST_ERROR;
         }
 
@@ -408,19 +408,19 @@ create_dsets(const state_t *s, dsets_state_t *ds)
 
         /* Dataspace for compact dataset */
         if ((ds->compact_sid = H5Screate_simple(1, dims, dims)) < 0) {
-            printf("H5Screate_simple failed\n");
+            HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
 
         /* Create the compact dataset with named datatype */
         if ((ds->compact_did = H5Dcreate2(s->file, DSET_COMPACT_NAME, dtid, ds->compact_sid, H5P_DEFAULT,
                                           dcpl, H5P_DEFAULT)) < 0) {
-            printf("H5Dcreate2 compact dataset failed\n");
+            HDprintf("H5Dcreate2 compact dataset failed\n");
             TEST_ERROR;
         }
 
         if (H5Pclose(dcpl) < 0) {
-            printf("H5Pclose failed\n");
+            HDprintf("H5Pclose failed\n");
             TEST_ERROR;
         }
     }
@@ -434,29 +434,29 @@ create_dsets(const state_t *s, dsets_state_t *ds)
 
         /* Dataspace for contiguous dataset */
         if ((ds->contig_sid = H5Screate_simple(2, dims, dims)) < 0) {
-            printf("H5Screate_simple failed\n");
+            HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
 
         if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
-            printf("H5Pcreate failed\n");
+            HDprintf("H5Pcreate failed\n");
             TEST_ERROR;
         }
 
         if (H5Pset_layout(dcpl, H5D_CONTIGUOUS) < 0) {
-            printf("H5Pset_layout failed\n");
+            HDprintf("H5Pset_layout failed\n");
             TEST_ERROR;
         }
 
         /* Create the contiguous dataset with the named datatype */
         if ((ds->contig_did = H5Dcreate2(s->file, DSET_CONTIG_NAME, dtid, ds->contig_sid, H5P_DEFAULT, dcpl,
                                          H5P_DEFAULT)) < 0) {
-            printf("H5Dcreate2 contiguous dataset failed\n");
+            HDprintf("H5Dcreate2 contiguous dataset failed\n");
             TEST_ERROR;
         }
 
         if (H5Pclose(dcpl) < 0) {
-            printf("H5Pclose failed\n");
+            HDprintf("H5Pclose failed\n");
             TEST_ERROR;
         }
     }
@@ -475,12 +475,12 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         chunk_dims[1] = MAX(1, s->cols / 2);
 
         if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
-            printf("H5Pcreate failed\n");
+            HDprintf("H5Pcreate failed\n");
             TEST_ERROR;
         }
 
         if (H5Pset_layout(dcpl, H5D_CHUNKED) < 0) {
-            printf("H5Pset_layout failed\n");
+            HDprintf("H5Pset_layout failed\n");
             TEST_ERROR;
         }
 
@@ -488,19 +488,19 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         /* Chunked, dims=max_dims=chunk_dims */
 
         if (H5Pset_chunk(dcpl, 2, dims) < 0) {
-            printf("H5Pset_chunk failed\n");
+            HDprintf("H5Pset_chunk failed\n");
             TEST_ERROR;
         }
 
         if ((ds->single_sid = H5Screate_simple(2, dims, dims)) < 0) {
-            printf("H5Screate_simple failed\n");
+            HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
 
         /* Create the chunked dataset (single index) with the named datatype */
         if ((ds->single_did = H5Dcreate2(s->file, DSET_SINGLE_NAME, dtid, ds->single_sid, H5P_DEFAULT, dcpl,
                                          H5P_DEFAULT)) < 0) {
-            printf("H5Dcreate2 chunked dataset:single index failed\n");
+            HDprintf("H5Dcreate2 chunked dataset:single index failed\n");
             TEST_ERROR;
         }
 
@@ -508,29 +508,29 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         /* Chunked, dims=max_dims, early allocation */
 
         if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) {
-            printf("H5Pset_alloc_time\n");
+            HDprintf("H5Pset_alloc_time\n");
             TEST_ERROR;
         }
 
         if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0) {
-            printf("H5Pset_chunk failed\n");
+            HDprintf("H5Pset_chunk failed\n");
             TEST_ERROR;
         }
 
         if ((ds->implicit_sid = H5Screate_simple(2, dims, dims)) < 0) {
-            printf("H5Screate_simple failed\n");
+            HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
 
         /* Create the chunked dataset (implicit index) with the named datatype */
         if ((ds->implicit_did = H5Dcreate2(s->file, DSET_IMPLICIT_NAME, dtid, ds->implicit_sid, H5P_DEFAULT,
                                            dcpl, H5P_DEFAULT)) < 0) {
-            printf("H5Dcreate2 chunked dataset:implicit index failed\n");
+            HDprintf("H5Dcreate2 chunked dataset:implicit index failed\n");
             TEST_ERROR;
         }
 
         if (H5Pclose(dcpl) < 0) {
-            printf("H5Pclose failed\n");
+            HDprintf("H5Pclose failed\n");
             TEST_ERROR;
         }
 
@@ -538,12 +538,12 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         /* Chunked, fixed max_dims */
 
         if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0) {
-            printf("H5Pcreate failed\n");
+            HDprintf("H5Pcreate failed\n");
             TEST_ERROR;
         }
 
         if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0) {
-            printf("H5Pset_chunk failed\n");
+            HDprintf("H5Pset_chunk failed\n");
             TEST_ERROR;
         }
 
@@ -551,14 +551,14 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         max_dims[1] = dims[1] + 10;
 
         if ((ds->fa_sid = H5Screate_simple(2, dims, max_dims)) < 0) {
-            printf("H5Screate_simple failed\n");
+            HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
 
         /* Create the chunked dataset (fixed array index) with the named datatype */
         if ((ds->fa_did =
                  H5Dcreate2(s->file, DSET_FA_NAME, dtid, ds->fa_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
-            printf("H5Dcreaet2 chunked dataset: fa index failed\n");
+            HDprintf("H5Dcreaet2 chunked dataset: fa index failed\n");
             TEST_ERROR;
         }
 
@@ -567,14 +567,14 @@ create_dsets(const state_t *s, dsets_state_t *ds)
 
         max_dims[1] = H5S_UNLIMITED;
         if ((ds->ea_sid = H5Screate_simple(2, dims, max_dims)) < 0) {
-            printf("H5Screate_simple failed\n");
+            HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
 
         /* Create the chunked dataset (extensible array index) with the named datatype */
         if ((ds->ea_did =
                  H5Dcreate2(s->file, DSET_EA_NAME, dtid, ds->ea_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
-            printf("H5Dcreate2 chunked dataset: ea index failed\n");
+            HDprintf("H5Dcreate2 chunked dataset: ea index failed\n");
             TEST_ERROR;
         }
 
@@ -583,25 +583,25 @@ create_dsets(const state_t *s, dsets_state_t *ds)
         max_dims[0] = H5S_UNLIMITED;
 
         if ((ds->bt2_sid = H5Screate_simple(2, dims, max_dims)) < 0) {
-            printf("H5Screate_simple failed\n");
+            HDprintf("H5Screate_simple failed\n");
             TEST_ERROR;
         }
 
         /* Create the chunked dataset (btree2 index) with the named datatype */
         if ((ds->bt2_did =
                  H5Dcreate2(s->file, DSET_BT2_NAME, dtid, ds->bt2_sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
-            printf("H5Dcreate2 chunked dataset: bt2 index failed\n");
+            HDprintf("H5Dcreate2 chunked dataset: bt2 index failed\n");
             TEST_ERROR;
         }
 
         if (H5Pclose(dcpl) < 0) {
-            printf("H5Pclose failed\n");
+            HDprintf("H5Pclose failed\n");
             TEST_ERROR;
         }
     }
 
     if (H5Tclose(dtid) < 0) {
-        printf("H5Tclose failed\n");
+        HDprintf("H5Tclose failed\n");
         TEST_ERROR;
     }
 
@@ -643,7 +643,7 @@ open_dsets(const state_t *s, dsets_state_t *ds)
 
     if (s->compact) {
         if (!open_dset_real(s, &ds->compact_did, &ds->compact_sid, DSET_COMPACT_NAME)) {
-            printf("open_dset_real() for compact dataset failed\n");
+            HDprintf("open_dset_real() for compact dataset failed\n");
             TEST_ERROR;
         }
     }
@@ -651,7 +651,7 @@ open_dsets(const state_t *s, dsets_state_t *ds)
     if (s->contig) {
 
         if (!open_dset_real(s, &ds->contig_did, &ds->contig_sid, DSET_CONTIG_NAME)) {
-            printf("open_dset_real() for contiguous dataset failed\n");
+            HDprintf("open_dset_real() for contiguous dataset failed\n");
             TEST_ERROR;
         }
     }
@@ -659,27 +659,27 @@ open_dsets(const state_t *s, dsets_state_t *ds)
     if (s->chunked) {
 
         if (!open_dset_real(s, &ds->single_did, &ds->single_sid, DSET_SINGLE_NAME)) {
-            printf("open_dset_real() for chunked dataset: single index failed\n");
+            HDprintf("open_dset_real() for chunked dataset: single index failed\n");
             TEST_ERROR;
         }
 
         if (!open_dset_real(s, &ds->implicit_did, &ds->implicit_sid, DSET_IMPLICIT_NAME)) {
-            printf("open_dset_real() for chunked dataset: implicit index failed\n");
+            HDprintf("open_dset_real() for chunked dataset: implicit index failed\n");
             TEST_ERROR;
         }
 
         if (!open_dset_real(s, &ds->fa_did, &ds->fa_sid, DSET_FA_NAME)) {
-            printf("open_dset_real() for chunked dataset: fa index failed\n");
+            HDprintf("open_dset_real() for chunked dataset: fa index failed\n");
             TEST_ERROR;
         }
 
         if (!open_dset_real(s, &ds->ea_did, &ds->ea_sid, DSET_EA_NAME)) {
-            printf("open_dset_real() for chunked dataset: ea index failed\n");
+            HDprintf("open_dset_real() for chunked dataset: ea index failed\n");
             TEST_ERROR;
         }
 
         if (!open_dset_real(s, &ds->bt2_did, &ds->bt2_sid, DSET_BT2_NAME)) {
-            printf("open_dset_real() for chunked dataset: bt2 index failed\n");
+            HDprintf("open_dset_real() for chunked dataset: bt2 index failed\n");
             TEST_ERROR;
         }
     }
@@ -701,12 +701,12 @@ open_dset_real(const state_t *s, hid_t *did, hid_t *sid, const char *name)
     hsize_t dims[2];
 
     if ((*did = H5Dopen2(s->file, name, H5P_DEFAULT)) < 0) {
-        printf("H5Dopen dataset failed\n");
+        HDprintf("H5Dopen dataset failed\n");
         TEST_ERROR;
     }
 
     if ((*sid = H5Dget_space(*did)) < 0) {
-        printf("H5Dget_space failed\n");
+        HDprintf("H5Dget_space failed\n");
         TEST_ERROR;
     }
     if (H5Sget_simple_extent_dims(*sid, dims, NULL) < 0)
@@ -743,37 +743,37 @@ static bool
 close_dsets(const dsets_state_t *ds)
 {
     if (!close_dset_real(ds->compact_did, ds->compact_sid)) {
-        printf("H5Dclose compact dataset failed\n");
+        HDprintf("H5Dclose compact dataset failed\n");
         TEST_ERROR;
     }
 
     if (!close_dset_real(ds->contig_did, ds->contig_sid)) {
-        printf("H5Dclose contiguous dataset failed\n");
+        HDprintf("H5Dclose contiguous dataset failed\n");
         TEST_ERROR;
     }
 
     if (!close_dset_real(ds->single_did, ds->single_sid)) {
-        printf("H5Dclose chunked dataset: single index failed\n");
+        HDprintf("H5Dclose chunked dataset: single index failed\n");
         TEST_ERROR;
     }
 
     if (!close_dset_real(ds->implicit_did, ds->implicit_sid)) {
-        printf("H5Dclose chunked dataset: implicit index failed\n");
+        HDprintf("H5Dclose chunked dataset: implicit index failed\n");
         TEST_ERROR;
     }
 
     if (!close_dset_real(ds->fa_did, ds->fa_sid)) {
-        printf("H5Dclose chunked dataset: fa index failed\n");
+        HDprintf("H5Dclose chunked dataset: fa index failed\n");
         TEST_ERROR;
     }
 
     if (!close_dset_real(ds->ea_did, ds->ea_sid)) {
-        printf("H5Dclose chunked dataset: ea index failed\n");
+        HDprintf("H5Dclose chunked dataset: ea index failed\n");
         TEST_ERROR;
     }
 
     if (!close_dset_real(ds->bt2_did, ds->bt2_sid)) {
-        printf("H5Dclose chunked dataset: bt2 index failed\n");
+        HDprintf("H5Dclose chunked dataset: bt2 index failed\n");
         TEST_ERROR;
     }
 
@@ -791,12 +791,12 @@ static bool
 close_dset_real(hid_t did, hid_t sid)
 {
     if (did != badhid && H5Dclose(did) < 0) {
-        printf("H5Dclose dataset failed\n");
+        HDprintf("H5Dclose dataset failed\n");
         TEST_ERROR;
     }
 
     if (sid != badhid && H5Sclose(sid) < 0) {
-        printf("H5Sclose dataspace for dataset failed\n");
+        HDprintf("H5Sclose dataspace for dataset failed\n");
         TEST_ERROR;
     }
 
@@ -841,7 +841,7 @@ write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *
             result = dsets_action(SEQ_WRITE, s, ds, step);
 
             if (s->use_np && !np_writer(result, step, s, np, config)) {
-                printf("np_writer() for sequential writes failed\n");
+                HDprintf("np_writer() for sequential writes failed\n");
                 TEST_ERROR;
             }
         }
@@ -858,11 +858,11 @@ write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *
             dbgf(2, "Random writes %u to dataset\n", step);
 
             newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
-            dbgf(2, "Random step is %u\n", newstep);
+            HDprintf("Random step is %u\n", newstep);
             result = dsets_action(RANDOM_WRITE, s, ds, newstep);
 
             if (s->use_np && !np_writer(result, step, s, np, config)) {
-                printf("np_writer() for random writes failed\n");
+                HDprintf("np_writer() for random writes failed\n");
                 TEST_ERROR;
             }
         }
@@ -878,7 +878,7 @@ write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *
             result = dsets_action(HYPER_WRITE, s, ds, k);
 
             if (s->use_np && !np_writer(result, step, s, np, config)) {
-                printf("np_writer() for hyperslab writes failed\n");
+                HDprintf("np_writer() for hyperslab writes failed\n");
                 TEST_ERROR;
             }
         }
@@ -893,7 +893,7 @@ write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *
             result = dsets_action(MODIFY_DATA, s, ds, step);
 
             if (s->use_np && !np_writer(result, step, s, np, config)) {
-                printf("np_writer() for modify raw data failed\n");
+                HDprintf("np_writer() for modify raw data failed\n");
                 TEST_ERROR;
             }
         }
@@ -925,7 +925,7 @@ dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigne
 
     /* Set up selection, dataspace and data buffer according to the specified action */
     if (!dset_setup(action, which, s, start, stride, count, block, &mem_sid, &wbuf)) {
-        printf("dset_setup() failed\n");
+        HDprintf("dset_setup() failed\n");
         TEST_ERROR;
     }
 
@@ -934,7 +934,7 @@ dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigne
 
         if (!write_dset(ds->contig_did, s->filetype, mem_sid, ds->contig_sid, start, stride, count, block,
                         wbuf)) {
-            printf("H5Dwrite to contiguous dataset failed\n");
+            HDprintf("H5Dwrite to contiguous dataset failed\n");
             TEST_ERROR;
         }
     }
@@ -944,28 +944,28 @@ dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigne
 
         if (!write_dset(ds->single_did, s->filetype, mem_sid, ds->single_sid, start, stride, count, block,
                         wbuf)) {
-            printf("H5Dwrite to chunked dataset: single index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: single index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!write_dset(ds->implicit_did, s->filetype, mem_sid, ds->implicit_sid, start, stride, count, block,
                         wbuf)) {
-            printf("H5Dwrite to chunked dataset: implicit index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: implicit index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!write_dset(ds->fa_did, s->filetype, mem_sid, ds->fa_sid, start, stride, count, block, wbuf)) {
-            printf("H5Dwrite to chunked dataset: fa index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: fa index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!write_dset(ds->ea_did, s->filetype, mem_sid, ds->ea_sid, start, stride, count, block, wbuf)) {
-            printf("H5Dwrite to chunked dataset: ea index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: ea index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!write_dset(ds->bt2_did, s->filetype, mem_sid, ds->bt2_sid, start, stride, count, block, wbuf)) {
-            printf("H5Dwrite to chunked dataset: bt2 index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: bt2 index dataset failed\n");
             TEST_ERROR;
         }
     }
@@ -1026,7 +1026,7 @@ dset_setup(unsigned action, unsigned which, const state_t *s, hsize_t *start, hs
 
     /* Allocating the buffer for writing */
     if ((tmp_buf = HDmalloc(count[1] * sizeof(unsigned int))) == NULL) {
-        printf("HDmalloc failed\n");
+        HDprintf("HDmalloc failed\n");
         TEST_ERROR;
     }
 
@@ -1074,12 +1074,12 @@ write_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start, 
 {
 
     if (H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, stride, count, block) < 0) {
-        printf("H5Sselect to dataset failed\n");
+        HDprintf("H5Sselect to dataset failed\n");
         TEST_ERROR;
     }
 
     if (H5Dwrite(did, tid, mem_sid, file_sid, H5P_DEFAULT, buf) < 0) {
-        printf("H5Dwrite to dataset failed\n");
+        HDprintf("H5Dwrite to dataset failed\n");
         TEST_ERROR;
     }
 
@@ -1100,7 +1100,7 @@ write_dset_compact(const state_t *s, const dsets_state_t *ds)
     unsigned      i;
 
     if ((buf = HDmalloc(s->compact_elmts * sizeof(unsigned int))) == NULL) {
-        printf("HDmalloc buffer for compact dataset failed\n");
+        HDprintf("HDmalloc buffer for compact dataset failed\n");
         goto error;
     }
 
@@ -1108,7 +1108,7 @@ write_dset_compact(const state_t *s, const dsets_state_t *ds)
         buf[i] = i + 1;
 
     if (H5Dwrite(ds->compact_did, s->filetype, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0) {
-        printf("H5Dwrite to compact dataset failed\n");
+        HDprintf("H5Dwrite to compact dataset failed\n");
         TEST_ERROR;
     }
 
@@ -1149,7 +1149,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             dbgf(2, "Verify sequential writes %u to dataset\n", step);
 
             if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
 
@@ -1159,7 +1159,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             result = verify_dsets_action(SEQ_WRITE, s, ds, step);
 
             if (s->use_np && !np_reader(result, step, s, np)) {
-                printf("np_reader() for verifying addition failed\n");
+                HDprintf("np_reader() for verifying addition failed\n");
                 TEST_ERROR;
             }
         }
@@ -1176,10 +1176,10 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             dbgf(2, "Verify random writes %u to dataset\n", step);
 
             newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
-            dbgf(2, "Random step is %u\n", newstep);
+            HDprintf("Random step is %u\n", newstep);
 
             if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
 
@@ -1189,7 +1189,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             result = verify_dsets_action(RANDOM_WRITE, s, ds, newstep);
 
             if (s->use_np && !np_reader(result, step, s, np)) {
-                printf("np_reader() for verifying addition failed\n");
+                HDprintf("np_reader() for verifying addition failed\n");
                 TEST_ERROR;
             }
         }
@@ -1203,7 +1203,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             dbgf(2, "Verify hyperslab writes %u to dataset\n", step);
 
             if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
 
@@ -1213,7 +1213,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             result = verify_dsets_action(HYPER_WRITE, s, ds, k);
 
             if (s->use_np && !np_reader(result, step, s, np)) {
-                printf("np_reader() for verifying addition failed\n");
+                HDprintf("np_reader() for verifying addition failed\n");
                 TEST_ERROR;
             }
         }
@@ -1226,7 +1226,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             dbgf(2, "Verify raw data modification %u to dataset\n", step);
 
             if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
 
@@ -1236,7 +1236,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
             result = verify_dsets_action(MODIFY_DATA, s, ds, step);
 
             if (s->use_np && !np_reader(result, step, s, np)) {
-                printf("np_reader() for verifying addition failed\n");
+                HDprintf("np_reader() for verifying addition failed\n");
                 TEST_ERROR;
             }
         }
@@ -1269,7 +1269,7 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
 
     /* Set up selection, dataspace and data buffer according to the specified action */
     if (!dset_setup(action, which, s, start, stride, count, block, &mem_sid, &vbuf)) {
-        printf("dset_setup() failed\n");
+        HDprintf("dset_setup() failed\n");
         TEST_ERROR;
     }
 
@@ -1277,7 +1277,7 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
     if (s->contig) {
         if (!verify_read_dset(ds->contig_did, s->filetype, mem_sid, ds->contig_sid, start, stride, count,
                               block, vbuf)) {
-            printf("H5Dwrite to contiguous dataset failed\n");
+            HDprintf("H5Dwrite to contiguous dataset failed\n");
             TEST_ERROR;
         }
     }
@@ -1287,31 +1287,31 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
 
         if (!verify_read_dset(ds->single_did, s->filetype, mem_sid, ds->single_sid, start, stride, count,
                               block, vbuf)) {
-            printf("H5Dwrite to chunked dataset: single index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: single index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!verify_read_dset(ds->implicit_did, s->filetype, mem_sid, ds->implicit_sid, start, stride, count,
                               block, vbuf)) {
-            printf("H5Dwrite to chunked dataset: implicit index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: implicit index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!verify_read_dset(ds->fa_did, s->filetype, mem_sid, ds->fa_sid, start, stride, count, block,
                               vbuf)) {
-            printf("H5Dwrite to chunked dataset: fa index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: fa index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!verify_read_dset(ds->ea_did, s->filetype, mem_sid, ds->ea_sid, start, stride, count, block,
                               vbuf)) {
-            printf("H5Dwrite to chunked dataset: ea index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: ea index dataset failed\n");
             TEST_ERROR;
         }
 
         if (!verify_read_dset(ds->bt2_did, s->filetype, mem_sid, ds->bt2_sid, start, stride, count, block,
                               vbuf)) {
-            printf("H5Dwrite to chunked dataset: bt2 index dataset failed\n");
+            HDprintf("H5Dwrite to chunked dataset: bt2 index dataset failed\n");
             TEST_ERROR;
         }
     }
@@ -1342,25 +1342,25 @@ verify_read_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *s
 
     /* Refresh the dataset */
     if (H5Drefresh(did) < 0) {
-        printf("H5Drefresh dataset failed\n");
+        HDprintf("H5Drefresh dataset failed\n");
         TEST_ERROR;
     }
 
     /* Allocate the buffer for reading */
     if ((rbuf = HDmalloc(count[1] * sizeof(unsigned int))) == NULL) {
-        printf("HDmalloc failed\n");
+        HDprintf("HDmalloc failed\n");
         TEST_ERROR;
     }
 
     /* Make the selection the file dataspace */
     if (H5Sselect_hyperslab(file_sid, H5S_SELECT_SET, start, stride, count, block) < 0) {
-        printf("H5Sselect to dataset failed\n");
+        HDprintf("H5Sselect to dataset failed\n");
         TEST_ERROR;
     }
 
     /* Read the data from the dataset into `rbuf` */
     if (H5Dread(did, tid, mem_sid, file_sid, H5P_DEFAULT, rbuf) < 0) {
-        printf("H5Dread from dataset failed\n");
+        HDprintf("H5Dread from dataset failed\n");
         TEST_ERROR;
     }
 
@@ -1391,18 +1391,18 @@ verify_read_dset_compact(const state_t *s, const dsets_state_t *ds)
     unsigned      i;
 
     if ((rbuf = HDmalloc(s->compact_elmts * sizeof(unsigned int))) == NULL) {
-        printf("HDmalloc buffer for compact dataset failed\n");
+        HDprintf("HDmalloc buffer for compact dataset failed\n");
         goto error;
     }
 
     if (H5Dread(ds->compact_did, s->filetype, H5S_ALL, H5S_ALL, H5P_DEFAULT, rbuf) < 0) {
-        printf("H5Dwrite to compact dataset failed\n");
+        HDprintf("H5Dwrite to compact dataset failed\n");
         TEST_ERROR;
     }
 
     for (i = 0; i < s->compact_elmts; i++)
         if (rbuf[i] != (i + 1)) {
-            printf("Invalid value for compact dataset element\n");
+            HDprintf("Invalid value for compact dataset element\n");
             TEST_ERROR;
         }
 
@@ -1440,36 +1440,36 @@ np_init(np_state_t *np, bool writer)
         /* If the named pipes are present at the start of the test, remove them */
         if (HDaccess(np->fifo_writer_to_reader, F_OK) == 0)
             if (HDremove(np->fifo_writer_to_reader) != 0) {
-                printf("HDremove fifo_writer_to_reader failed\n");
+                HDprintf("HDremove fifo_writer_to_reader failed\n");
                 TEST_ERROR;
             }
 
         if (HDaccess(np->fifo_reader_to_writer, F_OK) == 0)
             if (HDremove(np->fifo_reader_to_writer) != 0) {
-                printf("HDremove fifo_reader_to_writer failed\n");
+                HDprintf("HDremove fifo_reader_to_writer failed\n");
                 TEST_ERROR;
             }
 
         /* Writer creates two named pipes(FIFO) */
         if (HDmkfifo(np->fifo_writer_to_reader, 0600) < 0) {
-            printf("HDmkfifo fifo_writer_to_reader failed\n");
+            HDprintf("HDmkfifo fifo_writer_to_reader failed\n");
             TEST_ERROR;
         }
 
         if (HDmkfifo(np->fifo_reader_to_writer, 0600) < 0) {
-            printf("HDmkfifo fifo_reader_to_writer failed\n");
+            HDprintf("HDmkfifo fifo_reader_to_writer failed\n");
             TEST_ERROR;
         }
     }
 
     /* Both the writer and reader open the pipes */
     if ((np->fd_writer_to_reader = HDopen(np->fifo_writer_to_reader, O_RDWR)) < 0) {
-        printf("HDopen fifo_writer_to_reader failed\n");
+        HDprintf("HDopen fifo_writer_to_reader failed\n");
         TEST_ERROR;
     }
 
     if ((np->fd_reader_to_writer = HDopen(np->fifo_reader_to_writer, O_RDWR)) < 0) {
-        printf("HDopen fifo_reader_to_writer failed\n");
+        HDprintf("HDopen fifo_reader_to_writer failed\n");
         TEST_ERROR;
     }
 
@@ -1488,24 +1488,24 @@ np_close(np_state_t *np, bool writer)
 {
     /* Both the writer and reader close the named pipes */
     if (HDclose(np->fd_writer_to_reader) < 0) {
-        printf("HDclose fd_writer_to_reader failed\n");
+        HDprintf("HDclose fd_writer_to_reader failed\n");
         TEST_ERROR;
     }
 
     if (HDclose(np->fd_reader_to_writer) < 0) {
-        printf("HDclose fd_reader_to_writer failed\n");
+        HDprintf("HDclose fd_reader_to_writer failed\n");
         TEST_ERROR;
     }
 
     /* Reader finishes last and deletes the named pipes */
     if (!writer) {
         if (HDremove(np->fifo_writer_to_reader) != 0) {
-            printf("HDremove fifo_writer_to_reader failed\n");
+            HDprintf("HDremove fifo_writer_to_reader failed\n");
             TEST_ERROR;
         }
 
         if (HDremove(np->fifo_reader_to_writer) != 0) {
-            printf("HDremove fifo_reader_to_writer failed\n");
+            HDprintf("HDremove fifo_reader_to_writer failed\n");
             TEST_ERROR;
         }
     }
@@ -1525,7 +1525,7 @@ np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_
 
     /* The action fails */
     if (!result) {
-        printf("attribute action failed\n");
+        HDprintf("attribute action failed\n");
         H5_FAILED();
         AT();
 
@@ -1543,7 +1543,7 @@ np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_
             /* Bump up the value of notify to tell the reader to start reading */
             np->notify++;
             if (HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int)) < 0) {
-                printf("HDwrite failed\n");
+                HDprintf("HDwrite failed\n");
                 TEST_ERROR;
             }
 
@@ -1560,7 +1560,7 @@ np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_
 
             /* Handshake between writer and reader */
             if (!np_confirm_verify_notify(np->fd_reader_to_writer, step, s, np)) {
-                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
         }
@@ -1581,7 +1581,7 @@ np_reader(bool result, unsigned step, const state_t *s, np_state_t *np)
 {
     /* The verification fails */
     if (!result) {
-        printf("verify action failed\n");
+        HDprintf("verify action failed\n");
         H5_FAILED();
         AT();
 
@@ -1598,7 +1598,7 @@ np_reader(bool result, unsigned step, const state_t *s, np_state_t *np)
             /* Send back the same notify value for acknowledgement:
              *   --inform the writer to move to the next step */
             if (HDwrite(np->fd_reader_to_writer, &np->notify, sizeof(int)) < 0) {
-                printf("HDwrite failed\n");
+                HDprintf("HDwrite failed\n");
                 TEST_ERROR;
             }
         }
@@ -1620,17 +1620,17 @@ np_confirm_verify_notify(int fd, unsigned step, const state_t *s, np_state_t *np
     if (step % s->csteps == 0) {
         np->verify++;
         if (HDread(fd, &np->notify, sizeof(int)) < 0) {
-            printf("HDread failed\n");
+            HDprintf("HDread failed\n");
             TEST_ERROR;
         }
 
         if (np->notify == -1) {
-            printf("reader/writer failed to verify\n");
+            HDprintf("reader/writer failed to verify\n");
             TEST_ERROR;
         }
 
         if (np->notify != np->verify) {
-            printf("received message %d, expecting %d\n", np->notify, np->verify);
+            HDprintf("received message %d, expecting %d\n", np->notify, np->verify);
             TEST_ERROR;
         }
     }
@@ -1658,18 +1658,18 @@ main(int argc, char **argv)
     bool                  result;
 
     if (!state_init(&s, argc, argv)) {
-        printf("state_init() failed\n");
+        HDprintf("state_init() failed\n");
         TEST_ERROR;
     }
 
     personality = HDstrstr(s.progname, "vfd_swmr_dsetops_");
 
-    if (personality != NULL && strcmp(personality, "vfd_swmr_dsetops_writer") == 0)
+    if (personality != NULL && HDstrcmp(personality, "vfd_swmr_dsetops_writer") == 0)
         writer = true;
-    else if (personality != NULL && strcmp(personality, "vfd_swmr_dsetops_reader") == 0)
+    else if (personality != NULL && HDstrcmp(personality, "vfd_swmr_dsetops_reader") == 0)
         writer = false;
     else {
-        printf("unknown personality, expected vfd_swmr_dsetops_{reader,writer}\n");
+        HDprintf("unknown personality, expected vfd_swmr_dsetops_{reader,writer}\n");
         TEST_ERROR;
     }
 
@@ -1678,45 +1678,45 @@ main(int argc, char **argv)
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, config */
     if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, &config)) < 0) {
-        printf("vfd_swmr_create_fapl() failed\n");
+        HDprintf("vfd_swmr_create_fapl() failed\n");
         TEST_ERROR;
     }
 
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
-        printf("H5Pcreate failed\n");
+        HDprintf("H5Pcreate failed\n");
         TEST_ERROR;
     }
 
     if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0) {
-        printf("H5Pset_file_space_strategy failed\n");
+        HDprintf("H5Pset_file_space_strategy failed\n");
         TEST_ERROR;
     }
 
     if (writer) {
         if ((s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl)) < 0) {
-            printf("H5Fcreate failed\n");
+            HDprintf("H5Fcreate failed\n");
             TEST_ERROR;
         }
 
         if (!create_dsets(&s, &ds)) {
-            printf("create_dsets() failed\n");
+            HDprintf("create_dsets() failed\n");
             TEST_ERROR;
         }
     }
     else {
         if ((s.file = H5Fopen(s.filename, H5F_ACC_RDONLY, fapl)) < 0) {
-            printf("H5Fopen failed\n");
+            HDprintf("H5Fopen failed\n");
             TEST_ERROR;
         }
         if (!open_dsets(&s, &ds)) {
-            printf("open_dsets() failed\n");
+            HDprintf("open_dsets() failed\n");
             TEST_ERROR;
         }
     }
 
     /* Initiailze named pipes */
     if (s.use_np && !np_init(&np, writer)) {
-        printf("np_init() failed\n");
+        HDprintf("np_init() failed\n");
         TEST_ERROR;
     }
 
@@ -1729,7 +1729,7 @@ main(int argc, char **argv)
             result = write_dset_compact(&s, &ds);
 
             if (s.use_np && !np_writer(result, 0, &s, &np, &config)) {
-                printf("np_writer() for addition failed\n");
+                HDprintf("np_writer() for addition failed\n");
                 TEST_ERROR;
             }
         }
@@ -1737,7 +1737,7 @@ main(int argc, char **argv)
         if (s.contig || s.chunked) {
             /* Perform writes for contiguous and/or chunked datasets */
             if (!write_dset_contig_chunked(&s, &ds, &config, &np)) {
-                printf("write_dset_contig_chunked() failed\n");
+                HDprintf("write_dset_contig_chunked() failed\n");
                 TEST_ERROR;
             }
         }
@@ -1749,7 +1749,7 @@ main(int argc, char **argv)
             dbgf(2, "Verify writes to compact dataset\n");
 
             if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, 0, &s, &np)) {
-                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
             /* Wait for a few ticks for the update to happen */
@@ -1758,7 +1758,7 @@ main(int argc, char **argv)
             result = verify_read_dset_compact(&s, &ds);
 
             if (s.use_np && !np_reader(result, 0, &s, &np)) {
-                printf("np_reader() for verifying addition failed\n");
+                HDprintf("np_reader() for verifying addition failed\n");
                 TEST_ERROR;
             }
         }
@@ -1767,34 +1767,34 @@ main(int argc, char **argv)
 
             /* Verify writes for contiguous and/or chunked datasets */
             if (!verify_write_dset_contig_chunked(&s, &ds, &config, &np)) {
-                printf("verify_write_dset_contig_chunked() failed\n");
+                HDprintf("verify_write_dset_contig_chunked() failed\n");
                 TEST_ERROR;
             }
         }
     }
 
     if (!close_dsets(&ds)) {
-        printf("close_dsets() failed\n");
+        HDprintf("close_dsets() failed\n");
         TEST_ERROR;
     }
 
     if (H5Pclose(fapl) < 0) {
-        printf("H5Pclose failed\n");
+        HDprintf("H5Pclose failed\n");
         TEST_ERROR;
     }
 
     if (H5Pclose(fcpl) < 0) {
-        printf("H5Pclose failed\n");
+        HDprintf("H5Pclose failed\n");
         TEST_ERROR;
     }
 
     if (H5Fclose(s.file) < 0) {
-        printf("H5Fclose failed\n");
+        HDprintf("H5Fclose failed\n");
         TEST_ERROR;
     }
 
     if (s.use_np && !np_close(&np, writer)) {
-        printf("np_close() failed\n");
+        HDprintf("np_close() failed\n");
         TEST_ERROR;
     }
 

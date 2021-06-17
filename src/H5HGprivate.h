@@ -70,6 +70,4 @@ H5_DLL size_t  H5HG_get_free_size(const H5HG_heap_t *h);
 /* Debugging functions */
 H5_DLL herr_t H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth);
 
-bool H5HG_trap(const char *);
-
 #endif /* H5HGprivate_H */

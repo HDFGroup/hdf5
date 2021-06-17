@@ -388,7 +388,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, H5FD_vfd_swmr_
     haddr_t          md_addr;             /* Address in the metadata file */
     uint32_t         i;                   /* Local index variable */
     herr_t           ret_value = SUCCEED; /* Return value */
-    hbool_t          queue_was_nonempty;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -472,8 +471,6 @@ H5F_update_vfd_swmr_metadata_file(H5F_t *f, uint32_t num_entries, H5FD_vfd_swmr_
     if (H5F__vfd_swmr_construct_write_md_hdr(shared, num_entries) < 0)
 
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "fail to construct & write header to md")
-
-    queue_was_nonempty = !TAILQ_EMPTY(&shared->shadow_defrees);
 
     /*
      * Release time out entries from the delayed list by scanning the
@@ -633,7 +630,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
 
     HDassert(shared->vfd_swmr);
     HDassert(shared->vfd_swmr_writer);
-    HDassert(shared->pb_ptr);
+    HDassert(shared->page_buf);
 
     /* since we are about to flush the page buffer, force and end of
      * tick so as to avoid attempts to flush entries on the page buffer
@@ -643,7 +640,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
 
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "H5F_vfd_swmr_writer_end_of_tick() failed.")
 
-    while (shared->pb_ptr->dwl_len > 0) {
+    while (shared->page_buf->dwl_len > 0) {
 
         if (H5F__vfd_swmr_writer__wait_a_tick(f) < 0)
 
@@ -761,7 +758,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(shared);
-    HDassert(shared->pb_ptr);
+    HDassert(shared->page_buf);
     HDassert(shared->vfd_swmr_writer);
 
     if (!vfd_swmr_writer_may_increase_tick_to(shared->tick_num + 1, wait_for_reader))
@@ -793,9 +790,17 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
 
     if (shared->cache) {
 
+        if (H5AC_prep_for_file_flush(f) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed")
+
         if (H5AC_flush(f) < 0)
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush metadata cache to the page buffer")
+
+        if (H5AC_secure_from_file_flush(f) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed")
     }
 
     if (H5FD_truncate(shared->lf, FALSE) < 0)
@@ -806,9 +811,17 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     /* 2) If it exists, flush the metadata cache to the page buffer. */
     if (shared->cache) {
 
+        if (H5AC_prep_for_file_flush(f) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed")
+
         if (H5AC_flush(f) < 0)
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush metadata cache to the page buffer")
+
+        if (H5AC_secure_from_file_flush(f) < 0)
+
+            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed")
     }
 
     /* 3) If this is the first tick (i.e. tick == 1), create the
@@ -1000,7 +1013,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    HDassert(shared->pb_ptr);
+    HDassert(shared->page_buf);
     HDassert(shared->vfd_swmr);
     HDassert(!shared->vfd_swmr_writer);
     HDassert(file);
@@ -1170,7 +1183,7 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
             entries_removed++;
         }
         for (i = 0; i < nchanges; i++) {
-            haddr_t page_addr = (haddr_t)(change[i].pgno * shared->pb_ptr->page_size);
+            haddr_t page_addr = (haddr_t)(change[i].pgno * shared->page_buf->page_size);
             if (H5PB_remove_entry(shared, page_addr) < 0) {
                 HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "remove page buffer entry failed");
             }
@@ -1360,7 +1373,7 @@ H5F_dump_eot_queue(void)
     for (curr = TAILQ_FIRST(&eot_queue_g), i = 0; curr != NULL; curr = TAILQ_NEXT(curr, link), i++) {
         HDfprintf(stderr, "%d: %s tick_num %" PRIu64 ", end_of_tick %jd.%09ld, vfd_swmr_file %p\n", i,
                   curr->vfd_swmr_writer ? "writer" : "not writer", curr->tick_num, curr->end_of_tick.tv_sec,
-                  curr->end_of_tick.tv_nsec, curr->vfd_swmr_file);
+                  curr->end_of_tick.tv_nsec, (void *)curr->vfd_swmr_file);
     }
 
     if (i == 0)
@@ -1798,12 +1811,9 @@ done:
 static herr_t
 H5F__vfd_swmr_writer__wait_a_tick(H5F_t *f)
 {
-    int             result;
-    struct timespec req;
-    struct timespec rem;
-    uint64_t        tick_in_nsec;
-    H5F_shared_t *  shared;
-    herr_t          ret_value = SUCCEED; /* Return value */
+    uint64_t      tick_in_nsec;
+    H5F_shared_t *shared;
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 

@@ -313,7 +313,7 @@ if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
 else ()
   FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT)
 endif ()
-file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT)
+file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT3)
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  sizeof INTEGER
 # dnl    -- LINE 2 --  kind of INTEGER
@@ -323,14 +323,14 @@ file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT)
 # dnl    -- LINE 6 --  kind of DOUBLE PRECISION
 
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+string (REGEX REPLACE "\n" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
 
-list (GET PROG_OUTPUT 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
-list (GET PROG_OUTPUT 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
-list (GET PROG_OUTPUT 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
-list (GET PROG_OUTPUT 3 PAC_FORTRAN_NATIVE_REAL_KIND)
-list (GET PROG_OUTPUT 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
-list (GET PROG_OUTPUT 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
+list (GET PROG_OUTPUT3 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
+list (GET PROG_OUTPUT3 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)
+list (GET PROG_OUTPUT3 2 PAC_FORTRAN_NATIVE_REAL_SIZEOF)
+list (GET PROG_OUTPUT3 3 PAC_FORTRAN_NATIVE_REAL_KIND)
+list (GET PROG_OUTPUT3 4 PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF)
+list (GET PROG_OUTPUT3 5 PAC_FORTRAN_NATIVE_DOUBLE_KIND)
 
 if (NOT PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
    message (FATAL_ERROR "Failed to find SIZEOF NATIVE INTEGER KINDs for Fortran")
@@ -372,132 +372,13 @@ endif ()
 
 set (${HDF_PREFIX}_H5CONFIG_F_NUM_RKIND "INTEGER, PARAMETER :: num_rkinds = ${NUM_RKIND}")
 
-string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS})
-string (REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR}/)")
+string (REGEX REPLACE "{" "" OUT_VAR1 ${PAC_FC_ALL_REAL_KINDS})
+string (REGEX REPLACE "}" "" OUT_VAR1 ${OUT_VAR1})
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND "INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/${OUT_VAR1}/)")
 
-string (REGEX REPLACE "{" "" OUT_VAR ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
-string (REGEX REPLACE "}" "" OUT_VAR ${OUT_VAR})
-set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR}/)")
-
-ENABLE_LANGUAGE (C)
-
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  include (CheckCSourceRuns)
-else ()
-#-----------------------------------------------------------------------------
-# The provided CMake C macros don't provide a general compile/run function
-# so this one is used.
-#-----------------------------------------------------------------------------
-macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (VERBOSE "Detecting C ${FUNCTION_NAME}")
-    endif ()
-    if (HDF5_REQUIRED_LIBRARIES)
-      set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES
-          "-DLINK_LIBRARIES:STRING=${HDF5_REQUIRED_LIBRARIES}")
-    else ()
-      set (CHECK_FUNCTION_EXISTS_ADD_LIBRARIES)
-    endif ()
-    file (WRITE
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-        ${SOURCE_CODE}
-    )
-    TRY_RUN (RUN_RESULT_VAR COMPILE_RESULT_VAR
-        ${CMAKE_BINARY_DIR}
-        ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testCCompiler1.c
-        CMAKE_FLAGS "${CHECK_FUNCTION_EXISTS_ADD_LIBRARIES}"
-        RUN_OUTPUT_VARIABLE OUTPUT_VAR
-    )
-
-    set (${RETURN_VAR} ${OUTPUT_VAR})
-
-    #if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-    #  message (TRACE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #  message (TRACE "Test COMPILE_RESULT_VAR ${COMPILE_RESULT_VAR} ")
-    #  message (TRACE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #  message (TRACE "Test RUN_RESULT_VAR ${RUN_RESULT_VAR} ")
-    #  message (TRACE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
-    #endif ()
-
-    if (${COMPILE_RESULT_VAR})
-      if (${RUN_RESULT_VAR} MATCHES 1)
-        set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
-        endif ()
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
-            "Determining if the C ${FUNCTION_NAME} exists passed with the following output:\n"
-            "${OUTPUT_VAR}\n\n"
-        )
-      else ()
-        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-          message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
-        endif ()
-        set (${RUN_RESULT_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
-        file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
-            "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
-            "${OUTPUT_VAR}\n\n")
-      endif ()
-    else ()
-        message (FATAL_ERROR "Compilation of C ${FUNCTION_NAME} - Failed")
-    endif ()
-endmacro ()
-endif ()
-
-set (PROG_SRC
-    "
-#include <float.h>
-#include <stdio.h>
-#define CHECK_FLOAT128 ${${HDF_PREFIX}_SIZEOF___FLOAT128}
-#if CHECK_FLOAT128!=0
-# if ${${HDF_PREFIX}_HAVE_QUADMATH_H}!=0
-#include <quadmath.h>
-# endif
-# ifdef FLT128_DIG
-#define C_FLT128_DIG FLT128_DIG
-# else
-#define C_FLT128_DIG 0
-# endif
-#else
-#define C_FLT128_DIG 0
-#endif
-#if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-#define C_LDBL_DIG DECIMAL_DIG
-#else
-#define C_LDBL_DIG LDBL_DIG
-#endif
-   int main() {
-       printf(\"%d\\\\n%d\\\\n\", C_LDBL_DIG, C_FLT128_DIG)\\\;
-       return 1\\\;
-   }
-     "
-)
-
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_c_source_runs (${PROG_SRC} PROG_OUTPUT)
-else ()
-  C_RUN ("maximum decimal precision for C" ${PROG_SRC} PROG_OUTPUT)
-endif ()
-
-# dnl The output from the above program will be:
-# dnl    -- LINE 1 --  long double decimal precision
-# dnl    -- LINE 2 --  __float128 decimal precision
-
-# Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
-
-list (GET PROG_OUTPUT 0 LDBL_DIG)
-list (GET PROG_OUTPUT 1 FLT128_DIG)
-
-if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
-  set (${HDF_PREFIX}_HAVE_FLOAT128 0)
-  set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
-  set (${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${LDBL_DIG})
-else ()
-  set(${HDF_PREFIX}_PAC_C_MAX_REAL_PRECISION ${FLT128_DIG})
-endif ()
-
+string (REGEX REPLACE "{" "" OUT_VAR2 ${PAC_FC_ALL_REAL_KINDS_SIZEOF})
+string (REGEX REPLACE "}" "" OUT_VAR2 ${OUT_VAR2})
+set (${HDF_PREFIX}_H5CONFIG_F_RKIND_SIZEOF "INTEGER, DIMENSION(1:num_rkinds) :: rkind_sizeof = (/${OUT_VAR2}/)")
 
 # Setting definition if there is a 16 byte fortran integer
 string (FIND ${PAC_FC_ALL_INTEGER_KINDS_SIZEOF} "16" pos)
