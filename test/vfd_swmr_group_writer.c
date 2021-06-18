@@ -24,7 +24,7 @@
 #ifndef H5_HAVE_WIN32_API
 
 #define READER_WAIT_TICKS 3
-#define VS_ATTR_NAME_LEN  21
+#define VS_ATTR_NAME_LEN  27
 
 typedef struct {
     hid_t        file, filetype, one_by_one_sid;

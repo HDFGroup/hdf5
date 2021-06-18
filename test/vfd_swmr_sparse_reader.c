@@ -45,7 +45,7 @@
 /* Local Variables */
 /*******************/
 
-static hid_t symbol_tid = (-1);
+static hid_t symbol_tid = H5I_INVALID_HID;
 
 /********************/
 /* Local Prototypes */
@@ -116,7 +116,7 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "READER: Symbol = '%s', nrecords = %Hu, name = %s, location = %Hu, %Hu\n",
+        HDfprintf(stderr, "READER: Symbol = '%s', nrecords = %" PRIuHSIZE ", name = %s, location = %" PRIuHSIZE ", %" PRIuHSIZE "\n",
                   symbol->name, symbol->nrecords, symbol->name, start[0], start[1]);
 
     /* Read record from dataset */
@@ -128,7 +128,7 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     if (record->rec_id != start[1]) {
         HDfprintf(stderr, "*** READER: ERROR ***\n");
         HDfprintf(stderr, "Incorrect record value!\n");
-        HDfprintf(stderr, "Symbol = '%s', location = %Hu, %Hu, record->rec_id = %" PRIu64 "\n", symbol->name,
+        HDfprintf(stderr, "Symbol = '%s', location = %" PRIuHSIZE ", %" PRIuHSIZE ", record->rec_id = %" PRIu64 "\n", symbol->name,
                   start[0], start[1], record->rec_id);
         goto error;
     } /* end if */
