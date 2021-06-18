@@ -181,9 +181,10 @@ H5I_register_type(const H5I_class_t *cls)
 
     /* Initialize the ID type structure for new types */
     if (type_info->init_count == 0) {
-        type_info->cls      = cls;
-        type_info->id_count = 0;
-        type_info->nextid   = cls->reserved;
+        type_info->cls          = cls;
+        type_info->id_count     = 0;
+        type_info->nextid       = cls->reserved;
+        type_info->last_id_info = NULL;
         if (NULL == (type_info->ids = H5SL_create(H5SL_TYPE_HID, NULL)))
             HGOTO_ERROR(H5E_ATOM, H5E_CANTCREATE, FAIL, "skip list creation failed")
     }
@@ -454,6 +455,9 @@ H5I_register(H5I_type_t type, const void *object, hbool_t app_ref)
     /* Sanity check for the 'nextid' getting too large and wrapping around */
     HDassert(type_info->nextid <= ID_MASK);
 
+    /* Set the most recent ID to this object */
+    type_info->last_id_info = info;
+
     /* Set return value */
     ret_value = new_id;
 
@@ -523,6 +527,9 @@ H5I_register_using_existing_id(H5I_type_t type, void *object, hbool_t app_ref, h
     if (H5SL_insert(type_info->ids, info, &info->id) < 0)
         HGOTO_ERROR(H5E_ATOM, H5E_CANTINSERT, FAIL, "can't insert ID node into skip list")
     type_info->id_count++;
+
+    /* Set the most recent ID to this object */
+    type_info->last_id_info = info;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -728,9 +735,14 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
     if (NULL == (info = (H5I_id_info_t *)H5SL_remove(type_info->ids, &id)))
         HGOTO_ERROR(H5E_ATOM, H5E_CANTDELETE, NULL, "can't remove ID node from skip list")
 
+    /* Check if this ID was the last one accessed */
+    if (type_info->last_id_info == info)
+        type_info->last_id_info = NULL;
+
     H5_GCC_DIAG_OFF("cast-qual")
     ret_value = (void *)info->object;
     H5_GCC_DIAG_ON("cast-qual")
+
     info = H5FL_FREE(H5I_id_info_t, info);
 
     /* Decrement the number of IDs in the type */
@@ -1240,6 +1252,7 @@ H5I__find_id(hid_t id)
 {
     H5I_type_t       type;             /* ID's type */
     H5I_type_info_t *type_info = NULL; /* Pointer to the type */
+    H5I_id_info_t *  id_info   = NULL; /* ID's info */
     H5I_id_info_t *  ret_value = NULL; /* Return value */
 
     FUNC_ENTER_PACKAGE_NOERR
@@ -1252,8 +1265,18 @@ H5I__find_id(hid_t id)
     if (!type_info || type_info->init_count <= 0)
         HGOTO_DONE(NULL)
 
-    /* Locate the ID node for the ID */
-    ret_value = (H5I_id_info_t *)H5SL_search(type_info->ids, &id);
+    /* Check for same ID as we have looked up last time */
+    if (type_info->last_id_info && type_info->last_id_info->id == id)
+        id_info = type_info->last_id_info;
+    else {
+        id_info = (H5I_id_info_t *)H5SL_search(type_info->ids, &id);
+
+        /* Remember this ID */
+        type_info->last_id_info = id_info;
+    }
+
+    /* Set return value */
+    ret_value = id_info;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

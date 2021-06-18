@@ -70,11 +70,12 @@ typedef struct H5I_id_info_t {
 
 /* Type information structure used */
 typedef struct H5I_type_info_t {
-    const H5I_class_t *cls;        /* Pointer to ID class */
-    unsigned           init_count; /* # of times this type has been initialized */
-    uint64_t           id_count;   /* Current number of IDs held */
-    uint64_t           nextid;     /* ID to use for the next ID */
-    H5SL_t *           ids;        /* Pointer to skip list that stores IDs */
+    const H5I_class_t *cls;          /* Pointer to ID class */
+    unsigned           init_count;   /* # of times this type has been initialized */
+    uint64_t           id_count;     /* Current number of IDs held */
+    uint64_t           nextid;       /* ID to use for the next object */
+    H5I_id_info_t *    last_id_info; /* Info for most recent ID looked up */
+    H5SL_t *           ids;          /* Pointer to skip list that stores IDs */
 } H5I_type_info_t;
 
 /*****************************/
