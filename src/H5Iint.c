@@ -27,9 +27,13 @@
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5FLprivate.h" /* Free Lists                               */
+#include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Ipkg.h"      /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Tprivate.h"  /* Datatypes                                */
+
+
+#include "H5SLprivate.h" /* Skip Lists                               */
 
 /****************/
 /* Local Macros */

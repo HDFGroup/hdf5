@@ -20,23 +20,15 @@
 /****************/
 
 #include "H5Imodule.h" /* This source code file is part of the H5I module */
-#define H5T_FRIEND     /* Suppress error about including H5Tpkg */
 
 /***********/
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5ACprivate.h" /* Metadata cache                           */
-#include "H5CXprivate.h" /* API Contexts                             */
-#include "H5Dprivate.h"  /* Datasets                                 */
 #include "H5Eprivate.h"  /* Error handling                           */
-#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Gprivate.h"  /* Groups                                   */
 #include "H5Ipkg.h"      /* IDs                                      */
 #include "H5MMprivate.h" /* Memory management                        */
-#include "H5Oprivate.h"  /* Object headers                           */
-#include "H5SLprivate.h" /* Skip Lists                               */
-#include "H5Tpkg.h"      /* Datatypes                                */
 
 /****************/
 /* Local Macros */
