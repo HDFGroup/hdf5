@@ -78,8 +78,8 @@ static void usage(void);
 static int
 check_dataset(hid_t fid, hid_t dapl, unsigned verbose, const char *sym_name, symbol_t *record, hid_t rec_sid)
 {
-    hid_t    dsid = H5I_INVALID_HID;                                 /* Dataset ID */
-    hid_t    file_sid = H5I_INVALID_HID;                             /* Dataset's space ID */
+    hid_t    dsid     = H5I_INVALID_HID;           /* Dataset ID */
+    hid_t    file_sid = H5I_INVALID_HID;           /* Dataset's space ID */
     hssize_t snpoints;                             /* Number of elements in dataset */
     hsize_t  start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
 
@@ -215,13 +215,13 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
     time_t                 curr_time;       /* Current time */
     symbol_info_t **       sym_com  = NULL; /* Pointers to array of common dataset IDs */
     symbol_info_t **       sym_rand = NULL; /* Pointers to array of random dataset IDs */
-    hid_t                  dapl = H5I_INVALID_HID;
-    hid_t                  mem_sid = H5I_INVALID_HID;       /* Memory dataspace ID */
-    hid_t                  fid = H5I_INVALID_HID;           /* SWMR test file ID */
-    hid_t                  fapl = H5I_INVALID_HID;          /* File access property list */
-    symbol_t               record;        /* The record to add to the dataset */
-    unsigned               v;             /* Local index variable */
-    H5F_vfd_swmr_config_t *config = NULL; /* Configuration for VFD SWMR */
+    hid_t                  dapl     = H5I_INVALID_HID;
+    hid_t                  mem_sid  = H5I_INVALID_HID; /* Memory dataspace ID */
+    hid_t                  fid      = H5I_INVALID_HID; /* SWMR test file ID */
+    hid_t                  fapl     = H5I_INVALID_HID; /* File access property list */
+    symbol_t               record;                     /* The record to add to the dataset */
+    unsigned               v;                          /* Local index variable */
+    H5F_vfd_swmr_config_t *config = NULL;              /* Configuration for VFD SWMR */
 
     HDassert(filename);
     HDassert(nseconds != 0);

@@ -1320,9 +1320,9 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
     char         vl_which[sizeof("attr-9999999999")];
     char *       read_vl_which = NULL;
     bool         is_vl         = false;
-    hid_t        aid = H5I_INVALID_HID;
-    hid_t        atid = H5I_INVALID_HID;
-    bool         ret = FALSE;
+    hid_t        aid           = H5I_INVALID_HID;
+    hid_t        atid          = H5I_INVALID_HID;
+    bool         ret           = FALSE;
 
     HDassert(did != badhid);
     HDassert(action == ADD_ATTR || action == MODIFY_ATTR);

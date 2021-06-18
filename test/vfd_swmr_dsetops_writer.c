@@ -1647,8 +1647,8 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID;
-    hid_t                 fcpl = H5I_INVALID_HID;
+    hid_t                 fapl   = H5I_INVALID_HID;
+    hid_t                 fcpl   = H5I_INVALID_HID;
     bool                  writer = FALSE;
     state_t               s;
     const char *          personality;
