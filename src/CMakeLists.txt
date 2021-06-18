@@ -906,6 +906,8 @@ set (H5_PRIVATE_HEADERS
     ${HDF5_SRC_DIR}/H5Zprivate.h
 
     ${HDF5_SRC_DIR}/H5win32defs.h
+
+    ${HDF5_SRC_DIR}/uthash.h
 )
 
 set (H5_GENERATED_HEADERS
