@@ -29,8 +29,6 @@
 /* Get package's private header */
 #include "H5Iprivate.h"
 
-#include "H5SLprivate.h" /* Skip Lists                               */
-
 /* uthash is an external, header-only hash table implementation.
  *
  * We include the file directly in src/ and #define a few functions
@@ -75,6 +73,10 @@ typedef struct H5I_id_info_t {
     unsigned    count;     /* Ref. count for this ID */
     unsigned    app_count; /* Ref. count of application visible IDs */
     const void *object;    /* Pointer associated with the ID */
+
+    /* Hash table ID fields */
+    hbool_t        marked; /* Marked for deletion */
+    UT_hash_handle hh;     /* Hash table handle (must be LAST) */
 } H5I_id_info_t;
 
 /* Type information structure used */
@@ -84,7 +86,7 @@ typedef struct H5I_type_info_t {
     uint64_t           id_count;     /* Current number of IDs held */
     uint64_t           nextid;       /* ID to use for the next object */
     H5I_id_info_t *    last_id_info; /* Info for most recent ID looked up */
-    H5SL_t *           ids;          /* Pointer to skip list that stores IDs */
+    H5I_id_info_t *    hash_table;   /* Hash table pointer for this ID type */
 } H5I_type_info_t;
 
 /*****************************/
