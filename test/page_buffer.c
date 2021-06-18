@@ -2557,7 +2557,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     if ((f->shared->page_buf->accesses[0] != 10) || (f->shared->page_buf->accesses[1] != 16) ||
         (f->shared->page_buf->accesses[2] != 0)) {
 
-        HDfprintf(stderr, "accesses[] = {%d, %d, %d}. {10, 16, 0} expected\n",
+        HDfprintf(stderr, "accesses[] = {%" PRId64 ", %" PRId64 ", %" PRId64 "}. {10, 16, 0} expected\n",
                   f->shared->page_buf->accesses[0], f->shared->page_buf->accesses[1],
                   f->shared->page_buf->accesses[2]);
         TEST_ERROR;
@@ -2567,16 +2567,17 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     if ((f->shared->page_buf->bypasses[0] != 0) || (f->shared->page_buf->bypasses[1] != 1) ||
         (f->shared->page_buf->bypasses[2] != 1)) {
 
-        HDfprintf(stderr, "bypasses[] = {%d, %d, %d}. {0, 1, 1} expected\n", f->shared->page_buf->bypasses[0],
-                  f->shared->page_buf->bypasses[1], f->shared->page_buf->bypasses[2]);
+        HDfprintf(stderr, "bypasses[] = {%" PRId64 ", %" PRId64 ", %" PRId64 "}. {0, 1, 1} expected\n",
+                  f->shared->page_buf->bypasses[0], f->shared->page_buf->bypasses[1],
+                  f->shared->page_buf->bypasses[2]);
         TEST_ERROR;
     }
 
     if ((f->shared->page_buf->hits[0] != 0) || (f->shared->page_buf->hits[1] != 4) ||
         (f->shared->page_buf->hits[2] != 0)) {
 
-        HDfprintf(stderr, "hits[] = {%d, %d, %d}. {0, 4, 0} expected\n", f->shared->page_buf->hits[0],
-                  f->shared->page_buf->hits[1], f->shared->page_buf->hits[2]);
+        HDfprintf(stderr, "hits[] = {%" PRId64 ", %" PRId64 ", %" PRId64 "}. {0, 4, 0} expected\n",
+                  f->shared->page_buf->hits[0], f->shared->page_buf->hits[1], f->shared->page_buf->hits[2]);
         TEST_ERROR;
     }
 
@@ -2584,8 +2585,9 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     if ((f->shared->page_buf->misses[0] != 10) || (f->shared->page_buf->misses[1] != 16) ||
         (f->shared->page_buf->misses[2] != 0)) {
 
-        HDfprintf(stderr, "misses[] = {%d, %d, %d}. {10, 16, 0} expected\n", f->shared->page_buf->misses[0],
-                  f->shared->page_buf->misses[1], f->shared->page_buf->misses[2]);
+        HDfprintf(stderr, "misses[] = {%" PRId64 ", %" PRId64 ", %" PRId64 "}. {10, 16, 0} expected\n",
+                  f->shared->page_buf->misses[0], f->shared->page_buf->misses[1],
+                  f->shared->page_buf->misses[2]);
         TEST_ERROR;
     }
 
@@ -2593,9 +2595,9 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
     if ((f->shared->page_buf->evictions[0] != 9) || (f->shared->page_buf->evictions[1] != 9) ||
         (f->shared->page_buf->evictions[2] != 0)) {
 
-        HDfprintf(stderr, "evictions[] = {%d, %d, %d}. {%d, %d, 0} expected\n",
+        HDfprintf(stderr, "evictions[] = {%" PRId64 ", %" PRId64 ", %" PRId64 "}. {7, 9, 0} expected\n",
                   f->shared->page_buf->evictions[0], f->shared->page_buf->evictions[1],
-                  f->shared->page_buf->evictions[2], 7, 9);
+                  f->shared->page_buf->evictions[2]);
         TEST_ERROR;
     }
 

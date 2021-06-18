@@ -1097,7 +1097,8 @@ modify_attr(const state_t *s, hid_t did, unsigned int which)
             TEST_ERROR;
         }
 
-        if ((val = HDmalloc(sizeof("9999999999"))) == NULL) {
+        /* Needs to fit "%u %c", below */
+        if ((val = HDmalloc(10 + 3)) == NULL) {
             HDprintf("HDmalloc failed\n");
             TEST_ERROR;
         }
@@ -1319,8 +1320,9 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
     char         vl_which[sizeof("attr-9999999999")];
     char *       read_vl_which = NULL;
     bool         is_vl         = false;
-    hid_t        aid, atid;
-    bool         ret;
+    hid_t        aid           = H5I_INVALID_HID;
+    hid_t        atid          = H5I_INVALID_HID;
+    bool         ret           = FALSE;
 
     HDassert(did != badhid);
     HDassert(action == ADD_ATTR || action == MODIFY_ATTR);
@@ -1761,9 +1763,10 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl, fcpl;
+    hid_t                 fapl = H5I_INVALID_HID;
+    hid_t                 fcpl = H5I_INVALID_HID;
     unsigned              step;
-    bool                  writer;
+    bool                  writer = FALSE;
     state_t               s;
     const char *          personality;
     H5F_vfd_swmr_config_t config;
