@@ -15,7 +15,6 @@
 
 #include <string>
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -458,8 +457,7 @@ PropList::getProperty(const char *name) const
     size_t size = getPropSize(name);
 
     // Allocate buffer then get the property
-    char *prop_strg_C = new char[size + 1]; // temporary C-string for C API
-    HDmemset(prop_strg_C, 0, size + 1);     // clear buffer
+    char *prop_strg_C = new char[size + 1]();
 
     herr_t ret_value = H5Pget(id, name, prop_strg_C); // call C API
 
