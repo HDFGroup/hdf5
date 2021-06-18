@@ -70,14 +70,14 @@ New Features
 
       This feature only works with Pthreads. Win32 threads are not supported.
 
-      (2021/05/10)
+      (DER - 2021/05/10)
 
     - CMake no longer builds the C++ library by default
 
       HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
       Autotools build defaults.
 
-      (2021/04/20)
+      (DER - 2021/04/20)
 
     - Removal of pre-VS2015 work-arounds
 
@@ -91,7 +91,7 @@ New Features
       * va_copy
       * struct timespec
 
-      (2021/03/22)
+      (DER - 2021/03/22)
 
     - Added CMake variable HDF5_LIB_INFIX
 
@@ -100,14 +100,14 @@ New Features
       This name is used in packages on debian based systems.
       (see https://packages.debian.org/jessie/amd64/libhdf5-openmpi-8/filelist)
 
-      (2021/03/22)
+      (RG - 2021/03/22)
 
     - On macOS, Universal Binaries can now be built, allowing native execution on
       both Intel and Apple Silicon (ARM) based Macs.
 
       To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-      (2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
 
     - Added a configure-time option to control certain compiler warnings
       diagnostics
@@ -126,7 +126,7 @@ New Features
 
       CMake:        HDF5_ENABLE_BUILD_DIAGS
 
-      (2021/02/05, HDFFV-11213)
+      (ADB - 2021/02/05, HDFFV-11213)
 
     - CMake option to build the HDF filter plugins project as an external project
 
@@ -142,7 +142,7 @@ New Features
       enabled the filter examples to be used as tests for operation of the
       filter plugins.
 
-      (2020/12/10, OESS-98)
+      (ADB - 2020/12/10, OESS-98)
 
     - FreeBSD Autotools configuration now defaults to 'cc' and 'c++' compilers
 
@@ -156,7 +156,7 @@ New Features
       and g++ options will now be set if that compiler is being used (an
       omission from the former functionality).
 
-      (2020/11/28, HDFFV-11193)
+      (DER - 2020/11/28, HDFFV-11193)
 
     - Fixed POSIX problems when building w/ gcc on Solaris
 
@@ -169,7 +169,7 @@ New Features
       differs slightly from the gcc norm, where we set the standard to c99
       and manually set POSIX #define symbols.
 
-      (2020/11/25, HDFFV-11191)
+      (DER - 2020/11/25, HDFFV-11191)
 
     - Added a configure-time option to consider certain compiler warnings
       as errors
@@ -191,7 +191,7 @@ New Features
 
       CMake:        HDF5_ENABLE_WARNINGS_AS_ERRORS
 
-      (2020/11/23, HDFFV-11189)
+      (DER - 2020/11/23, HDFFV-11189)
 
     - Autotools and CMake target added to produce doxygen generated documentation
 
@@ -202,21 +202,21 @@ New Features
           CMake target is 'doxygen' for all available doxygen targets
           CMake target is 'hdf5lib_doc' for the src subdirectory
 
-      (2020/11/13)
+      (ADB - 2020/11/13)
 
     - CMake option to use MSVC naming conventions with MinGW
 
       HDF5_MSVC_NAMING_CONVENTION option enables the use of MSVC naming
       conventions when using a MinGW toolchain
 
-      (2020/10/30)
+      (xan - 2020/10/30)
 
     - CMake option to statically link gcc libs with MinGW
 
       HDF5_MINGW_STATIC_GCC_LIBS allows to statically link libg/libstdc++
       with the MinGW toolchain
 
-      (2020/10/30)
+      (xan - 2020/10/30)
 
     - CMake option to build the HDF filter plugins project as an external project
 
@@ -232,7 +232,7 @@ New Features
       There are more options necessary for various filters and the plugin project
       documents should be referenced.
 
-      (2020/10/16, OESS-98)
+      (ADB - 2020/10/16, OESS-98)
 
     - Added CMake option to format source files
 
@@ -241,7 +241,7 @@ New Features
       or tool folder. All sources can be formatted by executing the format target;
       make format
 
-      (2020/09/24)
+      (ADB - 2020/09/24)
 
     - Disable memory sanity checks in the Autotools in release branches
 
@@ -258,7 +258,7 @@ New Features
       This change only affects Autotools debug builds. Non-debug autotools
       builds and all CMake builds do not enable this feature by default.
 
-      (2020/08/19)
+      (DER - 2020/08/19)
 
     - Add file locking configure and CMake options
 
@@ -307,7 +307,7 @@ New Features
 
         4) library defaults (currently best-effort)
 
-      (2020/07/30, HDFFV-11092)
+      (DER - 2020/07/30, HDFFV-11092)
 
     - CMake option to link the generated Fortran MOD files into the include
       directory.
@@ -332,7 +332,7 @@ New Features
       The defaults can be overridden by setting the config option
             HDF5_INSTALL_MOD_FORTRAN to one of NO, SHARED, or STATIC
 
-      (2020/07/09, HDFFV-11116)
+      (ADB - 2020/07/09, HDFFV-11116)
 
     - CMake option to use AEC (open source SZip) library instead of SZip
 
@@ -342,14 +342,14 @@ New Features
       compression libraries within hdf5 builds. New option USE_LIBAEC is
       required to compensate for the different files produced by AEC build.
 
-      (2020/04/22, OESS-65)
+      (ADB - 2020/04/22, OESS-65)
 
     - CMake ConfigureChecks.cmake file now uses CHECK_STRUCT_HAS_MEMBER
 
       Some handcrafted tests in HDFTests.c has been removed and the CMake
       CHECK_STRUCT_HAS_MEMBER module has been used.
 
-      (2020/03/24, TRILAB-24)
+      (ADB - 2020/03/24, TRILAB-24)
 
     - Both build systems use same set of warnings flags
 
@@ -390,7 +390,7 @@ New Features
       The Doxygen documentation has been updated and passing values larger
       than UINT32_MAX for size_hint will now produce a normal HDF5 error.
       
-      (2021/04/29, HDFFV-11241)
+      (DER - 2021/04/29, HDFFV-11241)
 
 
     - H5Pset_fapl_log() no longer crashes when passed an invalid fapl ID
@@ -404,7 +404,7 @@ New Features
       The pointer is now correctly initialized and the API call now
       produces a normal HDF5 error when fed an invalid fapl ID.
 
-      (2021/04/28, HDFFV-11240)
+      (DER - 2021/04/28, HDFFV-11240)
 
     - Fixes a segfault when H5Pset_mdc_log_options() is called multiple times
 
@@ -416,7 +416,7 @@ New Features
 
       The string is now handled properly and the segfault no longer occurs.
 
-      (2021/04/27, HDFFV-11239)
+      (DER - 2021/04/27, HDFFV-11239)
       
     - HSYS_GOTO_ERROR now emits the results of GetLastError() on Windows
 
@@ -443,7 +443,7 @@ New Features
 
       for those inclined to parse it for error values.
 
-      (2021/03/21)
+      (DER - 2021/03/21)
 
     - File locking now works on Windows
 
@@ -459,7 +459,7 @@ New Features
       same scheme as POSIX systems. We lock the entire file when we set up the
       locks (by passing DWORDMAX as both size parameters to LockFileEx()).
 
-      (2021/03/19, HDFFV-10191)
+      (DER - 2021/03/19, HDFFV-10191)
 
     - H5Epush_ret() now requires a trailing semicolon
 
@@ -469,7 +469,7 @@ New Features
       semi would work, but was not mandatory. This change was made to allow
       clang-format to correctly format the source code.
 
-      (2021/03/03)
+      (SAM - 2021/03/03)
 
     - Improved performance of H5Sget_select_elem_pointlist
 
@@ -478,7 +478,7 @@ New Features
       same function to retrieve the next block of points from the list can
       proceed immediately without needing to iterate over the point list.
 
-      (2021/01/19)
+      (NAF - 2021/01/19)
 
     - Added H5VL_VERSION macro that indicates the version of the VOL framework
       implemented by a version of the library.  Currently, compatibility
@@ -486,7 +486,7 @@ New Features
       a VOL connector must match the version of the VOL framework for the
       library when it is registered or dynamically loaded.
 
-      (2020/12/10)
+      (QAK - 2020/12/10)
 
     - Add BEST_EFFORT value to HDF5_USE_FILE_LOCKING environment variable
 
@@ -501,7 +501,7 @@ New Features
       See the configure option discussion for HDFFV-11092 (above) for more
       information on the file locking feature and how it's controlled.
 
-      (2020/07/30, HDFFV-11092)
+      (DER - 2020/07/30, HDFFV-11092)
 
 
     - Add H5Pset/get_file_locking() API calls
@@ -518,12 +518,12 @@ New Features
       See the configure option discussion for HDFFV-11092 (above) for more
       information on the file locking feature and how it's controlled.
 
-      (2020/07/30, HDFFV-11092)
+      (DER - 2020/07/30, HDFFV-11092)
 
     - Added two new API routines for tracking library memory use:
       H5get_alloc_stats() and H5get_free_list_sizes().
 
-      (2020/03/25)
+      (QAK - 2020/03/25)
 
     - Add Mirror VFD
 
@@ -550,7 +550,7 @@ New Features
       See the configure option discussion for HDFFV-11092 (above) for more
       information on the file locking feature and how it's controlled.
 
-      (2020/07/30, HDFFV-11092)
+      (DER - 2020/07/30, HDFFV-11092)
 
     Java Library:
     -------------
@@ -561,7 +561,7 @@ New Features
       H5Scombine_hyperslab, H5Smodify_select, H5Scombine_select
       wrapper functions added.
 
-      (2020/10/27, HDFFV-10868)
+      (ADB - 2020/10/27, HDFFV-10868)
 
     - Add wrappers for H5Pset/get_file_locking() API calls
 
@@ -575,7 +575,7 @@ New Features
       See the configure option discussion for HDFFV-11092 (above) for more
       information on the file locking feature and how it's controlled.
 
-      (2020/07/30, HDFFV-11092)
+      (ADB - 2020/07/30, HDFFV-11092)
 
 
     Tools:
@@ -586,7 +586,7 @@ New Features
       for user-defined filters;
           filter_flag: 1 is OPTIONAL or 0 is MANDATORY
 
-      (2021/01/14, HDFFV-11099)
+      (ADB - 2021/01/14, HDFFV-11099)
 
     - h5repack added options to control how external links are handled.
 
@@ -597,7 +597,7 @@ New Features
             --prune             Do not follow external soft links and remove link.
             --merge --prune     Follow external link, merge data and remove dangling link.
 
-      (2020/08/05, HDFFV-9984)
+      (ADB - 2020/08/05, HDFFV-9984)
 
 
 Support for new platforms, languages and compilers
@@ -620,7 +620,7 @@ Bug Fixes since HDF5-1.12.0 release
       The problem was fixed by ensuring that decoding the dimension sizes
       and max values will not go beyong the end of the buffer.
 
-      (2021/05/12, HDFFV-11223)
+      (BMR - 2021/05/12, HDFFV-11223)
 
     - Fixed CVE-2018-11206
 
@@ -630,7 +630,7 @@ Bug Fixes since HDF5-1.12.0 release
       The problem was fixed by verifying the fill value's size
       against the buffer size before attempting to access the buffer.
 
-      (2021/03/15, HDFFV-10480)
+      (BMR - 2021/03/15, HDFFV-10480)
 
     - Fixed CVE-2018-14033 (same issue as CVE-2020-10811)
 
@@ -640,7 +640,7 @@ Bug Fixes since HDF5-1.12.0 release
       The problem was fixed by verifying the storage size against the
       buffer size before attempting to access the buffer.
 
-      (2021/03/15, HDFFV-11159/HDFFV-11049)
+      (BMR - 2021/03/15, HDFFV-11159/HDFFV-11049)
 
     - Remove underscores on header file guards
 
@@ -648,7 +648,7 @@ Bug Fixes since HDF5-1.12.0 release
 
       Removed all leading (some trailing) underscores from header file guards.
 
-      (2021/03/03, #361)
+      (ADB - 2021/03/03, #361)
 
     - Fixed issue with MPI communicator and info object not being
       copied into new FAPL retrieved from H5F_get_access_plist
@@ -657,7 +657,7 @@ Bug Fixes since HDF5-1.12.0 release
       the output FAPL. MPI communicator is retrieved from the VFD, while
       the MPI info object is retrieved from the file's original FAPL.
 
-      (2021/02/15, HDFFV-11109)
+      (JTH - 2021/02/15, HDFFV-11109)
 
     - Fixed problems with vlens and refs inside compound using
       H5VLget_file_type()
@@ -666,19 +666,19 @@ Bug Fixes since HDF5-1.12.0 release
       consider file vlen and reference types to be equal if their files are
       the same.
 
-      (2021/01/22)
+      (NAF - 2021/01/22)
 
     - Fix bug and simplify collective metadata write operation when some ranks
       have no entries to contribute.  This fixes parallel regression test
       failures with IBM SpectrumScale MPI on the Summit system at ORNL.
 
-      (2020/09/02)
+      (QAK - 2020/09/02)
 
     - Avoid setting up complex MPI types with 0-length vectors, which some
       MPI implementations don't handle well.  (In particular, IBM
       SpectrumScale MPI on the Summit system at ORNL)
 
-      (2020/08/21)
+      (QAK - 2020/08/21)
 
     - Explicitly declared dlopen to use RTLD_LOCAL
 
@@ -687,7 +687,7 @@ Bug Fixes since HDF5-1.12.0 release
       The default on linux is usually RTLD_LOCAL while macos will default
       to RTLD_GLOBAL.
 
-      (2020/08/12, HDFFV-11127)
+      (ADB - 2020/08/12, HDFFV-11127)
 
     - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
       causes asserts/errors when passed to other dataspace API calls.
@@ -702,7 +702,7 @@ Bug Fixes since HDF5-1.12.0 release
       the dataspace into one of type H5S_NULL, which is better handled
       by the library and easier for developers to reason about.
 
-      (2020/07/27, HDFFV-11027)
+      (DER - 2020/07/27, HDFFV-11027)
 
     - Fixed the segmentation fault when reading attributes with multiple threads
 
@@ -716,38 +716,38 @@ Bug Fixes since HDF5-1.12.0 release
       when the attribute was accessed.  Similar patch up was done before when reading
       dataset with variable length string datatype.
 
-      (2020/07/13, HDFFV-11080)
+      (VC - 2020/07/13, HDFFV-11080)
 
     - Reduce overhead for H5open(), which is involved in public symbols like
       H5T_NATIVE_INT, etc.
 
-      (2020/06/18)
+      (QAK - 2020/06/18)
 
     - Cache last ID looked up for an ID type (dataset, datatype, file, etc),
       improving performance when accessing the same ID repeatedly.
 
-      (2020/06/11)
+      (QAK - 2020/06/11)
 
     - Streamline I/O to a single element, improving performance for record
       appends to chunked datasets.
 
-      (2020/06/11)
+      (QAK - 2020/06/11)
 
     - Remove redundant tagging of metadata cache entries for some chunked
       dataset operations, slightly improving performance for chunked
       datasets.
 
-      (2020/06/10)
+      (QAK - 2020/06/10)
 
     - Better detect selections with the same shape, improving performance for
       some uses of H5DOappend (and other situations).
 
-      (2020/06/07)
+      (QAK - 2020/06/07)
 
     - Don't allocate an empty (0-dimensioned) chunked dataset's chunk
       index, until the dataset's dimensions are increased.
 
-      (2020/05/07)
+      (QAK - 2020/05/07)
 
 
     Java Library
@@ -758,7 +758,7 @@ Bug Fixes since HDF5-1.12.0 release
       not use the new APIs. In addition to fixing that function, added new
       java tests for using the new APIs.
 
-      (2021/02/16, HDFFV-11212)
+      (ADB - 2021/02/16, HDFFV-11212)
 
     - The H5FArray.java class, in which virtually the entire execution time
       is spent using the HDFNativeData method that converts from an array
@@ -769,7 +769,7 @@ Bug Fixes since HDF5-1.12.0 release
         2. Use the Java Arrays method copyOfRange to grab the section of the
            array from (1) that is desired to be inserted into the destination array.
 
-      (2020/12/29, HDFFV-10865)
+      (PGT,ADB - 2020/12/29, HDFFV-10865)
 
 
     Configuration
@@ -788,7 +788,7 @@ Bug Fixes since HDF5-1.12.0 release
       In addition it was moved from the Fortran specific HDF5UseFortran.camke file
       to the C centric ConfigureChecks.cmake file.
 
-      (2021/06/03)
+      (ADB - 2021/06/03)
 
     - Remove arbitrary warning flag groups from CMake builds
 
@@ -801,7 +801,7 @@ Bug Fixes since HDF5-1.12.0 release
       Visual Studio warnings C4100, C4706, and C4127 have been moved to
       developer warnings, HDF5_ENABLE_DEV_WARNINGS, and are disabled for normal builds.
 
-      (2021/03/22, HDFFV-11228)
+      (ADB - 2021/03/22, HDFFV-11228)
 
     - Reclassify CMake messages, to allow new modes and --log-level option
 
@@ -813,7 +813,7 @@ Bug Fixes since HDF5-1.12.0 release
       version 3.17 or above is used, the user can use the command line option
       of "--log-level" to further restrict which message commands are displayed.
 
-      (2021/01/11, HDFFV-11144)
+      (ADB - 2021/01/11, HDFFV-11144)
 
     - Fixes Autotools determination of the stat struct having an st_blocks field
 
@@ -824,7 +824,7 @@ Bug Fixes since HDF5-1.12.0 release
       CMake. This #define is only used in the tests and does not affect the
       HDF5 C library.
 
-      (2021/01/07, HDFFV-11201)
+      (DER - 2021/01/07, HDFFV-11201)
 
 
     Tools
@@ -838,7 +838,7 @@ Bug Fixes since HDF5-1.12.0 release
       also show the number of bits for precision.
       These files are also used in the java tests.
 
-      (2021/03/24, HDFFV-11229)
+      (ADB - 2021/03/24, HDFFV-11229)
 
     - Fixed tools argument parsing.
 
@@ -847,7 +847,7 @@ Bug Fixes since HDF5-1.12.0 release
       name option that happened to be a subset of another long option.
       Changed to match whole names.
 
-      (2021/01/19, HDFFV-11106)
+      (ADB - 2021/01/19, HDFFV-11106)
 
 
     Fortran API
@@ -857,14 +857,14 @@ Bug Fixes since HDF5-1.12.0 release
       HDF5 now accounts for the addition of half-precision floating-point
       in NAG 7.0 with a KIND=16.
 
-      (2020/02/28, HDFFV-11033)
+      (MSB - 2020/02/28, HDFFV-11033)
 
 
     High-Level Library
     ------------------
     - Eliminated unnecessary code in H5DOappend(), improving its performance.
 
-      (2020/06/05)
+      (QAK - 2020/06/05)
 
 
     Fortran High-Level APIs
@@ -876,7 +876,7 @@ Bug Fixes since HDF5-1.12.0 release
     -------------
     - Updated doxygen comments with changes for release
 
-      (2021/05/03)
+      (ADB - 2021/05/03)
 
 
     F90 APIs
@@ -891,7 +891,7 @@ Bug Fixes since HDF5-1.12.0 release
         Some compilers complain if the copy constructor is given explicitly
         but the assignment operator is implicitly set to default.
 
-        (2021/05/19)
+        (LN - 2021/05/19)
 
 
     Testing
@@ -902,7 +902,7 @@ Bug Fixes since HDF5-1.12.0 release
       directory, and on Macs the loader path for libhdf5.xxxs.so is changed
       in the temporary copy of libhdf5_java.dylib.
 
-      (2020/07/02, HDFFV-11063)
+      (LRK - 2020/07/02, HDFFV-11063)
 
 
 Supported Platforms
