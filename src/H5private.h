@@ -1449,11 +1449,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #define HDstrtol(S, R, N) strtol(S, R, N)
 #endif /* HDstrtol */
 #ifndef HDstrtoll
-#ifdef H5_HAVE_STRTOLL
 #define HDstrtoll(S, R, N) strtoll(S, R, N)
-#else
-H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
-#endif /* H5_HAVE_STRTOLL */
 #endif /* HDstrtoll */
 #ifndef HDstrtoul
 #define HDstrtoul(S, R, N) strtoul(S, R, N)
@@ -1551,7 +1547,7 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif /* H5_HAVE_VASPRINTF */
 #endif /* HDvasprintf */
 #ifndef HDva_arg
