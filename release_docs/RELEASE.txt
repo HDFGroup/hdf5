@@ -680,6 +680,24 @@ Bug Fixes since HDF5-1.12.0 release
 
       (QAK - 2020/08/21)
 
+    - Fixed use-of-uninitialized-value error
+
+      Appropriate initialization of local structs was added to remove the
+      use-of-uninitialized-value errors reported by MemorySanitizer.
+
+      (BMR - 2020/8/13, HDFFV-11101)
+
+    - Creation of dataset with optional filter
+
+      When the combination of type, space, etc doesn't work for filter
+      and the filter is optional, it was supposed to be skipped but it was
+      not skipped and the creation failed.
+
+      A fix is applied to allow the creation of a dataset in such
+      situation, as specified in the user documentation.
+
+      (BMR - 2020/8/13, HDFFV-10933)
+
     - Explicitly declared dlopen to use RTLD_LOCAL
 
       dlopen documentation states that if neither RTLD_GLOBAL nor
@@ -688,6 +706,17 @@ Bug Fixes since HDF5-1.12.0 release
       to RTLD_GLOBAL.
 
       (ADB - 2020/08/12, HDFFV-11127)
+
+    - Fixed issues CVE-2018-13870 and CVE-2018-13869
+
+      When a buffer overflow occurred because a name length was corrupted
+      and became very large, h5dump crashed on memory access violation.
+
+      A check for reading past the end of the buffer was added to multiple
+      locations to prevent the crashes and h5dump now simply fails with an
+      error message when this error condition occurs.
+
+      (BMR - 2020/7/31, HDFFV-11120 and HDFFV-11121)
 
     - H5Sset_extent_none() sets the dataspace class to H5S_NO_CLASS which
       causes asserts/errors when passed to other dataspace API calls.
@@ -717,6 +746,17 @@ Bug Fixes since HDF5-1.12.0 release
       dataset with variable length string datatype.
 
       (VC - 2020/07/13, HDFFV-11080)
+
+    - Fixed CVE-2018-17435
+
+      The tool h52gif produced a segfault when the size of an attribute message
+      was corrupted and caused a buffer overflow.
+
+      The problem was fixed by verifying the attribute message's size against the
+      buffer size before accessing the buffer.  h52gif was also fixed to display
+      the failure instead of silently exiting after the segfault was eliminated.
+
+      (BMR - 2020/6/19, HDFFV-10591)
 
     - Reduce overhead for H5open(), which is involved in public symbols like
       H5T_NATIVE_INT, etc.
@@ -826,6 +866,16 @@ Bug Fixes since HDF5-1.12.0 release
 
       (DER - 2021/01/07, HDFFV-11201)
 
+    - Stopped addition of szip header and include directory path for
+      incompatible libsz
+
+      szlib.h is the same for both 32-bit and 64-bit szip, and the header file
+      and its path were added to the HDF5 binary even though the configure
+      check of a function in libsz later failed and szip compression was not
+      enabled.  The header file and include path are now added only when the
+      libsz function passes the configure check.
+
+      (LRK - 2020/08/17, HDFFV-10830)
 
     Tools
     -----
@@ -848,6 +898,26 @@ Bug Fixes since HDF5-1.12.0 release
       Changed to match whole names.
 
       (ADB - 2021/01/19, HDFFV-11106)
+
+    - h5diff fixed a command line parsing error.
+
+      h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
+      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+
+      (ADB - 2020/07/20, HDFFV-10897)
+
+    - The tools library was updated by standardizing the error stack process.
+
+      General sequence is:
+          h5tools_setprogname(PROGRAMNAME);
+          h5tools_setstatus(EXIT_SUCCESS);
+          h5tools_init();
+          ... process the command-line (check for error-stack enable) ...
+          h5tools_error_report();
+          ... (do work) ...
+          h5diff_exit(ret);
+
+      (ADB - 2020/07/20, HDFFV-11066)
 
 
     Fortran API
