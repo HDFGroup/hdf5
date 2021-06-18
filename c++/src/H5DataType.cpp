@@ -317,7 +317,7 @@ DataType::encode()
     if (buf_size > 0) {
         encoded_buf = new unsigned char[buf_size]();
 
-        ret_value   = H5Tencode(id, encoded_buf, &buf_size);
+        ret_value = H5Tencode(id, encoded_buf, &buf_size);
         if (ret_value < 0) {
             throw DataTypeIException("DataType::encode", "H5Tencode failed");
         }
