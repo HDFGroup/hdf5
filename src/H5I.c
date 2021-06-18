@@ -791,7 +791,7 @@ done:
 ssize_t
 H5Iget_name(hid_t id, char *name /*out*/, size_t size)
 {
-    H5G_loc_t loc;       /* Object location */
+    H5G_loc_t loc;            /* Object location */
     ssize_t   ret_value = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
