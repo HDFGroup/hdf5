@@ -899,26 +899,6 @@ Bug Fixes since HDF5-1.12.0 release
 
       (ADB - 2021/01/19, HDFFV-11106)
 
-    - h5diff fixed a command line parsing error.
-
-      h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
-      The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
-
-      (ADB - 2020/07/20, HDFFV-10897)
-
-    - The tools library was updated by standardizing the error stack process.
-
-      General sequence is:
-          h5tools_setprogname(PROGRAMNAME);
-          h5tools_setstatus(EXIT_SUCCESS);
-          h5tools_init();
-          ... process the command-line (check for error-stack enable) ...
-          h5tools_error_report();
-          ... (do work) ...
-          h5diff_exit(ret);
-
-      (ADB - 2020/07/20, HDFFV-11066)
-
 
     Fortran API
     -----------
