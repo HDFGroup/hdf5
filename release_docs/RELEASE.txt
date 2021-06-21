@@ -47,6 +47,39 @@ New Features
 
     Configuration:
     -------------
+   - Adds C++ Autotools configuration file for Intel
+
+      * Checks for icpc as the compiler
+      * Sets std=c++11
+      * Copies most non-warning flags from intel-flags
+
+      (DER - 2021/06/02)
+
+    - Adds C++ Autotools configuration file for PGI
+
+      * Checks for pgc++ as the compiler name (was: pgCC)
+      * Sets -std=c++11
+      * Other options basically match new C options (below)
+
+      (DER - 2021/06/02)
+
+    - Updates PGI C options
+
+      * -Minform set to warn (was: inform) to suppress spurious messages
+      * Sets -gopt -O2 as debug options
+      * Sets -O4 as 'high optimization' option
+      * Sets -O0 as 'no optimization' option
+      * Removes specific settings for PGI 9 and 10
+
+      (DER - 2021/06/02)
+
+    - A C++11-compliant compiler is now required to build the C++ wrappers
+
+      CMAKE_CXX_STANDARD is now set to 11 when building with CMake and
+      -std=c++11 is added when building with clang/gcc via the Autotools.
+
+      (DER - 2021/05/27)
+
     - Added an option to make the global thread-safe lock a recursive R/W lock
 
         Prior to this release, the HDF5 library supported multi-threaded
@@ -107,7 +140,7 @@ New Features
 
       To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+      (SAM - 2021/02/07, github-311)
 
     - Added a configure-time option to control certain compiler warnings
       diagnostics
@@ -202,7 +235,7 @@ New Features
           CMake target is 'doxygen' for all available doxygen targets
           CMake target is 'hdf5lib_doc' for the src subdirectory
 
-        (ADB - 2020/11/13)
+        (ADB - 2020/11/13, HDFFV-11243)
 
     - CMake option to use MSVC naming conventions with MinGW
 
@@ -648,6 +681,13 @@ Bug Fixes since HDF5-1.12.0 release
 
       (ADB - 2021/06/03)
 
+    - Move emscripten flag to compile flags
+
+      The emscripten flag, -O0, was removed from target_link_libraries command
+      to the correct target_compile_options command.
+
+      (ADB - 2021/04/26 HDFFV-11083)
+
     - Remove arbitrary warning flag groups from CMake builds
 
       The arbitrary groups were created to reduce the quantity of warnings being
@@ -684,6 +724,14 @@ Bug Fixes since HDF5-1.12.0 release
 
       (DER - 2021/01/07, HDFFV-11201)
 
+    - Add missing ENV variable line to hdfoptions.cmake file
+
+      Using the build options to use system SZIP/ZLIB libraries need to also
+      specify the library root directory. Setting the {library}_ROOT ENV
+      variable was added to the hdfoptions.cmake file.
+
+      (ADB - 2020/10/19 HDFFV-11108)
+
 
     Tools
     -----
@@ -696,7 +744,7 @@ Bug Fixes since HDF5-1.12.0 release
         also show the number of bits for precision.
         These files are also used in the java tests.
 
-        (ADB - 2021/03/24, HDFFV-11229)
+        (ADB - 2021/03/24, HDFFV-11229,HDFFV-11113)
 
     - Fixed tools argument parsing.
 
@@ -706,6 +754,44 @@ Bug Fixes since HDF5-1.12.0 release
         Changed to match whole names.
 
         (ADB - 2021/01/19, HDFFV-11106)
+
+    - The tools library was updated by standardizing the error stack process.
+
+        General sequence is:
+          h5tools_setprogname(PROGRAMNAME);
+          h5tools_setstatus(EXIT_SUCCESS);
+          h5tools_init();
+          ... process the command-line (check for error-stack enable) ...
+          h5tools_error_report();
+          ... (do work) ...
+          h5diff_exit(ret);
+
+        (ADB - 2020/07/20, HDFFV-11066)
+
+    - h5diff fixed a command line parsing error.
+
+        h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
+        The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+
+        (ADB - 2020/07/20, HDFFV-10897)
+
+    - h5diff added a command line option to ignore attributes.
+
+        h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
+        Adding the exclude-attribute argument will only exclude attributes, with the supplied path,
+        from comparison.
+
+        (ADB - 2020/07/20, HDFFV-5935)
+
+    - h5diff added another level to the verbose argument to print filenames.
+
+        Added verbose level 3 that is level 2 plus the filenames. The levels are:
+          0 : Identical to '-v' or '--verbose'
+          1 : All level 0 information plus one-line attribute status summary
+          2 : All level 1 information plus extended attribute status report
+          3 : All level 2 information plus file names
+
+        (ADB - 2020/07/20, HDFFV-10005)
 
 
     Fortran API
