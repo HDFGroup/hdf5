@@ -133,7 +133,7 @@ New Features
 
       To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+      (SAM - 2021/02/07, github-311)
 
     - Added a configure-time option to control certain compiler warnings
       diagnostics
@@ -1076,6 +1076,13 @@ Bug Fixes since HDF5-1.12.0 release
 
       (ADB - 2021/06/03)
 
+    - Move emscripten flag to compile flags
+
+      The emscripten flag, -O0, was removed from target_link_libraries command
+      to the correct target_compile_options command.
+
+      (ADB - 2021/04/26 HDFFV-11083)
+
     - Remove arbitrary warning flag groups from CMake builds
 
       The arbitrary groups were created to reduce the quantity of warnings being
@@ -1112,6 +1119,14 @@ Bug Fixes since HDF5-1.12.0 release
 
       (DER - 2021/01/07, HDFFV-11201)
 
+    - Add missing ENV variable line to hdfoptions.cmake file
+
+      Using the build options to use system SZIP/ZLIB libraries need to also
+      specify the library root directory. Setting the {library}_ROOT ENV
+      variable was added to the hdfoptions.cmake file.
+
+      (ADB - 2020/10/19 HDFFV-11108)
+
 
     Tools
     -----
@@ -1124,7 +1139,7 @@ Bug Fixes since HDF5-1.12.0 release
         also show the number of bits for precision.
         These files are also used in the java tests.
 
-        (ADB - 2021/03/24, HDFFV-11229)
+        (ADB - 2021/03/24, HDFFV-11229,HDFFV-11113)
 
     - Fixed tools argument parsing.
 
