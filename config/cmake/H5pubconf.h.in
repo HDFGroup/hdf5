@@ -340,9 +340,6 @@
 /* Define to 1 if you have the `sigsetjmp' function. */
 #cmakedefine H5_HAVE_SIGSETJMP @H5_HAVE_SIGSETJMP@
 
-/* Define to 1 if you have the `snprintf' function. */
-#cmakedefine H5_HAVE_SNPRINTF @H5_HAVE_SNPRINTF@
-
 /* Define to 1 if you have the `srandom' function. */
 #cmakedefine H5_HAVE_SRANDOM @H5_HAVE_SRANDOM@
 
@@ -431,9 +428,6 @@
 
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
-
-/* Define to 1 if you have the `vsnprintf' function. */
-#cmakedefine H5_HAVE_VSNPRINTF @H5_HAVE_VSNPRINTF@
 
 /* Define to 1 if you have the `waitpid' function. */
 #cmakedefine H5_HAVE_WAITPID @H5_HAVE_WAITPID@
