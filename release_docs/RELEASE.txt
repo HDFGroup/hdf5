@@ -1186,7 +1186,7 @@ Bug Fixes since HDF5-1.12.0 release
           2 : All level 1 information plus extended attribute status report
           3 : All level 2 information plus file names
 
-        (ADB - 2020/07/20, HDFFV-10005)
+        (ADB - 2020/07/20, HDFFV-1005)
 
     - h5repack was fixed to repack the reference attributes properly.
 
