@@ -879,6 +879,8 @@
 ./src/H5HP.c
 ./src/H5HPprivate.h
 ./src/H5I.c
+./src/H5Idbg.c
+./src/H5Iint.c
 ./src/H5Imodule.h
 ./src/H5Ipkg.h
 ./src/H5Iprivate.h
@@ -1068,6 +1070,7 @@
 ./src/hdf5.h
 ./src/libhdf5.settings.in
 ./src/H5win32defs.h
+./src/uthash.h
 
 ./test/AtomicWriterReader.txt
 ./test/H5srcdir.h
