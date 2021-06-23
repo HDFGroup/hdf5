@@ -35,22 +35,20 @@
 #include <features.h> /* For setting POSIX, BSD, etc. compatibility */
 #endif
 
-#ifdef H5_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
-#include <stdarg.h> /* For variadic functions in H5VLpublic.h   */
-
-#include <stdint.h> /* For C9x types */
-
+/* C library header files for things that appear in HDF5 public headers */
 #ifdef __cplusplus
 #define __STDC_FORMAT_MACROS
 #endif
-#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
-
-#ifdef H5_HAVE_STDDEF_H
+#include <inttypes.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+
+/* POSIX headers */
+#ifdef H5_HAVE_UNISTD_H
+#include <sys/types.h>
 #endif
 
 #ifdef H5_HAVE_PARALLEL
@@ -192,7 +190,6 @@ typedef int herr_t;
  * }
  * \endcode
  */
-#include <stdbool.h>
 typedef bool hbool_t;
 typedef int  htri_t;
 
