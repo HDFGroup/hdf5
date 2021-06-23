@@ -600,14 +600,6 @@ if (WINDOWS)
 endif ()
 
 #-----------------------------------------------------------------------------
-# Determine how 'inline' is used
-#-----------------------------------------------------------------------------
-foreach (inline_test inline __inline__ __inline)
-  string (TOUPPER ${inline_test} INLINE_TEST_MACRO)
-  HDF_FUNCTION_TEST (HAVE_${INLINE_TEST_MACRO})
-endforeach ()
-
-#-----------------------------------------------------------------------------
 # Check how to print a Long Long integer
 #-----------------------------------------------------------------------------
 if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "unknown")
