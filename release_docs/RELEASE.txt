@@ -899,6 +899,20 @@ Bug Fixes since HDF5-1.12.0 release
 
       (ADB - 2021/01/19, HDFFV-11106)
 
+    - Fixed a bug with h5repack ignoring the "-q" and "-z" command-line options
+
+        h5repack uses the -q and -z command-line options to specify the indexing
+        options for objects in the file when repacking. Previously, h5repack
+        would simply ignore any setting from these options. This has been fixed
+        so that h5repack will correctly interpret the following settings:
+
+          -q "name"           : Sort objects by name order
+          -q "creation_order" : Sort objects by link creation order
+          -z "ascending"      : Sort objects by ascending name/link creation order
+          -z "descending"     : Sort objects by descending name/link creation order
+
+        (JTH - 2020/04/16, HDFFV-11030)
+
 
     Fortran API
     -----------
