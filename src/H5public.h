@@ -46,8 +46,11 @@
 #include <stddef.h>
 #include <stdint.h>
 
-/* POSIX headers */
-#ifdef H5_HAVE_UNISTD_H
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is avaible
+ * on Windows, though it doesn't necessarily contain all the POSIX types
+ * we need for HDF5 (e.g. ssize_t).
+ */
+#ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
 
