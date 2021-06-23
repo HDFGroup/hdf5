@@ -1673,9 +1673,9 @@ ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
             failure_mssg = "ds_ctg_i: H5Dwrite() failed.";
         }
         HDassert(ret >= 0);
-
-        HDfree(wdata);
     }
+
+    HDfree(wdata);
 
     if (pass) {
         ret = H5Dclose(dsid);
@@ -1891,9 +1891,9 @@ vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data)
             }
             HDassert((int)u == rdata[u]);
         }
-
-        HDfree(rdata);
     } /* end if */
+
+    HDfree(rdata);
 
     if (pass) {
         ret = H5Dclose(dsid);
@@ -2250,9 +2250,9 @@ vrfy_ds_chk_i(hid_t fid, const char *dset_name, hbool_t write_data)
             }
             HDassert((int)u == rdata[u]);
         }
-
-        HDfree(rdata);
     } /* end if */
+
+    HDfree(rdata);
 
     if (pass) {
         ret = H5Dclose(dsid);
@@ -2590,9 +2590,9 @@ vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data)
             }
             HDassert((int)u == rdata[u]);
         }
-
-        HDfree(rdata);
     } /* end if */
+
+    HDfree(rdata);
 
     if (pass) {
         ret = H5Dclose(dsid);
@@ -2982,9 +2982,9 @@ vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data)
             failure_mssg = "vrfy_ds_ctg_v: H5Treclaim() failed.";
         }
         HDassert(ret >= 0);
-
-        HDfree(rdata);
     } /* end if */
+
+    HDfree(rdata);
 
     if (pass) {
         ret = H5Sclose(sid);

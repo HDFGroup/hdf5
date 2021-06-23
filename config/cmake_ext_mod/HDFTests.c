@@ -64,31 +64,6 @@ main ()
 
 #endif
 
-#ifdef VSNPRINTF_WORKS
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-int test_vsnprintf(const char *fmt,...)
-{
-    va_list     ap;
-    char *s = malloc(16);
-    int ret;
-
-    va_start(ap, fmt);
-    ret=vsnprintf(s,16,"%s",ap);
-    va_end(ap);
-
-    return(ret!=42 ? 1 : 0);
-}
-
-int main(void)
-{
-    return(test_vsnprintf("%s","A string that is longer than 16 characters"));
-}
-#endif
-
-
 #ifdef HAVE_ATTRIBUTE
 
 #if 0
@@ -356,20 +331,3 @@ int main ()
 }
 
 #endif /* HAVE_IOEO */
-
-#if defined( HAVE_INLINE ) || defined( HAVE___INLINE__ ) || defined( HAVE___INLINE )
-#ifndef __cplusplus
-#if defined( HAVE_INLINE )
-#  define INLINE_KW inline
-#elif defined ( HAVE___INLINE__ )
-#  define INLINE_KW __inline__
-#elif defined ( HAVE___INLINE )
-#  define INLINE_KW __inline
-#endif /* HAVE_INLINE */
-typedef int foo_t;
-static INLINE_KW foo_t static_foo () { return 0; }
-INLINE_KW foo_t foo () {return 0; }
-int main(void) { return 0; }
-#endif /* __cplusplus */
-#endif /* defined( HAVE_INLINE ) || defined( HAVE___INLINE__ ) || defined( HAVE___INLINE ) */
-

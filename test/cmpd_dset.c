@@ -1466,6 +1466,10 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     return 0;
 
 error:
+    HDfree(orig);
+    HDfree(rbuf);
+    HDfree(rew_buf);
+
     HDputs("*** DATASET TESTS FAILED ***");
     return 1;
 }

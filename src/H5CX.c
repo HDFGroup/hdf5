@@ -1768,7 +1768,8 @@ H5CX_get_ring(void)
 hbool_t
 H5CX_get_coll_metadata_read(void)
 {
-    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+    H5CX_node_t **head         = NULL; /* Pointer to head of API context list */
+    hbool_t       coll_md_read = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1776,7 +1777,10 @@ H5CX_get_coll_metadata_read(void)
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
     HDassert(head && *head);
 
-    FUNC_LEAVE_NOAPI((*head)->ctx.coll_metadata_read)
+    /* Set return value */
+    coll_md_read = (*head)->ctx.coll_metadata_read;
+
+    FUNC_LEAVE_NOAPI(coll_md_read)
 } /* end H5CX_get_coll_metadata_read() */
 
 /*-------------------------------------------------------------------------
@@ -1830,7 +1834,8 @@ done:
 hbool_t
 H5CX_get_mpi_file_flushing(void)
 {
-    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+    H5CX_node_t **head     = NULL; /* Pointer to head of API context list */
+    hbool_t       flushing = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1838,7 +1843,10 @@ H5CX_get_mpi_file_flushing(void)
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
     HDassert(head && *head);
 
-    FUNC_LEAVE_NOAPI((*head)->ctx.mpi_file_flushing)
+    /* Set return value */
+    flushing = (*head)->ctx.mpi_file_flushing;
+
+    FUNC_LEAVE_NOAPI(flushing)
 } /* end H5CX_get_mpi_file_flushing() */
 
 /*-------------------------------------------------------------------------
@@ -1857,7 +1865,8 @@ H5CX_get_mpi_file_flushing(void)
 hbool_t
 H5CX_get_mpio_rank0_bcast(void)
 {
-    H5CX_node_t **head = NULL; /* Pointer to head of API context list */
+    H5CX_node_t **head           = NULL; /* Pointer to head of API context list */
+    hbool_t       do_rank0_bcast = FALSE;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1865,7 +1874,10 @@ H5CX_get_mpio_rank0_bcast(void)
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
     HDassert(head && *head);
 
-    FUNC_LEAVE_NOAPI((*head)->ctx.rank0_bcast)
+    /* Set return value */
+    do_rank0_bcast = (*head)->ctx.rank0_bcast;
+
+    FUNC_LEAVE_NOAPI(do_rank0_bcast)
 } /* end H5CX_get_mpio_rank0_bcast() */
 #endif /* H5_HAVE_PARALLEL */
 

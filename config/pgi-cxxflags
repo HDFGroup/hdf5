@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # All rights reserved.
@@ -44,21 +44,24 @@ fi
 # Common PGI flags for various situations
 if test "X-pgc++" = "X-$cxx_vendor"; then
 
-    # C++-specific
+    ###########
+    # General #
+    ###########
+
+    # Default to C++11 standard
     H5_CXXFLAGS="$H5_CXXFLAGS -std=c++11 -Minform=warn"
 
     ##############
     # Production #
     ##############
 
-    # NDEBUG is handled explicitly by the configure script
-    PROD_CXXFLAGS="-fast"
+    PROD_CXXFLAGS=
 
     #########
     # Debug #
     #########
 
-    # NDEBUG is handled explicitly by the configure script
+    # NDEBUG is handled explicitly in configure
     # -g is handled by the symbols flags
     DEBUG_CXXFLAGS="-Mbounds"
 
@@ -66,8 +69,8 @@ if test "X-pgc++" = "X-$cxx_vendor"; then
     # Symbols #
     ###########
 
-    SYMBOLS_CXXFLAGS="-g"
     NO_SYMBOLS_CXXFLAGS="-s"
+    SYMBOLS_CXXFLAGS="-g"
 
     #############
     # Profiling #
@@ -85,12 +88,14 @@ if test "X-pgc++" = "X-$cxx_vendor"; then
     DEBUG_OPT_CXXFLAGS="-gopt -O2"
     NO_OPT_CXXFLAGS="-O0"
 
-    # Flags are set
+    #################
+    # Flags are set #
+    #################
     cxx_flags_set=yes
 fi
 
 # Clear cxx info if no flags set
 if test "X-$cxx_flags_set" = "X-"; then
-  cxx_vendor=
-  cxx_version=
+    cxx_vendor=
+    cxx_version=
 fi
