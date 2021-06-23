@@ -32,7 +32,6 @@
 #include "H5DataType.h"
 #include "H5AtomType.h"
 #include "H5PredType.h"
-#include "H5private.h"
 #include "H5AbstractDs.h"
 #include "H5DataSet.h"
 #include "H5Attribute.h"
@@ -316,8 +315,9 @@ DataType::encode()
 
     // Allocate buffer and call C function again to encode
     if (buf_size > 0) {
-        encoded_buf = static_cast<unsigned char *>(HDcalloc(1, buf_size));
-        ret_value   = H5Tencode(id, encoded_buf, &buf_size);
+        encoded_buf = new unsigned char[buf_size]();
+
+        ret_value = H5Tencode(id, encoded_buf, &buf_size);
         if (ret_value < 0) {
             throw DataTypeIException("DataType::encode", "H5Tencode failed");
         }
@@ -970,7 +970,7 @@ DataType::close()
 
         // Free and reset buffer of encoded object description if it's been used
         if (encoded_buf != NULL) {
-            HDfree(encoded_buf);
+            delete[] encoded_buf;
             buf_size = 0;
         }
     }

@@ -14,7 +14,6 @@
 #include <iostream>
 #include <string>
 
-#include "H5private.h" // for HDfree
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -717,8 +716,8 @@ DataSet::p_read_fixed_len(const hid_t mem_type_id, const hid_t mem_space_id, con
 
     // If there is data, allocate buffer and read it.
     if (data_size > 0) {
-        char *strg_C = new char[data_size + 1];
-        HDmemset(strg_C, 0, data_size + 1); // clear buffer
+        // Create buffer for C string
+        char *strg_C = new char[data_size + 1]();
 
         herr_t ret_value = H5Dread(id, mem_type_id, mem_space_id, file_space_id, xfer_plist_id, strg_C);
 
@@ -759,7 +758,7 @@ DataSet::p_read_variable_len(const hid_t mem_type_id, const hid_t mem_space_id, 
 
     // Get string from the C char* and release resource allocated by C API
     strg = strg_C;
-    HDfree(strg_C);
+    free(strg_C);
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
