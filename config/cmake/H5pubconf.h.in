@@ -188,9 +188,6 @@
 /* Define to 1 if you have the <hdfs.h> header file. */
 #cmakedefine H5_HAVE_HDFS_H @H5_HAVE_HDFS_H@
 
-/* Define if the compiler understands inline */
-#cmakedefine H5_HAVE_INLINE @H5_HAVE_INLINE@
-
 /* Define if parallel library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
@@ -355,9 +352,6 @@
 /* Define to 1 if you have the `symlink' function. */
 #cmakedefine H5_HAVE_SYMLINK @H5_HAVE_SYMLINK@
 
-/* Define to 1 if you have the `system' function. */
-#cmakedefine H5_HAVE_SYSTEM @H5_HAVE_SYSTEM@
-
 /* Define to 1 if you have the <sys/file.h> header file. */
 #cmakedefine H5_HAVE_SYS_FILE_H @H5_HAVE_SYS_FILE_H@
 
@@ -431,12 +425,6 @@
 
 /* Define to 1 if you have the `_scrsize' function. */
 #cmakedefine H5_HAVE__SCRSIZE @H5_HAVE__SCRSIZE@
-
-/* Define if the compiler understands __inline */
-#cmakedefine H5_HAVE___INLINE @H5_HAVE___INLINE@
-
-/* Define if the compiler understands __inline__ */
-#cmakedefine H5_HAVE___INLINE__ @H5_HAVE___INLINE__@
 
 /* Define if the library will ignore file locks when disabled */
 #cmakedefine H5_IGNORE_DISABLED_FILE_LOCKS @H5_IGNORE_DISABLED_FILE_LOCKS@

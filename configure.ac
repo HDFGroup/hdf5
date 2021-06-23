@@ -1351,16 +1351,6 @@ CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
-## Write the confdefs.h header for checking sizes
-cat >>confdefs.h <<\EOF
-#include <stdbool.h>
-#include <stdint.h>
-#ifdef HAVE_UNISTD_H
-#include <sys/types.h>
-#endif
-#include <time.h>
-EOF
-
 AC_CHECK_SIZEOF(        [int8_t])
 AC_CHECK_SIZEOF(       [uint8_t])
 AC_CHECK_SIZEOF(  [int_least8_t])
@@ -1389,12 +1379,12 @@ AC_CHECK_SIZEOF([uint_least64_t])
 AC_CHECK_SIZEOF(  [int_fast64_t])
 AC_CHECK_SIZEOF( [uint_fast64_t])
 
-AC_CHECK_SIZEOF([bool])
+AC_CHECK_SIZEOF([bool], [], [#include <stdbool.h>])
 AC_CHECK_SIZEOF([off_t])
 AC_CHECK_SIZEOF([ptrdiff_t])
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([ssize_t])
-AC_CHECK_SIZEOF([time_t])
+AC_CHECK_SIZEOF([time_t], [], [#include <time.h>])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
@@ -2029,34 +2019,13 @@ AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
 AC_CHECK_FUNCS([frexpl gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
-AC_CHECK_FUNCS([srandom strdup symlink system])
+AC_CHECK_FUNCS([srandom strdup symlink])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics
 ##
 AC_C_CONST
-
-AC_MSG_CHECKING([if the compiler understands  __inline__])
-AC_COMPILE_IFELSE(
-    [AC_LANG_SOURCE([[static __inline__ void f(void){return;};]])],
-    [AC_DEFINE([HAVE___INLINE__], [1], [Define if the compiler understands __inline__]) AC_MSG_RESULT([yes])],
-    [AC_MSG_RESULT([no])]
-)
-
-AC_MSG_CHECKING([if the compiler understands __inline])
-AC_COMPILE_IFELSE(
-    [AC_LANG_SOURCE([[static __inline void f(void){return;};]])],
-    [AC_DEFINE([HAVE___INLINE], [1], [Define if the compiler understands __inline]) AC_MSG_RESULT([yes])],
-    [AC_MSG_RESULT([no])]
-)
-
-AC_MSG_CHECKING([if the compiler understands inline])
-AC_COMPILE_IFELSE(
-    [AC_LANG_SOURCE([[static inline void f(void){return;};]])],
-    [AC_DEFINE([HAVE_INLINE], [1], [Define if the compiler understands inline]) AC_MSG_RESULT([yes])],
-    [AC_MSG_RESULT([no])]
-)
 
 AC_MSG_CHECKING([for __attribute__ extension])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
