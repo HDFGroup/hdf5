@@ -35,31 +35,23 @@
 #include <features.h> /* For setting POSIX, BSD, etc. compatibility */
 #endif
 
-#ifdef H5_HAVE_SYS_TYPES_H
-#include <sys/types.h>
-#endif
-
-#include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
-#include <stdarg.h> /* For variadic functions   */
-
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
-#include <stdint.h> /* For C9x types */
-#endif
-#else
-#ifdef H5_HAVE_STDINT_H_CXX
-#include <stdint.h> /* For C9x types (when included from C++) */
-#endif
-#endif
-
+/* C library header files for things that appear in HDF5 public headers */
 #ifdef __cplusplus
 #define __STDC_FORMAT_MACROS
 #endif
-
-#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
-
-#ifdef H5_HAVE_STDDEF_H
+#include <inttypes.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
 #include <stddef.h>
+#include <stdint.h>
+
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is avaible
+ * on Windows, though it doesn't necessarily contain all the POSIX types
+ * we need for HDF5 (e.g. ssize_t).
+ */
+#ifdef H5_HAVE_SYS_TYPES_H
+#include <sys/types.h>
 #endif
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
@@ -222,7 +214,6 @@ typedef int herr_t;
  * }
  * \endcode
  */
-#include <stdbool.h>
 typedef bool hbool_t;
 typedef int  htri_t;
 
