@@ -31,21 +31,20 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <float.h>
-#include <limits.h>
 #include <math.h>
 #include <signal.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
 /* POSIX headers */
+#ifdef H5_HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef H5_HAVE_UNISTD_H
 #include <pwd.h>
 #include <unistd.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #endif
 
