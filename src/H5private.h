@@ -772,12 +772,11 @@ typedef struct {
 #ifndef HDfabs
 #define HDfabs(X) fabs(X)
 #endif /* HDfabs */
-/* use ABS() because fabsf() fabsl() are not common yet. */
 #ifndef HDfabsf
-#define HDfabsf(X) ABS(X)
+#define HDfabsf(X) fabsf(X)
 #endif /* HDfabsf */
 #ifndef HDfabsl
-#define HDfabsl(X) ABS(X)
+#define HDfabsl(X) fabsl(X)
 #endif /* HDfabsl */
 #ifndef HDfclose
 #define HDfclose(F) fclose(F)
@@ -869,20 +868,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
 #endif /* HDfrexp */
-/* Check for Cray-specific 'frexpf()' and 'frexpl()' routines */
 #ifndef HDfrexpf
-#ifdef H5_HAVE_FREXPF
 #define HDfrexpf(X, N) frexpf(X, N)
-#else /* H5_HAVE_FREXPF */
-#define HDfrexpf(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPF */
 #endif /* HDfrexpf */
 #ifndef HDfrexpl
-#ifdef H5_HAVE_FREXPL
 #define HDfrexpl(X, N) frexpl(X, N)
-#else /* H5_HAVE_FREXPL */
-#define HDfrexpl(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPL */
 #endif /* HDfrexpl */
 /* fscanf() variable arguments */
 #ifndef HDfseek
