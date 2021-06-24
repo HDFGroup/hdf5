@@ -36,8 +36,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 /* POSIX headers */
+#ifdef H5_HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef H5_HAVE_UNISTD_H
 #include <pwd.h>
 #include <unistd.h>
@@ -56,25 +60,6 @@
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
-
-/*
- * If a program may include both `time.h' and `sys/time.h' then
- * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.ac).
- * On some older systems, `sys/time.h' includes `time.h' but `time.h' is not
- * protected against multiple inclusion, so programs should not explicitly
- * include both files. This macro is useful in programs that use, for example,
- * `struct timeval' or `struct timezone' as well as `struct tm'.  It is best
- * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
- * by `AC_CHECK_HEADERS(sys/time.h)' in configure.ac.
- */
-#if defined(H5_TIME_WITH_SYS_TIME)
-#include <sys/time.h>
-#include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#else
-#include <time.h>
 #endif
 
 /*
