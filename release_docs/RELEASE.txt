@@ -866,6 +866,12 @@ Bug Fixes since HDF5-1.12.0 release
 
       (DER - 2021/01/07, HDFFV-11201)
 
+    - Fixed removal of Java lib files by "make uninstall"
+
+      "make uninstall" was not removing 5 Java files from the lib directory.
+
+      (LRK - 2020/08/24, HDFFV-10811)
+
     - Stopped addition of szip header and include directory path for
       incompatible libsz
 
@@ -945,7 +951,9 @@ Bug Fixes since HDF5-1.12.0 release
 
     F90 APIs
     --------
-    -
+    - Fixed parallel make build failure due to a missing H5forkit dependency.
+
+      (MSB, 2021/03/31, HDFFV-11232)
 
 
     C++ APIs
