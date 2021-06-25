@@ -50,7 +50,6 @@ New Features
    - Adds C++ Autotools configuration file for Intel
 
       * Checks for icpc as the compiler
-      * Sets std=c++11
       * Copies most non-warning flags from intel-flags
 
       (DER - 2021/06/02)
@@ -58,7 +57,6 @@ New Features
     - Adds C++ Autotools configuration file for PGI
 
       * Checks for pgc++ as the compiler name (was: pgCC)
-      * Sets -std=c++11
       * Other options basically match new C options (below)
 
       (DER - 2021/06/02)
@@ -72,13 +70,6 @@ New Features
       * Removes specific settings for PGI 9 and 10
 
       (DER - 2021/06/02)
-
-    - A C++11-compliant compiler is now required to build the C++ wrappers
-
-      CMAKE_CXX_STANDARD is now set to 11 when building with CMake and
-      -std=c++11 is added when building with clang/gcc via the Autotools.
-
-      (DER - 2021/05/27)
 
     - Added an option to make the global thread-safe lock a recursive R/W lock
 
