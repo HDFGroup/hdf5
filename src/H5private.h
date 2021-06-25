@@ -32,6 +32,7 @@
 #include <fcntl.h>
 #include <float.h>
 #include <math.h>
+#include <setjmp.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -60,13 +61,6 @@
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
-
-/*
- * Longjumps are used to detect alignment constrants
- */
-#ifdef H5_HAVE_SETJMP_H
-#include <setjmp.h>
 #endif
 
 /*
