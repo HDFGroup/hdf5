@@ -993,19 +993,19 @@ parse_command_line(int argc, const char *argv[])
     cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
-                cl_opts->h5_alignment = parse_size_directive(opt_arg);
+                cl_opts->h5_alignment = parse_size_directive(H5_optarg);
                 break;
             case 'G':
-                cl_opts->page_size = parse_size_directive(opt_arg);
+                cl_opts->page_size = parse_size_directive(H5_optarg);
                 break;
             case 'b':
-                cl_opts->page_buffer_size = parse_size_directive(opt_arg);
+                cl_opts->page_buffer_size = parse_size_directive(H5_optarg);
                 break;
             case 'A': {
-                const char *end = opt_arg;
+                const char *end = H5_optarg;
                 while (end && *end != '\0') {
                     char buf[10];
 
@@ -1043,7 +1043,7 @@ parse_command_line(int argc, const char *argv[])
                 /* Turn on chunked HDF5 dataset creation */
                 cl_opts->h5_use_chunks = 1;
                 {
-                    const char *end = opt_arg;
+                    const char *end = H5_optarg;
                     int         j   = 0;
 
                     while (end && *end != '\0') {
@@ -1070,7 +1070,7 @@ parse_command_line(int argc, const char *argv[])
                 break;
 
             case 'D': {
-                const char *end = opt_arg;
+                const char *end = H5_optarg;
 
                 while (end && *end != '\0') {
                     char buf[10];
@@ -1126,7 +1126,7 @@ parse_command_line(int argc, const char *argv[])
 
             break;
             case 'e': {
-                const char *end = opt_arg;
+                const char *end = H5_optarg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {
@@ -1153,38 +1153,38 @@ parse_command_line(int argc, const char *argv[])
             break;
 
             case 'i':
-                cl_opts->num_iters = HDatoi(opt_arg);
+                cl_opts->num_iters = HDatoi(H5_optarg);
                 break;
             case 'o':
-                cl_opts->output_file = opt_arg;
+                cl_opts->output_file = H5_optarg;
                 break;
             case 'T':
-                cl_opts->h5_threshold = parse_size_directive(opt_arg);
+                cl_opts->h5_threshold = parse_size_directive(H5_optarg);
                 break;
             case 'v':
-                if (!HDstrcasecmp(opt_arg, "sec2")) {
+                if (!HDstrcasecmp(H5_optarg, "sec2")) {
                     cl_opts->vfd = sec2;
                 }
-                else if (!HDstrcasecmp(opt_arg, "stdio")) {
+                else if (!HDstrcasecmp(H5_optarg, "stdio")) {
                     cl_opts->vfd = stdio;
                 }
-                else if (!HDstrcasecmp(opt_arg, "core")) {
+                else if (!HDstrcasecmp(H5_optarg, "core")) {
                     cl_opts->vfd = core;
                 }
-                else if (!HDstrcasecmp(opt_arg, "split")) {
+                else if (!HDstrcasecmp(H5_optarg, "split")) {
                     cl_opts->vfd = split;
                 }
-                else if (!HDstrcasecmp(opt_arg, "multi")) {
+                else if (!HDstrcasecmp(H5_optarg, "multi")) {
                     cl_opts->vfd = multi;
                 }
-                else if (!HDstrcasecmp(opt_arg, "family")) {
+                else if (!HDstrcasecmp(H5_optarg, "family")) {
                     cl_opts->vfd = family;
                 }
-                else if (!HDstrcasecmp(opt_arg, "direct")) {
+                else if (!HDstrcasecmp(H5_optarg, "direct")) {
                     cl_opts->vfd = direct;
                 }
                 else {
-                    HDfprintf(stderr, "sio_perf: invalid --api option %s\n", opt_arg);
+                    HDfprintf(stderr, "sio_perf: invalid --api option %s\n", H5_optarg);
                     HDexit(EXIT_FAILURE);
                 }
                 break;
@@ -1195,7 +1195,7 @@ parse_command_line(int argc, const char *argv[])
                 cl_opts->h5_extendable = TRUE;
                 break;
             case 'x': {
-                const char *end = opt_arg;
+                const char *end = H5_optarg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {
@@ -1222,7 +1222,7 @@ parse_command_line(int argc, const char *argv[])
             break;
 
             case 'r': {
-                const char *end = opt_arg;
+                const char *end = H5_optarg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {

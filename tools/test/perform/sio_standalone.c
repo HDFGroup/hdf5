@@ -23,9 +23,9 @@
 int nCols = 80;
 
 /* ``get_option'' variables */
-int         opt_err = 1; /*get_option prints errors if this is on */
-int         opt_ind = 1; /*token pointer                          */
-const char *opt_arg;     /*flag argument (or value)               */
+int         H5_opterr = 1; /*get_option prints errors if this is on */
+int         H5_optind = 1; /*token pointer                          */
+const char *H5_optarg;     /*flag argument (or value)               */
 
 int
 get_option(int argc, const char **argv, const char *opts, const struct long_options *l_opts)
@@ -35,18 +35,18 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
     if (sp == 1) {
         /* check for more flag-like tokens */
-        if (opt_ind >= argc || argv[opt_ind][0] != '-' || argv[opt_ind][1] == '\0') {
+        if (H5_optind >= argc || argv[H5_optind][0] != '-' || argv[H5_optind][1] == '\0') {
             return EOF;
         }
-        else if (HDstrcmp(argv[opt_ind], "--") == 0) {
-            opt_ind++;
+        else if (HDstrcmp(argv[H5_optind], "--") == 0) {
+            H5_optind++;
             return EOF;
         }
     }
 
-    if (sp == 1 && argv[opt_ind][0] == '-' && argv[opt_ind][1] == '-') {
+    if (sp == 1 && argv[H5_optind][0] == '-' && argv[H5_optind][1] == '-') {
         /* long command line option */
-        const char *arg = &argv[opt_ind][2];
+        const char *arg = &argv[H5_optind][2];
         int         i;
 
         for (i = 0; l_opts && l_opts[i].name; i++) {
@@ -58,13 +58,13 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
                 if (l_opts[i].has_arg != no_arg) {
                     if (arg[len] == '=') {
-                        opt_arg = &arg[len + 1];
+                        H5_optarg = &arg[len + 1];
                     }
-                    else if (opt_ind < (argc - 1) && argv[opt_ind + 1][0] != '-') {
-                        opt_arg = argv[++opt_ind];
+                    else if (H5_optind < (argc - 1) && argv[H5_optind + 1][0] != '-') {
+                        H5_optarg = argv[++H5_optind];
                     }
                     else if (l_opts[i].has_arg == require_arg) {
-                        if (opt_err)
+                        if (H5_opterr)
                             HDfprintf(stderr, "%s: option required for \"--%s\" flag\n", argv[0], arg);
 
                         opt_opt = '?';
@@ -72,13 +72,13 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
                 }
                 else {
                     if (arg[len] == '=') {
-                        if (opt_err)
+                        if (H5_opterr)
                             HDfprintf(stderr, "%s: no option required for \"%s\" flag\n", argv[0], arg);
 
                         opt_opt = '?';
                     }
 
-                    opt_arg = NULL;
+                    H5_optarg = NULL;
                 }
 
                 break;
@@ -87,29 +87,29 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         if (l_opts[i].name == NULL) {
             /* exhausted all of the l_opts we have and still didn't match */
-            if (opt_err)
+            if (H5_opterr)
                 HDfprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
 
             opt_opt = '?';
         }
 
-        opt_ind++;
+        H5_optind++;
         sp = 1;
     }
     else {
         register char *cp; /* pointer into current token */
 
         /* short command line option */
-        opt_opt = argv[opt_ind][sp];
+        opt_opt = argv[H5_optind][sp];
 
         if (opt_opt == ':' || (cp = strchr(opts, opt_opt)) == 0) {
 
-            if (opt_err)
+            if (H5_opterr)
                 HDfprintf(stderr, "%s: unknown option \"%c\"\n", argv[0], opt_opt);
 
             /* if no chars left in this token, move to next token */
-            if (argv[opt_ind][++sp] == '\0') {
-                opt_ind++;
+            if (argv[H5_optind][++sp] == '\0') {
+                H5_optind++;
                 sp = 1;
             }
 
@@ -118,32 +118,32 @@ get_option(int argc, const char **argv, const char *opts, const struct long_opti
 
         if (*++cp == ':') {
             /* if a value is expected, get it */
-            if (argv[opt_ind][sp + 1] != '\0') {
+            if (argv[H5_optind][sp + 1] != '\0') {
                 /* flag value is rest of current token */
-                opt_arg = &argv[opt_ind++][sp + 1];
+                H5_optarg = &argv[H5_optind++][sp + 1];
             }
-            else if (++opt_ind >= argc) {
-                if (opt_err)
+            else if (++H5_optind >= argc) {
+                if (H5_opterr)
                     HDfprintf(stderr, "%s: value expected for option \"%c\"\n", argv[0], opt_opt);
 
                 opt_opt = '?';
             }
             else {
                 /* flag value is next token */
-                opt_arg = argv[opt_ind++];
+                H5_optarg = argv[H5_optind++];
             }
 
             sp = 1;
         }
         else {
             /* set up to look at next char in token, next time */
-            if (argv[opt_ind][++sp] == '\0') {
+            if (argv[H5_optind][++sp] == '\0') {
                 /* no more in current token, so setup next token */
-                opt_ind++;
+                H5_optind++;
                 sp = 1;
             }
 
-            opt_arg = NULL;
+            H5_optarg = NULL;
         }
     }
 

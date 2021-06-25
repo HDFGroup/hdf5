@@ -486,9 +486,9 @@ void h5_dump_info_object(MPI_Info info);
 
 /** From h5tools_utils.h **/
 
-extern int         opt_err; /* getoption prints errors if this is on    */
-extern int         opt_ind; /* token pointer                            */
-extern const char *opt_arg; /* flag argument (or value)                 */
+extern int         H5_opterr; /* getoption prints errors if this is on    */
+extern int         H5_optind; /* token pointer                            */
+extern const char *H5_optarg; /* flag argument (or value)                 */
 
 enum {
     no_arg = 0,  /* doesn't take an argument     */
@@ -503,7 +503,7 @@ typedef struct long_options {
                            * this gets returned from get_option   */
 } long_options;
 
-extern int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
+extern int H5_get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
 
 extern int nCols; /*max number of columns for outputting  */
 

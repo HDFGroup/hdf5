@@ -101,23 +101,23 @@ parse_command_line(int argc, const char *argv[])
     int opt = FALSE;
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'o':
-                output_file = HDstrdup(opt_arg);
+                output_file = HDstrdup(H5_optarg);
                 if (output_file)
                     h5tools_set_data_output_file(output_file, 1);
                 break;
 
             case 'i':
-                input_file = HDstrdup(opt_arg);
+                input_file = HDstrdup(H5_optarg);
                 if (input_file)
                     h5tools_set_input_file(input_file, 1);
                 break;
                 ;
 
             case 'u':
-                ub_file = HDstrdup(opt_arg);
+                ub_file = HDstrdup(H5_optarg);
                 if (ub_file)
                     h5tools_set_output_file(ub_file, 1);
                 else

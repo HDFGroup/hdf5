@@ -150,7 +150,7 @@ parse_command_line(int argc, const char **argv)
     }
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
@@ -176,12 +176,12 @@ parse_command_line(int argc, const char **argv)
 
             case 'i':
                 increment_eoa_eof = TRUE;
-                if (opt_arg != NULL) {
-                    if (HDatoi(opt_arg) < 0) {
+                if (H5_optarg != NULL) {
+                    if (HDatoi(H5_optarg) < 0) {
                         usage(h5tools_getprogname());
                         goto done;
                     }
-                    increment = (hsize_t)HDatoi(opt_arg);
+                    increment = (hsize_t)HDatoi(H5_optarg);
                 }
                 break;
 
@@ -193,14 +193,14 @@ parse_command_line(int argc, const char **argv)
     }     /* end while */
 
     /* check for file name to be processed */
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
         goto error;
     } /* end if */
 
-    fname_g = HDstrdup(argv[opt_ind]);
+    fname_g = HDstrdup(argv[H5_optind]);
 
 done:
     return (0);

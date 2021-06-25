@@ -123,7 +123,7 @@ parse_command_line(int argc, const char **argv)
     }
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
@@ -140,11 +140,11 @@ parse_command_line(int argc, const char **argv)
                 break;
 
             case 'd': /* -d dname */
-                if (opt_arg != NULL && *opt_arg)
-                    dname_g = HDstrdup(opt_arg);
+                if (H5_optarg != NULL && *H5_optarg)
+                    dname_g = HDstrdup(H5_optarg);
                 if (dname_g == NULL) {
                     h5tools_setstatus(EXIT_FAILURE);
-                    error_msg("No dataset name\n", opt_arg);
+                    error_msg("No dataset name\n", H5_optarg);
                     usage(h5tools_getprogname());
                     goto error;
                 }
@@ -167,19 +167,19 @@ parse_command_line(int argc, const char **argv)
         } /* switch */
     }     /* while */
 
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
         goto error;
     }
 
-    fname_g = HDstrdup(argv[opt_ind]);
+    fname_g = HDstrdup(argv[H5_optind]);
 
-    return (0);
+    return 0;
 
 error:
-    return (-1);
+    return -1;
     ;
 } /* parse_command_line() */
 

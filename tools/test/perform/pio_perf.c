@@ -1286,13 +1286,13 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_write_only = FALSE; /* Do both read and write by default */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
-                cl_opts->h5_alignment = parse_size_directive(opt_arg);
+                cl_opts->h5_alignment = parse_size_directive(H5_optarg);
                 break;
             case 'A': {
-                const char *end = opt_arg;
+                const char *end = H5_optarg;
 
                 while (end && *end != '\0') {
                     char buf[10];
@@ -1332,7 +1332,7 @@ parse_command_line(int argc, char *argv[])
             break;
 #endif /* 0 */
             case 'B':
-                cl_opts->blk_size = (size_t)parse_size_directive(opt_arg);
+                cl_opts->blk_size = (size_t)parse_size_directive(H5_optarg);
                 break;
             case 'c':
                 /* Turn on chunked HDF5 dataset creation */
@@ -1342,10 +1342,10 @@ parse_command_line(int argc, char *argv[])
                 cl_opts->collective = 1;
                 break;
             case 'd':
-                cl_opts->num_dsets = atoi(opt_arg);
+                cl_opts->num_dsets = atoi(H5_optarg);
                 break;
             case 'D': {
-                const char *end = opt_arg;
+                const char *end = H5_optarg;
 
                 while (end && *end != '\0') {
                     char buf[10];
@@ -1402,40 +1402,40 @@ parse_command_line(int argc, char *argv[])
 
             break;
             case 'e':
-                cl_opts->num_bpp = parse_size_directive(opt_arg);
+                cl_opts->num_bpp = parse_size_directive(H5_optarg);
                 break;
             case 'F':
-                cl_opts->num_files = HDatoi(opt_arg);
+                cl_opts->num_files = HDatoi(H5_optarg);
                 break;
             case 'g':
                 cl_opts->dim2d = 1;
                 break;
             case 'i':
-                cl_opts->num_iters = HDatoi(opt_arg);
+                cl_opts->num_iters = HDatoi(H5_optarg);
                 break;
             case 'I':
                 cl_opts->interleaved = 1;
                 break;
             case 'o':
-                cl_opts->output_file = opt_arg;
+                cl_opts->output_file = H5_optarg;
                 break;
             case 'p':
-                cl_opts->min_num_procs = HDatoi(opt_arg);
+                cl_opts->min_num_procs = HDatoi(H5_optarg);
                 break;
             case 'P':
-                cl_opts->max_num_procs = HDatoi(opt_arg);
+                cl_opts->max_num_procs = HDatoi(H5_optarg);
                 break;
             case 'T':
-                cl_opts->h5_threshold = parse_size_directive(opt_arg);
+                cl_opts->h5_threshold = parse_size_directive(H5_optarg);
                 break;
             case 'w':
                 cl_opts->h5_write_only = TRUE;
                 break;
             case 'x':
-                cl_opts->min_xfer_size = (size_t)parse_size_directive(opt_arg);
+                cl_opts->min_xfer_size = (size_t)parse_size_directive(H5_optarg);
                 break;
             case 'X':
-                cl_opts->max_xfer_size = (size_t)parse_size_directive(opt_arg);
+                cl_opts->max_xfer_size = (size_t)parse_size_directive(H5_optarg);
                 break;
             case 'h':
             case '?':

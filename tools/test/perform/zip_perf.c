@@ -551,7 +551,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) > 0) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
             case '0':
             case '1':
@@ -566,13 +566,13 @@ main(int argc, const char *argv[])
                 compress_level = opt - '0';
                 break;
             case 'B':
-                max_buf_size = parse_size_directive(opt_arg);
+                max_buf_size = parse_size_directive(H5_optarg);
                 break;
             case 'b':
-                min_buf_size = parse_size_directive(opt_arg);
+                min_buf_size = parse_size_directive(H5_optarg);
                 break;
             case 'c':
-                compress_percent = (int)HDstrtol(opt_arg, NULL, 10);
+                compress_percent = (int)HDstrtol(H5_optarg, NULL, 10);
 
                 if (compress_percent < 0)
                     compress_percent = 0;
@@ -581,13 +581,13 @@ main(int argc, const char *argv[])
 
                 break;
             case 'p':
-                option_prefix = opt_arg;
+                option_prefix = H5_optarg;
                 break;
             case 'r':
                 random_test = TRUE;
                 break;
             case 's':
-                file_size = parse_size_directive(opt_arg);
+                file_size = parse_size_directive(H5_optarg);
                 break;
             case '?':
                 usage();

@@ -242,19 +242,19 @@ main(int argc, const char *argv[])
     } /* end if */
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'd':
-                oname_dst = HDstrdup(opt_arg);
+                oname_dst = HDstrdup(H5_optarg);
                 break;
 
             case 'f':
                 /* validate flag */
-                if (parse_flag(opt_arg, &flag) < 0) {
+                if (parse_flag(H5_optarg, &flag) < 0) {
                     usage();
                     leave(EXIT_FAILURE);
                 }
-                str_flag = HDstrdup(opt_arg);
+                str_flag = HDstrdup(H5_optarg);
                 break;
 
             case 'h':
@@ -263,11 +263,11 @@ main(int argc, const char *argv[])
                 break;
 
             case 'i':
-                fname_src = HDstrdup(opt_arg);
+                fname_src = HDstrdup(H5_optarg);
                 break;
 
             case 'o':
-                fname_dst = HDstrdup(opt_arg);
+                fname_dst = HDstrdup(H5_optarg);
                 break;
 
             case 'p':
@@ -275,7 +275,7 @@ main(int argc, const char *argv[])
                 break;
 
             case 's':
-                oname_src = HDstrdup(opt_arg);
+                oname_src = HDstrdup(H5_optarg);
                 break;
 
             case 'V':

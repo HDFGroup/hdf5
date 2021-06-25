@@ -2658,10 +2658,9 @@ H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_
 /* getopt(3) equivalent that papers over the lack of long options on BSD
  * and lack of Windows support.
  */
-H5_DLLVAR int opt_err; /* getoption prints errors if this is on    */
-H5_DLLVAR int opt_ind; /* token pointer                            */
-// H5_DLLVAR int         optopt;
-H5_DLLVAR const char *opt_arg; /* flag argument (or value)                 */
+H5_DLLVAR int H5_opterr; /* get_option prints errors if this is on */
+H5_DLLVAR int H5_optind; /* token pointer */
+H5_DLLVAR const char *H5_optarg; /* flag argument (or value) */
 
 enum {
     no_arg = 0,  /* doesn't take an argument     */
@@ -2672,7 +2671,7 @@ enum {
 /*
  * get_option determines which options are specified on the command line and
  * returns a pointer to any arguments possibly associated with the option in
- * the ``opt_arg'' variable. get_option returns the shortname equivalent of
+ * the ``H5_optarg'' variable. get_option returns the shortname equivalent of
  * the option. The long options are specified in the following way:
  *
  * struct long_options foo[] = {
@@ -2704,8 +2703,7 @@ typedef struct long_options {
                            * this gets returned from get_option   */
 } long_options;
 
-H5_DLL int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
-// H5_DLL int H5_getopt_long(int argc, const char **argv, const char *opt, const h5_long_options_t *l_opt);
+H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */

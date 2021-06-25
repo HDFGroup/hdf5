@@ -920,7 +920,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
     struct handler_t *hand = NULL;
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
@@ -959,8 +959,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'l':
-                if (opt_arg) {
-                    sgroups_threshold = HDatoi(opt_arg);
+                if (H5_optarg) {
+                    sgroups_threshold = HDatoi(H5_optarg);
                     if (sgroups_threshold < 1) {
                         error_msg("Invalid threshold for small groups\n");
                         goto error;
@@ -982,8 +982,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'm':
-                if (opt_arg) {
-                    sdsets_threshold = HDatoi(opt_arg);
+                if (H5_optarg) {
+                    sdsets_threshold = HDatoi(H5_optarg);
                     if (sdsets_threshold < 1) {
                         error_msg("Invalid threshold for small datasets\n");
                         goto error;
@@ -1005,8 +1005,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'a':
-                if (opt_arg) {
-                    sattrs_threshold = HDatoi(opt_arg);
+                if (H5_optarg) {
+                    sattrs_threshold = HDatoi(H5_optarg);
                     if (sattrs_threshold < 1) {
                         error_msg("Invalid threshold for small # of attributes\n");
                         goto error;
@@ -1046,7 +1046,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 
                 /* Store object names */
                 for (u = 0; u < hand->obj_count; u++)
-                    if (NULL == (hand->obj[u] = HDstrdup(opt_arg))) {
+                    if (NULL == (hand->obj[u] = HDstrdup(H5_optarg))) {
                         error_msg("unable to allocate memory for object name\n");
                         goto error;
                     } /* end if */
@@ -1054,7 +1054,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 
             case 'w':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(opt_arg, ',', &ros3_fa) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
                     goto error;
                 }
@@ -1068,7 +1068,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 
             case 'H':
 #ifdef H5_HAVE_LIBHDFS
-                if (h5tools_parse_hdfs_fapl_tuple(opt_arg, ',', &hdfs_fa) < 0) {
+                if (h5tools_parse_hdfs_fapl_tuple(H5_optarg, ',', &hdfs_fa) < 0) {
                     error_msg("failed to parse HDFS VFD configuration info\n");
                     goto error;
                 }
@@ -1087,7 +1087,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
     }     /* end while */
 
     /* check for file name to be processed */
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         goto error;
@@ -1811,7 +1811,7 @@ main(int argc, const char *argv[])
         }
     }
 
-    fname = argv[opt_ind];
+    fname = argv[H5_optind];
 
     /* Check for filename given */
     if (fname) {

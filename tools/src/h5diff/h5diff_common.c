@@ -232,7 +232,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     exclude_attr_head = NULL;
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             default:
                 usage();
@@ -256,20 +256,20 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                      * special check for short opt
                      */
                     if (!strcmp(argv[i], "-v")) {
-                        if (opt_arg != NULL)
-                            opt_ind--;
+                        if (H5_optarg != NULL)
+                            H5_optind--;
                         opts->mode_verbose_level = 0;
                         break;
                     }
                     else if (!strncmp(argv[i], "-v", (size_t)2)) {
-                        if (opt_arg != NULL)
-                            opt_ind--;
+                        if (H5_optarg != NULL)
+                            H5_optind--;
                         opts->mode_verbose_level = atoi(&argv[i][2]);
                         break;
                     }
                     else {
-                        if (opt_arg != NULL)
-                            opts->mode_verbose_level = HDatoi(opt_arg);
+                        if (H5_optarg != NULL)
+                            opts->mode_verbose_level = HDatoi(H5_optarg);
                         else
                             opts->mode_verbose_level = 0;
                     }
@@ -308,7 +308,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 }
 
                 /* init */
-                exclude_node->obj_path = opt_arg;
+                exclude_node->obj_path = H5_optarg;
                 exclude_node->obj_type = H5TRAV_TYPE_UNKNOWN;
                 exclude_prev           = exclude_head;
 
@@ -336,7 +336,7 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
                 }
 
                 /* init */
-                exclude_attr_node->obj_path = opt_arg;
+                exclude_attr_node->obj_path = H5_optarg;
                 exclude_attr_node->obj_type = H5TRAV_TYPE_UNKNOWN;
                 exclude_attr_prev           = exclude_attr_head;
 
@@ -356,23 +356,23 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
             case 'd':
                 opts->delta_bool = 1;
 
-                if (check_d_input(opt_arg) == -1) {
-                    HDprintf("<-d %s> is not a valid option\n", opt_arg);
+                if (check_d_input(H5_optarg) == -1) {
+                    HDprintf("<-d %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->delta = HDatof(opt_arg);
+                opts->delta = HDatof(H5_optarg);
                 /* do not check against default, the DBL_EPSILON is being replaced by user */
                 break;
 
             case 'p':
                 opts->percent_bool = 1;
-                if (check_p_input(opt_arg) == -1) {
-                    HDprintf("<-p %s> is not a valid option\n", opt_arg);
+                if (check_p_input(H5_optarg) == -1) {
+                    HDprintf("<-p %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->percent = HDatof(opt_arg);
+                opts->percent = HDatof(H5_optarg);
 
                 /* -p 0 is the same as default */
                 if (H5_DBL_ABS_EQUAL(opts->percent, 0.0))
@@ -381,12 +381,12 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
 
             case 'n':
                 opts->count_bool = 1;
-                if (check_n_input(opt_arg) == -1) {
-                    HDprintf("<-n %s> is not a valid option\n", opt_arg);
+                if (check_n_input(H5_optarg) == -1) {
+                    HDprintf("<-n %s> is not a valid option\n", H5_optarg);
                     usage();
                     h5diff_exit(EXIT_FAILURE);
                 }
-                opts->count = HDstrtoull(opt_arg, NULL, 0);
+                opts->count = HDstrtoull(H5_optarg, NULL, 0);
                 break;
 
             case 'N':
@@ -403,34 +403,34 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
 
             case '1':
                 opts->vol_info[0].type    = VOL_BY_VALUE;
-                opts->vol_info[0].u.value = (H5VL_class_value_t)HDatoi(opt_arg);
+                opts->vol_info[0].u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
                 opts->custom_vol[0]       = TRUE;
                 break;
 
             case '2':
                 opts->vol_info[0].type   = VOL_BY_NAME;
-                opts->vol_info[0].u.name = opt_arg;
+                opts->vol_info[0].u.name = H5_optarg;
                 opts->custom_vol[0]      = TRUE;
                 break;
 
             case '3':
-                opts->vol_info[0].info_string = opt_arg;
+                opts->vol_info[0].info_string = H5_optarg;
                 break;
 
             case '4':
                 opts->vol_info[1].type    = VOL_BY_VALUE;
-                opts->vol_info[1].u.value = (H5VL_class_value_t)HDatoi(opt_arg);
+                opts->vol_info[1].u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
                 opts->custom_vol[1]       = TRUE;
                 break;
 
             case '5':
                 opts->vol_info[1].type   = VOL_BY_NAME;
-                opts->vol_info[1].u.name = opt_arg;
+                opts->vol_info[1].u.name = H5_optarg;
                 opts->custom_vol[1]      = TRUE;
                 break;
 
             case '6':
-                opts->vol_info[1].info_string = opt_arg;
+                opts->vol_info[1].info_string = H5_optarg;
                 break;
         }
     }
@@ -447,15 +447,15 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
         opts->exclude_attr = exclude_attr_head;
 
     /* check for file names to be processed */
-    if (argc <= opt_ind || argv[opt_ind + 1] == NULL) {
+    if (argc <= H5_optind || argv[H5_optind + 1] == NULL) {
         error_msg("missing file names\n");
         usage();
         h5diff_exit(EXIT_FAILURE);
     }
 
-    *fname1   = argv[opt_ind];
-    *fname2   = argv[opt_ind + 1];
-    *objname1 = argv[opt_ind + 2];
+    *fname1   = argv[H5_optind];
+    *fname2   = argv[H5_optind + 1];
+    *objname1 = argv[H5_optind + 2];
     H5TOOLS_DEBUG("file1 = %s", *fname1);
     H5TOOLS_DEBUG("file2 = %s", *fname2);
 
@@ -466,8 +466,8 @@ parse_command_line(int argc, const char *argv[], const char **fname1, const char
     }
     H5TOOLS_DEBUG("objname1 = %s", *objname1);
 
-    if (argv[opt_ind + 3] != NULL) {
-        *objname2 = argv[opt_ind + 3];
+    if (argv[H5_optind + 3] != NULL) {
+        *objname2 = argv[H5_optind + 3];
     }
     else {
         *objname2 = *objname1;

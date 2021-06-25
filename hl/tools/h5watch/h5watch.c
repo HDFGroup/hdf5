@@ -677,7 +677,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case '?':
             case 'h': /* --help */
@@ -691,7 +691,7 @@ parse_command_line(int argc, const char *argv[])
                 break;
 
             case 'w': /* --width=N */
-                g_display_width = (int)HDstrtol(opt_arg, NULL, 0);
+                g_display_width = (int)HDstrtol(H5_optarg, NULL, 0);
                 if (g_display_width < 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
@@ -711,8 +711,8 @@ parse_command_line(int argc, const char *argv[])
                 break;
 
             case 'p': /* --polling=N */
-                /* g_polling_interval = HDstrtod(opt_arg, NULL); */
-                if ((tmp = (int)HDstrtol(opt_arg, NULL, 10)) <= 0) {
+                /* g_polling_interval = HDstrtod(H5_optarg, NULL); */
+                if ((tmp = (int)HDstrtol(H5_optarg, NULL, 10)) <= 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
@@ -721,7 +721,7 @@ parse_command_line(int argc, const char *argv[])
 
             case 'f': /* --fields=<list_of_fields> */
                 if (g_list_of_fields == NULL) {
-                    if ((g_list_of_fields = HDstrdup(opt_arg)) == NULL) {
+                    if ((g_list_of_fields = HDstrdup(H5_optarg)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
@@ -729,7 +729,7 @@ parse_command_line(int argc, const char *argv[])
                 else {
                     char *str;
 
-                    if ((str = HDstrdup(opt_arg)) == NULL) {
+                    if ((str = HDstrdup(H5_optarg)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
@@ -751,7 +751,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* check for object to be processed */
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing dataset name\n");
         usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
@@ -821,7 +821,7 @@ main(int argc, const char *argv[])
     /* parse command line options */
     parse_command_line(argc, argv);
 
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing dataset name\n");
         usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
@@ -845,7 +845,7 @@ main(int argc, const char *argv[])
      * then there must have been something wrong with the file (perhaps it
      * doesn't exist).
      */
-    if ((fname = HDstrdup(argv[opt_ind])) == NULL) {
+    if ((fname = HDstrdup(argv[H5_optind])) == NULL) {
         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
