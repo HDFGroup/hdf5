@@ -621,11 +621,13 @@ SetTest(const char *testname, int action)
 }
 
 /*
- * Enable alarm on test execution, configurable by environment variable
+ * Enable alarm on test execution, configurable by environment variable.
+ * Only useful on POSIX systems where alarm(2) is present.
  */
 void
 TestAlarmOn(void)
 {
+#ifdef H5_HAVE_ALARM
     char *        env_val   = HDgetenv("HDF5_ALARM_SECONDS"); /* Alarm environment */
     unsigned long alarm_sec = H5_ALARM_SEC;                   /* Number of seconds before alarm goes off */
 
@@ -635,4 +637,5 @@ TestAlarmOn(void)
 
     /* Set the number of seconds before alarm goes off */
     HDalarm((unsigned)alarm_sec);
+#endif
 }

@@ -90,17 +90,10 @@
 #define HDctermid(S)             ctermid(S)
 #define HDctime(T)               ctime(T)
 #define HDcuserid(S)             cuserid(S)
-#ifdef H5_HAVE_DIFFTIME
 #define HDdifftime(X, Y) difftime(X, Y)
-#else
-#define HDdifftime(X, Y) ((double)(X) - (double)(Y))
-#endif
-#define HDdiv(X, Y)  div(X, Y)
-#define HDdup(F)     dup(F)
-#define HDdup2(F, I) dup2(F, I)
-/* execl() variable arguments */
-/* execle() variable arguments */
-/* execlp() variable arguments */
+#define HDdiv(X, Y)        div(X, Y)
+#define HDdup(F)           dup(F)
+#define HDdup2(F, I)       dup2(F, I)
 #define HDexecv(S, AV)     execv(S, AV)
 #define HDexecve(S, AV, E) execve(S, AV, E)
 #define HDexecvp(S, AV)    execvp(S, AV)
