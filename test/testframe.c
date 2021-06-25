@@ -320,9 +320,9 @@ PerformTests(void)
             MESSAGE(5, ("===============================================\n"));
             Test[Loop].NumErrors = num_errs;
             Test_parameters      = Test[Loop].Parameters;
-            ALARM_ON;
+            TestAlarmOn();
             Test[Loop].Call();
-            ALARM_OFF;
+            TestAlarmOff();
             Test[Loop].NumErrors = num_errs - Test[Loop].NumErrors;
             MESSAGE(5, ("===============================================\n"));
             MESSAGE(5, ("There were %d errors detected.\n\n", (int)Test[Loop].NumErrors));
@@ -620,8 +620,9 @@ SetTest(const char *testname, int action)
     }
 }
 
-/*
- * Enable alarm on test execution, configurable by environment variable.
+/* Enable a test timer that will kill long-running tests, the time is configurable
+ * via an environment variable.
+ *
  * Only useful on POSIX systems where alarm(2) is present.
  */
 void
@@ -637,5 +638,15 @@ TestAlarmOn(void)
 
     /* Set the number of seconds before alarm goes off */
     HDalarm((unsigned)alarm_sec);
+#endif
+}
+
+/* Disable the test timer */
+void
+TestAlarmOff(void)
+{
+#ifdef H5_HAVE_ALARM
+    /* Set the number of seconds to zero */
+    HDalarm(0);
 #endif
 }
