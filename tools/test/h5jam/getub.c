@@ -21,9 +21,9 @@ void parse_command_line(int argc, const char *argv[]);
 #define PROGRAM_NAME "getub"
 char *nbytes = NULL;
 
-static const char *        s_opts   = "c:";                     /* add more later ? */
-static struct long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file */
-                                       {NULL, 0, '\0'}};
+static const char *           s_opts   = "c:";                     /* add more later ? */
+static struct h5_long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file */
+                                          {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage

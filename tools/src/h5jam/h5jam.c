@@ -34,8 +34,8 @@ char *ub_file     = NULL;
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *        s_opts   = "hi:u:o:c:V"; /* add more later ? */
-static struct long_options l_opts[] = {
+static const char *           s_opts   = "hi:u:o:c:V"; /* add more later ? */
+static struct h5_long_options l_opts[] = {
     {"help", no_arg, 'h'},    {"hel", no_arg, 'h'},   {"i", require_arg, 'i'}, /* input file */
     {"u", require_arg, 'u'},                                                   /* user block file */
     {"o", require_arg, 'o'},                                                   /* output file */

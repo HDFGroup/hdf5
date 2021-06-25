@@ -19,23 +19,23 @@
 #define PROGRAMNAME "h5copy"
 
 /* command-line options: short and long-named parameters */
-static const char *        s_opts    = "d:f:hi:o:ps:vVE";
-static struct long_options l_opts[]  = {{"destination", require_arg, 'd'},
-                                       {"flag", require_arg, 'f'},
-                                       {"help", no_arg, 'h'},
-                                       {"input", require_arg, 'i'},
-                                       {"output", require_arg, 'o'},
-                                       {"parents", no_arg, 'p'},
-                                       {"source", require_arg, 's'},
-                                       {"verbose", no_arg, 'v'},
-                                       {"version", no_arg, 'V'},
-                                       {"enable-error-stack", no_arg, 'E'},
-                                       {NULL, 0, '\0'}};
-char *                     fname_src = NULL;
-char *                     fname_dst = NULL;
-char *                     oname_src = NULL;
-char *                     oname_dst = NULL;
-char *                     str_flag  = NULL;
+static const char *           s_opts    = "d:f:hi:o:ps:vVE";
+static struct h5_long_options l_opts[]  = {{"destination", require_arg, 'd'},
+                                          {"flag", require_arg, 'f'},
+                                          {"help", no_arg, 'h'},
+                                          {"input", require_arg, 'i'},
+                                          {"output", require_arg, 'o'},
+                                          {"parents", no_arg, 'p'},
+                                          {"source", require_arg, 's'},
+                                          {"verbose", no_arg, 'v'},
+                                          {"version", no_arg, 'V'},
+                                          {"enable-error-stack", no_arg, 'E'},
+                                          {NULL, 0, '\0'}};
+char *                        fname_src = NULL;
+char *                        fname_dst = NULL;
+char *                        oname_src = NULL;
+char *                        oname_dst = NULL;
+char *                        str_flag  = NULL;
 
 /*-------------------------------------------------------------------------
  * Function:    leave

@@ -956,10 +956,10 @@ const char *H5_optarg;     /* Flag argument (or value)               */
  *-------------------------------------------------------------------------
  */
 int
-H5_get_option(int argc, const char **argv, const char *opts, const struct long_options *l_opts)
+H5_get_option(int argc, const char **argv, const char *opts, const struct h5_long_options *l_opts)
 {
-    static int sp      = 1;   /* character index in current token */
-    int        optopt  = '?'; /* option character passed back to user */
+    static int sp     = 1;   /* character index in current token */
+    int        optopt = '?'; /* option character passed back to user */
 
     if (sp == 1) {
         /* check for more flag-like tokens */
@@ -980,7 +980,7 @@ H5_get_option(int argc, const char **argv, const char *opts, const struct long_o
         size_t     arg_len = 0;
 
         H5_optarg = strchr(&argv[H5_optind][2], ch);
-        arg_len = HDstrlen(&argv[H5_optind][2]);
+        arg_len   = HDstrlen(&argv[H5_optind][2]);
         if (H5_optarg) {
             arg_len -= HDstrlen(H5_optarg);
             H5_optarg++; /* skip the equal sign */

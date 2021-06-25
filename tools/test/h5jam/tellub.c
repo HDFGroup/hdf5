@@ -24,8 +24,8 @@
  * parameters. The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *        s_opts   = "h";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'}, {"hel", no_arg, 'h'}, {NULL, 0, '\0'}};
+static const char *           s_opts   = "h";
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'}, {"hel", no_arg, 'h'}, {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage

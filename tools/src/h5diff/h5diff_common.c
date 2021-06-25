@@ -25,30 +25,30 @@ static int check_d_input(const char *);
  * Command-line options: The user can specify short or long-named
  * parameters.
  */
-static const char *        s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},
-                                       {"version", no_arg, 'V'},
-                                       {"report", no_arg, 'r'},
-                                       {"verbose", optional_arg, 'v'},
-                                       {"quiet", no_arg, 'q'},
-                                       {"count", require_arg, 'n'},
-                                       {"delta", require_arg, 'd'},
-                                       {"relative", require_arg, 'p'},
-                                       {"nan", no_arg, 'N'},
-                                       {"compare", no_arg, 'c'},
-                                       {"use-system-epsilon", no_arg, 'e'},
-                                       {"follow-symlinks", no_arg, 'l'},
-                                       {"no-dangling-links", no_arg, 'x'},
-                                       {"exclude-path", require_arg, 'E'},
-                                       {"exclude-attribute", require_arg, 'A'},
-                                       {"enable-error-stack", no_arg, 'S'},
-                                       {"vol-value-1", require_arg, '1'},
-                                       {"vol-name-1", require_arg, '2'},
-                                       {"vol-info-1", require_arg, '3'},
-                                       {"vol-value-2", require_arg, '4'},
-                                       {"vol-name-2", require_arg, '5'},
-                                       {"vol-info-2", require_arg, '6'},
-                                       {NULL, 0, '\0'}};
+static const char *           s_opts   = "hVrv*qn:d:p:NcelxE:A:S";
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
+                                          {"version", no_arg, 'V'},
+                                          {"report", no_arg, 'r'},
+                                          {"verbose", optional_arg, 'v'},
+                                          {"quiet", no_arg, 'q'},
+                                          {"count", require_arg, 'n'},
+                                          {"delta", require_arg, 'd'},
+                                          {"relative", require_arg, 'p'},
+                                          {"nan", no_arg, 'N'},
+                                          {"compare", no_arg, 'c'},
+                                          {"use-system-epsilon", no_arg, 'e'},
+                                          {"follow-symlinks", no_arg, 'l'},
+                                          {"no-dangling-links", no_arg, 'x'},
+                                          {"exclude-path", require_arg, 'E'},
+                                          {"exclude-attribute", require_arg, 'A'},
+                                          {"enable-error-stack", no_arg, 'S'},
+                                          {"vol-value-1", require_arg, '1'},
+                                          {"vol-name-1", require_arg, '2'},
+                                          {"vol-info-1", require_arg, '3'},
+                                          {"vol-value-2", require_arg, '4'},
+                                          {"vol-name-2", require_arg, '5'},
+                                          {"vol-info-2", require_arg, '6'},
+                                          {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function: check_options

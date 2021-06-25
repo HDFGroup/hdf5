@@ -2658,11 +2658,11 @@ H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_
 /* getopt(3) equivalent that papers over the lack of long options on BSD
  * and lack of Windows support.
  */
-H5_DLLVAR int H5_opterr; /* get_option prints errors if this is on */
-H5_DLLVAR int H5_optind; /* token pointer */
+H5_DLLVAR int         H5_opterr; /* get_option prints errors if this is on */
+H5_DLLVAR int         H5_optind; /* token pointer */
 H5_DLLVAR const char *H5_optarg; /* flag argument (or value) */
 
-enum {
+enum h5_arg_level {
     no_arg = 0,  /* doesn't take an argument     */
     require_arg, /* requires an argument          */
     optional_arg /* argument is optional         */
@@ -2674,7 +2674,7 @@ enum {
  * the ``H5_optarg'' variable. get_option returns the shortname equivalent of
  * the option. The long options are specified in the following way:
  *
- * struct long_options foo[] = {
+ * struct h5_long_options foo[] = {
  *   { "filename", require_arg, 'f' },
  *   { "append", no_arg, 'a' },
  *   { "width", require_arg, 'w' },
@@ -2696,14 +2696,15 @@ enum {
  * in which case those options which expect an argument need to come at the
  * end.
  */
-typedef struct long_options {
-    const char *name;     /* name of the long option              */
-    int         has_arg;  /* whether we should look for an arg    */
-    char        shortval; /* the shortname equivalent of long arg
-                           * this gets returned from get_option   */
-} long_options;
+struct h5_long_options {
+    const char *      name;     /* Name of the long option */
+    enum h5_arg_level has_arg;  /* Whether we should look for an arg */
+    char              shortval; /* The shortname equivalent of long arg
+                                 * this gets returned from get_option
+                                 */
+};
 
-H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
+H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
