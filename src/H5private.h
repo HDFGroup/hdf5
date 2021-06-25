@@ -811,8 +811,7 @@ typedef off_t       h5_stat_size_t;
  * when possible to avoid them becoming dead code.
  */
 #ifdef H5_HAVE_FCNTL
-    H5_DLL int
-    Pflock(int fd, int operation);
+H5_DLL int Pflock(int fd, int operation);
 #endif
 H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 
@@ -1580,7 +1579,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int             HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 

@@ -1582,7 +1582,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #endif
                             }
                         }
-                        else if (!HDstrcmp("STRPAD", temp)) {       /* STRPAD */
+                        else if (!HDstrcmp("STRPAD", temp)) {         /* STRPAD */
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* STRPAD type */
                                 (void)HDfprintf(stderr, "%s", err18);
                                 goto error;
@@ -1591,7 +1591,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             HDprintf("h5dump DATATYPE STRING STRPAD %s found\n", temp);
 #endif
                         }
-                        else if (!HDstrcmp("CSET", key)) {          /* CSET */
+                        else if (!HDstrcmp("CSET", key)) {            /* CSET */
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* CSET type */
                                 (void)HDfprintf(stderr, "%s", err18);
                                 goto error;
@@ -1600,7 +1600,7 @@ processConfigurationFile(char *infile, struct Input *in)
                             HDprintf("h5dump DATATYPE STRING CSET %s found\n", temp);
 #endif
                         }
-                        else if (!HDstrcmp("CTYPE", temp)) {        /* CTYPE */
+                        else if (!HDstrcmp("CTYPE", temp)) {          /* CTYPE */
                             if (HDfscanf(strm, "%254s", temp) != 1) { /* CTYPE type */
                                 (void)HDfprintf(stderr, "%s", err18);
                                 goto error;
