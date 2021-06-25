@@ -159,12 +159,6 @@
 /* Define to 1 if you have the `fork' function. */
 #cmakedefine H5_HAVE_FORK @H5_HAVE_FORK@
 
-/* Define to 1 if you have the `frexpf' function. */
-#cmakedefine H5_HAVE_FREXPF @H5_HAVE_FREXPF@
-
-/* Define to 1 if you have the `frexpl' function. */
-#cmakedefine H5_HAVE_FREXPL @H5_HAVE_FREXPL@
-
 /* Define to 1 if you have the `fseeko' function. */
 #cmakedefine H5_HAVE_FSEEKO @H5_HAVE_FSEEKO@
 
