@@ -31,19 +31,21 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <float.h>
-#include <limits.h>
 #include <math.h>
+#include <setjmp.h>
 #include <signal.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
 /* POSIX headers */
+#ifdef H5_HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef H5_HAVE_UNISTD_H
 #include <pwd.h>
 #include <unistd.h>
-#include <sys/types.h>
 #include <sys/wait.h>
 #endif
 
@@ -59,32 +61,6 @@
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
-
-/*
- * If a program may include both `time.h' and `sys/time.h' then
- * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.ac).
- * On some older systems, `sys/time.h' includes `time.h' but `time.h' is not
- * protected against multiple inclusion, so programs should not explicitly
- * include both files. This macro is useful in programs that use, for example,
- * `struct timeval' or `struct timezone' as well as `struct tm'.  It is best
- * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
- * by `AC_CHECK_HEADERS(sys/time.h)' in configure.ac.
- */
-#if defined(H5_TIME_WITH_SYS_TIME)
-#include <sys/time.h>
-#include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#else
-#include <time.h>
-#endif
-
-/*
- * Longjumps are used to detect alignment constrants
- */
-#ifdef H5_HAVE_SETJMP_H
-#include <setjmp.h>
 #endif
 
 /*
@@ -790,12 +766,11 @@ typedef struct {
 #ifndef HDfabs
 #define HDfabs(X) fabs(X)
 #endif /* HDfabs */
-/* use ABS() because fabsf() fabsl() are not common yet. */
 #ifndef HDfabsf
-#define HDfabsf(X) ABS(X)
+#define HDfabsf(X) fabsf(X)
 #endif /* HDfabsf */
 #ifndef HDfabsl
-#define HDfabsl(X) ABS(X)
+#define HDfabsl(X) fabsl(X)
 #endif /* HDfabsl */
 #ifndef HDfclose
 #define HDfclose(F) fclose(F)
@@ -887,20 +862,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
 #endif /* HDfrexp */
-/* Check for Cray-specific 'frexpf()' and 'frexpl()' routines */
 #ifndef HDfrexpf
-#ifdef H5_HAVE_FREXPF
 #define HDfrexpf(X, N) frexpf(X, N)
-#else /* H5_HAVE_FREXPF */
-#define HDfrexpf(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPF */
 #endif /* HDfrexpf */
 #ifndef HDfrexpl
-#ifdef H5_HAVE_FREXPL
 #define HDfrexpl(X, N) frexpl(X, N)
-#else /* H5_HAVE_FREXPL */
-#define HDfrexpl(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPL */
 #endif /* HDfrexpl */
 /* fscanf() variable arguments */
 #ifndef HDfseek

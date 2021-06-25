@@ -156,12 +156,6 @@
 /* Define to 1 if you have the `fork' function. */
 #cmakedefine H5_HAVE_FORK @H5_HAVE_FORK@
 
-/* Define to 1 if you have the `frexpf' function. */
-#cmakedefine H5_HAVE_FREXPF @H5_HAVE_FREXPF@
-
-/* Define to 1 if you have the `frexpl' function. */
-#cmakedefine H5_HAVE_FREXPL @H5_HAVE_FREXPL@
-
 /* Define to 1 if you have the `fseeko' function. */
 #cmakedefine H5_HAVE_FSEEKO @H5_HAVE_FSEEKO@
 
@@ -235,9 +229,6 @@
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
 
-/* Define to 1 if you have the `longjmp' function. */
-#cmakedefine H5_HAVE_LONGJMP @H5_HAVE_LONGJMP@
-
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
 
@@ -302,20 +293,11 @@
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
 
-/* Define to 1 if you have the `setjmp' function. */
-#cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
-
-/* Define to 1 if you have the <setjmp.h> header file. */
-#cmakedefine H5_HAVE_SETJMP_H @H5_HAVE_SETJMP_H@
-
 /* Define to 1 if you have the `setsysinfo' function. */
 #cmakedefine H5_HAVE_SETSYSINFO @H5_HAVE_SETSYSINFO@
 
 /* Define to 1 if you have the `siglongjmp' function. */
 #cmakedefine H5_HAVE_SIGLONGJMP @H5_HAVE_SIGLONGJMP@
-
-/* Define to 1 if you have the `signal' function. */
-#cmakedefine H5_HAVE_SIGNAL @H5_HAVE_SIGNAL@
 
 /* Define to 1 if you have the `sigprocmask' function. */
 #cmakedefine H5_HAVE_SIGPROCMASK @H5_HAVE_SIGPROCMASK@
@@ -331,9 +313,6 @@
 
 /* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
-
-/* Define to 1 if you have the <stddef.h> header file. */
-#cmakedefine H5_HAVE_STDDEF_H @H5_HAVE_STDDEF_H@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
