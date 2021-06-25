@@ -47,6 +47,30 @@ New Features
 
     Configuration:
     -------------
+   - Adds C++ Autotools configuration file for Intel
+
+      * Checks for icpc as the compiler
+      * Copies most non-warning flags from intel-flags
+
+      (DER - 2021/06/02)
+
+    - Adds C++ Autotools configuration file for PGI
+
+      * Checks for pgc++ as the compiler name (was: pgCC)
+      * Other options basically match new C options (below)
+
+      (DER - 2021/06/02)
+
+    - Updates PGI C options
+
+      * -Minform set to warn (was: inform) to suppress spurious messages
+      * Sets -gopt -O2 as debug options
+      * Sets -O4 as 'high optimization' option
+      * Sets -O0 as 'no optimization' option
+      * Removes specific settings for PGI 9 and 10
+
+      (DER - 2021/06/02)
+
     - Added an option to make the global thread-safe lock a recursive R/W lock
 
       Prior to this release, the HDF5 library supported multi-threaded
