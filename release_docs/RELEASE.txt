@@ -131,7 +131,7 @@ New Features
 
       To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+      (SAM - 2021/02/07, github-311)
 
     - Added a configure-time option to control certain compiler warnings
       diagnostics
@@ -226,7 +226,7 @@ New Features
           CMake target is 'doxygen' for all available doxygen targets
           CMake target is 'hdf5lib_doc' for the src subdirectory
 
-      (ADB - 2020/11/13)
+        (ADB - 2020/11/13, HDFFV-11243)
 
     - CMake option to use MSVC naming conventions with MinGW
 
@@ -646,6 +646,15 @@ Bug Fixes since HDF5-1.12.0 release
 
       (BMR - 2021/05/12, HDFFV-11223)
 
+    - Fixed CVE-2019-9151
+
+      h5repack generated a segfault when an invalid memory read occurred on
+      a corrupted file.
+
+      The issue is now fixed. h5repack produces an error instead of segfault.
+
+      (BMR - 2021/05/04, HDFFV-10718)
+
     - Fixed CVE-2018-11206
 
       The tool h5dump produced a segfault when the size of a fill value
@@ -854,6 +863,13 @@ Bug Fixes since HDF5-1.12.0 release
 
       (ADB - 2021/06/03)
 
+    - Move emscripten flag to compile flags
+
+      The emscripten flag, -O0, was removed from target_link_libraries command
+      to the correct target_compile_options command.
+
+      (ADB - 2021/04/26 HDFFV-11083)
+
     - Remove arbitrary warning flag groups from CMake builds
 
       The arbitrary groups were created to reduce the quantity of warnings being
@@ -890,6 +906,20 @@ Bug Fixes since HDF5-1.12.0 release
 
       (DER - 2021/01/07, HDFFV-11201)
 
+    - Add missing ENV variable line to hdfoptions.cmake file
+
+      Using the build options to use system SZIP/ZLIB libraries need to also
+      specify the library root directory. Setting the {library}_ROOT ENV
+      variable was added to the hdfoptions.cmake file.
+
+      (ADB - 2020/10/19 HDFFV-11108)
+
+    - Fixed removal of Java lib files by "make uninstall"
+
+      "make uninstall" was not removing 5 Java files from the lib directory.
+
+      (LRK - 2020/08/24, HDFFV-10811)
+
     - Stopped addition of szip header and include directory path for
       incompatible libsz
 
@@ -900,6 +930,7 @@ Bug Fixes since HDF5-1.12.0 release
       libsz function passes the configure check.
 
       (LRK - 2020/08/17, HDFFV-10830)
+
 
     Tools
     -----
@@ -912,7 +943,7 @@ Bug Fixes since HDF5-1.12.0 release
       also show the number of bits for precision.
       These files are also used in the java tests.
 
-      (ADB - 2021/03/24, HDFFV-11229)
+      (ADB - 2021/03/24, HDFFV-11229,HDFFV-11113)
 
     - Fixed tools argument parsing.
 
@@ -922,6 +953,58 @@ Bug Fixes since HDF5-1.12.0 release
       Changed to match whole names.
 
       (ADB - 2021/01/19, HDFFV-11106)
+
+    - Fixed a bug with h5repack ignoring the "-q" and "-z" command-line options
+
+        h5repack uses the -q and -z command-line options to specify the indexing
+        options for objects in the file when repacking. Previously, h5repack
+        would simply ignore any setting from these options. This has been fixed
+        so that h5repack will correctly interpret the following settings:
+
+          -q "name"           : Sort objects by name order
+          -q "creation_order" : Sort objects by link creation order
+          -z "ascending"      : Sort objects by ascending name/link creation order
+          -z "descending"     : Sort objects by descending name/link creation order
+
+        (JTH - 2020/04/16, HDFFV-11030)
+
+    - The tools library was updated by standardizing the error stack process.
+
+        General sequence is:
+          h5tools_setprogname(PROGRAMNAME);
+          h5tools_setstatus(EXIT_SUCCESS);
+          h5tools_init();
+          ... process the command-line (check for error-stack enable) ...
+          h5tools_error_report();
+          ... (do work) ...
+          h5diff_exit(ret);
+
+        (ADB - 2020/07/20, HDFFV-11066)
+
+    - h5diff fixed a command line parsing error.
+
+        h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
+        The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+
+        (ADB - 2020/07/20, HDFFV-10897)
+
+    - h5diff added a command line option to ignore attributes.
+
+        h5diff would ignore all objects with a supplied path if the exclude-path argument is used.
+        Adding the exclude-attribute argument will only exclude attributes, with the supplied path,
+        from comparison.
+
+        (ADB - 2020/07/20, HDFFV-5935)
+
+    - h5diff added another level to the verbose argument to print filenames.
+
+        Added verbose level 3 that is level 2 plus the filenames. The levels are:
+          0 : Identical to '-v' or '--verbose'
+          1 : All level 0 information plus one-line attribute status summary
+          2 : All level 1 information plus extended attribute status report
+          3 : All level 2 information plus file names
+
+        (ADB - 2020/07/20, HDFFV-1005)
 
 
     Fortran API
@@ -952,10 +1035,24 @@ Bug Fixes since HDF5-1.12.0 release
 
       (ADB - 2021/05/03)
 
+    - Fixed the dimension size description in the layout message table of the
+      file format specification section IV.A.2.i.
+
+      The layout message table described the dimension sizes starting from
+      Dimension 0 to Dimension #n.  This was incorrect because it would mean
+      the rank is n+1.
+
+      The dimension size entries were changed to starting from Dimension 1 to
+      Dimension #n.
+
+      (VC – 2020/06/09, HDFFV-11079)
+
 
     F90 APIs
     --------
-    -
+    - Fixed parallel make build failure due to a missing H5forkit dependency.
+
+      (MSB, 2021/03/31, HDFFV-11232)
 
 
     C++ APIs
@@ -1080,24 +1177,24 @@ The following platforms are not supported but have been tested for this release.
 
     Linux-3.10.0-1127.0.0.1chaos  openmpi/4.0.0
     #1 SMP x86_64 GNU/Linux           clang/6.0.0, 11.0.1
-    (quartz)                          gcc/7.3.0, 8.1.0
+    (quartz)                          gcc/7.3.0, 8.3.0
                                       intel/16.0.4, 18.0.2, 19.0.4
 
     Linux-4.14.0-115.10.1.1       spectrum-mpi/rolling-release
-    #1 SMP ppc64le GNU/Linux          clang/7.1.0, 10.0.1
+    #1 SMP ppc64le GNU/Linux          clang/7.1.0, ibm-11.0.1
     (lassen)                          gcc/4.9.3, 8.3.1
-                                      xl/2019.02.07,2021.03.11
+                                      xl/2019.02.07, 2021.03.11
 
     Linux-4.12.14-150.52-default  cray-mpich/7.7.10
     #1 SMP x86_64 GNU/Linux           gcc/8.3.0
     (cori)                            intel/19.0.3
 
-    Linux-4.4.180-94.107-default  cray-mpich/7.7.6
-    # 1SMP x86_64 GNU/Linux           gcc/7.2.0, 8.2.0
-    (mutrino)                         intel/17.0.4, 18.0.2, 19.0.4
+    Linux-4.4.180-94.107-default  cray-mpich/7.7.16
+    # 1SMP x86_64 GNU/Linux           gcc/7.3.0, 8.3.0, 10.2.0
+    (mutrino)                         intel/17.0.4, 18.0.5, 19.1.3
 
     Linux-3.10.0-                 spectrum-mpi/rolling-release
-    1127.10.1.1chaos.ch6.ppc64le       clang/7.1,11.0.1
+    1127.10.1.1chaos.ch6.ppc64le       clang/7.1.0, 11.0.1
     #1 SMP ppc64le GNU/Linux           gcc/4.9.3,8.3.1
     (ray)                              xl/2019.08.20,2021.03.11
 
@@ -1155,6 +1252,9 @@ Known Problems
 
     CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
     issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+
+    The subsetting option in ph5diff currently will fail and should be avoided.
+    The subsetting option works correctly in serial h5diff.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to
