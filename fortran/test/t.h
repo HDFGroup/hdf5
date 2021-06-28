@@ -34,3 +34,5 @@ H5_FCTESTDLL int_f nh5_cleanup_c(_fcd base_name, size_t_f *base_namelen, hid_t_f
 H5_FCTESTDLL H5_ATTR_NORETURN void nh5_exit_c(int_f *status);
 
 H5_FCTESTDLL void nh5_env_nocleanup_c(int_f *status);
+
+H5_FCDLL int_f h5vl_fapl_is_native_c(hid_t_f *fapl_id, int_f *flag);

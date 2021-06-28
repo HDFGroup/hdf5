@@ -981,6 +981,7 @@
 ./src/H5Pdapl.c
 ./src/H5Pdcpl.c
 ./src/H5Pdeprec.c
+./src/H5Pdevelop.h
 ./src/H5Pdxpl.c
 ./src/H5Pencdec.c
 ./src/H5Pfapl.c
@@ -2972,6 +2973,7 @@
 
 # Utils directory
 ./utils/Makefile.am
+./utils/vds_check_compat_vol.c
 
 # Mirror VFD utilities
 ./utils/mirror_vfd/Makefile.am

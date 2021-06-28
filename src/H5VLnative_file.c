@@ -92,7 +92,6 @@ H5VL__native_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t 
     /* Create the file */
     if (NULL == (new_file = H5F_open(name, flags, fcpl_id, fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create file")
-    new_file->id_exists = TRUE;
 
     ret_value = (void *)new_file;
 
@@ -126,7 +125,6 @@ H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t H5
     /* Open the file */
     if (NULL == (new_file = H5F_open(name, flags, H5P_FILE_CREATE_DEFAULT, fapl_id)))
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file")
-    new_file->id_exists = TRUE;
 
     ret_value = (void *)new_file;
 
@@ -719,7 +717,7 @@ H5VL__native_file_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_
         /* Finalize H5Fopen */
         case H5VL_NATIVE_FILE_POST_OPEN: {
             /* Call package routine */
-            if (H5F__post_open(f) < 0)
+            if (H5F__post_open(f, opt_args->post_open.vol_obj, opt_args->post_open.id_exists) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't finish opening file")
             break;
         }
@@ -752,15 +750,12 @@ H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
 
     FUNC_ENTER_PACKAGE
 
-    /* This routine should only be called when a file ID's ref count drops to zero */
-    HDassert(H5F_ID_EXISTS(f));
-
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.
      * This is only necessary to replicate previous behaviour, and could be
      * disabled by an option/property to improve performance.
      */
-    if ((H5F_NREFS(f) > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
+    if (H5F_ID_EXISTS(f) && (H5F_NREFS(f) > 1) && (H5F_INTENT(f) & H5F_ACC_RDWR)) {
         /* Get the file ID corresponding to the H5F_t struct */
         if (H5I_find_id(f, H5I_FILE, &file_id) < 0 || H5I_INVALID_HID == file_id)
             HGOTO_ERROR(H5E_ID, H5E_CANTGET, FAIL, "invalid ID")

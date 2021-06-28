@@ -211,7 +211,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
     tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5 \
-    splitter*.h5 splitter.log mirror_rw mirror_ro event_set_[0-9].h5
+    splitter*.h5 splitter.log mirror_rw mirror_ro event_set_[0-9].h5 vol_public.h5
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \

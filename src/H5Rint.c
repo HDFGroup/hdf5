@@ -542,12 +542,8 @@ H5R__get_loc_id(const H5R_ref_priv_t *ref)
 hid_t
 H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 {
-    H5P_genplist_t *      plist;           /* Property list for FAPL */
-    void *                new_file = NULL; /* File object opened */
-    H5VL_connector_prop_t connector_prop;  /* Property for VOL connector ID & info     */
-    H5VL_object_t *       vol_obj = NULL;  /* VOL object for file */
-    uint64_t              supported;       /* Whether 'post open' operation is supported by VOL connector */
-    hid_t                 ret_value = H5I_INVALID_HID;
+    hid_t file_id = H5I_INVALID_HID;    /* New file's ID */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -557,53 +553,17 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
     if (H5CX_set_apl(&fapl_id, H5P_CLS_FACC, H5I_INVALID_HID, TRUE) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "can't set access property list info")
 
-    /* Get the VOL info from the fapl */
-    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a file access property list")
-    if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL connector info")
-
-    /* Stash a copy of the "top-level" connector property, before any pass-through
-     *  connectors modify or unwrap it.
-     */
-    if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID,
-                    "can't set VOL connector info in API context")
-
     /* Open the file */
     /* (Must open file read-write to allow for object modifications) */
-    if (NULL == (new_file = H5VL_file_open(&connector_prop, H5R_REF_FILENAME(ref), H5F_ACC_RDWR, fapl_id,
-                                           H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
+    if (NULL == H5VL_file_open(H5R_REF_FILENAME(ref), H5F_ACC_RDWR, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &file_id))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
-    /* Get an ID for the file */
-    if ((ret_value = H5VL_register_using_vol_id(H5I_FILE, new_file, connector_prop.connector_id, TRUE)) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
-
-    /* Get the file object */
-    if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "invalid object identifier")
-
-    /* Make the 'post open' callback */
-    supported = 0;
-    if (H5VL_introspect_opt_query(vol_obj, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
-        HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID, "can't check for 'post open' operation")
-    if (supported & H5VL_OPT_QUERY_SUPPORTED) {
-        H5VL_optional_args_t vol_cb_args; /* Arguments to VOL callback */
-
-        /* Set up VOL callback arguments */
-        vol_cb_args.op_type = H5VL_NATIVE_FILE_POST_OPEN;
-        vol_cb_args.args    = NULL;
-
-        /* Make the 'post open' callback */
-        if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
-            HGOTO_ERROR(H5E_REFERENCE, H5E_CANTINIT, H5I_INVALID_HID,
-                        "unable to make file 'post open' callback")
-    } /* end if */
-
     /* Attach loc_id to reference */
-    if (H5R__set_loc_id((H5R_ref_priv_t *)ref, ret_value, FALSE, TRUE) < 0)
+    if (H5R__set_loc_id((H5R_ref_priv_t *)ref, file_id, FALSE, TRUE) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTSET, H5I_INVALID_HID, "unable to attach location id to reference")
+
+    /* Set return value */
+    ret_value = file_id;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

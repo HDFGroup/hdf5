@@ -63,6 +63,7 @@ typedef struct H5CX_state_t {
 /* Library private routines */
 #ifndef H5private_H
 H5_DLL herr_t H5CX_push(void);
+H5_DLL herr_t H5CX_test_and_push(hbool_t *pushed);
 H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #endif /* H5private_H */
 H5_DLL void    H5CX_push_special(void);

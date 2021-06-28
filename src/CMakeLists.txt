@@ -520,6 +520,7 @@ set (H5P_SOURCES
 )
 
 set (H5P_HDRS
+    ${HDF5_SRC_DIR}/H5Pdevelop.h
     ${HDF5_SRC_DIR}/H5Ppublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5P" "${H5P_HDRS}" "${H5P_SOURCES}" )

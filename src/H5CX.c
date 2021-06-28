@@ -664,7 +664,7 @@ done:
  *            Failure:    Negative.
  *
  * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
+ *              February 22, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -754,7 +754,7 @@ H5CX__get_context(void)
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
+ *              February 22, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -795,7 +795,7 @@ H5CX__push_common(H5CX_node_t *cnode)
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 19, 2018
+ *              February 19, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -828,7 +828,7 @@ done:
  * Return:      <none>
  *
  * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
+ *              February 22, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -848,6 +848,52 @@ H5CX_push_special(void)
 
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5CX_push_special() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_test_and_push
+ *
+ * Purpose:     Pushes a context for an API call, if one isn't already pushed.
+ *
+ * Return:      <none>
+ *
+ * Programmer:  Quincey Koziol
+ *              June 9, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5CX_test_and_push(hbool_t *pushed)
+{
+    H5CX_node_t **head     = NULL;    /* Pointer to head of API context list */
+    herr_t       ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(pushed);
+
+    /* Check for API context already pushed */
+    head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
+    if(NULL == *head) {
+        H5CX_node_t *cnode     = NULL;    /* Context node */
+
+        /* Allocate & clear API context node */
+        if (NULL == (cnode = H5FL_CALLOC(H5CX_node_t)))
+            HGOTO_ERROR(H5E_CONTEXT, H5E_CANTALLOC, FAIL, "unable to allocate new struct")
+
+        /* Set context info */
+        H5CX__push_common(cnode);
+
+        /* Indicate that the context was pushed */
+        *pushed = TRUE;
+    } /* end if */
+    else
+        /* Context was not pushed */
+        *pushed = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5CX_test_and_push() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5CX_retrieve_state
@@ -1312,7 +1358,7 @@ H5CX_set_lapl(hid_t lapl_id)
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 19, 2018
+ *              February 19, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1567,7 +1613,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 20, 2018
+ *              February 20, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1699,7 +1745,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 20, 2018
+ *              February 20, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1729,7 +1775,7 @@ H5CX_get_tag(void)
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 22, 2018
+ *              February 22, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1761,7 +1807,7 @@ H5CX_get_ring(void)
  * Return:      TRUE / FALSE on success / <can't fail>
  *
  * Programmer:  Quincey Koziol
- *              Februrary 23, 2018
+ *              February 23, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1793,7 +1839,7 @@ H5CX_get_coll_metadata_read(void)
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
+ *              February 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1889,7 +1935,7 @@ H5CX_get_mpio_rank0_bcast(void)
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 23, 2018
+ *              February 23, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1925,7 +1971,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
+ *              February 25, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1960,7 +2006,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
+ *              February 25, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -1995,7 +2041,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
+ *              February 25, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2030,7 +2076,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
+ *              February 25, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2065,7 +2111,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
+ *              February 25, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2102,7 +2148,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 25, 2018
+ *              February 25, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2137,7 +2183,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
+ *              February 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2353,7 +2399,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
+ *              February 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2388,7 +2434,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
+ *              February 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2423,7 +2469,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
+ *              February 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2878,7 +2924,7 @@ done:
  * Return:      <none>
  *
  * Programmer:  Quincey Koziol
- *              Februrary 20, 2018
+ *              February 20, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2906,7 +2952,7 @@ H5CX_set_tag(haddr_t tag)
  * Return:      <none>
  *
  * Programmer:  Quincey Koziol
- *              Februrary 20, 2018
+ *              February 20, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2936,7 +2982,7 @@ H5CX_set_ring(H5AC_ring_t ring)
  * Return:      <none>
  *
  * Programmer:  Quincey Koziol
- *              Februrary 23, 2018
+ *              February 23, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2966,7 +3012,7 @@ H5CX_set_coll_metadata_read(hbool_t cmdr)
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
+ *              February 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -2999,7 +3045,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
+ *              February 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3033,7 +3079,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 26, 2018
+ *              February 26, 2018
  *
  *-------------------------------------------------------------------------
  */
@@ -3658,7 +3704,7 @@ done:
  * Return:      Non-negative on success / Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              Februrary 19, 2018
+ *              February 19, 2018
  *
  *-------------------------------------------------------------------------
  */

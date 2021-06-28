@@ -4292,6 +4292,7 @@ check_external_link_open_tags(void)
 #endif                                /* NDEBUG */
     H5O_native_info_t ninfo;          /* Native object info struct */
     hid_t             fapl      = -1; /* File access prop list */
+    hbool_t           is_native;        /* Whether the native VOL connector is being used */
     haddr_t           root_tag  = 0;
     haddr_t           root2_tag = 0;
 
@@ -4306,9 +4307,14 @@ check_external_link_open_tags(void)
     if ((fapl = h5_fileaccess_flags(H5_FILEACCESS_LIBVER)) < 0)
         TEST_ERROR;
 
+    /* Check for operating with native (only) VOL connector */
+    is_native = FALSE;
+    if (H5VL_fapl_is_native(fapl, &is_native) < 0)
+        TEST_ERROR;
+
     /* Create a test file */
     if ((fid = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* determine tag value of root group's object header */
     if (get_object_header_tag(fid, &root_tag) < 0)
@@ -4316,7 +4322,7 @@ check_external_link_open_tags(void)
 
     /* Create a second file */
     if ((fid2 = H5Fcreate(FILENAME2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* determine tag value of root group's object header */
     if (get_object_header_tag(fid2, &root2_tag) < 0)
@@ -4324,26 +4330,26 @@ check_external_link_open_tags(void)
 
     /* Create group in second file */
     if ((gid = H5Gcreate2(fid2, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close out second file */
     if ((H5Gclose(gid)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if ((H5Fclose(fid2)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Create external link to second file */
     if (H5Lcreate_external(FILENAME2, GROUPNAMEPATH, fid, LINKNAME, H5P_DEFAULT, H5P_DEFAULT) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Close and Reopen the file */
     if (H5Fclose(fid) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
     if ((fid = H5Fopen(FILENAME, H5F_ACC_RDWR, fapl)) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     if (H5Pclose(fapl) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* Evict as much as we can from the cache so we can track full tag path */
     if (evict_entries(fid) < 0)
@@ -4353,78 +4359,94 @@ check_external_link_open_tags(void)
     /* Open External Link */
     /* ================== */
 
-    if ((xid = H5Gopen2(fid, LINKNAME, H5P_DEFAULT)) < 0)
-        TEST_ERROR;
-    if ((fid2 = H5Iget_file_id(xid)) < 0)
-        TEST_ERROR;
-    if (get_object_header_tag(xid, &link_tag) < 0)
-        TEST_ERROR;
+    H5E_BEGIN_TRY {
+    xid = H5Gopen2(fid, LINKNAME, H5P_DEFAULT);
+    } H5E_END_TRY
+    if (is_native) {
+        if (xid < 0)
+            FAIL_STACK_ERROR;
+        if ((fid2 = H5Iget_file_id(xid)) < 0)
+            FAIL_STACK_ERROR;
+        if (get_object_header_tag(xid, &link_tag) < 0)
+            TEST_ERROR;
 
-    /* Even though we do nothing with this, touching the internal
-     * data structures is needed for the test to pass.
-     */
-    if (H5Oget_native_info(xid, &ninfo, H5O_NATIVE_INFO_ALL) < 0)
-        TEST_ERROR;
+        /* Even though we do nothing with this, touching the internal
+         * data structures is needed for the test to pass.
+         */
+        if (H5Oget_native_info(xid, &ninfo, H5O_NATIVE_INFO_ALL) < 0)
+            FAIL_STACK_ERROR;
 
-        /* =================================== */
-        /* Verification of Metadata Tag Values */
-        /* =================================== */
+            /* =================================== */
+            /* Verification of Metadata Tag Values */
+            /* =================================== */
 
 #ifndef NDEBUG
-    /* if verbose, print cache index to screen for visual verification */
-    if (verbose)
-        dump_cache(fid);
+        /* if verbose, print cache index to screen for visual verification */
+        if (verbose)
+            dump_cache(fid);
 #endif /* NDEBUG */ /* end debugging functions */
 
-    /* verify tag value of first file's root group */
-    if (verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0)
-        TEST_ERROR;
-    if (verify_tag(fid, H5AC_OHDR_CHK_ID, root_tag) < 0)
-        TEST_ERROR;
+        /* verify tag value of first file's root group */
+        if (verify_tag(fid, H5AC_OHDR_ID, root_tag) < 0)
+            TEST_ERROR;
+        if (verify_tag(fid, H5AC_OHDR_CHK_ID, root_tag) < 0)
+            TEST_ERROR;
 
-    /* verify there is a superblock entry with superblock tag. */
-    if (verify_tag(fid2, H5AC_SUPERBLOCK_ID, H5AC__SUPERBLOCK_TAG) < 0)
-        TEST_ERROR;
+        /* verify there is a superblock entry with superblock tag. */
+        if (verify_tag(fid2, H5AC_SUPERBLOCK_ID, H5AC__SUPERBLOCK_TAG) < 0)
+            TEST_ERROR;
 
-    /* verify tag value of linked file's root group */
-    if (verify_tag(fid2, H5AC_OHDR_ID, root2_tag) < 0)
-        TEST_ERROR;
-    if (verify_tag(fid2, H5AC_LHEAP_PRFX_ID, root2_tag) < 0)
-        TEST_ERROR;
-    if (verify_tag(fid2, H5AC_BT_ID, root2_tag) < 0)
-        TEST_ERROR;
-    if (verify_tag(fid2, H5AC_SNODE_ID, root2_tag) < 0)
-        TEST_ERROR;
+        /* verify tag value of linked file's root group */
+        if (verify_tag(fid2, H5AC_OHDR_ID, root2_tag) < 0)
+            TEST_ERROR;
+        if (verify_tag(fid2, H5AC_LHEAP_PRFX_ID, root2_tag) < 0)
+            TEST_ERROR;
+        if (verify_tag(fid2, H5AC_BT_ID, root2_tag) < 0)
+            TEST_ERROR;
+        if (verify_tag(fid2, H5AC_SNODE_ID, root2_tag) < 0)
+            TEST_ERROR;
 
-    /* verify tag value of linked group's object header */
-    if (verify_tag(fid2, H5AC_OHDR_ID, link_tag) < 0)
-        TEST_ERROR;
-    if (verify_tag(fid2, H5AC_LHEAP_PRFX_ID, link_tag) < 0)
-        TEST_ERROR;
-    if (verify_tag(fid2, H5AC_BT_ID, link_tag) < 0)
-        TEST_ERROR;
+        /* verify tag value of linked group's object header */
+        if (verify_tag(fid2, H5AC_OHDR_ID, link_tag) < 0)
+            TEST_ERROR;
+        if (verify_tag(fid2, H5AC_LHEAP_PRFX_ID, link_tag) < 0)
+            TEST_ERROR;
+        if (verify_tag(fid2, H5AC_BT_ID, link_tag) < 0)
+            TEST_ERROR;
 
-    /* verify no other entries present */
-    if (verify_no_unknown_tags(fid) < 0)
-        TEST_ERROR;
-    if (verify_no_unknown_tags(fid2) < 0)
-        TEST_ERROR;
+        /* verify no other entries present */
+        if (verify_no_unknown_tags(fid) < 0)
+            TEST_ERROR;
+        if (verify_no_unknown_tags(fid2) < 0)
+            TEST_ERROR;
 
-    /* Reset the changes we've made to the cache's data structures */
-    if (reset_all_entries_investigated(fid) < 0)
-        TEST_ERROR;
-    if (reset_all_entries_investigated(fid2) < 0)
-        TEST_ERROR;
+        /* Reset the changes we've made to the cache's data structures */
+        if (reset_all_entries_investigated(fid) < 0)
+            TEST_ERROR;
+        if (reset_all_entries_investigated(fid2) < 0)
+            TEST_ERROR;
 
-    /* =========================== */
-    /* Close open objects and file */
-    /* =========================== */
-    if (H5Gclose(xid) < 0)
-        TEST_ERROR;
+        /* ================== */
+        /* Close open objects */
+        /* ================== */
+        if (H5Gclose(xid) < 0)
+            FAIL_STACK_ERROR;
+
+        /* ========== */
+        /* Close file */
+        /* ========== */
+        if (H5Fclose(fid2) < 0)
+            FAIL_STACK_ERROR;
+    }
+    else
+        if (xid >= 0)
+            TEST_ERROR;
+
+    /* ========== */
+    /* Close file */
+    /* ========== */
     if (H5Fclose(fid) < 0)
-        TEST_ERROR;
-    if (H5Fclose(fid2) < 0)
-        TEST_ERROR;
+        FAIL_STACK_ERROR;
 
     /* ========================================== */
     /* Finished Test. Print status and return. */

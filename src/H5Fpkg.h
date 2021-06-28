@@ -310,7 +310,6 @@ struct H5F_shared_t {
 
     /* Cached VOL connector ID & info */
     hid_t               vol_id;   /* ID of VOL connector for the container */
-    const H5VL_class_t *vol_cls;  /* Pointer to VOL connector class for the container */
     void *              vol_info; /* Copy of VOL connector info for container */
 
     /* File space allocation information */
@@ -404,7 +403,7 @@ H5_DLLVAR htri_t use_locks_env_g;
 /******************************/
 
 /* General routines */
-H5_DLL herr_t H5F__post_open(H5F_t *f);
+H5_DLL herr_t H5F__post_open(H5F_t *f, H5VL_object_t *vol_obj, hbool_t id_exists);
 H5_DLL H5F_t *H5F__reopen(H5F_t *f);
 H5_DLL herr_t H5F__flush(H5F_t *f);
 H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
@@ -413,6 +412,7 @@ H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
 H5_DLL herr_t H5F__format_convert(H5F_t *f);
 H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t H5F__close(H5F_t *f);
+H5_DLL herr_t H5F__close_obj(H5VL_object_t *file_vol_obj, void **request);
 H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
 H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks);
@@ -456,7 +456,7 @@ H5_DLL herr_t H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag);
 
 /* External file cache routines */
 H5_DLL H5F_efc_t *H5F__efc_create(unsigned max_nfiles);
-H5_DLL H5F_t *  H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id);
+H5_DLL H5F_t *  H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fapl_id);
 H5_DLL unsigned H5F__efc_max_nfiles(H5F_efc_t *efc);
 H5_DLL herr_t   H5F__efc_release(H5F_efc_t *efc);
 H5_DLL herr_t   H5F__efc_destroy(H5F_efc_t *efc);

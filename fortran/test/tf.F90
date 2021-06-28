@@ -135,7 +135,7 @@ CONTAINS
 !DEC$if defined(BUILD_HDF5_TEST_DLL)
 !DEC$attributes dllexport :: h5_fixname_f
 !DEC$endif
-    USE H5GLOBAL
+    USE H5GLOBAL, ONLY : HID_T, SIZE_T
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name
     CHARACTER(LEN=*), INTENT(IN) :: full_name   ! full name
@@ -149,7 +149,7 @@ CONTAINS
     INTERFACE
        INTEGER FUNCTION h5_fixname_c(base_name, base_namelen, fapl, &
             full_name, full_namelen)
-         USE H5GLOBAL
+         USE H5GLOBAL, ONLY : HID_T, SIZE_T
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_FIXNAME_C':: h5_fixname_c
          !DEC$ ENDIF
@@ -195,7 +195,7 @@ CONTAINS
 !DEC$if defined(BUILD_HDF5_TEST_DLL)
 !DEC$attributes dllexport :: h5_cleanup_f
 !DEC$endif
-    USE H5GLOBAL
+    USE H5GLOBAL, ONLY : HID_T, SIZE_T
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
@@ -205,7 +205,7 @@ CONTAINS
 
     INTERFACE
        INTEGER FUNCTION h5_cleanup_c(base_name, base_namelen, fapl)
-         USE H5GLOBAL
+         USE H5GLOBAL, ONLY : HID_T, SIZE_T
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
          !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5_CLEANUP_C':: h5_cleanup_c
          !DEC$ ENDIF
@@ -303,6 +303,56 @@ CONTAINS
     IF(status.EQ.1) HDF5_NOCLEANUP = .TRUE.
 
   END SUBROUTINE h5_env_nocleanup_f
+
+!----------------------------------------------------------------------
+! Name:		h5vl_fapl_is_native_f
+!
+! Purpose:	Invokes the H5VL_fapl_is_native() operation
+!
+! Inputs:       fapl - file access property list
+!               flag - flag indicating whether VOL connector stack in FAPL is the native connector
+!
+! Outputs:      IsNative - .true. - FAPL indicates that VOL connector stack is just native connector
+!		           .false. - Not the native connector
+!               hdferr    - Returns 0 on success and -1 on failure
+!
+! Programmer:	Quincey Koziol
+!               June 24, 2021
+!
+!----------------------------------------------------------------------
+  SUBROUTINE h5vl_fapl_is_native_f(fapl_id, IsNative, hdferr)
+!
+!This definition is needed for Windows DLLs
+!DEC$if defined(BUILD_HDF5_TEST_DLL)
+!DEC$attributes dllexport :: h5vl_fapl_is_native_f
+!DEC$endif
+    USE H5GLOBAL, ONLY : HID_T
+    IMPLICIT NONE
+    INTEGER(HID_T), INTENT(IN) :: fapl_id
+    LOGICAL, INTENT(OUT) :: IsNative
+    INTEGER, INTENT(OUT) :: hdferr
+!*****
+    INTEGER :: flag ! "TRUE/FALSE" flag from C routine
+
+    INTERFACE
+       INTEGER FUNCTION h5vl_fapl_is_native_c(fapl_id, flag) BIND(C,NAME='h5vl_fapl_is_native_c')
+         USE H5GLOBAL, ONLY : HID_T
+         !DEC$ IF DEFINED(HDF5F90_WINDOWS)
+         !DEC$ ATTRIBUTES C,reference,decorate,alias:'H5VL_FAPL_IS_NATIVE_C':: h5vl_fapl_is_native_c
+         !DEC$ ENDIF
+         IMPLICIT NONE
+         INTEGER(HID_T), INTENT(IN) :: fapl_id
+         INTEGER :: flag
+       END FUNCTION h5vl_fapl_is_native_c
+    END INTERFACE
+
+    hdferr = h5vl_fapl_is_native_c(fapl_id, flag)
+    IF(hdferr.GE.0) THEN
+        IsNative = .FALSE.
+        IF (flag .EQ. 1) IsNative = .TRUE.
+    ENDIF
+
+  END SUBROUTINE h5vl_fapl_is_native_f
 
 ! ---------------------------------------------------------------------------------------------------
 ! H5_SIZEOF routines

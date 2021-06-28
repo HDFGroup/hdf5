@@ -686,7 +686,7 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     /* Create VOL object for file if necessary (force_conv will be TRUE if and
      * only if file needs to be passed to H5T_set_loc) */
     if (H5T_GET_FORCE_CONV(dtype) &&
-        (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id))))
+        (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id, TRUE))))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
 
     /* Copy the datatype */

@@ -12289,11 +12289,17 @@ main(void)
     int          test_api_config;
     unsigned     bit_config;
     H5F_libver_t low, high; /* Low and high bounds */
+    hbool_t is_native;              /* Whether native VOL connector is being used */
     int          nerrors = 0;
 
     /* Testing setup */
     h5_reset();
     fapl = h5_fileaccess();
+
+    /* Check for operating with native (only) VOL connector */
+    is_native = FALSE;
+    if (H5VL_fapl_is_native(fapl, &is_native) < 0)
+        TEST_ERROR;
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
@@ -12340,53 +12346,61 @@ main(void)
                 nerrors += test_api((test_api_config_t)test_api_config, vds_fapl, low);
 
             TESTING_2("Virtual dataset I/O")
+
+            /* Skip tests for virtual dataset I/O when using non-native VOL connectors */
+            if (!is_native) {
+                SKIPPED();
+                HDputs("    Not using native VOL connector");
+            }
+            else {
 #ifdef VDS_TEST_VERBOSE
-            HDputs("");
+                HDputs("");
 #else  /* VDS_TEST_VERBOSE */
-            tmp_nerrors = nerrors;
+                tmp_nerrors = nerrors;
 #endif /* VDS_TEST_VERBOSE */
 
-            for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
-                /* Skip invalid configurations */
-                if ((bit_config & TEST_IO_FCLOSE_SEMI) && (bit_config & TEST_IO_FCLOSE_STRONG))
-                    continue;
+                for (bit_config = 0; bit_config < TEST_IO_NTESTS; bit_config++) {
+                    /* Skip invalid configurations */
+                    if ((bit_config & TEST_IO_FCLOSE_SEMI) && (bit_config & TEST_IO_FCLOSE_STRONG))
+                        continue;
 
-                /* Print message */
-                PRINT_CONFIG(
-                    "%s%s%s, %s file close degree",
-                    bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
-                    bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
-                    bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "",
-                    bit_config & TEST_IO_FCLOSE_SEMI
-                        ? "H5F_CLOSE_SEMI"
-                        : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
+                    /* Print message */
+                    PRINT_CONFIG(
+                        "%s%s%s, %s file close degree",
+                        bit_config & TEST_IO_CLOSE_SRC ? "closed source dataset, " : "",
+                        bit_config & TEST_IO_DIFFERENT_FILE ? "different source file" : "same source file",
+                        bit_config & TEST_IO_REOPEN_VIRT ? ", reopen virtual file" : "",
+                        bit_config & TEST_IO_FCLOSE_SEMI
+                            ? "H5F_CLOSE_SEMI"
+                            : (bit_config & TEST_IO_FCLOSE_STRONG ? "H5F_CLOSE_STRONG" : "H5F_CLOSE_WEAK"));
 
-                /* Set file close degree */
-                if (bit_config & TEST_IO_FCLOSE_SEMI) {
-                    if (H5Pset_fclose_degree(vds_fapl, H5F_CLOSE_SEMI) < 0)
-                        TEST_ERROR
-                }
-                else if (bit_config & TEST_IO_FCLOSE_STRONG) {
-                    if (H5Pset_fclose_degree(vds_fapl, H5F_CLOSE_STRONG) < 0)
-                        TEST_ERROR
-                }
-                else {
-                    if (H5Pset_fclose_degree(vds_fapl, H5F_CLOSE_WEAK) < 0)
-                        TEST_ERROR
-                }
+                    /* Set file close degree */
+                    if (bit_config & TEST_IO_FCLOSE_SEMI) {
+                        if (H5Pset_fclose_degree(vds_fapl, H5F_CLOSE_SEMI) < 0)
+                            TEST_ERROR
+                    }
+                    else if (bit_config & TEST_IO_FCLOSE_STRONG) {
+                        if (H5Pset_fclose_degree(vds_fapl, H5F_CLOSE_STRONG) < 0)
+                            TEST_ERROR
+                    }
+                    else {
+                        if (H5Pset_fclose_degree(vds_fapl, H5F_CLOSE_WEAK) < 0)
+                            TEST_ERROR
+                    }
 
-                /* Run tests */
-                nerrors += test_basic_io(bit_config, vds_fapl, src_fapl);
-                nerrors += test_vds_prefix_first(bit_config, vds_fapl, src_fapl);
-                nerrors += test_unlim(bit_config, vds_fapl, src_fapl);
-                nerrors += test_printf(bit_config, vds_fapl, src_fapl);
-                nerrors += test_all(bit_config, vds_fapl, src_fapl);
-            }
+                    /* Run tests */
+                    nerrors += test_basic_io(bit_config, vds_fapl, src_fapl);
+                    nerrors += test_vds_prefix_first(bit_config, vds_fapl, src_fapl);
+                    nerrors += test_unlim(bit_config, vds_fapl, src_fapl);
+                    nerrors += test_printf(bit_config, vds_fapl, src_fapl);
+                    nerrors += test_all(bit_config, vds_fapl, src_fapl);
+                }
 
 #ifndef VDS_TEST_VERBOSE
-            if (tmp_nerrors == nerrors)
-                PASSED();
+                if (tmp_nerrors == nerrors)
+                    PASSED();
 #endif /* VDS_TEST_VERBOSE */
+            }
 
             nerrors += test_dapl_values(vds_fapl);
 

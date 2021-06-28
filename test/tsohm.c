@@ -21,9 +21,10 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_FRIEND /* suppress error about including H5Fpkg      */
+#define H5F_FRIEND       /* suppress error about including H5Fpkg      */
 #define H5F_TESTING
-#include "H5Fpkg.h" /* File access */
+#include "H5Fpkg.h"      /* File access */
+#include "H5VLprivate.h" /* Virtual Object Layer */
 
 /* Default SOHM values */
 #define DEF_NUM_INDEXES 0
@@ -3225,11 +3226,12 @@ test_sohm_delete_revert(void)
 static void
 verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t dst_fcpl_id)
 {
-    hid_t   src_file_id = -1;
-    hid_t   dst_file_id = -1;
-    hid_t   space_id    = -1;
-    hid_t   dset_id     = -1;
+    hid_t   src_file_id = H5I_INVALID_HID;
+    hid_t   dst_file_id = H5I_INVALID_HID;
+    hid_t   space_id    = H5I_INVALID_HID;
+    hid_t   dset_id     = H5I_INVALID_HID;
     hsize_t dims[]      = {1, 1};
+    hbool_t is_native;
     herr_t  ret;
 
     /* Create files */
@@ -3242,20 +3244,31 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
     ret = H5Lcreate_external(FILENAME_DST, "/", src_file_id, "ext_link", H5P_DEFAULT, H5P_DEFAULT);
     CHECK_I(ret, "H5Lcreate_external");
 
+    /* Check for operating with native (only) VOL connector */
+    is_native = FALSE;
+    ret = H5VL_fapl_is_native(H5P_DEFAULT, &is_native);
+    CHECK_I(ret, "H5VL__fapl_is_native_test");
+
     /* Create a dataset through the external link */
     space_id = H5Screate_simple(2, dims, dims);
     CHECK_I(space_id, "H5Screate_simple");
     dset_id = H5Dcreate2(src_file_id, "ext_link/dataset", H5T_NATIVE_FLOAT, space_id, H5P_DEFAULT,
                          H5P_DEFAULT, H5P_DEFAULT);
-    CHECK_I(dset_id, "H5Dcreate2");
+    if (is_native) {
+        CHECK_I(dset_id, "H5Dcreate2");
+
+        /* Close the dataset */
+        ret = H5Sclose(space_id);
+        CHECK_I(ret, "H5Sclose");
+        ret = H5Dclose(dset_id);
+        CHECK_I(ret, "H5Dclose");
+    }
+    else
+        VERIFY(dset_id, H5I_INVALID_HID, "H5Dcreate2");
 
     /* Close the dataset and both files to make sure everything gets flushed
      * out of memory
      */
-    ret = H5Sclose(space_id);
-    CHECK_I(ret, "H5Sclose");
-    ret = H5Dclose(dset_id);
-    CHECK_I(ret, "H5Dclose");
     ret = H5Fclose(src_file_id);
     CHECK_I(ret, "H5Fclose");
     ret = H5Fclose(dst_file_id);
@@ -3265,16 +3278,18 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
      * the wrong file, it'll be impossible to read the dataset's object
      * header.
      */
-    dst_file_id = H5Fopen(FILENAME_DST, H5F_ACC_RDONLY, H5P_DEFAULT);
-    CHECK_I(dst_file_id, "H5Fopen");
-    dset_id = H5Dopen2(dst_file_id, "dataset", H5P_DEFAULT);
-    CHECK_I(dset_id, "H5Dopen2");
+    if (is_native) {
+        dst_file_id = H5Fopen(FILENAME_DST, H5F_ACC_RDONLY, H5P_DEFAULT);
+        CHECK_I(dst_file_id, "H5Fopen");
+        dset_id = H5Dopen2(dst_file_id, "dataset", H5P_DEFAULT);
+        CHECK_I(dset_id, "H5Dopen2");
 
-    /* Cleanup */
-    ret = H5Dclose(dset_id);
-    CHECK_I(ret, "H5Dclose");
-    ret = H5Fclose(dst_file_id);
-    CHECK_I(ret, "H5Fclose");
+        /* Cleanup */
+        ret = H5Dclose(dset_id);
+        CHECK_I(ret, "H5Dclose");
+        ret = H5Fclose(dst_file_id);
+        CHECK_I(ret, "H5Fclose");
+    }
 } /* verify_dset_create_and_open_through_extlink_with_sohm */
 
 /*-------------------------------------------------------------------------

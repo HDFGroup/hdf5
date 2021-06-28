@@ -56,76 +56,90 @@ static int external_link_env(hid_t fapl, hbool_t new_format);
 static int
 external_link_env(hid_t fapl, hbool_t new_format)
 {
-    hid_t       fid    = (-1); /* File ID */
-    hid_t       gid    = (-1); /* Group IDs */
+    hid_t       fid    = H5I_INVALID_HID; /* File ID */
+    hid_t       gid    = H5I_INVALID_HID; /* Group IDs */
     const char *envval = NULL; /* Pointer to environment variable */
     char        filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE],
         filename3[NAME_BUF_SIZE]; /* Holders for filename */
+    hbool_t is_native;              /* Whether native VOL connector is being used */
 
     if (new_format)
         TESTING("external links via environment variable (w/new group format)")
     else
         TESTING("external links via environment variable")
 
-    if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
-        envval = "nomatch";
-    if (HDstrcmp(envval, ".:tmp_links_env") != 0)
-        TEST_ERROR
+    /* Check for operating with native (only) VOL connector */
+    is_native = FALSE;
+    if (H5VL_fapl_is_native(fapl, &is_native) < 0)
+        TEST_ERROR;
 
-    /* Set up name for main file:"extlinks_env0" */
-    h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
-
-    /* Set up name for external linked target file: "extlinks_env1" */
-    h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
-
-    /* Create "tmp_links_env" directory */
-    if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
-        TEST_ERROR
-
-    /* Set up name (location) for the target file: "tmp_links_env/extlinks1" */
-    h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
-
-    /* Create the target file in "tmp_links_env" directory */
-    if ((fid = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR
-    if ((gid = H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        TEST_ERROR
-
-    /* Closing for target file */
-    if (H5Gclose(gid) < 0)
-        TEST_ERROR
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR
-
-    /* Create the main file */
-    if ((fid = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        TEST_ERROR
-
-    /* Create external link to target file */
-    if (H5Lcreate_external(filename2, "/A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        TEST_ERROR
-
-    /* Open object through external link */
-    H5E_BEGIN_TRY
-    {
-        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    /* Skip tests when using non-native VOL connectors */
+    if (!is_native) {
+        SKIPPED();
+        HDputs("    Not using native VOL connector");
     }
-    H5E_END_TRY;
+    else {
+        if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
+            envval = "nomatch";
+        if (HDstrcmp(envval, ".:tmp_links_env") != 0)
+            TEST_ERROR
 
-    /* Should be able to find the target file from pathnames set via HDF5_EXT_PREFIX */
-    if (gid < 0) {
-        H5_FAILED();
-        HDputs("    Should have found the file in tmp_links_env directory.");
-        goto error;
+        /* Set up name for main file:"extlinks_env0" */
+        h5_fixname(FILENAME[0], fapl, filename1, sizeof filename1);
+
+        /* Set up name for external linked target file: "extlinks_env1" */
+        h5_fixname(FILENAME[1], fapl, filename2, sizeof filename2);
+
+        /* Create "tmp_links_env" directory */
+        if (HDmkdir(TMPDIR, (mode_t)0755) < 0 && errno != EEXIST)
+            TEST_ERROR
+
+        /* Set up name (location) for the target file: "tmp_links_env/extlinks1" */
+        h5_fixname(FILENAME[2], fapl, filename3, sizeof filename3);
+
+        /* Create the target file in "tmp_links_env" directory */
+        if ((fid = H5Fcreate(filename3, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+        if ((gid = H5Gcreate2(fid, "A", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            TEST_ERROR
+
+        /* Closing for target file */
+        if (H5Gclose(gid) < 0)
+            TEST_ERROR
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR
+
+        /* Create the main file */
+        if ((fid = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            TEST_ERROR
+
+        /* Create external link to target file */
+        if (H5Lcreate_external(filename2, "/A", fid, "ext_link", H5P_DEFAULT, H5P_DEFAULT) < 0)
+            TEST_ERROR
+
+        /* Open object through external link */
+        H5E_BEGIN_TRY
+        {
+            gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+
+        /* Should be able to find the target file from pathnames set via HDF5_EXT_PREFIX */
+        if (gid < 0) {
+            H5_FAILED();
+            HDputs("    Should have found the file in tmp_links_env directory.");
+            goto error;
+        }
+
+        /* closing for main file */
+        if (H5Gclose(gid) < 0)
+            TEST_ERROR
+        if (H5Fclose(fid) < 0)
+            TEST_ERROR
+
+        PASSED();
     }
 
-    /* closing for main file */
-    if (H5Gclose(gid) < 0)
-        TEST_ERROR
-    if (H5Fclose(fid) < 0)
-        TEST_ERROR
-
-    PASSED();
     return 0;
 
 error:

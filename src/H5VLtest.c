@@ -31,9 +31,12 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions                    */
-#include "H5Eprivate.h" /* Error handling                       */
-#include "H5VLpkg.h"    /* Virtual Object Layer                 */
+#include "H5private.h"  /* Generic Functions                        */
+#include "H5Eprivate.h" /* Error handling                           */
+#include "H5Fprivate.h" /* Files                                    */
+#include "H5Iprivate.h" /* IDs                                      */
+#include "H5Pprivate.h" /* Property lists                           */
+#include "H5VLpkg.h"    /* Virtual Object Layer                     */
 
 /****************/
 /* Local Macros */
@@ -94,3 +97,4 @@ H5VL__reparse_def_vol_conn_variable_test(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__reparse_def_vol_conn_variable_test() */
+

@@ -917,7 +917,8 @@ done:
  *-------------------------------------------------------------------------
  */
 H5VL_object_t *
-H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id)
+H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id,
+                                hbool_t wrap_obj)
 {
     H5VL_class_t * cls          = NULL;  /* VOL connector class */
     H5VL_t *       connector    = NULL;  /* VOL connector struct */
@@ -940,8 +941,7 @@ H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id)
     conn_id_incr = TRUE;
 
     /* Set up VOL object for the passed-in data */
-    /* (Wraps object, since it's a library object) */
-    if (NULL == (ret_value = H5VL__new_vol_obj(type, obj, connector, TRUE)))
+    if (NULL == (ret_value = H5VL__new_vol_obj(type, obj, connector, wrap_obj)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "can't create VOL object")
 
 done:
@@ -1041,7 +1041,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-hsize_t
+size_t
 H5VL_object_inc_rc(H5VL_object_t *vol_obj)
 {
     FUNC_ENTER_NOAPI_NOERR_NOFS
@@ -1086,6 +1086,59 @@ done:
 } /* end H5VL_free_object() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_fapl_is_native
+ *
+ * Purpose:     Query if a FAPL will use the native VOL connector.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Jun 17, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_fapl_is_native(hid_t fapl_id, hbool_t *is_native)
+{
+    H5P_genplist_t *      fapl_plist;                       /* Property list pointer                    */
+    H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
+    H5VL_class_t *cls;              /* VOL class structure for callback info    */
+    const H5VL_class_t *native_cls;          /* Native VOL connector class structs */
+    int                 cmp_value;           /* Comparison result */
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check for default property list value */
+    if (H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+
+    /* Get the VOL info from the fapl */
+    if (NULL == (fapl_plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (H5P_peek(fapl_plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector info")
+
+    /* Get the connector's class */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Retrieve the native connector class */
+    if (NULL == (native_cls = (H5VL_class_t *)H5I_object_verify(H5VL_NATIVE, H5I_VOL)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve native VOL connector class")
+
+    /* Compare connector classes */
+    if (H5VL_cmp_connector_cls(&cmp_value, cls, native_cls) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "can't compare connector classes")
+
+    /* If classes compare equal, then the object is / is in a native connector's file */
+    *is_native = (cmp_value == 0);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_fapl_is_native() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_object_is_native
  *
  * Purpose:     Query if an object is (if it's a file object) / is in (if its
@@ -1099,7 +1152,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_object_is_native(const H5VL_object_t *obj, hbool_t *is_native)
+H5VL_object_is_native(const H5VL_object_t *obj, H5VL_get_conn_lvl_t lvl, hbool_t *is_native)
 {
     const H5VL_class_t *cls;                 /* VOL connector class structs for object */
     const H5VL_class_t *native_cls;          /* Native VOL connector class structs */
@@ -1114,7 +1167,7 @@ H5VL_object_is_native(const H5VL_object_t *obj, hbool_t *is_native)
 
     /* Retrieve the terminal connector class for the object */
     cls = NULL;
-    if (H5VL_introspect_get_conn_cls(obj, H5VL_GET_CONN_LVL_TERM, &cls) < 0)
+    if (H5VL_introspect_get_conn_cls(obj, lvl, &cls) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector class")
 
     /* Retrieve the native connector class */

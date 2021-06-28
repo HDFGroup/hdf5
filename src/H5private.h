@@ -2092,6 +2092,7 @@ extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
+H5_DLL herr_t H5CX_test_and_push(hbool_t *pushed);
 H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 #ifndef NDEBUG
@@ -2249,6 +2250,28 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                         {                                                                                    \
                             FUNC_ENTER_COMMON_NOERR(H5_IS_API(FUNC));                                        \
                             {
+
+/*
+ * Use this macro for public API functions for the various "plugin" wrappers.
+ *      Examples are: public VOL callback wrappers (e.g. H5VLfile_create,
+ *      H5VLdataset_read, etc.), public VFD callback wrappers (e.g. H5FDopen,
+ *      H5FDread, etc.), etc.
+ *
+ */
+#define FUNC_ENTER_API_WRAPPER(err)                                                                                \
+    {                                                                                                        \
+        {                                                                                                    \
+            {                                                                                                \
+    hbool_t pushed = FALSE; \
+                                                                                                             \
+                FUNC_ENTER_API_COMMON                                                                        \
+                H5_PUSH_FUNC                                                                                 \
+    /* Push an API context, if there isn't already one */                                                                               \
+    if (H5CX_test_and_push(&pushed) < 0)                                                                                     \
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")                                     \
+                                                                                                             \
+                BEGIN_MPE_LOG                                                                                \
+                {
 
 /* Note: this macro only works when there's _no_ interface initialization routine for the module */
 #define FUNC_ENTER_NOAPI_INIT(err)                                                                           \
@@ -2503,6 +2526,20 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     }                                                                                                        \
     }                                                                                                        \
     }                                                                                                        \
+    }                                                                                                        \
+    }                                                                                                        \
+    } /*end scope from beginning of FUNC_ENTER*/
+
+/* Use this macro to match the FUNC_ENTER_API_WRAPPER macro */
+#define FUNC_LEAVE_API_WRAPPER(ret_value)                                                                     \
+    FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
+    if (pushed)                                                                                     \
+        (void)H5CX_pop(TRUE);                                                                                    \
+    H5_POP_FUNC                                                                                              \
+    if (err_occurred)                                                                                        \
+        (void)H5E_dump_api_stack(TRUE);                                                                      \
+    FUNC_LEAVE_API_THREADSAFE                                                                                \
+    return (ret_value);                                                                                      \
     }                                                                                                        \
     }                                                                                                        \
     } /*end scope from beginning of FUNC_ENTER*/

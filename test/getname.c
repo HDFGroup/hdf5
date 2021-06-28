@@ -3684,69 +3684,86 @@ test_elinks(hid_t fapl)
     char    name[NAME_BUF_SIZE];              /* Buffer for storing object's name */
     ssize_t namelen;                          /* Length of object's name */
     hbool_t name_cached;                      /* Indicate if name is cached */
+    hbool_t is_native;              /* Whether native VOL connector is being used */
 
-    /* Initialize the file names */
-    h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
-    h5_fixname(FILENAME[2], fapl, filename2, sizeof filename2);
+    TESTING("getting path to externally linked objects");
 
-    /* Create files */
-    if ((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
-    if ((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        FAIL_STACK_ERROR
+    /* Check for operating with native (only) VOL connector */
+    is_native = FALSE;
+    if (H5VL_fapl_is_native(fapl, &is_native) < 0)
+        TEST_ERROR;
 
-    /* Create a group in the second file */
-    if ((group2 = H5Gcreate2(fid2, "Group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+    /* Skip tests for expanding external links when using non-native VOL connectors */
+    if (!is_native) {
+        SKIPPED();
+        HDputs("    Not using native VOL connector");
+    }
+    else {
+        /* Initialize the file names */
+        h5_fixname(FILENAME[1], fapl, filename1, sizeof filename1);
+        h5_fixname(FILENAME[2], fapl, filename2, sizeof filename2);
 
-    /* Close Group */
-    if (H5Gclose(group2) < 0)
-        FAIL_STACK_ERROR
+        /* Create files */
+        if ((fid1 = H5Fcreate(filename1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
+        if ((fid2 = H5Fcreate(filename2, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Create an external link in first file to the group in the second file */
-    if (H5Lcreate_external(filename2, "Group2", fid1, "Link_to_Group2", H5P_DEFAULT, H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR
+        /* Create a group in the second file */
+        if ((group2 = H5Gcreate2(fid2, "Group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Create an external link in second file to the external link in the first file */
-    if (H5Lcreate_external(filename1, "Link_to_Group2", fid2, "Link_to_Link_to_Group2", H5P_DEFAULT,
-                           H5P_DEFAULT) < 0)
-        FAIL_STACK_ERROR
+        /* Close Group */
+        if (H5Gclose(group2) < 0)
+            FAIL_STACK_ERROR
 
-    /* Open the group in thesecond file through the external link */
-    if ((group = H5Gopen2(fid1, "Link_to_Group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        /* Create an external link in first file to the group in the second file */
+        if (H5Lcreate_external(filename2, "Group2", fid1, "Link_to_Group2", H5P_DEFAULT, H5P_DEFAULT) < 0)
+            FAIL_STACK_ERROR
 
-    /* Query the external link object's name */
-    *name       = '\0';
-    name_cached = FALSE;
-    namelen     = H5I__get_name_test(group, (char *)name, sizeof(name), &name_cached);
-    if (!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
-        TEST_ERROR
+        /* Create an external link in second file to the external link in the first file */
+        if (H5Lcreate_external(filename1, "Link_to_Group2", fid2, "Link_to_Link_to_Group2", H5P_DEFAULT,
+                               H5P_DEFAULT) < 0)
+            FAIL_STACK_ERROR
 
-    /* Close Group */
-    if (H5Gclose(group) < 0)
-        FAIL_STACK_ERROR
+        /* Open the group in the second file through the external link */
+        if ((group = H5Gopen2(fid1, "Link_to_Group2", H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Open the group in the second file through the external link to the external link */
-    if ((group = H5Gopen2(fid2, "Link_to_Link_to_Group2", H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+        /* Query the external link object's name */
+        *name       = '\0';
+        name_cached = FALSE;
+        namelen     = H5I__get_name_test(group, (char *)name, sizeof(name), &name_cached);
+        if (!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
+            TEST_ERROR
 
-    /* Query the external link to external link object's name */
-    *name       = '\0';
-    name_cached = FALSE;
-    namelen     = H5I__get_name_test(group, (char *)name, sizeof(name), &name_cached);
-    if (!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
-        TEST_ERROR
+        /* Close Group */
+        if (H5Gclose(group) < 0)
+            FAIL_STACK_ERROR
 
-    /* Close Group */
-    if (H5Gclose(group) < 0)
-        FAIL_STACK_ERROR
+        /* Open the group in the second file through the external link to the external link */
+        if ((group = H5Gopen2(fid2, "Link_to_Link_to_Group2", H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Close files */
-    if (H5Fclose(fid1) < 0)
-        FAIL_STACK_ERROR
-    if (H5Fclose(fid2) < 0)
-        FAIL_STACK_ERROR
+        /* Query the external link to external link object's name */
+        *name       = '\0';
+        name_cached = FALSE;
+        namelen     = H5I__get_name_test(group, (char *)name, sizeof(name), &name_cached);
+        if (!((HDstrcmp(name, "/Group2") == 0) && (namelen == 7) && name_cached))
+            TEST_ERROR
+
+        /* Close Group */
+        if (H5Gclose(group) < 0)
+            FAIL_STACK_ERROR
+
+        /* Close files */
+        if (H5Fclose(fid1) < 0)
+            FAIL_STACK_ERROR
+        if (H5Fclose(fid2) < 0)
+            FAIL_STACK_ERROR
+
+        PASSED();
+    }
 
     return 0;
 

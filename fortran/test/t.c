@@ -25,6 +25,7 @@
 
 #include "t.h"
 #include "H5Eprivate.h"
+#include "H5VLprivate.h"
 
 /*----------------------------------------------------------------------------
  * Name:        h5_fixname_c
@@ -155,3 +156,25 @@ nh5_env_nocleanup_c(int_f *status)
     if (HDgetenv("HDF5_NOCLEANUP"))
         *status = (int_f)1;
 } /* h5_env_nocleanup_c */
+
+/*----------------------------------------------------------------------------
+ * Name:        h5vl_fapl_is_native_c
+ * Purpose:     Invokes the H5VL_fapl_is_native() operation
+ * Inputs:      fapl - file access property list
+ *              flag - flag indicating whether VOL connector stack in FAPL is the native connector
+ * Returns:     0 on success, -1 on failure
+ * Programmer:  Quincey Koziol
+ *              June 24, 2021
+ *---------------------------------------------------------------------------*/
+int_f
+h5vl_fapl_is_native_c(hid_t_f *fapl_id, int_f *flag)
+{
+    int    ret_value = 0;
+    hbool_t is_native = FALSE;
+
+    ret_value  = H5VL_fapl_is_native((hid_t)*fapl_id, &is_native);
+    if (ret_value >= 0)
+        *flag      = (int_f)is_native;
+
+    return ret_value;
+} /* h5vl_fapl_is_native_c */

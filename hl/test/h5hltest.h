@@ -27,6 +27,9 @@
 /* Include the High-Level private header */
 #include "H5HLprivate2.h"
 
+/* Include library private headers needed for testing */
+#include "H5VLprivate.h"
+
 /* Macros used in HL tests */
 #define HL_TESTING2(WHAT)                                                                                    \
     {                                                                                                        \

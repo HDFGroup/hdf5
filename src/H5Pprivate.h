@@ -20,7 +20,8 @@
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5P_genplist_t H5P_genplist_t;
 
-/* Include package's public header */
+/* Include package's public headers */
+#include "H5Pdevelop.h"
 #include "H5Ppublic.h"
 
 /* Private headers needed by this file */

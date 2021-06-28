@@ -365,7 +365,7 @@ H5Oopen_by_addr(hid_t loc_id, haddr_t addr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid location identifier")
 
     /* Check if the VOL object is a native VOL connector object */
-    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+    if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native_vol_obj) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object")
     if (is_native_vol_obj) {
@@ -584,7 +584,7 @@ H5Oget_info2(hid_t loc_id, H5O_info1_t *oinfo /*out*/, unsigned fields)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Check if the VOL object is a native VOL connector object */
-    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+    if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native_vol_obj) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
@@ -650,7 +650,7 @@ H5Oget_info_by_name2(hid_t loc_id, const char *name, H5O_info1_t *oinfo /*out*/,
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Check if the VOL object is a native VOL connector object */
-    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+    if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native_vol_obj) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
@@ -722,7 +722,7 @@ H5Oget_info_by_idx2(hid_t loc_id, const char *group_name, H5_index_t idx_type, H
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Check if the VOL object is a native VOL connector object */
-    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+    if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native_vol_obj) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
@@ -976,7 +976,7 @@ H5Ovisit2(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate1
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Check if the VOL object is a native VOL connector object */
-    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+    if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native_vol_obj) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)
@@ -1081,7 +1081,7 @@ H5Ovisit_by_name2(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
     /* Check if the VOL object is a native VOL connector object */
-    if (H5VL_object_is_native(vol_obj, &is_native_vol_obj) < 0)
+    if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native_vol_obj) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, H5I_INVALID_HID,
                     "can't determine if VOL object is native connector object")
     if (!is_native_vol_obj)

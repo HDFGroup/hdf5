@@ -104,7 +104,7 @@ H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref
         hbool_t is_native = FALSE; /* Whether the src file is using the native VOL connector */
 
         /* Check if using native VOL connector */
-        if (H5VL_object_is_native(vol_obj, &is_native) < 0)
+        if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
         /* Must use native VOL connector for this operation */
@@ -409,7 +409,7 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
         hbool_t is_native = FALSE; /* Whether the src file is using the native VOL connector */
 
         /* Check if using native VOL connector */
-        if (H5VL_object_is_native(vol_obj, &is_native) < 0)
+        if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't query if file uses native VOL connector")
 
         /* Must use native VOL connector for this operation */
@@ -659,7 +659,7 @@ H5Rget_region(hid_t id, H5R_type_t ref_type, const void *ref)
         hbool_t is_native = FALSE; /* Whether the src file is using the native VOL connector */
 
         /* Check if using native VOL connector */
-        if (H5VL_object_is_native(vol_obj, &is_native) < 0)
+        if (H5VL_object_is_native(vol_obj, H5VL_GET_CONN_LVL_TERM, &is_native) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, H5I_INVALID_HID,
                         "can't query if file uses native VOL connector")
 

@@ -32,6 +32,9 @@ H5DIFF_BIN=`pwd`/$H5DIFF          # The path of the h5diff  tool binary
 H5IMPORT=../../src/h5import/h5import     # The h5import tool name
 H5IMPORT_BIN=`pwd`/$H5IMPORT      # The path of the h5import  tool binary
 
+VDS_CHECK_COMPAT_VOL=../../../utils/vds_check_compat_vol # The vds_check_compat_vol tool name
+VDS_CHECK_COMPAT_VOL_BIN=`pwd`/$VDS_CHECK_COMPAT_VOL # The path of the vds_check_compat_vol tool binary
+
 RM='rm -rf'
 CMP='cmp -s'
 DIFF='diff -c'
@@ -418,6 +421,18 @@ SKIP() {
     echo  " -SKIP-"
 }
 
+# Check for compatible VOL connector
+# Note: Requires VOL connector that supports external links and virtual datasets
+COMPAT_VOL_TEST() {
+    if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
+        TOOLTEST $@
+    else
+        SKIP $@
+        echo "    The VOL connector specified by the HDF5_VOL_CONNECTOR environment"
+        echo "    variable does not support external links or virtual datasets."
+    fi
+}
+
 # Print a line-line message left justified in a field of 70 characters
 #
 PRINT_H5DIFF() {
@@ -487,31 +502,55 @@ IMPORTTEST()
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
 
+# Check to see if the VOL connector specified by the HDF5_VOL_CONNECTOR
+# environment variable supports virtual datasets (and external links)
+#
+# Note: Depends on vds_check_compat_vol tool from $(topdir)/utils
+$VDS_CHECK_COMPAT_VOL_BIN
+COMPAT_VOL=$?
+
 ####### test for dataset vds ######
 
 # Data read
 if test $USE_FILTER_DEFLATE = "yes" ; then
-    TOOLTEST tvds-1.ddl --enable-error-stack 1_vds.h5
-    TOOLTEST tvds-2.ddl --enable-error-stack 2_vds.h5
-    TOOLTEST tvds-3_1.ddl --enable-error-stack 3_1_vds.h5
-    TOOLTEST tvds-3_2.ddl --enable-error-stack 3_2_vds.h5
-    TOOLTEST tvds-4.ddl --enable-error-stack 4_vds.h5
-    TOOLTEST tvds-5.ddl --enable-error-stack 5_vds.h5
-    TOOLTEST vds-first.ddl --vds-view-first-missing --enable-error-stack vds-percival-unlim-maxmin.h5
-    TOOLTEST vds-gap1.ddl -d /VDS-Eiger --vds-gap-size=1 --enable-error-stack vds-eiger.h5
-    TOOLTEST vds-gap2.ddl --vds-gap-size=2 --enable-error-stack vds-eiger.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds-1.ddl --enable-error-stack 1_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds-2.ddl --enable-error-stack 2_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds-3_1.ddl --enable-error-stack 3_1_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds-3_2.ddl --enable-error-stack 3_2_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds-4.ddl --enable-error-stack 4_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds-5.ddl --enable-error-stack 5_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST vds-first.ddl --vds-view-first-missing --enable-error-stack vds-percival-unlim-maxmin.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST vds-gap1.ddl -d /VDS-Eiger --vds-gap-size=1 --enable-error-stack vds-eiger.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST vds-gap2.ddl --vds-gap-size=2 --enable-error-stack vds-eiger.h5
 fi
 
 # Layout read
 if test $USE_FILTER_DEFLATE = "yes" ; then
-    TOOLTEST tvds_layout-1.ddl -p --enable-error-stack 1_vds.h5
-    TOOLTEST tvds_layout-2.ddl -p --enable-error-stack 2_vds.h5
-    TOOLTEST tvds_layout-3_1.ddl -p --enable-error-stack 3_1_vds.h5
-    TOOLTEST tvds_layout-3_2.ddl -p --enable-error-stack 3_2_vds.h5
-    TOOLTEST tvds_layout-4.ddl -p --enable-error-stack 4_vds.h5
-    TOOLTEST tvds_layout-5.ddl -p --enable-error-stack 5_vds.h5
-    TOOLTEST vds_layout-eiger.ddl -p --enable-error-stack vds-eiger.h5
-    TOOLTEST vds_layout-maxmin.ddl -p --enable-error-stack vds-percival-unlim-maxmin.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds_layout-1.ddl -p --enable-error-stack 1_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds_layout-2.ddl -p --enable-error-stack 2_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds_layout-3_1.ddl -p --enable-error-stack 3_1_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds_layout-3_2.ddl -p --enable-error-stack 3_2_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds_layout-4.ddl -p --enable-error-stack 4_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST tvds_layout-5.ddl -p --enable-error-stack 5_vds.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST vds_layout-eiger.ddl -p --enable-error-stack vds-eiger.h5
+    # Note: Requires VOL connector that supports external links
+    COMPAT_VOL_TEST vds_layout-maxmin.ddl -p --enable-error-stack vds-percival-unlim-maxmin.h5
 fi
 
 # Clean up temporary files/directories

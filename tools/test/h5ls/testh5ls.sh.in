@@ -24,6 +24,8 @@ EXIT_FAILURE=1
 
 H5LS=../../src/h5ls/h5ls               # The tool name
 H5LS_BIN=`pwd`/$H5LS    # The path of the tool binary
+VDS_CHECK_COMPAT_VOL=../../../utils/vds_check_compat_vol # The vds_check_compat_vol tool name
+VDS_CHECK_COMPAT_VOL_BIN=`pwd`/$VDS_CHECK_COMPAT_VOL # The path of the vds_check_compat_vol tool binary
 
 RM='rm -rf'
 CMP='cmp -s'
@@ -290,6 +292,24 @@ TOOLTEST() {
     fi
 }
 
+# Print a "SKIP" message
+SKIP() {
+   TESTING $H5LS $@
+    echo  " -SKIP-"
+}
+
+# Check for compatible VOL connector
+# Note: Requires VOL connector that supports external links and virtual datasets
+COMPAT_VOL_TEST() {
+    if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
+        TOOLTEST $@
+    else
+        SKIP $@
+        echo "    The VOL connector specified by the HDF5_VOL_CONNECTOR environment"
+        echo "    variable does not support external links or virtual datasets."
+    fi
+}
+
 ##############################################################################
 ##############################################################################
 ###              T H E   T E S T S                                ###
@@ -297,6 +317,13 @@ TOOLTEST() {
 ##############################################################################
 # prepare for test
 COPY_TESTFILES_TO_TESTDIR
+
+# Check to see if the VOL connector specified by the HDF5_VOL_CONNECTOR
+# environment variable supports virtual datasets (and external links)
+#
+# Note: Depends on vds_check_compat_vol tool from $(topdir)/utils
+$VDS_CHECK_COMPAT_VOL_BIN
+COMPAT_VOL=$?
 
 # Toss in a bunch of tests.  Not sure if they are the right kinds.
 # test the help syntax
@@ -334,29 +361,41 @@ TOOLTEST tsoftlinks-5.ls 0 --follow-symlinks tsoftlinks.h5/soft_dset1
 
 # test for displaying external and user-defined links with --follow-symlinks
 TOOLTEST textlink-1.ls 0 -w80 -r textlink.h5
-TOOLTEST textlinksrc-1.ls 0 -w80 --follow-symlinks -r textlinksrc.h5
-TOOLTEST textlinksrc-2.ls 0 -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5
-TOOLTEST textlinksrc-3.ls 0 -w80 --follow-symlinks -r textlinksrc.h5/ext_link1
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-1.ls 0 -w80 --follow-symlinks -r textlinksrc.h5
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-2.ls 0 -w80 --follow-symlinks -rv textlinksrc.h5/ext_link5
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-3.ls 0 -w80 --follow-symlinks -r textlinksrc.h5/ext_link1
 TOOLTEST textlinksrc-4.ls 0 -w80 -r textlinksrc.h5
 TOOLTEST textlinksrc-5.ls 0 -w80 -r textlinksrc.h5/ext_link1
-TOOLTEST textlinksrc-6.ls 0 -w80 --follow-symlinks textlinksrc.h5
-TOOLTEST textlinksrc-7.ls 0 -w80 --follow-symlinks textlinksrc.h5/ext_link1
-TOOLTEST tudlink-1.ls 0 -w80 -r tudlink.h5
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-6.ls 0 -w80 --follow-symlinks textlinksrc.h5
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-7.ls 0 -w80 --follow-symlinks textlinksrc.h5/ext_link1
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST tudlink-1.ls 0 -w80 -r tudlink.h5
 
 # test for displaying external links with -E
 # the option -E will be depriciated but keep it for backward compatibility
-TOOLTEST textlinksrc-1-old.ls 0 -w80 -Er textlinksrc.h5
-TOOLTEST textlinksrc-2-old.ls 0 -w80 -Erv textlinksrc.h5/ext_link5
-TOOLTEST textlinksrc-3-old.ls 0 -w80 -Er textlinksrc.h5/ext_link1
-TOOLTEST textlinksrc-6-old.ls 0 -w80 -E textlinksrc.h5
-TOOLTEST textlinksrc-7-old.ls 0 -w80 -E textlinksrc.h5/ext_link1
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-1-old.ls 0 -w80 -Er textlinksrc.h5
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-2-old.ls 0 -w80 -Erv textlinksrc.h5/ext_link5
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-3-old.ls 0 -w80 -Er textlinksrc.h5/ext_link1
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-6-old.ls 0 -w80 -E textlinksrc.h5
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-7-old.ls 0 -w80 -E textlinksrc.h5/ext_link1
 
 # tests for no-dangling-links
 # if this option is given on dangling link, h5ls should return exit code 1
 # when used alone , expect to print out help and return exit code 1
 TOOLTEST textlinksrc-nodangle-1.ls 1 -w80 --no-dangling-links textlinksrc.h5
 # external dangling link - expected exit code 1
-TOOLTEST textlinksrc-nodangle-2.ls 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5
+# Note: Requires VOL connector that supports external links
+COMPAT_VOL_TEST textlinksrc-nodangle-2.ls 1 -w80 --follow-symlinks --no-dangling-links textlinksrc.h5
 # soft dangling link - expected exit code 1
 TOOLTEST tsoftlinks-nodangle-1.ls 1 -w80 --follow-symlinks --no-dangling-links tsoftlinks.h5
 # when used file with no dangling links - expected exit code 0

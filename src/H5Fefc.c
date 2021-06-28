@@ -63,6 +63,7 @@ struct H5F_efc_t {
 };
 
 /* Private prototypes */
+static H5F_t *H5F__efc_open_real(const char *name, unsigned flags, hid_t fapl_id);
 static herr_t H5F__efc_release_real(H5F_efc_t *efc);
 static herr_t H5F__efc_remove_ent(H5F_efc_t *efc, H5F_efc_ent_t *ent);
 static void   H5F__efc_try_close_tag1(H5F_shared_t *sf, H5F_shared_t **tail);
@@ -119,6 +120,80 @@ done:
 } /* end H5F__efc_create() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F__efc_open_real
+ *
+ * Purpose:     Opens a file for the external file cache 'open' operation.
+ *
+ * Return:      Pointer to open file on success
+ *              NULL on failure
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, June 12, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+static H5F_t *
+H5F__efc_open_real(const char *name, unsigned flags, hid_t fapl_id)
+{
+    H5VL_object_t *file_obj = NULL;       /* Pointer to file VOL object */
+    H5F_t *file = NULL;       /* Pointer to opened file */
+    hbool_t is_native;          /* Whether the file VOL object is using the native VOL connector */
+    H5F_t *ret_value = NULL;  /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(name);
+
+    /* The data structures and algorithms that use this routine currently depend on
+     * having a native file object (H5F_t*).  It seems possible to convert
+     * them to using a file VOL object (H5VL_object_t*), but that appears to
+     * be a fairly intensive task, so fail if the file VOL object is not using
+     * a "trivial" VOL connector stack, composed of only the native connector
+     * as the terminal connector, without any pass-through connectors.
+     */
+    is_native = FALSE;
+    if (H5VL_fapl_is_native(fapl_id, &is_native) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't check for native VOL connector")
+    if (!is_native)
+        HGOTO_ERROR(H5E_FILE, H5E_UNSUPPORTED, NULL, "can't open files w/non-native VOL connector")
+
+    /* Open the file VOL object */
+    if (NULL == (file_obj = H5VL_file_open(name, flags, fapl_id, H5P_DATASET_XFER_DEFAULT, NULL, NULL)))
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
+
+    /* Get native file pointer from VOL object */
+    if (NULL == (file = H5VL_object_data(file_obj))) {
+        /* Close opened file */
+        if (H5F__close_obj(file_obj, NULL) < 0)
+            HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "can't close file")
+
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get native file pointer")
+    } /* end if */
+
+    /* Release VOL object */
+    if (H5VL_free_object(file_obj) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, NULL, "can't release file VOL object")
+    file_obj = NULL;
+
+    /* Increment the number of open objects to prevent the file from being
+     * closed out from under us - "simulate" having an open file id.  Note
+     * that this behaviour replaces the calls to H5F_incr_nopen_objs() and
+     * H5F_decr_nopen_objs() in H5L_extern_traverse().
+     */
+    /* NOTE: This assumes that file object is a _native_ file object and
+     *          won't work with passthrough VOL connectors.
+     */
+    file->nopen_objs++;
+
+    /* Set return value */
+    ret_value = file;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__efc_open_real() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5F__efc_open
  *
  * Purpose:     Opens a file using the external file cache.  The target
@@ -138,13 +213,11 @@ done:
  *-------------------------------------------------------------------------
  */
 H5F_t *
-H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
+H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fapl_id)
 {
     H5F_efc_t *           efc       = NULL;  /* External file cache for parent file */
     H5F_efc_ent_t *       ent       = NULL;  /* Entry for target file in efc */
     hbool_t               open_file = FALSE; /* Whether ent->file needs to be closed in case of error */
-    H5P_genplist_t *      plist;             /* Property list pointer for FAPL */
-    H5VL_connector_prop_t connector_prop;    /* Property for VOL connector ID & info        */
     H5F_t *               ret_value = NULL;  /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -154,37 +227,15 @@ H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hi
     HDassert(parent->shared);
     HDassert(name);
 
-    /* Get the VOL info from the fapl */
-    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, NULL, "not a file access property list")
-    if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get VOL connector info")
-
-    /* Stash a copy of the "top-level" connector property, before any pass-through
-     *  connectors modify or unwrap it.
-     */
-    if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't set VOL connector info in API context")
-
     /* Get external file cache */
     efc = parent->shared->efc;
 
-    /* Check if the EFC exists.  If it does not, just call H5F_open().  We
+    /* Check if the EFC exists.  If it does not, just open the file.  We
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if (!efc) {
-        if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
+        if (NULL == (ret_value = H5F__efc_open_real(name, flags, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
-
-        /* Make file post open call */
-        if (H5F__post_open(ret_value) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
-
-        /* Increment the number of open objects to prevent the file from being
-         * closed out from under us - "simulate" having an open file id.  Note
-         * that this behaviour replaces the calls to H5F_incr_nopen_objs() and
-         * H5F_decr_nopen_objs() in H5L_extern_traverse(). */
-        ret_value->nopen_objs++;
 
         HGOTO_DONE(ret_value)
     } /* end if */
@@ -250,17 +301,8 @@ H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hi
             } /* end if */
             else {
                 /* Cannot cache file, just open file and return */
-                if (NULL == (ret_value = H5F_open(name, flags, fcpl_id, fapl_id)))
+                if (NULL == (ret_value = H5F__efc_open_real(name, flags, fapl_id)))
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
-
-                /* Make file post open call */
-                if (H5F__post_open(ret_value) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
-
-                /* Increment the number of open objects to prevent the file from
-                 * being closed out from under us - "simulate" having an open
-                 * file id */
-                ret_value->nopen_objs++;
 
                 HGOTO_DONE(ret_value)
             } /* end else */
@@ -275,17 +317,9 @@ H5F__efc_open(H5F_t *parent, const char *name, unsigned flags, hid_t fcpl_id, hi
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
         /* Open the file */
-        if (NULL == (ent->file = H5F_open(name, flags, fcpl_id, fapl_id)))
+        if (NULL == (ent->file = H5F__efc_open_real(name, flags, fapl_id)))
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "can't open file")
         open_file = TRUE;
-
-        /* Make file post open call */
-        if (H5F__post_open(ent->file) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, NULL, "can't finish opening file")
-
-        /* Increment the number of open objects to prevent the file from being
-         * closed out from under us - "simulate" having an open file id */
-        ent->file->nopen_objs++;
 
         /* Add the file to the cache */
         /* Skip list */
@@ -372,6 +406,9 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
      * support this so clients do not have to make 2 different calls depending
      * on the state of the efc. */
     if (!efc) {
+        /* NOTE: This assumes that file object is a _native_ file object and
+         *          won't work with passthrough VOL connectors.
+         */
         file->nopen_objs--;
         if (H5F_try_close(file, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")
@@ -387,6 +424,9 @@ H5F_efc_close(H5F_t *parent, H5F_t *file)
     for (ent = efc->LRU_head; ent && ent->file != file; ent = ent->LRU_next)
         ;
     if (!ent) {
+        /* NOTE: This assumes that file object is a _native_ file object and
+         *          won't work with passthrough VOL connectors.
+         */
         file->nopen_objs--;
         if (H5F_try_close(file, NULL) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "can't close external file")

@@ -16673,12 +16673,22 @@ obj_exists(hid_t fapl, hbool_t new_format)
     char   filename[NAME_BUF_SIZE]; /* Buffer for file name */
     hid_t  fid = -1;                /* File ID */
     hid_t  gid = -1;                /* Group ID */
+    hbool_t is_native;              /* Whether native VOL connector is being used */
     herr_t status;                  /* Generic return value */
 
     if (new_format)
         TESTING("object exists (w/new group format)")
     else
         TESTING("object exists")
+
+    /* Check for operating with native (only) VOL connector */
+    is_native = FALSE;
+    if (H5VL_fapl_is_native(fapl, &is_native) < 0)
+        TEST_ERROR;
+
+    /* Note that some testing will be skipped with non-native VOL connectors */
+    if (!is_native)
+        HDputs("    Tests involving external links skipped - not using native VOL connector");
 
     /* Set up filename and create file*/
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
@@ -16772,8 +16782,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE for external link in root group that points to object */
-    if (TRUE != H5Oexists_by_name(fid, "external3", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "external3", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Create dangling (file doesn't exist) external link in non-root group */
     if (H5Lcreate_external("nofile", "dangle", fid, "group/external1", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -16799,8 +16811,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
 
     /* Verify that H5Oexists_by_name() returns TRUE for external link in non-root group that points to object
      */
-    if (TRUE != H5Oexists_by_name(fid, "group/external3", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "group/external3", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Soft->External links */
     /* Create soft-link in root group that points to dangling (file doesn't exist) external link */
@@ -16824,8 +16838,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE */
-    if (TRUE != H5Oexists_by_name(fid, "soft-elink3", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "soft-elink3", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Create soft-link in root group that points to dangling (file doesn't exist) external link in non-root
      * group */
@@ -16850,8 +16866,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE */
-    if (TRUE != H5Oexists_by_name(fid, "soft-elink6", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "soft-elink6", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Create soft-link in non-root group that points to dangling (file doesn't exist) external link */
     if (H5Lcreate_soft("/external1", fid, "group/soft-elink1", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -16874,8 +16892,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE */
-    if (TRUE != H5Oexists_by_name(fid, "group/soft-elink3", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "group/soft-elink3", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Create soft-link in non-root group that points to dangling (file doesn't exist) external link in
      * non-root group */
@@ -16901,8 +16921,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE */
-    if (TRUE != H5Oexists_by_name(fid, "group/soft-elink6", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "group/soft-elink6", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* External->Soft links */
     /* Create external link in root group that points to dangling soft link in root group */
@@ -16918,8 +16940,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE */
-    if (TRUE != H5Oexists_by_name(fid, "elink-soft2", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "elink-soft2", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Create external link in root group that points to dangling soft link in non-root group */
     if (H5Lcreate_external(filename, "group/soft1", fid, "elink-soft3", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -16934,8 +16958,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE */
-    if (TRUE != H5Oexists_by_name(fid, "elink-soft4", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "elink-soft4", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Create external link in non-root group that points to dangling soft link in root group */
     if (H5Lcreate_external(filename, "soft1", fid, "group/elink-soft1", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -16950,8 +16976,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE */
-    if (TRUE != H5Oexists_by_name(fid, "group/elink-soft2", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "group/elink-soft2", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Create external link in non-root group that points to dangling soft link in non-root group */
     if (H5Lcreate_external(filename, "group/soft1", fid, "group/elink-soft3", H5P_DEFAULT, H5P_DEFAULT) < 0)
@@ -16967,8 +16995,10 @@ obj_exists(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Verify that H5Oexists_by_name() returns TRUE */
-    if (TRUE != H5Oexists_by_name(fid, "group/elink-soft4", H5P_DEFAULT))
-        TEST_ERROR
+    if (is_native) {
+        if (TRUE != H5Oexists_by_name(fid, "group/elink-soft4", H5P_DEFAULT))
+            TEST_ERROR
+    }
 
     /* Close file created */
     if (H5Fclose(fid) < 0)
@@ -22572,6 +22602,7 @@ main(void)
 
         for (new_format = FALSE; new_format <= TRUE; new_format++) {
             hid_t my_fapl;
+            hbool_t is_native;              /* Whether native VOL connector is being used */
 
             /* Check for FAPL to use */
             if (new_format) {
@@ -22611,88 +22642,99 @@ main(void)
             nerrors += test_deprec(my_fapl, new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-            /* tests for external link */
-            /* Test external file cache first, so it sees the default efc setting on the fapl
-             */
-            nerrors += external_file_cache(my_fapl, new_format) < 0 ? 1 : 0;
+            /* Check for operating with native (only) VOL connector */
+            is_native = FALSE;
+            if (H5VL_fapl_is_native(my_fapl, &is_native) < 0)
+                TEST_ERROR;
 
-            /* This test cannot run with the EFC because it assumes that an
-             * intermediate file is not held open
-             */
-            nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
+            /* Skip tests external link tests when using non-native VOL connectors */
+            if (!is_native) {
+                HDputs("    External link tests skipped - not using native VOL connector");
+            }
+            else {
+                /* tests for external link */
+                /* Test external file cache first, so it sees the default efc setting on the fapl
+                 */
+                nerrors += external_file_cache(my_fapl, new_format) < 0 ? 1 : 0;
 
-            /* This test cannot run with the EFC because the EFC cannot currently
-             * reopen a cached file with a different intent
-             */
-            nerrors += external_set_elink_acc_flags(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+                /* This test cannot run with the EFC because it assumes that an
+                 * intermediate file is not held open
+                 */
+                nerrors += external_link_mult(my_fapl, new_format) < 0 ? 1 : 0;
 
-            /* Try external link tests both with and without the external file cache */
-            for (efc = FALSE; efc <= TRUE; efc++) {
-                if (efc) {
-                    if (H5Pset_elink_file_cache_size(my_fapl, 8) < 0)
-                        TEST_ERROR
-                    HDprintf("\n---Testing with external file cache---\n");
-                } /* end if */
-                else {
-                    if (H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
-                        TEST_ERROR
-                    HDprintf("\n---Testing without external file cache---\n");
-                } /* end else */
+                /* This test cannot run with the EFC because the EFC cannot currently
+                 * reopen a cached file with a different intent
+                 */
+                nerrors += external_set_elink_acc_flags(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
 
-                nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
+                /* Try external link tests both with and without the external file cache */
+                for (efc = FALSE; efc <= TRUE; efc++) {
+                    if (efc) {
+                        if (H5Pset_elink_file_cache_size(my_fapl, 8) < 0)
+                            TEST_ERROR
+                        HDprintf("\n---Testing with external file cache---\n");
+                    } /* end if */
+                    else {
+                        if (H5Pset_elink_file_cache_size(my_fapl, 0) < 0)
+                            TEST_ERROR
+                        HDprintf("\n---Testing without external file cache---\n");
+                    } /* end else */
+
+                    nerrors += external_link_root(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-                nerrors += external_link_root_deprec(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_root_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-                nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_self(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_path(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_self(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_pingpong(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_toomany(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_dangling(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_recursive(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_query(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-                nerrors += external_link_query_deprec(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_query_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-                nerrors += external_link_unlink_compact(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_closing(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_unlink_compact(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_unlink_dense(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_move(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_ride(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_closing(my_fapl, new_format) < 0 ? 1 : 0;
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-                nerrors += external_link_closing_deprec(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_closing_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-                nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
-                nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
 
-                nerrors += external_link_prefix(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_abs_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_rel_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_cwd(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_abstar(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
-                nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_prefix(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_abs_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_rel_mainpath(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_cwd(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_abstar(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
+                    nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;
 #ifdef H5_HAVE_WINDOW_PATH
-                nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win3(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win7(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win1(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win2(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win3(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win4(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win5(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win6(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win7(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win8(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_win9(my_fapl, new_format) < 0 ? 1 : 0;
 #endif
-                nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
-                nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
-            } /* with/without external file cache */
+                    nerrors += external_symlink(env_h5_drvr, my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_copy_invalid_object(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_dont_fail_to_source(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_open_twice(my_fapl, new_format) < 0 ? 1 : 0;
+                    nerrors += external_link_with_committed_datatype(my_fapl, new_format) < 0 ? 1 : 0;
+                } /* with/without external file cache */
+            }
 
             /* These tests assume that external links are a form of UD links,
              * so assume that everything that passed for external links

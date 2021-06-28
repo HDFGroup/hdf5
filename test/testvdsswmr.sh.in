@@ -92,7 +92,23 @@ if [ $rc -ne 0 ] ; then
     echo "The VFD specified by the HDF5_DRIVER environment variable"
     echo "does not support SWMR."
     echo
-    echo "SWMR acceptance tests skipped"
+    echo "Virtual dataset SWMR acceptance tests skipped"
+    echo
+    exit 0
+fi
+
+# Check to see if the VOL connector specified by the HDF5_VOL_CONNECTOR
+# environment variable supports Virtual Datasets.
+#
+# Note: Depends on vds_check_compat_vol tool from $(topdir)/utils
+../utils/vds_check_compat_vol
+rc=$?
+if [ $rc -ne 0 ] ; then
+    echo
+    echo "The VOL connector specified by the HDF5_VOL_CONNECTOR environment"
+    echo "variable does not support virtual datasets."
+    echo
+    echo "Virtual dataset SWMR acceptance tests skipped"
     echo
     exit 0
 fi

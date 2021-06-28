@@ -253,7 +253,7 @@
         H5T_INIT_TYPE_ALLOC_COMMON(H5T_REFERENCE)                                                            \
         H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)                                                             \
         dt->shared->force_conv        = TRUE;                                                                \
-        dt->shared->u.atomic.u.r.file = NULL;                                                                \
+        dt->shared->u.atomic.u.r.file_obj = NULL;                                                                \
         dt->shared->u.atomic.u.r.loc  = H5T_LOC_BADLOC;                                                      \
         dt->shared->u.atomic.u.r.cls  = NULL;                                                                \
     }
@@ -4821,9 +4821,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
             }
 
             /* Don't allow VL types in different files to compare as equal */
-            if (dt1->shared->u.vlen.file < dt2->shared->u.vlen.file)
+            if (dt1->shared->u.vlen.file_obj < dt2->shared->u.vlen.file_obj)
                 HGOTO_DONE(-1);
-            if (dt1->shared->u.vlen.file > dt2->shared->u.vlen.file)
+            if (dt1->shared->u.vlen.file_obj > dt2->shared->u.vlen.file_obj)
                 HGOTO_DONE(1);
             break;
 
@@ -4970,9 +4970,9 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                         HGOTO_DONE(-1);
                     if (dt1->shared->u.atomic.u.r.loc > dt2->shared->u.atomic.u.r.loc)
                         HGOTO_DONE(1);
-                    if (dt1->shared->u.atomic.u.r.file < dt2->shared->u.atomic.u.r.file)
+                    if (dt1->shared->u.atomic.u.r.file_obj < dt2->shared->u.atomic.u.r.file_obj)
                         HGOTO_DONE(-1);
-                    if (dt1->shared->u.atomic.u.r.file > dt2->shared->u.atomic.u.r.file)
+                    if (dt1->shared->u.atomic.u.r.file_obj > dt2->shared->u.atomic.u.r.file_obj)
                         HGOTO_DONE(1);
                     break;
 
@@ -5832,7 +5832,7 @@ done:
  USAGE
     htri_t H5T_set_loc(dt,f,loc)
         H5T_t *dt;              IN/OUT: Pointer to the datatype to mark
-        H5F_t *f;               IN: Pointer to the file the datatype is in
+        H5VL_object_t *file_obj; IN: Pointer to the VOL file object the datatype is in
         H5T_loc_t loc           IN: location of type
 
  RETURNS
@@ -5846,7 +5846,7 @@ done:
  --------------------------------------------------------------------------
  */
 htri_t
-H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
+H5T_set_loc(H5T_t *dt, H5VL_object_t *file_obj, H5T_loc_t loc)
 {
     htri_t   changed;       /* Whether H5T_set_loc changed the type (even if the size didn't change) */
     htri_t   ret_value = 0; /* Indicate that success, but no location change */
@@ -5871,7 +5871,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     old_size = dt->shared->parent->shared->size;
 
                     /* Mark the VL, compound or array type */
-                    if ((changed = H5T_set_loc(dt->shared->parent, file, loc)) < 0)
+                    if ((changed = H5T_set_loc(dt->shared->parent, file_obj, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location")
                     if (changed > 0)
                         ret_value = changed;
@@ -5912,7 +5912,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                         old_size = memb_type->shared->size;
 
                         /* Mark the VL, compound, enum or array type */
-                        if ((changed = H5T_set_loc(memb_type, file, loc)) < 0)
+                        if ((changed = H5T_set_loc(memb_type, file_obj, loc)) < 0)
                             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                         if (changed > 0)
                             ret_value = changed;
@@ -5951,14 +5951,14 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 if (dt->shared->parent->shared->force_conv &&
                     H5T_IS_COMPLEX(dt->shared->parent->shared->type) &&
                     (dt->shared->parent->shared->type != H5T_REFERENCE)) {
-                    if ((changed = H5T_set_loc(dt->shared->parent, file, loc)) < 0)
+                    if ((changed = H5T_set_loc(dt->shared->parent, file_obj, loc)) < 0)
                         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                     if (changed > 0)
                         ret_value = changed;
                 } /* end if */
 
                 /* Mark this VL sequence */
-                if ((changed = H5T__vlen_set_loc(dt, file, loc)) < 0)
+                if ((changed = H5T__vlen_set_loc(dt, file_obj, loc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "Unable to set VL location");
                 if (changed > 0)
                     ret_value = changed;
@@ -5966,7 +5966,7 @@ H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 
             case H5T_REFERENCE:
                 /* Reference types go through type conversion */
-                if ((ret_value = H5T__ref_set_loc(dt, file, loc)) < 0)
+                if ((ret_value = H5T__ref_set_loc(dt, file_obj, loc)) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "Unable to set reference location");
                 break;
 
@@ -6308,17 +6308,17 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5T_patch_vlen_file(H5T_t *dt, H5VL_object_t *file)
+H5T_patch_vlen_file(H5T_t *dt, H5VL_object_t *file_obj)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check */
     HDassert(dt);
     HDassert(dt->shared);
-    HDassert(file);
+    HDassert(file_obj);
 
-    if ((dt->shared->type == H5T_VLEN) && dt->shared->u.vlen.file != file)
-        dt->shared->u.vlen.file = file;
+    if ((dt->shared->type == H5T_VLEN) && dt->shared->u.vlen.file_obj != file_obj)
+        dt->shared->u.vlen.file_obj = file_obj;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T_patch_vlen_file() */

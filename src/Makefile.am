@@ -157,7 +157,7 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
 
 # Public component author headers
 include_HEADERS += H5ESdevelop.h H5FDdevelop.h H5Idevelop.h H5Ldevelop.h \
-        H5Tdevelop.h H5TSdevelop.h H5Zdevelop.h
+        H5Pdevelop.h H5Tdevelop.h H5TSdevelop.h H5Zdevelop.h
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

@@ -169,6 +169,11 @@
 #define H5D_XFER_DSET_IO_SEL_ENC H5P__dxfr_edc_enc
 #define H5D_XFER_DSET_IO_SEL_DEC H5P__dxfr_edc_dec
 #endif /* QAK */
+/* Definition for  property */
+#define H5D_XFER_PLUGIN_NEW_API_CTX_SIZE sizeof(hbool_t)
+#define H5D_XFER_PLUGIN_NEW_API_CTX_DEF  FALSE
+#define H5D_XFER_PLUGIN_NEW_API_CTX_ENC  H5P__encode_hbool_t
+#define H5D_XFER_PLUGIN_NEW_API_CTX_DEC  H5P__decode_hbool_t
 
 /******************/
 /* Local Typedefs */
@@ -278,6 +283,8 @@ static const H5T_conv_cb_t H5D_def_conv_cb_g =
 static const void * H5D_def_xfer_xform_g = H5D_XFER_XFORM_DEF; /* Default value for data transform */
 static const H5S_t *H5D_def_dset_io_sel_g =
     H5D_XFER_DSET_IO_SEL_DEF; /* Default value for dataset I/O selection */
+static const hbool_t H5D_def_new_api_ctx_g =
+    H5D_XFER_PLUGIN_NEW_API_CTX_DEF; /* Default value for plugin new API context */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__dxfr_reg_prop
@@ -440,6 +447,13 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
                            &H5D_def_dset_io_sel_g, NULL, NULL, NULL, NULL, NULL, NULL,
                            H5D_XFER_DSET_IO_SEL_COPY, H5D_XFER_DSET_IO_SEL_CMP,
                            H5D_XFER_DSET_IO_SEL_CLOSE) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the plugin new API context property */
+    if (H5P__register_real(pclass, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, H5D_XFER_PLUGIN_NEW_API_CTX_SIZE,
+                           &H5D_def_new_api_ctx_g, NULL, NULL, NULL,
+                           H5D_XFER_PLUGIN_NEW_API_CTX_ENC, H5D_XFER_PLUGIN_NEW_API_CTX_DEC,
+                           NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -2281,7 +2295,7 @@ herr_t
 H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op, const hsize_t start[],
                                       const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5P_genplist_t *plist;                         /* Property list pointer */
+    H5P_genplist_t *plist = NULL;                  /* Property list pointer */
     H5S_t *         space;                         /* Dataspace to hold selection */
     hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
     hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
@@ -2379,3 +2393,76 @@ done:
 
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_dataset_io_hyperslab_selection() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pset_plugin_new_api_context
+ *
+ * Purpose:     Set flag to indicate that an API wrapper for a plugin's
+ *              public wrapper API call (e.g. H5VLfile_create, H5FDopen, etc)
+ *              should open a new API context for the API call.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Jun 11, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_plugin_new_api_context(hid_t plist_id, hbool_t new_api_ctx)
+{
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ib", plist_id, new_api_ctx);
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID")
+
+    /* Update property list */
+    if (H5P_set(plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &new_api_ctx) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "unable to set value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_plugin_new_api_context() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5Pget_plugin_new_api_context
+ *
+ * Purpose:     Retrieve "new API context" flag for plugin wrapper API calls.
+ *
+ * Return:	Non-negative on success/Negative on failure
+ *
+ * Programmer:	Quincey Koziol
+ *              Jun 11, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_plugin_new_api_context(hid_t plist_id, hbool_t *new_api_ctx /*out*/)
+{
+    H5P_genplist_t *plist;     /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "ix", plist_id, new_api_ctx);
+
+    /* Check argument */
+    if (NULL == new_api_ctx)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "'new_api_ctx' pointer is NULL")
+
+    /* Get the plist structure */
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADID, FAIL, "can't find object for ID")
+
+    /* Query property list */
+    if (H5P_get(plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, new_api_ctx) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "unable to get value")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_plugin_new_api_context() */
+

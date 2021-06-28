@@ -218,6 +218,38 @@ H5F_term_package(void)
 } /* end H5F_term_package() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5F__close_obj
+ *
+ * Purpose:     Close a file VOL object, possibly asynchronously.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F__close_obj(H5VL_object_t *file_vol_obj, void **request)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_PACKAGE
+
+    /* Sanity check */
+    HDassert(file_vol_obj);
+
+    /* Close the file */
+    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+
+    /* Free the VOL object; it is unnecessary to unwrap the VOL
+     * object before freeing it, as the object was not wrapped */
+    if (H5VL_free_object(file_vol_obj) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F__close_obj() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5F__close_cb
  *
  * Purpose:     Closes a file or causes the close operation to be pended.
@@ -244,14 +276,9 @@ H5F__close_cb(H5VL_object_t *file_vol_obj, void **request)
     /* Sanity check */
     HDassert(file_vol_obj);
 
-    /* Close the file */
-    if (H5VL_file_close(file_vol_obj, H5P_DATASET_XFER_DEFAULT, request) < 0)
+    /* Close the file object */
+    if (H5F__close_obj(file_vol_obj, request) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
-
-    /* Free the VOL object; it is unnecessary to unwrap the VOL
-     * object before freeing it, as the object was not wrapped */
-    if (H5VL_free_object(file_vol_obj) < 0)
-        HGOTO_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -302,6 +329,7 @@ static herr_t
 H5F__set_vol_conn(H5F_t *file)
 {
     H5VL_connector_prop_t connector_prop;               /* Property for VOL connector ID & info */
+    const H5VL_class_t *vol_cls;  /* Pointer to VOL connector class for the container */
     void *                new_connector_info = NULL;    /* Copy of connector info */
     herr_t                ret_value          = SUCCEED; /* Return value */
 
@@ -320,13 +348,12 @@ H5F__set_vol_conn(H5F_t *file)
     HDassert(0 != connector_prop.connector_id);
 
     /* Retrieve the connector for the ID */
-    if (NULL == (file->shared->vol_cls = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
+    if (NULL == (vol_cls = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
         HGOTO_ERROR(H5E_FILE, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Allocate and copy connector info, if it exists */
     if (connector_prop.connector_info)
-        if (H5VL_copy_connector_info(file->shared->vol_cls, &new_connector_info,
-                                     connector_prop.connector_info) < 0)
+        if (H5VL_copy_connector_info(vol_cls, &new_connector_info, connector_prop.connector_info) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTCOPY, FAIL, "connector info copy failed")
 
     /* Cache the connector ID & info for the container */
@@ -858,7 +885,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     /* Target file_name is an absolute pathname: see RM for detailed description */
     if (H5_CHECK_ABSOLUTE(file_name) || H5_CHECK_ABS_PATH(file_name)) {
         /* Try opening file */
-        src_file = H5F__efc_open(primary_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(primary_file, file_name, file_intent, fapl_id);
 
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
@@ -881,7 +908,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     }     /* end if */
     else if (H5_CHECK_ABS_DRIVE(file_name)) {
         /* Try opening file */
-        src_file = H5F__efc_open(primary_file, file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(primary_file, file_name, file_intent, fapl_id);
 
         /* Adjust temporary file name if file not opened */
         if (NULL == src_file) {
@@ -926,8 +953,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                     } /* end if */
 
                     /* Try opening file */
-                    src_file =
-                        H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+                    src_file = H5F__efc_open(primary_file, full_name, file_intent, fapl_id);
 
                     /* Release copy of file name */
                     full_name = (char *)H5MM_xfree(full_name);
@@ -939,7 +965,6 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                     /* Leave if file was opened */
                     else
                         break;
-                    H5E_clear_stack(NULL);
                 } /* end if */
             }     /* end while */
 
@@ -954,7 +979,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
 
         /* Try opening file */
-        src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(primary_file, full_name, file_intent, fapl_id);
 
         /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
@@ -975,7 +1000,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't prepend prefix to filename")
 
             /* Try opening file */
-            src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+            src_file = H5F__efc_open(primary_file, full_name, file_intent, fapl_id);
 
             /* Release name */
             full_name = (char *)H5MM_xfree(full_name);
@@ -990,7 +1015,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
     /* Try the relative file_name stored in temp_file_name */
     if (src_file == NULL) {
         /* Try opening file */
-        src_file = H5F__efc_open(primary_file, temp_file_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(primary_file, temp_file_name, file_intent, fapl_id);
 
         /* Check for file not opened */
         if (NULL == src_file)
@@ -1018,7 +1043,7 @@ H5F_prefix_open_file(H5F_t *primary_file, H5F_prefix_open_t prefix_type, const c
         actual_file_name = (char *)H5MM_xfree(actual_file_name);
 
         /* Try opening with the resolved name */
-        src_file = H5F__efc_open(primary_file, full_name, file_intent, H5P_FILE_CREATE_DEFAULT, fapl_id);
+        src_file = H5F__efc_open(primary_file, full_name, file_intent, fapl_id);
 
         /* Release name */
         full_name = (char *)H5MM_xfree(full_name);
@@ -1121,7 +1146,6 @@ H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5F
 
     if (NULL == (f = H5FL_CALLOC(H5F_t)))
         HGOTO_ERROR(H5E_FILE, H5E_NOSPACE, NULL, "can't allocate top file structure")
-    f->id_exists = FALSE;
 
     if (shared) {
         HDassert(lf == NULL);
@@ -1596,7 +1620,6 @@ H5F__dest(H5F_t *f, hbool_t flush)
             if (H5I_dec_ref(f->shared->vol_id) < 0)
                 /* Push error, but keep going*/
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "can't close VOL connector ID")
-        f->shared->vol_cls = NULL;
 
         /* Close the file */
         if (H5FD_close(f->shared->lf) < 0)
@@ -1630,15 +1653,15 @@ H5F__dest(H5F_t *f, hbool_t flush)
     f->open_name   = (char *)H5MM_xfree(f->open_name);
     f->actual_name = (char *)H5MM_xfree(f->actual_name);
     if (f->vol_obj) {
-        void *vol_wrap_ctx = NULL;
+//        void *vol_wrap_ctx = NULL;
 
         /* If a VOL wrapping context is available, retrieve it
          * and unwrap file VOL object
          */
-        if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
-        if (vol_wrap_ctx && (NULL == H5VL_object_unwrap(f->vol_obj)))
-            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't unwrap VOL object")
+//        if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
+//            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
+//        if (vol_wrap_ctx && (NULL == H5VL_object_unwrap(f->vol_obj)))
+//            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't unwrap VOL object")
 
         if (H5VL_free_object(f->vol_obj) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
@@ -2124,21 +2147,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F__post_open(H5F_t *f)
+H5F__post_open(H5F_t *f, H5VL_object_t *vol_obj, hbool_t id_exists)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check arguments */
     HDassert(f);
+    HDassert(vol_obj);
 
-    /* Store a vol object in the file struct */
-    if (NULL == (f->vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, f, f->shared->vol_id)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "can't create VOL object")
+    /* Have an ID now? */
+    f->id_exists = id_exists;
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    /* Store a VOL object in the file struct */
+    (void)H5VL_object_inc_rc(vol_obj);
+    f->vol_obj = vol_obj;
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5F__post_open() */
 
 /*-------------------------------------------------------------------------

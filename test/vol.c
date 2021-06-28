@@ -28,7 +28,14 @@
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 /* Filename */
-const char *FILENAME[] = {"native_vol_test", NULL};
+const char *FILENAME[] = {
+    "native_vol_test",          /* 0 */
+    "vol_public",               /* 1 */
+    NULL
+};
+
+#define PUBLIC_VOL_API_DATASET_NAME     "/Dataset1"
+#define PUBLIC_VOL_API_DATASET_SIZE     10
 
 #define NATIVE_VOL_TEST_GROUP_NAME     "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME   "test_dataset"
@@ -2097,6 +2104,150 @@ error:
 } /* end test_async_vol_props() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_public_vol_api()
+ *
+ * Purpose:     Test calling the public VOL routines directly.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_public_vol_api(void)
+{
+    char        filename[1024];
+    void *file;         /* File object */
+    void *dataset;      /* Dataset object */
+    H5VL_loc_params_t loc_params;       /* VOL location parameters for operations */
+    hid_t                    fapl_id = H5I_INVALID_HID;
+    hid_t                    fcpl_id = H5I_INVALID_HID;
+    hid_t                    lcpl_id = H5I_INVALID_HID;
+    hid_t                    dcpl_id = H5I_INVALID_HID;
+    hid_t                    dapl_id = H5I_INVALID_HID;
+    hid_t                    dxpl_id = H5I_INVALID_HID;
+    hid_t                    vol_id = H5I_INVALID_HID;
+    hid_t                    space_id = H5I_INVALID_HID;
+    hsize_t curr_dims;
+    int wdata[PUBLIC_VOL_API_DATASET_SIZE];
+    int rdata[PUBLIC_VOL_API_DATASET_SIZE];
+    unsigned u;
+
+    TESTING("Public VOL API");
+
+    /* Retrieve the file access property for testing */
+    fapl_id = h5_fileaccess();
+    h5_fixname(FILENAME[1], fapl_id, filename, sizeof filename);
+
+    /* Get property list IDs we need */
+    /* (H5P_DEFAULT is not supported by public callback routines) */
+    if ((fcpl_id = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if ((lcpl_id = H5Pcreate(H5P_LINK_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        FAIL_STACK_ERROR
+    if ((dapl_id = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
+        FAIL_STACK_ERROR
+    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Retrieve the current VOL connector ID */
+    if (H5Pget_vol_id(fapl_id, &vol_id) < 0)
+        FAIL_STACK_ERROR
+    if (H5I_INVALID_HID == vol_id)
+        TEST_ERROR
+
+    /* Create dataspace for operations */
+    curr_dims = PUBLIC_VOL_API_DATASET_SIZE;
+    if ((space_id = H5Screate_simple(1, &curr_dims, NULL)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Indicate that a new API context should be pushed */
+    if (H5Pset_plugin_new_api_context(dxpl_id, TRUE) < 0)
+        FAIL_STACK_ERROR
+
+    /* Create a file */
+    if (NULL == (file = H5VLfile_create(filename, H5F_ACC_TRUNC, fcpl_id, fapl_id, dxpl_id, NULL)))
+        TEST_ERROR
+
+    /* Set up VOL location parameters */
+    loc_params.type     = H5VL_OBJECT_BY_SELF;
+    loc_params.obj_type = H5I_FILE;
+
+    /* Create a dataset */
+    if (NULL == (dataset = H5VLdataset_create(file, &loc_params, vol_id, PUBLIC_VOL_API_DATASET_NAME,
+                                              lcpl_id, H5T_NATIVE_INT, space_id, dcpl_id, dapl_id, dxpl_id, NULL)))
+        TEST_ERROR
+
+    /* Initialize data */
+    for (u = 0; u < PUBLIC_VOL_API_DATASET_SIZE; u++)
+        wdata[u] = (int)u;
+
+    /* Write data to the dataset */
+    if (H5VLdataset_write(dataset, vol_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, wdata, NULL) < 0)
+        TEST_ERROR
+
+    /* Read data from the dataset */
+    if (H5VLdataset_read(dataset, vol_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, rdata, NULL) < 0)
+        TEST_ERROR
+
+    /* Verify data */
+    for (u = 0; u < PUBLIC_VOL_API_DATASET_SIZE; u++)
+        if(wdata[u] != rdata[u])
+            TEST_ERROR
+
+    /* Close dataset */
+    if (H5VLdataset_close(dataset, vol_id, dxpl_id, NULL) < 0)
+        TEST_ERROR
+
+    /* Close file */
+    if (H5VLfile_close(file, vol_id, dxpl_id, NULL) < 0)
+        TEST_ERROR
+
+    /* Close dataspace */
+    if (H5Sclose(space_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close property lists */
+    if (H5Pclose(fapl_id) < 0)
+        FAIL_STACK_ERROR
+    if (H5Pclose(fcpl_id) < 0)
+        FAIL_STACK_ERROR
+    if (H5Pclose(lcpl_id) < 0)
+        FAIL_STACK_ERROR
+    if (H5Pclose(dcpl_id) < 0)
+        FAIL_STACK_ERROR
+    if (H5Pclose(dapl_id) < 0)
+        FAIL_STACK_ERROR
+    if (H5Pclose(dxpl_id) < 0)
+        FAIL_STACK_ERROR
+
+    /* Close VOL connector ID */
+    if (H5VLclose(vol_id) < 0)
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5VLclose(vol_id);
+        H5Pclose(fapl_id);
+        H5Pclose(fcpl_id);
+        H5Pclose(lcpl_id);
+        H5Pclose(dcpl_id);
+        H5Pclose(dapl_id);
+        H5Pclose(dxpl_id);
+        H5Sclose(space_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_public_vol_api() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the virtual object layer interface (H5VL)
@@ -2131,6 +2282,7 @@ main(void)
     nerrors += test_basic_link_operation() < 0 ? 1 : 0;
     nerrors += test_basic_datatype_operation() < 0 ? 1 : 0;
     nerrors += test_async_vol_props() < 0 ? 1 : 0;
+    nerrors += test_public_vol_api() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual Object Layer TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

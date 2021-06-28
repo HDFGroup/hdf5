@@ -1883,6 +1883,7 @@ test_valid_path(void)
 {
     hid_t       file_id, group;
     htri_t      path_valid;
+    hbool_t is_native;
     const char *data_string_in = "test";
 
     HL_TESTING2("H5LTpath_valid");
@@ -1918,6 +1919,11 @@ test_valid_path(void)
      *  to /G2)
      *
      ****************************************************************/
+
+    /* Check for operating with native (only) VOL connector */
+    is_native = FALSE;
+    if (H5VL_fapl_is_native(H5P_DEFAULT, &is_native) < 0)
+        goto out;
 
     file_id = H5Fcreate(FILE_NAME3, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
@@ -2069,17 +2075,14 @@ test_valid_path(void)
      * CHECK ABSOLUTE PATHS
      **************************************/
 
-    if ((path_valid = H5LTpath_valid(file_id, "/", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/", TRUE)) != TRUE)
         goto out;
-    }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/", FALSE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/", FALSE)) != TRUE)
         goto out;
-    }
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(file_id, "/G1", TRUE)) != TRUE)
         goto out;
-    }
 
     if ((path_valid = H5LTpath_valid(file_id, "/G1/DS1", TRUE)) != TRUE)
         goto out;
@@ -2126,13 +2129,11 @@ test_valid_path(void)
     if ((group = H5Gopen2(file_id, "/", H5P_DEFAULT)) < 0)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(group, "/", TRUE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(group, "/", TRUE)) != TRUE)
         goto out;
-    }
 
-    if ((path_valid = H5LTpath_valid(group, "/", FALSE)) != TRUE) {
+    if ((path_valid = H5LTpath_valid(group, "/", FALSE)) != TRUE)
         goto out;
-    }
 
     if (H5Gclose(group) < 0)
         goto out;
@@ -2195,17 +2196,20 @@ test_valid_path(void)
     if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", FALSE)) != TRUE)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", TRUE)) != TRUE)
-        goto out;
+    if (is_native) {
+        if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink", TRUE)) != TRUE)
+            goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
-        goto out;
+        if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+            goto out;
+    }
 
     if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/Gcyc/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
         goto out;
 
-    if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
-        goto out;
+    if (is_native)
+        if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/DS1", TRUE)) != TRUE)
+            goto out;
 
     if ((path_valid = H5LTpath_valid(file_id, "/G1/G2/G6/ExternalLink/G20", FALSE)) != TRUE)
         goto out;

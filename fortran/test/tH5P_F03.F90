@@ -736,6 +736,7 @@ SUBROUTINE test_vds(total_error)
   INTEGER(SIZE_T) :: nsize
   LOGICAL :: IsRegular
   INTEGER(HSIZE_T) :: gap_size
+  LOGICAL :: IsNative
 
   ! For testing against
   vdsdims_out_correct(1,1) = DIM0_1*5
@@ -904,6 +905,9 @@ SUBROUTINE test_vds(total_error)
   CALL H5Pcreate_f(H5P_DATASET_ACCESS_F, dapl, error)
   CALL check("H5Pcreate_f", error, total_error)
 
+  !
+  ! Check for native VOL connector
+  CALL H5VL_fapl_is_native_f(H5P_DEFAULT_F, IsNative, error)
   DO i = 1, 2
 
      IF(i.NE.1)THEN
@@ -924,10 +928,24 @@ SUBROUTINE test_vds(total_error)
      CALL check("H5Sget_simple_extent_dims_f", error, total_error)
 
      ! check VDS dimensions
+     !
+     ! NOTE:
+     !  When not using the native VOL connector, the VDS will have a 0 for the
+     !  initial dimension.  If the library is updated to support virtual datasets
+     !  with other VOL connector stacks (either passthroughs or other terminal
+     !  connectors), this code can be returned to just checking that the
+     !  dimensions are correct. QAK, 2021/06/24
      DO j = 1, RANK
-        IF(vdsdims_out(j).NE.vdsdims_out_correct(i,j))THEN
-           total_error = total_error + 1
-           EXIT
+        IF(IsNative.OR.j.GT.1)THEN
+            IF(vdsdims_out(j).NE.vdsdims_out_correct(i,j))THEN
+               total_error = total_error + 1
+               EXIT
+            ENDIF
+        ELSE
+            IF(vdsdims_out(j).NE.0)THEN
+               total_error = total_error + 1
+               EXIT
+            ENDIF
         ENDIF
      ENDDO
 
@@ -942,7 +960,6 @@ SUBROUTINE test_vds(total_error)
         IF(virtual_view .NE. H5D_VDS_LAST_AVAILABLE_F)THEN
            total_error = total_error + 1
         ENDIF
-
      ENDIF
 
      ! Close
