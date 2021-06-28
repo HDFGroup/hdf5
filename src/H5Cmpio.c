@@ -185,7 +185,7 @@ H5C_apply_candidate_list(H5F_t *f, H5C_t *cache_ptr, unsigned num_candidates, ha
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(num_candidates > 0);
-    HDassert(num_candidates <= cache_ptr->slist_len);
+    HDassert((!cache_ptr->slist_enabled) || (num_candidates <= cache_ptr->slist_len));
     HDassert(candidates_list_ptr != NULL);
     HDassert(0 <= mpi_rank);
     HDassert(mpi_rank < mpi_size);
@@ -393,6 +393,7 @@ done:
 } /* H5C_apply_candidate_list() */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    H5C_construct_candidate_list__clean_cache
  *
  * Purpose:     Construct the list of entries that should be flushed to
@@ -408,6 +409,16 @@ done:
  * Programmer:  John Mainzer
  *              3/17/10
  *
+ * Changes:     With the slist optimization, the slist is not maintained
+ *              unless a flush is in progress.  Thus we can not longer use
+ *              cache_ptr->slist_size to determine the total size of
+ *              the entries we must insert in the candidate list.
+ *
+ *              To address this, we now use cache_ptr->dirty_index_size
+ *              instead.
+ *
+ *                                              JRM -- 7/27/20
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -421,18 +432,22 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
     HDassert(cache_ptr != NULL);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
-    /* As a sanity check, set space needed to the size of the skip list.
-     * This should be the sum total of the sizes of all the dirty entries
-     * in the metadata cache.
+    /* As a sanity check, set space needed to the dirty_index_size.  This
+     * should be the sum total of the sizes of all the dirty entries
+     * in the metadata cache.  Note that if the slist is enabled,
+     * cache_ptr->slist_size should equal cache_ptr->dirty_index_size.
      */
-    space_needed = cache_ptr->slist_size;
+    space_needed = cache_ptr->dirty_index_size;
+
+    HDassert((!cache_ptr->slist_enabled) || (space_needed == cache_ptr->slist_size));
 
     /* Recall that while we shouldn't have any protected entries at this
      * point, it is possible that some dirty entries may reside on the
      * pinned list at this point.
      */
-    HDassert(cache_ptr->slist_size <= (cache_ptr->dLRU_list_size + cache_ptr->pel_size));
-    HDassert(cache_ptr->slist_len <= (cache_ptr->dLRU_list_len + cache_ptr->pel_len));
+    HDassert(cache_ptr->dirty_index_size <= (cache_ptr->dLRU_list_size + cache_ptr->pel_size));
+    HDassert((!cache_ptr->slist_enabled) ||
+             (cache_ptr->slist_len <= (cache_ptr->dLRU_list_len + cache_ptr->pel_len)));
 
     if (space_needed > 0) { /* we have work to do */
 
@@ -441,21 +456,22 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
         size_t             nominated_entries_size  = 0;
         haddr_t            nominated_addr;
 
-        HDassert(cache_ptr->slist_len > 0);
+        HDassert((!cache_ptr->slist_enabled) || (cache_ptr->slist_len > 0));
 
         /* Scan the dirty LRU list from tail forward and nominate sufficient
          * entries to free up the necessary space.
          */
         entry_ptr = cache_ptr->dLRU_tail_ptr;
 
-        while ((nominated_entries_size < space_needed) && (nominated_entries_count < cache_ptr->slist_len) &&
+        while ((nominated_entries_size < space_needed) &&
+               ((!cache_ptr->slist_enabled) || (nominated_entries_count < cache_ptr->slist_len)) &&
                (entry_ptr != NULL)) {
 
             HDassert(!(entry_ptr->is_protected));
             HDassert(!(entry_ptr->is_read_only));
             HDassert(entry_ptr->ro_ref_count == 0);
             HDassert(entry_ptr->is_dirty);
-            HDassert(entry_ptr->in_slist);
+            HDassert((!cache_ptr->slist_enabled) || (entry_ptr->in_slist));
 
             nominated_addr = entry_ptr->addr;
 
@@ -476,7 +492,8 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
          */
         entry_ptr = cache_ptr->pel_head_ptr;
 
-        while ((nominated_entries_size < space_needed) && (nominated_entries_count < cache_ptr->slist_len) &&
+        while ((nominated_entries_size < space_needed) &&
+               ((!cache_ptr->slist_enabled) || (nominated_entries_count < cache_ptr->slist_len)) &&
                (entry_ptr != NULL)) {
 
             if (entry_ptr->is_dirty) {
@@ -502,7 +519,7 @@ H5C_construct_candidate_list__clean_cache(H5C_t *cache_ptr)
 
         } /* end while */
 
-        HDassert(nominated_entries_count == cache_ptr->slist_len);
+        HDassert((!cache_ptr->slist_enabled) || (nominated_entries_count == cache_ptr->slist_len));
         HDassert(nominated_entries_size == space_needed);
 
     } /* end if */
@@ -528,6 +545,12 @@ done:
  *
  * Programmer:  John Mainzer
  *              3/17/10
+ *
+ * Changes:     With the slist optimization, the slist is not maintained
+ *              unless a flush is in progress.  Updated sanity checks to
+ *              reflect this.
+ *
+ *                                              JRM -- 7/27/20
  *
  *-------------------------------------------------------------------------
  */
@@ -576,14 +599,15 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
         unsigned           nominated_entries_count = 0;
         size_t             nominated_entries_size  = 0;
 
-        HDassert(cache_ptr->slist_len > 0);
+        HDassert((!cache_ptr->slist_enabled) || (cache_ptr->slist_len > 0));
 
         /* Scan the dirty LRU list from tail forward and nominate sufficient
          * entries to free up the necessary space.
          */
         entry_ptr = cache_ptr->dLRU_tail_ptr;
 
-        while ((nominated_entries_size < space_needed) && (nominated_entries_count < cache_ptr->slist_len) &&
+        while ((nominated_entries_size < space_needed) &&
+               ((!cache_ptr->slist_enabled) || (nominated_entries_count < cache_ptr->slist_len)) &&
                (entry_ptr != NULL) && (!entry_ptr->flush_me_last)) {
 
             haddr_t nominated_addr;
@@ -592,7 +616,7 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
             HDassert(!(entry_ptr->is_read_only));
             HDassert(entry_ptr->ro_ref_count == 0);
             HDassert(entry_ptr->is_dirty);
-            HDassert(entry_ptr->in_slist);
+            HDassert((!cache_ptr->slist_enabled) || (entry_ptr->in_slist));
 
             nominated_addr = entry_ptr->addr;
 
@@ -605,7 +629,9 @@ H5C_construct_candidate_list__min_clean(H5C_t *cache_ptr)
             entry_ptr = entry_ptr->aux_prev;
 
         } /* end while */
-        HDassert(nominated_entries_count <= cache_ptr->slist_len);
+
+        HDassert((!cache_ptr->slist_enabled) || (nominated_entries_count <= cache_ptr->slist_len));
+        HDassert(nominated_entries_size <= cache_ptr->dirty_index_size);
         HDassert(nominated_entries_size >= space_needed);
     } /* end if */
 
@@ -893,7 +919,9 @@ H5C_clear_coll_entries(H5C_t *cache_ptr, hbool_t partial)
         entry_ptr = prev_ptr;
     } /* end while */
 
+#ifdef H5C_DO_SANITY_CHECKS
 done:
+#endif /* H5C_DO_SANITY_CHECKS */
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5C_clear_coll_entries */
 

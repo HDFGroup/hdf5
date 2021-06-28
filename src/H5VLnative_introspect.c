@@ -15,11 +15,42 @@
  *
  */
 
+/****************/
+/* Module Setup */
+/****************/
+
+/***********/
+/* Headers */
+/***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5VLprivate.h" /* Virtual Object Layer                     */
 
 #include "H5VLnative_private.h" /* Native VOL connector                     */
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Note: H5VL__native_introspect_get_conn_cls is in src/H5VLnative.c so that
  *      it can return the address of the staticly declared class struct.
@@ -150,8 +181,10 @@ H5VL__native_introspect_opt_query(void H5_ATTR_UNUSED *obj, H5VL_subclass_t subc
                 case H5VL_NATIVE_FILE_SET_LIBVER_BOUNDS:
                 case H5VL_NATIVE_FILE_GET_MIN_DSET_OHDR_FLAG:
                 case H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG:
+#ifdef H5_HAVE_PARALLEL
                 case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY:
                 case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY:
+#endif /* H5_HAVE_PARALLEL */
                 case H5VL_NATIVE_FILE_POST_OPEN:
                     break;
 

@@ -100,6 +100,7 @@ H5_DLL int      H5_get_win32_times(H5_timevals_t *tvs);
 
 #define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
 #define HDsetenv(N, V, O)    Wsetenv(N, V, O)
+#define HDunsetenv(N, V, O)  Wsetenv(N, "", 1)
 #define HDflock(F, L)        Wflock(F, L)
 #define HDgetlogin()         Wgetlogin()
 
