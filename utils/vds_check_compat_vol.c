@@ -38,8 +38,8 @@
 int
 main(void)
 {
-    hid_t fapl_id;
-    hbool_t is_native;              /* Whether native VOL connector is being used */
+    hid_t   fapl_id;
+    hbool_t is_native; /* Whether native VOL connector is being used */
 
     /* Open the VDS file and dataset */
     if ((fapl_id = h5_fileaccess()) < 0)
@@ -56,5 +56,3 @@ main(void)
     else
         return EXIT_FAILURE;
 } /* end main() */
-
-
