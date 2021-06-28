@@ -16670,11 +16670,11 @@ error:
 static int
 obj_exists(hid_t fapl, hbool_t new_format)
 {
-    char   filename[NAME_BUF_SIZE]; /* Buffer for file name */
-    hid_t  fid = -1;                /* File ID */
-    hid_t  gid = -1;                /* Group ID */
-    hbool_t is_native;              /* Whether native VOL connector is being used */
-    herr_t status;                  /* Generic return value */
+    char    filename[NAME_BUF_SIZE]; /* Buffer for file name */
+    hid_t   fid = -1;                /* File ID */
+    hid_t   gid = -1;                /* Group ID */
+    hbool_t is_native;               /* Whether native VOL connector is being used */
+    herr_t  status;                  /* Generic return value */
 
     if (new_format)
         TESTING("object exists (w/new group format)")
@@ -22601,8 +22601,8 @@ main(void)
         }
 
         for (new_format = FALSE; new_format <= TRUE; new_format++) {
-            hid_t my_fapl;
-            hbool_t is_native;              /* Whether native VOL connector is being used */
+            hid_t   my_fapl;
+            hbool_t is_native; /* Whether native VOL connector is being used */
 
             /* Check for FAPL to use */
             if (new_format) {

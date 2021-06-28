@@ -252,10 +252,10 @@
     {                                                                                                        \
         H5T_INIT_TYPE_ALLOC_COMMON(H5T_REFERENCE)                                                            \
         H5T_INIT_TYPE_NUM_COMMON(H5T_ORDER_NONE)                                                             \
-        dt->shared->force_conv        = TRUE;                                                                \
-        dt->shared->u.atomic.u.r.file_obj = NULL;                                                                \
-        dt->shared->u.atomic.u.r.loc  = H5T_LOC_BADLOC;                                                      \
-        dt->shared->u.atomic.u.r.cls  = NULL;                                                                \
+        dt->shared->force_conv            = TRUE;                                                            \
+        dt->shared->u.atomic.u.r.file_obj = NULL;                                                            \
+        dt->shared->u.atomic.u.r.loc      = H5T_LOC_BADLOC;                                                  \
+        dt->shared->u.atomic.u.r.cls      = NULL;                                                            \
     }
 
 #define H5T_INIT_TYPE_OBJREF_CORE                                                                            \

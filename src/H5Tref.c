@@ -77,8 +77,8 @@ static size_t H5T__ref_mem_getsize(H5VL_object_t *src_file_obj, const void *src_
 static herr_t H5T__ref_mem_read(H5VL_object_t *src_file_obj, const void *src_buf, size_t src_size,
                                 H5VL_object_t *dst_file_obj, void *dst_buf, size_t dst_size);
 static herr_t H5T__ref_mem_write(H5VL_object_t *src_file_obj, const void *src_buf, size_t src_size,
-                                 H5R_type_t src_type, H5VL_object_t *dst_file_obj, void *dst_buf, size_t dst_size,
-                                 void *bg_buf);
+                                 H5R_type_t src_type, H5VL_object_t *dst_file_obj, void *dst_buf,
+                                 size_t dst_size, void *bg_buf);
 
 static herr_t H5T__ref_disk_isnull(const H5VL_object_t *src_file_obj, const void *src_buf, hbool_t *isnull);
 static herr_t H5T__ref_disk_setnull(H5VL_object_t *dst_file_obj, void *dst_buf, void *bg_buf);
@@ -91,7 +91,8 @@ static herr_t H5T__ref_disk_write(H5VL_object_t *src_file_obj, const void *src_b
                                   size_t dst_size, void *bg_buf);
 
 /* For compatibility */
-static herr_t H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file_obj, const void *src_buf, hbool_t *isnull);
+static herr_t H5T__ref_obj_disk_isnull(const H5VL_object_t *src_file_obj, const void *src_buf,
+                                       hbool_t *isnull);
 static size_t H5T__ref_obj_disk_getsize(H5VL_object_t *src_file_obj, const void *src_buf, size_t src_size,
                                         H5VL_object_t *dst_file_obj, hbool_t *dst_copy);
 static herr_t H5T__ref_obj_disk_read(H5VL_object_t *src_file_obj, const void *src_buf, size_t src_size,
@@ -523,8 +524,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file_obj, const void *src_buf, size_t H5_ATTR_UNUSED src_size,
-                  H5VL_object_t *dst_file_obj, void *dst_buf, size_t dst_size)
+H5T__ref_mem_read(H5VL_object_t H5_ATTR_UNUSED *src_file_obj, const void *src_buf,
+                  size_t H5_ATTR_UNUSED src_size, H5VL_object_t *dst_file_obj, void *dst_buf, size_t dst_size)
 {
     H5VL_object_t *       vol_obj; /* VOL object for src ref's location */
     const H5R_ref_priv_t *src_ref     = (const H5R_ref_priv_t *)src_buf;
@@ -1117,7 +1118,8 @@ done:
  */
 static herr_t
 H5T__ref_obj_disk_read(H5VL_object_t *src_file_obj, const void *src_buf, size_t src_size,
-                       H5VL_object_t H5_ATTR_UNUSED *dst_file_obj, void *dst_buf, size_t H5_ATTR_UNUSED dst_size)
+                       H5VL_object_t H5_ATTR_UNUSED *dst_file_obj, void *dst_buf,
+                       size_t H5_ATTR_UNUSED dst_size)
 {
     H5F_t *src_f;
     herr_t ret_value = SUCCEED;

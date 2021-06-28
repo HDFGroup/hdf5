@@ -4288,11 +4288,11 @@ check_external_link_open_tags(void)
     hid_t   gid      = -1; /* Dataspace Identifier */
     hid_t   xid      = -1; /* Dataspace Identifier */
 #ifndef NDEBUG
-    int verbose = FALSE;              /* verbose file outout */
-#endif                                /* NDEBUG */
-    H5O_native_info_t ninfo;          /* Native object info struct */
-    hid_t             fapl      = -1; /* File access prop list */
-    hbool_t           is_native;        /* Whether the native VOL connector is being used */
+    int verbose = FALSE;         /* verbose file outout */
+#endif                           /* NDEBUG */
+    H5O_native_info_t ninfo;     /* Native object info struct */
+    hid_t             fapl = -1; /* File access prop list */
+    hbool_t           is_native; /* Whether the native VOL connector is being used */
     haddr_t           root_tag  = 0;
     haddr_t           root2_tag = 0;
 
@@ -4359,9 +4359,11 @@ check_external_link_open_tags(void)
     /* Open External Link */
     /* ================== */
 
-    H5E_BEGIN_TRY {
-    xid = H5Gopen2(fid, LINKNAME, H5P_DEFAULT);
-    } H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        xid = H5Gopen2(fid, LINKNAME, H5P_DEFAULT);
+    }
+    H5E_END_TRY
     if (is_native) {
         if (xid < 0)
             FAIL_STACK_ERROR;
@@ -4438,9 +4440,8 @@ check_external_link_open_tags(void)
         if (H5Fclose(fid2) < 0)
             FAIL_STACK_ERROR;
     }
-    else
-        if (xid >= 0)
-            TEST_ERROR;
+    else if (xid >= 0)
+        TEST_ERROR;
 
     /* ========== */
     /* Close file */

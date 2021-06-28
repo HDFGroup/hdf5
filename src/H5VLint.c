@@ -917,8 +917,7 @@ done:
  *-------------------------------------------------------------------------
  */
 H5VL_object_t *
-H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id,
-                                hbool_t wrap_obj)
+H5VL_create_object_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool_t wrap_obj)
 {
     H5VL_class_t * cls          = NULL;  /* VOL connector class */
     H5VL_t *       connector    = NULL;  /* VOL connector struct */
@@ -1100,12 +1099,12 @@ done:
 herr_t
 H5VL_fapl_is_native(hid_t fapl_id, hbool_t *is_native)
 {
-    H5P_genplist_t *      fapl_plist;                       /* Property list pointer                    */
-    H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
-    H5VL_class_t *cls;              /* VOL class structure for callback info    */
-    const H5VL_class_t *native_cls;          /* Native VOL connector class structs */
-    int                 cmp_value;           /* Comparison result */
-    herr_t ret_value = SUCCEED;
+    H5P_genplist_t *      fapl_plist;     /* Property list pointer                    */
+    H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info     */
+    H5VL_class_t *        cls;            /* VOL class structure for callback info    */
+    const H5VL_class_t *  native_cls;     /* Native VOL connector class structs */
+    int                   cmp_value;      /* Comparison result */
+    herr_t                ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 

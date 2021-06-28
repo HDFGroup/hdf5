@@ -200,12 +200,12 @@ typedef struct H5T_ref_class_t {
 } H5T_ref_class_t;
 
 typedef struct H5T_atomic_ref_t {
-    H5R_type_t             rtype;   /* type of reference stored             */
-    unsigned               version; /* version of encoded reference         */
-    hbool_t                opaque;  /* opaque reference type                */
-    H5T_loc_t              loc;     /* location of data in buffer           */
-    H5VL_object_t *file_obj; /* File VOL object (if data is on disk) */
-    const H5T_ref_class_t *cls;     /* Pointer to ref class callbacks */
+    H5R_type_t             rtype;    /* type of reference stored             */
+    unsigned               version;  /* version of encoded reference         */
+    hbool_t                opaque;   /* opaque reference type                */
+    H5T_loc_t              loc;      /* location of data in buffer           */
+    H5VL_object_t *        file_obj; /* File VOL object (if data is on disk) */
+    const H5T_ref_class_t *cls;      /* Pointer to ref class callbacks */
 } H5T_atomic_ref_t;
 
 typedef struct H5T_atomic_t {
@@ -235,7 +235,7 @@ typedef struct H5T_atomic_t {
             H5T_str_t  pad;  /* space or null padding of extra bytes */
         } s;                 /* string types */
 
-        H5T_atomic_ref_t r;     /* Reference type info */
+        H5T_atomic_ref_t r; /* Reference type info */
     } u;
 } H5T_atomic_t;
 
@@ -304,13 +304,13 @@ typedef struct H5T_vlen_class_t {
 
 /* A VL datatype */
 typedef struct H5T_vlen_t {
-    H5T_vlen_type_t type;         /* Type of VL data in buffer */
-    H5T_loc_t       loc;          /* Location of VL data in buffer */
-    H5T_cset_t      cset;         /* For VL string: character set */
-    H5T_str_t       pad;          /* For VL string: space or null padding of
-                                   * extra bytes */
-    H5VL_object_t *file_obj; /* File VOL object (if VL data is on disk) */
-    const H5T_vlen_class_t *cls;  /* Pointer to VL class callbacks */
+    H5T_vlen_type_t type;             /* Type of VL data in buffer */
+    H5T_loc_t       loc;              /* Location of VL data in buffer */
+    H5T_cset_t      cset;             /* For VL string: character set */
+    H5T_str_t       pad;              /* For VL string: space or null padding of
+                                       * extra bytes */
+    H5VL_object_t *         file_obj; /* File VOL object (if VL data is on disk) */
+    const H5T_vlen_class_t *cls;      /* Pointer to VL class callbacks */
 } H5T_vlen_t;
 
 /* An opaque datatype */

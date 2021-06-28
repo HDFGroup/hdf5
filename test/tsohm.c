@@ -21,7 +21,7 @@
  * This file needs to access private information from the H5F package.
  * This file also needs to access the file testing code.
  */
-#define H5F_FRIEND       /* suppress error about including H5Fpkg      */
+#define H5F_FRIEND /* suppress error about including H5Fpkg      */
 #define H5F_TESTING
 #include "H5Fpkg.h"      /* File access */
 #include "H5VLprivate.h" /* Virtual Object Layer */
@@ -3246,7 +3246,7 @@ verify_dset_create_and_open_through_extlink_with_sohm(hid_t src_fcpl_id, hid_t d
 
     /* Check for operating with native (only) VOL connector */
     is_native = FALSE;
-    ret = H5VL_fapl_is_native(H5P_DEFAULT, &is_native);
+    ret       = H5VL_fapl_is_native(H5P_DEFAULT, &is_native);
     CHECK_I(ret, "H5VL__fapl_is_native_test");
 
     /* Create a dataset through the external link */

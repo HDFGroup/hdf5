@@ -67,7 +67,7 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
     int         fill = -1;                                  /* Fill value */
     int         i, j;
     char        buffer[1024]; /* buffer to read vds_prefix       */
-    hbool_t is_native;              /* Whether native VOL connector is being used */
+    hbool_t     is_native;    /* Whether native VOL connector is being used */
 
     TESTING("basic virtual dataset I/O via H5Pset_vds_prefix(): all selection with ENV prefix")
 
@@ -128,8 +128,8 @@ test_vds_prefix_second(unsigned config, hid_t fapl)
             TEST_ERROR
 
         /* Add virtual layout mapping */
-        if (H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".", "src_dset",
-                           srcspace[0]) < 0)
+        if (H5Pset_virtual(dcpl, vspace[0], config & TEST_IO_DIFFERENT_FILE ? srcfilename_map : ".",
+                           "src_dset", srcspace[0]) < 0)
             TEST_ERROR
 
         /* Create virtual file */

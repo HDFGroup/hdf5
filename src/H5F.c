@@ -520,7 +520,7 @@ done:
 static hid_t
 H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id, void **token_ptr)
 {
-    hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value                             */
 
     FUNC_ENTER_STATIC
 
@@ -557,7 +557,8 @@ H5F__create_api_common(const char *filename, unsigned flags, hid_t fcpl_id, hid_
     flags |= H5F_ACC_RDWR | H5F_ACC_CREAT;
 
     /* Create a new file or truncate an existing file through the VOL */
-    if ((ret_value = H5VL_file_create(filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)) < 0)
+    if ((ret_value =
+             H5VL_file_create(filename, flags, fcpl_id, fapl_id, H5P_DATASET_XFER_DEFAULT, token_ptr)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to create file")
 
 done:
@@ -592,7 +593,7 @@ done:
 hid_t
 H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE4("i", "*sIuii", filename, flags, fcpl_id, fapl_id);
@@ -620,9 +621,9 @@ hid_t
 H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, const char *filename,
                 unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t es_id)
 {
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    void * token     = NULL;            /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE8("i", "*s*sIu*sIuiii", app_file, app_func, app_line, filename, flags, fcpl_id, fapl_id, es_id);
@@ -637,7 +638,7 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, c
 
     /* If a token was created, add the token to the event set */
     if (NULL != token) {
-        H5VL_object_t *vol_obj;            /* File object */
+        H5VL_object_t *vol_obj; /* File object */
 
         /* Get the file object */
         if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
@@ -651,7 +652,7 @@ H5Fcreate_async(const char *app_file, const char *app_func, unsigned app_line, c
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID")
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -671,8 +672,8 @@ done:
 static hid_t
 H5F__open_api_common(const char *filename, unsigned flags, hid_t fapl_id, void **token_ptr)
 {
-    hid_t file_id = H5I_INVALID_HID; /* File ID */
-    hid_t                 ret_value = H5I_INVALID_HID; /* Return value                             */
+    hid_t file_id   = H5I_INVALID_HID; /* File ID */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value                             */
 
     FUNC_ENTER_STATIC
 
@@ -729,7 +730,7 @@ done:
 hid_t
 H5Fopen(const char *filename, unsigned flags, hid_t fapl_id)
 {
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE3("i", "*sIui", filename, flags, fapl_id);
@@ -758,9 +759,9 @@ hid_t
 H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, const char *filename,
               unsigned flags, hid_t fapl_id, hid_t es_id)
 {
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    void * token     = NULL;            /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t  ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE7("i", "*s*sIu*sIuii", app_file, app_func, app_line, filename, flags, fapl_id, es_id);
@@ -775,7 +776,7 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, con
 
     /* If a token was created, add the token to the event set */
     if (NULL != token) {
-        H5VL_object_t *vol_obj   = NULL;            /* File object */
+        H5VL_object_t *vol_obj = NULL; /* File object */
 
         /* Get the file object */
         if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
@@ -789,7 +790,7 @@ H5Fopen_async(const char *app_file, const char *app_func, unsigned app_line, con
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID")
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1342,7 +1343,7 @@ done:
 hid_t
 H5Freopen(hid_t file_id)
 {
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", file_id);
@@ -1370,9 +1371,9 @@ done:
 hid_t
 H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, hid_t file_id, hid_t es_id)
 {
-    void *         token     = NULL;            /* Request token for async operation        */
-    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
-    hid_t          ret_value;                   /* Return value */
+    void * token     = NULL;            /* Request token for async operation        */
+    void **token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    hid_t  ret_value;                   /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE5("i", "*s*sIuii", app_file, app_func, app_line, file_id, es_id);
@@ -1387,7 +1388,7 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, h
 
     /* If a token was created, add the token to the event set */
     if (NULL != token) {
-        H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
+        H5VL_object_t *vol_obj = NULL; /* Object for loc_id */
 
         /* Get the file object */
         if (NULL == (vol_obj = H5VL_vol_object(ret_value)))
@@ -1401,7 +1402,7 @@ H5Freopen_async(const char *app_file, const char *app_func, unsigned app_line, h
                 HDONE_ERROR(H5E_FILE, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on file ID")
             HGOTO_ERROR(H5E_FILE, H5E_CANTINSERT, H5I_INVALID_HID, "can't insert token into event set")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)

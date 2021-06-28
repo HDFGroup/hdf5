@@ -72,16 +72,16 @@ typedef herr_t (*H5VL_api_oper_t)(void *ctx);
 /* Attribute create "common" callback context data */
 typedef struct H5VL_attr_create_ctx_t {
     /* DOWN: API routine parameters */
-    void *obj;
+    void *                   obj;
     const H5VL_loc_params_t *loc_params;
-    H5VL_class_t *cls;
-    const char *name;
-    hid_t type_id;
-    hid_t space_id;
-    hid_t acpl_id;
-    hid_t aapl_id;
-    hid_t dxpl_id;
-    void **req;
+    H5VL_class_t *           cls;
+    const char *             name;
+    hid_t                    type_id;
+    hid_t                    space_id;
+    hid_t                    acpl_id;
+    hid_t                    aapl_id;
+    hid_t                    dxpl_id;
+    void **                  req;
 
     /* UP: API routine return value */
     void *ret_value;
@@ -90,16 +90,16 @@ typedef struct H5VL_attr_create_ctx_t {
 /* Attribute open "common" callback context data */
 typedef struct H5VL_attr_open_ctx_t {
     /* DOWN: API routine parameters */
-    void *obj;
+    void *                   obj;
     const H5VL_loc_params_t *loc_params;
-    H5VL_class_t *cls;
-    const char *name;
-    hid_t type_id;
-    hid_t space_id;
-    hid_t acpl_id;
-    hid_t aapl_id;
-    hid_t dxpl_id;
-    void **req;
+    H5VL_class_t *           cls;
+    const char *             name;
+    hid_t                    type_id;
+    hid_t                    space_id;
+    hid_t                    acpl_id;
+    hid_t                    aapl_id;
+    hid_t                    dxpl_id;
+    void **                  req;
 
     /* UP: API routine return value */
     void *ret_value;
@@ -431,10 +431,10 @@ done:
 static herr_t
 H5VL__common_api_op(hid_t dxpl_id, H5VL_api_oper_t wrap_op, void *wrap_ctx)
 {
-    H5P_genplist_t *      dxpl_plist = NULL; /* DXPL property list pointer */
-    hbool_t new_api_ctx = FALSE;    /* Whether to start a new API context */
-    hbool_t api_pushed = FALSE; /* Indicate that a new API context was pushed */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *dxpl_plist  = NULL;    /* DXPL property list pointer */
+    hbool_t         new_api_ctx = FALSE;   /* Whether to start a new API context */
+    hbool_t         api_pushed  = FALSE;   /* Indicate that a new API context was pushed */
+    herr_t          ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -448,18 +448,18 @@ H5VL__common_api_op(hid_t dxpl_id, H5VL_api_oper_t wrap_op, void *wrap_ctx)
 
         /* Start a new API context, if requested */
         if (new_api_ctx) {
-            hbool_t reset_api_ctx = FALSE;  /* Flag to reset the 'new API context' */
+            hbool_t reset_api_ctx = FALSE; /* Flag to reset the 'new API context' */
 
-            /* Push the API context */                                                                               \
-            if (H5CX_push() < 0)                                                                                     \
-                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context")                                     \
+            /* Push the API context */
+            if (H5CX_push() < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context")
             api_pushed = TRUE;
 
             /* Reset 'new API context' flag for next layer down */
             if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &reset_api_ctx) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set value")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Call the corresponding internal bounce routine */
     if ((*wrap_op)(wrap_ctx) < 0)
@@ -467,14 +467,14 @@ H5VL__common_api_op(hid_t dxpl_id, H5VL_api_oper_t wrap_op, void *wrap_ctx)
 
 done:
     /* Pop the API context, if it was pushed */
-    if(api_pushed) {
-        hbool_t undo_api_ctx = TRUE;  /* Flag to reset the 'new API context' */
+    if (api_pushed) {
+        hbool_t undo_api_ctx = TRUE; /* Flag to reset the 'new API context' */
 
         /* Undo change to 'new API context' flag */
         if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &undo_api_ctx) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set value")
 
-        (void)H5CX_pop(FALSE);                                                                                    \
+        (void)H5CX_pop(FALSE);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1161,8 +1161,8 @@ done:
 static herr_t
 H5VL__attr_create_api_op(void *_ctx)
 {
-    H5VL_attr_create_ctx_t *ctx = (H5VL_attr_create_ctx_t *)_ctx; /* Get pointer to context */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_attr_create_ctx_t *ctx       = (H5VL_attr_create_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t                  ret_value = SUCCEED;                        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1170,8 +1170,9 @@ H5VL__attr_create_api_op(void *_ctx)
     HDassert(ctx);
 
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ctx->ret_value = H5VL__attr_create(ctx->obj, ctx->loc_params, ctx->cls, ctx->name, ctx->type_id, ctx->space_id, ctx->acpl_id,
-                                               ctx->aapl_id, ctx->dxpl_id, ctx->req)))
+    if (NULL == (ctx->ret_value =
+                     H5VL__attr_create(ctx->obj, ctx->loc_params, ctx->cls, ctx->name, ctx->type_id,
+                                       ctx->space_id, ctx->acpl_id, ctx->aapl_id, ctx->dxpl_id, ctx->req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "unable to create attribute")
 
 done:
@@ -1193,9 +1194,9 @@ H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_
                 hid_t type_id, hid_t space_id, hid_t acpl_id, hid_t aapl_id, hid_t dxpl_id,
                 void **req /*out*/)
 {
-    H5VL_attr_create_ctx_t ctx; /* Context for common API wrapper call */
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    void *        ret_value = NULL; /* Return value */
+    H5VL_attr_create_ctx_t ctx;              /* Context for common API wrapper call */
+    H5VL_class_t *         cls;              /* VOL connector's class struct */
+    void *                 ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(NULL)
     H5TRACE10("*x", "*x*#i*siiiiix", obj, loc_params, connector_id, name, type_id, space_id, acpl_id, aapl_id,
@@ -1208,16 +1209,16 @@ H5VLattr_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Set up context */
-    ctx.obj = obj;
+    ctx.obj        = obj;
     ctx.loc_params = loc_params;
-    ctx.cls = cls;
-    ctx.name = name;
-    ctx.type_id = type_id;
-    ctx.space_id = space_id;
-    ctx.acpl_id = acpl_id;
-    ctx.aapl_id = aapl_id;
-    ctx.dxpl_id = dxpl_id;
-    ctx.req = req;
+    ctx.cls        = cls;
+    ctx.name       = name;
+    ctx.type_id    = type_id;
+    ctx.space_id   = space_id;
+    ctx.acpl_id    = acpl_id;
+    ctx.aapl_id    = aapl_id;
+    ctx.dxpl_id    = dxpl_id;
+    ctx.req        = req;
 
     /* Invoke bounce routine */
     if (H5VL__common_api_op(dxpl_id, H5VL__attr_create_api_op, &ctx) < 0)
@@ -1310,8 +1311,8 @@ done:
 static herr_t
 H5VL__attr_open_api_op(void *_ctx)
 {
-    H5VL_attr_open_ctx_t *ctx = (H5VL_attr_open_ctx_t *)_ctx; /* Get pointer to context */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5VL_attr_open_ctx_t *ctx       = (H5VL_attr_open_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t                ret_value = SUCCEED;                      /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1319,7 +1320,8 @@ H5VL__attr_open_api_op(void *_ctx)
     HDassert(ctx);
 
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ctx->ret_value = H5VL__attr_open(ctx->obj, ctx->loc_params, ctx->cls, ctx->name, ctx->aapl_id, ctx->dxpl_id, ctx->req)))
+    if (NULL == (ctx->ret_value = H5VL__attr_open(ctx->obj, ctx->loc_params, ctx->cls, ctx->name,
+                                                  ctx->aapl_id, ctx->dxpl_id, ctx->req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, FAIL, "unable to open attribute")
 
 done:
@@ -1340,9 +1342,9 @@ void *
 H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name,
               hid_t aapl_id, hid_t dxpl_id, void **req /*out*/)
 {
-    H5VL_attr_open_ctx_t ctx; /* Context for common API wrapper call */
-    H5VL_class_t *cls;              /* VOL connector's class struct */
-    void *        ret_value = NULL; /* Return value */
+    H5VL_attr_open_ctx_t ctx;              /* Context for common API wrapper call */
+    H5VL_class_t *       cls;              /* VOL connector's class struct */
+    void *               ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(NULL)
     H5TRACE7("*x", "*x*#i*siix", obj, loc_params, connector_id, name, aapl_id, dxpl_id, req);
@@ -1354,13 +1356,13 @@ H5VLattr_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
     /* Set up context */
-    ctx.obj = obj;
+    ctx.obj        = obj;
     ctx.loc_params = loc_params;
-    ctx.cls = cls;
-    ctx.name = name;
-    ctx.aapl_id = aapl_id;
-    ctx.dxpl_id = dxpl_id;
-    ctx.req = req;
+    ctx.cls        = cls;
+    ctx.name       = name;
+    ctx.aapl_id    = aapl_id;
+    ctx.dxpl_id    = dxpl_id;
+    ctx.req        = req;
 
     /* Invoke bounce routine */
     if (H5VL__common_api_op(dxpl_id, H5VL__attr_open_api_op, &ctx) < 0)
@@ -1450,11 +1452,11 @@ done:
 herr_t
 H5VLattr_read(void *obj, hid_t connector_id, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req /*out*/)
 {
-    H5VL_class_t *cls;                 /* VOL connector's class struct */
-    H5P_genplist_t *      dxpl_plist = NULL; /* DXPL property list pointer */
-    hbool_t new_api_ctx = FALSE;    /* Whether to start a new API context */
-    hbool_t api_pushed = FALSE; /* Indicate that a new API context was pushed */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5VL_class_t *  cls;                   /* VOL connector's class struct */
+    H5P_genplist_t *dxpl_plist  = NULL;    /* DXPL property list pointer */
+    hbool_t         new_api_ctx = FALSE;   /* Whether to start a new API context */
+    hbool_t         api_pushed  = FALSE;   /* Indicate that a new API context was pushed */
+    herr_t          ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(FAIL)
     H5TRACE6("e", "*xii*xix", obj, connector_id, mem_type_id, buf, dxpl_id, req);
@@ -1475,18 +1477,18 @@ H5VLattr_read(void *obj, hid_t connector_id, hid_t mem_type_id, void *buf, hid_t
 
         /* Start a new API context, if requested */
         if (new_api_ctx) {
-            hbool_t reset_api_ctx = FALSE;  /* Flag to reset the 'new API context' */
+            hbool_t reset_api_ctx = FALSE; /* Flag to reset the 'new API context' */
 
-            /* Push the API context */                                                                               \
-            if (H5CX_push() < 0)                                                                                     \
-                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context")                                     \
+            /* Push the API context */
+            if (H5CX_push() < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context")
             api_pushed = TRUE;
 
             /* Reset 'new API context' flag for next layer down */
             if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &reset_api_ctx) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set value")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__attr_read(obj, cls, mem_type_id, buf, dxpl_id, req) < 0)
@@ -1494,14 +1496,14 @@ H5VLattr_read(void *obj, hid_t connector_id, hid_t mem_type_id, void *buf, hid_t
 
 done:
     /* Pop the API context, if it was pushed */
-    if(api_pushed) {
-        hbool_t undo_api_ctx = TRUE;  /* Flag to reset the 'new API context' */
+    if (api_pushed) {
+        hbool_t undo_api_ctx = TRUE; /* Flag to reset the 'new API context' */
 
         /* Undo change to 'new API context' flag */
         if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &undo_api_ctx) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set value")
 
-        (void)H5CX_pop(FALSE);                                                                                    \
+        (void)H5CX_pop(FALSE);
     } /* end if */
 
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -1586,11 +1588,11 @@ herr_t
 H5VLattr_write(void *obj, hid_t connector_id, hid_t mem_type_id, const void *buf, hid_t dxpl_id,
                void **req /*out*/)
 {
-    H5VL_class_t *cls;                 /* VOL connector's class struct */
-    H5P_genplist_t *      dxpl_plist = NULL; /* DXPL property list pointer */
-    hbool_t new_api_ctx = FALSE;    /* Whether to start a new API context */
-    hbool_t api_pushed = FALSE; /* Indicate that a new API context was pushed */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5VL_class_t *  cls;                   /* VOL connector's class struct */
+    H5P_genplist_t *dxpl_plist  = NULL;    /* DXPL property list pointer */
+    hbool_t         new_api_ctx = FALSE;   /* Whether to start a new API context */
+    hbool_t         api_pushed  = FALSE;   /* Indicate that a new API context was pushed */
+    herr_t          ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(FAIL)
     H5TRACE6("e", "*xii*xix", obj, connector_id, mem_type_id, buf, dxpl_id, req);
@@ -1611,18 +1613,18 @@ H5VLattr_write(void *obj, hid_t connector_id, hid_t mem_type_id, const void *buf
 
         /* Start a new API context, if requested */
         if (new_api_ctx) {
-            hbool_t reset_api_ctx = FALSE;  /* Flag to reset the 'new API context' */
+            hbool_t reset_api_ctx = FALSE; /* Flag to reset the 'new API context' */
 
-            /* Push the API context */                                                                               \
-            if (H5CX_push() < 0)                                                                                     \
-                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context")                                     \
+            /* Push the API context */
+            if (H5CX_push() < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context")
             api_pushed = TRUE;
 
             /* Reset 'new API context' flag for next layer down */
             if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &reset_api_ctx) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set value")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__attr_write(obj, cls, mem_type_id, buf, dxpl_id, req) < 0)
@@ -1630,14 +1632,14 @@ H5VLattr_write(void *obj, hid_t connector_id, hid_t mem_type_id, const void *buf
 
 done:
     /* Pop the API context, if it was pushed */
-    if(api_pushed) {
-        hbool_t undo_api_ctx = TRUE;  /* Flag to reset the 'new API context' */
+    if (api_pushed) {
+        hbool_t undo_api_ctx = TRUE; /* Flag to reset the 'new API context' */
 
         /* Undo change to 'new API context' flag */
         if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &undo_api_ctx) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set value")
 
-        (void)H5CX_pop(FALSE);                                                                                    \
+        (void)H5CX_pop(FALSE);
     } /* end if */
 
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -1720,11 +1722,11 @@ done:
 herr_t
 H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
-    H5VL_class_t *cls;                 /* VOL connector's class struct */
-    H5P_genplist_t *      dxpl_plist = NULL; /* DXPL property list pointer */
-    hbool_t new_api_ctx = FALSE;    /* Whether to start a new API context */
-    hbool_t api_pushed = FALSE; /* Indicate that a new API context was pushed */
-    herr_t        ret_value = SUCCEED; /* Return value */
+    H5VL_class_t *  cls;                   /* VOL connector's class struct */
+    H5P_genplist_t *dxpl_plist  = NULL;    /* DXPL property list pointer */
+    hbool_t         new_api_ctx = FALSE;   /* Whether to start a new API context */
+    hbool_t         api_pushed  = FALSE;   /* Indicate that a new API context was pushed */
+    herr_t          ret_value   = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(FAIL)
     H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
@@ -1747,18 +1749,18 @@ H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dx
 
         /* Start a new API context, if requested */
         if (new_api_ctx) {
-            hbool_t reset_api_ctx = FALSE;  /* Flag to reset the 'new API context' */
+            hbool_t reset_api_ctx = FALSE; /* Flag to reset the 'new API context' */
 
-            /* Push the API context */                                                                               \
-            if (H5CX_push() < 0)                                                                                     \
-                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context")                                     \
+            /* Push the API context */
+            if (H5CX_push() < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context")
             api_pushed = TRUE;
 
             /* Reset 'new API context' flag for next layer down */
             if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &reset_api_ctx) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set value")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__attr_get(obj, cls, args, dxpl_id, req) < 0)
@@ -1766,14 +1768,14 @@ H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *args, hid_t dx
 
 done:
     /* Pop the API context, if it was pushed */
-    if(api_pushed) {
-        hbool_t undo_api_ctx = TRUE;  /* Flag to reset the 'new API context' */
+    if (api_pushed) {
+        hbool_t undo_api_ctx = TRUE; /* Flag to reset the 'new API context' */
 
         /* Undo change to 'new API context' flag */
         if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &undo_api_ctx) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set value")
 
-        (void)H5CX_pop(FALSE);                                                                                    \
+        (void)H5CX_pop(FALSE);
     } /* end if */
 
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -3718,16 +3720,15 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
-                 hid_t dxpl_id, void **req)
+H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id, void **req)
 {
-    H5P_genplist_t *      fapl_plist;                       /* Property list pointer                    */
-    H5VL_class_t *cls;              /* VOL class structure for callback info    */
-    H5VL_object_t *vol_obj = NULL;           /* Temporary VOL object for file */
-    H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
-    uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
-    void *        file = NULL;    /* New file created */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    H5P_genplist_t *      fapl_plist;       /* Property list pointer                    */
+    H5VL_class_t *        cls;              /* VOL class structure for callback info    */
+    H5VL_object_t *       vol_obj = NULL;   /* Temporary VOL object for file */
+    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info     */
+    uint64_t              supported;        /* Whether 'post open' operation is supported by VOL connector */
+    void *                file      = NULL; /* New file created */
+    hid_t                 ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -3750,7 +3751,8 @@ H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "file create failed")
 
     /* Create a temporary VOL object for the file struct */
-    if (NULL == (vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file, connector_prop.connector_id, FALSE)))
+    if (NULL ==
+        (vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file, connector_prop.connector_id, FALSE)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "can't create VOL object")
 
     /* Check for 'post open' callback */
@@ -3758,14 +3760,14 @@ H5VL_file_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id,
     if (H5VL__introspect_opt_query(file, cls, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't query optional operation support")
     if (supported & H5VL_OPT_QUERY_SUPPORTED) {
-        H5VL_optional_args_t vol_cb_args; /* Arguments to VOL callback */
-        H5VL_native_file_optional_args_t file_opt_args;      /* Arguments for optional operation */
+        H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
+        H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
 
         /* Set up VOL callback arguments */
-        file_opt_args.post_open.vol_obj = vol_obj;
+        file_opt_args.post_open.vol_obj   = vol_obj;
         file_opt_args.post_open.id_exists = TRUE;
-        vol_cb_args.op_type = H5VL_NATIVE_FILE_POST_OPEN;
-        vol_cb_args.args    = &file_opt_args;
+        vol_cb_args.op_type               = H5VL_NATIVE_FILE_POST_OPEN;
+        vol_cb_args.args                  = &file_opt_args;
 
         /* Make the 'post open' callback */
         if (H5VL__file_optional(file, cls, &vol_cb_args, dxpl_id, req) < 0)
@@ -3794,14 +3796,14 @@ void *
 H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, hid_t dxpl_id,
                 void **req /*out*/)
 {
-    H5P_genplist_t *      fapl_plist = NULL; /* FAPL property list pointer */
-    H5P_genplist_t *      dxpl_plist = NULL; /* DXPL property list pointer */
-    H5VL_object_t *vol_obj = NULL;           /* Temporary VOL object for file */
-    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info */
-    H5VL_class_t *        cls;              /* VOL connector's class struct */
-    hbool_t new_api_ctx = FALSE;    /* Whether to start a new API context */
-    hbool_t api_pushed = FALSE; /* Indicate that a new API context was pushed */
-    void *                ret_value = NULL; /* Return value */
+    H5P_genplist_t *      fapl_plist = NULL;   /* FAPL property list pointer */
+    H5P_genplist_t *      dxpl_plist = NULL;   /* DXPL property list pointer */
+    H5VL_object_t *       vol_obj    = NULL;   /* Temporary VOL object for file */
+    H5VL_connector_prop_t connector_prop;      /* Property for VOL connector ID & info */
+    H5VL_class_t *        cls;                 /* VOL connector's class struct */
+    hbool_t               new_api_ctx = FALSE; /* Whether to start a new API context */
+    hbool_t               api_pushed  = FALSE; /* Indicate that a new API context was pushed */
+    void *                ret_value   = NULL;  /* Return value */
 
     FUNC_ENTER_API_WRAPPER(NULL)
     H5TRACE6("*x", "*sIuiiix", name, flags, fcpl_id, fapl_id, dxpl_id, req);
@@ -3822,11 +3824,11 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
 
         /* Start a new API context, if requested */
         if (new_api_ctx) {
-            hbool_t reset_api_ctx = FALSE;  /* Flag to reset the 'new API context' */
+            hbool_t reset_api_ctx = FALSE; /* Flag to reset the 'new API context' */
 
-            /* Push the API context */                                                                               \
-            if (H5CX_push() < 0)                                                                                     \
-                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set API context")                                     \
+            /* Push the API context */
+            if (H5CX_push() < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set API context")
             api_pushed = TRUE;
 
             /* Reset 'new API context' flag for next layer down */
@@ -3837,7 +3839,7 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
             if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL connector info in API context")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
@@ -3848,32 +3850,34 @@ H5VLfile_create(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id, 
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create file")
 
     /* Attempt 'post open' callback, for new API contexts */
-    if(new_api_ctx) {
-        uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
+    if (new_api_ctx) {
+        uint64_t supported; /* Whether 'post open' operation is supported by VOL connector */
 
         /* Check for 'post open' callback */
         supported = 0;
-        if (H5VL__introspect_opt_query(ret_value, cls, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
+        if (H5VL__introspect_opt_query(ret_value, cls, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN,
+                                       &supported) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't query optional operation support")
         if (supported & H5VL_OPT_QUERY_SUPPORTED) {
-            H5VL_optional_args_t vol_cb_args; /* Arguments to VOL callback */
-            H5VL_native_file_optional_args_t file_opt_args;      /* Arguments for optional operation */
+            H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
+            H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
 
             /* Create a temporary VOL object for the file struct */
-            if (NULL == (vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, ret_value, connector_prop.connector_id, FALSE)))
+            if (NULL == (vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, ret_value,
+                                                                   connector_prop.connector_id, FALSE)))
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "can't create VOL object")
 
             /* Set up VOL callback arguments */
-            file_opt_args.post_open.vol_obj = vol_obj;
+            file_opt_args.post_open.vol_obj   = vol_obj;
             file_opt_args.post_open.id_exists = TRUE;
-            vol_cb_args.op_type = H5VL_NATIVE_FILE_POST_OPEN;
-            vol_cb_args.args    = &file_opt_args;
+            vol_cb_args.op_type               = H5VL_NATIVE_FILE_POST_OPEN;
+            vol_cb_args.args                  = &file_opt_args;
 
             /* Make the 'post open' callback */
             if (H5VL__file_optional(ret_value, cls, &vol_cb_args, dxpl_id, req) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, NULL, "file optional failed")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Destroy temporary VOL file object */
@@ -3881,14 +3885,14 @@ done:
         HDONE_ERROR(H5E_VOL, H5E_CANTRELEASE, NULL, "unable to free VOL object")
 
     /* Pop the API context, if it was pushed */
-    if(api_pushed) {
-        hbool_t undo_api_ctx = TRUE;  /* Flag to reset the 'new API context' */
+    if (api_pushed) {
+        hbool_t undo_api_ctx = TRUE; /* Flag to reset the 'new API context' */
 
         /* Undo change to 'new API context' flag */
         if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &undo_api_ctx) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTSET, NULL, "unable to set value")
 
-        (void)H5CX_pop(FALSE);                                                                                    \
+        (void)H5CX_pop(FALSE);
     } /* end if */
 
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -4036,16 +4040,16 @@ done:
  *-------------------------------------------------------------------------
  */
 H5VL_object_t *
-H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id,
-               hid_t dxpl_id, void **req, hid_t *ret_id /*out*/)
+H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req,
+               hid_t *ret_id /*out*/)
 {
-    H5P_genplist_t *      fapl_plist;                       /* Property list pointer                    */
-    H5VL_class_t *cls;              /* VOL class structure for callback info    */
-    H5VL_object_t *vol_obj = NULL;           /* Temporary VOL object for file */
-    H5VL_connector_prop_t connector_prop;              /* Property for VOL connector ID & info     */
-    void *        file = NULL;          /* File pointer */
-    uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
-    H5VL_object_t *ret_value = NULL; /* Return value */
+    H5P_genplist_t *      fapl_plist;       /* Property list pointer                    */
+    H5VL_class_t *        cls;              /* VOL class structure for callback info    */
+    H5VL_object_t *       vol_obj = NULL;   /* Temporary VOL object for file */
+    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info     */
+    void *                file = NULL;      /* File pointer */
+    uint64_t              supported;        /* Whether 'post open' operation is supported by VOL connector */
+    H5VL_object_t *       ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -4106,7 +4110,7 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id,
                     HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL connector info in API context")
 
                 if (NULL == (file = H5VL__file_open(find_connector_ud.cls, name, flags,
-                                                         find_connector_ud.fapl_id, dxpl_id, req)))
+                                                    find_connector_ud.fapl_id, dxpl_id, req)))
                     HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL,
                                 "can't open file '%s' with VOL connector '%s'", name,
                                 find_connector_ud.cls->name)
@@ -4119,7 +4123,8 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id,
     } /* end if */
 
     /* Create a VOL object for the file struct */
-    if (NULL == (vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file, connector_prop.connector_id, FALSE)))
+    if (NULL ==
+        (vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file, connector_prop.connector_id, FALSE)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "can't create VOL object")
 
     /* Check for 'post open' callback */
@@ -4127,12 +4132,13 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id,
     if (H5VL__introspect_opt_query(file, cls, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't query optional operation support")
     if (supported & H5VL_OPT_QUERY_SUPPORTED) {
-        H5VL_optional_args_t vol_cb_args; /* Arguments to VOL callback */
-        H5VL_native_file_optional_args_t file_opt_args;      /* Arguments for optional operation */
+        H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
+        H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
 
         /* Set up VOL callback arguments */
         file_opt_args.post_open.vol_obj = vol_obj;
-        file_opt_args.post_open.id_exists = (ret_id != NULL);   /* Set the 'id_exists' flag to TRUE when returning an ID */
+        file_opt_args.post_open.id_exists =
+            (ret_id != NULL); /* Set the 'id_exists' flag to TRUE when returning an ID */
         vol_cb_args.op_type = H5VL_NATIVE_FILE_POST_OPEN;
         vol_cb_args.args    = &file_opt_args;
 
@@ -4143,7 +4149,7 @@ H5VL_file_open(const char *name, unsigned flags, hid_t fapl_id,
 
     /* Check for registering ID for file */
     if (ret_id) {
-        hid_t file_id;        /* File ID for file pointer */
+        hid_t file_id; /* File ID for file pointer */
 
         /* Register ID for VOL object, for future API calls */
         if ((file_id = H5I_register(H5I_FILE, vol_obj, TRUE)) < 0)
@@ -4173,14 +4179,14 @@ done:
 void *
 H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req /*out*/)
 {
-    H5P_genplist_t *      fapl_plist = NULL; /* FAPL property list pointer */
-    H5P_genplist_t *      dxpl_plist = NULL; /* DXPL property list pointer */
-    H5VL_object_t *vol_obj = NULL;           /* Temporary VOL object for file */
-    H5VL_connector_prop_t connector_prop;   /* Property for VOL connector ID & info */
-    H5VL_class_t *        cls;              /* VOL connector's class struct */
-    hbool_t new_api_ctx = FALSE;    /* Whether to start a new API context */
-    hbool_t api_pushed = FALSE; /* Indicate that a new API context was pushed */
-    void *                ret_value = NULL; /* Return value */
+    H5P_genplist_t *      fapl_plist = NULL;   /* FAPL property list pointer */
+    H5P_genplist_t *      dxpl_plist = NULL;   /* DXPL property list pointer */
+    H5VL_object_t *       vol_obj    = NULL;   /* Temporary VOL object for file */
+    H5VL_connector_prop_t connector_prop;      /* Property for VOL connector ID & info */
+    H5VL_class_t *        cls;                 /* VOL connector's class struct */
+    hbool_t               new_api_ctx = FALSE; /* Whether to start a new API context */
+    hbool_t               api_pushed  = FALSE; /* Indicate that a new API context was pushed */
+    void *                ret_value   = NULL;  /* Return value */
 
     FUNC_ENTER_API_WRAPPER(NULL)
     H5TRACE5("*x", "*sIuiix", name, flags, fapl_id, dxpl_id, req);
@@ -4201,11 +4207,11 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, vo
 
         /* Start a new API context, if requested */
         if (new_api_ctx) {
-            hbool_t reset_api_ctx = FALSE;  /* Flag to reset the 'new API context' */
+            hbool_t reset_api_ctx = FALSE; /* Flag to reset the 'new API context' */
 
-            /* Push the API context */                                                                               \
-            if (H5CX_push() < 0)                                                                                     \
-                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set API context")                                     \
+            /* Push the API context */
+            if (H5CX_push() < 0)
+                HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set API context")
             api_pushed = TRUE;
 
             /* Reset 'new API context' flag for next layer down */
@@ -4216,7 +4222,7 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, vo
             if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTSET, NULL, "can't set VOL connector info in API context")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_prop.connector_id, H5I_VOL)))
@@ -4227,32 +4233,34 @@ H5VLfile_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, vo
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "unable to open file")
 
     /* Attempt 'post open' callback, for new API contexts */
-    if(new_api_ctx) {
-        uint64_t supported;           /* Whether 'post open' operation is supported by VOL connector */
+    if (new_api_ctx) {
+        uint64_t supported; /* Whether 'post open' operation is supported by VOL connector */
 
         /* Check for 'post open' callback */
         supported = 0;
-        if (H5VL__introspect_opt_query(ret_value, cls, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
+        if (H5VL__introspect_opt_query(ret_value, cls, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN,
+                                       &supported) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, NULL, "can't query optional operation support")
         if (supported & H5VL_OPT_QUERY_SUPPORTED) {
-            H5VL_optional_args_t vol_cb_args; /* Arguments to VOL callback */
-            H5VL_native_file_optional_args_t file_opt_args;      /* Arguments for optional operation */
+            H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
+            H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
 
             /* Create a temporary VOL object for the file struct */
-            if (NULL == (vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, ret_value, connector_prop.connector_id, FALSE)))
+            if (NULL == (vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, ret_value,
+                                                                   connector_prop.connector_id, FALSE)))
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "can't create VOL object")
 
             /* Set up VOL callback arguments */
-            file_opt_args.post_open.vol_obj = vol_obj;
+            file_opt_args.post_open.vol_obj   = vol_obj;
             file_opt_args.post_open.id_exists = TRUE;
-            vol_cb_args.op_type = H5VL_NATIVE_FILE_POST_OPEN;
-            vol_cb_args.args    = &file_opt_args;
+            vol_cb_args.op_type               = H5VL_NATIVE_FILE_POST_OPEN;
+            vol_cb_args.args                  = &file_opt_args;
 
             /* Make the 'post open' callback */
             if (H5VL__file_optional(ret_value, cls, &vol_cb_args, dxpl_id, req) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, NULL, "file optional failed")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Destroy temporary VOL file object */
@@ -4260,14 +4268,14 @@ done:
         HDONE_ERROR(H5E_VOL, H5E_CANTRELEASE, NULL, "unable to free VOL object")
 
     /* Pop the API context, if it was pushed */
-    if(api_pushed) {
-        hbool_t undo_api_ctx = TRUE;  /* Flag to reset the 'new API context' */
+    if (api_pushed) {
+        hbool_t undo_api_ctx = TRUE; /* Flag to reset the 'new API context' */
 
         /* Undo change to 'new API context' flag */
         if (H5P_set(dxpl_plist, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, &undo_api_ctx) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTSET, NULL, "unable to set value")
 
-        (void)H5CX_pop(FALSE);                                                                                    \
+        (void)H5CX_pop(FALSE);
     } /* end if */
 
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -4414,7 +4422,7 @@ herr_t
 H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     const H5VL_class_t *cls;                       /* VOL connector's class struct */
-    H5VL_object_t *reopen_vol_obj = NULL;           /* Temporary VOL object for file */
+    H5VL_object_t *     reopen_vol_obj  = NULL;    /* Temporary VOL object for file */
     hbool_t             vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value       = SUCCEED; /* Return value */
 
@@ -4464,8 +4472,8 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args
 
     /* Special treatment of file re-open operation */
     if (args->op_type == H5VL_FILE_REOPEN) {
-        void *reopen_file;      /* Pointer to re-opened file */
-        uint64_t supported;     /* Whether 'post open' operation is supported by VOL connector */
+        void *   reopen_file; /* Pointer to re-opened file */
+        uint64_t supported;   /* Whether 'post open' operation is supported by VOL connector */
 
         /* Get pointer to re-opened file */
         reopen_file = *args->args.reopen.file;
@@ -4473,27 +4481,29 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args
 
         /* Check for 'post open' callback */
         supported = 0;
-        if (H5VL__introspect_opt_query(reopen_file, cls, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN, &supported) < 0)
+        if (H5VL__introspect_opt_query(reopen_file, cls, H5VL_SUBCLS_FILE, H5VL_NATIVE_FILE_POST_OPEN,
+                                       &supported) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query optional operation support")
         if (supported & H5VL_OPT_QUERY_SUPPORTED) {
-            H5VL_optional_args_t vol_cb_args; /* Arguments to VOL callback */
-            H5VL_native_file_optional_args_t file_opt_args;      /* Arguments for optional operation */
+            H5VL_optional_args_t             vol_cb_args;   /* Arguments to VOL callback */
+            H5VL_native_file_optional_args_t file_opt_args; /* Arguments for optional operation */
 
             /* Create a temporary VOL object for the file struct */
-            if (NULL == (reopen_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, reopen_file, vol_obj->connector->id, TRUE)))
+            if (NULL == (reopen_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, reopen_file,
+                                                                          vol_obj->connector->id, TRUE)))
                 HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't create VOL object")
 
             /* Set up VOL callback arguments */
-            file_opt_args.post_open.vol_obj = reopen_vol_obj;
+            file_opt_args.post_open.vol_obj   = reopen_vol_obj;
             file_opt_args.post_open.id_exists = TRUE;
-            vol_cb_args.op_type = H5VL_NATIVE_FILE_POST_OPEN;
-            vol_cb_args.args    = &file_opt_args;
+            vol_cb_args.op_type               = H5VL_NATIVE_FILE_POST_OPEN;
+            vol_cb_args.args                  = &file_opt_args;
 
             /* Make the 'post open' callback */
             if (H5VL__file_optional(reopen_file, cls, &vol_cb_args, dxpl_id, req) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file optional failed")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     /* Destroy temporary VOL file object */

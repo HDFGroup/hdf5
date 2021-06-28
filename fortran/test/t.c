@@ -169,12 +169,12 @@ nh5_env_nocleanup_c(int_f *status)
 int_f
 h5vl_fapl_is_native_c(hid_t_f *fapl_id, int_f *flag)
 {
-    int    ret_value = 0;
+    int     ret_value = 0;
     hbool_t is_native = FALSE;
 
-    ret_value  = H5VL_fapl_is_native((hid_t)*fapl_id, &is_native);
+    ret_value = H5VL_fapl_is_native((hid_t)*fapl_id, &is_native);
     if (ret_value >= 0)
-        *flag      = (int_f)is_native;
+        *flag = (int_f)is_native;
 
     return ret_value;
 } /* h5vl_fapl_is_native_c */

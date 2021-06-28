@@ -97,4 +97,3 @@ H5VL__reparse_def_vol_conn_variable_test(void)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__reparse_def_vol_conn_variable_test() */
-

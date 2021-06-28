@@ -3684,7 +3684,7 @@ test_elinks(hid_t fapl)
     char    name[NAME_BUF_SIZE];              /* Buffer for storing object's name */
     ssize_t namelen;                          /* Length of object's name */
     hbool_t name_cached;                      /* Indicate if name is cached */
-    hbool_t is_native;              /* Whether native VOL connector is being used */
+    hbool_t is_native;                        /* Whether native VOL connector is being used */
 
     TESTING("getting path to externally linked objects");
 

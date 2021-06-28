@@ -508,7 +508,8 @@ test_graph_nocycle(hid_t fapl_id, hid_t fcpl_id)
     if (NULL ==
         (ftmp1 = H5F_open(filename[1], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fcpl_id, fapl_id)))
         FAIL_STACK_ERROR
-    if (NULL == (f2 = H5F__efc_open(ftmp1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fapl_id)))
+    if (NULL ==
+        (f2 = H5F__efc_open(ftmp1, filename[2], H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC, fapl_id)))
         FAIL_STACK_ERROR
     if (NULL == (f1 = H5F__efc_open(f0, filename[1], H5F_ACC_RDWR, fapl_id)))
         FAIL_STACK_ERROR
@@ -2537,11 +2538,11 @@ error:
 int
 main(void)
 {
-    hid_t fapl_id = H5I_INVALID_HID;
-    hbool_t               is_native;              /* Whether native VOL connector is being used */
-    hbool_t               api_ctx_pushed = FALSE; /* Whether API context pushed */
-    int                   i;                      /* iterator */
-    unsigned              nerrors = 0;            /* track errors */
+    hid_t    fapl_id = H5I_INVALID_HID;
+    hbool_t  is_native;              /* Whether native VOL connector is being used */
+    hbool_t  api_ctx_pushed = FALSE; /* Whether API context pushed */
+    int      i;                      /* iterator */
+    unsigned nerrors = 0;            /* track errors */
 
     /* Test Setup */
     HDputs("Testing the external file cache");
@@ -2555,9 +2556,9 @@ main(void)
         FAIL_STACK_ERROR;
 
     if (is_native) {
-        hid_t fcpl_id = H5I_INVALID_HID;
-        H5P_genplist_t *      plist;                  /* Property list pointer for FAPL */
-        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
+        hid_t                 fcpl_id = H5I_INVALID_HID;
+        H5P_genplist_t *      plist;          /* Property list pointer for FAPL */
+        H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
 
         fcpl_id = H5Pcreate(H5P_FILE_CREATE);
 
