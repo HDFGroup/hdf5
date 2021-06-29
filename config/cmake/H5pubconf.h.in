@@ -114,9 +114,6 @@
 /* Define if Darwin or Mac OS X */
 #cmakedefine H5_HAVE_DARWIN @H5_HAVE_DARWIN@
 
-/* Define to 1 if you have the `difftime' function. */
-#cmakedefine H5_HAVE_DIFFTIME @H5_HAVE_DIFFTIME@
-
 /* Define if the direct I/O virtual file driver (VFD) should be compiled */
 #cmakedefine H5_HAVE_DIRECT @H5_HAVE_DIRECT@
 
