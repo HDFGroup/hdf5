@@ -363,7 +363,7 @@ read_info(const char *filename, pack_opt_t *options)
 
     /* cycle until end of file reached */
     while (1) {
-        if (EOF == fscanf(fp, "%9s", stype))
+        if (EOF == HDfscanf(fp, "%9s", stype))
             break;
 
         /* Info indicator must be for layout or filter */
@@ -378,7 +378,7 @@ read_info(const char *filename, pack_opt_t *options)
         i = 0;
         c = '0';
         while (c != ' ') {
-            if (fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+            if (HDfscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
                 error_msg("fscanf error\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
@@ -390,7 +390,7 @@ read_info(const char *filename, pack_opt_t *options)
         c = '0';
         /* go until end */
         while (c != ' ') {
-            if (fscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
+            if (HDfscanf(fp, "%c", &c) < 0 && HDferror(fp)) {
                 error_msg("fscanf error\n");
                 h5tools_setstatus(EXIT_FAILURE);
                 ret_value = EXIT_FAILURE;
