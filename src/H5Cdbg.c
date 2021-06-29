@@ -262,6 +262,12 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
  * Programmer:  John Mainzer
  *              11/15/14
  *
+ * Changes:     Updated function for the slist_enabled field in H5C_t.
+ *              Recall that to minimize slist overhead, the slist is
+ *              empty and not maintained if cache_ptr->slist_enabled is
+ *              false.
+ *                                             JRM -- 5/6/20
+ *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -280,6 +286,7 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
     HDassert(calling_fcn != NULL);
 
     HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
+    HDfprintf(stdout, " slist %s.\n", cache_ptr->slist_enabled ? "enabled" : "disabled");
     HDfprintf(stdout, "	slist len = %" PRIu32 ".\n", cache_ptr->slist_len);
     HDfprintf(stdout, "	slist size = %zu.\n", cache_ptr->slist_size);
 
@@ -404,7 +411,7 @@ H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn)
 
             HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
 
-            HDfprintf(stdout, "%s%d       0x%016" PRIxHADDR "  %4%zu    %d/%d       %d    %s\n",
+            HDfprintf(stdout, "%s%d       0x%016" PRIxHADDR "  %4zu    %d/%d       %d    %s\n",
                       cache_ptr->prefix, i, entry_ptr->addr, entry_ptr->size, (int)(entry_ptr->is_protected),
                       (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty), entry_ptr->type->name);
 

@@ -1035,7 +1035,7 @@ H5MF__alloc_pagefs(H5F_t *f, H5FD_mem_t alloc_type, hsize_t size)
 
             /* Insert the new page into the Page Buffer list of new pages so
                we don't read an empty page from disk */
-            if (f->shared->pb_ptr != NULL && H5PB_add_new_page(f->shared, alloc_type, new_page) < 0)
+            if (f->shared->page_buf != NULL && H5PB_add_new_page(f->shared, alloc_type, new_page) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINSERT, HADDR_UNDEF,
                             "can't add new page to Page Buffer new page list")
 
@@ -1366,7 +1366,7 @@ H5MF__xfree_impl(H5F_t *f, H5FD_mem_t alloc_type, haddr_t addr, hsize_t size)
      *
      *                                    JRM -- 4/28/20
      */
-    if (ret_value == SUCCEED && f->shared->pb_ptr && size >= f->shared->fs_page_size) {
+    if (ret_value == SUCCEED && f->shared->page_buf && size >= f->shared->fs_page_size) {
 
         HDassert(H5F_SHARED_PAGED_AGGR(f->shared));
 

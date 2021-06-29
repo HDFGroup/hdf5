@@ -15,9 +15,6 @@
  *              (registration, etc.).
  */
 
-/* Public HDF5 header */
-#include "hdf5.h"
-
 /* For HDF5 plugin functionality */
 #include "H5PLextern.h"
 
