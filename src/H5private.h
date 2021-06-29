@@ -356,74 +356,6 @@
 #endif
 
 /*
- * Numeric data types.  Some of these might be defined in Posix.1g, otherwise
- * we define them with the closest available type which is at least as large
- * as the number of bits indicated in the type name.  The `int8' types *must*
- * be exactly one byte wide because we use it for pointer calculations to
- * void* memory.
- */
-#if H5_SIZEOF_INT8_T == 0
-typedef signed char int8_t;
-#undef H5_SIZEOF_INT8_T
-#define H5_SIZEOF_INT8_T H5_SIZEOF_CHAR
-#elif H5_SIZEOF_INT8_T == 1
-#else
-#error "the int8_t type must be 1 byte wide"
-#endif
-
-#if H5_SIZEOF_UINT8_T == 0
-typedef unsigned char uint8_t;
-#undef H5_SIZEOF_UINT8_T
-#define H5_SIZEOF_UINT8_T H5_SIZEOF_CHAR
-#elif H5_SIZEOF_UINT8_T == 1
-#else
-#error "the uint8_t type must be 1 byte wide"
-#endif
-
-#if H5_SIZEOF_INT16_T >= 2
-#elif H5_SIZEOF_SHORT >= 2
-typedef short          int16_t;
-#undef H5_SIZEOF_INT16_T
-#define H5_SIZEOF_INT16_T H5_SIZEOF_SHORT
-#elif H5_SIZEOF_INT >= 2
-typedef int      int16_t;
-#undef H5_SIZEOF_INT16_T
-#define H5_SIZEOF_INT16_T H5_SIZEOF_INT
-#else
-#error "nothing appropriate for int16_t"
-#endif
-
-#if H5_SIZEOF_UINT16_T >= 2
-#elif H5_SIZEOF_SHORT >= 2
-typedef unsigned short uint16_t;
-#undef H5_SIZEOF_UINT16_T
-#define H5_SIZEOF_UINT16_T H5_SIZEOF_SHORT
-#elif H5_SIZEOF_INT >= 2
-typedef unsigned uint16_t;
-#undef H5_SIZEOF_UINT16_T
-#define H5_SIZEOF_UINT16_T H5_SIZEOF_INT
-#else
-#error "nothing appropriate for uint16_t"
-#endif
-
-#if H5_SIZEOF_INT32_T >= 4
-#elif H5_SIZEOF_SHORT >= 4
-typedef short          int32_t;
-#undef H5_SIZEOF_INT32_T
-#define H5_SIZEOF_INT32_T H5_SIZEOF_SHORT
-#elif H5_SIZEOF_INT >= 4
-typedef int      int32_t;
-#undef H5_SIZEOF_INT32_T
-#define H5_SIZEOF_INT32_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 4
-typedef long int32_t;
-#undef H5_SIZEOF_INT32_T
-#define H5_SIZEOF_INT32_T H5_SIZEOF_LONG
-#else
-#error "nothing appropriate for int32_t"
-#endif
-
-/*
  * Maximum and minimum values.  These should be defined in <limits.h> for the
  * most part.
  */
@@ -2633,6 +2565,57 @@ H5_DLL double H5_get_time(void);
 /* Functions for building paths, etc. */
 H5_DLL herr_t H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
+
+/* getopt(3) equivalent that papers over the lack of long options on BSD
+ * and lack of Windows support.
+ */
+H5_DLLVAR int         H5_opterr; /* get_option prints errors if this is on */
+H5_DLLVAR int         H5_optind; /* token pointer */
+H5_DLLVAR const char *H5_optarg; /* flag argument (or value) */
+
+enum h5_arg_level {
+    no_arg = 0,  /* doesn't take an argument     */
+    require_arg, /* requires an argument          */
+    optional_arg /* argument is optional         */
+};
+
+/*
+ * get_option determines which options are specified on the command line and
+ * returns a pointer to any arguments possibly associated with the option in
+ * the ``H5_optarg'' variable. get_option returns the shortname equivalent of
+ * the option. The long options are specified in the following way:
+ *
+ * struct h5_long_options foo[] = {
+ *   { "filename", require_arg, 'f' },
+ *   { "append", no_arg, 'a' },
+ *   { "width", require_arg, 'w' },
+ *   { NULL, 0, 0 }
+ * };
+ *
+ * Long named options can have arguments specified as either:
+ *
+ *   ``--param=arg'' or ``--param arg''
+ *
+ * Short named options can have arguments specified as either:
+ *
+ *   ``-w80'' or ``-w 80''
+ *
+ * and can have more than one short named option specified at one time:
+ *
+ *   -aw80
+ *
+ * in which case those options which expect an argument need to come at the
+ * end.
+ */
+struct h5_long_options {
+    const char *      name;     /* Name of the long option */
+    enum h5_arg_level has_arg;  /* Whether we should look for an arg */
+    char              shortval; /* The shortname equivalent of long arg
+                                 * this gets returned from get_option
+                                 */
+};
+
+H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
