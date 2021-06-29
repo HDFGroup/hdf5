@@ -78,7 +78,7 @@ struct handler_t {
 /* The following initialization makes use of C language concatenating */
 /* "xxx" "yyy" into "xxxyyy". */
 static const char *        s_opts   = "a:b*c:d:ef:g:hik:l:m:n*o*pq:rs:t:uvw:xyz:A*BCD:E*F:G:HM:N:O*RS:VX:";
-static struct long_options l_opts[] = {{"attribute", require_arg, 'a'},
+static struct h5_long_options l_opts[] = {{"attribute", require_arg, 'a'},
                                        {"attribut", require_arg, 'a'},
                                        {"attribu", require_arg, 'a'},
                                        {"attrib", require_arg, 'a'},
@@ -902,7 +902,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
 parse_start:
         switch ((char)opt) {
             case 'R':
@@ -916,8 +916,8 @@ parse_start:
             case 'n':
                 dump_opts.display_fi = TRUE;
                 last_was_dset        = FALSE;
-                if (opt_arg != NULL)
-                    h5trav_set_verbose(HDatoi(opt_arg));
+                if (H5_optarg != NULL)
+                    h5trav_set_verbose(HDatoi(H5_optarg));
                 break;
             case 'p':
                 dump_opts.display_dcpl = TRUE;
@@ -934,8 +934,8 @@ parse_start:
                 last_was_dset               = FALSE;
                 break;
             case 'A':
-                if (opt_arg != NULL) {
-                    if (0 == HDatoi(opt_arg))
+                if (H5_optarg != NULL) {
+                    if (0 == HDatoi(H5_optarg))
                         dump_opts.include_attrs = FALSE;
                 }
                 else {
@@ -959,7 +959,7 @@ parse_start:
                 goto done;
                 break;
             case 'w': {
-                int sh5tools_nCols = HDatoi(opt_arg);
+                int sh5tools_nCols = HDatoi(H5_optarg);
 
                 if (sh5tools_nCols <= 0)
                     h5tools_nCols = 65535;
@@ -973,7 +973,7 @@ parse_start:
                 for (i = 0; i < argc; i++)
                     if (!hand[i].func) {
                         hand[i].func = handle_paths;
-                        hand[i].obj  = HDstrdup(opt_arg);
+                        hand[i].obj  = HDstrdup(H5_optarg);
                         break;
                     }
 
@@ -985,7 +985,7 @@ parse_start:
                 for (i = 0; i < argc; i++)
                     if (!hand[i].func) {
                         hand[i].func = handle_attributes;
-                        hand[i].obj  = HDstrdup(opt_arg);
+                        hand[i].obj  = HDstrdup(H5_optarg);
                         break;
                     }
 
@@ -997,7 +997,7 @@ parse_start:
                 for (i = 0; i < argc; i++)
                     if (!hand[i].func) {
                         hand[i].func        = handle_datasets;
-                        hand[i].obj         = HDstrdup(opt_arg);
+                        hand[i].obj         = HDstrdup(H5_optarg);
                         hand[i].subset_info = parse_subset_params(hand[i].obj);
                         last_dset           = &hand[i];
                         break;
@@ -1006,7 +1006,7 @@ parse_start:
                 last_was_dset = TRUE;
                 break;
             case 'f':
-                driver_name_g = opt_arg;
+                driver_name_g = H5_optarg;
                 break;
             case 'g':
                 dump_opts.display_all = 0;
@@ -1014,7 +1014,7 @@ parse_start:
                 for (i = 0; i < argc; i++)
                     if (!hand[i].func) {
                         hand[i].func = handle_groups;
-                        hand[i].obj  = HDstrdup(opt_arg);
+                        hand[i].obj  = HDstrdup(H5_optarg);
                         break;
                     }
 
@@ -1026,7 +1026,7 @@ parse_start:
                 for (i = 0; i < argc; i++)
                     if (!hand[i].func) {
                         hand[i].func = handle_links;
-                        hand[i].obj  = HDstrdup(opt_arg);
+                        hand[i].obj  = HDstrdup(H5_optarg);
                         break;
                     }
 
@@ -1038,7 +1038,7 @@ parse_start:
                 for (i = 0; i < argc; i++)
                     if (!hand[i].func) {
                         hand[i].func = handle_datatypes;
-                        hand[i].obj  = HDstrdup(opt_arg);
+                        hand[i].obj  = HDstrdup(H5_optarg);
                         break;
                     }
 
@@ -1046,7 +1046,7 @@ parse_start:
                 break;
 
             case 'O':
-                if (h5tools_set_output_file(opt_arg, 0) < 0) {
+                if (h5tools_set_output_file(H5_optarg, 0) < 0) {
                     usage(h5tools_getprogname());
                     goto error;
                 }
@@ -1054,20 +1054,20 @@ parse_start:
 
             case 'o':
                 if (bin_output) {
-                    if (h5tools_set_data_output_file(opt_arg, 1) < 0) {
+                    if (h5tools_set_data_output_file(H5_optarg, 1) < 0) {
                         usage(h5tools_getprogname());
                         goto error;
                     }
                 }
                 else {
                     if (dump_opts.display_attr_data && !dump_opts.display_data) {
-                        if (h5tools_set_attr_output_file(opt_arg, 0) < 0) {
+                        if (h5tools_set_attr_output_file(H5_optarg, 0) < 0) {
                             usage(h5tools_getprogname());
                             goto error;
                         }
                     }
                     if (dump_opts.display_data || dump_opts.display_all) {
-                        if (h5tools_set_data_output_file(opt_arg, 0) < 0) {
+                        if (h5tools_set_data_output_file(H5_optarg, 0) < 0) {
                             usage(h5tools_getprogname());
                             goto error;
                         }
@@ -1076,12 +1076,12 @@ parse_start:
 
                 dump_opts.usingdasho = TRUE;
                 last_was_dset        = FALSE;
-                outfname_g           = opt_arg;
+                outfname_g           = H5_optarg;
                 break;
 
             case 'b':
-                if (opt_arg != NULL) {
-                    if ((bin_form = set_binary_form(opt_arg)) < 0) {
+                if (H5_optarg != NULL) {
+                    if ((bin_form = set_binary_form(H5_optarg)) < 0) {
                         /* failed to set binary form */
                         usage(h5tools_getprogname());
                         goto error;
@@ -1100,7 +1100,7 @@ parse_start:
                 break;
 
             case 'q':
-                if ((sort_by = set_sort_by(opt_arg)) < 0) {
+                if ((sort_by = set_sort_by(H5_optarg)) < 0) {
                     /* failed to set "sort by" form */
                     usage(h5tools_getprogname());
                     goto error;
@@ -1108,7 +1108,7 @@ parse_start:
                 break;
 
             case 'z':
-                if ((sort_order = set_sort_order(opt_arg)) < 0) {
+                if ((sort_order = set_sort_order(H5_optarg)) < 0) {
                     /* failed to set "sort order" form */
                     usage(h5tools_getprogname());
                     goto error;
@@ -1120,7 +1120,7 @@ parse_start:
                     error_msg("option \"-%c\" can only be used after --dataset option\n", opt);
                     goto error;
                 }
-                if (parse_mask_list(opt_arg) != SUCCEED) {
+                if (parse_mask_list(H5_optarg) != SUCCEED) {
                     usage(h5tools_getprogname());
                     goto error;
                 }
@@ -1130,7 +1130,7 @@ parse_start:
                 dump_opts.display_vds_first = TRUE;
                 break;
             case 'G':
-                dump_opts.vds_gap_size = HDatoi(opt_arg);
+                dump_opts.vds_gap_size = HDatoi(H5_optarg);
                 if (dump_opts.vds_gap_size < 0) {
                     usage(h5tools_getprogname());
                     goto error;
@@ -1157,13 +1157,13 @@ parse_start:
             case 'D':
                 /* specify alternative XML DTD or schema */
                 /* To Do: check format of this value?  */
-                xml_dtd_uri_g = opt_arg;
+                xml_dtd_uri_g = H5_optarg;
                 h5tools_nCols = 0;
                 break;
 
             case 'm':
                 /* specify alternative floating point printing format */
-                fp_format     = opt_arg;
+                fp_format     = H5_optarg;
                 h5tools_nCols = 0;
                 break;
 
@@ -1174,10 +1174,10 @@ parse_start:
                     usage(h5tools_getprogname());
                     goto error;
                 }
-                if (HDstrcmp(opt_arg, ":") == 0)
+                if (HDstrcmp(H5_optarg, ":") == 0)
                     xmlnsprefix = "";
                 else
-                    xmlnsprefix = opt_arg;
+                    xmlnsprefix = H5_optarg;
                 h5tools_nCols = 0;
                 break;
             /** end XML parameters **/
@@ -1223,33 +1223,33 @@ parse_start:
                                 HDfree(s->start.data);
                                 s->start.data = NULL;
                             }
-                            parse_hsize_list(opt_arg, &s->start);
+                            parse_hsize_list(H5_optarg, &s->start);
                             break;
                         case 'S':
                             if (s->stride.data) {
                                 HDfree(s->stride.data);
                                 s->stride.data = NULL;
                             }
-                            parse_hsize_list(opt_arg, &s->stride);
+                            parse_hsize_list(H5_optarg, &s->stride);
                             break;
                         case 'c':
                             if (s->count.data) {
                                 HDfree(s->count.data);
                                 s->count.data = NULL;
                             }
-                            parse_hsize_list(opt_arg, &s->count);
+                            parse_hsize_list(H5_optarg, &s->count);
                             break;
                         case 'k':
                             if (s->block.data) {
                                 HDfree(s->block.data);
                                 s->block.data = NULL;
                             }
-                            parse_hsize_list(opt_arg, &s->block);
+                            parse_hsize_list(H5_optarg, &s->block);
                             break;
                         default:
                             goto end_collect;
                     }
-                } while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF);
+                } while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF);
 
 end_collect:
                 last_was_dset = FALSE;
@@ -1262,8 +1262,8 @@ end_collect:
                 /** end subsetting parameters **/
 
             case 'E':
-                if (opt_arg != NULL)
-                    enable_error_stack = HDatoi(opt_arg);
+                if (H5_optarg != NULL)
+                    enable_error_stack = HDatoi(H5_optarg);
                 else
                     enable_error_stack = 1;
                 break;
@@ -1279,7 +1279,7 @@ end_collect:
 
             case '$':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(opt_arg, ',', &ros3_fa_g) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa_g) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
                     usage(h5tools_getprogname());
                     free_handler(hand, argc);
@@ -1296,7 +1296,7 @@ end_collect:
 
             case '#':
 #ifdef H5_HAVE_LIBHDFS
-                if (h5tools_parse_hdfs_fapl_tuple(opt_arg, ',', &hdfs_fa_g) < 0) {
+                if (h5tools_parse_hdfs_fapl_tuple(H5_optarg, ',', &hdfs_fa_g) < 0) {
                     error_msg("failed to parse HDFS VFD configuration info\n");
                     usage(h5tools_getprogname());
                     free_handler(hand, argc);
@@ -1320,7 +1320,7 @@ end_collect:
 
 parse_end:
     /* check for file name to be processed */
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         goto error;
@@ -1412,7 +1412,7 @@ main(int argc, const char *argv[])
         }
     }
 
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
@@ -1457,8 +1457,8 @@ main(int argc, const char *argv[])
         }
     } /* driver name defined */
 
-    while (opt_ind < argc) {
-        fname = HDstrdup(argv[opt_ind++]);
+    while (H5_optind < argc) {
+        fname = HDstrdup(argv[H5_optind++]);
 
         fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0);
 
