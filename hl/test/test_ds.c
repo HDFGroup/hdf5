@@ -4959,12 +4959,12 @@ read_data(const char *fname, int ndims, hsize_t *dims, float **buf)
     }
 
     for (i = 0, nelms = 1; i < ndims; i++) {
-        if (fscanf(f, "%s %u", str, &j) && HDferror(f)) {
+        if (HDfscanf(f, "%s %u", str, &j) && HDferror(f)) {
             HDprintf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
         } /* end if */
-        if (fscanf(f, "%d", &n) < 0 && HDferror(f)) {
+        if (HDfscanf(f, "%d", &n) < 0 && HDferror(f)) {
             HDprintf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
@@ -4982,7 +4982,7 @@ read_data(const char *fname, int ndims, hsize_t *dims, float **buf)
     }
 
     for (j = 0; j < nelms; j++) {
-        if (fscanf(f, "%f", &val) < 0 && HDferror(f)) {
+        if (HDfscanf(f, "%f", &val) < 0 && HDferror(f)) {
             HDprintf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
