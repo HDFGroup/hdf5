@@ -2524,6 +2524,57 @@ H5_DLL double H5_get_time(void);
 H5_DLL herr_t H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
 
+/* getopt(3) equivalent that papers over the lack of long options on BSD
+ * and lack of Windows support.
+ */
+H5_DLLVAR int         H5_opterr; /* get_option prints errors if this is on */
+H5_DLLVAR int         H5_optind; /* token pointer */
+H5_DLLVAR const char *H5_optarg; /* flag argument (or value) */
+
+enum h5_arg_level {
+    no_arg = 0,  /* doesn't take an argument     */
+    require_arg, /* requires an argument          */
+    optional_arg /* argument is optional         */
+};
+
+/*
+ * get_option determines which options are specified on the command line and
+ * returns a pointer to any arguments possibly associated with the option in
+ * the ``H5_optarg'' variable. get_option returns the shortname equivalent of
+ * the option. The long options are specified in the following way:
+ *
+ * struct h5_long_options foo[] = {
+ *   { "filename", require_arg, 'f' },
+ *   { "append", no_arg, 'a' },
+ *   { "width", require_arg, 'w' },
+ *   { NULL, 0, 0 }
+ * };
+ *
+ * Long named options can have arguments specified as either:
+ *
+ *   ``--param=arg'' or ``--param arg''
+ *
+ * Short named options can have arguments specified as either:
+ *
+ *   ``-w80'' or ``-w 80''
+ *
+ * and can have more than one short named option specified at one time:
+ *
+ *   -aw80
+ *
+ * in which case those options which expect an argument need to come at the
+ * end.
+ */
+struct h5_long_options {
+    const char *      name;     /* Name of the long option */
+    enum h5_arg_level has_arg;  /* Whether we should look for an arg */
+    char              shortval; /* The shortname equivalent of long arg
+                                 * this gets returned from get_option
+                                 */
+};
+
+H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
+
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */
 H5_DLL hsize_t H5_mpi_set_bigio_count(hsize_t new_count);
