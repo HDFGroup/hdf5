@@ -90,27 +90,20 @@
 #define HDctermid(S)             ctermid(S)
 #define HDctime(T)               ctime(T)
 #define HDcuserid(S)             cuserid(S)
-#ifdef H5_HAVE_DIFFTIME
-#define HDdifftime(X, Y) difftime(X, Y)
-#else
-#define HDdifftime(X, Y) ((double)(X) - (double)(Y))
-#endif
-#define HDdiv(X, Y)  div(X, Y)
-#define HDdup(F)     dup(F)
-#define HDdup2(F, I) dup2(F, I)
-/* execl() variable arguments */
-/* execle() variable arguments */
-/* execlp() variable arguments */
-#define HDexecv(S, AV)     execv(S, AV)
-#define HDexecve(S, AV, E) execve(S, AV, E)
-#define HDexecvp(S, AV)    execvp(S, AV)
-#define HDexit(N)          exit(N)
-#define HD_exit(N)         _exit(N)
-#define HDexp(X)           exp(X)
-#define HDfabs(X)          fabs(X)
-#define HDfabsf(X)         fabsf(X)
-#define HDfabsl(X)         fabsl(X)
-#define HDfclose(F)        fclose(F)
+#define HDdifftime(X, Y)         difftime(X, Y)
+#define HDdiv(X, Y)              div(X, Y)
+#define HDdup(F)                 dup(F)
+#define HDdup2(F, I)             dup2(F, I)
+#define HDexecv(S, AV)           execv(S, AV)
+#define HDexecve(S, AV, E)       execve(S, AV, E)
+#define HDexecvp(S, AV)          execvp(S, AV)
+#define HDexit(N)                exit(N)
+#define HD_exit(N)               _exit(N)
+#define HDexp(X)                 exp(X)
+#define HDfabs(X)                fabs(X)
+#define HDfabsf(X)               fabsf(X)
+#define HDfabsl(X)               fabsl(X)
+#define HDfclose(F)              fclose(F)
 /* fcntl() variable arguments */
 #define HDfdopen(N, S)   fdopen(N, S)
 #define HDfeof(F)        feof(F)
@@ -461,24 +454,25 @@ void h5_dump_info_object(MPI_Info info);
 
 /** From h5tools_utils.h **/
 
-extern int         opt_err; /* getoption prints errors if this is on    */
-extern int         opt_ind; /* token pointer                            */
-extern const char *opt_arg; /* flag argument (or value)                 */
+extern int         H5_opterr; /* getoption prints errors if this is on    */
+extern int         H5_optind; /* token pointer                            */
+extern const char *H5_optarg; /* flag argument (or value)                 */
 
-enum {
+enum h5_arg_level {
     no_arg = 0,  /* doesn't take an argument     */
     require_arg, /* requires an argument          */
     optional_arg /* argument is optional         */
 };
 
-typedef struct long_options {
-    const char *name;     /* name of the long option              */
-    int         has_arg;  /* whether we should look for an arg    */
-    char        shortval; /* the shortname equivalent of long arg
-                           * this gets returned from get_option   */
-} long_options;
+struct h5_long_options {
+    const char *      name;     /* Name of the long option */
+    enum h5_arg_level has_arg;  /* Whether we should look for an arg */
+    char              shortval; /* The shortname equivalent of long arg
+                                 * this gets returned from get_option
+                                 */
+};
 
-extern int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
+extern int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
 
 extern int nCols; /*max number of columns for outputting  */
 

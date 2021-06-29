@@ -2211,7 +2211,7 @@ H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_li
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, attr_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(__func__, "*s*sIui*!ii", app_file, app_func, app_line, attr_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -3181,7 +3181,7 @@ H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, dset_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(__func__, "*s*sIui*!ii", app_file, app_func, app_line, dset_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -3884,7 +3884,7 @@ H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned ap
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, type_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(__func__, "*s*sIui*!ii", app_file, app_func, app_line, type_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -5000,7 +5000,7 @@ H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_li
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, file_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(__func__, "*s*sIui*!ii", app_file, app_func, app_line, file_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -5647,7 +5647,7 @@ H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_l
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*!ii", app_file, app_func, app_line, group_id, args, dxpl_id, es_id)) < 0)
+                        H5ARG_TRACE7(__func__, "*s*sIui*!ii", app_file, app_func, app_line, group_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -6436,7 +6436,7 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(__func__, "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -7015,7 +7015,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         /* clang-format off */
-        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(FUNC, "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id)) < 0)
+        if (H5ES_insert(es_id, vol_obj->connector, token, H5ARG_TRACE9(__func__, "*s*sIui*si*!ii", app_file, app_func, app_line, loc_id, name, lapl_id, args, dxpl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 

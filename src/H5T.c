@@ -2045,7 +2045,7 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
+                        H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:

@@ -44,26 +44,6 @@ main ()
 
 #endif
 
-#ifdef HAVE_C99_FUNC
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
- const char *fname = __func__;
-  ;
-  return 0;
-}
-
-#endif
-
 #ifdef HAVE_ATTRIBUTE
 
 #if 0
@@ -89,26 +69,6 @@ int __attribute__((unused)) x
 
 
 #endif /* HAVE_ATTRIBUTE */
-
-#ifdef HAVE_FUNCTION
-
-#ifdef FC_DUMMY_MAIN
-#ifndef FC_DUMMY_MAIN_EQ_F77
-#  ifdef __cplusplus
-     extern "C"
-#  endif
-   int FC_DUMMY_MAIN() { return 1; }
-#endif
-#endif
-int
-main ()
-{
-(void)__FUNCTION__
-  ;
-  return 0;
-}
-
-#endif /* HAVE_FUNCTION */
 
 #ifdef HAVE_TIMEZONE
 
