@@ -2258,17 +2258,17 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  *      H5FDread, etc.), etc.
  *
  */
-#define FUNC_ENTER_API_WRAPPER(err)                                                                                \
+#define FUNC_ENTER_API_WRAPPER(err)                                                                          \
     {                                                                                                        \
         {                                                                                                    \
             {                                                                                                \
-    hbool_t pushed = FALSE; \
+                hbool_t pushed = FALSE;                                                                      \
                                                                                                              \
                 FUNC_ENTER_API_COMMON                                                                        \
                 H5_PUSH_FUNC                                                                                 \
-    /* Push an API context, if there isn't already one */                                                                               \
-    if (H5CX_test_and_push(&pushed) < 0)                                                                                     \
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")                                     \
+                /* Push an API context, if there isn't already one */                                        \
+                if (H5CX_test_and_push(&pushed) < 0)                                                         \
+                    HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")                         \
                                                                                                              \
                 BEGIN_MPE_LOG                                                                                \
                 {
@@ -2531,10 +2531,10 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     } /*end scope from beginning of FUNC_ENTER*/
 
 /* Use this macro to match the FUNC_ENTER_API_WRAPPER macro */
-#define FUNC_LEAVE_API_WRAPPER(ret_value)                                                                     \
+#define FUNC_LEAVE_API_WRAPPER(ret_value)                                                                    \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
-    if (pushed)                                                                                     \
-        (void)H5CX_pop(TRUE);                                                                                    \
+    if (pushed)                                                                                              \
+        (void)H5CX_pop(TRUE);                                                                                \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
         (void)H5E_dump_api_stack(TRUE);                                                                      \

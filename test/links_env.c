@@ -58,10 +58,10 @@ external_link_env(hid_t fapl, hbool_t new_format)
 {
     hid_t       fid    = H5I_INVALID_HID; /* File ID */
     hid_t       gid    = H5I_INVALID_HID; /* Group IDs */
-    const char *envval = NULL; /* Pointer to environment variable */
+    const char *envval = NULL;            /* Pointer to environment variable */
     char        filename1[NAME_BUF_SIZE], filename2[NAME_BUF_SIZE],
         filename3[NAME_BUF_SIZE]; /* Holders for filename */
-    hbool_t is_native;              /* Whether native VOL connector is being used */
+    hbool_t is_native;            /* Whether native VOL connector is being used */
 
     if (new_format)
         TESTING("external links via environment variable (w/new group format)")

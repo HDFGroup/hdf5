@@ -309,8 +309,8 @@ struct H5F_shared_t {
     hbool_t              closing;           /* File is in the process of being closed */
 
     /* Cached VOL connector ID & info */
-    hid_t               vol_id;   /* ID of VOL connector for the container */
-    void *              vol_info; /* Copy of VOL connector info for container */
+    hid_t vol_id;   /* ID of VOL connector for the container */
+    void *vol_info; /* Copy of VOL connector info for container */
 
     /* File space allocation information */
     H5F_fspace_strategy_t fs_strategy;  /* File space handling strategy	*/

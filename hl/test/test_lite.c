@@ -1883,7 +1883,7 @@ test_valid_path(void)
 {
     hid_t       file_id, group;
     htri_t      path_valid;
-    hbool_t is_native;
+    hbool_t     is_native;
     const char *data_string_in = "test";
 
     HL_TESTING2("H5LTpath_valid");

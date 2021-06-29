@@ -12289,7 +12289,7 @@ main(void)
     int          test_api_config;
     unsigned     bit_config;
     H5F_libver_t low, high; /* Low and high bounds */
-    hbool_t is_native;              /* Whether native VOL connector is being used */
+    hbool_t      is_native; /* Whether native VOL connector is being used */
     int          nerrors = 0;
 
     /* Testing setup */

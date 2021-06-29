@@ -74,8 +74,8 @@ static herr_t H5T__vlen_disk_getlen(H5VL_object_t *file_obj, const void *_vl, si
 static herr_t H5T__vlen_disk_isnull(const H5VL_object_t *file_obj, void *_vl, hbool_t *isnull);
 static herr_t H5T__vlen_disk_setnull(H5VL_object_t *file_obj, void *_vl, void *_bg);
 static herr_t H5T__vlen_disk_read(H5VL_object_t *file_obj, void *_vl, void *_buf, size_t len);
-static herr_t H5T__vlen_disk_write(H5VL_object_t *file_obj, const H5T_vlen_alloc_info_t *vl_alloc_info, void *_vl,
-                                   void *_buf, void *_bg, size_t seq_len, size_t base_size);
+static herr_t H5T__vlen_disk_write(H5VL_object_t *file_obj, const H5T_vlen_alloc_info_t *vl_alloc_info,
+                                   void *_vl, void *_buf, void *_bg, size_t seq_len, size_t base_size);
 static herr_t H5T__vlen_disk_delete(H5VL_object_t *file_obj, const void *_vl);
 
 /*********************/

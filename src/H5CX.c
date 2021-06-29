@@ -864,8 +864,8 @@ H5CX_push_special(void)
 herr_t
 H5CX_test_and_push(hbool_t *pushed)
 {
-    H5CX_node_t **head     = NULL;    /* Pointer to head of API context list */
-    herr_t       ret_value = SUCCEED; /* Return value */
+    H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -874,8 +874,8 @@ H5CX_test_and_push(hbool_t *pushed)
 
     /* Check for API context already pushed */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
-    if(NULL == *head) {
-        H5CX_node_t *cnode     = NULL;    /* Context node */
+    if (NULL == *head) {
+        H5CX_node_t *cnode = NULL; /* Context node */
 
         /* Allocate & clear API context node */
         if (NULL == (cnode = H5FL_CALLOC(H5CX_node_t)))

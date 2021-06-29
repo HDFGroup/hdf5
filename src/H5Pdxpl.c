@@ -451,9 +451,8 @@ H5P__dxfr_reg_prop(H5P_genclass_t *pclass)
 
     /* Register the plugin new API context property */
     if (H5P__register_real(pclass, H5D_XFER_PLUGIN_NEW_API_CTX_NAME, H5D_XFER_PLUGIN_NEW_API_CTX_SIZE,
-                           &H5D_def_new_api_ctx_g, NULL, NULL, NULL,
-                           H5D_XFER_PLUGIN_NEW_API_CTX_ENC, H5D_XFER_PLUGIN_NEW_API_CTX_DEC,
-                           NULL, NULL, NULL, NULL) < 0)
+                           &H5D_def_new_api_ctx_g, NULL, NULL, NULL, H5D_XFER_PLUGIN_NEW_API_CTX_ENC,
+                           H5D_XFER_PLUGIN_NEW_API_CTX_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
@@ -2444,7 +2443,7 @@ done:
 herr_t
 H5Pget_plugin_new_api_context(hid_t plist_id, hbool_t *new_api_ctx /*out*/)
 {
-    H5P_genplist_t *plist;     /* Property list pointer */
+    H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
@@ -2465,4 +2464,3 @@ H5Pget_plugin_new_api_context(hid_t plist_id, hbool_t *new_api_ctx /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_plugin_new_api_context() */
-

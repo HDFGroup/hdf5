@@ -283,8 +283,8 @@ typedef struct H5VL_native_file_set_libver_bounds_t {
 
 /* Parameters for native connector's file 'post open' operation */
 typedef struct H5VL_native_file_post_open_t {
-    void *vol_obj;              /* VOL object for "top" file object */
-    hbool_t id_exists;          /* Whether an ID (will) exists for this file */
+    void *  vol_obj;   /* VOL object for "top" file object */
+    hbool_t id_exists; /* Whether an ID (will) exists for this file */
 } H5VL_native_file_post_open_t;
 
 /* Parameters for native connector's file 'optional' operations */

@@ -542,7 +542,7 @@ H5R__get_loc_id(const H5R_ref_priv_t *ref)
 hid_t
 H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 {
-    hid_t file_id = H5I_INVALID_HID;    /* New file's ID */
+    hid_t file_id   = H5I_INVALID_HID; /* New file's ID */
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -555,7 +555,8 @@ H5R__reopen_file(H5R_ref_priv_t *ref, hid_t fapl_id)
 
     /* Open the file */
     /* (Must open file read-write to allow for object modifications) */
-    if (NULL == H5VL_file_open(H5R_REF_FILENAME(ref), H5F_ACC_RDWR, fapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &file_id))
+    if (NULL == H5VL_file_open(H5R_REF_FILENAME(ref), H5F_ACC_RDWR, fapl_id, H5P_DATASET_XFER_DEFAULT,
+                               H5_REQUEST_NULL, &file_id))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTOPENFILE, H5I_INVALID_HID, "unable to open file")
 
     /* Attach loc_id to reference */

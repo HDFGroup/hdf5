@@ -28,14 +28,12 @@
 #include "H5VLpkg.h" /* Virtual Object Layer                 */
 
 /* Filename */
-const char *FILENAME[] = {
-    "native_vol_test",          /* 0 */
-    "vol_public",               /* 1 */
-    NULL
-};
+const char *FILENAME[] = {"native_vol_test", /* 0 */
+                          "vol_public",      /* 1 */
+                          NULL};
 
-#define PUBLIC_VOL_API_DATASET_NAME     "/Dataset1"
-#define PUBLIC_VOL_API_DATASET_SIZE     10
+#define PUBLIC_VOL_API_DATASET_NAME "/Dataset1"
+#define PUBLIC_VOL_API_DATASET_SIZE 10
 
 #define NATIVE_VOL_TEST_GROUP_NAME     "test_group"
 #define NATIVE_VOL_TEST_DATASET_NAME   "test_dataset"
@@ -2115,22 +2113,22 @@ error:
 static herr_t
 test_public_vol_api(void)
 {
-    char        filename[1024];
-    void *file;         /* File object */
-    void *dataset;      /* Dataset object */
-    H5VL_loc_params_t loc_params;       /* VOL location parameters for operations */
-    hid_t                    fapl_id = H5I_INVALID_HID;
-    hid_t                    fcpl_id = H5I_INVALID_HID;
-    hid_t                    lcpl_id = H5I_INVALID_HID;
-    hid_t                    dcpl_id = H5I_INVALID_HID;
-    hid_t                    dapl_id = H5I_INVALID_HID;
-    hid_t                    dxpl_id = H5I_INVALID_HID;
-    hid_t                    vol_id = H5I_INVALID_HID;
-    hid_t                    space_id = H5I_INVALID_HID;
-    hsize_t curr_dims;
-    int wdata[PUBLIC_VOL_API_DATASET_SIZE];
-    int rdata[PUBLIC_VOL_API_DATASET_SIZE];
-    unsigned u;
+    char              filename[1024];
+    void *            file;       /* File object */
+    void *            dataset;    /* Dataset object */
+    H5VL_loc_params_t loc_params; /* VOL location parameters for operations */
+    hid_t             fapl_id  = H5I_INVALID_HID;
+    hid_t             fcpl_id  = H5I_INVALID_HID;
+    hid_t             lcpl_id  = H5I_INVALID_HID;
+    hid_t             dcpl_id  = H5I_INVALID_HID;
+    hid_t             dapl_id  = H5I_INVALID_HID;
+    hid_t             dxpl_id  = H5I_INVALID_HID;
+    hid_t             vol_id   = H5I_INVALID_HID;
+    hid_t             space_id = H5I_INVALID_HID;
+    hsize_t           curr_dims;
+    int               wdata[PUBLIC_VOL_API_DATASET_SIZE];
+    int               rdata[PUBLIC_VOL_API_DATASET_SIZE];
+    unsigned          u;
 
     TESTING("Public VOL API");
 
@@ -2175,8 +2173,8 @@ test_public_vol_api(void)
     loc_params.obj_type = H5I_FILE;
 
     /* Create a dataset */
-    if (NULL == (dataset = H5VLdataset_create(file, &loc_params, vol_id, PUBLIC_VOL_API_DATASET_NAME,
-                                              lcpl_id, H5T_NATIVE_INT, space_id, dcpl_id, dapl_id, dxpl_id, NULL)))
+    if (NULL == (dataset = H5VLdataset_create(file, &loc_params, vol_id, PUBLIC_VOL_API_DATASET_NAME, lcpl_id,
+                                              H5T_NATIVE_INT, space_id, dcpl_id, dapl_id, dxpl_id, NULL)))
         TEST_ERROR
 
     /* Initialize data */
@@ -2193,7 +2191,7 @@ test_public_vol_api(void)
 
     /* Verify data */
     for (u = 0; u < PUBLIC_VOL_API_DATASET_SIZE; u++)
-        if(wdata[u] != rdata[u])
+        if (wdata[u] != rdata[u])
             TEST_ERROR
 
     /* Close dataset */

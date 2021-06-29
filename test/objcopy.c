@@ -8339,13 +8339,13 @@ error:
 static int
 test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
-    hid_t       fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID, fid_ext = H5I_INVALID_HID; /* File IDs */
-    hid_t       sid = H5I_INVALID_HID;                                 /* Dataspace ID */
-    hid_t       did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;                      /* Dataset ID */
-    hid_t       gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;                      /* Group IDs */
-    hid_t       plid = H5I_INVALID_HID;                                /* Object copy plist ID */
-    hsize_t     dim2d[2];
-    hsize_t     dim1d[1];
+    hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID, fid_ext = H5I_INVALID_HID; /* File IDs */
+    hid_t   sid = H5I_INVALID_HID;                         /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset ID */
+    hid_t   gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID; /* Group IDs */
+    hid_t   plid = H5I_INVALID_HID;                        /* Object copy plist ID */
+    hsize_t dim2d[2];
+    hsize_t dim1d[1];
     H5L_info2_t linfo;
     int         buf[DIM_SIZE_1][DIM_SIZE_2];
     int         i, j;
@@ -8484,7 +8484,7 @@ test_copy_group_links(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_
             if (expand_soft)
                 copy_options |= H5O_COPY_EXPAND_SOFT_LINK_FLAG;
             if (expand_ext) {
-                hbool_t is_native;              /* Whether native VOL connector is being used */
+                hbool_t is_native; /* Whether native VOL connector is being used */
 
                 /* Check for operating with native (only) VOL connector */
                 is_native = FALSE;
@@ -8839,16 +8839,16 @@ static int
 test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl)
 {
     hid_t   fid_src = H5I_INVALID_HID, fid_dst = H5I_INVALID_HID, fid_ext = H5I_INVALID_HID; /* File IDs */
-    hid_t   sid = H5I_INVALID_HID;                                 /* Dataspace ID */
-    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID;                      /* Dataset IDs */
-    hid_t   gid = H5I_INVALID_HID;                                 /* Group ID */
+    hid_t   sid = H5I_INVALID_HID;                         /* Dataspace ID */
+    hid_t   did = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t   gid = H5I_INVALID_HID;                         /* Group ID */
     hsize_t dim2d[2];
     int     buf[DIM_SIZE_1][DIM_SIZE_2];
     int     i, j;
     char    src_filename[NAME_BUF_SIZE];
     char    dst_filename[NAME_BUF_SIZE];
     char    ext_filename[NAME_BUF_SIZE];
-    hbool_t is_native;              /* Whether native VOL connector is being used */
+    hbool_t is_native; /* Whether native VOL connector is being used */
 
     TESTING("H5Ocopy(): object through external link");
 
@@ -8935,8 +8935,8 @@ test_copy_ext_link(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fap
         if ((fid_dst = H5Fcreate(dst_filename, H5F_ACC_TRUNC, fcpl_dst, dst_fapl)) < 0)
             TEST_ERROR
 
-        /* Create an uncopied object in destination file so that tokens in source and destination files aren't the
-         * same */
+        /* Create an uncopied object in destination file so that tokens in source and destination files aren't
+         * the same */
         if (H5Gclose(H5Gcreate2(fid_dst, NAME_GROUP_UNCOPIED, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
             TEST_ERROR
 
@@ -16523,7 +16523,7 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
     int      i, j;
     char     src_filename[NAME_BUF_SIZE];
     char     dst_filename[NAME_BUF_SIZE];
-    hbool_t is_native;              /* Whether native VOL connector is being used */
+    hbool_t  is_native; /* Whether native VOL connector is being used */
 
     TESTING(test_desciption);
 
@@ -16593,7 +16593,8 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
             TEST_ERROR
 
         /* create sub-sub-group */
-        if ((gid_sub_sub = H5Gcreate2(gid_sub, NAME_GROUP_SUB_SUB2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+        if ((gid_sub_sub = H5Gcreate2(gid_sub, NAME_GROUP_SUB_SUB2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+            0)
             TEST_ERROR
 
         /* add a dataset to the sub sub group */
@@ -16784,7 +16785,8 @@ test_copy_option(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid_t dst_fapl,
             if ((gid2 = H5Gopen2(fid_dst, "/new_g0/new_g00", H5P_DEFAULT)) < 0)
                 FAIL_STACK_ERROR
         }
-        else if (((flag & H5O_COPY_EXPAND_SOFT_LINK_FLAG) > 0) || ((flag & H5O_COPY_EXPAND_EXT_LINK_FLAG) > 0)) {
+        else if (((flag & H5O_COPY_EXPAND_SOFT_LINK_FLAG) > 0) ||
+                 ((flag & H5O_COPY_EXPAND_EXT_LINK_FLAG) > 0)) {
             if (H5Ocopy(fid_src, NAME_GROUP_LINK, fid_dst, NAME_GROUP_LINK, pid, H5P_DEFAULT) < 0)
                 TEST_ERROR
 
