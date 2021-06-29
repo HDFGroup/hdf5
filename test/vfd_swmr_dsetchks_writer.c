@@ -20,7 +20,7 @@
  *          4. extensible array (1 unlimited max_dims, default incremental allocation)
  *          5. btree2 (2 unlimited max_dims, default incremental allocation)
  *
- *      --with compression--H5Pset_shuffle(dcpl)
+ *      --with compression--H5Pset_deflate(dcpl)
  *      --with fill values--H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
  *
  *      Types of chunk operations:
@@ -223,7 +223,7 @@ usage(const char *progname)
         "-q:              silence printouts, few messages\n"
         "-b:              write data in big-endian byte order\n"
         "                 (default is H5T_NATIVE_UINT32)\n\n"
-        "-o:              enable compression (shuffle filter) for the datasets\n");
+        "-o:              enable compression (deflate filter) for the datasets\n");
 
     fprintf(
         stderr,
@@ -447,7 +447,7 @@ error:
  *  --2-dimensional chunked datasets
  *  --chunk dimension is rows/2 by cols/2
  *  --fill value is FILL_INIT
- *  --shuffle filter if specified
+ *  --deflate filter if specified
  *  --dataset with single index if specified
  *  --dataset with implicit index if specified
  *  --dataset with fixeda array index if specified
@@ -490,8 +490,8 @@ create_dsets(const state_t *s, dsets_state_t *ds)
 
     /* Set to use filter as specified */
     if (s->use_filter) {
-        if (H5Pset_shuffle(dcpl) < 0) {
-            printf("H5Pset_shuffle failed\n");
+        if (H5Pset_deflate(dcpl, 5) < 0) {
+            printf("H5Pset_deflate failed\n");
             goto error;
         }
     }
@@ -1655,14 +1655,9 @@ verify_dsets_chunks(unsigned action, const state_t *s, const dsets_state_t *ds, 
         }
     }
 
-    if (vbuf)
-        HDfree(vbuf);
-
     return true;
 
 error:
-    if (vbuf)
-        HDfree(vbuf);
 
     return false;
 
@@ -1735,6 +1730,11 @@ verify_read_dset(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t 
     }
 
     if (H5Sclose(sid) < 0) {
+        printf("H5Sclose failed\n");
+        TEST_ERROR;
+    }
+
+    if (H5Sclose(mem_sid) < 0) {
         printf("H5Sclose failed\n");
         TEST_ERROR;
     }
@@ -1850,6 +1850,11 @@ verify_dset_extent_real(unsigned action, hid_t did, unsigned rows, unsigned cols
             HDassert(0 && "Unknown action?!?");
 
     } /* end switch */
+
+    if (H5Sclose(sid) < 0) {
+        printf("H5Sclose failed\n");
+        TEST_ERROR;
+    }
 
     return true;
 
@@ -2134,11 +2139,11 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    personality = strstr(s.progname, "vfd_swmr_dsetchks_");
+    personality = HDstrstr(s.progname, "vfd_swmr_dsetchks_");
 
-    if (personality != NULL && strcmp(personality, "vfd_swmr_dsetchks_writer") == 0)
+    if (personality != NULL && HDstrcmp(personality, "vfd_swmr_dsetchks_writer") == 0)
         writer = true;
-    else if (personality != NULL && strcmp(personality, "vfd_swmr_dsetchks_reader") == 0)
+    else if (personality != NULL && HDstrcmp(personality, "vfd_swmr_dsetchks_reader") == 0)
         writer = false;
     else {
         printf("unknown personality, expected vfd_swmr_dsetchks_{reader,writer}\n");
