@@ -755,7 +755,7 @@ H5MF__sect_small_merge(H5FS_section_info_t **_sect1, H5FS_section_info_t *_sect2
          * Note: Update of raw data page (large or small sized) is handled
          * by the PB cache
          */
-        if (udata->f->shared->pb_ptr != NULL)
+        if (udata->f->shared->page_buf != NULL)
             if (H5PB_remove_entry(udata->f->shared, (*sect1)->sect_info.addr) < 0)
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "can't free merged section from page buffer")
 

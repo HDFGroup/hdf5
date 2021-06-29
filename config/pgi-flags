@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -45,8 +45,8 @@ fi
 
 # Common PGI flags for various situations
 if test "X-pgcc" = "X-$cc_vendor"; then
-    # Insert section about version specific problems from gnu-flags here, if
-    # necessary.
+    # Insert section about version specific problems from compiler flags here,
+    # if necessary.
 
     arch=
     # Architecture-specific flags
@@ -65,7 +65,11 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     #        ;;
     #esac
 
-    # General
+    ###########
+    # General #
+    ###########
+
+    # Default to C99 standard.
     H5_CFLAGS="$H5_CFLAGS $arch -c99 -Minform=warn"
 
     ##############
@@ -87,8 +91,8 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     # Symbols #
     ###########
 
-    SYMBOLS_CFLAGS="-g"
     NO_SYMBOLS_CFLAGS="-s"
+    SYMBOLS_CFLAGS="-g"
 
     #############
     # Profiling #
@@ -106,12 +110,14 @@ if test "X-pgcc" = "X-$cc_vendor"; then
     DEBUG_OPT_CFLAGS="-gopt -O2"
     NO_OPT_CFLAGS="-O0"
 
-    # Flags are set
+    #################
+    # Flags are set #
+    #################
     cc_flags_set=yes
 fi
 
 # Clear cc info if no flags set
 if test "X-$cc_flags_set" = "X-"; then
-  cc_vendor=
-  cc_version=
+    cc_vendor=
+    cc_version=
 fi

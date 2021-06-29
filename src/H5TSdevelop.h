@@ -2,7 +2,7 @@
  * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
  * distribution tree, or in https://www.hdfgroup.org/licenses.               *
@@ -11,14 +11,12 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * This file contains public declarations for the H5TS (threadsafety) module.
+ * This file contains public declarations for the H5TS (threadsafety) developer
+ *      support routines.
  */
 
-#ifndef H5TSpublic_H
-#define H5TSpublic_H
-
-/* Public headers needed by this file */
-#include "H5public.h" /* Generic Functions                    */
+#ifndef H5TSdevelop_H
+#define H5TSdevelop_H
 
 /*****************/
 /* Public Macros */
@@ -49,4 +47,4 @@ H5_DLL herr_t H5TSmutex_get_attempt_count(unsigned int *count);
 }
 #endif
 
-#endif /* H5TSpublic_H */
+#endif /* H5TSdevelop_H */

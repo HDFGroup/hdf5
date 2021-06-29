@@ -1135,12 +1135,13 @@ open_hdf5_file(const hbool_t create_file, const hbool_t mdci_sbem_expected, cons
      */
     if (pass) {
 
-        if ((file_ptr->shared->pb_ptr) && ((!enable_page_buffer) || (l_facc_type == FACC_MPIO))) {
+        if ((file_ptr->shared->page_buf) && ((!enable_page_buffer) || (l_facc_type == FACC_MPIO))) {
 
             pass         = FALSE;
             failure_mssg = "page buffer unexepectedly enabled.";
         }
-        else if ((file_ptr->shared->pb_ptr != NULL) && ((enable_page_buffer) || (l_facc_type != FACC_MPIO))) {
+        else if ((file_ptr->shared->page_buf != NULL) &&
+                 ((enable_page_buffer) || (l_facc_type != FACC_MPIO))) {
 
             pass         = FALSE;
             failure_mssg = "page buffer unexepectedly disabled.";

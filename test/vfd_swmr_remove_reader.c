@@ -32,13 +32,11 @@
 
 #ifndef H5_HAVE_WIN32_API
 
-#include <err.h>
-
 /*******************/
 /* Local Variables */
 /*******************/
 
-static hid_t symbol_tid = -1;
+static hid_t symbol_tid = H5I_INVALID_HID;
 
 /********************/
 /* Local Prototypes */
@@ -80,8 +78,8 @@ static void usage(void);
 static int
 check_dataset(hid_t fid, hid_t dapl, unsigned verbose, const char *sym_name, symbol_t *record, hid_t rec_sid)
 {
-    hid_t    dsid;                                 /* Dataset ID */
-    hid_t    file_sid;                             /* Dataset's space ID */
+    hid_t    dsid     = H5I_INVALID_HID;           /* Dataset ID */
+    hid_t    file_sid = H5I_INVALID_HID;           /* Dataset's space ID */
     hssize_t snpoints;                             /* Number of elements in dataset */
     hsize_t  start[2] = {0, 0}, count[2] = {1, 1}; /* Hyperslab selection values */
 
@@ -217,13 +215,13 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
     time_t                 curr_time;       /* Current time */
     symbol_info_t **       sym_com  = NULL; /* Pointers to array of common dataset IDs */
     symbol_info_t **       sym_rand = NULL; /* Pointers to array of random dataset IDs */
-    hid_t                  dapl;
-    hid_t                  mem_sid;       /* Memory dataspace ID */
-    hid_t                  fid;           /* SWMR test file ID */
-    hid_t                  fapl;          /* File access property list */
-    symbol_t               record;        /* The record to add to the dataset */
-    unsigned               v;             /* Local index variable */
-    H5F_vfd_swmr_config_t *config = NULL; /* Configuration for VFD SWMR */
+    hid_t                  dapl     = H5I_INVALID_HID;
+    hid_t                  mem_sid  = H5I_INVALID_HID; /* Memory dataspace ID */
+    hid_t                  fid      = H5I_INVALID_HID; /* SWMR test file ID */
+    hid_t                  fapl     = H5I_INVALID_HID; /* File access property list */
+    symbol_t               record;                     /* The record to add to the dataset */
+    unsigned               v;                          /* Local index variable */
+    H5F_vfd_swmr_config_t *config = NULL;              /* Configuration for VFD SWMR */
 
     HDassert(filename);
     HDassert(nseconds != 0);
@@ -233,11 +231,15 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
     /* (record's 'info' field might need to change for each record written, also) */
     HDmemset(&record, 0, sizeof(record));
 
-    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed", __func__, __LINE__);
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0) {
+        HDfprintf(stderr, "%s.%d: H5Pcreate failed", __func__, __LINE__);
+        goto error;
+    }
 
-    if (H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 0, H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
-        errx(EXIT_FAILURE, "H5Pset_chunk_cache failed");
+    if (H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 0, H5D_CHUNK_CACHE_W0_DEFAULT) < 0) {
+        HDfprintf(stderr, "H5Pset_chunk_cache failed");
+        goto error;
+    }
 
     /* Emit informational message */
     if (verbose)
@@ -306,7 +308,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nseconds, uns
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, config */
     if ((fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, config)) < 0) {
-        fprintf(stderr, "%s.%d: vfd_swmr_create_fapl failed\n", __func__, __LINE__);
+        HDfprintf(stderr, "%s.%d: vfd_swmr_create_fapl failed\n", __func__, __LINE__);
         goto error;
     }
 
@@ -429,17 +431,17 @@ error:
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: vfd_swmr_remove_reader [-q] [-s <# of seconds to sleep between\n");
-    printf("    polling>] [-h <# of common symbols to poll>] [-l <# of random symbols\n");
-    printf("    to poll>] [-r <random seed>] <# of seconds to test>\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), 1 second between polling ('-s 1'),\n");
-    printf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
-    printf("and will generate a random seed (no -r given).\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: vfd_swmr_remove_reader [-q] [-s <# of seconds to sleep between\n");
+    HDprintf("    polling>] [-h <# of common symbols to poll>] [-l <# of random symbols\n");
+    HDprintf("    to poll>] [-r <random seed>] <# of seconds to test>\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), 1 second between polling ('-s 1'),\n");
+    HDprintf("5 common symbols to poll ('-h 5'), 10 random symbols to poll ('-l 10'),\n");
+    HDprintf("and will generate a random seed (no -r given).\n");
+    HDprintf("\n");
     HDexit(1);
 }
 
