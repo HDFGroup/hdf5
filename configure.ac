@@ -914,6 +914,11 @@ fi
 ##               command).  The value of this variable is
 ##               substituted in *.in files.
 ##
+##    PARALLELTOOLS  -- This variable is set to a non-null value if
+##               the user has selected --with-libmfu
+##
+
+##
 AC_SUBST([PARALLEL])
 AC_SUBST([RUNSERIAL])
 AC_SUBST([RUNPARALLEL])
@@ -1494,6 +1499,83 @@ case "X-$withval" in
     fi
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Is the mpiFileUtils library (libmfu) required and available?
+##
+AC_SUBST([PARALLELTOOLS])
+
+## Default is not present
+HAVE_LIBMFU=no
+
+AC_ARG_WITH([libmfu],
+            [AS_HELP_STRING([--with-libmfu=DIR],
+                            [Use the libmfu library [default=no]])],,
+            [withval=no])
+
+case "X-$withval" in
+  X-yes)
+    HAVE_LIBMFU="yes"
+    AC_CHECK_HEADERS([mfu.h],, [unset HAVE_LIBMFU])
+    if test "x$HAVE_LIBMFU" = "xyes"; then
+      AC_CHECK_LIB([mfu], [mfu_init],, [unset HAVE_LIBMFU])
+    fi
+    if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find libmfu library])
+    fi
+	PARALLELTOOLS=yes
+    ;;
+  X-|X-no|X-none)
+    HAVE_LIBMFU="no"
+    AC_MSG_CHECKING([for libmfu library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_LIBMFU="yes"
+    case "$withval" in
+      *,*)
+        libmfu_inc="`echo $withval |cut -f1 -d,`"
+        libmfu_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          libmfu_inc="$withval/include"
+          libmfu_lib="$withval/lib64"
+          libcircle_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$libmfu_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$libmfu_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$libmfu_inc"
+    fi
+
+    AC_CHECK_HEADERS([mfu.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_LIBMFU])
+
+    if test "x$HAVE_LIBMFU" = "xyes"; then
+      if test -n "$libmfu_lib"; then
+        LDFLAGS="$LDFLAGS -L$libmfu_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+      fi
+
+      AC_CHECK_LIB([mfu], [mfu_init],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
+    fi
+
+    if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find libmfu library])
+    fi
+    ;;
+esac
+
+## 
+AM_CONDITIONAL([PARALLEL_TOOLS_CONDITIONAL], [test "X$HAVE_LIBMFU" = "Xyes"])
+
 
 ## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files

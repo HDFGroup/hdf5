@@ -1125,12 +1125,12 @@ int main(int argc, char** argv)
      */
     int option_index = 0;
     static struct option long_options[] = {
-        {"input",          1, 0, 'i'},
-        {"output",         1, 0, 'o'},
-        {"error",          1, 0, 'E'},
-        {"tool",           1, 0, 'T'},
-        {"log_text",       2, 0, 'l'},
-        {"help",           0, 0, 'h'},
+        {"input",          required_argument, 0, 'i'},
+        {"output",         required_argument, 0, 'o'},
+        {"error",          optional_argument, 0, 'E'},
+        {"tool",           required_argument, 0, 'T'},
+        {"log_text",       optional_argument, 0, 'l'},
+        {"help",           no_argument,       0, 'h'},
         {0, 0, 0, 0}
     };
 
@@ -1143,7 +1143,7 @@ int main(int argc, char** argv)
 
     while (!tool_selected) {
         int c = getopt_long(
-                    mfu_argc+1, h5tool_argv, "i:o:E::T:l::h:",
+                    mfu_argc+1, h5tool_argv, "h:i:o:E::T:l::",
                     long_options, &option_index
                 );
 
@@ -1193,6 +1193,7 @@ int main(int argc, char** argv)
                 break;
             case 'h':
                 usage = 1;
+                goto show_help;
                 break;
             case '?':
                 usage = 1;
@@ -1213,6 +1214,7 @@ int main(int argc, char** argv)
         usage = 1;
     }
 
+show_help:
     /* print usage if we need to */
     if (usage) {
         if (rank == 0) {

@@ -30,3 +30,8 @@ add_subdirectory (h5dump)
 
 #-- Add the h5format_convert and test executables
 add_subdirectory (h5format_convert)
+
+#-- Add the dh5walk and test executables
+if (HDF5_BUILD_PARALLEL_TOOLS AND HDF5_ENABLE_PARALLEL)
+  add_subdirectory(dh5walk)
+endif()
