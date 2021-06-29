@@ -1112,28 +1112,23 @@ main(int argc, char **argv)
      * struct option { char * name; int has_arg; int *flag; int val};
      */
     int                  option_index   = 0;
-    static struct option long_options[] = {
-        {"input",          required_argument, 0, 'i'},
-        {"output",         required_argument, 0, 'o'},
-        {"error",          optional_argument, 0, 'E'},
-        {"tool",           required_argument, 0, 'T'},
-        {"log_text",       optional_argument, 0, 'l'},
-        {"help",           no_argument,       0, 'h'},
-        {0, 0, 0, 0}
-    };
+    static struct option long_options[] = {{"input", required_argument, 0, 'i'},
+                                           {"output", required_argument, 0, 'o'},
+                                           {"error", optional_argument, 0, 'E'},
+                                           {"tool", required_argument, 0, 'T'},
+                                           {"log_text", optional_argument, 0, 'l'},
+                                           {"help", no_argument, 0, 'h'},
+                                           {0, 0, 0, 0}};
 
-    int usage = 0;
-    int tool_selected = 0;
-    int tool_paths = 0;
-    int tool_args_start = -1;
-    int last_mfu_arg = 0;
-    mfu_pred* pred_head = NULL;
+    int       usage           = 0;
+    int       tool_selected   = 0;
+    int       tool_paths      = 0;
+    int       tool_args_start = -1;
+    int       last_mfu_arg    = 0;
+    mfu_pred *pred_head       = NULL;
 
     while (!tool_selected) {
-        int c = getopt_long(
-                    mfu_argc+1, h5tool_argv, "h:i:o:E::T:l::",
-                    long_options, &option_index
-                );
+        int c = getopt_long(mfu_argc + 1, h5tool_argv, "h:i:o:E::T:l::", long_options, &option_index);
         if (c == -1) {
             break;
         }
