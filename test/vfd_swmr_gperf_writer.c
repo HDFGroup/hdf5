@@ -26,8 +26,8 @@
 #define READER_WAIT_TICKS 3
 #define VS_ATTR_NAME_LEN  21
 
-#define TIME_PASSED(X,Y)        \
-             ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
+#define TIME_PASSED(X, Y)                                                                                    \
+    ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
 
 typedef struct {
     hid_t        file, filetype, one_by_one_sid;
@@ -66,8 +66,8 @@ typedef struct {
         .update_interval = READER_WAIT_TICKS, .use_vfd_swmr = true, .old_style_grp = false,                  \
         .use_named_pipes = true, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',             \
         .attr_test = false, .tick_len = 4, .max_lag = 7, .np_fd_w_to_r = -1, .np_fd_r_to_w = -1,             \
-        .np_notify = 0, .np_verify = 0, .gperf = false, .min_time = 100., .max_time = 0.,.mean_time = 0., \
-        .total_time = 0.,.num_attrs = 1                                                                        \
+        .np_notify = 0, .np_verify = 0, .gperf = false, .min_time = 100., .max_time = 0., .mean_time = 0.,   \
+        .total_time = 0., .num_attrs = 1                                                                     \
     }
 
 static void
@@ -1734,14 +1734,14 @@ add_group_attribute(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
 static bool
 write_group(state_t *s, unsigned int which)
 {
-    char       name[sizeof("/group-9999999999")];
-    hid_t      g       = H5I_INVALID_HID;
-    hid_t      dummy_d = H5I_INVALID_HID;
-    hid_t      gcpl    = H5I_INVALID_HID;
-    bool       result  = true;
-    H5G_info_t group_info;
+    char            name[sizeof("/group-9999999999")];
+    hid_t           g       = H5I_INVALID_HID;
+    hid_t           dummy_d = H5I_INVALID_HID;
+    hid_t           gcpl    = H5I_INVALID_HID;
+    bool            result  = true;
+    H5G_info_t      group_info;
     struct timespec start_time, end_time;
-    double temp_time;
+    double          temp_time;
 
     if (which >= s->nsteps) {
         printf("Number of created groups is out of bounds\n");
@@ -1770,42 +1770,36 @@ write_group(state_t *s, unsigned int which)
     }
 #endif
 
-    if(s->gperf) {
+    if (s->gperf) {
 
-       if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
 
-                fprintf(stderr, "HDclock_gettime failed");
+            fprintf(stderr, "HDclock_gettime failed");
 
-                TEST_ERROR;
-
-            }    
-
-
+            TEST_ERROR;
+        }
     }
     if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         printf("H5Gcreate2 failed\n");
         TEST_ERROR;
     }
 
-    if(s->gperf) {
+    if (s->gperf) {
 
-       if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
 
-                fprintf(stderr, "HDclock_gettime failed");
+            fprintf(stderr, "HDclock_gettime failed");
 
-                TEST_ERROR;
+            TEST_ERROR;
+        }
 
-            }    
-
-
-       temp_time = TIME_PASSED(start_time,end_time);
-       if(temp_time < s->min_time)
+        temp_time = TIME_PASSED(start_time, end_time);
+        if (temp_time < s->min_time)
             s->min_time = temp_time;
-       if(temp_time > s->max_time)
+        if (temp_time > s->max_time)
             s->max_time = temp_time;
-       s->total_time += temp_time;      
+        s->total_time += temp_time;
     }
-    
 
 #if 0
     /* We need to create a dummy dataset for the object header continuation block test. */
@@ -1880,13 +1874,12 @@ write_group(state_t *s, unsigned int which)
         TEST_ERROR;
     }
 
-
     return result;
 
 error:
 
-
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Gclose(g);
     }
     H5E_END_TRY;
@@ -5132,11 +5125,11 @@ main(int argc, char **argv)
                 }
             }
         }
-        s.mean_time = s.total_time/s.nsteps;
-         fprintf(stdout, "group creation min. time = %lf\n", s.min_time);
-         fprintf(stdout, "group creation max. time = %lf\n", s.max_time);
-         fprintf(stdout, "group creation mean time = %lf\n", s.mean_time);
-         fprintf(stdout, "group creation total time = %lf\n", s.total_time);
+        s.mean_time = s.total_time / s.nsteps;
+        fprintf(stdout, "group creation min. time = %lf\n", s.min_time);
+        fprintf(stdout, "group creation max. time = %lf\n", s.max_time);
+        fprintf(stdout, "group creation mean time = %lf\n", s.mean_time);
+        fprintf(stdout, "group creation total time = %lf\n", s.total_time);
     }
     else {
         for (step = 0; step < s.nsteps; step++) {
