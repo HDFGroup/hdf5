@@ -186,7 +186,7 @@ H5FD__init_package(void)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     if (H5FD_splitter_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize splitter VFD")
@@ -212,7 +212,7 @@ H5FD_splitter_init(void)
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     if (H5I_VFL != H5I_get_type(H5FD_SPLITTER_g))
         H5FD_SPLITTER_g = H5FDregister(&H5FD_splitter_g);
@@ -236,7 +236,7 @@ H5FD__splitter_term(void)
 {
     FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Reset VFL ID */
     H5FD_SPLITTER_g = 0;
@@ -261,7 +261,7 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     HDassert(id_out_ptr != NULL);
 
@@ -299,7 +299,7 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Dr", fapl_id, vfd_config);
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     if (H5FD_SPLITTER_MAGIC != vfd_config->magic)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid configuration (magic number mismatch)")
@@ -387,7 +387,7 @@ H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config_out)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Dr", fapl_id, config_out);
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
@@ -441,13 +441,13 @@ H5FD__splitter_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closin
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Public API for dxpl "context" */
     if (H5FDflush(file->rw_file, dxpl_id, closing) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTFLUSH, FAIL, "unable to flush R/W file")
     if (H5FDflush(file->wo_file, dxpl_id, closing) < 0)
-        H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTFLUSH, FAIL, "unable to flush W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, __func__, H5E_VFL, H5E_CANTFLUSH, FAIL, "unable to flush W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -476,7 +476,7 @@ H5FD__splitter_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
@@ -516,7 +516,7 @@ H5FD__splitter_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     if (NULL == (plist_ptr = (H5P_genplist_t *)H5I_object(dxpl_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
@@ -526,7 +526,7 @@ H5FD__splitter_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr
     if (H5FDwrite(file->rw_file, type, dxpl_id, addr, size, buf) < 0)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "R/W file write failed")
     if (H5FDwrite(file->wo_file, type, dxpl_id, addr, size, buf) < 0)
-        H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, __func__, H5E_VFL, H5E_WRITEERROR, FAIL, "unable to write W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -552,7 +552,7 @@ H5FD__splitter_fapl_get(H5FD_t *_file)
 
     FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     ret_value = H5FD__splitter_fapl_copy(&(file->fa));
 
@@ -577,7 +577,7 @@ H5FD__splitter_fapl_copy(const void *_old_fa)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     HDassert(old_fa_ptr);
 
@@ -621,7 +621,7 @@ H5FD__splitter_fapl_free(void *_fapl)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     HDassert(fapl);
@@ -659,7 +659,7 @@ H5FD__splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, ha
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     if (!name || !*name)
@@ -715,7 +715,7 @@ H5FD__splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, ha
 
     file_ptr->wo_file = H5FD_open(fapl_ptr->wo_path, flags, fapl_ptr->wo_fapl_id, HADDR_UNDEF);
     if (!file_ptr->wo_file)
-        H5FD_SPLITTER_WO_ERROR(file_ptr, FUNC, H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open W/O file")
+        H5FD_SPLITTER_WO_ERROR(file_ptr, __func__, H5E_VFL, H5E_CANTOPENFILE, NULL, "unable to open W/O file")
 
     ret_value = (H5FD_t *)file_ptr;
 
@@ -756,7 +756,7 @@ H5FD__splitter_close(H5FD_t *_file)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
     HDassert(file);
@@ -771,7 +771,8 @@ H5FD__splitter_close(H5FD_t *_file)
             HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close R/W file")
     if (file->wo_file)
         if (H5FD_close(file->wo_file) == FAIL)
-            H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close W/O file")
+            H5FD_SPLITTER_WO_ERROR(file, __func__, H5E_VFL, H5E_CANTCLOSEFILE, FAIL,
+                                   "unable to close W/O file")
 
     if (file->logfp) {
         HDfclose(file->logfp);
@@ -806,7 +807,7 @@ H5FD__splitter_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
     HDassert(file);
@@ -837,7 +838,7 @@ H5FD__splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t ad
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC)
+    H5FD_SPLITTER_LOG_CALL(__func__)
 
     /* Sanity check */
     HDassert(file);
@@ -848,7 +849,7 @@ H5FD__splitter_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t ad
         HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "H5FDset_eoa failed for R/W file")
 
     if (H5FD_set_eoa(file->wo_file, type, addr) < 0)
-        H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTSET, FAIL, "unable to set EOA for W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, __func__, H5E_VFL, H5E_CANTSET, FAIL, "unable to set EOA for W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -874,7 +875,7 @@ H5FD__splitter_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
     HDassert(file);
@@ -903,7 +904,7 @@ H5FD__splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     HDassert(file);
     HDassert(file->rw_file);
@@ -913,7 +914,7 @@ H5FD__splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing)
         HGOTO_ERROR(H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to truncate R/W file")
 
     if (H5FDtruncate(file->wo_file, dxpl_id, closing) < 0)
-        H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to truncate W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, __func__, H5E_VFL, H5E_CANTUPDATE, FAIL, "unable to truncate W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -941,7 +942,7 @@ H5FD__splitter_sb_size(H5FD_t *_file)
 
     FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
     HDassert(file);
@@ -969,7 +970,7 @@ H5FD__splitter_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
     HDassert(file);
@@ -1000,7 +1001,7 @@ H5FD__splitter_sb_decode(H5FD_t *_file, const char *name, const unsigned char *b
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Sanity check */
     HDassert(file);
@@ -1031,7 +1032,7 @@ H5FD__splitter_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 
     FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     HDassert(f1);
     HDassert(f2);
@@ -1058,7 +1059,7 @@ H5FD__splitter_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     HDassert(file);
@@ -1089,7 +1090,7 @@ H5FD__splitter_lock(H5FD_t *_file, hbool_t rw)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     HDassert(file);
     HDassert(file->rw_file);
@@ -1100,7 +1101,7 @@ H5FD__splitter_lock(H5FD_t *_file, hbool_t rw)
 
     if (file->wo_file != NULL)
         if (H5FD_lock(file->wo_file, rw) < 0)
-            H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock W/O file")
+            H5FD_SPLITTER_WO_ERROR(file, __func__, H5E_VFL, H5E_CANTLOCKFILE, FAIL, "unable to lock W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1122,7 +1123,7 @@ H5FD__splitter_unlock(H5FD_t *_file)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     HDassert(file);
@@ -1157,7 +1158,7 @@ H5FD__splitter_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     if (file) {
         HDassert(file);
@@ -1194,7 +1195,7 @@ H5FD__splitter_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     HDassert(file);
@@ -1205,7 +1206,8 @@ H5FD__splitter_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, hsize_t size
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to allocate for R/W file")
 
     if (H5FDalloc(file->wo_file, type, dxpl_id, size) == HADDR_UNDEF)
-        H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTINIT, HADDR_UNDEF, "unable to alloc for W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, __func__, H5E_VFL, H5E_CANTINIT, HADDR_UNDEF,
+                               "unable to alloc for W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1227,7 +1229,7 @@ H5FD__splitter_get_type_map(const H5FD_t *_file, H5FD_mem_t *type_map)
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     HDassert(file);
@@ -1257,7 +1259,7 @@ H5FD__splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
 
     FUNC_ENTER_STATIC
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     HDassert(file);
@@ -1267,7 +1269,7 @@ H5FD__splitter_free(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
         HGOTO_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free for R/W file")
 
     if (H5FDfree(file->wo_file, type, dxpl_id, addr, size) < 0)
-        H5FD_SPLITTER_WO_ERROR(file, FUNC, H5E_VFL, H5E_CANTINIT, FAIL, "unable to free for W/O file")
+        H5FD_SPLITTER_WO_ERROR(file, __func__, H5E_VFL, H5E_CANTINIT, FAIL, "unable to free for W/O file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1288,7 +1290,7 @@ H5FD__splitter_log_error(const H5FD_splitter_t *file, const char *atfunc, const 
 
     FUNC_ENTER_STATIC_NOERR
 
-    H5FD_SPLITTER_LOG_CALL(FUNC);
+    H5FD_SPLITTER_LOG_CALL(__func__);
 
     /* Check arguments */
     HDassert(file);
