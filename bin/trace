@@ -353,7 +353,7 @@ sub rewrite_func ($$$$$) {
 
     # Compose the trace macro
     $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
-    $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(FUNC, \"";
+    $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(__func__, \"";
     $trace .= join("", @arg_str) . "\"";
     $argtrace .= join("", @arg_str) . "\"";
 

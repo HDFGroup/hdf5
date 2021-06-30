@@ -2021,18 +2021,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 
-AC_MSG_CHECKING([for __func__ extension])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[ const char *fname = __func__; ]])],
-               [AC_DEFINE([HAVE_C99_FUNC], [1],
-                         [Define if the compiler understands the __func__ keyword])
-                 AC_MSG_RESULT([yes])],
-               [AC_MSG_RESULT([no])])
-AC_MSG_CHECKING([for __FUNCTION__ extension])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],,[[ const char *fname = __FUNCTION__; ]])],
-               [AC_DEFINE([HAVE_FUNCTION], [1],
-                         [Define if the compiler understands the __FUNCTION__ keyword])
-                 AC_MSG_RESULT([yes])],
-               [AC_MSG_RESULT([no])])
 AC_MSG_CHECKING([for C99 designated initialization support])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
                 typedef struct {
