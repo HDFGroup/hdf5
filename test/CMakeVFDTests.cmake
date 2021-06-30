@@ -26,7 +26,7 @@ set (VFD_LIST
     multi
     family
 )
-if (DIRECT_VFD)
+if (H5_HAVE_DIRECT)
   set (VFD_LIST ${VFD_LIST} direct)
 endif ()
 
