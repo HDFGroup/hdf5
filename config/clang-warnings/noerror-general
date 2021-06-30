@@ -1,6 +1,8 @@
 #
-# HDF5 code should not trigger the following warnings under any
-# circumstances, so ask the compiler to treat them as errors:
+# These warnings will be treated as errors, using the error-general file,
+# when HDF5_ENABLE_WARNINGS_AS_ERRORS is set to true for CMake or
+# the --enable-warnings-as-errors option is specified for configure.
+#   Otherwise this file will be used to treat them as warnings.
 #
 -Wbad-function-cast
 -Wimplicit-function-declaration
