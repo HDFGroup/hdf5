@@ -150,8 +150,8 @@
 #define eventa(func_name) h5_mpe_eventa
 #define eventb(func_name) h5_mpe_eventb
 #define MPE_LOG_VARS                                                                                         \
-    static int eventa(FUNC) = -1;                                                                            \
-    static int eventb(FUNC) = -1;                                                                            \
+    static int eventa(__func__) = -1;                                                                        \
+    static int eventb(__func__) = -1;                                                                        \
     char       p_event_start[128];
 
 /* Hardwire the color to "red", since that's what all the routines are using
@@ -163,14 +163,14 @@
  */
 #define BEGIN_MPE_LOG                                                                                        \
     if (H5_MPEinit_g) {                                                                                      \
-        sprintf(p_event_start, "start %s", FUNC);                                                            \
-        if (eventa(FUNC) == -1 && eventb(FUNC) == -1) {                                                      \
+        sprintf(p_event_start, "start %s", __func__);                                                        \
+        if (eventa(__func__) == -1 && eventb(__func__) == -1) {                                              \
             const char *p_color = "red";                                                                     \
-            eventa(FUNC)        = MPE_Log_get_event_number();                                                \
-            eventb(FUNC)        = MPE_Log_get_event_number();                                                \
-            MPE_Describe_state(eventa(FUNC), eventb(FUNC), FUNC, p_color);                                   \
+            eventa(__func__)    = MPE_Log_get_event_number();                                                \
+            eventb(__func__)    = MPE_Log_get_event_number();                                                \
+            MPE_Describe_state(eventa(__func__), eventb(__func__), __func__, p_color);                       \
         }                                                                                                    \
-        MPE_Log_event(eventa(FUNC), 0, p_event_start);                                                       \
+        MPE_Log_event(eventa(__func__), 0, p_event_start);                                                   \
     }
 
 /*------------------------------------------------------------------------
@@ -181,7 +181,7 @@
  */
 #define FINISH_MPE_LOG                                                                                       \
     if (H5_MPEinit_g) {                                                                                      \
-        MPE_Log_event(eventb(FUNC), 0, FUNC);                                                                \
+        MPE_Log_event(eventb(__func__), 0, __func__);                                                        \
     }
 
 #else                  /* H5_HAVE_MPE */
@@ -1978,7 +1978,7 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 /* Include required function stack header */
 #include "H5CSprivate.h"
 
-#define H5_PUSH_FUNC H5CS_push(FUNC);
+#define H5_PUSH_FUNC H5CS_push(__func__);
 #define H5_POP_FUNC  H5CS_pop();
 #else                /* H5_HAVE_CODESTACK */
 #define H5_PUSH_FUNC /* void */
