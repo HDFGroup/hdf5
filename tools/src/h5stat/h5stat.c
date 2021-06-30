@@ -171,106 +171,106 @@ struct handler_t {
 
 static const char *s_opts = "Aa:Ddm:EFfhGgl:sSTO:Vw:H:";
 /* e.g. "filemetadata" has to precede "file"; "groupmetadata" has to precede "group" etc. */
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},
-                                       {"hel", no_arg, 'h'},
-                                       {"he", no_arg, 'h'},
-                                       {"filemetadata", no_arg, 'F'},
-                                       {"filemetadat", no_arg, 'F'},
-                                       {"filemetada", no_arg, 'F'},
-                                       {"filemetad", no_arg, 'F'},
-                                       {"filemeta", no_arg, 'F'},
-                                       {"filemet", no_arg, 'F'},
-                                       {"fileme", no_arg, 'F'},
-                                       {"filem", no_arg, 'F'},
-                                       {"file", no_arg, 'f'},
-                                       {"fil", no_arg, 'f'},
-                                       {"fi", no_arg, 'f'},
-                                       {"groupmetadata", no_arg, 'G'},
-                                       {"groupmetadat", no_arg, 'G'},
-                                       {"groupmetada", no_arg, 'G'},
-                                       {"groupmetad", no_arg, 'G'},
-                                       {"groupmeta", no_arg, 'G'},
-                                       {"groupmet", no_arg, 'G'},
-                                       {"groupme", no_arg, 'G'},
-                                       {"groupm", no_arg, 'G'},
-                                       {"group", no_arg, 'g'},
-                                       {"grou", no_arg, 'g'},
-                                       {"gro", no_arg, 'g'},
-                                       {"gr", no_arg, 'g'},
-                                       {"links", require_arg, 'l'},
-                                       {"link", require_arg, 'l'},
-                                       {"lin", require_arg, 'l'},
-                                       {"li", require_arg, 'l'},
-                                       {"dsetmetadata", no_arg, 'D'},
-                                       {"dsetmetadat", no_arg, 'D'},
-                                       {"dsetmetada", no_arg, 'D'},
-                                       {"dsetmetad", no_arg, 'D'},
-                                       {"dsetmeta", no_arg, 'D'},
-                                       {"dsetmet", no_arg, 'D'},
-                                       {"dsetme", no_arg, 'D'},
-                                       {"dsetm", no_arg, 'D'},
-                                       {"dset", no_arg, 'd'},
-                                       {"dse", no_arg, 'd'},
-                                       {"ds", no_arg, 'd'},
-                                       {"dims", require_arg, 'm'},
-                                       {"dim", require_arg, 'm'},
-                                       {"di", require_arg, 'm'},
-                                       {"dtypemetadata", no_arg, 'T'},
-                                       {"dtypemetadat", no_arg, 'T'},
-                                       {"dtypemetada", no_arg, 'T'},
-                                       {"dtypemetad", no_arg, 'T'},
-                                       {"dtypemeta", no_arg, 'T'},
-                                       {"dtypemet", no_arg, 'T'},
-                                       {"dtypeme", no_arg, 'T'},
-                                       {"dtypem", no_arg, 'T'},
-                                       {"dtype", no_arg, 'T'},
-                                       {"dtyp", no_arg, 'T'},
-                                       {"dty", no_arg, 'T'},
-                                       {"dt", no_arg, 'T'},
-                                       {"object", require_arg, 'O'},
-                                       {"objec", require_arg, 'O'},
-                                       {"obje", require_arg, 'O'},
-                                       {"obj", require_arg, 'O'},
-                                       {"ob", require_arg, 'O'},
-                                       {"version", no_arg, 'V'},
-                                       {"versio", no_arg, 'V'},
-                                       {"versi", no_arg, 'V'},
-                                       {"vers", no_arg, 'V'},
-                                       {"ver", no_arg, 'V'},
-                                       {"ve", no_arg, 'V'},
-                                       {"attribute", no_arg, 'A'},
-                                       {"attribut", no_arg, 'A'},
-                                       {"attribu", no_arg, 'A'},
-                                       {"attrib", no_arg, 'A'},
-                                       {"attri", no_arg, 'A'},
-                                       {"attr", no_arg, 'A'},
-                                       {"att", no_arg, 'A'},
-                                       {"at", no_arg, 'A'},
-                                       {"enable-error-stack", no_arg, 'E'},
-                                       {"numattrs", require_arg, 'a'},
-                                       {"numattr", require_arg, 'a'},
-                                       {"numatt", require_arg, 'a'},
-                                       {"numat", require_arg, 'a'},
-                                       {"numa", require_arg, 'a'},
-                                       {"num", require_arg, 'a'},
-                                       {"nu", require_arg, 'a'},
-                                       {"freespace", no_arg, 's'},
-                                       {"freespac", no_arg, 's'},
-                                       {"freespa", no_arg, 's'},
-                                       {"freesp", no_arg, 's'},
-                                       {"frees", no_arg, 's'},
-                                       {"free", no_arg, 's'},
-                                       {"fre", no_arg, 's'},
-                                       {"fr", no_arg, 's'},
-                                       {"summary", no_arg, 'S'},
-                                       {"summar", no_arg, 'S'},
-                                       {"summa", no_arg, 'S'},
-                                       {"summ", no_arg, 'S'},
-                                       {"sum", no_arg, 'S'},
-                                       {"su", no_arg, 'S'},
-                                       {"s3-cred", require_arg, 'w'},
-                                       {"hdfs-attrs", require_arg, 'H'},
-                                       {NULL, 0, '\0'}};
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
+                                          {"hel", no_arg, 'h'},
+                                          {"he", no_arg, 'h'},
+                                          {"filemetadata", no_arg, 'F'},
+                                          {"filemetadat", no_arg, 'F'},
+                                          {"filemetada", no_arg, 'F'},
+                                          {"filemetad", no_arg, 'F'},
+                                          {"filemeta", no_arg, 'F'},
+                                          {"filemet", no_arg, 'F'},
+                                          {"fileme", no_arg, 'F'},
+                                          {"filem", no_arg, 'F'},
+                                          {"file", no_arg, 'f'},
+                                          {"fil", no_arg, 'f'},
+                                          {"fi", no_arg, 'f'},
+                                          {"groupmetadata", no_arg, 'G'},
+                                          {"groupmetadat", no_arg, 'G'},
+                                          {"groupmetada", no_arg, 'G'},
+                                          {"groupmetad", no_arg, 'G'},
+                                          {"groupmeta", no_arg, 'G'},
+                                          {"groupmet", no_arg, 'G'},
+                                          {"groupme", no_arg, 'G'},
+                                          {"groupm", no_arg, 'G'},
+                                          {"group", no_arg, 'g'},
+                                          {"grou", no_arg, 'g'},
+                                          {"gro", no_arg, 'g'},
+                                          {"gr", no_arg, 'g'},
+                                          {"links", require_arg, 'l'},
+                                          {"link", require_arg, 'l'},
+                                          {"lin", require_arg, 'l'},
+                                          {"li", require_arg, 'l'},
+                                          {"dsetmetadata", no_arg, 'D'},
+                                          {"dsetmetadat", no_arg, 'D'},
+                                          {"dsetmetada", no_arg, 'D'},
+                                          {"dsetmetad", no_arg, 'D'},
+                                          {"dsetmeta", no_arg, 'D'},
+                                          {"dsetmet", no_arg, 'D'},
+                                          {"dsetme", no_arg, 'D'},
+                                          {"dsetm", no_arg, 'D'},
+                                          {"dset", no_arg, 'd'},
+                                          {"dse", no_arg, 'd'},
+                                          {"ds", no_arg, 'd'},
+                                          {"dims", require_arg, 'm'},
+                                          {"dim", require_arg, 'm'},
+                                          {"di", require_arg, 'm'},
+                                          {"dtypemetadata", no_arg, 'T'},
+                                          {"dtypemetadat", no_arg, 'T'},
+                                          {"dtypemetada", no_arg, 'T'},
+                                          {"dtypemetad", no_arg, 'T'},
+                                          {"dtypemeta", no_arg, 'T'},
+                                          {"dtypemet", no_arg, 'T'},
+                                          {"dtypeme", no_arg, 'T'},
+                                          {"dtypem", no_arg, 'T'},
+                                          {"dtype", no_arg, 'T'},
+                                          {"dtyp", no_arg, 'T'},
+                                          {"dty", no_arg, 'T'},
+                                          {"dt", no_arg, 'T'},
+                                          {"object", require_arg, 'O'},
+                                          {"objec", require_arg, 'O'},
+                                          {"obje", require_arg, 'O'},
+                                          {"obj", require_arg, 'O'},
+                                          {"ob", require_arg, 'O'},
+                                          {"version", no_arg, 'V'},
+                                          {"versio", no_arg, 'V'},
+                                          {"versi", no_arg, 'V'},
+                                          {"vers", no_arg, 'V'},
+                                          {"ver", no_arg, 'V'},
+                                          {"ve", no_arg, 'V'},
+                                          {"attribute", no_arg, 'A'},
+                                          {"attribut", no_arg, 'A'},
+                                          {"attribu", no_arg, 'A'},
+                                          {"attrib", no_arg, 'A'},
+                                          {"attri", no_arg, 'A'},
+                                          {"attr", no_arg, 'A'},
+                                          {"att", no_arg, 'A'},
+                                          {"at", no_arg, 'A'},
+                                          {"enable-error-stack", no_arg, 'E'},
+                                          {"numattrs", require_arg, 'a'},
+                                          {"numattr", require_arg, 'a'},
+                                          {"numatt", require_arg, 'a'},
+                                          {"numat", require_arg, 'a'},
+                                          {"numa", require_arg, 'a'},
+                                          {"num", require_arg, 'a'},
+                                          {"nu", require_arg, 'a'},
+                                          {"freespace", no_arg, 's'},
+                                          {"freespac", no_arg, 's'},
+                                          {"freespa", no_arg, 's'},
+                                          {"freesp", no_arg, 's'},
+                                          {"frees", no_arg, 's'},
+                                          {"free", no_arg, 's'},
+                                          {"fre", no_arg, 's'},
+                                          {"fr", no_arg, 's'},
+                                          {"summary", no_arg, 'S'},
+                                          {"summar", no_arg, 'S'},
+                                          {"summa", no_arg, 'S'},
+                                          {"summ", no_arg, 'S'},
+                                          {"sum", no_arg, 'S'},
+                                          {"su", no_arg, 'S'},
+                                          {"s3-cred", require_arg, 'w'},
+                                          {"hdfs-attrs", require_arg, 'H'},
+                                          {NULL, 0, '\0'}};
 
 static void
 leave(int ret)
@@ -920,7 +920,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
     struct handler_t *hand = NULL;
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
@@ -959,8 +959,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'l':
-                if (opt_arg) {
-                    sgroups_threshold = HDatoi(opt_arg);
+                if (H5_optarg) {
+                    sgroups_threshold = HDatoi(H5_optarg);
                     if (sgroups_threshold < 1) {
                         error_msg("Invalid threshold for small groups\n");
                         goto error;
@@ -982,8 +982,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'm':
-                if (opt_arg) {
-                    sdsets_threshold = HDatoi(opt_arg);
+                if (H5_optarg) {
+                    sdsets_threshold = HDatoi(H5_optarg);
                     if (sdsets_threshold < 1) {
                         error_msg("Invalid threshold for small datasets\n");
                         goto error;
@@ -1005,8 +1005,8 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'a':
-                if (opt_arg) {
-                    sattrs_threshold = HDatoi(opt_arg);
+                if (H5_optarg) {
+                    sattrs_threshold = HDatoi(H5_optarg);
                     if (sattrs_threshold < 1) {
                         error_msg("Invalid threshold for small # of attributes\n");
                         goto error;
@@ -1046,7 +1046,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 
                 /* Store object names */
                 for (u = 0; u < hand->obj_count; u++)
-                    if (NULL == (hand->obj[u] = HDstrdup(opt_arg))) {
+                    if (NULL == (hand->obj[u] = HDstrdup(H5_optarg))) {
                         error_msg("unable to allocate memory for object name\n");
                         goto error;
                     } /* end if */
@@ -1054,7 +1054,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 
             case 'w':
 #ifdef H5_HAVE_ROS3_VFD
-                if (h5tools_parse_ros3_fapl_tuple(opt_arg, ',', &ros3_fa) < 0) {
+                if (h5tools_parse_ros3_fapl_tuple(H5_optarg, ',', &ros3_fa) < 0) {
                     error_msg("failed to parse S3 VFD credential info\n");
                     goto error;
                 }
@@ -1068,7 +1068,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
 
             case 'H':
 #ifdef H5_HAVE_LIBHDFS
-                if (h5tools_parse_hdfs_fapl_tuple(opt_arg, ',', &hdfs_fa) < 0) {
+                if (h5tools_parse_hdfs_fapl_tuple(H5_optarg, ',', &hdfs_fa) < 0) {
                     error_msg("failed to parse HDFS VFD configuration info\n");
                     goto error;
                 }
@@ -1087,7 +1087,7 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
     }     /* end while */
 
     /* check for file name to be processed */
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         goto error;
@@ -1813,6 +1813,8 @@ main(int argc, const char *argv[])
             goto done;
         }
     }
+
+    fname = argv[H5_optind];
 
     /* Check for filename given */
     if (fname) {
