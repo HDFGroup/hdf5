@@ -19,7 +19,7 @@ CMakeTests.*      @byrnHDF @derobins
 
 /doc/             @gnuoyd @jrmainzer
 
-/examples/        @lrknox @derobins @bljhdf
+/examples/        @lrknox @derobins @bmribler
 
 /fortran/         @brtnfld @epourmal
 
@@ -29,7 +29,7 @@ CMakeTests.*      @byrnHDF @derobins
 
 /m4/              @lrknox @derobins
 
-/release_docs/    @lrknox @bljhdf @byrnHDF
+/release_docs/    @lrknox @bmribler @byrnHDF
 
 /src/             @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup @jrmainzer
 
