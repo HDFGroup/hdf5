@@ -649,11 +649,11 @@ set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     WILL_FAIL "true"
 )
-add_test (NAME H5TEST-tcheck_version-release COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tr")
-set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
-    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-    WILL_FAIL "true"
-)
+#add_test (NAME H5TEST-tcheck_version-release COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tr")
+#set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
+#    WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+#    WILL_FAIL "true"
+#)
 
 ##############################################################################
 ##############################################################################
