@@ -1225,11 +1225,9 @@ AC_CHECK_LIB([dl], [dlopen])
 ##
 
 ## Unix
-AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
-AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
-AC_CHECK_HEADERS([features.h])
-AC_CHECK_HEADERS([dirent.h])
-AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
+AC_CHECK_HEADERS([dirent.h features.h unistd.h])
+AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/resource.h])
+AC_CHECK_HEADERS([sys/stat.h sys/time.h sys/types.h])
 
 ## Darwin
 AC_SUBST([H5_IS_DARWIN])
@@ -1242,19 +1240,16 @@ case $host_os in
 esac
 
 ## Windows
+## The winsock header is needed for gethostname
+AC_CHECK_HEADERS([winsock2.h])
 case "`uname`" in
-  CYGWIN*)
-    AC_CHECK_HEADERS([sys/timeb.h])
-    UNAME_CYGWIN="yes"
-    ;;
   MINGW*)
-    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     AC_HAVE_LIBRARY([ws2_32])
     ;;
-  *)
-    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
-    ;;
 esac
+
+# Mirror VFD networking
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h])
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
@@ -2001,12 +1996,12 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## NOTE: clock_gettime may require linking to the rt or posix4 library
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork])
+AC_CHECK_FUNCS([alarm asprintf clock_gettime fcntl flock fork])
 AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([srandom strdup symlink])
-AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
+AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
 
 ## VFD SWMR (move to main CHECK_FUNCS section at merge time)
 AC_CHECK_FUNCS([sigtimedwait timespeccmp])
