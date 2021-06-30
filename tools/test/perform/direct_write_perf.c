@@ -28,23 +28,22 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-
-#ifdef H5_HAVE_UNISTD_H
-#include <sys/types.h>
-#include <unistd.h>
-#endif
+#include <time.h>
 
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 
-#if defined(H5_TIME_WITH_SYS_TIME)
+#ifdef H5_HAVE_SYS_TIME_H
 #include <sys/time.h>
-#include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#else
-#include <time.h>
+#endif
+
+#ifdef H5_HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
