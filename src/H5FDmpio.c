@@ -702,7 +702,7 @@ H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* set atomicity value */
@@ -712,7 +712,7 @@ H5FD_set_mpio_atomicity(H5FD_t *_file, hbool_t flag)
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -745,7 +745,7 @@ H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Get atomicity value */
@@ -760,7 +760,7 @@ H5FD_get_mpio_atomicity(H5FD_t *_file, hbool_t *flag)
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -826,7 +826,7 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
                               (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == mpi_rank));
     if (H5FD_mpio_debug_t_flag)
         HDfprintf(stderr, "%s: (%d) Entering - name = \"%s\", flags = 0x%x, fapl_id = %d, maxaddr = %lu\n",
-                  FUNC, mpi_rank, name, flags, (int)fapl_id, (unsigned long)maxaddr);
+                  __func__, mpi_rank, name, flags, (int)fapl_id, (unsigned long)maxaddr);
 #endif
 
     /* Convert HDF5 flags to MPI-IO flags */
@@ -906,7 +906,7 @@ done:
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -939,7 +939,7 @@ H5FD__mpio_close(H5FD_t *_file)
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -958,7 +958,7 @@ H5FD__mpio_close(H5FD_t *_file)
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1178,7 +1178,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -1240,7 +1240,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
-            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", FUNC, file->mpi_rank);
+            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
 #endif
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
         if (H5CX_get_mpio_coll_opt(&coll_opt_mode) < 0)
@@ -1249,13 +1249,13 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_r_flag)
-                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", FUNC, file->mpi_rank);
+                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
 #endif
             /* Check whether we should read from rank 0 and broadcast to other ranks */
             if (H5CX_get_mpio_rank0_bcast()) {
 #ifdef H5FDmpio_DEBUG
                 if (H5FD_mpio_debug_r_flag)
-                    HDfprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", FUNC, file->mpi_rank);
+                    HDfprintf(stderr, "%s: (%d) doing read-rank0-and-MPI_Bcast\n", __func__, file->mpi_rank);
 #endif
                 /* Indicate path we've taken */
                 rank0_bcast = TRUE;
@@ -1277,7 +1277,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
         else {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_r_flag)
-                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
+                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
             /* Perform independent read operation */
@@ -1296,7 +1296,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     else {
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_r_flag)
-            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
+            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
         /* Perform independent read operation */
@@ -1346,8 +1346,8 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_r_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld\n", FUNC, file->mpi_rank, (long)mpi_off,
-                  bytes_read);
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_read = %lld\n", __func__, file->mpi_rank,
+                  (long)mpi_off, bytes_read);
 #endif
 
     /*
@@ -1359,7 +1359,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1418,7 +1418,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -1490,7 +1490,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
-            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", FUNC, file->mpi_rank);
+            HDfprintf(stderr, "%s: (%d) using MPIO collective mode\n", __func__, file->mpi_rank);
 #endif
 
         /* Get the collective_opt property to check whether the application wants to do IO individually. */
@@ -1500,7 +1500,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)
-                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", FUNC, file->mpi_rank);
+                HDfprintf(stderr, "%s: (%d) doing MPI collective IO\n", __func__, file->mpi_rank);
 #endif
             /* Perform collective write operation */
             if (MPI_SUCCESS !=
@@ -1514,7 +1514,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_debug_w_flag)
-                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
+                HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
             /* Perform independent write operation */
             if (MPI_SUCCESS !=
@@ -1530,7 +1530,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     else {
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_debug_w_flag)
-            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", FUNC, file->mpi_rank);
+            HDfprintf(stderr, "%s: (%d) doing MPI independent IO\n", __func__, file->mpi_rank);
 #endif
 
         /* Perform independent write operation */
@@ -1563,7 +1563,7 @@ H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_w_flag)
-        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", FUNC, file->mpi_rank,
+        HDfprintf(stderr, "%s: (%d) mpi_off = %ld  bytes_written = %lld\n", __func__, file->mpi_rank,
                   (long)mpi_off, bytes_written);
 #endif
 
@@ -1584,7 +1584,7 @@ done:
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving: ret_value = %d\n", FUNC, file->mpi_rank, ret_value);
+        HDfprintf(stderr, "%s: (%d) Leaving: ret_value = %d\n", __func__, file->mpi_rank, ret_value);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1616,7 +1616,7 @@ H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -1631,7 +1631,7 @@ H5FD__mpio_flush(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t closing)
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1673,7 +1673,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Entering\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Entering\n", __func__, file->mpi_rank);
 #endif
 
     /* Sanity checks */
@@ -1742,7 +1742,7 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
 done:
 #ifdef H5FDmpio_DEBUG
     if (H5FD_mpio_debug_t_flag)
-        HDfprintf(stderr, "%s: (%d) Leaving\n", FUNC, file->mpi_rank);
+        HDfprintf(stderr, "%s: (%d) Leaving\n", __func__, file->mpi_rank);
 #endif
 
     FUNC_LEAVE_NOAPI(ret_value)

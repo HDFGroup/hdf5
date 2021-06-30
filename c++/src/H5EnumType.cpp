@@ -13,7 +13,6 @@
 
 #include <string>
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -219,8 +218,7 @@ EnumType::insert(const H5std_string &name, void *value) const
 H5std_string
 EnumType::nameOf(void *value, size_t size) const
 {
-    char *name_C = new char[size + 1]; // temporary C-string for C API
-    HDmemset(name_C, 0, size + 1);     // clear buffer
+    char *name_C = new char[size + 1](); // temporary C-string for C API
 
     // Calls C routine H5Tenum_nameof to get the name of the specified enum type
     herr_t ret_value = H5Tenum_nameof(id, value, name_C, size);

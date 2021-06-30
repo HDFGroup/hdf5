@@ -147,7 +147,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
     FUNC_ENTER_PACKAGE
 
 #ifdef H5FA_DEBUG
-    HDfprintf(stderr, "%s: Called, addr = %a\n", FUNC, addr);
+    HDfprintf(stderr, "%s: Called, addr = %a\n", __func__, addr);
 #endif /* H5FA_DEBUG */
 
     /* Sanity check */
@@ -162,7 +162,7 @@ H5FA__dblk_page_create(H5FA_hdr_t *hdr, haddr_t addr, size_t nelmts)
     dblk_page->addr = addr;
     dblk_page->size = H5FA_DBLK_PAGE_SIZE(hdr, nelmts);
 #ifdef H5FA_DEBUG
-    HDfprintf(stderr, "%s: dblk_page->size = %Zu\n", FUNC, dblk_page->size);
+    HDfprintf(stderr, "%s: dblk_page->size = %Zu\n", __func__, dblk_page->size);
 #endif /* H5FA_DEBUG */
 
     /* Clear any elements in data block page to fill value */
@@ -223,7 +223,7 @@ H5FA__dblk_page_protect(H5FA_hdr_t *hdr, haddr_t dblk_page_addr, size_t dblk_pag
     FUNC_ENTER_PACKAGE
 
 #ifdef H5FA_DEBUG
-    HDfprintf(stderr, "%s: Called\n", FUNC);
+    HDfprintf(stderr, "%s: Called\n", __func__);
 #endif /* H5FA_DEBUG */
 
     /* Sanity check */
@@ -293,7 +293,7 @@ H5FA__dblk_page_unprotect(H5FA_dblk_page_t *dblk_page, unsigned cache_flags)
     FUNC_ENTER_PACKAGE
 
 #ifdef H5FA_DEBUG
-    HDfprintf(stderr, "%s: Called\n", FUNC);
+    HDfprintf(stderr, "%s: Called\n", __func__);
 #endif /* H5FA_DEBUG */
 
     /* Sanity check */
