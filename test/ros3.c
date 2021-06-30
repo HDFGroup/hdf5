@@ -106,7 +106,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                                \
+        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
     }
 
 /*----------------------------------------------------------------------------

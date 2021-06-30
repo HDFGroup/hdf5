@@ -1812,7 +1812,7 @@ do_express_test(int world_mpi_rank)
         nerrors++;
         max_express_test = -1;
         if (VERBOSE_MED && (world_mpi_rank == 0)) {
-            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n", world_mpi_rank, FUNC);
+            HDfprintf(stdout, "%d:%s: MPI_Allreduce() failed.\n", world_mpi_rank, __func__);
         }
     }
 
@@ -1849,7 +1849,7 @@ main(int argc, char **argv)
         HDprintf("Failed to turn off atexit processing. Continue.\n");
 
     /* set alarm. */
-    ALARM_ON;
+    TestAlarmOn();
 
     ExpressMode = do_express_test(mpi_rank_g);
 
@@ -1872,7 +1872,7 @@ main(int argc, char **argv)
     }
 
     /* turn off alarm */
-    ALARM_OFF;
+    TestAlarmOff();
 
     if (mpi_rank_g == 0)
         HDremove(FILENAME[0]);
