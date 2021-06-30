@@ -1779,7 +1779,7 @@ main(int argc, const char *argv[])
     if (parse_command_line(argc, argv, &hand) < 0)
         goto done;
 
-    fname = argv[opt_ind];
+    fname = argv[H5_optind];
 
     /* enable error reporting if command line option */
     h5tools_error_report();
