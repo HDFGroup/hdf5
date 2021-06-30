@@ -1978,7 +1978,7 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 /* Include required function stack header */
 #include "H5CSprivate.h"
 
-#define H5_PUSH_FUNC H5CS_push(FUNC);
+#define H5_PUSH_FUNC H5CS_push(__func__);
 #define H5_POP_FUNC  H5CS_pop();
 #else                /* H5_HAVE_CODESTACK */
 #define H5_PUSH_FUNC /* void */
