@@ -634,9 +634,6 @@
    PTHREAD_SCOPE_SYSTEM) call. */
 #cmakedefine H5_SYSTEM_SCOPE_THREADS @H5_SYSTEM_SCOPE_THREADS@
 
-/* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
-#cmakedefine H5_TIME_WITH_SYS_TIME @H5_TIME_WITH_SYS_TIME@
-
 /* Define using v1.10 public API symbols by default */
 #cmakedefine H5_USE_110_API_DEFAULT @H5_USE_110_API_DEFAULT@
 
