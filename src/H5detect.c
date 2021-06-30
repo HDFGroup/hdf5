@@ -1278,60 +1278,18 @@ detect_C89_floats(void)
 static void HDF_NO_UBSAN
 detect_C99_integers8(void)
 {
-#if H5_SIZEOF_INT8_T > 0
-#if H5_SIZEOF_INT8_T == 1
     DETECT_BYTE(int8_t, INT8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(int8_t, INT8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_UINT8_T > 0
-#if H5_SIZEOF_UINT8_T == 1
     DETECT_BYTE(uint8_t, UINT8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(uint8_t, UINT8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_INT_LEAST8_T > 0
-#if H5_SIZEOF_INT_LEAST8_T == 1
     DETECT_BYTE(int_least8_t, INT_LEAST8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(int_least8_t, INT_LEAST8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_UINT_LEAST8_T > 0
-#if H5_SIZEOF_UINT_LEAST8_T == 1
     DETECT_BYTE(uint_least8_t, UINT_LEAST8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(uint_least8_t, UINT_LEAST8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_INT_FAST8_T > 0
-#if H5_SIZEOF_INT_FAST8_T == 1
     DETECT_BYTE(int_fast8_t, INT_FAST8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(int_fast8_t, INT_FAST8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_UINT_FAST8_T > 0
-#if H5_SIZEOF_UINT_FAST8_T == 1
     DETECT_BYTE(uint_fast8_t, UINT_FAST8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(uint_fast8_t, UINT_FAST8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -1345,30 +1303,18 @@ detect_C99_integers8(void)
 static void HDF_NO_UBSAN
 detect_C99_integers16(void)
 {
-#if H5_SIZEOF_INT16_T > 0
     DETECT_I(int16_t, INT16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT16_T > 0
     DETECT_I(uint16_t, UINT16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_LEAST16_T > 0
     DETECT_I(int_least16_t, INT_LEAST16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_LEAST16_T > 0
     DETECT_I(uint_least16_t, UINT_LEAST16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_FAST16_T > 0
     DETECT_I(int_fast16_t, INT_FAST16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_FAST16_T > 0
     DETECT_I(uint_fast16_t, UINT_FAST16, d_g[nd_g]);
     nd_g++;
-#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -1382,30 +1328,18 @@ detect_C99_integers16(void)
 static void HDF_NO_UBSAN
 detect_C99_integers32(void)
 {
-#if H5_SIZEOF_INT32_T > 0
     DETECT_I(int32_t, INT32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT32_T > 0
     DETECT_I(uint32_t, UINT32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_LEAST32_T > 0
     DETECT_I(int_least32_t, INT_LEAST32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_LEAST32_T > 0
     DETECT_I(uint_least32_t, UINT_LEAST32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_FAST32_T > 0
     DETECT_I(int_fast32_t, INT_FAST32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_FAST32_T > 0
     DETECT_I(uint_fast32_t, UINT_FAST32, d_g[nd_g]);
     nd_g++;
-#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -1420,47 +1354,23 @@ detect_C99_integers32(void)
 static void HDF_NO_UBSAN
 detect_C99_integers64(void)
 {
-#if H5_SIZEOF_INT64_T > 0
     DETECT_I(int64_t, INT64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT64_T > 0
     DETECT_I(uint64_t, UINT64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_LEAST64_T > 0
     DETECT_I(int_least64_t, INT_LEAST64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_LEAST64_T > 0
     DETECT_I(uint_least64_t, UINT_LEAST64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_FAST64_T > 0
     DETECT_I(int_fast64_t, INT_FAST64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_FAST64_T > 0
     DETECT_I(uint_fast64_t, UINT_FAST64, d_g[nd_g]);
     nd_g++;
-#endif
 
-#if H5_SIZEOF_LONG_LONG > 0
     DETECT_I(long long, LLONG, d_g[nd_g]);
     nd_g++;
     DETECT_I(unsigned long long, ULLONG, d_g[nd_g]);
     nd_g++;
-#else
-    /*
-     * This architecture doesn't support an integer type larger than `long'
-     * so we'll just make H5T_NATIVE_LLONG the same as H5T_NATIVE_LONG since
-     * `long long' is probably equivalent to `long' here anyway.
-     */
-    DETECT_I(long, LLONG, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(unsigned long, ULLONG, d_g[nd_g]);
-    nd_g++;
-#endif
 }
 
 /*-------------------------------------------------------------------------
