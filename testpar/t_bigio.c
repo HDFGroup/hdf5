@@ -1861,7 +1861,7 @@ main(int argc, char **argv)
         HDprintf("Failed to turn off atexit processing. Continue.\n");
 
     /* set alarm. */
-    ALARM_ON;
+    TestAlarmOn();
 
     dataset_big_write();
     MPI_Barrier(MPI_COMM_WORLD);
@@ -1878,7 +1878,7 @@ main(int argc, char **argv)
     single_rank_independent_io();
 
     /* turn off alarm */
-    ALARM_OFF;
+    TestAlarmOff();
 
     if (mpi_rank_g == 0)
         HDremove(FILENAME[0]);
