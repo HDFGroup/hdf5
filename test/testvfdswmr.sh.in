@@ -68,6 +68,13 @@ DSETOPS_FIFO_WRITER_TO_READER=fifo_dsetops_writer_to_reader
 DSETOPS_FIFO_READER_TO_WRITER=fifo_dsetops_reader_to_writer
 
 ###############################################################################
+## For dsetchks test: definitions for fifo files to coordinate test runs
+###############################################################################
+#
+DSETCHKS_FIFO_WRITER_TO_READER=fifo_dsetchks_writer_to_reader
+DSETCHKS_FIFO_READER_TO_WRITER=fifo_dsetchks_reader_to_writer
+
+###############################################################################
 ## short hands and function definitions
 ###############################################################################
 #
@@ -138,9 +145,9 @@ all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo
 all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small attrdset"
 tests=${all_tests}
 
-# For exhaustive run, add: os_groups_attrs, os_groups_ops, dsetops
+# For exhaustive run, add: os_groups_attrs, os_groups_ops, dsetops, dsetchks
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
-    all_tests="${all_tests} os_groups_attrs os_groups_ops dsetops"
+    all_tests="${all_tests} os_groups_attrs os_groups_ops dsetops dsetchks"
 fi
 
 if [ $# -gt 0 ]; then
@@ -1249,6 +1256,70 @@ for options in "-p -e 20 -t -q" "-g -m 5 -n 2 -s 10 -w 7 -q" "-k -m 10 -n 5 -r 5
 	# Clean up output files
 	rm -f vfd_swmr_dsetops_writer.{out,rc}
 	rm -f vfd_swmr_dsetops_reader.*.{out,rc}
+done
+
+###############################################################################
+#
+# "dsetchks" test
+#
+# Only for exhaustive run
+#
+###############################################################################
+#
+#
+dsetchks_list=(
+                "-s -m 8 -n 3 -g 1 -q"
+                "-i -o -g 3 -q"
+                "-f -p 4 -q"
+                "-e -m 3 -n 5 -t 1 -q"
+                "-r -m 11 -n 5 -l 7 -q"
+                "-f -x 5 -y 2 -q"
+               )
+for options in "${dsetchks_list[@]}"; do
+	#
+	#
+	if [ ${do_dsetchks:-no} = no ]; then
+		continue
+	fi
+    # Clean up any existing fifo files from previous runs
+    if [ -e ./$DSETCHKS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+        rm -f ./$DSETCHKS_FIFO_WRITER_TO_READER
+    fi
+    if [ -e ./$DSETCHKS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+        rm -f ./$DSETCHKS_FIFO_READER_TO_WRITER
+    fi
+    #
+	echo launch vfd_swmr_dsetchks_writer dsetchks, options $options ......may take some time......
+	catch_out_err_and_rc vfd_swmr_dsetchks_writer \
+	    ../vfd_swmr_dsetchks_writer $options &
+	pid_writer=$!
+
+	catch_out_err_and_rc vfd_swmr_dsetchks_reader \
+	    ../vfd_swmr_dsetchks_reader $options &
+	pid_reader=$!
+
+	# Wait for the reader to finish before signaling the
+	# writer to quit: the writer holds the file open so that the
+	# reader will find the shadow file when it opens
+	# the .h5 file.
+	wait $pid_reader
+	wait $pid_writer
+
+	# Collect exit code of the reader
+	if [ $(cat vfd_swmr_dsetchks_reader.rc) -ne 0 ]; then
+		echo reader had error
+		nerrors=$((nerrors + 1))
+	fi
+
+	# Collect exit code of the writer
+	if [ $(cat vfd_swmr_dsetchks_writer.rc) -ne 0 ]; then
+	    echo writer had error
+	    nerrors=$((nerrors + 1))
+	fi
+
+	# Clean up output files
+	rm -f vfd_swmr_dsetchks_writer.{out,rc}
+	rm -f vfd_swmr_dsetchks_reader.*.{out,rc}
 done
 
 ###############################################################################

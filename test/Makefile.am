@@ -112,6 +112,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     vfd_swmr_zoo_reader vfd_swmr_zoo_writer \
     vfd_swmr_attrdset_reader vfd_swmr_attrdset_writer \
 	vfd_swmr_check_compat \
+    vfd_swmr_dsetchks_reader vfd_swmr_dsetchks_writer \
     swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
     mirror_vfd
 if HAVE_SHARED_CONDITIONAL
@@ -181,6 +182,9 @@ vfd_swmr_dsetops_reader_SOURCES=vfd_swmr_dsetops_writer.c
 
 vfd_swmr_attrdset_writer_SOURCES=vfd_swmr_attrdset_writer.c
 vfd_swmr_attrdset_reader_SOURCES=vfd_swmr_attrdset_writer.c
+
+vfd_swmr_dsetchks_writer_SOURCES=vfd_swmr_dsetchks_writer.c
+vfd_swmr_dsetchks_reader_SOURCES=vfd_swmr_dsetchks_writer.c
 
 # Additional target for running timing test
 timings _timings: testmeta

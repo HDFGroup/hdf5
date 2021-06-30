@@ -296,11 +296,11 @@ H5S__hyper_print_spans_helper(FILE *f, const H5S_hyper_span_t *span, unsigned de
     FUNC_ENTER_STATIC_NOERR
 
     while (span) {
-        HDfprintf(f, "%s: %*sdepth=%u, span=%p, (%Hu, %Hu), next=%p\n", FUNC, depth * 2, "", depth, span,
+        HDfprintf(f, "%s: %*sdepth=%u, span=%p, (%Hu, %Hu), next=%p\n", __func__, depth * 2, "", depth, span,
                   span->low, span->high, span->next);
         if (span->down) {
-            HDfprintf(f, "%s: %*sspans=%p, count=%u, bounds[0]={%Hu, %Hu}, head=%p\n", FUNC, (depth + 1) * 2,
-                      "", span->down, span->down->count, span->down->low_bounds[0],
+            HDfprintf(f, "%s: %*sspans=%p, count=%u, bounds[0]={%Hu, %Hu}, head=%p\n", __func__,
+                      (depth + 1) * 2, "", span->down, span->down->count, span->down->low_bounds[0],
                       span->down->high_bounds[0], span->down->head);
             H5S__hyper_print_spans_helper(f, span->down->head, depth + 1);
         } /* end if */
@@ -316,7 +316,7 @@ H5S__hyper_print_spans(FILE *f, const H5S_hyper_span_info_t *span_lst)
     FUNC_ENTER_STATIC_NOERR
 
     if (span_lst != NULL) {
-        HDfprintf(f, "%s: spans=%p, count=%u, bounds[0]={%Hu, %Hu}, head=%p\n", FUNC, span_lst,
+        HDfprintf(f, "%s: spans=%p, count=%u, bounds[0]={%Hu, %Hu}, head=%p\n", __func__, span_lst,
                   span_lst->count, span_lst->low_bounds[0], span_lst->high_bounds[0], span_lst->head);
         H5S__hyper_print_spans_helper(f, span_lst->head, 0);
     } /* end if */
@@ -342,21 +342,21 @@ H5S__hyper_print_diminfo_helper(FILE *f, const char *field, unsigned ndims, cons
     FUNC_ENTER_STATIC_NOERR
 
     if (dinfo != NULL) {
-        HDfprintf(f, "%s: %s: start=[", FUNC, field);
+        HDfprintf(f, "%s: %s: start=[", __func__, field);
         for (u = 0; u < ndims; u++)
             HDfprintf(f, "%Hd%s", dinfo[u].start, (u < (ndims - 1) ? ", " : "]\n"));
-        HDfprintf(f, "%s: %s: stride=[", FUNC, field);
+        HDfprintf(f, "%s: %s: stride=[", __func__, field);
         for (u = 0; u < ndims; u++)
             HDfprintf(f, "%Hu%s", dinfo[u].stride, (u < (ndims - 1) ? ", " : "]\n"));
-        HDfprintf(f, "%s: %s: count=[", FUNC, field);
+        HDfprintf(f, "%s: %s: count=[", __func__, field);
         for (u = 0; u < ndims; u++)
             HDfprintf(f, "%Hu%s", dinfo[u].count, (u < (ndims - 1) ? ", " : "]\n"));
-        HDfprintf(f, "%s: %s: block=[", FUNC, field);
+        HDfprintf(f, "%s: %s: block=[", __func__, field);
         for (u = 0; u < ndims; u++)
             HDfprintf(f, "%Hu%s", dinfo[u].block, (u < (ndims - 1) ? ", " : "]\n"));
     } /* end if */
     else
-        HDfprintf(f, "%s: %s==NULL\n", FUNC, field);
+        HDfprintf(f, "%s: %s==NULL\n", __func__, field);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 }

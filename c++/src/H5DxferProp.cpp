@@ -13,7 +13,6 @@
 
 #include <string>
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -324,8 +323,7 @@ DSetMemXferPropList::getDataTransform() const
     // If expression exists, calls C routine again to get it
     else if (exp_len > 0) {
         // Temporary buffer for char* expression
-        char *exp_C = new char[exp_len + 1];
-        HDmemset(exp_C, 0, exp_len + 1); // clear buffer
+        char *exp_C = new char[exp_len + 1]();
 
         // Used overloaded function
         exp_len = getDataTransform(exp_C, exp_len + 1);

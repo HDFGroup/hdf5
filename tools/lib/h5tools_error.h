@@ -29,15 +29,6 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_id_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_min_info_id_g;
 H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
 
-/* Use FUNC to safely handle variations of C99 __func__ keyword handling */
-#ifdef H5_HAVE_C99_FUNC
-#define FUNC __func__
-#elif defined(H5_HAVE_FUNCTION)
-#define FUNC __FUNCTION__
-#else
-#error "We need __func__ or __FUNCTION__ to test function names!"
-#endif
-
 /*
  * H5TOOLS_INIT_ERROR macro, used to initialize error reporting.
  */
@@ -105,7 +96,8 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
     do {                                                                                                     \
         if (enable_error_stack > 0) {                                                                        \
             if (estack_id >= 0 && err_cls >= 0)                                                              \
-                H5Epush2(estack_id, __FILE__, FUNC, __LINE__, err_cls, maj_err_id, min_err_id, __VA_ARGS__); \
+                H5Epush2(estack_id, __FILE__, __func__, __LINE__, err_cls, maj_err_id, min_err_id,           \
+                         __VA_ARGS__);                                                                       \
             else {                                                                                           \
                 HDfprintf(stderr, __VA_ARGS__);                                                              \
                 HDfprintf(stderr, "\n");                                                                     \
@@ -175,7 +167,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
 #define H5TOOLS_START_DEBUG(...)                                                                             \
     do {                                                                                                     \
         H5tools_INDENT_g += 2;                                                                               \
-        HDfprintf(stderr, "%*sENTER %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);      \
+        HDfprintf(stderr, "%*sENTER %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);  \
         HDfprintf(stderr, __VA_ARGS__);                                                                      \
         HDfprintf(stderr, "\n");                                                                             \
         HDfflush(stderr);                                                                                    \
@@ -183,7 +175,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
 
 #define H5TOOLS_DEBUG(...)                                                                                   \
     do {                                                                                                     \
-        HDfprintf(stderr, "%*s %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);           \
+        HDfprintf(stderr, "%*s %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);       \
         HDfprintf(stderr, __VA_ARGS__);                                                                      \
         HDfprintf(stderr, "\n");                                                                             \
         HDfflush(stderr);                                                                                    \
@@ -191,7 +183,7 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
 
 #define H5TOOLS_ENDDEBUG(...)                                                                                \
     do {                                                                                                     \
-        HDfprintf(stderr, "%*sEXIT %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, FUNC);       \
+        HDfprintf(stderr, "%*sEXIT %s:%d in %s()...", H5tools_INDENT_g, "", __FILE__, __LINE__, __func__);   \
         HDfprintf(stderr, __VA_ARGS__);                                                                      \
         HDfprintf(stderr, "\n");                                                                             \
         H5tools_INDENT_g -= 2;                                                                               \

@@ -15,7 +15,6 @@
 #include <iostream>
 using namespace std;
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -367,8 +366,7 @@ H5Location::getComment(const char *name, size_t buf_size) const
             tmp_len = comment_len;
 
         // Temporary buffer for char* comment
-        char *comment_C = new char[tmp_len + 1];
-        HDmemset(comment_C, 0, tmp_len + 1); // clear buffer
+        char *comment_C = new char[tmp_len + 1]();
 
         // Used overloaded function
         ssize_t temp_len = getComment(name, tmp_len + 1, comment_C);
@@ -1835,8 +1833,8 @@ H5Location::getLinkval(const char *name, size_t size) const
 
     // if link has value, retrieve the value, otherwise, return null string
     if (val_size > 0) {
-        value_C = new char[val_size + 1];   // temporary C-string for C API
-        HDmemset(value_C, 0, val_size + 1); // clear buffer
+        // Create buffer for C string
+        value_C = new char[val_size + 1]();
 
         ret_value = H5Lget_val(getId(), name, value_C, val_size, H5P_DEFAULT);
         if (ret_value < 0) {
@@ -2046,9 +2044,8 @@ H5Location::getObjnameByIdx(hsize_t idx) const
     if (name_len < 0)
         throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
 
-    // now, allocate C buffer to get the name
-    char *name_C = new char[name_len + 1];
-    HDmemset(name_C, 0, name_len + 1); // clear buffer
+    // Create buffer for C string
+    char *name_C = new char[name_len + 1]();
 
     name_len =
         H5Lget_name_by_idx(getId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, name_len + 1, H5P_DEFAULT);
@@ -2102,8 +2099,8 @@ H5Location::getObjnameByIdx(hsize_t idx, char *name, size_t size) const
 ssize_t
 H5Location::getObjnameByIdx(hsize_t idx, H5std_string &name, size_t size) const
 {
-    char *name_C = new char[size + 1]; // temporary C-string for object name
-    HDmemset(name_C, 0, size + 1);     // clear buffer
+    // Create buffer for C string
+    char *name_C = new char[size + 1]();
 
     // call overloaded function to get the name
     ssize_t name_len = getObjnameByIdx(idx, name_C, size + 1);
