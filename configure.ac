@@ -2023,8 +2023,9 @@ AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
 AC_CHECK_FUNCS([frexpl gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
-AC_CHECK_FUNCS([sigtimedwait snprintf srandom strdup symlink system])
-AC_CHECK_FUNCS([strtoll strtoull timespeccmp])
+AC_CHECK_FUNCS([sigtimedwait])
+AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
+AC_CHECK_FUNCS([timespeccmp])
 AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
 
 ## ----------------------------------------------------------------------

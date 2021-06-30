@@ -352,12 +352,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #cmakedefine H5_HAVE_STRING_H @H5_HAVE_STRING_H@
 
-/* Define to 1 if you have the `strtoll' function. */
-#cmakedefine H5_HAVE_STRTOLL @H5_HAVE_STRTOLL@
-
-/* Define to 1 if you have the `strtoull' function. */
-#cmakedefine H5_HAVE_STRTOULL @H5_HAVE_STRTOULL@
-
 /* Define if struct text_info is defined */
 #cmakedefine H5_HAVE_STRUCT_TEXT_INFO @H5_HAVE_STRUCT_TEXT_INFO@
 
