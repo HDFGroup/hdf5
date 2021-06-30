@@ -16,18 +16,15 @@
 
 #include "hdf5.h"
 
-#if defined(H5_TIME_WITH_SYS_TIME)
-#include <sys/time.h>
 #include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
+
+#ifdef H5_HAVE_SYS_TIME_H
 #include <sys/time.h>
-#else
-#include <time.h>
 #endif
 
 #ifdef H5_HAVE_WINSOCK2_H
 #include <winsock2.h>
-#endif /* H5_HAVE_WINSOCK2_H */
+#endif
 
 /* The different types of timers we can have */
 typedef enum timer_type_ {
