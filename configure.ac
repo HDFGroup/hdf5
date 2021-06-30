@@ -1240,8 +1240,6 @@ case $host_os in
 esac
 
 ## Windows
-## The winsock header is needed for gethostname
-AC_CHECK_HEADERS([winsock2.h])
 case "`uname`" in
   MINGW*)
     AC_HAVE_LIBRARY([ws2_32])
