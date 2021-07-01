@@ -163,7 +163,7 @@ if (NOT DEFINED HPC)
       set (SITE_COMPILER_NAME "vs2012")
       set (SITE_COMPILER_VERSION "11")
     else ()
-      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564,")
+      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
     endif ()
   ##  Set the following to unique id your computer  ##
     set (CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")
