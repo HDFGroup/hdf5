@@ -7314,8 +7314,8 @@ H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, void *dst_
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(FAIL)
-    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, src_loc_params, dst_obj, dst_loc_params, connector_id, lcpl_id, lapl_id,
-             dxpl_id, req);
+    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, src_loc_params, dst_obj, dst_loc_params, connector_id, lcpl_id,
+             lapl_id, dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -7462,8 +7462,8 @@ H5VLlink_move(void *src_obj, const H5VL_loc_params_t *src_loc_params, void *dst_
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(FAIL)
-    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, src_loc_params, dst_obj, dst_loc_params, connector_id, lcpl_id, lapl_id,
-             dxpl_id, req);
+    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, src_loc_params, dst_obj, dst_loc_params, connector_id, lcpl_id,
+             lapl_id, dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
