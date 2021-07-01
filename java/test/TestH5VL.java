@@ -19,6 +19,7 @@ import static org.junit.Assert.fail;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
+import test.H5TestUtils;
 
 import java.io.File;
 
@@ -167,6 +168,11 @@ public class TestH5VL {
     @Test(expected = HDF5LibraryException.class)
     public void testH5VLunregister_connector_NegativeID() throws Throwable {
         H5.H5VLunregister_connector(-1);
+    }
+
+    @Test(expected = HDF5LibraryException.class)
+    public void testH5VLfapl_is_native() throws Throwable {
+        H5TestUtils.H5VLfapl_is_native(-1);
     }
 }
 

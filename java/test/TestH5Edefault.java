@@ -18,6 +18,7 @@ import static org.junit.Assert.fail;
 import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
+import test.H5TestUtils;
 
 import org.junit.After;
 import org.junit.Before;

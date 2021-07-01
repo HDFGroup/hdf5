@@ -62,6 +62,7 @@ test -d $BLDLIBDIR || mkdir -p $BLDLIBDIR
 LIST_LIBRARY_FILES="
 $top_builddir/src/.libs/libhdf5.*
 $top_builddir/java/src/jni/.libs/libhdf5_java.*
+$top_builddir/java/src/jni/.libs/libhdf5_java_test.*
 "
 LIST_JAR_TESTFILES="
 $HDFLIB_HOME/hamcrest-core.jar

@@ -25,12 +25,15 @@ JAVA_API=yes
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/java/src/jni $(JNIFLAGS)
 
 # This is our main target
-lib_LTLIBRARIES=libhdf5_java.la
+lib_LTLIBRARIES=libhdf5_java.la libhdf5_java_test.la
 
 # Add libtool numbers to the HDF5 Java (JNI) library (from config/lt_vers.am)
 libhdf5_java_la_LDFLAGS = -avoid-version -shared -export-dynamic -version-info $(LT_JAVA_VERS_INTERFACE):$(LT_JAVA_VERS_REVISION):$(LT_JAVA_VERS_AGE) $(AM_LDFLAGS)
 
-# Source files for the library
+# Add libtool numbers to the HDF5 Java (JNI) library (from config/lt_vers.am)
+libhdf5_java_test_la_LDFLAGS = -avoid-version -shared -export-dynamic -version-info $(LT_JAVA_VERS_INTERFACE):$(LT_JAVA_VERS_REVISION):$(LT_JAVA_VERS_AGE) $(AM_LDFLAGS)
+
+# Source files for the main Java library
 libhdf5_java_la_SOURCES=exceptionImp.c h5Constants.c nativeData.c h5util.c h5Imp.c \
 	h5aImp.c h5dImp.c h5eImp.c h5fImp.c h5gImp.c h5iImp.c h5lImp.c h5oImp.c    \
 	h5pImp.c h5pACPLImp.c h5pDAPLImp.c h5pDCPLImp.c h5pDXPLImp.c \
@@ -38,7 +41,13 @@ libhdf5_java_la_SOURCES=exceptionImp.c h5Constants.c nativeData.c h5util.c h5Imp
 	h5pOCPLImp.c h5pOCpyPLImp.c h5pStrCPLImp.c h5plImp.c h5rImp.c h5sImp.c h5tImp.c \
 	h5vlImp.c h5zImp.c
 
+# Source files for the Java testing library
+libhdf5_java_test_la_SOURCES=h5jni_test.c
+
 # HDF5 Java (JNI) library depends on HDF5 Library.
 libhdf5_java_la_LIBADD=$(LIBHDF5)
+
+# HDF5 Java (JNI) Testing library depends on HDF5 Library and Java Library.
+libhdf5_java_test_la_LIBADD=$(LIBHDF5) libhdf5_java.la
 
 include $(top_srcdir)/config/conclude.am
