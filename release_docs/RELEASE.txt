@@ -5,7 +5,7 @@ HDF5 version 1.12.1 released on 2021-06-25
 INTRODUCTION
 ============
 
-This document describes the new features introduced in the HDF5 1.12.0 release.
+This document describes the new features introduced in the HDF5 1.12.1 release.
 It contains information on the platforms tested and known problems in this
 release. For more details check the HISTORY*.txt files in the HDF5 source.
 
@@ -34,7 +34,7 @@ CONTENTS
 
 - New Features
 - Support for new platforms and languages
-- Bug Fixes since HDF5-1.12.0-alpha1
+- Bug Fixes since HDF5-1.12.0
 - Supported Platforms
 - Tested Configuration Features Summary
 - More Tested Platforms
