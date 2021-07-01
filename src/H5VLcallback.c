@@ -341,6 +341,262 @@ typedef struct H5VL_datatype_close_ctx_t {
     void **req;
 } H5VL_datatype_close_ctx_t;
 
+/* File get "common" callback context data */
+typedef struct H5VL_file_get_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    H5VL_class_t *cls;
+    H5VL_file_get_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_file_get_ctx_t;
+
+/* File specific "common" callback context data */
+typedef struct H5VL_file_specific_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    H5VL_class_t *cls;
+    H5VL_file_specific_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_file_specific_ctx_t;
+
+/* File optional "common" callback context data */
+typedef struct H5VL_file_optional_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    H5VL_class_t *cls;
+    H5VL_optional_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_file_optional_ctx_t;
+
+/* File close "common" callback context data */
+typedef struct H5VL_file_close_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    H5VL_class_t *cls;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_file_close_ctx_t;
+
+/* Group create "common" callback context data */
+typedef struct H5VL_group_create_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    const char *name;
+    hid_t lcpl_id;
+    hid_t gcpl_id;
+    hid_t gapl_id;
+    hid_t dxpl_id;
+    void **req;
+
+    /* UP: API routine return value */
+    void *ret_value;
+} H5VL_group_create_ctx_t;
+
+/* Group open "common" callback context data */
+typedef struct H5VL_group_open_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    const char *name;
+    hid_t gapl_id;
+    hid_t dxpl_id;
+    void **req;
+
+    /* UP: API routine return value */
+    void *ret_value;
+} H5VL_group_open_ctx_t;
+
+/* Group get "common" callback context data */
+typedef struct H5VL_group_get_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    H5VL_class_t *cls;
+    H5VL_group_get_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_group_get_ctx_t;
+
+/* Group specific "common" callback context data */
+typedef struct H5VL_group_specific_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    H5VL_class_t *cls;
+    H5VL_group_specific_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_group_specific_ctx_t;
+
+/* Group optional "common" callback context data */
+typedef struct H5VL_group_optional_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    H5VL_class_t *cls;
+    H5VL_optional_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+
+    /* UP: API routine return value */
+    herr_t ret_value;
+} H5VL_group_optional_ctx_t;
+
+/* Group close "common" callback context data */
+typedef struct H5VL_group_close_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    H5VL_class_t *cls;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_group_close_ctx_t;
+
+/* Link create "common" callback context data */
+typedef struct H5VL_link_create_ctx_t {
+    /* DOWN: API routine parameters */
+    H5VL_link_create_args_t *args;
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    hid_t lcpl_id;
+    hid_t lapl_id;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_link_create_ctx_t;
+
+/* Link copy "common" callback context data */
+typedef struct H5VL_link_copy_ctx_t {
+    /* DOWN: API routine parameters */
+    void *src_obj;
+    const H5VL_loc_params_t *src_loc_params;
+    void *dst_obj;
+    const H5VL_loc_params_t *dst_loc_params;
+    H5VL_class_t *cls;
+    hid_t lcpl_id;
+    hid_t lapl_id;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_link_copy_ctx_t;
+
+/* Link move "common" callback context data */
+typedef struct H5VL_link_move_ctx_t {
+    /* DOWN: API routine parameters */
+    void *src_obj;
+    const H5VL_loc_params_t *src_loc_params;
+    void *dst_obj;
+    const H5VL_loc_params_t *dst_loc_params;
+    H5VL_class_t *cls;
+    hid_t lcpl_id;
+    hid_t lapl_id;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_link_move_ctx_t;
+
+/* Link get "common" callback context data */
+typedef struct H5VL_link_get_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    H5VL_link_get_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_link_get_ctx_t;
+
+/* Link specific "common" callback context data */
+typedef struct H5VL_link_specific_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    H5VL_link_specific_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+
+    /* UP: API routine return value */
+    herr_t ret_value;
+} H5VL_link_specific_ctx_t;
+
+/* Link optional "common" callback context data */
+typedef struct H5VL_link_optional_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    H5VL_optional_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_link_optional_ctx_t;
+
+/* Object open "common" callback context data */
+typedef struct H5VL_object_open_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    H5I_type_t *opened_type;
+    hid_t dxpl_id;
+    void **req;
+
+    /* UP: API routine return value */
+    void *ret_value;
+} H5VL_object_open_ctx_t;
+
+/* Object copy "common" callback context data */
+typedef struct H5VL_object_copy_ctx_t {
+    /* DOWN: API routine parameters */
+    void *src_obj;
+    const H5VL_loc_params_t *src_loc_params;
+    const char *src_name;
+    void *dst_obj;
+    const H5VL_loc_params_t *dst_loc_params;
+    const char *dst_name;
+    H5VL_class_t *cls;
+    hid_t ocpypl_id;
+    hid_t lcpl_id;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_object_copy_ctx_t;
+
+/* Object get "common" callback context data */
+typedef struct H5VL_object_get_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    H5VL_object_get_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_object_get_ctx_t;
+
+/* Object specific "common" callback context data */
+typedef struct H5VL_object_specific_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    H5VL_object_specific_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+
+    /* UP: API routine return value */
+    herr_t ret_value;
+} H5VL_object_specific_ctx_t;
+
+/* Object optional "common" callback context data */
+typedef struct H5VL_object_optional_ctx_t {
+    /* DOWN: API routine parameters */
+    void *obj;
+    const H5VL_loc_params_t *loc_params;
+    H5VL_class_t *cls;
+    H5VL_optional_args_t *args;
+    hid_t dxpl_id;
+    void **req;
+} H5VL_object_optional_ctx_t;
+
 /********************/
 /* Package Typedefs */
 /********************/
@@ -422,50 +678,71 @@ static herr_t H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const v
                                                 void *op_data);
 static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_args_t *args, hid_t dxpl_id,
                              void **req);
+static herr_t H5VL__file_get_api_op(void *ctx);
 static herr_t H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_args_t *args,
                                   hid_t dxpl_id, void **req);
+static herr_t H5VL__file_specific_api_op(void *ctx);
 static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args,
                                   hid_t dxpl_id, void **req);
+static herr_t H5VL__file_optional_api_op(void *ctx);
 static herr_t H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
+static herr_t H5VL__file_close_api_op(void *ctx);
 static void * H5VL__group_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                  const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id,
                                  void **req);
+static herr_t H5VL__group_create_api_op(void *ctx);
 static void * H5VL__group_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL__group_open_api_op(void *ctx);
 static herr_t H5VL__group_get(void *obj, const H5VL_class_t *cls, H5VL_group_get_args_t *args, hid_t dxpl_id,
                               void **req);
+static herr_t H5VL__group_get_api_op(void *ctx);
 static herr_t H5VL__group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_args_t *args,
                                    hid_t dxpl_id, void **req);
+static herr_t H5VL__group_specific_api_op(void *ctx);
 static herr_t H5VL__group_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args,
                                    hid_t dxpl_id, void **req);
+static herr_t H5VL__group_optional_api_op(void *ctx);
 static herr_t H5VL__group_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
+static herr_t H5VL__group_close_api_op(void *ctx);
 static herr_t H5VL__link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
                                 const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id,
                                 void **req);
-static herr_t H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-                              const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
+static herr_t H5VL__link_create_api_op(void *ctx);
+static herr_t H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, void *dst_obj,
+                              const H5VL_loc_params_t *dst_loc_params, const H5VL_class_t *cls, hid_t lcpl_id,
                               hid_t lapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_copy_api_op(void *ctx);
 static herr_t H5VL__link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
                               const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls, hid_t lcpl_id,
                               hid_t lapl_id, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_move_api_op(void *ctx);
 static herr_t H5VL__link_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                              H5VL_link_get_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_get_api_op(void *ctx);
 static herr_t H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                   H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_specific_api_op(void *ctx);
 static herr_t H5VL__link_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                   H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL__link_optional_api_op(void *ctx);
 static void * H5VL__object_open(void *obj, const H5VL_loc_params_t *params, const H5VL_class_t *cls,
                                 H5I_type_t *opened_type, hid_t dxpl_id, void **req);
+static herr_t H5VL__object_open_api_op(void *ctx);
 static herr_t H5VL__object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const char *src_name,
                                 void *dst_obj, const H5VL_loc_params_t *dst_loc_params, const char *dst_name,
                                 const H5VL_class_t *cls, hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id,
                                 void **req);
+static herr_t H5VL__object_copy_api_op(void *ctx);
 static herr_t H5VL__object_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL__object_get_api_op(void *ctx);
 static herr_t H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                     H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL__object_specific_api_op(void *ctx);
 static herr_t H5VL__object_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                     H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL__object_optional_api_op(void *ctx);
 static herr_t H5VL__introspect_get_conn_cls(void *obj, const H5VL_class_t *cls, H5VL_get_conn_lvl_t lvl,
                                             const H5VL_class_t **conn_cls);
 static herr_t H5VL__introspect_opt_query(void *obj, const H5VL_class_t *cls, H5VL_subclass_t subcls,
@@ -664,7 +941,7 @@ H5VL__common_optional_op(hid_t id, H5I_type_t id_type, H5VL_reg_opt_oper_t reg_o
     /* (Must return value from callback, for iterators) */
     if ((ret_value =
              (*reg_opt_op)((*vol_obj_ptr)->data, (*vol_obj_ptr)->connector->cls, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute optional callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute generic 'optional' callback");
 
 done:
     /* Reset object wrapping info in API context */
@@ -2209,7 +2486,7 @@ H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *ar
     /* Call the corresponding VOL callback */
     /* (Must return value from callback, for iterators) */
     if ((ret_value = (cls->attr_cls.optional)(obj, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute optional callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute 'optional' callback");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2241,7 +2518,7 @@ H5VL_attr_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
     if ((ret_value = H5VL__attr_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute optional callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute 'optional' callback");
 
 done:
     /* Reset object wrapping info in API context */
@@ -2354,7 +2631,7 @@ H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* Call the common VOL connector optional routine */
     if ((ret_value = H5VL__common_optional_op(attr_id, H5I_ATTR, H5VL__attr_optional, args, dxpl_id,
                                               token_ptr, &vol_obj)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute 'optional' callback")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -2568,7 +2845,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__dataset_create_api_op
  *
- * Purpose:     Callback for common API wrapper to create an dataset
+ * Purpose:     Callback for common API wrapper to create a dataset
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -2719,7 +2996,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5VL__dataset_open_api_op
  *
- * Purpose:     Callback for common API wrapper to open an dataset
+ * Purpose:     Callback for common API wrapper to open a dataset
  *
  * Return:      Success:    Non-negative
  *              Failure:    Negative
@@ -3165,7 +3442,7 @@ H5VL__dataset_get_api_op(void *_ctx)
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_get(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute dataset get callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute dataset 'get' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3237,7 +3514,7 @@ H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific
 
     /* Call the corresponding VOL callback */
     if ((cls->dataset_cls.specific)(obj, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset 'specific' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3269,7 +3546,7 @@ H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_args_t
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_specific(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset 'specific' callback")
 
 done:
     /* Reset object wrapping info in API context */
@@ -3374,7 +3651,7 @@ H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t 
 
     /* Call the corresponding VOL callback */
     if ((cls->dataset_cls.optional)(obj, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3405,7 +3682,7 @@ H5VL_dataset_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, 
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset 'optional' callback")
 
 done:
     /* Reset object wrapping info in API context */
@@ -3438,7 +3715,7 @@ H5VL__dataset_optional_api_op(void *_ctx)
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__dataset_optional(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3515,7 +3792,7 @@ H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app
     /* Call the corresponding internal VOL routine */
     if (H5VL__common_optional_op(dset_id, H5I_DATASET, H5VL__dataset_optional, args, dxpl_id, token_ptr,
                                  &vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset 'optional' callback")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -4056,7 +4333,7 @@ H5VL__datatype_get_api_op(void *_ctx)
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_get(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute datatype get callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute datatype 'get' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4128,7 +4405,7 @@ H5VL__datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specif
 
     /* Call the corresponding VOL callback */
     if ((cls->datatype_cls.specific)(obj, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype 'specific' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4160,7 +4437,7 @@ H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype_specific_args
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_specific(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype 'specific' callback")
 
 done:
     /* Reset object wrapping info in API context */
@@ -4265,7 +4542,7 @@ H5VL__datatype_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t
 
     /* Call the corresponding VOL callback */
     if ((cls->datatype_cls.optional)(obj, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -4296,7 +4573,7 @@ H5VL_datatype_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args,
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype 'optional' callback")
 
 done:
     /* Reset object wrapping info in API context */
@@ -4340,7 +4617,7 @@ H5VL_datatype_optional_op(H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hi
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__datatype_optional((*vol_obj_ptr)->data, (*vol_obj_ptr)->connector->cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype 'optional' callback")
 
 done:
     /* Reset object wrapping info in API context */
@@ -5274,6 +5551,35 @@ done:
 } /* end H5VL_file_get() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__file_get_api_op
+ *
+ * Purpose:     Callback for common API wrapper to get information about a file
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_get_api_op(void *_ctx)
+{
+    H5VL_file_get_ctx_t *ctx = (H5VL_file_get_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__file_get(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute dataset 'get' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_get_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLfile_get
  *
  * Purpose:     Gets information about the file
@@ -5286,6 +5592,7 @@ done:
 herr_t
 H5VLfile_get(void *obj, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_file_get_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -5298,9 +5605,16 @@ H5VLfile_get(void *obj, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dx
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__file_get(obj, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute file get callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__file_get_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -5446,6 +5760,35 @@ done:
 } /* end H5VL_file_specific() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__file_specific_api_op
+ *
+ * Purpose:     Callback for common API wrapper to perform 'specific' operation on a file
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_specific_api_op(void *_ctx)
+{
+    H5VL_file_specific_ctx_t *ctx = (H5VL_file_specific_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__file_specific(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file 'specific' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_specific_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLfile_specific
  *
  * Purpose:     Performs a connector-specific operation on a file
@@ -5461,6 +5804,7 @@ herr_t
 H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id,
                   void **req /*out*/)
 {
+    H5VL_file_specific_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -5471,9 +5815,16 @@ H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__file_specific(obj, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file specific callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__file_specific_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -5544,6 +5895,35 @@ done:
 } /* end H5VL_file_optional() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__file_optional_api_op
+ *
+ * Purpose:     Callback for common API wrapper to perform 'optional' operation on a file
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_optional_api_op(void *_ctx)
+{
+    H5VL_file_optional_ctx_t *ctx = (H5VL_file_optional_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__file_optional(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file 'optional' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_optional_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLfile_optional
  *
  * Purpose:     Performs an optional connector-specific operation on a file
@@ -5557,6 +5937,7 @@ herr_t
 H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
                   void **req /*out*/)
 {
+    H5VL_file_optional_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -5569,9 +5950,16 @@ H5VLfile_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__file_optional(obj, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file optional callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__file_optional_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -5606,7 +5994,7 @@ H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* Call the corresponding internal VOL routine */
     if (H5VL__common_optional_op(file_id, H5I_FILE, H5VL__file_optional, args, dxpl_id, token_ptr, &vol_obj) <
         0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file 'optional' callback")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -5689,6 +6077,35 @@ done:
 } /* end H5VL_file_close() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__file_close_api_op
+ *
+ * Purpose:     Callback for common API wrapper to close a file
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__file_close_api_op(void *_ctx)
+{
+    H5VL_file_close_ctx_t *ctx = (H5VL_file_close_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__file_close(ctx->obj, ctx->cls, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__file_close_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLfile_close
  *
  * Purpose:     Closes a file
@@ -5701,6 +6118,7 @@ done:
 herr_t
 H5VLfile_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_file_close_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -5713,9 +6131,15 @@ H5VLfile_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out*/)
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__file_close(obj, cls, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.cls = cls;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__file_close_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -5790,6 +6214,35 @@ done:
 } /* end H5VL_group_create() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__group_create_api_op
+ *
+ * Purpose:     Callback for common API wrapper to create a group
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_create_api_op(void *_ctx)
+{
+    H5VL_group_create_ctx_t *ctx = (H5VL_group_create_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (NULL == (ctx->ret_value = H5VL__group_create(ctx->obj, ctx->loc_params, ctx->cls, ctx->name, ctx->lcpl_id, ctx->gcpl_id, ctx->gapl_id, ctx->dxpl_id, ctx->req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "unable to create group")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_create_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLgroup_create
  *
  * Purpose:     Creates a group
@@ -5803,6 +6256,7 @@ void *
 H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name,
                  hid_t lcpl_id, hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_group_create_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;              /* VOL connector's class struct */
     void *        ret_value = NULL; /* Return value */
 
@@ -5816,10 +6270,24 @@ H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (NULL ==
-        (ret_value = H5VL__group_create(obj, loc_params, cls, name, lcpl_id, gcpl_id, gapl_id, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, NULL, "unable to create group")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.name = name;
+    ctx.lcpl_id = lcpl_id;
+    ctx.gcpl_id = gcpl_id;
+    ctx.gapl_id = gapl_id;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+    ctx.ret_value = NULL;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__group_create_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, NULL, "unable to execute common wrapper operation")
+
+    /* Set return value */
+    ret_value = ctx.ret_value;
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -5893,6 +6361,35 @@ done:
 } /* end H5VL_group_open() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__group_open_api_op
+ *
+ * Purpose:     Callback for common API wrapper to open a group
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_open_api_op(void *_ctx)
+{
+    H5VL_group_open_ctx_t *ctx = (H5VL_group_open_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (NULL == (ctx->ret_value = H5VL__group_open(ctx->obj, ctx->loc_params, ctx->cls, ctx->name, ctx->gapl_id, ctx->dxpl_id, ctx->req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, FAIL, "unable to open group")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_open_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLgroup_open
  *
  * Purpose:     Opens a group
@@ -5906,6 +6403,7 @@ void *
 H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, const char *name,
                hid_t gapl_id, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_group_open_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;              /* VOL connector's class struct */
     void *        ret_value = NULL; /* Return value */
 
@@ -5918,9 +6416,22 @@ H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_i
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__group_open(obj, loc_params, cls, name, gapl_id, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, NULL, "unable to open group")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.name = name;
+    ctx.gapl_id = gapl_id;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+    ctx.ret_value = NULL;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__group_open_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, NULL, "unable to execute common wrapper operation")
+
+    /* Set return value */
+    ret_value = ctx.ret_value;
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -5991,6 +6502,35 @@ done:
 } /* end H5VL_group_get() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__group_get_api_op
+ *
+ * Purpose:     Callback for common API wrapper to get information about a group
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_get_api_op(void *_ctx)
+{
+    H5VL_group_get_ctx_t *ctx = (H5VL_group_get_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__group_get(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute group 'get' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_get_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLgroup_get
  *
  * Purpose:     Gets information about the group
@@ -6003,6 +6543,7 @@ done:
 herr_t
 H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_group_get_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -6015,9 +6556,16 @@ H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t 
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__group_get(obj, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute group get callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__group_get_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6047,7 +6595,7 @@ H5VL__group_specific(void *obj, const H5VL_class_t *cls, H5VL_group_specific_arg
 
     /* Call the corresponding VOL callback */
     if ((cls->group_cls.specific)(obj, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group 'specific' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6078,7 +6626,7 @@ H5VL_group_specific(const H5VL_object_t *vol_obj, H5VL_group_specific_args_t *ar
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__group_specific(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group 'specific' callback")
 
 done:
     /* Reset object wrapping info in API context */
@@ -6087,6 +6635,35 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_specific() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__group_specific_api_op
+ *
+ * Purpose:     Callback for common API wrapper to issue specific operations on a group
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_specific_api_op(void *_ctx)
+{
+    H5VL_group_specific_ctx_t *ctx = (H5VL_group_specific_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__group_specific(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group 'specific' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_specific_api_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLgroup_specific
@@ -6102,6 +6679,7 @@ herr_t
 H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args, hid_t dxpl_id,
                    void **req /*out*/)
 {
+    H5VL_group_specific_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -6114,9 +6692,16 @@ H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *ar
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__group_specific(obj, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group specific callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__group_specific_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6147,7 +6732,7 @@ H5VL__group_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *a
     /* Call the corresponding VOL callback */
     /* (Must return value from callback, for iterators) */
     if ((ret_value = (cls->group_cls.optional)(obj, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute group optional callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute group 'optional' callback");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6179,7 +6764,7 @@ H5VL_group_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hi
     /* Call the corresponding internal VOL routine */
     /* (Must return value from callback, for iterators) */
     if ((ret_value = H5VL__group_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute group optional callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute group 'optional' callback");
 
 done:
     /* Reset object wrapping info in API context */
@@ -6188,6 +6773,33 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_group_optional() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__group_optional_api_op
+ *
+ * Purpose:     Callback for common API wrapper to perform optional operation on a group
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_optional_api_op(void *_ctx)
+{
+    H5VL_group_optional_ctx_t *ctx = (H5VL_group_optional_ctx_t *)_ctx; /* Get pointer to context */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    /* (Must capture return value from callback, for iterators) */
+    ctx->ret_value = H5VL__group_optional(ctx->obj, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__group_optional_api_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLgroup_optional
@@ -6203,6 +6815,7 @@ herr_t
 H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
                    void **req /*out*/)
 {
+    H5VL_group_optional_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -6215,10 +6828,21 @@ H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hi
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    /* (Must return value from callback, for iterators) */
-    if ((ret_value = H5VL__group_optional(obj, cls, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute group optional callback");
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+    ctx.ret_value = -1;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__group_optional_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
+
+    /* Must return value from callback, for iterators */
+    if ((ret_value = ctx.ret_value) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute group 'optional' callback");
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6253,7 +6877,7 @@ H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_l
     /* Call the corresponding internal VOL routine */
     if ((ret_value = H5VL__common_optional_op(group_id, H5I_GROUP, H5VL__group_optional, args, dxpl_id,
                                               token_ptr, &vol_obj)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute group 'optional' callback")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -6336,6 +6960,35 @@ done:
 } /* end H5VL_group_close() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__group_close_api_op
+ *
+ * Purpose:     Callback for common API wrapper to close a group
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__group_close_api_op(void *_ctx)
+{
+    H5VL_group_close_ctx_t *ctx = (H5VL_group_close_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__group_close(ctx->obj, ctx->cls, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "unable to close group")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__group_close_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLgroup_close
  *
  * Purpose:     Closes a group
@@ -6348,6 +7001,7 @@ done:
 herr_t
 H5VLgroup_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_group_close_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -6363,6 +7017,16 @@ H5VLgroup_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out*/
     /* Call the corresponding internal VOL routine */
     if (H5VL__group_close(obj, cls, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "unable to close group")
+
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.cls = cls;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__group_close_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6448,6 +7112,35 @@ done:
 } /* end H5VL_link_create() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__link_create_api_op
+ *
+ * Purpose:     Callback for common API wrapper to create a link
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_create_api_op(void *_ctx)
+{
+    H5VL_link_create_ctx_t *ctx = (H5VL_link_create_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__link_create(ctx->args, ctx->obj, ctx->loc_params, ctx->cls, ctx->lcpl_id, ctx->lapl_id, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "unable to create link")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_create_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLlink_create
  *
  * Purpose:     Creates a link
@@ -6463,6 +7156,7 @@ herr_t
 H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
                 hid_t connector_id, hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_link_create_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -6473,9 +7167,19 @@ H5VLlink_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__link_create(args, obj, loc_params, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "unable to create link")
+    /* Set up context */
+    ctx.args = args;
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.lcpl_id = lcpl_id;
+    ctx.lapl_id = lapl_id;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__link_create_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6492,8 +7196,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-                const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id,
+H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, void *dst_obj,
+                const H5VL_loc_params_t *dst_loc_params, const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id,
                 hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -6505,7 +7209,7 @@ H5VL__link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_o
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'link copy' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->link_cls.copy)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if ((cls->link_cls.copy)(src_obj, src_loc_params, dst_obj, dst_loc_params, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "link copy failed")
 
 done:
@@ -6523,8 +7227,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_params1,
-               const H5VL_object_t *dst_vol_obj, const H5VL_loc_params_t *loc_params2, hid_t lcpl_id,
+H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *src_loc_params,
+               const H5VL_object_t *dst_vol_obj, const H5VL_loc_params_t *dst_loc_params, hid_t lcpl_id,
                hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     const H5VL_object_t *vol_obj;                   /* VOL object for object with data */
@@ -6540,7 +7244,7 @@ H5VL_link_copy(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__link_copy(src_vol_obj->data, loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2,
+    if (H5VL__link_copy(src_vol_obj->data, src_loc_params, (dst_vol_obj ? dst_vol_obj->data : NULL), dst_loc_params,
                         vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "link copy failed")
 
@@ -6551,6 +7255,35 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_copy() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__link_copy_api_op
+ *
+ * Purpose:     Callback for common API wrapper to copy a link
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_copy_api_op(void *_ctx)
+{
+    H5VL_link_copy_ctx_t *ctx = (H5VL_link_copy_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__link_copy(ctx->src_obj, ctx->src_loc_params, ctx->dst_obj, ctx->dst_loc_params, ctx->cls, ctx->lcpl_id, ctx->lapl_id, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_copy_api_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLlink_copy
@@ -6565,24 +7298,36 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-              const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id,
+H5VLlink_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, void *dst_obj,
+              const H5VL_loc_params_t *dst_loc_params, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id,
               hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_link_copy_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(FAIL)
-    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id,
+    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, src_loc_params, dst_obj, dst_loc_params, connector_id, lcpl_id, lapl_id,
              dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__link_copy(src_obj, loc_params1, dst_obj, loc_params2, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy object")
+    /* Set up context */
+    ctx.src_obj = src_obj;
+    ctx.src_loc_params = src_loc_params;
+    ctx.dst_obj = dst_obj;
+    ctx.dst_loc_params = dst_loc_params;
+    ctx.cls = cls;
+    ctx.lcpl_id = lcpl_id;
+    ctx.lapl_id = lapl_id;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__link_copy_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6599,8 +7344,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-                const H5VL_loc_params_t *loc_params2, const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id,
+H5VL__link_move(void *src_obj, const H5VL_loc_params_t *src_loc_params, void *dst_obj,
+                const H5VL_loc_params_t *dst_loc_params, const H5VL_class_t *cls, hid_t lcpl_id, hid_t lapl_id,
                 hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -6612,7 +7357,7 @@ H5VL__link_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_o
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'link move' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->link_cls.move)(src_obj, loc_params1, dst_obj, loc_params2, lcpl_id, lapl_id, dxpl_id, req) < 0)
+    if ((cls->link_cls.move)(src_obj, src_loc_params, dst_obj, dst_loc_params, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "link move failed")
 
 done:
@@ -6630,8 +7375,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_params1,
-               const H5VL_object_t *dst_vol_obj, const H5VL_loc_params_t *loc_params2, hid_t lcpl_id,
+H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *src_loc_params,
+               const H5VL_object_t *dst_vol_obj, const H5VL_loc_params_t *dst_loc_params, hid_t lcpl_id,
                hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     const H5VL_object_t *vol_obj;                   /* VOL object for object with data */
@@ -6647,7 +7392,7 @@ H5VL_link_move(const H5VL_object_t *src_vol_obj, const H5VL_loc_params_t *loc_pa
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__link_move(src_vol_obj->data, loc_params1, (dst_vol_obj ? dst_vol_obj->data : NULL), loc_params2,
+    if (H5VL__link_move(src_vol_obj->data, src_loc_params, (dst_vol_obj ? dst_vol_obj->data : NULL), dst_loc_params,
                         vol_obj->connector->cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "link move failed")
 
@@ -6658,6 +7403,35 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_move() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__link_move_api_op
+ *
+ * Purpose:     Callback for common API wrapper to move a link
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_move_api_op(void *_ctx)
+{
+    H5VL_link_move_ctx_t *ctx = (H5VL_link_move_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__link_move(ctx->src_obj, ctx->src_loc_params, ctx->dst_obj, ctx->dst_loc_params, ctx->cls, ctx->lcpl_id, ctx->lapl_id, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "unable to move object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_move_api_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLlink_move
@@ -6672,24 +7446,36 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLlink_move(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
-              const H5VL_loc_params_t *loc_params2, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id,
+H5VLlink_move(void *src_obj, const H5VL_loc_params_t *src_loc_params, void *dst_obj,
+              const H5VL_loc_params_t *dst_loc_params, hid_t connector_id, hid_t lcpl_id, hid_t lapl_id,
               hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_link_move_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(FAIL)
-    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, loc_params1, dst_obj, loc_params2, connector_id, lcpl_id, lapl_id,
+    H5TRACE9("e", "*x*#*x*#iiiix", src_obj, src_loc_params, dst_obj, dst_loc_params, connector_id, lcpl_id, lapl_id,
              dxpl_id, req);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__link_move(src_obj, loc_params1, dst_obj, loc_params2, cls, lcpl_id, lapl_id, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTMOVE, FAIL, "unable to move object")
+    /* Set up context */
+    ctx.src_obj = src_obj;
+    ctx.src_loc_params = src_loc_params;
+    ctx.dst_obj = dst_obj;
+    ctx.dst_loc_params = dst_loc_params;
+    ctx.cls = cls;
+    ctx.lcpl_id = lcpl_id;
+    ctx.lapl_id = lapl_id;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__link_move_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6762,6 +7548,35 @@ done:
 } /* end H5VL_link_get() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__link_get_api_op
+ *
+ * Purpose:     Callback for common API wrapper to get information about a link
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_get_api_op(void *_ctx)
+{
+    H5VL_link_get_ctx_t *ctx = (H5VL_link_get_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__link_get(ctx->obj, ctx->loc_params, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute link 'get' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_get_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLlink_get
  *
  * Purpose:     Gets information about a link
@@ -6775,6 +7590,7 @@ herr_t
 H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5VL_link_get_args_t *args,
              hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_link_get_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -6787,9 +7603,17 @@ H5VLlink_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__link_get(obj, loc_params, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute link get callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__link_get_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6820,7 +7644,7 @@ H5VL__link_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
     /* Call the corresponding VOL callback */
     /* (Must return value from callback, for iterators) */
     if ((ret_value = (cls->link_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute link specific callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute link 'specific' callback");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6854,7 +7678,7 @@ H5VL_link_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
     /* (Must return value from callback, for iterators) */
     if ((ret_value =
              H5VL__link_specific(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute link specific callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute link 'specific' callback");
 
 done:
     /* Reset object wrapping info in API context */
@@ -6863,6 +7687,33 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_specific() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__link_specific_api_op
+ *
+ * Purpose:     Callback for common API wrapper to issue specific operations on a link
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_specific_api_op(void *_ctx)
+{
+    H5VL_link_specific_ctx_t *ctx = (H5VL_link_specific_ctx_t *)_ctx; /* Get pointer to context */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    /* (Must capture return value from callback, for iterators) */
+    ctx->ret_value = H5VL__link_specific(ctx->obj, ctx->loc_params, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__link_specific_api_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLlink_specific
@@ -6878,6 +7729,7 @@ herr_t
 H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                   H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_link_specific_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -6890,10 +7742,22 @@ H5VLlink_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    /* (Must return value from callback, for iterators) */
-    if ((ret_value = H5VL__link_specific(obj, loc_params, cls, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute link specific callback");
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+    ctx.ret_value = -1;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__link_specific_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
+
+    /* Must return value from callback, for iterators */
+    if ((ret_value = ctx.ret_value) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute link 'specific' callback");
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -6923,7 +7787,7 @@ H5VL__link_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
 
     /* Call the corresponding VOL callback */
     if ((cls->link_cls.optional)(obj, loc_params, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -6955,7 +7819,7 @@ H5VL_link_optional(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__link_optional(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link 'optional' callback")
 
 done:
     /* Reset object wrapping info in API context */
@@ -6964,6 +7828,35 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_link_optional() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__link_optional_api_op
+ *
+ * Purpose:     Callback for common API wrapper to issue optional operations on a link
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__link_optional_api_op(void *_ctx)
+{
+    H5VL_link_optional_ctx_t *ctx = (H5VL_link_optional_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__link_optional(ctx->obj, ctx->loc_params, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link 'optional' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__link_optional_api_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLlink_optional
@@ -6979,6 +7872,7 @@ herr_t
 H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                   H5VL_optional_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_link_optional_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -6991,9 +7885,17 @@ H5VLlink_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__link_optional(obj, loc_params, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__link_optional_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -7043,7 +7945,7 @@ H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_li
     /* Call the corresponding internal VOL routine */
     if (H5VL__link_optional(vol_obj->data, &loc_params, vol_obj->connector->cls, args, dxpl_id, token_ptr) <
         0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute link 'optional' callback")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -7071,7 +7973,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void *
-H5VL__object_open(void *obj, const H5VL_loc_params_t *params, const H5VL_class_t *cls,
+H5VL__object_open(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                   H5I_type_t *opened_type, hid_t dxpl_id, void **req)
 {
     void *ret_value = NULL; /* Return value */
@@ -7083,7 +7985,7 @@ H5VL__object_open(void *obj, const H5VL_loc_params_t *params, const H5VL_class_t
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, NULL, "VOL connector has no 'object open' method")
 
     /* Call the corresponding VOL callback */
-    if (NULL == (ret_value = (cls->object_cls.open)(obj, params, opened_type, dxpl_id, req)))
+    if (NULL == (ret_value = (cls->object_cls.open)(obj, loc_params, opened_type, dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "object open failed")
 
 done:
@@ -7101,7 +8003,7 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VL_object_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *params, H5I_type_t *opened_type,
+H5VL_object_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params, H5I_type_t *opened_type,
                  hid_t dxpl_id, void **req)
 {
     hbool_t vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
@@ -7115,7 +8017,7 @@ H5VL_object_open(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *params, 
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__object_open(vol_obj->data, params, vol_obj->connector->cls, opened_type,
+    if (NULL == (ret_value = H5VL__object_open(vol_obj->data, loc_params, vol_obj->connector->cls, opened_type,
                                                dxpl_id, req)))
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "object open failed")
 
@@ -7128,6 +8030,35 @@ done:
 } /* end H5VL_object_open() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__object_open_api_op
+ *
+ * Purpose:     Callback for common API wrapper to open an object
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__object_open_api_op(void *_ctx)
+{
+    H5VL_object_open_ctx_t *ctx = (H5VL_object_open_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (NULL == (ctx->ret_value = H5VL__object_open(ctx->obj, ctx->loc_params, ctx->cls, ctx->opened_type, ctx->dxpl_id, ctx->req)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, FAIL, "unable to open object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_open_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLobject_open
  *
  * Purpose:     Opens an object
@@ -7138,14 +8069,15 @@ done:
  *-------------------------------------------------------------------------
  */
 void *
-H5VLobject_open(void *obj, const H5VL_loc_params_t *params, hid_t connector_id, H5I_type_t *opened_type,
+H5VLobject_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id, H5I_type_t *opened_type,
                 hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_object_open_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;              /* VOL connector's class struct */
     void *        ret_value = NULL; /* Return value */
 
     FUNC_ENTER_API_WRAPPER(NULL)
-    H5TRACE6("*x", "*x*#i*Itix", obj, params, connector_id, opened_type, dxpl_id, req);
+    H5TRACE6("*x", "*x*#i*Itix", obj, loc_params, connector_id, opened_type, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -7153,9 +8085,21 @@ H5VLobject_open(void *obj, const H5VL_loc_params_t *params, hid_t connector_id, 
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (NULL == (ret_value = H5VL__object_open(obj, params, cls, opened_type, dxpl_id, req)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "unable to open object")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.opened_type = opened_type;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+    ctx.ret_value = NULL;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__object_open_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, NULL, "unable to execute common wrapper operation")
+
+    /* Set return value */
+    ret_value = ctx.ret_value;
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -7237,6 +8181,36 @@ done:
 } /* end H5VL_object_copy() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__object_copy_api_op
+ *
+ * Purpose:     Callback for common API wrapper to copy a object
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__object_copy_api_op(void *_ctx)
+{
+    H5VL_object_copy_ctx_t *ctx = (H5VL_object_copy_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__object_copy(ctx->src_obj, ctx->src_loc_params, ctx->src_name, ctx->dst_obj, ctx->dst_loc_params, ctx->dst_name, ctx->cls,
+                          ctx->ocpypl_id, ctx->lcpl_id, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy object")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_copy_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLobject_copy
  *
  * Purpose:     Copies an object to another location
@@ -7251,6 +8225,7 @@ H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const ch
                 const H5VL_loc_params_t *dst_loc_params, const char *dst_name, hid_t connector_id,
                 hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_object_copy_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -7264,10 +8239,22 @@ H5VLobject_copy(void *src_obj, const H5VL_loc_params_t *src_loc_params, const ch
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__object_copy(src_obj, src_loc_params, src_name, dst_obj, dst_loc_params, dst_name, cls,
-                          ocpypl_id, lcpl_id, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCOPY, FAIL, "unable to copy object")
+    /* Set up context */
+    ctx.src_obj = src_obj;
+    ctx.src_loc_params = src_loc_params;
+    ctx.src_name = src_name;
+    ctx.dst_obj = dst_obj;
+    ctx.dst_loc_params = dst_loc_params;
+    ctx.dst_name = dst_name;
+    ctx.cls = cls;
+    ctx.ocpypl_id = ocpypl_id;
+    ctx.lcpl_id = lcpl_id;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__object_copy_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -7340,6 +8327,35 @@ done:
 } /* end H5VL_object_get() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__object_get_api_op
+ *
+ * Purpose:     Callback for common API wrapper to get information about a object
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__object_get_api_op(void *_ctx)
+{
+    H5VL_object_get_ctx_t *ctx = (H5VL_object_get_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__object_get(ctx->obj, ctx->loc_params, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute object 'get' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_get_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLobject_get
  *
  * Purpose:     Gets information about an object
@@ -7353,6 +8369,7 @@ herr_t
 H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                H5VL_object_get_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_object_get_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -7365,9 +8382,17 @@ H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_i
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__object_get(obj, loc_params, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute object get callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__object_get_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -7443,6 +8468,33 @@ done:
 } /* end H5VL_object_specific() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL__object_specific_api_op
+ *
+ * Purpose:     Callback for common API wrapper to issue specific operations on an object
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__object_specific_api_op(void *_ctx)
+{
+    H5VL_object_specific_ctx_t *ctx = (H5VL_object_specific_ctx_t *)_ctx; /* Get pointer to context */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    /* (Must capture return value from callback, for iterators) */
+    ctx->ret_value = H5VL__object_specific(ctx->obj, ctx->loc_params, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req);
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5VL__object_specific_api_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VLobject_specific
  *
  * Purpose:     Performs a connector-specific operation on an object
@@ -7456,6 +8508,7 @@ herr_t
 H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                     H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_object_specific_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -7468,10 +8521,22 @@ H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Bypass the H5VLint layer, calling the VOL callback directly */
-    /* (Must return value from callback, for iterators) */
-    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute object specific callback");
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+    ctx.ret_value = -1;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__object_specific_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
+
+    /* Must return value from callback, for iterators */
+    if ((ret_value = ctx.ret_value) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute link 'specific' callback");
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -7501,7 +8566,7 @@ H5VL__object_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
 
     /* Call the corresponding VOL callback */
     if ((cls->object_cls.optional)(obj, loc_params, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -7533,7 +8598,7 @@ H5VL_object_optional(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__object_optional(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object 'optional' callback")
 
 done:
     /* Reset object wrapping info in API context */
@@ -7542,6 +8607,35 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_object_optional() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__object_optional_api_op
+ *
+ * Purpose:     Callback for common API wrapper to issue optional operations on an object
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__object_optional_api_op(void *_ctx)
+{
+    H5VL_object_optional_ctx_t *ctx = (H5VL_object_optional_ctx_t *)_ctx; /* Get pointer to context */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity check */
+    HDassert(ctx);
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__object_optional(ctx->obj, ctx->loc_params, ctx->cls, ctx->args, ctx->dxpl_id, ctx->req) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object 'optional' callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__object_optional_api_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VLobject_optional
@@ -7557,6 +8651,7 @@ herr_t
 H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                     H5VL_optional_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
+    H5VL_object_optional_ctx_t ctx; /* Context for common API wrapper call */
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -7569,9 +8664,17 @@ H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__object_optional(obj, loc_params, cls, args, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
+    /* Set up context */
+    ctx.obj = obj;
+    ctx.loc_params = loc_params;
+    ctx.cls = cls;
+    ctx.args = args;
+    ctx.dxpl_id = dxpl_id;
+    ctx.req = req;
+
+    /* Invoke common wrapper routine */
+    if (H5VL__common_api_op(dxpl_id, H5VL__object_optional_api_op, &ctx) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute common wrapper operation")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -7622,7 +8725,7 @@ H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_
     /* Call the corresponding internal VOL routine */
     if (H5VL__object_optional(vol_obj->data, &loc_params, vol_obj->connector->cls, args, dxpl_id, token_ptr) <
         0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object 'optional' callback")
 
     /* If a token was created, add the token to the event set */
     if (NULL != token)
@@ -8230,7 +9333,7 @@ H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific
     /* Call the corresponding VOL callback */
     if ((cls->request_cls.specific)(req, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+                    "unable to execute asynchronous request 'specific' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8259,7 +9362,7 @@ H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+                    "unable to execute asynchronous request 'specific' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8291,7 +9394,7 @@ H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_specific(req, cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request specific callback")
+                    "unable to execute asynchronous request 'specific' callback")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -8325,7 +9428,7 @@ H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_optional_args_t 
     /* Call the corresponding VOL callback */
     if ((cls->request_cls.optional)(req, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+                    "unable to execute asynchronous request 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8354,7 +9457,7 @@ H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args)
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_optional(vol_obj->data, vol_obj->connector->cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+                    "unable to execute asynchronous request 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8386,7 +9489,7 @@ H5VLrequest_optional(void *req, hid_t connector_id, H5VL_optional_args_t *args)
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_optional(req, cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
-                    "unable to execute asynchronous request optional callback")
+                    "unable to execute asynchronous request 'optional' callback")
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
@@ -8423,7 +9526,7 @@ H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_optional_args_t *arg
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_optional(req, cls, args) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute request optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute request 'optional' callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -8744,7 +9847,7 @@ H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob
 
     /* Call the corresponding VOL callback */
     if ((cls->blob_cls.specific)(obj, blob_id, args) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob 'specific' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8773,7 +9876,7 @@ H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specif
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, args) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob 'specific' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8841,7 +9944,7 @@ H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_opti
 
     /* Call the corresponding VOL callback */
     if ((cls->blob_cls.optional)(obj, blob_id, args) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -8870,7 +9973,7 @@ H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_optional_ar
 
     /* Call the corresponding internal VOL routine */
     if (H5VL__blob_optional(vol_obj->data, vol_obj->connector->cls, blob_id, args) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob optional callback")
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob 'optional' callback")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9269,7 +10372,7 @@ H5VL__optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args, h
 
     /* Call the corresponding VOL callback */
     if ((ret_value = (cls->optional)(obj, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute optional callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute generic 'optional' callback");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -9300,7 +10403,7 @@ H5VL_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dx
 
     /* Call the corresponding internal VOL routine */
     if ((ret_value = H5VL__optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute optional callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute generic 'optional' callback");
 
 done:
     /* Reset object wrapping info in API context */
@@ -9337,7 +10440,7 @@ H5VLoptional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dx
 
     /* Call the corresponding internal VOL routine */
     if ((ret_value = H5VL__optional(obj, cls, args, dxpl_id, req)) < 0)
-        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute optional callback");
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute generic 'optional' callback");
 
 done:
     FUNC_LEAVE_API_WRAPPER(ret_value)
