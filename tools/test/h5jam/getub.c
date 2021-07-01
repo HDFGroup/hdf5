@@ -21,9 +21,9 @@ void parse_command_line(int argc, const char *argv[]);
 #define PROGRAM_NAME "getub"
 char *nbytes = NULL;
 
-static const char *        s_opts   = "c:";                     /* add more later ? */
-static struct long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file */
-                                       {NULL, 0, '\0'}};
+static const char *           s_opts   = "c:";                     /* add more later ? */
+static struct h5_long_options l_opts[] = {{"c", require_arg, 'c'}, /* input file */
+                                          {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -57,10 +57,10 @@ parse_command_line(int argc, const char *argv[])
     int opt;
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'c':
-                nbytes = HDstrdup(opt_arg);
+                nbytes = HDstrdup(H5_optarg);
                 break;
             case '?':
             default:
@@ -69,7 +69,7 @@ parse_command_line(int argc, const char *argv[])
         } /* end switch */
     }     /* end while */
 
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         HDexit(EXIT_FAILURE);
@@ -100,16 +100,16 @@ main(int argc, const char *argv[])
         goto error;
     } /* end if */
 
-    if (argc <= (opt_ind)) {
+    if (argc <= (H5_optind)) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         goto error;
     } /* end if */
 
-    filename = HDstrdup(argv[opt_ind]);
+    filename = HDstrdup(argv[H5_optind]);
 
     size = 0;
-    if (EOF == (res = sscanf(nbytes, "%u", &size))) {
+    if (EOF == (res = HDsscanf(nbytes, "%u", &size))) {
         /* fail */
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
