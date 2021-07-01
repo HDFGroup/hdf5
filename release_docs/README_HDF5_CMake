@@ -10,6 +10,7 @@ This tar file contains
     LIBAEC.tar.gz       source for building SZIP replacement
     ZLib.tar.gz         source for building ZLIB
     hdf5_plugins.tar.gz source for building compression plugins
+    HDF5Examples-1.12.7-Source.tar.gz  source for building examples
 
 For more information about building HDF5 with CMake, see USING_HDF5_CMake.txt in
 hdf5-1.12.1/release_docs, or
