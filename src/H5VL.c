@@ -669,8 +669,8 @@ done:
 hbool_t
 H5VLobject_is_native(hid_t obj_id)
 {
-    H5VL_object_t *vol_obj = NULL;
-    hbool_t ret_value = FALSE;
+    H5VL_object_t *vol_obj   = NULL;
+    hbool_t        ret_value = FALSE;
 
     FUNC_ENTER_API(FALSE)
     H5TRACE1("b", "i", obj_id);

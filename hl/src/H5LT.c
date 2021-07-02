@@ -1900,9 +1900,7 @@ herr_t
 H5LT_find_attribute(hid_t loc_id, const char *attr_name)
 {
     htri_t attr_exists = H5Aexists(loc_id, attr_name);
-    return (attr_exists < 0) ? (herr_t)-1 :
-           (attr_exists)     ? (herr_t)1  :
-                               (herr_t)0;
+    return (attr_exists < 0) ? (herr_t)-1 : (attr_exists) ? (herr_t)1 : (herr_t)0;
 }
 
 /*-------------------------------------------------------------------------

@@ -64,9 +64,9 @@ static int test_foreign_scaleattached(const char *filename);
 
 #define FILENAME "test_ds_"
 #ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
-#define FILEEXT  "_new_ref.h5"
+#define FILEEXT "_new_ref.h5"
 #else
-#define FILEEXT  ".h5"
+#define FILEEXT ".h5"
 #endif
 
 /*-------------------------------------------------------------------------
