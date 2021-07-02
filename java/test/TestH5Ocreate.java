@@ -278,18 +278,22 @@ public class TestH5Ocreate {
 
     @Test
     public void testH5Oget_info_externallink() {
-        H5O_info_t obj_info = null;
-        _createExternalLink(H5fid, H5_EXTFILE, "DT1", H5fid, "L1", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-        try {
-            obj_info = H5.H5Oget_info_by_name(H5fid, "L1", HDF5Constants.H5P_DEFAULT);
+        if (H5TestUtils.H5VLfapl_is_native(HDF5Constants.H5P_DEFAULT)) {
+            H5O_info_t obj_info = null;
+
+            _createExternalLink(H5fid, H5_EXTFILE, "DT1", H5fid, "L1", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+
+            try {
+                obj_info = H5.H5Oget_info_by_name(H5fid, "L1", HDF5Constants.H5P_DEFAULT);
+            }
+            catch (Throwable err) {
+                err.printStackTrace();
+                fail("H5.H5Oget_info: " + err);
+            }
+            assertFalse("H5Oget_info", obj_info==null);
+            assertTrue("H5Oget_info link type", obj_info.type==HDF5Constants.H5O_TYPE_NAMED_DATATYPE);
+            assertTrue("Link Object Token", obj_info.token != null);
         }
-        catch (Throwable err) {
-            err.printStackTrace();
-            fail("H5.H5Oget_info: " + err);
-        }
-        assertFalse("H5Oget_info", obj_info==null);
-        assertTrue("H5Oget_info link type", obj_info.type==HDF5Constants.H5O_TYPE_NAMED_DATATYPE);
-        assertTrue("Link Object Token", obj_info.token != null);
     }
 
     @Test
