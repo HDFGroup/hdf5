@@ -2973,7 +2973,7 @@
 
 # Utils directory
 ./utils/Makefile.am
-./utils/vds_check_compat_vol.c
+./utils/vds_elink_compat_vol.c
 
 # Mirror VFD utilities
 ./utils/mirror_vfd/Makefile.am

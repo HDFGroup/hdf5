@@ -25,7 +25,7 @@ SUBDIRS=mirror_vfd
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/test
 
-bin_PROGRAMS = vds_check_compat_vol
+bin_PROGRAMS = vds_elink_compat_vol
 
 # All programs depend on the hdf5 library
 LDADD=$(LIBH5TEST) $(LIBHDF5)

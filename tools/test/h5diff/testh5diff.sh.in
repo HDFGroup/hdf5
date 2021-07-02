@@ -35,8 +35,8 @@ EXIT_FAILURE=1
 
 H5DIFF=../../src/h5diff/h5diff               # The tool name
 H5DIFF_BIN=`pwd`/$H5DIFF    # The path of the tool binary
-VDS_CHECK_COMPAT_VOL=../../../utils/vds_check_compat_vol # The vds_check_compat_vol tool name
-VDS_CHECK_COMPAT_VOL_BIN=`pwd`/$VDS_CHECK_COMPAT_VOL # The path of the vds_check_compat_vol tool binary
+VDS_ELINK_COMPAT_VOL=../../../utils/vds_elink_compat_vol # The vds_elink_compat_vol tool name
+VDS_ELINK_COMPAT_VOL_BIN=`pwd`/$VDS_ELINK_COMPAT_VOL # The path of the vds_elink_compat_vol tool binary
 
 RM='rm -rf'
 CMP='cmp -s'
@@ -600,8 +600,8 @@ $CP -f $SRC_TOOLS_TESTFILES/tvlstr.h5 $TESTDIR/tvlstr2.h5
 # Check to see if the VOL connector specified by the HDF5_VOL_CONNECTOR
 # environment variable supports virtual datasets (and external links)
 #
-# Note: Depends on vds_check_compat_vol tool from $(topdir)/utils
-$VDS_CHECK_COMPAT_VOL_BIN
+# Note: Depends on vds_elink_compat_vol tool from $(topdir)/utils
+$VDS_ELINK_COMPAT_VOL_BIN
 COMPAT_VOL=$?
 
 # ############################################################################

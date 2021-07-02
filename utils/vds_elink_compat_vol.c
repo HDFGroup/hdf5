@@ -12,7 +12,9 @@
 
 /* Purpose:     This is a small program that checks if the HDF5_VOL_CONNECTOR
  *              environment variable is set to a value that supports virtual
- *              datasets.
+ *              datasets & external links.  Currently that is limited to a
+ *              VOL connector stack that is composed of _only_ the trivial
+ *              single connector stack of the native VOL connector.
  *
  *              It is intended for use in shell scripts.
  */
@@ -25,12 +27,12 @@
  *
  * Purpose:     Uses the default file access property lists, which is
  *              initialized with the VOL connector from the HDF5_VOL_CONNECTOR
- *              environment variable to determine if virtual datasets are
- *              supported.
+ *              environment variable to determine if virtual datasets & external
+ *              links are supported.
  *
- * Return:      VOL connector supports virtual datasets:          EXIT_SUCCESS
+ * Return:      VOL connector supports virtual datasets & external links: EXIT_SUCCESS
  *
- *              VOL connector does not support virtual datasets
+ *              VOL connector does not support virtual datasets & external links,
  *              or failure:                 EXIT_FAILURE
  *
  *-------------------------------------------------------------------------
