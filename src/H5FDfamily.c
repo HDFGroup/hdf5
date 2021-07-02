@@ -133,6 +133,8 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD__family_write,         /* write        */
     NULL,                       /* read_vector          */
     NULL,                       /* write_vector         */
+    NULL,                       /* read_selection       */
+    NULL,                       /* write_selection      */
     H5FD__family_flush,         /* flush        */
     H5FD__family_truncate,      /* truncate        */
     H5FD__family_lock,          /* lock                 */

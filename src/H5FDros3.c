@@ -264,6 +264,8 @@ static const H5FD_class_t H5FD_ros3_g = {
     H5FD__ros3_write,         /* write                */
     NULL,                     /* read_vector          */
     NULL,                     /* write_vector         */
+    NULL,                     /* read_selection       */
+    NULL,                     /* write_selection      */
     NULL,                     /* flush                */
     H5FD__ros3_truncate,      /* truncate             */
     NULL,                     /* lock                 */

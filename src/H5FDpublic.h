@@ -299,6 +299,12 @@ typedef struct H5FD_class_t {
                           size_t sizes[], void *bufs[]);
     herr_t (*write_vector)(H5FD_t *file, hid_t dxpl, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
                            size_t sizes[], const void *bufs[]);
+    herr_t (*read_selection)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, size_t count, hid_t mem_spaces[],
+                             hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
+                             void *bufs[] /*out*/);
+    herr_t (*write_selection)(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, size_t count, hid_t mem_spaces[],
+                              hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
+                              const void *bufs[] /*in*/);
     herr_t (*flush)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t (*lock)(H5FD_t *file, hbool_t rw);
@@ -381,6 +387,12 @@ H5_DLL herr_t  H5FDread_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD
                                haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
 H5_DLL herr_t  H5FDwrite_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
                                 haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
+H5_DLL herr_t  H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                                  hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
+                                  size_t element_sizes[], void *bufs[] /* out */);
+H5_DLL herr_t  H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
+                                   hid_t mem_spaces[], hid_t file_spaces[], haddr_t offsets[],
+                                   size_t element_sizes[], const void *bufs[]);
 H5_DLL herr_t  H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
