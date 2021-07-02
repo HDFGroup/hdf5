@@ -7024,10 +7024,6 @@ H5VLgroup_close(void *obj, hid_t connector_id, hid_t dxpl_id, void **req /*out*/
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Call the corresponding internal VOL routine */
-    if (H5VL__group_close(obj, cls, dxpl_id, req) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "unable to close group")
-
     /* Set up context */
     ctx.obj     = obj;
     ctx.cls     = cls;
