@@ -1653,16 +1653,6 @@ H5F__dest(H5F_t *f, hbool_t flush)
     f->open_name   = (char *)H5MM_xfree(f->open_name);
     f->actual_name = (char *)H5MM_xfree(f->actual_name);
     if (f->vol_obj) {
-        //        void *vol_wrap_ctx = NULL;
-
-        /* If a VOL wrapping context is available, retrieve it
-         * and unwrap file VOL object
-         */
-        //        if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
-        //            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get VOL object wrap context")
-        //        if (vol_wrap_ctx && (NULL == H5VL_object_unwrap(f->vol_obj)))
-        //            HDONE_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't unwrap VOL object")
-
         if (H5VL_free_object(f->vol_obj) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTDEC, FAIL, "unable to free VOL object")
         f->vol_obj = NULL;
