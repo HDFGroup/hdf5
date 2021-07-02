@@ -151,13 +151,21 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             fi
         fi
     done
+
+    # Patch rpath for MacOS (Darwin) builds
     if [ "$IS_DARWIN" = "yes" ]; then
        (cd testlibs; \
          install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
+         install_name_tool -add_rpath @loader_path libhdf5_java_test.dylib; \
          exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
-         echo $exist_path; \
-         install_name_tool -change $exist_path @rpath/libhdf5.dylib libhdf5_java.dylib)
+#         echo "exist_path=" $exist_path; \
+         install_name_tool -change $exist_path @rpath/libhdf5.dylib libhdf5_java.dylib; \
+         install_name_tool -change $exist_path @rpath/libhdf5.dylib libhdf5_java_test.dylib; \
+         exist_path2=` otool -l libhdf5_java_test.dylib | grep libhdf5_java | grep -v java_test | awk '{print $2}'`; \
+#         echo "exist_path2=" $exist_path2; \
+         install_name_tool -change $exist_path2 @rpath/libhdf5_java.dylib libhdf5_java_test.dylib)
     fi
+
     # copy jar files. Used -f to make sure get a new copy
     for tstfile in $COPY_JARTESTFILES
     do
