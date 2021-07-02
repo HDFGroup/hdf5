@@ -1597,6 +1597,206 @@ done:
 } /* end H5FDwrite_vector() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FDread_selection
+ *
+ * Purpose:     Perform count reads from the specified file at the
+ *              locations selected in the dataspaces in the file_spaces
+ *              array, with each of those dataspaces starting at the file
+ *              address specified by the corresponding element of the
+ *              offsets array, and with the size of each element in the
+ *              dataspace specified by the corresponding element of the
+ *              element_sizes array.  The memory type provided by type is
+ *              the same for all selections.  Data read is returned in
+ *              the locations selected in the dataspaces in the
+ *              mem_spaces array, within the buffers provided in the
+ *              corresponding elements of the bufs array.
+ *
+ *              If i > 0 and element_sizes[i] == 0, presume
+ *              element_sizes[n] = element_sizes[i-1] for all n >= i and
+ *              < count.
+ *
+ *              If the underlying VFD supports selection reads, pass the
+ *              call through directly.
+ *
+ *              If it doesn't, convert the vector write into a sequence
+ *              of individual reads.
+ *
+ *              All reads are done according to the data transfer property
+ *              list dxpl_id (which may be the constant H5P_DEFAULT).
+ *
+ * Return:      Success:    SUCCEED
+ *                          All reads have completed successfully, and
+ *                          the results havce been into the supplied
+ *                          buffers.
+ *
+ *              Failure:    FAIL
+ *                          The contents of supplied buffers are undefined.
+ *
+ * Programmer:  NAF -- 5/19/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDread_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
+                   hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
+{
+    herr_t ret_value = SUCCEED; /* Return value             */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    if ((!mem_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive")
+
+    if ((!file_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive")
+
+    if ((!offsets) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive")
+
+    if ((!element_sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "element_sizes parameter can't be NULL if count is positive")
+
+    if ((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    if ((count > 0) && (element_sizes[0] == 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+
+    if ((count > 0) && (bufs[0] == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_read_selection_id(file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
+                               bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file selection read request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDread_selection() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDwrite_selection
+ *
+ * Purpose:     Perform count writes to the specified file at the
+ *              locations selected in the dataspaces in the file_spaces
+ *              array, with each of those dataspaces starting at the file
+ *              address specified by the corresponding element of the
+ *              offsets array, and with the size of each element in the
+ *              dataspace specified by the corresponding element of the
+ *              element_sizes array.  The memory type provided by type is
+ *              the same for all selections.  Data write is from
+ *              the locations selected in the dataspaces in the
+ *              mem_spaces array, within the buffers provided in the
+ *              corresponding elements of the bufs array.
+ *
+ *              If i > 0 and element_sizes[i] == 0, presume
+ *              element_sizes[n] = element_sizes[i-1] for all n >= i and
+ *              < count.
+ *
+ *              If the underlying VFD supports selection reads, pass the
+ *              call through directly.
+ *
+ *              If it doesn't, convert the vector write into a sequence
+ *              of individual writes.
+ *
+ *              All writes are done according to the data transfer property
+ *              list dxpl_id (which may be the constant H5P_DEFAULT).
+ *
+ * Return:      Success:    SUCCEED
+ *                          All writes have completed successfully
+ *
+ *              Failure:    FAIL
+ *                          One or more of the writes failed.
+ *
+ * Programmer:  NAF -- 5/14/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDwrite_selection(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count, hid_t mem_space_ids[],
+                    hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+{
+    herr_t ret_value = SUCCEED; /* Return value             */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    if ((!mem_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "mem_spaces parameter can't be NULL if count is positive")
+
+    if ((!file_space_ids) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file_spaces parameter can't be NULL if count is positive")
+
+    if ((!offsets) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "offsets parameter can't be NULL if count is positive")
+
+    if ((!element_sizes) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "element_sizes parameter can't be NULL if count is positive")
+
+    if ((!bufs) && (count > 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs parameter can't be NULL if count is positive")
+
+    if ((count > 0) && (element_sizes[0] == 0))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "sizes[0] can't be 0")
+
+    if ((count > 0) && (bufs[0] == NULL))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bufs[0] can't be NULL")
+
+    /* Get the default dataset transfer property list if the user didn't provide one */
+    if (H5P_DEFAULT == dxpl_id) {
+        dxpl_id = H5P_DATASET_XFER_DEFAULT;
+    }
+    else {
+        if (TRUE != H5P_isa_class(dxpl_id, H5P_DATASET_XFER))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data transfer property list")
+    }
+
+    /* Set DXPL for operation */
+    H5CX_set_dxpl(dxpl_id);
+
+    /* Call private function */
+    /* (Note compensating for base address addition in internal routine) */
+    if (H5FD_write_selection_id(file, type, count, mem_space_ids, file_space_ids, offsets, element_sizes,
+                                bufs) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file selection write request failed")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDwrite_selection() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FDflush
  *
  * Purpose:     Notify driver to flush all cached data.  If the driver has no

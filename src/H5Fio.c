@@ -254,7 +254,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_shared_select_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t type, H5S_t *mem_spaces[],
+H5F_shared_select_read(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count, H5S_t *mem_spaces[],
                        H5S_t *file_spaces[], haddr_t offsets[], size_t element_sizes[],
                        void *bufs[] /* out */)
 {
@@ -275,7 +275,7 @@ H5F_shared_select_read(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t type, H5S_
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
     /* Pass down to file driver layer (bypass page buffer for now) */
-    if (H5FD_read_selection(f_sh->lf, count, map_type, mem_spaces, file_spaces, offsets, element_sizes,
+    if (H5FD_read_selection(f_sh->lf, map_type, count, mem_spaces, file_spaces, offsets, element_sizes,
                             bufs) < 0)
         HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "selection read through file driver failed")
 
@@ -300,7 +300,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_shared_select_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t type, H5S_t *mem_spaces[],
+H5F_shared_select_write(H5F_shared_t *f_sh, H5FD_mem_t type, uint32_t count, H5S_t *mem_spaces[],
                         H5S_t *file_spaces[], haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     H5FD_mem_t map_type;            /* Mapped memory type */
@@ -320,7 +320,7 @@ H5F_shared_select_write(H5F_shared_t *f_sh, uint32_t count, H5FD_mem_t type, H5S
     map_type = (type == H5FD_MEM_GHEAP) ? H5FD_MEM_DRAW : type;
 
     /* Pass down to file driver layer (bypass page buffer for now) */
-    if (H5FD_write_selection(f_sh->lf, count, map_type, mem_spaces, file_spaces, offsets, element_sizes,
+    if (H5FD_write_selection(f_sh->lf, map_type, count, mem_spaces, file_spaces, offsets, element_sizes,
                              bufs) < 0)
         HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "selection write through file driver failed")
 
