@@ -1298,7 +1298,6 @@
 ./test/stab.c
 ./test/swmr.c
 ./test/swmr_addrem_writer.c
-./test/swmr_check_compat_vfd.c
 ./test/swmr_common.c
 ./test/swmr_common.h
 ./test/swmr_generator.c
@@ -2973,6 +2972,7 @@
 
 # Utils directory
 ./utils/Makefile.am
+./utils/swmr_compat_vfd.c
 ./utils/vds_elink_compat_vol.c
 
 # Mirror VFD utilities

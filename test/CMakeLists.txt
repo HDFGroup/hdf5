@@ -573,7 +573,6 @@ endif ()
 
 set (H5_SWMR_TESTS
     swmr_addrem_writer
-    swmr_check_compat_vfd
     swmr_generator
     swmr_reader
     swmr_remove_reader

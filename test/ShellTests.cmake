@@ -34,14 +34,14 @@ if (UNIX)
     #  copy test programs to test dir
     ##############################################################################
     add_custom_command (
-        TARGET     swmr_check_compat_vfd
+        TARGET     swmr_compat_vfd
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "$<TARGET_FILE:swmr_check_compat_vfd>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_check_compat_vfd"
     )
 
     add_custom_command (
-        TARGET     swmr_check_compat_vfd
+        TARGET     output_filter.sh
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "${HDF5_SOURCE_DIR}/bin/output_filter.sh" "${HDF5_TEST_BINARY_DIR}/H5TEST/bin/output_filter.sh"
