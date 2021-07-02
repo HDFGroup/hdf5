@@ -176,7 +176,7 @@ static herr_t  H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
-    H5FD_CLASS_VERSION,        /* struct version       */
+    H5FD_CLASS_VERSION,        /* struct version    */
     H5_VFD_MULTI,              /* value             */
     "multi",                   /* name              */
     HADDR_MAX,                 /* maxaddr           */
