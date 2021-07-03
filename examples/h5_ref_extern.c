@@ -10,12 +10,12 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
- /*
-  * The example below illustrates the use of the new API with files that are
-  * opened read-only. Created references to the objects in that file are
-  * stored into a separate file, and accessed from that file, without the user
-  * explicitly opening the original file that was referenced. 
-  */
+/*
+ * The example below illustrates the use of the new API with files that are
+ * opened read-only. Created references to the objects in that file are
+ * stored into a separate file, and accessed from that file, without the user
+ * explicitly opening the original file that was referenced.
+ */
 
 #include <stdlib.h>
 
@@ -25,30 +25,30 @@
 #define H5FILE_NAME1 "refer_extern1.h5"
 #define H5FILE_NAME2 "refer_extern2.h5"
 
-#define NDIMS    1    /* Number of dimensions */
-#define BUF_SIZE 4    /* Size of example buffer */
-#define NREFS    1    /* Number of references */
+#define NDIMS    1 /* Number of dimensions */
+#define BUF_SIZE 4 /* Size of example buffer */
+#define NREFS    1 /* Number of references */
 
 int
-main(void) {
-    hid_t file1, dset1, space1;
-    hsize_t dset1_dims[NDIMS] = { BUF_SIZE };
-    int dset_buf[BUF_SIZE];
+main(void)
+{
+    hid_t   file1, dset1, space1;
+    hsize_t dset1_dims[NDIMS] = {BUF_SIZE};
+    int     dset_buf[BUF_SIZE];
 
-    hid_t file2, dset2, space2;
-    hsize_t dset2_dims[NDIMS] = { NREFS };
-    H5R_ref_t ref_buf[NREFS] = { 0 };
+    hid_t      file2, dset2, space2;
+    hsize_t    dset2_dims[NDIMS] = {NREFS};
+    H5R_ref_t  ref_buf[NREFS]    = {0};
     H5O_type_t obj_type;
-    int i;
+    int        i;
 
     for (i = 0; i < BUF_SIZE; i++)
         dset_buf[i] = i;
 
     /* Create file with one dataset and close it */
-    file1 = H5Fcreate(H5FILE_NAME1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file1  = H5Fcreate(H5FILE_NAME1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     space1 = H5Screate_simple(NDIMS, dset1_dims, NULL);
-    dset1 = H5Dcreate2(file1, "dataset1", H5T_NATIVE_INT, space1, H5P_DEFAULT,
-                       H5P_DEFAULT, H5P_DEFAULT);
+    dset1  = H5Dcreate2(file1, "dataset1", H5T_NATIVE_INT, space1, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dset1, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_buf);
     H5Dclose(dset1);
     H5Sclose(space1);
@@ -60,10 +60,9 @@ main(void) {
     H5Fclose(file1);
 
     /* Store reference in dataset in separate file "refer_extern2.h5" */
-    file2 = H5Fcreate(H5FILE_NAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    file2  = H5Fcreate(H5FILE_NAME2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     space2 = H5Screate_simple(NDIMS, dset2_dims, NULL);
-    dset2 = H5Dcreate2(file2, "references", H5T_STD_REF, space2, H5P_DEFAULT,
-                       H5P_DEFAULT, H5P_DEFAULT);
+    dset2  = H5Dcreate2(file2, "references", H5T_STD_REF, space2, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Dwrite(dset2, H5T_STD_REF, H5S_ALL, H5S_ALL, H5P_DEFAULT, ref_buf);
     H5Dclose(dset2);
     H5Sclose(space2);
@@ -91,4 +90,3 @@ main(void) {
 
     return 0;
 }
-

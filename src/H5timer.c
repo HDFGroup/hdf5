@@ -26,57 +26,48 @@
 /* Module Setup */
 /****************/
 
-
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions			*/
+#include "H5private.h" /* Generic Functions			*/
 
 /* We need this for the struct rusage declaration */
 #if defined(H5_HAVE_GETRUSAGE) && defined(H5_HAVE_SYS_RESOURCE_H)
-#   include <sys/resource.h>
+#include <sys/resource.h>
 #endif
 
 #if defined(H5_HAVE_GETTIMEOFDAY) && defined(H5_HAVE_SYS_TIME_H)
 #include <sys/time.h>
 #endif
 
-
 /****************/
 /* Local Macros */
 /****************/
-
 
 /******************/
 /* Local Typedefs */
 /******************/
 
-
 /********************/
 /* Package Typedefs */
 /********************/
-
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-
 /*********************/
 /* Package Variables */
 /*********************/
-
 
 /*****************************/
 /* Library Private Variables */
 /*****************************/
 
-
 /*******************/
 /* Local Variables */
 /*******************/
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5_timer_reset
  *
@@ -91,13 +82,12 @@
  *-------------------------------------------------------------------------
  */
 void
-H5_timer_reset (H5_timer_t *timer)
+H5_timer_reset(H5_timer_t *timer)
 {
     HDassert(timer);
     HDmemset(timer, 0, sizeof *timer);
 } /* end H5_timer_reset() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5_timer_begin
  *
@@ -111,36 +101,33 @@ H5_timer_reset (H5_timer_t *timer)
  *-------------------------------------------------------------------------
  */
 void
-H5_timer_begin (H5_timer_t *timer)
+H5_timer_begin(H5_timer_t *timer)
 {
 #ifdef H5_HAVE_GETRUSAGE
-    struct rusage	rusage;
+    struct rusage rusage;
 #endif
 #ifdef H5_HAVE_GETTIMEOFDAY
-    struct timeval	etime;
+    struct timeval etime;
 #endif
 
     HDassert(timer);
 
 #ifdef H5_HAVE_GETRUSAGE
-    HDgetrusage (RUSAGE_SELF, &rusage);
-    timer->utime = (double)rusage.ru_utime.tv_sec +
-                   ((double)rusage.ru_utime.tv_usec / (double)1e6F);
-    timer->stime = (double)rusage.ru_stime.tv_sec +
-                   ((double)rusage.ru_stime.tv_usec / (double)1e6F);
+    HDgetrusage(RUSAGE_SELF, &rusage);
+    timer->utime = (double)rusage.ru_utime.tv_sec + ((double)rusage.ru_utime.tv_usec / (double)1e6F);
+    timer->stime = (double)rusage.ru_stime.tv_sec + ((double)rusage.ru_stime.tv_usec / (double)1e6F);
 #else
     timer->utime = 0.0F;
     timer->stime = 0.0F;
 #endif
 #ifdef H5_HAVE_GETTIMEOFDAY
-    HDgettimeofday (&etime, NULL);
+    HDgettimeofday(&etime, NULL);
     timer->etime = (double)etime.tv_sec + ((double)etime.tv_usec / (double)1e6F);
 #else
     timer->etime = 0.0F;
 #endif
 } /* end H5_timer_begin() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5_timer_end
  *
@@ -157,9 +144,9 @@ H5_timer_begin (H5_timer_t *timer)
  *-------------------------------------------------------------------------
  */
 void
-H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
+H5_timer_end(H5_timer_t *sum /*in,out*/, H5_timer_t *timer /*in,out*/)
 {
-    H5_timer_t		now;
+    H5_timer_t now;
 
     HDassert(timer);
     H5_timer_begin(&now);
@@ -175,7 +162,6 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
     }
 } /* end H5_timer_end() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5_bandwidth
  *
@@ -202,42 +188,46 @@ H5_timer_end (H5_timer_t *sum/*in,out*/, H5_timer_t *timer/*in,out*/)
  *-------------------------------------------------------------------------
  */
 void
-H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
+H5_bandwidth(char *buf /*out*/, double nbytes, double nseconds)
 {
-    double	bw;
+    double bw;
 
-    if(nseconds <= (double)0.0F)
+    if (nseconds <= (double)0.0F)
         HDstrcpy(buf, "       NaN");
     else {
-        bw = nbytes/nseconds;
-        if(H5_DBL_ABS_EQUAL(bw, (double)0.0F))
+        bw = nbytes / nseconds;
+        if (H5_DBL_ABS_EQUAL(bw, (double)0.0F))
             HDstrcpy(buf, "0.000  B/s");
-        else if(bw < (double)1.0F)
+        else if (bw < (double)1.0F)
             HDsprintf(buf, "%10.4e", bw);
-        else if(bw < (double)H5_KB) {
+        else if (bw < (double)H5_KB) {
             HDsprintf(buf, "%05.4f", bw);
-            HDstrcpy(buf+5, "  B/s");
-        } else if(bw < (double)H5_MB) {
+            HDstrcpy(buf + 5, "  B/s");
+        }
+        else if (bw < (double)H5_MB) {
             HDsprintf(buf, "%05.4f", bw / (double)H5_KB);
-            HDstrcpy(buf+5, " kB/s");
-        } else if(bw < (double)H5_GB) {
+            HDstrcpy(buf + 5, " kB/s");
+        }
+        else if (bw < (double)H5_GB) {
             HDsprintf(buf, "%05.4f", bw / (double)H5_MB);
-            HDstrcpy(buf+5, " MB/s");
-        } else if(bw < (double)H5_TB) {
+            HDstrcpy(buf + 5, " MB/s");
+        }
+        else if (bw < (double)H5_TB) {
             HDsprintf(buf, "%05.4f", bw / (double)H5_GB);
-            HDstrcpy(buf+5, " GB/s");
-        } else if(bw < (double)H5_PB) {
+            HDstrcpy(buf + 5, " GB/s");
+        }
+        else if (bw < (double)H5_PB) {
             HDsprintf(buf, "%05.4f", bw / (double)H5_TB);
-            HDstrcpy(buf+5, " TB/s");
-        } else {
+            HDstrcpy(buf + 5, " TB/s");
+        }
+        else {
             HDsprintf(buf, "%10.4e", bw);
-            if(HDstrlen(buf) > 10)
+            if (HDstrlen(buf) > 10)
                 HDsprintf(buf, "%10.3e", bw);
         }
     }
 } /* end H5_bandwidth() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5_now
  *
@@ -253,7 +243,7 @@ H5_bandwidth(char *buf/*out*/, double nbytes, double nseconds)
 time_t
 H5_now(void)
 {
-    time_t	now;                    /* Current time */
+    time_t now; /* Current time */
 
 #ifdef H5_HAVE_GETTIMEOFDAY
     {
@@ -262,10 +252,9 @@ H5_now(void)
         HDgettimeofday(&now_tv, NULL);
         now = now_tv.tv_sec;
     }
-#else /* H5_HAVE_GETTIMEOFDAY */
-    now = HDtime(NULL);
+#else  /* H5_HAVE_GETTIMEOFDAY */
+    now          = HDtime(NULL);
 #endif /* H5_HAVE_GETTIMEOFDAY */
 
-    return(now);
+    return (now);
 } /* end H5_now() */
-

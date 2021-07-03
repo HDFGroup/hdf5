@@ -31,31 +31,25 @@
 
 /* Other private headers needed by this file */
 
-
 /**************************/
 /* Package Private Macros */
 /**************************/
-
 
 /****************************/
 /* Package Private Typedefs */
 /****************************/
 
-
 /*****************************/
 /* Package Private Variables */
 /*****************************/
-
 
 /******************************/
 /* Package Private Prototypes */
 /******************************/
 
-H5_DLL herr_t H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name,
-    const void * ud_data, size_t ud_data_size, H5L_type_t type,
-    hid_t lcpl_id);
-H5_DLL herr_t H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk,
-    const H5O_loc_t *src_oloc, H5O_link_t *dst_lnk, H5O_copy_t *cpy_info);
+H5_DLL herr_t H5L__create_ud(const H5G_loc_t *link_loc, const char *link_name, const void *ud_data,
+                             size_t ud_data_size, H5L_type_t type, hid_t lcpl_id);
+H5_DLL herr_t H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t *src_oloc,
+                                  H5O_link_t *dst_lnk, H5O_copy_t *cpy_info);
 
 #endif /* _H5Lpkg_H */
-

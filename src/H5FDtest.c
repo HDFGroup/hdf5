@@ -25,51 +25,43 @@
 /* Module Setup */
 /****************/
 
-#include "H5FDmodule.h"         /* This source code file is part of the H5FD module */
-#define H5FD_TESTING		/* Suppress warning about H5FD testing funcs    */
-
+#include "H5FDmodule.h" /* This source code file is part of the H5FD module */
+#define H5FD_TESTING    /* Suppress warning about H5FD testing funcs    */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"		/* Generic Functions    */
-#include "H5FDpkg.h"        /* File Drivers         */
+#include "H5private.h" /* Generic Functions    */
+#include "H5FDpkg.h"   /* File Drivers         */
 
 /****************/
 /* Local Macros */
 /****************/
 
-
 /******************/
 /* Local Typedefs */
 /******************/
-
 
 /********************/
 /* Package Typedefs */
 /********************/
 
-
 /********************/
 /* Local Prototypes */
 /********************/
-
 
 /*********************/
 /* Package Variables */
 /*********************/
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
-
 /*-------------------------------------------------------------------------
  * Function:	H5FD__supports_swmr_test()
  *
@@ -104,12 +96,11 @@ H5FD__supports_swmr_test(const char *vfd_name)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(!vfd_name || !HDstrcmp(vfd_name, "") || !HDstrcmp(vfd_name, "nomatch"))
+    if (!vfd_name || !HDstrcmp(vfd_name, "") || !HDstrcmp(vfd_name, "nomatch"))
         ret_value = TRUE;
     else
         ret_value = !HDstrcmp(vfd_name, "log") || !HDstrcmp(vfd_name, "sec2");
 
     FUNC_LEAVE_NOAPI(ret_value)
-    
-} /* end H5FD__supports_swmr_test() */
 
+} /* end H5FD__supports_swmr_test() */

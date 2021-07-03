@@ -7,7 +7,7 @@ main(int argc, char **argv)
     hid_t     fid;
     hid_t     did;
     hid_t     sid;
-    int i;
+    int       i;
 
     if ((fid = H5Fcreate("HDFFV-10992.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
         HDfprintf(stderr, "H5Fcreate failed\n");
@@ -50,7 +50,7 @@ main(int argc, char **argv)
     /*
      * "Forget" to call H5Rdestroy on reference objects. If H5Rdestroy
      * is called at least once on either reference object, or both
-     * objects, the infinite loop goes away. If H5Rdestroy is never 
+     * objects, the infinite loop goes away. If H5Rdestroy is never
      * called, the infinite loop will appear.
      */
 #if 0

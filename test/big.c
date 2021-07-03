@@ -53,50 +53,45 @@
  */
 #include "h5test.h"
 
-#define DNAME		"big.data"
+#define DNAME "big.data"
 
-#define WRT_N		50
-#define WRT_SIZE	4*1024
-#define FAMILY_SIZE	1024*1024*1024
+#define WRT_N       50
+#define WRT_SIZE    4 * 1024
+#define FAMILY_SIZE 1024 * 1024 * 1024
 
 #define GB (HDoff_t)0x40000000L
 
-#define MAX_TRIES	100
+#define MAX_TRIES 100
 
 #if H5_SIZEOF_LONG_LONG >= 8
-#   define GB8LL	((unsigned long long)8*1024*1024*1024)
+#define GB8LL ((unsigned long long)8 * 1024 * 1024 * 1024)
 #else
-#   define GB8LL	0	/*cannot do the test*/
+#define GB8LL 0 /*cannot do the test*/
 #endif
 
-/* Define Small, Large, Extra Large, Huge File which 
+/* Define Small, Large, Extra Large, Huge File which
  * corrspond to less than 2GB, 2GB, 4GB, and tens of GB file size.
  * NO_FILE stands for "no file" to be tested.
  */
-typedef enum fsizes_t { SFILE, LFILE, XLFILE, HUGEFILE, NO_FILE} fsizes_t;
-fsizes_t file_size= NO_FILE;
+typedef enum fsizes_t { SFILE, LFILE, XLFILE, HUGEFILE, NO_FILE } fsizes_t;
+fsizes_t file_size = NO_FILE;
 
-const char *FILENAME[] = {
-        "big",
-        "sec2",
-        "stdio",
-        NULL
-};
-int  cflag=1;    /* check file system before test */
-int  sparse_support=0;  /* sparse file supported, default false */
-int  have_space=0;    /* enough space for huge file test, default false */
-hsize_t  family_size_def=FAMILY_SIZE;  /* default family file size */
+const char *FILENAME[]      = {"big", "sec2", "stdio", NULL};
+int         cflag           = 1;           /* check file system before test */
+int         sparse_support  = 0;           /* sparse file supported, default false */
+int         have_space      = 0;           /* enough space for huge file test, default false */
+hsize_t     family_size_def = FAMILY_SIZE; /* default family file size */
 
 /* Prototypes */
 static void usage(void);
-static int test_sec2(hid_t fapl);
-static int test_stdio(hid_t fapl);
-static int test_family(hid_t fapl);
+static int  test_sec2(hid_t fapl);
+static int  test_stdio(hid_t fapl);
+static int  test_family(hid_t fapl);
 
 /* Array used to record all addresses at which data has been written */
 /* so far.  Used to prevent overlapping writes. */
 static hsize_t values_used[WRT_N];
-
+
 /*-------------------------------------------------------------------------
  * Function:	randll
  *
@@ -118,36 +113,33 @@ static hsize_t values_used[WRT_N];
 static hsize_t
 randll(hsize_t limit, int current_index)
 {
-    hsize_t	acc = 0;
-    int 	overlap = 1;
-    int 	i;
-    int 	tries = 0;
+    hsize_t acc     = 0;
+    int     overlap = 1;
+    int     i;
+    int     tries = 0;
 
     /* Generate up to MAX_TRIES random numbers until one of them */
     /* does not overlap with any previous writes */
-    while(overlap != 0 && tries < MAX_TRIES)
-    {
+    while (overlap != 0 && tries < MAX_TRIES) {
         acc = (hsize_t)HDrandom();
         acc *= (hsize_t)HDrandom();
-        acc = acc % limit;
+        acc     = acc % limit;
         overlap = 0;
 
-        for(i = 0; i < current_index; i++)
-        {
-            if((acc >= values_used[i]) && (acc < values_used[i]+WRT_SIZE))
+        for (i = 0; i < current_index; i++) {
+            if ((acc >= values_used[i]) && (acc < values_used[i] + WRT_SIZE))
                 overlap = 1;
-            if((acc+WRT_SIZE >= values_used[i]) && (acc+WRT_SIZE < values_used[i]+WRT_SIZE))
+            if ((acc + WRT_SIZE >= values_used[i]) && (acc + WRT_SIZE < values_used[i] + WRT_SIZE))
                 overlap = 1;
         }
         tries++;
     }
 
-    values_used[current_index]=acc;
+    values_used[current_index] = acc;
 
     return acc;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	is_sparse
  *
@@ -169,23 +161,28 @@ randll(hsize_t limit, int current_index)
 static int
 is_sparse(void)
 {
-    int		fd;
-    h5_stat_t	sb;
+    int       fd;
+    h5_stat_t sb;
 
-    if ((fd = HDopen("x.h5", O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0) return 0;
-    if (HDlseek(fd, (off_t)(1024*1024), SEEK_SET)!=1024*1024) return 0;
-    if (5!=HDwrite(fd, "hello", (size_t)5)) return 0;
-    if (HDclose(fd) < 0) return 0;
-    if (HDstat("x.h5", &sb) < 0) return 0;
-    if (HDremove("x.h5") < 0) return 0;
+    if ((fd = HDopen("x.h5", O_RDWR | O_TRUNC | O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
+        return 0;
+    if (HDlseek(fd, (off_t)(1024 * 1024), SEEK_SET) != 1024 * 1024)
+        return 0;
+    if (5 != HDwrite(fd, "hello", (size_t)5))
+        return 0;
+    if (HDclose(fd) < 0)
+        return 0;
+    if (HDstat("x.h5", &sb) < 0)
+        return 0;
+    if (HDremove("x.h5") < 0)
+        return 0;
 #ifdef H5_HAVE_STAT_ST_BLOCKS
-    return ((unsigned long)sb.st_blocks*512 < (unsigned long)sb.st_size);
+    return ((unsigned long)sb.st_blocks * 512 < (unsigned long)sb.st_size);
 #else
     return (0);
 #endif
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	supports_big
  *
@@ -207,56 +204,55 @@ is_sparse(void)
 static fsizes_t
 supports_big(void)
 {
-    int		fd = -1;
-    fsizes_t    fsize = NO_FILE;
+    int      fd    = -1;
+    fsizes_t fsize = NO_FILE;
 
-    if((fd=HDopen("y.h5", O_RDWR|O_TRUNC|O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
+    if ((fd = HDopen("y.h5", O_RDWR | O_TRUNC | O_CREAT, H5_POSIX_CREATE_MODE_RW)) < 0)
         goto error;
 
     /* Write a few byte at the beginning */
-    if(5!=HDwrite(fd, "hello", (size_t)5))
+    if (5 != HDwrite(fd, "hello", (size_t)5))
         goto quit;
     fsize = SFILE;
 
     /* Write a few bytes at 2GB */
-    if(HDlseek(fd, 2*GB, SEEK_SET)!=2*GB)
+    if (HDlseek(fd, 2 * GB, SEEK_SET) != 2 * GB)
         goto quit;
-    if(5!=HDwrite(fd, "hello", (size_t)5))
+    if (5 != HDwrite(fd, "hello", (size_t)5))
         goto quit;
     fsize = LFILE;
 
     /* Write a few bytes at 4GB */
-    if(HDlseek(fd, 4*GB, SEEK_SET) != 4*GB)
+    if (HDlseek(fd, 4 * GB, SEEK_SET) != 4 * GB)
         goto quit;
-    if(5!=HDwrite(fd, "hello", (size_t)5))
+    if (5 != HDwrite(fd, "hello", (size_t)5))
         goto quit;
     fsize = XLFILE;
 
     /* If this supports sparse_file, write a few bytes at 32GB */
-    if(!sparse_support)
+    if (!sparse_support)
         goto quit;
-    if(HDlseek(fd, 32*GB, SEEK_SET) != 32*GB)
+    if (HDlseek(fd, 32 * GB, SEEK_SET) != 32 * GB)
         goto quit;
-    if(5!=HDwrite(fd, "hello", (size_t)5))
+    if (5 != HDwrite(fd, "hello", (size_t)5))
         goto quit;
     fsize = HUGEFILE;
 
 quit:
-    if(HDclose(fd) < 0)
+    if (HDclose(fd) < 0)
         goto error;
-    if(HDremove("y.h5") < 0)
+    if (HDremove("y.h5") < 0)
         goto error;
     return fsize;
 
 error:
-    if(fd >= 0){
+    if (fd >= 0) {
         HDclose(fd);
         HDremove("y.h5");
     }
     return fsize;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	enough_room
  *
@@ -281,50 +277,50 @@ error:
  *      'name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF(format - nonliteral)
 static int
 enough_room(hid_t fapl)
 {
-    int		ret_value=0;
-    int		fd[68];
-    size_t	i, size = (size_t)1 << 30;
-    char	filename[1024], name[1024];
+    int    ret_value = 0;
+    int    fd[68];
+    size_t i, size = (size_t)1 << 30;
+    char   filename[1024], name[1024];
 
     /* Initialize file descriptors */
-    for (i=0; i<NELMTS(fd); i++) fd[i] = -1;
+    for (i = 0; i < NELMTS(fd); i++)
+        fd[i] = -1;
 
     /* Get file name template */
-    HDassert(H5FD_FAMILY==H5Pget_driver(fapl));
+    HDassert(H5FD_FAMILY == H5Pget_driver(fapl));
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
 
     /* Create files */
-    for (i=0; i<NELMTS(fd); i++) {
+    for (i = 0; i < NELMTS(fd); i++) {
         HDsnprintf(name, sizeof(name), filename, i);
-        if ((fd[i]=HDopen(name, O_RDWR|O_CREAT|O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
+        if ((fd[i] = HDopen(name, O_RDWR | O_CREAT | O_TRUNC, H5_POSIX_CREATE_MODE_RW)) < 0) {
             goto done;
         }
         if ((off_t)size != HDlseek(fd[i], (off_t)size, SEEK_SET)) {
             goto done;
         }
-        if (1!=HDwrite(fd[i], "X", (size_t)1)) {
+        if (1 != HDwrite(fd[i], "X", (size_t)1)) {
             goto done;
         }
     }
     ret_value = 1;
 
 done:
-    for (i=0; i<NELMTS(fd) && fd[i]>=0; i++) {
+    for (i = 0; i < NELMTS(fd) && fd[i] >= 0; i++) {
         HDsnprintf(name, sizeof(name), filename, i);
-        if(HDclose(fd[i]) < 0)
-            ret_value=0;
+        if (HDclose(fd[i]) < 0)
+            ret_value = 0;
         HDremove(name);
     }
 
     return ret_value;
 }
-H5_GCC_DIAG_ON(format-nonliteral)
+H5_GCC_DIAG_ON(format - nonliteral)
 
-
 /*-------------------------------------------------------------------------
  * Function:	writer
  *
@@ -344,68 +340,68 @@ H5_GCC_DIAG_ON(format-nonliteral)
  *-------------------------------------------------------------------------
  */
 static int
-writer (char* filename, hid_t fapl, fsizes_t testsize, int wrt_n)
+writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
 {
-    hsize_t	size1[4] = {8, 1024, 1024, 1024};
-    hsize_t	size2[1] = {GB8LL};
-    hsize_t	hs_start[1];
-    hsize_t	hs_size[1];
-    hid_t	file=-1, space1=-1, space2=-1, mem_space=-1, d1=-1, d2=-1;
-    int		*buf = (int*)HDmalloc (sizeof(int) * WRT_SIZE);
-    int		i, j;
-    FILE	*out = HDfopen(DNAME, "w");
-    hid_t       dcpl;
+    hsize_t size1[4] = {8, 1024, 1024, 1024};
+    hsize_t size2[1] = {GB8LL};
+    hsize_t hs_start[1];
+    hsize_t hs_size[1];
+    hid_t   file = -1, space1 = -1, space2 = -1, mem_space = -1, d1 = -1, d2 = -1;
+    int *   buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int     i, j;
+    FILE *  out = HDfopen(DNAME, "w");
+    hid_t   dcpl;
 
-    switch(testsize){
-    case LFILE:
-        TESTING("Large dataset write(2GB)");
-        /* reduce size1 to produce a 2GB dataset */
-        size1[1] = 1024/16;
-        size2[0] /= 16;
-        break;
+    switch (testsize) {
+        case LFILE:
+            TESTING("Large dataset write(2GB)");
+            /* reduce size1 to produce a 2GB dataset */
+            size1[1] = 1024 / 16;
+            size2[0] /= 16;
+            break;
 
-    case XLFILE:
-        TESTING("Extra large dataset write(4GB)");
-        /* reduce size1 to produce a 4GB dataset */
-        size1[1] = 1024/8;
-        size2[0] /= 8;
-        break;
+        case XLFILE:
+            TESTING("Extra large dataset write(4GB)");
+            /* reduce size1 to produce a 4GB dataset */
+            size1[1] = 1024 / 8;
+            size2[0] /= 8;
+            break;
 
-    case HUGEFILE:
-        TESTING("Huge dataset write");
-        /* Leave size1 as 32GB */
-        break;
+        case HUGEFILE:
+            TESTING("Huge dataset write");
+            /* Leave size1 as 32GB */
+            break;
 
-    case SFILE:
-        TESTING("small dataset write(1GB)");
-        /* reduce size1 to produce a 1GB dataset */
-        size1[1] = 1024/32;
-        size2[0] /= 32;
-        break;
+        case SFILE:
+            TESTING("small dataset write(1GB)");
+            /* reduce size1 to produce a 1GB dataset */
+            size1[1] = 1024 / 32;
+            size2[0] /= 32;
+            break;
 
-    case NO_FILE:
-        /* what to do?? */
-        HDfprintf(stdout, "Unexpected file size of NO_FILE\n");
-        goto error;
-        break;
+        case NO_FILE:
+            /* what to do?? */
+            HDfprintf(stdout, "Unexpected file size of NO_FILE\n");
+            goto error;
+            break;
 
-    default:
-        HDfprintf(stdout, "Unexpected file size(%d)\n", testsize);
-        goto error;
-        break;
+        default:
+            HDfprintf(stdout, "Unexpected file size(%d)\n", testsize);
+            goto error;
+            break;
     }
 
     /*
      * We might be on a machine that has 32-bit files, so create an HDF5 file
      * which is a family of files.  Each member of the family will be 1GB
      */
-    if ((file=H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
+    if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
         goto error;
     }
 
     /* Create simple data spaces according to the size specified above. */
-    if ((space1 = H5Screate_simple (4, size1, size1)) < 0 ||
-            (space2 = H5Screate_simple (1, size2, size2)) < 0) {
+    if ((space1 = H5Screate_simple(4, size1, size1)) < 0 ||
+        (space2 = H5Screate_simple(1, size2, size2)) < 0) {
         goto error;
     }
 
@@ -421,54 +417,63 @@ writer (char* filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     dcpl = H5Pcreate(H5P_DATASET_CREATE);
     H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_LATE);
     H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER);
-    if((d1 = H5Dcreate2(file, "d1", H5T_NATIVE_INT, space1, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0 ||
-            (d2 = H5Dcreate2(file, "d2", H5T_NATIVE_INT, space2, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
+    if ((d1 = H5Dcreate2(file, "d1", H5T_NATIVE_INT, space1, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0 ||
+        (d2 = H5Dcreate2(file, "d2", H5T_NATIVE_INT, space2, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0) {
         goto error;
     }
 
-
     /* Write some things to them randomly */
     hs_size[0] = WRT_SIZE;
-    if ((mem_space = H5Screate_simple (1, hs_size, hs_size)) < 0) goto error;
-    for (i=0; i<wrt_n; i++) {
-	/* start position must be at least hs_size from the end */
-        hs_start[0] = randll (size2[0]-hs_size[0], i);
-        HDfprintf (out, "#%03d 0x%016Hx\n", i, hs_start[0]);
-        if (H5Sselect_hyperslab (space2, H5S_SELECT_SET, hs_start, NULL,
-                hs_size, NULL) < 0) goto error;
-        for (j=0; j<WRT_SIZE; j++) {
-            buf[j] = i+1;
+    if ((mem_space = H5Screate_simple(1, hs_size, hs_size)) < 0)
+        goto error;
+    for (i = 0; i < wrt_n; i++) {
+        /* start position must be at least hs_size from the end */
+        hs_start[0] = randll(size2[0] - hs_size[0], i);
+        HDfprintf(out, "#%03d 0x%016Hx\n", i, hs_start[0]);
+        if (H5Sselect_hyperslab(space2, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL) < 0)
+            goto error;
+        for (j = 0; j < WRT_SIZE; j++) {
+            buf[j] = i + 1;
         }
-        if (H5Dwrite (d2, H5T_NATIVE_INT, mem_space, space2,
-                H5P_DEFAULT, buf) < 0) goto error;
+        if (H5Dwrite(d2, H5T_NATIVE_INT, mem_space, space2, H5P_DEFAULT, buf) < 0)
+            goto error;
     }
 
-    if (H5Dclose (d1) < 0) goto error;
-    if (H5Dclose (d2) < 0) goto error;
-    if (H5Sclose (mem_space) < 0) goto error;
-    if (H5Sclose (space1) < 0) goto error;
-    if (H5Sclose (space2) < 0) goto error;
-    if (H5Fclose (file) < 0) goto error;
-    HDfree (buf);
+    if (H5Dclose(d1) < 0)
+        goto error;
+    if (H5Dclose(d2) < 0)
+        goto error;
+    if (H5Sclose(mem_space) < 0)
+        goto error;
+    if (H5Sclose(space1) < 0)
+        goto error;
+    if (H5Sclose(space2) < 0)
+        goto error;
+    if (H5Fclose(file) < 0)
+        goto error;
+    HDfree(buf);
     HDfclose(out);
     PASSED();
     return 0;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(d1);
         H5Dclose(d2);
         H5Sclose(space1);
         H5Sclose(space2);
         H5Sclose(mem_space);
         H5Fclose(file);
-    } H5E_END_TRY;
-    if (buf) HDfree(buf);
-    if (out) HDfclose(out);
+    }
+    H5E_END_TRY;
+    if (buf)
+        HDfree(buf);
+    if (out)
+        HDfclose(out);
     return 1;
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:	reader
  *
@@ -488,85 +493,95 @@ error:
 static int
 reader(char *filename, hid_t fapl)
 {
-    FILE	*script = NULL;
-    hid_t	file = -1, mspace = -1, fspace = -1, d2 = -1;
-    char	ln[128], *s;
-    hsize_t	hs_offset[1];
-    hsize_t	hs_size[1] = {WRT_SIZE};
-    int		*buf = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
-    int		i, j, zero, wrong, nerrors = 0;
+    FILE *  script = NULL;
+    hid_t   file = -1, mspace = -1, fspace = -1, d2 = -1;
+    char    ln[128], *s;
+    hsize_t hs_offset[1];
+    hsize_t hs_size[1] = {WRT_SIZE};
+    int *   buf        = (int *)HDmalloc(sizeof(int) * WRT_SIZE);
+    int     i, j, zero, wrong, nerrors = 0;
 
     /* Open script file */
     script = HDfopen(DNAME, "r");
 
     /* Open HDF5 file */
-    if((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0) FAIL_STACK_ERROR
+    if ((file = H5Fopen(filename, H5F_ACC_RDONLY, fapl)) < 0)
+        FAIL_STACK_ERROR
 
     /* Open the dataset */
-    if((d2 = H5Dopen2(file, "d2", H5P_DEFAULT)) < 0) FAIL_STACK_ERROR
-    if((fspace = H5Dget_space(d2)) < 0) FAIL_STACK_ERROR
+    if ((d2 = H5Dopen2(file, "d2", H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+    if ((fspace = H5Dget_space(d2)) < 0)
+        FAIL_STACK_ERROR
 
     /* Describe `buf' */
-    if((mspace = H5Screate_simple(1, hs_size, hs_size)) < 0) FAIL_STACK_ERROR
+    if ((mspace = H5Screate_simple(1, hs_size, hs_size)) < 0)
+        FAIL_STACK_ERROR
 
     /* Read each region */
-    while(HDfgets(ln, (int)sizeof(ln), script)) {
-        if('#' != ln[0])
+    while (HDfgets(ln, (int)sizeof(ln), script)) {
+        if ('#' != ln[0])
             break;
-        i = (int)HDstrtol(ln + 1, &s, 10);
+        i            = (int)HDstrtol(ln + 1, &s, 10);
         hs_offset[0] = HDstrtoull(s, NULL, 0);
         HDfprintf(stdout, "#%03d 0x%016Hx%47s", i, hs_offset[0], "");
         HDfflush(stdout);
 
-        if(H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL,
-                hs_size, NULL) < 0) FAIL_STACK_ERROR
-                if(H5Dread(d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
-                    FAIL_STACK_ERROR
+        if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
+            FAIL_STACK_ERROR
+        if (H5Dread(d2, H5T_NATIVE_INT, mspace, fspace, H5P_DEFAULT, buf) < 0)
+            FAIL_STACK_ERROR
 
-                    /* Check */
-                    for(j = zero = wrong = 0; j < WRT_SIZE; j++) {
-                        if(0 == buf[j])
-                            zero++;
-                        else if(buf[j] != i + 1)
-                            wrong++;
-                    }
-        if(zero) {
+        /* Check */
+        for (j = zero = wrong = 0; j < WRT_SIZE; j++) {
+            if (0 == buf[j])
+                zero++;
+            else if (buf[j] != i + 1)
+                wrong++;
+        }
+        if (zero) {
             H5_FAILED();
             HDprintf("    %d zero%s\n", zero, 1 == zero ? "" : "s");
-        } else if(wrong) {
+        }
+        else if (wrong) {
             SKIPPED();
             HDputs("    Possible overlap with another region.");
             nerrors++;
-        } else {
+        }
+        else {
             PASSED();
         }
     }
 
-    if(H5Dclose(d2) < 0) FAIL_STACK_ERROR
-            if(H5Sclose(mspace) < 0) FAIL_STACK_ERROR
-            if(H5Sclose(fspace) < 0) FAIL_STACK_ERROR
-            if(H5Fclose(file) < 0) FAIL_STACK_ERROR
-            HDfree(buf);
+    if (H5Dclose(d2) < 0)
+        FAIL_STACK_ERROR
+    if (H5Sclose(mspace) < 0)
+        FAIL_STACK_ERROR
+    if (H5Sclose(fspace) < 0)
+        FAIL_STACK_ERROR
+    if (H5Fclose(file) < 0)
+        FAIL_STACK_ERROR
+    HDfree(buf);
     HDfclose(script);
 
     return nerrors;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(d2);
         H5Sclose(mspace);
         H5Sclose(fspace);
         H5Fclose(file);
-    } H5E_END_TRY;
-    if(buf)
+    }
+    H5E_END_TRY;
+    if (buf)
         HDfree(buf);
-    if(script)
+    if (script)
         HDfclose(script);
     return 1;
 }
 
-
-
 /*-------------------------------------------------------------------------
  * Function:	usage
  *
@@ -585,27 +600,27 @@ static void
 usage(void)
 {
     HDfprintf(stdout,
-            "Usage: big [-h] [-c] [-fsize <fsize>}\n"
-            "\t-h\tPrint the help page\n"
-            "\t-c\tFile system Checking skipped.  Caution: this test generates\n"
-            "\t\tmany big files and may fill up the file system.\n"
-            "\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
-            "\t\ta positive float point number.  Default value is %Hu.\n"
-            "Examples:\n"
-            "\tbig -fsize 2.1e9 \t# test with file size just under 2GB\n"
-            "\tbig -fsize 2.2e9 \t# test with file size just above 2GB\n"
-            "\tBe sure the file system can support the file size requested\n"
-            , (hsize_t)FAMILY_SIZE);
+              "Usage: big [-h] [-c] [-fsize <fsize>}\n"
+              "\t-h\tPrint the help page\n"
+              "\t-c\tFile system Checking skipped.  Caution: this test generates\n"
+              "\t\tmany big files and may fill up the file system.\n"
+              "\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
+              "\t\ta positive float point number.  Default value is %Hu.\n"
+              "Examples:\n"
+              "\tbig -fsize 2.1e9 \t# test with file size just under 2GB\n"
+              "\tbig -fsize 2.2e9 \t# test with file size just above 2GB\n"
+              "\tBe sure the file system can support the file size requested\n",
+              (hsize_t)FAMILY_SIZE);
 }
 
 static int
 test_sec2(hid_t fapl)
 {
-    char	filename[1024];
-    fsizes_t	testsize;
+    char     filename[1024];
+    fsizes_t testsize;
 
     testsize = supports_big();
-    if(testsize == NO_FILE) {
+    if (testsize == NO_FILE) {
         HDfprintf(stdout, "Test for sec2 is skipped because file system does not support big files.\n");
         goto quit;
     }
@@ -614,9 +629,9 @@ test_sec2(hid_t fapl)
 
     h5_fixname(FILENAME[1], fapl, filename, sizeof filename);
 
-    if(writer(filename, fapl, testsize, WRT_N))
+    if (writer(filename, fapl, testsize, WRT_N))
         goto error;
-    if(reader(filename, fapl))
+    if (reader(filename, fapl))
         goto error;
 
     HDputs("Test passed with the SEC2 Driver.");
@@ -633,14 +648,14 @@ error:
     return 1;
 } /* end test_sec2() */
 
-static int 
+static int
 test_stdio(hid_t fapl)
 {
-    char	filename[1024];
-    fsizes_t	testsize;
+    char     filename[1024];
+    fsizes_t testsize;
 
     testsize = supports_big();
-    if(testsize == NO_FILE) {
+    if (testsize == NO_FILE) {
         HDfprintf(stdout, "Test for stdio is skipped because file system does not support big files.\n");
         goto quit;
     }
@@ -648,9 +663,9 @@ test_stdio(hid_t fapl)
 
     h5_fixname(FILENAME[2], fapl, filename, sizeof filename);
 
-    if(writer(filename, fapl, testsize, WRT_N))
+    if (writer(filename, fapl, testsize, WRT_N))
         goto error;
-    if(reader(filename, fapl))
+    if (reader(filename, fapl))
         goto error;
     HDputs("Test passed with the STDIO Driver.");
 
@@ -675,34 +690,34 @@ error:
 static int
 test_family(hid_t fapl)
 {
-    char	filename[1024];
+    char filename[1024];
 
     /* Test huge file with the family driver */
     HDputs("Testing big file with the Family Driver ");
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         goto error;
 
-    if(H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT) < 0)
+    if (H5Pset_fapl_family(fapl, family_size_def, H5P_DEFAULT) < 0)
         goto error;
 
-    if(cflag){
+    if (cflag) {
         /*
          * We shouldn't run this test if the file system doesn't support holes
          * because we would generate multi-gigabyte files.
          */
         HDputs("Checking if file system is adequate for this test...");
-        if(sizeof(long long) < 8 || 0 == GB8LL) {
+        if (sizeof(long long) < 8 || 0 == GB8LL) {
             HDputs("Test skipped because sizeof(long long) is too small. This");
             HDputs("hardware apparently doesn't support 64-bit integer types.");
             usage();
             goto quit;
         }
-        if(!sparse_support) {
+        if (!sparse_support) {
             HDputs("Test skipped because file system does not support holes.");
             usage();
             goto quit;
         }
-        if(!enough_room(fapl)) {
+        if (!enough_room(fapl)) {
             HDputs("Test skipped because of quota (file size or num open files).");
             usage();
             goto quit;
@@ -712,9 +727,9 @@ test_family(hid_t fapl)
     /* Do the test with the Family Driver */
     h5_fixname(FILENAME[0], fapl, filename, sizeof filename);
 
-    if(writer(filename, fapl, HUGEFILE, WRT_N))
+    if (writer(filename, fapl, HUGEFILE, WRT_N))
         goto error;
-    if(reader(filename, fapl))
+    if (reader(filename, fapl))
         goto error;
 
     HDputs("Test passed with the Family Driver.");
@@ -731,7 +746,6 @@ error:
     return 1;
 } /* end test_family() */
 
-
 /*-------------------------------------------------------------------------
  * Function:	main
  *
@@ -756,49 +770,51 @@ error:
  *-------------------------------------------------------------------------
  */
 int
-main (int ac, char **av)
+main(int ac, char **av)
 {
-    unsigned long seed = 0;             /* Random # seed */
-    hid_t fapl = -1;
-    hid_t driver = -1;
+    unsigned long seed   = 0; /* Random # seed */
+    hid_t         fapl   = -1;
+    hid_t         driver = -1;
 
     /* parameters setup */
 
-    while (--ac > 0){
+    while (--ac > 0) {
         av++;
-        if (HDstrcmp("-fsize", *av)==0){
+        if (HDstrcmp("-fsize", *av) == 0) {
             /* specify a different family file size */
-            ac--; av++;
+            ac--;
+            av++;
             if (ac > 0) {
                 family_size_def = (hsize_t)HDstrtoull(*av, NULL, 0);
             }
-            else{
+            else {
                 HDprintf("***Missing fsize value***\n");
                 usage();
                 return 1;
             }
         }
-        else if (HDstrcmp("-c", *av)==0){
+        else if (HDstrcmp("-c", *av) == 0) {
             /* turn off file system check before test */
-            cflag=0;
+            cflag = 0;
         }
-        else if (HDstrcmp("-h", *av)==0){
+        else if (HDstrcmp("-h", *av) == 0) {
             usage();
             return 0;
-        }else{
+        }
+        else {
             usage();
             return 1;
         }
     }
 
     /* check VFD to see if this is one we test */
-    if((fapl = h5_fileaccess()) < 0)
+    if ((fapl = h5_fileaccess()) < 0)
         goto error;
-    if((driver = H5Pget_driver(fapl)) < 0)
+    if ((driver = H5Pget_driver(fapl)) < 0)
         goto error;
 
     /* check sparse file support unless cflag is not set. */
-    if(cflag)
+    if (cflag)
         sparse_support = is_sparse();
 
     /* Choose random # seed */
@@ -810,16 +826,16 @@ main (int ac, char **av)
     HDsrandom((unsigned)seed);
 
     /* run VFD-specific test */
-    if(H5FD_SEC2 == driver) {
-        if(test_sec2(fapl) != 0)
+    if (H5FD_SEC2 == driver) {
+        if (test_sec2(fapl) != 0)
             goto error;
     }
-    else if(H5FD_STDIO == driver) {
-        if(test_stdio(fapl) != 0)
+    else if (H5FD_STDIO == driver) {
+        if (test_stdio(fapl) != 0)
             goto error;
     }
-    else if(H5FD_FAMILY == driver) {
-        if(test_family(fapl) != 0)
+    else if (H5FD_FAMILY == driver) {
+        if (test_family(fapl) != 0)
             goto error;
     }
     else
@@ -831,8 +847,7 @@ main (int ac, char **av)
 
 error:
     HDputs("*** TEST FAILED ***");
-    if(fapl > 0)
+    if (fapl > 0)
         H5Pclose(fapl);
     return 1;
 }
-

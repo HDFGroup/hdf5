@@ -37,8 +37,7 @@ extern "C" {
  * Signature: (JI)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1copy_1object
-    (JNIEnv *env, jclass clss, jlong ocp_plist_id, jint copy_options)
+Java_hdf_hdf5lib_H5_H5Pset_1copy_1object(JNIEnv *env, jclass clss, jlong ocp_plist_id, jint copy_options)
 {
     herr_t retVal = FAIL;
 
@@ -57,8 +56,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1copy_1object
-    (JNIEnv *env, jclass clss, jlong ocp_plist_id)
+Java_hdf_hdf5lib_H5_H5Pget_1copy_1object(JNIEnv *env, jclass clss, jlong ocp_plist_id)
 {
     unsigned copy_options = 0;
 

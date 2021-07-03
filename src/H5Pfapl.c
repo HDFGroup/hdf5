@@ -24,33 +24,31 @@
 /* Module Setup */
 /****************/
 
-#include "H5Pmodule.h"          /* This source code file is part of the H5P module */
-
+#include "H5Pmodule.h" /* This source code file is part of the H5P module */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"          /* Generic Functions                        */
-#include "H5ACprivate.h"        /* Metadata cache                           */
-#include "H5Eprivate.h"         /* Error handling                           */
-#include "H5Fprivate.h"         /* Files                                    */
-#include "H5FDprivate.h"        /* File drivers                             */
-#include "H5Iprivate.h"         /* IDs                                      */
-#include "H5MMprivate.h"        /* Memory Management                        */
-#include "H5Ppkg.h"             /* Property lists                           */
-#include "H5VLprivate.h"        /* Virtual Object Layer                     */
-#include "H5VMprivate.h"        /* Vector Functions                         */
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5ACprivate.h" /* Metadata cache                           */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5Fprivate.h"  /* Files                                    */
+#include "H5FDprivate.h" /* File drivers                             */
+#include "H5Iprivate.h"  /* IDs                                      */
+#include "H5MMprivate.h" /* Memory Management                        */
+#include "H5Ppkg.h"      /* Property lists                           */
+#include "H5VLprivate.h" /* Virtual Object Layer                     */
+#include "H5VMprivate.h" /* Vector Functions                         */
 
 /* Includes needed to set default file driver */
-#include "H5FDsec2.h"           /* POSIX unbuffered I/O                     */
-#include "H5FDstdio.h"          /* Standard C buffered I/O                  */
+#include "H5FDsec2.h"  /* POSIX unbuffered I/O                     */
+#include "H5FDstdio.h" /* Standard C buffered I/O                  */
 #ifdef H5_HAVE_WINDOWS
-#include "H5FDwindows.h"        /* Win32 I/O                                */
+#include "H5FDwindows.h" /* Win32 I/O                                */
 #endif
 
 /* Includes needed to set default VOL connector */
 #include "H5VLnative_private.h" /* Native VOL connector                     */
-
 
 /****************/
 /* Local Macros */
@@ -58,197 +56,203 @@
 
 /* ========= File Access properties ============ */
 /* Definitions for the initial metadata cache resize configuration */
-#define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE    sizeof(H5AC_cache_config_t)
-#define H5F_ACS_META_CACHE_INIT_CONFIG_DEF    H5AC__DEFAULT_CACHE_CONFIG
-#define H5F_ACS_META_CACHE_INIT_CONFIG_ENC    H5P__facc_cache_config_enc
-#define H5F_ACS_META_CACHE_INIT_CONFIG_DEC    H5P__facc_cache_config_dec
-#define H5F_ACS_META_CACHE_INIT_CONFIG_CMP      H5P__facc_cache_config_cmp
+#define H5F_ACS_META_CACHE_INIT_CONFIG_SIZE sizeof(H5AC_cache_config_t)
+#define H5F_ACS_META_CACHE_INIT_CONFIG_DEF  H5AC__DEFAULT_CACHE_CONFIG
+#define H5F_ACS_META_CACHE_INIT_CONFIG_ENC  H5P__facc_cache_config_enc
+#define H5F_ACS_META_CACHE_INIT_CONFIG_DEC  H5P__facc_cache_config_dec
+#define H5F_ACS_META_CACHE_INIT_CONFIG_CMP  H5P__facc_cache_config_cmp
 /* Definitions for size of raw data chunk cache(slots) */
-#define H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE       sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF        521
-#define H5F_ACS_DATA_CACHE_NUM_SLOTS_ENC        H5P__encode_size_t
-#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC        H5P__decode_size_t
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE sizeof(size_t)
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF  521
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_ENC  H5P__encode_size_t
+#define H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC  H5P__decode_size_t
 /* Definition for size of raw data chunk cache(bytes) */
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE       sizeof(size_t)
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF        (1024*1024)
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_ENC        H5P__encode_size_t
-#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC        H5P__decode_size_t
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE sizeof(size_t)
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF  (1024 * 1024)
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_ENC  H5P__encode_size_t
+#define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC  H5P__decode_size_t
 /* Definition for preemption read chunks first */
-#define H5F_ACS_PREEMPT_READ_CHUNKS_SIZE        sizeof(double)
-#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF         0.75f
-#define H5F_ACS_PREEMPT_READ_CHUNKS_ENC         H5P__encode_double
-#define H5F_ACS_PREEMPT_READ_CHUNKS_DEC         H5P__decode_double
+#define H5F_ACS_PREEMPT_READ_CHUNKS_SIZE sizeof(double)
+#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF  0.75f
+#define H5F_ACS_PREEMPT_READ_CHUNKS_ENC  H5P__encode_double
+#define H5F_ACS_PREEMPT_READ_CHUNKS_DEC  H5P__decode_double
 /* Definition for threshold for alignment */
-#define H5F_ACS_ALIGN_THRHD_SIZE                sizeof(hsize_t)
-#define H5F_ACS_ALIGN_THRHD_DEF                 H5F_ALIGN_THRHD_DEF
-#define H5F_ACS_ALIGN_THRHD_ENC                 H5P__encode_hsize_t
-#define H5F_ACS_ALIGN_THRHD_DEC                 H5P__decode_hsize_t
+#define H5F_ACS_ALIGN_THRHD_SIZE sizeof(hsize_t)
+#define H5F_ACS_ALIGN_THRHD_DEF  H5F_ALIGN_THRHD_DEF
+#define H5F_ACS_ALIGN_THRHD_ENC  H5P__encode_hsize_t
+#define H5F_ACS_ALIGN_THRHD_DEC  H5P__decode_hsize_t
 /* Definition for alignment */
-#define H5F_ACS_ALIGN_SIZE                      sizeof(hsize_t)
-#define H5F_ACS_ALIGN_DEF                       H5F_ALIGN_DEF
-#define H5F_ACS_ALIGN_ENC                       H5P__encode_hsize_t
-#define H5F_ACS_ALIGN_DEC                       H5P__decode_hsize_t
+#define H5F_ACS_ALIGN_SIZE sizeof(hsize_t)
+#define H5F_ACS_ALIGN_DEF  H5F_ALIGN_DEF
+#define H5F_ACS_ALIGN_ENC  H5P__encode_hsize_t
+#define H5F_ACS_ALIGN_DEC  H5P__decode_hsize_t
 /* Definition for minimum metadata allocation block size (when
    aggregating metadata allocations. */
-#define H5F_ACS_META_BLOCK_SIZE_SIZE            sizeof(hsize_t)
-#define H5F_ACS_META_BLOCK_SIZE_DEF             H5F_META_BLOCK_SIZE_DEF
-#define H5F_ACS_META_BLOCK_SIZE_ENC             H5P__encode_hsize_t
-#define H5F_ACS_META_BLOCK_SIZE_DEC             H5P__decode_hsize_t
+#define H5F_ACS_META_BLOCK_SIZE_SIZE sizeof(hsize_t)
+#define H5F_ACS_META_BLOCK_SIZE_DEF  H5F_META_BLOCK_SIZE_DEF
+#define H5F_ACS_META_BLOCK_SIZE_ENC  H5P__encode_hsize_t
+#define H5F_ACS_META_BLOCK_SIZE_DEC  H5P__decode_hsize_t
 /* Definition for maximum sieve buffer size (when data sieving
    is allowed by file driver */
-#define H5F_ACS_SIEVE_BUF_SIZE_SIZE             sizeof(size_t)
-#define H5F_ACS_SIEVE_BUF_SIZE_DEF              (64*1024)
-#define H5F_ACS_SIEVE_BUF_SIZE_ENC              H5P__encode_size_t
-#define H5F_ACS_SIEVE_BUF_SIZE_DEC              H5P__decode_size_t
+#define H5F_ACS_SIEVE_BUF_SIZE_SIZE sizeof(size_t)
+#define H5F_ACS_SIEVE_BUF_SIZE_DEF  (64 * 1024)
+#define H5F_ACS_SIEVE_BUF_SIZE_ENC  H5P__encode_size_t
+#define H5F_ACS_SIEVE_BUF_SIZE_DEC  H5P__decode_size_t
 /* Definition for minimum "small data" allocation block size (when
    aggregating "small" raw data allocations. */
-#define H5F_ACS_SDATA_BLOCK_SIZE_SIZE           sizeof(hsize_t)
-#define H5F_ACS_SDATA_BLOCK_SIZE_DEF            H5F_SDATA_BLOCK_SIZE_DEF
-#define H5F_ACS_SDATA_BLOCK_SIZE_ENC            H5P__encode_hsize_t
-#define H5F_ACS_SDATA_BLOCK_SIZE_DEC            H5P__decode_hsize_t
+#define H5F_ACS_SDATA_BLOCK_SIZE_SIZE sizeof(hsize_t)
+#define H5F_ACS_SDATA_BLOCK_SIZE_DEF  H5F_SDATA_BLOCK_SIZE_DEF
+#define H5F_ACS_SDATA_BLOCK_SIZE_ENC  H5P__encode_hsize_t
+#define H5F_ACS_SDATA_BLOCK_SIZE_DEC  H5P__decode_hsize_t
 /* Definition for garbage-collect references */
-#define H5F_ACS_GARBG_COLCT_REF_SIZE            sizeof(unsigned)
-#define H5F_ACS_GARBG_COLCT_REF_DEF             0
-#define H5F_ACS_GARBG_COLCT_REF_ENC             H5P__encode_unsigned
-#define H5F_ACS_GARBG_COLCT_REF_DEC             H5P__decode_unsigned
+#define H5F_ACS_GARBG_COLCT_REF_SIZE sizeof(unsigned)
+#define H5F_ACS_GARBG_COLCT_REF_DEF  0
+#define H5F_ACS_GARBG_COLCT_REF_ENC  H5P__encode_unsigned
+#define H5F_ACS_GARBG_COLCT_REF_DEC  H5P__decode_unsigned
 /* Definition for file driver ID & info */
-#define H5F_ACS_FILE_DRV_SIZE                   sizeof(H5FD_driver_prop_t)
-#define H5F_ACS_FILE_DRV_DEF                    {H5_DEFAULT_VFD, NULL}
-#define H5F_ACS_FILE_DRV_CRT                    H5P__facc_file_driver_create
-#define H5F_ACS_FILE_DRV_SET                    H5P__facc_file_driver_set
-#define H5F_ACS_FILE_DRV_GET                    H5P__facc_file_driver_get
-#define H5F_ACS_FILE_DRV_DEL                    H5P__facc_file_driver_del
-#define H5F_ACS_FILE_DRV_COPY                   H5P__facc_file_driver_copy
-#define H5F_ACS_FILE_DRV_CMP                    H5P__facc_file_driver_cmp
-#define H5F_ACS_FILE_DRV_CLOSE                  H5P__facc_file_driver_close
+#define H5F_ACS_FILE_DRV_SIZE sizeof(H5FD_driver_prop_t)
+#define H5F_ACS_FILE_DRV_DEF                                                                                 \
+    {                                                                                                        \
+        H5_DEFAULT_VFD, NULL                                                                                 \
+    }
+#define H5F_ACS_FILE_DRV_CRT   H5P__facc_file_driver_create
+#define H5F_ACS_FILE_DRV_SET   H5P__facc_file_driver_set
+#define H5F_ACS_FILE_DRV_GET   H5P__facc_file_driver_get
+#define H5F_ACS_FILE_DRV_DEL   H5P__facc_file_driver_del
+#define H5F_ACS_FILE_DRV_COPY  H5P__facc_file_driver_copy
+#define H5F_ACS_FILE_DRV_CMP   H5P__facc_file_driver_cmp
+#define H5F_ACS_FILE_DRV_CLOSE H5P__facc_file_driver_close
 /* Definition for file close degree */
-#define H5F_CLOSE_DEGREE_SIZE                sizeof(H5F_close_degree_t)
-#define H5F_CLOSE_DEGREE_DEF                H5F_CLOSE_DEFAULT
-#define H5F_CLOSE_DEGREE_ENC                H5P__facc_fclose_degree_enc
-#define H5F_CLOSE_DEGREE_DEC                H5P__facc_fclose_degree_dec
+#define H5F_CLOSE_DEGREE_SIZE sizeof(H5F_close_degree_t)
+#define H5F_CLOSE_DEGREE_DEF  H5F_CLOSE_DEFAULT
+#define H5F_CLOSE_DEGREE_ENC  H5P__facc_fclose_degree_enc
+#define H5F_CLOSE_DEGREE_DEC  H5P__facc_fclose_degree_dec
 /* Definition for offset position in file for family file driver */
-#define H5F_ACS_FAMILY_OFFSET_SIZE              sizeof(hsize_t)
-#define H5F_ACS_FAMILY_OFFSET_DEF               0
-#define H5F_ACS_FAMILY_OFFSET_ENC               H5P__encode_hsize_t
-#define H5F_ACS_FAMILY_OFFSET_DEC               H5P__decode_hsize_t
+#define H5F_ACS_FAMILY_OFFSET_SIZE sizeof(hsize_t)
+#define H5F_ACS_FAMILY_OFFSET_DEF  0
+#define H5F_ACS_FAMILY_OFFSET_ENC  H5P__encode_hsize_t
+#define H5F_ACS_FAMILY_OFFSET_DEC  H5P__decode_hsize_t
 /* Definition for new member size of family driver. It's private
  * property only used by h5repart */
-#define H5F_ACS_FAMILY_NEWSIZE_SIZE             sizeof(hsize_t)
-#define H5F_ACS_FAMILY_NEWSIZE_DEF              0
+#define H5F_ACS_FAMILY_NEWSIZE_SIZE sizeof(hsize_t)
+#define H5F_ACS_FAMILY_NEWSIZE_DEF  0
 /* Definition for whether to convert family to a single-file driver.
  * It's a private property only used by h5repart.
  */
-#define H5F_ACS_FAMILY_TO_SINGLE_SIZE           sizeof(hbool_t)
-#define H5F_ACS_FAMILY_TO_SINGLE_DEF            FALSE
+#define H5F_ACS_FAMILY_TO_SINGLE_SIZE sizeof(hbool_t)
+#define H5F_ACS_FAMILY_TO_SINGLE_DEF  FALSE
 /* Definition for data type in multi file driver */
-#define H5F_ACS_MULTI_TYPE_SIZE                 sizeof(H5FD_mem_t)
-#define H5F_ACS_MULTI_TYPE_DEF                  H5FD_MEM_DEFAULT
-#define H5F_ACS_MULTI_TYPE_ENC                  H5P__facc_multi_type_enc
-#define H5F_ACS_MULTI_TYPE_DEC                  H5P__facc_multi_type_dec
+#define H5F_ACS_MULTI_TYPE_SIZE sizeof(H5FD_mem_t)
+#define H5F_ACS_MULTI_TYPE_DEF  H5FD_MEM_DEFAULT
+#define H5F_ACS_MULTI_TYPE_ENC  H5P__facc_multi_type_enc
+#define H5F_ACS_MULTI_TYPE_DEC  H5P__facc_multi_type_dec
 
 /* Definition for "low" bound of library format versions */
-#define H5F_ACS_LIBVER_LOW_BOUND_SIZE       sizeof(H5F_libver_t)
-#define H5F_ACS_LIBVER_LOW_BOUND_DEF        H5F_LIBVER_EARLIEST
-#define H5F_ACS_LIBVER_LOW_BOUND_ENC        H5P__facc_libver_type_enc
-#define H5F_ACS_LIBVER_LOW_BOUND_DEC        H5P__facc_libver_type_dec
+#define H5F_ACS_LIBVER_LOW_BOUND_SIZE sizeof(H5F_libver_t)
+#define H5F_ACS_LIBVER_LOW_BOUND_DEF  H5F_LIBVER_EARLIEST
+#define H5F_ACS_LIBVER_LOW_BOUND_ENC  H5P__facc_libver_type_enc
+#define H5F_ACS_LIBVER_LOW_BOUND_DEC  H5P__facc_libver_type_dec
 
 /* Definition for "high" bound of library format versions */
-#define H5F_ACS_LIBVER_HIGH_BOUND_SIZE      sizeof(H5F_libver_t)
-#define H5F_ACS_LIBVER_HIGH_BOUND_DEF       H5F_LIBVER_LATEST
-#define H5F_ACS_LIBVER_HIGH_BOUND_ENC       H5P__facc_libver_type_enc
-#define H5F_ACS_LIBVER_HIGH_BOUND_DEC       H5P__facc_libver_type_dec
+#define H5F_ACS_LIBVER_HIGH_BOUND_SIZE sizeof(H5F_libver_t)
+#define H5F_ACS_LIBVER_HIGH_BOUND_DEF  H5F_LIBVER_LATEST
+#define H5F_ACS_LIBVER_HIGH_BOUND_ENC  H5P__facc_libver_type_enc
+#define H5F_ACS_LIBVER_HIGH_BOUND_DEC  H5P__facc_libver_type_dec
 
 /* Definition for whether to query the file descriptor from the core VFD
  * instead of the memory address.  (Private to library)
  */
-#define H5F_ACS_WANT_POSIX_FD_SIZE              sizeof(hbool_t)
-#define H5F_ACS_WANT_POSIX_FD_DEF               FALSE
+#define H5F_ACS_WANT_POSIX_FD_SIZE sizeof(hbool_t)
+#define H5F_ACS_WANT_POSIX_FD_DEF  FALSE
 /* Definition for external file cache size */
-#define H5F_ACS_EFC_SIZE_SIZE                   sizeof(unsigned)
-#define H5F_ACS_EFC_SIZE_DEF                    0
-#define H5F_ACS_EFC_SIZE_ENC                    H5P__encode_unsigned
-#define H5F_ACS_EFC_SIZE_DEC                    H5P__decode_unsigned
+#define H5F_ACS_EFC_SIZE_SIZE sizeof(unsigned)
+#define H5F_ACS_EFC_SIZE_DEF  0
+#define H5F_ACS_EFC_SIZE_ENC  H5P__encode_unsigned
+#define H5F_ACS_EFC_SIZE_DEC  H5P__decode_unsigned
 /* Definition of pointer to initial file image info */
-#define H5F_ACS_FILE_IMAGE_INFO_SIZE            sizeof(H5FD_file_image_info_t)
-#define H5F_ACS_FILE_IMAGE_INFO_DEF             H5FD_DEFAULT_FILE_IMAGE_INFO
-#define H5F_ACS_FILE_IMAGE_INFO_SET             H5P__facc_file_image_info_set
-#define H5F_ACS_FILE_IMAGE_INFO_GET             H5P__facc_file_image_info_get
-#define H5F_ACS_FILE_IMAGE_INFO_DEL             H5P__facc_file_image_info_del
-#define H5F_ACS_FILE_IMAGE_INFO_COPY            H5P__facc_file_image_info_copy
-#define H5F_ACS_FILE_IMAGE_INFO_CMP             H5P__facc_file_image_info_cmp
-#define H5F_ACS_FILE_IMAGE_INFO_CLOSE           H5P__facc_file_image_info_close
+#define H5F_ACS_FILE_IMAGE_INFO_SIZE  sizeof(H5FD_file_image_info_t)
+#define H5F_ACS_FILE_IMAGE_INFO_DEF   H5FD_DEFAULT_FILE_IMAGE_INFO
+#define H5F_ACS_FILE_IMAGE_INFO_SET   H5P__facc_file_image_info_set
+#define H5F_ACS_FILE_IMAGE_INFO_GET   H5P__facc_file_image_info_get
+#define H5F_ACS_FILE_IMAGE_INFO_DEL   H5P__facc_file_image_info_del
+#define H5F_ACS_FILE_IMAGE_INFO_COPY  H5P__facc_file_image_info_copy
+#define H5F_ACS_FILE_IMAGE_INFO_CMP   H5P__facc_file_image_info_cmp
+#define H5F_ACS_FILE_IMAGE_INFO_CLOSE H5P__facc_file_image_info_close
 /* Definition for # of metadata read attempts */
-#define H5F_ACS_METADATA_READ_ATTEMPTS_SIZE    sizeof(unsigned)
-#define H5F_ACS_METADATA_READ_ATTEMPTS_DEF         0
-#define H5F_ACS_METADATA_READ_ATTEMPTS_ENC         H5P__encode_unsigned
-#define H5F_ACS_METADATA_READ_ATTEMPTS_DEC         H5P__decode_unsigned
+#define H5F_ACS_METADATA_READ_ATTEMPTS_SIZE sizeof(unsigned)
+#define H5F_ACS_METADATA_READ_ATTEMPTS_DEF  0
+#define H5F_ACS_METADATA_READ_ATTEMPTS_ENC  H5P__encode_unsigned
+#define H5F_ACS_METADATA_READ_ATTEMPTS_DEC  H5P__decode_unsigned
 /* Definition for object flush callback */
-#define H5F_ACS_OBJECT_FLUSH_CB_SIZE        sizeof(H5F_object_flush_t)
-#define H5F_ACS_OBJECT_FLUSH_CB_DEF             {NULL, NULL}
+#define H5F_ACS_OBJECT_FLUSH_CB_SIZE sizeof(H5F_object_flush_t)
+#define H5F_ACS_OBJECT_FLUSH_CB_DEF                                                                          \
+    {                                                                                                        \
+        NULL, NULL                                                                                           \
+    }
 /* Definition for status_flags in the superblock */
-#define H5F_ACS_CLEAR_STATUS_FLAGS_SIZE         sizeof(hbool_t)
-#define H5F_ACS_CLEAR_STATUS_FLAGS_DEF          FALSE
+#define H5F_ACS_CLEAR_STATUS_FLAGS_SIZE sizeof(hbool_t)
+#define H5F_ACS_CLEAR_STATUS_FLAGS_DEF  FALSE
 
 /* Definition for dropping free-space to the floor when reading in the superblock */
-#define H5F_ACS_NULL_FSM_ADDR_SIZE          sizeof(hbool_t)
-#define H5F_ACS_NULL_FSM_ADDR_DEF           FALSE
+#define H5F_ACS_NULL_FSM_ADDR_SIZE sizeof(hbool_t)
+#define H5F_ACS_NULL_FSM_ADDR_DEF  FALSE
 /* Definition for skipping EOF check when reading in the superblock */
-#define H5F_ACS_SKIP_EOF_CHECK_SIZE         sizeof(hbool_t)
-#define H5F_ACS_SKIP_EOF_CHECK_DEF          FALSE
+#define H5F_ACS_SKIP_EOF_CHECK_SIZE sizeof(hbool_t)
+#define H5F_ACS_SKIP_EOF_CHECK_DEF  FALSE
 
 /* Definition for 'use metadata cache logging' flag */
-#define H5F_ACS_USE_MDC_LOGGING_SIZE            sizeof(hbool_t)
-#define H5F_ACS_USE_MDC_LOGGING_DEF             FALSE
-#define H5F_ACS_USE_MDC_LOGGING_ENC             H5P__encode_hbool_t
-#define H5F_ACS_USE_MDC_LOGGING_DEC             H5P__decode_hbool_t
+#define H5F_ACS_USE_MDC_LOGGING_SIZE sizeof(hbool_t)
+#define H5F_ACS_USE_MDC_LOGGING_DEF  FALSE
+#define H5F_ACS_USE_MDC_LOGGING_ENC  H5P__encode_hbool_t
+#define H5F_ACS_USE_MDC_LOGGING_DEC  H5P__decode_hbool_t
 /* Definition for 'mdc log location' flag */
-#define H5F_ACS_MDC_LOG_LOCATION_SIZE           sizeof(char *)
-#define H5F_ACS_MDC_LOG_LOCATION_DEF            NULL /* default is no log location */
-#define H5F_ACS_MDC_LOG_LOCATION_ENC            H5P_facc_mdc_log_location_enc
-#define H5F_ACS_MDC_LOG_LOCATION_DEC            H5P_facc_mdc_log_location_dec
-#define H5F_ACS_MDC_LOG_LOCATION_DEL            H5P_facc_mdc_log_location_del
-#define H5F_ACS_MDC_LOG_LOCATION_COPY           H5P_facc_mdc_log_location_copy
-#define H5F_ACS_MDC_LOG_LOCATION_CMP            H5P_facc_mdc_log_location_cmp
-#define H5F_ACS_MDC_LOG_LOCATION_CLOSE          H5P_facc_mdc_log_location_close
+#define H5F_ACS_MDC_LOG_LOCATION_SIZE  sizeof(char *)
+#define H5F_ACS_MDC_LOG_LOCATION_DEF   NULL /* default is no log location */
+#define H5F_ACS_MDC_LOG_LOCATION_ENC   H5P_facc_mdc_log_location_enc
+#define H5F_ACS_MDC_LOG_LOCATION_DEC   H5P_facc_mdc_log_location_dec
+#define H5F_ACS_MDC_LOG_LOCATION_DEL   H5P_facc_mdc_log_location_del
+#define H5F_ACS_MDC_LOG_LOCATION_COPY  H5P_facc_mdc_log_location_copy
+#define H5F_ACS_MDC_LOG_LOCATION_CMP   H5P_facc_mdc_log_location_cmp
+#define H5F_ACS_MDC_LOG_LOCATION_CLOSE H5P_facc_mdc_log_location_close
 /* Definition for 'start metadata cache logging on access' flag */
-#define H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE    sizeof(hbool_t)
-#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF     FALSE
-#define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC     H5P__encode_hbool_t
-#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC     H5P__decode_hbool_t
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE sizeof(hbool_t)
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF  FALSE
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC  H5P__encode_hbool_t
+#define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC  H5P__decode_hbool_t
 /* Definition for evict on close property */
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE                sizeof(hbool_t)
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF                 FALSE
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC                 H5P__encode_hbool_t
-#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC                 H5P__decode_hbool_t
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE sizeof(hbool_t)
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF  FALSE
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC  H5P__encode_hbool_t
+#define H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC  H5P__decode_hbool_t
 #ifdef H5_HAVE_PARALLEL
 /* Definition of collective metadata read mode flag */
-#define H5F_ACS_COLL_MD_READ_FLAG_SIZE   sizeof(H5P_coll_md_read_flag_t)
-#define H5F_ACS_COLL_MD_READ_FLAG_DEF    H5P_USER_FALSE
-#define H5F_ACS_COLL_MD_READ_FLAG_ENC    H5P__encode_coll_md_read_flag_t
-#define H5F_ACS_COLL_MD_READ_FLAG_DEC    H5P__decode_coll_md_read_flag_t
+#define H5F_ACS_COLL_MD_READ_FLAG_SIZE sizeof(H5P_coll_md_read_flag_t)
+#define H5F_ACS_COLL_MD_READ_FLAG_DEF  H5P_USER_FALSE
+#define H5F_ACS_COLL_MD_READ_FLAG_ENC  H5P__encode_coll_md_read_flag_t
+#define H5F_ACS_COLL_MD_READ_FLAG_DEC  H5P__decode_coll_md_read_flag_t
 /* Definition of collective metadata write mode flag */
-#define H5F_ACS_COLL_MD_WRITE_FLAG_SIZE   sizeof(hbool_t)
-#define H5F_ACS_COLL_MD_WRITE_FLAG_DEF    FALSE
-#define H5F_ACS_COLL_MD_WRITE_FLAG_ENC    H5P__encode_hbool_t
-#define H5F_ACS_COLL_MD_WRITE_FLAG_DEC    H5P__decode_hbool_t
+#define H5F_ACS_COLL_MD_WRITE_FLAG_SIZE sizeof(hbool_t)
+#define H5F_ACS_COLL_MD_WRITE_FLAG_DEF  FALSE
+#define H5F_ACS_COLL_MD_WRITE_FLAG_ENC  H5P__encode_hbool_t
+#define H5F_ACS_COLL_MD_WRITE_FLAG_DEC  H5P__decode_hbool_t
 /* Definition for the file's MPI communicator */
-#define H5F_ACS_MPI_PARAMS_COMM_SIZE            sizeof(MPI_Comm)
-#define H5F_ACS_MPI_PARAMS_COMM_DEF             MPI_COMM_NULL
-#define H5F_ACS_MPI_PARAMS_COMM_SET             H5P__facc_mpi_comm_set
-#define H5F_ACS_MPI_PARAMS_COMM_GET             H5P__facc_mpi_comm_get
-#define H5F_ACS_MPI_PARAMS_COMM_DEL             H5P__facc_mpi_comm_del
-#define H5F_ACS_MPI_PARAMS_COMM_COPY            H5P__facc_mpi_comm_copy
-#define H5F_ACS_MPI_PARAMS_COMM_CMP             H5P__facc_mpi_comm_cmp
-#define H5F_ACS_MPI_PARAMS_COMM_CLOSE           H5P__facc_mpi_comm_close
+#define H5F_ACS_MPI_PARAMS_COMM_SIZE  sizeof(MPI_Comm)
+#define H5F_ACS_MPI_PARAMS_COMM_DEF   MPI_COMM_NULL
+#define H5F_ACS_MPI_PARAMS_COMM_SET   H5P__facc_mpi_comm_set
+#define H5F_ACS_MPI_PARAMS_COMM_GET   H5P__facc_mpi_comm_get
+#define H5F_ACS_MPI_PARAMS_COMM_DEL   H5P__facc_mpi_comm_del
+#define H5F_ACS_MPI_PARAMS_COMM_COPY  H5P__facc_mpi_comm_copy
+#define H5F_ACS_MPI_PARAMS_COMM_CMP   H5P__facc_mpi_comm_cmp
+#define H5F_ACS_MPI_PARAMS_COMM_CLOSE H5P__facc_mpi_comm_close
 /* Definition for the file's MPI info */
-#define H5F_ACS_MPI_PARAMS_INFO_SIZE            sizeof(MPI_Info)
-#define H5F_ACS_MPI_PARAMS_INFO_DEF             MPI_INFO_NULL
-#define H5F_ACS_MPI_PARAMS_INFO_SET             H5P__facc_mpi_info_set
-#define H5F_ACS_MPI_PARAMS_INFO_GET             H5P__facc_mpi_info_get
-#define H5F_ACS_MPI_PARAMS_INFO_DEL             H5P__facc_mpi_info_del
-#define H5F_ACS_MPI_PARAMS_INFO_COPY            H5P__facc_mpi_info_copy
-#define H5F_ACS_MPI_PARAMS_INFO_CMP             H5P__facc_mpi_info_cmp
-#define H5F_ACS_MPI_PARAMS_INFO_CLOSE           H5P__facc_mpi_info_close
+#define H5F_ACS_MPI_PARAMS_INFO_SIZE  sizeof(MPI_Info)
+#define H5F_ACS_MPI_PARAMS_INFO_DEF   MPI_INFO_NULL
+#define H5F_ACS_MPI_PARAMS_INFO_SET   H5P__facc_mpi_info_set
+#define H5F_ACS_MPI_PARAMS_INFO_GET   H5P__facc_mpi_info_get
+#define H5F_ACS_MPI_PARAMS_INFO_DEL   H5P__facc_mpi_info_del
+#define H5F_ACS_MPI_PARAMS_INFO_COPY  H5P__facc_mpi_info_copy
+#define H5F_ACS_MPI_PARAMS_INFO_CMP   H5P__facc_mpi_info_cmp
+#define H5F_ACS_MPI_PARAMS_INFO_CLOSE H5P__facc_mpi_info_close
 #endif /* H5_HAVE_PARALLEL */
 /* Definitions for the initial metadata cache image configuration */
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE sizeof(H5AC_cache_image_config_t)
@@ -257,41 +261,41 @@
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEC  H5P__facc_cache_image_config_dec
 #define H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_CMP  H5P__facc_cache_image_config_cmp
 /* Definition for total size of page buffer(bytes) */
-#define H5F_ACS_PAGE_BUFFER_SIZE_SIZE           sizeof(size_t)
-#define H5F_ACS_PAGE_BUFFER_SIZE_DEF            0
-#define H5F_ACS_PAGE_BUFFER_SIZE_ENC            H5P__encode_size_t
-#define H5F_ACS_PAGE_BUFFER_SIZE_DEC            H5P__decode_size_t
+#define H5F_ACS_PAGE_BUFFER_SIZE_SIZE sizeof(size_t)
+#define H5F_ACS_PAGE_BUFFER_SIZE_DEF  0
+#define H5F_ACS_PAGE_BUFFER_SIZE_ENC  H5P__encode_size_t
+#define H5F_ACS_PAGE_BUFFER_SIZE_DEC  H5P__decode_size_t
 /* Definition for minimum metadata size of page buffer(bytes) */
-#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE           sizeof(unsigned)
-#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF            0
-#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_ENC            H5P__encode_unsigned
-#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEC            H5P__decode_unsigned
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE sizeof(unsigned)
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF  0
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_ENC  H5P__encode_unsigned
+#define H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEC  H5P__decode_unsigned
 /* Definition for minimum raw data size of page buffer(bytes) */
-#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE           sizeof(unsigned)
-#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF            0
-#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC            H5P__encode_unsigned
-#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC            H5P__decode_unsigned
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE sizeof(unsigned)
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF  0
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC  H5P__encode_unsigned
+#define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC  H5P__decode_unsigned
 /* Definition for file VOL connector properties (ID, etc.) */
-#define H5F_ACS_VOL_CONN_SIZE                   sizeof(H5VL_connector_prop_t)
-#define H5F_ACS_VOL_CONN_DEF                    {H5_DEFAULT_VOL, NULL}
-#define H5F_ACS_VOL_CONN_CRT                    H5P__facc_vol_create
-#define H5F_ACS_VOL_CONN_SET                    H5P__facc_vol_set
-#define H5F_ACS_VOL_CONN_GET                    H5P__facc_vol_get
-#define H5F_ACS_VOL_CONN_DEL                    H5P__facc_vol_del
-#define H5F_ACS_VOL_CONN_COPY                   H5P__facc_vol_copy
-#define H5F_ACS_VOL_CONN_CMP                    H5P__facc_vol_cmp
-#define H5F_ACS_VOL_CONN_CLOSE                  H5P__facc_vol_close
-
+#define H5F_ACS_VOL_CONN_SIZE sizeof(H5VL_connector_prop_t)
+#define H5F_ACS_VOL_CONN_DEF                                                                                 \
+    {                                                                                                        \
+        H5_DEFAULT_VOL, NULL                                                                                 \
+    }
+#define H5F_ACS_VOL_CONN_CRT   H5P__facc_vol_create
+#define H5F_ACS_VOL_CONN_SET   H5P__facc_vol_set
+#define H5F_ACS_VOL_CONN_GET   H5P__facc_vol_get
+#define H5F_ACS_VOL_CONN_DEL   H5P__facc_vol_del
+#define H5F_ACS_VOL_CONN_COPY  H5P__facc_vol_copy
+#define H5F_ACS_VOL_CONN_CMP   H5P__facc_vol_cmp
+#define H5F_ACS_VOL_CONN_CLOSE H5P__facc_vol_close
 
 /******************/
 /* Local Typedefs */
 /******************/
 
-
 /********************/
 /* Package Typedefs */
 /********************/
-
 
 /********************/
 /* Local Prototypes */
@@ -306,7 +310,7 @@ static herr_t H5P__facc_file_driver_set(hid_t prop_id, const char *name, size_t 
 static herr_t H5P__facc_file_driver_get(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__facc_file_driver_del(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__facc_file_driver_copy(const char *name, size_t size, void *value);
-static int H5P__facc_file_driver_cmp(const void *value1, const void *value2, size_t size);
+static int    H5P__facc_file_driver_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__facc_file_driver_close(const char *name, size_t size, void *value);
 
 /* File image info property callbacks */
@@ -316,13 +320,13 @@ static herr_t H5P__facc_file_image_info_set(hid_t prop_id, const char *name, siz
 static herr_t H5P__facc_file_image_info_get(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__facc_file_image_info_del(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__facc_file_image_info_copy(const char *name, size_t size, void *value);
-static int H5P__facc_file_image_info_cmp(const void *value1, const void *value2, size_t size);
+static int    H5P__facc_file_image_info_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__facc_file_image_info_close(const char *name, size_t size, void *value);
 
 /* encode & decode callbacks */
 static herr_t H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_cache_config_dec(const void **_pp, void *value);
-static int H5P__facc_cache_config_cmp(const void *value1, const void *value2, size_t size);
+static int    H5P__facc_cache_config_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_fclose_degree_dec(const void **pp, void *value);
 static herr_t H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size);
@@ -339,7 +343,8 @@ static int    H5P_facc_mdc_log_location_cmp(const void *value1, const void *valu
 static herr_t H5P_facc_mdc_log_location_close(const char *name, size_t size, void *value);
 
 /* Metadata cache image property callbacks */
-static int H5P__facc_cache_image_config_cmp(const void *_config1, const void *_config2, size_t H5_ATTR_UNUSED size);
+static int    H5P__facc_cache_image_config_cmp(const void *_config1, const void *_config2,
+                                               size_t H5_ATTR_UNUSED size);
 static herr_t H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size);
 static herr_t H5P__facc_cache_image_config_dec(const void **_pp, void *_value);
 
@@ -349,7 +354,7 @@ static herr_t H5P__facc_vol_set(hid_t prop_id, const char *name, size_t size, vo
 static herr_t H5P__facc_vol_get(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__facc_vol_del(hid_t prop_id, const char *name, size_t size, void *value);
 static herr_t H5P__facc_vol_copy(const char *name, size_t size, void *value);
-static int H5P__facc_vol_cmp(const void *value1, const void *value2, size_t size);
+static int    H5P__facc_vol_cmp(const void *value1, const void *value2, size_t size);
 static herr_t H5P__facc_vol_close(const char *name, size_t size, void *value);
 
 #ifdef H5_HAVE_PARALLEL
@@ -370,7 +375,6 @@ static int    H5P__facc_mpi_info_cmp(const void *value1, const void *value2, siz
 static herr_t H5P__facc_mpi_info_close(const char *name, size_t size, void *value);
 #endif /* H5_HAVE_PARALLEL */
 
-
 /*********************/
 /* Package Variables */
 /*********************/
@@ -378,77 +382,103 @@ static herr_t H5P__facc_mpi_info_close(const char *name, size_t size, void *valu
 /* File access property list class library initialization object */
 const H5P_libclass_t H5P_CLS_FACC[1] = {{
     "file access",        /* Class name for debugging     */
-    H5P_TYPE_FILE_ACCESS,       /* Class type                   */
+    H5P_TYPE_FILE_ACCESS, /* Class type                   */
 
-    &H5P_CLS_ROOT_g,        /* Parent class                 */
+    &H5P_CLS_ROOT_g,           /* Parent class                 */
     &H5P_CLS_FILE_ACCESS_g,    /* Pointer to class             */
-    &H5P_CLS_FILE_ACCESS_ID_g,    /* Pointer to class ID          */
-    &H5P_LST_FILE_ACCESS_ID_g,    /* Pointer to default property list ID */
+    &H5P_CLS_FILE_ACCESS_ID_g, /* Pointer to class ID          */
+    &H5P_LST_FILE_ACCESS_ID_g, /* Pointer to default property list ID */
     H5P__facc_reg_prop,        /* Default property registration routine */
 
-    NULL,            /* Class creation callback      */
-    NULL,                /* Class creation callback info */
-    NULL,            /* Class copy callback          */
-    NULL,                /* Class copy callback info     */
-    NULL,            /* Class close callback         */
-    NULL                 /* Class close callback info    */
+    NULL, /* Class creation callback      */
+    NULL, /* Class creation callback info */
+    NULL, /* Class copy callback          */
+    NULL, /* Class copy callback info     */
+    NULL, /* Class close callback         */
+    NULL  /* Class close callback info    */
 }};
-
 
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /*******************/
 /* Local Variables */
 /*******************/
 
 /* Property value defaults */
-static const H5AC_cache_config_t H5F_def_mdc_initCacheCfg_g = H5F_ACS_META_CACHE_INIT_CONFIG_DEF;  /* Default metadata cache settings */
-static const size_t H5F_def_rdcc_nslots_g = H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF;      /* Default raw data chunk cache # of slots */
-static const size_t H5F_def_rdcc_nbytes_g = H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF;      /* Default raw data chunk cache # of bytes */
-static const double H5F_def_rdcc_w0_g = H5F_ACS_PREEMPT_READ_CHUNKS_DEF;           /* Default raw data chunk cache dirty ratio */
-static const hsize_t H5F_def_threshold_g = H5F_ACS_ALIGN_THRHD_DEF;                /* Default allocation alignment threshold */
-static const hsize_t H5F_def_alignment_g = H5F_ACS_ALIGN_DEF;                      /* Default allocation alignment value */
-static const hsize_t H5F_def_meta_block_size_g = H5F_ACS_META_BLOCK_SIZE_DEF;      /* Default metadata allocation block size */
-static const size_t H5F_def_sieve_buf_size_g = H5F_ACS_SIEVE_BUF_SIZE_DEF;         /* Default raw data I/O sieve buffer size */
-static const hsize_t H5F_def_sdata_block_size_g = H5F_ACS_SDATA_BLOCK_SIZE_DEF;    /* Default small data allocation block size */
-static const unsigned H5F_def_gc_ref_g = H5F_ACS_GARBG_COLCT_REF_DEF;              /* Default garbage collection for references setting */
-static const H5F_close_degree_t H5F_def_close_degree_g = H5F_CLOSE_DEGREE_DEF;     /* Default file close degree */
-static const hsize_t H5F_def_family_offset_g = H5F_ACS_FAMILY_OFFSET_DEF;          /* Default offset for family VFD */
-static const hsize_t H5F_def_family_newsize_g = H5F_ACS_FAMILY_NEWSIZE_DEF;        /* Default size of new files for family VFD */
-static const hbool_t H5F_def_family_to_single_g = H5F_ACS_FAMILY_TO_SINGLE_DEF;    /* Default ?? for family VFD */
-static const H5FD_mem_t H5F_def_mem_type_g = H5F_ACS_MULTI_TYPE_DEF;               /* Default file space type for multi VFD */
+static const H5AC_cache_config_t H5F_def_mdc_initCacheCfg_g =
+    H5F_ACS_META_CACHE_INIT_CONFIG_DEF; /* Default metadata cache settings */
+static const size_t H5F_def_rdcc_nslots_g =
+    H5F_ACS_DATA_CACHE_NUM_SLOTS_DEF; /* Default raw data chunk cache # of slots */
+static const size_t H5F_def_rdcc_nbytes_g =
+    H5F_ACS_DATA_CACHE_BYTE_SIZE_DEF; /* Default raw data chunk cache # of bytes */
+static const double H5F_def_rdcc_w0_g =
+    H5F_ACS_PREEMPT_READ_CHUNKS_DEF; /* Default raw data chunk cache dirty ratio */
+static const hsize_t H5F_def_threshold_g =
+    H5F_ACS_ALIGN_THRHD_DEF;                                  /* Default allocation alignment threshold */
+static const hsize_t H5F_def_alignment_g = H5F_ACS_ALIGN_DEF; /* Default allocation alignment value */
+static const hsize_t H5F_def_meta_block_size_g =
+    H5F_ACS_META_BLOCK_SIZE_DEF; /* Default metadata allocation block size */
+static const size_t H5F_def_sieve_buf_size_g =
+    H5F_ACS_SIEVE_BUF_SIZE_DEF; /* Default raw data I/O sieve buffer size */
+static const hsize_t H5F_def_sdata_block_size_g =
+    H5F_ACS_SDATA_BLOCK_SIZE_DEF; /* Default small data allocation block size */
+static const unsigned H5F_def_gc_ref_g =
+    H5F_ACS_GARBG_COLCT_REF_DEF; /* Default garbage collection for references setting */
+static const H5F_close_degree_t H5F_def_close_degree_g = H5F_CLOSE_DEGREE_DEF; /* Default file close degree */
+static const hsize_t H5F_def_family_offset_g = H5F_ACS_FAMILY_OFFSET_DEF; /* Default offset for family VFD */
+static const hsize_t H5F_def_family_newsize_g =
+    H5F_ACS_FAMILY_NEWSIZE_DEF; /* Default size of new files for family VFD */
+static const hbool_t H5F_def_family_to_single_g =
+    H5F_ACS_FAMILY_TO_SINGLE_DEF; /* Default ?? for family VFD */
+static const H5FD_mem_t H5F_def_mem_type_g =
+    H5F_ACS_MULTI_TYPE_DEF; /* Default file space type for multi VFD */
 
-static const H5F_libver_t H5F_def_libver_low_bound_g = H5F_ACS_LIBVER_LOW_BOUND_DEF;    /* Default setting for "low" bound of format version */
-static const H5F_libver_t H5F_def_libver_high_bound_g = H5F_ACS_LIBVER_HIGH_BOUND_DEF;  /* Default setting for "high" bound of format version */
+static const H5F_libver_t H5F_def_libver_low_bound_g =
+    H5F_ACS_LIBVER_LOW_BOUND_DEF; /* Default setting for "low" bound of format version */
+static const H5F_libver_t H5F_def_libver_high_bound_g =
+    H5F_ACS_LIBVER_HIGH_BOUND_DEF; /* Default setting for "high" bound of format version */
 
-static const hbool_t H5F_def_want_posix_fd_g = H5F_ACS_WANT_POSIX_FD_DEF;          /* Default setting for retrieving 'handle' from core VFD */
-static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF;                   /* Default external file cache size */
-static const H5FD_file_image_info_t H5F_def_file_image_info_g = H5F_ACS_FILE_IMAGE_INFO_DEF;                 /* Default file image info and callbacks */
-static const unsigned H5F_def_metadata_read_attempts_g = H5F_ACS_METADATA_READ_ATTEMPTS_DEF;  /* Default setting for the # of metadata read attempts */
-static const H5F_object_flush_t H5F_def_object_flush_cb_g = H5F_ACS_OBJECT_FLUSH_CB_DEF;      /* Default setting for object flush callback */
-static const hbool_t H5F_def_clear_status_flags_g = H5F_ACS_CLEAR_STATUS_FLAGS_DEF;           /* Default to clear the superblock status_flags */
-static const hbool_t H5F_def_skip_eof_check_g = H5F_ACS_SKIP_EOF_CHECK_DEF;    /* Default setting for skipping EOF check */
-static const hbool_t H5F_def_null_fsm_addr_g = H5F_ACS_NULL_FSM_ADDR_DEF;      /* Default setting for dropping free-space to the floor */
+static const hbool_t H5F_def_want_posix_fd_g =
+    H5F_ACS_WANT_POSIX_FD_DEF; /* Default setting for retrieving 'handle' from core VFD */
+static const unsigned H5F_def_efc_size_g = H5F_ACS_EFC_SIZE_DEF; /* Default external file cache size */
+static const H5FD_file_image_info_t H5F_def_file_image_info_g =
+    H5F_ACS_FILE_IMAGE_INFO_DEF; /* Default file image info and callbacks */
+static const unsigned H5F_def_metadata_read_attempts_g =
+    H5F_ACS_METADATA_READ_ATTEMPTS_DEF; /* Default setting for the # of metadata read attempts */
+static const H5F_object_flush_t H5F_def_object_flush_cb_g =
+    H5F_ACS_OBJECT_FLUSH_CB_DEF; /* Default setting for object flush callback */
+static const hbool_t H5F_def_clear_status_flags_g =
+    H5F_ACS_CLEAR_STATUS_FLAGS_DEF; /* Default to clear the superblock status_flags */
+static const hbool_t H5F_def_skip_eof_check_g =
+    H5F_ACS_SKIP_EOF_CHECK_DEF; /* Default setting for skipping EOF check */
+static const hbool_t H5F_def_null_fsm_addr_g =
+    H5F_ACS_NULL_FSM_ADDR_DEF; /* Default setting for dropping free-space to the floor */
 
-static const hbool_t H5F_def_use_mdc_logging_g = H5F_ACS_USE_MDC_LOGGING_DEF;                 /* Default metadata cache logging flag */
-static const char *H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF;                 /* Default mdc log location */
-static const hbool_t H5F_def_start_mdc_log_on_access_g = H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
-static const hbool_t H5F_def_evict_on_close_flag_g = H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF;         /* Default setting for evict on close property */
+static const hbool_t H5F_def_use_mdc_logging_g =
+    H5F_ACS_USE_MDC_LOGGING_DEF; /* Default metadata cache logging flag */
+static const char *  H5F_def_mdc_log_location_g = H5F_ACS_MDC_LOG_LOCATION_DEF; /* Default mdc log location */
+static const hbool_t H5F_def_start_mdc_log_on_access_g =
+    H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF; /* Default mdc log start on access flag */
+static const hbool_t H5F_def_evict_on_close_flag_g =
+    H5F_ACS_EVICT_ON_CLOSE_FLAG_DEF; /* Default setting for evict on close property */
 #ifdef H5_HAVE_PARALLEL
-static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g = H5F_ACS_COLL_MD_READ_FLAG_DEF;  /* Default setting for the collective metedata read flag */
-static const hbool_t H5F_def_coll_md_write_flag_g = H5F_ACS_COLL_MD_WRITE_FLAG_DEF;  /* Default setting for the collective metedata write flag */
-static const MPI_Comm H5F_def_mpi_params_comm_g = H5F_ACS_MPI_PARAMS_COMM_DEF;  /* Default MPI communicator */
-static const MPI_Info H5F_def_mpi_params_info_g = H5F_ACS_MPI_PARAMS_INFO_DEF;  /* Default MPI info struct */
-#endif /* H5_HAVE_PARALLEL */
-static const H5AC_cache_image_config_t H5F_def_mdc_initCacheImageCfg_g = H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEF;  /* Default metadata cache image settings */
-static const size_t H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF;      /* Default page buffer size */
-static const unsigned H5F_def_page_buf_min_meta_perc_g = H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF;      /* Default page buffer minimum metadata size */
-static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF;      /* Default page buffer mininum raw data size */
+static const H5P_coll_md_read_flag_t H5F_def_coll_md_read_flag_g =
+    H5F_ACS_COLL_MD_READ_FLAG_DEF; /* Default setting for the collective metedata read flag */
+static const hbool_t H5F_def_coll_md_write_flag_g =
+    H5F_ACS_COLL_MD_WRITE_FLAG_DEF; /* Default setting for the collective metedata write flag */
+static const MPI_Comm H5F_def_mpi_params_comm_g = H5F_ACS_MPI_PARAMS_COMM_DEF; /* Default MPI communicator */
+static const MPI_Info H5F_def_mpi_params_info_g = H5F_ACS_MPI_PARAMS_INFO_DEF; /* Default MPI info struct */
+#endif                                                                         /* H5_HAVE_PARALLEL */
+static const H5AC_cache_image_config_t H5F_def_mdc_initCacheImageCfg_g =
+    H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEF; /* Default metadata cache image settings */
+static const size_t   H5F_def_page_buf_size_g = H5F_ACS_PAGE_BUFFER_SIZE_DEF; /* Default page buffer size */
+static const unsigned H5F_def_page_buf_min_meta_perc_g =
+    H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF; /* Default page buffer minimum metadata size */
+static const unsigned H5F_def_page_buf_min_raw_perc_g =
+    H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF; /* Default page buffer mininum raw data size */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_reg_prop
  *
@@ -463,253 +493,281 @@ static const unsigned H5F_def_page_buf_min_raw_perc_g = H5F_ACS_PAGE_BUFFER_MIN_
 static herr_t
 H5P__facc_reg_prop(H5P_genclass_t *pclass)
 {
-    const H5FD_driver_prop_t def_driver_prop    = H5F_ACS_FILE_DRV_DEF;     /* Default VFL driver ID & info (initialized from a variable) */
-    const H5VL_connector_prop_t def_vol_prop    = H5F_ACS_VOL_CONN_DEF;     /* Default VOL connector ID & info (initialized from a variable) */
-    herr_t ret_value = SUCCEED;                                             /* Return value */
+    const H5FD_driver_prop_t def_driver_prop =
+        H5F_ACS_FILE_DRV_DEF; /* Default VFL driver ID & info (initialized from a variable) */
+    const H5VL_connector_prop_t def_vol_prop =
+        H5F_ACS_VOL_CONN_DEF;   /* Default VOL connector ID & info (initialized from a variable) */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Register the initial metadata cache resize configuration */
-    if(H5P__register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE, &H5F_def_mdc_initCacheCfg_g,
-            NULL, NULL, NULL, H5F_ACS_META_CACHE_INIT_CONFIG_ENC, H5F_ACS_META_CACHE_INIT_CONFIG_DEC,
-            NULL, NULL, H5F_ACS_META_CACHE_INIT_CONFIG_CMP, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_CONFIG_SIZE,
+                           &H5F_def_mdc_initCacheCfg_g, NULL, NULL, NULL, H5F_ACS_META_CACHE_INIT_CONFIG_ENC,
+                           H5F_ACS_META_CACHE_INIT_CONFIG_DEC, NULL, NULL, H5F_ACS_META_CACHE_INIT_CONFIG_CMP,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache (elements) */
-    if(H5P__register_real(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE, &H5F_def_rdcc_nslots_g,
-            NULL, NULL, NULL, H5F_ACS_DATA_CACHE_NUM_SLOTS_ENC, H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, H5F_ACS_DATA_CACHE_NUM_SLOTS_SIZE,
+                           &H5F_def_rdcc_nslots_g, NULL, NULL, NULL, H5F_ACS_DATA_CACHE_NUM_SLOTS_ENC,
+                           H5F_ACS_DATA_CACHE_NUM_SLOTS_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of raw data chunk cache(bytes) */
-    if(H5P__register_real(pclass, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE, &H5F_def_rdcc_nbytes_g,
-            NULL, NULL, NULL, H5F_ACS_DATA_CACHE_BYTE_SIZE_ENC, H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, H5F_ACS_DATA_CACHE_BYTE_SIZE_SIZE,
+                           &H5F_def_rdcc_nbytes_g, NULL, NULL, NULL, H5F_ACS_DATA_CACHE_BYTE_SIZE_ENC,
+                           H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the preemption for reading chunks */
-    if(H5P__register_real(pclass, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, H5F_ACS_PREEMPT_READ_CHUNKS_SIZE, &H5F_def_rdcc_w0_g,
-            NULL, NULL, NULL, H5F_ACS_PREEMPT_READ_CHUNKS_ENC, H5F_ACS_PREEMPT_READ_CHUNKS_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, H5F_ACS_PREEMPT_READ_CHUNKS_SIZE,
+                           &H5F_def_rdcc_w0_g, NULL, NULL, NULL, H5F_ACS_PREEMPT_READ_CHUNKS_ENC,
+                           H5F_ACS_PREEMPT_READ_CHUNKS_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the threshold for alignment */
-    if(H5P__register_real(pclass, H5F_ACS_ALIGN_THRHD_NAME, H5F_ACS_ALIGN_THRHD_SIZE, &H5F_def_threshold_g,
-            NULL, NULL, NULL, H5F_ACS_ALIGN_THRHD_ENC, H5F_ACS_ALIGN_THRHD_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_ALIGN_THRHD_NAME, H5F_ACS_ALIGN_THRHD_SIZE, &H5F_def_threshold_g,
+                           NULL, NULL, NULL, H5F_ACS_ALIGN_THRHD_ENC, H5F_ACS_ALIGN_THRHD_DEC, NULL, NULL,
+                           NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the alignment */
-    if(H5P__register_real(pclass, H5F_ACS_ALIGN_NAME, H5F_ACS_ALIGN_SIZE, &H5F_def_alignment_g,
-            NULL, NULL, NULL, H5F_ACS_ALIGN_ENC, H5F_ACS_ALIGN_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_ALIGN_NAME, H5F_ACS_ALIGN_SIZE, &H5F_def_alignment_g, NULL, NULL,
+                           NULL, H5F_ACS_ALIGN_ENC, H5F_ACS_ALIGN_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the minimum metadata allocation block size */
-    if(H5P__register_real(pclass, H5F_ACS_META_BLOCK_SIZE_NAME, H5F_ACS_META_BLOCK_SIZE_SIZE, &H5F_def_meta_block_size_g,
-            NULL, NULL, NULL, H5F_ACS_META_BLOCK_SIZE_ENC, H5F_ACS_META_BLOCK_SIZE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_META_BLOCK_SIZE_NAME, H5F_ACS_META_BLOCK_SIZE_SIZE,
+                           &H5F_def_meta_block_size_g, NULL, NULL, NULL, H5F_ACS_META_BLOCK_SIZE_ENC,
+                           H5F_ACS_META_BLOCK_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the maximum sieve buffer size */
-    if(H5P__register_real(pclass, H5F_ACS_SIEVE_BUF_SIZE_NAME, H5F_ACS_SIEVE_BUF_SIZE_SIZE, &H5F_def_sieve_buf_size_g,
-            NULL, NULL, NULL, H5F_ACS_SIEVE_BUF_SIZE_ENC, H5F_ACS_SIEVE_BUF_SIZE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_SIEVE_BUF_SIZE_NAME, H5F_ACS_SIEVE_BUF_SIZE_SIZE,
+                           &H5F_def_sieve_buf_size_g, NULL, NULL, NULL, H5F_ACS_SIEVE_BUF_SIZE_ENC,
+                           H5F_ACS_SIEVE_BUF_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the minimum "small data" allocation block size */
-    if(H5P__register_real(pclass, H5F_ACS_SDATA_BLOCK_SIZE_NAME, H5F_ACS_SDATA_BLOCK_SIZE_SIZE, &H5F_def_sdata_block_size_g,
-            NULL, NULL, NULL, H5F_ACS_SDATA_BLOCK_SIZE_ENC, H5F_ACS_SDATA_BLOCK_SIZE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_SDATA_BLOCK_SIZE_NAME, H5F_ACS_SDATA_BLOCK_SIZE_SIZE,
+                           &H5F_def_sdata_block_size_g, NULL, NULL, NULL, H5F_ACS_SDATA_BLOCK_SIZE_ENC,
+                           H5F_ACS_SDATA_BLOCK_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the garbage collection reference */
-    if(H5P__register_real(pclass, H5F_ACS_GARBG_COLCT_REF_NAME, H5F_ACS_GARBG_COLCT_REF_SIZE, &H5F_def_gc_ref_g,
-            NULL, NULL, NULL, H5F_ACS_GARBG_COLCT_REF_ENC, H5F_ACS_GARBG_COLCT_REF_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_GARBG_COLCT_REF_NAME, H5F_ACS_GARBG_COLCT_REF_SIZE,
+                           &H5F_def_gc_ref_g, NULL, NULL, NULL, H5F_ACS_GARBG_COLCT_REF_ENC,
+                           H5F_ACS_GARBG_COLCT_REF_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file driver ID & info */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_FILE_DRV_NAME, H5F_ACS_FILE_DRV_SIZE, &def_driver_prop,
-            H5F_ACS_FILE_DRV_CRT, H5F_ACS_FILE_DRV_SET, H5F_ACS_FILE_DRV_GET, NULL, NULL,
-            H5F_ACS_FILE_DRV_DEL, H5F_ACS_FILE_DRV_COPY, H5F_ACS_FILE_DRV_CMP, H5F_ACS_FILE_DRV_CLOSE) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_FILE_DRV_NAME, H5F_ACS_FILE_DRV_SIZE, &def_driver_prop,
+                           H5F_ACS_FILE_DRV_CRT, H5F_ACS_FILE_DRV_SET, H5F_ACS_FILE_DRV_GET, NULL, NULL,
+                           H5F_ACS_FILE_DRV_DEL, H5F_ACS_FILE_DRV_COPY, H5F_ACS_FILE_DRV_CMP,
+                           H5F_ACS_FILE_DRV_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file close degree */
-    if(H5P__register_real(pclass, H5F_ACS_CLOSE_DEGREE_NAME, H5F_CLOSE_DEGREE_SIZE, &H5F_def_close_degree_g,
-            NULL, NULL, NULL, H5F_CLOSE_DEGREE_ENC, H5F_CLOSE_DEGREE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_CLOSE_DEGREE_NAME, H5F_CLOSE_DEGREE_SIZE, &H5F_def_close_degree_g,
+                           NULL, NULL, NULL, H5F_CLOSE_DEGREE_ENC, H5F_CLOSE_DEGREE_DEC, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the offset of family driver info */
-    if(H5P__register_real(pclass, H5F_ACS_FAMILY_OFFSET_NAME, H5F_ACS_FAMILY_OFFSET_SIZE, &H5F_def_family_offset_g,
-            NULL, NULL, NULL, H5F_ACS_FAMILY_OFFSET_ENC, H5F_ACS_FAMILY_OFFSET_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_FAMILY_OFFSET_NAME, H5F_ACS_FAMILY_OFFSET_SIZE,
+                           &H5F_def_family_offset_g, NULL, NULL, NULL, H5F_ACS_FAMILY_OFFSET_ENC,
+                           H5F_ACS_FAMILY_OFFSET_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of new family file size. It's used by h5repart only. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_FAMILY_NEWSIZE_NAME, H5F_ACS_FAMILY_NEWSIZE_SIZE, &H5F_def_family_newsize_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_FAMILY_NEWSIZE_NAME, H5F_ACS_FAMILY_NEWSIZE_SIZE,
+                           &H5F_def_family_newsize_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the private property of whether convert family to a single-file driver. It's used by h5repart only. */
+    /* Register the private property of whether convert family to a single-file driver. It's used by h5repart
+     * only. */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_FAMILY_TO_SINGLE_NAME, H5F_ACS_FAMILY_TO_SINGLE_SIZE, &H5F_def_family_to_single_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_FAMILY_TO_SINGLE_NAME, H5F_ACS_FAMILY_TO_SINGLE_SIZE,
+                           &H5F_def_family_to_single_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the data type of multi driver info */
-    if(H5P__register_real(pclass, H5F_ACS_MULTI_TYPE_NAME, H5F_ACS_MULTI_TYPE_SIZE, &H5F_def_mem_type_g,
-            NULL, NULL, NULL, H5F_ACS_MULTI_TYPE_ENC, H5F_ACS_MULTI_TYPE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_MULTI_TYPE_NAME, H5F_ACS_MULTI_TYPE_SIZE, &H5F_def_mem_type_g,
+                           NULL, NULL, NULL, H5F_ACS_MULTI_TYPE_ENC, H5F_ACS_MULTI_TYPE_DEC, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 'low' bound of library format versions */
-    if(H5P__register_real(pclass, H5F_ACS_LIBVER_LOW_BOUND_NAME, H5F_ACS_LIBVER_LOW_BOUND_SIZE, &H5F_def_libver_low_bound_g,
-            NULL, NULL, NULL, H5F_ACS_LIBVER_LOW_BOUND_ENC, H5F_ACS_LIBVER_LOW_BOUND_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_LIBVER_LOW_BOUND_NAME, H5F_ACS_LIBVER_LOW_BOUND_SIZE,
+                           &H5F_def_libver_low_bound_g, NULL, NULL, NULL, H5F_ACS_LIBVER_LOW_BOUND_ENC,
+                           H5F_ACS_LIBVER_LOW_BOUND_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the 'high' bound of library format versions */
-    if(H5P__register_real(pclass, H5F_ACS_LIBVER_HIGH_BOUND_NAME, H5F_ACS_LIBVER_HIGH_BOUND_SIZE, &H5F_def_libver_high_bound_g,
-            NULL, NULL, NULL, H5F_ACS_LIBVER_HIGH_BOUND_ENC, H5F_ACS_LIBVER_HIGH_BOUND_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_LIBVER_HIGH_BOUND_NAME, H5F_ACS_LIBVER_HIGH_BOUND_SIZE,
+                           &H5F_def_libver_high_bound_g, NULL, NULL, NULL, H5F_ACS_LIBVER_HIGH_BOUND_ENC,
+                           H5F_ACS_LIBVER_HIGH_BOUND_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether to retrieve the file descriptor from the core VFD */
     /* (used internally to the library only) */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_WANT_POSIX_FD_NAME, H5F_ACS_WANT_POSIX_FD_SIZE, &H5F_def_want_posix_fd_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_WANT_POSIX_FD_NAME, H5F_ACS_WANT_POSIX_FD_SIZE,
+                           &H5F_def_want_posix_fd_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the external file cache size */
-    if(H5P__register_real(pclass, H5F_ACS_EFC_SIZE_NAME, H5F_ACS_EFC_SIZE_SIZE, &H5F_def_efc_size_g,
-            NULL, NULL, NULL, H5F_ACS_EFC_SIZE_ENC, H5F_ACS_EFC_SIZE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_EFC_SIZE_NAME, H5F_ACS_EFC_SIZE_SIZE, &H5F_def_efc_size_g, NULL,
+                           NULL, NULL, H5F_ACS_EFC_SIZE_ENC, H5F_ACS_EFC_SIZE_DEC, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the initial file image info */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE, &H5F_def_file_image_info_g,
-            NULL, H5F_ACS_FILE_IMAGE_INFO_SET, H5F_ACS_FILE_IMAGE_INFO_GET, NULL, NULL,
-            H5F_ACS_FILE_IMAGE_INFO_DEL, H5F_ACS_FILE_IMAGE_INFO_COPY, H5F_ACS_FILE_IMAGE_INFO_CMP, H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_FILE_IMAGE_INFO_NAME, H5F_ACS_FILE_IMAGE_INFO_SIZE,
+                           &H5F_def_file_image_info_g, NULL, H5F_ACS_FILE_IMAGE_INFO_SET,
+                           H5F_ACS_FILE_IMAGE_INFO_GET, NULL, NULL, H5F_ACS_FILE_IMAGE_INFO_DEL,
+                           H5F_ACS_FILE_IMAGE_INFO_COPY, H5F_ACS_FILE_IMAGE_INFO_CMP,
+                           H5F_ACS_FILE_IMAGE_INFO_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the # of read attempts */
-    if(H5P__register_real(pclass, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, H5F_ACS_METADATA_READ_ATTEMPTS_SIZE, &H5F_def_metadata_read_attempts_g,
-            NULL, NULL, NULL, H5F_ACS_METADATA_READ_ATTEMPTS_ENC, H5F_ACS_METADATA_READ_ATTEMPTS_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, H5F_ACS_METADATA_READ_ATTEMPTS_SIZE,
+                           &H5F_def_metadata_read_attempts_g, NULL, NULL, NULL,
+                           H5F_ACS_METADATA_READ_ATTEMPTS_ENC, H5F_ACS_METADATA_READ_ATTEMPTS_DEC, NULL, NULL,
+                           NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register object flush callback */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_OBJECT_FLUSH_CB_NAME, H5F_ACS_OBJECT_FLUSH_CB_SIZE, &H5F_def_object_flush_cb_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_OBJECT_FLUSH_CB_NAME, H5F_ACS_OBJECT_FLUSH_CB_SIZE,
+                           &H5F_def_object_flush_cb_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
-    /* Register the private property of whether to clear the superblock status_flags. It's used by h5clear only. */
-    if(H5P__register_real(pclass, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, H5F_ACS_CLEAR_STATUS_FLAGS_SIZE, &H5F_def_clear_status_flags_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    /* Register the private property of whether to clear the superblock status_flags. It's used by h5clear
+     * only. */
+    if (H5P__register_real(pclass, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, H5F_ACS_CLEAR_STATUS_FLAGS_SIZE,
+                           &H5F_def_clear_status_flags_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether to skip EOF check. It's used by h5clear only. */
-    if(H5P__register_real(pclass, H5F_ACS_SKIP_EOF_CHECK_NAME, H5F_ACS_SKIP_EOF_CHECK_SIZE, &H5F_def_skip_eof_check_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_SKIP_EOF_CHECK_NAME, H5F_ACS_SKIP_EOF_CHECK_SIZE,
+                           &H5F_def_skip_eof_check_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the private property of whether to drop free-space to the floor. It's used by h5clear only. */
-    if(H5P__register_real(pclass, H5F_ACS_NULL_FSM_ADDR_NAME, H5F_ACS_NULL_FSM_ADDR_SIZE, &H5F_def_null_fsm_addr_g,
-            NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_NULL_FSM_ADDR_NAME, H5F_ACS_NULL_FSM_ADDR_SIZE,
+                           &H5F_def_null_fsm_addr_g, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL,
+                           NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata cache logging flag. */
-    if(H5P__register_real(pclass, H5F_ACS_USE_MDC_LOGGING_NAME, H5F_ACS_USE_MDC_LOGGING_SIZE, &H5F_def_use_mdc_logging_g,
-            NULL, NULL, NULL, H5F_ACS_USE_MDC_LOGGING_ENC, H5F_ACS_USE_MDC_LOGGING_DEC, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_USE_MDC_LOGGING_NAME, H5F_ACS_USE_MDC_LOGGING_SIZE,
+                           &H5F_def_use_mdc_logging_g, NULL, NULL, NULL, H5F_ACS_USE_MDC_LOGGING_ENC,
+                           H5F_ACS_USE_MDC_LOGGING_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata cache log location. */
-    if(H5P__register_real(pclass, H5F_ACS_MDC_LOG_LOCATION_NAME, H5F_ACS_MDC_LOG_LOCATION_SIZE, &H5F_def_mdc_log_location_g,
-        NULL, NULL, NULL, H5F_ACS_MDC_LOG_LOCATION_ENC, H5F_ACS_MDC_LOG_LOCATION_DEC,
-        H5F_ACS_MDC_LOG_LOCATION_DEL, H5F_ACS_MDC_LOG_LOCATION_COPY, H5F_ACS_MDC_LOG_LOCATION_CMP, H5F_ACS_MDC_LOG_LOCATION_CLOSE) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_MDC_LOG_LOCATION_NAME, H5F_ACS_MDC_LOG_LOCATION_SIZE,
+                           &H5F_def_mdc_log_location_g, NULL, NULL, NULL, H5F_ACS_MDC_LOG_LOCATION_ENC,
+                           H5F_ACS_MDC_LOG_LOCATION_DEC, H5F_ACS_MDC_LOG_LOCATION_DEL,
+                           H5F_ACS_MDC_LOG_LOCATION_COPY, H5F_ACS_MDC_LOG_LOCATION_CMP,
+                           H5F_ACS_MDC_LOG_LOCATION_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the flag that indicates whether mdc logging starts on file access. */
-    if(H5P__register_real(pclass, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE, &H5F_def_start_mdc_log_on_access_g,
-            NULL, NULL, NULL, H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC, H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC, NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE,
+                           &H5F_def_start_mdc_log_on_access_g, NULL, NULL, NULL,
+                           H5F_ACS_START_MDC_LOG_ON_ACCESS_ENC, H5F_ACS_START_MDC_LOG_ON_ACCESS_DEC, NULL,
+                           NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the evict on close flag */
-    if(H5P__register_real(pclass, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE, &H5F_def_evict_on_close_flag_g,
-            NULL, NULL, NULL, H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC, H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, H5F_ACS_EVICT_ON_CLOSE_FLAG_SIZE,
+                           &H5F_def_evict_on_close_flag_g, NULL, NULL, NULL, H5F_ACS_EVICT_ON_CLOSE_FLAG_ENC,
+                           H5F_ACS_EVICT_ON_CLOSE_FLAG_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 #ifdef H5_HAVE_PARALLEL
     /* Register the metadata collective read flag */
-    if(H5P__register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE, &H5F_def_coll_md_read_flag_g,
-            NULL, NULL, NULL, H5F_ACS_COLL_MD_READ_FLAG_ENC, H5F_ACS_COLL_MD_READ_FLAG_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5_COLL_MD_READ_FLAG_NAME, H5F_ACS_COLL_MD_READ_FLAG_SIZE,
+                           &H5F_def_coll_md_read_flag_g, NULL, NULL, NULL, H5F_ACS_COLL_MD_READ_FLAG_ENC,
+                           H5F_ACS_COLL_MD_READ_FLAG_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the metadata collective write flag */
-    if(H5P__register_real(pclass, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, H5F_ACS_COLL_MD_WRITE_FLAG_SIZE, &H5F_def_coll_md_write_flag_g,
-            NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC, H5F_ACS_COLL_MD_WRITE_FLAG_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, H5F_ACS_COLL_MD_WRITE_FLAG_SIZE,
+                           &H5F_def_coll_md_write_flag_g, NULL, NULL, NULL, H5F_ACS_COLL_MD_WRITE_FLAG_ENC,
+                           H5F_ACS_COLL_MD_WRITE_FLAG_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the MPI communicator */
-    if(H5P__register_real(pclass, H5F_ACS_MPI_PARAMS_COMM_NAME, H5F_ACS_MPI_PARAMS_COMM_SIZE, &H5F_def_mpi_params_comm_g,
-            NULL, H5F_ACS_MPI_PARAMS_COMM_SET, H5F_ACS_MPI_PARAMS_COMM_GET, NULL, NULL,
-            H5F_ACS_MPI_PARAMS_COMM_DEL, H5F_ACS_MPI_PARAMS_COMM_COPY, H5F_ACS_MPI_PARAMS_COMM_CMP, H5F_ACS_MPI_PARAMS_COMM_CLOSE) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_MPI_PARAMS_COMM_NAME, H5F_ACS_MPI_PARAMS_COMM_SIZE,
+                           &H5F_def_mpi_params_comm_g, NULL, H5F_ACS_MPI_PARAMS_COMM_SET,
+                           H5F_ACS_MPI_PARAMS_COMM_GET, NULL, NULL, H5F_ACS_MPI_PARAMS_COMM_DEL,
+                           H5F_ACS_MPI_PARAMS_COMM_COPY, H5F_ACS_MPI_PARAMS_COMM_CMP,
+                           H5F_ACS_MPI_PARAMS_COMM_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the MPI info struct */
-    if(H5P__register_real(pclass, H5F_ACS_MPI_PARAMS_INFO_NAME, H5F_ACS_MPI_PARAMS_INFO_SIZE, &H5F_def_mpi_params_info_g,
-            NULL, H5F_ACS_MPI_PARAMS_INFO_SET, H5F_ACS_MPI_PARAMS_INFO_GET, NULL, NULL,
-            H5F_ACS_MPI_PARAMS_INFO_DEL, H5F_ACS_MPI_PARAMS_INFO_COPY, H5F_ACS_MPI_PARAMS_INFO_CMP, H5F_ACS_MPI_PARAMS_INFO_CLOSE) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_MPI_PARAMS_INFO_NAME, H5F_ACS_MPI_PARAMS_INFO_SIZE,
+                           &H5F_def_mpi_params_info_g, NULL, H5F_ACS_MPI_PARAMS_INFO_SET,
+                           H5F_ACS_MPI_PARAMS_INFO_GET, NULL, NULL, H5F_ACS_MPI_PARAMS_INFO_DEL,
+                           H5F_ACS_MPI_PARAMS_INFO_COPY, H5F_ACS_MPI_PARAMS_INFO_CMP,
+                           H5F_ACS_MPI_PARAMS_INFO_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 #endif /* H5_HAVE_PARALLEL */
 
     /* Register the initial metadata cache image configuration */
-    if(H5P__register_real(pclass, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE, &H5F_def_mdc_initCacheImageCfg_g,
-            NULL, NULL, NULL, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_ENC, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEC,
-            NULL, NULL, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_CMP, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME,
+                           H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_SIZE, &H5F_def_mdc_initCacheImageCfg_g, NULL,
+                           NULL, NULL, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_ENC,
+                           H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_DEC, NULL, NULL,
+                           H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_CMP, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of the page buffer size */
-    if(H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_SIZE_NAME, H5F_ACS_PAGE_BUFFER_SIZE_SIZE, &H5F_def_page_buf_size_g,
-            NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_SIZE_ENC, H5F_ACS_PAGE_BUFFER_SIZE_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_SIZE_NAME, H5F_ACS_PAGE_BUFFER_SIZE_SIZE,
+                           &H5F_def_page_buf_size_g, NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_SIZE_ENC,
+                           H5F_ACS_PAGE_BUFFER_SIZE_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of the page buffer minimum metadata size */
-    if(H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE, &H5F_def_page_buf_min_meta_perc_g,
-            NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME,
+                           H5F_ACS_PAGE_BUFFER_MIN_META_PERC_SIZE, &H5F_def_page_buf_min_meta_perc_g, NULL,
+                           NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_ENC,
+                           H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the size of the page buffer minimum raw data size */
-    if(H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE, &H5F_def_page_buf_min_raw_perc_g,
-            NULL, NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC,
-            NULL, NULL, NULL, NULL) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME,
+                           H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_SIZE, &H5F_def_page_buf_min_raw_perc_g, NULL,
+                           NULL, NULL, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_ENC,
+                           H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEC, NULL, NULL, NULL, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
     /* Register the file VOL connector ID & info */
     /* (Note: this property should not have an encode/decode callback -QAK) */
-    if(H5P__register_real(pclass, H5F_ACS_VOL_CONN_NAME, H5F_ACS_VOL_CONN_SIZE, &def_vol_prop,
-            H5F_ACS_VOL_CONN_CRT, H5F_ACS_VOL_CONN_SET, H5F_ACS_VOL_CONN_GET, NULL, NULL,
-            H5F_ACS_VOL_CONN_DEL, H5F_ACS_VOL_CONN_COPY, H5F_ACS_VOL_CONN_CMP, H5F_ACS_VOL_CONN_CLOSE) < 0)
+    if (H5P__register_real(pclass, H5F_ACS_VOL_CONN_NAME, H5F_ACS_VOL_CONN_SIZE, &def_vol_prop,
+                           H5F_ACS_VOL_CONN_CRT, H5F_ACS_VOL_CONN_SET, H5F_ACS_VOL_CONN_GET, NULL, NULL,
+                           H5F_ACS_VOL_CONN_DEL, H5F_ACS_VOL_CONN_COPY, H5F_ACS_VOL_CONN_CMP,
+                           H5F_ACS_VOL_CONN_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_reg_prop() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_alignment
  *
@@ -743,31 +801,30 @@ done:
 herr_t
 H5Pset_alignment(hid_t fapl_id, hsize_t threshold, hsize_t alignment)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ihh", fapl_id, threshold, alignment);
 
     /* Check args */
-    if(alignment < 1)
+    if (alignment < 1)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "alignment must be positive")
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_ALIGN_THRHD_NAME, &threshold) < 0)
+    if (H5P_set(plist, H5F_ACS_ALIGN_THRHD_NAME, &threshold) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set threshold")
-    if(H5P_set(plist, H5F_ACS_ALIGN_NAME, &alignment) < 0)
+    if (H5P_set(plist, H5F_ACS_ALIGN_NAME, &alignment) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set alignment")
 
 done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_alignment
  *
@@ -783,32 +840,30 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_alignment(hid_t fapl_id, hsize_t *threshold/*out*/,
-    hsize_t *alignment/*out*/)
+H5Pget_alignment(hid_t fapl_id, hsize_t *threshold /*out*/, hsize_t *alignment /*out*/)
 {
-    H5P_genplist_t *plist;              /* Property list pointer */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", fapl_id, threshold, alignment);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(fapl_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if(threshold)
-        if(H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, threshold) < 0)
+    if (threshold)
+        if (H5P_get(plist, H5F_ACS_ALIGN_THRHD_NAME, threshold) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get threshold")
-    if(alignment)
-        if(H5P_get(plist, H5F_ACS_ALIGN_NAME, alignment) < 0)
+    if (alignment)
+        if (H5P_get(plist, H5F_ACS_ALIGN_NAME, alignment) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get alignment")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_alignment() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_set_driver
  *
@@ -831,22 +886,22 @@ done:
 herr_t
 H5P_set_driver(H5P_genplist_t *plist, hid_t new_driver_id, const void *new_driver_info)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == H5I_object_verify(new_driver_id, H5I_VFL))
+    if (NULL == H5I_object_verify(new_driver_id, H5I_VFL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
+    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
 
         /* Prepare the driver property */
-        driver_prop.driver_id = new_driver_id;
+        driver_prop.driver_id   = new_driver_id;
         driver_prop.driver_info = new_driver_info;
 
         /* Set the driver ID & info property */
-        if(H5P_set(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+        if (H5P_set(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver ID & info")
     } /* end if */
     else
@@ -856,7 +911,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_driver() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_driver
  *
@@ -879,27 +933,26 @@ done:
 herr_t
 H5Pset_driver(hid_t plist_id, hid_t new_driver_id, const void *new_driver_info)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", plist_id, new_driver_id, new_driver_info);
 
     /* Check arguments */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if(NULL == H5I_object_verify(new_driver_id, H5I_VFL))
+    if (NULL == H5I_object_verify(new_driver_id, H5I_VFL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file driver ID")
 
     /* Set the driver */
-    if(H5P_set_driver(plist, new_driver_id, new_driver_info) < 0)
+    if (H5P_set_driver(plist, new_driver_id, new_driver_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set driver info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_driver() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_peek_driver
  *
@@ -921,29 +974,28 @@ done:
 hid_t
 H5P_peek_driver(H5P_genplist_t *plist)
 {
-    hid_t ret_value = FAIL;     /* Return value */
+    hid_t ret_value = FAIL; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the current driver ID */
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
+    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
 
-        if(H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+        if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver ID")
         ret_value = driver_prop.driver_id;
     } /* end if */
     else
         HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    if(H5FD_VFD_DEFAULT == ret_value)
+    if (H5FD_VFD_DEFAULT == ret_value)
         ret_value = H5_DEFAULT_VFD;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_peek_driver() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_driver
  *
@@ -967,24 +1019,23 @@ done:
 hid_t
 H5Pget_driver(hid_t plist_id)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    hid_t    ret_value;      /* Return value */
+    H5P_genplist_t *plist;     /* Property list pointer */
+    hid_t           ret_value; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("i", "i", plist_id);
 
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the driver */
-    if((ret_value = H5P_peek_driver(plist)) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver")
+    if ((ret_value = H5P_peek_driver(plist)) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_peek_driver_info
  *
@@ -1007,15 +1058,15 @@ done:
 const void *
 H5P_peek_driver_info(H5P_genplist_t *plist)
 {
-    const void *ret_value = NULL;     /* Return value */
+    const void *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Get the current driver info */
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5FD_driver_prop_t driver_prop;         /* Property for driver ID & info */
+    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5FD_driver_prop_t driver_prop; /* Property for driver ID & info */
 
-        if(H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
+        if (H5P_peek(plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
         ret_value = driver_prop.driver_info;
     } /* end if */
@@ -1026,7 +1077,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_peek_driver_info() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_driver_info
  *
@@ -1049,24 +1099,23 @@ done:
 const void *
 H5Pget_driver_info(hid_t plist_id)
 {
-    H5P_genplist_t *plist = NULL;       /* Property list pointer            */
-    const void *ret_value = NULL;       /* Return value                     */
+    H5P_genplist_t *plist     = NULL; /* Property list pointer            */
+    const void *    ret_value = NULL; /* Return value                     */
 
     FUNC_ENTER_API(NULL)
     H5TRACE1("*x", "i", plist_id);
 
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a property list")
 
     /* Get the driver info */
-    if(NULL == (ret_value = (const void *)H5P_peek_driver_info(plist)))
+    if (NULL == (ret_value = (const void *)H5P_peek_driver_info(plist)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get driver info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_driver_info() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_driver_copy
  *
@@ -1087,35 +1136,35 @@ done:
 static herr_t
 H5P__file_driver_copy(void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
-    if(value) {
+    if (value) {
         H5FD_driver_prop_t *info = (H5FD_driver_prop_t *)value; /* Driver ID & info struct */
 
         /* Copy the driver & info, if there is one */
-        if(info->driver_id > 0) {
+        if (info->driver_id > 0) {
             /* Increment the reference count on driver and copy driver info */
-            if(H5I_inc_ref(info->driver_id, FALSE) < 0)
+            if (H5I_inc_ref(info->driver_id, FALSE) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VFL driver")
 
             /* Copy driver info, if it exists */
-            if(info->driver_info) {
-                H5FD_class_t *driver;       /* Pointer to driver */
-                void *new_pl;        /* Copy of driver info */
+            if (info->driver_info) {
+                H5FD_class_t *driver; /* Pointer to driver */
+                void *        new_pl; /* Copy of driver info */
 
                 /* Retrieve the driver for the ID */
-                if(NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
+                if (NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
                     HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a driver ID")
 
                 /* Allow the driver to copy or do it ourselves */
-                if(driver->fapl_copy) {
-                    if(NULL == (new_pl = (driver->fapl_copy)(info->driver_info)))
+                if (driver->fapl_copy) {
+                    if (NULL == (new_pl = (driver->fapl_copy)(info->driver_info)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "driver info copy failed")
                 } /* end if */
-                else if(driver->fapl_size > 0) {
-                    if(NULL == (new_pl = H5MM_malloc(driver->fapl_size)))
+                else if (driver->fapl_size > 0) {
+                    if (NULL == (new_pl = H5MM_malloc(driver->fapl_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "driver info allocation failed")
                     H5MM_memcpy(new_pl, info->driver_info, driver->fapl_size);
                 } /* end else-if */
@@ -1125,14 +1174,13 @@ H5P__file_driver_copy(void *value)
                 /* Set the driver info for the copy */
                 info->driver_info = new_pl;
             } /* end if */
-        } /* end if */
-    } /* end if */
+        }     /* end if */
+    }         /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_driver_copy() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_driver_free
  *
@@ -1149,42 +1197,41 @@ done:
 static herr_t
 H5P__file_driver_free(void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
-    if(value) {
+    if (value) {
         H5FD_driver_prop_t *info = (H5FD_driver_prop_t *)value; /* Driver ID & info struct */
 
         /* Copy the driver & info, if there is one */
-        if(info->driver_id > 0) {
-            if(info->driver_info) {
-                H5FD_class_t *driver;       /* Pointer to driver */
+        if (info->driver_id > 0) {
+            if (info->driver_info) {
+                H5FD_class_t *driver; /* Pointer to driver */
 
                 /* Retrieve the driver for the ID */
-                if(NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
+                if (NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
                     HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a driver ID")
 
                 /* Allow driver to free info or do it ourselves */
-                if(driver->fapl_free) {
-                    if((driver->fapl_free)((void *)info->driver_info) < 0)      /* Casting away const OK -QAK */
+                if (driver->fapl_free) {
+                    if ((driver->fapl_free)((void *)info->driver_info) < 0) /* Casting away const OK -QAK */
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
                 } /* end if */
                 else
-                    H5MM_xfree((void *)info->driver_info);      /* Casting away const OK -QAK */
-            } /* end if */
+                    H5MM_xfree((void *)info->driver_info); /* Casting away const OK -QAK */
+            }                                              /* end if */
 
             /* Decrement reference count for driver */
-            if(H5I_dec_ref(info->driver_id) < 0)
+            if (H5I_dec_ref(info->driver_id) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement reference count for driver ID")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_driver_free() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_create
  *
@@ -1201,19 +1248,18 @@ done:
 static herr_t
 H5P__facc_file_driver_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Make copy of file driver */
-    if(H5P__file_driver_copy(value) < 0)
+    if (H5P__file_driver_copy(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_create() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_set
  *
@@ -1229,9 +1275,9 @@ done:
  */
 static herr_t
 H5P__facc_file_driver_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                          size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1239,14 +1285,13 @@ H5P__facc_file_driver_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSE
     HDassert(value);
 
     /* Make copy of file driver ID & info */
-    if(H5P__file_driver_copy(value) < 0)
+    if (H5P__file_driver_copy(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_set() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_get
  *
@@ -1262,9 +1307,9 @@ done:
  */
 static herr_t
 H5P__facc_file_driver_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                          size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1272,14 +1317,13 @@ H5P__facc_file_driver_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSE
     HDassert(value);
 
     /* Make copy of file driver */
-    if(H5P__file_driver_copy(value) < 0)
+    if (H5P__file_driver_copy(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_get() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_del
  *
@@ -1294,21 +1338,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_file_driver_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_file_driver_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                          size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Free the file driver ID & info */
-    if(H5P__file_driver_free(value) < 0)
+    if (H5P__file_driver_free(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release file driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_del() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_copy
  *
@@ -1325,19 +1369,18 @@ done:
 static herr_t
 H5P__facc_file_driver_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Make copy of file driver */
-    if(H5P__file_driver_copy(value) < 0)
+    if (H5P__file_driver_copy(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_copy() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_file_driver_cmp
  *
@@ -1354,14 +1397,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__facc_file_driver_cmp(const void *_info1, const void *_info2,
-    size_t H5_ATTR_UNUSED size)
+H5P__facc_file_driver_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
 {
-    const H5FD_driver_prop_t *info1 = (const H5FD_driver_prop_t *)_info1, /* Create local aliases for values */
+    const H5FD_driver_prop_t *info1 =
+                                 (const H5FD_driver_prop_t *)_info1, /* Create local aliases for values */
         *info2 = (const H5FD_driver_prop_t *)_info2;
-    H5FD_class_t *cls1, *cls2;  /* Driver class for each property */
-    int cmp_value;              /* Value from comparison */
-    herr_t ret_value = 0;       /* Return value */
+    H5FD_class_t *cls1, *cls2;   /* Driver class for each property */
+    int           cmp_value;     /* Value from comparison */
+    herr_t        ret_value = 0; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -1371,24 +1414,30 @@ H5P__facc_file_driver_cmp(const void *_info1, const void *_info2,
     HDassert(size == sizeof(H5FD_driver_prop_t));
 
     /* Compare drivers */
-    if(NULL == (cls1 = H5FD_get_class(info1->driver_id)))
+    if (NULL == (cls1 = H5FD_get_class(info1->driver_id)))
         HGOTO_DONE(-1)
-    if(NULL == (cls2 = H5FD_get_class(info2->driver_id)))
+    if (NULL == (cls2 = H5FD_get_class(info2->driver_id)))
         HGOTO_DONE(1)
-    if(cls1->name == NULL && cls2->name != NULL) HGOTO_DONE(-1);
-    if(cls1->name != NULL && cls2->name == NULL) HGOTO_DONE(1);
-    if(0 != (cmp_value = HDstrcmp(cls1->name, cls2->name)))
+    if (cls1->name == NULL && cls2->name != NULL)
+        HGOTO_DONE(-1);
+    if (cls1->name != NULL && cls2->name == NULL)
+        HGOTO_DONE(1);
+    if (0 != (cmp_value = HDstrcmp(cls1->name, cls2->name)))
         HGOTO_DONE(cmp_value);
 
     /* Compare driver infos */
-    if(cls1->fapl_size < cls2->fapl_size) HGOTO_DONE(-1)
-    if(cls1->fapl_size > cls2->fapl_size) HGOTO_DONE(1)
+    if (cls1->fapl_size < cls2->fapl_size)
+        HGOTO_DONE(-1)
+    if (cls1->fapl_size > cls2->fapl_size)
+        HGOTO_DONE(1)
     HDassert(cls1->fapl_size == cls2->fapl_size);
-    if(info1->driver_info == NULL && info2->driver_info != NULL) HGOTO_DONE(-1);
-    if(info1->driver_info != NULL && info2->driver_info == NULL) HGOTO_DONE(1);
-    if(info1->driver_info) {
+    if (info1->driver_info == NULL && info2->driver_info != NULL)
+        HGOTO_DONE(-1);
+    if (info1->driver_info != NULL && info2->driver_info == NULL)
+        HGOTO_DONE(1);
+    if (info1->driver_info) {
         HDassert(cls1->fapl_size > 0);
-        if(0 != (cmp_value = HDmemcmp(info1->driver_info, info2->driver_info, cls1->fapl_size)))
+        if (0 != (cmp_value = HDmemcmp(info1->driver_info, info2->driver_info, cls1->fapl_size)))
             HGOTO_DONE(cmp_value);
     } /* end if */
 
@@ -1396,7 +1445,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_driver_close
  *
@@ -1413,19 +1461,18 @@ done:
 static herr_t
 H5P__facc_file_driver_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Free the file driver */
-    if(H5P__file_driver_free(value) < 0)
+    if (H5P__file_driver_free(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release file driver")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_driver_close() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_family_offset
  *
@@ -1440,31 +1487,30 @@ done:
  *              Sep 17, 2002
  *
  *-------------------------------------------------------------------------
-*/
+ */
 herr_t
 H5Pset_family_offset(hid_t fapl_id, hsize_t offset)
 {
-    H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", fapl_id, offset);
 
     /* Get the plist structure */
-    if(H5P_DEFAULT == fapl_id)
+    if (H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
-    if(H5P_set(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
+    if (H5P_set(plist, H5F_ACS_FAMILY_OFFSET_NAME, &offset) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set offset for family file")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_family_offset() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_family_offset
  *
@@ -1483,21 +1529,21 @@ done:
 herr_t
 H5Pget_family_offset(hid_t fapl_id, hsize_t *offset)
 {
-    H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*h", fapl_id, offset);
 
     /* Get the plist structure */
-    if(H5P_DEFAULT == fapl_id)
+    if (H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value */
-    if(offset) {
-        if(H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
+    if (offset) {
+        if (H5P_get(plist, H5F_ACS_FAMILY_OFFSET_NAME, offset) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't set offset for family file")
     } /* end if */
 
@@ -1505,7 +1551,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_family_offset() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_multi_type
  *
@@ -1524,27 +1569,26 @@ done:
 herr_t
 H5Pset_multi_type(hid_t fapl_id, H5FD_mem_t type)
 {
-    H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value = SUCCEED;      /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iMt", fapl_id, type);
 
     /* Get the plist structure */
-    if(H5P_DEFAULT == fapl_id)
+    if (H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
-     if(H5P_set(plist, H5F_ACS_MULTI_TYPE_NAME, &type) < 0)
+    if (H5P_set(plist, H5F_ACS_MULTI_TYPE_NAME, &type) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set type for multi driver")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_multi_type() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_multi_type
  *
@@ -1563,21 +1607,21 @@ done:
 herr_t
 H5Pget_multi_type(hid_t fapl_id, H5FD_mem_t *type)
 {
-    H5P_genplist_t      *plist;                 /* Property list pointer */
-    herr_t              ret_value = SUCCEED;    /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Mt", fapl_id, type);
 
     /* Get the plist structure */
-    if(H5P_DEFAULT == fapl_id)
+    if (H5P_DEFAULT == fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
-    if(NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value */
-    if(type) {
-        if(H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
+    if (type) {
+        if (H5P_get(plist, H5F_ACS_MULTI_TYPE_NAME, type) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get type for multi driver")
     } /* end if */
 
@@ -1585,7 +1629,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_multi_type() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_cache
  *
@@ -1609,37 +1652,36 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts,
-        size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0)
+H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts, size_t rdcc_nslots, size_t rdcc_nbytes,
+             double rdcc_w0)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
-             rdcc_w0);
+    H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Check arguments */
-    if(rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
+    if (rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set sizes */
-    if(H5P_set(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc_nslots) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache number of slots")
-    if(H5P_set(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set data cache byte size")
-    if(H5P_set(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set preempt read chunks")
+    if (H5P_set(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, &rdcc_nslots) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache number of slots")
+    if (H5P_set(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, &rdcc_nbytes) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set data cache byte size")
+    if (H5P_set(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, &rdcc_w0) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set preempt read chunks")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_cache() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_cache
  *
@@ -1657,41 +1699,38 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_cache(hid_t plist_id, int *mdc_nelmts,
-        size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
+H5Pget_cache(hid_t plist_id, int *mdc_nelmts, size_t *rdcc_nslots, size_t *rdcc_nbytes, double *rdcc_w0)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes,
-             rdcc_w0);
+    H5TRACE5("e", "i*Is*z*z*d", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get sizes */
 
     /* the mdc_nelmts FAPL entry no longer exists, so just return a constant */
-    if(mdc_nelmts)
+    if (mdc_nelmts)
         *mdc_nelmts = 0;
 
-    if(rdcc_nslots)
-        if(H5P_get(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, rdcc_nslots) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache number of slots")
-    if(rdcc_nbytes)
-        if(H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, rdcc_nbytes) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get data cache byte size")
-    if(rdcc_w0)
-        if(H5P_get(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, rdcc_w0) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get preempt read chunks")
+    if (rdcc_nslots)
+        if (H5P_get(plist, H5F_ACS_DATA_CACHE_NUM_SLOTS_NAME, rdcc_nslots) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get data cache number of slots")
+    if (rdcc_nbytes)
+        if (H5P_get(plist, H5F_ACS_DATA_CACHE_BYTE_SIZE_NAME, rdcc_nbytes) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get data cache byte size")
+    if (rdcc_w0)
+        if (H5P_get(plist, H5F_ACS_PREEMPT_READ_CHUNKS_NAME, rdcc_w0) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get preempt read chunks")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_cache() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_image_config
  *
@@ -1708,18 +1747,18 @@ done:
 herr_t
 H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* validate the new configuration */
-    if(H5AC_validate_cache_image_config(config_ptr) < 0)
+    if (H5AC_validate_cache_image_config(config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid metadata cache image configuration")
 
     /* set the modified metadata cache image config */
@@ -1728,14 +1767,13 @@ H5Pset_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
      * will have to test the version and do translation here.
      */
 
-    if(H5P_set(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, config_ptr) < 0)
+    if (H5P_set(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, config_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache image initial config")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_mdc_image_config() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_image_config
  *
@@ -1756,21 +1794,21 @@ done:
 herr_t
 H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* validate the config_ptr */
-    if(config_ptr == NULL)
+    if (config_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
 
-    if(config_ptr->version != H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION)
+    if (config_ptr->version != H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown image config version.")
 
     /* If we ever support multiple versions of H5AC_cache_config_t, we
@@ -1779,14 +1817,13 @@ H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
      */
 
     /* Get the current initial metadata cache resize configuration */
-    if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, config_ptr) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get metadata cache initial image config")
+    if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, config_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get metadata cache initial image config")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_mdc_image_config() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_config
  *
@@ -1803,18 +1840,18 @@ done:
 herr_t
 H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* validate the new configuration */
-    if(H5AC_validate_config(config_ptr) < 0)
+    if (H5AC_validate_config(config_ptr) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid metadata cache configuration")
 
     /* set the modified config */
@@ -1823,14 +1860,13 @@ H5Pset_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
      * will have to test the version and do translation here.
      */
 
-    if(H5P_set(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, config_ptr) < 0)
+    if (H5P_set(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, config_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache initial config")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_mdc_config() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_config
  *
@@ -1851,21 +1887,21 @@ done:
 herr_t
 H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", plist_id, config_ptr);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* validate the config_ptr */
-    if(config_ptr == NULL)
+    if (config_ptr == NULL)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
 
-    if(config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION)
+    if (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
 
     /* If we ever support multiple versions of H5AC_cache_config_t, we
@@ -1874,14 +1910,13 @@ H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
      */
 
     /* Get the current initial metadata cache resize configuration */
-    if(H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, config_ptr) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get metadata cache initial resize config")
+    if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, config_ptr) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get metadata cache initial resize config")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_mdc_config() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_gc_references
  *
@@ -1916,25 +1951,24 @@ done:
 herr_t
 H5Pset_gc_references(hid_t plist_id, unsigned gc_ref)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, gc_ref);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_GARBG_COLCT_REF_NAME, &gc_ref) < 0)
+    if (H5P_set(plist, H5F_ACS_GARBG_COLCT_REF_NAME, &gc_ref) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set garbage collect reference")
 
 done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_gc_references
  *
@@ -1956,28 +1990,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref/*out*/)
+H5Pget_gc_references(hid_t plist_id, unsigned *gc_ref /*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, gc_ref);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if(gc_ref)
-        if(H5P_get(plist, H5F_ACS_GARBG_COLCT_REF_NAME, gc_ref) < 0)
+    if (gc_ref)
+        if (H5P_get(plist, H5F_ACS_GARBG_COLCT_REF_NAME, gc_ref) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get garbage collect reference")
 
 done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fclose_degree
  *
@@ -1995,25 +2028,24 @@ done:
 herr_t
 H5Pset_fclose_degree(hid_t plist_id, H5F_close_degree_t degree)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iFd", plist_id, degree);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_CLOSE_DEGREE_NAME, &degree) < 0)
+    if (H5P_set(plist, H5F_ACS_CLOSE_DEGREE_NAME, &degree) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file close degree")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_fclose_degree() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fclose_degree
  *
@@ -2031,24 +2063,23 @@ done:
 herr_t
 H5Pget_fclose_degree(hid_t plist_id, H5F_close_degree_t *degree)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Fd", plist_id, degree);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if(degree && H5P_get(plist, H5F_ACS_CLOSE_DEGREE_NAME, degree) < 0)
+    if (degree && H5P_get(plist, H5F_ACS_CLOSE_DEGREE_NAME, degree) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file close degree")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_fclose_degree() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_meta_block_size
  *
@@ -2081,25 +2112,24 @@ done:
 herr_t
 H5Pset_meta_block_size(hid_t plist_id, hsize_t size)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", plist_id, size);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &size) < 0)
+    if (H5P_set(plist, H5F_ACS_META_BLOCK_SIZE_NAME, &size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set meta data block size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_meta_block_size
  *
@@ -2121,21 +2151,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_meta_block_size(hid_t plist_id, hsize_t *size/*out*/)
+H5Pget_meta_block_size(hid_t plist_id, hsize_t *size /*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, size);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if(size) {
-        if(H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
+    if (size) {
+        if (H5P_get(plist, H5F_ACS_META_BLOCK_SIZE_NAME, size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get meta data block size")
     } /* end if */
 
@@ -2143,7 +2173,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_sieve_buf_size
  *
@@ -2176,25 +2205,24 @@ done:
 herr_t
 H5Pset_sieve_buf_size(hid_t plist_id, size_t size)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iz", plist_id, size);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
+    if (H5P_set(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, &size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sieve buffer size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_sieve_buf_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_sieve_buf_size
  *
@@ -2216,28 +2244,27 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sieve_buf_size(hid_t plist_id, size_t *size/*out*/)
+H5Pget_sieve_buf_size(hid_t plist_id, size_t *size /*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, size);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if(size)
-        if(H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, size) < 0)
+    if (size)
+        if (H5P_get(plist, H5F_ACS_SIEVE_BUF_SIZE_NAME, size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get sieve buffer size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_sieve_buf_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_small_data_block_size
  *
@@ -2265,25 +2292,24 @@ done:
 herr_t
 H5Pset_small_data_block_size(hid_t plist_id, hsize_t size)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ih", plist_id, size);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &size) < 0)
+    if (H5P_set(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, &size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set 'small data' block size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_small_data_block_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_small_data_block_size
  *
@@ -2300,21 +2326,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size/*out*/)
+H5Pget_small_data_block_size(hid_t plist_id, hsize_t *size /*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, size);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id,H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if(size) {
-        if(H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, size) < 0)
+    if (size) {
+        if (H5P_get(plist, H5F_ACS_SDATA_BLOCK_SIZE_NAME, size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get 'small data' block size")
     } /* end if */
 
@@ -2322,7 +2348,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_small_data_block_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_libver_bounds
  *
@@ -2430,41 +2455,40 @@ done:
 herr_t
 H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_t high)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iFvFv", plist_id, low, high);
 
     /* Check args */
-    if(low < 0 || low > H5F_LIBVER_LATEST)
+    if (low < 0 || low > H5F_LIBVER_LATEST)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "low bound is not valid")
 
-    if(high < 0 || high > H5F_LIBVER_LATEST)
+    if (high < 0 || high > H5F_LIBVER_LATEST)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "high bound is not valid")
 
     /* (earliest, earliest), (latest, earliest), (v18, earliest) are not valid combinations */
-    if(high == H5F_LIBVER_EARLIEST)
+    if (high == H5F_LIBVER_EARLIEST)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid (low,high) combination of library version bound")
 
     /* (latest, v18) is not valid combination */
-    if(high < low)
+    if (high < low)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid (low,high) combination of library version bound")
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &low) < 0)
+    if (H5P_set(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, &low) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set low bound for library format versions")
-    if(H5P_set(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &high) < 0)
+    if (H5P_set(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &high) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set high bound for library format versions")
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_libver_bounds() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_libver_bounds
  *
@@ -2479,27 +2503,26 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low/*out*/,
-    H5F_libver_t *high/*out*/)
+H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low /*out*/, H5F_libver_t *high /*out*/)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED; /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixx", plist_id, low, high);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-     /* Get values */
-    if(low) {
-        if(H5P_get(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, low) < 0)
+    /* Get values */
+    if (low) {
+        if (H5P_get(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, low) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get low bound for library format versions")
     }
 
-    if(high) {
-        if(H5P_get(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, high) < 0)
+    if (high) {
+        if (H5P_get(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, high) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get high bound for library format versions")
     }
 
@@ -2507,7 +2530,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_libver_bounds() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_elink_file_cache_size
  *
@@ -2527,25 +2549,24 @@ done:
 herr_t
 H5Pset_elink_file_cache_size(hid_t plist_id, unsigned efc_size)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, efc_size);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set value */
-    if(H5P_set(plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
+    if (H5P_set(plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set elink file cache size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_elink_file_cache_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_elink_file_cache_size
  *
@@ -2565,26 +2586,25 @@ done:
 herr_t
 H5Pget_elink_file_cache_size(hid_t plist_id, unsigned *efc_size)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*Iu", plist_id, efc_size);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get value */
-    if(efc_size)
-        if(H5P_get(plist, H5F_ACS_EFC_SIZE_NAME, efc_size) < 0)
+    if (efc_size)
+        if (H5P_get(plist, H5F_ACS_EFC_SIZE_NAME, efc_size) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get elink file cache size")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_elink_file_cache_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function: H5Pset_file_image
  *
@@ -2601,29 +2621,31 @@ done:
 herr_t
 H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
 {
-    H5P_genplist_t *fapl;               /* Property list pointer */
-    H5FD_file_image_info_t image_info;  /* File image info */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5FD_file_image_info_t image_info;          /* File image info */
+    herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*xz", fapl_id, buf_ptr, buf_len);
 
     /* validate parameters */
-    if(!(((buf_ptr == NULL) && (buf_len == 0)) || ((buf_ptr != NULL) && (buf_len > 0))))
+    if (!(((buf_ptr == NULL) && (buf_len == 0)) || ((buf_ptr != NULL) && (buf_len > 0))))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "inconsistent buf_ptr and buf_len")
 
     /* Get the plist structure */
-    if(NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get old image info */
-    if(H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
+    if (H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get old file image pointer")
 
     /* Release previous buffer, if it exists */
-    if(image_info.buffer != NULL) {
-        if(image_info.callbacks.image_free) {
-            if(SUCCEED != image_info.callbacks.image_free(image_info.buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata))
+    if (image_info.buffer != NULL) {
+        if (image_info.callbacks.image_free) {
+            if (SUCCEED != image_info.callbacks.image_free(image_info.buffer,
+                                                           H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
+                                                           image_info.callbacks.udata))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "image_free callback failed")
         } /* end if */
         else
@@ -2631,25 +2653,24 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
     } /* end if */
 
     /* Update struct */
-    if(buf_ptr) {
+    if (buf_ptr) {
         /* Allocate memory */
-        if(image_info.callbacks.image_malloc) {
-            if(NULL == (image_info.buffer = image_info.callbacks.image_malloc(buf_len,
-                    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata)))
+        if (image_info.callbacks.image_malloc) {
+            if (NULL == (image_info.buffer = image_info.callbacks.image_malloc(
+                             buf_len, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET, image_info.callbacks.udata)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "image malloc callback failed")
-         } /* end if */
-         else
-            if(NULL == (image_info.buffer = H5MM_malloc(buf_len)))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
+        } /* end if */
+        else if (NULL == (image_info.buffer = H5MM_malloc(buf_len)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate memory block")
 
         /* Copy data */
-        if(image_info.callbacks.image_memcpy) {
-            if(image_info.buffer != image_info.callbacks.image_memcpy(image_info.buffer,
-                   buf_ptr, buf_len, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
-                   image_info.callbacks.udata))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
+        if (image_info.callbacks.image_memcpy) {
+            if (image_info.buffer != image_info.callbacks.image_memcpy(image_info.buffer, buf_ptr, buf_len,
+                                                                       H5FD_FILE_IMAGE_OP_PROPERTY_LIST_SET,
+                                                                       image_info.callbacks.udata))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
         } /* end if */
-    else
+        else
             H5MM_memcpy(image_info.buffer, buf_ptr, buf_len);
     } /* end if */
     else
@@ -2658,14 +2679,13 @@ H5Pset_file_image(hid_t fapl_id, void *buf_ptr, size_t buf_len)
     image_info.size = buf_len;
 
     /* Set values */
-    if(H5P_poke(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
+    if (H5P_poke(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file image info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_file_image() */
 
-
 /*-------------------------------------------------------------------------
  * Function: H5Pget_file_image
  *
@@ -2698,19 +2718,19 @@ done:
 herr_t
 H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
 {
-    H5P_genplist_t *fapl;               /* Property list pointer */
-    H5FD_file_image_info_t image_info;  /* File image info */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5FD_file_image_info_t image_info;          /* File image info */
+    herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i**x*z", fapl_id, buf_ptr_ptr, buf_len_ptr);
 
     /* Get the plist structure */
-    if(NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if(H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
+    if (H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &image_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file image info")
 
     /* verify file image field consistency */
@@ -2718,32 +2738,32 @@ H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
              ((image_info.buffer == NULL) && (image_info.size == 0)));
 
     /* Set output size */
-    if(buf_len_ptr != NULL)
+    if (buf_len_ptr != NULL)
         *buf_len_ptr = image_info.size;
 
     /* Duplicate the image if desired, using callbacks if available */
-    if(buf_ptr_ptr != NULL) {
-        void * copy_ptr = NULL;         /* Copy of memory image */
+    if (buf_ptr_ptr != NULL) {
+        void *copy_ptr = NULL; /* Copy of memory image */
 
-        if(image_info.buffer != NULL) {
+        if (image_info.buffer != NULL) {
             /* Allocate memory */
-            if(image_info.callbacks.image_malloc) {
-                if(NULL == (copy_ptr = image_info.callbacks.image_malloc(image_info.size,
-                        H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, image_info.callbacks.udata)))
+            if (image_info.callbacks.image_malloc) {
+                if (NULL ==
+                    (copy_ptr = image_info.callbacks.image_malloc(
+                         image_info.size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, image_info.callbacks.udata)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "image malloc callback failed")
             } /* end if */
-            else
-                if(NULL == (copy_ptr = H5MM_malloc(image_info.size)))
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate copy")
+            else if (NULL == (copy_ptr = H5MM_malloc(image_info.size)))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "unable to allocate copy")
 
             /* Copy data */
-            if(image_info.callbacks.image_memcpy) {
-                if(copy_ptr != image_info.callbacks.image_memcpy(copy_ptr, image_info.buffer,
-                        image_info.size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET,
-                        image_info.callbacks.udata))
+            if (image_info.callbacks.image_memcpy) {
+                if (copy_ptr != image_info.callbacks.image_memcpy(
+                                    copy_ptr, image_info.buffer, image_info.size,
+                                    H5FD_FILE_IMAGE_OP_PROPERTY_LIST_GET, image_info.callbacks.udata))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
             } /* end if */
-        else
+            else
                 H5MM_memcpy(copy_ptr, image_info.buffer, image_info.size);
         } /* end if */
 
@@ -2754,7 +2774,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_file_image */
 
-
 /*-------------------------------------------------------------------------
  * Function: H5Pset_file_image_callbacks
  *
@@ -2774,64 +2793,64 @@ done:
 herr_t
 H5Pset_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr)
 {
-    H5P_genplist_t *fapl;               /* Property list pointer */
-    H5FD_file_image_info_t info;        /* File image info */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5FD_file_image_info_t info;                /* File image info */
+    herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", fapl_id, callbacks_ptr);
 
     /* Get the plist structure */
-    if(NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get old info */
-    if(H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
+    if (H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get old file image info")
 
     /* verify file image field consistency */
-    HDassert(((info.buffer != NULL) && (info.size > 0)) ||
-             ((info.buffer == NULL) && (info.size == 0)));
+    HDassert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
 
     /* Make sure a file image hasn't already been set */
-    if(info.buffer != NULL || info.size > 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_SETDISALLOWED, FAIL, "setting callbacks when an image is already set is forbidden. It could cause memory leaks.")
+    if (info.buffer != NULL || info.size > 0)
+        HGOTO_ERROR(
+            H5E_PLIST, H5E_SETDISALLOWED, FAIL,
+            "setting callbacks when an image is already set is forbidden. It could cause memory leaks.")
 
     /* verify that callbacks_ptr is not NULL */
-    if(NULL == callbacks_ptr)
-    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL callbacks_ptr")
+    if (NULL == callbacks_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL callbacks_ptr")
 
     /* Make sure udata callbacks are going to be set if udata is going to be set */
-    if(callbacks_ptr->udata)
-        if(callbacks_ptr->udata_copy == NULL || callbacks_ptr->udata_free == NULL)
+    if (callbacks_ptr->udata)
+        if (callbacks_ptr->udata_copy == NULL || callbacks_ptr->udata_free == NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_SETDISALLOWED, FAIL, "udata callbacks must be set if udata is set")
 
     /* Release old udata if it exists */
-    if(info.callbacks.udata != NULL) {
+    if (info.callbacks.udata != NULL) {
         HDassert(info.callbacks.udata_free);
-        if(info.callbacks.udata_free(info.callbacks.udata) < 0)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "udata_free callback failed")
+        if (info.callbacks.udata_free(info.callbacks.udata) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTFREE, FAIL, "udata_free callback failed")
     } /* end if */
 
     /* Update struct */
     info.callbacks = *callbacks_ptr;
 
-    if(callbacks_ptr->udata) {
+    if (callbacks_ptr->udata) {
         HDassert(callbacks_ptr->udata_copy);
         HDassert(callbacks_ptr->udata_free);
-        if((info.callbacks.udata = callbacks_ptr->udata_copy(callbacks_ptr->udata)) == NULL)
+        if ((info.callbacks.udata = callbacks_ptr->udata_copy(callbacks_ptr->udata)) == NULL)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy the suppplied udata")
     } /* end if */
 
     /* Set values */
-    if(H5P_poke(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
+    if (H5P_poke(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set file image info")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_file_image_callbacks() */
 
-
 /*-------------------------------------------------------------------------
  * Function: H5Pget_file_image_callbacks
  *
@@ -2850,44 +2869,42 @@ done:
 herr_t
 H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr)
 {
-    H5P_genplist_t *fapl;               /* Property list pointer */
-    H5FD_file_image_info_t info;        /* File image info */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5P_genplist_t *       fapl;                /* Property list pointer */
+    H5FD_file_image_info_t info;                /* File image info */
+    herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", fapl_id, callbacks_ptr);
 
     /* Get the plist structure */
-    if(NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+    if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get old info */
-    if(H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
+    if (H5P_peek(fapl, H5F_ACS_FILE_IMAGE_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get file image info")
 
     /* verify file image field consistency */
-    HDassert(((info.buffer != NULL) && (info.size > 0)) ||
-             ((info.buffer == NULL) && (info.size == 0)));
+    HDassert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
 
     /* verify that callbacks_ptr is not NULL */
-    if(NULL == callbacks_ptr)
-    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL callbacks_ptr")
+    if (NULL == callbacks_ptr)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL callbacks_ptr")
 
     /* Transfer values to parameters */
     *callbacks_ptr = info.callbacks;
 
     /* Copy udata if it exists */
-    if(info.callbacks.udata != NULL) {
+    if (info.callbacks.udata != NULL) {
         HDassert(info.callbacks.udata_copy);
-        if((callbacks_ptr->udata = info.callbacks.udata_copy(info.callbacks.udata)) == 0)
-                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy udata")
+        if ((callbacks_ptr->udata = info.callbacks.udata_copy(info.callbacks.udata)) == 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy udata")
     } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_file_image_callbacks() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_image_info_copy
  *
@@ -2910,12 +2927,12 @@ done:
 static herr_t
 H5P__file_image_info_copy(void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
-    if(value) {
-        H5FD_file_image_info_t *info;   /* Image info struct */
+    if (value) {
+        H5FD_file_image_info_t *info; /* Image info struct */
 
         info = (H5FD_file_image_info_t *)value;
 
@@ -2923,49 +2940,49 @@ H5P__file_image_info_copy(void *value)
         HDassert(((info->buffer != NULL) && (info->size > 0)) ||
                  ((info->buffer == NULL) && (info->size == 0)));
 
-        if(info->buffer && info->size > 0) {
-            void *old_buffer;            /* Pointer to old image buffer */
+        if (info->buffer && info->size > 0) {
+            void *old_buffer; /* Pointer to old image buffer */
 
             /* Store the old buffer */
             old_buffer = info->buffer;
 
             /* Allocate new buffer */
-            if(info->callbacks.image_malloc) {
-                if(NULL == (info->buffer = info->callbacks.image_malloc(info->size,
-                        H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata)))
+            if (info->callbacks.image_malloc) {
+                if (NULL == (info->buffer = info->callbacks.image_malloc(
+                                 info->size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata)))
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "image malloc callback failed")
             } /* end if */
             else {
-                if(NULL == (info->buffer = H5MM_malloc(info->size)))
+                if (NULL == (info->buffer = H5MM_malloc(info->size)))
                     HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL, "unable to allocate memory block")
             } /* end else */
 
             /* Copy data to new buffer */
-            if(info->callbacks.image_memcpy) {
-                if(info->buffer != info->callbacks.image_memcpy(info->buffer, old_buffer,
-            info->size, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY, info->callbacks.udata))
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
+            if (info->callbacks.image_memcpy) {
+                if (info->buffer != info->callbacks.image_memcpy(info->buffer, old_buffer, info->size,
+                                                                 H5FD_FILE_IMAGE_OP_PROPERTY_LIST_COPY,
+                                                                 info->callbacks.udata))
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "image_memcpy callback failed")
             } /* end if */
-        else
+            else
                 H5MM_memcpy(info->buffer, old_buffer, info->size);
         } /* end if */
 
         /* Copy udata if it exists */
-        if(info->callbacks.udata) {
+        if (info->callbacks.udata) {
             void *old_udata = info->callbacks.udata;
 
-            if(NULL == info->callbacks.udata_copy)
+            if (NULL == info->callbacks.udata_copy)
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "udata_copy not defined")
 
             info->callbacks.udata = info->callbacks.udata_copy(old_udata);
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_image_info_copy() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__file_image_info_free
  *
@@ -2984,12 +3001,12 @@ done:
 static herr_t
 H5P__file_image_info_free(void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
-    if(value) {
-        H5FD_file_image_info_t *info;        /* Image info struct */
+    if (value) {
+        H5FD_file_image_info_t *info; /* Image info struct */
 
         info = (H5FD_file_image_info_t *)value;
 
@@ -2998,29 +3015,29 @@ H5P__file_image_info_free(void *value)
                  ((info->buffer == NULL) && (info->size == 0)));
 
         /* Free buffer */
-        if(info->buffer != NULL && info->size > 0) {
-            if(info->callbacks.image_free) {
-                if((*info->callbacks.image_free)(info->buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE, info->callbacks.udata) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "image_free callback failed")
+        if (info->buffer != NULL && info->size > 0) {
+            if (info->callbacks.image_free) {
+                if ((*info->callbacks.image_free)(info->buffer, H5FD_FILE_IMAGE_OP_PROPERTY_LIST_CLOSE,
+                                                  info->callbacks.udata) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "image_free callback failed")
             } /* end if */
             else
                 H5MM_xfree(info->buffer);
         } /* end if */
 
         /* Free udata if it exists */
-        if(info->callbacks.udata) {
-            if(NULL == info->callbacks.udata_free)
+        if (info->callbacks.udata) {
+            if (NULL == info->callbacks.udata_free)
                 HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "udata_free not defined")
-            if((*info->callbacks.udata_free)(info->callbacks.udata) < 0)
+            if ((*info->callbacks.udata_free)(info->callbacks.udata) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "udata_free callback failed")
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__file_image_info_free() */
 
-
 /*-------------------------------------------------------------------------
  * Function: H5P__facc_cache_image_config_cmp
  *
@@ -3037,33 +3054,44 @@ done:
 static int
 H5P__facc_cache_image_config_cmp(const void *_config1, const void *_config2, size_t H5_ATTR_UNUSED size)
 {
-    const H5AC_cache_image_config_t *config1 = (const H5AC_cache_image_config_t *)_config1; /* Create local aliases for values */
-    const H5AC_cache_image_config_t *config2 = (const H5AC_cache_image_config_t *)_config2; /* Create local aliases for values */
-    int ret_value = 0;               /* Return value */
+    const H5AC_cache_image_config_t *config1 =
+        (const H5AC_cache_image_config_t *)_config1; /* Create local aliases for values */
+    const H5AC_cache_image_config_t *config2 =
+        (const H5AC_cache_image_config_t *)_config2; /* Create local aliases for values */
+    int ret_value = 0;                               /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Check for a property being set */
-    if(config1 == NULL && config2 != NULL) HGOTO_DONE(-1);
-    if(config1 != NULL && config2 == NULL) HGOTO_DONE(1);
+    if (config1 == NULL && config2 != NULL)
+        HGOTO_DONE(-1);
+    if (config1 != NULL && config2 == NULL)
+        HGOTO_DONE(1);
 
-    if(config1->version < config2->version) HGOTO_DONE(-1);
-    if(config1->version > config2->version) HGOTO_DONE(1);
+    if (config1->version < config2->version)
+        HGOTO_DONE(-1);
+    if (config1->version > config2->version)
+        HGOTO_DONE(1);
 
-    if(config1->generate_image < config2->generate_image) HGOTO_DONE(-1);
-    if(config1->generate_image > config2->generate_image) HGOTO_DONE(1);
+    if (config1->generate_image < config2->generate_image)
+        HGOTO_DONE(-1);
+    if (config1->generate_image > config2->generate_image)
+        HGOTO_DONE(1);
 
-    if(config1->save_resize_status < config2->save_resize_status) HGOTO_DONE(-1);
-    if(config1->save_resize_status > config2->save_resize_status) HGOTO_DONE(1);
+    if (config1->save_resize_status < config2->save_resize_status)
+        HGOTO_DONE(-1);
+    if (config1->save_resize_status > config2->save_resize_status)
+        HGOTO_DONE(1);
 
-    if(config1->entry_ageout < config2->entry_ageout) HGOTO_DONE(-1);
-    if(config1->entry_ageout > config2->entry_ageout) HGOTO_DONE(1);
+    if (config1->entry_ageout < config2->entry_ageout)
+        HGOTO_DONE(-1);
+    if (config1->entry_ageout > config2->entry_ageout)
+        HGOTO_DONE(1);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_image_config_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_image_config_enc
  *
@@ -3082,7 +3110,8 @@ done:
 static herr_t
 H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
 {
-    const H5AC_cache_image_config_t *config = (const H5AC_cache_image_config_t *)value; /* Create local aliases for value */
+    const H5AC_cache_image_config_t *config =
+        (const H5AC_cache_image_config_t *)value; /* Create local aliases for value */
     uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
@@ -3090,7 +3119,7 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
     /* Sanity check */
     HDassert(value);
 
-    if(NULL != *pp) {
+    if (NULL != *pp) {
         /* Encode type sizes (as a safety check) */
         *(*pp)++ = (uint8_t)sizeof(unsigned);
 
@@ -3109,7 +3138,6 @@ H5P__facc_cache_image_config_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_cache_image_config_enc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_image_config_dec
  *
@@ -3129,9 +3157,9 @@ static herr_t
 H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
 {
     H5AC_cache_image_config_t *config = (H5AC_cache_image_config_t *)_value;
-    const uint8_t **pp = (const uint8_t **)_pp;
-    unsigned enc_size;
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const uint8_t **           pp     = (const uint8_t **)_pp;
+    unsigned                   enc_size;
+    herr_t                     ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3146,7 +3174,7 @@ H5P__facc_cache_image_config_dec(const void **_pp, void *_value)
 
     /* Decode type sizes */
     enc_size = *(*pp)++;
-    if(enc_size != sizeof(unsigned))
+    if (enc_size != sizeof(unsigned))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
 
     INT32DECODE(*pp, config->version);
@@ -3161,7 +3189,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_image_config_dec() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_set
  *
@@ -3177,9 +3204,9 @@ done:
  */
 static herr_t
 H5P__facc_file_image_info_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                              size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3187,14 +3214,13 @@ H5P__facc_file_image_info_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
     HDassert(value);
 
     /* Make copy of file image info */
-    if(H5P__file_image_info_copy(value) < 0)
+    if (H5P__file_image_info_copy(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file image info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_set() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_get
  *
@@ -3210,9 +3236,9 @@ done:
  */
 static herr_t
 H5P__facc_file_image_info_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                              size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3220,14 +3246,13 @@ H5P__facc_file_image_info_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
     HDassert(value);
 
     /* Make copy of file image info */
-    if(H5P__file_image_info_copy(value) < 0)
+    if (H5P__file_image_info_copy(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file image info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_get() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_del
  *
@@ -3244,21 +3269,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_file_image_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_file_image_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                              size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Free the file image info */
-    if(H5P__file_image_info_free(value) < 0)
+    if (H5P__file_image_info_free(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release file image info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_del() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_copy
  *
@@ -3276,19 +3301,18 @@ done:
 static herr_t
 H5P__facc_file_image_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Make copy of file image info */
-    if(H5P__file_image_info_copy(value) < 0)
+    if (H5P__file_image_info_copy(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy file image info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_copy() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_file_image_info_cmp
  *
@@ -3305,12 +3329,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2,
-    size_t H5_ATTR_UNUSED size)
+H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
 {
-    const H5FD_file_image_info_t *info1 = (const H5FD_file_image_info_t *)_info1, /* Create local aliases for values */
-        *info2 = (const H5FD_file_image_info_t *)_info2;
-    herr_t ret_value = 0;       /* Return value */
+    const H5FD_file_image_info_t *info1 = (const H5FD_file_image_info_t *)
+                                     _info1, /* Create local aliases for values */
+        *info2       = (const H5FD_file_image_info_t *)_info2;
+    herr_t ret_value = 0; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3320,34 +3344,45 @@ H5P__facc_file_image_info_cmp(const void *_info1, const void *_info2,
     HDassert(size == sizeof(H5FD_file_image_info_t));
 
     /* Check for different buffer sizes */
-    if(info1->size < info2->size) HGOTO_DONE(-1)
-    if(info1->size > info2->size) HGOTO_DONE(1)
+    if (info1->size < info2->size)
+        HGOTO_DONE(-1)
+    if (info1->size > info2->size)
+        HGOTO_DONE(1)
 
     /* Check for different callbacks */
     /* (Order in memory is fairly meaningless, so just check for equality) */
-    if(info1->callbacks.image_malloc != info2->callbacks.image_malloc) HGOTO_DONE(1)
-    if(info1->callbacks.image_memcpy != info2->callbacks.image_memcpy) HGOTO_DONE(-1)
-    if(info1->callbacks.image_realloc != info2->callbacks.image_realloc) HGOTO_DONE(1)
-    if(info1->callbacks.image_free != info2->callbacks.image_free) HGOTO_DONE(-1)
-    if(info1->callbacks.udata_copy != info2->callbacks.udata_copy) HGOTO_DONE(1)
-    if(info1->callbacks.udata_free != info2->callbacks.udata_free) HGOTO_DONE(-1)
+    if (info1->callbacks.image_malloc != info2->callbacks.image_malloc)
+        HGOTO_DONE(1)
+    if (info1->callbacks.image_memcpy != info2->callbacks.image_memcpy)
+        HGOTO_DONE(-1)
+    if (info1->callbacks.image_realloc != info2->callbacks.image_realloc)
+        HGOTO_DONE(1)
+    if (info1->callbacks.image_free != info2->callbacks.image_free)
+        HGOTO_DONE(-1)
+    if (info1->callbacks.udata_copy != info2->callbacks.udata_copy)
+        HGOTO_DONE(1)
+    if (info1->callbacks.udata_free != info2->callbacks.udata_free)
+        HGOTO_DONE(-1)
 
     /* Check for different udata */
     /* (Don't know how big it is, so can't check contents) */
-    if(info1->callbacks.udata < info2->callbacks.udata) HGOTO_DONE(-1)
-    if(info1->callbacks.udata > info2->callbacks.udata) HGOTO_DONE(1)
+    if (info1->callbacks.udata < info2->callbacks.udata)
+        HGOTO_DONE(-1)
+    if (info1->callbacks.udata > info2->callbacks.udata)
+        HGOTO_DONE(1)
 
     /* Check buffer contents (instead of buffer pointers) */
-    if(info1->buffer != NULL && info2->buffer == NULL) HGOTO_DONE(-1)
-    if(info1->buffer == NULL && info2->buffer != NULL) HGOTO_DONE(1)
-    if(info1->buffer != NULL && info2->buffer != NULL)
+    if (info1->buffer != NULL && info2->buffer == NULL)
+        HGOTO_DONE(-1)
+    if (info1->buffer == NULL && info2->buffer != NULL)
+        HGOTO_DONE(1)
+    if (info1->buffer != NULL && info2->buffer != NULL)
         ret_value = HDmemcmp(info1->buffer, info2->buffer, size);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_file_image_info_close
  *
@@ -3365,19 +3400,18 @@ done:
 static herr_t
 H5P__facc_file_image_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Free the file image info */
-    if(H5P__file_image_info_free(value) < 0)
+    if (H5P__file_image_info_free(value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release file image info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_file_image_info_close() */
 
-
 /*-------------------------------------------------------------------------
  * Function: H5P__facc_cache_config_cmp
  *
@@ -3394,102 +3428,159 @@ done:
 static int
 H5P__facc_cache_config_cmp(const void *_config1, const void *_config2, size_t H5_ATTR_UNUSED size)
 {
-    const H5AC_cache_config_t *config1 = (const H5AC_cache_config_t *)_config1; /* Create local aliases for values */
-    const H5AC_cache_config_t *config2 = (const H5AC_cache_config_t *)_config2; /* Create local aliases for values */
-    int ret_value = 0;               /* Return value */
+    const H5AC_cache_config_t *config1 =
+        (const H5AC_cache_config_t *)_config1; /* Create local aliases for values */
+    const H5AC_cache_config_t *config2 =
+        (const H5AC_cache_config_t *)_config2; /* Create local aliases for values */
+    int ret_value = 0;                         /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
     /* Check for a property being set */
-    if(config1 == NULL && config2 != NULL) HGOTO_DONE(-1);
-    if(config1 != NULL && config2 == NULL) HGOTO_DONE(1);
+    if (config1 == NULL && config2 != NULL)
+        HGOTO_DONE(-1);
+    if (config1 != NULL && config2 == NULL)
+        HGOTO_DONE(1);
 
-    if(config1->version < config2->version) HGOTO_DONE(-1);
-    if(config1->version > config2->version) HGOTO_DONE(1);
+    if (config1->version < config2->version)
+        HGOTO_DONE(-1);
+    if (config1->version > config2->version)
+        HGOTO_DONE(1);
 
-    if(config1->rpt_fcn_enabled < config2->rpt_fcn_enabled) HGOTO_DONE(-1);
-    if(config1->rpt_fcn_enabled > config2->rpt_fcn_enabled) HGOTO_DONE(1);
+    if (config1->rpt_fcn_enabled < config2->rpt_fcn_enabled)
+        HGOTO_DONE(-1);
+    if (config1->rpt_fcn_enabled > config2->rpt_fcn_enabled)
+        HGOTO_DONE(1);
 
-    if(config1->evictions_enabled < config2->evictions_enabled) HGOTO_DONE(-1);
-    if(config1->evictions_enabled > config2->evictions_enabled) HGOTO_DONE(1);
+    if (config1->evictions_enabled < config2->evictions_enabled)
+        HGOTO_DONE(-1);
+    if (config1->evictions_enabled > config2->evictions_enabled)
+        HGOTO_DONE(1);
 
-    if(config1->set_initial_size < config2->set_initial_size) HGOTO_DONE(-1);
-    if(config1->set_initial_size > config2->set_initial_size) HGOTO_DONE(1);
+    if (config1->set_initial_size < config2->set_initial_size)
+        HGOTO_DONE(-1);
+    if (config1->set_initial_size > config2->set_initial_size)
+        HGOTO_DONE(1);
 
-    if(config1->initial_size < config2->initial_size) HGOTO_DONE(-1);
-    if(config1->initial_size > config2->initial_size) HGOTO_DONE(1);
+    if (config1->initial_size < config2->initial_size)
+        HGOTO_DONE(-1);
+    if (config1->initial_size > config2->initial_size)
+        HGOTO_DONE(1);
 
-    if(config1->min_clean_fraction < config2->min_clean_fraction) HGOTO_DONE(-1);
-    if(config1->min_clean_fraction > config2->min_clean_fraction) HGOTO_DONE(1);
+    if (config1->min_clean_fraction < config2->min_clean_fraction)
+        HGOTO_DONE(-1);
+    if (config1->min_clean_fraction > config2->min_clean_fraction)
+        HGOTO_DONE(1);
 
-    if(config1->max_size < config2->max_size) HGOTO_DONE(-1);
-    if(config1->max_size > config2->max_size) HGOTO_DONE(1);
+    if (config1->max_size < config2->max_size)
+        HGOTO_DONE(-1);
+    if (config1->max_size > config2->max_size)
+        HGOTO_DONE(1);
 
-    if(config1->min_size < config2->min_size) HGOTO_DONE(-1);
-    if(config1->min_size > config2->min_size) HGOTO_DONE(1);
+    if (config1->min_size < config2->min_size)
+        HGOTO_DONE(-1);
+    if (config1->min_size > config2->min_size)
+        HGOTO_DONE(1);
 
-    if(config1->epoch_length < config2->epoch_length) HGOTO_DONE(-1);
-    if(config1->epoch_length > config2->epoch_length) HGOTO_DONE(1);
+    if (config1->epoch_length < config2->epoch_length)
+        HGOTO_DONE(-1);
+    if (config1->epoch_length > config2->epoch_length)
+        HGOTO_DONE(1);
 
-    if(config1->incr_mode < config2->incr_mode) HGOTO_DONE(-1);
-    if(config1->incr_mode > config2->incr_mode) HGOTO_DONE(1);
+    if (config1->incr_mode < config2->incr_mode)
+        HGOTO_DONE(-1);
+    if (config1->incr_mode > config2->incr_mode)
+        HGOTO_DONE(1);
 
-    if(config1->lower_hr_threshold < config2->lower_hr_threshold) HGOTO_DONE(-1);
-    if(config1->lower_hr_threshold > config2->lower_hr_threshold) HGOTO_DONE(1);
+    if (config1->lower_hr_threshold < config2->lower_hr_threshold)
+        HGOTO_DONE(-1);
+    if (config1->lower_hr_threshold > config2->lower_hr_threshold)
+        HGOTO_DONE(1);
 
-    if(config1->increment < config2->increment) HGOTO_DONE(-1);
-    if(config1->increment > config2->increment) HGOTO_DONE(1);
+    if (config1->increment < config2->increment)
+        HGOTO_DONE(-1);
+    if (config1->increment > config2->increment)
+        HGOTO_DONE(1);
 
-    if(config1->apply_max_increment < config2->apply_max_increment) HGOTO_DONE(-1);
-    if(config1->apply_max_increment > config2->apply_max_increment) HGOTO_DONE(1);
+    if (config1->apply_max_increment < config2->apply_max_increment)
+        HGOTO_DONE(-1);
+    if (config1->apply_max_increment > config2->apply_max_increment)
+        HGOTO_DONE(1);
 
-    if(config1->max_increment < config2->max_increment) HGOTO_DONE(-1);
-    if(config1->max_increment > config2->max_increment) HGOTO_DONE(1);
+    if (config1->max_increment < config2->max_increment)
+        HGOTO_DONE(-1);
+    if (config1->max_increment > config2->max_increment)
+        HGOTO_DONE(1);
 
-    if(config1->flash_incr_mode < config2->flash_incr_mode) HGOTO_DONE(-1);
-    if(config1->flash_incr_mode > config2->flash_incr_mode) HGOTO_DONE(1);
+    if (config1->flash_incr_mode < config2->flash_incr_mode)
+        HGOTO_DONE(-1);
+    if (config1->flash_incr_mode > config2->flash_incr_mode)
+        HGOTO_DONE(1);
 
-    if(config1->flash_multiple < config2->flash_multiple) HGOTO_DONE(-1);
-    if(config1->flash_multiple > config2->flash_multiple) HGOTO_DONE(1);
+    if (config1->flash_multiple < config2->flash_multiple)
+        HGOTO_DONE(-1);
+    if (config1->flash_multiple > config2->flash_multiple)
+        HGOTO_DONE(1);
 
-    if(config1->flash_threshold < config2->flash_threshold) HGOTO_DONE(-1);
-    if(config1->flash_threshold > config2->flash_threshold) HGOTO_DONE(1);
+    if (config1->flash_threshold < config2->flash_threshold)
+        HGOTO_DONE(-1);
+    if (config1->flash_threshold > config2->flash_threshold)
+        HGOTO_DONE(1);
 
-    if(config1->decr_mode < config2->decr_mode) HGOTO_DONE(-1);
-    if(config1->decr_mode > config2->decr_mode) HGOTO_DONE(1);
+    if (config1->decr_mode < config2->decr_mode)
+        HGOTO_DONE(-1);
+    if (config1->decr_mode > config2->decr_mode)
+        HGOTO_DONE(1);
 
-    if(config1->upper_hr_threshold < config2->upper_hr_threshold) HGOTO_DONE(-1);
-    if(config1->upper_hr_threshold > config2->upper_hr_threshold) HGOTO_DONE(1);
+    if (config1->upper_hr_threshold < config2->upper_hr_threshold)
+        HGOTO_DONE(-1);
+    if (config1->upper_hr_threshold > config2->upper_hr_threshold)
+        HGOTO_DONE(1);
 
-    if(config1->decrement < config2->decrement) HGOTO_DONE(-1);
-    if(config1->decrement > config2->decrement) HGOTO_DONE(1);
+    if (config1->decrement < config2->decrement)
+        HGOTO_DONE(-1);
+    if (config1->decrement > config2->decrement)
+        HGOTO_DONE(1);
 
-    if(config1->apply_max_decrement < config2->apply_max_decrement) HGOTO_DONE(-1);
-    if(config1->apply_max_decrement > config2->apply_max_decrement) HGOTO_DONE(1);
+    if (config1->apply_max_decrement < config2->apply_max_decrement)
+        HGOTO_DONE(-1);
+    if (config1->apply_max_decrement > config2->apply_max_decrement)
+        HGOTO_DONE(1);
 
-    if(config1->max_decrement < config2->max_decrement) HGOTO_DONE(-1);
-    if(config1->max_decrement > config2->max_decrement) HGOTO_DONE(1);
+    if (config1->max_decrement < config2->max_decrement)
+        HGOTO_DONE(-1);
+    if (config1->max_decrement > config2->max_decrement)
+        HGOTO_DONE(1);
 
-    if(config1->epochs_before_eviction < config2->epochs_before_eviction) HGOTO_DONE(-1);
-    if(config1->epochs_before_eviction > config2->epochs_before_eviction) HGOTO_DONE(1);
+    if (config1->epochs_before_eviction < config2->epochs_before_eviction)
+        HGOTO_DONE(-1);
+    if (config1->epochs_before_eviction > config2->epochs_before_eviction)
+        HGOTO_DONE(1);
 
-    if(config1->apply_empty_reserve < config2->apply_empty_reserve) HGOTO_DONE(-1);
-    if(config1->apply_empty_reserve > config2->apply_empty_reserve) HGOTO_DONE(1);
+    if (config1->apply_empty_reserve < config2->apply_empty_reserve)
+        HGOTO_DONE(-1);
+    if (config1->apply_empty_reserve > config2->apply_empty_reserve)
+        HGOTO_DONE(1);
 
-    if(config1->empty_reserve < config2->empty_reserve) HGOTO_DONE(-1);
-    if(config1->empty_reserve > config2->empty_reserve) HGOTO_DONE(1);
+    if (config1->empty_reserve < config2->empty_reserve)
+        HGOTO_DONE(-1);
+    if (config1->empty_reserve > config2->empty_reserve)
+        HGOTO_DONE(1);
 
-    if(config1->dirty_bytes_threshold < config2->dirty_bytes_threshold) HGOTO_DONE(-1);
-    if(config1->dirty_bytes_threshold > config2->dirty_bytes_threshold) HGOTO_DONE(1);
+    if (config1->dirty_bytes_threshold < config2->dirty_bytes_threshold)
+        HGOTO_DONE(-1);
+    if (config1->dirty_bytes_threshold > config2->dirty_bytes_threshold)
+        HGOTO_DONE(1);
 
-    if(config1->metadata_write_strategy < config2->metadata_write_strategy) HGOTO_DONE(-1);
-    if(config1->metadata_write_strategy > config2->metadata_write_strategy) HGOTO_DONE(1);
+    if (config1->metadata_write_strategy < config2->metadata_write_strategy)
+        HGOTO_DONE(-1);
+    if (config1->metadata_write_strategy > config2->metadata_write_strategy)
+        HGOTO_DONE(1);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_config_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_config_enc
  *
@@ -3508,10 +3599,11 @@ done:
 static herr_t
 H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 {
-    const H5AC_cache_config_t *config = (const H5AC_cache_config_t *)value; /* Create local aliases for values */
+    const H5AC_cache_config_t *config =
+        (const H5AC_cache_config_t *)value; /* Create local aliases for values */
     uint8_t **pp = (uint8_t **)_pp;
-    unsigned enc_size;      /* Size of encoded property */
-    uint64_t enc_value;         /* Property to encode */
+    unsigned  enc_size;  /* Size of encoded property */
+    uint64_t  enc_value; /* Property to encode */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3519,7 +3611,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
     HDassert(value);
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
-    if(NULL != *pp) {
+    if (NULL != *pp) {
         /* Encode type sizes (as a safety check) */
         *(*pp)++ = (uint8_t)sizeof(unsigned);
         *(*pp)++ = (uint8_t)sizeof(double);
@@ -3533,7 +3625,8 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
 
         H5_ENCODE_UNSIGNED(*pp, config->close_trace_file);
 
-        H5MM_memcpy(*pp, (const uint8_t *)(config->trace_file_name), (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1));
+        H5MM_memcpy(*pp, (const uint8_t *)(config->trace_file_name),
+                    (size_t)(H5AC__MAX_TRACE_FILE_NAME_LEN + 1));
         *pp += H5AC__MAX_TRACE_FILE_NAME_LEN + 1;
 
         H5_ENCODE_UNSIGNED(*pp, config->evictions_enabled);
@@ -3541,7 +3634,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->set_initial_size);
 
         enc_value = (uint64_t)config->initial_size;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size  = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -3549,13 +3642,13 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_DOUBLE(*pp, config->min_clean_fraction);
 
         enc_value = (uint64_t)config->max_size;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size  = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
         enc_value = (uint64_t)config->min_size;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size  = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -3573,7 +3666,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->apply_max_increment);
 
         enc_value = (uint64_t)config->max_increment;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size  = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -3595,7 +3688,7 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
         H5_ENCODE_UNSIGNED(*pp, config->apply_max_decrement);
 
         enc_value = (uint64_t)config->max_decrement;
-        enc_size = H5VM_limit_enc_size(enc_value);
+        enc_size  = H5VM_limit_enc_size(enc_value);
         HDassert(enc_size < 256);
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
@@ -3627,14 +3720,12 @@ H5P__facc_cache_config_enc(const void *value, void **_pp, size_t *size)
     *size += 1 + H5VM_limit_enc_size(enc_value);
 
     /* Compute encoded size of fixed-size values */
-    *size += (5 + (sizeof(unsigned) * 8) + (sizeof(double) * 8) +
-            (sizeof(int32_t) * 4) + sizeof(int64_t) +
-            H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
+    *size += (5 + (sizeof(unsigned) * 8) + (sizeof(double) * 8) + (sizeof(int32_t) * 4) + sizeof(int64_t) +
+              H5AC__MAX_TRACE_FILE_NAME_LEN + 1);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_cache_config_enc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_cache_config_dec
  *
@@ -3654,10 +3745,10 @@ static herr_t
 H5P__facc_cache_config_dec(const void **_pp, void *_value)
 {
     H5AC_cache_config_t *config = (H5AC_cache_config_t *)_value;
-    const uint8_t **pp = (const uint8_t **)_pp;
-    unsigned enc_size;
-    uint64_t enc_value;
-    herr_t ret_value = SUCCEED;         /* Return value */
+    const uint8_t **     pp     = (const uint8_t **)_pp;
+    unsigned             enc_size;
+    uint64_t             enc_value;
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -3672,10 +3763,10 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
 
     /* Decode type sizes */
     enc_size = *(*pp)++;
-    if(enc_size != sizeof(unsigned))
+    if (enc_size != sizeof(unsigned))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unsigned value can't be decoded")
     enc_size = *(*pp)++;
-    if(enc_size != sizeof(double))
+    if (enc_size != sizeof(double))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "double value can't be decoded")
 
     /* int */
@@ -3718,7 +3809,7 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
         config->epoch_length = (long int)temp;
     }
     /* enum */
-    config->incr_mode = (enum H5C_cache_incr_mode)*(*pp)++;
+    config->incr_mode = (enum H5C_cache_incr_mode) * (*pp)++;
 
     H5_DECODE_DOUBLE(*pp, config->lower_hr_threshold);
 
@@ -3732,14 +3823,14 @@ H5P__facc_cache_config_dec(const void **_pp, void *_value)
     config->max_increment = (size_t)enc_value;
 
     /* enum */
-    config->flash_incr_mode = (enum H5C_cache_flash_incr_mode)*(*pp)++;
+    config->flash_incr_mode = (enum H5C_cache_flash_incr_mode) * (*pp)++;
 
     H5_DECODE_DOUBLE(*pp, config->flash_multiple);
 
     H5_DECODE_DOUBLE(*pp, config->flash_threshold);
 
     /* enum */
-    config->decr_mode = (enum H5C_cache_decr_mode)*(*pp)++;
+    config->decr_mode = (enum H5C_cache_decr_mode) * (*pp)++;
 
     H5_DECODE_DOUBLE(*pp, config->upper_hr_threshold);
 
@@ -3769,7 +3860,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_cache_config_dec() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_fclose_degree_enc
  *
@@ -3788,7 +3878,8 @@ done:
 static herr_t
 H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
 {
-    const H5F_close_degree_t *fclose_degree = (const H5F_close_degree_t *)value; /* Create local alias for values */
+    const H5F_close_degree_t *fclose_degree =
+        (const H5F_close_degree_t *)value; /* Create local alias for values */
     uint8_t **pp = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
@@ -3797,7 +3888,7 @@ H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
     HDassert(fclose_degree);
     HDassert(size);
 
-    if(NULL != *pp)
+    if (NULL != *pp)
         /* Encode file close degree */
         *(*pp)++ = (uint8_t)*fclose_degree;
 
@@ -3807,7 +3898,6 @@ H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_fclose_degree_enc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_fclose_degree_dec
  *
@@ -3826,8 +3916,8 @@ H5P__facc_fclose_degree_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
 {
-    H5F_close_degree_t *fclose_degree = (H5F_close_degree_t *)_value;            /* File close degree */
-    const uint8_t **pp = (const uint8_t **)_pp;
+    H5F_close_degree_t *fclose_degree = (H5F_close_degree_t *)_value; /* File close degree */
+    const uint8_t **    pp            = (const uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3837,12 +3927,11 @@ H5P__facc_fclose_degree_dec(const void **_pp, void *_value)
     HDassert(fclose_degree);
 
     /* Decode file close degree */
-    *fclose_degree = (H5F_close_degree_t)*(*pp)++;
+    *fclose_degree = (H5F_close_degree_t) * (*pp)++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_fclose_degree_dec() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_multi_type_enc
  *
@@ -3862,7 +3951,7 @@ static herr_t
 H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
 {
     const H5FD_mem_t *type = (const H5FD_mem_t *)value; /* Create local alias for values */
-    uint8_t **pp = (uint8_t **)_pp;
+    uint8_t **        pp   = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3870,7 +3959,7 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
     HDassert(type);
     HDassert(size);
 
-    if(NULL != *pp)
+    if (NULL != *pp)
         /* Encode file close degree */
         *(*pp)++ = (uint8_t)*type;
 
@@ -3880,7 +3969,6 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_multi_type_enc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_multi_type_dec
  *
@@ -3899,8 +3987,8 @@ H5P__facc_multi_type_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__facc_multi_type_dec(const void **_pp, void *_value)
 {
-    H5FD_mem_t *type = (H5FD_mem_t *)_value;            /* File close degree */
-    const uint8_t **pp = (const uint8_t **)_pp;
+    H5FD_mem_t *    type = (H5FD_mem_t *)_value; /* File close degree */
+    const uint8_t **pp   = (const uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3910,12 +3998,11 @@ H5P__facc_multi_type_dec(const void **_pp, void *_value)
     HDassert(type);
 
     /* Decode multi VFD memory type */
-    *type = (H5FD_mem_t)*(*pp)++;
+    *type = (H5FD_mem_t) * (*pp)++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_multi_type_dec() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_libver_type_enc
  *
@@ -3934,7 +4021,7 @@ static herr_t
 H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
 {
     const H5F_libver_t *type = (const H5F_libver_t *)value; /* Create local alias for values */
-    uint8_t **pp = (uint8_t **)_pp;
+    uint8_t **          pp   = (uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3943,7 +4030,7 @@ H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
     HDassert(size);
 
     /* Encode */
-    if(NULL != *pp)
+    if (NULL != *pp)
         *(*pp)++ = (uint8_t)*type;
 
     /* Size */
@@ -3951,7 +4038,6 @@ H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_libver_type_enc() */
-
 
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_libver_type_dec
@@ -3970,8 +4056,8 @@ H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P__facc_libver_type_dec(const void **_pp, void *_value)
 {
-    H5F_libver_t *type = (H5F_libver_t *)_value;
-    const uint8_t **pp = (const uint8_t **)_pp;
+    H5F_libver_t *  type = (H5F_libver_t *)_value;
+    const uint8_t **pp   = (const uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -3981,12 +4067,11 @@ H5P__facc_libver_type_dec(const void **_pp, void *_value)
     HDassert(type);
 
     /* Decode */
-    *type = (H5F_libver_t)*(*pp)++;
+    *type = (H5F_libver_t) * (*pp)++;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__facc_libver_type_dec() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_metadata_read_attempts
  *
@@ -4007,29 +4092,29 @@ H5P__facc_libver_type_dec(const void **_pp, void *_value)
 herr_t
 H5Pset_metadata_read_attempts(hid_t plist_id, unsigned attempts)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "iIu", plist_id, attempts);
 
     /* Cannot set the # of attempts to 0 */
-    if(attempts == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "number of metadatata read attempts must be greater than 0");
+    if (attempts == 0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "number of metadatata read attempts must be greater than 0");
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &attempts) < 0)
+    if (H5P_set(plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, &attempts) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set # of metadata read attempts")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_metadata_read_attempts() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_metadata_read_attempts
  *
@@ -4042,35 +4127,34 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts/*out*/)
+H5Pget_metadata_read_attempts(hid_t plist_id, unsigned *attempts /*out*/)
 {
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", plist_id, attempts);
 
     /* Get values */
-    if(attempts) {
-        H5P_genplist_t *plist;              /* Property list pointer */
+    if (attempts) {
+        H5P_genplist_t *plist; /* Property list pointer */
 
         /* Get the plist structure */
-        if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+        if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* Get the # of read attempts set */
-        if(H5P_get(plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, attempts) < 0)
+        /* Get the # of read attempts set */
+        if (H5P_get(plist, H5F_ACS_METADATA_READ_ATTEMPTS_NAME, attempts) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get the number of metadata read attempts")
 
-    /* If not set, return the default value */
-    if(*attempts == H5F_ACS_METADATA_READ_ATTEMPTS_DEF)    /* 0 */
-        *attempts = H5F_METADATA_READ_ATTEMPTS;
+        /* If not set, return the default value */
+        if (*attempts == H5F_ACS_METADATA_READ_ATTEMPTS_DEF) /* 0 */
+            *attempts = H5F_METADATA_READ_ATTEMPTS;
     } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_metadata_read_attempts() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_obj_flush_cb
  *
@@ -4086,35 +4170,34 @@ done:
 herr_t
 H5Pset_object_flush_cb(hid_t plist_id, H5F_flush_cb_t func, void *udata)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
+    H5P_genplist_t *   plist; /* Property list pointer */
     H5F_object_flush_t flush_info;
-    herr_t ret_value = SUCCEED;   /* return value */
+    herr_t             ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ix*x", plist_id, func, udata);
 
     /* Check if the callback function is NULL and the user data is non-NULL.
      * This is almost certainly an error as the user data will not be used. */
-    if(!func && udata)
+    if (!func && udata)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "callback is NULL while user data is not")
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Update property list */
-    flush_info.func = func;
+    flush_info.func  = func;
     flush_info.udata = udata;
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &flush_info) < 0)
+    if (H5P_set(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &flush_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set object flush callback")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pset_obj_flush_cb() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_obj_flush_cb
  *
@@ -4130,32 +4213,31 @@ done:
 herr_t
 H5Pget_object_flush_cb(hid_t plist_id, H5F_flush_cb_t *func, void **udata)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
+    H5P_genplist_t *   plist; /* Property list pointer */
     H5F_object_flush_t flush_info;
-    herr_t ret_value = SUCCEED;   /* return value */
+    herr_t             ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*x**x", plist_id, func, udata);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Retrieve the callback function and user data */
-    if(H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &flush_info) < 0)
+    if (H5P_get(plist, H5F_ACS_OBJECT_FLUSH_CB_NAME, &flush_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get object flush callback")
 
     /* Assign return value */
-    if(func)
-    *func = flush_info.func;
-    if(udata)
-    *udata = flush_info.udata;
+    if (func)
+        *func = flush_info.func;
+    if (udata)
+        *udata = flush_info.udata;
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_obj_flush_cb() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mdc_log_options
  *
@@ -4166,48 +4248,46 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location,
-                       hbool_t start_on_access)
+H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location, hbool_t start_on_access)
 {
-    H5P_genplist_t *plist;              /* Property list pointer */
-    char *      tmp_location;           /* Working location pointer */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    char *          tmp_location;        /* Working location pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "ib*sb", plist_id, is_enabled, location, start_on_access);
 
     /* Check arguments */
-    if(H5P_DEFAULT == plist_id)
+    if (H5P_DEFAULT == plist_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't modify default property list")
-    if(!location)
+    if (!location)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "location cannot be NULL")
 
     /* Get the property list structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list")
 
     /* Get the current location string and free it */
-    if(H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
+    if (H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current log location")
     H5MM_xfree(tmp_location);
 
     /* Make a copy of the passed-in location */
-    if(NULL == (tmp_location = H5MM_xstrdup(location)))
+    if (NULL == (tmp_location = H5MM_xstrdup(location)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy passed-in log location")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &is_enabled) < 0)
+    if (H5P_set(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &is_enabled) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set is_enabled flag")
-    if(H5P_set(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
+    if (H5P_set(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set log location")
-    if(H5P_set(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &start_on_access) < 0)
+    if (H5P_set(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &start_on_access) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set start_on_access flag")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_mdc_log_options() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mdc_log_options
  *
@@ -4218,41 +4298,40 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location,
-                       size_t *location_size, hbool_t *start_on_access)
+H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location, size_t *location_size,
+                       hbool_t *start_on_access)
 {
-    H5P_genplist_t *plist;              /* Property list pointer */
-    char *location_ptr;                 /* Pointer to location string */
-    herr_t      ret_value = SUCCEED;    /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    char *          location_ptr;        /* Pointer to location string */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "i*b*s*z*b", plist_id, is_enabled, location, location_size,
-             start_on_access);
+    H5TRACE5("e", "i*b*s*z*b", plist_id, is_enabled, location, location_size, start_on_access);
 
     /* Get the property list structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list")
 
     /* Get simple values */
-    if(is_enabled)
-        if(H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, is_enabled) < 0)
+    if (is_enabled)
+        if (H5P_get(plist, H5F_ACS_USE_MDC_LOGGING_NAME, is_enabled) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get log location")
-    if(start_on_access)
-        if(H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, start_on_access) < 0)
+    if (start_on_access)
+        if (H5P_get(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, start_on_access) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get start_on_access flag")
 
     /* Get the location */
-    if(location || location_size)
-        if(H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &location_ptr) < 0)
+    if (location || location_size)
+        if (H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &location_ptr) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get log location")
 
     /* Copy log location to output buffer */
-    if(location_ptr && location)
+    if (location_ptr && location)
         H5MM_memcpy(location, location_ptr, *location_size);
 
     /* Get location size, including terminating NULL */
-    if(location_size) {
-        if(location_ptr)
+    if (location_size) {
+        if (location_ptr)
             *location_size = HDstrlen(location_ptr) + 1;
         else
             *location_size = 0;
@@ -4262,7 +4341,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mdc_log_options() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_enc
  *
@@ -4278,44 +4356,43 @@ done:
 static herr_t
 H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 {
-    const char *log_location = *(const char * const *)value;
-    uint8_t **pp = (uint8_t **)_pp;
-    size_t len = 0;
-    uint64_t enc_value;
-    unsigned enc_size;
+    const char *log_location = *(const char *const *)value;
+    uint8_t **  pp           = (uint8_t **)_pp;
+    size_t      len          = 0;
+    uint64_t    enc_value;
+    unsigned    enc_size;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
     /* calculate prefix length */
-    if(NULL != log_location)
+    if (NULL != log_location)
         len = HDstrlen(log_location);
 
     enc_value = (uint64_t)len;
-    enc_size = H5VM_limit_enc_size(enc_value);
+    enc_size  = H5VM_limit_enc_size(enc_value);
     HDassert(enc_size < 256);
 
-    if(NULL != *pp) {
+    if (NULL != *pp) {
         /* encode the length of the prefix */
         *(*pp)++ = (uint8_t)enc_size;
         UINT64ENCODE_VAR(*pp, enc_value, enc_size);
 
         /* encode the prefix */
-        if(NULL != log_location) {
+        if (NULL != log_location) {
             H5MM_memcpy(*(char **)pp, log_location, len);
             *pp += len;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     *size += (1 + enc_size);
-    if(NULL != log_location)
+    if (NULL != log_location)
         *size += len;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_enc() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_dec
  *
@@ -4331,12 +4408,12 @@ H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 static herr_t
 H5P_facc_mdc_log_location_dec(const void **_pp, void *_value)
 {
-    char **log_location = (char **)_value;
-    const uint8_t **pp = (const uint8_t **)_pp;
-    size_t len;
-    uint64_t enc_value;                 /* Decoded property value */
-    unsigned enc_size;                  /* Size of encoded property */
-    herr_t ret_value = SUCCEED;
+    char **         log_location = (char **)_value;
+    const uint8_t **pp           = (const uint8_t **)_pp;
+    size_t          len;
+    uint64_t        enc_value; /* Decoded property value */
+    unsigned        enc_size;  /* Size of encoded property */
+    herr_t          ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -4353,9 +4430,9 @@ H5P_facc_mdc_log_location_dec(const void **_pp, void *_value)
     UINT64DECODE_VAR(*pp, enc_value, enc_size);
     len = enc_value;
 
-    if(0 != len) {
+    if (0 != len) {
         /* Make a copy of the user's prefix string */
-        if(NULL == (*log_location = (char *)H5MM_malloc(len + 1)))
+        if (NULL == (*log_location = (char *)H5MM_malloc(len + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, FAIL, "memory allocation failed for prefix")
         HDstrncpy(*log_location, *(const char **)pp, len);
         (*log_location)[len] = '\0';
@@ -4369,7 +4446,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_mdc_log_location_dec() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_del
  *
@@ -4381,7 +4457,7 @@ done:
  */
 static herr_t
 H5P_facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                              size_t H5_ATTR_UNUSED size, void *value)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -4392,7 +4468,6 @@ H5P_facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_del() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_copy
  *
@@ -4414,7 +4489,6 @@ H5P_facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_copy() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P_facc_mdc_log_location_cmp
  *
@@ -4429,24 +4503,23 @@ H5P_facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
 static int
 H5P_facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
 {
-    const char *pref1 = *(const char * const *)value1;
-    const char *pref2 = *(const char * const *)value2;
-    int ret_value = 0;
+    const char *pref1     = *(const char *const *)value1;
+    const char *pref2     = *(const char *const *)value2;
+    int         ret_value = 0;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if(NULL == pref1 && NULL != pref2)
+    if (NULL == pref1 && NULL != pref2)
         HGOTO_DONE(1);
-    if(NULL != pref1 && NULL == pref2)
+    if (NULL != pref1 && NULL == pref2)
         HGOTO_DONE(-1);
-    if(NULL != pref1 && NULL != pref2)
+    if (NULL != pref1 && NULL != pref2)
         ret_value = HDstrcmp(pref1, pref2);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_facc_mdc_log_location_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_facc_mdc_log_location_close
  *
@@ -4469,7 +4542,6 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P_facc_mdc_log_location_close() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_evict_on_close
  *
@@ -4491,33 +4563,33 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
 herr_t
 H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
 {
-    H5P_genplist_t *plist;          /* property list pointer */
-    herr_t ret_value = SUCCEED;     /* return value */
+    H5P_genplist_t *plist;               /* property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", fapl_id, evict_on_close);
 
     /* Compare the property list's class against the other class */
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
 
     /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
 #ifndef H5_HAVE_PARALLEL
     /* Set value */
-    if(H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
+    if (H5P_set(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, &evict_on_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set evict on close property")
 #else
-    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL, "evict on close is currently not supported in parallel HDF5")
+    HGOTO_ERROR(H5E_PLIST, H5E_UNSUPPORTED, FAIL,
+                "evict on close is currently not supported in parallel HDF5")
 #endif /* H5_HAVE_PARALLEL */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_evict_on_close() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_evict_on_close
  *
@@ -4539,21 +4611,21 @@ done:
 herr_t
 H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close)
 {
-    H5P_genplist_t *plist;          /* property list pointer */
-    herr_t ret_value = SUCCEED;     /* return value */
+    H5P_genplist_t *plist;               /* property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", fapl_id, evict_on_close);
 
     /* Compare the property list's class against the other class */
-    if(TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
 
     /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if(H5P_get(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, evict_on_close) < 0)
+    if (H5P_get(plist, H5F_ACS_EVICT_ON_CLOSE_FLAG_NAME, evict_on_close) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get evict on close property")
 
 done:
@@ -4561,7 +4633,7 @@ done:
 } /* end H5Pget_evict_on_close() */
 
 #ifdef H5_HAVE_PARALLEL
-
+
 /*-------------------------------------------------------------------------
  * Function:       H5P__encode_coll_md_read_flag_t
  *
@@ -4579,7 +4651,7 @@ herr_t
 H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
 {
     const H5P_coll_md_read_flag_t *coll_md_read_flag = (const H5P_coll_md_read_flag_t *)value;
-    uint8_t **pp = (uint8_t **)_pp;
+    uint8_t **                     pp                = (uint8_t **)_pp;
 
     FUNC_ENTER_PACKAGE_NOERR
 
@@ -4587,7 +4659,7 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
     HDassert(coll_md_read_flag);
     HDassert(size);
 
-    if(NULL != *pp) {
+    if (NULL != *pp) {
         /* Encode the value */
         H5MM_memcpy(*pp, coll_md_read_flag, sizeof(H5P_coll_md_read_flag_t));
         *pp += sizeof(H5P_coll_md_read_flag_t);
@@ -4599,7 +4671,6 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__encode_coll_md_read_flag_t() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__decode_coll_md_read_flag_t
  *
@@ -4616,8 +4687,8 @@ H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size)
 herr_t
 H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
 {
-    H5P_coll_md_read_flag_t *coll_md_read_flag = (H5P_coll_md_read_flag_t *)_value;            /* File close degree */
-    const uint8_t **pp = (const uint8_t **)_pp;
+    H5P_coll_md_read_flag_t *coll_md_read_flag = (H5P_coll_md_read_flag_t *)_value; /* File close degree */
+    const uint8_t **         pp                = (const uint8_t **)_pp;
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -4627,13 +4698,12 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
     HDassert(coll_md_read_flag);
 
     /* Decode file close degree */
-    *coll_md_read_flag = (H5P_coll_md_read_flag_t)*(*pp);
+    *coll_md_read_flag = (H5P_coll_md_read_flag_t) * (*pp);
     *pp += sizeof(H5P_coll_md_read_flag_t);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5P__decode_coll_md_read_flag_t() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_all_coll_metadata_ops
  *
@@ -4658,9 +4728,9 @@ H5P__decode_coll_md_read_flag_t(const void **_pp, void *_value)
 herr_t
 H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective)
 {
-    H5P_genplist_t *plist;        /* Property list pointer */
-    H5P_coll_md_read_flag_t coll_meta_read;     /* Property value */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *        plist;               /* Property list pointer */
+    H5P_coll_md_read_flag_t coll_meta_read;      /* Property value */
+    herr_t                  ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", plist_id, is_collective);
@@ -4669,30 +4739,28 @@ H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective)
     /* (Dataset, group, attribute, and named datype  access property lists
      *  are sub-classes of link access property lists -QAK)
      */
-    if(TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
-            TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
-            TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+    if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
+        TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) && TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
 
     /* set property to either TRUE if > 0, or FALSE otherwise */
-    if(is_collective)
+    if (is_collective)
         coll_meta_read = H5P_USER_TRUE;
     else
         coll_meta_read = H5P_USER_FALSE;
 
     /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5_COLL_MD_READ_FLAG_NAME, &coll_meta_read) < 0)
+    if (H5P_set(plist, H5_COLL_MD_READ_FLAG_NAME, &coll_meta_read) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata read flag")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_all_coll_metadata_ops() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_all_coll_metadata_ops
  *
@@ -4714,7 +4782,7 @@ done:
 herr_t
 H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective)
 {
-    herr_t ret_value = SUCCEED;   /* return value */
+    herr_t ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", plist_id, is_collective);
@@ -4723,24 +4791,24 @@ H5Pget_all_coll_metadata_ops(hid_t plist_id, hbool_t *is_collective)
     /* (Dataset, group, attribute, and named datype  access property lists
      *  are sub-classes of link access property lists -QAK)
      */
-    if(TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
-            TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) &&
-            TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
+    if (TRUE != H5P_isa_class(plist_id, H5P_LINK_ACCESS) &&
+        TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS) && TRUE != H5P_isa_class(plist_id, H5P_DATASET_XFER))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
 
     /* Get value */
-    if(is_collective) {
-        H5P_coll_md_read_flag_t internal_flag; /* property setting. we need to convert to either TRUE or FALSE */
-        H5P_genplist_t *plist;      /* Property list pointer */
+    if (is_collective) {
+        H5P_coll_md_read_flag_t
+                        internal_flag; /* property setting. we need to convert to either TRUE or FALSE */
+        H5P_genplist_t *plist;         /* Property list pointer */
 
         /* Get the plist structure */
-        if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+        if (NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
             HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-        if(H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &internal_flag) < 0)
+        if (H5P_get(plist, H5_COLL_MD_READ_FLAG_NAME, &internal_flag) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get core collective metadata read flag")
 
-        if(internal_flag < 0)
+        if (internal_flag < 0)
             *is_collective = FALSE;
         else
             *is_collective = (hbool_t)internal_flag;
@@ -4750,7 +4818,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5Pget_all_coll_metadata_ops */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_coll_metadata_write
  *
@@ -4767,29 +4834,28 @@ done:
 herr_t
 H5Pset_coll_metadata_write(hid_t plist_id, hbool_t is_collective)
 {
-    H5P_genplist_t *plist;        /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ib", plist_id, is_collective);
 
     /* Compare the property list's class against the other class */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
 
     /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &is_collective) < 0)
+    if (H5P_set(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, &is_collective) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set collective metadata write flag")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_coll_metadata_write() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_mpi_params
  *
@@ -4805,31 +4871,30 @@ done:
 herr_t
 H5Pget_mpi_params(hid_t plist_id, MPI_Comm *comm, MPI_Info *info)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*Mc*Mi", plist_id, comm, info);
 
     /* Make sure that the property list is a fapl */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
 
     /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get the properties */
-    if(H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, comm) < 0)
+    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, comm) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI communicator from plist")
-    if(H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, info) < 0)
+    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get MPI info from plist")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mpi_params() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_mpi_params
  *
@@ -4845,35 +4910,34 @@ done:
 herr_t
 H5Pset_mpi_params(hid_t plist_id, MPI_Comm comm, MPI_Info info)
 {
-    H5P_genplist_t  *plist;                 /* Property list pointer */
-    herr_t          ret_value = SUCCEED;    /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "iMcMi", plist_id, comm, info);
 
     /* Make sure the MPI communicator is valid */
-    if(MPI_COMM_NULL == comm)
+    if (MPI_COMM_NULL == comm)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "not a valid argument")
 
     /* Make sure that the property list is a fapl */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
 
     /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Set values */
-    if(H5P_set(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+    if (H5P_set(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI communicator")
-    if(H5P_set(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+    if (H5P_set(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI info object")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_mpi_params() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_comm_set
  *
@@ -4886,21 +4950,21 @@ done:
  */
 static herr_t
 H5P__facc_mpi_comm_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                       size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Comm    *comm = (MPI_Comm *)value;
-    MPI_Comm    comm_tmp = MPI_COMM_NULL;
-    herr_t      ret_value = SUCCEED;
+    MPI_Comm *comm      = (MPI_Comm *)value;
+    MPI_Comm  comm_tmp  = MPI_COMM_NULL;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Make a copy of the MPI communicator */
-    if(H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
+    if (H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI communicator")
 
 done:
     /* Copy the communicator to the in/out parameter */
-    if(ret_value != SUCCEED)
+    if (ret_value != SUCCEED)
         *comm = MPI_COMM_NULL;
     else
         *comm = comm_tmp;
@@ -4908,7 +4972,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_comm_set() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_comm_get
  *
@@ -4921,21 +4984,21 @@ done:
  */
 static herr_t
 H5P__facc_mpi_comm_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                       size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Comm    *comm = (MPI_Comm *)value;
-    MPI_Comm    comm_tmp = MPI_COMM_NULL;
-    herr_t      ret_value = SUCCEED;
+    MPI_Comm *comm      = (MPI_Comm *)value;
+    MPI_Comm  comm_tmp  = MPI_COMM_NULL;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Make a copy of the MPI communicator */
-    if(H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
+    if (H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI communicator")
 
 done:
     /* Copy the communicator to the out parameter */
-    if(ret_value != SUCCEED)
+    if (ret_value != SUCCEED)
         *comm = MPI_COMM_NULL;
     else
         *comm = comm_tmp;
@@ -4943,7 +5006,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_comm_get() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_comm_del
  *
@@ -4955,22 +5017,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_mpi_comm_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_mpi_comm_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                       size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Comm    *comm = (MPI_Comm *)value;
-    herr_t      ret_value = SUCCEED;
+    MPI_Comm *comm      = (MPI_Comm *)value;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Free the MPI communicator */
-    if(H5_mpi_comm_free(comm) < 0)
+    if (H5_mpi_comm_free(comm) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI communicator")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_comm_del() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_comm_copy
  *
@@ -4984,19 +5046,19 @@ done:
 static herr_t
 H5P__facc_mpi_comm_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Comm    *comm = (MPI_Comm *)value;
-    MPI_Comm    comm_tmp = MPI_COMM_NULL;
-    herr_t      ret_value = SUCCEED;
+    MPI_Comm *comm      = (MPI_Comm *)value;
+    MPI_Comm  comm_tmp  = MPI_COMM_NULL;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Make a copy of the MPI communicator */
-    if(H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
+    if (H5_mpi_comm_dup(*comm, &comm_tmp) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI communicator")
 
 done:
     /* Copy the communicator to the in/out parameter */
-    if(ret_value != SUCCEED)
+    if (ret_value != SUCCEED)
         *comm = MPI_COMM_NULL;
     else
         *comm = comm_tmp;
@@ -5004,7 +5066,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_comm_copy() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_mpi_comm_cmp
  *
@@ -5021,21 +5082,20 @@ done:
 static int
 H5P__facc_mpi_comm_cmp(const void *_comm1, const void *_comm2, size_t H5_ATTR_UNUSED size)
 {
-    const MPI_Comm  *comm1 = (const MPI_Comm *)_comm1;
-    const MPI_Comm  *comm2 = (const MPI_Comm *)_comm2;
-    int         ret_value = 0;
+    const MPI_Comm *comm1     = (const MPI_Comm *)_comm1;
+    const MPI_Comm *comm2     = (const MPI_Comm *)_comm2;
+    int             ret_value = 0;
 
     FUNC_ENTER_STATIC
 
     /* Compare the MPI communicators */
-    if(H5_mpi_comm_cmp(*comm1, *comm2, &ret_value) < 0)
+    if (H5_mpi_comm_cmp(*comm1, *comm2, &ret_value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, 0, "unable to compare MPI communicator")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_comm_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_comm_close
  *
@@ -5049,20 +5109,19 @@ done:
 static herr_t
 H5P__facc_mpi_comm_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Comm    *comm = (MPI_Comm *)value;
-    herr_t      ret_value = SUCCEED;
+    MPI_Comm *comm      = (MPI_Comm *)value;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Free the MPI communicator */
-    if(H5_mpi_comm_free(comm) < 0)
+    if (H5_mpi_comm_free(comm) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI communicator")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_comm_close() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_info_set
  *
@@ -5075,21 +5134,21 @@ done:
  */
 static herr_t
 H5P__facc_mpi_info_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                       size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Info    *info = (MPI_Info *)value;
-    MPI_Info    info_tmp = MPI_INFO_NULL;
-    herr_t      ret_value = SUCCEED;
+    MPI_Info *info      = (MPI_Info *)value;
+    MPI_Info  info_tmp  = MPI_INFO_NULL;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Make a copy of the MPI info object */
-    if(H5_mpi_info_dup(*info, &info_tmp) < 0)
+    if (H5_mpi_info_dup(*info, &info_tmp) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI info object")
 
 done:
     /* Copy the info object to the in/out parameter */
-    if(ret_value != SUCCEED)
+    if (ret_value != SUCCEED)
         *info = MPI_INFO_NULL;
     else
         *info = info_tmp;
@@ -5097,7 +5156,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_info_set() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_info_get
  *
@@ -5110,21 +5168,21 @@ done:
  */
 static herr_t
 H5P__facc_mpi_info_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+                       size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Info    *info = (MPI_Info *)value;
-    MPI_Info    info_tmp = MPI_INFO_NULL;
-    herr_t      ret_value = SUCCEED;
+    MPI_Info *info      = (MPI_Info *)value;
+    MPI_Info  info_tmp  = MPI_INFO_NULL;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Make a copy of the MPI communicator */
-    if(H5_mpi_info_dup(*info, &info_tmp) < 0)
+    if (H5_mpi_info_dup(*info, &info_tmp) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI info object")
 
 done:
     /* Copy the info object to the out parameter */
-    if(ret_value != SUCCEED)
+    if (ret_value != SUCCEED)
         *info = MPI_INFO_NULL;
     else
         *info = info_tmp;
@@ -5132,7 +5190,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_info_get() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_info_del
  *
@@ -5144,22 +5201,22 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_mpi_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_mpi_info_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                       size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Info    *info = (MPI_Info *)value;
-    herr_t      ret_value = SUCCEED;
+    MPI_Info *info      = (MPI_Info *)value;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Free the MPI info object */
-    if(H5_mpi_info_free(info) < 0)
+    if (H5_mpi_info_free(info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI info object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_info_del() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_info_copy
  *
@@ -5173,19 +5230,19 @@ done:
 static herr_t
 H5P__facc_mpi_info_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Info    *info = (MPI_Info *)value;
-    MPI_Info    info_tmp = MPI_INFO_NULL;
-    herr_t      ret_value = SUCCEED;
+    MPI_Info *info      = (MPI_Info *)value;
+    MPI_Info  info_tmp  = MPI_INFO_NULL;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Make a copy of the MPI info object */
-    if(H5_mpi_info_dup(*info, &info_tmp) < 0)
+    if (H5_mpi_info_dup(*info, &info_tmp) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to duplicate MPI info object")
 
 done:
     /* Copy the info object to the in/out parameter */
-    if(ret_value != SUCCEED)
+    if (ret_value != SUCCEED)
         *info = MPI_INFO_NULL;
     else
         *info = info_tmp;
@@ -5193,7 +5250,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_info_copy() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_mpi_info_cmp
  *
@@ -5210,21 +5266,20 @@ done:
 static int
 H5P__facc_mpi_info_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
 {
-    const MPI_Info  *info1 = (const MPI_Info *)_info1;
-    const MPI_Info  *info2 = (const MPI_Info *)_info2;
-    int         ret_value = 0;
+    const MPI_Info *info1     = (const MPI_Info *)_info1;
+    const MPI_Info *info2     = (const MPI_Info *)_info2;
+    int             ret_value = 0;
 
     FUNC_ENTER_STATIC
 
     /* Compare the MPI info objects */
-    if(H5_mpi_info_cmp(*info1, *info2, &ret_value) < 0)
+    if (H5_mpi_info_cmp(*info1, *info2, &ret_value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, 0, "unable to compare MPI info objects")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_info_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_mpi_info_close
  *
@@ -5238,20 +5293,19 @@ done:
 static herr_t
 H5P__facc_mpi_info_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    MPI_Info    *info = (MPI_Info *)value;
-    herr_t      ret_value = SUCCEED;
+    MPI_Info *info      = (MPI_Info *)value;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
     /* Free the MPI info object */
-    if(H5_mpi_info_free(info) < 0)
+    if (H5_mpi_info_free(info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "unable to free MPI info object")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_mpi_info_close() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_coll_metadata_write
  *
@@ -5267,21 +5321,21 @@ done:
 herr_t
 H5Pget_coll_metadata_write(hid_t plist_id, hbool_t *is_collective)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", plist_id, is_collective);
 
     /* Compare the property list's class against the other class */
-    if(TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
+    if (TRUE != H5P_isa_class(plist_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
 
     /* Get the plist structure */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(plist_id)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if(H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, is_collective) < 0)
+    if (H5P_get(plist, H5F_ACS_COLL_MD_WRITE_FLAG_NAME, is_collective) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get collective metadata write flag")
 
 done:
@@ -5289,7 +5343,6 @@ done:
 } /* end H5Pget_coll_metadata_write() */
 #endif /* H5_HAVE_PARALLEL */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_page_buffer_size
  *
@@ -5307,37 +5360,39 @@ done:
 herr_t
 H5Pset_page_buffer_size(hid_t plist_id, size_t buf_size, unsigned min_meta_perc, unsigned min_raw_perc)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "izIuIu", plist_id, buf_size, min_meta_perc, min_raw_perc);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    if(min_meta_perc > 100)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Minimum metadata fractions must be between 0 and 100 inclusive")
-    if(min_raw_perc > 100)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Minimum rawdata fractions must be between 0 and 100 inclusive")
+    if (min_meta_perc > 100)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "Minimum metadata fractions must be between 0 and 100 inclusive")
+    if (min_raw_perc > 100)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "Minimum rawdata fractions must be between 0 and 100 inclusive")
 
-    if(min_meta_perc + min_raw_perc > 100)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Sum of minimum metadata and raw data fractions can't be bigger than 100");
+    if (min_meta_perc + min_raw_perc > 100)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
+                    "Sum of minimum metadata and raw data fractions can't be bigger than 100");
 
     /* Set size */
-    if(H5P_set(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &buf_size) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set page buffer size")
-    if(H5P_set(plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &min_meta_perc) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set percentage of min metadata entries")
-    if(H5P_set(plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &min_raw_perc) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET,FAIL, "can't set percentage of min rawdata entries")
+    if (H5P_set(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &buf_size) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set page buffer size")
+    if (H5P_set(plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &min_meta_perc) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set percentage of min metadata entries")
+    if (H5P_set(plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &min_raw_perc) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set percentage of min rawdata entries")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_page_buffer_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_page_buffer_size
  *
@@ -5353,33 +5408,32 @@ done:
 herr_t
 H5Pget_page_buffer_size(hid_t plist_id, size_t *buf_size, unsigned *min_meta_perc, unsigned *min_raw_perc)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED;   /* return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*z*Iu*Iu", plist_id, buf_size, min_meta_perc, min_raw_perc);
 
     /* Get the plist structure */
-    if(NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
+    if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get size */
 
-    if(buf_size)
-        if(H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, buf_size) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get page buffer size")
-    if(min_meta_perc)
-        if(H5P_get(plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, min_meta_perc) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get page buffer minimum metadata percent")
-    if(min_raw_perc)
-        if(H5P_get(plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, min_raw_perc) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET,FAIL, "can't get page buffer minimum raw data percent")
+    if (buf_size)
+        if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, buf_size) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get page buffer size")
+    if (min_meta_perc)
+        if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, min_meta_perc) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get page buffer minimum metadata percent")
+    if (min_raw_perc)
+        if (H5P_get(plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, min_raw_perc) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get page buffer minimum raw data percent")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_page_buffer_size() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_set_vol
  *
@@ -5395,22 +5449,22 @@ done:
 herr_t
 H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
 {
-    herr_t  ret_value = SUCCEED;   /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if(NULL == H5I_object_verify(vol_id, H5I_VOL))
+    if (NULL == H5I_object_verify(vol_id, H5I_VOL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5VL_connector_prop_t vol_prop;         /* Property for VOL ID & info */
+    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5VL_connector_prop_t vol_prop; /* Property for VOL ID & info */
 
         /* Prepare the VOL connector property */
-        vol_prop.connector_id = vol_id;
+        vol_prop.connector_id   = vol_id;
         vol_prop.connector_info = (void *)vol_info;
 
         /* Set the connector ID & info property */
-        if(H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)
+        if (H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL connector ID & info")
     } /* end if */
     else
@@ -5420,7 +5474,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_vol() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P_reset_vol_class
  *
@@ -5440,24 +5493,23 @@ done:
 herr_t
 H5P_reset_vol_class(const H5P_genclass_t *pclass, const H5VL_connector_prop_t *vol_prop)
 {
-    H5VL_connector_prop_t old_vol_prop;         /* Previous VOL connector property */
-    herr_t  ret_value = SUCCEED;   /* Return value */
+    H5VL_connector_prop_t old_vol_prop;        /* Previous VOL connector property */
+    herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Get the connector ID & info property */
-    if(H5P__class_get(pclass, H5F_ACS_VOL_CONN_NAME, &old_vol_prop) < 0)
+    if (H5P__class_get(pclass, H5F_ACS_VOL_CONN_NAME, &old_vol_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector ID & info")
 
     /* Set the new connector ID & info property */
-    if(H5P__class_set(pclass, H5F_ACS_VOL_CONN_NAME, vol_prop) < 0)
+    if (H5P__class_set(pclass, H5F_ACS_VOL_CONN_NAME, vol_prop) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL connector ID & info")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P_set_vol_class() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_vol
  *
@@ -5472,27 +5524,26 @@ done:
 herr_t
 H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info)
 {
-    H5P_genplist_t *plist;      /* Property list pointer */
-    herr_t ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ii*x", plist_id, new_vol_id, new_vol_info);
 
     /* Check arguments */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
-    if(NULL == H5I_object_verify(new_vol_id, H5I_VOL))
+    if (NULL == H5I_object_verify(new_vol_id, H5I_VOL))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file VOL ID")
 
     /* Set the VOL */
-    if(H5P_set_vol(plist, new_vol_id, new_vol_info) < 0)
+    if (H5P_set_vol(plist, new_vol_id, new_vol_info) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set VOL")
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pset_vol() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_vol_id
  *
@@ -5507,26 +5558,26 @@ done:
 herr_t
 H5Pget_vol_id(hid_t plist_id, hid_t *vol_id)
 {
-    H5P_genplist_t  *plist;             /* Property list pointer */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*i", plist_id, vol_id);
 
     /* Get property list for ID */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the current VOL ID */
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
+    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
 
         /* Get the connector property */
-        if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+        if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector info")
 
         /* Increment the VOL ID's ref count */
-        if(H5I_inc_ref(connector_prop.connector_id, TRUE) < 0)
+        if (H5I_inc_ref(connector_prop.connector_id, TRUE) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTINC, FAIL, "unable to increment ref count on VOL connector ID")
 
         /* Set the connector ID to return */
@@ -5539,7 +5590,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_vol_id() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_vol_info
  *
@@ -5554,35 +5604,35 @@ done:
 herr_t
 H5Pget_vol_info(hid_t plist_id, void **vol_info)
 {
-    H5P_genplist_t  *plist;             /* Property list pointer */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5P_genplist_t *plist;               /* Property list pointer */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i**x", plist_id, vol_info);
 
     /* Get property list for ID */
-    if(NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
 
     /* Get the current VOL info */
-    if(TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
-        void *new_connector_info = NULL;   /* Copy of connector info */
-        H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
+    if (TRUE == H5P_isa_class(plist->plist_id, H5P_FILE_ACCESS)) {
+        void *                new_connector_info = NULL; /* Copy of connector info */
+        H5VL_connector_prop_t connector_prop;            /* Property for VOL connector ID & info */
 
         /* Get the connector property */
-        if(H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+        if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector property")
 
         /* Copy connector info, if it exists */
-        if(connector_prop.connector_info) {
-            H5VL_class_t *connector;           /* Pointer to connector */
+        if (connector_prop.connector_info) {
+            H5VL_class_t *connector; /* Pointer to connector */
 
             /* Retrieve the connector for the ID */
-            if(NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
+            if (NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop.connector_id)))
                 HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
             /* Allocate and copy connector info */
-            if(H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
+            if (H5VL_copy_connector_info(connector, &new_connector_info, connector_prop.connector_info) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "connector info copy failed")
         } /* end if */
 
@@ -5596,7 +5646,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_vol_info() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_create
  *
@@ -5610,19 +5659,18 @@ done:
 static herr_t
 H5P__facc_vol_create(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Make copy of the VOL connector */
-    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+    if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_create() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_set
  *
@@ -5634,10 +5682,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
+                  void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -5645,14 +5693,13 @@ H5P__facc_vol_set(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     HDassert(value);
 
     /* Make copy of VOL connector ID & info */
-    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+    if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_set() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_get
  *
@@ -5664,10 +5711,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-    size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
+                  void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -5675,14 +5722,13 @@ H5P__facc_vol_get(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
     HDassert(value);
 
     /* Make copy of VOL connector */
-    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+    if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_get() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_del
  *
@@ -5694,21 +5740,21 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P__facc_vol_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_vol_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size,
+                  void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Free the VOL connector ID & info */
-    if(H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
+    if (H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_del() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_copy
  *
@@ -5722,19 +5768,18 @@ done:
 static herr_t
 H5P__facc_vol_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Make copy of VOL connector */
-    if(H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
+    if (H5VL_conn_copy((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_copy() */
 
-
 /*-------------------------------------------------------------------------
  * Function:       H5P__facc_vol_cmp
  *
@@ -5751,12 +5796,13 @@ done:
 static int
 H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED size)
 {
-    const H5VL_connector_prop_t *info1 = (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
+    const H5VL_connector_prop_t *info1 =
+        (const H5VL_connector_prop_t *)_info1; /* Create local aliases for values */
     const H5VL_connector_prop_t *info2 = (const H5VL_connector_prop_t *)_info2;
-    H5VL_class_t *cls1, *cls2;          /* connector class for each property */
-    int cmp_value = 0;                  /* Value from comparison */
-    herr_t H5_ATTR_NDEBUG_UNUSED status; /* Status from info comparison */
-    int ret_value = 0;                  /* Return value */
+    H5VL_class_t *               cls1, *cls2;   /* connector class for each property */
+    int                          cmp_value = 0; /* Value from comparison */
+    herr_t H5_ATTR_NDEBUG_UNUSED status;        /* Status from info comparison */
+    int                          ret_value = 0; /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -5766,19 +5812,18 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
     HDassert(size == sizeof(H5VL_connector_prop_t));
 
     /* Compare connectors */
-    if(NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->connector_id)))
+    if (NULL == (cls1 = (H5VL_class_t *)H5I_object(info1->connector_id)))
         HGOTO_DONE(-1)
-    if(NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
+    if (NULL == (cls2 = (H5VL_class_t *)H5I_object(info2->connector_id)))
         HGOTO_DONE(1)
     status = H5VL_cmp_connector_cls(&cmp_value, cls1, cls2);
     HDassert(status >= 0);
-    if(cmp_value != 0)
+    if (cmp_value != 0)
         HGOTO_DONE(cmp_value);
 
     /* At this point, we should be able to assume that we are dealing with
      * the same connector class struct (or a copies of the same class struct)
      */
-
 
     /* Use one of the classes (cls1) info comparison routines to compare the
      * info objects
@@ -5789,12 +5834,11 @@ H5P__facc_vol_cmp(const void *_info1, const void *_info2, size_t H5_ATTR_UNUSED 
 
     /* Set return value */
     ret_value = cmp_value;
-    
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_cmp() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_close
  *
@@ -5808,15 +5852,14 @@ done:
 static herr_t
 H5P__facc_vol_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    herr_t ret_value = SUCCEED;         /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Free the VOL connector */
-    if(H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
+    if (H5VL_conn_free((H5VL_connector_prop_t *)value) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTRELEASE, FAIL, "can't release VOL connector")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_vol_close() */
-

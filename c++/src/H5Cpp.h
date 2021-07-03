@@ -53,9 +53,9 @@
 */
 #ifndef H5_CXX_HAVE_OFFSETOF
 #ifdef HOFFSET
-   #undef HOFFSET
+#undef HOFFSET
 #endif
-#define HOFFSET(TYPE, MEMBER) ((size_t) &((TYPE *)0)->MEMBER)
+#define HOFFSET(TYPE, MEMBER) ((size_t) & ((TYPE *)0)->MEMBER)
 #endif
 
 #endif // __H5Cpp_H
