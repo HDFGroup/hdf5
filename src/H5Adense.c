@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5Adense.c
  *			Dec  4 2006
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Routines for operating on "dense" attribute storage
  *                      for an object.
@@ -161,7 +161,6 @@ typedef struct H5A_bt2_ud_rmbi_t {
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec  4 2006
  *
  *-------------------------------------------------------------------------
@@ -200,9 +199,6 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
     /* Retrieve the heap's address in the file */
     if (H5HF_get_heap_addr(fheap, &ainfo->fheap_addr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get fractal heap address")
-#ifdef QAK
-    HDfprintf(stderr, "%s: ainfo->fheap_addr = %a\n", FUNC, ainfo->fheap_addr);
-#endif /* QAK */
 
 #ifndef NDEBUG
     {
@@ -212,9 +208,6 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
         if (H5HF_get_id_len(fheap, &fheap_id_len) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGETSIZE, FAIL, "can't get fractal heap ID length")
         HDassert(fheap_id_len == H5O_FHEAP_ID_LEN);
-#ifdef QAK
-        HDfprintf(stderr, "%s: fheap_id_len = %Zu\n", FUNC, fheap_id_len);
-#endif /* QAK */
     }
 #endif /* NDEBUG */
 
@@ -234,9 +227,6 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
     /* Retrieve the v2 B-tree's address in the file */
     if (H5B2_get_addr(bt2_name, &ainfo->name_bt2_addr) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get v2 B-tree address for name index")
-#ifdef QAK
-    HDfprintf(stderr, "%s: ainfo->name_bt2_addr = %a\n", FUNC, ainfo->name_bt2_addr);
-#endif /* QAK */
 
     /* Check if we should create a creation order index v2 B-tree */
     if (ainfo->index_corder) {
@@ -255,10 +245,7 @@ H5A__dense_create(H5F_t *f, H5O_ainfo_t *ainfo)
         /* Retrieve the v2 B-tree's address in the file */
         if (H5B2_get_addr(bt2_corder, &ainfo->corder_bt2_addr) < 0)
             HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "can't get v2 B-tree address for creation order index")
-#ifdef QAK
-        HDfprintf(stderr, "%s: ainfo->corder_bt2_addr = %a\n", FUNC, ainfo->corder_bt2_addr);
-#endif /* QAK */
-    }  /* end if */
+    } /* end if */
 
 done:
     /* Release resources */
@@ -279,9 +266,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -339,9 +325,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -427,9 +412,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  4 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -584,7 +568,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, February 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -617,7 +601,7 @@ H5A__dense_write_bt2_cb2(void *_record, void *_op_data, hbool_t *changed)
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, December  5, 2006
  *
  *-------------------------------------------------------------------------
@@ -729,9 +713,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  4 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  4 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -825,9 +808,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  5 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -868,9 +850,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jan  3 2007
+ * Programmer:  Quincey Koziol
+ *              Jan  3 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1049,9 +1030,8 @@ done:
  *
  * Return:      H5_ITER_ERROR/H5_ITER_CONT/H5_ITER_STOP
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  5 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1146,9 +1126,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  5 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  5 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1280,9 +1259,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1344,9 +1322,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1431,9 +1408,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Feb 14 2007
+ * Programmer:  Quincey Koziol
+ *              Feb 14 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1558,9 +1534,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Feb 14 2007
+ * Programmer:  Quincey Koziol
+ *              Feb 14 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1685,9 +1660,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec 11 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1770,9 +1744,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Jan  3 2007
+ * Programmer:  Quincey Koziol
+ *              Jan  3 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1834,9 +1807,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Dec  6 2006
+ * Programmer:  Quincey Koziol
+ *              Dec  6 2006
  *
  *-------------------------------------------------------------------------
  */

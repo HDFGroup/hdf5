@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*-------------------------------------------------------------------------
  *
  * Created:        H5Aint.c
- *            Dec 18 2006
- *            Quincey Koziol <koziol@hdfgroup.org>
+ *                 Dec 18 2006
+ *                 Quincey Koziol
  *
  * Purpose:        Internal routines for managing attributes.
  *
@@ -281,12 +281,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5A__create_by_name
  *
- * Purpose:    Create an attribute on object, according to it's name
+ * Purpose:     Create an attribute on object, according to it's name
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
- *        December 6, 2017
+ * Programmer:  Quincey Koziol
+ *              December 6, 2017
  *
  *-------------------------------------------------------------------------
  */
@@ -341,18 +341,17 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5A__open_common
  *
- * Purpose:
- *      Finishes initializing an attributes the open
+ * Purpose:     Finishes initializing an attributes the open
  *
  * Usage:
  *  herr_t H5A__open_common(loc, name)
  *      const H5G_loc_t *loc;   IN: Pointer to group location for object
  *      H5A_t *attr;            IN/OUT: Pointer to attribute to initialize
  *
- * Return: Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
- *        December 18, 2006
+ * Programmer:  Quincey Koziol
+ *              December 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -444,7 +443,7 @@ done:
  *
  * Purpose:     Open an attribute according to its index order
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:    Quincey Koziol
  *        April 2, 1998
@@ -600,6 +599,10 @@ H5A__read(const H5A_t *attr, const H5T_t *mem_type, void *buf)
     HDassert(attr);
     HDassert(mem_type);
     HDassert(buf);
+
+    /* Patch the top level file pointer in attr->shared->dt->shared->u.vlen.f if needed */
+    if (H5T_patch_vlen_file(attr->shared->dt, H5F_VOL_OBJ(attr->oloc.file)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTOPENOBJ, FAIL, "can't patch VL datatype file pointer")
 
     /* Create buffer for data to store on disk */
     if ((snelmts = H5S_GET_EXTENT_NPOINTS(attr->shared->ds)) < 0)
@@ -869,7 +872,6 @@ done:
  * Purpose:     Returns an ID for the datatype of an attribute
  *
  * Return:      Success:    A valid ID for the datatype of an attribute
- *
  *              Failure:    H5I_INVALID_HID
  *
  *-------------------------------------------------------------------------
@@ -1016,7 +1018,6 @@ done:
  * Purpose:     Copies attribute OLD_ATTR.
  *
  * Return:      Success:    Pointer to a new copy of the OLD_ATTR argument.
- *
  *              Failure:    NULL
  *
  * Programmer:    Robb Matzke
@@ -1349,7 +1350,6 @@ done:
  * Return:    Non-negative on success/Negative on failure
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Dec 18 2006
  *
  * Modification:Raymond Lu
@@ -1411,8 +1411,8 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
- *            Dec 18, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1468,11 +1468,9 @@ done:
  * Purpose:    Callback routine for building table of attributes from dense
  *              attribute storage.
  *
- * Return:    Success:        Non-negative
- *        Failure:    Negative
+ * Return:      SUCCEED/FAIL
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1592,17 +1590,16 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5A__attr_cmp_name_inc
  *
- * Purpose:    Callback routine for comparing two attribute names, in
+ * Purpose:     Callback routine for comparing two attribute names, in
  *              increasing alphabetic order
  *
- * Return:    An integer less than, equal to, or greater than zero if the
+ * Return:      An integer less than, equal to, or greater than zero if the
  *              first argument is considered to be respectively less than,
  *              equal to, or greater than the second.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *              (i.e. same as strcmp())
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Dec 11 2006
  *
  *-------------------------------------------------------------------------
@@ -1629,7 +1626,6 @@ H5A__attr_cmp_name_inc(const void *attr1, const void *attr2)
  *              (i.e. opposite of strcmp())
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Feb  8 2007
  *
  *-------------------------------------------------------------------------
@@ -1655,7 +1651,6 @@ H5A__attr_cmp_name_dec(const void *attr1, const void *attr2)
  *              as equal, their order in the sorted array is undefined.
  *
  * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
  *        Feb  8 2007
  *
  *-------------------------------------------------------------------------
@@ -1681,17 +1676,16 @@ H5A__attr_cmp_corder_inc(const void *attr1, const void *attr2)
 /*-------------------------------------------------------------------------
  * Function:    H5A__attr_cmp_corder_dec
  *
- * Purpose:    Callback routine for comparing two attributes, in
+ * Purpose:     Callback routine for comparing two attributes, in
  *              decreasing creation order
  *
- * Return:    An integer less than, equal to, or greater than zero if the
+ * Return:      An integer less than, equal to, or greater than zero if the
  *              second argument is considered to be respectively less than,
  *              equal to, or greater than the first.  If two members compare
  *              as equal, their order in the sorted array is undefined.
  *
- * Programmer:    Quincey Koziol
- *        koziol@hdfgroup.org
- *        Feb  8 2007
+ * Programmer:  Quincey Koziol
+ *              Feb  8 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1718,11 +1712,10 @@ H5A__attr_cmp_corder_dec(const void *attr1, const void *attr2)
  *
  * Purpose:     Sort table containing a list of attributes for an object
  *
- * Return:    Success:        Non-negative
- *        Failure:    Negative
+ * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
- *            Dec 11, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 11, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1764,8 +1757,8 @@ H5A__attr_sort_table(H5A_attr_table_t *atable, H5_index_t idx_type, H5_iter_orde
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
- *            Dec 18, 2006
+ * Programmer:  Quincey Koziol
+ *              Dec 18, 2006
  *
  *-------------------------------------------------------------------------
  */
@@ -1842,7 +1835,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:      Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Dec 11, 2006
  *
  *-------------------------------------------------------------------------
@@ -1881,11 +1874,9 @@ done:
  * Purpose:     Retrieves the "attribute info" message for an object.  Also
  *              sets the number of attributes correctly, if it isn't set up yet.
  *
- * Return:      Success:    TRUE/FALSE whether message was found & retrieved
- *              Failure:    FAIL if error occurred
+ * Return:      TRUE/FALSE/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar 11 2007
  *
  *-------------------------------------------------------------------------
@@ -1948,7 +1939,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Jul 17 2007
  *
  *-------------------------------------------------------------------------
@@ -2389,7 +2379,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              July 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -2446,7 +2435,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Peter Cao
- *              xcao@hdfgroup.org
  *              July 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -2491,7 +2479,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              February 20, 2007
  *
  *-------------------------------------------------------------------------
@@ -2508,7 +2496,7 @@ H5A__rename_by_name(H5G_loc_t loc, const char *obj_name, const char *old_attr_na
     FUNC_ENTER_PACKAGE
 
     /* Avoid thrashing things if the names are the same */
-    if (HDstrcmp(old_attr_name, new_attr_name)) {
+    if (HDstrcmp(old_attr_name, new_attr_name) != 0) {
         /* Set up opened group location to fill in */
         obj_loc.oloc = &obj_oloc;
         obj_loc.path = &obj_path;
@@ -2539,7 +2527,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              December 6, 2017
  *
  *-------------------------------------------------------------------------
@@ -2638,7 +2626,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              December 6, 2017
  *
  *-------------------------------------------------------------------------
@@ -2679,7 +2667,7 @@ H5A__iterate_old(hid_t loc_id, unsigned *attr_num, H5A_operator1_t op, void *op_
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              December 6, 2017
  *
  *-------------------------------------------------------------------------
@@ -2724,7 +2712,7 @@ done:
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              December 6, 2017
  *
  *-------------------------------------------------------------------------

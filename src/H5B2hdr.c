@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5B2int.c
  *			Feb 27 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Internal routines for managing v2 B-trees.
  *
@@ -92,7 +92,6 @@ H5FL_SEQ_DEFINE(H5B2_node_info_t);
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
  *-------------------------------------------------------------------------
@@ -224,7 +223,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 27 2009
  *
  *-------------------------------------------------------------------------
@@ -269,7 +267,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 21 2006
  *
  *-------------------------------------------------------------------------
@@ -350,7 +347,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 13 2009
  *
  *-------------------------------------------------------------------------
@@ -385,7 +381,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 13 2009
  *
  *-------------------------------------------------------------------------
@@ -421,7 +416,6 @@ done:
  * Return:      SUCCEED (Can't fail)
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 27 2009
  *
  *-------------------------------------------------------------------------
@@ -448,7 +442,6 @@ H5B2__hdr_fuse_incr(H5B2_hdr_t *hdr)
  * Return:      The file's reference count after the decrement. (Can't fail)
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Oct 27 2009
  *
  *-------------------------------------------------------------------------
@@ -476,7 +469,6 @@ H5B2__hdr_fuse_decr(H5B2_hdr_t *hdr)
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 13 2009
  *
  *-------------------------------------------------------------------------
@@ -507,7 +499,6 @@ done:
  * Return:	Non-NULL pointer to header on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2015
  *
  *-------------------------------------------------------------------------
@@ -573,7 +564,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2015
  *
  *-------------------------------------------------------------------------
@@ -605,7 +595,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  2 2005
  *
  *-------------------------------------------------------------------------
@@ -683,7 +672,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Oct 15 2009
  *
  *-------------------------------------------------------------------------

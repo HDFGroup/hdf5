@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5HFcache.c
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Implement fractal heap metadata cache methods.
  *
@@ -209,7 +209,7 @@ H5HF__hdr_prefix_decode(H5HF_hdr_t *hdr, const uint8_t **image_ref)
     HDassert(image);
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HF_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, FAIL, "wrong fractal heap header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -238,7 +238,6 @@ done:
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
@@ -287,7 +286,6 @@ H5HF__dtable_decode(H5F_t *f, const uint8_t **pp, H5HF_dtable_t *dtable)
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 27 2006
  *
  *-------------------------------------------------------------------------
@@ -334,7 +332,7 @@ H5HF__dtable_encode(H5F_t *f, uint8_t **pp, const H5HF_dtable_t *dtable)
  *
  *		Note also that the value returned by this function presumes that
  *		there is no I/O filtering data in the header.  If there is, the
- *		size reported will be too small, and H5C_load_entry()
+ *		size reported will be too small, and H5C__load_entry()
  *		will have to make two tries to load the fractal heap header.
  *
  * Return:	Success:	SUCCEED
@@ -484,7 +482,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     HDassert(dirty);
 
     /* Allocate space for the fractal heap data structure */
-    if (NULL == (hdr = H5HF_hdr_alloc(udata->f)))
+    if (NULL == (hdr = H5HF__hdr_alloc(udata->f)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Deserialize the fractal heap header's prefix */
@@ -569,7 +567,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
     HDassert((size_t)(image - (const uint8_t *)_image) == hdr->heap_size);
 
     /* Finish initialization of heap header */
-    if (H5HF_hdr_finish_init(hdr) < 0)
+    if (H5HF__hdr_finish_init(hdr) < 0)
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTINIT, NULL, "can't finish initializing shared fractal heap header")
 
     /* Set return value */
@@ -577,7 +575,7 @@ H5HF__cache_hdr_deserialize(const void *_image, size_t len, void *_udata, hbool_
 
 done:
     if (!ret_value && hdr)
-        if (H5HF_hdr_free(hdr) < 0)
+        if (H5HF__hdr_free(hdr) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTRELEASE, NULL, "unable to release fractal heap header")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -853,7 +851,7 @@ H5HF__cache_hdr_free_icr(void *_thing)
     HDassert(hdr->cache_info.type == H5AC_FHEAP_HDR);
     HDassert(hdr->rc == 0);
 
-    if (H5HF_hdr_free(hdr) < 0)
+    if (H5HF__hdr_free(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "unable to release fractal heap header")
 
 done:
@@ -979,7 +977,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
     /* Share common heap information */
     iblock->hdr = hdr;
-    if (H5HF_hdr_incr(hdr) < 0)
+    if (H5HF__hdr_incr(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
     /* Set block's internal information */
@@ -994,7 +992,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     HDassert(iblock->size == len);
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HF_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong fractal heap indirect block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1019,7 +1017,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
     iblock->par_entry = udata->par_info->entry;
     if (iblock->parent) {
         /* Share parent block */
-        if (H5HF_iblock_incr(iblock->parent) < 0)
+        if (H5HF__iblock_incr(iblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL,
                         "can't increment reference count on shared indirect block")
 
@@ -1118,7 +1116,7 @@ H5HF__cache_iblock_deserialize(const void *_image, size_t H5_ATTR_NDEBUG_UNUSED 
 
 done:
     if (!ret_value && iblock)
-        if (H5HF_man_iblock_dest(iblock) < 0)
+        if (H5HF__man_iblock_dest(iblock) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap indirect block")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1253,7 +1251,7 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
             hdr->man_dtable.table_addr = iblock_addr;
 
             /* Mark that heap header was modified */
-            if (H5HF_hdr_dirty(hdr) < 0)
+            if (H5HF__hdr_dirty(hdr) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
         } /* end if */
         else {
@@ -1268,7 +1266,7 @@ H5HF__cache_iblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t H5
             par_iblock->ents[par_entry].addr = iblock_addr;
 
             /* Mark that parent was modified */
-            if (H5HF_iblock_dirty(par_iblock) < 0)
+            if (H5HF__iblock_dirty(par_iblock) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
         } /* end if */
 
@@ -1531,7 +1529,7 @@ H5HF__cache_iblock_free_icr(void *thing)
     HDassert(iblock->hdr);
 
     /* Destroy fractal heap indirect block */
-    if (H5HF_man_iblock_dest(iblock) < 0)
+    if (H5HF__man_iblock_dest(iblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap indirect block")
 
 done:
@@ -1761,7 +1759,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
 
     /* Share common heap information */
     dblock->hdr = hdr;
-    if (H5HF_hdr_incr(hdr) < 0)
+    if (H5HF__hdr_incr(hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
     /* Set block's internal information */
@@ -1833,7 +1831,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     image = dblock->blk;
 
     /* Magic number */
-    if (HDmemcmp(image, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5HF_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         HGOTO_ERROR(H5E_HEAP, H5E_BADVALUE, NULL, "wrong fractal heap direct block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1855,7 +1853,7 @@ H5HF__cache_dblock_deserialize(const void *_image, size_t len, void *_udata, hbo
     dblock->par_entry = par_info->entry;
     if (dblock->parent) {
         /* Share parent block */
-        if (H5HF_iblock_incr(dblock->parent) < 0)
+        if (H5HF__iblock_incr(dblock->parent) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL,
                         "can't increment reference count on shared indirect block")
     } /* end if */
@@ -1886,7 +1884,7 @@ done:
 
     /* Cleanup on error */
     if (!ret_value && dblock)
-        if (H5HF_man_dblock_dest(dblock) < 0)
+        if (H5HF__man_dblock_dest(dblock) < 0)
             HDONE_ERROR(H5E_HEAP, H5E_CANTFREE, NULL, "unable to destroy fractal heap direct block")
 
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2241,7 +2239,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
 
             /* Check if heap header was modified */
             if (hdr_changed)
-                if (H5HF_hdr_dirty(hdr) < 0)
+                if (H5HF__hdr_dirty(hdr) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
         }                                /* end if */
         else {                           /* the direct block's parent is an indirect block */
@@ -2296,7 +2294,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
 
             /* Check if parent was modified */
             if (par_changed)
-                if (H5HF_iblock_dirty(par_iblock) < 0)
+                if (H5HF__iblock_dirty(par_iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
         } /* end else */
     }     /* end if */
@@ -2334,7 +2332,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
                 hdr->man_dtable.table_addr = dblock_addr;
 
                 /* Mark that heap header was modified */
-                if (H5HF_hdr_dirty(hdr) < 0)
+                if (H5HF__hdr_dirty(hdr) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
             }      /* end if */
             else { /* the direct block's parent is an indirect block */
@@ -2348,7 +2346,7 @@ H5HF__cache_dblock_pre_serialize(H5F_t *f, void *_thing, haddr_t addr, size_t le
                 par_iblock->ents[par_entry].addr = dblock_addr;
 
                 /* Mark that parent was modified */
-                if (H5HF_iblock_dirty(par_iblock) < 0)
+                if (H5HF__iblock_dirty(par_iblock) < 0)
                     HGOTO_ERROR(H5E_HEAP, H5E_CANTDIRTY, FAIL, "can't mark heap header as dirty")
             } /* end else */
         }     /* end if */
@@ -2548,7 +2546,7 @@ H5HF__cache_dblock_free_icr(void *_thing)
     HDassert(dblock->cache_info.type == H5AC_FHEAP_DBLOCK);
 
     /* Destroy fractal heap direct block */
-    if (H5HF_man_dblock_dest(dblock) < 0)
+    if (H5HF__man_dblock_dest(dblock) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTFREE, FAIL, "unable to destroy fractal heap direct block")
 
 done:

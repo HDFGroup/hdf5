@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -22,7 +22,7 @@
 ! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
 ! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
 !      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
-!                             
+!
 !  If you add a new function here then you MUST add the function name to the
 !  Windows dll file 'hdf5_hl_fortrandll.def.in' in the hl/fortran/src directory.
 !  This is needed for Windows based operating systems.
@@ -41,7 +41,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -82,10 +82,10 @@ CONTAINS
          INTEGER         , INTENT(in), DIMENSION(*) :: buf       ! buffer
        END FUNCTION h5immake_image_8bit_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     errcode = h5immake_image_8bit_c(loc_id,namelen,dset_name,width,height,buf)
-    
+
   END SUBROUTINE h5immake_image_8bit_f
 
 !-------------------------------------------------------------------------
@@ -95,7 +95,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -110,7 +110,7 @@ CONTAINS
        errcode )
 
     IMPLICIT NONE
-   
+
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER, INTENT(inout), DIMENSION(*) :: buf        ! buffer
@@ -129,10 +129,10 @@ CONTAINS
          INTEGER, INTENT(inout), DIMENSION(*) :: buf             ! buffer
        END FUNCTION h5imread_image_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     errcode = h5imread_image_c(loc_id,namelen,dset_name,buf)
-    
+
   END SUBROUTINE h5imread_image_f
 
 !-------------------------------------------------------------------------
@@ -142,7 +142,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -159,7 +159,7 @@ CONTAINS
        il,&
        buf,&
        errcode )
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
@@ -171,7 +171,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER(size_t) :: ILEN                                    ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5immake_image_24bit_c(loc_id,namelen,dset_name,ILEN,il,width,height,buf) &
             BIND(C,NAME='h5immake_image_24bit_c')
@@ -186,14 +186,14 @@ CONTAINS
          INTEGER, INTENT(in), DIMENSION(*) :: buf                ! buffer
          INTEGER(size_t) :: namelen                                      ! length of name buffer
          INTEGER(size_t) :: ILEN                                         ! name length
-         
+
        END FUNCTION h5immake_image_24bit_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     ILEN    = LEN(il)
     errcode = h5immake_image_24bit_c(loc_id,namelen,dset_name,ILEN,il,width,height,buf)
-    
+
   END SUBROUTINE h5immake_image_24bit_f
 
 !-------------------------------------------------------------------------
@@ -204,7 +204,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -222,7 +222,7 @@ CONTAINS
        interlace,&
        npals,&
        errcode )
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
@@ -235,7 +235,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER(size_t) :: ILEN                                    ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5imget_image_info_c(loc_id,namelen,dset_name,width,height,planes,npals,ILEN,interlace) &
             BIND(C,NAME='h5imget_image_info_c')
@@ -253,11 +253,11 @@ CONTAINS
          INTEGER(size_t) :: ILEN                                    ! name length
        END FUNCTION h5imget_image_info_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     ILEN    = LEN(interlace)
     errcode = h5imget_image_info_c(loc_id,namelen,dset_name,width,height,planes,npals,ILEN,interlace)
-    
+
   END SUBROUTINE h5imget_image_info_f
 
 !-------------------------------------------------------------------------
@@ -267,7 +267,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -286,7 +286,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5imis_image_c(loc_id,namelen,dset_name) &
             BIND(C,NAME='h5imis_image_c')
@@ -298,13 +298,13 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
        END FUNCTION h5imis_image_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     errcode = h5imis_image_c(loc_id,namelen,dset_name)
     h5imis_image_f = errcode
-    
+
   END FUNCTION h5imis_image_f
-  
+
 
 !-------------------------------------------------------------------------
 ! Function: h5immake_palette_f
@@ -313,7 +313,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -328,16 +328,16 @@ CONTAINS
        pal_dims,&
        buf,&
        errcode )
-    
+
     IMPLICIT NONE
-    
+
     INTEGER(hid_t),   INTENT(in) :: loc_id                 ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name              ! name of the dataset
     INTEGER(hsize_t), INTENT(in), DIMENSION(*) :: pal_dims ! dimensions
     INTEGER, INTENT(in), DIMENSION(*) :: buf               ! buffer
     INTEGER :: errcode                                     ! error code
     INTEGER(size_t) :: namelen                                     ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5immake_palette_c(loc_id,namelen,dset_name,pal_dims,buf) &
             BIND(C,NAME='h5immake_palette_c')
@@ -351,12 +351,12 @@ CONTAINS
          INTEGER, INTENT(in), DIMENSION(*) :: buf                ! buffer
        END FUNCTION h5immake_palette_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     errcode = h5immake_palette_c(loc_id,namelen,dset_name,pal_dims,buf)
-    
+
   END SUBROUTINE h5immake_palette_f
-  
+
 !-------------------------------------------------------------------------
 ! Function: h5imlink_palette_f
 !
@@ -364,7 +364,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -378,16 +378,16 @@ CONTAINS
        dset_name,&
        pal_name,&
        errcode )
-    
+
     IMPLICIT NONE
-    
+
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     CHARACTER(len=*), INTENT(in) :: pal_name           ! palette name
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER(size_t) :: ILEN                                    ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5imlink_palette_c(loc_id,namelen,dset_name,ILEN,pal_name) &
             BIND(C,NAME='h5imlink_palette_c')
@@ -401,13 +401,13 @@ CONTAINS
          INTEGER(size_t) :: ILEN                                    ! name length
        END FUNCTION h5imlink_palette_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     ILEN    = LEN(pal_name)
     errcode = h5imlink_palette_c(loc_id,namelen,dset_name,ILEN,pal_name)
-    
+
   END SUBROUTINE h5imlink_palette_f
-  
+
 
 !-------------------------------------------------------------------------
 ! Function: h5imunlink_palette_f
@@ -416,7 +416,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -430,7 +430,7 @@ CONTAINS
        dset_name,&
        pal_name,&
        errcode )
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
@@ -439,7 +439,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER(size_t) :: ILEN                                    ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5imunlink_palette_c(loc_id,namelen,dset_name,ILEN,pal_name) &
             BIND(C,NAME='h5imunlink_palette_c')
@@ -453,13 +453,13 @@ CONTAINS
          INTEGER(size_t) :: ILEN                                    ! name length
        END FUNCTION h5imunlink_palette_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     ILEN    = LEN(pal_name)
     errcode = h5imunlink_palette_c(loc_id,namelen,dset_name,ILEN,pal_name)
-    
+
   END SUBROUTINE h5imunlink_palette_f
-  
+
 !-------------------------------------------------------------------------
 ! Function: h5imget_npalettes_f
 !
@@ -467,7 +467,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 05, 2004
 !
@@ -481,7 +481,7 @@ CONTAINS
        dset_name,&
        npals,&
        errcode )
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
@@ -489,7 +489,7 @@ CONTAINS
     INTEGER(hsize_t), INTENT(inout) :: npals           ! palettes
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5imget_npalettes_c(loc_id,namelen,dset_name,npals) &
             BIND(C,NAME='h5imget_npalettes_c')
@@ -502,10 +502,10 @@ CONTAINS
          INTEGER(size_t) :: namelen                                 ! name length
        END FUNCTION h5imget_npalettes_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     errcode = h5imget_npalettes_c(loc_id,namelen,dset_name,npals)
-    
+
   END SUBROUTINE h5imget_npalettes_f
 
 
@@ -516,7 +516,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -531,7 +531,7 @@ CONTAINS
        pal_number,&
        dims,&
        errcode )
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t),   INTENT(in) :: loc_id                ! file or group identifier
@@ -540,7 +540,7 @@ CONTAINS
     INTEGER(hsize_t), DIMENSION(*), INTENT(inout) :: dims ! dimensions
     INTEGER :: errcode                                    ! error code
     INTEGER(size_t) :: namelen                            ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5imget_palette_info_c(loc_id,namelen,dset_name,pal_number,dims) &
             BIND(C,NAME='h5imget_palette_info_c')
@@ -554,10 +554,10 @@ CONTAINS
          INTEGER(size_t) :: namelen                            ! name length
        END FUNCTION h5imget_palette_info_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     errcode = h5imget_palette_info_c(loc_id,namelen,dset_name,pal_number,dims)
-    
+
   END SUBROUTINE h5imget_palette_info_f
 
 !-------------------------------------------------------------------------
@@ -567,7 +567,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -582,7 +582,7 @@ CONTAINS
        pal_number,&
        buf,&
        errcode )
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
@@ -591,7 +591,7 @@ CONTAINS
     INTEGER, INTENT(inout), DIMENSION(*) :: buf        ! buffer
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5imget_palette_c(loc_id,namelen,dset_name,pal_number,buf) &
             BIND(C,NAME='h5imget_palette_c')
@@ -605,10 +605,10 @@ CONTAINS
          INTEGER, INTENT(inout), DIMENSION(*) :: buf             ! buffer
        END FUNCTION h5imget_palette_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     errcode = h5imget_palette_c(loc_id,namelen,dset_name,pal_number,buf)
-    
+
   END SUBROUTINE h5imget_palette_f
 
 
@@ -619,7 +619,7 @@ CONTAINS
 !
 ! Return: true, false, fail
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -638,7 +638,7 @@ CONTAINS
     CHARACTER(len=*), INTENT(in) :: dset_name          ! name of the dataset
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
-    
+
     INTERFACE
        INTEGER FUNCTION h5imis_palette_c(loc_id,namelen,dset_name) &
             BIND(C,NAME='h5imis_palette_c')
@@ -650,11 +650,11 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: dset_name               ! name of the dataset
        END FUNCTION h5imis_palette_c
     END INTERFACE
-    
+
     namelen = LEN(dset_name)
     errcode = h5imis_palette_c(loc_id,namelen,dset_name)
     h5imis_palette_f = errcode
-    
+
   END FUNCTION h5imis_palette_f
 
 END MODULE H5IM

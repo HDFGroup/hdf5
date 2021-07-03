@@ -16,7 +16,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -24,7 +24,7 @@
 !*****
 
 PROGRAM fortranlibtest_F03
-  
+
   USE HDF5
   USE THDF5_F03
 
@@ -48,7 +48,7 @@ PROGRAM fortranlibtest_F03
   IF(total_error .EQ. 0) THEN
      WRITE(*, '(" FORTRANLIB_TEST is linked with HDF5 Library version ")', advance="NO")
      WRITE(*, '(I0)', advance="NO") majnum
-     WRITE(*, '(".")', advance="NO") 
+     WRITE(*, '(".")', advance="NO")
      WRITE(*, '(I0)', advance="NO") minnum
      WRITE(*, '(" release ")', advance="NO")
      WRITE(*, '(I0)') relnum
@@ -77,11 +77,11 @@ PROGRAM fortranlibtest_F03
 
   ret_total_error = 0
   CALL t_enum(ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing writing/reading enum dataset, using C_LOC', total_error)  
+  CALL write_test_status(ret_total_error, ' Testing writing/reading enum dataset, using C_LOC', total_error)
 
   ret_total_error = 0
   CALL t_enum_conv(ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing enumeration conversions', total_error)  
+  CALL write_test_status(ret_total_error, ' Testing enumeration conversions', total_error)
 
   ret_total_error = 0
   CALL t_bit(ret_total_error)
@@ -89,7 +89,7 @@ PROGRAM fortranlibtest_F03
 
   ret_total_error = 0
   CALL t_opaque(ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing writing/reading opaque datatypes, using C_LOC', total_error) 
+  CALL write_test_status(ret_total_error, ' Testing writing/reading opaque datatypes, using C_LOC', total_error)
 
   ret_total_error = 0
   CALL t_objref(ret_total_error)
@@ -97,7 +97,7 @@ PROGRAM fortranlibtest_F03
 
   ret_total_error = 0
   CALL t_regref(ret_total_error)
-  CALL write_test_status(ret_total_error, ' Testing writing/reading region references, using C_LOC', total_error)  
+  CALL write_test_status(ret_total_error, ' Testing writing/reading region references, using C_LOC', total_error)
 
   ret_total_error = 0
   CALL t_vlen(ret_total_error)
@@ -150,7 +150,7 @@ PROGRAM fortranlibtest_F03
   ret_total_error = 0
   CALL test_h5p_file_image(ret_total_error)
   CALL write_test_status(ret_total_error, ' Testing h5pset/get file image', total_error)
-  
+
 !     write(*,*)
 !     write(*,*) '========================================='
 !     write(*,*) 'Testing OBJECT interface                 '
@@ -188,7 +188,7 @@ PROGRAM fortranlibtest_F03
   WRITE(*, fmt = '(i4)', advance='NO') total_error
   WRITE(*, fmt = '(12a)' ) ' error(s) ! '
   WRITE(*,*) '                  ============================================  '
-  
+
   CALL h5close_f(error)
 
   ! if errors detected, exit with non-zero code.

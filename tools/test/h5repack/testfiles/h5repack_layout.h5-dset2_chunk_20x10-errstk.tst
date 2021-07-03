@@ -1,7 +1,7 @@
 HDF5-DIAG: Error detected in HDF5 (version (number)) thread (IDs):
   #000: (file name) line (number) in H5Dcreate2(): unable to create dataset
     major: Dataset
-    minor: Unable to initialize object
+    minor: Unable to create file
   #001: (file name) line (number) in H5VL_dataset_create(): dataset create failed
     major: Virtual Object Layer
     minor: Unable to create file

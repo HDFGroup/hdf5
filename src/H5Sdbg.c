@@ -6,18 +6,18 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Sdbg.c
- *			Jul 24 2007
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:         H5Sdbg.c
+ *                  Quincey Koziol
+ *                  Jul 24 2007
  *
- * Purpose:		Dump debugging information about a dataspace
+ * Purpose:         Dump debugging information about a dataspace
  *
  *-------------------------------------------------------------------------
  */
@@ -31,9 +31,9 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions			*/
-#include "H5Eprivate.h" /* Error handling		  	*/
-#include "H5Spkg.h"     /* Dataspaces         			*/
+#include "H5private.h"  /* Generic Functions            */
+#include "H5Eprivate.h" /* Error handling              */
+#include "H5Spkg.h"     /* Dataspaces                     */
 
 /****************/
 /* Local Macros */
@@ -64,13 +64,13 @@
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5S_debug
+ * Function:    H5S_debug
  *
- * Purpose:	Prints debugging information about a dataspace.
+ * Purpose:     Prints debugging information about a dataspace.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:  Robb Matzke
  *              Tuesday, July 21, 1998
  *
  *-------------------------------------------------------------------------

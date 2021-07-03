@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, January  6, 2004
  *
  * Purpose:    Provides support functions for the testing framework.
@@ -442,15 +442,15 @@ GetTestExpress(void)
 
     /* set it here for now.  Should be done in something like h5test_init(). */
     if (TestExpress == -1) {
-        env_val = getenv("HDF5TestExpress");
+        env_val = HDgetenv("HDF5TestExpress");
 
         if (env_val == NULL)
             SetTestExpress(1);
-        else if (strcmp(env_val, "0") == 0)
+        else if (HDstrcmp(env_val, "0") == 0)
             SetTestExpress(0);
-        else if (strcmp(env_val, "1") == 0)
+        else if (HDstrcmp(env_val, "1") == 0)
             SetTestExpress(1);
-        else if (strcmp(env_val, "2") == 0)
+        else if (HDstrcmp(env_val, "2") == 0)
             SetTestExpress(2);
         else
             SetTestExpress(3);
@@ -521,7 +521,7 @@ ParseTestVerbosity(char *argv)
     else if (*argv == 'h')
         SetTestVerbosity(VERBO_HI);
     else
-        SetTestVerbosity(atoi(argv));
+        SetTestVerbosity(HDatoi(argv));
 }
 
 /*

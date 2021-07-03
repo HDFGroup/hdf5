@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5EAsblock.c
  *			Sep 30 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Super block routines for extensible arrays.
  *
@@ -87,7 +87,6 @@ H5FL_BLK_DEFINE(page_init);
  * Return:	Non-NULL pointer to super block on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
@@ -166,7 +165,6 @@ END_FUNC(PKG) /* end H5EA__sblock_alloc() */
  * Return:	Valid file address on success/HADDR_UNDEF on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
@@ -253,7 +251,6 @@ END_FUNC(PKG) /* end H5EA__sblock_create() */
  * Return:	Non-NULL pointer to data block on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
@@ -316,7 +313,6 @@ END_FUNC(PKG) /* end H5EA__sblock_protect() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
@@ -346,7 +342,6 @@ END_FUNC(PKG) /* end H5EA__sblock_unprotect() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
  *-------------------------------------------------------------------------
@@ -394,7 +389,6 @@ END_FUNC(PKG) /* end H5EA__sblock_delete() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 30 2008
  *
  *-------------------------------------------------------------------------

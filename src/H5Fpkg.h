@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:	Quincey Koziol
  *		Thursday, September 28, 2000
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5F package!"
 #endif
 
-#ifndef _H5Fpkg_H
-#define _H5Fpkg_H
+#ifndef H5Fpkg_H
+#define H5Fpkg_H
 
 /* Get package's private header */
 #include "H5Fprivate.h"
@@ -304,6 +304,7 @@ struct H5F_shared_t {
     struct H5G_t *       root_grp;          /* Open root group			*/
     H5FO_t *             open_objs;         /* Open objects in file                 */
     H5UC_t *             grp_btree_shared;  /* Ref-counted group B-tree node info   */
+    hbool_t              use_file_locking;  /* Whether or not to use file locking */
     hbool_t              closing;           /* File is in the process of being closed */
 
     /* Cached VOL connector ID & info */
@@ -392,6 +393,11 @@ H5FL_EXTERN(H5F_t);
 /* Declare a free list to manage the H5F_shared_t struct */
 H5FL_EXTERN(H5F_shared_t);
 
+/* Whether or not to use file locking (based on the environment variable)
+ * FAIL means ignore the environment variable.
+ */
+H5_DLLVAR htri_t use_locks_env_g;
+
 /******************************/
 /* Package Private Prototypes */
 /******************************/
@@ -399,7 +405,6 @@ H5FL_EXTERN(H5F_shared_t);
 /* General routines */
 H5_DLL herr_t H5F__post_open(H5F_t *f);
 H5_DLL H5F_t * H5F__reopen(H5F_t *f);
-H5_DLL herr_t  H5F__dest(H5F_t *f, hbool_t flush);
 H5_DLL herr_t  H5F__flush(H5F_t *f);
 H5_DLL htri_t  H5F__is_hdf5(const char *name, hid_t fapl_id);
 H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
@@ -409,6 +414,7 @@ H5_DLL herr_t  H5F__start_swmr_write(H5F_t *f);
 H5_DLL herr_t  H5F__close(H5F_t *f);
 H5_DLL herr_t  H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
 H5_DLL herr_t  H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
+H5_DLL herr_t  H5F__parse_file_lock_env_var(htri_t *use_locks);
 
 /* File mount related routines */
 H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
@@ -471,6 +477,7 @@ H5_DLL herr_t H5F__check_cached_stab_test(hid_t file_id);
 H5_DLL herr_t H5F__get_maxaddr_test(hid_t file_id, haddr_t *maxaddr);
 H5_DLL herr_t H5F__get_sbe_addr_test(hid_t file_id, haddr_t *sbe_addr);
 H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
+H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
-#endif /* _H5Fpkg_H */
+#endif /* H5Fpkg_H */

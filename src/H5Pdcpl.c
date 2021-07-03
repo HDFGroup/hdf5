@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -523,13 +523,13 @@ H5P__dcrt_layout_enc(const void *value, void **_pp, size_t *size)
             for (u = 0; u < layout->storage.u.virt.list_nused; u++) {
                 /* Source file name */
                 tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_file_name) + (size_t)1;
-                (void)H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_file_name, tmp_size);
+                H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_file_name, tmp_size);
                 *pp += tmp_size;
                 *size += tmp_size;
 
                 /* Source dataset name */
                 tmp_size = HDstrlen(layout->storage.u.virt.list[u].source_dset_name) + (size_t)1;
-                (void)H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_dset_name, tmp_size);
+                H5MM_memcpy(*pp, layout->storage.u.virt.list[u].source_dset_name, tmp_size);
                 *pp += tmp_size;
                 *size += tmp_size;
 
@@ -699,7 +699,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                         (tmp_layout.storage.u.virt.list[u].source_file_name = (char *)H5MM_malloc(tmp_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL,
                                     "unable to allocate memory for source file name")
-                    (void)H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
+                    H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_file_name, *pp, tmp_size);
                     *pp += tmp_size;
 
                     /* Source dataset name */
@@ -708,7 +708,7 @@ H5P__dcrt_layout_dec(const void **_pp, void *value)
                         (tmp_layout.storage.u.virt.list[u].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                         HGOTO_ERROR(H5E_PLIST, H5E_CANTALLOC, FAIL,
                                     "unable to allocate memory for source dataset name")
-                    (void)H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
+                    H5MM_memcpy(tmp_layout.storage.u.virt.list[u].source_dset_name, *pp, tmp_size);
                     *pp += tmp_size;
 
                     /* Source selection */
@@ -1977,13 +1977,6 @@ H5P__init_def_layout(void)
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2057,13 +2050,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 H5D_layout_t
@@ -2105,13 +2091,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2187,13 +2166,6 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -2255,7 +2227,7 @@ herr_t
 H5Pset_virtual(hid_t dcpl_id, hid_t vspace_id, const char *src_file_name, const char *src_dset_name,
                hid_t src_space_id)
 {
-    H5P_genplist_t *           plist;                      /* Property list pointer */
+    H5P_genplist_t *           plist = NULL;               /* Property list pointer */
     H5O_layout_t               virtual_layout;             /* Layout information for setting virtual info */
     H5S_t *                    vspace;                     /* Virtual dataset space selection */
     H5S_t *                    src_space;                  /* Source dataset space selection */
@@ -2502,7 +2474,7 @@ H5Pget_virtual_vspace(hid_t dcpl_id, size_t idx)
 
     /* Get the virtual space */
     if (idx >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     if (NULL == (space = H5S_copy(layout.storage.u.virt.list[idx].source_dset.virtual_select, FALSE, TRUE)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "unable to copy virtual selection")
@@ -2557,9 +2529,9 @@ H5Pget_virtual_srcspace(hid_t dcpl_id, size_t idx)
     if (H5D_VIRTUAL != layout.type)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "not a virtual storage layout")
 
-    /* Check idx */
+    /* Check index */
     if (idx >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
 
     /* Attempt to open source dataset and patch extent if extent status is not
@@ -2662,7 +2634,7 @@ H5Pget_virtual_filename(hid_t dcpl_id, size_t idx, char *name /*out*/, size_t si
 
     /* Get the virtual filename */
     if (idx >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     HDassert(layout.storage.u.virt.list[idx].source_file_name);
     if (name && (size > 0))
@@ -2723,7 +2695,7 @@ H5Pget_virtual_dsetname(hid_t dcpl_id, size_t idx, char *name /*out*/, size_t si
 
     /* Get the virtual filename */
     if (idx >= layout.storage.u.virt.list_nused)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid idx (out of range)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "invalid index (out of range)")
     HDassert(layout.storage.u.virt.list_nused <= layout.storage.u.virt.list_nalloc);
     HDassert(layout.storage.u.virt.list[idx].source_dset_name);
     if (name && (size > 0))
@@ -2947,13 +2919,6 @@ done:
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
  *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and set property for
- *              generic property list.
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -3002,13 +2967,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *              Tuesday, March  3, 1998
- *
- * Modifications:
- *
- *              Raymond Lu
- *              Tuesday, October 2, 2001
- *              Changed the way to check parameter and get property for
- *              generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -3129,8 +3087,6 @@ done:
  * Programmer:	Kent Yang
  *              Wednesday, November 13, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3172,9 +3128,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Wednesday, December 22, 2004
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -3233,9 +3186,6 @@ done:
  *
  * Programmer:  Xiaowen Wu
  *              Thursday, April 14, 2005
- *
- * Modifications:
- *
  *
  *-------------------------------------------------------------------------
  */
@@ -3635,9 +3585,6 @@ done:
  * Programmer:	Raymond Lu
  * 		Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3815,9 +3762,6 @@ done:
  * Programmer:  Raymond Lu
  *              Wednesday, January 16, 2002
  *
- * Modifications:
- *
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -3865,8 +3809,6 @@ done:
  * Programmer: Jacob Smith
  *             2018 August 14
  *
- * Modifications: None.
- *
  *-----------------------------------------------------------------------------
  */
 herr_t
@@ -3910,8 +3852,6 @@ done:
  *
  * Programmer: Jacob Smith
  *             2018 August 14
- *
- * Modifications: None.
  *
  *-----------------------------------------------------------------------------
  */

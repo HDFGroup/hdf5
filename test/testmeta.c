@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -83,7 +83,7 @@ main(void)
 
     for (i = 0; i < NEXTARRAYS; i++) {
         /* Create dataset */
-        sprintf(name, "/ExtArray%06d", i);
+        HDsprintf(name, "/ExtArray%06d", i);
         dataset_id =
             H5Dcreate2(file_id, name, H5T_NATIVE_FLOAT, dataspace_id, H5P_DEFAULT, prop_id, H5P_DEFAULT);
 
@@ -103,7 +103,7 @@ main(void)
         /* Removed print statement as it would lock system resources on Windows */
         /*
          * HDprintf("\rWriting Object #%d of %d", j+1, NDATAOBJECTS);
-         * fflush(stdout);
+         * HDfflush(stdout);
          */
         floatval = (float)j;
 

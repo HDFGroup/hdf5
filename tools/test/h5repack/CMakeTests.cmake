@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -51,6 +51,8 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_named_dtypes.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nested_8bit_enum.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nested_8bit_enum_deflated.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_CVE-2018-17432.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_CVE-2018-14460.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_nbit.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_objs.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_refs.h5
@@ -72,6 +74,14 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5repack_paged_persist.h5
       # h5diff/testfile
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_attr1.h5
+      # tools/testfiles for external links
+      ${HDF5_TOOLS_DIR}/testfiles/tsoftlinks.h5
+      ${HDF5_TOOLS_DIR}/testfiles/textlinkfar.h5
+      ${HDF5_TOOLS_DIR}/testfiles/textlinksrc.h5
+      ${HDF5_TOOLS_DIR}/testfiles/textlinktar.h5
+      ${HDF5_TOOLS_DIR}/testfiles/textlink.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_trg.h5
       # tools/testfiles
       ${HDF5_TOOLS_DIR}/testfiles/tfamily00000.h5
       ${HDF5_TOOLS_DIR}/testfiles/tfamily00001.h5
@@ -128,6 +138,13 @@
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_version_test.h5repack_layout.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_zero.h5repack_layout.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/plugin_none.h5repack_layout.UD.h5
+      # tools/testfiles for external links
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-merge.tsoftlinks.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-merge.textlinkfar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-merge.textlinksrc.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-merge.textlinktar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-merge.textlink.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-merge.h5copy_extlinks_src.h5
   )
 
   set (LIST_DDL_TEST_FILES
@@ -154,6 +171,25 @@
       # refs
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/attrregion.tattrreg.h5
       ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/dataregion.tdatareg.h5
+      # tools/testfiles for external links
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-base.textlinkfar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-base.textlinksrc.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-base.textlinktar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-base.textlink.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-base.tsoftlinks.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-base.h5copy_extlinks_src.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-prune.textlinkfar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-prune.textlinksrc.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-prune.textlinktar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-prune.textlink.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-prune.tsoftlinks.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-prune.h5copy_extlinks_src.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinkfar-mergeprune.textlinkfar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinksrc-mergeprune.textlinksrc.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlinktar-mergeprune.textlinktar.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/textlink-mergeprune.textlink.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/tsoftlinks-mergeprune.tsoftlinks.h5
+      ${HDF5_TOOLS_TEST_H5REPACK_SOURCE_DIR}/testfiles/h5copy_extlinks_src-mergeprune.h5copy_extlinks_src.h5
   )
 
   foreach (h5_file ${LIST_HDF5_TEST_FILES})
@@ -276,7 +312,7 @@
     endif ()
   endmacro ()
 
-  macro (ADD_H5_CMP_TEST testname testfilter testtype resultcode resultfile)
+  macro (ADD_H5_FILTER_TEST testname testfilter testtype resultcode resultfile)
     if ("${testtype}" STREQUAL "SKIP")
       if (NOT HDF5_ENABLE_USING_MEMCHECKER)
         add_test (
@@ -407,6 +443,48 @@
             DEPENDS "H5REPACK_DMP-${testname}"
         )
       endif ()
+    endif ()
+  endmacro ()
+
+  macro (ADD_H5_DIFF_TEST testname testtype resultcode testfile)
+    if ("${testtype}" STREQUAL "SKIP")
+      if (NOT HDF5_ENABLE_USING_MEMCHECKER)
+        add_test (
+            NAME H5REPACK_DIFF-${testname}
+            COMMAND ${CMAKE_COMMAND} -E echo "SKIP ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}"
+        )
+        set_property(TEST H5REPACK_DIFF-${testname} PROPERTY DISABLED)
+      endif ()
+    else ()
+      add_test (
+          NAME H5REPACK_DIFF-${testname}-clear-objects
+          COMMAND ${CMAKE_COMMAND} -E remove testfiles/out-${testname}.${testfile}
+      )
+      set_tests_properties (H5REPACK_DIFF-${testname}-clear-objects PROPERTIES
+          FIXTURES_REQUIRED clear_h5repack
+      )
+      add_test (
+          NAME H5REPACK_DIFF-${testname}
+          COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5repack${tgt_file_ext}> --enable-error-stack ${ARGN} ${PROJECT_BINARY_DIR}/testfiles/${testfile} ${PROJECT_BINARY_DIR}/testfiles/out-${testname}.${testfile}
+      )
+      set_tests_properties (H5REPACK_DIFF-${testname} PROPERTIES
+          DEPENDS H5REPACK_DIFF-${testname}-clear-objects
+      )
+      add_test (
+          NAME H5REPACK_DIFF-${testname}_DFF
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
+              -D "TEST_ARGS:STRING=-v;--enable-error-stack;${testfile};out-${testname}.${testfile}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=out-${testname}.${testfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${testname}.${testfile}.tst"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      set_tests_properties (H5REPACK_DIFF-${testname}_DFF PROPERTIES
+          DEPENDS H5REPACK_DIFF-${testname}
+      )
     endif ()
   endmacro ()
 
@@ -662,7 +740,7 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
-              -D "TEST_ARGS:STRING=${testfile};out-${testname}_N.${testname}.h5"
+              -D "TEST_ARGS:STRING=-v;${testfile};out-${testname}_N.${testname}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=out-${testname}_N.${testname}.out"
               -D "TEST_EXPECT=0"
@@ -684,7 +762,7 @@
           COMMAND "${CMAKE_COMMAND}"
               -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
               -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
-              -D "TEST_ARGS:STRING=${testfile};out-${testname}_M.${testname}.h5"
+              -D "TEST_ARGS:STRING=-v;${testfile};out-${testname}_M.${testname}.h5"
               -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
               -D "TEST_OUTPUT=out-${testname}_M.${testname}.out"
               -D "TEST_EXPECT=0"
@@ -1148,7 +1226,7 @@
   if (NOT USE_FILTER_DEFLATE)
     set (TESTTYPE "SKIP")
   endif ()
-  ADD_H5_CMP_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
+  ADD_H5_FILTER_TEST (gzip_verbose_filters "O?...ing file[^\n]+\n" ${TESTTYPE} 0 ${arg})
 
 ###########################################################
 # the following tests assume the input files have filters
@@ -1473,6 +1551,16 @@
 # Note: this test is experimental for sharing test file among tools
   ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
 
+# test CVE-2018-17432 fix
+  set (arg h5repack_CVE-2018-17432.h5 h5repack__CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
+  set (TESTTYPE "TEST")
+  ADD_H5_FILTER_TEST (HDFFV-10590 "" ${TESTTYPE} 1 ${arg})
+
+# test CVE-2018-14460 fix
+  set (arg h5repack_CVE-2018-14460.h5 h5repack_CVE-2018-14460_out.h5)
+  set (TESTTYPE "TEST")
+  ADD_H5_FILTER_TEST (HDFFV-11223 "" ${TESTTYPE} 1 ${arg})
+
 # tests for metadata block size option ('-M')
   ADD_H5_TEST_META (meta_short h5repack_layout.h5 -M 8192)
   ADD_H5_TEST_META (meta_long h5repack_layout.h5 --metadata_block_size=8192)
@@ -1538,6 +1626,44 @@ ADD_H5_EXTERNAL_TEST (ext_int32le_1d "TEST" int32le_1d -l CONTI)
 ADD_H5_EXTERNAL_TEST (ext_int32le_2d "TEST" int32le_2d -l CONTI)
 ADD_H5_EXTERNAL_TEST (ext_int32le_3d "TEST" int32le_3d -l CONTI)
 ADD_H5_EXTERNAL_TEST (ext_uint8be "TEST" uint8be -l CONTI)
+
+##############################################################################
+###    E X T E R N A L  L I N K  T E S T S
+##############################################################################
+### HDFFV-11128 needs fixed to enable the following test
+#ADD_H5_DMP_TEST (h5copy_extlinks_src-base "TEST" 0 h5copy_extlinks_src.h5 --enable-error-stack)
+ADD_H5_DMP_TEST (tsoftlinks-base "TEST" 0 tsoftlinks.h5 --enable-error-stack)
+ADD_H5_DMP_TEST (textlink-base "TEST" 0 textlink.h5 --enable-error-stack)
+ADD_H5_DMP_TEST (textlinkfar-base "TEST" 0 textlinkfar.h5 --enable-error-stack)
+ADD_H5_DMP_TEST (textlinksrc-base "TEST" 0 textlinksrc.h5 --enable-error-stack)
+ADD_H5_DMP_TEST (textlinktar-base "TEST" 0 textlinktar.h5 --enable-error-stack)
+
+ADD_H5_DIFF_TEST (h5copy_extlinks_src-merge "TEST" 0 h5copy_extlinks_src.h5 --merge)
+ADD_H5_DIFF_TEST (tsoftlinks-merge "TEST" 1 tsoftlinks.h5 --merge)
+ADD_H5_DIFF_TEST (textlink-merge "TEST" 0 textlink.h5 --merge)
+### HDFFV-11128 needs fixed to enable the following test
+#ADD_H5_DIFF_TEST (textlinkfar-merge "TEST" 1 textlinkfar.h5 --merge)
+### HDFFV-11128 needs fixed to enable the following test
+#ADD_H5_DIFF_TEST (textlinksrc-merge "TEST" 1 textlinksrc.h5 --merge)
+### HDFFV-11128 needs fixed to enable the following test
+#ADD_H5_DIFF_TEST (textlinktar-merge "TEST" 1 textlinktar.h5 --merge)
+
+ADD_H5_DMP_TEST (h5copy_extlinks_src-prune "TEST" 0 h5copy_extlinks_src.h5 --prune --enable-error-stack)
+ADD_H5_DMP_TEST (tsoftlinks-prune "TEST" 0 tsoftlinks.h5 --prune --enable-error-stack)
+ADD_H5_DMP_TEST (textlink-prune "TEST" 0 textlink.h5 --prune --enable-error-stack)
+ADD_H5_DMP_TEST (textlinkfar-prune "TEST" 0 textlinkfar.h5 --prune --enable-error-stack)
+ADD_H5_DMP_TEST (textlinksrc-prune "TEST" 0 textlinksrc.h5 --prune --enable-error-stack)
+ADD_H5_DMP_TEST (textlinktar-prune "TEST" 0 textlinktar.h5 --prune --enable-error-stack)
+
+ADD_H5_DMP_TEST (h5copy_extlinks_src-mergeprune "TEST" 0 h5copy_extlinks_src.h5 --merge --prune --enable-error-stack)
+ADD_H5_DMP_TEST (tsoftlinks-mergeprune "TEST" 0 tsoftlinks.h5 --merge --prune --enable-error-stack)
+ADD_H5_DMP_TEST (textlink-mergeprune "TEST" 0 textlink.h5 --merge --prune --enable-error-stack)
+### HDFFV-11128 needs fixed to enable the following test
+#ADD_H5_DMP_TEST (textlinkfar-mergeprune "TEST" 0 textlinkfar.h5 --merge --prune --enable-error-stack)
+### HDFFV-11128 needs fixed to enable the following test
+#ADD_H5_DMP_TEST (textlinksrc-mergeprune "TEST" 0 textlinksrc.h5 --merge --prune --enable-error-stack)
+### HDFFV-11128 needs fixed to enable the following test
+#ADD_H5_DMP_TEST (textlinktar-mergeprune "TEST" 0 textlinktar.h5 --merge --prune --enable-error-stack)
 
 ##############################################################################
 ###    P L U G I N  T E S T S

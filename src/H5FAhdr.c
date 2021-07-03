@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,7 +37,7 @@
 #include "H5Eprivate.h"  /* Error handling                               */
 #include "H5FApkg.h"     /* Fixed Arrays                                 */
 #include "H5MFprivate.h" /* File memory management                       */
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5MMprivate.h" /* Memory management                            */
 
 /****************/
 /* Local Macros */
@@ -382,7 +382,6 @@ END_FUNC(PKG) /* end H5FA__hdr_modified() */
  * Return:	Non-NULL pointer to header on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 12 2013
  *
  *-------------------------------------------------------------------------
@@ -438,7 +437,6 @@ END_FUNC(PKG) /* end H5FA__hdr_protect() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 12 2013
  *
  *-------------------------------------------------------------------------
@@ -457,7 +455,7 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL, H5FA__hdr_unprotect(H5FA_hdr_t *hdr,
 
     CATCH
 
-END_FUNC(PKG) /* end H5EA__hdr_unprotect() */
+END_FUNC(PKG) /* end H5FA__hdr_unprotect() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5FA__hdr_delete

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -621,7 +621,7 @@ H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
 } /* end H5F__mount_count_ids() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5F_flush_mounts_recurse
+ * Function:	H5F__flush_mounts_recurse
  *
  * Purpose:	Flush a mount hierarchy, recursively
  *
@@ -633,20 +633,20 @@ H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5F_flush_mounts_recurse(H5F_t *f)
+H5F__flush_mounts_recurse(H5F_t *f)
 {
     unsigned nerrors = 0;         /* Errors from recursive flushes */
     unsigned u;                   /* Index variable */
     herr_t   ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
 
     /* Flush all child files, not stopping for errors */
     for (u = 0; u < f->shared->mtab.nmounts; u++)
-        if (H5F_flush_mounts_recurse(f->shared->mtab.child[u].file) < 0)
+        if (H5F__flush_mounts_recurse(f->shared->mtab.child[u].file) < 0)
             nerrors++;
 
     /* Call the "real" flush routine, for this file */
@@ -659,7 +659,7 @@ H5F_flush_mounts_recurse(H5F_t *f)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_flush_mounts_recurse() */
+} /* end H5F__flush_mounts_recurse() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_flush_mounts
@@ -688,7 +688,7 @@ H5F_flush_mounts(H5F_t *f)
         f = f->parent;
 
     /* Flush the mounted file hierarchy */
-    if (H5F_flush_mounts_recurse(f) < 0)
+    if (H5F__flush_mounts_recurse(f) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
 
 done:

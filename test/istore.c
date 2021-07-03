@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke <matzke@llnl.gov>
+/* Programmer:    Robb Matzke
  *        Wednesday, October 15, 1997
  *
  * Purpose:    Tests various aspects of indexed raw data storage.
@@ -376,7 +376,7 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
             HDfprintf(stderr, "    Read failed: ctr=%lu\n", (unsigned long)ctr);
             goto error;
         }
-        if (HDmemcmp(buf, check, (size_t)nelmts)) {
+        if (HDmemcmp(buf, check, (size_t)nelmts) != 0) {
             H5_FAILED();
             HDfprintf(stderr, "    Read check failed: ctr=%lu\n", (unsigned long)ctr);
             HDfprintf(stderr, "    Wrote:\n");
@@ -619,13 +619,13 @@ main(int argc, char *argv[])
     else {
         int i;
         for (i = 1, size_of_test = 0; i < argc; i++) {
-            if (!strcmp(argv[i], "small")) {
+            if (!HDstrcmp(argv[i], "small")) {
                 size_of_test |= TEST_SMALL;
             }
-            else if (!strcmp(argv[i], "medium")) {
+            else if (!HDstrcmp(argv[i], "medium")) {
                 size_of_test |= TEST_MEDIUM;
             }
-            else if (!strcmp(argv[i], "large")) {
+            else if (!HDstrcmp(argv[i], "large")) {
                 size_of_test |= TEST_LARGE;
             }
             else {

@@ -6,16 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 #include <string>
 
 using std::cerr;
@@ -694,6 +690,52 @@ FileAccPropList::getGcReferences() const
         throw PropListIException("FileAccPropList::getGcReferences", "H5Pget_gc_references failed");
     }
     return (gc_ref);
+}
+
+//--------------------------------------------------------------------------
+// Function:    FileAccPropList::setFileLocking
+///\brief       Sets file locking flags.
+///\param       use_file_locking - IN: Flag that determines if file locks should
+//                  be used or not.
+///\param       ignore_when_disabled - IN: Flag that determines if file locks
+//                  should be be used when disabled on the file system or not.
+///\exception   H5::PropListIException
+///\par Description
+///             For information, please refer to the H5Pset_file_locking API in
+///             the HDF5 C Reference Manual.
+// Programmer   Dana Robinson - 2020
+//--------------------------------------------------------------------------
+void
+FileAccPropList::setFileLocking(hbool_t use_file_locking, hbool_t ignore_when_disabled) const
+{
+    herr_t ret_value = H5Pset_file_locking(id, use_file_locking, ignore_when_disabled);
+
+    if (ret_value < 0) {
+        throw PropListIException("FileAccPropList::setFileLocking", "H5Pset_file_locking failed");
+    }
+}
+
+//--------------------------------------------------------------------------
+// Function:    FileAccPropList::getFileLocking
+///\brief       Gets file locking flags.
+///\param       use_file_locking - OUT: Flag that determines if file locks
+//                  should be used or not.
+///\param       ignore_when_disabled - OUT: Flag that determines if file locks
+//                  should be be used when disabled on the file system or not.
+///\exception   H5::PropListIException
+///\par Description
+///             For information, please refer to the H5Pget_file_locking API in
+///             the HDF5 C Reference Manual.
+// Programmer   Dana Robinson - 2020
+//--------------------------------------------------------------------------
+void
+FileAccPropList::getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_disabled) const
+{
+    herr_t ret_value = H5Pget_file_locking(id, &use_file_locking, &ignore_when_disabled);
+
+    if (ret_value < 0) {
+        throw PropListIException("FileAccPropList::getFileLocking", "H5Pget_file_locking failed");
+    }
 }
 
 //--------------------------------------------------------------------------

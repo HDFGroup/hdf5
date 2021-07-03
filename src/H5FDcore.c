@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, August 10, 1999
  *
  * Purpose:     A driver which stores the HDF5 data in main memory  using
@@ -36,6 +36,9 @@
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_CORE_g = 0;
 
+/* Whether to ignore file locks when disabled (env var value) */
+static htri_t ignore_disabled_file_locks_s = FAIL;
+
 /* The skip list node type.  Represents a region in the file. */
 typedef struct H5FD_core_region_t {
     haddr_t start; /* Start address of the region          */
@@ -56,7 +59,8 @@ typedef struct H5FD_core_t {
     hbool_t        backing_store;    /* write to file name on flush          */
     hbool_t        write_tracking;   /* Whether to track writes              */
     size_t         bstore_page_size; /* backing store page size              */
-    int            fd;               /* backing store file descriptor        */
+    hbool_t        ignore_disabled_file_locks;
+    int            fd; /* backing store file descriptor        */
     /* Information for determining uniqueness of a file with a backing store */
 #ifndef H5_HAVE_WIN32_API
     /* On most systems the combination of device and i-node number uniquely
@@ -142,8 +146,8 @@ static herr_t  H5FD__core_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, h
                                 const void *buf);
 static herr_t  H5FD__core_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t  H5FD_core_lock(H5FD_t *_file, hbool_t rw);
-static herr_t  H5FD_core_unlock(H5FD_t *_file);
+static herr_t  H5FD__core_lock(H5FD_t *_file, hbool_t rw);
+static herr_t  H5FD__core_unlock(H5FD_t *_file);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",                   /* name                 */
@@ -175,8 +179,8 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_write,         /* write                */
     H5FD__core_flush,         /* flush                */
     H5FD__core_truncate,      /* truncate             */
-    H5FD_core_lock,           /* lock                 */
-    H5FD_core_unlock,         /* unlock               */
+    H5FD__core_lock,          /* lock                 */
+    H5FD__core_unlock,        /* unlock               */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
@@ -277,13 +281,13 @@ H5FD__core_add_dirty_region(H5FD_core_t *file, haddr_t start, haddr_t end)
         else {
             /* Store the new item endpoint if it's bigger */
             item->end = (item->end < end) ? end : item->end;
-        } /* end else */
-    }     /* end if */
+        }
+    }
     else {
         /* Update the size of the before region */
         if (b_item->end < end)
             b_item->end = end;
-    } /* end else */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -338,9 +342,10 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
     unsigned char *ptr = file->mem + addr; /* mutable pointer into the
                                             * buffer (can't change mem)
                                             */
-    herr_t ret_value = SUCCEED;            /* Return value */
+    HDoff_t offset    = (HDoff_t)addr;     /* Offset to write at */
+    herr_t  ret_value = SUCCEED;           /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -354,7 +359,6 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
 
         h5_posix_io_t     bytes_in    = 0;  /* # of bytes to write  */
         h5_posix_io_ret_t bytes_wrote = -1; /* # of bytes written   */
-        HDoff_t           offset      = (HDoff_t)addr;
 
         /* Trying to write more bytes than the return type can handle is
          * undefined behavior in POSIX.
@@ -367,7 +371,8 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
         do {
 #ifdef H5_HAVE_PREADWRITE
             bytes_wrote = HDpwrite(file->fd, ptr, bytes_in, offset);
-            offset += bytes_wrote;
+            if (bytes_wrote > 0)
+                offset += bytes_wrote;
 #else
             bytes_wrote = HDwrite(file->fd, ptr, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
@@ -412,9 +417,19 @@ done:
 static herr_t
 H5FD__init_package(void)
 {
-    herr_t ret_value = SUCCEED;
+    char * lock_env_var = NULL; /* Environment variable pointer */
+    herr_t ret_value    = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
+
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5FD_core_init() < 0)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize core VFD")
@@ -793,6 +808,16 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     /* Save file image callbacks */
     file->fi_callbacks = file_image_info.callbacks;
 
+    /* Check the file locking flags in the fapl */
+    if (ignore_disabled_file_locks_s != FAIL)
+        /* The environment variable was set, so use that preferentially */
+        file->ignore_disabled_file_locks = ignore_disabled_file_locks_s;
+    else {
+        /* Use the value in the property list */
+        if (H5P_get(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &file->ignore_disabled_file_locks) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get ignore disabled file locks property")
+    }
+
     if (fd >= 0) {
         /* Retrieve information for determining uniqueness of file */
 #ifdef H5_HAVE_WIN32_API
@@ -855,12 +880,12 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                  * partial results, and the end of the file.
                  */
 
-                uint8_t *mem = file->mem; /* memory pointer for writes */
+                uint8_t *mem    = file->mem;  /* memory pointer for writes */
+                HDoff_t  offset = (HDoff_t)0; /* offset for reading */
 
                 while (size > 0) {
                     h5_posix_io_t     bytes_in   = 0;  /* # of bytes to read       */
                     h5_posix_io_ret_t bytes_read = -1; /* # of bytes actually read */
-                    HDoff_t           offset     = (HDoff_t)0;
 
                     /* Trying to read more bytes than the return type can handle is
                      * undefined behavior in POSIX.
@@ -873,7 +898,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                     do {
 #ifdef H5_HAVE_PREADWRITE
                         bytes_read = HDpread(file->fd, mem, bytes_in, offset);
-                        offset += bytes_read;
+                        if (bytes_read > 0)
+                            offset += bytes_read;
 #else
                         bytes_read = HDread(file->fd, mem, bytes_in);
 #endif /* H5_HAVE_PREADWRITE */
@@ -1104,24 +1130,24 @@ H5FD__core_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
     FUNC_ENTER_STATIC_NOERR
 
+    /* clang-format off */
     /* Set the VFL feature flags that this driver supports */
-    if (flags) {
+    if(flags) {
         *flags = 0;
-        *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
-        *flags |= H5FD_FEAT_ACCUMULATE_METADATA; /* OK to accumulate metadata for faster writes */
-        *flags |= H5FD_FEAT_DATA_SIEVE; /* OK to perform data sieving for faster raw data reads & writes    */
-        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;          /* OK to aggregate "small" raw data allocations          */
-        *flags |= H5FD_FEAT_ALLOW_FILE_IMAGE;             /* OK to use file image feature with this VFD             */
-        *flags |= H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS; /* OK to use file image callbacks with this VFD */
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;             /* OK to aggregate metadata allocations                             */
+        *flags |= H5FD_FEAT_ACCUMULATE_METADATA;            /* OK to accumulate metadata for faster writes                      */
+        *flags |= H5FD_FEAT_DATA_SIEVE;                     /* OK to perform data sieving for faster raw data reads & writes    */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA;            /* OK to aggregate "small" raw data allocations                     */
+        *flags |= H5FD_FEAT_ALLOW_FILE_IMAGE;               /* OK to use file image feature with this VFD                       */
+        *flags |= H5FD_FEAT_CAN_USE_FILE_IMAGE_CALLBACKS;   /* OK to use file image callbacks with this VFD                     */
 
         /* These feature flags are only applicable if the backing store is enabled */
-        if (file && file->fd >= 0 && file->backing_store) {
-            *flags |=
-                H5FD_FEAT_POSIX_COMPAT_HANDLE; /* get_handle callback returns a POSIX file descriptor */
-            *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the
-                                                           default VFD      */
+        if(file && file->fd >= 0 && file->backing_store) {
+            *flags |= H5FD_FEAT_POSIX_COMPAT_HANDLE;        /* get_handle callback returns a POSIX file descriptor              */
+            *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE;     /* VFD creates a file which can be opened with the default VFD      */
         }
     } /* end if */
+    /* clang-format on */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__core_query() */
@@ -1499,7 +1525,7 @@ done:
  *              If we are not closing, we realloc the buffer to size equal
  *              to the smallest multiple of the allocation increment that
  *              equals or exceeds the eoa and set the eof accordingly.
- *              Note that we no longer truncate	the backing store to the
+ *              Note that we no longer truncate    the backing store to the
  *              new eof if applicable.
  *                                                                  -- JRM
  *
@@ -1598,12 +1624,12 @@ done:
 } /* end H5FD__core_truncate() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_lock
+ * Function:    H5FD__core_lock
  *
  * Purpose:     To place an advisory lock on a file.
- *		The lock type to apply depends on the parameter "rw":
- *			TRUE--opens for write: an exclusive lock
- *			FALSE--opens for read: a shared lock
+ *        The lock type to apply depends on the parameter "rw":
+ *            TRUE--opens for write: an exclusive lock
+ *            FALSE--opens for read: a shared lock
  *
  * Return:      SUCCEED/FAIL
  *
@@ -1612,13 +1638,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_lock(H5FD_t *_file, hbool_t rw)
+H5FD__core_lock(H5FD_t *_file, hbool_t rw)
 {
     H5FD_core_t *file = (H5FD_core_t *)_file; /* VFD file struct          */
     int          lock_flags;                  /* file locking flags       */
     herr_t       ret_value = SUCCEED;         /* Return value             */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
@@ -1626,28 +1652,28 @@ H5FD_core_lock(H5FD_t *_file, hbool_t rw)
      * descriptor, this is a no-op.
      */
     if (file->fd >= 0) {
-
         /* Set exclusive or shared lock based on rw status */
         lock_flags = rw ? LOCK_EX : LOCK_SH;
 
         /* Place a non-blocking lock on the file */
         if (HDflock(file->fd, lock_flags | LOCK_NB) < 0) {
-            if (ENOSYS == errno)
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL,
-                                "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING "
-                                "environment variable to override)")
+            if (file->ignore_disabled_file_locks && ENOSYS == errno) {
+                /* When errno is set to ENOSYS, the file system does not support
+                 * locking, so ignore it.
+                 */
+                errno = 0;
+            }
             else
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")
         } /* end if */
-
-    } /* end if */
+    }     /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_lock() */
+} /* end H5FD__core_lock() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD_core_unlock
+ * Function:    H5FD__core_unlock
  *
  * Purpose:     To remove the existing lock on the file
  *
@@ -1658,28 +1684,27 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_core_unlock(H5FD_t *_file)
+H5FD__core_unlock(H5FD_t *_file)
 {
     H5FD_core_t *file      = (H5FD_core_t *)_file; /* VFD file struct */
     herr_t       ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(file);
 
-    if (file->fd >= 0) {
-
+    if (file->fd >= 0)
         if (HDflock(file->fd, LOCK_UN) < 0) {
-            if (ENOSYS == errno)
-                HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL,
-                                "file locking disabled on this file system (use HDF5_USE_FILE_LOCKING "
-                                "environment variable to override)")
+            if (file->ignore_disabled_file_locks && ENOSYS == errno) {
+                /* When errno is set to ENOSYS, the file system does not support
+                 * locking, so ignore it.
+                 */
+                errno = 0;
+            }
             else
                 HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file")
-        } /* end if */
-
-    } /* end if */
+        }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_core_unlock() */
+} /* end H5FD__core_unlock() */

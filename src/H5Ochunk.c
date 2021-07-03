@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5Ochunk.c
  *			Jul 13 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Object header chunk routines.
  *
@@ -74,7 +74,6 @@ H5FL_DEFINE(H5O_chunk_proxy_t);
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -136,14 +135,13 @@ done:
 } /* end H5O__chunk_add() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_chunk_protect
+ * Function:    H5O__chunk_protect
  *
  * Purpose:     Protect an object header chunk for modifications
  *
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 17 2008
  *
  *-------------------------------------------------------------------------
@@ -217,7 +215,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 17 2008
  *
  *-------------------------------------------------------------------------
@@ -268,7 +265,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May  6 2010
  *
  *-------------------------------------------------------------------------
@@ -308,7 +304,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -348,7 +343,7 @@ H5O__chunk_update_idx(H5F_t *f, H5O_t *oh, unsigned idx)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNPROTECT, FAIL, "unable to release object header chunk")
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5O__chunk_update_idx() */
 
 /*-------------------------------------------------------------------------
@@ -359,7 +354,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jul 13 2008
  *
  *-------------------------------------------------------------------------
@@ -403,7 +397,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 13, 2008
  *
  *-------------------------------------------------------------------------

@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,27 +43,25 @@ typedef enum part_t {
 } part_t;
 
 typedef struct options_t {
-    hsize_t chunksize;          /* chunks are chunksize^2 planes	*/
-    hsize_t chunkplanes;        /* number of planes per chunk, default 1 */
-    hsize_t chunkdims[UC_RANK]; /* chunk dims is (chunkplan, chunksize, chunksize) */
-    hsize_t dims[UC_RANK];      /* dataset initial dims */
-    hsize_t max_dims[UC_RANK];  /* dataset max dims */
-    hsize_t nplanes;            /* number of planes to write, default proportional to chunksize */
-    char *  filename;           /* use case data filename		*/
-    part_t  launch;             /* launch writer, reader or both	*/
-    hbool_t use_swmr;           /* use swmr open (1) or not 		*/
-    int     iterations;         /* iterations, default 1		*/
+    hsize_t     chunksize;          /* chunks are chunksize^2 planes         */
+    hsize_t     chunkplanes;        /* number of planes per chunk, default 1 */
+    hsize_t     chunkdims[UC_RANK]; /* chunk dims is (chunkplan, chunksize, chunksize) */
+    hsize_t     dims[UC_RANK];      /* dataset initial dims */
+    hsize_t     max_dims[UC_RANK];  /* dataset max dims */
+    hsize_t     nplanes;            /* number of planes to write, default proportional to chunksize */
+    char *      filename;           /* use case data filename               */
+    part_t      launch;             /* launch writer, reader or both        */
+    hbool_t     use_swmr;           /* use swmr open (1) or not             */
+    int         iterations;         /* iterations, default 1                */
+    hid_t       fapl_id;            /* instance-specific FAPL ID            */
+    const char *progname;           /* Program name (used in usage and dset name) */
 } options_t;
 
-/* global variables declarations */
-extern options_t   UC_opts;    /* Use Case Options */
-extern const char *progname_g; /* Program name */
-
 /* prototype declarations */
-int  parse_option(int argc, char *const argv[]);
-int  setup_parameters(int argc, char *const argv[]);
-void show_parameters(void);
+int  parse_option(int argc, char *const argv[], options_t *opts);
+int  setup_parameters(int argc, char *const argv[], options_t *opts);
+void show_parameters(options_t *opts);
 void usage(const char *prog);
-int  create_uc_file(void);
-int  write_uc_file(hbool_t tosend, hid_t fid);
-int  read_uc_file(hbool_t towait);
+int  create_uc_file(options_t *opts);
+int  write_uc_file(hbool_t tosend, hid_t file_id, options_t *opts);
+int  read_uc_file(hbool_t towait, options_t *opts);

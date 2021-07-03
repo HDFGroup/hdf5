@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -16,6 +16,7 @@
  * Jacob Smith 2017-11-10
  */
 
+#include "h5tools.h"
 #include "h5tools_utils.h"
 #include "h5test.h"
 
@@ -67,6 +68,8 @@
  *             2017-10-24
  *
  *****************************************************************************/
+
+H5_GCC_DIAG_OFF("format")
 
 /*----------------------------------------------------------------------------
  *
@@ -964,7 +967,7 @@ error:
  *
  * Function:   test_set_configured_fapl()
  *
- * Purpose:    Verify `h5tools_set_configured_fapl()` with ROS3 VFD
+ * Purpose:    Verify `h5tools_get_fapl()` with ROS3 and HDFS VFDs
  *
  * Return:     0 if test passes
  *             1 if failure
@@ -1004,8 +1007,9 @@ test_set_configured_fapl(void)
      * TEST-LOCAL VARIABLES *
      ************************/
 
-    hid_t            fapl_id      = H5I_INVALID_HID;
-    other_fa_t       wrong_fa     = {0x432, 0xf82, 0x9093};
+    hid_t      fapl_id  = H5I_INVALID_HID;
+    other_fa_t wrong_fa = {0x432, 0xf82, 0x9093};
+#ifdef H5_HAVE_ROS3_VFD
     H5FD_ros3_fapl_t ros3_anon_fa = {1, FALSE, "", "", ""};
     H5FD_ros3_fapl_t ros3_auth_fa = {
         1,                            /* fapl version           */
@@ -1014,6 +1018,8 @@ test_set_configured_fapl(void)
         "12345677890abcdef",          /* simulate access key ID */
         "oiwnerwe9u0234nJw0-aoj+dsf", /* simulate secret key    */
     };
+#endif /* H5_HAVE_ROS3_VFD */
+#ifdef H5_HAVE_LIBHDFS
     H5FD_hdfs_fapl_t hdfs_fa = {
         1,    /* fapl version          */
         "",   /* namenode name         */
@@ -1022,6 +1028,7 @@ test_set_configured_fapl(void)
         "",   /* user name             */
         2048, /* stream buffer size    */
     };
+#endif                    /* H5_HAVE_LIBHDFS */
     unsigned n_cases = 7; /* number of common testcases */
     testcase cases[] = {
         {
@@ -1168,8 +1175,9 @@ test_set_configured_fapl(void)
     TESTING("programmatic fapl set");
 
     for (i = 0; i < n_cases; i++) {
-        int      result;
-        testcase C = cases[i];
+        h5tools_vfd_info_t vfd_info;
+        hid_t              result;
+        testcase           C = cases[i];
 
         fapl_id = H5I_INVALID_HID;
 
@@ -1193,8 +1201,13 @@ test_set_configured_fapl(void)
 #endif /* UTIL_TEST_DEBUG */
 
         /* test */
-        result = h5tools_set_configured_fapl(fapl_id, C.vfdname, C.conf_fa);
-        JSVERIFY(result, C.expected, C.message)
+        vfd_info.info = C.conf_fa;
+        vfd_info.name = C.vfdname;
+        result        = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info);
+        if (C.expected == 0)
+            JSVERIFY(result, H5I_INVALID_HID, C.message)
+        else
+            JSVERIFY_NOT(result, H5I_INVALID_HID, C.message)
 
 #if UTIL_TEST_DEBUG
         HDfprintf(stderr, "after test\n");
@@ -1241,6 +1254,7 @@ error:
 #undef UTIL_TEST_DEFAULT
 #undef UTIL_TEST_CREATE
 } /* test_set_configured_fapl */
+H5_GCC_DIAG_ON("format")
 
 /*----------------------------------------------------------------------------
  *

@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, January 23, 1998
  */
 
@@ -302,7 +302,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s2[i].c[1] || s1[i].c[2] != s2[i].c[2] || s1[i].c[3] != s2[i].c[3] ||
             s1[i].d != s2[i].d || s1[i].e != s2[i].e) {
             H5_FAILED();
-            puts("    Incorrect values read from the file");
+            HDputs("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -339,7 +339,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s3[i].c[1] || s1[i].c[2] != s3[i].c[2] || s1[i].c[3] != s3[i].c[3] ||
             s1[i].d != s3[i].d || s1[i].e != s3[i].e) {
             H5_FAILED();
-            puts("    Incorrect values read from the file");
+            HDputs("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -369,7 +369,7 @@ test_compound(char *filename, hid_t fapl)
     for (i = 0; i < NX * NY; i++) {
         if (s1[i].b != s4[i].b || s1[i].d != s4[i].d) {
             H5_FAILED();
-            puts("    Incorrect values read from the file");
+            HDputs("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -413,7 +413,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s5[i].c[1] || s1[i].c[2] != s5[i].c[2] || s1[i].c[3] != s5[i].c[3] ||
             s1[i].d != s5[i].d || s1[i].e != s5[i].e) {
             H5_FAILED();
-            puts("    Incorrect values read from the file");
+            HDputs("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -423,7 +423,7 @@ test_compound(char *filename, hid_t fapl)
         if (s5[i].pre != 1000 + 4 * i || s5[i].mid1 != 1001 + 4 * i || s5[i].mid2 != 1002 + 4 * i ||
             s5[i].post != 1003 + 4 * i) {
             H5_FAILED();
-            puts("    Memory values were clobbered");
+            HDputs("    Memory values were clobbered");
             goto error;
         }
     }
@@ -482,7 +482,7 @@ test_compound(char *filename, hid_t fapl)
             s1[i].c[1] != s6[i].c[1] || s1[i].c[2] != s6[i].c[2] || s1[i].c[3] != s6[i].c[3] ||
             s1[i].d != s6[i].d || s1[i].e != s6[i].e) {
             H5_FAILED();
-            puts("    Incorrect values read from the file");
+            HDputs("    Incorrect values read from the file");
             goto error;
         }
     }
@@ -492,7 +492,7 @@ test_compound(char *filename, hid_t fapl)
         if (s6[i].pre != 1000 + 4 * i || s6[i].mid1 != 1001 + 4 * i || s6[i].mid2 != 1002 + 4 * i ||
             s6[i].post != 1003 + 4 * i) {
             H5_FAILED();
-            puts("    Memory values were clobbered");
+            HDputs("    Memory values were clobbered");
             goto error;
         }
     }
@@ -561,7 +561,7 @@ test_compound(char *filename, hid_t fapl)
             s2[i].c[1] != s1[i].c[1] || s2[i].c[2] != s1[i].c[2] || s2[i].c[3] != s1[i].c[3] ||
             s2[i].d != s1[i].d || s2[i].e != s1[i].e) {
             H5_FAILED();
-            puts("    Incorrect values read from file");
+            HDputs("    Incorrect values read from file");
             goto error;
         }
     }
@@ -590,7 +590,7 @@ test_compound(char *filename, hid_t fapl)
 
     /* Read the dataset */
     s8 = (s1_t *)HDcalloc((size_t)(h_size[0] * h_size[1]), sizeof(s1_t));
-    assert(s8);
+    HDassert(s8);
     if (H5Dread(dataset, s1_tid, s8_m_sid, s8_f_sid, H5P_DEFAULT, s8) < 0) {
         goto error;
     }
@@ -604,7 +604,7 @@ test_compound(char *filename, hid_t fapl)
             if (ps8->a != ps1->a || ps8->b != ps1->b || ps8->c[0] != ps1->c[0] || ps8->c[1] != ps1->c[1] ||
                 ps8->c[2] != ps1->c[2] || ps8->c[3] != ps1->c[3] || ps8->d != ps1->d || ps8->e != ps1->e) {
                 H5_FAILED();
-                puts("    Incorrect values read from file");
+                HDputs("    Incorrect values read from file");
                 goto error;
             }
         }
@@ -643,7 +643,7 @@ test_compound(char *filename, hid_t fapl)
                     ps2->c[1] != ps1->c[1] || ps2->c[2] != ps1->c[2] || ps2->c[3] != ps1->c[3] ||
                     ps2->d != ps1->d || ps2->e != ps1->e) {
                     H5_FAILED();
-                    puts("    Memory values clobbered");
+                    HDputs("    Memory values clobbered");
                     goto error;
                 }
             }
@@ -652,7 +652,7 @@ test_compound(char *filename, hid_t fapl)
                     ps2->c[1] != (unsigned)(-1) || ps2->c[2] != (unsigned)(-1) ||
                     ps2->c[3] != (unsigned)(-1) || ps2->d != (unsigned)(-1) || ps2->e != (unsigned)(-1)) {
                     H5_FAILED();
-                    puts("    Incorrect values read from file");
+                    HDputs("    Incorrect values read from file");
                     goto error;
                 }
             }
@@ -691,7 +691,7 @@ test_compound(char *filename, hid_t fapl)
                     ps5->c[2] != ps1->c[2] || ps5->c[3] != ps1->c[3] || ps5->mid2 != (unsigned)(-1) ||
                     ps5->d != ps1->d || ps5->e != ps1->e || ps5->post != (unsigned)(-1)) {
                     H5_FAILED();
-                    puts("    Memory values clobbered");
+                    HDputs("    Memory values clobbered");
                     goto error;
                 }
             }
@@ -702,7 +702,7 @@ test_compound(char *filename, hid_t fapl)
                     ps5->c[3] != (unsigned)(-1) || ps5->mid2 != (unsigned)(-1) || ps5->d != (unsigned)(-1) ||
                     ps5->e != (unsigned)(-1) || ps5->post != (unsigned)(-1)) {
                     H5_FAILED();
-                    puts("    Incorrect values read from file");
+                    HDputs("    Incorrect values read from file");
                     goto error;
                 }
             }
@@ -723,7 +723,7 @@ test_compound(char *filename, hid_t fapl)
     h_size[0]   = 2 * NX / 3 - f_offset[0];
     h_size[1]   = 2 * NY / 3 - f_offset[1];
     s11         = (s4_t *)HDmalloc((size_t)h_size[0] * (size_t)h_size[1] * sizeof(s4_t));
-    assert(s11);
+    HDassert(s11);
 
     /* Initialize */
     for (i = 0; i < h_size[0] * h_size[1]; i++) {
@@ -751,7 +751,7 @@ test_compound(char *filename, hid_t fapl)
                 ps1->c[1] != 8 * (i * NY + j) + 3 || ps1->c[2] != 8 * (i * NY + j) + 4 ||
                 ps1->c[3] != 8 * (i * NY + j) + 5 || ps1->e != 8 * (i * NY + j) + 7) {
                 H5_FAILED();
-                puts("    Write clobbered values");
+                HDputs("    Write clobbered values");
                 goto error;
             }
 
@@ -759,14 +759,14 @@ test_compound(char *filename, hid_t fapl)
                 j < f_offset[1] + h_size[1]) {
                 if (ps1->b != (unsigned)(-1) || ps1->d != (unsigned)(-1)) {
                     H5_FAILED();
-                    puts("    Wrong values written or read");
+                    HDputs("    Wrong values written or read");
                     goto error;
                 }
             }
             else {
                 if (ps1->b != 8 * (i * NY + j) + 1 || ps1->d != 8 * (i * NY + j) + 6) {
                     H5_FAILED();
-                    puts("    Write clobbered values");
+                    HDputs("    Write clobbered values");
                     goto error;
                 }
             }
@@ -792,7 +792,7 @@ test_compound(char *filename, hid_t fapl)
     return 0;
 
 error:
-    puts("*** DATASET TESTS FAILED ***");
+    HDputs("*** DATASET TESTS FAILED ***");
 
     /* Release resources */
     if (s1)
@@ -1669,7 +1669,7 @@ test_hdf5_dst_subset(char *filename, hid_t fapl)
     return 0;
 
 error:
-    puts("*** DATASET TESTS FAILED ***");
+    HDputs("*** DATASET TESTS FAILED ***");
     return 1;
 }
 
@@ -1684,7 +1684,7 @@ error:
         for (_i = 0; _i < PACK_NMEMBS; _i++)                                                                 \
             HDprintf(" %d", order[_i]);                                                                      \
         HDprintf("\n    Inner compound order = %d, location = %d\n", sub_cmpd_order, order[sub_cmpd_order]); \
-        fflush(stdout);                                                                                      \
+        HDfflush(stdout);                                                                                    \
         goto error;                                                                                          \
     }
 
@@ -1719,7 +1719,7 @@ test_pack_ooo(void)
                                        * the compound */
     unsigned i, j;                    /* Indices */
 
-    HDsrand((unsigned)time(NULL));
+    HDsrand((unsigned)HDtime(NULL));
 
     /* Initialize "free_order" array to indicate that all slots in order are
      * free */
@@ -2233,7 +2233,7 @@ main(int argc, char *argv[])
 
     /* Turn off optimized compound converter? */
     if (argc > 1) {
-        if (argc > 2 || strcmp("--noopt", argv[1])) {
+        if (argc > 2 || HDstrcmp("--noopt", argv[1]) != 0) {
             HDfprintf(stderr, "usage: %s [--noopt]\n", argv[0]);
             HDexit(EXIT_FAILURE);
         }

@@ -16,7 +16,7 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-/*
+/**
  * Java representation of the HDFS VFD file access property list (fapl)
  * structure.
  *
@@ -26,15 +26,31 @@ import java.io.Serializable;
 public class H5FD_hdfs_fapl_t implements Serializable {
     private static final long serialVersionUID = 2072473407027648309L;
 
+    /** Version number of the H5FD_hdfs_fapl_t structure. */
     private int    version;
+    /** Name of "Name Node" to access as the HDFS server. */
     private String namenode_name;
+    /** Port number to use to connect with Name Node. */
     private int    namenode_port;
+    /** Username to use when accessing file. */
     private String user_name;
+    /** Path to the location of the Kerberos authentication cache. */
     private String kerberos_ticket_cache;
+    /** Size (in bytes) of the file read stream buffer. */
     private int    stream_buffer_size;
 
-    /*
+    /**
      * Create a fapl_t structure with the specified components.
+     * @param namenode_name
+     *     Name of "Name Node" to access as the HDFS server.
+     * @param namenode_port
+     *     Port number to use to connect with Name Node.
+     * @param user_name
+     *     Username to use when accessing file.
+     * @param kerberos_ticket_cache
+     *     Path to the location of the Kerberos authentication cache.
+     * @param stream_buffer_size
+     *     Size (in bytes) of the file read stream buffer.
      */
     public H5FD_hdfs_fapl_t(
             String namenode_name,

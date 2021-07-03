@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, November 10, 1998
  *
  * Purpose:	"None" selection dataspace I/O functions.
@@ -28,7 +28,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5Eprivate.h"  /* Error handling			    */
+#include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Iprivate.h"  /* ID Functions                             */
 #include "H5Spkg.h"      /* Dataspace functions                      */
 #include "H5VMprivate.h" /* Vector functions                         */
@@ -132,13 +132,13 @@ static const H5S_sel_iter_class_t H5S_sel_iter_none[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_iter_init
+ * Function:    H5S__none_iter_init
  *
- * Purpose:	Initializes iteration information for "none" selection.
+ * Purpose:     Initializes iteration information for "none" selection.
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
@@ -159,14 +159,14 @@ H5S__none_iter_init(const H5S_t H5_ATTR_UNUSED *space, H5S_sel_iter_t *iter)
 } /* end H5S__none_iter_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_iter_coords
+ * Function:    H5S__none_iter_coords
  *
- * Purpose:	Retrieve the current coordinates of iterator for current
+ * Purpose:     Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, April 22, 2003
  *
  *-------------------------------------------------------------------------
@@ -184,14 +184,14 @@ H5S__none_iter_coords(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR
 } /* end H5S__none_iter_coords() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_iter_block
+ * Function:    H5S__none_iter_block
  *
- * Purpose:	Retrieve the current block of iterator for current
+ * Purpose:     Retrieve the current block of iterator for current
  *              selection
  *
- * Return:	Non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, June 2, 2003
  *
  *-------------------------------------------------------------------------
@@ -211,13 +211,13 @@ H5S__none_iter_block(const H5S_sel_iter_t H5_ATTR_UNUSED *iter, hsize_t H5_ATTR_
 } /* end H5S__none_iter_block() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_iter_nelmts
+ * Function:    H5S__none_iter_nelmts
  *
- * Purpose:	Return number of elements left to process in iterator
+ * Purpose:     Return number of elements left to process in iterator
  *
- * Return:	Non-negative number of elements on success, zero on failure
+ * Return:      Non-negative number of elements on success, zero on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
@@ -621,6 +621,9 @@ H5S__none_deserialize(H5S_t **space, const uint8_t **p)
     /* Decode version */
     UINT32DECODE(*p, version);
 
+    if (version < H5S_NONE_VERSION_1 || version > H5S_NONE_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for none selection")
+
     /* Skip over the remainder of the header */
     *p += 8;
 
@@ -677,7 +680,7 @@ H5S__none_bounds(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUSED *star
     HDassert(end);
 
     FUNC_LEAVE_NOAPI(FAIL)
-} /* end H5Sget_none_bounds() */
+} /* end H5S_none_bounds() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -949,11 +952,11 @@ H5S__none_adjust_s(H5S_t H5_ATTR_UNUSED *space, const hssize_t H5_ATTR_UNUSED *o
 } /* end H5S__none_adjust_s() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_project_scalar
+ * Function:    H5S__none_project_scalar
  *
- * Purpose:	Projects a 'none' selection into a scalar dataspace
+ * Purpose:     Projects a 'none' selection into a scalar dataspace
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
  * Programmer:	Quincey Koziol
  *              Sunday, July 18, 2010
@@ -973,14 +976,14 @@ H5S__none_project_scalar(const H5S_t H5_ATTR_UNUSED *space, hsize_t H5_ATTR_UNUS
 } /* end H5S__none_project_scalar() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5S__none_project_simple
+ * Function:    H5S__none_project_simple
  *
- * Purpose:	Projects an 'none' selection onto/into a simple dataspace
+ * Purpose:     Projects an 'none' selection onto/into a simple dataspace
  *              of a different rank
  *
- * Return:	Non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Sunday, July 18, 2010
  *
  *-------------------------------------------------------------------------

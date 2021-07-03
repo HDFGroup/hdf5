@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -138,11 +138,11 @@ H5Dcreate2(hid_t loc_id, const char *name, hid_t type_id, hid_t space_id, hid_t 
     /* Create the dataset */
     if (NULL == (dset = H5VL_dataset_create(vol_obj, &loc_params, name, lcpl_id, type_id, space_id, dcpl_id,
                                             dapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, H5I_INVALID_HID, "unable to create dataset")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, H5I_INVALID_HID, "unable to create dataset")
 
-    /* Get an atom for the dataset */
+    /* Get an ID for the dataset */
     if ((ret_value = H5VL_register(H5I_DATASET, dset, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize dataset handle")
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register dataset")
 
 done:
     if (H5I_INVALID_HID == ret_value)
@@ -187,9 +187,9 @@ done:
 hid_t
 H5Dcreate_anon(hid_t loc_id, hid_t type_id, hid_t space_id, hid_t dcpl_id, hid_t dapl_id)
 {
-    void *            dset    = NULL; /* dset object from VOL connector */
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
-    H5VL_loc_params_t loc_params;
+    void *            dset    = NULL;              /* dset object from VOL connector */
+    H5VL_object_t *   vol_obj = NULL;              /* Object for loc_id */
+    H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -303,7 +303,7 @@ done:
  *              it. It is illegal to subsequently use that same dataset
  *              ID in calls to other dataset functions.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -369,7 +369,7 @@ done:
  *
  * Purpose:     Returns the status of dataspace allocation.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -750,7 +750,7 @@ done:
  * Purpose:     Modifies the dimensions of a dataset.
  *              Can change to a smaller dimension.
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -787,7 +787,7 @@ done:
  *
  * Purpose:     Flushes all buffers associated with a dataset.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -825,7 +825,7 @@ done:
  *
  * Purpose:     Refreshes all buffers associated with a dataset.
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  *-------------------------------------------------------------------------
  */
@@ -865,7 +865,7 @@ done:
  *              For virtual:
  *                  No conversion
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Non-negative on success, negative on failure
  *
  * Programmer:  Vailin Choi
  *              Feb 2015
@@ -942,7 +942,7 @@ done:
  *              Intended for use with the H5D(O)read_chunk API call so
  *              the caller can construct an appropriate buffer.
  *
- * Return:      SUCCEED/FAIL
+ * Return:	Non-negative on success, negative on failure
  *
  * Programmer:  Matthew Strong (GE Healthcare)
  *              20 October 2016

@@ -15,13 +15,19 @@ usage: h5dump [OPTIONS] files
      --s3-cred=<cred>     Supply S3 authentication information to "ros3" vfd.
                           <cred> :: "(<aws-region>,<access-id>,<access-key>)"
                           If absent or <cred> -> "(,,)", no authentication.
-                          Has no effect is filedriver is not `ros3'.
+                          Has no effect if filedriver is not "ros3".
      --hdfs-attrs=<attrs> Supply configuration information for HDFS file access.
                           For use with "--filedriver=hdfs"
                           <attrs> :: (<namenode name>,<namenode port>,
                                       <kerberos cache path>,<username>,
                                       <buffer size>)
                           Any absent attribute will use a default value.
+     --vol-value          Value (ID) of the VOL connector to use for opening the
+                          HDF5 file specified
+     --vol-name           Name of the VOL connector to use for opening the
+                          HDF5 file specified
+     --vol-info           VOL-specific info to pass to the VOL connector used for
+                          opening the HDF5 file specified
 --------------- Object Options ---------------
      -a P, --attribute=P  Print the specified attribute
                           If an attribute name contains a slash (/), escape the
@@ -67,7 +73,7 @@ usage: h5dump [OPTIONS] files
      -D U, --xml-dtd=U    Use the DTD or schema at U
      -X S, --xml-ns=S     (XML Schema) Use qualified names n the XML
                           ":": no namespace, default: "hdf5:"
-                          E.g., to dump a file called `-f', use h5dump -- -f
+                          E.g., to dump a file called "-f", use h5dump -- -f
 
 --------------- Subsetting Options ---------------
  Subsetting is available by using the following options with a dataset

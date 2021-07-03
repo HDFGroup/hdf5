@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,7 +14,7 @@
   creates a large number of attributes, groups, and datasets by specifying
   -a, -g, -d options respectively. Using "-h" option to see details.
 
-  Programmer:  Peter Cao <xcao@hdfgroup.org>, Jan. 2013
+  Programmer:  Peter Cao, Jan. 2013
  ****************************************************************************/
 
 #include "hdf5.h"
@@ -128,7 +128,7 @@ main(int argc, char *argv[])
 
   Return:  Non-negative on success/Negative on failure
 
-  Programmer:  Peter Cao <xcao@hdfgroup.org>, Jan. 2013
+  Programmer:  Peter Cao, Jan. 2013
  ****************************************************************************/
 herr_t
 create_perf_test_file(const char *fname, int ngrps, int ndsets, int nattrs, hsize_t nrows, hsize_t dim0,

@@ -7,13 +7,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5DataSpace_H
-#define __H5DataSpace_H
+#ifndef H5DataSpace_H
+#define H5DataSpace_H
 
 namespace H5 {
 
@@ -43,7 +43,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
     DataSpace &operator=(const DataSpace &rhs);
 
     // Closes this dataspace.
-    virtual void close();
+    virtual void close() H5_OVERRIDE;
 
     // Makes copy of an existing dataspace.
     void copy(const DataSpace &like_space);
@@ -115,13 +115,13 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const H5_OVERRIDE
     {
         return ("DataSpace");
     }
 
     // Gets the dataspace id.
-    virtual hid_t getId() const;
+    virtual hid_t getId() const H5_OVERRIDE;
 
     // Deletes the global constant
     static void deleteConstants();
@@ -133,7 +133,7 @@ class H5_DLLCPP DataSpace : public IdComponent {
 
   protected:
     // Sets the dataspace id.
-    virtual void p_setId(const hid_t new_id);
+    virtual void p_setId(const hid_t new_id) H5_OVERRIDE;
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
@@ -155,4 +155,4 @@ class H5_DLLCPP DataSpace : public IdComponent {
 }; // end of DataSpace
 } // namespace H5
 
-#endif // __H5DataSpace_H
+#endif // H5DataSpace_H

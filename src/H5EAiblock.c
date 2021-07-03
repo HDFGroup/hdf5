@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5EAiblock.c
  *			Sep  9 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Index block routines for extensible arrays.
  *
@@ -87,7 +87,6 @@ H5FL_SEQ_DEFINE_STATIC(haddr_t);
  * Return:	Non-NULL pointer to index block on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -116,11 +115,6 @@ BEGIN_FUNC(PKG, ERR, H5EA_iblock_t *, NULL, NULL, H5EA__iblock_alloc(H5EA_hdr_t 
     iblock->nsblks      = H5EA_SBLK_FIRST_IDX(hdr->cparam.sup_blk_min_data_ptrs);
     iblock->ndblk_addrs = 2 * ((size_t)hdr->cparam.sup_blk_min_data_ptrs - 1);
     iblock->nsblk_addrs = hdr->nsblks - iblock->nsblks;
-#ifdef QAK
-    HDfprintf(stderr, "%s: iblock->nsblks = %u\n", FUNC, iblock->nsblks);
-    HDfprintf(stderr, "%s: iblock->ndblk_addrs = %Zu\n", FUNC, iblock->ndblk_addrs);
-    HDfprintf(stderr, "%s: iblock->nsblk_addrs = %Zu\n", FUNC, iblock->nsblk_addrs);
-#endif /* QAK */
 
     /* Allocate buffer for elements in index block */
     if (hdr->cparam.idx_blk_elmts > 0)
@@ -157,7 +151,6 @@ END_FUNC(PKG) /* end H5EA__iblock_alloc() */
  * Return:	Valid file address on success/HADDR_UNDEF on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -170,10 +163,6 @@ BEGIN_FUNC(PKG, ERR, haddr_t, HADDR_UNDEF, HADDR_UNDEF,
     haddr_t        iblock_addr;      /* Extensible array index block address */
     hbool_t        inserted = FALSE; /* Whether the header was inserted into cache */
 
-#ifdef QAK
-    HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
-
     /* Sanity check */
     HDassert(hdr);
     HDassert(stats_changed);
@@ -184,9 +173,6 @@ BEGIN_FUNC(PKG, ERR, haddr_t, HADDR_UNDEF, HADDR_UNDEF,
 
     /* Set size of index block on disk */
     iblock->size = H5EA_IBLOCK_SIZE(iblock);
-#ifdef QAK
-    HDfprintf(stderr, "%s: iblock->size = %Zu\n", FUNC, iblock->size);
-#endif /* QAK */
 
     /* Allocate space for the index block on disk */
     if (HADDR_UNDEF == (iblock_addr = H5MF_alloc(hdr->f, H5FD_MEM_EARRAY_IBLOCK, (hsize_t)iblock->size)))
@@ -271,7 +257,6 @@ END_FUNC(PKG) /* end H5EA__iblock_create() */
  * Return:	Non-NULL pointer to index block on success/NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -280,10 +265,6 @@ BEGIN_FUNC(PKG, ERR, H5EA_iblock_t *, NULL, NULL, H5EA__iblock_protect(H5EA_hdr_
 
     /* Local variables */
     H5EA_iblock_t *iblock = NULL; /* Pointer to index block */
-
-#ifdef QAK
-    HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(hdr);
@@ -328,7 +309,6 @@ END_FUNC(PKG) /* end H5EA__iblock_protect() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -336,11 +316,7 @@ END_FUNC(PKG) /* end H5EA__iblock_protect() */
 BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
            H5EA__iblock_unprotect(H5EA_iblock_t *iblock, unsigned cache_flags))
 
-/* Local variables */
-
-#ifdef QAK
-    HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
+    /* Local variables */
 
     /* Sanity check */
     HDassert(iblock);
@@ -362,7 +338,6 @@ END_FUNC(PKG) /* end H5EA__iblock_unprotect() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -371,10 +346,6 @@ BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL, H5EA__iblock_delete(H5EA_hdr_t *hdr)
 
     /* Local variables */
     H5EA_iblock_t *iblock = NULL; /* Pointer to index block */
-
-#ifdef QAK
-    HDfprintf(stderr, "%s: Called\n", FUNC);
-#endif /* QAK */
 
     /* Sanity check */
     HDassert(hdr);
@@ -447,7 +418,6 @@ END_FUNC(PKG) /* end H5EA__iblock_delete() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
  *-------------------------------------------------------------------------

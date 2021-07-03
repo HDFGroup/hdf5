@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -73,12 +73,12 @@ uint64_t   swap_uint64(uint64_t val);
 int
 main(int argc, char *argv[])
 {
-    struct Options opt;
-    int            outfile_named = FALSE;
-    int            token;
-    int            i;
-    int            state = 0;
-    struct Input * in    = NULL;
+    struct Options *opt;
+    int             outfile_named = FALSE;
+    int             token;
+    int             i;
+    int             state = 0;
+    struct Input *  in    = NULL;
 
     const char *err1  = "Invalid number of arguments:  %d.\n";
     const char *err2  = "Error in state table.\n";
@@ -100,8 +100,8 @@ main(int argc, char *argv[])
     (void)HDsetvbuf(stderr, (char *)NULL, _IOLBF, 0);
     (void)HDsetvbuf(stdout, (char *)NULL, _IOLBF, 0);
 
-    /* Initialize the file structure to 0 */
-    HDmemset(&opt, 0, sizeof(struct Options));
+    if ((opt = (struct Options *)HDcalloc(1, sizeof(struct Options))) == NULL)
+        goto err;
 
     if (argv[1] && (HDstrcmp("-V", argv[1]) == 0)) {
         print_version(PROGRAMNAME);
@@ -131,12 +131,12 @@ main(int argc, char *argv[])
         switch (state) {
 
             case 1: /* counting input files */
-                if (opt.fcount < 29) {
-                    (void)HDstrcpy(opt.infiles[opt.fcount].datafile, argv[i]);
-                    in                             = &(opt.infiles[opt.fcount].in);
-                    opt.infiles[opt.fcount].config = 0;
-                    setDefaultValues(in, opt.fcount);
-                    opt.fcount++;
+                if (opt->fcount < 29) {
+                    (void)HDstrcpy(opt->infiles[opt->fcount].datafile, argv[i]);
+                    in                               = &(opt->infiles[opt->fcount].in);
+                    opt->infiles[opt->fcount].config = 0;
+                    setDefaultValues(in, opt->fcount);
+                    opt->fcount++;
                 }
                 else {
                     (void)HDfprintf(stderr, err9, argv[i]);
@@ -149,8 +149,8 @@ main(int argc, char *argv[])
                 break;
 
             case 3: /* get configfile name */
-                (void)HDstrcpy(opt.infiles[opt.fcount - 1].configfile, argv[i]);
-                opt.infiles[opt.fcount - 1].config = 1;
+                (void)HDstrcpy(opt->infiles[opt->fcount - 1].configfile, argv[i]);
+                opt->infiles[opt->fcount - 1].config = 1;
                 break;
 
             case 4: /* -o found; look for outfile */
@@ -161,7 +161,7 @@ main(int argc, char *argv[])
                     (void)HDfprintf(stderr, err10, argv[i]);
                     goto err;
                 }
-                (void)HDstrcpy(opt.outfile, argv[i]);
+                (void)HDstrcpy(opt->outfile, argv[i]);
                 outfile_named = TRUE;
                 break;
 
@@ -233,11 +233,11 @@ main(int argc, char *argv[])
         goto err;
     }
 
-    if (process(&opt) == -1)
+    if (process(opt) == -1)
         goto err;
 
-    for (i = 0; i < opt.fcount; i++) {
-        in = &(opt.infiles[i].in);
+    for (i = 0; i < opt->fcount; i++) {
+        in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
             HDfree(in->sizeOfDimension);
         if (in->sizeOfChunk)
@@ -249,12 +249,13 @@ main(int argc, char *argv[])
         if (in->data)
             HDfree(in->data);
     }
+    HDfree(opt);
 
-    return (EXIT_SUCCESS);
+    return EXIT_SUCCESS;
 err:
     (void)HDfprintf(stderr, "%s", err4);
-    for (i = 0; i < opt.fcount; i++) {
-        in = &(opt.infiles[i].in);
+    for (i = 0; i < opt->fcount; i++) {
+        in = &(opt->infiles[i].in);
         if (in->sizeOfDimension)
             HDfree(in->sizeOfDimension);
         if (in->sizeOfChunk)
@@ -266,7 +267,9 @@ err:
         if (in->data)
             HDfree(in->data);
     }
-    return (EXIT_FAILURE);
+    HDfree(opt);
+
+    return EXIT_FAILURE;
 }
 
 static int
@@ -943,7 +946,7 @@ readFloatData(FILE *strm, struct Input *in)
  *
  * Return: 0, ok, -1 no
  *
- * Programmer: Pedro Vicente, pvn@hdfgroup.org
+ * Programmer: Pedro Vicente
  *
  * Date: July, 26, 2007
  *
@@ -1567,7 +1570,7 @@ processConfigurationFile(char *infile, struct Input *in)
 #ifdef H5DEBUGIMPORT
                             HDprintf("h5dump DATATYPE STRING STRSIZE %s found\n", temp);
 #endif
-                            if (HDstrcmp("H5T_VARIABLE;", temp)) {
+                            if (HDstrcmp("H5T_VARIABLE;", temp) != 0) {
                                 char *more = temp;
                                 ival       = (int)HDstrtol(more, &more, 10);
                                 if (getInputSize(in, ival) == -1) {
@@ -1893,7 +1896,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         HDprintf("h5dump STORAGE_LAYOUT CHUNKED SIZE %d found\n", ival);
 #endif
                     }
-                    while (HDstrcmp("}", temp)) {
+                    while (HDstrcmp("}", temp) != 0) {
                         if (fscanf(strm, "%254s", temp) != 1) { /* end bracket */
                             (void)HDfprintf(stderr, "%s", err18);
                             goto error;
@@ -2533,7 +2536,7 @@ parsePathInfo(struct path_info *path, char *temp)
 
     token = HDstrtok(temp, delimiter);
     if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
-        (void)HDfprintf(stderr, err1);
+        (void)HDfprintf(stderr, "%s", err1);
         return (-1);
     }
     HDstrcpy(path->group[i++], token);
@@ -2543,7 +2546,7 @@ parsePathInfo(struct path_info *path, char *temp)
         if (token == NULL)
             break;
         if (HDstrlen(token) >= MAX_PATH_NAME_LENGTH) {
-            (void)HDfprintf(stderr, err1);
+            (void)HDfprintf(stderr, "%s", err1);
             return (-1);
         }
         HDstrcpy(path->group[i++], token);
@@ -3776,8 +3779,8 @@ getExternalFilename(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    in->externFilename = (char *)HDmalloc((size_t)(HDstrlen(temp)) * sizeof(char));
-    (void)HDstrcpy(in->externFilename, temp);
+    in->externFilename = (char *)HDmalloc((size_t)(HDstrlen(temp) + 1) * sizeof(char));
+    (void)HDstrncpy(in->externFilename, temp, HDstrlen(temp) + 1);
     return (0);
 }
 
@@ -5094,7 +5097,6 @@ help(char *name)
     (void)HDfprintf(stdout, "\t  data-set will be compressed using GZIP and a compression level \n");
     (void)HDfprintf(stdout, "\t  of 7.\n");
     (void)HDfprintf(stdout, "\t  The dataset will be stored at \"/Second-set\"\n\n");
-    return;
 }
 
 void
@@ -5104,5 +5106,4 @@ usage(char *name)
     (void)HDfprintf(stdout, "\t%s <infile> -c[onfig] <configfile> \
   [<infile> -c[config] <configfile>...] -o[utfile] <outfile> \n\n",
                     name);
-    return;
 }

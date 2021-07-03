@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Wednesday, May 13, 1998
  *
  * Purpose:    Repartitions a file family.  This program can be used to
@@ -64,10 +64,10 @@ usage(const char *progname)
                       "(windows or sec2)\n");
     HDfprintf(stderr, "   SRC    The name of the source file\n");
     HDfprintf(stderr, "   DST    The name of the destination files\n");
-    HDfprintf(stderr, "Sizes may be suffixed with `g' for GB, `m' for MB or "
-                      "`k' for kB.\n");
+    HDfprintf(stderr, "Sizes may be suffixed with 'g' for GB, 'm' for MB or "
+                      "'k' for kB.\n");
     HDfprintf(stderr, "File family names include an integer printf "
-                      "format such as `%%d'\n");
+                      "format such as '%%d'\n");
     HDexit(EXIT_FAILURE);
 }
 
@@ -97,7 +97,7 @@ static off_t
 get_size(const char *progname, int *argno, int argc, char *argv[])
 {
     off_t retval = -1;
-    char *suffix;
+    char *suffix = NULL;
 
     if (isdigit((int)(argv[*argno][2]))) {
         retval = HDstrtol(argv[*argno] + 2, &suffix, 10);

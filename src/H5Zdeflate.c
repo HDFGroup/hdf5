@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, August 27, 1999
  */
 
@@ -33,25 +33,25 @@
 #endif
 
 /* Local function prototypes */
-static size_t H5Z_filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                                 size_t *buf_size, void **buf);
+static size_t H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+                                  size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DEFLATE[1] = {{
-    H5Z_CLASS_T_VERS,   /* H5Z_class_t version */
-    H5Z_FILTER_DEFLATE, /* Filter id number		*/
-    1,                  /* encoder_present flag (set to true) */
-    1,                  /* decoder_present flag (set to true) */
-    "deflate",          /* Filter name for debugging	*/
-    NULL,               /* The "can apply" callback     */
-    NULL,               /* The "set local" callback     */
-    H5Z_filter_deflate, /* The actual filter function	*/
+    H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
+    H5Z_FILTER_DEFLATE,  /* Filter id number		*/
+    1,                   /* encoder_present flag (set to true) */
+    1,                   /* decoder_present flag (set to true) */
+    "deflate",           /* Filter name for debugging	*/
+    NULL,                /* The "can apply" callback     */
+    NULL,                /* The "set local" callback     */
+    H5Z__filter_deflate, /* The actual filter function	*/
 }};
 
-#define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * (double)1.001f) + 12)
+#define H5Z_DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * 1.001) + 12)
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_deflate
+ * Function:	H5Z__filter_deflate
  *
  * Purpose:	Implement an I/O filter around the 'deflate' algorithm in
  *              libz
@@ -62,19 +62,17 @@ const H5Z_class2_t H5Z_DEFLATE[1] = {{
  * Programmer:	Robb Matzke
  *              Thursday, April 16, 1998
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                   size_t *buf_size, void **buf)
+H5Z__filter_deflate(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+                    size_t *buf_size, void **buf)
 {
     void * outbuf = NULL; /* Pointer to new buffer */
     int    status;        /* Status from zlib operation */
     size_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(*buf_size > 0);

@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -26,7 +26,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! Function: H5DSset_scale_f
 !
-! Purpose: Convert dataset dsid to a dimension scale, with optional name, dimname. 
+! Purpose: Convert dataset dsid to a dimension scale, with optional name, dimname.
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -93,28 +93,28 @@ CONTAINS
     IMPLICIT NONE
 
     INTEGER(hid_t), INTENT(in) :: did     ! the dataset
-    INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached 
+    INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached
     INTEGER       , INTENT(in) :: idx     ! the dimension of did that dsid is associated with.
     INTEGER                    :: errcode ! error code
     INTEGER                    :: c_idx
-    
+
     INTERFACE
        INTEGER FUNCTION  H5DSattach_scale_c(did, dsid, idx) &
-            BIND(C,NAME='h5dsattach_scale_c') 
+            BIND(C,NAME='h5dsattach_scale_c')
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(hid_t), INTENT(in) :: did     ! the dataset
-         INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached 
+         INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be attached
          INTEGER       , INTENT(in) :: idx     ! the dimension of did that dsid is associated with.
        END FUNCTION H5DSattach_scale_c
     END INTERFACE
 
-    c_idx = idx -1 ! account for C-dimensions starting at 0 
-    
+    c_idx = idx -1 ! account for C-dimensions starting at 0
+
     errcode = H5DSattach_scale_c( did, dsid, c_idx)
-    
+
   END SUBROUTINE H5DSattach_scale_f
-  
+
 !-------------------------------------------------------------------------
 ! Function: H5DSdetach_scale_f
 !
@@ -133,37 +133,37 @@ CONTAINS
 !-------------------------------------------------------------------------
 
   SUBROUTINE H5DSdetach_scale_f( did, dsid, idx, errcode)
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t), INTENT(in) :: did     ! the dataset
-    INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached 
+    INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached
     INTEGER       , INTENT(in) :: idx     ! the dimension of did to detach
     INTEGER                    :: errcode ! error code
     INTEGER                    :: c_idx
-    
+
     INTERFACE
        INTEGER FUNCTION  H5DSdetach_scale_c(did, dsid, idx) &
             BIND(C,NAME='h5dsdetach_scale_c')
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(hid_t), INTENT(in) :: did     ! the dataset
-         INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached 
+         INTEGER(hid_t), INTENT(in) :: dsid    ! the scale to be detached
          INTEGER       , INTENT(in) :: idx     ! the dimension of did to detach
        END FUNCTION H5DSdetach_scale_c
     END INTERFACE
 
-    c_idx = idx - 1 ! account for C-dimensions starting at 0 
+    c_idx = idx - 1 ! account for C-dimensions starting at 0
 
     errcode = H5DSdetach_scale_c( did, dsid, c_idx)
-    
+
   END SUBROUTINE H5DSdetach_scale_f
 
 
 !-------------------------------------------------------------------------
 ! Function: H5DSis_attached_f
 !
-! Purpose: Report if dimension scale dsid is currently attached to dimension idx of dataset did. 
+! Purpose: Report if dimension scale dsid is currently attached to dimension idx of dataset did.
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -178,32 +178,32 @@ CONTAINS
 !-------------------------------------------------------------------------
 
   SUBROUTINE H5DSis_attached_f( did, dsid, idx, is_attached, errcode)
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t), INTENT(in)  :: did         ! the dataset
     INTEGER(hid_t), INTENT(in)  :: dsid        ! the scale to be attached
     INTEGER       , INTENT(in)  :: idx         ! the dimension of did that dsid is associated with
-    LOGICAL       , INTENT(out) :: is_attached ! logical: dimension scale dsid is currently attached to 
+    LOGICAL       , INTENT(out) :: is_attached ! logical: dimension scale dsid is currently attached to
                                                ! dimension idx of dataset did
     INTEGER                     :: errcode     ! error code
     INTEGER                     :: c_is_attached
     INTEGER                     :: c_idx
-    
+
     INTERFACE
        INTEGER FUNCTION H5DSis_attached_c(did, dsid, idx, c_is_attached) &
             BIND(C,NAME='h5dsis_attached_c')
          IMPORT :: HID_T
          IMPLICIT NONE
          INTEGER(hid_t), INTENT(in)  :: did         ! the dataset
-         INTEGER(hid_t), INTENT(in)  :: dsid        ! the scale to be detached 
+         INTEGER(hid_t), INTENT(in)  :: dsid        ! the scale to be detached
          INTEGER       , INTENT(in)  :: idx         ! the dimension of did to detach
-         INTEGER       , INTENT(out) :: c_is_attached ! dimension scale dsid is currently attached to 
+         INTEGER       , INTENT(out) :: c_is_attached ! dimension scale dsid is currently attached to
        END FUNCTION H5DSis_attached_c
     END INTERFACE
 
-    c_idx = idx - 1 ! account for C-dimensions starting at 0 
-    
+    c_idx = idx - 1 ! account for C-dimensions starting at 0
+
     errcode = H5DSis_attached_c(did, dsid, c_idx, c_is_attached)
 
     is_attached = .FALSE. ! default
@@ -212,7 +212,7 @@ CONTAINS
     ELSE IF(errcode.LT.0)THEN
        errcode = -1
     ENDIF
-    
+
   END SUBROUTINE H5DSis_attached_f
 
 !
@@ -222,7 +222,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! Function: H5DSis_scale_f
 !
-! Purpose: Determines whether dset is a Dimension Scale. 
+! Purpose: Determines whether dset is a Dimension Scale.
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -237,15 +237,15 @@ CONTAINS
 !-------------------------------------------------------------------------
 
   SUBROUTINE H5DSis_scale_f( did, is_scale, errcode)
-    
+
     IMPLICIT NONE
 
     INTEGER(hid_t), INTENT(in)  :: did         ! the data set to query
-    LOGICAL       , INTENT(out) :: is_scale    ! logical:  
+    LOGICAL       , INTENT(out) :: is_scale    ! logical:
                                                ! .TRUE. if did is a Dimension Scale
     INTEGER                     :: errcode     ! error code
     INTEGER                     :: c_is_scale
-    
+
     INTERFACE
        INTEGER FUNCTION H5DSis_scale_c(did,c_is_scale) &
             BIND(C,NAME='h5dsis_scale_c')
@@ -255,7 +255,7 @@ CONTAINS
          INTEGER, INTENT(out) :: c_is_scale
        END FUNCTION H5DSis_scale_c
     END INTERFACE
-    
+
     errcode = H5DSis_scale_c(did, c_is_scale)
 
     is_scale = .FALSE. ! default
@@ -264,7 +264,7 @@ CONTAINS
     ELSE IF(errcode.LT.0)THEN
        errcode = -1
     ENDIF
-    
+
   END SUBROUTINE H5DSis_scale_f
 
 !-------------------------------------------------------------------------
@@ -319,7 +319,7 @@ CONTAINS
 !-------------------------------------------------------------------------
 ! Function: H5DSget_label_f
 !
-! Purpose: Read the label for dimension idx of did into buffer label. 
+! Purpose: Read the label for dimension idx of did into buffer label.
 !
 ! Return: Success: 0, Failure: -1
 !
@@ -431,7 +431,7 @@ CONTAINS
     INTEGER       , INTENT(INOUT) :: num_scales ! the number of Dimension Scales associated with did
     INTEGER                     :: errcode      ! error code
     INTEGER                     :: c_idx
-    
+
     INTERFACE
        INTEGER FUNCTION H5DSget_num_scales_c(did, idx, num_scales) &
             BIND(C,NAME='h5dsget_num_scales_c')
@@ -442,10 +442,10 @@ CONTAINS
          INTEGER       , INTENT(INOUT) :: num_scales ! the number of Dimension Scales associated with did
        END FUNCTION H5DSget_num_scales_c
     END INTERFACE
-    
+
     c_idx = idx - 1
     errcode = H5DSget_num_scales_c(did, c_idx, num_scales)
-    
+
   END SUBROUTINE H5DSget_num_scales_f
 
 END MODULE h5ds

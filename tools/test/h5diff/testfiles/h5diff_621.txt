@@ -18,14 +18,25 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
          Verbose mode with level. Print differences and list of objects.
          Level of detail depends on value of N:
           0 : Identical to '-v' or '--verbose'.
-          1 : All level 0 information plus one-line attribute
-              status summary.
-          2 : All level 1 information plus extended attribute
-              status report.
+          1 : All level 0 information plus one-line attribute status summary.
+          2 : All level 1 information plus extended attribute status report.
+          3 : All level 2 information plus file names.
    -q, --quiet
          Quiet mode. Do not produce output.
    --enable-error-stack
                    Prints messages from the HDF5 error stack as they occur.
+   --vol-value-1           Value (ID) of the VOL connector to use for opening the
+                           first HDF5 file specified
+   --vol-name-1            Name of the VOL connector to use for opening the first
+                           HDF5 file specified
+   --vol-info-1            VOL-specific info to pass to the VOL connector used for
+                           opening the first HDF5 file specified
+   --vol-value-2           Value (ID) of the VOL connector to use for opening the
+                           second HDF5 file specified
+   --vol-name-2            Name of the VOL connector to use for opening the second
+                           HDF5 file specified
+   --vol-info-2            VOL-specific info to pass to the VOL connector used for
+                           opening the second HDF5 file specified
    --follow-symlinks
          Follow symbolic links (soft links and external links and compare the)
          links' target objects.
@@ -98,6 +109,14 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
          excluded.
          This option can be used repeatedly to exclude multiple paths.
 
+   --exclude-attribute "path/to/object/with/attribute"
+         Exclude attributes on the specified path to an object when comparing files or groups.
+
+         If there are multiple paths to an object, only the specified path(s)
+         will be excluded; the comparison will include any path not explicitly
+         excluded.
+         This option can be used repeatedly to exclude multiple paths.
+
  Modes of output:
   Default mode: print the number of differences found and where they occured
   -r Report mode: print the above plus the differences
@@ -124,6 +143,18 @@ usage: h5diff [OPTIONS] file1 file2 [obj1[ obj2]]
       The paths to the target objects are compared.
       (The option --follow-symlinks overrides the default behavior when
        symbolic links are compared.).
+
+ Subsetting options:
+  Subsetting is available by using the fcompact form of subsetting, as follows:
+    obj1 /foo/mydataset[START;STRIDE;COUNT;BLOCK]
+  It is not required to use all parameters, but until the last parameter value used,
+  all of the semicolons (;) are required, even when a parameter value is not specified. Example:
+    obj1 /foo/mydataset[START;;COUNT;BLOCK]
+    obj1 /foo/mydataset[START]
+  The STRIDE, COUNT, and BLOCK parameters are optional and will default to 1 in
+  each dimension. START is optional and will default to 0 in each dimension.
+  Each of START, STRIDE, COUNT, and BLOCK must be a comma-separated list of integers with
+  one integer for each dimension of the dataset.
 
  Exit code:
   0 if no differences, 1 if differences found, 2 if error

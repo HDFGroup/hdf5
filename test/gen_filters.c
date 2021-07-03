@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,7 +37,7 @@ static size_t filter_bogus(unsigned int flags, size_t cd_nelmts, const unsigned 
  *
  *		Failure:	-1
  *
- * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente
  *              Thursday, March 25, 2004
  *
  *-------------------------------------------------------------------------
@@ -243,12 +243,12 @@ main(void)
 
     if (nerrors)
         goto error;
-    printf("All tests passed.\n");
+    HDprintf("All tests passed.\n");
 
     return 0;
 
 error:
     nerrors = MAX(1, nerrors);
-    printf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
+    HDprintf("***** %d GEN_FILTERS FAILURES *****\n", nerrors);
     return 1;
 }

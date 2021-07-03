@@ -6,17 +6,17 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
-! This file contains all the configure test programs 
+! This file contains all the configure test programs
 ! used by autotools and cmake. This avoids having to
 ! duplicate code for both cmake and autotool tests.
 ! For autotools, a program below is chosen via a
 ! sed command in aclocal_fc.m4. For cmake, a program
-! below is chosen via the macro READ_SOURCE in 
+! below is chosen via the macro READ_SOURCE in
 ! HDF5UseFortran.cmake
 !
 
@@ -83,11 +83,12 @@ END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
 !---- START ----- Determine the available KINDs for REALs and INTEGERs
 PROGRAM FC_AVAIL_KINDS
       IMPLICIT NONE
-      INTEGER :: ik, jk, k, max_decimal_prec
-      INTEGER :: num_rkinds = 1, num_ikinds = 1
+      INTEGER :: ik, jk, k, kk, max_decimal_prec
+      INTEGER :: prev_rkind, num_rkinds = 1, num_ikinds = 1
       INTEGER, DIMENSION(1:10) :: list_ikinds = -1
       INTEGER, DIMENSION(1:10) :: list_rkinds = -1
-  
+      LOGICAL :: new_kind
+
       OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
 
       ! Find integer KINDs
@@ -113,14 +114,26 @@ PROGRAM FC_AVAIL_KINDS
       ! Find real KINDs
       list_rkinds(num_rkinds)=SELECTED_REAL_KIND(1)
       max_decimal_prec = 1
+      prev_rkind=list_rkinds(num_rkinds)
 
       prec: DO ik = 2, 36
-         exp: DO jk = 1, 17000
+         exp: DO jk = 1, 700
             k = SELECTED_REAL_KIND(ik,jk)
             IF(k.LT.0) EXIT exp
-            IF(k.GT.list_rkinds(num_rkinds))THEN
-               num_rkinds = num_rkinds + 1
-               list_rkinds(num_rkinds) = k
+            IF(k.NE.prev_rkind)THEN
+               ! Check if we aleady have that kind
+               new_kind = .TRUE.
+               DO kk = 1, num_rkinds
+                  IF(k.EQ.list_rkinds(kk))THEN
+                     new_kind=.FALSE.
+                     EXIT
+                  ENDIF
+               ENDDO
+               IF(new_kind)THEN
+                  num_rkinds = num_rkinds + 1
+                  list_rkinds(num_rkinds) = k
+                  prev_rkind=list_rkinds(num_rkinds)
+               ENDIF
             ENDIF
             max_decimal_prec = ik
          ENDDO exp
@@ -144,6 +157,6 @@ END PROGRAM FC_AVAIL_KINDS
 PROGRAM FC_MPI_CHECK
   INCLUDE 'mpif.h'
   INTEGER :: comm, amode, info, fh, ierror
-  CHARACTER(LEN=1) :: filename 
+  CHARACTER(LEN=1) :: filename
   CALL MPI_File_open( comm, filename, amode, info, fh, ierror)
 END PROGRAM FC_MPI_CHECK

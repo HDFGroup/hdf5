@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -33,9 +33,11 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       testvdsswmr.sh: vds_swmr*
 #       testabort_fail.sh: filenotclosed.c and del_many_dense_attrs.c
 #       test_filter_plugin.sh: filter_plugin.c
+#       test_mirror.sh: mirror_vfd ../utils/mirror_vfd/*
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh testexternal_env.sh \
-    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh
+    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh \
+    test_mirror.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
@@ -58,12 +60,13 @@ TEST_PROG= testhdf5 \
            cache cache_api cache_image cache_tagging lheap ohdr \
            stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
-           dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
-           external efc objcopy objcopy_ref links unlink twriteorder big mtime fillval mount \
+           dtypes dsets chunk_info cmpd_dset cmpd_dtransform filter_fail extend direct_chunk \
+           external efc objcopy objcopy_ref links unlink twriteorder big mtime \
+           fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
            dangle dtransform reserved cross_read freespace mf vds file_image \
-           unregister cache_logging cork swmr vol
+           unregister cache_logging cork swmr thread_id vol timer
 
 # List programs to be built when testing here.
 # error_test and err_compat are built at the same time as the other tests, but executed by testerror.sh.
@@ -78,16 +81,18 @@ TEST_PROG= testhdf5 \
 # swmr_* files (besides swmr.c) are used by testswmr.sh.
 # vds_swmr_* files are used by testvdsswmr.sh
 # vds_env is used by testvds_env.sh
+# mirror_vfd is used by test_mirror.sh
 # 'make check' doesn't run them directly, so they are not included in TEST_PROG.
 # Also build testmeta, which is used for timings test.  It builds quickly,
 # and this lets automake keep all its test programs in one place.
 check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     testmeta accum_swmr_reader atomic_writer atomic_reader external_env \
     links_env filenotclosed del_many_dense_attrs flushrefresh \
-    use_append_chunk use_append_mchunks use_disable_mdc_flushes \
+    use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
+    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
+    mirror_vfd
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin vol_plugin
 endif
@@ -142,8 +147,9 @@ LDADD=libh5test.la $(LIBHDF5)
 
 # List the source files for tests that have more than one
 ttsafe_SOURCES=ttsafe.c ttsafe_dcreate.c ttsafe_error.c ttsafe_cancel.c       \
-               ttsafe_acreate.c
+               ttsafe_acreate.c ttsafe_attr_vlen.c ttsafe_rec_rw_lock.c
 cache_image_SOURCES=cache_image.c genall5.c
+mirror_vfd_SOURCES=mirror_vfd.c genall5.c
 
 VFD_LIST = sec2 stdio core core_paged split multi family
 if DIRECT_VFD_CONDITIONAL
@@ -179,14 +185,15 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     chunk_fixed.h5 copy_dcpl_newfile.h5 partial_chunks.h5 layout_extend.h5 \
     zero_chunk.h5 chunk_single.h5 swmr_non_latest.h5 \
     earray_hdr_fd.h5 farray_hdr_fd.h5 bt2_hdr_fd.h5 \
-    storage_size.h5 dls_01_strings.h5 \
+    storage_size.h5 dls_01_strings.h5 power2up.h5 version_bounds.h5 \
+    alloc_0sized.h5 \
     extend.h5 istore.h5 extlinks*.h5 frspace.h5 links*.h5 \
     sys_file1 tfile[1-7].h5 th5s[1-4].h5 lheap.h5 fheap.h5 ohdr.h5 \
     stab.h5 extern_[1-5].h5 extern_[1-4][rw].raw gheap[0-4].h5 \
-    ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5\
+    ohdr_min_a.h5 ohdr_min_b.h5 min_dset_ohdr_testfile.h5 \
     dt_arith[1-2] links.h5 links[0-6]*.h5 extlinks[0-15].h5 \
-    tmp tmp_links tmp2_links tmp_links_env tmp_vds_env \
-    big.data big[0-9][0-9][0-9][0-9][0-9].h5  \
+    tmp tmp_links tmp2_links tmp_links_env tmp_vds tmp_vds_env \
+    big.data big[0-9][0-9][0-9][0-9][0-9].h5 \
     stdio.h5 sec2.h5 dtypes[0-9].h5 dtypes1[0].h5 dt_arith[1-2].h5 tattr.h5 \
     tselect.h5 mtime.h5 unlink.h5 unicode.h5 coord.h5 \
     fillval_[0-9].h5 fillval.raw mount_[0-9].h5 testmeta.h5 ttime.h5 \
@@ -201,34 +208,37 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
     new_move_[ab].h5 ntypes.h5 dangle.h5 error_test.h5 err_compat.h5 \
     dtransform.h5 test_filters.h5 get_file_name.h5 tstint[1-2].h5    \
     unlink_chunked.h5 btree2.h5 btree2_tmp.h5 objcopy_src.h5 objcopy_dst.h5 \
-    objcopy_ext.dat trefer1.h5 trefer2.h5 app_ref.h5 farray.h5 farray_tmp.h5 \
+    objcopy_ext.dat app_ref.h5 farray.h5 farray_tmp.h5 \
     earray.h5 earray_tmp.h5 efc[0-5].h5 log_vfd_out.log log_ros3_out.log    \
     log_s3comms_out.log new_multi_file_v16-r.h5 new_multi_file_v16-s.h5     \
     split_get_file_image_test-m.h5 split_get_file_image_test-r.h5    \
     file_image_core_test.h5.copy unregister_filter_1.h5 unregister_filter_2.h5 \
     vds_virt.h5 vds_dapl.h5 vds_src_[0-1].h5 \
-    swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5 use_disable_mdc_flushes.h5     \
-    flushrefresh.h5 flushrefresh_VERIFICATION_START                  \
+    swmr_data.h5 use_use_append_chunk.h5 use_append_mchunks.h5 \
+    use_disable_mdc_flushes.h5 flushrefresh.h5 flushrefresh_VERIFICATION_START \
     flushrefresh_VERIFICATION_CHECKPOINT1 flushrefresh_VERIFICATION_CHECKPOINT2 \
-    flushrefresh_VERIFICATION_DONE atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
+    flushrefresh_VERIFICATION_DONE filenotclosed.h5 del_many_dense_attrs.h5 \
+    atomic_data accum_swmr_big.h5 ohdr_swmr.h5 \
     test_swmr*.h5 cache_logging.h5 cache_logging.out vds_swmr.h5 vds_swmr_src_*.h5 \
     swmr[0-2].h5 swmr_writer.out swmr_writer.log.* swmr_reader.out.* swmr_reader.log.* \
-    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5
+    tbogus.h5.copy cache_image_test.h5 direct_chunk.h5 native_vol_test.h5 \
+    splitter*.h5 splitter.log mirror_rw mirror_ro
 
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
-    trefer.c trefer_deprec.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
+    trefer.c trefer_deprec.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c tunicode.c \
     tvlstr.c tvltypes.c
 
 # Sources for Use Cases
 use_append_chunk_SOURCES=use_append_chunk.c use_common.c
+use_append_chunk_mirror_SOURCES=use_append_chunk_mirror.c use_common.c
 use_append_mchunks_SOURCES=use_append_mchunks.c use_common.c
 use_disable_mdc_flushes_SOURCES=use_disable_mdc_flushes.c
 
 # Temporary files.
 DISTCLEANFILES=testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh test_filter_plugin.sh \
-    testexternal_env.sh testswmr.sh testvds_env.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh testabort_fail.sh \
-	test_vol_plugin.sh
+    testexternal_env.sh testswmr.sh testvds_env.sh testvdsswmr.sh test_usecases.sh testflushrefresh.sh \
+    testabort_fail.sh test_vol_plugin.sh test_mirror.sh
 
 include $(top_srcdir)/config/conclude.am

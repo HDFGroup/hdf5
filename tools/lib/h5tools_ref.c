@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -200,7 +200,7 @@ ref_path_table_lookup(const char *thepath, H5O_token_t *token)
     if ((thepath == NULL) || (HDstrlen(thepath) == 0))
         return -1;
     /* Allow lookups on the root group, even though it doesn't have any link info */
-    if (HDstrcmp(thepath, "/")) {
+    if (HDstrcmp(thepath, "/") != 0) {
         H5L_info2_t li;
 
         /* Check for external link first, so we don't return the OID of an object in another file */

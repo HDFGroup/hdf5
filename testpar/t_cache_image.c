@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -3117,8 +3117,9 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
 
             H5_FAILED();
 
-            if (show_progress)
-                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", failure_mssg);
+            if (show_progress) {
+                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            }
         }
     }
 
@@ -3401,8 +3402,9 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
 
             H5_FAILED();
 
-            if (show_progress)
-                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", failure_mssg);
+            if (show_progress) {
+                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            }
         }
     }
 
@@ -3916,9 +3918,8 @@ main(int argc, char **argv)
      * hang in the atexit post processing in which it may try to make MPI
      * calls.  By then, MPI calls may not work.
      */
-    if (H5dont_atexit() < 0) {
+    if (H5dont_atexit() < 0)
         HDprintf("%d:Failed to turn off atexit processing. Continue.\n", mpi_rank);
-    };
 
     H5open();
 
@@ -3930,11 +3931,8 @@ main(int argc, char **argv)
     }
 
     if (mpi_size < 2) {
-
-        if (mpi_rank == 0) {
-
+        if (mpi_rank == 0)
             HDprintf("    Need at least 2 processes.  Exiting.\n");
-        }
         goto finish;
     }
 
@@ -3989,12 +3987,11 @@ main(int argc, char **argv)
     MPI_Barrier(MPI_COMM_WORLD);
 
     nerrs += verify_cache_image_RO(0, H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY, mpi_rank);
-#if 1
     nerrs += verify_cache_image_RO(1, H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, mpi_rank);
     nerrs += verify_cache_image_RW(0, H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY, mpi_rank);
     nerrs += verify_cache_image_RW(1, H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED, mpi_rank);
     nerrs += smoke_check_1(comm, info, mpi_rank, mpi_size);
-#endif
+
 finish:
 
     /* make sure all processes are finished before final report, cleanup
@@ -4003,18 +4000,13 @@ finish:
     MPI_Barrier(MPI_COMM_WORLD);
 
     if (mpi_rank == 0) { /* only process 0 reports */
-        HDsleep(10);
         HDprintf("===================================\n");
-        if (nerrs > 0) {
+        if (nerrs > 0)
             HDprintf("***metadata cache image tests detected %d failures***\n", nerrs);
-        }
-        else {
+        else
             HDprintf("metadata cache image tests finished with no failures\n");
-        }
         HDprintf("===================================\n");
     }
-
-    /* takedown_derived_types(); */
 
     /* close HDF5 library */
     H5close();

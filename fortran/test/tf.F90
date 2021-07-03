@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -79,7 +79,7 @@ CONTAINS
     CHARACTER(LEN=8), PARAMETER :: success = ' PASSED '
     CHARACTER(LEN=8), PARAMETER :: failure = '*FAILED*'
     CHARACTER(LEN=8), PARAMETER :: skip    = '--SKIP--'
-    
+
 
     error_string = failure
     IF (test_result ==  0) THEN
@@ -167,7 +167,7 @@ CONTAINS
     full_namelen = LEN(full_name)
     hdferr = h5_fixname_c(base_name, base_namelen, fapl, &
          full_name, full_namelen)
-  
+
   END SUBROUTINE h5_fixname_f
 
 !----------------------------------------------------------------------
@@ -200,7 +200,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(IN) :: base_name   ! base name
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
     INTEGER(HID_T), INTENT(IN) :: fapl ! file access property list
-    
+
     INTEGER(SIZE_T) :: base_namelen ! Length of the base name character string
 
     INTERFACE
@@ -215,10 +215,10 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: fapl
        END FUNCTION h5_cleanup_c
     END INTERFACE
-    
+
     base_namelen = LEN(base_name)
     hdferr = h5_cleanup_c(base_name, base_namelen, fapl)
-    
+
   END SUBROUTINE h5_cleanup_f
 
 !----------------------------------------------------------------------
@@ -258,7 +258,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: status
        END SUBROUTINE h5_exit_c
     END INTERFACE
-    
+
     CALL h5_exit_c(status)
 
   END SUBROUTINE h5_exit_f
@@ -287,7 +287,7 @@ CONTAINS
     IMPLICIT NONE
     LOGICAL, INTENT(OUT) :: HDF5_NOCLEANUP ! Return code
     INTEGER :: status
-    
+
     INTERFACE
        SUBROUTINE h5_env_nocleanup_c(status)
          !DEC$ IF DEFINED(HDF5F90_WINDOWS)
@@ -296,12 +296,12 @@ CONTAINS
          INTEGER :: status
        END SUBROUTINE h5_env_nocleanup_c
     END INTERFACE
-    
+
     CALL h5_env_nocleanup_c(status)
-    
+
     HDF5_NOCLEANUP = .FALSE.
     IF(status.EQ.1) HDF5_NOCLEANUP = .TRUE.
-    
+
   END SUBROUTINE h5_env_nocleanup_f
 
 ! ---------------------------------------------------------------------------------------------------
@@ -310,11 +310,11 @@ CONTAINS
 ! NOTES
 !   (1) The Sun/Oracle compiler has the following restrictions on the SIZEOF intrinsic function:
 !
-!     "The SIZEOF intrinsic cannot be applied to arrays of an assumed size, characters of a 
-!      length that is passed, or subroutine calls or names. SIZEOF returns default INTEGER*4 data. 
-!      If compiling for a 64-bit environment, the compiler will issue a warning if the result overflows 
-!      the INTEGER*4 data range. To use SIZEOF in a 64-bit environment with arrays larger 
-!      than the INTEGER*4 limit (2 Gbytes), the SIZEOF function and 
+!     "The SIZEOF intrinsic cannot be applied to arrays of an assumed size, characters of a
+!      length that is passed, or subroutine calls or names. SIZEOF returns default INTEGER*4 data.
+!      If compiling for a 64-bit environment, the compiler will issue a warning if the result overflows
+!      the INTEGER*4 data range. To use SIZEOF in a 64-bit environment with arrays larger
+!      than the INTEGER*4 limit (2 Gbytes), the SIZEOF function and
 !      the variables receiving the result must be declared INTEGER*8."
 !
 !    Thus, we can not overload the H5_SIZEOF function to handle arrays (as used in tH5P_F03.f90), or

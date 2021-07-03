@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,6 +18,7 @@
  *          other mechanisms.
  */
 
+/* Headers needed */
 #include "h5test.h"
 
 /* Filename */
@@ -41,7 +42,7 @@ const char *FILENAME[] = {"native_vol_test", NULL};
  * functionality.
  */
 static const H5VL_class_t fake_vol_g = {
-    0,              /* version      */
+    H5VL_VERSION,   /* VOL class struct version */
     FAKE_VOL_VALUE, /* value        */
     FAKE_VOL_NAME,  /* name         */
     0,              /* capability flags */
@@ -90,7 +91,7 @@ static const H5VL_class_t fake_vol_g = {
         /* datatype_cls */
         NULL, /* commit       */
         NULL, /* open         */
-        NULL, /* get_size     */
+        NULL, /* get          */
         NULL, /* specific     */
         NULL, /* optional     */
         NULL  /* close        */
@@ -173,13 +174,14 @@ static const H5VL_class_t fake_vol_g = {
 static herr_t
 test_vol_registration(void)
 {
-    hid_t  native_id     = H5I_INVALID_HID;
-    hid_t  lapl_id       = H5I_INVALID_HID;
-    hid_t  vipl_id       = H5I_INVALID_HID;
-    herr_t ret           = SUCCEED;
-    htri_t is_registered = FAIL;
-    hid_t  vol_id        = H5I_INVALID_HID;
-    hid_t  vol_id2       = H5I_INVALID_HID;
+    hid_t         native_id          = H5I_INVALID_HID;
+    hid_t         lapl_id            = H5I_INVALID_HID;
+    hid_t         vipl_id            = H5I_INVALID_HID;
+    herr_t        ret                = SUCCEED;
+    htri_t        is_registered      = FAIL;
+    hid_t         vol_id             = H5I_INVALID_HID;
+    hid_t         vol_id2            = H5I_INVALID_HID;
+    H5VL_class_t *bad_fake_vol_class = NULL;
 
     TESTING("VOL registration");
 
@@ -205,6 +207,21 @@ test_vol_registration(void)
         FAIL_PUTS_ERROR("should not be able to register a connector with an incorrect property list");
     if (H5Pclose(lapl_id) < 0)
         TEST_ERROR;
+
+    /* Test registering a VOL connector with an incompatible version # */
+    if (NULL == (bad_fake_vol_class = HDmalloc(sizeof(H5VL_class_t))))
+        TEST_ERROR;
+    HDmemcpy(bad_fake_vol_class, &fake_vol_g, sizeof(H5VL_class_t));
+    bad_fake_vol_class->version = H5VL_VERSION + 1;
+    H5E_BEGIN_TRY
+    {
+        vol_id = H5VLregister_connector(bad_fake_vol_class, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
+    if (H5I_INVALID_HID != vol_id)
+        FAIL_PUTS_ERROR("should not be able to register a connector with an incompatible version #");
+    HDfree(bad_fake_vol_class);
+    bad_fake_vol_class = NULL;
 
     /* Load a VOL interface
      * The vipl_id does nothing without a VOL that needs it, but we do need to
@@ -282,8 +299,11 @@ error:
         H5Pclose(vipl_id);
     }
     H5E_END_TRY;
-    return FAIL;
 
+    if (bad_fake_vol_class)
+        HDfree(bad_fake_vol_class);
+
+    return FAIL;
 } /* end test_vol_registration() */
 
 /*-------------------------------------------------------------------------
@@ -387,8 +407,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                  HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                  HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -409,8 +429,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't retrieve VFD handle for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                  HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                  HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_vfd_handle */
         if (H5Fget_vfd_handle(fid, H5P_DEFAULT, &os_file_handle) < 0)
             TEST_ERROR;
@@ -449,8 +469,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                  HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                  HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -464,8 +484,8 @@ test_basic_file_operation(const char *env_h5_drvr)
         TEST_ERROR;
 
     /* Can't compare VFD properties for split / multi / family VFDs */
-    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                  HDstrcmp(env_h5_drvr, "family"))) {
+    if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                  HDstrcmp(env_h5_drvr, "family") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;

@@ -7,7 +7,7 @@
 ## This file is part of HDF5.  The full HDF5 copyright notice, including
 ## terms governing use, modification, and redistribution, is contained in
 ## the COPYING file, which can be found at the root of the source code
-## distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+## distribution tree, or in https://www.hdfgroup.org/licenses.
 ## If you do not have access to either file, you may request a copy from
 ## help@hdfgroup.org.
 
@@ -24,7 +24,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.12.0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.12.1], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -37,14 +37,42 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) # use silent rules where available - automake 1.11
 
-## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
-## for Makefiles, configure, src/H5config.h, etc. If AM_MAINTAINER_MODE
-## is enabled, these files will be rebuilt if out of date. This is a
-## problem because if users try to build on a machine with
-## the wrong versions of autoconf and automake, these files will be
-## rebuilt with the wrong versions and bad things can happen.
-## Also, CVS doesn't preserve dependencies between timestamps, so
-## Makefiles will often think rebuilding needs to occur when it doesn't.
+## AM_MAINTAINER_MODE determines the behavior of "rebuild rules" that contain
+## dependencies for Makefile.in files, configure, src/H5config.h, etc. If
+## AM_MAINTAINER_MODE is enabled, these files will be rebuilt if out of date.
+## When disabled, the autotools build files can get out of sync and the build
+## system will not complain or try to regenerate downstream files.
+##
+## The AM_MAINTAINER_MODE macro also determines whether the
+## --(enable|disable)-maintainer-mode configure option is available. When the
+## macro is present, with or without a parameter, the option will be added
+## to the generated configure script.
+##
+## In summary:
+##
+##  AM_MAINTAINER_MODE([enable])
+##      - Build dependencies ON by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE([disable])
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  No AM_MAINTAINER_MODE macro
+##      - Build dependencies ON by default
+##      - No configure option to control build dependencies
+##
+## The biggest concern for us is that version control systems like git
+## usually don't preserve dependencies between timestamps, so the build
+## system will often think that upstream build files like Makefile.am are
+## dirty and that rebuilding needs to occur when it doesn't. This is a problem
+## in release branches where we provide the autotools-generated files. Users
+## who don't have autoconf, automake, etc. will then have difficulty building
+## release branches checked out from git.
 ##
 ## By default, it is enabled. Users can configure with
 ## --disable-maintainer-mode to prevent running the autotools.
@@ -103,6 +131,7 @@ AC_SUBST([AR_FLAGS])
 
 ## H5_CFLAGS (and company) are for CFLAGS that should be used on HDF5, but
 ## not exported to h5cc (or h5fc, etc.)
+##
 AC_SUBST([H5_CFLAGS])
 AC_SUBST([H5_CPPFLAGS])
 AC_SUBST([H5_FCFLAGS])
@@ -284,6 +313,62 @@ while test -n "$hname"; do
   test "$hname_tmp" = "$hname" && break
 done
 
+##
+## Enable/disable sanitizer checks for clang compilers, initially address sanitizer
+##
+AC_MSG_CHECKING([for clang sanitizer checks])
+AC_ARG_ENABLE([sanitize-checks],
+              [AS_HELP_STRING([--enable-sanitize-checks=address],
+                              [(clang/clang++ compilers only) Enable sanitize checks.
+                               Address is useful for detecting issues dealing with
+                               memory. See AddressSanitizer in config/sanitizer/README.md
+                               for more information.
+                               [default=none]
+                               ])],
+              [CLANG_SANITIZE_CHECKS=$enableval])
+
+# Set default
+if test "X-$CLANG_SANITIZE_CHECKS" = X- ; then
+  CLANG_SANITIZE_CHECKS=none
+fi
+
+if test "X$CC_BASENAME" = "Xclang"; then
+  AC_SUBST([CLANG_SANITIZE_CHECKS])
+
+  # There are several sanitizer tools.  At present we are testing
+  # and describing only -fsanitizer=address with autotools.
+  case "X-$CLANG_SANITIZE_CHECKS" in
+    X-no|X-none)
+      CLANG_SANITIZE_CHECKS=none
+      CLANG_SANITIZE_LIST=
+      ;;
+    *)
+      CLANG_SANITIZE_LIST=$CLANG_SANITIZE_CHECKS
+      ;;
+  esac
+  AC_MSG_RESULT([$CLANG_SANITIZE_CHECKS])
+
+  # Other tools can be added to the list of checks
+  # The clang compiler doesn't support some of them; they should be
+  # checked before adding them to the list in the help message.
+  # The sanitizers/sanitizers.cmake file lists these options:
+  # address, memory, memoryWithOrigins, undefined, thread, leak,
+  # 'address;undefined'.  Which and which combinations of these are
+  #  supported varies by compiler version, but unsupported options
+  # or combinations will result in configure errors reported in config.log.
+  # Comma separated lists of sanitize options wil be entered intact in
+  # one -fsanitize=<list> flag.  Space separated lists will be entered in
+  # separate -fsanitize=<item> flags.
+  # NOTE: No sanity checking done here!
+  if test -n "$CLANG_SANITIZE_LIST"; then
+    H5_CFLAGS="$H5_CFLAGS -fno-omit-frame-pointer"
+    H5_CXXFLAGS="$H5_CXXFLAGS -fno-omit-frame-pointer"
+    for sanitizer in `echo $CLANG_SANITIZE_LIST`; do
+      H5_CFLAGS="$H5_CFLAGS -fsanitize=${sanitizer}"
+      H5_CXXFLAGS="$H5_CXXFLAGS -fsanitize=${sanitizer}"
+    done
+  fi
+fi
 
 ## ----------------------------------------------------------------------
 ## Determine build mode (debug, production, clean).
@@ -302,14 +387,14 @@ AC_ARG_ENABLE([build-mode],
                                (i.e.: a 'clean slate' configuration).
                                All these settings can be overridden by using
                                specific configure flags.
-                               [default=debug]
+                               [default=production]
                                ])],
               [BUILD_MODE=$enableval])
 
 ## Set the default
 ## Depends on branch, set via script at branch creation time
 if test "X-$BUILD_MODE" = X- ; then
-    BUILD_MODE=debug
+    BUILD_MODE=production
 fi
 
 ## Allow this variable to be substituted in
@@ -963,7 +1048,10 @@ AC_ARG_ENABLE([tests],
               [HDF5_TESTS=$enableval])
 
 if test "X$HDF5_TESTS" = "Xno"; then
+  AC_MSG_RESULT([yes])
   echo "Building HDF5 tests is disabled"
+else
+  AC_MSG_RESULT([no])
 fi
 
 ## ----------------------------------------------------------------------
@@ -984,8 +1072,88 @@ AC_ARG_ENABLE([tools],
               [HDF5_TOOLS=$enableval])
 
 if test "X$HDF5_TOOLS" = "Xno"; then
+  AC_MSG_RESULT([yes])
   echo "Building HDF5 tools is disabled"
+else
+  AC_MSG_RESULT([no])
 fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to enable building doxygen files
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_DOXYGEN])
+
+## Default is to not build DOXYGEN
+HDF5_DOXYGEN=no
+
+AC_MSG_CHECKING([if building doxygen is enabled])
+
+AC_ARG_ENABLE([doxygen],
+              [AS_HELP_STRING([--enable-doxygen],
+                              [Compile the HDF5 doxygen files [default=no]])],
+              [HDF5_DOXYGEN=$enableval])
+
+if test "X$HDF5_DOXYGEN" = "Xyes"; then
+  AC_MSG_RESULT([yes])
+  DX_DOXYGEN_FEATURE(ON)
+  DX_DOT_FEATURE(OFF)
+  DX_HTML_FEATURE(ON)
+  DX_CHM_FEATURE(OFF)
+  DX_CHI_FEATURE(OFF)
+  DX_MAN_FEATURE(ON)
+  DX_RTF_FEATURE(OFF)
+  DX_XML_FEATURE(OFF)
+  DX_PDF_FEATURE(OFF)
+  DX_PS_FEATURE(OFF)
+
+  AC_SUBST([DOXYGEN_PACKAGE])
+  AC_SUBST([DOXYGEN_VERSION_STRING])
+  AC_SUBST([DOXYGEN_INCLUDE_ALIASES])
+  AC_SUBST([DOXYGEN_PROJECT_LOGO])
+  AC_SUBST([DOXYGEN_PROJECT_BRIEF])
+  AC_SUBST([DOXYGEN_INPUT_DIRECTORY])
+  AC_SUBST([DOXYGEN_OPTIMIZE_OUTPUT_FOR_C])
+  AC_SUBST([DOXYGEN_MACRO_EXPANSION])
+  AC_SUBST([DOXYGEN_OUTPUT_DIRECTORY])
+  AC_SUBST([DOXYGEN_EXAMPLES_DIRECTORY])
+  AC_SUBST([DOXYGEN_LAYOUT_FILE])
+  AC_SUBST([DOXYGEN_HTML_HEADER])
+  AC_SUBST([DOXYGEN_HTML_FOOTER])
+  AC_SUBST([DOXYGEN_HTML_EXTRA_STYLESHEET])
+  AC_SUBST([DOXYGEN_HTML_EXTRA_FILES])
+  AC_SUBST([DOXYGEN_SERVER_BASED_SEARCH])
+  AC_SUBST([DOXYGEN_EXTERNAL_SEARCH])
+  AC_SUBST([DOXYGEN_SEARCHENGINE_URL])
+
+# SRCDIR Environment variables used inside doxygen macro for the source location:
+  DOXYGEN_PACKAGE=${PACKAGE_NAME}
+  DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
+  DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
+  DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
+  DOXYGEN_PROJECT_BRIEF=
+  DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
+  DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
+  DOXYGEN_MACRO_EXPANSION=YES
+  DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
+  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/examples $(SRCDIR)/test'
+  DOXYGEN_LAYOUT_FILE='$(SRCDIR)/doxygen/hdf5doxy_layout.xml'
+  DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
+  DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
+  DOXYGEN_HTML_EXTRA_STYLESHEET='$(SRCDIR)/doxygen/hdf5doxy.css'
+  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js $(SRCDIR)/doxygen/img/ftv2node.png $(SRCDIR)/doxygen/img/ftv2pnode.png'
+  DOXYGEN_SERVER_BASED_SEARCH=NO
+  DOXYGEN_EXTERNAL_SEARCH=NO
+  DOXYGEN_SEARCHENGINE_URL=
+
+  DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
+
+else
+  AC_MSG_RESULT([no])
+  echo "Doxygen support is disabled"
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
@@ -1086,14 +1254,16 @@ AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 AC_CHECK_HEADERS([stdbool.h])
+AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
-AC_CHECK_HEADERS([mach/mach_time.h])
-## Also need to detect Darwin for pubconf
+AC_SUBST([H5_IS_DARWIN])
+H5_IS_DARWIN="no"
 case $host_os in
   darwin*)
     AC_DEFINE([HAVE_DARWIN], [1], [Define if Darwin or Mac OS X])
-  ;;
+    H5_IS_DARWIN="yes"
+    ;;
 esac
 
 ## Windows
@@ -1186,6 +1356,7 @@ case "$host_cpu-$host_vendor-$host_os" in
     ## VFD on Linux systems.
     H5_CPPFLAGS="-D_GNU_SOURCE $H5_CPPFLAGS"
     ;;
+
 esac
 
 ## Need to add the AM_ and H5_ into CFLAGS/CPPFLAGS to make them visible
@@ -1530,18 +1701,21 @@ case "X-$withval" in
       AM_CPPFLAGS="$AM_CPPFLAGS -I$szlib_inc"
     fi
 
-    AC_CHECK_HEADERS([szlib.h],
-                     [HAVE_SZLIB_H="yes"],
-                     [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
-
     if test -n "$szlib_lib"; then
       LDFLAGS="$LDFLAGS -L$szlib_lib"
       AM_LDFLAGS="$AM_LDFLAGS -L$szlib_lib"
     fi
 
-    if test "x$HAVE_SZLIB" = "xyes" -a "x$HAVE_SZLIB_H" = "xyes"; then
+    if test "x$HAVE_SZLIB" = "xyes"; then
       AC_CHECK_LIB([sz], [SZ_BufftoBuffCompress],,
-                   [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+                   [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"; LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_SZLIB])
+      if test -n "$HAVE_SZLIB"; then
+        AC_CHECK_HEADERS([szlib.h],
+                         [HAVE_SZLIB_H="yes"],
+                         [CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_SZLIB])
+      else
+        AC_MSG_RESULT([Using SZ_BufftoBuffCompress from libsz in $szlib_lib failed.  Szip not enabled.])
+      fi
     fi
 
     if test -z "$HAVE_SZLIB" -a -n "$HDF5_CONFIG_ABORT"; then
@@ -1611,8 +1785,13 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support
-## on POSIX systems.
+## Enable thread-safe version of library (requires Pthreads on POSIX
+## systems). We usually pick up the system Pthreads library, so --with-pthread
+## is only necessary if you are using a custom Pthreads library or if
+## your OS hides its implementation in an unusual location.
+##
+## On Windows, we use Win32 threads and no special configuration should be
+## required to use them.
 ##
 AC_SUBST([THREADSAFE])
 
@@ -1790,6 +1969,45 @@ if test "X$THREADSAFE" = "Xyes"; then
 fi
 
 ## ----------------------------------------------------------------------
+## Should the thread-safety feature use a recursive RW lock?
+##
+## NOTE: Most RW locks do not allow recursive write locks, which would be
+##       beneficial in some HDF5 use cases (in callbacks, custom VOL or VFD
+##       connectors) so we use a custom RW lock scheme.
+##
+## Reqires a thread-safe library and Pthreads.
+AC_SUBST([RECURSIVE_RW_LOCKS])
+
+## Default is to not use recursive RW locks
+RECURSIVE_RW_LOCKS=no
+
+AC_MSG_CHECKING([whether to use recursive RW locks for thread safety])
+AC_ARG_ENABLE([recursive-rw-locks],
+              [AS_HELP_STRING([--enable-recursive-rw-locks],
+                              [Enable recursive RW locks for thread safety. Requires a thread-safe library and Pthreads.
+                              [default=no]])],
+              [RECURSIVE_RW_LOCKS=$enableval])
+
+case "X-$RECURSIVE_RW_LOCKS" in
+  X-|X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  X-yes)
+    if test "X-$THREADSAFE" = "X-yes" -a "X-$HAVE_PTHREAD" = "X-yes" ; then
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([USE_RECURSIVE_RW_LOCKS], [1], [Define if the library will use recursive RW locks for thread safety])
+    else
+      AC_MSG_RESULT([error])
+      AC_MSG_ERROR([recursive RW locks require a thread-safe library and Pthreads])
+    fi
+    ;;
+  *)
+    AC_MSG_RESULT([error])
+    AC_MSG_ERROR([\'$enableval\' is not a valid recursive RW lock value])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Check for MONOTONIC_TIMER support (used in clock_gettime).  This has
 ## to be done after any POSIX defines to ensure that the test gets
 ## the correct POSIX level on linux.
@@ -1831,10 +2049,10 @@ esac
 
 
 ## ----------------------------------------------------------------------
-## Does the struct stat have the st_blocks field?  This field is not Posix.
+## Does the struct stat have the st_blocks field? This field is not POSIX.
 ##
 AC_MSG_CHECKING([for st_blocks in struct stat])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM[[
+AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
   #include <sys/stat.h>]],[[struct stat sb; sb.st_blocks=0;]])],
   [AC_DEFINE([HAVE_STAT_ST_BLOCKS], [1],
           [Define if struct stat has the st_blocks field])
@@ -1970,7 +2188,7 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
 AC_MSG_CHECKING([how to print long long])
 AC_CACHE_VAL([hdf5_cv_printf_ll], [
 
-for hdf5_cv_printf_ll in l ll L q unknown; do
+for hdf5_cv_printf_ll in ll l L q unknown; do
    AC_RUN_IFELSE(
         [AC_LANG_PROGRAM([
             #include <stdio.h>
@@ -2001,6 +2219,51 @@ AC_ARG_ENABLE([debug],
 AC_ARG_ENABLE([production],
               [AS_HELP_STRING([--enable-production], [OPTION CHANGE: use --enable-build-mode=production])],
               [AC_MSG_ERROR([--enable-production is no longer supported, use --enable-build-mode=production instead.])])
+
+
+## ----------------------------------------------------------------------
+## Check if the compiler should include build diagnostics
+##
+AC_MSG_CHECKING([enable build diagnostics])
+AC_ARG_ENABLE([diags],
+              [AS_HELP_STRING([--enable-diags=(yes|no|<custom>)],
+                              [Allow default enhanced diagnostics to the build.
+                               This is independent of the build mode and optimization
+                               level.
+                               [default=no]
+                               ])],
+              [DIAGS=$enableval])
+
+## Set default
+if test "X-$DIAGS" = X- ; then
+  DIAGS=no
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([DIAGS])
+
+case "X-$DIAGS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS_FCFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $NO_DIAGS_CFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $NO_DIAGS_CXXFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $NO_DIAGS_FCFLAGS"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    H5_CFLAGS="$H5_CFLAGS $DIAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $DIAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DIAGS"
+    DIAGS="custom ($DIAGS)"
+    AC_MSG_RESULT([$DIAGS])
+    ;;
+esac
 
 
 ## ----------------------------------------------------------------------
@@ -2117,10 +2380,6 @@ if test "X-$DEV_WARNINGS" = X- ; then
   DEV_WARNINGS=no
 fi
 
-## Allow this variable to be substituted in
-## other files (src/libhdf5.settings.in, etc.)
-AC_SUBST([DEV_WARNINGS])
-
 case "X-$DEV_WARNINGS" in
   X-yes)
     H5_CFLAGS="$H5_CFLAGS $DEVELOPER_WARNING_CFLAGS"
@@ -2132,6 +2391,45 @@ case "X-$DEV_WARNINGS" in
     ;;
   *)
     AC_MSG_ERROR([Unrecognized value: $DEV_WARNINGS])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
+## Check if we should consider certain compiler warnings as errors
+##
+## These should NOT be on by default as the risk of breakage is high
+## when compiling HDF5 on new (or new versions) of platforms and
+## compilers. It can also cause failures when header files we have no
+## control over (e.g. MPI, HDFS) raise warnings.
+##
+AC_MSG_CHECKING([enable warnings as errors])
+AC_ARG_ENABLE([warnings-as-errors],
+              [AS_HELP_STRING([--enable-warnings-as-errors],
+                              [Determines whether certain warnings will be
+                               considered errors. This is mainly for use
+                               by HDF5 library developers.
+                               [default=no]
+                               ])],
+              [WARNINGS_AS_ERRORS=$enableval])
+
+## Set default
+if test "X-$WARNINGS_AS_ERRORS" = X- ; then
+  WARNINGS_AS_ERRORS=no
+fi
+
+case "X-$WARNINGS_AS_ERRORS" in
+  X-yes)
+    H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
+    AC_MSG_RESULT([yes])
+    ;;
+  X-no)
+    H5_CFLAGS="$H5_CFLAGS $H5_NECFLAGS"
+    H5_CXXFLAGS="$H5_CXXFLAGS $H5_NECXXFLAGS"
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $WARNINGS_AS_ERRORS])
     ;;
 esac
 
@@ -2247,6 +2545,56 @@ case "X-$OPTIMIZATION" in
     AC_MSG_RESULT([$OPTIMIZATION])
     ;;
 esac
+
+## ----------------------------------------------------------------------
+## Check if file locking should be used
+##
+AC_MSG_CHECKING([enable file locking])
+AC_ARG_ENABLE([file-locking],
+              [AS_HELP_STRING([--enable-file-locking=(yes|no|best-effort)],
+                              [Sets the default for whether or not to use file
+                               locking when opening files. Can be overridden
+                               with the HDF5_USE_FILE_LOCKING environment variable
+                               and the H5Pset_file_locking() API call.
+                               best-effort attempts to use file locking but does
+                               not fail when file locks have been disabled on
+                               the file system (useful with Lustre).
+                               [default=best-effort]
+                               ])],
+              [DESIRED_FILE_LOCKING=$enableval])
+
+## Set defaults
+if test "X-$DESIRED_FILE_LOCKING" = X- ; then
+  DESIRED_FILE_LOCKING=best-effort
+fi
+
+## Allow this variable to be substituted in
+## other files (src/libhdf5.settings.in, etc.)
+AC_SUBST([DESIRED_FILE_LOCKING])
+AC_SUBST([USE_FILE_LOCKING])
+AC_SUBST([IGNORE_DISABLED_FILE_LOCKS])
+
+case "X-$DESIRED_FILE_LOCKING" in
+  X-best-effort)
+      AC_MSG_RESULT([best-effort])
+      AC_DEFINE([USE_FILE_LOCKING], [1],
+                [Define if the library will use file locking])
+      AC_DEFINE([IGNORE_DISABLED_FILE_LOCKS], [1],
+                [Define if the library will ignore file locks when disabled])
+    ;;
+  X-yes)
+      AC_MSG_RESULT([yes])
+      AC_DEFINE([USE_FILE_LOCKING], [1],
+                [Define if the library will use file locking])
+    ;;
+  X-no)
+      AC_MSG_RESULT([no])
+    ;;
+  *)
+      AC_MSG_ERROR([Unrecognized value: $USE_FILE_LOCKING])
+    ;;
+esac
+
 
 ## ----------------------------------------------------------------------
 ## Enable/disable internal package-level debugging output
@@ -2438,7 +2786,7 @@ AC_ARG_ENABLE([memory-alloc-sanity-check],
                               more memory use and somewhat slower allocation.
                               This option is orthogonal to the
                               --enable-using-memchecker option.
-                               [default=yes if debug build, otherwise no]
+                               [default=no]
                               ])],
               [MEMORYALLOCSANITYCHECK=$enableval])
 
@@ -2448,11 +2796,7 @@ AC_SUBST([MEMORYALLOCSANITYCHECK])
 
 ## Set default
 if test "X-$MEMORYALLOCSANITYCHECK" = X- ; then
-  if test "X-$BUILD_MODE" = "X-debug" ; then
-    MEMORYALLOCSANITYCHECK=yes
-  else
-    MEMORYALLOCSANITYCHECK=no
-  fi
+  MEMORYALLOCSANITYCHECK=no
 fi
 
 case "X-$MEMORYALLOCSANITYCHECK" in
@@ -2838,6 +3182,50 @@ fi
 AM_CONDITIONAL([DIRECT_VFD_CONDITIONAL], [test "X$DIRECT_VFD" = "Xyes"])
 
 ## ----------------------------------------------------------------------
+## Check whether the Mirror VFD can be built.
+## Auto-enabled if the required libraries are present.
+##
+AC_SUBST([MIRROR_VFD])
+
+## Default is no Mirror VFD
+MIRROR_VFD=no
+
+AC_ARG_ENABLE([mirror-vfd],
+              [AS_HELP_STRING([--enable-mirror-vfd],
+                              [Build the socket-based Mirror virtual file driver (VFD).
+                               [default=no]])],
+              [MIRROR_VFD=$enableval], [MIRROR_VFD=no])
+
+if test "X$MIRROR_VFD" = "Xyes"; then
+
+    AC_CHECK_HEADERS([arpa/inet.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([netinet/in.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([netdb.h],, [unset MIRROR_VFD])
+    AC_CHECK_HEADERS([sys/socket.h],, [unset MIRROR_VFD])
+    AC_CHECK_FUNC([fork], [], [unset MIRROR_VFD])
+
+    AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) can be built])
+    if test "X$MIRROR_VFD" = "Xyes"; then
+        AC_DEFINE([HAVE_MIRROR_VFD], [1],
+                [Define whether the Mirror virtual file driver (VFD) will be compiled])
+        AC_MSG_RESULT([yes])
+    else
+        AC_MSG_RESULT([no])
+        MIRROR_VFD=no
+        AC_MSG_ERROR([The Mirror VFD cannot be built.
+                      Missing one or more of: arpa/inet.h, netinet/in.h,
+                      netdb.h, sys/socket.h, fork().])
+    fi
+else
+    AC_MSG_CHECKING([if the Mirror virtual file driver (VFD) is enabled])
+    AC_MSG_RESULT([no])
+    MIRROR_VFD=no
+fi
+
+## Mirror VFD files built only if able.
+AM_CONDITIONAL([MIRROR_VFD_CONDITIONAL], [test "X$MIRROR_VFD" = "Xyes"])
+
+## ----------------------------------------------------------------------
 ## Check if Read-Only S3 virtual file driver is enabled by --enable-ros3-vfd
 ##
 AC_SUBST([ROS3_VFD])
@@ -2962,6 +3350,9 @@ if test "x$HAVE_LIBHDFS" = "xyes"; then
   AC_DEFINE([HAVE_LIBHDFS], [1],
             [Proceed to build with libhdfs])
 fi
+
+## Read-only HDFS files are not built if not required.
+AM_CONDITIONAL([HDFS_VFD_CONDITIONAL], [test "X$HAVE_LIBHDFS" = "Xyes"])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
@@ -3592,6 +3983,7 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
+AM_CONDITIONAL([BUILD_DOXYGEN_CONDITIONAL], [test "X$HDF5_DOXYGEN" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
@@ -3697,6 +4089,7 @@ AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
+                 doxygen/Doxyfile
                  src/Makefile
                  test/Makefile
                  test/H5srcdir_str.h
@@ -3711,10 +4104,13 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  test/testvds_env.sh
                  test/testvdsswmr.sh
                  test/test_filter_plugin.sh
+                 test/test_mirror.sh
                  test/test_usecases.sh
                  test/test_vol_plugin.sh
                  testpar/Makefile
                  testpar/testpflush.sh
+                 utils/Makefile
+                 utils/mirror_vfd/Makefile
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile

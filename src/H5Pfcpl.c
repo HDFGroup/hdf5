@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5Pfcpl.c
  *			January  6 1998
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		File creation property list class routines
  *
@@ -132,7 +132,7 @@
 /********************/
 
 /* Property class callbacks */
-static herr_t H5P_fcrt_reg_prop(H5P_genclass_t *pclass);
+static herr_t H5P__fcrt_reg_prop(H5P_genclass_t *pclass);
 
 /* property callbacks */
 static herr_t H5P__fcrt_btree_rank_enc(const void *value, void **_pp, size_t *size);
@@ -157,7 +157,7 @@ const H5P_libclass_t H5P_CLS_FCRT[1] = {{
     &H5P_CLS_FILE_CREATE_g,    /* Pointer to class             */
     &H5P_CLS_FILE_CREATE_ID_g, /* Pointer to class ID          */
     &H5P_LST_FILE_CREATE_ID_g, /* Pointer to default property list ID */
-    H5P_fcrt_reg_prop,         /* Default property registration routine */
+    H5P__fcrt_reg_prop,        /* Default property registration routine */
 
     NULL, /* Class creation callback      */
     NULL, /* Class creation callback info */
@@ -197,7 +197,7 @@ static const hsize_t               H5F_def_free_space_threshold_g = H5F_CRT_FREE
 static const hsize_t               H5F_def_file_space_page_size_g = H5F_CRT_FILE_SPACE_PAGE_SIZE_DEF;
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_fcrt_reg_prop
+ * Function:    H5P__fcrt_reg_prop
  *
  * Purpose:     Register the file creation property list class's properties
  *
@@ -208,11 +208,11 @@ static const hsize_t               H5F_def_file_space_page_size_g = H5F_CRT_FILE
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
+H5P__fcrt_reg_prop(H5P_genclass_t *pclass)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Register the user block size */
     if (H5P__register_real(pclass, H5F_CRT_USER_BLOCK_NAME, H5F_CRT_USER_BLOCK_SIZE,
@@ -303,7 +303,7 @@ H5P_fcrt_reg_prop(H5P_genclass_t *pclass)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_fcrt_reg_prop() */
+} /* end H5P__fcrt_reg_prop() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5Pset_userblock
@@ -362,11 +362,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
- *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -518,11 +513,6 @@ done:
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *         	Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -571,15 +561,10 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *		Raymond Lu
- *		Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out */, unsigned *lk /*out */)
+H5Pget_sym_k(hid_t plist_id, unsigned *ik /*out*/, unsigned *lk /*out*/)
 {
     unsigned        btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;               /* Property list pointer */
@@ -617,11 +602,6 @@ done:
  *
  * Programmer:	Robb Matzke
  *		Tuesday, January  6, 1998
- *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
  *
  *-------------------------------------------------------------------------
  */
@@ -671,15 +651,10 @@ done:
  * Programmer:	Robb Matzke
  *		Wednesday, January  7, 1998
  *
- * Modifications:
- *
- *		Raymond Lu, Oct 14, 2001
- *		Changed to the new generic property list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out */)
+H5Pget_istore_k(hid_t plist_id, unsigned *ik /*out*/)
 {
     unsigned        btree_k[H5B_NUM_BTREE_ID];
     H5P_genplist_t *plist;               /* Property list pointer */

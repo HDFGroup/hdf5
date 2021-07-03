@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -178,20 +178,20 @@ check_stats(const H5FA_t *fa, const farray_state_t *state)
 
     /* Compare information */
     if (farray_stats.hdr_size != state->hdr_size) {
-        HDfprintf(stdout, "farray_stats.hdr_size = %Hu, state->hdr_size = %Hu\n", farray_stats.hdr_size,
-                  state->hdr_size);
+        HDfprintf(stdout, "farray_stats.hdr_size = %" PRIuHSIZE ", state->hdr_size = %" PRIuHSIZE "\n",
+                  farray_stats.hdr_size, state->hdr_size);
         TEST_ERROR
     }
 
     if (farray_stats.dblk_size != state->dblk_size) {
-        HDfprintf(stdout, "farray_stats.dblk_size = %Hu, state->dblk_size = %Hu\n", farray_stats.dblk_size,
-                  state->dblk_size);
+        HDfprintf(stdout, "farray_stats.dblk_size = %" PRIuHSIZE ", state->dblk_size = %" PRIuHSIZE "\n",
+                  farray_stats.dblk_size, state->dblk_size);
         TEST_ERROR
     }
 
     if (farray_stats.nelmts != state->nelmts) {
-        HDfprintf(stdout, "farray_stats.nelmts = %Hu, state->nelmts = %Hu\n", farray_stats.nelmts,
-                  state->nelmts);
+        HDfprintf(stdout, "farray_stats.nelmts = %" PRIuHSIZE ", state->nelmts = %" PRIuHSIZE "\n",
+                  farray_stats.nelmts, state->nelmts);
         TEST_ERROR
     }
 
@@ -488,11 +488,11 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
             TEST_ERROR
         } /* end if */
 
-        PASSED()
+        PASSED();
     }
 #else  /* NDEBUG */
     SKIPPED();
-    puts("    Not tested when assertions are disabled");
+    HDputs("    Not tested when assertions are disabled");
 #endif /* NDEBUG */
 
     /*
@@ -504,7 +504,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
     if (create_array(f, cparam, &fa, &fa_addr) < 0)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     /* Verify the creation parameters */
     TESTING("verify array creation parameters");
@@ -518,7 +518,7 @@ test_create(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t H5_ATTR_UNUSE
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -586,7 +586,7 @@ test_reopen(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -686,7 +686,7 @@ test_open_twice(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *tpara
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -820,7 +820,7 @@ test_open_twice_diff(hid_t fapl_id, H5FA_create_t *cparam, farray_test_param_t *
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -943,7 +943,7 @@ test_delete_open(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam)
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1471,7 +1471,7 @@ test_set_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, h
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1599,7 +1599,7 @@ test_skip_elmts(hid_t fapl, H5FA_create_t *cparam, farray_test_param_t *tparam, 
         TEST_ERROR
 
     /* All tests passed */
-    PASSED()
+    PASSED();
 
     return 0;
 

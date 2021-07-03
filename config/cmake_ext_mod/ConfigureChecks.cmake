@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -20,21 +20,7 @@ include (CheckSymbolExists)
 include (CheckTypeSize)
 include (CheckVariableExists)
 include (TestBigEndian)
-
-#-----------------------------------------------------------------------------
-# APPLE/Darwin setup
-#-----------------------------------------------------------------------------
-if (APPLE)
-  list (LENGTH CMAKE_OSX_ARCHITECTURES ARCH_LENGTH)
-  if (ARCH_LENGTH GREATER 1)
-    set (CMAKE_OSX_ARCHITECTURES "" CACHE STRING "" FORCE)
-    message (FATAL_ERROR "Building Universal Binaries on OS X is NOT supported by the HDF5 project. This is"
-    "due to technical reasons. The best approach would be build each architecture in separate directories"
-    "and use the 'lipo' tool to combine them into a single executable or library. The 'CMAKE_OSX_ARCHITECTURES'"
-    "variable has been set to a blank value which will build the default architecture for this system.")
-  endif ()
-  set (${HDF_PREFIX}_AC_APPLE_UNIVERSAL_BUILD 0)
-endif ()
+include (CheckStructHasMember)
 
 # Check for Darwin (not just Apple - we also want to catch OpenDarwin)
 if (${CMAKE_SYSTEM_NAME} MATCHES "Darwin")
@@ -68,6 +54,7 @@ if (MINGW)
   set (WINDOWS 1) # MinGW tries to imitate Windows
   set (CMAKE_REQUIRED_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
   set (${HDF_PREFIX}_HAVE_WINSOCK2_H 1)
+  set (__USE_MINGW_ANSI_STDIO 1)
 endif ()
 
 if (WIN32 AND NOT MINGW)
@@ -136,15 +123,11 @@ CHECK_INCLUDE_FILE_CONCAT ("stddef.h"        ${HDF_PREFIX}_HAVE_STDDEF_H)
 CHECK_INCLUDE_FILE_CONCAT ("stdint.h"        ${HDF_PREFIX}_HAVE_STDINT_H)
 CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        ${HDF_PREFIX}_HAVE_UNISTD_H)
 
-# Darwin
-CHECK_INCLUDE_FILE_CONCAT ("mach/mach_time.h" ${HDF_PREFIX}_HAVE_MACH_MACH_TIME_H)
-
 # Windows
 CHECK_INCLUDE_FILE_CONCAT ("io.h"            ${HDF_PREFIX}_HAVE_IO_H)
 if (NOT CYGWIN)
   CHECK_INCLUDE_FILE_CONCAT ("winsock2.h"      ${HDF_PREFIX}_HAVE_WINSOCK2_H)
 endif ()
-CHECK_INCLUDE_FILE_CONCAT ("sys/timeb.h"     ${HDF_PREFIX}_HAVE_SYS_TIMEB_H)
 
 if (CMAKE_SYSTEM_NAME MATCHES "OSF")
   CHECK_INCLUDE_FILE_CONCAT ("sys/sysinfo.h" ${HDF_PREFIX}_HAVE_SYS_SYSINFO_H)
@@ -165,6 +148,8 @@ CHECK_INCLUDE_FILE_CONCAT ("memory.h"        ${HDF_PREFIX}_HAVE_MEMORY_H)
 CHECK_INCLUDE_FILE_CONCAT ("dlfcn.h"         ${HDF_PREFIX}_HAVE_DLFCN_H)
 CHECK_INCLUDE_FILE_CONCAT ("inttypes.h"      ${HDF_PREFIX}_HAVE_INTTYPES_H)
 CHECK_INCLUDE_FILE_CONCAT ("netinet/in.h"    ${HDF_PREFIX}_HAVE_NETINET_IN_H)
+CHECK_INCLUDE_FILE_CONCAT ("netdb.h"         ${HDF_PREFIX}_HAVE_NETDB_H)
+CHECK_INCLUDE_FILE_CONCAT ("arpa/inet.h"     ${HDF_PREFIX}_HAVE_ARPA_INET_H)
 # _Bool type support
 CHECK_INCLUDE_FILE_CONCAT (stdbool.h    ${HDF_PREFIX}_HAVE_STDBOOL_H)
 
@@ -224,7 +209,9 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
       )
     endif ()
 
-    #message (STATUS "Performing ${OTHER_TEST}")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (TRACE "Performing ${OTHER_TEST}")
+    endif ()
     try_compile (${OTHER_TEST}
         ${CMAKE_BINARY_DIR}
         ${HDF_RESOURCES_EXT_DIR}/HDFTests.c
@@ -234,9 +221,13 @@ macro (HDF_FUNCTION_TEST OTHER_TEST)
     )
     if (${OTHER_TEST})
       set (${HDF_PREFIX}_${OTHER_TEST} 1 CACHE INTERNAL "Other test ${FUNCTION}")
-      message (STATUS "Performing Other Test ${OTHER_TEST} - Success")
+      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+        message (VERBOSE "Performing Other Test ${OTHER_TEST} - Success")
+      endif ()
     else ()
-      message (STATUS "Performing Other Test ${OTHER_TEST} - Failed")
+      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+        message (VERBOSE "Performing Other Test ${OTHER_TEST} - Failed")
+      endif ()
       set (${HDF_PREFIX}_${OTHER_TEST} "" CACHE INTERNAL "Other test ${FUNCTION}")
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Performing Other Test ${OTHER_TEST} failed with the following output:\n"
@@ -273,11 +264,11 @@ if (MINGW OR NOT WINDOWS)
   # systems.
   # POSIX feature information can be found in the gcc manual at:
   # http://www.gnu.org/s/libc/manual/html_node/Feature-Test-Macros.html
-  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200112L)
+  set (HDF_EXTRA_C_FLAGS -D_POSIX_C_SOURCE=200809L)
 
   # Need to add this so that O_DIRECT is visible for the direct
   # VFD on Linux systems.
-  set (HDF_EXTRA_C_FLAGS -D_GNU_SOURCE)
+  set (HDF_EXTRA_C_FLAGS ${HDF_EXTRA_C_FLAGS} -D_GNU_SOURCE)
 
   option (HDF_ENABLE_LARGE_FILE "Enable support for large (64-bit) files on Linux." ON)
   if (HDF_ENABLE_LARGE_FILE AND NOT DEFINED TEST_LFS_WORKS_RUN)
@@ -297,17 +288,23 @@ if (MINGW OR NOT WINDOWS)
         set (TEST_LFS_WORKS 1 CACHE INTERNAL ${msg})
         set (LARGEFILE 1)
         set (HDF_EXTRA_FLAGS ${HDF_EXTRA_FLAGS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE)
-        message (STATUS "${msg}... yes")
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "${msg}... yes")
+        endif ()
       else ()
         set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-        message (STATUS "${msg}... no")
+        if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "${msg}... no")
+        endif ()
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
               "Test TEST_LFS_WORKS Run failed with the following exit code:\n ${TEST_LFS_WORKS_RUN}\n"
         )
       endif ()
     else ()
       set (TEST_LFS_WORKS "" CACHE INTERNAL ${msg})
-      message (STATUS "${msg}... no")
+      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+          message (VERBOSE "${msg}... no")
+      endif ()
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
           "Test TEST_LFS_WORKS Compile failed\n"
       )
@@ -328,7 +325,7 @@ if (MINGW OR NOT WINDOWS)
 
   CHECK_FUNCTION_EXISTS (fseeko               ${HDF_PREFIX}_HAVE_FSEEKO)
 
-  HDF_FUNCTION_TEST (HAVE_STAT64_STRUCT)
+  CHECK_STRUCT_HAS_MEMBER("struct stat64" st_blocks "sys/types.h;sys/stat.h" HAVE_STAT64_STRUCT)
   if (HAVE_STAT64_STRUCT)
     CHECK_FUNCTION_EXISTS (stat64             ${HDF_PREFIX}_HAVE_STAT64)
   endif ()
@@ -340,11 +337,15 @@ endif ()
 macro (HDF_CHECK_TYPE_SIZE type var)
   set (aType ${type})
   set (aVar  ${var})
-#  message (STATUS "Checking size of ${aType} and storing into ${aVar}")
+  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+    message (TRACE "Checking size of ${aType} and storing into ${aVar}")
+  endif ()
   CHECK_TYPE_SIZE (${aType}   ${aVar})
   if (NOT ${aVar})
     set (${aVar} 0 CACHE INTERNAL "SizeOf for ${aType}")
-#    message (STATUS "Size of ${aType} was NOT Found")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (TRACE "Size of ${aType} was NOT Found")
+    endif ()
   endif ()
 endmacro ()
 
@@ -438,14 +439,18 @@ if (MINGW OR NOT WINDOWS)
   #-----------------------------------------------------------------------------
   # Check a bunch of time functions
   #-----------------------------------------------------------------------------
+  CHECK_STRUCT_HAS_MEMBER("struct tm" tm_gmtoff "time.h" ${HDF_PREFIX}_HAVE_TM_GMTOFF)
+  CHECK_STRUCT_HAS_MEMBER("struct tm" __tm_gmtoff "time.h" ${HDF_PREFIX}_HAVE___TM_GMTOFF)
+  CHECK_STRUCT_HAS_MEMBER("struct tm" tm_sec "sys/types.h;sys/time.h;time.h" ${HDF_PREFIX}_TIME_WITH_SYS_TIME)
+  if (${HDF_PREFIX}_HAVE_SYS_TIME_H)
+    CHECK_STRUCT_HAS_MEMBER("struct tm" tz_minuteswest "sys/types.h;sys/time.h;time.h" ${HDF_PREFIX}_HAVE_STRUCT_TIMEZONE)
+  else ()
+    CHECK_STRUCT_HAS_MEMBER("struct tm" tz_minuteswest "sys/types.h;time.h" ${HDF_PREFIX}_HAVE_STRUCT_TIMEZONE)
+  endif ()
   CHECK_FUNCTION_EXISTS (gettimeofday      ${HDF_PREFIX}_HAVE_GETTIMEOFDAY)
   foreach (time_test
-      HAVE_TM_GMTOFF
-      HAVE___TM_GMTOFF
 #      HAVE_TIMEZONE
-      HAVE_STRUCT_TIMEZONE
       GETTIMEOFDAY_GIVES_TZ
-      TIME_WITH_SYS_TIME
       HAVE_TM_ZONE
       HAVE_STRUCT_TM_TM_ZONE
   )
@@ -453,20 +458,19 @@ if (MINGW OR NOT WINDOWS)
   endforeach ()
   if (NOT CYGWIN AND NOT MINGW)
       HDF_FUNCTION_TEST (HAVE_TIMEZONE)
-#      HDF_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
   endif ()
 
   # ----------------------------------------------------------------------
   # Does the struct stat have the st_blocks field?  This field is not Posix.
   #
-  HDF_FUNCTION_TEST (HAVE_STAT_ST_BLOCKS)
+  CHECK_STRUCT_HAS_MEMBER("struct stat" st_blocks "sys/types.h;sys/stat.h" ${HDF_PREFIX}_HAVE_STAT_ST_BLOCKS)
 
   # ----------------------------------------------------------------------
   # How do we figure out the width of a tty in characters?
   #
   CHECK_FUNCTION_EXISTS (ioctl             ${HDF_PREFIX}_HAVE_IOCTL)
-  HDF_FUNCTION_TEST (HAVE_STRUCT_VIDEOCONFIG)
-  HDF_FUNCTION_TEST (HAVE_STRUCT_TEXT_INFO)
+  CHECK_STRUCT_HAS_MEMBER ("struct videoconfig" numtextcols "" ${HDF_PREFIX}_HAVE_STRUCT_VIDEOCONFIG)
+  CHECK_STRUCT_HAS_MEMBER ("struct text_info" screenwidth "" ${HDF_PREFIX}_HAVE_STRUCT_TEXT_INFO)
   CHECK_FUNCTION_EXISTS (_getvideoconfig   ${HDF_PREFIX}_HAVE__GETVIDEOCONFIG)
   CHECK_FUNCTION_EXISTS (gettextinfo       ${HDF_PREFIX}_HAVE_GETTEXTINFO)
   CHECK_FUNCTION_EXISTS (_scrsize          ${HDF_PREFIX}_HAVE__SCRSIZE)
@@ -571,7 +575,9 @@ endif ()
 #-----------------------------------------------------------------------------
 if (WINDOWS)
   if (NOT HDF_NO_IOEO_TEST)
-  message (STATUS "Checking for InitOnceExecuteOnce:")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "Checking for InitOnceExecuteOnce:")
+    endif ()
   if (NOT DEFINED ${HDF_PREFIX}_HAVE_IOEO)
     if (LARGEFILE)
       set (CMAKE_REQUIRED_DEFINITIONS
@@ -600,7 +606,9 @@ if (WINDOWS)
     # if the return value was 0 then it worked
     if ("${HAVE_IOEO_EXITCODE}" EQUAL 0)
       set (${HDF_PREFIX}_HAVE_IOEO 1 CACHE INTERNAL "Test InitOnceExecuteOnce")
-      message (STATUS "Performing Test InitOnceExecuteOnce - Success")
+      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+        message (VERBOSE "Performing Test InitOnceExecuteOnce - Success")
+      endif ()
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeOutput.log
         "Performing C SOURCE FILE Test InitOnceExecuteOnce succeded with the following output:\n"
         "${OUTPUT}\n"
@@ -612,7 +620,9 @@ if (WINDOWS)
         set (${HDF_PREFIX}_HAVE_IOEO "" CACHE INTERNAL "Test InitOnceExecuteOnce")
       endif ()
 
-      message (STATUS "Performing Test InitOnceExecuteOnce - Failed")
+      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+        message (VERBOSE "Performing Test InitOnceExecuteOnce - Failed")
+      endif ()
       file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
         "Performing InitOnceExecuteOnce Test  failed with the following output:\n"
         "${OUTPUT}\n"
@@ -635,7 +645,9 @@ endforeach ()
 #-----------------------------------------------------------------------------
 if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "unknown")
   set (PRINT_LL_FOUND 0)
-  message (STATUS "Checking for appropriate format for 64 bit long:")
+  if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+    message (VERBOSE "Checking for appropriate format for 64 bit long:")
+  endif ()
   set (CURRENT_TEST_DEFINITIONS "-DPRINTF_LL_WIDTH")
   if (${HDF_PREFIX}_SIZEOF_LONG_LONG)
     set (CURRENT_TEST_DEFINITIONS "${CURRENT_TEST_DEFINITIONS} -DHAVE_LONG_LONG")
@@ -652,7 +664,9 @@ if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "
       set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"${${HDF_PREFIX}_PRINTF_LL}\"" CACHE INTERNAL "Width for printf for type `long long' or `__int64', us. `ll")
       set (PRINT_LL_FOUND 1)
     else ()
-      message (STATUS "Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
+      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+        message (VERBOSE "Width test failed with result: ${${HDF_PREFIX}_PRINTF_LL_TEST_RUN}")
+      endif ()
     endif ()
   else ()
     file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
@@ -661,9 +675,13 @@ if (NOT ${HDF_PREFIX}_PRINTF_LL_WIDTH OR ${HDF_PREFIX}_PRINTF_LL_WIDTH MATCHES "
   endif ()
 
   if (PRINT_LL_FOUND)
-    message (STATUS "Checking for appropriate format for 64 bit long: found ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "Checking for appropriate format for 64 bit long: found ${${HDF_PREFIX}_PRINTF_LL_WIDTH}")
+    endif ()
   else ()
-    message (STATUS "Checking for appropriate format for 64 bit long: not found")
+    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
+      message (VERBOSE "Checking for appropriate format for 64 bit long: not found")
+    endif ()
     set (${HDF_PREFIX}_PRINTF_LL_WIDTH "\"unknown\"" CACHE INTERNAL
         "Width for printf for type `long long' or `__int64', us. `ll"
     )

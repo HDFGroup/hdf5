@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -16,11 +16,7 @@
    ttypes.cpp - HDF5 C++ testing the general datatype functionality
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -399,7 +395,7 @@ test_vltype()
 
         // Verify that the copied type has a valid id
         bool is_valid = IdComponent::isValid(vltype2.getId());
-        verify_val(in_class, true, "isValid on vltype2", __LINE__, __FILE__);
+        verify_val(is_valid, true, "isValid on vltype2", __LINE__, __FILE__);
 
         in_class = vltype2.detectClass(H5T_VLEN);
         verify_val(in_class, true, "VarLenType::detectClass() with H5T_VLEN for vltype2", __LINE__, __FILE__);
@@ -730,8 +726,11 @@ test_named()
 
         // It should be possible to define an attribute for the named type
         Attribute attr1 = itype.createAttribute("attr1", PredType::NATIVE_UCHAR, space);
-        for (i = 0; i < ds_size[0] * ds_size[1]; i++)
-            attr_data[0][i] = (int)i; /*tricky*/
+        for (hsize_t i = 0; i < ds_size[0]; i++) {
+            for (hsize_t j = 0; j < ds_size[1]; j++) {
+                attr_data[i][j] = static_cast<unsigned>(i * ds_size[1] + j);
+            }
+        }
         attr1.write(PredType::NATIVE_UINT, attr_data);
         attr1.close();
 
@@ -1017,8 +1016,8 @@ test_encode_decode()
         FloatType decoded_flttyp(decoded_flt_ptr->getId());
         verify_val(flttyp == decoded_flttyp, true, "DataType::decode", __LINE__, __FILE__);
 
-        H5std_string norm_string;
-        H5T_norm_t   mant_norm = decoded_flttyp.getNorm(norm_string);
+        // H5std_string norm_string;
+        // H5T_norm_t mant_norm = decoded_flttyp.getNorm(norm_string);
         // verify_val(decoded_flttyp.isVariableStr(), true, "DataType::decode", __LINE__, __FILE__);
 
         delete decoded_flt_ptr;

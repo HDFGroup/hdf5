@@ -8,6 +8,18 @@ usage: h5repack [OPTIONS] file1 file2
    -n, --native            Use a native HDF5 type when repacking
    --enable-error-stack    Prints messages from the HDF5 error stack as they
                            occur
+   --src-vol-value         Value (ID) of the VOL connector to use for opening the
+                           input HDF5 file specified
+   --src-vol-name          Name of the VOL connector to use for opening the input
+                           HDF5 file specified
+   --src-vol-info          VOL-specific info to pass to the VOL connector used for
+                           opening the input HDF5 file specified
+   --dst-vol-value         Value (ID) of the VOL connector to use for opening the
+                           output HDF5 file specified
+   --dst-vol-name          Name of the VOL connector to use for opening the output
+                           HDF5 file specified
+   --dst-vol-info          VOL-specific info to pass to the VOL connector used for
+                           opening the output HDF5 file specified
    -L, --latest            Use latest version of file format
                            This option will take precedence over the options
                            --low and --high
@@ -17,6 +29,9 @@ usage: h5repack [OPTIONS] file1 file2
    --high=BOUND            The high bound for library release versions to use
                            when creating objects in the file
                            (default is H5F_LIBVER_LATEST)
+   --merge                 Follow external soft link recursively and merge data
+   --prune                 Do not follow external soft links and remove link
+   --merge --prune         Follow external link, merge data and remove dangling link
    -c L1, --compact=L1     Maximum number of links in header messages
    -d L2, --indexed=L2     Minimum number of links in the indexed format
    -s S[:F], --ssize=S[:F] Shared object header message minimum size
@@ -61,7 +76,8 @@ usage: h5repack [OPTIONS] file1 file2
         1: This is H5F_LIBVER_V18 in H5F_libver_t struct
         2: This is H5F_LIBVER_V110 in H5F_libver_t struct
         3: This is H5F_LIBVER_V112 in H5F_libver_t struct
-           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V112 for this release
+        4: This is H5F_LIBVER_V114 in H5F_libver_t struct
+           (H5F_LIBVER_LATEST is aliased to H5F_LIBVER_V114 for this release
 
     FS_STRATEGY is a string indicating the file space strategy used:
         FSM_AGGR:
@@ -120,6 +136,7 @@ usage: h5repack [OPTIONS] file1 file2
         UD=<filter_number,filter_flag,cd_value_count,value1[,value2,...,valueN]>
             Required values: filter_number, filter_flag, cd_value_count, value1
             Optional values: value2 to valueN
+            filter_flag: 1 is OPTIONAL or 0 is MANDATORY
         NONE (no parameter)
 
     LAYT - is a string with the format:

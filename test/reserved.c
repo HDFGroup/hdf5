@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -126,7 +126,7 @@ rsrv_heap(void)
     /* If we can read a dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)
@@ -268,7 +268,7 @@ rsrv_ohdr(void)
     /* If we can read the dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)
@@ -432,7 +432,7 @@ rsrv_vlen(void)
     /* If we can read the dataset from the file, the file has been flushed to disk
      * (if the heap or object headers weren't flushed, the file would be empty).
      */
-    if (dataset_id == H5I_BADID)
+    if (dataset_id == H5I_INVALID_HID)
         TEST_ERROR;
 
     if (H5Dclose(dataset_id) < 0)

@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -15,12 +15,12 @@
 
 PROGRAM H5_EXTEND
 
-  USE HDF5 ! This module contains all necessary modules 
+  USE HDF5 ! This module contains all necessary modules
 
   IMPLICIT NONE
 
   !
-  !the dataset is stored in file "extend.h5" 
+  !the dataset is stored in file "extend.h5"
   !
   CHARACTER(LEN=9), PARAMETER :: filename = "extend.h5"
 
@@ -30,11 +30,11 @@ PROGRAM H5_EXTEND
   CHARACTER(LEN=15), PARAMETER :: dsetname = "ExtendibleArray"
   INTEGER :: RANK = 2
 
-  INTEGER(HID_T) :: file_id       ! File identifier 
-  INTEGER(HID_T) :: dset_id       ! Dataset identifier 
-  INTEGER(HID_T) :: dataspace     ! Dataspace identifier 
-  INTEGER(HID_T) :: memspace      ! Memory dataspace identifier 
-  INTEGER(HID_T) :: crp_list      ! Dataset creation property identifier 
+  INTEGER(HID_T) :: file_id       ! File identifier
+  INTEGER(HID_T) :: dset_id       ! Dataset identifier
+  INTEGER(HID_T) :: dataspace     ! Dataspace identifier
+  INTEGER(HID_T) :: memspace      ! Memory dataspace identifier
+  INTEGER(HID_T) :: crp_list      ! Dataset creation property identifier
 
   !
   !dataset dimensions at creation time
@@ -42,7 +42,7 @@ PROGRAM H5_EXTEND
   INTEGER(HSIZE_T), DIMENSION(1:2) :: dims = (/3,3/)
 
   !
-  !data dimensions 
+  !data dimensions
   !
   INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsc = (/2,5/)
   INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsm = (/3,7/)
@@ -50,49 +50,49 @@ PROGRAM H5_EXTEND
   !
   !Maximum dimensions
   !
-  INTEGER(HSIZE_T), DIMENSION(1:2) :: maxdims 
+  INTEGER(HSIZE_T), DIMENSION(1:2) :: maxdims
 
   INTEGER(HSIZE_T), DIMENSION(1:2) :: offset
-  INTEGER(HSIZE_T), DIMENSION(1:2) :: count 
+  INTEGER(HSIZE_T), DIMENSION(1:2) :: count
 
   !
-  ! Variables for reading and writing 
+  ! Variables for reading and writing
   !
-  INTEGER, DIMENSION(1:3,1:3)  :: data1 
+  INTEGER, DIMENSION(1:3,1:3)  :: data1
   INTEGER, DIMENSION(1:21) :: data2 = &
        (/2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4, 2, 3, 4/)
   INTEGER(HSIZE_T), DIMENSION(1:2) :: data_dims
 
   !
-  !Size of data in the file 
+  !Size of data in the file
   !
   INTEGER(HSIZE_T), DIMENSION(1:2) :: size
 
   !
-  !general purpose integer 
+  !general purpose integer
   !
   INTEGER(HSIZE_T) :: i, j
 
   !
-  !flag to check operation success 
+  !flag to check operation success
   !
-  INTEGER :: error 
+  INTEGER :: error
 
   !
   !Variables used in reading data back
-  !  
+  !
   INTEGER(HSIZE_T), DIMENSION(1:2) :: dimsr, maxdimsr
   INTEGER :: rankr
-  INTEGER, DIMENSION(1:3,1:10)  :: rdata 
+  INTEGER, DIMENSION(1:3,1:10)  :: rdata
 
   !
   !Initialize FORTRAN predifined datatypes
   !
-  CALL h5open_f(error) 
+  CALL h5open_f(error)
 
   !
   !Create a new file using default properties.
-  ! 
+  !
   CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, error)
 
   !
@@ -117,7 +117,7 @@ PROGRAM H5_EXTEND
   CALL h5sclose_f(dataspace, error)
 
   !
-  !Fill data array with 1's 
+  !Fill data array with 1's
   !
   DO i = 1, dims(1)
      DO j = 1, dims(2)
@@ -128,7 +128,7 @@ PROGRAM H5_EXTEND
   !
   !Write data array to dataset
   !
-  data_dims(1:2) = (/3,3/) 
+  data_dims(1:2) = (/3,3/)
   CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, data1, data_dims, error)
 
   !
@@ -144,7 +144,7 @@ PROGRAM H5_EXTEND
 
   !
   !Write to 3x7 extended part of dataset
-  !   
+  !
   CALL h5dget_space_f(dset_id, dataspace, error)
   CALL h5sselect_hyperslab_f(dataspace, H5S_SELECT_SET_F, &
        offset, count, error)
@@ -185,7 +185,7 @@ PROGRAM H5_EXTEND
 
   !
   !Get dataspace's dimensions.
-  ! 
+  !
   CALL h5sget_simple_extent_dims_f(dataspace, dimsr, maxdimsr, error)
 
   !
@@ -204,15 +204,15 @@ PROGRAM H5_EXTEND
   CALL h5screate_simple_f(rankr, dimsr, memspace, error)
 
   !
-  !Read data 
+  !Read data
   !
   data_dims(1:2) = (/3,10/)
   CALL H5dread_f(dset_id, H5T_NATIVE_INTEGER, rdata, data_dims, &
        error, memspace, dataspace)
 
-  WRITE(*,'(A)') "Dataset:" 
+  WRITE(*,'(A)') "Dataset:"
   DO i = 1, dimsr(1)
-     WRITE(*,'(100(I0,1X))') rdata(i,1:dimsr(2))    
+     WRITE(*,'(100(I0,1X))') rdata(i,1:dimsr(2))
   END DO
 
   !

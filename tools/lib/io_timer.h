@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef IO_TIMER__
-#define IO_TIMER__
+#ifndef IO_TIMER
+#define IO_TIMER
 
 #include "hdf5.h"
 
@@ -88,4 +88,4 @@ H5TOOLS_DLL double     io_time_get(io_time_t *pt, timer_type t);
 }
 #endif /* __cplusplus */
 
-#endif /* IO_TIMER__ */
+#endif /* IO_TIMER */

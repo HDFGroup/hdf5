@@ -12,16 +12,16 @@ GROUP "/" {
             }
          }
          ATTRIBUTE "trefer_ext1.h5/Group1/Dataset2/Attr1" {
-               NULL
+            NULL
          }
-         ATTRIBUTE "trefer_ext1.h5/Group1/Attr2"  {
+         ATTRIBUTE "trefer_ext1.h5/Group1/Attr2" {
             DATATYPE  H5T_STD_U32LE
             DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
             DATA {
             (0): 1, 4, 7, 10
             }
          }
-         ATTRIBUTE "trefer_ext1.h5/Group1/Datatype1/Attr3"  {
+         ATTRIBUTE "trefer_ext1.h5/Group1/Datatype1/Attr3" {
             DATATYPE  H5T_STD_U32LE
             DATASPACE  SIMPLE { ( 4 ) / ( 4 ) }
             DATA {

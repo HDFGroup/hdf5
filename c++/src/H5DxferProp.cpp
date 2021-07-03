@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -312,7 +312,7 @@ DSetMemXferPropList::getDataTransform() const
 {
     // Initialize string to "", so that if there is no expression, the returned
     // string will be empty
-    H5std_string expression("");
+    H5std_string expression;
 
     // Preliminary call to get the expression's length
     ssize_t exp_len = H5Pget_data_transform(id, NULL, (size_t)0);

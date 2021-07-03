@@ -6,13 +6,11 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
 #include "h5hltest.h"
 #include "H5srcdir.h"
 #include "H5DSpublic.h"
@@ -3556,9 +3554,9 @@ verify_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
     int ret = 0;
 
     /* unused */
-    dset         = dset;
-    dim          = dim;
-    visitor_data = visitor_data;
+    (void)dset;
+    (void)dim;
+    (void)visitor_data;
 
     /* define a positive value for return value. This will cause the iterator to
     immediately return that positive value, indicating short-circuit success
@@ -3604,8 +3602,8 @@ read_scale(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
     char *   data = (char *)visitor_data;
 
     /* unused */
-    dset = dset;
-    dim  = dim;
+    (void)dset;
+    (void)dim;
 
     /* get space */
     if ((sid = H5Dget_space(scale_id)) < 0)
@@ -3693,7 +3691,7 @@ match_dim_scale(hid_t did, unsigned dim, hid_t dsid, void *visitor_data)
     hsize_t  storage_size;
 
     /* Stop compiler from whining about "unused parameters" */
-    visitor_data = visitor_data;
+    (void)visitor_data;
 
     /*-------------------------------------------------------------------------
      * get DID (dataset) space info
@@ -3771,9 +3769,9 @@ static herr_t
 op_continue(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 {
     /* Stop compiler from whining about "unused parameters" */
-    dset     = dset;
-    dim      = dim;
-    scale_id = scale_id;
+    (void)dset;
+    (void)dim;
+    (void)scale_id;
 
     if (visitor_data != NULL) {
         (*(int *)visitor_data)++;
@@ -3804,9 +3802,9 @@ static herr_t
 op_stop(hid_t dset, unsigned dim, hid_t scale_id, void *visitor_data)
 {
     /* Stop compiler from whining about "unused parameters" */
-    dset     = dset;
-    dim      = dim;
-    scale_id = scale_id;
+    (void)dset;
+    (void)dim;
+    (void)scale_id;
 
     if (visitor_data != NULL) {
         (*(int *)visitor_data)++;

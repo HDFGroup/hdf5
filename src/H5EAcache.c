@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5EAcache.c
  *			Aug 26 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implement extensible array metadata cache methods.
  *
@@ -217,7 +217,6 @@ const H5AC_class_t H5AC_EARRAY_DBLK_PAGE[1] = {{
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -279,7 +278,6 @@ END_FUNC(STATIC) /* end H5EA__cache_hdr_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -309,7 +307,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     hdr->addr = udata->addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5EA_HDR_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong extensible array header signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -404,7 +402,6 @@ END_FUNC(STATIC) /* end H5EA__cache_hdr_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -432,7 +429,6 @@ END_FUNC(STATIC) /* end H5EA__cache_hdr_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -464,7 +460,7 @@ BEGIN_FUNC(STATIC, NOERR, herr_t, SUCCEED, -,
     /* General array creation/configuration information */
     *image++ = hdr->cparam.raw_elmt_size;      /* Element size in file (in bytes) */
     *image++ = hdr->cparam.max_nelmts_bits;    /* Log2(Max. # of elements in array) - i.e. # of bits needed to
-                                                  store max. # of elements */
+                                                  store    max. # of elements */
     *image++ = hdr->cparam.idx_blk_elmts;      /* # of elements to store in index block */
     *image++ = hdr->cparam.data_blk_min_elmts; /* Min. # of elements per data block */
     *image++ = hdr->cparam.sup_blk_min_data_ptrs; /* Min. # of data block pointers for a super block */
@@ -580,7 +576,6 @@ END_FUNC(STATIC) /* end H5EA__cache_hdr_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 16, 2013
  *
  *-------------------------------------------------------------------------
@@ -606,7 +601,6 @@ END_FUNC(STATIC) /* end H5EA__cache_hdr_free_icr() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -675,7 +669,6 @@ END_FUNC(STATIC) /* end H5EA__cache_iblock_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -704,7 +697,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     iblock->addr = hdr->idx_blk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5EA_IBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong extensible array index block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -781,7 +774,6 @@ END_FUNC(STATIC) /* end H5EA__cache_iblock_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -809,7 +801,6 @@ END_FUNC(STATIC) /* end H5EA__cache_iblock_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -895,7 +886,6 @@ END_FUNC(STATIC) /* end H5EA__cache_iblock_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -967,7 +957,6 @@ END_FUNC(STATIC) /* end H5EA__cache_iblock_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -993,7 +982,6 @@ END_FUNC(STATIC) /* end H5EA__cache_iblock_free_icr() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1081,7 +1069,6 @@ END_FUNC(STATIC) /* end H5EA__cache_sblock_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1113,7 +1100,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     sblock->addr = udata->sblk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5EA_SBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong extensible array super block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1184,7 +1171,6 @@ END_FUNC(STATIC) /* end H5EA__cache_sblock_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1212,7 +1198,6 @@ END_FUNC(STATIC) /* end H5EA__cache_sblock_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1285,7 +1270,6 @@ END_FUNC(STATIC) /* end H5EA__cache_sblock_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
@@ -1380,7 +1364,6 @@ END_FUNC(STATIC) /* end H5EA__cache_sblock_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1406,7 +1389,6 @@ END_FUNC(STATIC) /* end H5EA__cache_sblock_free_icr() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1495,7 +1477,6 @@ END_FUNC(STATIC) /* end H5EA__cache_sblock_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1529,7 +1510,7 @@ BEGIN_FUNC(STATIC, ERR, void *, NULL, NULL,
     dblock->addr = udata->dblk_addr;
 
     /* Magic number */
-    if (HDmemcmp(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+    if (HDmemcmp(image, H5EA_DBLOCK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
         H5E_THROW(H5E_BADVALUE, "wrong extensible array data block signature")
     image += H5_SIZEOF_MAGIC;
 
@@ -1596,7 +1577,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblock_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1627,7 +1607,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblock_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1697,7 +1676,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblock_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
@@ -1790,7 +1768,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblock_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1861,7 +1838,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblock_fsf_size() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1923,7 +1899,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblk_page_verify_chksum() */
  *		Failure:	NULL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -1996,7 +1971,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblk_page_deserialize() */
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -2024,7 +1998,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblk_page_image_len() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------
@@ -2075,7 +2048,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblk_page_serialize() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Mar 31 2009
  *
  *-------------------------------------------------------------------------
@@ -2134,8 +2106,9 @@ BEGIN_FUNC(STATIC, ERR, herr_t, SUCCEED, FAIL,
             /* Detach from 'top' proxy for extensible array */
             if (dblk_page->top_proxy) {
                 if (H5AC_proxy_entry_remove_child(dblk_page->top_proxy, dblk_page) < 0)
-                    H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency between data block page "
-                                                "and extensible array 'top' proxy")
+                    H5E_THROW(H5E_CANTUNDEPEND,
+                              "unable to destroy flush dependency between data block page and "
+                              "extensible array 'top' proxy")
                 dblk_page->top_proxy = NULL;
             } /* end if */
             break;
@@ -2170,7 +2143,6 @@ END_FUNC(STATIC) /* end H5EA__cache_dblk_page_notify() */
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 17, 2013
  *
  *-------------------------------------------------------------------------

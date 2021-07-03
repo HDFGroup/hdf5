@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  James Laird <jlaird@ncsa.uiuc.edu>
+ * Programmer:  James Laird
  *              Thursday, March 30, 2006
  *
  * Purpose:     This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5SM package!"
 #endif
 
-#ifndef _H5SMpkg_H
-#define _H5SMpkg_H
+#ifndef H5SMpkg_H
+#define H5SMpkg_H
 
 /* Get package's private header */
 #include "H5SMprivate.h" /* Shared Object Header Messages	*/
@@ -255,26 +255,20 @@ H5_DLLVAR const H5B2_class_t H5SM_INDEX[1];
 /****************************/
 
 /* General routines */
-H5_DLL ssize_t H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id);
+H5_DLL ssize_t H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id);
 
 /* Encode and decode routines, used for B-tree and cache encoding/decoding */
 H5_DLL herr_t H5SM__message_compare(const void *rec1, const void *rec2, int *result);
 H5_DLL herr_t H5SM__message_encode(uint8_t *raw, const void *native, void *ctx);
 H5_DLL herr_t H5SM__message_decode(const uint8_t *raw, void *native, void *ctx);
 
-/* H5B2_remove_t callback to add messages to a list index */
-H5_DLL herr_t H5SM_bt2_convert_to_list_op(const void *record, void *op_data);
-
-/* Fractal heap 'op' callback to compute hash value for message "in place" */
-H5_DLL herr_t H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata);
-
 /* Routines to release data structures */
-herr_t H5SM_table_free(H5SM_master_table_t *table);
-herr_t H5SM_list_free(H5SM_list_t *list);
+H5_DLL herr_t H5SM__table_free(H5SM_master_table_t *table);
+H5_DLL herr_t H5SM__list_free(H5SM_list_t *list);
 
 /* Testing functions */
 #ifdef H5SM_TESTING
 H5_DLL herr_t H5SM__get_mesg_count_test(H5F_t *f, unsigned type_id, size_t *mesg_count);
 #endif /* H5SM_TESTING */
 
-#endif /* _H5SMpkg_H */
+#endif /* H5SMpkg_H */

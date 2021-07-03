@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,8 +19,8 @@
 #error "Do not include this file outside the H5R package!"
 #endif
 
-#ifndef _H5Rpkg_H
-#define _H5Rpkg_H
+#ifndef H5Rpkg_H
+#define H5Rpkg_H
 
 /* Get package's private header */
 #include "H5Rprivate.h"
@@ -119,19 +119,13 @@ H5_DLL herr_t H5R__encode_heap(H5F_t *f, unsigned char *buf, size_t *nalloc, con
                                size_t data_size);
 H5_DLL herr_t H5R__decode_heap(H5F_t *f, const unsigned char *buf, size_t *nbytes, unsigned char **data_ptr,
                                size_t *data_size);
-H5_DLL herr_t H5R__free_heap(H5F_t *f, const unsigned char *buf, size_t nbytes);
-
-H5_DLL herr_t H5R__decode_token_compat(H5VL_object_t *vol_obj, H5I_type_t type, H5R_type_t ref_type,
-                                       const unsigned char *buf, H5O_token_t *obj_token);
 
 H5_DLL herr_t H5R__encode_token_obj_compat(const H5O_token_t *obj_token, size_t token_size,
                                            unsigned char *buf, size_t *nalloc);
 H5_DLL herr_t H5R__decode_token_obj_compat(const unsigned char *buf, size_t *nbytes, H5O_token_t *obj_token,
                                            size_t token_size);
 
-H5_DLL herr_t H5R__encode_token_region_compat(H5F_t *f, const H5O_token_t *obj_token, size_t token_size,
-                                              H5S_t *space, unsigned char *buf, size_t *nalloc);
 H5_DLL herr_t H5R__decode_token_region_compat(H5F_t *f, const unsigned char *buf, size_t *nbytes,
                                               H5O_token_t *obj_token, size_t token_size, H5S_t **space_ptr);
 
-#endif /* _H5Rpkg_H */
+#endif /* H5Rpkg_H */

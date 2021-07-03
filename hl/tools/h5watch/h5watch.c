@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,7 +43,7 @@ static unsigned g_retry = DEFAULT_RETRY;  /* # of times to try opening the file 
 static hbool_t  g_display_hex    = FALSE; /* display data in hexadecimal format : LATER */
 static hbool_t  g_user_interrupt = FALSE; /* Flag to indicate that user interrupted execution */
 
-static herr_t doprint(hid_t did, hsize_t *start, hsize_t *block, int rank);
+static herr_t doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank);
 static herr_t slicendump(hid_t did, hsize_t *prev_dims, hsize_t *cur_dims, hsize_t *start, hsize_t *block,
                          int rank, int subrank);
 static herr_t monitor_dataset(hid_t fid, char *dsetname);
@@ -95,7 +95,7 @@ static struct long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel", no
  *-------------------------------------------------------------------------
  */
 static herr_t
-doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
+doprint(hid_t did, const hsize_t *start, const hsize_t *block, int rank)
 {
     h5tools_context_t ctx;                           /* print context  */
     h5tool_format_t   info;                          /* Format info for the tools library */
@@ -182,7 +182,7 @@ doprint(hid_t did, hsize_t *start, hsize_t *block, int rank)
     info.dset_format     = "DSET-%s ";
     info.dset_hidefileno = 0;
 
-    info.obj_format     = "-%lu:" H5_PRINTF_HADDR_FMT;
+    info.obj_format     = "-%lu:%" PRIuHADDR;
     info.obj_hidefileno = 0;
 
     info.dset_blockformat_pre = "%sBlk%lu: ";
@@ -340,7 +340,8 @@ monitor_dataset(hid_t fid, char *dsetname)
         if (i != ndims) {
             /* Printing changes in dimension sizes */
             for (u = 0; u < ndims; u++) {
-                HDfprintf(stdout, "dimension %u: %Hu->%Hu", (unsigned)u, prev_dims[u], cur_dims[u]);
+                HDfprintf(stdout, "dimension %d: %" PRIuHSIZE "->%" PRIuHSIZE "", u, prev_dims[u],
+                          cur_dims[u]);
                 if (cur_dims[u] > prev_dims[u])
                     HDfprintf(stdout, " (increases)\n");
                 else if (cur_dims[u] < prev_dims[u])
@@ -791,22 +792,16 @@ catch_signal(int H5_ATTR_UNUSED signo)
 int
 main(int argc, const char *argv[])
 {
-    char        drivername[50]; /* VFD name */
-    char *      fname = NULL;   /* File name */
-    char *      dname = NULL;   /* Dataset name */
-    void *      edata;          /* Error reporting */
-    H5E_auto2_t func;           /* Error reporting */
-    char *      x;              /* Temporary string pointer */
-    hid_t       fid  = -1;      /* File ID */
-    hid_t       fapl = -1;      /* File access property list */
+    char  drivername[50]; /* VFD name */
+    char *fname = NULL;   /* File name */
+    char *dname = NULL;   /* Dataset name */
+    char *x;              /* Temporary string pointer */
+    hid_t fid  = -1;      /* File ID */
+    hid_t fapl = -1;      /* File access property list */
 
     /* Set up tool name and exit status */
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
-
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -832,6 +827,9 @@ main(int argc, const char *argv[])
         leave(EXIT_FAILURE);
     }
 
+    /* enable error reporting if command line option */
+    h5tools_error_report();
+
     /* Mostly copied from tools/h5ls coding & modified accordingly */
     /*
      * [OBJECT] is specified as
@@ -850,19 +848,24 @@ main(int argc, const char *argv[])
     if ((fname = HDstrdup(argv[opt_ind])) == NULL) {
         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
         h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     /* Create a copy of file access property list */
-    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        return -1;
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
 
     /* Set to use the latest library format */
-    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-        return -1;
+    if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
+    }
 
     do {
         while (fname && *fname) {
-            fid = h5tools_fopen(fname, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl, NULL, drivername,
+            fid = h5tools_fopen(fname, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl, FALSE, drivername,
                                 sizeof drivername);
 
             if (fid >= 0) {
@@ -884,16 +887,14 @@ main(int argc, const char *argv[])
 
     if (fid < 0) {
         error_msg("unable to open file \"%s\"\n", fname);
-        if (fname)
-            HDfree(fname);
-        if (fapl >= 0)
-            H5Pclose(fapl);
-        leave(EXIT_FAILURE);
+        h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
 
     if (!dname) {
         error_msg("no dataset specified\n");
         h5tools_setstatus(EXIT_FAILURE);
+        goto done;
     }
     else {
         *dname = '/';
@@ -901,16 +902,22 @@ main(int argc, const char *argv[])
         if ((dname = HDstrdup(dname)) == NULL) {
             error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
+            goto done;
         }
         else {
             *x = '\0';
             /* Validate dataset */
-            if (check_dataset(fid, dname) < 0)
+            if (check_dataset(fid, dname) < 0) {
                 h5tools_setstatus(EXIT_FAILURE);
+                goto done;
+            }
             /* Validate input "fields" */
-            else if (g_list_of_fields && *g_list_of_fields)
-                if (process_cmpd_fields(fid, dname) < 0)
+            else if (g_list_of_fields && *g_list_of_fields) {
+                if (process_cmpd_fields(fid, dname) < 0) {
                     h5tools_setstatus(EXIT_FAILURE);
+                    goto done;
+                }
+            }
         }
     }
 
@@ -919,6 +926,7 @@ main(int argc, const char *argv[])
         if (monitor_dataset(fid, dname) < 0)
             h5tools_setstatus(EXIT_FAILURE);
 
+done:
     /* Free spaces */
     if (fname)
         HDfree(fname);
@@ -940,12 +948,11 @@ main(int argc, const char *argv[])
     }
 
     /* Close the file */
-    if (H5Fclose(fid) < 0) {
+    if (fid >= 0 && H5Fclose(fid) < 0) {
         error_msg("unable to close file\n");
         h5tools_setstatus(EXIT_FAILURE);
     }
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
     /* exit */
     leave(h5tools_getstatus());
 } /* main() */

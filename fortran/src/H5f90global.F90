@@ -29,7 +29,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -49,7 +49,7 @@ MODULE H5GLOBAL
     ENUMERATOR :: enum_dtype
   END ENUM
   INTEGER, PARAMETER :: ENUM_T = KIND(enum_dtype)
-  
+
   ! Definitions for reference datatypes.
   ! If you change the value of these parameters, do not forget to change corresponding
   ! values in the H5f90.h file.
@@ -87,7 +87,7 @@ MODULE H5GLOBAL
   INTEGER(HID_T), DIMENSION(1:PREDEF_TYPES_LEN)   :: predef_types = -1
   INTEGER(HID_T), DIMENSION(1:FLOATING_TYPES_LEN) :: floating_types = -1
   INTEGER(HID_T), DIMENSION(1:INTEGER_TYPES_LEN)  :: integer_types = -1
-  
+
   !DEC$if defined(BUILD_HDF5_DLL)
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_REAL_C_FLOAT
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_REAL_C_DOUBLE
@@ -95,7 +95,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_INTEGER
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_REAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_DOUBLE
-  !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_CHARACTER 
+  !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_CHARACTER
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_STD_REF_OBJ
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_STD_REF_DSETREG
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_IEEE_F32BE
@@ -136,14 +136,14 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_INTEGER_KIND
   !DEC$ATTRIBUTES DLLEXPORT :: H5T_NATIVE_FLOAT_128
   !DEC$endif
-  
+
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_FLOAT
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_DOUBLE
   INTEGER(HID_T) :: H5T_NATIVE_REAL_C_LONG_DOUBLE
   INTEGER(HID_T) :: H5T_NATIVE_INTEGER
   INTEGER(HID_T) :: H5T_NATIVE_REAL
   INTEGER(HID_T) :: H5T_NATIVE_DOUBLE
-  INTEGER(HID_T) :: H5T_NATIVE_CHARACTER 
+  INTEGER(HID_T) :: H5T_NATIVE_CHARACTER
   INTEGER(HID_T) :: H5T_STD_REF_OBJ
   INTEGER(HID_T) :: H5T_STD_REF_DSETREG
   INTEGER(HID_T) :: H5T_IEEE_F32BE
@@ -202,7 +202,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5_ITER_N_F
   !DEC$ATTRIBUTES DLLEXPORT :: HADDR_UNDEF_F
   !DEC$endif
-  
+
   INTEGER :: H5_INDEX_UNKNOWN_F
   INTEGER :: H5_INDEX_NAME_F
   INTEGER :: H5_INDEX_CRT_ORDER_F
@@ -243,7 +243,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V110_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5F_LIBVER_V112_F
   !DEC$endif
-  
+
   INTEGER :: H5F_ACC_RDWR_F
   INTEGER :: H5F_ACC_RDONLY_F
   INTEGER :: H5F_ACC_TRUNC_F
@@ -287,7 +287,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5G_STORAGE_TYPE_COMPACT_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5G_STORAGE_TYPE_DENSE_F
   !DEC$endif
-  
+
   INTEGER :: H5G_UNKNOWN_F
   INTEGER :: H5G_GROUP_F
   INTEGER :: H5G_DATASET_F
@@ -338,7 +338,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5D_VDS_LAST_AVAILABLE_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5D_VIRTUAL_F
   !DEC$endif
-  
+
   INTEGER :: H5D_COMPACT_F
   INTEGER :: H5D_CONTIGUOUS_F
   INTEGER :: H5D_CHUNKED_F
@@ -367,7 +367,7 @@ MODULE H5GLOBAL
   ! characters for variable names in Fortran.
   ! shortened "_CONTIGUOUS" to "_CONTIG" to satisfy the limit of 31
   ! characters for variable names in Fortran.
-  
+
   INTEGER(SIZE_T) :: H5D_CHUNK_CACHE_NSLOTS_DFLT_F
   INTEGER(SIZE_T) :: H5D_CHUNK_CACHE_NBYTES_DFLT_F
 
@@ -491,7 +491,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5L_SAME_LOC_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5L_LINK_CLASS_T_VERS_F
   !DEC$endif
-  
+
   INTEGER :: H5L_TYPE_ERROR_F
   INTEGER :: H5L_TYPE_HARD_F
   INTEGER :: H5L_TYPE_SOFT_F
@@ -537,7 +537,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5O_INFO_META_SIZE_F
   !
   !DEC$endif
-  
+
   INTEGER :: H5O_COPY_SHALLOW_HIERARCHY_F ! *** THESE VARIABLES DO
   INTEGER :: H5O_COPY_EXPAND_SOFT_LINK_F  ! NOT MATCH THE C VARIABLE
   INTEGER :: H5O_COPY_EXPAND_EXT_LINK_F   ! IN ORDER
@@ -653,7 +653,7 @@ MODULE H5GLOBAL
   !DEC$ATTRIBUTES DLLEXPORT :: H5S_SEL_HYPERSLABS_F
   !DEC$ATTRIBUTES DLLEXPORT :: H5S_SEL_ALL_F
   !DEC$endif
-  
+
   INTEGER(HSIZE_T) :: H5S_UNLIMITED_F
 
   INTEGER(HID_T) :: H5S_ALL_F
@@ -817,7 +817,7 @@ CONTAINS
 
   SUBROUTINE H5_Fortran_string_c2f(c_string, f_string)
 
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_CHAR, C_NULL_CHAR
     IMPLICIT NONE
     CHARACTER(KIND=C_CHAR, LEN=*), INTENT(IN) :: c_string
     CHARACTER(LEN=*), INTENT(OUT) :: f_string
@@ -829,11 +829,11 @@ CONTAINS
     f_len = LEN(f_string)
 
     ! CASE (1): C string is equal to or larger than Fortran character buffer,
-    !           so fill the entire Fortran buffer. 
+    !           so fill the entire Fortran buffer.
     IF(c_len.GE.f_len)THEN !
        f_string(1:f_len) = c_string(1:f_len)
 
-    ! CASE (2): C string is smaller than Fortran character buffer, 
+    ! CASE (2): C string is smaller than Fortran character buffer,
     !           so copy C string and blank pad remaining characters.
     ELSE
        f_string(1:c_len) = c_string(1:c_len)
@@ -843,7 +843,7 @@ CONTAINS
 
   SUBROUTINE H5_Fortran_string_f2c(f_string, c_string)
 
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_CHAR, C_NULL_CHAR
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: f_string
     CHARACTER(KIND=C_CHAR, LEN=*), INTENT(OUT) :: c_string
@@ -900,6 +900,6 @@ CONTAINS
 !!$        fstring(j:j) = ' '
 !!$    end do
 !!$end subroutine MPIR_Fortran_string_c2f
-  
+
 END MODULE H5GLOBAL
 

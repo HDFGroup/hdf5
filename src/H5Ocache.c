@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5Ocache.c
  *			Sep 28 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Object header metadata cache virtual functions.
  *
@@ -275,7 +275,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *
  *		Note that the object header is read with with a speculative read.
  *		If the initial read is too small, make note of this fact and return
- *     		without error.  H5C_load_entry() will note the size discrepency
+ *     		without error.  H5C__load_entry() will note the size discrepency
  *		and retry the deserialize operation with the correct size read.
  *
  * Return:      Success:        Pointer to in core representation
@@ -1053,7 +1053,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1271,7 +1270,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------
@@ -1337,7 +1335,7 @@ H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t len, const uint8_t *image
     /* Check for magic # on chunks > 0 in later versions of the format */
     else if (chunkno > 0 && oh->version > H5O_VERSION_1) {
         /* Magic number */
-        if (HDmemcmp(chunk_image, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC))
+        if (HDmemcmp(chunk_image, H5O_CHK_MAGIC, (size_t)H5_SIZEOF_MAGIC) != 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "wrong object header chunk signature")
         chunk_image += H5_SIZEOF_MAGIC;
     } /* end if */
@@ -1617,7 +1615,6 @@ done:
  *              Failure: FAIL
  *
  * Programmer:	Quincey Koziol
- *              koziol@hdfgroup.org
  *              July 12, 2008
  *
  *-------------------------------------------------------------------------

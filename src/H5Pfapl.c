@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -208,12 +208,12 @@
 /* Definition for 'mdc log location' flag */
 #define H5F_ACS_MDC_LOG_LOCATION_SIZE  sizeof(char *)
 #define H5F_ACS_MDC_LOG_LOCATION_DEF   NULL /* default is no log location */
-#define H5F_ACS_MDC_LOG_LOCATION_ENC   H5P_facc_mdc_log_location_enc
-#define H5F_ACS_MDC_LOG_LOCATION_DEC   H5P_facc_mdc_log_location_dec
-#define H5F_ACS_MDC_LOG_LOCATION_DEL   H5P_facc_mdc_log_location_del
-#define H5F_ACS_MDC_LOG_LOCATION_COPY  H5P_facc_mdc_log_location_copy
-#define H5F_ACS_MDC_LOG_LOCATION_CMP   H5P_facc_mdc_log_location_cmp
-#define H5F_ACS_MDC_LOG_LOCATION_CLOSE H5P_facc_mdc_log_location_close
+#define H5F_ACS_MDC_LOG_LOCATION_ENC   H5P__facc_mdc_log_location_enc
+#define H5F_ACS_MDC_LOG_LOCATION_DEC   H5P__facc_mdc_log_location_dec
+#define H5F_ACS_MDC_LOG_LOCATION_DEL   H5P__facc_mdc_log_location_del
+#define H5F_ACS_MDC_LOG_LOCATION_COPY  H5P__facc_mdc_log_location_copy
+#define H5F_ACS_MDC_LOG_LOCATION_CMP   H5P__facc_mdc_log_location_cmp
+#define H5F_ACS_MDC_LOG_LOCATION_CLOSE H5P__facc_mdc_log_location_close
 /* Definition for 'start metadata cache logging on access' flag */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_SIZE sizeof(hbool_t)
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_DEF  FALSE
@@ -288,6 +288,29 @@
 #define H5F_ACS_VOL_CONN_COPY  H5P__facc_vol_copy
 #define H5F_ACS_VOL_CONN_CMP   H5P__facc_vol_cmp
 #define H5F_ACS_VOL_CONN_CLOSE H5P__facc_vol_close
+/* Definition for using file locking or not. The default is set
+ * via the configure step.
+ */
+#define H5F_ACS_USE_FILE_LOCKING_SIZE sizeof(hbool_t)
+#if defined H5_USE_FILE_LOCKING && H5_USE_FILE_LOCKING
+#define H5F_ACS_USE_FILE_LOCKING_DEF TRUE
+#else
+#define H5F_ACS_USE_FILE_LOCKING_DEF FALSE
+#endif
+#define H5F_ACS_USE_FILE_LOCKING_ENC H5P__encode_hbool_t
+#define H5F_ACS_USE_FILE_LOCKING_DEC H5P__decode_hbool_t
+/* Definition for whether we ignore file locking errors when we can
+ * tell that file locking has been disabled on the file system.
+ * The default is set via the configure step.
+ */
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE sizeof(hbool_t)
+#if defined H5_IGNORE_DISABLED_FILE_LOCKS && H5_IGNORE_DISABLED_FILE_LOCKS
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF TRUE
+#else
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF FALSE
+#endif
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC H5P__encode_hbool_t
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC H5P__decode_hbool_t
 
 /******************/
 /* Local Typedefs */
@@ -335,12 +358,12 @@ static herr_t H5P__facc_libver_type_enc(const void *value, void **_pp, size_t *s
 static herr_t H5P__facc_libver_type_dec(const void **_pp, void *value);
 
 /* Metadata cache log location property callbacks */
-static herr_t H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size);
-static herr_t H5P_facc_mdc_log_location_dec(const void **_pp, void *value);
-static herr_t H5P_facc_mdc_log_location_del(hid_t prop_id, const char *name, size_t size, void *value);
-static herr_t H5P_facc_mdc_log_location_copy(const char *name, size_t size, void *value);
-static int    H5P_facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t size);
-static herr_t H5P_facc_mdc_log_location_close(const char *name, size_t size, void *value);
+static herr_t H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size);
+static herr_t H5P__facc_mdc_log_location_dec(const void **_pp, void *value);
+static herr_t H5P__facc_mdc_log_location_del(hid_t prop_id, const char *name, size_t size, void *value);
+static herr_t H5P__facc_mdc_log_location_copy(const char *name, size_t size, void *value);
+static int    H5P__facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t size);
+static herr_t H5P__facc_mdc_log_location_close(const char *name, size_t size, void *value);
 
 /* Metadata cache image property callbacks */
 static int    H5P__facc_cache_image_config_cmp(const void *_config1, const void *_config2,
@@ -478,6 +501,10 @@ static const unsigned H5F_def_page_buf_min_meta_perc_g =
     H5F_ACS_PAGE_BUFFER_MIN_META_PERC_DEF; /* Default page buffer minimum metadata size */
 static const unsigned H5F_def_page_buf_min_raw_perc_g =
     H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_DEF; /* Default page buffer mininum raw data size */
+static const hbool_t H5F_def_use_file_locking_g =
+    H5F_ACS_USE_FILE_LOCKING_DEF; /* Default use file locking flag */
+static const hbool_t H5F_def_ignore_disabled_file_locks_g =
+    H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEF; /* Default ignore disabled file locks flag */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_reg_prop
@@ -764,6 +791,19 @@ H5P__facc_reg_prop(H5P_genclass_t *pclass)
                            H5F_ACS_VOL_CONN_CLOSE) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
 
+    /* Register the use file locking flag */
+    if (H5P__register_real(pclass, H5F_ACS_USE_FILE_LOCKING_NAME, H5F_ACS_USE_FILE_LOCKING_SIZE,
+                           &H5F_def_use_file_locking_g, NULL, NULL, NULL, H5F_ACS_USE_FILE_LOCKING_ENC,
+                           H5F_ACS_USE_FILE_LOCKING_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
+    /* Register the ignore disabled file locks flag */
+    if (H5P__register_real(pclass, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME,
+                           H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_SIZE, &H5F_def_ignore_disabled_file_locks_g,
+                           NULL, NULL, NULL, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_ENC,
+                           H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_DEC, NULL, NULL, NULL, NULL) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTINSERT, FAIL, "can't insert property into class")
+
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__facc_reg_prop() */
@@ -790,12 +830,6 @@ done:
  * Programmer:    Robb Matzke
  *              Tuesday, June  9, 1998
  *
- * Modifications:
- *
- *        Raymond Lu
- *        Tuesday, Oct 23, 2001
- *        Changed file access property list mechanism to the new
- *        generic property list.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1206,27 +1240,17 @@ H5P__file_driver_free(void *value)
 
         /* Copy the driver & info, if there is one */
         if (info->driver_id > 0) {
-            if (info->driver_info) {
-                H5FD_class_t *driver; /* Pointer to driver */
 
-                /* Retrieve the driver for the ID */
-                if (NULL == (driver = (H5FD_class_t *)H5I_object(info->driver_id)))
-                    HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a driver ID")
-
-                /* Allow driver to free info or do it ourselves */
-                if (driver->fapl_free) {
-                    if ((driver->fapl_free)((void *)info->driver_info) < 0) /* Casting away const OK -QAK */
-                        HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
-                } /* end if */
-                else
-                    H5MM_xfree((void *)info->driver_info); /* Casting away const OK -QAK */
-            }                                              /* end if */
+            /* Free the driver info, if it exists */
+            if (info->driver_info)
+                if (H5FD_free_driver_info(info->driver_id, info->driver_info) < 0)
+                    HGOTO_ERROR(H5E_PLIST, H5E_CANTFREE, FAIL, "driver info free request failed")
 
             /* Decrement reference count for driver */
             if (H5I_dec_ref(info->driver_id) < 0)
                 HGOTO_ERROR(H5E_PLIST, H5E_CANTDEC, FAIL, "can't decrement reference count for driver ID")
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1662,7 +1686,7 @@ H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts, size_t rdcc_nslots, 
     H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Check arguments */
-    if (rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
+    if (rdcc_w0 < 0.0 || rdcc_w0 > 1.0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
 
@@ -1792,23 +1816,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
+H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", plist_id, config_ptr);
+    H5TRACE2("e", "i*x", plist_id, config);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* validate the config_ptr */
-    if (config_ptr == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-
-    if (config_ptr->version != H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION)
+    /* validate the config ptr */
+    if (config == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config ptr on entry.")
+    if (config->version != H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown image config version.")
 
     /* If we ever support multiple versions of H5AC_cache_config_t, we
@@ -1817,7 +1840,7 @@ H5Pget_mdc_image_config(hid_t plist_id, H5AC_cache_image_config_t *config_ptr)
      */
 
     /* Get the current initial metadata cache resize configuration */
-    if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, config_ptr) < 0)
+    if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_IMAGE_CONFIG_NAME, config) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get metadata cache initial image config")
 
 done:
@@ -1873,7 +1896,7 @@ done:
  * Purpose:    Retrieve the metadata cache initial resize configuration
  *        from the target FAPL.
  *
- *        Observe that the function will fail if config_ptr is
+ *        Observe that the function will fail if config is
  *        NULL, or if config_ptr->version specifies an unknown
  *        version of H5AC_cache_config_t.
  *
@@ -1885,23 +1908,22 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
+H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
     herr_t          ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", plist_id, config_ptr);
+    H5TRACE2("e", "i*x", plist_id, config);
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
-    /* validate the config_ptr */
-    if (config_ptr == NULL)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config_ptr on entry.")
-
-    if (config_ptr->version != H5AC__CURR_CACHE_CONFIG_VERSION)
+    /* validate the config ptr */
+    if (config == NULL)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL config ptr on entry.")
+    if (config->version != H5AC__CURR_CACHE_CONFIG_VERSION)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown config version.")
 
     /* If we ever support multiple versions of H5AC_cache_config_t, we
@@ -1910,7 +1932,7 @@ H5Pget_mdc_config(hid_t plist_id, H5AC_cache_config_t *config_ptr)
      */
 
     /* Get the current initial metadata cache resize configuration */
-    if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, config_ptr) < 0)
+    if (H5P_get(plist, H5F_ACS_META_CACHE_INIT_CONFIG_NAME, config) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get metadata cache initial resize config")
 
 done:
@@ -1938,13 +1960,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *        June, 1999
- *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
  *
  *-------------------------------------------------------------------------
  */
@@ -1980,13 +1995,6 @@ done:
  * Programmer:    Quincey Koziol
  *              June, 1999
  *
- * Modifications:
- *
- *        Raymond Lu
- *        Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2021,8 +2029,6 @@ done:
  * Programmer:  Raymond Lu
  *              November, 2001
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2055,8 +2061,6 @@ done:
  *
  * Programmer:  Raymond Lu
  *              November, 2001
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2100,13 +2104,6 @@ done:
  * Programmer:    Quincey Koziol
  *              Friday, August 25, 2000
  *
- * Modifications:
- *
- *        Raymond Lu
- *        Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2140,13 +2137,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *              Friday, August 29, 2000
- *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2193,13 +2183,6 @@ done:
  * Programmer:    Quincey Koziol
  *              Thursday, September 21, 2000
  *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2233,13 +2216,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *              Thursday, September 21, 2000
- *
- * Modifications:
- *
- *        Raymond Lu
- *         Tuesday, Oct 23, 2001
- *        Changed the file access list to the new generic property
- *        list.
  *
  *-------------------------------------------------------------------------
  */
@@ -2285,8 +2261,6 @@ done:
  * Programmer:    Quincey Koziol
  *              Wednesday, June 5, 2002
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -2320,8 +2294,6 @@ done:
  *
  * Programmer:    Quincey Koziol
  *              Wednesday, June 5, 2002
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -2464,7 +2436,6 @@ H5Pset_libver_bounds(hid_t plist_id, H5F_libver_t low, H5F_libver_t high)
     /* Check args */
     if (low < 0 || low > H5F_LIBVER_LATEST)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "low bound is not valid")
-
     if (high < 0 || high > H5F_LIBVER_LATEST)
         HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL, "high bound is not valid")
 
@@ -2516,15 +2487,13 @@ H5Pget_libver_bounds(hid_t plist_id, H5F_libver_t *low /*out*/, H5F_libver_t *hi
         HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
 
     /* Get values */
-    if (low) {
+    if (low)
         if (H5P_get(plist, H5F_ACS_LIBVER_LOW_BOUND_NAME, low) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get low bound for library format versions")
-    }
 
-    if (high) {
+    if (high)
         if (H5P_get(plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, high) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get high bound for library format versions")
-    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -2689,22 +2658,22 @@ done:
 /*-------------------------------------------------------------------------
  * Function: H5Pget_file_image
  *
- * Purpose:     If the file image exists and buf_ptr_ptr is not NULL,
+ * Purpose:     If the file image exists and buf is not NULL,
  *        allocate a buffer of the correct size, copy the image into
  *        the new buffer, and return the buffer to the caller in
- *        *buf_ptr_ptr.  Do this using the file image callbacks
+ *        *buf.  Do this using the file image callbacks
  *        if defined.
  *
  *        NB: It is the responsibility of the caller to free the
- *        buffer whose address is returned in *buf_ptr_ptr.  Do
+ *        buffer whose address is returned in *buf.  Do
  *        this using free if the file image callbacks are not
  *        defined, or with whatever method is appropriate if
  *        the callbacks are defined.
  *
- *              If buf_ptr_ptr is not NULL, and no image exists, set
- *        *buf_ptr_ptr to NULL.
+ *              If buf is not NULL, and no image exists, set
+ *        *buf to NULL.
  *
- *        If buf_len_ptr is not NULL, set *buf_len_ptr equal
+ *        If buf_len is not NULL, set *buf_len equal
  *        to the length of the file image if it exists, and
  *        to 0 if it does not.
  *
@@ -2716,14 +2685,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
+H5Pget_file_image(hid_t fapl_id, void **buf, size_t *buf_len)
 {
     H5P_genplist_t *       fapl;                /* Property list pointer */
     H5FD_file_image_info_t image_info;          /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE3("e", "i**x*z", fapl_id, buf_ptr_ptr, buf_len_ptr);
+    H5TRACE3("e", "i**x*z", fapl_id, buf, buf_len);
 
     /* Get the plist structure */
     if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -2738,11 +2707,11 @@ H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
              ((image_info.buffer == NULL) && (image_info.size == 0)));
 
     /* Set output size */
-    if (buf_len_ptr != NULL)
-        *buf_len_ptr = image_info.size;
+    if (buf_len != NULL)
+        *buf_len = image_info.size;
 
     /* Duplicate the image if desired, using callbacks if available */
-    if (buf_ptr_ptr != NULL) {
+    if (buf != NULL) {
         void *copy_ptr = NULL; /* Copy of memory image */
 
         if (image_info.buffer != NULL) {
@@ -2767,7 +2736,7 @@ H5Pget_file_image(hid_t fapl_id, void **buf_ptr_ptr, size_t *buf_len_ptr)
                 H5MM_memcpy(copy_ptr, image_info.buffer, image_info.size);
         } /* end if */
 
-        *buf_ptr_ptr = copy_ptr;
+        *buf = copy_ptr;
     } /* end if */
 
 done:
@@ -2852,7 +2821,7 @@ done:
 } /* end H5Pset_file_image_callbacks() */
 
 /*-------------------------------------------------------------------------
- * Function: H5Pget_file_image_callbacks
+ * Function:    H5Pget_file_image_callbacks
  *
  * Purpose:     Sets the callbacks for file images. Some file drivers allow
  *              the use of user-defined callbacks for allocating, freeing and
@@ -2867,14 +2836,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks_ptr)
+H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callbacks)
 {
     H5P_genplist_t *       fapl;                /* Property list pointer */
     H5FD_file_image_info_t info;                /* File image info */
     herr_t                 ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE2("e", "i*x", fapl_id, callbacks_ptr);
+    H5TRACE2("e", "i*x", fapl_id, callbacks);
 
     /* Get the plist structure */
     if (NULL == (fapl = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
@@ -2887,17 +2856,17 @@ H5Pget_file_image_callbacks(hid_t fapl_id, H5FD_file_image_callbacks_t *callback
     /* verify file image field consistency */
     HDassert(((info.buffer != NULL) && (info.size > 0)) || ((info.buffer == NULL) && (info.size == 0)));
 
-    /* verify that callbacks_ptr is not NULL */
-    if (NULL == callbacks_ptr)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL callbacks_ptr")
+    /* verify that callbacks is not NULL */
+    if (NULL == callbacks)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL callbacks ptr")
 
     /* Transfer values to parameters */
-    *callbacks_ptr = info.callbacks;
+    *callbacks = info.callbacks;
 
     /* Copy udata if it exists */
     if (info.callbacks.udata != NULL) {
         HDassert(info.callbacks.udata_copy);
-        if ((callbacks_ptr->udata = info.callbacks.udata_copy(info.callbacks.udata)) == 0)
+        if ((callbacks->udata = info.callbacks.udata_copy(info.callbacks.udata)) == 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't copy udata")
     } /* end if */
 
@@ -4251,7 +4220,7 @@ herr_t
 H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location, hbool_t start_on_access)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
-    char *          tmp_location;        /* Working location pointer */
+    char *          new_location;        /* Working location pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -4267,19 +4236,14 @@ H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location,
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list")
 
-    /* Get the current location string and free it */
-    if (H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current log location")
-    H5MM_xfree(tmp_location);
-
     /* Make a copy of the passed-in location */
-    if (NULL == (tmp_location = H5MM_xstrdup(location)))
+    if (NULL == (new_location = H5MM_xstrdup(location)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy passed-in log location")
 
     /* Set values */
     if (H5P_set(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &is_enabled) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set is_enabled flag")
-    if (H5P_set(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
+    if (H5P_set(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &new_location) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set log location")
     if (H5P_set(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &start_on_access) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set start_on_access flag")
@@ -4301,9 +4265,9 @@ herr_t
 H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location, size_t *location_size,
                        hbool_t *start_on_access)
 {
-    H5P_genplist_t *plist;               /* Property list pointer */
-    char *          location_ptr;        /* Pointer to location string */
-    herr_t          ret_value = SUCCEED; /* Return value */
+    H5P_genplist_t *plist;                  /* Property list pointer */
+    char *          location_ptr = NULL;    /* Pointer to location string */
+    herr_t          ret_value    = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*b*s*z*b", plist_id, is_enabled, location, location_size, start_on_access);
@@ -4335,14 +4299,14 @@ H5Pget_mdc_log_options(hid_t plist_id, hbool_t *is_enabled, char *location, size
             *location_size = HDstrlen(location_ptr) + 1;
         else
             *location_size = 0;
-    }
+    } /* end if */
 
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_mdc_log_options() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P_facc_mdc_log_location_enc
+ * Function:       H5P__facc_mdc_log_location_enc
  *
  * Purpose:        Callback routine which is called whenever the metadata
  *                 cache log location property in the file access property
@@ -4354,7 +4318,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
+H5P__facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
 {
     const char *log_location = *(const char *const *)value;
     uint8_t **  pp           = (uint8_t **)_pp;
@@ -4362,7 +4326,7 @@ H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
     uint64_t    enc_value;
     unsigned    enc_size;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDcompile_assert(sizeof(size_t) <= sizeof(uint64_t));
 
@@ -4391,10 +4355,10 @@ H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
         *size += len;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P_facc_mdc_log_location_enc() */
+} /* end H5P__facc_mdc_log_location_enc() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P_facc_mdc_log_location_dec
+ * Function:       H5P__facc_mdc_log_location_dec
  *
  * Purpose:        Callback routine which is called whenever the metadata
  *                 cache log location property in the file access property
@@ -4406,7 +4370,7 @@ H5P_facc_mdc_log_location_enc(const void *value, void **_pp, size_t *size)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_facc_mdc_log_location_dec(const void **_pp, void *_value)
+H5P__facc_mdc_log_location_dec(const void **_pp, void *_value)
 {
     char **         log_location = (char **)_value;
     const uint8_t **pp           = (const uint8_t **)_pp;
@@ -4415,7 +4379,7 @@ H5P_facc_mdc_log_location_dec(const void **_pp, void *_value)
     unsigned        enc_size;  /* Size of encoded property */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     HDassert(pp);
     HDassert(*pp);
@@ -4444,10 +4408,10 @@ H5P_facc_mdc_log_location_dec(const void **_pp, void *_value)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_facc_mdc_log_location_dec() */
+} /* end H5P__facc_mdc_log_location_dec() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_facc_mdc_log_location_del
+ * Function:    H5P__facc_mdc_log_location_del
  *
  * Purpose:     Frees memory used to store the metadata cache log location.
  *
@@ -4456,20 +4420,20 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
-                              size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_UNUSED *name,
+                               size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
     H5MM_xfree(*(void **)value);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P_facc_mdc_log_location_del() */
+} /* end H5P__facc_mdc_log_location_del() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_facc_mdc_log_location_copy
+ * Function:    H5P__facc_mdc_log_location_copy
  *
  * Purpose:     Creates a copy of the metadata cache log location string.
  *
@@ -4478,19 +4442,19 @@ H5P_facc_mdc_log_location_del(hid_t H5_ATTR_UNUSED prop_id, const char H5_ATTR_U
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
     *(char **)value = H5MM_xstrdup(*(const char **)value);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P_facc_mdc_log_location_copy() */
+} /* end H5P__facc_mdc_log_location_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:       H5P_facc_mdc_log_location_cmp
+ * Function:       H5P__facc_mdc_log_location_cmp
  *
  * Purpose:        Callback routine which is called whenever the metadata
  *                 cache log location property in the file creation property
@@ -4500,14 +4464,14 @@ H5P_facc_mdc_log_location_copy(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_U
  *
  *-------------------------------------------------------------------------
  */
-static int
-H5P_facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
+static H5_ATTR_PURE int
+H5P__facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t H5_ATTR_UNUSED size)
 {
     const char *pref1     = *(const char *const *)value1;
     const char *pref2     = *(const char *const *)value2;
     int         ret_value = 0;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     if (NULL == pref1 && NULL != pref2)
         HGOTO_DONE(1);
@@ -4518,10 +4482,10 @@ H5P_facc_mdc_log_location_cmp(const void *value1, const void *value2, size_t H5_
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_facc_mdc_log_location_cmp() */
+} /* end H5P__facc_mdc_log_location_cmp() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5P_facc_mdc_log_location_close
+ * Function:    H5P__facc_mdc_log_location_close
  *
  * Purpose:     Frees memory used to store the metadata cache log location
  *              string
@@ -4531,16 +4495,16 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
+H5P__facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_UNUSED size, void *value)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     HDassert(value);
 
     H5MM_xfree(*(void **)value);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5P_facc_mdc_log_location_close() */
+} /* end H5P__facc_mdc_log_location_close() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_evict_on_close
@@ -4561,7 +4525,7 @@ H5P_facc_mdc_log_location_close(const char H5_ATTR_UNUSED *name, size_t H5_ATTR_
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_evict_on_close(hid_t fapl_id, hbool_t evict_on_close)
+H5Pset_evict_on_close(hid_t fapl_id, hbool_t H5_ATTR_PARALLEL_UNUSED evict_on_close)
 {
     H5P_genplist_t *plist;               /* property list pointer */
     herr_t          ret_value = SUCCEED; /* return value */
@@ -4631,6 +4595,96 @@ H5Pget_evict_on_close(hid_t fapl_id, hbool_t *evict_on_close)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_evict_on_close() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pset_file_locking
+ *
+ * Purpose:     Sets the file locking property values.
+ *
+ *              Overrides the default file locking flag setting that was
+ *              set when the library was configured.
+ *
+ *              Can be overridden by the HDF5_USE_FILE_LOCKING environment
+ *              variable.
+ *
+ *              File locking is used when creating/opening a file to prevent
+ *              problematic file accesses.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pset_file_locking(hid_t fapl_id, hbool_t use_file_locking, hbool_t ignore_when_disabled)
+{
+    H5P_genplist_t *plist;               /* property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ibb", fapl_id, use_file_locking, ignore_when_disabled);
+
+    /* Make sure this is a fapl */
+    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not a file access plist")
+
+    /* Get the plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Set values */
+    if (H5P_set(plist, H5F_ACS_USE_FILE_LOCKING_NAME, &use_file_locking) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set use file locking property")
+    if (H5P_set(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, &ignore_when_disabled) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set ignore disabled file locks property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pset_file_locking() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_file_locking
+ *
+ * Purpose:     Gets the file locking property values.
+ *
+ *              File locking is used when creating/opening a file to prevent
+ *              problematic file accesses.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ * Programmer:  Dana Robinson
+ *              Spring 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_file_locking(hid_t fapl_id, hbool_t *use_file_locking, hbool_t *ignore_when_disabled)
+{
+    H5P_genplist_t *plist;               /* property list pointer */
+    herr_t          ret_value = SUCCEED; /* return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "i*b*b", fapl_id, use_file_locking, ignore_when_disabled);
+
+    /* Make sure this is a fapl */
+    if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "property list is not an access plist")
+
+    /* Get the plist structure */
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ATOM, H5E_BADATOM, FAIL, "can't find object for ID")
+
+    /* Get values */
+    if (H5P_get(plist, H5F_ACS_USE_FILE_LOCKING_NAME, use_file_locking) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get use file locking property")
+    if (H5P_get(plist, H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME, ignore_when_disabled) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get ignore disabled file locks property")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_file_locking() */
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -5461,7 +5515,7 @@ H5P_set_vol(H5P_genplist_t *plist, hid_t vol_id, const void *vol_info)
 
         /* Prepare the VOL connector property */
         vol_prop.connector_id   = vol_id;
-        vol_prop.connector_info = (void *)vol_info;
+        vol_prop.connector_info = vol_info;
 
         /* Set the connector ID & info property */
         if (H5P_set(plist, H5F_ACS_VOL_CONN_NAME, &vol_prop) < 0)

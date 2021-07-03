@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -42,7 +42,7 @@ main(void)
     hsize_t                   max_size[1];        /* data space maximum size */
     size_t                    nslots = 521 * 2;
     size_t                    nbytes = 1048576 * 10;
-    double                    w0     = 0.5f;
+    double                    w0     = 0.5;
     unsigned                  max_compact;
     unsigned                  min_dense;
     const char *              c_to_f = "x+32";
@@ -56,26 +56,26 @@ main(void)
                                            1 /*TRUE*/,
                                            0 /*FALSE*/,
                                            (2 * 2048 * 1024),
-                                           0.3f,
+                                           0.3,
                                            (64 * 1024 * 1024),
                                            (4 * 1024 * 1024),
                                            60000,
                                            H5C_incr__threshold,
-                                           0.8f,
-                                           3.0f,
+                                           0.8,
+                                           3.0,
                                            1 /*TRUE*/,
                                            (8 * 1024 * 1024),
                                            H5C_flash_incr__add_space,
-                                           2.0f,
-                                           0.25f,
+                                           2.0,
+                                           0.25,
                                            H5C_decr__age_out_with_threshold,
-                                           0.997f,
-                                           0.8f,
+                                           0.997,
+                                           0.8,
                                            1 /*TRUE*/,
                                            (3 * 1024 * 1024),
                                            3,
                                            0 /*FALSE*/,
-                                           0.2f,
+                                           0.2,
                                            (256 * 2048),
                                            H5AC_METADATA_WRITE_STRATEGY__PROCESS_0_ONLY};
     H5AC_cache_image_config_t my_cache_image_config = {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE,
@@ -443,12 +443,12 @@ main(void)
 static int
 encode_plist(hid_t plist_id, int little_endian, int word_length, const char *filename_prefix)
 {
-    int     fd        = 0; /* file descriptor */
-    herr_t  ret       = 0;
-    void *  temp_buf  = NULL;
-    size_t  temp_size = 0;
-    ssize_t write_size;
-    char    filename[1024];
+    int                           fd        = 0; /* file descriptor */
+    herr_t                        ret       = 0;
+    void *                        temp_buf  = NULL;
+    size_t                        temp_size = 0;
+    ssize_t H5_ATTR_NDEBUG_UNUSED write_size;
+    char                          filename[1024];
 
     /* Generate filename */
     if ((ret = HDsnprintf(filename, sizeof(filename), "%s%d%s", filename_prefix, word_length,

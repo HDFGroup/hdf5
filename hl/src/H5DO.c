@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -102,17 +102,16 @@ H5DOread_chunk(hid_t dset_id, hid_t dxpl_id, const hsize_t *offset, uint32_t *fi
 herr_t
 H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t memtype, const void *buf)
 {
-    hbool_t  created_dxpl = FALSE; /* Whether we created a DXPL */
-    hsize_t  size[H5S_MAX_RANK];   /* The new size (after extension */
-    hsize_t  old_size = 0;         /* The size of the dimension to be extended */
-    int      sndims;               /* Number of dimensions in dataspace (signed) */
-    unsigned ndims;                /* Number of dimensions in dataspace */
-    hid_t    space_id     = FAIL;  /* Old file space */
-    hid_t    new_space_id = FAIL;  /* New file space (after extension) */
-    hid_t    mem_space_id = FAIL;  /* Memory space for data buffer */
-    hssize_t snelmts;              /* Number of elements in selection (signed) */
-    hsize_t  nelmts;               /* Number of elements in selection */
-    hid_t    dapl = FAIL;          /* Dataset access property list */
+    hsize_t  size[H5S_MAX_RANK];  /* The new size (after extension */
+    hsize_t  old_size = 0;        /* The size of the dimension to be extended */
+    int      sndims;              /* Number of dimensions in dataspace (signed) */
+    unsigned ndims;               /* Number of dimensions in dataspace */
+    hid_t    space_id     = FAIL; /* Old file space */
+    hid_t    new_space_id = FAIL; /* New file space (after extension) */
+    hid_t    mem_space_id = FAIL; /* Memory space for data buffer */
+    hssize_t snelmts;             /* Number of elements in selection (signed) */
+    hsize_t  nelmts;              /* Number of elements in selection */
+    hid_t    dapl = FAIL;         /* Dataset access property list */
 
     hsize_t start[H5S_MAX_RANK];  /* H5Sselect_Hyperslab: starting offset */
     hsize_t count[H5S_MAX_RANK];  /* H5Sselect_hyperslab: # of blocks to select */
@@ -131,14 +130,10 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
     if (H5I_DATASET != H5Iget_type(dset_id))
         goto done;
 
-    /* If the user passed in a default DXPL, create one to pass to H5Dwrite() */
-    if (H5P_DEFAULT == dxpl_id) {
-        if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+    /* If the user passed in a default DXPL, sanity check it */
+    if (H5P_DEFAULT != dxpl_id)
+        if (TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
             goto done;
-        created_dxpl = TRUE;
-    } /* end if */
-    else if (TRUE != H5Pisa_class(dxpl_id, H5P_DATASET_XFER))
-        goto done;
 
     /* Get the dataspace of the dataset */
     if (FAIL == (space_id = H5Dget_space(dset_id)))
@@ -236,12 +231,6 @@ H5DOappend(hid_t dset_id, hid_t dxpl_id, unsigned axis, size_t extension, hid_t 
     ret_value = SUCCEED;
 
 done:
-    /* Close dxpl if we created it vs. one was passed in */
-    if (created_dxpl) {
-        if (H5Pclose(dxpl_id) < 0)
-            ret_value = FAIL;
-    } /* end if */
-
     /* Close old dataspace */
     if (space_id != FAIL && H5Sclose(space_id) < 0)
         ret_value = FAIL;

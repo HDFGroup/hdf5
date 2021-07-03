@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -254,7 +254,7 @@ CONTAINS
 !  estack_id   - Error stack identifier.
 !  func        - Function to be called upon an error condition.
 !  client_data - Data passed to the error function
-!  
+!
 ! Outputs:
 !  hdferr      - Returns 0 if successful and -1 if fails
 !
@@ -264,7 +264,7 @@ CONTAINS
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5eset_auto_f(printflag, hdferr, estack_id, func, client_data)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
     INTEGER       , INTENT(IN)            :: printflag
     INTEGER       , INTENT(OUT)           :: hdferr
     INTEGER(HID_T), INTENT(IN) , OPTIONAL :: estack_id

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,15 +28,13 @@
 
 #include "H5Cmodule.h" /* This source code file is part of the H5C module */
 
-#define H5AC_FRIEND
-
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"  /* Generic Functions            */
-#include "H5ACpkg.h"    /* Metadata Cache               */
-#include "H5Cpkg.h"     /* Cache                        */
-#include "H5Eprivate.h" /* Error Handling               */
+#include "H5private.h"   /* Generic Functions            */
+#include "H5ACprivate.h" /* Metadata Cache               */
+#include "H5Cpkg.h"      /* Cache                        */
+#include "H5Eprivate.h"  /* Error Handling               */
 
 /****************/
 /* Local Macros */
@@ -250,16 +248,23 @@ H5C_dump_cache_LRU(H5C_t *cache_ptr, const char *cache_name)
 #endif /* NDEBUG */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    H5C_dump_cache_skip_list
  *
  * Purpose:     Debugging routine that prints a summary of the contents of
- *		the skip list used by the metadata cache metadata cache to
- *		maintain an address sorted list of dirty entries.
+ *              the skip list used by the metadata cache metadata cache to
+ *              maintain an address sorted list of dirty entries.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  John Mainzer
  *              11/15/14
+ *
+ * Changes:     Updated function for the slist_enabled field in H5C_t.
+ *              Recall that to minimize slist overhead, the slist is
+ *              empty and not maintained if cache_ptr->slist_enabled is
+ *              false.
+ *                                             JRM -- 5/6/20
  *
  *-------------------------------------------------------------------------
  */
@@ -279,109 +284,29 @@ H5C_dump_cache_skip_list(H5C_t *cache_ptr, char *calling_fcn)
     HDassert(calling_fcn != NULL);
 
     HDfprintf(stdout, "\n\nDumping metadata cache skip list from %s.\n", calling_fcn);
-    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
-    HDfprintf(stdout, "	slist size = %lld.\n", (long long)(cache_ptr->slist_size));
+    HDfprintf(stdout, " slist %s.\n", cache_ptr->slist_enabled ? "enabled" : "disabled");
+    HDfprintf(stdout, "	slist len = %" PRIu32 ".\n", cache_ptr->slist_len);
+    HDfprintf(stdout, "	slist size = %zu.\n", cache_ptr->slist_size);
 
     if (cache_ptr->slist_len > 0) {
+
         /* If we get this far, all entries in the cache are listed in the
          * skip list -- scan the skip list generating the desired output.
          */
         HDfprintf(stdout, "Num:    Addr:               Len: Prot/Pind: Dirty: Type:\n");
 
-        i        = 0;
-        node_ptr = H5SL_first(cache_ptr->slist_ptr);
-        if (node_ptr != NULL)
-            entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-        else
-            entry_ptr = NULL;
-
-        while (entry_ptr != NULL) {
-            HDassert(entry_ptr->magic == H5C__H5C_CACHE_ENTRY_T_MAGIC);
-
-            HDfprintf(stdout, "%s%d       0x%016llx  %4lld    %d/%d       %d    %s\n", cache_ptr->prefix, i,
-                      (long long)(entry_ptr->addr), (long long)(entry_ptr->size),
-                      (int)(entry_ptr->is_protected), (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty),
-                      entry_ptr->type->name);
-
-            HDfprintf(stdout, "		node_ptr = %p, item = %p\n", node_ptr, H5SL_item(node_ptr));
-
-            /* increment node_ptr before we delete its target */
-            node_ptr = H5SL_next(node_ptr);
-            if (node_ptr != NULL)
-                entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-            else
-                entry_ptr = NULL;
-
-            i++;
-        } /* end while */
-    }     /* end if */
-
-    HDfprintf(stdout, "\n\n");
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_dump_cache_skip_list() */
-#endif /* NDEBUG */
-
-/*-------------------------------------------------------------------------
- * Function:    H5C_dump_coll_write_list
- *
- * Purpose:     Debugging routine that prints a summary of the contents of
- *		the collective write skip list used by the metadata cache
- *              in the parallel case to maintain a list of entries to write
- *              collectively at a sync point.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- * Programmer:  John Mainzer
- *              4/1/17
- *
- *-------------------------------------------------------------------------
- */
-#ifdef H5_HAVE_PARALLEL
-#ifndef NDEBUG
-herr_t
-H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn)
-{
-    herr_t             ret_value = SUCCEED; /* Return value */
-    int                i;
-    int                list_len;
-    H5AC_aux_t *       aux_ptr   = NULL;
-    H5C_cache_entry_t *entry_ptr = NULL;
-    H5SL_node_t *      node_ptr  = NULL;
-
-    FUNC_ENTER_NOAPI_NOERR
-
-    HDassert(cache_ptr != NULL);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(cache_ptr->aux_ptr);
-
-    aux_ptr = (H5AC_aux_t *)cache_ptr->aux_ptr;
-
-    HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
-
-    HDassert(calling_fcn != NULL);
-
-    list_len = (int)H5SL_count(cache_ptr->coll_write_list);
-
-    HDfprintf(stdout, "\n\nDumping MDC coll write list from %d:%s.\n", aux_ptr->mpi_rank, calling_fcn);
-    HDfprintf(stdout, "	slist len = %u.\n", cache_ptr->slist_len);
-
-    if (list_len > 0) {
-
-        /* scan the collective write list generating the desired output */
-        HDfprintf(stdout, "Num:    Addr:               Len: Prot/Pind: Dirty: Type:\n");
-
         i = 0;
 
-        node_ptr = H5SL_first(cache_ptr->coll_write_list);
+        node_ptr = H5SL_first(cache_ptr->slist_ptr);
 
-        if (node_ptr != NULL)
+        if (node_ptr != NULL) {
 
             entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-
-        else
+        }
+        else {
 
             entry_ptr = NULL;
+        }
 
         while (entry_ptr != NULL) {
 
@@ -392,15 +317,20 @@ H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn)
                       (int)(entry_ptr->is_protected), (int)(entry_ptr->is_pinned), (int)(entry_ptr->is_dirty),
                       entry_ptr->type->name);
 
+            HDfprintf(stdout, "		node_ptr = %p, item = %p\n", (void *)node_ptr, H5SL_item(node_ptr));
+
+            /* increment node_ptr before we delete its target */
+
             node_ptr = H5SL_next(node_ptr);
 
-            if (node_ptr != NULL)
+            if (node_ptr != NULL) {
 
                 entry_ptr = (H5C_cache_entry_t *)H5SL_item(node_ptr);
-
-            else
+            }
+            else {
 
                 entry_ptr = NULL;
+            }
 
             i++;
 
@@ -411,9 +341,8 @@ H5C_dump_coll_write_list(H5C_t *cache_ptr, char *calling_fcn)
 
     FUNC_LEAVE_NOAPI(ret_value)
 
-} /* H5C_dump_coll_write_list() */
+} /* H5C_dump_cache_skip_list() */
 #endif /* NDEBUG */
-#endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_set_prefix
@@ -500,11 +429,11 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     int32_t aggregate_max_pins             = 0;
     double  hit_rate;
     double  prefetch_use_rate;
-    double  average_successful_search_depth                   = 0.0f;
-    double  average_failed_search_depth                       = 0.0f;
-    double  average_entries_skipped_per_calls_to_msic         = 0.0f;
-    double  average_dirty_pf_entries_skipped_per_call_to_msic = 0.0f;
-    double  average_entries_scanned_per_calls_to_msic         = 0.0f;
+    double  average_successful_search_depth                   = 0.0;
+    double  average_failed_search_depth                       = 0.0;
+    double  average_entries_skipped_per_calls_to_msic         = 0.0;
+    double  average_dirty_pf_entries_skipped_per_call_to_msic = 0.0;
+    double  average_entries_scanned_per_calls_to_msic         = 0.0;
 #endif                          /* H5C_COLLECT_CACHE_STATS */
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -563,9 +492,9 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
     }  /* end for */
 
     if ((total_hits > 0) || (total_misses > 0))
-        hit_rate = (double)100.0f * ((double)(total_hits)) / ((double)(total_hits + total_misses));
+        hit_rate = 100.0 * ((double)(total_hits)) / ((double)(total_hits + total_misses));
     else
-        hit_rate = 0.0f;
+        hit_rate = 0.0;
 
     if (cache_ptr->successful_ht_searches > 0)
         average_successful_search_depth = ((double)(cache_ptr->total_successful_ht_search_depth)) /
@@ -688,8 +617,8 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
               (long long)(cache_ptr->slist_scan_restarts), (long long)(cache_ptr->LRU_scan_restarts),
               (long long)(cache_ptr->index_scan_restarts));
 
-    HDfprintf(stdout, "%s  cache image creations/reads/loads/size = %d / %d /%d / %Hu\n", cache_ptr->prefix,
-              cache_ptr->images_created, cache_ptr->images_read, cache_ptr->images_loaded,
+    HDfprintf(stdout, "%s  cache image creations/reads/loads/size = %d / %d /%d / %" PRIuHSIZE "\n",
+              cache_ptr->prefix, cache_ptr->images_created, cache_ptr->images_read, cache_ptr->images_loaded,
               cache_ptr->last_image_size);
 
     HDfprintf(stdout, "%s  prefetches / dirty prefetches      = %lld / %lld\n", cache_ptr->prefix,
@@ -701,10 +630,9 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
               (long long)(cache_ptr->evictions[H5AC_PREFETCHED_ENTRY_ID]));
 
     if (cache_ptr->prefetches > 0)
-        prefetch_use_rate =
-            (double)100.0f * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
+        prefetch_use_rate = 100.0 * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
     else
-        prefetch_use_rate = 0.0f;
+        prefetch_use_rate = 0.0;
 
     HDfprintf(stdout, "%s  prefetched entry use rate          = %lf\n", cache_ptr->prefix, prefetch_use_rate);
 
@@ -729,10 +657,10 @@ H5C_stats(H5C_t *cache_ptr, const char *cache_name,
                       ((cache_ptr->class_table_ptr))[i]->name);
 
             if ((cache_ptr->hits[i] > 0) || (cache_ptr->misses[i] > 0))
-                hit_rate = (double)100.0f * ((double)(cache_ptr->hits[i])) /
+                hit_rate = 100.0 * ((double)(cache_ptr->hits[i])) /
                            ((double)(cache_ptr->hits[i] + cache_ptr->misses[i]));
             else
-                hit_rate = 0.0f;
+                hit_rate = 0.0;
 
             HDfprintf(stdout, "%s    hits / misses / hit_rate       = %ld / %ld / %f\n", cache_ptr->prefix,
                       (long)(cache_ptr->hits[i]), (long)(cache_ptr->misses[i]), hit_rate);
@@ -903,80 +831,7 @@ H5C_stats__reset(H5C_t H5_ATTR_UNUSED *cache_ptr)
 
 #endif /* H5C_COLLECT_CACHE_ENTRY_STATS */
 #endif /* H5C_COLLECT_CACHE_STATS */
-
-    return;
 } /* H5C_stats__reset() */
-
-extern void H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t dump_parents,
-                            const char *prefix, int indent);
-
-static void
-H5C__dump_parents(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, const char *prefix, int indent)
-{
-    unsigned u;
-
-    for (u = 0; u < entry_ptr->flush_dep_nparents; u++)
-        H5C__dump_entry(cache_ptr, entry_ptr->flush_dep_parent[u], TRUE, prefix, indent + 2);
-}
-
-typedef struct H5C__dump_child_ctx_t {
-    H5C_t *                  cache_ptr;
-    const H5C_cache_entry_t *parent;
-    hbool_t                  dump_parents;
-    const char *             prefix;
-    int                      indent;
-} H5C__dump_child_ctx_t;
-
-static int
-H5C__dump_children_cb(H5C_cache_entry_t *entry_ptr, void *_ctx)
-{
-    H5C__dump_child_ctx_t *ctx = (H5C__dump_child_ctx_t *)_ctx;
-
-    if (entry_ptr->tag_info->tag != entry_ptr->addr) {
-        unsigned u;
-
-        HDassert(entry_ptr->flush_dep_nparents);
-        for (u = 0; u < entry_ptr->flush_dep_nparents; u++)
-            if (ctx->parent == entry_ptr->flush_dep_parent[u])
-                H5C__dump_entry(ctx->cache_ptr, entry_ptr, ctx->dump_parents, ctx->prefix, ctx->indent + 2);
-    } /* end if */
-
-    return (H5_ITER_CONT);
-} /* end H5C__dump_children_cb() */
-
-static void
-H5C__dump_children(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t dump_parents,
-                   const char *prefix, int indent)
-{
-    H5C__dump_child_ctx_t ctx;
-
-    HDassert(entry_ptr->tag_info);
-
-    ctx.cache_ptr    = cache_ptr;
-    ctx.parent       = entry_ptr;
-    ctx.dump_parents = dump_parents;
-    ctx.prefix       = prefix;
-    ctx.indent       = indent;
-    H5C__iter_tagged_entries(cache_ptr, entry_ptr->tag_info->tag, FALSE, H5C__dump_children_cb, &ctx);
-} /* end H5C__dump_children() */
-
-void
-H5C__dump_entry(H5C_t *cache_ptr, const H5C_cache_entry_t *entry_ptr, hbool_t dump_parents,
-                const char *prefix, int indent)
-{
-    HDassert(cache_ptr);
-    HDassert(entry_ptr);
-
-    HDfprintf(stderr, "%*s%s: entry_ptr = (%a, '%s', %a, %t, %u, %u/%u)\n", indent, "", prefix,
-              entry_ptr->addr, entry_ptr->type->name,
-              entry_ptr->tag_info ? entry_ptr->tag_info->tag : HADDR_UNDEF, entry_ptr->is_dirty,
-              entry_ptr->flush_dep_nparents, entry_ptr->flush_dep_nchildren,
-              entry_ptr->flush_dep_ndirty_children);
-    if (dump_parents && entry_ptr->flush_dep_nparents)
-        H5C__dump_parents(cache_ptr, entry_ptr, "Parent", indent);
-    if (entry_ptr->flush_dep_nchildren)
-        H5C__dump_children(cache_ptr, entry_ptr, FALSE, "Child", indent);
-} /* end H5C__dump_entry() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5C_flush_dependency_exists()

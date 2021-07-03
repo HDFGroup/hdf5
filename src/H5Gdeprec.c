@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:	H5Gdeprec.c
  *		June 21 2006
- *		James Laird <jlaird@ncsa.uiuc.edu>
+ *		James Laird
  *
  * Purpose:	Deprecated functions from the H5G interface.  These
  *              functions are here for compatibility purposes and may be
@@ -141,10 +141,10 @@ H5G_map_obj_type(H5O_type_t obj_type)
  *		specified NAME.  The group is opened for write access
  *		and it's object ID is returned.
  *
- *		The optional SIZE_HINT specifies how much file space to
- *		reserve to store the names that will appear in this
- *		group. If a non-positive value is supplied for the SIZE_HINT
- *		then a default size is chosen.
+ *		The SIZE_HINT parameter specifies how much file space to reserve
+ *		to store the names that will appear in this group. This number
+ *		must be less than or equal to UINT32_MAX. If zero is supplied
+ *		for the SIZE_HINT then a default size is chosen.
  *
  * Note:	Deprecated in favor of H5Gcreate2
  *
@@ -174,6 +174,8 @@ H5Gcreate1(hid_t loc_id, const char *name, size_t size_hint)
     /* Check arguments */
     if (!name || !*name)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "no name given")
+    if (size_hint > UINT32_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "size_hint cannot be larger than UINT32_MAX")
 
     /* Check if we need to create a non-standard GCPL */
     if (size_hint > 0) {
@@ -971,7 +973,7 @@ H5G__get_objinfo_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char *name, 
     H5G_trav_goi_t *udata     = (H5G_trav_goi_t *)_udata; /* User data passed in */
     herr_t          ret_value = SUCCEED;                  /* Return value */
 
-    FUNC_ENTER_STATIC;
+    FUNC_ENTER_STATIC
 
     /* Check if the name in this group resolved to a valid link */
     if (lnk == NULL && obj_loc == NULL)

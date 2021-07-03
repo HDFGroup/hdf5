@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -423,35 +423,39 @@ done:
  * Function:    H5C__deserialize_prefetched_entry()
  *
  * Purpose:     Deserialize the supplied prefetched entry entry, and return
- *		a pointer to the deserialized entry in *entry_ptr_ptr.
- *		If successful, remove the prefetched entry from the cache,
- *		and free it.  Insert the deserialized entry into the cache.
+ *              a pointer to the deserialized entry in *entry_ptr_ptr.
+ *              If successful, remove the prefetched entry from the cache,
+ *              and free it.  Insert the deserialized entry into the cache.
  *
- *		Note that the on disk image of the entry is not freed --
- *		a pointer to it is stored in the deserialized entries'
- *		image_ptr field, and its image_up_to_date field is set to
- *		TRUE unless the entry is dirtied by the deserialize call.
+ *              Note that the on disk image of the entry is not freed --
+ *              a pointer to it is stored in the deserialized entries'
+ *              image_ptr field, and its image_up_to_date field is set to
+ *              TRUE unless the entry is dirtied by the deserialize call.
  *
- *		If the prefetched entry is a flush dependency child,
- *		destroy that flush dependency prior to calling the
- *		deserialize callback.  If appropriate, the flush dependency
- *		relationship will be recreated by the cache client.
+ *              If the prefetched entry is a flush dependency child,
+ *              destroy that flush dependency prior to calling the
+ *              deserialize callback.  If appropriate, the flush dependency
+ *              relationship will be recreated by the cache client.
  *
- *		If the prefetched entry is a flush dependency parent,
- *		destroy the flush dependency relationship with all its
- *		children.  As all these children must be prefetched entries,
- *		recreate these flush dependency relationships with
- *		deserialized entry after it is inserted in the cache.
+ *              If the prefetched entry is a flush dependency parent,
+ *              destroy the flush dependency relationship with all its
+ *              children.  As all these children must be prefetched entries,
+ *              recreate these flush dependency relationships with
+ *              deserialized entry after it is inserted in the cache.
  *
- *		Since deserializing a prefetched entry is semantically
- *		equivalent to a load, issue an entry loaded nofification
- *		if the notify callback is defined.
+ *              Since deserializing a prefetched entry is semantically
+ *              equivalent to a load, issue an entry loaded nofification
+ *              if the notify callback is defined.
  *
  * Return:      SUCCEED on success, and FAIL on failure.
  *
- *		Note that *entry_ptr_ptr is undefined on failure.
+ *              Note that *entry_ptr_ptr is undefined on failure.
  *
  * Programmer:  John Mainzer, 8/10/15
+ *
+ * Changes:     Updated sanity checks for possibility that the slist
+ *              is disabled.
+ *                                            JRM -- 5/17/20
  *
  *-------------------------------------------------------------------------
  */
@@ -685,15 +689,20 @@ H5C__deserialize_prefetched_entry(H5F_t *f, H5C_t *cache_ptr, H5C_cache_entry_t 
      *
      *  1) Set pf_entry_ptr->image_ptr to NULL.  Since we have already
      *     transferred the buffer containing the image to *ds_entry_ptr,
-     *	   this is not a memory leak.
+     *     this is not a memory leak.
      *
      *  2) Call H5C__flush_single_entry() with the H5C__FLUSH_INVALIDATE_FLAG
      *     and H5C__FLUSH_CLEAR_ONLY_FLAG flags set.
      */
     pf_entry_ptr->image_ptr = NULL;
+
     if (pf_entry_ptr->is_dirty) {
-        HDassert(pf_entry_ptr->in_slist);
+
+        HDassert(((cache_ptr->slist_enabled) && (pf_entry_ptr->in_slist)) ||
+                 ((!cache_ptr->slist_enabled) && (!pf_entry_ptr->in_slist)));
+
         flush_flags |= H5C__DEL_FROM_SLIST_ON_DESTROY_FLAG;
+
     } /* end if */
 
     if (H5C__flush_single_entry(f, pf_entry_ptr, flush_flags) < 0)
@@ -853,53 +862,6 @@ H5C__free_image_entries_array(H5C_t *cache_ptr)
 } /* H5C__free_image_entries_array() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5C_force_cache_image_load()
- *
- * Purpose:     On rare occasions, it is necessary to run
- *		H5MF_tidy_self_referential_fsm_hack() prior to the first
- *              metadata cache access.  This is a problem as if there is a
- *              cache image at the end of the file, that routine will
- *              discard it.
- *
- *              We solve this issue by calling this function, which will
- *		load the cache image and then call
- *              H5MF_tidy_self_referential_fsm_hack() to discard it.
- *
- * Return:      SUCCEED on success, and FAIL on failure.
- *
- * Programmer:  John Mainzer
- *              1/11/17
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5C_force_cache_image_load(H5F_t *f)
-{
-    H5C_t *cache_ptr;
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Sanity checks */
-    HDassert(f);
-    HDassert(f->shared);
-    cache_ptr = f->shared->cache;
-    HDassert(cache_ptr);
-    HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
-    HDassert(cache_ptr->load_image);
-
-    /* Load the cache image, if requested */
-    if (cache_ptr->load_image) {
-        cache_ptr->load_image = FALSE;
-        if (H5C__load_cache_image(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, FAIL, "can't load cache image")
-    } /* end if */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5C_force_cache_image_load() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5C_get_cache_image_config
  *
  * Purpose:     Copy the current configuration for cache image generation
@@ -971,15 +933,14 @@ H5C_image_stats(H5C_t *cache_ptr, hbool_t H5_ATTR_UNUSED print_header)
     } /* end for */
 
     if ((total_hits > 0) || (total_misses > 0))
-        hit_rate = (double)100.0f * ((double)(total_hits)) / ((double)(total_hits + total_misses));
+        hit_rate = 100.0 * ((double)(total_hits)) / ((double)(total_hits + total_misses));
     else
-        hit_rate = 0.0f;
+        hit_rate = 0.0;
 
     if (cache_ptr->prefetches > 0)
-        prefetch_use_rate =
-            (double)100.0f * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
+        prefetch_use_rate = 100.0 * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
     else
-        prefetch_use_rate = 0.0f;
+        prefetch_use_rate = 0.0;
 
     if (print_header) {
         HDfprintf(stdout, "\nhit     prefetches      prefetch              image  pf hit\n");
@@ -1196,7 +1157,8 @@ H5C_load_cache_image_on_next_protect(H5F_t *f, haddr_t addr, hsize_t len, hbool_
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
 
     /* Set information needed to load cache image */
-    cache_ptr->image_addr = addr, cache_ptr->image_len = len;
+    cache_ptr->image_addr   = addr;
+    cache_ptr->image_len    = len;
     cache_ptr->load_image   = TRUE;
     cache_ptr->delete_image = rw;
 
@@ -1810,7 +1772,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
     p = *buf;
 
     /* Check signature */
-    if (HDmemcmp(p, H5C__MDCI_BLOCK_SIGNATURE, (size_t)H5C__MDCI_BLOCK_SIGNATURE_LEN))
+    if (HDmemcmp(p, H5C__MDCI_BLOCK_SIGNATURE, (size_t)H5C__MDCI_BLOCK_SIGNATURE_LEN) != 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad metadata cache image header signature")
     p += H5C__MDCI_BLOCK_SIGNATURE_LEN;
 

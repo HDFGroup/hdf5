@@ -6,34 +6,34 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5ACprivate.h
- *			Jul  9 1997
- *			Robb Matzke <matzke@llnl.gov>
+ * Created:   H5ACprivate.h
+ *            Jul  9 1997
+ *            Robb Matzke
  *
- * Purpose:		Constants and typedefs available to the rest of the
- *			library.
+ * Purpose:   Constants and typedefs available to the rest of the
+ *            library.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5ACprivate_H
-#define _H5ACprivate_H
+#ifndef H5ACprivate_H
+#define H5ACprivate_H
 
-#include "H5ACpublic.h" /*public prototypes			*/
+#include "H5ACpublic.h" /*public prototypes            */
 
 /* Pivate headers needed by this header */
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Cprivate.h"  /* Cache				*/
-#include "H5Fprivate.h"  /* File access				*/
-#include "H5Pprivate.h"  /* Property lists			*/
-#include "H5SLprivate.h" /* Skip lists 				*/
+#include "H5private.h"   /* Generic Functions            */
+#include "H5Cprivate.h"  /* Cache                */
+#include "H5Fprivate.h"  /* File access                */
+#include "H5Pprivate.h"  /* Property lists            */
+#include "H5SLprivate.h" /* Skip lists                 */
 
 /* Global metadata tag values */
 #define H5AC__INVALID_TAG    (haddr_t)0
@@ -90,20 +90,20 @@ typedef enum {
  *
  * NOTE: test/cache plays games with the f->shared->cache, and thus
  *       setting H5AC_DUMP_STATS_ON_CLOSE will generate constant,
- *	 irrelevant data when run with that test program.  See
- * 	 comments on setup_cache() / takedown_cache() in test/cache_common.c.
+ *       irrelevant data when run with that test program.  See
+ *       comments on setup_cache() / takedown_cache() in test/cache_common.c.
  *       for details.
  *
- *	 If you need to dump stats at file close in test/cache.c,
- *	 use the dump_stats parameter to takedown_cache(), or call
- *	 H5C_stats() directly.
- *					JRM -- 4/12/15
+ *     If you need to dump stats at file close in test/cache.c,
+ *     use the dump_stats parameter to takedown_cache(), or call
+ *     H5C_stats() directly.
+ *                    JRM -- 4/12/15
  *
  * Added the H5AC_DUMP_IMAGE_STATS_ON_CLOSE #define, which works much
  * the same way as H5AC_DUMP_STATS_ON_CLOSE.  However, the set of stats
  * displayed is much smaller, and directed purely at the cache image feature.
  *
- *					JRM -- 11/1/15
+ *                    JRM -- 11/1/15
  */
 #if H5C_COLLECT_CACHE_STATS
 
@@ -132,7 +132,7 @@ typedef enum {
 #endif
 
 /*
- * Class methods pertaining to caching.	 Each type of cached object will
+ * Class methods pertaining to caching. Each type of cached object will
  * have a constant variable with permanent life-span that describes how
  * to cache the object.
  */
@@ -222,80 +222,89 @@ typedef struct H5AC_proxy_entry_t {
 /* Default cache configuration. */
 #define H5AC__DEFAULT_METADATA_WRITE_STRATEGY H5AC_METADATA_WRITE_STRATEGY__DISTRIBUTED
 
+/* clang-format off */
 #ifdef H5_HAVE_PARALLEL
-#define H5AC__DEFAULT_CACHE_CONFIG                                                                           \
-    {                                                                                                        \
-        /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION,                          \
-            /* hbool_t     rpt_fcn_enabled        = */ FALSE,                                                \
-            /* hbool_t     open_trace_file        = */ FALSE,                                                \
-            /* hbool_t     close_trace_file       = */ FALSE, /* char        trace_file_name[]      = */ "", \
-            /* hbool_t     evictions_enabled      = */ TRUE,                                                 \
-            /* hbool_t     set_initial_size       = */ TRUE,                                                 \
-            /* size_t      initial_size           = */ (2 * 1024 * 1024),                                    \
-            /* double      min_clean_fraction     = */ 0.3f,                                                 \
-            /* size_t      max_size               = */ (32 * 1024 * 1024),                                   \
-            /* size_t      min_size               = */ (1 * 1024 * 1024),                                    \
-            /* long int    epoch_length           = */ 50000,                                                \
-            /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,                                  \
-            /* double      lower_hr_threshold     = */ 0.9f,                                                 \
-            /* double      increment              = */ 2.0f,                                                 \
-            /* hbool_t     apply_max_increment    = */ TRUE,                                                 \
-            /* size_t      max_increment          = */ (4 * 1024 * 1024), /* enum H5C_cache_flash_incr_mode  \
-                                                                           */                                \
-            /*                    flash_incr_mode = */ H5C_flash_incr__add_space,                            \
-            /* double      flash_multiple         = */ 1.0f,                                                 \
-            /* double      flash_threshold        = */ 0.25f,                                                \
-            /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,                     \
-            /* double      upper_hr_threshold     = */ 0.999f,                                               \
-            /* double      decrement              = */ 0.9f,                                                 \
-            /* hbool_t     apply_max_decrement    = */ TRUE,                                                 \
-            /* size_t      max_decrement          = */ (1 * 1024 * 1024),                                    \
-            /* int         epochs_before_eviction = */ 3, /* hbool_t     apply_empty_reserve    = */ TRUE,   \
-            /* double      empty_reserve          = */ 0.1f,                                                 \
-            /* size_t	 dirty_bytes_threshold  = */ (256 * 1024), /* int	metadata_write_strategy = */       \
-            H5AC__DEFAULT_METADATA_WRITE_STRATEGY                                                            \
-    }
+#define H5AC__DEFAULT_CACHE_CONFIG                                            \
+{                                                                             \
+  /* int         version                = */ H5AC__CURR_CACHE_CONFIG_VERSION, \
+  /* hbool_t     rpt_fcn_enabled        = */ FALSE,                           \
+  /* hbool_t     open_trace_file        = */ FALSE,                           \
+  /* hbool_t     close_trace_file       = */ FALSE,                           \
+  /* char        trace_file_name[]      = */ "",                              \
+  /* hbool_t     evictions_enabled      = */ TRUE,                            \
+  /* hbool_t     set_initial_size       = */ TRUE,                            \
+  /* size_t      initial_size           = */ ( 2 * 1024 * 1024),              \
+  /* double      min_clean_fraction     = */ 0.3f,                            \
+  /* size_t      max_size               = */ (32 * 1024 * 1024),              \
+  /* size_t      min_size               = */ (1 * 1024 * 1024),               \
+  /* long int    epoch_length           = */ 50000,                           \
+  /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
+  /* double      lower_hr_threshold     = */ 0.9f,                            \
+  /* double      increment              = */ 2.0f,                            \
+  /* hbool_t     apply_max_increment    = */ TRUE,                            \
+  /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
+  /* enum H5C_cache_flash_incr_mode       */                                  \
+  /*                    flash_incr_mode = */ H5C_flash_incr__add_space,       \
+  /* double      flash_multiple         = */ 1.0f,                            \
+  /* double      flash_threshold        = */ 0.25f,                           \
+  /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold, \
+  /* double      upper_hr_threshold     = */ 0.999f,                          \
+  /* double      decrement              = */ 0.9f,                            \
+  /* hbool_t     apply_max_decrement    = */ TRUE,                            \
+  /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
+  /* int         epochs_before_eviction = */ 3,                               \
+  /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
+  /* double      empty_reserve          = */ 0.1f,                            \
+  /* size_t      dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* int         metadata_write_strategy = */                                  \
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
+}
 #else /* H5_HAVE_PARALLEL */
-#define H5AC__DEFAULT_CACHE_CONFIG                                                                           \
-    {                                                                                                        \
-        /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,                              \
-            /* hbool_t     rpt_fcn_enabled        = */ FALSE,                                                \
-            /* hbool_t     open_trace_file        = */ FALSE,                                                \
-            /* hbool_t     close_trace_file       = */ FALSE, /* char        trace_file_name[]      = */ "", \
-            /* hbool_t     evictions_enabled      = */ TRUE,                                                 \
-            /* hbool_t     set_initial_size       = */ TRUE,                                                 \
-            /* size_t      initial_size           = */ (2 * 1024 * 1024),                                    \
-            /* double      min_clean_fraction     = */ 0.01f,                                                \
-            /* size_t      max_size               = */ (32 * 1024 * 1024),                                   \
-            /* size_t      min_size               = */ (1 * 1024 * 1024),                                    \
-            /* long int    epoch_length           = */ 50000,                                                \
-            /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,                                  \
-            /* double      lower_hr_threshold     = */ 0.9f,                                                 \
-            /* double      increment              = */ 2.0f,                                                 \
-            /* hbool_t     apply_max_increment    = */ TRUE,                                                 \
-            /* size_t      max_increment          = */ (4 * 1024 * 1024), /* enum H5C_cache_flash_incr_mode  \
-                                                                           */                                \
-            /*                    flash_incr_mode = */ H5C_flash_incr__add_space,                            \
-            /* double      flash_multiple         = */ 1.4f,                                                 \
-            /* double      flash_threshold        = */ 0.25f,                                                \
-            /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,                     \
-            /* double      upper_hr_threshold     = */ 0.999f,                                               \
-            /* double      decrement              = */ 0.9f,                                                 \
-            /* hbool_t     apply_max_decrement    = */ TRUE,                                                 \
-            /* size_t      max_decrement          = */ (1 * 1024 * 1024),                                    \
-            /* int         epochs_before_eviction = */ 3, /* hbool_t     apply_empty_reserve    = */ TRUE,   \
-            /* double      empty_reserve          = */ 0.1f,                                                 \
-            /* size_t	 dirty_bytes_threshold  = */ (256 * 1024), /* int	metadata_write_strategy = */       \
-            H5AC__DEFAULT_METADATA_WRITE_STRATEGY                                                            \
-    }
+#define H5AC__DEFAULT_CACHE_CONFIG                                            \
+{                                                                             \
+  /* int         version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,     \
+  /* hbool_t     rpt_fcn_enabled        = */ FALSE,                           \
+  /* hbool_t     open_trace_file        = */ FALSE,                           \
+  /* hbool_t     close_trace_file       = */ FALSE,                           \
+  /* char        trace_file_name[]      = */ "",                              \
+  /* hbool_t     evictions_enabled      = */ TRUE,                            \
+  /* hbool_t     set_initial_size       = */ TRUE,                            \
+  /* size_t      initial_size           = */ ( 2 * 1024 * 1024),              \
+  /* double      min_clean_fraction     = */ 0.01f,                           \
+  /* size_t      max_size               = */ (32 * 1024 * 1024),              \
+  /* size_t      min_size               = */ ( 1 * 1024 * 1024),              \
+  /* long int    epoch_length           = */ 50000,                           \
+  /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
+  /* double      lower_hr_threshold     = */ 0.9f,                            \
+  /* double      increment              = */ 2.0f,                            \
+  /* hbool_t     apply_max_increment    = */ TRUE,                            \
+  /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
+  /* enum H5C_cache_flash_incr_mode       */                                  \
+  /*                    flash_incr_mode = */ H5C_flash_incr__add_space,       \
+  /* double      flash_multiple         = */ 1.4f,                            \
+  /* double      flash_threshold        = */ 0.25f,                           \
+  /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,\
+  /* double      upper_hr_threshold     = */ 0.999f,                          \
+  /* double      decrement              = */ 0.9f,                            \
+  /* hbool_t     apply_max_decrement    = */ TRUE,                            \
+  /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
+  /* int         epochs_before_eviction = */ 3,                               \
+  /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
+  /* double      empty_reserve          = */ 0.1f,                            \
+  /* size_t      dirty_bytes_threshold  = */ (256 * 1024),                    \
+  /* int         metadata_write_strategy = */                                  \
+                    H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
+}
 #endif /* H5_HAVE_PARALLEL */
 
-#define H5AC__DEFAULT_CACHE_IMAGE_CONFIG                                                                     \
-    {                                                                                                        \
-        /* int32_t version            = */ H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION,                            \
-            /* hbool_t generate_image     = */ FALSE, /* hbool_t save_resize_status = */ FALSE,              \
-            /* int32_t entry_ageout       = */ H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE                         \
-    }
+#define H5AC__DEFAULT_CACHE_IMAGE_CONFIG                                     \
+{                                                                            \
+   /* int32_t version            = */ H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, \
+   /* hbool_t generate_image     = */ FALSE,                                 \
+   /* hbool_t save_resize_status = */ FALSE,                                 \
+   /* int32_t entry_ageout       = */ H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE  \
+}
+/* clang-format on */
 /*
  * Library prototypes.
  */
@@ -376,6 +385,8 @@ H5_DLL herr_t H5AC_insert_entry(H5F_t *f, const H5AC_class_t *type, haddr_t addr
                                 unsigned int flags);
 H5_DLL herr_t H5AC_pin_protected_entry(void *thing);
 H5_DLL herr_t H5AC_prep_for_file_close(H5F_t *f);
+H5_DLL herr_t H5AC_prep_for_file_flush(H5F_t *f);
+H5_DLL herr_t H5AC_secure_from_file_flush(H5F_t *f);
 H5_DLL herr_t H5AC_create_flush_dependency(void *parent_thing, void *child_thing);
 H5_DLL void * H5AC_protect(H5F_t *f, const H5AC_class_t *type, haddr_t addr, void *udata, unsigned flags);
 H5_DLL herr_t H5AC_resize_entry(void *thing, size_t new_size);
@@ -447,4 +458,4 @@ H5_DLL hbool_t H5AC_get_serialization_in_progress(H5F_t *f);
 H5_DLL hbool_t H5AC_cache_is_clean(const H5F_t *f, H5AC_ring_t inner_ring);
 #endif /* NDEBUG */ /* end debugging functions */
 
-#endif /* !_H5ACprivate_H */
+#endif /* H5ACprivate_H */

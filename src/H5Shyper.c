@@ -6,16 +6,16 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Thursday, June 18, 1998
  *
- * Purpose:    Hyperslab selection dataspace I/O functions.
+ * Purpose:     Hyperslab selection dataspace I/O functions.
  */
 
 /****************/
@@ -29,8 +29,8 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5CXprivate.h" /* API Contexts                             */
-#include "H5Eprivate.h"  /* Error handling                */
-#include "H5FLprivate.h" /* Free Lists                    */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FLprivate.h" /* Free Lists                               */
 #include "H5Iprivate.h"  /* ID Functions                             */
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Spkg.h"      /* Dataspace functions                      */
@@ -286,7 +286,7 @@ H5FL_EXTERN(H5S_sel_iter_t);
 /* (Start with '1' to avoid clashing with '0' value in newly allocated structs) */
 static uint64_t H5S_hyper_op_gen_g = 1;
 
-/* Uncomment this, to provide the debugging routines for printing selection info */
+/* Uncomment this to provide the debugging routines for printing selection info */
 /* #define H5S_HYPER_DEBUG */
 #ifdef H5S_HYPER_DEBUG
 static herr_t
@@ -543,11 +543,11 @@ H5S__hyper_get_op_gen(void)
 /*-------------------------------------------------------------------------
  * Function:    H5S__hyper_iter_init
  *
- * Purpose:    Initializes iteration information for hyperslab selection.
+ * Purpose:     Initializes iteration information for hyperslab selection.
  *
- * Return:    Non-negative on success, negative on failure.
+ * Return:      Non-negative on success, negative on failure.
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, February 24, 2001
  *
  * Notes:       If the 'iter->elmt_size' field is set to zero, the regular
@@ -784,12 +784,12 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S__hyper_iter_coords
  *
- * Purpose:    Retrieve the current coordinates of iterator for current
+ * Purpose:     Retrieve the current coordinates of iterator for current
  *              selection
  *
- * Return:    Non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, April 22, 2003
  *
  *-------------------------------------------------------------------------
@@ -869,12 +869,12 @@ H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords)
 /*-------------------------------------------------------------------------
  * Function:    H5S__hyper_iter_block
  *
- * Purpose:    Retrieve the current block of iterator for current
+ * Purpose:     Retrieve the current block of iterator for current
  *              selection
  *
- * Return:    Non-negative on success, negative on failure
+ * Return:      Non-negative on success, negative on failure
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Monday, June 2, 2003
  *
  * Notes:       This routine assumes that the iterator is always located at
@@ -902,15 +902,15 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
         for (u = 0; u < iter->rank; u++) {
             start[u] = iter->u.hyp.off[u];
             end[u]   = (start[u] + iter->u.hyp.diminfo[u].block) - 1;
-        } /* end for */
-    }     /* end if */
+        }
+    } /* end if */
     else {
         /* Copy the start & end of the block */
         for (u = 0; u < iter->rank; u++) {
             start[u] = iter->u.hyp.span[u]->low;
             end[u]   = iter->u.hyp.span[u]->high;
-        } /* end for */
-    }     /* end else */
+        }
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_iter_block() */
@@ -918,11 +918,11 @@ H5S__hyper_iter_block(const H5S_sel_iter_t *iter, hsize_t *start, hsize_t *end)
 /*-------------------------------------------------------------------------
  * Function:    H5S__hyper_iter_nelmts
  *
- * Purpose:    Return number of elements left to process in iterator
+ * Purpose:     Return number of elements left to process in iterator
  *
- * Return:    Non-negative number of elements on success, zero on failure
+ * Return:      Non-negative number of elements on success, zero on failure
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  *-------------------------------------------------------------------------
@@ -996,13 +996,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S__hyper_iter_next
  *
- * Purpose:    Moves a hyperslab iterator to the beginning of the next sequence
- *      of elements to read.  Handles walking off the end in all dimensions.
+ * Purpose:     Moves a hyperslab iterator to the beginning of the next sequence
+ *              of elements to read.  Handles walking off the end in all dimensions.
  *
- * Return:    Success:    non-negative
- *        Failure:    negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Friday, September 8, 2000
  *
  *-------------------------------------------------------------------------
@@ -1103,10 +1103,10 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span; /* Current hyperslab span node */
-        H5S_hyper_span_t **ispan;     /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;   /* Absolute hyperslab span position */
-        int                curr_dim;  /* Temporary rank holder */
+        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
+        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
         ndims    = iter->rank;
@@ -1205,13 +1205,13 @@ H5S__hyper_iter_next(H5S_sel_iter_t *iter, size_t nelem)
 /*-------------------------------------------------------------------------
  * Function:    H5S__hyper_iter_next_block
  *
- * Purpose:    Moves a hyperslab iterator to the beginning of the next sequence
- *      of elements to read.  Handles walking off the end in all dimensions.
+ * Purpose:     Moves a hyperslab iterator to the beginning of the next sequence
+ *              of elements to read.  Handles walking off the end in all dimensions.
  *
- * Return:    Success:    non-negative
- *        Failure:    negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 3, 2003
  *
  *-------------------------------------------------------------------------
@@ -1295,10 +1295,10 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
     } /* end if */
     /* Must be an irregular hyperslab selection */
     else {
-        H5S_hyper_span_t * curr_span; /* Current hyperslab span node */
-        H5S_hyper_span_t **ispan;     /* Iterator's hyperslab span nodes */
-        hsize_t *          abs_arr;   /* Absolute hyperslab span position */
-        int                curr_dim;  /* Temporary rank holder */
+        H5S_hyper_span_t * curr_span = NULL; /* Current hyperslab span node */
+        H5S_hyper_span_t **ispan;            /* Iterator's hyperslab span nodes */
+        hsize_t *          abs_arr;          /* Absolute hyperslab span position */
+        int                curr_dim;         /* Temporary rank holder */
 
         /* Set the rank of the fastest changing dimension */
         ndims    = iter->rank;
@@ -1395,7 +1395,7 @@ H5S__hyper_iter_next_block(H5S_sel_iter_t *iter)
         hsize_t *off;           OUT: Array of offsets
         size_t *len;            OUT: Array of lengths
  RETURNS
-    Non-negative on success/Negative on failure.
+    Non-negative on success/Negative on failure
  DESCRIPTION
     Use the selection in the dataspace to generate a list of byte offsets and
     lengths for the region(s) selected.  Start/Restart from the position in the
@@ -2137,24 +2137,31 @@ H5S__hyper_iter_get_seq_list_opt(H5S_sel_iter_t *iter, size_t maxseq, size_t max
                 case 0:
                     do {
                         DUFF_GUTS
+                        /* FALLTHROUGH */
                         H5_ATTR_FALLTHROUGH
                         case 7:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 6:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 5:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 4:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 3:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 2:
                             DUFF_GUTS
+                            /* FALLTHROUGH */
                             H5_ATTR_FALLTHROUGH
                         case 1:
                             DUFF_GUTS
@@ -2569,7 +2576,6 @@ H5S__hyper_iter_get_seq_list_single(H5S_sel_iter_t *iter, size_t maxseq, size_t 
  USAGE
     herr_t H5S__hyper_iter_get_seq_list(iter,maxseq,maxelem,nseq,nelem,off,len)
         H5S_t *space;           IN: Dataspace containing selection to use.
-        unsigned flags;         IN: Flags for extra information about operation
         H5S_sel_iter_t *iter;   IN/OUT: Selection iterator describing last
                                     position of interest in selection.
         size_t maxseq;          IN: Maximum number of sequences to generate
@@ -3695,7 +3701,7 @@ H5S__hyper_get_version_enc_size(const H5S_t *space, hsize_t block_count, uint32_
         default:
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNSUPPORTED, FAIL, "unknown hyperslab selection version")
             break;
-    } /* end switch */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -3725,13 +3731,14 @@ H5S__hyper_serial_size(const H5S_t *space)
 {
     hsize_t  block_count = 0; /* block counter for regular hyperslabs */
     uint32_t version;         /* Version number */
-    uint8_t  enc_size;        /* Encoded size of hyerslab selection info */
+    uint8_t  enc_size;        /* Encoded size of hyperslab selection info */
     hssize_t ret_value = -1;  /* return value */
 
     FUNC_ENTER_STATIC
 
     HDassert(space);
 
+    /* Determine the number of blocks */
     if (space->select.sel_info.hslab->unlim_dim < 0) /* ! H5S_UNLIMITED */
         block_count = H5S__get_select_hyper_nblocks(space, FALSE);
 
@@ -3773,7 +3780,7 @@ H5S__hyper_serial_size(const H5S_t *space)
          */
         HDassert(enc_size == 8);
         ret_value = (hssize_t)17 + ((hssize_t)4 * (hssize_t)8 * (hssize_t)space->extent.rank);
-    } /* end else-if */
+    }
     else {
         HDassert(version == H5S_HYPER_VERSION_1);
         HDassert(enc_size == 4);
@@ -3919,7 +3926,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans, hsize_t *start, 
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_hyper_serialize(space, p)
+    herr_t H5S__hyper_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -3942,18 +3949,18 @@ H5S__hyper_serialize(const H5S_t *space, uint8_t **p)
     hsize_t                offset[H5S_MAX_RANK];    /* Offset of element in dataspace */
     hsize_t                start[H5S_MAX_RANK];     /* Location of start of hyperslab */
     hsize_t                end[H5S_MAX_RANK];       /* Location of end of hyperslab */
-    uint8_t *              pp;                      /* Local pointer for decoding */
+    uint8_t *              pp;                      /* Local pointer for encoding */
     uint8_t *              lenp = NULL;             /* pointer to length location for later storage */
     uint32_t               len  = 0;                /* number of bytes used */
     uint32_t               version;                 /* Version number */
     uint8_t                flags       = 0;         /* Flags for message */
     hsize_t                block_count = 0;         /* block counter for regular hyperslabs */
-    unsigned               fast_dim;         /* Rank of the fastest changing dimension for the dataspace */
-    unsigned               ndims;            /* Rank of the dataspace */
-    unsigned               u;                /* Local counting variable */
-    hbool_t                complete = FALSE; /* Whether we are done with the iteration */
-    hbool_t                is_regular;       /* Whether selection is regular */
-    uint8_t                enc_size;
+    unsigned               fast_dim;            /* Rank of the fastest changing dimension for the dataspace */
+    unsigned               ndims;               /* Rank of the dataspace */
+    unsigned               u;                   /* Local counting variable */
+    hbool_t                complete = FALSE;    /* Whether we are done with the iteration */
+    hbool_t                is_regular;          /* Whether selection is regular */
+    uint8_t                enc_size;            /* Encoded size */
     herr_t                 ret_value = SUCCEED; /* return value */
 
     FUNC_ENTER_STATIC
@@ -3968,6 +3975,7 @@ H5S__hyper_serialize(const H5S_t *space, uint8_t **p)
     ndims   = space->extent.rank;
     diminfo = space->select.sel_info.hslab->diminfo.opt;
 
+    /* Calculate the # of blocks */
     if (space->select.sel_info.hslab->unlim_dim < 0) /* ! H5S_UNLIMITED */
         block_count = H5S__get_select_hyper_nblocks(space, FALSE);
 
@@ -4268,7 +4276,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
         /* Check for unknown flags */
         if (flags & ~H5S_SELECT_FLAG_BITS)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTLOAD, FAIL, "unknown flag for selection")
-    } /* end if */
+    }
     else {
         /* Skip over the remainder of the header */
         pp += 8;
@@ -4284,7 +4292,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
 
     if (!*space) {
         /* Patch the rank of the allocated dataspace */
-        (void)HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
+        HDmemset(dims, 0, (size_t)rank * sizeof(dims[0]));
         if (H5S_set_extent_simple(tmp_space, rank, dims, NULL) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_CANTINIT, FAIL, "can't set dimensions")
     } /* end if */
@@ -4300,7 +4308,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
 
         /* Sanity checks */
         HDassert(H5S_UNLIMITED == HSIZE_UNDEF);
-        HDassert(version >= 2);
+        HDassert(version >= H5S_HYPER_VERSION_2);
 
         /* Decode start/stride/block/count */
         switch (enc_size) {
@@ -4368,7 +4376,7 @@ H5S__hyper_deserialize(H5S_t **space, const uint8_t **p)
         size_t         num_elem;          /* Number of elements in selection */
         unsigned       v;                 /* Local counting variable */
 
-        /* decode the number of blocks */
+        /* Decode the number of blocks */
         switch (enc_size) {
             case H5S_SELECT_INFO_ENC_SIZE_2:
                 UINT16DECODE(pp, num_elem);
@@ -4744,7 +4752,7 @@ H5S__get_select_hyper_blocklist(H5S_t *space, hsize_t startblock, hsize_t numblo
         hsize_t numblocks;      IN: Number of hyperslab blocks to get
         hsize_t buf[];          OUT: List of hyperslab blocks selected
  RETURNS
-    Non-negative on success/Negative on failure
+    Non-negative on success, negative on failure
  DESCRIPTION
         Puts a list of the hyperslab blocks into the user's buffer.  The blocks
     start with the 'startblock'th block in the list of blocks and put
@@ -5386,7 +5394,7 @@ H5S__hyper_spans_shape_same_helper(const H5S_hyper_span_info_t *span_info1,
 {
     hbool_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(span_info1);
@@ -6472,7 +6480,7 @@ H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset)
         if (0 != offset[u]) {
             non_zero_offset = TRUE;
             break;
-        } /* end if */
+        }
 
     /* Only perform operation if the offset is non-zero */
     if (non_zero_offset) {
@@ -7002,9 +7010,8 @@ H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
 {
     hbool_t  non_zero_offset = FALSE; /* Whether any offset is non-zero */
     unsigned u;                       /* Local index variable */
-    herr_t   ret_value = SUCCEED;     /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity checks */
     HDassert(space);
@@ -7049,10 +7056,9 @@ H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset)
             H5S__hyper_adjust_s_helper(space->select.sel_info.hslab->span_lst, space->extent.rank, offset, 0,
                                        op_gen);
         } /* end if */
-    }     /* end if */
+    }
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5S__hyper_adjust_s() */
 
 /*--------------------------------------------------------------------------
@@ -7185,7 +7191,7 @@ H5S__hyper_append_span(H5S_hyper_span_info_t **span_tree, unsigned ndims, hsize_
 
     FUNC_ENTER_STATIC
 
-    /* Sanity check */
+    /* Sanity checks */
     HDassert(span_tree);
 
     /* Check for adding first node to merged spans */
@@ -9457,11 +9463,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S__generate_hyperlab
  *
- * Purpose:    Generate hyperslab information from H5S_select_hyperslab()
+ * Purpose:     Generate hyperslab information from H5S_select_hyperslab()
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, September 12, 2000
  *
  *-------------------------------------------------------------------------
@@ -9664,7 +9670,7 @@ H5S__hyper_regular_and_single_block(H5S_t *space, const hsize_t start[], const h
     unsigned u;                     /* Local index variable */
     herr_t   ret_value = SUCCEED;   /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(space);
@@ -9874,11 +9880,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S_select_hyperslab
  *
- * Purpose:    Internal version of H5Sselect_hyperslab().
+ * Purpose:     Internal version of H5Sselect_hyperslab().
  *
- * Return:    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Wednesday, January 10, 2001
  *
  *-------------------------------------------------------------------------
@@ -10101,7 +10107,7 @@ H5S_select_hyperslab(H5S_t *space, H5S_seloper_t op, const hsize_t start[], cons
         case H5S_SEL_POINTS:          /* Can't combine hyperslab operations and point selections currently */
             if (op == H5S_SELECT_SET) /* Allow only "set" operation to proceed */
                 break;
-            /* Else fall through to error */
+            /* FALLTHROUGH (to error) */
             H5_ATTR_FALLTHROUGH
 
         case H5S_SEL_ERROR:
@@ -10585,11 +10591,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S__combine_select
  *
- * Purpose:    Internal version of H5Scombine_select().
+ * Purpose:     Internal version of H5Scombine_select().
  *
- * Return:    New dataspace on success/NULL on failure
+ * Return:      New dataspace on success/NULL on failure
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, October 30, 2001
  *
  *-------------------------------------------------------------------------
@@ -10727,11 +10733,11 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5S__modify_select
  *
- * Purpose:    Internal version of H5Smodify_select().
+ * Purpose:     Internal version of H5Smodify_select().
  *
- * Return:    New dataspace on success/NULL on failure
+ * Return:      New dataspace on success/NULL on failure
  *
- * Programmer:    Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, October 30, 2001
  *
  *-------------------------------------------------------------------------
@@ -12246,7 +12252,7 @@ hsize_t
 H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, hbool_t *partial)
 {
     H5S_hyper_sel_t *hslab;   /* Convenience pointer to hyperslab info */
-    H5S_hyper_dim_t *diminfo; /* Convenience pointer to diminfo.opt in unlimited dimension */
+    H5S_hyper_dim_t *diminfo; /* Convenience pointer to diminfo in unlimited dimension */
     hsize_t          ret_value = 0;
 
     FUNC_ENTER_NOAPI(0)

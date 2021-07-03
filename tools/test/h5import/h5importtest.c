@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -64,16 +64,16 @@ main(void)
 
     double b64r3[5][3][4];
     double row8[3], col8[4], pln8[5];
-    double rowo8 = 11.0F, colo8 = 21.0F, plno8 = 51.0F;
-    double rowi8 = 1.0F, coli8 = 2.0F, plni8 = 5.0F;
+    double rowo8 = 11.0, colo8 = 21.0, plno8 = 51.0;
+    double rowi8 = 1.0, coli8 = 2.0, plni8 = 5.0;
 
     /* Initialize machine endian */
     volatile uint32_t ibyte = 0x01234567;
     /* 0 for big endian, 1 for little endian. */
-    if ((*((uint8_t *)(&ibyte))) == 0x67)
-        HDstrncpy(machine_order, "LE", 2);
+    if ((*((volatile uint8_t *)(&ibyte))) == 0x67)
+        HDstrcpy(machine_order, "LE");
     else
-        HDstrncpy(machine_order, "BE", 2);
+        HDstrcpy(machine_order, "BE");
 
     /*
      * initialize the row, column, and plane vectors

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5Pdxpl.c
  *			March 16 1998
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Data transfer property list class routines
  *
@@ -782,7 +782,7 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber larber@uiuc.edu
+ * Programmer: Leon Arber
  *
  * Date: April 9, 2004
  *
@@ -813,7 +813,7 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber larber@uiuc.edu
+ * Programmer: Leon Arber
  *
  * Date: April 9, 2004
  *
@@ -903,7 +903,7 @@ done:
  *
  * Return: Success: SUCCEED, Failure: FAIL
  *
- * Programmer: Leon Arber larber@uiuc.edu
+ * Programmer: Leon Arber
  *
  * Date: April 9, 2004
  *
@@ -1304,8 +1304,6 @@ done:
  * Programmer:	Raymond Lu
  *              Jan 14, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1345,8 +1343,6 @@ done:
  * Programmer:	Raymond Lu
  *              April 15, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -1385,8 +1381,6 @@ done:
  *
  * Programmer:	Raymond Lu
  *              April 15, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -1492,9 +1486,8 @@ H5Pset_btree_ratios(hid_t plist_id, double left, double middle, double right)
     H5TRACE4("e", "iddd", plist_id, left, middle, right);
 
     /* Check arguments */
-    if (left < (double)0.0f || left > (double)1.0f || middle < (double)0.0f || middle > (double)1.0f ||
-        right < (double)0.0f || right > (double)1.0f)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0<=X<=1.0")
+    if (left < 0.0 || left > 1.0 || middle < 0.0 || middle > 1.0 || right < 0.0 || right > 1.0)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "split ratio must satisfy 0.0 <= X <= 1.0")
 
     /* Get the plist structure */
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_DATASET_XFER)))

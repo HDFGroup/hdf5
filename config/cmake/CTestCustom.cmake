@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -18,23 +18,18 @@ set (CTEST_CUSTOM_MAXIMUM_FAILED_TEST_OUTPUT_SIZE 50000)
 
 set (CTEST_CUSTOM_WARNING_EXCEPTION
     ${CTEST_CUSTOM_WARNING_EXCEPTION}
-#    "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning C4090:"
-#    "H5detect.c.[0-9]+.[ \t]*:[ \t]*warning:[ \t]*passing argument"
-#    "H5detect.c[0-9 \t:]*warning:[ \t]*passing argument"
     "note.*expected.*void.*but argument is of type.*volatile"
-#    "H5Tconv.c[0-9 \t:]*warning:[ \t]*comparison is always false due to limited range of data type"
-#    "H5Ztrans.c.[0-9]+.[ \t]*:[ \t]*warning C4244"
     "src.ZLIB.*:[ \t]*warning"
     "warning LNK4197:.*ZLIB-prefix"
     "src.SZIP.*:[ \t]*warning"
 #    "POSIX name for this item is deprecated"
     "disabling jobserver mode"
     "config.cmake.xlatefile.c"
-#    "warning.*implicit declaration of function"
     "warning.*unknown pragma"
     "warning.*unrecognized .pragma"
 #    "note: expanded from macro"
-#    "fpp:[ \t]*warning:[ \t]*cannot remove H5_DEBUG_API - not a predefined macro"
+    # HDDFFV-11074
+    "This directive is not standard"
 )
 
 set (CTEST_CUSTOM_MEMCHECK_IGNORE
@@ -142,8 +137,8 @@ set (CTEST_CUSTOM_MEMCHECK_IGNORE
     H5REPACK-bug1814-clear-objects
     H5REPACK-HDFFV-5932-clear-objects
     H5REPACK-HDFFV-7840-clear-objects
-    H5REPACK_META-meta_long_N-clear-objects
-    H5REPACK_META-meta_short_N-clear-objects
+    H5REPACK_META-meta_long-clear-objects
+    H5REPACK_META-meta_short-clear-objects
     H5REPACK_STAT-GS_AGGR-clear-objects
     H5REPACK_STAT-S_AGGR-clear-objects
     H5REPACK_STAT-SP_NONE-clear-objects

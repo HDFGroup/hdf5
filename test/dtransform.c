@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,12 +18,12 @@
 #define FLOAT_TOL 0.0001F
 
 static int init_test(hid_t file_id);
-static int test_copy(const hid_t dxpl_id_c_to_f_copy, const hid_t dxpl_id_polynomial_copy);
-static int test_trivial(const hid_t dxpl_id_simple);
-static int test_poly(const hid_t dxpl_id_polynomial);
+static int test_copy(hid_t dxpl_id_c_to_f_copy, hid_t dxpl_id_polynomial_copy);
+static int test_trivial(hid_t dxpl_id_simple);
+static int test_poly(hid_t dxpl_id_polynomial);
 static int test_specials(hid_t file);
 static int test_set(void);
-static int test_getset(const hid_t dxpl_id_simple);
+static int test_getset(hid_t dxpl_id_simple);
 
 /* These are needed for multiple tests, so are declared here globally and are init'ed in init_test */
 hid_t dset_id_int         = -1;
@@ -581,6 +581,7 @@ test_specials(hid_t file)
     const char *special3 = "1000/x";
     const char *special4 = "-x";
     const char *special5 = "+x";
+    const char *special6 = "2e+1*x";
 
     TESTING("data transform of some special cases")
 
@@ -705,6 +706,29 @@ test_specials(hid_t file)
     if (H5Dclose(dset_id) < 0)
         TEST_ERROR
 
+    /*-----------------------------
+     * Operation 6: 2e+1*x
+     *----------------------------*/
+    if (H5Pset_data_transform(dxpl_id, special6) < 0)
+        TEST_ERROR;
+
+    for (row = 0; row < ROWS; row++)
+        for (col = 0; col < COLS; col++)
+            data_res[row][col] = transformData[row][col] * 20;
+
+    if ((dset_id = H5Dcreate2(file, "/special6", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+
+    COMPARE_INT(read_buf, data_res)
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
     if (H5Pclose(dxpl_id) < 0)
         TEST_ERROR
     if (H5Sclose(dataspace) < 0)
@@ -766,7 +790,7 @@ test_trivial(const hid_t dxpl_id_simple)
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n");
         }
 
-    PASSED()
+    PASSED();
 
     TESTING("data transform, trivial transform, with type conversion")
     if (H5Dread(dset_id_float, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id_simple, windchillFintread) < 0)
@@ -777,7 +801,7 @@ test_trivial(const hid_t dxpl_id_simple)
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n")
         }
 
-    PASSED()
+    PASSED();
 
     return 0;
 error:
@@ -804,7 +828,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
     if (HDstrcmp(c_to_f, ptrgetTest) != 0)
         FAIL_PUTS_ERROR("    ERROR: Data transform failed to match what was set\n")
 
-    PASSED()
+    PASSED();
 
     HDfree(ptrgetTest);
     ptrgetTest = NULL;
@@ -823,7 +847,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
                 FAIL_PUTS_ERROR("    ERROR: Conversion failed to match computed data\n")
         }
 
-    PASSED()
+    PASSED();
 
     TESTING("H5Pget_data_transform, after resetting transform property")
 
@@ -834,7 +858,7 @@ test_getset(const hid_t dxpl_id_c_to_f)
     if (HDstrcmp(simple, ptrgetTest) != 0)
         FAIL_PUTS_ERROR("    ERROR: Data transform failed to match what was set\n")
 
-    PASSED()
+    PASSED();
 
     HDfree(ptrgetTest);
     ptrgetTest = NULL;
@@ -870,7 +894,7 @@ test_set(void)
     H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     if (H5Pget_data_transform(dxpl_id, ptrgetTest, HDstrlen(str) + 1) < 0)
-        PASSED()
+        PASSED();
     else
         FAIL_PUTS_ERROR("    ERROR: Data transform get before set succeeded (it shouldn't have)\n");
 

@@ -13,8 +13,8 @@
 !  depending on which of the KIND values are found.
 !
 ! NOTES
-!  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF 
-!  depending on availablity.It generates code that makes use of 
+!  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF
+!  depending on availablity.It generates code that makes use of
 !  STORAGE_SIZE/SIZEOF in H5fortran_detect.f90. STORAGE_SIZE is standard
 !  compliant and should always be chosen over SIZEOF.
 !
@@ -34,7 +34,7 @@
 !  This file is part of HDF5.  The full HDF5 copyright notice, including       *
 !  terms governing use, modification, and redistribution, is contained in      *
 !  the COPYING file, which can be found at the root of the source code         *
-!  distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.    *
+!  distribution tree, or in https://www.hdfgroup.org/licenses.    *
 !  If you do not have access to either file, you may request a copy from       *
 !  help@hdfgroup.org.                                                          *
 !  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -81,7 +81,7 @@ PROGRAM H5_test_buildiface
 '!   This file is part of HDF5.  The full HDF5 copyright notice, including     *',&
 '!   terms governing use, modification, and redistribution, is contained in    *',&
 '!   the COPYING file, which can be found at the root of the source code       *',&
-'!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *',&
+'!   distribution tree, or in https://www.hdfgroup.org/licenses.               *',&
 '!   If you do not have access to either file, you may request a copy from     *',&
 '!   help@hdfgroup.org.                                                        *',&
 '! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *',&
@@ -94,7 +94,7 @@ PROGRAM H5_test_buildiface
   WRITE(11,'(a)') "MODULE TH5_MISC_gen"
 
   WRITE(11,'(A)') '  USE, INTRINSIC :: ISO_C_BINDING'
-  
+
 ! Interfaces for validating REALs, INTEGERs, CHARACTERs, LOGICALs
 
   WRITE(11,'(A)') '  INTERFACE verify'
@@ -156,8 +156,8 @@ PROGRAM H5_test_buildiface
      WRITE(11,'(A)') '!DEC$if defined(BUILD_HDF5_TEST_DLL)'
      WRITE(11,'(A)') '!DEC$attributes dllexport :: verify_real_kind_'//TRIM(ADJUSTL(chr2))
      WRITE(11,'(A)') '!DEC$endif'
-    
-! Subroutine API 
+
+! Subroutine API
      WRITE(11,'(A)') '  SUBROUTINE verify_real_kind_'//TRIM(ADJUSTL(chr2))//'(string,value,correct_value,total_error)'
      WRITE(11,'(A)') '    IMPLICIT NONE'
      WRITE(11,'(A)') '    CHARACTER(LEN=*) :: string'
@@ -186,7 +186,7 @@ PROGRAM H5_test_buildiface
 !                      {     EXPONENT(x)-DIGITS(x)
 !                      {  2.0                        for x /= 0
 !         SPACING(x) = {
-!                      {  
+!                      {
 !                      {  TINY(x)                    for x == 0
 !
 !       The ULP optional argument scales the comparison:
@@ -228,7 +228,7 @@ PROGRAM H5_test_buildiface
   WRITE(11,'(A)') '!DEC$attributes dllexport :: verify_character'
   WRITE(11,'(A)') '!DEC$endif'
 
-! Subroutine API 
+! Subroutine API
   WRITE(11,'(A)') '  SUBROUTINE verify_character(string,value,correct_value,total_error)'
   WRITE(11,'(A)') '    IMPLICIT NONE'
   WRITE(11,'(A)') '    CHARACTER*(*) :: string'
@@ -258,7 +258,7 @@ PROGRAM H5_test_buildiface
   WRITE(11,'(A)') '       total_error = total_error + 1'
   WRITE(11,'(A)') '       WRITE(*,*) "ERROR: INCORRECT VALIDATION ", string'
   WRITE(11,'(A)') '    ENDIF'
-  
+
   WRITE(11,'(A)') '  END SUBROUTINE verify_logical'
 
   WRITE(11,'(A)') "END MODULE TH5_MISC_gen"

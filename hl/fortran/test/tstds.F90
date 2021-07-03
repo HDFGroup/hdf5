@@ -6,7 +6,7 @@
 ! * This file is part of HDF5.  The full HDF5 copyright notice, including     *
 ! * terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -46,7 +46,7 @@ SUBROUTINE write_test_status( test_result)
   IF (test_result .EQ.  0) THEN
      error_string = success
   ENDIF
-  
+
   WRITE(*, fmt = '(T34, A)') error_string
 
 END SUBROUTINE write_test_status
@@ -66,7 +66,7 @@ SUBROUTINE test_testds(err)
 
   IMPLICIT NONE
 
-  INTEGER, PARAMETER :: RANK      = 2 ! rank of DATA dataset 
+  INTEGER, PARAMETER :: RANK      = 2 ! rank of DATA dataset
   INTEGER, PARAMETER :: DIM_DATA  = 12
   INTEGER, PARAMETER :: DIM1_SIZE = 3
   INTEGER, PARAMETER :: DIM2_SIZE = 4
@@ -82,13 +82,13 @@ SUBROUTINE test_testds(err)
   INTEGER(hid_t) :: fid    ! file ID
   INTEGER(hid_t) :: did    ! dataset ID
   INTEGER(hid_t) :: dsid   ! DS dataset ID
-  INTEGER :: rankds = 1    ! rank of DS dataset 
-  INTEGER(hsize_t), DIMENSION(1:rank) ::  dims  = (/DIM2_SIZE,DIM1_SIZE/) ! size of DATA dataset 
-  INTEGER, DIMENSION(1:DIM_DATA) :: buf = (/1,2,3,4,5,6,7,8,9,10,11,12/)  ! DATA of DATA dataset 
-  INTEGER(hsize_t), DIMENSION(1:1) ::  s1_dim  = (/DIM1_SIZE/)  ! size of DS 1 dataset 
-  INTEGER(hsize_t), DIMENSION(1:1) ::  s2_dim  = (/DIM2_SIZE/)  ! size of DS 2 dataset 
-  REAL, DIMENSION(1:DIM1_SIZE) ::   s1_wbuf = (/10,20,30/)     ! DATA of DS 1 dataset 
-  INTEGER, DIMENSION(1:DIM2_SIZE) :: s2_wbuf = (/10,20,50,100/) ! DATA of DS 2 dataset 
+  INTEGER :: rankds = 1    ! rank of DS dataset
+  INTEGER(hsize_t), DIMENSION(1:rank) ::  dims  = (/DIM2_SIZE,DIM1_SIZE/) ! size of DATA dataset
+  INTEGER, DIMENSION(1:DIM_DATA) :: buf = (/1,2,3,4,5,6,7,8,9,10,11,12/)  ! DATA of DATA dataset
+  INTEGER(hsize_t), DIMENSION(1:1) ::  s1_dim  = (/DIM1_SIZE/)  ! size of DS 1 dataset
+  INTEGER(hsize_t), DIMENSION(1:1) ::  s2_dim  = (/DIM2_SIZE/)  ! size of DS 2 dataset
+  REAL, DIMENSION(1:DIM1_SIZE) ::   s1_wbuf = (/10,20,30/)     ! DATA of DS 1 dataset
+  INTEGER, DIMENSION(1:DIM2_SIZE) :: s2_wbuf = (/10,20,50,100/) ! DATA of DS 2 dataset
   INTEGER :: err
   INTEGER :: num_scales
   INTEGER(size_t) :: name_len
@@ -107,7 +107,7 @@ SUBROUTINE test_testds(err)
   CALL H5Fcreate_f("tstds.h5",H5F_ACC_TRUNC_F, fid, err)
   IF(err.LT.0) RETURN
 
-  ! make a dataset 
+  ! make a dataset
   CALL H5LTmake_dataset_int_f(fid,DSET_NAME,rank,dims,buf, err)
   IF(err.LT.0) RETURN
 
@@ -185,11 +185,11 @@ SUBROUTINE test_testds(err)
      RETURN
   ENDIF
   CALL write_test_status(err)
-  
+
   !-------------------------------------------------------------------------
   ! set the DS_1_NAME dimension scale to DSET_NAME at dimension 0
   !-------------------------------------------------------------------------
- 
+
   CALL test_begin(' Test Setting Dimension Scale           ')
 
   CALL H5DSset_scale_f(dsid, err, "Dimension Scale Set 1")
@@ -245,15 +245,15 @@ SUBROUTINE test_testds(err)
      CALL write_test_status(err)
      RETURN
   ENDIF
-  
+
   ! close DS id
   CALL H5Dclose_f(dsid, err)
   IF(err.LT.0) RETURN
-  
+
   !-------------------------------------------------------------------------
   ! attach the DS_2_NAME dimension scale to DSET_NAME
   !-------------------------------------------------------------------------
- 
+
   ! get the DS dataset id
   CALL H5Dopen_f(fid, DS_2_NAME, dsid, err)
   IF(err.LT.0) RETURN
@@ -301,7 +301,7 @@ SUBROUTINE test_testds(err)
   ENDIF
 
   ! Test label where character length is to small
-  
+
   label_len = 5
   label = ''
   CALL H5DSget_label_f(did, DIM2, label(1:label_len), label_len, err)
@@ -341,7 +341,7 @@ SUBROUTINE test_testds(err)
   CALL H5Dclose_f(dsid, err)
   IF(err.LT.0) RETURN
 
- ! close file 
+ ! close file
   CALL H5Fclose_f(fid, err)
   IF(err.LT.0) RETURN
 
@@ -352,7 +352,7 @@ END MODULE TSTDS_TESTS
 PROGRAM test_ds
 
   USE TSTDS_TESTS ! module for testing dataset routines
-  
+
   IMPLICIT NONE
 
   INTEGER :: err

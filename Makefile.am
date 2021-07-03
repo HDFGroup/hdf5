@@ -6,14 +6,14 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
 ## Makefile.am
 ## Run automake to generate a Makefile.in from this file.
 ##
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -35,6 +35,9 @@
 
 include $(top_srcdir)/config/commence.am
 
+# include Doxygen rules (requires autoconf-archive >2016-03-20)
+@DX_RULES@
+
 # Define subdirectories to build.
 ## Automake understands that `make distclean' should recurse into
 ## conditional subdirectories even if `make all' does not.
@@ -45,7 +48,7 @@ include $(top_srcdir)/config/commence.am
 # Since we're explicitly listing DIST_SUBDIRS, we also need to list
 # directories that are only conditionally built (so that their Makefiles
 # are cleaned as well).
-# Note that `make clean' will not affect the examples or doc directories. 
+# Note that `make clean' will not affect the examples or doc directories.
 
 # Conditionals.  These conditionals are defined during configure
 # Define each variable to empty if it is not used to placate pmake
@@ -85,9 +88,9 @@ else
    TOOLS_DIR=
 endif
 
-SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin $(TOOLS_DIR) . \
+SUBDIRS = src $(TESTSERIAL_DIR) $(TESTPARALLEL_DIR) bin utils $(TOOLS_DIR) . \
           $(CXX_DIR) $(FORTRAN_DIR) $(JAVA_DIR) $(HDF5_HL_DIR)
-DIST_SUBDIRS = src test testpar tools . c++ fortran hl examples java
+DIST_SUBDIRS = src test testpar utils tools . c++ fortran hl examples java
 
 # Some files generated during configure that should be cleaned
 DISTCLEANFILES=config/stamp1 config/stamp2
@@ -133,7 +136,7 @@ mostlyclean-local:
 # 'make install' will now install examples, the same as 'make install-all'.
 # 'make-install-all' will be redundant but will still work.
 install: install-recursive install-examples
-uninstall: uninstall-recursive uninstall-examples 
+uninstall: uninstall-recursive uninstall-examples
 
 # 'make install-all' also installs examples
 install-all:
@@ -154,7 +157,7 @@ install-doc:
 uninstall-doc:
 	@echo "docs no longer live in this tree.  Use install-examples to install examples."
 
-# `make check-install' or `make installcheck' checks that examples can 
+# `make check-install' or `make installcheck' checks that examples can
 #  be successfully built
 installcheck-local:
 	if test -n "${DESTDIR}"; then                                  \
@@ -187,13 +190,18 @@ check-all-install:
 trace:
 	@(cd src && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
 
+# doxygen support
+if BUILD_DOXYGEN_CONDITIONAL
+doxygen: doxygen-doc
+endif
+
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
 check-vfd:
-	for d in src test; do                                 \
-	  if test $$d != .; then                                       \
-	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;          \
-	  fi;                                                          \
+	for d in src utils test; do                                     \
+	  if test $$d != .; then                                        \
+	    (cd $$d && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;           \
+	  fi;                                                           \
 	done
 
 # Run tests with different passthrough Virtual Object Layer Connectors.

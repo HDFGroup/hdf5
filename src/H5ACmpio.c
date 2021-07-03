@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:             H5ACmpio.c
  *                      Jun 20 2015
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             Functions in this file implement support for parallel
  *                      I/O cache functionality
@@ -773,7 +773,7 @@ H5AC__log_dirtied_entry(const H5AC_info_t *entry_ptr)
     else {
         aux_ptr->dirty_bytes += entry_ptr->size;
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-        aux_ptr->unprotect_dirty_bytes += entry_size;
+        aux_ptr->unprotect_dirty_bytes += entry_ptr->size;
         aux_ptr->unprotect_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
     }  /* end else */
@@ -971,7 +971,7 @@ H5AC__log_inserted_entry(const H5AC_info_t *entry_ptr)
     aux_ptr->dirty_bytes += entry_ptr->size;
 
 #if H5AC_DEBUG_DIRTY_BYTES_CREATION
-    aux_ptr->insert_dirty_bytes += size;
+    aux_ptr->insert_dirty_bytes += entry_ptr->size;
     aux_ptr->insert_dirty_bytes_updates += 1;
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
@@ -1272,7 +1272,7 @@ H5AC__propagate_and_apply_candidate_list(H5F_t *f)
         if (aux_ptr->write_done)
             (aux_ptr->write_done)();
 
-        /* to prevent "messages from the past" we must synchronize all
+        /* To prevent "messages from the past" we must synchronize all
          * processes again before we go on.
          */
         if (MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
@@ -1515,7 +1515,7 @@ H5AC__receive_and_apply_clean_list(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't receive clean list")
 
     if (num_entries > 0)
-        /* mark the indicated entries as clean */
+        /* Mark the indicated entries as clean */
         if (H5C_mark_entries_as_clean(f, num_entries, haddr_buf_ptr) < 0)
             HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't mark entries clean.")
 
@@ -1849,6 +1849,8 @@ done:
  * Programmer:  John Mainzer
  *              April 28, 2010
  *
+ * Changes:     None.
+ *
  *-------------------------------------------------------------------------
  */
 static herr_t
@@ -1877,9 +1879,12 @@ H5AC__rsp__p0_only__flush(H5F_t *f)
      * However, when flushing from within the close operation from a file,
      * it's possible to skip this barrier (on the second flush of the cache).
      */
-    if (!H5CX_get_mpi_file_flushing())
+    if (!H5CX_get_mpi_file_flushing()) {
+
         if (MPI_SUCCESS != (mpi_result = MPI_Barrier(aux_ptr->mpi_comm)))
+
             HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_result)
+    }
 
     /* Flush data to disk, from rank 0 process */
     if (aux_ptr->mpi_rank == 0) {
@@ -2076,9 +2081,13 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
 
     /* Sanity checks */
     HDassert(f != NULL);
+
     cache_ptr = f->shared->cache;
+
     HDassert(cache_ptr != NULL);
+
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(cache_ptr);
+
     HDassert(aux_ptr != NULL);
     HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
     HDassert((sync_point_op == H5AC_SYNC_POINT_OP__FLUSH_TO_MIN_CLEAN) ||
@@ -2158,6 +2167,7 @@ H5AC__run_sync_point(H5F_t *f, int sync_point_op)
 #endif /* H5AC_DEBUG_DIRTY_BYTES_CREATION */
 
 done:
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC__run_sync_point() */
 
@@ -2253,7 +2263,6 @@ H5AC__tidy_cache_0_lists(H5AC_t *cache_ptr, unsigned num_candidates, haddr_t *ca
  *              request to flush all items and something was protected.
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Aug 22 2009
  *
  *-------------------------------------------------------------------------

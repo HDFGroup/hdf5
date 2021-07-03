@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:    Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:    Quincey Koziol
  *        Monday, April 14, 2003
  *
  * Purpose:    This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5D package!"
 #endif
 
-#ifndef _H5Dpkg_H
-#define _H5Dpkg_H
+#ifndef H5Dpkg_H
+#define H5Dpkg_H
 
 /* Get package's private header */
 #include "H5Dprivate.h"
@@ -569,7 +569,6 @@ H5_DLL haddr_t H5D__get_offset(const H5D_t *dset);
 H5_DLL herr_t  H5D__vlen_get_buf_size(H5D_t *dset, hid_t type_id, hid_t space_id, hsize_t *size);
 H5_DLL herr_t  H5D__vlen_get_buf_size_gen(H5VL_object_t *vol_obj, hid_t type_id, hid_t space_id,
                                           hsize_t *size);
-H5_DLL herr_t  H5D__check_filters(H5D_t *dataset);
 H5_DLL herr_t  H5D__set_extent(H5D_t *dataset, const hsize_t *size);
 H5_DLL herr_t  H5D__flush_sieve_buf(H5D_t *dataset);
 H5_DLL herr_t  H5D__flush_real(H5D_t *dataset);
@@ -632,7 +631,8 @@ H5_DLL hbool_t H5D__chunk_is_space_alloc(const H5O_storage_t *storage);
 H5_DLL hbool_t H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset);
 H5_DLL herr_t  H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata);
 H5_DLL herr_t  H5D__chunk_allocated(const H5D_t *dset, hsize_t *nbytes);
-H5_DLL herr_t  H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[]);
+H5_DLL herr_t  H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite,
+                                   const hsize_t old_dim[]);
 H5_DLL herr_t  H5D__chunk_file_alloc(const H5D_chk_idx_info_t *idx_info, const H5F_block_t *old_chunk,
                                      H5F_block_t *new_chunk, hbool_t *need_insert, const hsize_t *scaled);
 H5_DLL herr_t  H5D__chunk_update_old_edge_chunks(H5D_t *dset, hsize_t old_dim[]);
@@ -740,4 +740,4 @@ H5_DLL herr_t H5D__layout_type_test(hid_t did, H5D_layout_t *layout_type);
 H5_DLL herr_t H5D__current_cache_size_test(hid_t did, size_t *nbytes_used, int *nused);
 #endif /* H5D_TESTING */
 
-#endif /*_H5Dpkg_H*/
+#endif /*H5Dpkg_H*/

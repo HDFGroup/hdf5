@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *
  * Purpose:	Generic Property Functions
  */
@@ -1436,7 +1436,7 @@ H5P__free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED 
  NAME
     H5P__access_class
  PURPOSE
-    Internal routine to increment or decrement list & class dependancies on a
+    Internal routine to increment or decrement list & class dependencies on a
         property list class
  USAGE
     herr_t H5P__access_class(pclass,mod)
@@ -5559,7 +5559,7 @@ done:
  * Return:      Success:        Non-negative ID of property list.
  *              Failure:        H5I_INVALID_HID
  *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		April 22, 2014
  *
  *-------------------------------------------------------------------------
@@ -5586,7 +5586,7 @@ H5P_get_plist_id(const H5P_genplist_t *plist)
  * Return:      Success:        Non-NULL class of property list.
  *              Failure:        NULL
  *
- * Programmer:	Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:	Quincey Koziol
  *		April 22, 2014
  *
  *-------------------------------------------------------------------------

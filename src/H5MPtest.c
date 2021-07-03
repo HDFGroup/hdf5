@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Tuesday, May  3, 2005
  *
  * Purpose:	Memory pool testing functions.
@@ -41,8 +41,6 @@
  * Programmer:	Quincey Koziol
  *              Tuesday, May  3, 2005
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -71,8 +69,6 @@ H5MP_get_pool_free_size(const H5MP_pool_t *mp, size_t *free_size)
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May  3, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -105,8 +101,6 @@ H5MP_get_pool_first_page(const H5MP_pool_t *mp, H5MP_page_t **page)
  *
  * Programmer:	Quincey Koziol
  *              Wednesday, May  3, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -141,10 +135,6 @@ H5MP_pool_is_free_size_correct(const H5MP_pool_t *mp)
 
         /* Check that the free space from the blocks on the free list
          * corresponds to space in page */
-#ifdef QAK
-        HDfprintf(stderr, "%s: page_free = %Zu, page->free_size = %Zu\n", "H5MP_pool_is_free_size_correct",
-                  page_free, page->free_size);
-#endif /* QAK */
         if (page_free != page->free_size)
             HGOTO_DONE(FALSE)
 
@@ -157,10 +147,6 @@ H5MP_pool_is_free_size_correct(const H5MP_pool_t *mp)
 
     /* Check that the free space from the pages
      * corresponds to free space in pool */
-#ifdef QAK
-    HDfprintf(stderr, "%s: pool_free = %Zu, mp->free_size = %Zu\n", "H5MP_pool_is_free_size_correct",
-              pool_free, mp->free_size);
-#endif /* QAK */
     if (pool_free != mp->free_size)
         HGOTO_DONE(FALSE)
 
@@ -179,8 +165,6 @@ done:
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May  3, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -210,8 +194,6 @@ H5MP_get_page_free_size(const H5MP_page_t *page, size_t *free_size)
  *
  * Programmer:	Quincey Koziol
  *              Tuesday, May  3, 2005
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

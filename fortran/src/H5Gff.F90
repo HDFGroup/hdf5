@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -64,11 +64,11 @@ CONTAINS
 !  gcpl_id 	 - Property list for group creation
 !  gapl_id 	 - Property list for group access
 !
-! AUTHOR	
+! AUTHOR
 !  Elena Pourmal
 !  August 12, 1999
 !
-! HISTORY 	
+! HISTORY
 !  Explicit Fortran interfaces were added for
 !  called C functions (it is needed for Windows
 !  port).  March 5, 2001
@@ -668,7 +668,7 @@ CONTAINS
 !*****
     INTEGER :: namelen         ! Lenghth of the current_name string
     INTEGER :: new_namelen     ! Lenghth of the new_name string
-    
+
     INTERFACE
        INTEGER FUNCTION h5gmove_c(loc_id, name, namelen, new_name, new_namelen) BIND(C,NAME='h5gmove_c')
          IMPORT :: C_CHAR
@@ -680,7 +680,7 @@ CONTAINS
          INTEGER :: new_namelen
        END FUNCTION h5gmove_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     new_namelen = LEN(new_name)
     hdferr = h5gmove_c(loc_id, name, namelen, new_name, new_namelen)
@@ -716,7 +716,7 @@ CONTAINS
 !*****
     INTEGER :: src_namelen         ! Length of the current_name string
     INTEGER :: dst_namelen         ! Lenghth of the new_name string
-    
+
     INTERFACE
        INTEGER FUNCTION h5gmove2_c(src_loc_id, src_name, src_namelen, &
             dst_loc_id, dst_name, dst_namelen) BIND(C,NAME='h5gmove2_c')
@@ -730,7 +730,7 @@ CONTAINS
          INTEGER :: dst_namelen
        END FUNCTION h5gmove2_c
     END INTERFACE
-    
+
     src_namelen = LEN(src_name)
     dst_namelen = LEN(dst_name)
     hdferr = h5gmove2_c(src_loc_id, src_name, src_namelen, dst_loc_id, dst_name, dst_namelen)
@@ -777,7 +777,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr         ! Error code
 !*****
     INTEGER :: namelen ! Lenghth of the current_name string
-    
+
     INTERFACE
        INTEGER FUNCTION h5gget_linkval_c(loc_id, name, namelen, size, buffer) BIND(C,NAME='h5gget_linkval_c')
          IMPORT :: C_CHAR, SIZE_T
@@ -789,7 +789,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buffer
        END FUNCTION h5gget_linkval_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     hdferr = h5gget_linkval_c(loc_id, name, namelen, size, buffer)
   END SUBROUTINE h5gget_linkval_f
@@ -829,7 +829,7 @@ CONTAINS
 !*****
     INTEGER :: namelen ! Lenghth of the current_name string
     INTEGER :: commentlen     ! Lenghth of the comment string
-    
+
     INTERFACE
        INTEGER FUNCTION h5gset_comment_c(loc_id, name, namelen, &
             comment, commentlen) BIND(C,NAME='h5gset_comment_c')
@@ -842,7 +842,7 @@ CONTAINS
          INTEGER :: commentlen
        END FUNCTION h5gset_comment_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     commentlen = LEN(comment)
     hdferr = h5gset_comment_c(loc_id, name, namelen, comment, commentlen)
@@ -1004,7 +1004,7 @@ CONTAINS
 ! INPUTS
 !  group_id 	 - Group identifier
 !
-! OUTPUTS  
+! OUTPUTS
 !  storage_type  - Type of storage for links in group
 !                    H5G_STORAGE_TYPE_COMPACT: Compact storage
 !                    H5G_STORAGE_TYPE_DENSE: Indexed storage

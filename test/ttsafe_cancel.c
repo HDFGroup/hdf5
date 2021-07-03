@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -58,53 +58,53 @@ pthread_cond_t  cond;
 void
 tts_cancel(void)
 {
-    pthread_attr_t attribute;
-    hid_t          dataset;
-    int            buffer;
-    int            ret;
+    pthread_attr_t            attribute;
+    hid_t                     dataset;
+    int                       buffer;
+    int H5_ATTR_NDEBUG_UNUSED ret;
 
     /* make thread scheduling global */
     ret = pthread_attr_init(&attribute);
-    assert(ret == 0);
+    HDassert(ret == 0);
 #ifdef H5_HAVE_SYSTEM_SCOPE_THREADS
     ret = pthread_attr_setscope(&attribute, PTHREAD_SCOPE_SYSTEM);
-    assert(ret == 0);
+    HDassert(ret == 0);
 #endif /* H5_HAVE_SYSTEM_SCOPE_THREADS */
 
     /* Initialize mutex & condition variables */
     ret = pthread_mutex_init(&mutex, NULL);
-    assert(ret == 0);
+    HDassert(ret == 0);
     ret = pthread_cond_init(&cond, NULL);
-    assert(ret == 0);
+    HDassert(ret == 0);
 
     /*
      * Create a hdf5 file using H5F_ACC_TRUNC access, default file
      * creation plist and default file access plist
      */
     cancel_file = H5Fcreate(FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-    assert(cancel_file >= 0);
+    HDassert(cancel_file >= 0);
     ret = pthread_create(&childthread, &attribute, tts_cancel_thread, NULL);
-    assert(ret == 0);
+    HDassert(ret == 0);
     tts_cancel_barrier();
     ret = pthread_cancel(childthread);
-    assert(ret == 0);
+    HDassert(ret == 0);
 
     dataset = H5Dopen2(cancel_file, DATASETNAME, H5P_DEFAULT);
-    assert(dataset >= 0);
+    HDassert(dataset >= 0);
     ret = H5Dread(dataset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, &buffer);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     if (buffer != 11)
         TestErrPrintf("operation unsuccessful with value at %d instead of 11\n", buffer);
 
     ret = H5Dclose(dataset);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
     ret = H5Fclose(cancel_file);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     /* Destroy the thread attribute */
     ret = pthread_attr_destroy(&attribute);
-    assert(ret == 0);
+    HDassert(ret == 0);
 } /* end tts_cancel() */
 
 void *

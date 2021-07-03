@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -706,7 +706,7 @@ error:
  *      'member_file_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format - nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 static int
 test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, hbool_t user)
 {
@@ -970,7 +970,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
 error:
     return 1;
 } /* end test_get_file_image() */
-H5_GCC_DIAG_ON(format - nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
 /******************************************************************************
  * Function:    test_get_file_image_error_rejection
@@ -1384,14 +1384,14 @@ main(void)
     } /* end for */
 
 #if 0
-    /* at present, H5Fget_file_image() rejects files opened with the 
+    /* at present, H5Fget_file_image() rejects files opened with the
      * family file driver, due to the addition of a driver info message
      * in the super block.  This message prevents the image being opened
-     * with any driver other than the family file driver, which sort of 
+     * with any driver other than the family file driver, which sort of
      * defeats the purpose of the get file image operation.
      *
      * While this issues is quite fixable, we don't have time or resources
-     * for this right now.  Once we do, the following code should be 
+     * for this right now.  Once we do, the following code should be
      * suitable for testing the fix.
      */
     /* test H5Fget_file_image() with family file driver */

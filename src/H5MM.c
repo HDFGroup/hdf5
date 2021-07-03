@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:     H5MM.c
  *              Jul 10 1997
- *              Robb Matzke <matzke@llnl.gov>
+ *              Robb Matzke
  *
  * Purpose:     Memory management functions
  *
@@ -102,8 +102,8 @@ static H5MM_block_t H5MM_block_head_s;
 
 /* Statistics about block allocations */
 static unsigned long long H5MM_total_alloc_bytes_s        = 0;
-static unsigned long long H5MM_curr_alloc_bytes_s         = 0;
-static unsigned long long H5MM_peak_alloc_bytes_s         = 0;
+static size_t             H5MM_curr_alloc_bytes_s         = 0;
+static size_t             H5MM_peak_alloc_bytes_s         = 0;
 static size_t             H5MM_max_block_size_s           = 0;
 static size_t             H5MM_total_alloc_blocks_count_s = 0;
 static size_t             H5MM_curr_alloc_blocks_count_s  = 0;
@@ -225,7 +225,7 @@ H5MM_final_sanity_check(void)
     HDassert(H5MM_block_head_s.prev == &H5MM_block_head_s);
 #ifdef H5MM_PRINT_MEMORY_STATS
     HDfprintf(stderr, "%s: H5MM_total_alloc_bytes_s = %llu\n", __func__, H5MM_total_alloc_bytes_s);
-    HDfprintf(stderr, "%s: H5MM_peak_alloc_bytes_s = %llu\n", __func__, H5MM_peak_alloc_bytes_s);
+    HDfprintf(stderr, "%s: H5MM_peak_alloc_bytes_s = %zu\n", __func__, H5MM_peak_alloc_bytes_s);
     HDfprintf(stderr, "%s: H5MM_max_block_size_s = %zu\n", __func__, H5MM_max_block_size_s);
     HDfprintf(stderr, "%s: H5MM_total_alloc_blocks_count_s = %zu\n", __func__,
               H5MM_total_alloc_blocks_count_s);
@@ -449,11 +449,17 @@ H5MM_xstrdup(const char *s)
 
     FUNC_ENTER_NOAPI(NULL)
 
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     if (s) {
         if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
         HDstrcpy(ret_value, s);
-    } /* end if */
+    }
+#else
+    if (s)
+        if (NULL == (ret_value = HDstrdup(s)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -483,10 +489,15 @@ H5MM_strdup(const char *s)
     FUNC_ENTER_NOAPI(NULL)
 
     if (!s)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "null string")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "NULL string not allowed")
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
     if (NULL == (ret_value = (char *)H5MM_malloc(HDstrlen(s) + 1)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     HDstrcpy(ret_value, s);
+#else
+    if (NULL == (ret_value = HDstrdup(s)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "string duplication failed")
+#endif
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -551,6 +562,30 @@ H5MM_xfree(void *mem)
 } /* end H5MM_xfree() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5MM_xfree_const
+ *
+ * Purpose:     H5MM_xfree() wrapper that handles const pointers without
+ *              warnings. Used for freeing buffers that should be regarded
+ *              as const in use but need to be freed when no longer needed.
+ *
+ * Return:      Success:    NULL
+ *              Failure:    never fails
+ *
+ *-------------------------------------------------------------------------
+ */
+void *
+H5MM_xfree_const(const void *mem)
+{
+    /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
+
+    /* Cast through uintptr_t to de-const memory */
+    H5MM_xfree((void *)(uintptr_t)mem);
+
+    FUNC_LEAVE_NOAPI(NULL)
+} /* end H5MM_xfree_const() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5MM_memcpy
  *
  * Purpose:     Like memcpy(3) but with sanity checks on the parameters,
@@ -584,3 +619,45 @@ H5MM_memcpy(void *dest, const void *src, size_t n)
     FUNC_LEAVE_NOAPI(ret)
 
 } /* end H5MM_memcpy() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5MM_get_alloc_stats
+ *
+ * Purpose:	Gets the memory allocation statistics for the library, if the
+ *	H5_MEMORY_ALLOC_SANITY_CHECK macro is defined.  If the macro is not
+ *	defined, zeros are returned.  These statistics are global for the
+ *	entire library.
+ *
+ * Parameters:
+ *  H5_alloc_stats_t *stats;            OUT: Memory allocation statistics
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, March 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5MM_get_alloc_stats(H5_alloc_stats_t *stats)
+{
+    FUNC_ENTER_NOAPI_NOERR
+
+#if defined H5_MEMORY_ALLOC_SANITY_CHECK
+    if (stats) {
+        stats->total_alloc_bytes        = H5MM_total_alloc_bytes_s;
+        stats->curr_alloc_bytes         = H5MM_curr_alloc_bytes_s;
+        stats->peak_alloc_bytes         = H5MM_peak_alloc_bytes_s;
+        stats->max_block_size           = H5MM_max_block_size_s;
+        stats->total_alloc_blocks_count = H5MM_total_alloc_blocks_count_s;
+        stats->curr_alloc_blocks_count  = H5MM_curr_alloc_blocks_count_s;
+        stats->peak_alloc_blocks_count  = H5MM_peak_alloc_blocks_count_s;
+    }  /* end if */
+#else  /* H5_MEMORY_ALLOC_SANITY_CHECK */
+    if (stats)
+        HDmemset(stats, 0, sizeof(H5_alloc_stats_t));
+#endif /* H5_MEMORY_ALLOC_SANITY_CHECK */
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5MM_get_alloc_stats() */

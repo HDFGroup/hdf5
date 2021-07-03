@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -127,7 +127,7 @@ void reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size);
 static int         verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type,
                                       hsize_t exp_num_chunks);
 static int         verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
-                                         hsize_t *exp_offset, unsigned exp_flt_msk);
+                                         const hsize_t *exp_offset, unsigned exp_flt_msk);
 static int         verify_get_chunk_info_by_coord(hid_t dset, hsize_t *offset, hsize_t exp_chk_size,
                                                   unsigned exp_flt_msk);
 static int         verify_empty_chunk_info(hid_t dset, hsize_t *offset);
@@ -169,8 +169,8 @@ reinit_vars(unsigned *read_flt_msk, haddr_t *addr, hsize_t *size)
  *-------------------------------------------------------------------------
  */
 static int
-verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size, hsize_t *exp_offset,
-                      unsigned exp_flt_msk)
+verify_get_chunk_info(hid_t dset, hid_t dspace, hsize_t chk_index, hsize_t exp_chk_size,
+                      const hsize_t *exp_offset, unsigned exp_flt_msk)
 {
     unsigned read_flt_msk  = 0;      /* Read filter mask */
     hsize_t  out_offset[2] = {0, 0}; /* Buffer to get offset coordinates */
@@ -302,7 +302,7 @@ index_type_str(H5D_chunk_index_t idx_type)
  *-------------------------------------------------------------------------
  */
 static int
-verify_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end)
+verify_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsize_t *end)
 {
     int      read_buf[CHUNK_NX][CHUNK_NY];
     int      expected_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY]; /* Expected data */
@@ -335,8 +335,9 @@ verify_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end)
 
             /* Verify that read chunk is the same as the corresponding written one */
             if (HDmemcmp(expected_buf[chk_index], read_buf, CHUNK_NX * CHUNK_NY) != 0) {
-                HDfprintf(stderr, "Read chunk differs from written chunk at offset (%d,%d)\n", offset[0],
-                          offset[1]);
+                HDfprintf(stderr,
+                          "Read chunk differs from written chunk at offset (%" PRIuHSIZE ",%" PRIuHSIZE ")\n",
+                          offset[0], offset[1]);
                 return FAIL;
             }
         }
@@ -363,7 +364,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static int
-write_selected_chunks(hid_t dset, hid_t plist, hsize_t *start, hsize_t *end, unsigned flt_msk)
+write_selected_chunks(hid_t dset, hid_t plist, const hsize_t *start, const hsize_t *end, unsigned flt_msk)
 {
     int     direct_buf[NUM_CHUNKS][CHUNK_NX][CHUNK_NY]; /* Data in chunks */
     hsize_t offset[2];                                  /* Offset coordinates of a chunk */
@@ -420,7 +421,7 @@ verify_idx_nchunks(hid_t dset, hid_t dspace, H5D_chunk_index_t exp_idx_type, hsi
     /* Ensure the correct chunk indexing scheme is used */
     if (idx_type != exp_idx_type) {
         char msg[256];
-        sprintf(msg, "Should be using %s.\n", index_type_str(idx_type));
+        HDsprintf(msg, "Should be using %s.\n", index_type_str(idx_type));
         FAIL_PUTS_ERROR(msg);
     }
 
@@ -541,7 +542,7 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
 #ifdef H5_HAVE_FILTER_DEFLATE
     /* Allocate input (compressed) buffer */
-    inbuf = malloc(z_dst_nbytes);
+    inbuf = HDmalloc(z_dst_nbytes);
 
     /* Set chunk size to the compressed chunk size and the chunk point
        to the compressed data chunk */
@@ -553,20 +554,20 @@ test_get_chunk_info_highest_v18(hid_t fapl)
 
     /* Check for various zlib errors */
     if (Z_BUF_ERROR == ret) {
-        fprintf(stderr, "overflow");
+        HDfprintf(stderr, "overflow");
         TEST_ERROR
     }
     else if (Z_MEM_ERROR == ret) {
-        fprintf(stderr, "deflate memory error");
+        HDfprintf(stderr, "deflate memory error");
         TEST_ERROR
     }
     else if (Z_OK != ret) {
-        fprintf(stderr, "other deflate error");
+        HDfprintf(stderr, "other deflate error");
         TEST_ERROR
     }
 #else
     /* Allocate input (non-compressed) buffer */
-    inbuf = malloc(CHK_SIZE);
+    inbuf = HDmalloc(CHK_SIZE);
     HDmemcpy(inbuf, direct_buf, CHK_SIZE);
 #endif /* end H5_HAVE_FILTER_DEFLATE */
 
@@ -709,7 +710,8 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     /* Verify that the number of chunks is NUM_CHUNKS */
     if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
         TEST_ERROR
-    VERIFY(nchunks, NUM_CHUNKS, "H5Dget_num_chunks, number of chunks");
+    if (nchunks != NUM_CHUNKS)
+        TEST_ERROR
 
     /* Attempt to get info of a chunk from an empty dataset, verify the
        returned address and size in the case of H5D_ALLOC_TIME_EARLY */
@@ -718,11 +720,12 @@ test_get_chunk_info_highest_v18(hid_t fapl)
     ret = H5Dget_chunk_info(dset, dspace, chk_index, out_offset, &read_flt_msk, &addr, &size);
     if (ret < 0)
         TEST_ERROR
+
     /* Because of H5D_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
     if (addr == HADDR_UNDEF)
-        FAIL_PUTS_ERROR(MSG_CHK_ADDR);
+        TEST_ERROR
     if (size == EMPTY_CHK_SIZE)
-        FAIL_PUTS_ERROR(MSG_CHK_SIZE);
+        TEST_ERROR
 
     chk_index = 10;
     reinit_vars(&read_flt_msk, &addr, &size);
@@ -731,9 +734,9 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         TEST_ERROR
     /* Because of H5D_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
     if (addr == HADDR_UNDEF)
-        FAIL_PUTS_ERROR(MSG_CHK_ADDR);
+        TEST_ERROR
     if (size == EMPTY_CHK_SIZE)
-        FAIL_PUTS_ERROR(MSG_CHK_SIZE);
+        TEST_ERROR
 
     /* Attempt to get info of a chunk given its coords from an empty dataset,
        verify the returned address and size */
@@ -743,9 +746,9 @@ test_get_chunk_info_highest_v18(hid_t fapl)
         TEST_ERROR
     /* Because of H5D_ALLOC_TIME_EARLY, addr cannot be HADDR_UNDEF and size not 0 */
     if (addr == HADDR_UNDEF)
-        FAIL_PUTS_ERROR(MSG_CHK_ADDR);
+        TEST_ERROR
     if (size == 0)
-        FAIL_PUTS_ERROR(MSG_CHK_SIZE);
+        TEST_ERROR
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
@@ -855,7 +858,8 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     /* Get the number of chunks and verify that no chunk has been written */
     if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
         TEST_ERROR
-    VERIFY(nchunks, NO_CHUNK_WRITTEN, "H5Dget_num_chunks, number of chunks");
+    if (nchunks != NO_CHUNK_WRITTEN)
+        TEST_ERROR
 
     /* Initialize the array of chunk data for the single chunk */
     for (ii = 0; ii < NX; ii++)
@@ -869,7 +873,8 @@ test_chunk_info_single_chunk(const char *filename, hid_t fapl)
     /* Get and verify that one chunk had been written */
     if (H5Dget_num_chunks(dset, dspace, &nchunks) < 0)
         TEST_ERROR
-    VERIFY(nchunks, ONE_CHUNK_WRITTEN, "H5Dget_num_chunks, number of chunks");
+    if (nchunks != ONE_CHUNK_WRITTEN)
+        TEST_ERROR
 
     /* Offset of the only chunk */
     offset[0] = 0;
@@ -1633,7 +1638,7 @@ test_basic_query(hid_t fapl)
         TEST_ERROR
 
     /* Remove the test file */
-    remove(filename);
+    HDremove(filename);
 
     PASSED();
     return SUCCEED;
@@ -2041,7 +2046,7 @@ test_flt_msk_with_skip_compress(hid_t fapl)
         TEST_ERROR
 
     /* Remove the test file */
-    remove(filename);
+    HDremove(filename);
 
     PASSED();
     return SUCCEED;
@@ -2067,8 +2072,7 @@ error:
  *
  * Purpose:     Tests functions related to chunk information
  *
- * Return:      Success:    SUCCEED
- *              Failure:    FAIL
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
  *
  * Programmer:  Binh-Minh Ribler
  *              November 5, 2018
@@ -2100,18 +2104,18 @@ main(void)
     nerrors += test_flt_msk_with_skip_compress(fapl) < 0 ? 1 : 0;
 
     if (nerrors)
-        TEST_ERROR
+        goto error;
 
     HDprintf("All chunk query tests passed.\n");
 
     h5_cleanup(FILENAME, fapl);
 
-    return SUCCEED;
+    return EXIT_SUCCESS;
 
 error:
     nerrors = MAX(1, nerrors);
     HDprintf("***** %d QUERY CHUNK INFO TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
-    return FAIL;
+    return EXIT_FAILURE;
 }
 
 /****************************************************************************

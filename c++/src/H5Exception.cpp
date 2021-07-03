@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,7 +25,7 @@ const char Exception::DEFAULT_MSG[] = "No detailed information provided";
 ///\brief       Default constructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception() : detail_message(""), func_name("")
+Exception::Exception()
 {
 }
 

@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -176,14 +176,14 @@ CONTAINS
               CALL check("h5sget_simple_extent_type_f", error, total_error)
           IF (classtype .NE. 1) write(*,*)"class type not H5S_SIMPLE_f"
 
-          ! 
+          !
           !set the copied space to none before extend the dimensions.
           !
           CALL h5sset_extent_none_f(space2_id, error)
               CALL check("h5sset_extent_none_f", error, total_error)
 
           !
-          !set the copied space to dim2 size. 
+          !set the copied space to dim2 size.
           !
           CALL h5sset_extent_simple_f(space2_id, rank2, dims2, maxdims2, error)
               CALL check("h5sset_extent_simple_f", error, total_error)

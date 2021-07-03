@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,6 +14,7 @@
 /****************/
 /* Module Setup */
 /****************/
+#include "H5module.h" /* This source code file is part of the H5 module */
 
 /***********/
 /* Headers */
@@ -46,14 +47,17 @@
 /********************/
 /* Local Prototypes */
 /********************/
-static void H5_debug_mask(const char *);
+static void H5__debug_mask(const char *);
 #ifdef H5_HAVE_PARALLEL
-static int H5_mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag);
+static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *flag);
 #endif /*H5_HAVE_PARALLEL*/
 
 /*********************/
 /* Package Variables */
 /*********************/
+
+/* Package initialization variable */
+hbool_t H5_PKG_INIT_VAR = FALSE;
 
 /*****************************/
 /* Library Private Variables */
@@ -85,6 +89,33 @@ H5_debug_t     H5_debug_g; /* debugging info */
 /*******************/
 
 /*--------------------------------------------------------------------------
+NAME
+    H5__init_package -- Initialize interface-specific information
+USAGE
+    herr_t H5__init_package()
+RETURNS
+    Non-negative on success/Negative on failure
+DESCRIPTION
+    Initializes any interface-specific data or routines.
+--------------------------------------------------------------------------*/
+herr_t
+H5__init_package(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI_NOINIT
+
+    /* Run the library initialization routine, if it hasn't already ran */
+    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {
+        if (H5_init_library() < 0)
+            HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "unable to initialize library")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5__init_package() */
+
+/*--------------------------------------------------------------------------
  * NAME
  *   H5_init_library -- Initialize library-global information
  * USAGE
@@ -102,6 +133,11 @@ herr_t
 H5_init_library(void)
 {
     herr_t ret_value = SUCCEED;
+
+    /* Set the 'library initialized' flag as early as possible, to avoid
+     * possible re-entrancy.
+     */
+    H5_INIT_GLOBAL = TRUE;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -132,7 +168,7 @@ H5_init_library(void)
             int key_val;
 
             if (MPI_SUCCESS != (mpi_code = MPI_Comm_create_keyval(
-                                    MPI_COMM_NULL_COPY_FN, (MPI_Comm_delete_attr_function *)H5_mpi_delete_cb,
+                                    MPI_COMM_NULL_COPY_FN, (MPI_Comm_delete_attr_function *)H5__mpi_delete_cb,
                                     &key_val, NULL)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Comm_create_keyval failed", mpi_code)
 
@@ -212,10 +248,6 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
     if (H5P_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
-    if (H5T_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize datatype interface")
-    if (H5D_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataset interface")
     if (H5AC_init() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
     if (H5L_init() < 0)
@@ -228,8 +260,8 @@ H5_init_library(void)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
 
     /* Debugging? */
-    H5_debug_mask("-all");
-    H5_debug_mask(HDgetenv("HDF5_DEBUG"));
+    H5__debug_mask("-all");
+    H5__debug_mask(HDgetenv("HDF5_DEBUG"));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -340,10 +372,13 @@ H5_term_library(void)
          */
         if (pending == 0) {
             pending += DOWN(AC);
+            /* Shut down the "pluggable" interfaces, before the plugin framework */
             pending += DOWN(Z);
             pending += DOWN(FD);
             pending += DOWN(VL);
-            pending += DOWN(PL);
+            /* Don't shut down the plugin code until all "pluggable" interfaces (Z, FD, PL) are shut down */
+            if (pending == 0)
+                pending += DOWN(PL);
             /* Don't shut down the error code until other APIs which use it are shut down */
             if (pending == 0)
                 pending += DOWN(E);
@@ -540,7 +575,85 @@ done:
 } /* end H5set_free_list_limits() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5_debug_mask
+ * Function:	H5get_free_list_sizes
+ *
+ * Purpose:	Gets the current size of the different kinds of free lists that
+ *	the library uses to manage memory.  The free list sizes can be set with
+ *	H5set_free_list_limits and garbage collected with H5garbage_collect.
+ *      These lists are global for the entire library.
+ *
+ * Parameters:
+ *  size_t *reg_size;    OUT: The current size of all "regular" free list memory used
+ *  size_t *arr_size;    OUT: The current size of all "array" free list memory used
+ *  size_t *blk_size;    OUT: The current size of all "block" free list memory used
+ *  size_t *fac_size;    OUT: The current size of all "factory" free list memory used
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, March 6, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5get_free_list_sizes(size_t *reg_size, size_t *arr_size, size_t *blk_size, size_t *fac_size)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "*z*z*z*z", reg_size, arr_size, blk_size, fac_size);
+
+    /* Call the free list function to actually get the sizes */
+    if (H5FL_get_free_list_sizes(reg_size, arr_size, blk_size, fac_size) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get garbage collection sizes")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5get_free_list_sizes() */
+
+/*-------------------------------------------------------------------------
+ * Function:	H5get_alloc_stats
+ *
+ * Purpose:	Gets the memory allocation statistics for the library, if the
+ *	--enable-memory-alloc-sanity-check option was given when building the
+ *      library.  Applications can check whether this option was enabled by
+ *	detecting if the 'H5_MEMORY_ALLOC_SANITY_CHECK' macro is defined.  This
+ *	option is enabled by default for debug builds of the library and
+ *	disabled by default for non-debug builds.  If the option is not enabled,
+ *	all the values returned with be 0.  These statistics are global for the
+ *	entire library, but don't include allocations from chunked dataset I/O
+ *	filters or non-native VOL connectors.
+ *
+ * Parameters:
+ *  H5_alloc_stats_t *stats;            OUT: Memory allocation statistics
+ *
+ * Return:	Success:	non-negative
+ *		Failure:	negative
+ *
+ * Programmer:  Quincey Koziol
+ *              Saturday, March 7, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5get_alloc_stats(H5_alloc_stats_t *stats)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "*x", stats);
+
+    /* Call the internal allocation stat routine to get the values */
+    if (H5MM_get_alloc_stats(stats) < 0)
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "can't get allocation stats")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5get_alloc_stats() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5__debug_mask
  *
  * Purpose:     Set runtime debugging flags according to the string S.  The
  *              string should contain file numbers and package names
@@ -563,7 +676,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static void
-H5_debug_mask(const char *s)
+H5__debug_mask(const char *s)
 {
     FILE *  stream = stderr;
     char    pkg_name[32], *rest;
@@ -644,15 +757,12 @@ H5_debug_mask(const char *s)
             s++;
         } /* end if-else */
     }     /* end while */
-
-    return;
-
-} /* end H5_debug_mask() */
+} /* end H5__debug_mask() */
 
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5_mpi_delete_cb
+ * Function:	H5__mpi_delete_cb
  *
  * Purpose:	Callback attribute on MPI_COMM_SELF to terminate the HDF5
  *              library when the communicator is destroyed, i.e. on MPI_Finalize.
@@ -662,8 +772,8 @@ H5_debug_mask(const char *s)
  *-------------------------------------------------------------------------
  */
 static int
-H5_mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val,
-                 int H5_ATTR_UNUSED *flag)
+H5__mpi_delete_cb(MPI_Comm H5_ATTR_UNUSED comm, int H5_ATTR_UNUSED keyval, void H5_ATTR_UNUSED *attr_val,
+                  int H5_ATTR_UNUSED *flag)
 {
     H5_term_library();
     return MPI_SUCCESS;
@@ -810,7 +920,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             HDstrncat(lib_str, "-", (size_t)1);
             HDstrncat(lib_str, substr, (sizeof(lib_str) - HDstrlen(lib_str)) - 1);
         } /* end if */
-        if (HDstrcmp(lib_str, H5_lib_vers_info_g)) {
+        if (HDstrcmp(lib_str, H5_lib_vers_info_g) != 0) {
             HDfputs("Warning!  Library version information error.\n"
                     "The HDF5 library version information are not "
                     "consistent in its source code.\nThis is NOT a fatal error "
@@ -847,11 +957,13 @@ H5open(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_API_NOCLEAR(FAIL)
-    H5TRACE0("e", "");
+    FUNC_ENTER_API_NOPUSH(FAIL)
+    /*NO TRACE*/
+
     /* all work is done by FUNC_ENTER() */
+
 done:
-    FUNC_LEAVE_API(ret_value)
+    FUNC_LEAVE_API_NOPUSH(ret_value)
 } /* end H5open() */
 
 /*-------------------------------------------------------------------------

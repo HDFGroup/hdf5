@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -36,7 +36,10 @@ const char *FILENAME[] = {"errors", NULL};
 #define DIM0 100
 #define DIM1 200
 
-int ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
+int **ipoints2      = NULL;
+int **icheck2       = NULL;
+int * ipoints2_data = NULL;
+int * icheck2_data  = NULL;
 
 hid_t ERR_CLS;
 hid_t ERR_CLS2;
@@ -126,13 +129,8 @@ test_error(hid_t file)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-#ifdef H5_USE_16_API
-    if (old_func != (H5E_auto_t)H5Eprint)
-        TEST_ERROR;
-#else  /* H5_USE_16_API */
     if (old_func != (H5E_auto2_t)H5Eprint2)
         TEST_ERROR;
-#endif /* H5_USE_16_API */
 
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         TEST_ERROR;
@@ -197,7 +195,7 @@ init_error(void)
 
     if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1)
         TEST_ERROR;
-    if (HDstrcmp(ERR_CLS_NAME, cls_name))
+    if (HDstrcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
 
     if ((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_TEST_MSG)) < 0)
@@ -222,7 +220,7 @@ init_error(void)
         TEST_ERROR;
     if (msg_type != H5E_MINOR)
         TEST_ERROR;
-    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG))
+    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
         TEST_ERROR;
 
     /* Register another class for later testing. */
@@ -321,7 +319,7 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
  *      'full_desc' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format - nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 static herr_t
 test_long_desc(void)
 {
@@ -377,7 +375,7 @@ error:
 
     return -1;
 } /* end test_long_desc() */
-H5_GCC_DIAG_ON(format - nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    dump_error
@@ -508,7 +506,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_copy
  *
- * Purpose:     Test copyinging an error stack
+ * Purpose:     Test copying an error stack
  *
  * Return:      Success:    0
  *              Failure:    -1
@@ -671,6 +669,7 @@ main(void)
     hid_t       estack_id = -1;
     char        filename[1024];
     const char *FUNC_main = "main";
+    int         i;
 
     HDfprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
 
@@ -680,6 +679,21 @@ main(void)
 
     if ((fapl = h5_fileaccess()) < 0)
         TEST_ERROR;
+
+    /* Set up data arrays */
+    if (NULL == (ipoints2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+        TEST_ERROR;
+    if (NULL == (ipoints2 = (int **)HDcalloc(DIM0, sizeof(ipoints2_data))))
+        TEST_ERROR;
+    for (i = 0; i < DIM0; i++)
+        ipoints2[i] = ipoints2_data + (i * DIM1);
+
+    if (NULL == (icheck2_data = (int *)HDcalloc(DIM0 * DIM1, sizeof(int))))
+        TEST_ERROR;
+    if (NULL == (icheck2 = (int **)HDcalloc(DIM0, sizeof(icheck2_data))))
+        TEST_ERROR;
+    for (i = 0; i < DIM0; i++)
+        icheck2[i] = icheck2_data + (i * DIM1);
 
     h5_fixname(FILENAME[0], fapl, filename, sizeof(filename));
     if ((file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
@@ -747,10 +761,20 @@ main(void)
 
     h5_clean_files(FILENAME, fapl);
 
+    HDfree(ipoints2);
+    HDfree(ipoints2_data);
+    HDfree(icheck2);
+    HDfree(icheck2_data);
+
     HDfprintf(stderr, "\nAll error API tests passed.\n");
     return 0;
 
 error:
+    HDfree(ipoints2);
+    HDfree(ipoints2_data);
+    HDfree(icheck2);
+    HDfree(icheck2_data);
+
     HDfprintf(stderr, "\n***** ERROR TEST FAILED (real problem)! *****\n");
     return 1;
 }

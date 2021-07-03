@@ -6,18 +6,18 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
  *
- * Created:		H5Tdbg.c
- *			Jul 19 2007
- *			Quincey Koziol <koziol@hdfgroup.org>
+ * Created:         H5Tdbg.c
+ *                  Jul 19 2007
+ *                  Quincey Koziol
  *
- * Purpose:		Dump debugging information about a datatype
+ * Purpose:         Dump debugging information about a datatype
  *
  *-------------------------------------------------------------------------
  */
@@ -85,22 +85,28 @@
 herr_t
 H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*in,out*/)
 {
-#ifdef H5T_DEBUG
-    hsize_t nbytes;
-    char    bandwidth[32];
-#endif
-
     FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5T_DEBUG
     if (H5DEBUG(T) && path->stats.ncalls > 0) {
+        hsize_t nbytes;
+        char    bandwidth[32];
+        struct {
+            char *user;
+            char *system;
+            char *elapsed;
+        } timestrs = {H5_timer_get_time_string(path->stats.times.user),
+                      H5_timer_get_time_string(path->stats.times.system),
+                      H5_timer_get_time_string(path->stats.times.elapsed)};
+
         if (nprint && 0 == (*nprint)++) {
             HDfprintf(H5DEBUG(T), "H5T: type conversion statistics:\n");
             HDfprintf(H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n", "Conversion", "Elmts", "Calls",
                       "User", "System", "Elapsed", "Bandwidth");
             HDfprintf(H5DEBUG(T), "   %-16s %10s %10s %8s %8s %8s %10s\n", "----------", "-----", "-----",
                       "----", "------", "-------", "---------");
-        }
+        } /* end if */
+
         if (path->src && path->dst)
             nbytes = MAX(H5T_get_size(path->src), H5T_get_size(path->dst));
         else if (path->src)
@@ -110,12 +116,16 @@ H5T__print_stats(H5T_path_t H5_ATTR_UNUSED *path, int H5_ATTR_UNUSED *nprint /*i
         else
             nbytes = 0;
         nbytes *= path->stats.nelmts;
-        H5_bandwidth(bandwidth, (double)nbytes, path->stats.timer.etime);
-        HDfprintf(H5DEBUG(T), "   %-16s %10Hd %10d %8.2f %8.2f %8.2f %10s\n", path->name, path->stats.nelmts,
-                  path->stats.ncalls, path->stats.timer.utime, path->stats.timer.stime,
-                  path->stats.timer.etime, bandwidth);
+        H5_bandwidth(bandwidth, (double)nbytes, path->stats.times.elapsed);
+        HDfprintf(H5DEBUG(T), "   %-16s %10" PRIdHSIZE " %10u %8s %8s %8s %10s\n", path->name,
+                  path->stats.nelmts, path->stats.ncalls, timestrs.user, timestrs.system, timestrs.elapsed,
+                  bandwidth);
+        HDfree(timestrs.user);
+        HDfree(timestrs.system);
+        HDfree(timestrs.elapsed);
     }
 #endif
+
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5T__print_stats() */
 
@@ -393,8 +403,8 @@ H5T_debug(const H5T_t *dt, FILE *stream)
 
             HDfprintf(stream, "\n\"%s\" = 0x", dt->shared->u.enumer.name[i]);
             for (k = 0; k < base_size; k++)
-                HDfprintf(stream, "%02lx",
-                          (unsigned long)((uint8_t *)dt->shared->u.enumer.value + (i * base_size) + k));
+                HDfprintf(stream, "%02" PRIx8,
+                          *((uint8_t *)dt->shared->u.enumer.value + (i * base_size) + k));
         } /* end for */
         HDfprintf(stream, "\n");
     }

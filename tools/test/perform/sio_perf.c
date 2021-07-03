@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -65,8 +65,7 @@
 #define SIO_HDF5  0x4
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes, t)                                                                                 \
-    (H5_DBL_ABS_EQUAL(t, (double)0.0F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
+#define MB_PER_SEC(bytes, t) (H5_DBL_ABS_EQUAL(t, 0.0) ? 0.0 : ((((double)bytes) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE 1
@@ -292,7 +291,7 @@ struct options {
     size_t      page_size;
 };
 
-typedef struct _minmax {
+typedef struct {
     double min;
     double max;
     double sum;
@@ -301,7 +300,7 @@ typedef struct _minmax {
 
 /* local functions */
 static hsize_t         parse_size_directive(const char *size);
-static struct options *parse_command_line(int argc, char *argv[]);
+static struct options *parse_command_line(int argc, const char *argv[]);
 static void            run_test_loop(struct options *options);
 static int             run_test(iotype iot, parameters parms, struct options *opts);
 static void            output_all_info(minmax *mm, int count, int indent_level);
@@ -322,7 +321,7 @@ static void report_parameters(struct options *opts);
  * Modifications:
  */
 int
-main(int argc, char **argv)
+main(int argc, const char *argv[])
 {
     int             exit_value = EXIT_SUCCESS;
     struct options *opts       = NULL;
@@ -872,9 +871,9 @@ report_parameters(struct options *opts)
     HDfprintf(output, "\n");
 
     if (opts->page_size) {
-        HDfprintf(output, "Page Aggregation Enabled. Page size = %ld\n", opts->page_size);
+        HDfprintf(output, "Page Aggregation Enabled. Page size = %zu\n", opts->page_size);
         if (opts->page_buffer_size)
-            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %ld\n", opts->page_buffer_size);
+            HDfprintf(output, "Page Buffering Enabled. Page Buffer size = %zu\n", opts->page_buffer_size);
         else
             HDfprintf(output, "Page Buffering Disabled\n");
     }
@@ -954,7 +953,7 @@ report_parameters(struct options *opts)
  *    Added multidimensional testing (Christian Chilan, April, 2008)
  */
 static struct options *
-parse_command_line(int argc, char *argv[])
+parse_command_line(int argc, const char *argv[])
 {
     int             opt;
     struct options *cl_opts;
@@ -994,7 +993,7 @@ parse_command_line(int argc, char *argv[])
     cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = get_option(argc, (const char **)argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
                 cl_opts->h5_alignment = parse_size_directive(opt_arg);

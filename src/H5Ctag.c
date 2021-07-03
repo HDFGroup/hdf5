@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -883,7 +883,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_tag(const void *thing, haddr_t *tag /*OUT*/)
+H5C_get_tag(const void *thing, haddr_t *tag)
 {
     const H5C_cache_entry_t *entry = (const H5C_cache_entry_t *)thing; /* Pointer to cache entry */
 

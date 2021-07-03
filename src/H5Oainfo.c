@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:             H5Oainfo.c
  *                      Mar  6 2007
- *                      Quincey Koziol <koziol@hdfgroup.org>
+ *                      Quincey Koziol
  *
  * Purpose:             Attribute Information messages.
  *
@@ -34,13 +34,13 @@
 /* PRIVATE PROTOTYPES */
 static void * H5O__ainfo_decode(H5F_t *f, H5O_t *open_oh, unsigned mesg_flags, unsigned *ioflags,
                                 size_t p_size, const uint8_t *p);
-static herr_t H5O_ainfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
-static void * H5O_ainfo_copy(const void *_mesg, void *_dest);
-static size_t H5O_ainfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
+static herr_t H5O__ainfo_encode(H5F_t *f, hbool_t disable_shared, uint8_t *p, const void *_mesg);
+static void * H5O__ainfo_copy(const void *_mesg, void *_dest);
+static size_t H5O__ainfo_size(const H5F_t *f, hbool_t disable_shared, const void *_mesg);
 static herr_t H5O__ainfo_free(void *_mesg);
 static herr_t H5O__ainfo_delete(H5F_t *f, H5O_t *open_oh, void *_mesg);
-static herr_t H5O_ainfo_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
-                                      const H5O_copy_t *cpy_info, void *udata);
+static herr_t H5O__ainfo_pre_copy_file(H5F_t *file_src, const void *mesg_src, hbool_t *deleted,
+                                       const H5O_copy_t *cpy_info, void *udata);
 static void * H5O__ainfo_copy_file(H5F_t *file_src, void *mesg_src, H5F_t *file_dst, hbool_t *recompute_size,
                                    unsigned *mesg_flags, H5O_copy_t *cpy_info, void *udata);
 static herr_t H5O__ainfo_post_copy_file(const H5O_loc_t *src_oloc, const void *mesg_src, H5O_loc_t *dst_oloc,
@@ -54,16 +54,16 @@ const H5O_msg_class_t H5O_MSG_AINFO[1] = {{
     sizeof(H5O_ainfo_t),       /*native message size           */
     0,                         /* messages are sharable?       */
     H5O__ainfo_decode,         /*decode message                */
-    H5O_ainfo_encode,          /*encode message                */
-    H5O_ainfo_copy,            /*copy the native value         */
-    H5O_ainfo_size,            /*size of symbol table entry    */
+    H5O__ainfo_encode,         /*encode message                */
+    H5O__ainfo_copy,           /*copy the native value         */
+    H5O__ainfo_size,           /*size of symbol table entry    */
     NULL,                      /*default reset method          */
     H5O__ainfo_free,           /* free method			*/
     H5O__ainfo_delete,         /* file delete method		*/
     NULL,                      /* link method			*/
     NULL,                      /*set share method		*/
     NULL,                      /*can share method		*/
-    H5O_ainfo_pre_copy_file,   /* pre copy native value to file */
+    H5O__ainfo_pre_copy_file,  /* pre copy native value to file */
     H5O__ainfo_copy_file,      /* copy native value to file    */
     H5O__ainfo_post_copy_file, /* post copy native value to file */
     NULL,                      /* get creation index		*/
@@ -91,7 +91,6 @@ H5FL_DEFINE_STATIC(H5O_ainfo_t);
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  6 2007
  *
  *-------------------------------------------------------------------------
@@ -157,25 +156,24 @@ done:
 } /* end H5O__ainfo_decode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ainfo_encode
+ * Function:    H5O__ainfo_encode
  *
  * Purpose:     Encodes a message.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  6 2007
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
+H5O__ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, const void *_mesg)
 {
     const H5O_ainfo_t *ainfo = (const H5O_ainfo_t *)_mesg;
     unsigned char      flags; /* Flags for encoding attribute info */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(f);
@@ -207,10 +205,10 @@ H5O_ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
         HDassert(!H5F_addr_defined(ainfo->corder_bt2_addr));
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_ainfo_encode() */
+} /* end H5O__ainfo_encode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ainfo_copy
+ * Function:    H5O__ainfo_copy
  *
  * Purpose:     Copies a message from _MESG to _DEST, allocating _DEST if
  *              necessary.
@@ -219,19 +217,18 @@ H5O_ainfo_encode(H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, uint8_t *p, co
  *              Failure:        NULL
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  6 2007
  *
  *-------------------------------------------------------------------------
  */
 static void *
-H5O_ainfo_copy(const void *_mesg, void *_dest)
+H5O__ainfo_copy(const void *_mesg, void *_dest)
 {
     const H5O_ainfo_t *ainfo     = (const H5O_ainfo_t *)_mesg;
     H5O_ainfo_t *      dest      = (H5O_ainfo_t *)_dest;
     void *             ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(ainfo);
@@ -246,10 +243,10 @@ H5O_ainfo_copy(const void *_mesg, void *_dest)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_ainfo_copy() */
+} /* end H5O__ainfo_copy() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ainfo_size
+ * Function:    H5O__ainfo_size
  *
  * Purpose:     Returns the size of the raw message in bytes not counting
  *              the message type or size fields, but only the data fields.
@@ -259,18 +256,17 @@ done:
  *              Failure:        zero
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  6 2007
  *
  *-------------------------------------------------------------------------
  */
 static size_t
-H5O_ainfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
+H5O__ainfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void *_mesg)
 {
     const H5O_ainfo_t *ainfo     = (const H5O_ainfo_t *)_mesg;
     size_t             ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Set return value */
     ret_value =
@@ -284,7 +280,7 @@ H5O_ainfo_size(const H5F_t *f, hbool_t H5_ATTR_UNUSED disable_shared, const void
                         : 0)); /* Address of v2 B-tree for indexing creation order values of attributes */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O_ainfo_size() */
+} /* end H5O__ainfo_size() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5O__ainfo_free
@@ -348,7 +344,7 @@ done:
 } /* end H5O__ainfo_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_ainfo_pre_copy_file
+ * Function:    H5O__ainfo_pre_copy_file
  *
  * Purpose:     Perform any necessary actions before copying message between
  *              files.
@@ -362,10 +358,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O_ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
-                        hbool_t *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
+H5O__ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSED *native_src,
+                         hbool_t *deleted, const H5O_copy_t *cpy_info, void H5_ATTR_UNUSED *udata)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* check args */
     HDassert(deleted);
@@ -378,7 +374,7 @@ H5O_ainfo_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void H5_ATTR_UNUSE
         *deleted = TRUE;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5O_ainfo_pre_copy_file() */
+} /* end H5O__ainfo_pre_copy_file() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__ainfo_copy_file
@@ -486,7 +482,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Quincey Koziol
- *              koziol@hdfgroup.org
  *              Mar  6 2007
  *
  *-------------------------------------------------------------------------
@@ -505,18 +500,18 @@ H5O__ainfo_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int i
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Number of attributes:", ainfo->nattrs);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Track creation order of attributes:", ainfo->track_corder);
-    HDfprintf(stream, "%*s%-*s %t\n", indent, "", fwidth,
-              "Index creation order of attributes:", ainfo->index_corder);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth, "Number of attributes:", ainfo->nattrs);
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Track creation order of attributes:", ainfo->track_corder ? "TRUE" : "FALSE");
+    HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,
+              "Index creation order of attributes:", ainfo->index_corder ? "TRUE" : "FALSE");
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Max. creation index value:", (unsigned)ainfo->max_crt_idx);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' attribute storage fractal heap address:", ainfo->fheap_addr);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' attribute storage name index v2 B-tree address:", ainfo->name_bt2_addr);
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
               "'Dense' attribute storage creation order index v2 B-tree address:", ainfo->corder_bt2_addr);
 
     FUNC_LEAVE_NOAPI(SUCCEED)

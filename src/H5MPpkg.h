@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:	Quincey Koziol
  *		Monday, May  2, 2005
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5MP package!"
 #endif
 
-#ifndef _H5MPpkg_H
-#define _H5MPpkg_H
+#ifndef H5MPpkg_H
+#define H5MPpkg_H
 
 /* Get package's private header */
 #include "H5MPprivate.h" /* Memory Pools				*/
@@ -96,4 +96,4 @@ H5_DLL herr_t H5MP_get_page_free_size(const H5MP_page_t *mp, size_t *page);
 H5_DLL herr_t H5MP_get_page_next_page(const H5MP_page_t *page, H5MP_page_t **next_page);
 #endif /* H5MP_TESTING */
 
-#endif /* _H5MPpkg_H */
+#endif /* H5MPpkg_H */

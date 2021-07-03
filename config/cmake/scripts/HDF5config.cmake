@@ -5,13 +5,13 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
-### BUILD_GENERATOR required [Unix, VS2017, VS201764, VS2015, VS201564, VS2013, VS201364] ###
+### BUILD_GENERATOR required [Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564] ###
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
@@ -21,6 +21,7 @@ cmake_minimum_required (VERSION 3.12)
 #     ctest -S HDF5config.cmake,OPTION=VALUE -C Release -VV -O test.log
 # where valid options for OPTION are:
 #     BUILD_GENERATOR - The cmake build generator:
+#            MinGW     * MinGW Makefiles
 #            Unix      * Unix Makefiles
 #            VS2019    * Visual Studio 16 2019
 #            VS201964  * Visual Studio 16 2019
@@ -36,7 +37,7 @@ cmake_minimum_required (VERSION 3.12)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.12.0")
+set (CTEST_SOURCE_VERSION "1.12.1")
 set (CTEST_SOURCE_VERSEXT "")
 
 ##############################################################################
@@ -67,7 +68,7 @@ endif ()
 
 # build generator must be defined
 if (NOT DEFINED BUILD_GENERATOR)
-  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
+  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
 endif ()
 
 ###################################################################
@@ -104,7 +105,7 @@ endif ()
 #########       Following describes compiler           ############
 if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
-    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
+    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
   endif ()
   if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")
@@ -162,12 +163,16 @@ if (NOT DEFINED HPC)
       set (SITE_COMPILER_NAME "vs2012")
       set (SITE_COMPILER_VERSION "11")
     else ()
-      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
+      message (FATAL_ERROR "Invalid BUILD_GENERATOR must be - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
     endif ()
   ##  Set the following to unique id your computer  ##
     set (CTEST_SITE "WIN7${BUILD_GENERATOR}.XXXX")
   else ()
-    set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
+    if (MINGW)
+      set (CTEST_CMAKE_GENERATOR "MinGW Makefiles")
+    else ()
+      set (CTEST_CMAKE_GENERATOR "Unix Makefiles")
+    endif ()
   ##  Set the following to unique id your computer  ##
     if (APPLE)
      set (CTEST_SITE "MAC.XXXX")
@@ -199,7 +204,7 @@ endif ()
 #set (LOCAL_NO_PACKAGE "TRUE")
 #####       Following controls source update                  #####
 #set (LOCAL_UPDATE "TRUE")
-set (REPOSITORY_URL "https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git")
+set (REPOSITORY_URL "https://github.com/HDFGroup/hdf5.git")
 set (REPOSITORY_BRANCH "hdf5_1_12")
 
 #uncomment to use a compressed source file: *.tar on linux or mac *.zip on windows

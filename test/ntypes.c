@@ -6,16 +6,16 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Raymond Lu
+ * Programmer:    Raymond Lu
  *              October 14, 2001
  *
- * Purpose:	Tests the H5Tget_native_type function.
+ * Purpose:    Tests the H5Tget_native_type function.
  */
 
 #include "h5test.h"
@@ -57,16 +57,16 @@ int   ipoints3[DIM0][DIM1][5], icheck3[DIM0][DIM1][5];
 #define BITFIELD_ENUMB 8
 
 /*-------------------------------------------------------------------------
- * Function:	test_atomic_dtype
+ * Function:    test_atomic_dtype
  *
- * Purpose:	Test H5Tget_native_type for atomic datatype
+ * Purpose:    Test H5Tget_native_type for atomic datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -291,16 +291,16 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_compound_dtype2
+ * Function:    test_compound_dtype2
  *
- * Purpose:	Test H5Tget_native_type for compound datatype
+ * Purpose:    Test H5Tget_native_type for compound datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -621,16 +621,16 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_compound_dtype
+ * Function:    test_compound_dtype
  *
- * Purpose:	Test H5Tget_native_type for compound datatype
+ * Purpose:    Test H5Tget_native_type for compound datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -834,16 +834,16 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_compound_dtype3
+ * Function:    test_compound_dtype3
  *
- * Purpose:	Test H5Tget_native_type for compound datatype
+ * Purpose:    Test H5Tget_native_type for compound datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1075,16 +1075,16 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_compound_opaque
+ * Function:    test_compound_opaque
  *
- * Purpose:	Test H5Tget_native_type for compound datatype with opaque field
+ * Purpose:    Test H5Tget_native_type for compound datatype with opaque field
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Quincey Koziol
- *		January 31, 2004
+ * Programmer:    Quincey Koziol
+ *        January 31, 2004
  *
  * Modifications:
  *
@@ -1302,16 +1302,16 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_enum_dtype
+ * Function:    test_enum_dtype
  *
- * Purpose:	Test H5Tget_native_type for enumerate datatype
+ * Purpose:    Test H5Tget_native_type for enumerate datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1446,16 +1446,16 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_array_dtype
+ * Function:    test_array_dtype
  *
- * Purpose:	Test H5Tget_native_type for array datatype
+ * Purpose:    Test H5Tget_native_type for array datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1634,16 +1634,16 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_array_dtype2
+ * Function:    test_array_dtype2
  *
- * Purpose:	Test H5Tget_native_type for array datatype
+ * Purpose:    Test H5Tget_native_type for array datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1769,16 +1769,16 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	test_vl_dtype
+ * Function:    test_vl_dtype
  *
- * Purpose:	Test H5Tget_native_type for variable length datatype
+ * Purpose:    Test H5Tget_native_type for variable length datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1975,16 +1975,16 @@ error:
 } /* end test_vl_type() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_vlstr_dtype
+ * Function:    test_vlstr_dtype
  *
- * Purpose:	Test H5Tget_native_type for variable length string datatype
+ * Purpose:    Test H5Tget_native_type for variable length string datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -1993,19 +1993,17 @@ error:
 static herr_t
 test_vlstr_dtype(hid_t file)
 {
+    /* Information to write */
     const char *wdata[SPACE1_DIM1] = {
         "Four score and seven years ago our forefathers brought forth on this continent a new nation,",
         "conceived in liberty and dedicated to the proposition that all men are created equal.",
         "Now we are engaged in a great civil war,",
-        "testing whether that nation or any nation so conceived and so dedicated can long endure."}; /* Information
-                                                                                                        to
-                                                                                                        write
-                                                                                                      */
+        "testing whether that nation or any nation so conceived and so dedicated can long endure."};
     char *   rdata[SPACE1_DIM1];                      /* Information read in */
     hbool_t  rdata_alloc = FALSE;                     /* Whether the read data is allocated */
-    hid_t    dataset     = -1;                        /* Dataset ID			*/
-    hid_t    sid1        = -1;                        /* Dataspace ID			*/
-    hid_t    tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID			*/
+    hid_t    dataset     = -1;                        /* Dataset ID            */
+    hid_t    sid1        = -1;                        /* Dataspace ID            */
+    hid_t    tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID            */
     hsize_t  dims1[] = {SPACE1_DIM1};
     unsigned i; /* counting variable */
 
@@ -2117,16 +2115,16 @@ error:
 } /* end test_vlstr_dtype() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_str_dtype
+ * Function:    test_str_dtype
  *
- * Purpose:	Test H5Tget_native_type for fixed-length string datatype
+ * Purpose:    Test H5Tget_native_type for fixed-length string datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -2137,9 +2135,9 @@ test_str_dtype(hid_t file)
 {
     const char wdata[SPACE1_DIM1][4] = {"one", "two", "3rd", "4th"}; /* Information to write */
     char       rdata[SPACE1_DIM1][4];                                /* Information read in */
-    hid_t      dataset = -1;                                         /* Dataset ID			*/
-    hid_t      sid1    = -1;                                         /* Dataspace ID			*/
-    hid_t      tid1 = -1, dtype = -1, native_type = -1;              /* Datatype ID			*/
+    hid_t      dataset = -1;                                         /* Dataset ID            */
+    hid_t      sid1    = -1;                                         /* Dataspace ID            */
+    hid_t      tid1 = -1, dtype = -1, native_type = -1;              /* Datatype ID            */
     hsize_t    dims1[] = {SPACE1_DIM1};
     unsigned   i; /* counting variable */
 
@@ -2239,16 +2237,16 @@ error:
 } /* end test_str_dtype() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_refer_dtype
+ * Function:    test_refer_dtype
  *
- * Purpose:	Test H5Tget_native_type for reference datatype
+ * Purpose:    Test H5Tget_native_type for reference datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -2264,10 +2262,10 @@ test_refer_dtype(hid_t file)
         float        c;
     } s1_t;
 
-    hid_t       dataset = -1;                            /* Dataset ID			*/
+    hid_t       dataset = -1;                            /* Dataset ID            */
     hid_t       group   = -1;                            /* Group ID             */
-    hid_t       sid1    = -1;                            /* Dataspace ID			*/
-    hid_t       tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID	*/
+    hid_t       sid1    = -1;                            /* Dataspace ID            */
+    hid_t       tid1 = -1, dtype = -1, native_type = -1; /* Datatype ID    */
     hsize_t     dims1[] = {1};
     H5O_type_t  obj_type;    /* Object type */
     hobj_ref_t *wbuf = NULL, /* buffer to write to disk */
@@ -2412,16 +2410,16 @@ error:
 } /* test_refer_dtype() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_refer_dtype2
+ * Function:    test_refer_dtype2
  *
- * Purpose:	Test H5Tget_native_type for reference
+ * Purpose:    Test H5Tget_native_type for reference
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -2430,10 +2428,10 @@ error:
 static herr_t
 test_refer_dtype2(hid_t file)
 {
-    hid_t dset1           = -1, /* Dataset ID			*/
+    hid_t dset1           = -1, /* Dataset ID            */
         dset2             = -1; /* Dereferenced dataset ID */
-    hid_t sid1            = -1, /* Dataspace ID	#1		*/
-        sid2              = -1; /* Dataspace ID	#2		*/
+    hid_t sid1            = -1, /* Dataspace ID    #1        */
+        sid2              = -1; /* Dataspace ID    #2        */
     hid_t           dtype = -1, native_type = -1;
     hsize_t         dims1[] = {1}, dims2[] = {SPACE2_DIM1, SPACE2_DIM2};
     hsize_t         start[SPACE2_RANK];  /* Starting location of hyperslab */
@@ -2626,16 +2624,16 @@ error:
 } /* test_refer_dtype2() */
 
 /*-------------------------------------------------------------------------
- * Function:	test_opaque_dtype
+ * Function:    test_opaque_dtype
  *
- * Purpose:	Test H5Tget_native_type for opaque datatype
+ * Purpose:    Test H5Tget_native_type for opaque datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *
@@ -2725,16 +2723,16 @@ error:
 } /* test_opaque_dtype */
 
 /*-------------------------------------------------------------------------
- * Function:	test_bitfield_dtype
+ * Function:    test_bitfield_dtype
  *
- * Purpose:	Test H5Tget_native_type for bitfield datatype
+ * Purpose:    Test H5Tget_native_type for bitfield datatype
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	-1
+ *        Failure:    -1
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *              Raymond Lu
@@ -2892,7 +2890,7 @@ error:
  * Return: Success: 0
  *  Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *  September 3, 2004
  *
  * Modifications:
@@ -3100,12 +3098,12 @@ error:
 } /* end test_ninteger() */
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Test H5Tget_native_type for different datatype
+ * Purpose:    Test H5Tget_native_type for different datatype
  *
- * Programmer:	Raymond Lu
- *		October 15, 2002
+ * Programmer:    Raymond Lu
+ *        October 15, 2002
  *
  * Modifications:
  *

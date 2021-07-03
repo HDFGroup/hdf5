@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -48,7 +48,6 @@ test_path_env(hid_t fapl)
     hid_t   dapl  = -1;        /* dataset access property list         */
     hid_t   dset  = -1;        /* dataset                              */
     size_t  i;                 /* miscellaneous counters               */
-    char    cwdpath[1024];     /* working directory                    */
     char    filename[1024];    /* file name                            */
     int     part[PART_SIZE];   /* raw data buffer (partial)            */
     int     whole[TOTAL_SIZE]; /* raw data buffer (total)              */
@@ -71,8 +70,6 @@ test_path_env(hid_t fapl)
     /* Create the dataset */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         FAIL_STACK_ERROR
-    if (NULL == HDgetcwd(cwdpath, sizeof(cwdpath)))
-        TEST_ERROR
     for (i = 0; i < N_EXT_FILES; i++) {
         HDsnprintf(filename, sizeof(filename), "..%sextern_env_%dr.raw", H5_DIR_SEPS, (int)i + 1);
         if (H5Pset_external(dcpl, filename, (off_t)(i * GARBAGE_PER_FILE), (hsize_t)sizeof(part)) < 0)

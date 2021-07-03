@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -26,7 +26,7 @@
 
 /* The VOL class struct */
 static const H5VL_class_t null_vol_g = {
-    0,                        /* version          */
+    H5VL_VERSION,             /* VOL class struct version */
     NULL_VOL_CONNECTOR_VALUE, /* value            */
     NULL_VOL_CONNECTOR_NAME,  /* name             */
     0,                        /* capability flags */

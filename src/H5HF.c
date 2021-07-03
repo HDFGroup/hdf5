@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5HF.c
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Implements a "fractal heap" for storing variable-
  *                      length objects in a file.
@@ -78,52 +78,50 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 H5FL_DEFINE_STATIC(H5HF_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_op_read
+ * Function:	H5HF__op_read
  *
  * Purpose:	Performs a 'read' operation for a heap 'op' callback
  *
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_op_read(const void *obj, size_t obj_len, void *op_data)
+H5HF__op_read(const void *obj, size_t obj_len, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Perform "read", using memcpy() */
     H5MM_memcpy(op_data, obj, obj_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_op_read() */
+} /* end H5HF__op_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5HF_op_write
+ * Function:	H5HF__op_write
  *
  * Purpose:	Performs a 'write' operation for a heap 'op' callback
  *
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5HF_op_write(const void *obj, size_t obj_len, void *op_data)
+H5HF__op_write(const void *obj, size_t obj_len, void *op_data)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Perform "write", using memcpy() */
     H5MM_memcpy((void *)obj, op_data, obj_len); /* Casting away const OK -QAK */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5HF_op_write() */
+} /* end H5HF__op_write() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5HF_create
@@ -134,7 +132,6 @@ H5HF_op_write(const void *obj, size_t obj_len, void *op_data)
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 24 2006
  *
  *-------------------------------------------------------------------------
@@ -156,7 +153,7 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
     HDassert(cparam);
 
     /* Create shared fractal heap header */
-    if (HADDR_UNDEF == (fh_addr = H5HF_hdr_create(f, cparam)))
+    if (HADDR_UNDEF == (fh_addr = H5HF__hdr_create(f, cparam)))
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINIT, NULL, "can't create fractal heap header")
 
     /* Allocate fractal heap wrapper */
@@ -169,11 +166,11 @@ H5HF_create(H5F_t *f, const H5HF_create_t *cparam)
 
     /* Point fractal heap wrapper at header and bump it's ref count */
     fh->hdr = hdr;
-    if (H5HF_hdr_incr(fh->hdr) < 0)
+    if (H5HF__hdr_incr(fh->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
     /* Increment # of files using this heap header */
-    if (H5HF_hdr_fuse_incr(fh->hdr) < 0)
+    if (H5HF__hdr_fuse_incr(fh->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
 
     /* Set file pointer for this heap open context */
@@ -201,7 +198,6 @@ done:
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 18 2006
  *
  *-------------------------------------------------------------------------
@@ -235,11 +231,11 @@ H5HF_open(H5F_t *f, haddr_t fh_addr)
 
     /* Point fractal heap wrapper at header */
     fh->hdr = hdr;
-    if (H5HF_hdr_incr(fh->hdr) < 0)
+    if (H5HF__hdr_incr(fh->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment reference count on shared heap header")
 
     /* Increment # of files using this heap header */
-    if (H5HF_hdr_fuse_incr(fh->hdr) < 0)
+    if (H5HF__hdr_fuse_incr(fh->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTINC, NULL, "can't increment file reference count on shared heap header")
 
     /* Set file pointer for this heap open context */
@@ -266,7 +262,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
@@ -296,7 +291,6 @@ H5HF_get_id_len(H5HF_t *fh, size_t *id_len_p)
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 18 2006
  *
  *-------------------------------------------------------------------------
@@ -327,7 +321,6 @@ H5HF_get_heap_addr(const H5HF_t *fh, haddr_t *heap_addr_p)
  *              filled in), negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 24 2006
  *
  *-------------------------------------------------------------------------
@@ -365,7 +358,7 @@ H5HF_insert(H5HF_t *fh, size_t size, const void *obj, void *id /*out*/)
     /* Check for 'tiny' object */
     else if (size <= hdr->tiny_max_len) {
         /* Store 'tiny' object in heap */
-        if (H5HF_tiny_insert(hdr, size, obj, id) < 0)
+        if (H5HF__tiny_insert(hdr, size, obj, id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTINSERT, FAIL, "can't store 'tiny' object in fractal heap")
     } /* end if */
     else {
@@ -392,7 +385,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May  9 2006
  *
  *-------------------------------------------------------------------------
@@ -425,7 +417,7 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
 
     /* Check type of object in heap */
     if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_MAN) {
-        if (H5HF_man_get_obj_len(fh->hdr, id, obj_len_p) < 0)
+        if (H5HF__man_get_obj_len(fh->hdr, id, obj_len_p) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'managed' object's length")
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_HUGE) {
@@ -433,7 +425,7 @@ H5HF_get_obj_len(H5HF_t *fh, const void *_id, size_t *obj_len_p)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'huge' object's length")
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
-        if (H5HF_tiny_get_obj_len(fh->hdr, id, obj_len_p) < 0)
+        if (H5HF__tiny_get_obj_len(fh->hdr, id, obj_len_p) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't get 'tiny' object's length")
     } /* end if */
     else {
@@ -453,7 +445,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 20 2015
  *
  *-------------------------------------------------------------------------
@@ -514,7 +505,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar 18 2006
  *
  *-------------------------------------------------------------------------
@@ -558,7 +548,7 @@ H5HF_read(H5HF_t *fh, const void *_id, void *obj /*out*/)
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Read 'tiny' object from file */
-        if (H5HF_tiny_read(fh->hdr, id, obj) < 0)
+        if (H5HF__tiny_read(fh->hdr, id, obj) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTGET, FAIL, "can't read 'tiny' object from fractal heap")
     } /* end if */
     else {
@@ -590,7 +580,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 18 2006
  *
  *-------------------------------------------------------------------------
@@ -660,7 +649,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sept 11 2006
  *
  *-------------------------------------------------------------------------
@@ -704,7 +692,7 @@ H5HF_op(H5HF_t *fh, const void *_id, H5HF_operator_t op, void *op_data)
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Operate on 'tiny' object from file */
-        if (H5HF_tiny_op(fh->hdr, id, op, op_data) < 0)
+        if (H5HF__tiny_op(fh->hdr, id, op, op_data) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTOPERATE, FAIL, "can't operate on 'tiny' object from fractal heap")
     } /* end if */
     else {
@@ -724,7 +712,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		May 15 2006
  *
  *-------------------------------------------------------------------------
@@ -768,7 +755,7 @@ H5HF_remove(H5HF_t *fh, const void *_id)
     } /* end if */
     else if ((id_flags & H5HF_ID_TYPE_MASK) == H5HF_ID_TYPE_TINY) {
         /* Remove 'tiny' object from heap statistics */
-        if (H5HF_tiny_remove(fh->hdr, id) < 0)
+        if (H5HF__tiny_remove(fh->hdr, id) < 0)
             HGOTO_ERROR(H5E_HEAP, H5E_CANTREMOVE, FAIL, "can't remove 'tiny' object from fractal heap")
     } /* end if */
     else {
@@ -788,7 +775,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Apr 17 2006
  *
  *-------------------------------------------------------------------------
@@ -808,7 +794,7 @@ H5HF_close(H5HF_t *fh)
     HDassert(fh);
 
     /* Decrement file reference & check if this is the last open fractal heap using the shared heap header */
-    if (0 == H5HF_hdr_fuse_decr(fh->hdr)) {
+    if (0 == H5HF__hdr_fuse_decr(fh->hdr)) {
         /* Set the shared heap header's file context for this operation */
         fh->hdr->f = fh->f;
 
@@ -827,8 +813,8 @@ H5HF_close(H5HF_t *fh)
          *      a reference loop and the objects couldn't be removed from
          *      the metadata cache - QAK)
          */
-        if (H5HF_man_iter_ready(&fh->hdr->next_block))
-            if (H5HF_man_iter_reset(&fh->hdr->next_block) < 0)
+        if (H5HF__man_iter_ready(&fh->hdr->next_block))
+            if (H5HF__man_iter_reset(&fh->hdr->next_block) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTRELEASE, FAIL, "can't reset block iterator")
 
         /* Shut down the huge object information */
@@ -850,10 +836,10 @@ H5HF_close(H5HF_t *fh)
     }     /* end if */
 
     /* Decrement the reference count on the heap header */
-    /* (don't put in H5HF_hdr_fuse_decr() as the heap header may be evicted
+    /* (don't put in H5HF__hdr_fuse_decr() as the heap header may be evicted
      *  immediately -QAK)
      */
-    if (H5HF_hdr_decr(fh->hdr) < 0)
+    if (H5HF__hdr_decr(fh->hdr) < 0)
         HGOTO_ERROR(H5E_HEAP, H5E_CANTDEC, FAIL, "can't decrement reference count on shared heap header")
 
     /* Check for pending heap deletion */
@@ -884,7 +870,6 @@ done:
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Aug  4 2006
  *
  *-------------------------------------------------------------------------

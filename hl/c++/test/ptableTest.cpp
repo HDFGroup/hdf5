@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -143,7 +143,7 @@ TestCompoundDatatype()
     HDfflush(stdout);
 
     /* Create compound datatype */
-    typedef struct compoundType {
+    typedef struct {
         short a, b, c;
         int   e;
     } compoundType;
@@ -272,13 +272,13 @@ const char *COMPRESS_PT("/compressTest");
 int
 TestCompress()
 {
+#ifdef H5_HAVE_FILTER_DEFLATE
     unsigned int flags      = 0;
     unsigned int config     = 0;
     size_t       cd_nelemts = 0;
 
     printf("Testing %-62s", "compression");
     HDfflush(stdout);
-#ifdef H5_HAVE_FILTER_DEFLATE
     try {
         /* Prepare property list to set compression, randomly use deflate */
         DSetCreatPropList dscreatplist;
@@ -493,7 +493,7 @@ SystemTest()
 
     /* Creating two inter-related datatypes.  Create two datasets and put
      * one datatype in each. */
-    typedef struct compoundType {
+    typedef struct {
         short a, b, c;
         int   e;
     } compoundType;
@@ -505,7 +505,7 @@ SystemTest()
     H5Tinsert(dtypeID1, "charlie", HOFFSET(compoundType, c), H5T_NATIVE_SHORT);
     H5Tinsert(dtypeID1, "ebert", HOFFSET(compoundType, e), H5T_NATIVE_INT);
 
-    typedef struct cType2 {
+    typedef struct {
         char         f;
         compoundType g;
     } cType2;
@@ -619,11 +619,11 @@ TestHDFFV_9758()
     s1_t s1[NUM_PACKETS];
 
     for (hsize_t i = 0; i < NUM_PACKETS; i++) {
-        s1[i].a = i;
+        s1[i].a = static_cast<int>(i);
         s1[i].b = 1.f * static_cast<float>(i * i);
         s1[i].c = 1. / (i + 1);
         HDsprintf(s1[i].d, "string%d", (int)i);
-        s1[i].e = 100 + i;
+        s1[i].e = static_cast<int>(100 + i);
     }
 
     printf("Testing %-62s", "data corruption in packed structs (HDFFV-9758)");
@@ -693,7 +693,7 @@ TestHDFFV_9758()
 
             if (s2.a != s1[i].a || s2.e != s1[i].e)
                 goto error;
-            else if (HDstrcmp(s2.d, s1[i].d))
+            else if (HDstrcmp(s2.d, s1[i].d) != 0)
                 goto error;
         }
     } // end of ptable block

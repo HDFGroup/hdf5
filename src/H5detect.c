@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -21,7 +21,7 @@ static const char *FileHeader = "\n\
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *\n\
  * terms governing use, modification, and redistribution, is contained in    *\n\
  * the COPYING file, which can be found at the root of the source code       *\n\
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *\n\
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *\n\
  * If you do not have access to either file, you may request a copy from     *\n\
  * help@hdfgroup.org.                                                        *\n\
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *";
@@ -43,13 +43,16 @@ static const char *FileHeader = "\n\
  */
 #undef NDEBUG
 #include "H5private.h"
+/* Do NOT use HDfprintf in this file as it is not linked with the library,
+ * which contains the H5system.c file in which the function is defined.
+ */
 #include "H5Tpublic.h"
 #include "H5Rpublic.h"
 
 /* Disable warning about cast increasing the alignment of the target type,
  * that's _exactly_ what this code is probing.  -QAK
  */
-H5_GCC_DIAG_OFF(cast - align)
+H5_GCC_DIAG_OFF("cast-align")
 
 #if defined(__has_attribute)
 #if __has_attribute(no_sanitize_address)
@@ -116,9 +119,9 @@ typedef struct malign_t {
 FILE *rawoutstream = NULL;
 
 /* global variables types detection code */
-H5_GCC_DIAG_OFF(larger - than =)
+H5_GCC_DIAG_OFF("larger-than=")
 static detected_t d_g[MAXDETECT];
-H5_GCC_DIAG_ON(larger - than =)
+H5_GCC_DIAG_ON("larger-than=")
 static malign_t     m_g[MAXDETECT];
 static volatile int nd_g = 0, na_g = 0;
 
@@ -217,25 +220,6 @@ precision(detected_t *d)
  *
  * Return:      void
  *
- * Modifications:
- *
- *    Robb Matzke, 4 Nov 1996
- *    The INFO.perm now contains `-1' for bytes that aren't used and
- *    are always zero.  This happens on the Cray for `short' where
- *    sizeof(short) is 8, but only the low-order 4 bytes are ever used.
- *
- *    Robb Matzke, 4 Nov 1996
- *    Added a `padding' field to indicate how many zero bytes appear to
- *    the left (N) or right (-N) of the value.
- *
- *    Robb Matzke, 5 Nov 1996
- *    Removed HFILE and CFILE arguments.
- *
- *      Neil Fortner, 6 Sep 2013
- *      Split macro into DETECT_I and DETECT_BYTE macros, extracted
- *      common code into DETECT_I_BYTE_CORE.  This was done to remove
- *      "will never be executed" warnings.
- *
  *-------------------------------------------------------------------------
  */
 #define DETECT_I_BYTE_CORE(TYPE, VAR, INFO, DETECT_TYPE)                                                     \
@@ -320,10 +304,10 @@ precision(detected_t *d)
             for (_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char)(_byte_mask << 1)) { \
                 _buf1[_i] ^= _byte_mask;                                                                     \
                 HDmemcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                   \
-                H5_GCC_DIAG_OFF(float - equal)                                                               \
+                H5_GCC_DIAG_OFF("float-equal")                                                               \
                 if (_v1 != _v2)                                                                              \
                     _pad_mask[_i] |= _byte_mask;                                                             \
-                H5_GCC_DIAG_ON(float - equal)                                                                \
+                H5_GCC_DIAG_ON("float-equal")                                                                \
                 _buf1[_i] ^= _byte_mask;                                                                     \
             } /* end for */                                                                                  \
                                                                                                              \
@@ -435,10 +419,10 @@ precision(detected_t *d)
                 HDmemcpy(_buf + align_g[_ano] + (INFO.offset / 8), ((char *)&_val) + (INFO.offset / 8),      \
                          (size_t)(INFO.precision / 8));                                                      \
             _val2 = *((TYPE *)(_buf + align_g[_ano]));                                                       \
-            H5_GCC_DIAG_OFF(float - equal)                                                                   \
+            H5_GCC_DIAG_OFF("float-equal")                                                                   \
             if (_val != _val2)                                                                               \
                 H5LONGJMP(jbuf_g, 1);                                                                        \
-            H5_GCC_DIAG_ON(float - equal)                                                                    \
+            H5_GCC_DIAG_ON("float-equal")                                                                    \
             /* End Cray Check */                                                                             \
             (INFO.align) = align_g[_ano];                                                                    \
         }                                                                                                    \
@@ -1650,12 +1634,6 @@ verify_signal_handlers(int signum, void (*handler)(int))
  *
  * Return:      Success:    EXIT_SUCCESS
  *
- * Modifications:
- *    Some compilers, e.g., Intel C v7.0, took a long time to compile
- *      with optimization when a module routine contains many code lines.
- *      Divide up all those types detections macros into subroutines, both
- *      to avoid the compiler optimization error and cleaner codes.
- *
  *-------------------------------------------------------------------------
  */
 int HDF_NO_UBSAN
@@ -1736,4 +1714,4 @@ main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-H5_GCC_DIAG_ON(cast - align)
+H5_GCC_DIAG_ON("cast-align")

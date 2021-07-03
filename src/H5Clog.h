@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
  * Purpose:     Cache logging header file
  */
 
-#ifndef _H5Clog_H
-#define _H5Clog_H
+#ifndef H5Clog_H
+#define H5Clog_H
 
 /* Get package's private header */
 #include "H5Cprivate.h" /* Cache                                    */
@@ -79,10 +79,10 @@ typedef struct H5C_log_class_t {
 
 /* Logging information */
 struct H5C_log_info_t {
-    hbool_t          enabled; /* Was the logging set up? */
-    hbool_t          logging; /* Are we currently logging? */
-    H5C_log_class_t *cls;     /* Callbacks for writing log messages */
-    void *           udata;   /* Log-specific data */
+    hbool_t                enabled; /* Was the logging set up? */
+    hbool_t                logging; /* Are we currently logging? */
+    const H5C_log_class_t *cls;     /* Callbacks for writing log messages */
+    void *                 udata;   /* Log-specific data */
 };
 
 /*****************************/
@@ -136,4 +136,4 @@ H5_DLL herr_t H5C_log_write_remove_entry_msg(H5C_t *cache, const H5C_cache_entry
 H5_DLL herr_t H5C_log_json_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
 H5_DLL herr_t H5C_log_trace_set_up(H5C_log_info_t *log_info, const char log_location[], int mpi_rank);
 
-#endif /* _H5Clog_H */
+#endif /* H5Clog_H */

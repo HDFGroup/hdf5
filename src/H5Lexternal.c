@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -117,7 +117,7 @@ H5L__extern_traverse(const char H5_ATTR_UNUSED *link_name, hid_t cur_group, cons
     size_t             fname_len;                    /* Length of external link file name */
     unsigned           intent;                       /* File access permissions */
     H5L_elink_cb_t     cb_info;                      /* Callback info struct */
-    hid_t              fapl_id    = -1;              /* File access property list for external link's file */
+    hid_t              fapl_id    = H5I_INVALID_HID; /* File access property list for external link's file */
     void *             ext_obj    = NULL;            /* External link's object */
     hid_t              ext_obj_id = H5I_INVALID_HID; /* ID for external link's object */
     H5I_type_t         opened_type;                  /* ID type of external link's object */
@@ -288,7 +288,7 @@ H5L__extern_query(const char H5_ATTR_UNUSED *link_name, const void *_udata, size
     const uint8_t *udata     = (const uint8_t *)_udata; /* Pointer to external link buffer */
     ssize_t        ret_value = SUCCEED;                 /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check external link version & flags */
     if (((*udata >> 4) & 0x0F) != H5L_EXT_VERSION)

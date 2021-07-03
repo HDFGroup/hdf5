@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -41,6 +41,8 @@ public class HDF5GroupInfo {
     long mtime;
     int linklen;
 
+    /** Container for the information reported about an HDF5 Object
+      * from the H5Gget_obj_info() method */
     public HDF5GroupInfo() {
         fileno = new long[2];
         objno = new long[2];
@@ -88,27 +90,44 @@ public class HDF5GroupInfo {
         linklen = 0;
     }
 
-    /* accessors */
+    /** fileno accessors
+     * @return the file number if successful
+     */
     public long[] getFileno() {
         return fileno;
     }
 
+    /** accessors
+     * @return the object number if successful
+     */
     public long[] getObjno() {
         return objno;
     }
 
+    /** accessors
+     * @return type of group if successful
+     */
     public int getType() {
         return type;
     }
 
+    /** accessors
+     * @return the number of links in the group if successful
+     */
     public int getNlink() {
         return nlink;
     }
 
+    /** accessors
+     * @return the modified time value if successful
+     */
     public long getMtime() {
         return mtime;
     }
 
+    /** accessors
+     * @return a length of link name if successful
+     */
     public int getLinklen() {
         return linklen;
     }

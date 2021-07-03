@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, December 22, 1998
  */
 #include "h5test.h"
@@ -792,11 +792,11 @@ main(void)
 
     if (nerrors)
         goto error;
-    puts("All enum tests passed.");
+    HDputs("All enum tests passed.");
     h5_cleanup(FILENAME, fapl);
     return 0;
 
 error:
-    puts("*** ENUM TESTS FAILED ***");
+    HDputs("*** ENUM TESTS FAILED ***");
     return 1;
 }

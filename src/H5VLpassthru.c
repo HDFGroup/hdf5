@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -263,7 +263,7 @@ static herr_t H5VL_pass_through_optional(void *obj, int op_type, hid_t dxpl_id, 
 
 /* Pass through VOL connector class struct */
 static const H5VL_class_t H5VL_pass_through_g = {
-    H5VL_PASSTHRU_VERSION,                   /* version      */
+    H5VL_VERSION,                            /* VOL class struct version */
     (H5VL_class_value_t)H5VL_PASSTHRU_VALUE, /* value        */
     H5VL_PASSTHRU_NAME,                      /* name         */
     0,                                       /* capability flags */
@@ -487,7 +487,7 @@ H5VL_pass_through_init(hid_t vipl_id)
 #endif
 
     /* Shut compiler up about unused parameter */
-    vipl_id = vipl_id;
+    (void)vipl_id;
 
     return 0;
 } /* end H5VL_pass_through_init() */
@@ -1633,6 +1633,10 @@ H5VL_pass_through_file_create(const char *name, unsigned flags, hid_t fcpl_id, h
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);
 
+    /* Make sure we have info about the underlying VOL to be used */
+    if (!info)
+        return NULL;
+
     /* Copy the FAPL */
     under_fapl_id = H5Pcopy(fapl_id);
 
@@ -1684,6 +1688,10 @@ H5VL_pass_through_file_open(const char *name, unsigned flags, hid_t fapl_id, hid
 
     /* Get copy of our VOL info from FAPL */
     H5Pget_vol_info(fapl_id, (void **)&info);
+
+    /* Make sure we have info about the underlying VOL to be used */
+    if (!info)
+        return NULL;
 
     /* Copy the FAPL */
     under_fapl_id = H5Pcopy(fapl_id);
@@ -1822,6 +1830,10 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_t specific_type, 
 
         /* Get copy of our VOL info from FAPL */
         H5Pget_vol_info(fapl_id, (void **)&info);
+
+        /* Make sure we have info about the underlying VOL to be used */
+        if (!info)
+            return (-1);
 
         /* Copy the FAPL */
         under_fapl_id = H5Pcopy(fapl_id);
@@ -2893,8 +2905,11 @@ H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_t
         /* Finish use of copied vararg list */
         va_end(tmp_arguments);
     } /* end if */
-    else
-        assert(0 && "Unknown 'specific' operation");
+    else {
+        H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
+
+        ret_value = H5VLrequest_specific(o->under_object, o->under_vol_id, specific_type, arguments);
+    } /* end else */
 
     return ret_value;
 } /* end H5VL_pass_through_request_specific() */

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -299,7 +299,7 @@ H5Acreate2(hid_t loc_id, const char *attr_name, hid_t type_id, hid_t space_id, h
 
     /* Register the new attribute and get an ID for it */
     if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
 
 done:
     /* Cleanup on failure */
@@ -387,7 +387,7 @@ H5Acreate_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, hid
 
     /* Register the new attribute and get an ID for it */
     if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
 
 done:
     /* Cleanup on failure */
@@ -455,7 +455,7 @@ H5Aopen(hid_t loc_id, const char *attr_name, hid_t aapl_id)
 
     /* Register the attribute and get an ID for it */
     if ((ret_value = H5VL_register(H5I_ATTR, attr, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize attribute handle")
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register attribute for ID")
 
 done:
     /* Cleanup on failure */
@@ -1004,7 +1004,7 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo)
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*x", attr_id, ainfo);
 
-    /* Check arguments */
+    /* Check args */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not an attribute")
     if (!ainfo)
@@ -1145,7 +1145,8 @@ done:
  *
  * Purpose:     Rename an attribute
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  * Programmer:	Raymond Lu
  *              October 23, 2002
@@ -1160,7 +1161,7 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*s", loc_id, old_name, new_name);
 
-    /* check arguments */
+    /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (!old_name)
@@ -1180,7 +1181,6 @@ H5Arename(hid_t loc_id, const char *old_name, const char *new_name)
         loc_params.type     = H5VL_OBJECT_BY_SELF;
         loc_params.obj_type = H5I_get_type(loc_id);
 
-        /* Get the location object */
         if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
@@ -1203,7 +1203,8 @@ done:
  *
  * Purpose:     Rename an attribute
  *
- * Return:      SUCCEED/FAIL
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
  *
  * Programmer:	Quincey Koziol
  *              February 20, 2007
@@ -1380,14 +1381,14 @@ herr_t
 H5Aiterate_by_name(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                    hsize_t *idx, H5A_operator2_t op, void *op_data, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* object of loc_id */
+    H5VL_object_t *   vol_obj = NULL; /* Object location */
     H5VL_loc_params_t loc_params;
     herr_t            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "i*sIiIo*hx*xi", loc_id, obj_name, idx_type, order, idx, op, op_data, lapl_id);
 
-    /* check arguments */
+    /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (!obj_name || !*obj_name)
@@ -1590,7 +1591,7 @@ H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_ite
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
-    /* Delete the attribute through the VOL */
+    /* Delete the attribute */
     if (H5VL_attr_specific(vol_obj, &loc_params, H5VL_ATTR_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
                            NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTDELETE, FAIL, "unable to delete attribute")

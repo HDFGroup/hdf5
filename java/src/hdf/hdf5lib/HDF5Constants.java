@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -35,21 +35,35 @@ public class HDF5Constants {
     // Get the HDF5 constants from the library //
     // /////////////////////////////////////////////////////////////////////////
 
-    public static final long H5_QUARTER_HADDR_MAX = H5_QUARTER_HADDR_MAX();
+    //public static final long H5_QUARTER_HADDR_MAX = H5_QUARTER_HADDR_MAX();
 
+    /** Special parameters for szip compression */
     public static final int H5_SZIP_MAX_PIXELS_PER_BLOCK = H5_SZIP_MAX_PIXELS_PER_BLOCK();
+    /** Special parameters for szip compression */
     public static final int H5_SZIP_NN_OPTION_MASK = H5_SZIP_NN_OPTION_MASK();
+    /** Special parameters for szip compression */
     public static final int H5_SZIP_EC_OPTION_MASK = H5_SZIP_EC_OPTION_MASK();
+    /** Special parameters for szip compression */
     public static final int H5_SZIP_ALLOW_K13_OPTION_MASK = H5_SZIP_ALLOW_K13_OPTION_MASK();
+    /** Special parameters for szip compression */
     public static final int H5_SZIP_CHIP_OPTION_MASK = H5_SZIP_CHIP_OPTION_MASK();
+    /** indices on links, unknown index type */
     public static final int H5_INDEX_UNKNOWN = H5_INDEX_UNKNOWN();
+    /** indices on links, index on names */
     public static final int H5_INDEX_NAME = H5_INDEX_NAME();
+    /** indices on links, index on creation order */
     public static final int H5_INDEX_CRT_ORDER = H5_INDEX_CRT_ORDER();
+    /** indices on links, number of indices defined */
     public static final int H5_INDEX_N = H5_INDEX_N();
+    /** Common iteration orders, Unknown order */
     public static final int H5_ITER_UNKNOWN = H5_ITER_UNKNOWN();
+    /** Common iteration orders, Increasing order */
     public static final int H5_ITER_INC = H5_ITER_INC();
+    /** Common iteration orders, Decreasing order */
     public static final int H5_ITER_DEC = H5_ITER_DEC();
+    /** Common iteration orders, No particular order, whatever is fastest */
     public static final int H5_ITER_NATIVE = H5_ITER_NATIVE();
+    /** Common iteration orders, Number of iteration orders */
     public static final int H5_ITER_N = H5_ITER_N();
     public static final int H5AC_CURR_CACHE_CONFIG_VERSION = H5AC_CURR_CACHE_CONFIG_VERSION();
     public static final int H5AC_MAX_TRACE_FILE_NAME_LEN = H5AC_MAX_TRACE_FILE_NAME_LEN();
@@ -92,110 +106,359 @@ public class HDF5Constants {
     public static final int H5D_VDS_LAST_AVAILABLE = H5D_VDS_LAST_AVAILABLE();
     public static final int H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS = H5D_CHUNK_DONT_FILTER_PARTIAL_CHUNKS();
 
+    /** Different kinds of error information - H5E_type_t */
     public static final int H5E_MAJOR = H5E_MAJOR();
+    /** Different kinds of error information - H5E_type_t */
     public static final int H5E_MINOR = H5E_MINOR();
+    /** Minor error codes - Object header related errors - Alignment error */
     public static final long H5E_ALIGNMENT = H5E_ALIGNMENT();
+    /** Minor error codes - Resource errors - Object already exists */
     public static final long H5E_ALREADYEXISTS = H5E_ALREADYEXISTS();
+    /** Minor error codes - Function entry/exit interface - Object already initialized */
     public static final long H5E_ALREADYINIT = H5E_ALREADYINIT();
+    /** Major error codes - Invalid arguments to routine */
     public static final long H5E_ARGS = H5E_ARGS();
+    /** Major error codes - Object atom */
     public static final long H5E_ATOM = H5E_ATOM();
+    /** Major error codes - Attribute */
     public static final long H5E_ATTR = H5E_ATTR();
+    /** Minor error codes - Object atom related errors - Unable to find atom information (already closed?) */
     public static final long H5E_BADATOM = H5E_BADATOM();
+    /** Minor error codes - File accessibility errors - Bad file ID accessed */
     public static final long H5E_BADFILE = H5E_BADFILE();
+    /** Minor error codes - Object atom related errors - Unable to find ID group information */
     public static final long H5E_BADGROUP = H5E_BADGROUP();
+    /** Minor error codes - Object header related errors - Iteration failed */
+    public static final long H5E_BADITER = H5E_BADITER();
+    /** Minor error codes - Object header related errors - Unrecognized message */
     public static final long H5E_BADMESG = H5E_BADMESG();
+    /** Minor error codes - Argument errors - Out of range */
     public static final long H5E_BADRANGE = H5E_BADRANGE();
+    /** Minor error codes - Dataspace errors - Invalid selection */
     public static final long H5E_BADSELECT = H5E_BADSELECT();
+    /** Datatype conversion errors - Bad size for object */
     public static final long H5E_BADSIZE = H5E_BADSIZE();
+    /** Minor error codes - Argument errors - Inappropriate type */
     public static final long H5E_BADTYPE = H5E_BADTYPE();
+    /** Minor error codes - Argument errors - Bad value */
     public static final long H5E_BADVALUE = H5E_BADVALUE();
+    /** Major error codes - B-Tree node */
     public static final long H5E_BTREE = H5E_BTREE();
+    /** Major error codes - Object cache */
     public static final long H5E_CACHE = H5E_CACHE();
+    /** I/O pipeline errors - Callback failed */
     public static final long H5E_CALLBACK = H5E_CALLBACK();
+    /** I/O pipeline errors - Error from filter 'can apply' callback */
     public static final long H5E_CANAPPLY = H5E_CANAPPLY();
-    // public static final long H5E_CANTALLOC = H5E_CANTALLOC();
+    /** Minor error codes - Resource errors - Can't allocate space */
+    public static final long H5E_CANTALLOC = H5E_CANTALLOC();
+    /** Minor error codes - Dataspace errors - Can't append object */
+    public static final long H5E_CANTAPPEND = H5E_CANTAPPEND();
+    /** Minor error codes - Heap errors - Can't attach object */
+    public static final long H5E_CANTATTACH = H5E_CANTATTACH();
+    /** Minor error codes - Cache related errors - Unable to mark metadata as clean */
+    public static final long H5E_CANTCLEAN = H5E_CANTCLEAN();
+    /** Minor error codes - Dataspace errors - Can't clip hyperslab region */
     public static final long H5E_CANTCLIP = H5E_CANTCLIP();
+    /** Minor error codes - File accessibility errors - Unable to close file */
     public static final long H5E_CANTCLOSEFILE = H5E_CANTCLOSEFILE();
+    /** Minor error codes - Group related errors - Can't close object */
+    public static final long H5E_CANTCLOSEOBJ = H5E_CANTCLOSEOBJ();
+    /** Minor error codes - Dataspace errors - Can't compare objects */
+    public static final long H5E_CANTCOMPARE = H5E_CANTCOMPARE();
+    /** Minor error codes - Heap errors - Can't compute value */
+    public static final long H5E_CANTCOMPUTE = H5E_CANTCOMPUTE();
+    /** Datatype conversion errors - Can't convert datatypes */
     public static final long H5E_CANTCONVERT = H5E_CANTCONVERT();
+    /** Minor error codes - Resource errors - Unable to copy object */
     public static final long H5E_CANTCOPY = H5E_CANTCOPY();
+    /** Minor error codes - Cache related errors - Unable to cork an object */
+    public static final long H5E_CANTCORK = H5E_CANTCORK();
+    /** Minor error codes - Dataspace errors - Can't count elements */
     public static final long H5E_CANTCOUNT = H5E_CANTCOUNT();
+    /** Minor error codes - File accessibility errors - Unable to create file */
     public static final long H5E_CANTCREATE = H5E_CANTCREATE();
+    /** Minor error codes - Object atom related errors - Unable to decrement reference count */
     public static final long H5E_CANTDEC = H5E_CANTDEC();
+    /** Minor error codes - B-tree related errors - Unable to decode value */
     public static final long H5E_CANTDECODE = H5E_CANTDECODE();
+    /** Minor error codes - Object header related errors - Can't delete message */
     public static final long H5E_CANTDELETE = H5E_CANTDELETE();
+    /** Minor error codes - File accessibility errors - Unable to delete file */
     public static final long H5E_CANTDELETEFILE = H5E_CANTDELETEFILE();
+    /** Minor error codes - Cache related errors - Unable to create a flush dependency */
+    public static final long H5E_CANTDEPEND = H5E_CANTDEPEND();
+    /** Minor error codes - Cache related errors - Unable to mark metadata as dirty */
+    public static final long H5E_CANTDIRTY = H5E_CANTDIRTY();
+    /** Minor error codes - B-tree related errors - Unable to encode value */
     public static final long H5E_CANTENCODE = H5E_CANTENCODE();
+    /** Minor error codes - Cache related errors - Unable to expunge a metadata cache entry */
+    public static final long H5E_CANTEXPUNGE = H5E_CANTEXPUNGE();
+    /** Minor error codes - Heap errors - Can't extend heap's space */
+    public static final long H5E_CANTEXTEND = H5E_CANTEXTEND();
+    /** I/O pipeline errors - Filter operation failed */
+    public static final long H5E_CANTFILTER = H5E_CANTFILTER();
+    /** Minor error codes - Cache related errors - Unable to flush data from cache */
     public static final long H5E_CANTFLUSH = H5E_CANTFLUSH();
+    /** Minor error codes - Resource errors - Unable to free object */
     public static final long H5E_CANTFREE = H5E_CANTFREE();
+    /** Minor error codes - Parallel MPI - Can't gather data */
+    public static final long H5E_CANTGATHER = H5E_CANTGATHER();
+    /** Minor error codes - Resource errors - Unable to garbage collect */
+    public static final long H5E_CANTGC = H5E_CANTGC();
+    /** Minor error codes - Property list errors - Can't get value */
     public static final long H5E_CANTGET = H5E_CANTGET();
+    /** Minor error codes - Resource errors - Unable to compute size */
+    public static final long H5E_CANTGETSIZE = H5E_CANTGETSIZE();
+    /** Minor error codes - Object atom related errors - Unable to increment reference count */
     public static final long H5E_CANTINC = H5E_CANTINC();
+    /** Minor error codes - Function entry/exit interface - Unable to initialize object */
     public static final long H5E_CANTINIT = H5E_CANTINIT();
+    /** Minor error codes - Cache related errors - Unable to insert metadata into cache */
+    public static final long H5E_CANTINS = H5E_CANTINS();
+    /** Minor error codes - B-tree related errors - Unable to insert object */
     public static final long H5E_CANTINSERT = H5E_CANTINSERT();
+    /** Minor error codes - B-tree related errors - Unable to list node */
     public static final long H5E_CANTLIST = H5E_CANTLIST();
+    /** Minor error codes - Cache related errors - Unable to load metadata into cache */
     public static final long H5E_CANTLOAD = H5E_CANTLOAD();
+    /** Minor error codes - Resource errors - Unable to lock object */
     public static final long H5E_CANTLOCK = H5E_CANTLOCK();
+    /** Minor error codes - File accessibility errors  Unable to lock file */
+    public static final long H5E_CANTLOCKFILE = H5E_CANTLOCKFILE();
+    /** Minor error codes - Cache related errors - Unable to mark a pinned entry as clean */
+    public static final long H5E_CANTMARKCLEAN = H5E_CANTMARKCLEAN();
+    /** Minor error codes - Cache related errors - Unable to mark a pinned entry as dirty */
+    public static final long H5E_CANTMARKDIRTY = H5E_CANTMARKDIRTY();
+    /** Minor error codes - Cache related errors - Unable to mark an entry as unserialized */
+    public static final long H5E_CANTMARKSERIALIZED = H5E_CANTMARKSERIALIZED();
+    /** Minor error codes - Cache related errors - Unable to mark an entry as serialized */
+    public static final long H5E_CANTMARKUNSERIALIZED = H5E_CANTMARKUNSERIALIZED();
+    /** Minor error codes - Free space errors - Can't merge objects */
+    public static final long H5E_CANTMERGE = H5E_CANTMERGE();
+    /** Minor error codes - B-tree related errors - Unable to modify record */
+    public static final long H5E_CANTMODIFY = H5E_CANTMODIFY();
+    /** Minor error codes - Link related errors - Can't move object */
+    public static final long H5E_CANTMOVE = H5E_CANTMOVE();
+    /** Minor error codes - Dataspace errors - Can't move to next iterator location */
     public static final long H5E_CANTNEXT = H5E_CANTNEXT();
+    /** Minor error codes - Cache related errors - Unable to notify object about action */
+    public static final long H5E_CANTNOTIFY = H5E_CANTNOTIFY();
+    /** Minor error codes - File accessibility errors - Unable to open file */
     public static final long H5E_CANTOPENFILE = H5E_CANTOPENFILE();
+    /** Minor error codes - Group related errors - Can't open object */
     public static final long H5E_CANTOPENOBJ = H5E_CANTOPENOBJ();
-    // public static final long H5E_CANTRECV = H5E_CANTRECV();
+    /** Minor error codes - Heap errors - Can't operate on object */
+    public static final long H5E_CANTOPERATE = H5E_CANTOPERATE();
+    /** Minor error codes - Object header related errors - Can't pack messages */
+    public static final long H5E_CANTPACK = H5E_CANTPACK();
+    /** Minor error codes - Cache related errors - Unable to pin cache entry */
+    public static final long H5E_CANTPIN = H5E_CANTPIN();
+    /** Minor error codes - Cache related errors - Unable to protect metadata */
+    public static final long H5E_CANTPROTECT = H5E_CANTPROTECT();
+    /** Minor error codes - Parallel MPI - Can't receive data */
+    public static final long H5E_CANTRECV = H5E_CANTRECV();
+    /** Minor error codes - B-tree related errors - Unable to redistribute records */
+    public static final long H5E_CANTREDISTRIBUTE = H5E_CANTREDISTRIBUTE();
+    /** Minor error codes - Object atom related errors - Unable to register new atom */
     public static final long H5E_CANTREGISTER = H5E_CANTREGISTER();
+    /** Minor error codes - Function entry/exit interface - Unable to release object */
     public static final long H5E_CANTRELEASE = H5E_CANTRELEASE();
+    /** Minor error codes - B-tree related errors - Unable to remove object */
+    public static final long H5E_CANTREMOVE = H5E_CANTREMOVE();
+    /** Minor error codes - Object header related errors - Unable to rename object */
+    public static final long H5E_CANTRENAME = H5E_CANTRENAME();
+    /** Minor error codes - Object header related errors - Can't reset object */
+    public static final long H5E_CANTRESET = H5E_CANTRESET();
+    /** Minor error codes - Cache related errors - Unable to resize a metadata cache entry */
+    public static final long H5E_CANTRESIZE = H5E_CANTRESIZE();
+    /** Minor error codes - Heap errors - Can't restore condition */
+    public static final long H5E_CANTRESTORE = H5E_CANTRESTORE();
+    /** Minor error codes - Free space errors - Can't revive object */
+    public static final long H5E_CANTREVIVE = H5E_CANTREVIVE();
+    /** Minor error codes - Free space errors - Can't shrink container */
+    public static final long H5E_CANTSHRINK = H5E_CANTSHRINK();
+    /** Minor error codes - Dataspace errors - Can't select hyperslab */
     public static final long H5E_CANTSELECT = H5E_CANTSELECT();
+    /** Minor error codes - Cache related errors - Unable to serialize data from cache */
+    public static final long H5E_CANTSERIALIZE = H5E_CANTSERIALIZE();
+    /** Minor error codes - Property list errors - Can't set value */
     public static final long H5E_CANTSET = H5E_CANTSET();
+    /** Minor error codes - Link related errors - Can't sort objects */
+    public static final long H5E_CANTSORT = H5E_CANTSORT();
+    /** Minor error codes - B-tree related errors - Unable to split node */
     public static final long H5E_CANTSPLIT = H5E_CANTSPLIT();
+    /** Minor error codes - B-tree related errors - Unable to swap records */
+    public static final long H5E_CANTSWAP = H5E_CANTSWAP();
+    /** Minor error codes - Cache related errors - Unable to tag metadata in the cache */
+    public static final long H5E_CANTTAG = H5E_CANTTAG();
+    /** Minor error codes - Cache related errors - Unable to uncork an object */
+    public static final long H5E_CANTUNCORK = H5E_CANTUNCORK();
+    /** Minor error codes - Cache related errors - Unable to destroy a flush dependency */
+    public static final long H5E_CANTUNDEPEND = H5E_CANTUNDEPEND();
+    /** Minor error codes - Resource errors - Unable to unlock object */
     public static final long H5E_CANTUNLOCK = H5E_CANTUNLOCK();
+    /** Minor error codes - File accessibility errors  Unable to unlock file */
+    public static final long H5E_CANTUNLOCKFILE = H5E_CANTUNLOCKFILE();
+    /** Minor error codes - Cache related errors - Unable to un-pin cache entry */
+    public static final long H5E_CANTUNPIN = H5E_CANTUNPIN();
+    /** Minor error codes - Cache related errors - Unable to unprotect metadata */
+    public static final long H5E_CANTUNPROTECT = H5E_CANTUNPROTECT();
+    /** Minor error codes - Cache related errors - Unable to mark metadata as unserialized */
+    public static final long H5E_CANTUNSERIALIZE = H5E_CANTUNSERIALIZE();
+    /** Minor error codes - Heap errors - Can't update object */
+    public static final long H5E_CANTUPDATE = H5E_CANTUPDATE();
+    /** Generic low-level file I/O errors - Close failed */
     public static final long H5E_CLOSEERROR = H5E_CLOSEERROR();
+    /** Minor error codes - Group related errors - Name component is too long */
     public static final long H5E_COMPLEN = H5E_COMPLEN();
+    /** Major error codes - API Context */
+    public static final long H5E_CONTEXT = H5E_CONTEXT();
+    /** Major error codes - Dataset */
     public static final long H5E_DATASET = H5E_DATASET();
+    /** Major error codes - Dataspace */
     public static final long H5E_DATASPACE = H5E_DATASPACE();
+    /** Major error codes - Datatype */
     public static final long H5E_DATATYPE = H5E_DATATYPE();
+    /** Value for the default error stack */
     public static final long H5E_DEFAULT = H5E_DEFAULT();
+    /** Minor error codes - Property list errors - Duplicate class name in parent class */
     public static final long H5E_DUPCLASS = H5E_DUPCLASS();
+    /** Major error codes - Extensible Array */
+    public static final long H5E_EARRAY = H5E_EARRAY();
+    /** Major error codes - External file list */
     public static final long H5E_EFL = H5E_EFL();
+    /** Major error codes - Error API */
+    public static final long H5E_ERROR = H5E_ERROR();
+    /** Minor error codes - B-tree related errors - Object already exists */
     public static final long H5E_EXISTS = H5E_EXISTS();
+    /** Major error codes - Fixed Array */
+    public static final long H5E_FARRAY = H5E_FARRAY();
+    /** Generic low-level file I/O errors - File control (fcntl) failed */
     public static final long H5E_FCNTL = H5E_FCNTL();
+    /** Major error codes - File accessibility */
     public static final long H5E_FILE = H5E_FILE();
+    /** Minor error codes - File accessibility errors - File already exists */
     public static final long H5E_FILEEXISTS = H5E_FILEEXISTS();
+    /** Minor error codes - File accessibility errors - File already open */
     public static final long H5E_FILEOPEN = H5E_FILEOPEN();
+    /** Major error codes - Free Space Manager */
+    public static final long H5E_FSPACE = H5E_FSPACE();
+    /** Major error codes - Function entry/exit */
     public static final long H5E_FUNC = H5E_FUNC();
+    /** Major error codes - Heap */
     public static final long H5E_HEAP = H5E_HEAP();
+    /** Minor error codes - Dataspace errors - Internal states are inconsistent */
+    public static final long H5E_INCONSISTENTSTATE = H5E_INCONSISTENTSTATE();
+    /** Major error codes - Internal error (too specific to document in detail) */
     public static final long H5E_INTERNAL = H5E_INTERNAL();
+    /** Major error codes - Low-level I/O */
     public static final long H5E_IO = H5E_IO();
+    /** Major error codes - Links */
     public static final long H5E_LINK = H5E_LINK();
+    /** Minor error codes - Object header related errors - Bad object header link count */
     public static final long H5E_LINKCOUNT = H5E_LINKCOUNT();
+    /** Minor error codes - Cache related errors - Failure in the cache logging framework */
+    public static final long H5E_LOGGING = H5E_LOGGING();
+    /** Major error codes - Map */
+    public static final long H5E_MAP = H5E_MAP();
+    /** Minor error codes - File accessibility errors - File mount error */
     public static final long H5E_MOUNT = H5E_MOUNT();
+    /** Minor error codes - Parallel MPI - Some MPI function failed */
     public static final long H5E_MPI = H5E_MPI();
+    /** Minor error codes - Parallel MPI - MPI Error String */
     public static final long H5E_MPIERRSTR = H5E_MPIERRSTR();
+    /** Minor error codes - Link related errors - Too many soft links in path */
+    public static final long H5E_NLINKS = H5E_NLINKS();
+    /** Minor error codes - Parallel MPI - Can't perform independent IO */
+    public static final long H5E_NO_INDEPENDENT = H5E_NO_INDEPENDENT();
+    /** I/O pipeline errors - Filter present but encoding disabled */
+    public static final long H5E_NOENCODER = H5E_NOENCODER();
+    /** I/O pipeline errors - Requested filter is not available */
     public static final long H5E_NOFILTER = H5E_NOFILTER();
+    /** Minor error codes - Object atom related errors - Out of IDs for group */
     public static final long H5E_NOIDS = H5E_NOIDS();
+    /** Major error codes - No error */
     public static final long H5E_NONE_MAJOR = H5E_NONE_MAJOR();
+    /** No error */
     public static final long H5E_NONE_MINOR = H5E_NONE_MINOR();
+    /** Minor error codes - Resource errors - No space available for allocation */
     public static final long H5E_NOSPACE = H5E_NOSPACE();
+    /** Minor error codes - Cache related errors - Metadata not currently cached */
     public static final long H5E_NOTCACHED = H5E_NOTCACHED();
+    /** Minor error codes - B-tree related errors - Object not found */
     public static final long H5E_NOTFOUND = H5E_NOTFOUND();
+    /** Minor error codes - File accessibility errors - Not an HDF5 file */
     public static final long H5E_NOTHDF5 = H5E_NOTHDF5();
+    /** Minor error codes - Link related errors - Link class not registered */
+    public static final long H5E_NOTREGISTERED = H5E_NOTREGISTERED();
+    /** Minor error codes - Resource errors - Object is already open */
+    public static final long H5E_OBJOPEN = H5E_OBJOPEN();
+    /** Major error codes - Object header */
     public static final long H5E_OHDR = H5E_OHDR();
+    /** Minor error codes - Plugin errors - Can't open directory or file */
+    public static final long H5E_OPENERROR = H5E_OPENERROR();
+    /** Generic low-level file I/O errors - Address overflowed */
     public static final long H5E_OVERFLOW = H5E_OVERFLOW();
+    /** Major error codes - Page Buffering */
+    public static final long H5E_PAGEBUF = H5E_PAGEBUF();
+    /** Minor error codes - Group related errors - Problem with path to object */
+    public static final long H5E_PATH = H5E_PATH();
+    /** Major error codes - Data filters */
     public static final long H5E_PLINE = H5E_PLINE();
+    /** Major error codes - Property lists */
     public static final long H5E_PLIST = H5E_PLIST();
+    /** Major error codes - Plugin for dynamically loaded library */
+    public static final long H5E_PLUGIN = H5E_PLUGIN();
+    /** Minor error codes - Cache related errors - Protected metadata error */
     public static final long H5E_PROTECT = H5E_PROTECT();
+    /** Generic low-level file I/O errors - Read failed */
     public static final long H5E_READERROR = H5E_READERROR();
+    /** Major error codes - References */
     public static final long H5E_REFERENCE = H5E_REFERENCE();
+    /** Major error codes - Resource unavailable */
     public static final long H5E_RESOURCE = H5E_RESOURCE();
+    /** Major error codes - Reference Counted Strings */
     public static final long H5E_RS = H5E_RS();
+    /** Generic low-level file I/O errors - Seek failed */
     public static final long H5E_SEEKERROR = H5E_SEEKERROR();
+    /** Minor error codes - Property list errors - Disallowed operation */
+    public static final long H5E_SETDISALLOWED = H5E_SETDISALLOWED();
+    /** I/O pipeline errors - Error from filter 'set local' callback */
     public static final long H5E_SETLOCAL = H5E_SETLOCAL();
+    /** Major error codes - Skip Lists */
+    public static final long H5E_SLIST = H5E_SLIST();
+    /** Major error codes - Shared Object Header Messages */
+    public static final long H5E_SOHM = H5E_SOHM();
+    /** Major error codes - Data storage */
     public static final long H5E_STORAGE = H5E_STORAGE();
+    /** Major error codes - Symbol table */
     public static final long H5E_SYM = H5E_SYM();
+    /** Minor error codes - System level errors - System error message */
+    public static final long H5E_SYSERRSTR = H5E_SYSERRSTR();
+    /** Minor error codes - Cache related errors - Internal error detected */
+    public static final long H5E_SYSTEM = H5E_SYSTEM();
+    /** Minor error codes - Link related errors - Link traversal failure */
+    public static final long H5E_TRAVERSE = H5E_TRAVERSE();
+    /** Minor error codes - File accessibility errors - File has been truncated */
     public static final long H5E_TRUNCATED = H5E_TRUNCATED();
+    /** Major error codes - Ternary Search Trees */
     public static final long H5E_TST = H5E_TST();
+    /** Minor error codes - Argument errors - Information is uinitialized */
     public static final long H5E_UNINITIALIZED = H5E_UNINITIALIZED();
+    /** Minor error codes - Argument errors - Feature is unsupported */
     public static final long H5E_UNSUPPORTED = H5E_UNSUPPORTED();
+    /** Minor error codes - Object header related errors - Wrong version number */
     public static final long H5E_VERSION = H5E_VERSION();
+    /** Major error codes - Virtual File Layer */
     public static final long H5E_VFL = H5E_VFL();
+    /** Major error codes - Virtual Object Layer */
     public static final long H5E_VOL = H5E_VOL();
+    /** Error stack traversal direction - begin at API function, end deep */
     public static final long H5E_WALK_DOWNWARD = H5E_WALK_DOWNWARD();
+    /** Error stack traversal direction - begin deep, end at API function */
     public static final long H5E_WALK_UPWARD = H5E_WALK_UPWARD();
+    /** Generic low-level file I/O errors - Write failed */
     public static final long H5E_WRITEERROR = H5E_WRITEERROR();
 
     private static final int H5ES_STATUS_IN_PROGRESS = H5ES_STATUS_IN_PROGRESS();
@@ -423,29 +686,53 @@ public class HDF5Constants {
     public static final int H5R_OBJECT1 = H5R_OBJECT1();
     public static final int H5R_OBJECT2 = H5R_OBJECT2();
 
+    /** Define atomic datatypes */
     public static final int H5S_ALL = H5S_ALL();
+    /** Define user-level maximum number of dimensions */
     public static final int H5S_MAX_RANK = H5S_MAX_RANK();
+    /** Different types of dataspaces - error */
     public static final int H5S_NO_CLASS = H5S_NO_CLASS();
+    /** Different types of dataspaces - null dataspace */
     public static final int H5S_NULL = H5S_NULL();
+    /** Different types of dataspaces - scalar variable */
     public static final int H5S_SCALAR = H5S_SCALAR();
+    /** Enumerated type for the type of selection - Entire extent selected */
     public static final int H5S_SEL_ALL = H5S_SEL_ALL();
+    /** Enumerated type for the type of selection - Error */
     public static final int H5S_SEL_ERROR = H5S_SEL_ERROR();
+    /** Enumerated type for the type of selection - Hyperslab selected */
     public static final int H5S_SEL_HYPERSLABS = H5S_SEL_HYPERSLABS();
+    /** Enumerated type for the type of selection - LAST */
     public static final int H5S_SEL_N = H5S_SEL_N();
+    /** Enumerated type for the type of selection - Nothing selected */
     public static final int H5S_SEL_NONE = H5S_SEL_NONE();
+    /** Enumerated type for the type of selection - Points / elements selected */
     public static final int H5S_SEL_POINTS = H5S_SEL_POINTS();
+    /** Different ways of combining selections - Binary "and" operation for hyperslabs */
     public static final int H5S_SELECT_AND = H5S_SELECT_AND();
+    /** Different ways of combining selections - Append elements to end of point selection */
     public static final int H5S_SELECT_APPEND = H5S_SELECT_APPEND();
+    /** Different ways of combining selections - Invalid upper bound on selection operations */
     public static final int H5S_SELECT_INVALID = H5S_SELECT_INVALID();
+    /** Different ways of combining selections - error */
     public static final int H5S_SELECT_NOOP = H5S_SELECT_NOOP();
+    /** Different ways of combining selections - Binary "not" operation for hyperslabs */
     public static final int H5S_SELECT_NOTA = H5S_SELECT_NOTA();
+    /** Different ways of combining selections - Binary "not" operation for hyperslabs */
     public static final int H5S_SELECT_NOTB = H5S_SELECT_NOTB();
+    /** Different ways of combining selections - Binary "or" operation for hyperslabs */
     public static final int H5S_SELECT_OR = H5S_SELECT_OR();
+    /** Different ways of combining selections - Prepend elements to beginning of point selection */
     public static final int H5S_SELECT_PREPEND = H5S_SELECT_PREPEND();
+    /** Different ways of combining selections - Select "set" operation */
     public static final int H5S_SELECT_SET = H5S_SELECT_SET();
+    /** Different ways of combining selections - Binary "xor" operation for hyperslabs */
     public static final int H5S_SELECT_XOR = H5S_SELECT_XOR();
+    /** Different types of dataspaces - simple dataspace */
     public static final int H5S_SIMPLE = H5S_SIMPLE();
+    /** Define atomic datatypes */
     public static final int H5S_UNLIMITED = H5S_UNLIMITED();
+
     public static final long H5T_ALPHA_B16 = H5T_ALPHA_B16();
     public static final long H5T_ALPHA_B32 = H5T_ALPHA_B32();
     public static final long H5T_ALPHA_B64 = H5T_ALPHA_B64();
@@ -664,48 +951,96 @@ public class HDF5Constants {
     public static final int H5_VOL_RESERVED = H5_VOL_RESERVED();
     public static final int H5_VOL_MAX = H5_VOL_MAX();
 
+    /** Return values for filter callback function */
     public static final int H5Z_CB_CONT = H5Z_CB_CONT();
+    /** Return values for filter callback function */
     public static final int H5Z_CB_ERROR = H5Z_CB_ERROR();
+    /** Return values for filter callback function */
     public static final int H5Z_CB_FAIL = H5Z_CB_FAIL();
+    /** Return values for filter callback function */
     public static final int H5Z_CB_NO = H5Z_CB_NO();
+    /** Values to decide if EDC is enabled for reading data */
     public static final int H5Z_DISABLE_EDC = H5Z_DISABLE_EDC();
+    /** Values to decide if EDC is enabled for reading data */
     public static final int H5Z_ENABLE_EDC = H5Z_ENABLE_EDC();
+    /** Values to decide if EDC is enabled for reading data */
     public static final int H5Z_ERROR_EDC = H5Z_ERROR_EDC();
+    /** Filter IDs - deflation like gzip */
     public static final int H5Z_FILTER_DEFLATE = H5Z_FILTER_DEFLATE();
+    /** Filter IDs - no filter */
     public static final int H5Z_FILTER_ERROR = H5Z_FILTER_ERROR();
+    /** Filter IDs - fletcher32 checksum of EDC */
     public static final int H5Z_FILTER_FLETCHER32 = H5Z_FILTER_FLETCHER32();
+    /** Filter IDs - maximum filter id */
     public static final int H5Z_FILTER_MAX = H5Z_FILTER_MAX();
+    /** Filter IDs - nbit compression */
     public static final int H5Z_FILTER_NBIT = H5Z_FILTER_NBIT();
+    /** Filter IDs - reserved indefinitely */
     public static final int H5Z_FILTER_NONE = H5Z_FILTER_NONE();
+    /** Filter IDs - filter ids below this value are reserved for library use */
     public static final int H5Z_FILTER_RESERVED = H5Z_FILTER_RESERVED();
+    /** Filter IDs - scale+offset compression */
     public static final int H5Z_FILTER_SCALEOFFSET = H5Z_FILTER_SCALEOFFSET();
+    /** Filter IDs - shuffle the data */
     public static final int H5Z_FILTER_SHUFFLE = H5Z_FILTER_SHUFFLE();
+    /** Filter IDs - szip compression */
     public static final int H5Z_FILTER_SZIP = H5Z_FILTER_SZIP();
+    /** Flags for filter definition (stored)
+     * definition flag mask */
     public static final int H5Z_FLAG_DEFMASK = H5Z_FLAG_DEFMASK();
+    /** Additional flags for filter invocation (not stored)
+     * invocation flag mask */
     public static final int H5Z_FLAG_INVMASK = H5Z_FLAG_INVMASK();
+    /** Flags for filter definition (stored)
+     * filter is mandatory */
     public static final int H5Z_FLAG_MANDATORY = H5Z_FLAG_MANDATORY();
+    /** Flags for filter definition (stored)
+     * filter is optional */
     public static final int H5Z_FLAG_OPTIONAL = H5Z_FLAG_OPTIONAL();
+    /** Additional flags for filter invocation (not stored)
+     * reverse direction; read */
     public static final int H5Z_FLAG_REVERSE = H5Z_FLAG_REVERSE();
+    /** Additional flags for filter invocation (not stored)
+     * skip EDC filters for read */
     public static final int H5Z_FLAG_SKIP_EDC = H5Z_FLAG_SKIP_EDC();
-    public static final int H5Z_MAX_NFILTERS = H5Z_MAX_NFILTERS();
-    public static final int H5Z_NO_EDC = H5Z_NO_EDC();
-    public static final int H5Z_FILTER_CONFIG_ENCODE_ENABLED = H5Z_FILTER_CONFIG_ENCODE_ENABLED();
-    public static final int H5Z_FILTER_CONFIG_DECODE_ENABLED = H5Z_FILTER_CONFIG_DECODE_ENABLED();
-    public static final int H5Z_SO_INT_MINBITS_DEFAULT = H5Z_SO_INT_MINBITS_DEFAULT();
-    public static final int H5Z_SO_FLOAT_DSCALE = H5Z_SO_FLOAT_DSCALE();
-    public static final int H5Z_SO_FLOAT_ESCALE = H5Z_SO_FLOAT_ESCALE();
-    public static final int H5Z_SO_INT = H5Z_SO_INT();
-    public static final int H5Z_SHUFFLE_USER_NPARMS = H5Z_SHUFFLE_USER_NPARMS();
-    public static final int H5Z_SHUFFLE_TOTAL_NPARMS = H5Z_SHUFFLE_TOTAL_NPARMS();
-    public static final int H5Z_SZIP_USER_NPARMS = H5Z_SZIP_USER_NPARMS();
-    public static final int H5Z_SZIP_TOTAL_NPARMS = H5Z_SZIP_TOTAL_NPARMS();
-    public static final int H5Z_SZIP_PARM_MASK = H5Z_SZIP_PARM_MASK();
-    public static final int H5Z_SZIP_PARM_PPB = H5Z_SZIP_PARM_PPB();
-    public static final int H5Z_SZIP_PARM_BPP = H5Z_SZIP_PARM_BPP();
-    public static final int H5Z_SZIP_PARM_PPS = H5Z_SZIP_PARM_PPS();
-    public static final int H5Z_NBIT_USER_NPARMS = H5Z_NBIT_USER_NPARMS();
-    public static final int H5Z_SCALEOFFSET_USER_NPARMS = H5Z_SCALEOFFSET_USER_NPARMS();
+    /** Symbol to remove all filters in H5Premove_filter */
     public static final int H5Z_FILTER_ALL = H5Z_FILTER_ALL();
+    /** Maximum number of filters allowed in a pipeline */
+    public static final int H5Z_MAX_NFILTERS = H5Z_MAX_NFILTERS();
+    /** Values to decide if EDC is enabled for reading data */
+    public static final int H5Z_NO_EDC = H5Z_NO_EDC();
+    /** Bit flags for H5Zget_filter_info */
+    public static final int H5Z_FILTER_CONFIG_ENCODE_ENABLED = H5Z_FILTER_CONFIG_ENCODE_ENABLED();
+    /** Bit flags for H5Zget_filter_info */
+    public static final int H5Z_FILTER_CONFIG_DECODE_ENABLED = H5Z_FILTER_CONFIG_DECODE_ENABLED();
+    /** Special parameters for ScaleOffset filter*/
+    public static final int H5Z_SO_INT_MINBITS_DEFAULT = H5Z_SO_INT_MINBITS_DEFAULT();
+    /** Special parameters for ScaleOffset filter*/
+    public static final int H5Z_SO_FLOAT_DSCALE = H5Z_SO_FLOAT_DSCALE();
+    /** Special parameters for ScaleOffset filter*/
+    public static final int H5Z_SO_FLOAT_ESCALE = H5Z_SO_FLOAT_ESCALE();
+    /** Special parameters for ScaleOffset filter*/
+    public static final int H5Z_SO_INT = H5Z_SO_INT();
+    /** shuffle filter - Number of parameters that users can set */
+    public static final int H5Z_SHUFFLE_USER_NPARMS = H5Z_SHUFFLE_USER_NPARMS();
+    /** shuffle filter - Total number of parameters for filter */
+    public static final int H5Z_SHUFFLE_TOTAL_NPARMS = H5Z_SHUFFLE_TOTAL_NPARMS();
+    /** szip filter - Number of parameters that users can set */
+    public static final int H5Z_SZIP_USER_NPARMS = H5Z_SZIP_USER_NPARMS();
+    /** szip filter - Total number of parameters for filter */
+    public static final int H5Z_SZIP_TOTAL_NPARMS = H5Z_SZIP_TOTAL_NPARMS();
+    /** szip filter - "User" parameter for option mask */
+    public static final int H5Z_SZIP_PARM_MASK = H5Z_SZIP_PARM_MASK();
+    /** szip filter - "User" parameter for pixels-per-block */
+    public static final int H5Z_SZIP_PARM_PPB = H5Z_SZIP_PARM_PPB();
+    /** szip filter - "Local" parameter for bits-per-pixel */
+    public static final int H5Z_SZIP_PARM_BPP = H5Z_SZIP_PARM_BPP();
+    /** szip filter - "Local" parameter for pixels-per-scanline */
+    public static final int H5Z_SZIP_PARM_PPS = H5Z_SZIP_PARM_PPS();
+    /** nbit filter - Number of parameters that users can set */
+    public static final int H5Z_NBIT_USER_NPARMS = H5Z_NBIT_USER_NPARMS();
+    /** scale offset filter - Number of parameters that users can set */
+    public static final int H5Z_SCALEOFFSET_USER_NPARMS = H5Z_SCALEOFFSET_USER_NPARMS();
 
     // /////////////////////////////////////////////////////////////////////////
     // List of private native variables to get constant values from C //
@@ -840,6 +1175,8 @@ public class HDF5Constants {
 
     private static native final long H5E_BADGROUP();
 
+    private static native final long H5E_BADITER();
+
     private static native final long H5E_BADMESG();
 
     private static native final long H5E_BADRANGE();
@@ -860,14 +1197,29 @@ public class HDF5Constants {
 
     private static native final long H5E_CANAPPLY();
 
-    // private static native final long H5E_CANTALLOC();
+    private static native final long H5E_CANTALLOC();
+
+    private static native final long H5E_CANTAPPEND();
+
+    private static native final long H5E_CANTATTACH();
+
+    private static native final long H5E_CANTCLEAN();
+
     private static native final long H5E_CANTCLIP();
 
     private static native final long H5E_CANTCLOSEFILE();
 
+    private static native final long H5E_CANTCLOSEOBJ();
+
+    private static native final long H5E_CANTCOMPARE();
+
+    private static native final long H5E_CANTCOMPUTE();
+
     private static native final long H5E_CANTCONVERT();
 
     private static native final long H5E_CANTCOPY();
+
+    private static native final long H5E_CANTCORK();
 
     private static native final long H5E_CANTCOUNT();
 
@@ -881,17 +1233,35 @@ public class HDF5Constants {
 
     private static native final long H5E_CANTDELETEFILE();
 
+    private static native final long H5E_CANTDEPEND();
+
+    private static native final long H5E_CANTDIRTY();
+
     private static native final long H5E_CANTENCODE();
+
+    private static native final long H5E_CANTEXPUNGE();
+
+    private static native final long H5E_CANTEXTEND();
+
+    private static native final long H5E_CANTFILTER();
 
     private static native final long H5E_CANTFLUSH();
 
     private static native final long H5E_CANTFREE();
 
+    private static native final long H5E_CANTGATHER();
+
+    private static native final long H5E_CANTGC();
+
     private static native final long H5E_CANTGET();
+
+    private static native final long H5E_CANTGETSIZE();
 
     private static native final long H5E_CANTINC();
 
     private static native final long H5E_CANTINIT();
+
+    private static native final long H5E_CANTINS();
 
     private static native final long H5E_CANTINSERT();
 
@@ -901,28 +1271,95 @@ public class HDF5Constants {
 
     private static native final long H5E_CANTLOCK();
 
+    private static native final long H5E_CANTLOCKFILE();
+
+    private static native final long H5E_CANTMARKCLEAN();
+
+    private static native final long H5E_CANTMARKDIRTY();
+
+    private static native final long H5E_CANTMARKSERIALIZED();
+
+    private static native final long H5E_CANTMARKUNSERIALIZED();
+
+    private static native final long H5E_CANTMERGE();
+
+    private static native final long H5E_CANTMOVE();
+
+    private static native final long H5E_CANTMODIFY();
+
     private static native final long H5E_CANTNEXT();
+
+    private static native final long H5E_CANTNOTIFY();
 
     private static native final long H5E_CANTOPENFILE();
 
     private static native final long H5E_CANTOPENOBJ();
 
-    // private static native final long H5E_CANTRECV();
+    private static native final long H5E_CANTOPERATE();
+
+    private static native final long H5E_CANTPACK();
+
+    private static native final long H5E_CANTPIN();
+
+    private static native final long H5E_CANTPROTECT();
+
+    private static native final long H5E_CANTRECV();
+
+    private static native final long H5E_CANTREDISTRIBUTE();
+
     private static native final long H5E_CANTREGISTER();
 
     private static native final long H5E_CANTRELEASE();
+
+    private static native final long H5E_CANTREMOVE();
+
+    private static native final long H5E_CANTRENAME();
+
+    private static native final long H5E_CANTRESET();
+
+    private static native final long H5E_CANTRESIZE();
+
+    private static native final long H5E_CANTRESTORE();
+
+    private static native final long H5E_CANTREVIVE();
+
+    private static native final long H5E_CANTSHRINK();
 
     private static native final long H5E_CANTSELECT();
 
     private static native final long H5E_CANTSET();
 
+    private static native final long H5E_CANTSERIALIZE();
+
+    private static native final long H5E_CANTSORT();
+
     private static native final long H5E_CANTSPLIT();
 
+    private static native final long H5E_CANTSWAP();
+
+    private static native final long H5E_CANTTAG();
+
+    private static native final long H5E_CANTUNCORK();
+
+    private static native final long H5E_CANTUNDEPEND();
+
     private static native final long H5E_CANTUNLOCK();
+
+    private static native final long H5E_CANTUNLOCKFILE();
+
+    private static native final long H5E_CANTUNPIN();
+
+    private static native final long H5E_CANTUNPROTECT();
+
+    private static native final long H5E_CANTUNSERIALIZE();
+
+    private static native final long H5E_CANTUPDATE();
 
     private static native final long H5E_CLOSEERROR();
 
     private static native final long H5E_COMPLEN();
+
+    private static native final long H5E_CONTEXT();
 
     private static native final long H5E_DATASET();
 
@@ -934,9 +1371,15 @@ public class HDF5Constants {
 
     private static native final long H5E_DUPCLASS();
 
+    private static native final long H5E_EARRAY();
+
     private static native final long H5E_EFL();
 
+    private static native final long H5E_ERROR();
+
     private static native final long H5E_EXISTS();
+
+    private static native final long H5E_FARRAY();
 
     private static native final long H5E_FCNTL();
 
@@ -946,9 +1389,13 @@ public class HDF5Constants {
 
     private static native final long H5E_FILEOPEN();
 
+    private static native final long H5E_FSPACE();
+
     private static native final long H5E_FUNC();
 
     private static native final long H5E_HEAP();
+
+    private static native final long H5E_INCONSISTENTSTATE();
 
     private static native final long H5E_INTERNAL();
 
@@ -958,7 +1405,11 @@ public class HDF5Constants {
 
     private static native final long H5E_LINKCOUNT();
 
+    private static native final long H5E_LOGGING();
+
     private static native final int H5E_MAJOR();
+
+    private static native final long H5E_MAP();
 
     private static native final int H5E_MINOR();
 
@@ -967,6 +1418,12 @@ public class HDF5Constants {
     private static native final long H5E_MPI();
 
     private static native final long H5E_MPIERRSTR();
+
+    private static native final long H5E_NLINKS();
+
+    private static native final long H5E_NO_INDEPENDENT();
+
+    private static native final long H5E_NOENCODER();
 
     private static native final long H5E_NOFILTER();
 
@@ -984,13 +1441,25 @@ public class HDF5Constants {
 
     private static native final long H5E_NOTHDF5();
 
+    private static native final long H5E_NOTREGISTERED();
+
+    private static native final long H5E_OBJOPEN();
+
     private static native final long H5E_OHDR();
 
+    private static native final long H5E_OPENERROR();
+
     private static native final long H5E_OVERFLOW();
+
+    private static native final long H5E_PAGEBUF();
+
+    private static native final long H5E_PATH();
 
     private static native final long H5E_PLINE();
 
     private static native final long H5E_PLIST();
+
+    private static native final long H5E_PLUGIN();
 
     private static native final long H5E_PROTECT();
 
@@ -1004,11 +1473,23 @@ public class HDF5Constants {
 
     private static native final long H5E_SEEKERROR();
 
+    private static native final long H5E_SETDISALLOWED();
+
     private static native final long H5E_SETLOCAL();
+
+    private static native final long H5E_SLIST();
+
+    private static native final long H5E_SOHM();
 
     private static native final long H5E_STORAGE();
 
     private static native final long H5E_SYM();
+
+    private static native final long H5E_SYSERRSTR();
+
+    private static native final long H5E_SYSTEM();
+
+    private static native final long H5E_TRAVERSE();
 
     private static native final long H5E_TRUNCATED();
 

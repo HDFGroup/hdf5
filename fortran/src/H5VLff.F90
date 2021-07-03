@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -82,7 +82,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN), VALUE :: vipl_id
        END FUNCTION H5VLregister_connector_by_name
     END INTERFACE
-    
+
     vipl_id_default = H5P_DEFAULT_F
     IF(PRESENT(vipl_id)) vipl_id_default = vipl_id
 
@@ -136,7 +136,7 @@ CONTAINS
 ! INPUTS
 !  name - Connector name
 ! OUTPUTS
-!  registered - state of VOL class registration 
+!  registered - state of VOL class registration
 !  hdferr - Returns 0 if successful and -1 if fails
 ! SOURCE
 
@@ -156,7 +156,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        END FUNCTION H5VLis_connector_registered_by_name
     END INTERFACE
-    
+
     c_name = TRIM(name)//C_NULL_CHAR
     registered_c = H5VLis_connector_registered_by_name(c_name)
 
@@ -180,7 +180,7 @@ CONTAINS
 ! INPUTS
 !  value - Connector value
 ! OUTPUTS
-!  registered - state of VOL class registration 
+!  registered - state of VOL class registration
 !  hdferr - Returns 0 if successful and -1 if fails
 ! SOURCE
 
@@ -278,10 +278,10 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(IN) :: name
        END FUNCTION H5VLget_connector_id_by_name
     END INTERFACE
-    
+
     c_name = TRIM(name)//C_NULL_CHAR
     vol_id = H5VLget_connector_id_by_name(c_name)
-    
+
     hdferr = 0
     IF(vol_id.LT.0)THEN
        hdferr = -1
@@ -367,7 +367,7 @@ CONTAINS
 
   END SUBROUTINE H5VLget_connector_name_f
 
-! 
+!
 !
 !****s* H5VL/H5VLclose_f
 !

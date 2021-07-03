@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_H__
-#define H5DUMP_H__
+#ifndef H5DUMP_H
+#define H5DUMP_H
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -43,6 +43,7 @@ typedef struct h5dump_table_items_t {
     table_t *     dset_table;  /* Table of datasets */
     table_t *     type_table;  /* Table of datatypes */
 } h5dump_table_items_t;
+
 typedef struct h5dump_table_list_t {
     size_t                nalloc;
     size_t                nused;
@@ -51,32 +52,36 @@ typedef struct h5dump_table_list_t {
 
 h5dump_table_list_t table_list  = {0, 0, NULL};
 table_t *           group_table = NULL, *dset_table = NULL, *type_table = NULL;
-unsigned            dump_indent = 0; /*how far in to indent the line         */
 
-int         unamedtype = 0;     /* shared datatype with no name */
-hbool_t     hit_elink  = FALSE; /* whether we have traversed an external link */
-size_t      prefix_len = 1024;
-char *      prefix     = NULL;
-const char *fp_format  = NULL;
+unsigned    dump_indent = 0;     /* how far in to indent the line */
+int         unamedtype  = 0;     /* shared datatype with no name */
+hbool_t     hit_elink   = FALSE; /* whether we have traversed an external link */
+size_t      prefix_len  = 1024;
+char *      prefix      = NULL;
+const char *fp_format   = NULL;
 
 /* things to display or which are set via command line parameters */
-int display_all            = TRUE;
-int display_oid            = FALSE;
-int display_data           = TRUE;
-int display_attr_data      = TRUE;
-int display_char           = FALSE; /*print 1-byte numbers as ASCII */
-int usingdasho             = FALSE;
-int display_bb             = FALSE; /*superblock */
-int display_dcpl           = FALSE; /*dcpl */
-int display_fi             = FALSE; /*file index */
-int display_ai             = TRUE;  /*array index */
-int display_escape         = FALSE; /*escape non printable characters */
-int display_region         = FALSE; /*print region reference data */
-int disable_compact_subset = FALSE; /* disable compact form of subset notation */
-int display_packed_bits    = FALSE; /*print 1-8 byte numbers as packed bits*/
-int include_attrs          = TRUE;  /* Display attributes */
-int display_vds_first      = FALSE; /* vds display to all by default*/
-int vds_gap_size           = 0;     /* vds skip missing files default is none */
+typedef struct {
+    int display_all;
+    int display_oid;
+    int display_data;
+    int display_attr_data;
+    int display_char; /* print 1-byte numbers as ASCII */
+    int usingdasho;
+    int display_bb;             /* superblock */
+    int display_dcpl;           /* dcpl */
+    int display_fi;             /* file index */
+    int display_ai;             /* array index */
+    int display_escape;         /* escape non printable characters */
+    int display_region;         /* print region reference data */
+    int disable_compact_subset; /* disable compact form of subset notation */
+    int display_packed_bits;    /* print 1-8 byte numbers as packed bits */
+    int include_attrs;          /* Display attributes */
+    int display_vds_first;      /* vds display to all by default */
+    int vds_gap_size;           /* vds skip missing files default is none */
+} dump_opt_t;
+dump_opt_t dump_opts = {TRUE, FALSE, TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE,
+                        TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,  FALSE, 0};
 
 #define PACKED_BITS_MAX      8                       /* Maximum number of packed-bits to display */
 #define PACKED_BITS_SIZE_MAX (8 * sizeof(long long)) /* Maximum bits size of integer types of packed-bits */
@@ -107,4 +112,4 @@ const dump_functions *dump_function_table;
 }
 #endif
 
-#endif /* !H5DUMP_H__ */
+#endif /* H5DUMP_H */

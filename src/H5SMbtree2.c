@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -187,56 +187,15 @@ H5SM__bt2_debug(FILE *stream, int indent, int fwidth, const void *record, const 
     FUNC_ENTER_STATIC_NOERR
 
     if (sohm->location == H5SM_IN_HEAP)
-        HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx}\n", indent, "", fwidth,
-                  "Shared Message in heap:", sohm->u.heap_loc.fheap_id, sohm->hash,
+        HDfprintf(stream, "%*s%-*s {%" PRIu64 ", %" PRIo32 ", %" PRIxHSIZE "}\n", indent, "", fwidth,
+                  "Shared Message in heap:", sohm->u.heap_loc.fheap_id.val, sohm->hash,
                   sohm->u.heap_loc.ref_count);
     else {
         HDassert(sohm->location == H5SM_IN_OH);
-        HDfprintf(stream, "%*s%-*s {%a, %lo, %Hx, %Hx}\n", indent, "", fwidth,
+        HDfprintf(stream, "%*s%-*s {%" PRIuHADDR ", %" PRIo32 ", %x, %" PRIx32 "}\n", indent, "", fwidth,
                   "Shared Message in OH:", sohm->u.mesg_loc.oh_addr, sohm->hash, sohm->msg_type_id,
                   sohm->u.mesg_loc.index);
     } /* end else */
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5SM__bt2_debug */
-
-/*-------------------------------------------------------------------------
- * Function:	H5SM_bt2_convert_to_list_op
- *
- * Purpose:	An H5B2_remove_t callback function to convert a SOHM
- *              B-tree index to a list.
- *
- *              Inserts this record into the list passed through op_data.
- *
- * Return:	Non-negative on success
- *              Negative on failure
- *
- * Programmer:	James Laird
- *              Monday, November 6, 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5SM_bt2_convert_to_list_op(const void *record, void *op_data)
-{
-    const H5SM_sohm_t *message = (const H5SM_sohm_t *)record;
-    const H5SM_list_t *list    = (const H5SM_list_t *)op_data;
-    size_t             mesg_idx; /* Index of message to modify */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity checks */
-    HDassert(record);
-    HDassert(op_data);
-
-    /* Get the message index, and increment the # of messages in list */
-    mesg_idx = list->header->num_messages++;
-    HDassert(list->header->num_messages <= list->header->list_max);
-
-    /* Insert this message at the end of the list */
-    HDassert(list->messages[mesg_idx].location == H5SM_NO_LOC);
-    HDassert(message->location != H5SM_NO_LOC);
-    H5MM_memcpy(&(list->messages[mesg_idx]), message, sizeof(H5SM_sohm_t));
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_bt2_convert_to_list_op() */

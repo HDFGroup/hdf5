@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -122,8 +122,6 @@ H5CS__get_stack(void)
  * Programmer:	Quincey Koziol
  *              Thursday, February 6, 2003
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -144,11 +142,7 @@ H5CS_print_stack(const H5CS_t *fstack, FILE *stream)
 
     HDfprintf(stream, "HDF5-DIAG: Function stack from %s ", H5_lib_vers_info_g);
     /* try show the process or thread id in multiple processes cases*/
-#ifdef H5_HAVE_THREADSAFE
-    HDfprintf(stream, "thread %lu.", HDpthread_self_ulong());
-#else  /* H5_HAVE_THREADSAFE */
-    HDfprintf(stream, "thread 0.");
-#endif /* H5_HAVE_THREADSAFE */
+    HDfprintf(stream, "thread %" PRIu64 ".", H5TS_thread_id());
     if (fstack && fstack->nused > 0)
         HDfprintf(stream, "  Back trace follows.");
     HDfputc('\n', stream);
@@ -214,8 +208,6 @@ H5CS_push(const char *func_name)
  *
  * Programmer:	Quincey Koziol
  *		Thursday, February 6, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */

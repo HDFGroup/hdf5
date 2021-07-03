@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              Tuesday, January 8, 2008
  *
  * Purpose:     This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5MF package!"
 #endif
 
-#ifndef _H5MFpkg_H
-#define _H5MFpkg_H
+#ifndef H5MFpkg_H
+#define H5MFpkg_H
 
 /* Get package's private header */
 #include "H5MFprivate.h"
@@ -50,11 +50,12 @@
 
 /* Free-space section types for file */
 /* (values stored in free space data structures in file) */
-#define H5MF_FSPACE_SECT_SIMPLE 0 /* For non-paged aggregation: section is a range of actual bytes in file   \
-                                   */
-#define H5MF_FSPACE_SECT_SMALL                                                                               \
-    1 /* For paged aggregation: "small" meta/raw data section which is < fsp_size) */
-#define H5MF_FSPACE_SECT_LARGE 2 /* For paged aggregation: "large" Section which is >= fsp_size) */
+/* For non-paged aggregation: section is a range of actual bytes in file */
+#define H5MF_FSPACE_SECT_SIMPLE 0
+/* For paged aggregation: "small" meta/raw data section which is < fsp_size) */
+#define H5MF_FSPACE_SECT_SMALL 1
+/* For paged aggregation: "large" Section which is >= fsp_size) */
+#define H5MF_FSPACE_SECT_LARGE 2
 
 /* Get section class type based on size */
 #define H5MF_SECT_CLASS_TYPE(F, S)                                                                           \
@@ -167,9 +168,9 @@ typedef struct H5MF_fs_t {
 /*****************************/
 
 /* H5MF single section inherits serializable properties from H5FS_section_class_t */
-H5_DLLVAR H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1];
-H5_DLLVAR H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1];
-H5_DLLVAR H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1];
+H5_DLLVAR const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SIMPLE[1];
+H5_DLLVAR const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_SMALL[1];
+H5_DLLVAR const H5FS_section_class_t H5MF_FSPACE_SECT_CLS_LARGE[1];
 
 /******************************/
 /* Package Private Prototypes */
@@ -190,6 +191,7 @@ H5_DLL herr_t               H5MF__sect_free(H5FS_section_info_t *sect);
 /* Block aggregator routines */
 H5_DLL htri_t H5MF__aggr_try_extend(H5F_t *f, H5F_blk_aggr_t *aggr, H5FD_mem_t type, haddr_t abs_blk_end,
                                     hsize_t extra_requested);
+H5_DLL htri_t H5MF__aggrs_try_shrink_eoa(H5F_t *f);
 H5_DLL htri_t H5MF__aggr_can_absorb(const H5F_t *f, const H5F_blk_aggr_t *aggr,
                                     const H5MF_free_section_t *sect, H5MF_shrink_type_t *shrink);
 H5_DLL herr_t H5MF__aggr_absorb(const H5F_t *f, H5F_blk_aggr_t *aggr, H5MF_free_section_t *sect,
@@ -205,4 +207,4 @@ H5_DLL herr_t H5MF__sects_dump(H5F_t *f, FILE *stream);
 #ifdef H5MF_TESTING
 #endif /* H5MF_TESTING */
 
-#endif /* _H5MFpkg_H */
+#endif /* H5MFpkg_H */

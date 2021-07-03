@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -187,7 +187,7 @@ main(int argc, char *argv[])
         goto error;
     }
     else if (mpi_rank == 0) {
-        PASSED()
+        PASSED();
     }
 
     /* Check the case where the file was not flushed.  This should give an error
@@ -201,7 +201,7 @@ main(int argc, char *argv[])
     h5_fixname(FILENAME[1], fapl_id2, name, sizeof(name));
     if (check_test_file(name, fapl_id2)) {
         if (mpi_rank == 0)
-            PASSED()
+            PASSED();
     }
     else {
         H5_FAILED()

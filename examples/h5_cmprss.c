@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -99,7 +99,7 @@ main()
 
     for (i = 0; i < numfilt; i++) {
         nelmts      = 0;
-        filter_type = H5Pget_filter2(plist_id, 0, &flags, &nelmts, NULL, 0, NULL, &filter_info);
+        filter_type = H5Pget_filter2(plist_id, i, &flags, &nelmts, NULL, 0, NULL, &filter_info);
         printf("Filter Type: ");
         switch (filter_type) {
             case H5Z_FILTER_DEFLATE:

@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.ued>
+/* Programmer:  Quincey Koziol
  *              Thursday, September 30, 2004
  *
  * Purpose:	Dataspace I/O functions.
@@ -105,51 +105,38 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, co
     HDassert(io_info->store);
     HDassert(io_info->u.rbuf);
 
-    /* Get info from API context */
-    if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
-
-    /* Allocate the vector I/O arrays */
-    if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
-        vec_size = dxpl_vec_size;
-    else
-        vec_size = H5D_IO_VECTOR_SIZE;
-    if (NULL == (mem_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
-    if (NULL == (mem_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
-    if (NULL == (file_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
-    if (NULL == (file_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
-
     /* Check for only one element in selection */
     if (nelmts == 1) {
+        hsize_t single_mem_off;  /* Offset in memory */
+        hsize_t single_file_off; /* Offset in the file */
+        size_t  single_mem_len;  /* Length in memory */
+        size_t  single_file_len; /* Length in the file */
+
         /* Get offset of first element in selections */
-        if (H5S_SELECT_OFFSET(file_space, file_off) < 0)
+        if (H5S_SELECT_OFFSET(file_space, &single_file_off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve file selection offset")
-        if (H5S_SELECT_OFFSET(mem_space, mem_off) < 0)
+        if (H5S_SELECT_OFFSET(mem_space, &single_mem_off) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "can't retrieve memory selection offset")
 
         /* Set up necessary information for I/O operation */
         file_nseq = mem_nseq = 1;
         curr_mem_seq = curr_file_seq = 0;
-        *file_off *= elmt_size;
-        *mem_off *= elmt_size;
-        *file_len = *mem_len = elmt_size;
+        single_file_off *= elmt_size;
+        single_mem_off *= elmt_size;
+        single_file_len = single_mem_len = elmt_size;
 
         /* Perform I/O on memory and file sequences */
         if (io_info->op_type == H5D_IO_OP_READ) {
-            if ((tmp_file_len =
-                     (*io_info->layout_ops.readvv)(io_info, file_nseq, &curr_file_seq, file_len, file_off,
-                                                   mem_nseq, &curr_mem_seq, mem_len, mem_off)) < 0)
+            if ((tmp_file_len = (*io_info->layout_ops.readvv)(
+                     io_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off, mem_nseq,
+                     &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_READERROR, FAIL, "read error")
         } /* end if */
         else {
             HDassert(io_info->op_type == H5D_IO_OP_WRITE);
-            if ((tmp_file_len =
-                     (*io_info->layout_ops.writevv)(io_info, file_nseq, &curr_file_seq, file_len, file_off,
-                                                    mem_nseq, &curr_mem_seq, mem_len, mem_off)) < 0)
+            if ((tmp_file_len = (*io_info->layout_ops.writevv)(
+                     io_info, file_nseq, &curr_file_seq, &single_file_len, &single_file_off, mem_nseq,
+                     &curr_mem_seq, &single_mem_len, &single_mem_off)) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_WRITEERROR, FAIL, "write error")
         } /* end else */
 
@@ -159,6 +146,24 @@ H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, co
     else {
         size_t mem_nelem;  /* Number of elements used in memory sequences */
         size_t file_nelem; /* Number of elements used in file sequences */
+
+        /* Get info from API context */
+        if (H5CX_get_vec_size(&dxpl_vec_size) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't retrieve I/O vector size")
+
+        /* Allocate the vector I/O arrays */
+        if (dxpl_vec_size > H5D_IO_VECTOR_SIZE)
+            vec_size = dxpl_vec_size;
+        else
+            vec_size = H5D_IO_VECTOR_SIZE;
+        if (NULL == (mem_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+        if (NULL == (mem_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
+        if (NULL == (file_len = H5FL_SEQ_MALLOC(size_t, vec_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O length vector array")
+        if (NULL == (file_off = H5FL_SEQ_MALLOC(hsize_t, vec_size)))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "can't allocate I/O offset vector array")
 
         /* Allocate the iterators */
         if (NULL == (mem_iter = H5FL_MALLOC(H5S_sel_iter_t)))

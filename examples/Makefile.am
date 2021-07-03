@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -34,25 +34,25 @@ INSTALL_TOP_FILES = README
 EXAMPLE_PROG = h5_write h5_read h5_extend_write h5_chunk_read h5_compound \
             h5_crtgrpd h5_subset h5_cmprss h5_rdwt h5_crtgrpar h5_extend \
             h5_crtatt h5_crtgrp h5_crtdat \
-            h5_group h5_select h5_attribute h5_mount h5_reference_deprec h5_drivers \
-            h5_ref_extern h5_ref_compat \
-            h5_ref2reg_deprec h5_extlink h5_elink_unix2win h5_shared_mesg h5_vds h5_vds-exc \
-            h5_vds-exclim h5_vds-eiger h5_vds-simpleIO h5_vds-percival \
-            h5_vds-percival-unlim h5_vds-percival-unlim-maxmin
-TEST_SCRIPT=testh5cc.sh 
+            h5_group h5_select h5_attribute h5_mount h5_drivers \
+            h5_reference_deprec h5_ref_extern h5_ref_compat h5_ref2reg_deprec \
+            h5_extlink h5_elink_unix2win h5_shared_mesg h5_debug_trace \
+            h5_vds h5_vds-exc h5_vds-exclim h5_vds-eiger h5_vds-simpleIO \
+            h5_vds-percival h5_vds-percival-unlim h5_vds-percival-unlim-maxmin
+TEST_SCRIPT=testh5cc.sh
 TEST_EXAMPLES_SCRIPT=$(INSTALL_SCRIPT_FILES)
 
 # Install files
 # List all file that should be installed in examples directory
-INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c   \
-            h5_crtgrpd.c h5_subset.c h5_cmprss.c h5_rdwt.c h5_crtgrpar.c \
-            h5_extend.c h5_crtatt.c h5_crtgrp.c h5_crtdat.c \
-            h5_compound.c h5_group.c h5_select.c h5_attribute.c h5_mount.c \
-            h5_reference_deprec.c h5_drivers.c h5_extlink.c h5_elink_unix2win.c   \
-            h5_ref_extern.c h5_ref_compat.c \
-            h5_ref2reg_deprec.c h5_shared_mesg.c ph5example.c h5_vds.c h5_vds-exc.c \
-            h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c h5_vds-percival.c \
-            h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c
+INSTALL_FILES = h5_write.c h5_read.c h5_extend_write.c h5_chunk_read.c h5_compound.c \
+            h5_crtgrpd.c h5_subset.c h5_cmprss.c h5_rdwt.c h5_crtgrpar.c h5_extend.c \
+            h5_crtatt.c h5_crtgrp.c h5_crtdat.c \
+            h5_group.c h5_select.c h5_attribute.c h5_mount.c h5_drivers.c \
+            h5_reference_deprec.c h5_ref_extern.c h5_ref_compat.c h5_ref2reg_deprec.c \
+            h5_extlink.c h5_elink_unix2win.c h5_shared_mesg.c h5_debug_trace.c \
+            ph5example.c \
+            h5_vds.c h5_vds-exc.c h5_vds-exclim.c h5_vds-eiger.c h5_vds-simpleIO.c \
+            h5_vds-percival.c h5_vds-percival-unlim.c h5_vds-percival-unlim-maxmin.c
 
 
 
@@ -86,8 +86,8 @@ CHECK_CLEANFILES+=$(EXTLINK_DIRS)
 
 # Example directory
 # Note: no '/' after DESTDIR.  Explanation in commence.am
-EXAMPLEDIR=$(examplesdir)/c
-EXAMPLETOPDIR=$(examplesdir)
+EXAMPLEDIR=${DESTDIR}$(examplesdir)/c
+EXAMPLETOPDIR=${DESTDIR}$(examplesdir)
 
 # List dependencies for each program.  Normally, automake would take
 # care of this for us, but if we tell automake about the programs it

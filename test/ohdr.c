@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
  */
 #include "h5test.h"
@@ -121,7 +121,11 @@ test_cont(char *filename, hid_t fapl)
         FAIL_STACK_ERROR
     if (1 != H5O_link(&oh_locB, 1))
         FAIL_STACK_ERROR
+    if (H5AC_prep_for_file_flush(f) < 0)
+        FAIL_STACK_ERROR
     if (H5AC_flush(f) < 0)
+        FAIL_STACK_ERROR
+    if (H5AC_secure_from_file_flush(f) < 0)
         FAIL_STACK_ERROR
     if (H5O__expunge_chunks_test(&oh_locA) < 0)
         FAIL_STACK_ERROR
@@ -788,7 +792,7 @@ count_attributes(hid_t dset_id)
  * On success, stores size in `size_out` pointer.
  */
 static herr_t
-_oh_getsize(hid_t did, hsize_t *size_out)
+oh_getsize(hid_t did, hsize_t *size_out)
 {
     H5O_native_info_t ninfo;
 
@@ -811,9 +815,9 @@ oh_compare(hid_t did1, hid_t did2)
     hsize_t space1 = 0;
     hsize_t space2 = 0;
 
-    if (FAIL == _oh_getsize(did1, &space1))
+    if (FAIL == oh_getsize(did1, &space1))
         return -1;
-    if (FAIL == _oh_getsize(did2, &space2))
+    if (FAIL == oh_getsize(did2, &space2))
         return -2;
 
     if (space1 < space2)
@@ -915,7 +919,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     /* Read the data back and verify */
     if (H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
         TEST_ERROR;
-    if (HDstrcmp(in_buf, out_buf))
+    if (HDstrcmp(in_buf, out_buf) != 0)
         TEST_ERROR;
 
     /* modify the string attribute */
@@ -930,7 +934,7 @@ test_minimized_dset_ohdr_attribute_addition(hid_t fapl_id)
     /* Read the data back and verify */
     if (H5Aread(aid, H5T_NATIVE_CHAR, out_buf) < 0)
         TEST_ERROR;
-    if (HDstrcmp(in_buf, out_buf))
+    if (HDstrcmp(in_buf, out_buf) != 0)
         TEST_ERROR;
 
     /* Close */
@@ -1184,7 +1188,7 @@ test_minimized_dset_ohdr_size_comparisons(hid_t fapl_id)
                     TEST_ERROR if (H5Dclose(dset_F_N_id) < 0) TEST_ERROR if (H5Dclose(dset_F_Y_id) < 0)
                         TEST_ERROR
 
-                        PASSED()
+                        PASSED();
 
     } /* compact and non-compact */
 
@@ -1348,7 +1352,7 @@ test_minimized_dset_ohdr_with_filter(hid_t fapl_id)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
     return SUCCEED;
 
 error:
@@ -1567,7 +1571,7 @@ test_minimized_dset_ohdr_modification_times(hid_t _fapl_id)
     if (H5Pclose(dcpl_mN_id) < 0)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
     return SUCCEED;
 
 error:
@@ -1707,7 +1711,7 @@ test_minimized_dset_ohdr_fillvalue_backwards_compatability(hid_t _fapl_id)
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
 
-    PASSED()
+    PASSED();
     return SUCCEED;
 
 error:
@@ -1761,8 +1765,8 @@ main(void)
         env_h5_drvr = "nomatch";
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                                HDstrcmp(env_h5_drvr, "family") != 0);
 
     /* Reset library */
     h5_reset();
@@ -1829,7 +1833,11 @@ main(void)
                 FAIL_STACK_ERROR
             if (1 != H5O_link(&oh_loc, 1))
                 FAIL_STACK_ERROR
+            if (H5AC_prep_for_file_flush(f) < 0)
+                FAIL_STACK_ERROR
             if (H5AC_flush(f) < 0)
+                FAIL_STACK_ERROR
+            if (H5AC_secure_from_file_flush(f) < 0)
                 FAIL_STACK_ERROR
             if (H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                 FAIL_STACK_ERROR
@@ -1846,7 +1854,11 @@ main(void)
             time_new = 33333333;
             if (H5O_msg_write(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
                 FAIL_STACK_ERROR
+            if (H5AC_prep_for_file_flush(f) < 0)
+                FAIL_STACK_ERROR
             if (H5AC_flush(f) < 0)
+                FAIL_STACK_ERROR
+            if (H5AC_secure_from_file_flush(f) < 0)
                 FAIL_STACK_ERROR
             if (H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                 FAIL_STACK_ERROR
@@ -1877,7 +1889,11 @@ main(void)
                 if (H5O_msg_create(&oh_loc, H5O_MTIME_ID, 0, 0, &time_new) < 0)
                     FAIL_STACK_ERROR
             } /* end for */
+            if (H5AC_prep_for_file_flush(f) < 0)
+                FAIL_STACK_ERROR
             if (H5AC_flush(f) < 0)
+                FAIL_STACK_ERROR
+            if (H5AC_secure_from_file_flush(f) < 0)
                 FAIL_STACK_ERROR
             if (H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                 FAIL_STACK_ERROR
@@ -1920,7 +1936,11 @@ main(void)
                 time_new = (i + 1) * 1000 + 10;
                 if (H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, 0, 0, &time_new) < 0)
                     FAIL_STACK_ERROR
+                if (H5AC_prep_for_file_flush(f) < 0)
+                    FAIL_STACK_ERROR
                 if (H5AC_flush(f) < 0)
+                    FAIL_STACK_ERROR
+                if (H5AC_secure_from_file_flush(f) < 0)
                     FAIL_STACK_ERROR
                 if (H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                     FAIL_STACK_ERROR
@@ -1949,7 +1969,11 @@ main(void)
             time_new = 22222222;
             if (H5O_msg_create(&oh_loc, H5O_MTIME_NEW_ID, H5O_MSG_FLAG_CONSTANT, 0, &time_new) < 0)
                 FAIL_STACK_ERROR
+            if (H5AC_prep_for_file_flush(f) < 0)
+                FAIL_STACK_ERROR
             if (H5AC_flush(f) < 0)
+                FAIL_STACK_ERROR
+            if (H5AC_secure_from_file_flush(f) < 0)
                 FAIL_STACK_ERROR
             if (H5AC_expunge_entry(f, H5AC_OHDR, oh_loc.addr, H5AC__NO_FLAGS_SET) < 0)
                 FAIL_STACK_ERROR

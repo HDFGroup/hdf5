@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
  * This file contains macros & information for file access
  */
 
-#ifndef _H5Fprivate_H
-#define _H5Fprivate_H
+#ifndef H5Fprivate_H
+#define H5Fprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5F_t H5F_t;
@@ -25,15 +25,15 @@ typedef struct H5F_t H5F_t;
 #include "H5Fpublic.h"
 
 /* Public headers needed by this file */
-#include "H5FDpublic.h" /* File drivers                */
+#include "H5FDpublic.h" /* File drivers                 */
 
 /* Private headers needed by this file */
-#include "H5MMprivate.h" /* Memory management	       */
+#include "H5MMprivate.h" /* Memory management            */
 #ifdef H5_HAVE_PARALLEL
-#include "H5Pprivate.h"  /* Property lists              */
+#include "H5Pprivate.h"  /* Property lists               */
 #endif                   /* H5_HAVE_PARALLEL */
-#include "H5VMprivate.h" /* Vectors and arrays          */
-#include "H5VLprivate.h" /* Virtual Object Layer        */
+#include "H5VMprivate.h" /* Vectors and arrays           */
+#include "H5VLprivate.h" /* Virtual Object Layer         */
 
 /**************************/
 /* Library Private Macros */
@@ -287,23 +287,36 @@ typedef struct H5F_t H5F_t;
         (p) += 8;                                                                                            \
     }
 
+/* clang-format off */
 /* Address-related macros */
-#define H5F_addr_overflow(X, Z)                                                                              \
-    (HADDR_UNDEF == (X) || HADDR_UNDEF == (X) + (haddr_t)(Z) || (X) + (haddr_t)(Z) < (X))
-#define H5F_addr_defined(X) ((X) != HADDR_UNDEF)
+#define H5F_addr_overflow(X,Z)    (HADDR_UNDEF==(X) ||                      \
+                HADDR_UNDEF==(X)+(haddr_t)(Z) ||                            \
+                (X)+(haddr_t)(Z)<(X))
+#define H5F_addr_defined(X)    ((X)!=HADDR_UNDEF)
 /* The H5F_addr_eq() macro guarantees that Y is not HADDR_UNDEF by making
  * certain that X is not HADDR_UNDEF and then checking that X equals Y
  */
-#define H5F_addr_eq(X, Y)  ((X) != HADDR_UNDEF && (X) == (Y))
-#define H5F_addr_ne(X, Y)  (!H5F_addr_eq((X), (Y)))
-#define H5F_addr_lt(X, Y)  ((X) != HADDR_UNDEF && (Y) != HADDR_UNDEF && (X) < (Y))
-#define H5F_addr_le(X, Y)  ((X) != HADDR_UNDEF && (Y) != HADDR_UNDEF && (X) <= (Y))
-#define H5F_addr_gt(X, Y)  ((X) != HADDR_UNDEF && (Y) != HADDR_UNDEF && (X) > (Y))
-#define H5F_addr_ge(X, Y)  ((X) != HADDR_UNDEF && (Y) != HADDR_UNDEF && (X) >= (Y))
-#define H5F_addr_cmp(X, Y) (H5F_addr_eq((X), (Y)) ? 0 : (H5F_addr_lt((X), (Y)) ? -1 : 1))
-#define H5F_addr_pow2(N)   ((haddr_t)1 << (N))
-#define H5F_addr_overlap(O1, L1, O2, L2)                                                                     \
-    (((O1) < (O2) && ((O1) + (L1)) > (O2)) || ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+#define H5F_addr_eq(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (X)==(Y))
+#define H5F_addr_ne(X,Y)    (!H5F_addr_eq((X),(Y)))
+#define H5F_addr_lt(X,Y)     ((X)!=HADDR_UNDEF &&                           \
+                (Y)!=HADDR_UNDEF &&                                         \
+                (X)<(Y))
+#define H5F_addr_le(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
+                (X)<=(Y))
+#define H5F_addr_gt(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
+                (X)>(Y))
+#define H5F_addr_ge(X,Y)    ((X)!=HADDR_UNDEF &&                            \
+                (Y)!=HADDR_UNDEF &&                                         \
+                (X)>=(Y))
+#define H5F_addr_cmp(X,Y)    (H5F_addr_eq((X), (Y)) ? 0 :                   \
+                (H5F_addr_lt((X), (Y)) ? -1 : 1))
+#define H5F_addr_pow2(N)    ((haddr_t)1<<(N))
+#define H5F_addr_overlap(O1,L1,O2,L2) (((O1) < (O2) && ((O1) + (L1)) > (O2)) || \
+                                 ((O1) >= (O2) && (O1) < ((O2) + (L2))))
+/* clang-format on */
 
 /* If the module using this macro is allowed access to the private variables, access them directly */
 #ifdef H5F_MODULE
@@ -368,6 +381,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_SET_MIN_DSET_OHDR(F, V)    ((F)->shared->crt_dset_min_ohdr_flag = (V))
 #define H5F_VOL_CLS(F)                 ((F)->shared->vol_cls)
 #define H5F_VOL_OBJ(F)                 ((F)->vol_obj)
+#define H5F_USE_FILE_LOCKING(F)        ((F)->shared->use_file_locking)
 #else /* H5F_MODULE */
 #define H5F_LOW_BOUND(F)                 (H5F_get_low_bound(F))
 #define H5F_HIGH_BOUND(F)                (H5F_get_high_bound(F))
@@ -430,6 +444,7 @@ typedef struct H5F_t H5F_t;
 #define H5F_SET_MIN_DSET_OHDR(F, V)    (H5F_set_min_dset_ohdr((F), (V)))
 #define H5F_VOL_CLS(F)                 (H5F_get_vol_cls(F))
 #define H5F_VOL_OBJ(F)                 (H5F_get_vol_obj(F))
+#define H5F_USE_FILE_LOCKING(F)        (H5F_get_use_file_locking(F))
 #endif /* H5F_MODULE */
 
 /* Macros to encode/decode offset/length's for storing in the file */
@@ -491,7 +506,7 @@ typedef struct H5F_t H5F_t;
             HDassert("bad sizeof size" && 0);                                                                \
     }
 
-#define H5F_DECODE_LENGTH(f, p, l) H5F_DECODE_LENGTH_LEN(p, l, H5F_SIZEOF_SIZE(f))
+#define H5F_DECODE_LENGTH(f, p, l) DECODE_VAR(p, l, H5F_SIZEOF_SIZE(f))
 
 /*
  * Macros that check for overflows.  These are somewhat dangerous to fiddle
@@ -517,17 +532,18 @@ typedef struct H5F_t H5F_t;
 #define H5F_DEFAULT_CSET H5T_CSET_ASCII
 
 /* ========= File Creation properties ============ */
-#define H5F_CRT_USER_BLOCK_NAME          "block_size"  /* Size of the file user block in bytes */
-#define H5F_CRT_SYM_LEAF_NAME            "symbol_leaf" /* 1/2 rank for symbol table leaf nodes */
-#define H5F_CRT_SYM_LEAF_DEF             4
-#define H5F_CRT_BTREE_RANK_NAME          "btree_rank"        /* 1/2 rank for btree internal nodes    */
-#define H5F_CRT_ADDR_BYTE_NUM_NAME       "addr_byte_num"     /* Byte number in an address            */
-#define H5F_CRT_OBJ_BYTE_NUM_NAME        "obj_byte_num"      /* Byte number for object size          */
-#define H5F_CRT_SUPER_VERS_NAME          "super_version"     /* Version number of the superblock     */
-#define H5F_CRT_SHMSG_NINDEXES_NAME      "num_shmsg_indexes" /* Number of shared object header message indexes */
-#define H5F_CRT_SHMSG_INDEX_TYPES_NAME   "shmsg_message_types"   /* Types of message in each index */
-#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME "shmsg_message_minsize" /* Minimum size of messages in each index   \
-                                                                  */
+#define H5F_CRT_USER_BLOCK_NAME    "block_size"  /* Size of the file user block in bytes */
+#define H5F_CRT_SYM_LEAF_NAME      "symbol_leaf" /* 1/2 rank for symbol table leaf nodes */
+#define H5F_CRT_SYM_LEAF_DEF       4
+#define H5F_CRT_BTREE_RANK_NAME    "btree_rank"    /* 1/2 rank for btree internal nodes    */
+#define H5F_CRT_ADDR_BYTE_NUM_NAME "addr_byte_num" /* Byte number in an address            */
+#define H5F_CRT_OBJ_BYTE_NUM_NAME  "obj_byte_num"  /* Byte number for object size          */
+#define H5F_CRT_SUPER_VERS_NAME    "super_version" /* Version number of the superblock     */
+/* Number of shared object header message indexes */
+#define H5F_CRT_SHMSG_NINDEXES_NAME    "num_shmsg_indexes"
+#define H5F_CRT_SHMSG_INDEX_TYPES_NAME "shmsg_message_types" /* Types of message in each index */
+/* Minimum size of messages in each index */
+#define H5F_CRT_SHMSG_INDEX_MINSIZE_NAME  "shmsg_message_minsize"
 #define H5F_CRT_SHMSG_LIST_MAX_NAME       "shmsg_list_max"       /* Shared message list maximum size */
 #define H5F_CRT_SHMSG_BTREE_MIN_NAME      "shmsg_btree_min"      /* Shared message B-tree minimum size */
 #define H5F_CRT_FILE_SPACE_STRATEGY_NAME  "file_space_strategy"  /* File space handling strategy */
@@ -574,10 +590,10 @@ typedef struct H5F_t H5F_t;
 #define H5F_ACS_CLEAR_STATUS_FLAGS_NAME                                                                      \
     "clear_status_flags" /* Whether to clear superblock status_flags (private property only used by h5clear) \
                           */
-#define H5F_ACS_NULL_FSM_ADDR_NAME "null_fsm_addr"       /* Nullify addresses of free-space managers */
-                                                         /* Private property used only by h5clear */
-#define H5F_ACS_SKIP_EOF_CHECK_NAME "skip_eof_check"     /* Skip EOF check */
-                                                         /* Private property used only by h5clear */
+#define H5F_ACS_NULL_FSM_ADDR_NAME "null_fsm_addr" /* Nullify addresses of free-space managers */
+/* Private property used only by h5clear */
+#define H5F_ACS_SKIP_EOF_CHECK_NAME "skip_eof_check" /* Skip EOF check */
+/* Private property used only by h5clear */
 #define H5F_ACS_USE_MDC_LOGGING_NAME  "use_mdc_logging"  /* Whether to use metadata cache logging */
 #define H5F_ACS_MDC_LOG_LOCATION_NAME "mdc_log_location" /* Name of metadata cache log location */
 #define H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME                                                                 \
@@ -594,6 +610,11 @@ typedef struct H5F_t H5F_t;
     "page_buffer_min_meta_perc" /* the min metadata percentage for the page buffer cache */
 #define H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME                                                                \
     "page_buffer_min_raw_perc" /* the min raw data percentage for the page buffer cache */
+#define H5F_ACS_USE_FILE_LOCKING_NAME                                                                        \
+    "use_file_locking" /* whether or not we use file locks for SWMR control and to prevent multiple writers  \
+                        */
+#define H5F_ACS_IGNORE_DISABLED_FILE_LOCKS_NAME                                                              \
+    "ignore_disabled_file_locks" /* whether or not we ignore "locks disabled" errors */
 #ifdef H5_HAVE_PARALLEL
 #define H5F_ACS_MPI_PARAMS_COMM_NAME "mpi_params_comm" /* the MPI communicator */
 #define H5F_ACS_MPI_PARAMS_INFO_NAME "mpi_params_info" /* the MPI info struct */
@@ -629,13 +650,13 @@ typedef struct H5F_t H5F_t;
 #define HDF5_BTREE_SNODE_IK_DEF 16
 #define HDF5_BTREE_CHUNK_IK_DEF                                                                              \
     32                                  /* Note! this value is assumed                                       \
-                                            to be 32 for version 0                                           \
-                                            of the superblock and                                            \
-                                            if it is changed, the code                                       \
-                                            must compensate. -QAK                                            \
-                                         */
+                                           to be 32 for version 0                                            \
+                                           of the superblock and                                             \
+                                           if it is changed, the code                                        \
+                                           must compensate. -QAK                                             \
+                                        */
 #define HDF5_BTREE_IK_MAX_ENTRIES 65536 /* 2^16 - 2 bytes for storing entries (children) */
-                                        /* See format specification on version 1 B-trees */
+/* See format specification on version 1 B-trees */
 
 /* Default file space handling strategy */
 #define H5F_FILE_SPACE_STRATEGY_DEF H5F_FSPACE_STRATEGY_FSM_AGGR
@@ -839,6 +860,7 @@ H5_DLL hbool_t  H5F_get_min_dset_ohdr(const H5F_t *f);
 H5_DLL herr_t   H5F_set_min_dset_ohdr(H5F_t *f, hbool_t minimize);
 H5_DLL const H5VL_class_t *H5F_get_vol_cls(const H5F_t *f);
 H5_DLL H5VL_object_t *H5F_get_vol_obj(const H5F_t *f);
+H5_DLL hbool_t        H5F_get_file_locking(const H5F_t *f);
 
 /* Functions than retrieve values set/cached from the superblock/FCPL */
 H5_DLL haddr_t            H5F_get_base_addr(const H5F_t *f);
@@ -871,7 +893,6 @@ H5_DLL hsize_t            H5F_get_alignment(const H5F_t *f);
 H5_DLL hsize_t            H5F_get_threshold(const H5F_t *f);
 #ifdef H5_HAVE_PARALLEL
 H5_DLL H5P_coll_md_read_flag_t H5F_coll_md_read(const H5F_t *f);
-H5_DLL void                    H5F_set_coll_md_read(H5F_t *f, H5P_coll_md_read_flag_t flag);
 #endif /* H5_HAVE_PARALLEL */
 H5_DLL hbool_t H5F_use_mdc_logging(const H5F_t *f);
 H5_DLL hbool_t H5F_start_mdc_log_on_access(const H5F_t *f);
@@ -934,13 +955,11 @@ H5_DLL herr_t H5F_eoa_dirty(H5F_t *f);
 
 /* Parallel I/O (i.e. MPI) related routines */
 #ifdef H5_HAVE_PARALLEL
-H5_DLL herr_t   H5F_get_mpi_handle(const H5F_t *f, MPI_File **f_handle);
 H5_DLL int      H5F_mpi_get_rank(const H5F_t *f);
 H5_DLL MPI_Comm H5F_mpi_get_comm(const H5F_t *f);
 H5_DLL int      H5F_shared_mpi_get_size(const H5F_shared_t *f_sh);
 H5_DLL int      H5F_mpi_get_size(const H5F_t *f);
 H5_DLL herr_t   H5F_mpi_retrieve_comm(hid_t loc_id, hid_t acspl_id, MPI_Comm *mpi_comm);
-H5_DLL herr_t   H5F_get_mpi_info(const H5F_t *f, MPI_Info **f_info);
 H5_DLL herr_t   H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag);
 H5_DLL herr_t   H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag);
 #endif /* H5_HAVE_PARALLEL */
@@ -962,4 +981,4 @@ H5_DLL herr_t H5F_cwfs_remove_heap(H5F_shared_t *shared, struct H5HG_heap_t *hea
 /* Debugging functions */
 H5_DLL herr_t H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5Fprivate_H */
+#endif /* H5Fprivate_H */

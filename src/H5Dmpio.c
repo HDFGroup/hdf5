@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -410,7 +410,7 @@ H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space, co
          * collective I/O
          */
         if (MPI_SUCCESS !=
-            (mpi_code = MPI_Allreduce(&local_cause, &global_cause, 2, MPI_UNSIGNED, MPI_BOR, io_info->comm)))
+            (mpi_code = MPI_Allreduce(local_cause, global_cause, 2, MPI_UNSIGNED, MPI_BOR, io_info->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allreduce failed", mpi_code)
     } /* end else */
 
@@ -1091,7 +1091,7 @@ H5D__link_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *typ
 
 #ifdef H5D_DEBUG
         if (H5DEBUG(D))
-            HDfprintf(H5DEBUG(D), "total_chunks = %Zu, num_chunk = %Zu\n", total_chunks, num_chunk);
+            HDfprintf(H5DEBUG(D), "total_chunks = %zu, num_chunk = %zu\n", total_chunks, num_chunk);
 #endif
 
         /* Set up MPI datatype for chunks selected */
@@ -1571,7 +1571,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *ty
     chunk_addr      = (haddr_t *)H5MM_calloc(total_chunk * sizeof(haddr_t));
 #ifdef H5D_DEBUG
     if (H5DEBUG(D))
-        HDfprintf(H5DEBUG(D), "total_chunk %Zu\n", total_chunk);
+        HDfprintf(H5DEBUG(D), "total_chunk %zu\n", total_chunk);
 #endif
 
     /* Obtain IO option for each chunk */
@@ -1605,7 +1605,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *ty
 
 #ifdef H5D_DEBUG
         if (H5DEBUG(D))
-            HDfprintf(H5DEBUG(D), "mpi_rank = %d, chunk index = %Zu\n", mpi_rank, u);
+            HDfprintf(H5DEBUG(D), "mpi_rank = %d, chunk index = %zu\n", mpi_rank, u);
 #endif
         /* Get the chunk info for this chunk, if there are elements selected */
         chunk_info = fm->select_chunk[u];
@@ -1625,7 +1625,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *ty
         if (chunk_io_option[u] == H5D_CHUNK_IO_MODE_COL) {
 #ifdef H5D_DEBUG
             if (H5DEBUG(D))
-                HDfprintf(H5DEBUG(D), "inside collective chunk IO mpi_rank = %d, chunk index = %Zu\n",
+                HDfprintf(H5DEBUG(D), "inside collective chunk IO mpi_rank = %d, chunk index = %zu\n",
                           mpi_rank, u);
 #endif
 
@@ -1664,7 +1664,7 @@ H5D__multi_chunk_collective_io(H5D_io_info_t *io_info, const H5D_type_info_t *ty
         else { /* possible independent IO for this chunk */
 #ifdef H5D_DEBUG
             if (H5DEBUG(D))
-                HDfprintf(H5DEBUG(D), "inside independent IO mpi_rank = %d, chunk index = %Zu\n", mpi_rank,
+                HDfprintf(H5DEBUG(D), "inside independent IO mpi_rank = %d, chunk index = %zu\n", mpi_rank,
                           u);
 #endif
 
@@ -3361,7 +3361,7 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
                     if (H5S_close(dataspace) < 0)
                         HGOTO_ERROR(H5E_DATASPACE, H5E_CANTFREE, FAIL, "can't close dataspace")
                     dataspace = NULL;
-                } /* end if */
+                }
                 H5MM_free(chunk_entry->async_info.receive_buffer_array[i]);
             } /* end for */
 

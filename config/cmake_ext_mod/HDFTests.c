@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -88,25 +88,6 @@ int main(void)
 }
 #endif
 
-
-#ifdef TIME_WITH_SYS_TIME
-/* Time with sys/time test */
-
-#include <sys/types.h>
-#include <sys/time.h>
-#include <time.h>
-
-int
-main ()
-{
-if ((struct tm *) 0)
-return 0;
-  ;
-  return 0;
-}
-
-#endif
-
 #ifdef STDC_HEADERS
 #include <stdlib.h>
 #include <stdarg.h>
@@ -162,26 +143,6 @@ main ()
 
 #endif /* HAVE_FUNCTION */
 
-#ifdef HAVE_TM_GMTOFF
-
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
-SIMPLE_TEST(struct tm tm; tm.tm_gmtoff=0);
-
-#endif /* HAVE_TM_GMTOFF */
-
-#ifdef HAVE___TM_GMTOFF
-
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
-SIMPLE_TEST(struct tm tm; tm.__tm_gmtoff=0);
-
-#endif /* HAVE_TM___GMTOFF */
-
 #ifdef HAVE_TIMEZONE
 
 #ifdef HAVE_SYS_TIME_H
@@ -191,24 +152,6 @@ SIMPLE_TEST(struct tm tm; tm.__tm_gmtoff=0);
 SIMPLE_TEST(timezone=0);
 
 #endif /* HAVE_TIMEZONE */
-
-#ifdef HAVE_STRUCT_TIMEZONE
-
-#include <sys/types.h>
-#ifdef HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#include <time.h>
-SIMPLE_TEST(struct timezone tz; tz.tz_minuteswest=0);
-
-#endif /* HAVE_STRUCT_TIMEZONE */
-
-#ifdef HAVE_STAT_ST_BLOCKS
-
-#include <sys/stat.h>
-SIMPLE_TEST(struct stat sb; sb.st_blocks=0);
-
-#endif /* HAVE_STAT_ST_BLOCKS */
 
 #ifdef PRINTF_LL_WIDTH
 
@@ -235,7 +178,7 @@ int DebugReport(int reportType, char* message, int* returnValue)
 
 int main(void)
 {
-  char *llwidthArgs[] = { "I64", "l64", "l", "L", "q", "ll", NULL };
+  char *llwidthArgs[] = { "I64", "l64", "ll", "l", "L", "q", NULL };
   char *s = malloc(128);
   char **currentArg = NULL;
   LL_TYPE x = (LL_TYPE)1048576 * (LL_TYPE)1048576;
@@ -316,16 +259,6 @@ int main()
 {
   off64_t n = 0;
   return (int)n;
-}
-#endif
-
-#ifdef HAVE_STAT64_STRUCT
-#include <sys/types.h>
-#include <sys/stat.h>],
-struct stat64 sb;
-int main()
-{
-  return 0;
 }
 #endif
 
@@ -431,18 +364,6 @@ int main ()
 }
 
 #endif /* HAVE_IOEO */
-
-#ifdef HAVE_STRUCT_VIDEOCONFIG
-
-SIMPLE_TEST(struct videoconfig w; w.numtextcols=0);
-
-#endif /* HAVE_STRUCT_VIDEOCONFIG */
-
-#ifdef HAVE_STRUCT_TEXT_INFO
-
-SIMPLE_TEST(struct text_info w; w.screenwidth=0);
-
-#endif /* HAVE_STRUCT_TEXT_INFO */
 
 #if defined( HAVE_INLINE ) || defined( HAVE___INLINE__ ) || defined( HAVE___INLINE )
 #ifndef __cplusplus

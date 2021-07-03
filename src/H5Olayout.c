@@ -6,18 +6,18 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Wednesday, October  8, 1997
  *
  * Purpose:     Messages related to data layout.
  */
 
-#define H5D_FRIEND     /*suppress error about including H5Dpkg	  */
+#define H5D_FRIEND     /*suppress error about including H5Dpkg       */
 #include "H5Omodule.h" /* This source code file is part of the H5O module */
 
 #include "H5private.h"   /* Generic Functions                        */
@@ -90,12 +90,13 @@ H5FL_DEFINE(H5O_layout_t);
  */
 static void *
 H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                   unsigned H5_ATTR_UNUSED *ioflags, size_t H5_ATTR_UNUSED p_size, const uint8_t *p)
+                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_layout_t *mesg       = NULL;
-    uint8_t *     heap_block = NULL;
-    unsigned      u;
-    void *        ret_value = NULL; /* Return value */
+    H5O_layout_t * mesg       = NULL;
+    uint8_t *      heap_block = NULL;
+    unsigned       u;
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void *         ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -179,6 +180,10 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
         if (mesg->type == H5D_COMPACT) {
             UINT32DECODE(p, mesg->storage.u.compact.size);
             if (mesg->storage.u.compact.size > 0) {
+                /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
+                if (p + mesg->storage.u.compact.size - 1 > p_end)
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "storage size exceeds buffer size")
+
                 if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
                                 "memory allocation failed for compact data buffer")
@@ -198,6 +203,10 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                 UINT16DECODE(p, mesg->storage.u.compact.size);
 
                 if (mesg->storage.u.compact.size > 0) {
+                    /* Ensure that size doesn't exceed buffer size, due to possible data corruption */
+                    if (p + mesg->storage.u.compact.size - 1 > p_end)
+                        HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "storage size exceeds buffer size")
+
                     /* Allocate space for compact data */
                     if (NULL == (mesg->storage.u.compact.buf = H5MM_malloc(mesg->storage.u.compact.size)))
                         HGOTO_ERROR(H5E_OHDR, H5E_CANTALLOC, NULL,
@@ -433,8 +442,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             (mesg->storage.u.virt.list[i].source_file_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, NULL,
                                         "unable to allocate memory for source file name")
-                        (void)H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p,
-                                          tmp_size);
+                        H5MM_memcpy(mesg->storage.u.virt.list[i].source_file_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         /* Source dataset name */
@@ -443,8 +451,7 @@ H5O__layout_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                             (mesg->storage.u.virt.list[i].source_dset_name = (char *)H5MM_malloc(tmp_size)))
                             HGOTO_ERROR(H5E_OHDR, H5E_RESOURCE, NULL,
                                         "unable to allocate memory for source dataset name")
-                        (void)H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p,
-                                          tmp_size);
+                        H5MM_memcpy(mesg->storage.u.virt.list[i].source_dset_name, heap_block_p, tmp_size);
                         heap_block_p += tmp_size;
 
                         /* Source selection */
@@ -889,13 +896,13 @@ done:
 } /* end H5O__layout_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5O__layout_free
+ * Function:    H5O__layout_free
  *
- * Purpose:	Free's the message
+ * Purpose:     Free's the message
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, March 11, 2000
  *
  *-------------------------------------------------------------------------
@@ -997,7 +1004,7 @@ H5O__layout_pre_copy_file(H5F_t H5_ATTR_UNUSED *file_src, const void *mesg_src,
     const H5O_layout_t *layout_src = (const H5O_layout_t *)mesg_src; /* Source layout */
     herr_t              ret_value  = SUCCEED;                        /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* check args */
     HDassert(cpy_info);
@@ -1196,31 +1203,32 @@ H5O__layout_debug(H5F_t H5_ATTR_UNUSED *f, const void *_mesg, FILE *stream, int 
                               (unsigned)mesg->u.chunk.idx_type);
                     break;
             } /* end switch */
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Index address:", mesg->storage.u.chunk.idx_addr);
             break;
 
         case H5D_CONTIGUOUS:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Contiguous");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Data address:", mesg->storage.u.contig.addr);
-            HDfprintf(stream, "%*s%-*s %Hu\n", indent, "", fwidth, "Data Size:", mesg->storage.u.contig.size);
+            HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent, "", fwidth,
+                      "Data Size:", mesg->storage.u.contig.size);
             break;
 
         case H5D_COMPACT:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Compact");
-            HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                       "Data Size:", mesg->storage.u.compact.size);
             break;
 
         case H5D_VIRTUAL:
             HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth, "Type:", "Virtual");
-            HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth,
                       "Global heap address:", mesg->storage.u.virt.serial_list_hobjid.addr);
-            HDfprintf(stream, "%*s%-*s %Zu\n", indent, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %zu\n", indent, "", fwidth,
                       "Global heap index:", mesg->storage.u.virt.serial_list_hobjid.idx);
             for (u = 0; u < mesg->storage.u.virt.list_nused; u++) {
-                HDfprintf(stream, "%*sMapping %u:\n", indent, "", u);
+                HDfprintf(stream, "%*sMapping %zu:\n", indent, "", u);
                 HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,
                           "Virtual selection:", "<Not yet implemented>");
                 HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth - 3,

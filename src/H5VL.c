@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -87,25 +87,6 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE2("i", "*xi", cls, vipl_id);
 
-    /* Check arguments */
-    if (!cls)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
-                    "VOL connector class pointer cannot be NULL")
-    if (!cls->name)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the NULL pointer")
-    if (0 == HDstrlen(cls->name))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector class name cannot be the empty string")
-    if (cls->info_cls.copy && !cls->info_cls.free)
-        HGOTO_ERROR(
-            H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-            "VOL connector must provide free callback for VOL info objects when a copy callback is provided")
-    if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
-                    "VOL connector must provide free callback for object wrapping contexts when a get "
-                    "callback is provided")
-
     /* Check VOL initialization property list */
     if (H5P_DEFAULT == vipl_id)
         vipl_id = H5P_VOL_INITIALIZE_DEFAULT;
@@ -113,7 +94,7 @@ H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL initialize property list")
 
     /* Register connector */
-    if ((ret_value = H5VL__register_connector(cls, TRUE, vipl_id)) < 0)
+    if ((ret_value = H5VL__register_connector_by_class(cls, TRUE, vipl_id)) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector")
 
 done:
@@ -646,7 +627,7 @@ done:
 /*---------------------------------------------------------------------------
  * Function:    H5VLobject
  *
- * Purpose:     Retrieve the object pointer associated with an hid_t for a.
+ * Purpose:     Retrieve the object pointer associated with an hid_t for a
  *              VOL object.
  *
  * Note:        This routine is mainly targeted toward unwrapping objects for
@@ -701,8 +682,10 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     if (NULL == (dtype = (H5T_t *)H5I_object_verify(dtype_id, H5I_DATATYPE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a data type")
 
-    /* Create VOL object for file */
-    if (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id)))
+    /* Create VOL object for file if necessary (force_conv will be TRUE if and
+     * only if file needs to be passed to H5T_set_loc) */
+    if (H5T_GET_FORCE_CONV(dtype) &&
+        (NULL == (file_vol_obj = H5VL_create_object_using_vol_id(H5I_FILE, file_obj, connector_id))))
         HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, FAIL, "can't create VOL object")
 
     /* Copy the datatype */
@@ -719,10 +702,12 @@ H5VLget_file_type(void *file_obj, hid_t connector_id, hid_t dtype_id)
     if (H5T_set_loc(file_type, file_vol_obj, H5T_LOC_DISK) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't set datatype location")
 
-    /* file_type now owns file_vol_obj */
-    if (H5T_own_vol_obj(file_type, file_vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
-    file_vol_obj = NULL;
+    /* Release our reference to file_type */
+    if (file_vol_obj) {
+        if (H5VL_free_object(file_vol_obj) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to free VOL object")
+        file_vol_obj = NULL;
+    } /* end if */
 
     /* Set return value */
     ret_value = file_type_id;
@@ -881,7 +866,7 @@ H5VLfree_lib_state(void *state)
 
     /* Check args */
     if (NULL == state)
-        HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, FAIL, "invalid state pointer")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid state pointer")
 
     /* Free the library state */
     if (H5VL_free_lib_state(state) < 0)
@@ -890,3 +875,37 @@ H5VLfree_lib_state(void *state)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLfree_lib_state() */
+
+/*---------------------------------------------------------------------------
+ * Function:    H5VLquery_optional
+ *
+ * Purpose:     Determine if a VOL connector supports a particular optional
+ *              callback operation.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *---------------------------------------------------------------------------
+ */
+herr_t
+H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, hbool_t *supported)
+{
+    H5VL_object_t *vol_obj   = NULL;
+    herr_t         ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "iVSIs*b", obj_id, subcls, opt_type, supported);
+
+    /* Check args */
+    if (NULL == supported)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid supported pointer")
+    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    /* Query the connector */
+    if (H5VL_introspect_opt_query(vol_obj, subcls, opt_type, supported) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to query VOL connector support")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5VLquery_optional() */

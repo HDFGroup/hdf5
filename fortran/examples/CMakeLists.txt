@@ -35,28 +35,22 @@ set (F2003_examples
 
 foreach (example ${examples})
   add_executable (f90_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  target_compile_options(f90_ex_${example}
-      PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
-  )
-#  set_property(TARGET f90_ex_${example} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#  )
-#  set_property(TARGET f90_ex_${example} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#  )
+  target_compile_options(f90_ex_${example} PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>)
+#  set_property(TARGET f90_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#  set_property(TARGET f90_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
   if(MSVC)
     set_property(TARGET f90_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
   if (NOT BUILD_SHARED_LIBS)
     target_include_directories (f90_ex_${example}
         PRIVATE
-            "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
+            "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
+            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}/static"
     )
-    target_link_libraries (f90_ex_${example}
-        PRIVATE
-            ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
-    )
+    target_link_libraries (f90_ex_${example} PRIVATE ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (f90_ex_${example} PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran
@@ -65,12 +59,13 @@ foreach (example ${examples})
   else ()
     target_include_directories (f90_ex_${example}
         PRIVATE
-            "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
+            "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
+            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}/shared"
     )
-    target_link_libraries (f90_ex_${example}
-        PRIVATE
-            ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
-    )
+    target_link_libraries (f90_ex_${example} PRIVATE ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
     set_target_properties (f90_ex_${example} PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran
@@ -81,28 +76,22 @@ endforeach ()
 
 foreach (example ${F2003_examples})
   add_executable (f03_ex_${example} ${HDF5_F90_EXAMPLES_SOURCE_DIR}/${example}.f90)
-  target_compile_options(f03_ex_${example}
-      PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
-  )
-#  set_property(TARGET f03_ex_${example} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#  )
-#  set_property(TARGET f03_ex_${example} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#  )
+  target_compile_options(f03_ex_${example} PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>)
+#  set_property(TARGET f03_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#  set_property(TARGET f03_ex_${example} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
   if(MSVC)
     set_property(TARGET f03_ex_${example} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
   if (NOT ONLY_SHARED_LIBS)
     target_include_directories (f03_ex_${example}
         PRIVATE
-            "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
+            "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
+            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}/static"
     )
-    target_link_libraries (f03_ex_${example}
-        PRIVATE
-            ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
-    )
+    target_link_libraries (f03_ex_${example} PRIVATE ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (f03_ex_${example} PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran03
@@ -111,12 +100,13 @@ foreach (example ${F2003_examples})
   else ()
     target_include_directories (f03_ex_${example}
         PRIVATE
-            "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
+            "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
+            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}/shared"
     )
-    target_link_libraries (f03_ex_${example}
-        PRIVATE
-            ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
-    )
+    target_link_libraries (f03_ex_${example} PRIVATE ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
     set_target_properties (f03_ex_${example} PROPERTIES
         LINKER_LANGUAGE Fortran
         FOLDER examples/fortran03
@@ -127,27 +117,26 @@ endforeach ()
 
 if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   add_executable (f90_ex_ph5example ${HDF5_F90_EXAMPLES_SOURCE_DIR}/ph5example.f90)
-  target_compile_options(f90_ex_ph5example
-      PRIVATE
-          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
-  )
-#  set_property(TARGET f90_ex_ph5example APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#  )
-#  set_property(TARGET f90_ex_ph5example APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#  )
+  target_compile_options(f90_ex_ph5example PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>)
+#  set_property(TARGET f90_ex_ph5example APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#  set_property(TARGET f90_ex_ph5example APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
   if(MSVC)
     set_property(TARGET f90_ex_ph5example PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
   if (NOT ONLY_SHARED_LIBS)
     target_include_directories (f90_ex_ph5example
         PRIVATE
-            "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
+            "${CMAKE_Fortran_MODULE_DIRECTORY}/static"
+            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}/static"
+            "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
     )
     target_link_libraries (f90_ex_ph5example
         PRIVATE
-            ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
+            ${HDF5_F90_LIB_TARGET}
+            ${HDF5_LIB_TARGET}
             $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_LIBRARIES}>
     )
     set_target_properties (f90_ex_ph5example PROPERTIES
@@ -158,11 +147,17 @@ if (H5_HAVE_PARALLEL AND MPI_Fortran_FOUND)
   else ()
     target_include_directories (f90_ex_ph5example
         PRIVATE
-            "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
+            "${CMAKE_Fortran_MODULE_DIRECTORY}/shared"
+            "${HDF5_SRC_DIR}"
+            "${HDF5_SRC_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}"
+            "${HDF5_F90_BINARY_DIR}/shared"
+            "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_INCLUDE_DIRS}>"
     )
     target_link_libraries (f90_ex_ph5example
         PRIVATE
-            ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
+            ${HDF5_F90_LIBSH_TARGET}
+            ${HDF5_LIBSH_TARGET}
             $<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_Fortran_LIBRARIES}>
     )
     set_target_properties (f90_ex_ph5example PROPERTIES

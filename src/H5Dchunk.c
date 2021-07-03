@@ -6,36 +6,36 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: 	Quincey Koziol <koziol@hdfgroup.org>
- *	       	Thursday, April 24, 2008
+/* Programmer:     Quincey Koziol
+ *               Thursday, April 24, 2008
  *
- * Purpose:	Abstract indexed (chunked) I/O functions.  The logical
- *		multi-dimensional dataspace is regularly partitioned into
- *		same-sized "chunks", the first of which is aligned with the
- *		logical origin.  The chunks are indexed by different methods,
- *		that map a chunk index to disk address.  Each chunk can be
+ * Purpose:    Abstract indexed (chunked) I/O functions.  The logical
+ *        multi-dimensional dataspace is regularly partitioned into
+ *        same-sized "chunks", the first of which is aligned with the
+ *        logical origin.  The chunks are indexed by different methods,
+ *        that map a chunk index to disk address.  Each chunk can be
  *              compressed independently and the chunks may move around in the
  *              file as their storage requirements change.
  *
- * Cache:	Disk I/O is performed in units of chunks and H5MF_alloc()
- *		contains code to optionally align chunks on disk block
- *		boundaries for performance.
+ * Cache:    Disk I/O is performed in units of chunks and H5MF_alloc()
+ *        contains code to optionally align chunks on disk block
+ *        boundaries for performance.
  *
- *		The chunk cache is an extendible hash indexed by a function
- *		of storage B-tree address and chunk N-dimensional offset
- *		within the dataset.  Collisions are not resolved -- one of
- *		the two chunks competing for the hash slot must be preempted
- *		from the cache.  All entries in the hash also participate in
- *		a doubly-linked list and entries are penalized by moving them
- *		toward the front of the list.  When a new chunk is about to
- *		be added to the cache the heap is pruned by preempting
- *		entries near the front of the list to make room for the new
- *		entry which is added to the end of the list.
+ *        The chunk cache is an extendible hash indexed by a function
+ *        of storage B-tree address and chunk N-dimensional offset
+ *        within the dataset.  Collisions are not resolved -- one of
+ *        the two chunks competing for the hash slot must be preempted
+ *        from the cache.  All entries in the hash also participate in
+ *        a doubly-linked list and entries are penalized by moving them
+ *        toward the front of the list.  When a new chunk is about to
+ *        be added to the cache the heap is pruned by preempting
+ *        entries near the front of the list to make room for the new
+ *        entry which is added to the end of the list.
  */
 
 /****************/
@@ -47,19 +47,19 @@
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h" /* Generic Functions			*/
+#include "H5private.h" /* Generic Functions            */
 #ifdef H5_HAVE_PARALLEL
-#include "H5ACprivate.h" /* Metadata cache			*/
+#include "H5ACprivate.h" /* Metadata cache            */
 #endif                   /* H5_HAVE_PARALLEL */
 #include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Dpkg.h"      /* Dataset functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fprivate.h"  /* File functions			*/
+#include "H5Dpkg.h"      /* Dataset functions            */
+#include "H5Eprivate.h"  /* Error handling              */
+#include "H5Fprivate.h"  /* File functions            */
 #include "H5FLprivate.h" /* Free Lists                           */
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5MMprivate.h" /* Memory management            */
 #include "H5MFprivate.h" /* File memory management               */
-#include "H5VMprivate.h" /* Vector and array functions		*/
+#include "H5VMprivate.h" /* Vector and array functions        */
 
 /****************/
 /* Local Macros */
@@ -82,26 +82,26 @@
 
 /*
  * Feature: If this constant is defined then every cache preemption and load
- *	    causes a character to be printed on the standard error stream:
+ *        causes a character to be printed on the standard error stream:
  *
  *     `.': Entry was preempted because it has been completely read or
- *	    completely written but not partially read and not partially
- *	    written. This is often a good reason for preemption because such
- *	    a chunk will be unlikely to be referenced in the near future.
+ *        completely written but not partially read and not partially
+ *        written. This is often a good reason for preemption because such
+ *        a chunk will be unlikely to be referenced in the near future.
  *
  *     `:': Entry was preempted because it hasn't been used recently.
  *
  *     `#': Entry was preempted because another chunk collided with it. This
- *	    is usually a relatively bad thing.  If there are too many of
- *	    these then the number of entries in the cache can be increased.
+ *        is usually a relatively bad thing.  If there are too many of
+ *        these then the number of entries in the cache can be increased.
  *
  *       c: Entry was preempted because the file is closing.
  *
- *	 w: A chunk read operation was eliminated because the library is
- *	    about to write new values to the entire chunk.  This is a good
- *	    thing, especially on files where the chunk size is the same as
- *	    the disk block size, chunks are aligned on disk block boundaries,
- *	    and the operating system can also eliminate a read operation.
+ *     w: A chunk read operation was eliminated because the library is
+ *        about to write new values to the entire chunk.  This is a good
+ *        thing, especially on files where the chunk size is the same as
+ *        the disk block size, chunks are aligned on disk block boundaries,
+ *        and the operating system can also eliminate a read operation.
  */
 
 /*#define H5D_CHUNK_DEBUG */
@@ -118,19 +118,19 @@
 
 /* Raw data chunks are cached.  Each entry in the cache is: */
 typedef struct H5D_rdcc_ent_t {
-    hbool_t                locked;                   /*entry is locked in cache		*/
-    hbool_t                dirty;                    /*needs to be written to disk?		*/
-    hbool_t                deleted;                  /*chunk about to be deleted		*/
+    hbool_t                locked;                   /*entry is locked in cache        */
+    hbool_t                dirty;                    /*needs to be written to disk?        */
+    hbool_t                deleted;                  /*chunk about to be deleted        */
     unsigned               edge_chunk_state;         /*states related to edge chunks (see above) */
     hsize_t                scaled[H5O_LAYOUT_NDIMS]; /*scaled chunk 'name' (coordinates) */
-    uint32_t               rd_count;                 /*bytes remaining to be read		*/
-    uint32_t               wr_count;                 /*bytes remaining to be written		*/
+    uint32_t               rd_count;                 /*bytes remaining to be read        */
+    uint32_t               wr_count;                 /*bytes remaining to be written        */
     H5F_block_t            chunk_block;              /*offset/length of chunk in file        */
     hsize_t                chunk_idx;                /*index of chunk in dataset             */
-    uint8_t *              chunk;                    /*the unfiltered chunk data		*/
-    unsigned               idx;                      /*index in hash table			*/
-    struct H5D_rdcc_ent_t *next;                     /*next item in doubly-linked list	*/
-    struct H5D_rdcc_ent_t *prev;                     /*previous item in doubly-linked list	*/
+    uint8_t *              chunk;                    /*the unfiltered chunk data        */
+    unsigned               idx;                      /*index in hash table            */
+    struct H5D_rdcc_ent_t *next;                     /*next item in doubly-linked list    */
+    struct H5D_rdcc_ent_t *prev;                     /*previous item in doubly-linked list    */
     struct H5D_rdcc_ent_t *tmp_next;                 /*next item in temporary doubly-linked list */
     struct H5D_rdcc_ent_t *tmp_prev;                 /*previous item in temporary doubly-linked list */
 } H5D_rdcc_ent_t;
@@ -141,7 +141,7 @@ typedef struct H5D_chunk_it_ud1_t {
     H5D_chunk_common_ud_t     common;          /* Common info for B-tree user data (must be first) */
     const H5D_chk_idx_info_t *idx_info;        /* Chunked index info */
     const H5D_io_info_t *     io_info;         /* I/O info for dataset operation */
-    const hsize_t *           space_dim;       /* New dataset dimensions	*/
+    const hsize_t *           space_dim;       /* New dataset dimensions    */
     const hbool_t *           shrunk_dim;      /* Dimensions which have been shrunk */
     H5S_t *                   chunk_space;     /* Dataspace for a chunk */
     uint32_t                  elmts_per_chunk; /* Elements in chunk */
@@ -192,12 +192,12 @@ typedef struct H5D_chunk_it_ud3_t {
 
     /* needed for getting raw data from chunk cache */
     hbool_t  chunk_in_cache;
-    uint8_t *chunk; /* the unfiltered chunk data		*/
+    uint8_t *chunk; /* the unfiltered chunk data        */
 } H5D_chunk_it_ud3_t;
 
 /* Callback info for iteration to dump index */
 typedef struct H5D_chunk_it_ud4_t {
-    FILE *    stream;           /* Output stream	*/
+    FILE *    stream;           /* Output stream    */
     hbool_t   header_displayed; /* Node's header is displayed? */
     unsigned  ndims;            /* Number of dimensions for chunk/dataset */
     uint32_t *chunk_dim;        /* Chunk dimensions */
@@ -216,6 +216,7 @@ typedef struct H5D_chunk_readvv_ud_t {
     const H5D_t *  dset; /* Dataset to operate on */
 } H5D_chunk_readvv_ud_t;
 
+/* Typedef for chunk info iterator callback */
 typedef struct H5D_chunk_info_iter_ud_t {
     hsize_t  scaled[H5O_LAYOUT_NDIMS]; /* Logical offset of the chunk */
     hsize_t  ndims;                    /* Number of dimensions in the dataset */
@@ -275,25 +276,23 @@ static ssize_t H5D__nonexistent_readvv(const H5D_io_info_t *io_info, size_t chun
                                        hsize_t chunk_offset_arr[], size_t mem_max_nseq, size_t *mem_curr_seq,
                                        size_t mem_len_arr[], hsize_t mem_offset_arr[]);
 
-/* format convert cb */
+/* Format convert cb */
 static int H5D__chunk_format_convert_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /* Helper routines */
-static herr_t  H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
-                                        const hsize_t *max_dims);
-static void *  H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
-static void *  H5D__chunk_mem_xfree(void *chk, const void *pline);
-static void *  H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
-static herr_t  H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
-static herr_t  H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *udata);
-static hbool_t H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udata);
-static herr_t  H5D__free_chunk_info(void *item, void *key, void *opdata);
-static herr_t  H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
-static herr_t  H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
-static herr_t  H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
-
-static herr_t H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm);
-
+static herr_t   H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize_t *curr_dims,
+                                         const hsize_t *max_dims);
+static void *   H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline);
+static void *   H5D__chunk_mem_xfree(void *chk, const void *pline);
+static void *   H5D__chunk_mem_realloc(void *chk, size_t size, const H5O_pline_t *pline);
+static herr_t   H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last);
+static herr_t   H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *udata);
+static hbool_t  H5D__chunk_cinfo_cache_found(const H5D_chunk_cached_t *last, H5D_chunk_ud_t *udata);
+static herr_t   H5D__free_chunk_info(void *item, void *key, void *opdata);
+static herr_t   H5D__create_chunk_map_single(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
+static herr_t   H5D__create_chunk_file_map_all(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
+static herr_t   H5D__create_chunk_file_map_hyper(H5D_chunk_map_t *fm, const H5D_io_info_t *io_info);
+static herr_t   H5D__create_chunk_mem_map_1d(const H5D_chunk_map_t *fm);
 static herr_t   H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm);
 static herr_t   H5D__chunk_file_cb(void *elem, const H5T_t *type, unsigned ndims, const hsize_t *coords,
                                    void *fm);
@@ -316,6 +315,7 @@ static herr_t H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_
 static int    H5D__chunk_cmp_addr(const void *addr1, const void *addr2);
 #endif /* H5_HAVE_PARALLEL */
 
+/* Debugging helper routine callback */
 static int H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata);
 
 /*********************/
@@ -358,13 +358,13 @@ H5FL_BLK_DEFINE_STATIC(chunk);
 H5FL_EXTERN(H5S_sel_iter_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_direct_write
+ * Function:    H5D__chunk_direct_write
  *
- * Purpose:	Internal routine to write a chunk directly into the file.
+ * Purpose:    Internal routine to write a chunk directly into the file.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
+ * Programmer:    Raymond Lu
  *              30 July 2012
  *
  *-------------------------------------------------------------------------
@@ -396,7 +396,7 @@ H5D__chunk_direct_write(const H5D_t *dset, uint32_t filters, hsize_t *offset, ui
         /* Allocate storage */
         if (H5D__alloc_storage(&io_info, H5D_ALLOC_WRITE, FALSE, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to initialize storage")
-    } /* end if */
+    }
 
     /* Calculate the index of this chunk */
     H5VM_chunk_scaled(dset->shared->ndims, offset, layout->u.chunk.dim, scaled);
@@ -666,13 +666,13 @@ done:
 } /* H5D__get_chunk_storage_size */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_set_info_real
+ * Function:    H5D__chunk_set_info_real
  *
- * Purpose:	Internal routine to set the information about chunks for a dataset
+ * Purpose:    Internal routine to set the information about chunks for a dataset
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, June 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -711,23 +711,21 @@ H5D__chunk_set_info_real(H5O_layout_chunk_t *layout, unsigned ndims, const hsize
     } /* end for */
 
     /* Get the "down" sizes for each dimension */
-    if (H5VM_array_down(ndims, layout->chunks, layout->down_chunks) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
-    if (H5VM_array_down(ndims, layout->max_chunks, layout->max_down_chunks) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't compute 'down' chunk size value")
+    H5VM_array_down(ndims, layout->chunks, layout->down_chunks);
+    H5VM_array_down(ndims, layout->max_chunks, layout->max_down_chunks);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_set_info_real() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_set_info
+ * Function:    H5D__chunk_set_info
  *
- * Purpose:	Sets the information about chunks for a dataset
+ * Purpose:    Sets the information about chunks for a dataset
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, June 30, 2009
  *
  *-------------------------------------------------------------------------
@@ -757,13 +755,13 @@ done:
 } /* end H5D__chunk_set_info() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_set_sizes
+ * Function:    H5D__chunk_set_sizes
  *
  * Purpose:     Sets chunk and type sizes.
  *
  * Return:      SUCCEED/FAIL
  *
- * Programmer:	Dana Robinson
+ * Programmer:    Dana Robinson
  *              December 2015
  *
  *-------------------------------------------------------------------------
@@ -821,13 +819,13 @@ done:
 } /* end H5D__chunk_set_sizes */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_construct
+ * Function:    H5D__chunk_construct
  *
- * Purpose:	Constructs new chunked layout information for dataset
+ * Purpose:    Constructs new chunked layout information for dataset
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, May 22, 2008
  *
  *-------------------------------------------------------------------------
@@ -885,14 +883,14 @@ done:
 } /* end H5D__chunk_construct() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_init
+ * Function:    H5D__chunk_init
  *
- * Purpose:	Initialize the raw data chunk cache for a dataset.  This is
- *		called when the dataset is initialized.
+ * Purpose:    Initialize the raw data chunk cache for a dataset.  This is
+ *        called when the dataset is initialized.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Monday, May 18, 1998
  *
  *-------------------------------------------------------------------------
@@ -989,13 +987,13 @@ done:
 } /* end H5D__chunk_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_is_space_alloc
+ * Function:    H5D__chunk_is_space_alloc
  *
- * Purpose:	Query if space is allocated for layout
+ * Purpose:    Query if space is allocated for layout
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, January 15, 2009
  *
  *-------------------------------------------------------------------------
@@ -1042,13 +1040,13 @@ H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
 } /* end H5D__chunk_is_data_cached() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_io_init
+ * Function:    H5D__chunk_io_init
  *
- * Purpose:	Performs initialization before any sort of I/O on the raw data
+ * Purpose:    Performs initialization before any sort of I/O on the raw data
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
@@ -1063,7 +1061,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     unsigned     f_ndims;                       /* The number of dimensions of the file's dataspace */
     int          sm_ndims;            /* The number of dimensions of the memory buffer's dataspace (signed) */
     unsigned     u;                   /* Local index variable */
-    herr_t       ret_value = SUCCEED; /* Return value		*/
+    herr_t       ret_value = SUCCEED; /* Return value        */
 
     FUNC_ENTER_STATIC
 
@@ -1131,13 +1129,13 @@ done:
 } /* end H5D__chunk_io_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_io_init_selections
+ * Function:    H5D__chunk_io_init_selections
  *
- * Purpose:	    Initialize the chunk mappings
+ * Purpose:        Initialize the chunk mappings
  *
- * Return:	    Non-negative on success/Negative on failure
+ * Return:        Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, March 20, 2008
  *
  *-------------------------------------------------------------------------
@@ -1152,7 +1150,7 @@ H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_
     H5T_t *      file_type  = NULL;                /* Temporary copy of file datatype for iteration */
     hbool_t      iter_init  = FALSE;               /* Selection iteration info has been initialized */
     char         bogus;                            /* "bogus" buffer to pass to selection iterator */
-    herr_t       ret_value = SUCCEED;              /* Return value		*/
+    herr_t       ret_value = SUCCEED;              /* Return value        */
 
     FUNC_ENTER_STATIC
 
@@ -1337,15 +1335,15 @@ done:
 } /* end H5D__chunk_io_init_selections() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_mem_alloc
+ * Function:    H5D__chunk_mem_alloc
  *
- * Purpose:	Allocate space for a chunk in memory.  This routine allocates
+ * Purpose:    Allocate space for a chunk in memory.  This routine allocates
  *              memory space for non-filtered chunks from a block free list
  *              and uses malloc()/free() for filtered chunks.
  *
- * Return:	Pointer to memory for chunk on success/NULL on failure
+ * Return:    Pointer to memory for chunk on success/NULL on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              April 22, 2004
  *
  *-------------------------------------------------------------------------
@@ -1368,15 +1366,15 @@ H5D__chunk_mem_alloc(size_t size, const H5O_pline_t *pline)
 } /* H5D__chunk_mem_alloc() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_mem_xfree
+ * Function:    H5D__chunk_mem_xfree
  *
- * Purpose:	Free space for a chunk in memory.  This routine releases
+ * Purpose:    Free space for a chunk in memory.  This routine releases
  *              memory space for non-filtered chunks from a block free list
  *              and uses malloc()/free() for filtered chunks.
  *
- * Return:	NULL (never fails)
+ * Return:    NULL (never fails)
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              April 22, 2004
  *
  *-------------------------------------------------------------------------
@@ -1473,14 +1471,14 @@ H5D__free_chunk_info(void *item, void H5_ATTR_UNUSED *key, void H5_ATTR_UNUSED *
 } /* H5D__free_chunk_info() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__create_chunk_map_single
+ * Function:    H5D__create_chunk_map_single
  *
- * Purpose:	Create chunk selections when appending a single record
+ * Purpose:    Create chunk selections when appending a single record
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Tuesday, November 20, 2007
+ * Programmer:    Quincey Koziol
+ *        Tuesday, November 20, 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -1558,14 +1556,14 @@ done:
 } /* end H5D__create_chunk_map_single() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__create_chunk_file_map_all
+ * Function:    H5D__create_chunk_file_map_all
  *
- * Purpose:	Create all chunk selections in file, for an "all" selection.
+ * Purpose:    Create all chunk selections in file, for an "all" selection.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Monday, January 21, 2019
+ * Programmer:    Quincey Koziol
+ *        Monday, January 21, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -1763,14 +1761,14 @@ done:
 } /* end H5D__create_chunk_file_map_all() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__create_chunk_file_map_hyper
+ * Function:    H5D__create_chunk_file_map_hyper
  *
- * Purpose:	Create all chunk selections in file, for a hyperslab selection.
+ * Purpose:    Create all chunk selections in file, for a hyperslab selection.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, May 29, 2003
+ * Programmer:    Quincey Koziol
+ *        Thursday, May 29, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -1939,16 +1937,16 @@ done:
 } /* end H5D__create_chunk_file_map_hyper() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__create_chunk_mem_map_hyper
+ * Function:    H5D__create_chunk_mem_map_hyper
  *
- * Purpose:	Create all chunk selections in memory by copying the file
+ * Purpose:    Create all chunk selections in memory by copying the file
  *              chunk selections and adjusting their offsets to be correct
  *              for the memory.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Thursday, May 29, 2003
+ * Programmer:    Quincey Koziol
+ *        Thursday, May 29, 2003
  *
  * Assumptions: That the file and memory selections are the same shape.
  *
@@ -2053,10 +2051,8 @@ H5D__create_chunk_mem_map_hyper(const H5D_chunk_map_t *fm)
                 for (u = 0; u < fm->f_ndims; u++) {
                     /* Compensate for the chunk offset */
                     H5_CHECK_OVERFLOW(coords[u], hsize_t, hssize_t);
-                    chunk_adjust[u] =
-                        adjust[u] -
-                        (hssize_t)coords[u]; /*lint !e771 The adjust array will always be initialized */
-                }                            /* end for */
+                    chunk_adjust[u] = adjust[u] - (hssize_t)coords[u];
+                } /* end for */
 
                 /* Adjust the selection */
                 if (H5S_SELECT_ADJUST_S(chunk_info->mspace, chunk_adjust) < 0)
@@ -2073,15 +2069,15 @@ done:
 } /* end H5D__create_chunk_mem_map_hyper() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__create_mem_map_1d
+ * Function:    H5D__create_mem_map_1d
  *
- * Purpose:	Create all chunk selections for 1-dimensional regular memory space
+ * Purpose:    Create all chunk selections for 1-dimensional regular memory space
  *          that has only one single block in the selection
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Vailin Choi
- *		        Sept 18, 2019
+ * Programmer:    Vailin Choi
+ *                Sept 18, 2019
  *
  *-------------------------------------------------------------------------
  */
@@ -2154,15 +2150,15 @@ done:
 } /* end H5D__create_chunk_mem_map_1d() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_file_cb
+ * Function:    H5D__chunk_file_cb
  *
- * Purpose:	Callback routine for file selection iterator.  Used when
+ * Purpose:    Callback routine for file selection iterator.  Used when
  *              creating selections in file for each point selected.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Wednesday, July 23, 2003
+ * Programmer:    Quincey Koziol
+ *        Wednesday, July 23, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2177,7 +2173,7 @@ H5D__chunk_file_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, 
     hsize_t                   chunk_index;                       /* Chunk index */
     hsize_t                   scaled[H5S_MAX_RANK];              /* Scaled coordinates for this chunk */
     unsigned                  u;                                 /* Local index variable */
-    herr_t                    ret_value = SUCCEED;               /* Return value		*/
+    herr_t                    ret_value = SUCCEED;               /* Return value        */
 
     FUNC_ENTER_STATIC
 
@@ -2272,15 +2268,15 @@ done:
 } /* end H5D__chunk_file_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_mem_cb
+ * Function:    H5D__chunk_mem_cb
  *
- * Purpose:	Callback routine for file selection iterator.  Used when
+ * Purpose:    Callback routine for file selection iterator.  Used when
  *              creating selections in memory for each chunk.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		Thursday, April 10, 2003
+ * Programmer:    Raymond Lu
+ *        Thursday, April 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2292,7 +2288,7 @@ H5D__chunk_mem_cb(void H5_ATTR_UNUSED *elem, const H5T_t H5_ATTR_UNUSED *type, u
     H5D_chunk_info_t *chunk_info;                  /* Chunk information for current chunk */
     hsize_t           coords_in_mem[H5S_MAX_RANK]; /* Coordinates of element in memory */
     hsize_t           chunk_index;                 /* Chunk index */
-    herr_t            ret_value = SUCCEED;         /* Return value		*/
+    herr_t            ret_value = SUCCEED;         /* Return value        */
 
     FUNC_ENTER_STATIC
 
@@ -2348,15 +2344,15 @@ done:
 } /* end H5D__chunk_mem_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_cacheable
+ * Function:    H5D__chunk_cacheable
  *
- * Purpose:	A small internal function to if it's possible to load the
+ * Purpose:    A small internal function to if it's possible to load the
  *              chunk into cache.
  *
- * Return:	TRUE or FALSE
+ * Return:    TRUE or FALSE
  *
- * Programmer:	Raymond Lu
- *		17 July 2007
+ * Programmer:    Raymond Lu
+ *        17 July 2007
  *
  *-------------------------------------------------------------------------
  */
@@ -2438,14 +2434,14 @@ done:
 } /* end H5D__chunk_cacheable() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_read
+ * Function:    H5D__chunk_read
  *
- * Purpose:	Read from a chunked dataset.
+ * Purpose:    Read from a chunked dataset.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		Thursday, April 10, 2003
+ * Programmer:    Raymond Lu
+ *        Thursday, April 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2463,7 +2459,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
     hbool_t       cpt_dirty;                     /* Temporary placeholder for compact storage "dirty" flag */
     uint32_t      src_accessed_bytes  = 0;       /* Total accessed size in a chunk */
     hbool_t       skip_missing_chunks = FALSE;   /* Whether to skip missing chunks */
-    herr_t        ret_value           = SUCCEED; /*return value		*/
+    herr_t        ret_value           = SUCCEED; /*return value        */
 
     FUNC_ENTER_STATIC
 
@@ -2515,7 +2511,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
     chunk_node = H5D_CHUNK_GET_FIRST_NODE(fm);
     while (chunk_node) {
         H5D_chunk_info_t *chunk_info; /* Chunk information */
-        H5D_chunk_ud_t    udata;      /* Chunk index pass-through	*/
+        H5D_chunk_ud_t    udata;      /* Chunk index pass-through    */
 
         /* Get the actual chunk information from the skip list node */
         chunk_info = H5D_CHUNK_GET_NODE_INFO(fm, chunk_node);
@@ -2589,14 +2585,14 @@ done:
 } /* H5D__chunk_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_write
+ * Function:    H5D__chunk_write
  *
- * Purpose:	Writes to a chunked dataset.
+ * Purpose:    Writes to a chunked dataset.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		Thursday, April 10, 2003
+ * Programmer:    Raymond Lu
+ *        Thursday, April 10, 2003
  *
  *-------------------------------------------------------------------------
  */
@@ -2612,7 +2608,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     H5D_storage_t cpt_store;                    /* Chunk storage information as compact dataset */
     hbool_t       cpt_dirty;                    /* Temporary placeholder for compact storage "dirty" flag */
     uint32_t      dst_accessed_bytes = 0;       /* Total accessed size in a chunk */
-    herr_t        ret_value          = SUCCEED; /* Return value		*/
+    herr_t        ret_value          = SUCCEED; /* Return value        */
 
     FUNC_ENTER_STATIC
 
@@ -2646,7 +2642,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
         H5D_chk_idx_info_t idx_info;            /* Chunked index info */
         H5D_io_info_t *    chk_io_info;         /* Pointer to I/O info object for this chunk */
         void *             chunk;               /* Pointer to locked chunk buffer */
-        H5D_chunk_ud_t     udata;               /* Index pass-through	*/
+        H5D_chunk_ud_t     udata;               /* Index pass-through    */
         htri_t             cacheable;           /* Whether the chunk is cacheable */
         hbool_t            need_insert = FALSE; /* Whether the chunk needs to be inserted into the index */
 
@@ -2753,14 +2749,14 @@ done:
 } /* H5D__chunk_write() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_flush
+ * Function:    H5D__chunk_flush
  *
- * Purpose:	Writes all dirty chunks to disk and optionally preempts them
- *		from the cache.
+ * Purpose:    Writes all dirty chunks to disk and optionally preempts them
+ *        from the cache.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
@@ -2792,21 +2788,21 @@ done:
 } /* end H5D__chunk_flush() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_io_term
+ * Function:    H5D__chunk_io_term
  *
- * Purpose:	Destroy I/O operation information.
+ * Purpose:    Destroy I/O operation information.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		Saturday, May 17, 2003
+ * Programmer:    Quincey Koziol
+ *        Saturday, May 17, 2003
  *
  *-------------------------------------------------------------------------
  */
 static herr_t
 H5D__chunk_io_term(const H5D_chunk_map_t *fm)
 {
-    herr_t ret_value = SUCCEED; /*return value		*/
+    herr_t ret_value = SUCCEED; /*return value        */
 
     FUNC_ENTER_STATIC
 
@@ -2842,14 +2838,14 @@ done:
 } /* end H5D__chunk_io_term() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_dest
+ * Function:    H5D__chunk_dest
  *
- * Purpose:	Destroy the entire chunk cache by flushing dirty entries,
- *		preempting all entries, and freeing the cache itself.
+ * Purpose:    Destroy the entire chunk cache by flushing dirty entries,
+ *        preempting all entries, and freeing the cache itself.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
@@ -2901,13 +2897,13 @@ done:
 } /* end H5D__chunk_dest() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D_chunk_idx_reset
+ * Function:    H5D_chunk_idx_reset
  *
- * Purpose:	Reset index information
+ * Purpose:    Reset index information
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, January 15, 2009
  *
  *-------------------------------------------------------------------------
@@ -2933,13 +2929,13 @@ done:
 } /* end H5D_chunk_idx_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_cinfo_cache_reset
+ * Function:    H5D__chunk_cinfo_cache_reset
  *
- * Purpose:	Reset the cached chunk info
+ * Purpose:    Reset the cached chunk info
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              November 27, 2007
  *
  *-------------------------------------------------------------------------
@@ -2947,7 +2943,7 @@ done:
 static herr_t
 H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last)
 {
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* Sanity check */
     HDassert(last);
@@ -2959,13 +2955,13 @@ H5D__chunk_cinfo_cache_reset(H5D_chunk_cached_t *last)
 } /* H5D__chunk_cinfo_cache_reset() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_cinfo_cache_update
+ * Function:    H5D__chunk_cinfo_cache_update
  *
- * Purpose:	Update the cached chunk info
+ * Purpose:    Update the cached chunk info
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              November 27, 2007
  *
  *-------------------------------------------------------------------------
@@ -2995,13 +2991,13 @@ H5D__chunk_cinfo_cache_update(H5D_chunk_cached_t *last, const H5D_chunk_ud_t *ud
 } /* H5D__chunk_cinfo_cache_update() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_cinfo_cache_found
+ * Function:    H5D__chunk_cinfo_cache_found
  *
- * Purpose:	Look for chunk info in cache
+ * Purpose:    Look for chunk info in cache
  *
- * Return:	TRUE/FALSE/FAIL
+ * Return:    TRUE/FALSE/FAIL
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              November 27, 2007
  *
  *-------------------------------------------------------------------------
@@ -3043,17 +3039,17 @@ done:
 } /* H5D__chunk_cinfo_cache_found() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_create
+ * Function:    H5D__chunk_create
  *
- * Purpose:	Creates a new chunked storage index and initializes the
- *		layout information with information about the storage.  The
- *		layout info should be immediately written to the object header.
+ * Purpose:    Creates a new chunked storage index and initializes the
+ *        layout information with information about the storage.  The
+ *        layout info should be immediately written to the object header.
  *
- * Return:	Non-negative on success (with the layout information initialized
- *		and ready to write to an object header). Negative on failure.
+ * Return:    Non-negative on success (with the layout information initialized
+ *        and ready to write to an object header). Negative on failure.
  *
- * Programmer:	Quincey Koziol
- *		Thursday, May 22, 2008
+ * Programmer:    Quincey Koziol
+ *        Thursday, May 22, 2008
  *
  *-------------------------------------------------------------------------
  */
@@ -3097,14 +3093,14 @@ done:
 } /* end H5D__chunk_create() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_hash_val
+ * Function:    H5D__chunk_hash_val
  *
- * Purpose:	To calculate an index based on the dataset's scaled
- *		coordinates and sizes of the faster dimensions.
+ * Purpose:     To calculate an index based on the dataset's scaled
+ *              coordinates and sizes of the faster dimensions.
  *
- * Return:	Hash value index
+ * Return:    Hash value index
  *
- * Programmer:	Vailin Choi; Nov 2014
+ * Programmer:    Vailin Choi; Nov 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -3138,14 +3134,14 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 } /* H5D__chunk_hash_val() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_lookup
+ * Function:    H5D__chunk_lookup
  *
- * Purpose:	Loops up a chunk in cache and on disk, and retrieves
+ * Purpose:    Loops up a chunk in cache and on disk, and retrieves
  *              information about that chunk.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Albert Cheng
+ * Programmer:    Albert Cheng
  *              June 27, 1998
  *
  *-------------------------------------------------------------------------
@@ -3153,9 +3149,9 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 herr_t
 H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata)
 {
-    H5D_rdcc_ent_t *     ent = NULL; /* Cache entry */
-    H5O_storage_chunk_t *sc  = &(dset->shared->layout.storage.u.chunk);
-    unsigned             idx;                 /* Index of chunk in cache, if present */
+    H5D_rdcc_ent_t *     ent       = NULL; /* Cache entry */
+    H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
+    unsigned             idx       = 0;       /* Index of chunk in cache, if present */
     hbool_t              found     = FALSE;   /* In cache? */
     herr_t               ret_value = SUCCEED; /* Return value */
 
@@ -3276,16 +3272,16 @@ done:
 } /* H5D__chunk_lookup() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_flush_entry
+ * Function:    H5D__chunk_flush_entry
  *
- * Purpose:	Writes a chunk to disk.  If RESET is non-zero then the
- *		entry is cleared -- it's slightly faster to flush a chunk if
- *		the RESET flag is turned on because it results in one fewer
- *		memory copy.
+ * Purpose:    Writes a chunk to disk.  If RESET is non-zero then the
+ *        entry is cleared -- it's slightly faster to flush a chunk if
+ *        the RESET flag is turned on because it results in one fewer
+ *        memory copy.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
@@ -3293,12 +3289,12 @@ done:
 static herr_t
 H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
 {
-    void *               buf                = NULL; /* Temporary buffer		*/
+    void *               buf                = NULL; /* Temporary buffer        */
     hbool_t              point_of_no_return = FALSE;
     H5O_storage_chunk_t *sc                 = &(dset->shared->layout.storage.u.chunk);
-    herr_t               ret_value          = SUCCEED; /* Return value			*/
+    herr_t               ret_value          = SUCCEED; /* Return value            */
 
-    FUNC_ENTER_STATIC_TAG(dset->oloc.addr)
+    FUNC_ENTER_STATIC
 
     HDassert(dset);
     HDassert(dset->shared);
@@ -3309,7 +3305,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
     buf = ent->chunk;
     if (ent->dirty) {
         H5D_chk_idx_info_t idx_info;            /* Chunked index info */
-        H5D_chunk_ud_t     udata;               /* pass through B-tree		*/
+        H5D_chunk_ud_t     udata;               /* pass through B-tree        */
         hbool_t            must_alloc  = FALSE; /* Whether the chunk must be allocated */
         hbool_t            need_insert = FALSE; /* Whether the chunk needs to be inserted into the index */
 
@@ -3326,7 +3322,7 @@ H5D__chunk_flush_entry(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t reset)
         if (dset->shared->dcpl_cache.pline.nused && !(ent->edge_chunk_state & H5D_RDCC_DISABLE_FILTERS)) {
             H5Z_EDC_t err_detect;                       /* Error detection info */
             H5Z_cb_t  filter_cb;                        /* I/O filter callback function */
-            size_t    alloc = udata.chunk_block.length; /* Bytes allocated for BUF	*/
+            size_t    alloc = udata.chunk_block.length; /* Bytes allocated for BUF    */
             size_t    nbytes;                           /* Chunk size (in bytes) */
 
             /* Retrieve filter settings from API context */
@@ -3465,7 +3461,7 @@ done:
                                                               ? NULL
                                                               : &(dset->shared->dcpl_cache.pline)));
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_flush_entry() */
 
 /*-------------------------------------------------------------------------
@@ -3548,15 +3544,15 @@ H5D__chunk_cache_evict(const H5D_t *dset, H5D_rdcc_ent_t *ent, hbool_t flush)
 } /* end H5D__chunk_cache_evict() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_cache_prune
+ * Function:    H5D__chunk_cache_prune
  *
- * Purpose:	Prune the cache by preempting some things until the cache has
- *		room for something which is SIZE bytes.  Only unlocked
- *		entries are considered for preemption.
+ * Purpose:    Prune the cache by preempting some things until the cache has
+ *        room for something which is SIZE bytes.  Only unlocked
+ *        entries are considered for preemption.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
@@ -3566,10 +3562,10 @@ H5D__chunk_cache_prune(const H5D_t *dset, size_t size)
 {
     const H5D_rdcc_t *rdcc  = &(dset->shared->cache.chunk);
     size_t            total = rdcc->nbytes_max;
-    const int         nmeth = 2;           /*number of methods		*/
-    int               w[1];                /*weighting as an interval	*/
-    H5D_rdcc_ent_t *  p[2], *cur;          /*list pointers			*/
-    H5D_rdcc_ent_t *  n[2];                /*list next pointers		*/
+    const int         nmeth = 2;           /* Number of methods */
+    int               w[1];                /* Weighting as an interval */
+    H5D_rdcc_ent_t *  p[2], *cur;          /* List pointers */
+    H5D_rdcc_ent_t *  n[2];                /* List next pointers */
     int               nerrors   = 0;       /* Accumulated error count during preemptions */
     herr_t            ret_value = SUCCEED; /* Return value */
 
@@ -3656,28 +3652,28 @@ done:
 } /* end H5D__chunk_cache_prune() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_lock
+ * Function:    H5D__chunk_lock
  *
- * Purpose:	Return a pointer to a dataset chunk.  The pointer points
- *		directly into the chunk cache and should not be freed
- *		by the caller but will be valid until it is unlocked.  The
- *		input value IDX_HINT is used to speed up cache lookups and
- *		it's output value should be given to H5D__chunk_unlock().
- *		IDX_HINT is ignored if it is out of range, and if it points
- *		to the wrong entry then we fall back to the normal search
- *		method.
+ * Purpose:    Return a pointer to a dataset chunk.  The pointer points
+ *        directly into the chunk cache and should not be freed
+ *        by the caller but will be valid until it is unlocked.  The
+ *        input value IDX_HINT is used to speed up cache lookups and
+ *        it's output value should be given to H5D__chunk_unlock().
+ *        IDX_HINT is ignored if it is out of range, and if it points
+ *        to the wrong entry then we fall back to the normal search
+ *        method.
  *
- *		If RELAX is non-zero and the chunk isn't in the cache then
- *		don't try to read it from the file, but just allocate an
- *		uninitialized buffer to hold the result.  This is intended
- *		for output functions that are about to overwrite the entire
- *		chunk.
+ *        If RELAX is non-zero and the chunk isn't in the cache then
+ *        don't try to read it from the file, but just allocate an
+ *        uninitialized buffer to hold the result.  This is intended
+ *        for output functions that are about to overwrite the entire
+ *        chunk.
  *
- * Return:	Success:	Ptr to a file chunk.
+ * Return:    Success:    Ptr to a file chunk.
  *
- *		Failure:	NULL
+ *        Failure:    NULL
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
@@ -3695,10 +3691,10 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata, hbool_t rel
     H5D_fill_buf_info_t fb_info;                                      /* Dataset's fill buffer info */
     hbool_t             fb_info_init = FALSE; /* Whether the fill value buffer has been initialized */
     H5D_rdcc_t *        rdcc         = &(dset->shared->cache.chunk); /*raw data chunk cache*/
-    H5D_rdcc_ent_t *    ent;                                         /*cache entry		*/
-    size_t              chunk_size;                                  /*size of a chunk	*/
+    H5D_rdcc_ent_t *    ent;                                         /*cache entry        */
+    size_t              chunk_size;                                  /*size of a chunk    */
     hbool_t             disable_filters = FALSE; /* Whether to disable filters (when adding to cache) */
-    void *              chunk           = NULL;  /*the file chunk	*/
+    void *              chunk           = NULL;  /*the file chunk    */
     void *              ret_value       = NULL;  /* Return value         */
 
     FUNC_ENTER_STATIC
@@ -3726,7 +3722,7 @@ H5D__chunk_lock(const H5D_io_info_t *io_info, H5D_chunk_ud_t *udata, hbool_t rel
 
 #ifndef NDEBUG
         {
-            unsigned u; /*counters		*/
+            unsigned u; /*counters        */
 
             /* Make sure this is the right chunk */
             for (u = 0; u < layout->u.chunk.ndims - 1; u++)
@@ -4060,23 +4056,23 @@ done:
 } /* end H5D__chunk_lock() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_unlock
+ * Function:    H5D__chunk_unlock
  *
- * Purpose:	Unlocks a previously locked chunk. The LAYOUT, COMP, and
- *		OFFSET arguments should be the same as for H5D__chunk_lock().
- *		The DIRTY argument should be set to non-zero if the chunk has
- *		been modified since it was locked. The IDX_HINT argument is
- *		the returned index hint from the lock operation and BUF is
- *		the return value from the lock.
+ * Purpose:    Unlocks a previously locked chunk. The LAYOUT, COMP, and
+ *        OFFSET arguments should be the same as for H5D__chunk_lock().
+ *        The DIRTY argument should be set to non-zero if the chunk has
+ *        been modified since it was locked. The IDX_HINT argument is
+ *        the returned index hint from the lock operation and BUF is
+ *        the return value from the lock.
  *
- *		The NACCESSED argument should be the number of bytes accessed
- *		for reading or writing (depending on the value of DIRTY).
- *		It's only purpose is to provide additional information to the
- *		preemption policy.
+ *        The NACCESSED argument should be the number of bytes accessed
+ *        for reading or writing (depending on the value of DIRTY).
+ *        It's only purpose is to provide additional information to the
+ *        preemption policy.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
@@ -4167,14 +4163,14 @@ done:
 } /* end H5D__chunk_unlock() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_allocated_cb
+ * Function:    H5D__chunk_allocated_cb
  *
- * Purpose:	Simply counts the number of chunks for a dataset.
+ * Purpose:    Simply counts the number of chunks for a dataset.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 21, 1999
  *
  *-------------------------------------------------------------------------
@@ -4192,15 +4188,15 @@ H5D__chunk_allocated_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 } /* H5D__chunk_allocated_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_allocated
+ * Function:    H5D__chunk_allocated
  *
- * Purpose:	Return the number of bytes allocated in the file for storage
- *		of raw data in the chunked dataset
+ * Purpose:    Return the number of bytes allocated in the file for storage
+ *        of raw data in the chunked dataset
  *
- * Return:	Success:	Number of bytes stored in all chunks.
- *		Failure:	0
+ * Return:    Success:    Number of bytes stored in all chunks.
+ *        Failure:    0
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Tuesday, May 20, 2008
  *
  *-------------------------------------------------------------------------
@@ -4246,21 +4242,21 @@ done:
 } /* end H5D__chunk_allocated() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_allocate
+ * Function:    H5D__chunk_allocate
  *
- * Purpose:	Allocate file space for all chunks that are not allocated yet.
- *		Return SUCCEED if all needed allocation succeed, otherwise
- *		FAIL.
+ * Purpose:    Allocate file space for all chunks that are not allocated yet.
+ *        Return SUCCEED if all needed allocation succeed, otherwise
+ *        FAIL.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Albert Cheng
- *		June 26, 1998
+ * Programmer:    Albert Cheng
+ *        June 26, 1998
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_t old_dim[])
+H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const hsize_t old_dim[])
 {
     const H5D_t *          dset = io_info->dset;                           /* the dataset pointer */
     H5D_chk_idx_info_t     idx_info;                                       /* Chunked index info */
@@ -4299,11 +4295,11 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
                                                         of each dimension */
     hsize_t edge_chunk_scaled[H5O_LAYOUT_NDIMS]; /* Offset of the unfiltered edge chunks at the edge of each
                                                     dimension */
-    unsigned                   nunfilt_edge_chunk_dims = 0; /* Number of dimensions on an edge */
-    const H5O_storage_chunk_t *sc                      = &(layout->storage.u.chunk);
-    herr_t                     ret_value               = SUCCEED; /* Return value */
+    unsigned             nunfilt_edge_chunk_dims = 0; /* Number of dimensions on an edge */
+    H5O_storage_chunk_t *sc                      = &(layout->storage.u.chunk); /* Convenience variable */
+    herr_t               ret_value               = SUCCEED;                    /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(dset->oloc.addr)
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(dset && H5D_CHUNKED == layout->type);
@@ -4507,9 +4503,8 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, hsize_
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error looking up chunk address")
 #ifndef NDEBUG
             /* None of the chunks should be allocated */
-            if (H5D_CHUNK_IDX_NONE != sc->idx_type) {
+            if (H5D_CHUNK_IDX_NONE != sc->idx_type)
                 HDassert(!H5F_addr_defined(udata.chunk_block.offset));
-            }
 
             /* Make sure the chunk is really in the dataset and outside the
              * original dimensions */
@@ -4712,7 +4707,7 @@ done:
         H5MM_free(chunk_info.addr);
 #endif
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__chunk_allocate() */
 
 /*-------------------------------------------------------------------------
@@ -4889,16 +4884,16 @@ done:
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_collective_fill
+ * Function:    H5D__chunk_collective_fill
  *
  * Purpose:     Use MPIO collective write to fill the chunks (if number of
  *              chunks to fill is greater than the number of MPI procs;
  *              otherwise use independent I/O).
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
- * 		July 30, 2014
+ * Programmer:    Mohamad Chaarawi
+ *         July 30, 2014
  *
  *-------------------------------------------------------------------------
  */
@@ -4915,7 +4910,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     int              blocks, leftover, block_len; /* converted to int for MPI */
     MPI_Aint *       chunk_disp_array = NULL;
     int *            block_lens       = NULL;
-    MPI_Datatype     mem_type, file_type;
+    MPI_Datatype     mem_type = MPI_BYTE, file_type = MPI_BYTE;
     H5FD_mpio_xfer_t prev_xfer_mode;         /* Previous data xfer mode */
     hbool_t          have_xfer_mode = FALSE; /* Whether the previous xffer mode has been retrieved */
     hbool_t          need_addr_sort = FALSE;
@@ -4941,9 +4936,9 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
         HGOTO_ERROR(H5E_DATASET, H5E_BADVALUE, FAIL, "Resulted in division by zero")
     num_blocks = (size_t)(chunk_info->num_io / (size_t)mpi_size); /* value should be the same on all procs */
 
-    /* after evenly distributing the blocks between processes, are
-       there any leftover blocks for each individual process
-       (round-robin) */
+    /* After evenly distributing the blocks between processes, are there any
+     * leftover blocks for each individual process (round-robin)?
+     */
     leftover_blocks = (size_t)(chunk_info->num_io % (size_t)mpi_size);
 
     /* Cast values to types needed by MPI */
@@ -4951,58 +4946,63 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
     H5_CHECKED_ASSIGN(leftover, int, leftover_blocks, size_t);
     H5_CHECKED_ASSIGN(block_len, int, chunk_size, size_t);
 
-    /* Allocate buffers */
-    /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
-    if (NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
-    if (NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
+    /* Check if we have any chunks to write on this rank */
+    if (num_blocks > 0 || (leftover && leftover > mpi_rank)) {
+        /* Allocate buffers */
+        /* (MSC - should not need block_lens if MPI_type_create_hindexed_block is working) */
+        if (NULL == (block_lens = (int *)H5MM_malloc((size_t)(blocks + 1) * sizeof(int))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk lengths buffer")
+        if (NULL == (chunk_disp_array = (MPI_Aint *)H5MM_malloc((size_t)(blocks + 1) * sizeof(MPI_Aint))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate chunk file displacement buffer")
 
-    for (i = 0; i < blocks; i++) {
-        /* store the chunk address as an MPI_Aint */
-        chunk_disp_array[i] = (MPI_Aint)(chunk_info->addr[i + mpi_rank * blocks]);
+        for (i = 0; i < blocks; i++) {
+            /* store the chunk address as an MPI_Aint */
+            chunk_disp_array[i] = (MPI_Aint)(chunk_info->addr[i + (mpi_rank * blocks)]);
 
-        /* MSC - should not need this if MPI_type_create_hindexed_block is working */
-        block_lens[i] = block_len;
+            /* MSC - should not need this if MPI_type_create_hindexed_block is working */
+            block_lens[i] = block_len;
 
-        /* make sure that the addresses in the datatype are
-           monotonically non decreasing */
-        if (i && (chunk_disp_array[i] < chunk_disp_array[i - 1]))
-            need_addr_sort = TRUE;
-    } /* end for */
+            /* Make sure that the addresses in the datatype are
+             * monotonically non-decreasing
+             */
+            if (i && (chunk_disp_array[i] < chunk_disp_array[i - 1]))
+                need_addr_sort = TRUE;
+        } /* end for */
 
-    /* calculate if there are any leftover blocks after evenly
-       distributing. If there are, then round robin the distribution
-       to processes 0 -> leftover. */
-    if (leftover && leftover > mpi_rank) {
-        chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[blocks * mpi_size + mpi_rank];
-        if (blocks && (chunk_disp_array[blocks] < chunk_disp_array[blocks - 1]))
-            need_addr_sort = TRUE;
-        block_lens[blocks] = block_len;
-        blocks++;
-    }
+        /* Calculate if there are any leftover blocks after evenly
+         * distributing. If there are, then round-robin the distribution
+         * to processes 0 -> leftover.
+         */
+        if (leftover && leftover > mpi_rank) {
+            chunk_disp_array[blocks] = (MPI_Aint)chunk_info->addr[(blocks * mpi_size) + mpi_rank];
+            if (blocks && (chunk_disp_array[blocks] < chunk_disp_array[blocks - 1]))
+                need_addr_sort = TRUE;
+            block_lens[blocks] = block_len;
+            blocks++;
+        }
 
-    /*
-     * Ensure that the blocks are sorted in monotonically non-decreasing
-     * order of offset in the file.
-     */
-    if (need_addr_sort)
-        HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
+        /* Ensure that the blocks are sorted in monotonically non-decreasing
+         * order of offset in the file.
+         */
+        if (need_addr_sort)
+            HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
 
-    /* MSC - should use this if MPI_type_create_hindexed block is working:
-     * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE, &file_type);
-     */
-    mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
-    if (mpi_code != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        /* MSC - should use this if MPI_type_create_hindexed block is working:
+         * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE,
+         * &file_type);
+         */
+        mpi_code = MPI_Type_create_hindexed(blocks, block_lens, chunk_disp_array, MPI_BYTE, &file_type);
+        if (mpi_code != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
-    mpi_code = MPI_Type_create_hvector(blocks, block_len, 0, MPI_BYTE, &mem_type);
-    if (mpi_code != MPI_SUCCESS)
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type)))
-        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+        mpi_code = MPI_Type_create_hvector(blocks, block_len, 0, MPI_BYTE, &mem_type);
+        if (mpi_code != MPI_SUCCESS)
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hvector failed", mpi_code)
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+    } /* end if */
 
     /* Set MPI-IO VFD properties */
 
@@ -5035,10 +5035,12 @@ done:
             HDONE_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set transfer mode")
 
     /* free things */
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
-        HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    if (MPI_BYTE != file_type)
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    if (MPI_BYTE != mem_type)
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
     H5MM_xfree(chunk_disp_array);
     H5MM_xfree(block_lens);
 
@@ -5076,15 +5078,15 @@ H5D__chunk_cmp_addr(const void *addr1, const void *addr2)
 #endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_prune_fill
+ * Function:    H5D__chunk_prune_fill
  *
- * Purpose:	Write the fill value to the parts of the chunk that are no
+ * Purpose:    Write the fill value to the parts of the chunk that are no
  *              longer part of the dataspace
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Pedro Vicente, pvn@ncsa.uiuc.edu
- * 		March 26, 2002
+ * Programmer:    Pedro Vicente
+ *              March 26, 2002
  *
  *-------------------------------------------------------------------------
  */
@@ -5198,16 +5200,16 @@ done:
 } /* H5D__chunk_prune_fill */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_prune_by_extent
+ * Function:    H5D__chunk_prune_by_extent
  *
- * Purpose:	This function searches for chunks that are no longer necessary
+ * Purpose:    This function searches for chunks that are no longer necessary
  *              both in the raw data cache and in the chunk index.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Pedro Vicente, pvn@ncsa.uiuc.edu
- * Algorithm:	Robb Matzke
- * 		March 27, 2002
+ * Programmer:    Pedro Vicente
+ * Algorithm:    Robb Matzke
+ *         March 27, 2002
  *
  * The algorithm is:
  *
@@ -5628,14 +5630,14 @@ done:
 #ifdef H5_HAVE_PARALLEL
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_addrmap_cb
+ * Function:    H5D__chunk_addrmap_cb
  *
  * Purpose:     Callback when obtaining the chunk addresses for all existing chunks
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:    Success:    Non-negative
+ *        Failure:    Negative
  *
- * Programmer:	Kent Yang
+ * Programmer:    Kent Yang
  *              Tuesday, November 15, 2005
  *
  *-------------------------------------------------------------------------
@@ -5659,12 +5661,12 @@ H5D__chunk_addrmap_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 } /* H5D__chunk_addrmap_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_addrmap
+ * Function:    H5D__chunk_addrmap
  *
  * Purpose:     Obtain the chunk addresses for all existing chunks
  *
- * Return:	Success:	Non-negative on succeed.
- *		Failure:	negative value
+ * Return:    Success:    Non-negative on succeed.
+ *        Failure:    negative value
  *
  * Programmer:  Kent Yang
  *              November 15, 2005
@@ -5709,14 +5711,14 @@ done:
 #endif /* H5_HAVE_PARALLEL */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_delete
+ * Function:    H5D__chunk_delete
  *
- * Purpose:	Delete raw data storage for entire dataset (i.e. all chunks)
+ * Purpose:    Delete raw data storage for entire dataset (i.e. all chunks)
  *
- * Return:	Success:	Non-negative
- *		Failure:	negative
+ * Return:    Success:    Non-negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Thursday, March 20, 2003
  *
  *-------------------------------------------------------------------------
@@ -5785,15 +5787,15 @@ done:
 } /* end H5D__chunk_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_update_cache
+ * Function:    H5D__chunk_update_cache
  *
- * Purpose:	Update any cached chunks index values after the dataspace
+ * Purpose:    Update any cached chunks index values after the dataspace
  *              size has changed
  *
- * Return:	Success:	Non-negative
- *		Failure:	negative
+ * Return:    Success:    Non-negative
+ *        Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:    Quincey Koziol
  *              Saturday, May 29, 2004
  *
  *-------------------------------------------------------------------------
@@ -5824,7 +5826,7 @@ H5D__chunk_update_cache(H5D_t *dset)
 
     /* Recompute the index for each cached chunk that is in a dataset */
     for (ent = rdcc->head; ent; ent = next) {
-        unsigned old_idx; /* Previous index number	*/
+        unsigned old_idx; /* Previous index number    */
 
         /* Get the pointer to the next cache entry */
         next = ent->next;
@@ -5948,7 +5950,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
             H5D__chunk_is_partial_edge_chunk(udata->dset_ndims, udata->common.layout->dim, chunk_rec->scaled,
                                              udata->dset_dims))
             must_filter = FALSE;
-    } /* end if */
+    }
 
     /* Check parameter for type conversion */
     if (udata->do_convert) {
@@ -5989,7 +5991,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         HDassert(!H5F_addr_defined(chunk_rec->chunk_addr));
         H5MM_memcpy(buf, udata->chunk, nbytes);
         udata->chunk = NULL;
-    } /* end if */
+    }
     else {
         H5D_rdcc_ent_t *ent = NULL; /* Cache entry */
         unsigned        idx;        /* Index of chunk in cache, if present */
@@ -6022,13 +6024,13 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, uint32_t);
             H5MM_memcpy(buf, ent->chunk, nbytes);
-        } /* end if */
+        }
         else {
             /* read chunk data from the source file */
             if (H5F_block_read(udata->file_src, H5FD_MEM_DRAW, chunk_rec->chunk_addr, nbytes, buf) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_READERROR, H5_ITER_ERROR, "unable to read raw data chunk")
-        } /* end else */
-    }     /* end else */
+        }
+    }
 
     /* Need to uncompress filtered variable-length & reference data elements that are not found in chunk cache
      */
@@ -6142,15 +6144,15 @@ done:
 } /* end H5D__chunk_copy_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_copy
+ * Function:    H5D__chunk_copy
  *
- * Purpose:	Copy chunked storage from SRC file to DST file.
+ * Purpose:    Copy chunked storage from SRC file to DST file.
  *
- * Return:	Success:	Non-negative
- *		Failure:	negative
+ * Return:    Success:    Non-negative
+ *        Failure:    negative
  *
  * Programmer:  Peter Cao
- *	        August 20, 2005
+ *            August 20, 2005
  *
  *-------------------------------------------------------------------------
  */
@@ -6502,16 +6504,16 @@ done:
 } /* end H5D__chunk_bh_info() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_dump_index_cb
+ * Function:    H5D__chunk_dump_index_cb
  *
- * Purpose:	If the UDATA.STREAM member is non-null then debugging
+ * Purpose:    If the UDATA.STREAM member is non-null then debugging
  *              information is written to that stream.
  *
- * Return:	Success:	Non-negative
+ * Return:    Success:    Non-negative
  *
- *		Failure:	Negative
+ *        Failure:    Negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 21, 1999
  *
  *-------------------------------------------------------------------------
@@ -6537,10 +6539,11 @@ H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
         } /* end if */
 
         /* Print information about this chunk */
-        HDfprintf(udata->stream, "        0x%08x %8Zu %10a [", chunk_rec->filter_mask, chunk_rec->nbytes,
-                  chunk_rec->chunk_addr);
+        HDfprintf(udata->stream, "        0x%08x %8" PRIu32 " %10" PRIuHADDR " [", chunk_rec->filter_mask,
+                  chunk_rec->nbytes, chunk_rec->chunk_addr);
         for (u = 0; u < udata->ndims; u++)
-            HDfprintf(udata->stream, "%s%Hu", (u ? ", " : ""), (chunk_rec->scaled[u] * udata->chunk_dim[u]));
+            HDfprintf(udata->stream, "%s%" PRIuHSIZE, (u ? ", " : ""),
+                      (chunk_rec->scaled[u] * udata->chunk_dim[u]));
         HDfputs("]\n", udata->stream);
     } /* end if */
 
@@ -6548,15 +6551,15 @@ H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 } /* H5D__chunk_dump_index_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_dump_index
+ * Function:    H5D__chunk_dump_index
  *
- * Purpose:	Prints information about the storage index to the specified
- *		stream.
+ * Purpose:    Prints information about the storage index to the specified
+ *        stream.
  *
- * Return:	Success:	Non-negative
- *		Failure:	negative
+ * Return:    Success:    Non-negative
+ *        Failure:    negative
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April 28, 1999
  *
  *-------------------------------------------------------------------------
@@ -6607,15 +6610,15 @@ done:
 #ifdef H5D_CHUNK_DEBUG
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__chunk_stats
+ * Function:    H5D__chunk_stats
  *
- * Purpose:	Print raw data cache statistics to the debug stream.  If
- *		HEADERS is non-zero then print table column headers,
- *		otherwise assume that the H5AC layer has already printed them.
+ * Purpose:    Print raw data cache statistics to the debug stream.  If
+ *        HEADERS is non-zero then print table column headers,
+ *        otherwise assume that the H5AC layer has already printed them.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, May 21, 1998
  *
  *-------------------------------------------------------------------------
@@ -6671,20 +6674,20 @@ done:
 #endif /* H5D_CHUNK_DEBUG */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__nonexistent_readvv_cb
+ * Function:    H5D__nonexistent_readvv_cb
  *
- * Purpose:	Callback operation for performing fill value I/O operation
+ * Purpose:    Callback operation for performing fill value I/O operation
  *              on memory buffer.
  *
- * Note:	This algorithm is pretty inefficient about initializing and
+ * Note:    This algorithm is pretty inefficient about initializing and
  *              terminating the fill buffer info structure and it would be
  *              faster to refactor this into a "real" initialization routine,
  *              and a "vectorized fill" routine. -QAK
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
- *		30 Sep 2010
+ * Programmer:    Quincey Koziol
+ *        30 Sep 2010
  *
  *-------------------------------------------------------------------------
  */
@@ -6718,22 +6721,22 @@ done:
 } /* H5D__nonexistent_readvv_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5D__nonexistent_readvv
+ * Function:    H5D__nonexistent_readvv
  *
- * Purpose:	When the chunk doesn't exist on disk and the chunk is bigger
+ * Purpose:    When the chunk doesn't exist on disk and the chunk is bigger
  *              than the cache size, performs fill value I/O operation on
  *              memory buffer, advancing through two I/O vectors, until one
  *              runs out.
  *
- * Note:	This algorithm is pretty inefficient about initializing and
+ * Note:    This algorithm is pretty inefficient about initializing and
  *              terminating the fill buffer info structure and it would be
  *              faster to refactor this into a "real" initialization routine,
  *              and a "vectorized fill" routine. -QAK
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:    Non-negative on success/Negative on failure
  *
- * Programmer:	Raymond Lu
- *		6 Feb 2009
+ * Programmer:    Raymond Lu
+ *        6 Feb 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -6812,9 +6815,9 @@ done:
  * Function:    H5D__chunk_file_alloc()
  *
  * Purpose:     Chunk allocation:
- *		  Create the chunk if it doesn't exist, or reallocate the
+ *          Create the chunk if it doesn't exist, or reallocate the
  *                chunk if its size changed.
- *		  The coding is moved and modified from each index structure.
+ *          The coding is moved and modified from each index structure.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -7044,7 +7047,7 @@ done:
  * Function:    H5D__chunk_format_convert
  *
  * Purpose:     Iterate over the chunks for the current chunk index and insert the
- *		the chunk addresses into v1 B-tree chunk index via callback.
+ *        the chunk addresses into v1 B-tree chunk index via callback.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -7166,10 +7169,10 @@ H5D__get_num_chunks(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                         "unable to retrieve allocated chunk information from index")
         *nchunks = num_chunks;
-    } /* end else */
+    }
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__get_num_chunks() */
 
 /*-------------------------------------------------------------------------
@@ -7212,7 +7215,7 @@ H5D__get_chunk_info_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* Stop iterating */
         ret_value = H5_ITER_STOP;
-    } /* end if */
+    }
     /* Go to the next chunk */
     else
         chunk_info->curr_idx++;
@@ -7308,7 +7311,7 @@ H5D__get_chunk_info(const H5D_t *dset, const H5S_t H5_ATTR_UNUSED *space, hsize_
     }     /* end if H5F_addr_defined */
 
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__get_chunk_info() */
 
 /*-------------------------------------------------------------------------
@@ -7353,7 +7356,7 @@ H5D__get_chunk_info_by_coord_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         /* Stop iterating */
         ret_value = H5_ITER_STOP;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__get_chunk_info_by_coord_cb() */

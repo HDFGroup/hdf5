@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
 /* Add new errors to H5err.txt file */
 
 
-#ifndef _H5Epubgen_H
-#define _H5Epubgen_H
+#ifndef H5Epubgen_H
+#define H5Epubgen_H
 
 #ifdef __cplusplus
 extern "C" {
@@ -46,6 +46,7 @@ extern "C" {
 #define H5E_IO               (H5OPEN H5E_IO_g)
 #define H5E_EFL              (H5OPEN H5E_EFL_g)
 #define H5E_TST              (H5OPEN H5E_TST_g)
+#define H5E_LIB              (H5OPEN H5E_LIB_g)
 #define H5E_PAGEBUF          (H5OPEN H5E_PAGEBUF_g)
 #define H5E_FSPACE           (H5OPEN H5E_FSPACE_g)
 #define H5E_DATASET          (H5OPEN H5E_DATASET_g)
@@ -83,6 +84,7 @@ H5_DLLVAR hid_t H5E_ATTR_g;          /* Attribute */
 H5_DLLVAR hid_t H5E_IO_g;            /* Low-level I/O */
 H5_DLLVAR hid_t H5E_EFL_g;           /* External file list */
 H5_DLLVAR hid_t H5E_TST_g;           /* Ternary Search Trees */
+H5_DLLVAR hid_t H5E_LIB_g;           /* General library infrastructure */
 H5_DLLVAR hid_t H5E_PAGEBUF_g;       /* Page Buffering */
 H5_DLLVAR hid_t H5E_FSPACE_g;        /* Free Space Manager */
 H5_DLLVAR hid_t H5E_DATASET_g;       /* Dataset */
@@ -248,6 +250,8 @@ H5_DLLVAR hid_t H5E_OPENERROR_g;     /* Can't open directory or file */
 #define H5E_TRUNCATED        (H5OPEN H5E_TRUNCATED_g)
 #define H5E_MOUNT            (H5OPEN H5E_MOUNT_g)
 #define H5E_CANTDELETEFILE   (H5OPEN H5E_CANTDELETEFILE_g)
+#define H5E_CANTLOCKFILE     (H5OPEN H5E_CANTLOCKFILE_g)
+#define H5E_CANTUNLOCKFILE   (H5OPEN H5E_CANTUNLOCKFILE_g)
 H5_DLLVAR hid_t H5E_FILEEXISTS_g;    /* File already exists */
 H5_DLLVAR hid_t H5E_FILEOPEN_g;      /* File already open */
 H5_DLLVAR hid_t H5E_CANTCREATE_g;    /* Unable to create file */
@@ -258,6 +262,8 @@ H5_DLLVAR hid_t H5E_BADFILE_g;       /* Bad file ID accessed */
 H5_DLLVAR hid_t H5E_TRUNCATED_g;     /* File has been truncated */
 H5_DLLVAR hid_t H5E_MOUNT_g;         /* File mount error */
 H5_DLLVAR hid_t H5E_CANTDELETEFILE_g; /* Unable to delete file */
+H5_DLLVAR hid_t H5E_CANTLOCKFILE_g;  /* Unable to lock file */
+H5_DLLVAR hid_t H5E_CANTUNLOCKFILE_g; /* Unable to unlock file */
 
 /* Object atom related errors */
 #define H5E_BADATOM          (H5OPEN H5E_BADATOM_g)

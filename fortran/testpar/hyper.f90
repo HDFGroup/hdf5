@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -135,7 +135,7 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
      ! Collective metadata READ API calling requirement
      CALL h5pset_all_coll_metadata_ops_f(fapl_id, is_coll_true, hdferror)
      CALL check("h5pset_all_coll_metadata_ops_f", hdferror, nerrors)
-   
+
      CALL h5fcreate_f(filename, H5F_ACC_TRUNC_F, file_id, hdferror, access_prp = fapl_id)
      CALL check("h5fcreate_f", hdferror, nerrors)
 
@@ -144,7 +144,7 @@ SUBROUTINE hyper(length,do_collective,do_chunk, mpi_size, mpi_rank, nerrors)
      CALL check("h5pclose_f", hdferror, nerrors)
      CALL h5fget_access_plist_f(file_id, fapl_id, hdferror)
      CALL check("h5fget_access_plist_f", hdferror, nerrors)
-    
+
      ! verify settings for file access properties
 
      ! Collective metadata writes

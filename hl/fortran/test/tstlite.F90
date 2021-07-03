@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -635,7 +635,7 @@ CONTAINS
           DO k = 1, dims(3)
              IF ( dset_data_i32(i,j,k) .NE. data_out_i32(i,j,k) ) THEN
                 PRINT *, 'read buffer differs from write buffer'
-                PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k) 
+                PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k)
                 STOP
              ENDIF
           END DO
@@ -660,7 +660,7 @@ CONTAINS
           DO k = 1, dims(3)
              IF ( dset_data_i32(i,j,k) .NE. data_out_i32(i,j,k) ) THEN
                 PRINT *, 'read buffer differs from write buffer'
-                PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k) 
+                PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k)
                 STOP
              ENDIF
           END DO
@@ -685,7 +685,7 @@ CONTAINS
           DO k = 1, dims(3)
              IF ( dset_data_i32(i,j,k) .NE. data_out_i32(i,j,k) ) THEN
                 PRINT *, 'read buffer differs from write buffer'
-                PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k) 
+                PRINT *,  dset_data_i32(i,j,k), ' and ', data_out_i32(i,j,k)
                 STOP
              ENDIF
           END DO
@@ -1356,7 +1356,7 @@ CONTAINS
     TYPE(hvl_t), DIMENSION(1:2), TARGET :: rdata ! Pointer to vlen structures
     INTEGER(hsize_t), DIMENSION(1:1) :: dims_vl = (/2/)
     INTEGER, DIMENSION(:), POINTER :: ptr_r
-    INTEGER(HID_T) :: type_id 
+    INTEGER(HID_T) :: type_id
 
     !
     ! Initialize FORTRAN predefined datatypes.
@@ -1911,7 +1911,7 @@ CONTAINS
        STOP
     ENDIF
 
-    ! 
+    !
     ! ** Test reading a string that was created with a C program **
     !
 
@@ -1923,7 +1923,7 @@ CONTAINS
 !!$  !
 !!$  IF ( bufr_c .NE. buf_c ) THEN
 !!$     PRINT *, 'read buffer differs from write buffer'
-!!$     PRINT *,  bufr1, ' and ',  buf_c 
+!!$     PRINT *,  bufr1, ' and ',  buf_c
 !!$     STOP
 !!$  ENDIF
 !!$  !
@@ -1936,9 +1936,9 @@ CONTAINS
 !!$  !
 !!$  IF ( buf_c(1:16) .NE. bufr_c_lg(1:16) .AND. bufr_c_lg(17:18) .NE. '  ' ) THEN
 !!$     PRINT *, 'larger read buffer differs from write buffer'
-!!$     PRINT *,  buf_c, ' and ',  bufr_c_lg 
+!!$     PRINT *,  buf_c, ' and ',  bufr_c_lg
 !!$     STOP
-!!$  ENDIF  
+!!$  ENDIF
 
 !!$  CALL h5fclose_f(file_id1,  errcode)
 

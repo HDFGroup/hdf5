@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Wednesday, July 9, 2003
  *
  * Purpose:	File object debugging functions.
@@ -37,7 +37,6 @@
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  1 1997
  *
  *-------------------------------------------------------------------------
@@ -73,9 +72,10 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
               "File name (after resolving symlinks):", H5F_ACTUAL_NAME(f));
     HDfprintf(stream, "%*s%-*s 0x%08x\n", indent, "", fwidth, "File access flags", f->shared->flags);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth, "File open reference count:", f->shared->nrefs);
-    HDfprintf(stream, "%*s%-*s %a (abs)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (abs)\n", indent, "", fwidth,
               "Address of super block:", f->shared->sblock->base_addr);
-    HDfprintf(stream, "%*s%-*s %Hu bytes\n", indent, "", fwidth, "Size of userblock:", userblock_size);
+    HDfprintf(stream, "%*s%-*s %" PRIuHSIZE " bytes\n", indent, "", fwidth,
+              "Size of userblock:", userblock_size);
 
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Superblock version number:", f->shared->sblock->super_vers);
@@ -100,16 +100,16 @@ H5F_debug(H5F_t *f, FILE *stream, int indent, int fwidth)
               "Indexed storage internal node 1/2 rank:", f->shared->sblock->btree_k[H5B_CHUNK_ID]);
     HDfprintf(stream, "%*s%-*s 0x%02x\n", indent, "", fwidth,
               "File status flags:", (unsigned)(f->shared->sblock->status_flags));
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
               "Superblock extension address:", f->shared->sblock->ext_addr);
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
               "Shared object header message table address:", f->shared->sohm_addr);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Shared object header message version number:", (unsigned)f->shared->sohm_vers);
     HDfprintf(stream, "%*s%-*s %u\n", indent, "", fwidth,
               "Number of shared object header message indexes:", (unsigned)f->shared->sohm_nindexes);
 
-    HDfprintf(stream, "%*s%-*s %a (rel)\n", indent, "", fwidth,
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR " (rel)\n", indent, "", fwidth,
               "Address of driver information block:", f->shared->sblock->driver_addr);
 
     HDfprintf(stream, "%*s%-*s %s\n", indent, "", fwidth,

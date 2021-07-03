@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -116,30 +116,28 @@ typedef struct iter_t {
     int                   local;                       /* Flag to indicate iteration over the object*/
 } iter_t;
 
-static const char *drivername = "";
+static const char *drivername = NULL;
 
 #ifdef H5_HAVE_ROS3_VFD
-/* default "anonymous" s3 configuration
- */
+/* Default "anonymous" S3 configuration */
 static H5FD_ros3_fapl_t ros3_fa = {
-    1,     /* fapl version      */
-    false, /* authenticate      */
-    "",    /* aws region        */
-    "",    /* access key id     */
-    "",    /* secret access key */
+    1,     /* Structure Version */
+    false, /* Authenticate?     */
+    "",    /* AWS Region        */
+    "",    /* Access Key ID     */
+    "",    /* Secret Access Key */
 };
 #endif /* H5_HAVE_ROS3_VFD */
 
 #ifdef H5_HAVE_LIBHDFS
-/* default HDFS access configuration
- */
+/* "Default" HDFS configuration */
 static H5FD_hdfs_fapl_t hdfs_fa = {
-    1,           /* fapl version          */
-    "localhost", /* namenode name         */
-    0,           /* namenode port         */
-    "",          /* kerberos ticket cache */
-    "",          /* user name             */
-    2048,        /* stream buffer size    */
+    1,           /* Structure Version     */
+    "localhost", /* Namenode Name         */
+    0,           /* Namenode Port         */
+    "",          /* Kerberos ticket cache */
+    "",          /* User name             */
+    2048,        /* Stream buffer size    */
 };
 #endif /* H5_HAVE_LIBHDFS */
 
@@ -1055,101 +1053,32 @@ parse_command_line(int argc, const char *argv[], struct handler_t **hand_ret)
                 break;
 
             case 'w':
-#ifndef H5_HAVE_ROS3_VFD
+#ifdef H5_HAVE_ROS3_VFD
+                if (h5tools_parse_ros3_fapl_tuple(opt_arg, ',', &ros3_fa) < 0) {
+                    error_msg("failed to parse S3 VFD credential info\n");
+                    goto error;
+                }
+
+                drivername = drivernames[ROS3_VFD_IDX];
+#else
                 error_msg("Read-Only S3 VFD not enabled.\n");
                 goto error;
-#else
-            {
-                char *      cred_str = NULL;
-                unsigned    nelems   = 0;
-                char **     cred     = NULL;
-                char const *ccred[3];
-
-                if (FAIL == parse_tuple((const char *)opt_arg, ',', &cred_str, &nelems, &cred)) {
-                    error_msg("Unable to parse s3 credential\n");
-                    goto error;
-                }
-                if (nelems != 3) {
-                    error_msg("s3 credential must have three elements\n");
-                    goto error;
-                }
-                ccred[0] = (const char *)cred[0];
-                ccred[1] = (const char *)cred[1];
-                ccred[2] = (const char *)cred[2];
-                if (0 == h5tools_populate_ros3_fapl(&ros3_fa, ccred)) {
-                    error_msg("Unable to set ros3 fapl config\n");
-                    goto error;
-                }
-                HDfree(cred);
-                HDfree(cred_str);
-            } /* parse s3-cred block */
-                drivername = "ros3";
+#endif
                 break;
-#endif /* H5_HAVE_ROS3_VFD */
 
             case 'H':
-#ifndef H5_HAVE_LIBHDFS
-                error_msg("HDFS VFD is not enabled.\n");
-                goto error;
+#ifdef H5_HAVE_LIBHDFS
+                if (h5tools_parse_hdfs_fapl_tuple(opt_arg, ',', &hdfs_fa) < 0) {
+                    error_msg("failed to parse HDFS VFD configuration info\n");
+                    goto error;
+                }
+
+                drivername = drivernames[HDFS_VFD_IDX];
 #else
-            {
-                unsigned      nelems    = 0;
-                char *        props_src = NULL;
-                char **       props     = NULL;
-                unsigned long k         = 0;
-                if (FAIL == parse_tuple((const char *)opt_arg, ',', &props_src, &nelems, &props)) {
-                    error_msg("unable to parse hdfs properties tuple\n");
-                    goto error;
-                }
-                /* sanity-check tuple count
-                 */
-                if (nelems != 5) {
-                    char str[64] = "";
-                    HDsprintf(str,
-                              "expected 5 elements in hdfs properties tuple "
-                              "but found %u\n",
-                              nelems);
-                    HDfree(props);
-                    HDfree(props_src);
-                    error_msg(str);
-                    goto error;
-                }
-                /* Populate fapl configuration structure with given
-                 * properties.
-                 * TODO/WARNING: No error-checking is done on length of
-                 *         input strings... Silent overflow is possible,
-                 *         albeit unlikely.
-                 */
-                if (HDstrncmp(props[0], "", 1)) {
-                    HDstrncpy(hdfs_fa.namenode_name, (const char *)props[0], HDstrlen(props[0]));
-                }
-                if (HDstrncmp(props[1], "", 1)) {
-                    k = strtoul((const char *)props[1], NULL, 0);
-                    if (errno == ERANGE) {
-                        error_msg("supposed port number wasn't.\n");
-                        goto error;
-                    }
-                    hdfs_fa.namenode_port = (int32_t)k;
-                }
-                if (HDstrncmp(props[2], "", 1)) {
-                    HDstrncpy(hdfs_fa.kerberos_ticket_cache, (const char *)props[2], HDstrlen(props[2]));
-                }
-                if (HDstrncmp(props[3], "", 1)) {
-                    HDstrncpy(hdfs_fa.user_name, (const char *)props[3], HDstrlen(props[3]));
-                }
-                if (strncmp(props[4], "", 1)) {
-                    k = HDstrtoul((const char *)props[4], NULL, 0);
-                    if (errno == ERANGE) {
-                        error_msg("supposed buffersize number wasn't.\n");
-                        goto error;
-                    }
-                    hdfs_fa.stream_buffer_size = (int32_t)k;
-                }
-                HDfree(props);
-                HDfree(props_src);
-                drivername = "hdfs";
-            } break;
-#endif /* H5_HAVE_LIBHDFS */
+                error_msg("HDFS VFD not enabled.\n");
+                goto error;
+#endif
+                break;
 
             default:
                 usage(h5tools_getprogname());
@@ -1267,7 +1196,7 @@ print_file_info(const iter_t *iter)
     HDprintf("\t# of unique links: %lu\n", iter->uniq_links);
     HDprintf("\t# of unique other: %lu\n", iter->uniq_others);
     HDprintf("\tMax. # of links to object: %lu\n", iter->max_links);
-    HDfprintf(stdout, "\tMax. # of objects in group: %Hu\n", iter->max_fanout);
+    HDfprintf(stdout, "\tMax. # of objects in group: %" PRIuHSIZE "\n", iter->max_fanout);
 
     return 0;
 } /* print_file_info() */
@@ -1290,40 +1219,40 @@ static herr_t
 print_file_metadata(const iter_t *iter)
 {
     HDfprintf(stdout, "File space information for file metadata (in bytes):\n");
-    HDfprintf(stdout, "\tSuperblock: %Hu\n", iter->super_size);
-    HDfprintf(stdout, "\tSuperblock extension: %Hu\n", iter->super_ext_size);
-    HDfprintf(stdout, "\tUser block: %Hu\n", iter->ublk_size);
+    HDfprintf(stdout, "\tSuperblock: %" PRIuHSIZE "\n", iter->super_size);
+    HDfprintf(stdout, "\tSuperblock extension: %" PRIuHSIZE "\n", iter->super_ext_size);
+    HDfprintf(stdout, "\tUser block: %" PRIuHSIZE "\n", iter->ublk_size);
 
     HDfprintf(stdout, "\tObject headers: (total/unused)\n");
-    HDfprintf(stdout, "\t\tGroups: %Hu/%Hu\n", iter->group_ohdr_info.total_size,
+    HDfprintf(stdout, "\t\tGroups: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->group_ohdr_info.total_size,
               iter->group_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %Hu/%Hu\n", iter->dset_ohdr_info.total_size,
-              iter->dset_ohdr_info.free_size);
-    HDfprintf(stdout, "\t\tDatatypes: %Hu/%Hu\n", iter->dtype_ohdr_info.total_size,
+    HDfprintf(stdout, "\t\tDatasets(exclude compact data): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+              iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
+    HDfprintf(stdout, "\t\tDatatypes: %" PRIuHSIZE "/%" PRIuHSIZE "\n", iter->dtype_ohdr_info.total_size,
               iter->dtype_ohdr_info.free_size);
 
     HDfprintf(stdout, "\tGroups:\n");
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->groups_btree_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->groups_heap_storage_size);
+    HDfprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
 
     HDfprintf(stdout, "\tAttributes:\n");
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->attrs_btree_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->attrs_heap_storage_size);
+    HDfprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->attrs_btree_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->attrs_heap_storage_size);
 
     HDfprintf(stdout, "\tChunked datasets:\n");
-    HDfprintf(stdout, "\t\tIndex: %Hu\n", iter->datasets_index_storage_size);
+    HDfprintf(stdout, "\t\tIndex: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
 
     HDfprintf(stdout, "\tDatasets:\n");
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->datasets_heap_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
     HDfprintf(stdout, "\tShared Messages:\n");
-    HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->SM_hdr_storage_size);
-    HDfprintf(stdout, "\t\tB-tree/List: %Hu\n", iter->SM_index_storage_size);
-    HDfprintf(stdout, "\t\tHeap: %Hu\n", iter->SM_heap_storage_size);
+    HDfprintf(stdout, "\t\tHeader: %" PRIuHSIZE "\n", iter->SM_hdr_storage_size);
+    HDfprintf(stdout, "\t\tB-tree/List: %" PRIuHSIZE "\n", iter->SM_index_storage_size);
+    HDfprintf(stdout, "\t\tHeap: %" PRIuHSIZE "\n", iter->SM_heap_storage_size);
 
     HDfprintf(stdout, "\tFree-space managers:\n");
-    HDfprintf(stdout, "\t\tHeader: %Hu\n", iter->free_hdr);
-    HDfprintf(stdout, "\t\tAmount of free space: %Hu\n", iter->free_space);
+    HDfprintf(stdout, "\t\tHeader: %" PRIuHSIZE "\n", iter->free_hdr);
+    HDfprintf(stdout, "\t\tAmount of free space: %" PRIuHSIZE "\n", iter->free_space);
 
     return 0;
 } /* print_file_metadata() */
@@ -1401,11 +1330,11 @@ print_group_metadata(const iter_t *iter)
 {
     HDprintf("File space information for groups' metadata (in bytes):\n");
 
-    HDfprintf(stdout, "\tObject headers (total/unused): %Hu/%Hu\n", iter->group_ohdr_info.total_size,
-              iter->group_ohdr_info.free_size);
+    HDfprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+              iter->group_ohdr_info.total_size, iter->group_ohdr_info.free_size);
 
-    HDfprintf(stdout, "\tB-tree/List: %Hu\n", iter->groups_btree_storage_size);
-    HDfprintf(stdout, "\tHeap: %Hu\n", iter->groups_heap_storage_size);
+    HDfprintf(stdout, "\tB-tree/List: %" PRIuHSIZE "\n", iter->groups_btree_storage_size);
+    HDfprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->groups_heap_storage_size);
 
     return 0;
 } /* print_group_metadata() */
@@ -1439,7 +1368,7 @@ print_dataset_info(const iter_t *iter)
                 HDprintf("\t\t# of dataset with rank %u: %lu\n", u, iter->dset_rank_count[u]);
 
         HDprintf("1-D Dataset information:\n");
-        HDfprintf(stdout, "\tMax. dimension size of 1-D datasets: %Hu\n", iter->max_dset_dims);
+        HDfprintf(stdout, "\tMax. dimension size of 1-D datasets: %" PRIuHSIZE "\n", iter->max_dset_dims);
         HDprintf("\tSmall 1-D datasets (with dimension sizes 0 to %u):\n", sdsets_threshold - 1);
         total = 0;
         for (u = 0; u < (unsigned)sdsets_threshold; u++) {
@@ -1471,8 +1400,9 @@ print_dataset_info(const iter_t *iter)
         } /* end if */
 
         HDprintf("Dataset storage information:\n");
-        HDfprintf(stdout, "\tTotal raw data size: %Hu\n", iter->dset_storage_size);
-        HDfprintf(stdout, "\tTotal external raw data size: %Hu\n", iter->dset_external_storage_size);
+        HDfprintf(stdout, "\tTotal raw data size: %" PRIuHSIZE "\n", iter->dset_storage_size);
+        HDfprintf(stdout, "\tTotal external raw data size: %" PRIuHSIZE "\n",
+                  iter->dset_external_storage_size);
 
         HDprintf("Dataset layout information:\n");
         for (u = 0; u < H5D_NLAYOUTS; u++)
@@ -1516,11 +1446,11 @@ print_dset_metadata(const iter_t *iter)
 {
     HDprintf("File space information for datasets' metadata (in bytes):\n");
 
-    HDfprintf(stdout, "\tObject headers (total/unused): %Hu/%Hu\n", iter->dset_ohdr_info.total_size,
-              iter->dset_ohdr_info.free_size);
+    HDfprintf(stdout, "\tObject headers (total/unused): %" PRIuHSIZE "/%" PRIuHSIZE "\n",
+              iter->dset_ohdr_info.total_size, iter->dset_ohdr_info.free_size);
 
-    HDfprintf(stdout, "\tIndex for Chunked datasets: %Hu\n", iter->datasets_index_storage_size);
-    HDfprintf(stdout, "\tHeap: %Hu\n", iter->datasets_heap_storage_size);
+    HDfprintf(stdout, "\tIndex for Chunked datasets: %" PRIuHSIZE "\n", iter->datasets_index_storage_size);
+    HDfprintf(stdout, "\tHeap: %" PRIuHSIZE "\n", iter->datasets_heap_storage_size);
 
     return 0;
 } /* print_dset_metadata() */
@@ -1634,7 +1564,7 @@ print_freespace_info(const iter_t *iter)
     unsigned      u;     /* Local index variable */
 
     HDfprintf(stdout, "Free-space persist: %s\n", iter->fs_persist ? "TRUE" : "FALSE");
-    HDfprintf(stdout, "Free-space section threshold: %Hu bytes\n", iter->fs_threshold);
+    HDfprintf(stdout, "Free-space section threshold: %" PRIuHSIZE " bytes\n", iter->fs_threshold);
     HDprintf("Small size free-space sections (< %u bytes):\n", (unsigned)SIZE_SMALL_SECTS);
     total = 0;
     for (u = 0; u < SIZE_SMALL_SECTS; u++) {
@@ -1679,10 +1609,10 @@ print_storage_summary(const iter_t *iter)
 {
     hsize_t total_meta = 0;
     hsize_t unaccount  = 0;
-    double  percent    = 0.0f;
+    double  percent    = 0.0;
 
     HDfprintf(stdout, "File space management strategy: %s\n", FS_STRATEGY_NAME[iter->fs_strategy]);
-    HDfprintf(stdout, "File space page size: %Hu bytes\n", iter->fsp_size);
+    HDfprintf(stdout, "File space page size: %" PRIuHSIZE " bytes\n", iter->fsp_size);
     HDprintf("Summary of file space information:\n");
     total_meta =
         iter->super_size + iter->super_ext_size + iter->ublk_size + iter->group_ohdr_info.total_size +
@@ -1691,27 +1621,28 @@ print_storage_summary(const iter_t *iter)
         iter->datasets_index_storage_size + iter->datasets_heap_storage_size + iter->SM_hdr_storage_size +
         iter->SM_index_storage_size + iter->SM_heap_storage_size + iter->free_hdr;
 
-    HDfprintf(stdout, "  File metadata: %Hu bytes\n", total_meta);
-    HDfprintf(stdout, "  Raw data: %Hu bytes\n", iter->dset_storage_size);
+    HDfprintf(stdout, "  File metadata: %" PRIuHSIZE " bytes\n", total_meta);
+    HDfprintf(stdout, "  Raw data: %" PRIuHSIZE " bytes\n", iter->dset_storage_size);
 
-    percent = ((double)iter->free_space / (double)iter->filesize) * (double)100.0f;
-    HDfprintf(stdout, "  Amount/Percent of tracked free space: %Hu bytes/%3.1f%\n", iter->free_space,
-              percent);
+    percent = ((double)iter->free_space / (double)iter->filesize) * 100.0;
+    HDfprintf(stdout, "  Amount/Percent of tracked free space: %" PRIuHSIZE " bytes/%3.1f%%\n",
+              iter->free_space, percent);
 
     if (iter->filesize < (total_meta + iter->dset_storage_size + iter->free_space)) {
         unaccount = (total_meta + iter->dset_storage_size + iter->free_space) - iter->filesize;
-        HDfprintf(stdout, "  ??? File has %Hu more bytes accounted for than its size! ???\n", unaccount);
+        HDfprintf(stdout, "  ??? File has %" PRIuHSIZE " more bytes accounted for than its size! ???\n",
+                  unaccount);
     }
     else {
         unaccount = iter->filesize - (total_meta + iter->dset_storage_size + iter->free_space);
-        HDfprintf(stdout, "  Unaccounted space: %Hu bytes\n", unaccount);
+        HDfprintf(stdout, "  Unaccounted space: %" PRIuHSIZE " bytes\n", unaccount);
     }
 
-    HDfprintf(stdout, "Total space: %Hu bytes\n",
+    HDfprintf(stdout, "Total space: %" PRIuHSIZE " bytes\n",
               total_meta + iter->dset_storage_size + iter->free_space + unaccount);
 
     if (iter->nexternal)
-        HDfprintf(stdout, "External raw data: %Hu bytes\n", iter->dset_external_storage_size);
+        HDfprintf(stdout, "External raw data: %" PRIuHSIZE " bytes\n", iter->dset_external_storage_size);
 
     return 0;
 } /* print_storage_summary() */
@@ -1832,75 +1763,55 @@ int
 main(int argc, const char *argv[])
 {
     iter_t            iter;
-    const char *      fname = NULL;
-    hid_t             fid   = H5I_INVALID_HID;
-    H5E_auto2_t       func;
-    H5E_auto2_t       tools_func;
-    void *            edata;
-    void *            tools_edata;
+    const char *      fname   = NULL;
+    hid_t             fid     = H5I_INVALID_HID;
     struct handler_t *hand    = NULL;
     hid_t             fapl_id = H5P_DEFAULT;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
-
     /* Initialize h5tools lib */
     h5tools_init();
-
-    /* Disable tools error reporting */
-    H5Eget_auto2(H5tools_ERR_STACK_g, &tools_func, &tools_edata);
-    H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     HDmemset(&iter, 0, sizeof(iter));
 
     if (parse_command_line(argc, argv, &hand) < 0)
         goto done;
 
-    /* if drivername is not null, probably need to set the fapl */
-    if (HDstrcmp(drivername, "")) {
-        void *conf_fa = NULL;
+    /* enable error reporting if command line option */
+    h5tools_error_report();
 
-        if (!HDstrcmp(drivername, "ros3")) {
-#ifndef H5_HAVE_ROS3_VFD
-            error_msg("Read-Only S3 VFD not enabled.\n\n");
-            goto done;
+    if (drivername) {
+        h5tools_vfd_info_t vfd_info;
+
+        vfd_info.info = NULL;
+        vfd_info.name = drivername;
+
+        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
+#ifdef H5_HAVE_ROS3_VFD
+            vfd_info.info = (void *)&ros3_fa;
 #else
-            conf_fa = (void *)&ros3_fa;
-#endif /* H5_HAVE_ROS3_VFD */
+            error_msg("Read-Only S3 VFD not enabled.\n");
+            goto done;
+#endif
         }
-        else if (!HDstrcmp(drivername, "hdfs")) {
-#ifndef H5_HAVE_LIBHDFS
-            error_msg("HDFS VFD not enabled.\n\n");
-            goto done;
+        else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
+#ifdef H5_HAVE_LIBHDFS
+            vfd_info.info = (void *)&hdfs_fa;
 #else
-            conf_fa = (void *)&hdfs_fa;
-#endif /* H5_HAVE_LIBHDFS */
+            error_msg("HDFS VFD not enabled.\n");
+            goto done;
+#endif
         }
 
-        if (conf_fa != NULL) {
-            HDassert(fapl_id == H5P_DEFAULT);
-            fapl_id = H5Pcreate(H5P_FILE_ACCESS);
-            if (fapl_id < 0) {
-                error_msg("Unable to create fapl entry\n");
-                goto done;
-            }
-            if (1 > h5tools_set_configured_fapl(fapl_id, drivername, conf_fa)) {
-                error_msg("Unable to set fapl\n");
-                goto done;
-            }
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
+            error_msg("Unable to create FAPL for file access\n");
+            goto done;
         }
-    } /* drivername set */
+    }
 
     fname = argv[opt_ind];
-
-    if (enable_error_stack > 0) {
-        H5Eset_auto2(H5E_DEFAULT, func, edata);
-        H5Eset_auto2(H5tools_ERR_STACK_g, tools_func, tools_edata);
-    }
 
     /* Check for filename given */
     if (fname) {
@@ -1909,7 +1820,8 @@ main(int argc, const char *argv[])
 
         HDprintf("Filename: %s\n", fname);
 
-        fid = H5Fopen(fname, H5F_ACC_RDONLY, fapl_id);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0);
+
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);
             h5tools_setstatus(EXIT_FAILURE);
@@ -2005,8 +1917,6 @@ done:
         error_msg("unable to close file \"%s\"\n", fname);
         h5tools_setstatus(EXIT_FAILURE);
     } /* end if */
-
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
 
     leave(h5tools_getstatus());
 } /* end main() */

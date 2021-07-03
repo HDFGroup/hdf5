@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -81,16 +81,6 @@ create_file(const char *filename, hbool_t verbose, FILE *verbose_file, unsigned 
     /* We ALWAYS select the latest file format for SWMR */
     if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
         return -1;
-
-#ifdef QAK
-    if (verbose) {
-        char verbose_name[1024];
-
-        HDsnprintf(verbose_name, sizeof(verbose_name), "swmr_start_write.log.%u", random_seed);
-
-        H5Pset_fapl_log(fapl, verbose_name, H5FD_LOG_ALL, (size_t)(512 * 1024 * 1024));
-    }  /* end if */
-#endif /* QAK */
 
     /* Create file creation property list */
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
@@ -395,7 +385,7 @@ main(int argc, const char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if (HDstrcmp(index_type, "ea") && HDstrcmp(index_type, "b2"))
+                        if (HDstrcmp(index_type, "ea") != 0 && HDstrcmp(index_type, "b2") != 0)
                             usage();
                         u += 2;
                         break;

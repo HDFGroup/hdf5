@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -31,25 +31,25 @@
 #endif
 
 /* Local function prototypes */
-static htri_t H5Z_can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static herr_t H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
-static size_t H5Z_filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
-                              size_t *buf_size, void **buf);
+static htri_t H5Z__can_apply_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static herr_t H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id);
+static size_t H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+                               size_t *buf_size, void **buf);
 
 /* This message derives from H5Z */
 H5Z_class2_t H5Z_SZIP[1] = {{
-    H5Z_CLASS_T_VERS,   /* H5Z_class_t version */
-    H5Z_FILTER_SZIP,    /* Filter id number		*/
-    1,                  /* Assume encoder present: check before registering */
-    1,                  /* decoder_present flag (set to true) */
-    "szip",             /* Filter name for debugging	*/
-    H5Z_can_apply_szip, /* The "can apply" callback     */
-    H5Z_set_local_szip, /* The "set local" callback     */
-    H5Z_filter_szip,    /* The actual filter function	*/
+    H5Z_CLASS_T_VERS,    /* H5Z_class_t version */
+    H5Z_FILTER_SZIP,     /* Filter id number		*/
+    1,                   /* Assume encoder present: check before registering */
+    1,                   /* decoder_present flag (set to true) */
+    "szip",              /* Filter name for debugging	*/
+    H5Z__can_apply_szip, /* The "can apply" callback     */
+    H5Z__set_local_szip, /* The "set local" callback     */
+    H5Z__filter_szip,    /* The actual filter function	*/
 }};
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_can_apply_szip
+ * Function:	H5Z__can_apply_szip
  *
  * Purpose:	Check the parameters for szip compression for validity and
  *              whether they fit a particular dataset.
@@ -70,14 +70,14 @@ H5Z_class2_t H5Z_SZIP[1] = {{
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5Z_can_apply_szip(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
+H5Z__can_apply_szip(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UNUSED space_id)
 {
     const H5T_t *type;             /* Datatype */
     unsigned     dtype_size;       /* Datatype's size (in bits) */
     H5T_order_t  dtype_order;      /* Datatype's endianness order */
     htri_t       ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Get datatype */
     if (NULL == (type = (H5T_t *)H5I_object_verify(type_id, H5I_DATATYPE)))
@@ -102,10 +102,10 @@ H5Z_can_apply_szip(hid_t H5_ATTR_UNUSED dcpl_id, hid_t type_id, hid_t H5_ATTR_UN
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_can_apply_szip() */
+} /* end H5Z__can_apply_szip() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_set_local_szip
+ * Function:	H5Z__set_local_szip
  *
  * Purpose:	Set the "local" dataset parameters for szip compression.
  *
@@ -115,18 +115,10 @@ done:
  * Programmer:	Quincey Koziol
  *              Monday, April  7, 2003
  *
- * Modifications: Used new logic to set the size of the scanline parameter.
- *                Now SZIP compression can be applied to the chunk
- *                of any shape and size with only one restriction: the number
- *                of elements in the chunk has to be not less than number
- *                of elements (pixels) in the block (cd_values[H5Z_SZIP_PARM_PPB]
- *                parameter).
- *                           Elena Pourmal, July 20, 2004
- *
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
+H5Z__set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 {
     H5P_genplist_t *dcpl_plist;                       /* Property list pointer */
     const H5T_t *   type;                             /* Datatype */
@@ -143,7 +135,7 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
     hsize_t         scanline;                         /* Size of dataspace's fastest changing dimension */
     herr_t          ret_value = SUCCEED;              /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_STATIC
 
     /* Get the plist structure */
     if (NULL == (dcpl_plist = H5P_object_verify(dcpl_id, H5P_DATASET_CREATE)))
@@ -250,10 +242,10 @@ H5Z_set_local_szip(hid_t dcpl_id, hid_t type_id, hid_t space_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5Z_set_local_szip() */
+} /* end H5Z__set_local_szip() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5Z_filter_szip
+ * Function:	H5Z__filter_szip
  *
  * Purpose:	Implement an I/O filter around the 'rice' algorithm in
  *              libsz
@@ -267,8 +259,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static size_t
-H5Z_filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes, size_t *buf_size,
-                void **buf)
+H5Z__filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], size_t nbytes,
+                 size_t *buf_size, void **buf)
 {
     size_t         ret_value = 0;    /* Return value */
     size_t         size_out  = 0;    /* Size of output buffer */
@@ -276,7 +268,7 @@ H5Z_filter_szip(unsigned flags, size_t cd_nelmts, const unsigned cd_values[], si
     unsigned char *newbuf    = NULL; /* Pointer to input buffer */
     SZ_com_t       sz_param;         /* szip parameter block */
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_STATIC
 
     /* Sanity check to make certain that we haven't drifted out of date with
      * the mask options from the szlib.h header */

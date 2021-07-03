@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -48,7 +48,7 @@ libhdf5_fortran_la_SOURCES=H5f90global.F90 \
           H5f90kit.c H5_f.c H5Af.c H5Df.c H5Ef.c H5Ff.c H5Gf.c           \
           H5If.c H5Lf.c H5Of.c H5Pf.c H5Rf.c H5Sf.c H5Tf.c H5Zf.c HDF5.F90
 
-# HDF5 Fortran library depends on HDF5 Library. 
+# HDF5 Fortran library depends on HDF5 Library.
 libhdf5_fortran_la_LIBADD=$(LIBHDF5)
 
 # h5fc is generated during configure.
@@ -155,7 +155,7 @@ H5Pff.lo:            $(srcdir)/H5Pff.F90 H5f90global.lo H5fortkit.lo
 H5Rff.lo:            $(srcdir)/H5Rff.F90 H5f90global.lo
 H5Sff.lo:            $(srcdir)/H5Sff.F90 H5f90global.lo
 H5Tff.lo:            $(srcdir)/H5Tff.F90 H5f90global.lo
-H5VLff.lo:           $(srcdir)/H5VLff.F90 H5f90global.lo
+H5VLff.lo:           $(srcdir)/H5VLff.F90 H5f90global.lo H5fortkit.lo
 H5Zff.lo:            $(srcdir)/H5Zff.F90 H5f90global.lo
 H5_gen.lo:           H5_gen.F90 H5f90global.lo H5Aff.lo H5Dff.lo H5Pff.lo
 HDF5.lo:             $(srcdir)/HDF5.F90 H5f90global.lo H5_ff.lo H5Aff.lo  \

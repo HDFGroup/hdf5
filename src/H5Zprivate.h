@@ -6,17 +6,17 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Robb Matzke <matzke@llnl.gov>
+/* Programmer:  Robb Matzke
  *              Thursday, April 16, 1998
  */
 
-#ifndef _H5Zprivate_H
-#define _H5Zprivate_H
+#ifndef H5Zprivate_H
+#define H5Zprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5Z_filter_info_t H5Z_filter_info_t;
@@ -26,6 +26,7 @@ typedef struct H5Z_filter_info_t H5Z_filter_info_t;
 
 /* Private headers needed by this file */
 #include "H5Tprivate.h" /* Datatypes				*/
+#include "H5Sprivate.h" /* Dataspace                */
 
 /**************************/
 /* Library Private Macros */
@@ -86,6 +87,7 @@ H5_DLL herr_t        H5Z_can_apply(hid_t dcpl_id, hid_t type_id);
 H5_DLL herr_t        H5Z_set_local(hid_t dcpl_id, hid_t type_id);
 H5_DLL herr_t        H5Z_can_apply_direct(const struct H5O_pline_t *pline);
 H5_DLL herr_t        H5Z_set_local_direct(const struct H5O_pline_t *pline);
+H5_DLL htri_t        H5Z_ignore_filters(hid_t dcpl_id, const H5T_t *type, const H5S_t *space);
 H5_DLL H5Z_filter_info_t *H5Z_filter_info(const struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL htri_t             H5Z_filter_in_pline(const struct H5O_pline_t *pline, H5Z_filter_t filter);
 H5_DLL htri_t             H5Z_all_filters_avail(const struct H5O_pline_t *pline);
