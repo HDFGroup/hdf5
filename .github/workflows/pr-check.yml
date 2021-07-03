@@ -1,0 +1,214 @@
+name: hdf5 dev CI
+
+# Controls when the action will run. Triggers the workflow on push or pull request
+on:
+  pull_request:
+    branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  # This workflow contains a single job called "build"
+  build:
+    strategy:
+#      fail-fast: false
+      matrix:
+        name: ["Windows Latest MSVC", "Ubuntu Latest GCC", "Ubuntu Debug GCC", "macOS Latest Clang", "Ubuntu Autotools GCC", "Windows TS MSVC", "Ubuntu TS GCC", "TS Debug GCC", "macOS TS Clang", "TS Autotools GCC"]
+        include:
+          - name: "Windows Latest MSVC"
+            artifact: "Windows-MSVC.tar.xz"
+            os: windows-latest
+            build_type: "Release"
+            toolchain: ""
+            cpp: ON
+            fortran: OFF
+            java: ON
+            ts: OFF
+            hl: ON
+            parallel: OFF
+            generator: "-G \"Visual Studio 16 2019\" -A x64"
+          - name: "Ubuntu Latest GCC"
+            artifact: "Linux.tar.xz"
+            os: ubuntu-latest
+            build_type: "Release"
+            cpp: ON
+            fortran: ON
+            java: ON
+            ts: OFF
+            hl: ON
+            parallel: OFF
+            toolchain: "config/toolchain/GCC.cmake"
+            generator: "-G Ninja"
+          - name: "macOS Latest Clang"
+            artifact: "macOS.tar.xz"
+            os: macos-latest
+            build_type: "Release"
+            cpp: ON
+            fortran: OFF
+            java: ON
+            ts: OFF
+            hl: ON
+            parallel: OFF
+            toolchain: "config/toolchain/clang.cmake"
+            generator: "-G Ninja"
+          - name: "Ubuntu Debug GCC"
+            artifact: "LinuxDBG.tar.xz"
+            os: ubuntu-latest
+            build_type: "Debug"
+            cpp: ON
+            fortran: OFF
+            java: OFF
+            ts: OFF
+            hl: ON
+            parallel: OFF
+            toolchain: "config/toolchain/GCC.cmake"
+            generator: "-G Ninja"
+          - name: "Ubuntu Autotools GCC"
+            artifact: "LinuxA.tar.xz"
+            os: ubuntu-latest
+            build_type: "Release"
+            cpp: enable
+            fortran: enable
+            java: enable
+            ts: disable
+            hl: enable
+            parallel: disable
+            toolchain: ""
+            generator: "autogen"
+#  Threadsafe runs
+          - name: "Windows TS MSVC"
+            artifact: "Windows-MSVCTS.tar.xz"
+            os: windows-2016
+            build_type: "Release"
+            toolchain: ""
+            cpp: OFF
+            fortran: OFF
+            java: OFF
+            ts: ON
+            hl: OFF
+            parallel: OFF
+            generator: "-G \"Visual Studio 15 2017 Win64\""
+          - name: "Ubuntu TS GCC"
+            artifact: "LinuxTS.tar.xz"
+            os: ubuntu-latest
+            build_type: "Release"
+            cpp: OFF
+            fortran: OFF
+            java: OFF
+            ts: ON
+            hl: OFF
+            parallel: OFF
+            toolchain: "config/toolchain/GCC.cmake"
+            generator: "-G Ninja"
+          - name: "macOS TS Clang"
+            artifact: "macOSTS.tar.xz"
+            os: macos-latest
+            build_type: "Release"
+            cpp: OFF
+            fortran: OFF
+            java: OFF
+            ts: ON
+            hl: OFF
+            parallel: OFF
+            toolchain: "config/toolchain/clang.cmake"
+            generator: "-G Ninja"
+          - name: "TS Debug GCC"
+            artifact: "LinuxTSDBG.tar.xz"
+            os: ubuntu-latest
+            build_type: "Debug"
+            cpp: OFF
+            fortran: OFF
+            java: OFF
+            ts: ON
+            hl: OFF
+            parallel: OFF
+            toolchain: "config/toolchain/GCC.cmake"
+            generator: "-G Ninja"
+          - name: "TS Autotools GCC"
+            artifact: "LinuxATS.tar.xz"
+            os: ubuntu-latest
+            build_type: "Release"
+            cpp: disable
+            fortran: disable
+            java: disable
+            ts: enable
+            hl: disable
+            parallel: disable
+            toolchain: ""
+            generator: "autogen"
+#          - name: "Ubuntu Parallel GCC"
+#            artifact: "LinuxPar.tar.xz"
+#            os: ubuntu-latest
+#            build_type: "Release"
+#            cpp: OFF
+#            fortran: OFF
+#            parallel: ON
+#            toolchain: "config/toolchain/GCC.cmake"
+#            generator: "-G Ninja"
+
+    name: ${{ matrix.name }}
+    # The type of runner that the job will run on
+    runs-on: ${{ matrix.os }}
+    if: "!contains(github.event.head_commit.message, 'skip-ci')"
+          
+    # Steps represent a sequence of tasks that will be executed as part of the job
+    steps:
+    - name: Install Dependencies (Linux)
+      run: sudo apt-get install ninja-build
+      if: matrix.os == 'ubuntu-latest'
+    - name: Install Autotools Dependencies (Linux)
+      run: sudo apt-get install automake autoconf libtool libtool-bin
+      if: matrix.generator == 'autogen'
+    - name: Install Dependencies (Windows)
+      run: choco install ninja
+      if: matrix.os == 'windows-latest'
+    - name: Install Dependencies (macOS)
+      run: brew install ninja
+      if: matrix.os == 'macos-latest'
+    - name: Set environment for MSVC (Windows)
+      if:  matrix.os == 'windows-latest'
+      run: |
+        # Set these env vars so cmake picks the correct compiler
+        echo "CXX=cl.exe" >> $GITHUB_ENV
+        echo "CC=cl.exe" >> $GITHUB_ENV
+    
+    # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
+    - name: Get Sources
+      uses: actions/checkout@v2
+
+    - name: Autotools Configure 
+      if: matrix.generator == 'autogen'
+      run: |
+        sh ./autogen.sh
+        sh ./bin/chkmanifest
+        mkdir "${{ runner.workspace }}/build"
+        cd "${{ runner.workspace }}/build"
+        $GITHUB_WORKSPACE/configure --enable-shared --${{ matrix.ts }}-threadsafe --${{ matrix.hl }}-hl --${{ matrix.parallel }}-parallel --${{ matrix.cpp }}-cxx --${{ matrix.fortran }}-fortran --${{ matrix.java }}-java
+      shell: bash
+
+    - name: Configure
+      if: matrix.generator != 'autogen'
+      run: |
+        mkdir "${{ runner.workspace }}/build"
+        cd "${{ runner.workspace }}/build"
+        cmake ${{ matrix.generator }} -DCMAKE_BUILD_TYPE=${{ matrix.build_type }} -DCMAKE_TOOLCHAIN_FILE=${{ matrix.toolchain }} -DBUILD_SHARED_LIBS=ON -DHDF5_ENABLE_ALL_WARNINGS=ON -DHDF5_ENABLE_THREADSAFE:BOOL=${{ matrix.ts }} -DHDF5_BUILD_HL_LIB:BOOL=${{ matrix.hl }} -DHDF5_ENABLE_PARALLEL:BOOL=${{ matrix.parallel }} -DHDF5_BUILD_CPP_LIB:BOOL=${{ matrix.cpp }} -DHDF5_BUILD_FORTRAN=${{ matrix.fortran }} -DHDF5_BUILD_JAVA=${{ matrix.java }} $GITHUB_WORKSPACE
+      shell: bash
+
+    - name: Autotools Build
+      if: matrix.generator == 'autogen'
+      run: make
+      working-directory: ${{ runner.workspace }}/build      
+
+    - name: Build
+      if: matrix.generator != 'autogen'
+      run: cmake --build . --config ${{ matrix.build_type }}
+      working-directory: ${{ runner.workspace }}/build      
+
+    - name: Autotools Test
+      if: matrix.generator == 'autogen'
+      run: make check
+      working-directory: ${{ runner.workspace }}/build
+
+    - name: Test
+      if: matrix.generator != 'autogen'
+      run: ctest --build . -C ${{ matrix.build_type }} -V
+      working-directory: ${{ runner.workspace }}/build
