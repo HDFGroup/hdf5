@@ -37,8 +37,7 @@ extern "C" {
  * Signature: (JI)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding
-    (JNIEnv *env, jclass clss, jlong acpl, jint encoding)
+Java_hdf_hdf5lib_H5_H5Pset_1char_1encoding(JNIEnv *env, jclass clss, jlong acpl, jint encoding)
 {
     UNUSED(clss);
 
@@ -55,8 +54,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding
-    (JNIEnv *env, jclass clss, jlong acpl)
+Java_hdf_hdf5lib_H5_H5Pget_1char_1encoding(JNIEnv *env, jclass clss, jlong acpl)
 {
     H5T_cset_t encoding = H5T_CSET_ERROR;
 

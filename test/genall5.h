@@ -34,8 +34,7 @@ void os_grp_0(hid_t fid, const char *group_name);
 void vrfy_os_grp_0(hid_t fid, const char *group_name);
 
 void os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
-void vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, 
-    unsigned nlinks);
+void vrfy_os_grp_n(hid_t fid, const char *group_name, int proc_num, unsigned nlinks);
 
 void ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
 void vrfy_ds_ctg_i(hid_t fid, const char *dset_name, hbool_t write_data);
@@ -48,4 +47,3 @@ void vrfy_ds_cpt_i(hid_t fid, const char *dset_name, hbool_t write_data);
 
 void ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
 void vrfy_ds_ctg_v(hid_t fid, const char *dset_name, hbool_t write_data);
-

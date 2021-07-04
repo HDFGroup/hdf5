@@ -20,12 +20,11 @@ extern "C" {
 
 H5_HLDLL herr_t H5LDget_dset_dims(hid_t did, hsize_t *cur_dims);
 H5_HLDLL size_t H5LDget_dset_type_size(hid_t did, const char *fields);
-H5_HLDLL herr_t H5LDget_dset_elmts(hid_t did, const hsize_t *prev_dims,
-    const hsize_t *cur_dims, const char *fields, void *buf);
+H5_HLDLL herr_t H5LDget_dset_elmts(hid_t did, const hsize_t *prev_dims, const hsize_t *cur_dims,
+                                   const char *fields, void *buf);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* _H5LDpublic_H */
-

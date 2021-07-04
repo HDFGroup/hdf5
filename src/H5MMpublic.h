@@ -42,4 +42,3 @@ extern "C" {
 }
 #endif
 #endif /* _H5MMpublic_H */
-

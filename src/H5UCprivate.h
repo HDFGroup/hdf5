@@ -13,7 +13,7 @@
 
 /*
  * This file contains private information about the H5UC module
- * The module used to be H5RC, but changed to H5UC because of 
+ * The module used to be H5RC, but changed to H5UC because of
  * conflicting requirement for the use of H5RC.
  */
 
@@ -41,24 +41,22 @@ typedef herr_t (*H5UC_free_func_t)(void *o);
 
 /* Typedef for reference counted objects */
 typedef struct H5UC_t {
-    void *o;            /* Object to be reference counted */
-    size_t n;           /* Reference count of number of pointers sharing object */
+    void *           o;         /* Object to be reference counted */
+    size_t           n;         /* Reference count of number of pointers sharing object */
     H5UC_free_func_t free_func; /* Function to free object */
 } H5UC_t;
 
 /**********/
 /* Macros */
 /**********/
-#define H5UC_INC(rc)            ((rc)->n++)
-#define H5UC_DEC(rc)            (H5UC_decr(rc))
-#define H5UC_GET_OBJ(rc)        ((rc)->o)
+#define H5UC_INC(rc)     ((rc)->n++)
+#define H5UC_DEC(rc)     (H5UC_decr(rc))
+#define H5UC_GET_OBJ(rc) ((rc)->o)
 
 /********************/
 /* Private routines */
 /********************/
 H5_DLL H5UC_t *H5UC_create(void *s, H5UC_free_func_t free_func);
-H5_DLL herr_t H5UC_decr(H5UC_t *rc);
+H5_DLL herr_t  H5UC_decr(H5UC_t *rc);
 
 #endif /* _H5RSprivate_H */
-
-

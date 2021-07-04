@@ -25,14 +25,14 @@
 /* This source code file is part of the H5FD driver module */
 #include "H5FDdrvr_module.h"
 
-#include "H5private.h"      /* Generic Functions        */
-#include "H5Eprivate.h"     /* Error handling           */
-#include "H5FDprivate.h"    /* File drivers             */
-#include "H5FDros3.h"       /* ros3 file driver         */
-#include "H5FLprivate.h"    /* Free Lists               */
-#include "H5Iprivate.h"     /* IDs                      */
-#include "H5MMprivate.h"    /* Memory management        */
-#include "H5FDs3comms.h"    /* S3 Communications        */
+#include "H5private.h"   /* Generic Functions        */
+#include "H5Eprivate.h"  /* Error handling           */
+#include "H5FDprivate.h" /* File drivers             */
+#include "H5FDros3.h"    /* ros3 file driver         */
+#include "H5FLprivate.h" /* Free Lists               */
+#include "H5Iprivate.h"  /* IDs                      */
+#include "H5MMprivate.h" /* Memory management        */
+#include "H5FDs3comms.h" /* S3 Communications        */
 
 #ifdef H5_HAVE_ROS3_VFD
 
@@ -63,29 +63,27 @@ static hid_t H5FD_ROS3_g = 0;
  * 2^(10+(1*16)) = 2^26 = 64MB
  *     Reads of 64MB or greater fall in "overflow" bin[BIN_COUNT]
  */
-#define ROS3_STATS_BASE         2
-#define ROS3_STATS_INTERVAL     1
+#define ROS3_STATS_BASE        2
+#define ROS3_STATS_INTERVAL    1
 #define ROS3_STATS_START_POWER 10
 #define ROS3_STATS_BIN_COUNT   16 /* MUST BE GREATER THAN 0 */
-
 
 /*
  * Calculate `BASE ^ (START_POWER + (INTERVAL * bin_i))`
  * Stores result at `(unsigned long long *) out_ptr`.
  * Used in computing boundaries between stats bins.
  */
-#define ROS3_STATS_POW(bin_i, out_ptr) {                       \
-    unsigned long long donotshadowresult = 1;                  \
-    unsigned           donotshadowindex  = 0;                  \
-    for (donotshadowindex = 0;                                 \
-         donotshadowindex < (((bin_i) * ROS3_STATS_INTERVAL) + \
-                              ROS3_STATS_START_POWER);         \
-         donotshadowindex++)                                   \
-    {                                                          \
-        donotshadowresult *= ROS3_STATS_BASE;                  \
-    }                                                          \
-    *(out_ptr) = donotshadowresult;                            \
-}
+#define ROS3_STATS_POW(bin_i, out_ptr)                                                                       \
+    {                                                                                                        \
+        unsigned long long donotshadowresult = 1;                                                            \
+        unsigned           donotshadowindex  = 0;                                                            \
+        for (donotshadowindex = 0;                                                                           \
+             donotshadowindex < (((bin_i)*ROS3_STATS_INTERVAL) + ROS3_STATS_START_POWER);                    \
+             donotshadowindex++) {                                                                           \
+            donotshadowresult *= ROS3_STATS_BASE;                                                            \
+        }                                                                                                    \
+        *(out_ptr) = donotshadowresult;                                                                      \
+    }
 
 /* array to hold pre-computed boundaries for stats bins
  */
@@ -192,13 +190,13 @@ typedef struct {
  *
  ***************************************************************************/
 typedef struct H5FD_ros3_t {
-    H5FD_t            pub;
-    H5FD_ros3_fapl_t  fa;
-    haddr_t           eoa;
-    s3r_t            *s3r_handle;
+    H5FD_t           pub;
+    H5FD_ros3_fapl_t fa;
+    haddr_t          eoa;
+    s3r_t *          s3r_handle;
 #if ROS3_STATS
-    ros3_statsbin    meta[ROS3_STATS_BIN_COUNT + 1];
-    ros3_statsbin    raw[ROS3_STATS_BIN_COUNT + 1];
+    ros3_statsbin meta[ROS3_STATS_BIN_COUNT + 1];
+    ros3_statsbin raw[ROS3_STATS_BIN_COUNT + 1];
 #endif
 } H5FD_ros3_t;
 
@@ -212,72 +210,68 @@ typedef struct H5FD_ros3_t {
  *                  Only included if it may be used -- ROS3 VFD is enabled.
  *
  */
-#define MAXADDR (((haddr_t)1<<(8*sizeof(HDoff_t)-1))-1)
-#define ADDR_OVERFLOW(A)    (HADDR_UNDEF==(A) || ((A) & ~(haddr_t)MAXADDR))
+#define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
+#define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 
 /* Prototypes */
 static herr_t  H5FD_ros3_term(void);
-static void   *H5FD_ros3_fapl_get(H5FD_t *_file);
-static void   *H5FD_ros3_fapl_copy(const void *_old_fa);
+static void *  H5FD_ros3_fapl_get(H5FD_t *_file);
+static void *  H5FD_ros3_fapl_copy(const void *_old_fa);
 static herr_t  H5FD_ros3_fapl_free(void *_fa);
-static H5FD_t *H5FD_ros3_open(const char *name, unsigned flags, hid_t fapl_id,
-                              haddr_t maxaddr);
+static H5FD_t *H5FD_ros3_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD_ros3_close(H5FD_t *_file);
 static int     H5FD_ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t  H5FD_ros3_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_ros3_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD_ros3_get_eof(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t  H5FD_ros3_get_handle(H5FD_t *_file, hid_t fapl,
-                                    void** file_handle);
-static herr_t  H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
-                               haddr_t addr, size_t size, void *buf);
-static herr_t  H5FD_ros3_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id,
-                               haddr_t addr, size_t size, const void *buf);
-static herr_t  H5FD_ros3_truncate(H5FD_t *_file, hid_t dxpl_id,
-                                  hbool_t closing);
+static herr_t  H5FD_ros3_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
+static herr_t  H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
+                              void *buf);
+static herr_t  H5FD_ros3_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
+                               const void *buf);
+static herr_t  H5FD_ros3_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD_ros3_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD_ros3_unlock(H5FD_t *_file);
-static herr_t  H5FD_ros3_validate_config(const H5FD_ros3_fapl_t * fa);
+static herr_t  H5FD_ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
 static const H5FD_class_t H5FD_ros3_g = {
-    "ros3",                     /* name                 */
-    MAXADDR,                    /* maxaddr              */
-    H5F_CLOSE_WEAK,             /* fc_degree            */
-    H5FD_ros3_term,             /* terminate            */
-    NULL,                       /* sb_size              */
-    NULL,                       /* sb_encode            */
-    NULL,                       /* sb_decode            */
-    sizeof(H5FD_ros3_fapl_t),   /* fapl_size            */
-    H5FD_ros3_fapl_get,         /* fapl_get             */
-    H5FD_ros3_fapl_copy,        /* fapl_copy            */
-    H5FD_ros3_fapl_free,        /* fapl_free            */
-    0,                          /* dxpl_size            */
-    NULL,                       /* dxpl_copy            */
-    NULL,                       /* dxpl_free            */
-    H5FD_ros3_open,             /* open                 */
-    H5FD_ros3_close,            /* close                */
-    H5FD_ros3_cmp,              /* cmp                  */
-    H5FD_ros3_query,            /* query                */
-    NULL,                       /* get_type_map         */
-    NULL,                       /* alloc                */
-    NULL,                       /* free                 */
-    H5FD_ros3_get_eoa,          /* get_eoa              */
-    H5FD_ros3_set_eoa,          /* set_eoa              */
-    H5FD_ros3_get_eof,          /* get_eof              */
-    H5FD_ros3_get_handle,       /* get_handle           */
-    H5FD_ros3_read,             /* read                 */
-    H5FD_ros3_write,            /* write                */
-    NULL,                       /* flush                */
-    H5FD_ros3_truncate,         /* truncate             */
-    H5FD_ros3_lock,             /* lock                 */
-    H5FD_ros3_unlock,           /* unlock               */
-    H5FD_FLMAP_DICHOTOMY        /* fl_map               */
+    "ros3",                   /* name                 */
+    MAXADDR,                  /* maxaddr              */
+    H5F_CLOSE_WEAK,           /* fc_degree            */
+    H5FD_ros3_term,           /* terminate            */
+    NULL,                     /* sb_size              */
+    NULL,                     /* sb_encode            */
+    NULL,                     /* sb_decode            */
+    sizeof(H5FD_ros3_fapl_t), /* fapl_size            */
+    H5FD_ros3_fapl_get,       /* fapl_get             */
+    H5FD_ros3_fapl_copy,      /* fapl_copy            */
+    H5FD_ros3_fapl_free,      /* fapl_free            */
+    0,                        /* dxpl_size            */
+    NULL,                     /* dxpl_copy            */
+    NULL,                     /* dxpl_free            */
+    H5FD_ros3_open,           /* open                 */
+    H5FD_ros3_close,          /* close                */
+    H5FD_ros3_cmp,            /* cmp                  */
+    H5FD_ros3_query,          /* query                */
+    NULL,                     /* get_type_map         */
+    NULL,                     /* alloc                */
+    NULL,                     /* free                 */
+    H5FD_ros3_get_eoa,        /* get_eoa              */
+    H5FD_ros3_set_eoa,        /* set_eoa              */
+    H5FD_ros3_get_eof,        /* get_eof              */
+    H5FD_ros3_get_handle,     /* get_handle           */
+    H5FD_ros3_read,           /* read                 */
+    H5FD_ros3_write,          /* write                */
+    NULL,                     /* flush                */
+    H5FD_ros3_truncate,       /* truncate             */
+    H5FD_ros3_lock,           /* lock                 */
+    H5FD_ros3_unlock,         /* unlock               */
+    H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
 /* Declare a free list to manage the H5FD_ros3_t struct */
 H5FL_DEFINE_STATIC(H5FD_ros3_t);
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__init_package
@@ -298,15 +292,13 @@ H5FD__init_package(void)
     FUNC_ENTER_STATIC
 
     if (H5FD_ros3_init() < 0) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL,
-                    "unable to initialize ros3 VFD")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize ros3 VFD")
     }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD__init_package() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_init
@@ -324,7 +316,7 @@ done:
 hid_t
 H5FD_ros3_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID;
+    hid_t        ret_value = H5I_INVALID_HID;
     unsigned int bin_i;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -354,7 +346,6 @@ done:
 
 } /* end H5FD_ros3_init() */
 
-
 /*---------------------------------------------------------------------------
  * Function:    H5FD_ros3_term
  *
@@ -382,7 +373,6 @@ H5FD_ros3_term(void)
 
 } /* end H5FD_ros3_term() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5Pset_fapl_ros3
  *
@@ -399,8 +389,7 @@ H5FD_ros3_term(void)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pset_fapl_ros3(hid_t             fapl_id,
-                 H5FD_ros3_fapl_t *fa)
+H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
 {
     H5P_genplist_t *plist     = NULL; /* Property list pointer */
     herr_t          ret_value = FAIL;
@@ -416,8 +405,7 @@ H5Pset_fapl_ros3(hid_t             fapl_id,
 
     plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
     if (plist == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, \
-                    "not a file access property list")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
     }
 
     if (FAIL == H5FD_ros3_validate_config(fa)) {
@@ -430,7 +418,6 @@ done:
     FUNC_LEAVE_API(ret_value)
 
 } /* end H5Pset_fapl_ros3() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_validate_config()
@@ -453,7 +440,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_validate_config(const H5FD_ros3_fapl_t * fa)
+H5FD_ros3_validate_config(const H5FD_ros3_fapl_t *fa)
 {
     herr_t ret_value = SUCCEED;
 
@@ -461,19 +448,15 @@ H5FD_ros3_validate_config(const H5FD_ros3_fapl_t * fa)
 
     HDassert(fa != NULL);
 
-    if ( fa->version != H5FD_CURR_ROS3_FAPL_T_VERSION ) {
-         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                     "Unknown H5FD_ros3_fapl_t version");
+    if (fa->version != H5FD_CURR_ROS3_FAPL_T_VERSION) {
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Unknown H5FD_ros3_fapl_t version");
     }
 
     /* if set to authenticate, region and id cannot be empty strings
      */
     if (fa->authenticate == TRUE) {
-        if ((fa->aws_region[0] == '\0') ||
-            (fa->secret_id[0]  == '\0'))
-        {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                        "Inconsistent authentication information");
+        if ((fa->aws_region[0] == '\0') || (fa->secret_id[0] == '\0')) {
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Inconsistent authentication information");
         }
     }
 
@@ -481,7 +464,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_ros3_validate_config() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_ros3
@@ -501,11 +483,10 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5Pget_fapl_ros3(hid_t             fapl_id,
-                 H5FD_ros3_fapl_t *fa_out)
+H5Pget_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa_out)
 {
     const H5FD_ros3_fapl_t *fa        = NULL;
-    H5P_genplist_t         *plist     = NULL;
+    H5P_genplist_t *        plist     = NULL;
     herr_t                  ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
@@ -541,7 +522,6 @@ done:
 
 } /* end H5Pget_fapl_ros3() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_fapl_get
  *
@@ -562,16 +542,15 @@ done:
 static void *
 H5FD_ros3_fapl_get(H5FD_t *_file)
 {
-    H5FD_ros3_t      *file      = (H5FD_ros3_t*)_file;
+    H5FD_ros3_t *     file      = (H5FD_ros3_t *)_file;
     H5FD_ros3_fapl_t *fa        = NULL;
-    void             *ret_value = NULL;
+    void *            ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     fa = (H5FD_ros3_fapl_t *)H5MM_calloc(sizeof(H5FD_ros3_fapl_t));
     if (fa == NULL) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     }
 
     /* Copy the fields of the structure */
@@ -589,7 +568,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_ros3_fapl_get() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_fapl_copy
@@ -610,16 +588,15 @@ done:
 static void *
 H5FD_ros3_fapl_copy(const void *_old_fa)
 {
-    const H5FD_ros3_fapl_t *old_fa    = (const H5FD_ros3_fapl_t*)_old_fa;
-    H5FD_ros3_fapl_t       *new_fa    = NULL;
-    void                   *ret_value = NULL;
+    const H5FD_ros3_fapl_t *old_fa    = (const H5FD_ros3_fapl_t *)_old_fa;
+    H5FD_ros3_fapl_t *      new_fa    = NULL;
+    void *                  ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     new_fa = (H5FD_ros3_fapl_t *)H5MM_malloc(sizeof(H5FD_ros3_fapl_t));
     if (new_fa == NULL) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "memory allocation failed");
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed");
     }
 
     HDmemcpy(new_fa, old_fa, sizeof(H5FD_ros3_fapl_t));
@@ -634,7 +611,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_ros3_fapl_copy() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_fapl_free
@@ -653,7 +629,7 @@ done:
 static herr_t
 H5FD_ros3_fapl_free(void *_fa)
 {
-    H5FD_ros3_fapl_t *fa = (H5FD_ros3_fapl_t*)_fa;
+    H5FD_ros3_fapl_t *fa = (H5FD_ros3_fapl_t *)_fa;
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -701,15 +677,14 @@ ros3_reset_stats(H5FD_ros3_t *file)
 #endif
 
     if (file == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "file was null");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file was null");
     }
 
     for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
-        file->raw[i].bytes  = 0;
-        file->raw[i].count  = 0;
-        file->raw[i].min    = (unsigned long long)ROS3_STATS_STARTING_MIN;
-        file->raw[i].max    = 0;
+        file->raw[i].bytes = 0;
+        file->raw[i].count = 0;
+        file->raw[i].min   = (unsigned long long)ROS3_STATS_STARTING_MIN;
+        file->raw[i].max   = 0;
 
         file->meta[i].bytes = 0;
         file->meta[i].count = 0;
@@ -723,7 +698,6 @@ done:
 } /* end ros3_reset_stats() */
 
 #endif /* ROS3_STATS */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -757,21 +731,15 @@ done:
  *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_ros3_open(
-        const char *url,
-        unsigned    flags,
-        hid_t       fapl_id,
-        haddr_t     maxaddr)
+H5FD_ros3_open(const char *url, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5FD_ros3_t      *file      = NULL;
-    struct tm        *now       = NULL;
-    char              iso8601now[ISO8601_SIZE];
-    unsigned char     signing_key[SHA256_DIGEST_LENGTH];
-    s3r_t            *handle    = NULL;
-    H5FD_ros3_fapl_t  fa;
-    H5FD_t           *ret_value = NULL;
-
-
+    H5FD_ros3_t *    file = NULL;
+    struct tm *      now  = NULL;
+    char             iso8601now[ISO8601_SIZE];
+    unsigned char    signing_key[SHA256_DIGEST_LENGTH];
+    s3r_t *          handle = NULL;
+    H5FD_ros3_fapl_t fa;
+    H5FD_t *         ret_value = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -790,16 +758,14 @@ H5FD_ros3_open(
     if (ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr")
     if (flags != H5F_ACC_RDONLY)
-        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL,
-                    "only Read-Only access allowed")
+        HGOTO_ERROR(H5E_ARGS, H5E_UNSUPPORTED, NULL, "only Read-Only access allowed")
 
     if (FAIL == H5Pget_fapl_ros3(fapl_id, &fa)) {
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "can't get property list")
     }
 
     if (CURLE_OK != curl_global_init(CURL_GLOBAL_DEFAULT)) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-                    "unable to initialize curl global (placeholder flags)")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "unable to initialize curl global (placeholder flags)")
     }
 
     /* open file; procedure depends on whether or not the fapl instructs to
@@ -811,26 +777,19 @@ H5FD_ros3_open(
          * find way to re-use/share
          */
         now = gmnow();
-        HDassert( now != NULL );
+        HDassert(now != NULL);
         if (ISO8601NOW(iso8601now, now) != (ISO8601_SIZE - 1)) {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-                        "problem while writing iso8601 timestamp")
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while writing iso8601 timestamp")
         }
-        if (FAIL == H5FD_s3comms_signing_key(signing_key,
-                                             (const char *)fa.secret_key,
-                                             (const char *)fa.aws_region,
-                                             (const char *)iso8601now) )
-        {
-            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL,
-                        "problem while computing signing key")
+        if (FAIL == H5FD_s3comms_signing_key(signing_key, (const char *)fa.secret_key,
+                                             (const char *)fa.aws_region, (const char *)iso8601now)) {
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "problem while computing signing key")
         }
 
-        handle = H5FD_s3comms_s3r_open(
-                 url,
-                 (const char *)fa.aws_region,
-                 (const char *)fa.secret_id,
-                 (const unsigned char *)signing_key);
-    } else {
+        handle = H5FD_s3comms_s3r_open(url, (const char *)fa.aws_region, (const char *)fa.secret_id,
+                                       (const unsigned char *)signing_key);
+    }
+    else {
         handle = H5FD_s3comms_s3r_open(url, NULL, NULL, NULL);
     } /* if/else should authenticate */
 
@@ -846,8 +805,7 @@ H5FD_ros3_open(
      */
     file = H5FL_CALLOC(H5FD_ros3_t);
     if (file == NULL) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL,
-                    "unable to allocate file struct")
+        HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "unable to allocate file struct")
     }
 
     file->s3r_handle = handle;
@@ -855,26 +813,24 @@ H5FD_ros3_open(
 
 #if ROS3_STATS
     if (FAIL == ros3_reset_stats(file)) {
-        HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL,
-                    "unable to reset file statistics")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_UNINITIALIZED, NULL, "unable to reset file statistics")
     }
 #endif /* ROS3_STATS */
 
-    ret_value = (H5FD_t*)file;
+    ret_value = (H5FD_t *)file;
 
 done:
     if (ret_value == NULL) {
         if (handle != NULL) {
             if (FAIL == H5FD_s3comms_s3r_close(handle)) {
-                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL,
-                            "unable to close s3 file handle")
+                HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "unable to close s3 file handle")
             }
         }
         if (file != NULL) {
             file = H5FL_FREE(H5FD_ros3_t, file);
         }
         curl_global_cleanup(); /* early cleanup because open failed */
-    } /* end if null return value (error) */
+    }                          /* end if null return value (error) */
 
     FUNC_LEAVE_NOAPI(ret_value)
 
@@ -937,45 +893,38 @@ done:
  *----------------------------------------------------------------------------
  */
 static herr_t
-ros3_fprint_stats(FILE              *stream,
-                  const H5FD_ros3_t *file)
+ros3_fprint_stats(FILE *stream, const H5FD_ros3_t *file)
 {
     herr_t             ret_value    = SUCCEED;
-    parsed_url_t      *purl         = NULL;
+    parsed_url_t *     purl         = NULL;
     unsigned           i            = 0;
     unsigned long      count_meta   = 0;
     unsigned long      count_raw    = 0;
     double             average_meta = 0.0;
     double             average_raw  = 0.0;
-    unsigned long long min_meta   = (unsigned long long)ROS3_STATS_STARTING_MIN;
-    unsigned long long min_raw    = (unsigned long long)ROS3_STATS_STARTING_MIN;
+    unsigned long long min_meta     = (unsigned long long)ROS3_STATS_STARTING_MIN;
+    unsigned long long min_raw      = (unsigned long long)ROS3_STATS_STARTING_MIN;
     unsigned long long max_meta     = 0;
     unsigned long long max_raw      = 0;
     unsigned long long bytes_raw    = 0;
     unsigned long long bytes_meta   = 0;
     double             re_dub       = 0.0; /* re-usable double variable */
     unsigned           suffix_i     = 0;
-    const char         suffixes[]   = { ' ', 'K', 'M', 'G', 'T', 'P' };
-
-
+    const char         suffixes[]   = {' ', 'K', 'M', 'G', 'T', 'P'};
 
     FUNC_ENTER_NOAPI_NOINIT
 
     if (stream == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "file stream cannot be null" );
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file stream cannot be null");
     }
     if (file == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "file cannot be null");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file cannot be null");
     }
     if (file->s3r_handle == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "s3 request handle cannot be null");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "s3 request handle cannot be null");
     }
     if (file->s3r_handle->purl == NULL) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
-                    "parsed url structure cannot be null");
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "parsed url structure cannot be null");
     }
     purl = file->s3r_handle->purl;
 
@@ -992,7 +941,8 @@ ros3_fprint_stats(FILE              *stream,
         else
             HDfprintf(stream, "/");
         HDfprintf(stream, "?%s", purl->query);
-    } else if (purl->path != NULL && purl->path[0] != '\0') {
+    }
+    else if (purl->path != NULL && purl->path[0] != '\0') {
         HDfprintf(stream, "/%s", purl->path);
     }
     HDfprintf(stream, "\n");
@@ -1005,14 +955,18 @@ ros3_fprint_stats(FILE              *stream,
         const ros3_statsbin *r = &file->raw[i];
         const ros3_statsbin *m = &file->meta[i];
 
-        if (m->min < min_meta)  min_meta = m->min;
-        if (r->min < min_raw)   min_raw  = r->min;
-        if (m->max > max_meta)  max_meta = m->max;
-        if (r->max > max_raw)   max_raw  = r->max;
+        if (m->min < min_meta)
+            min_meta = m->min;
+        if (r->min < min_raw)
+            min_raw = r->min;
+        if (m->max > max_meta)
+            max_meta = m->max;
+        if (r->max > max_raw)
+            max_raw = r->max;
 
-        count_raw  += r->count;
+        count_raw += r->count;
         count_meta += m->count;
-        bytes_raw  += r->bytes;
+        bytes_raw += r->bytes;
         bytes_meta += m->bytes;
     }
     if (count_raw > 0)
@@ -1024,10 +978,10 @@ ros3_fprint_stats(FILE              *stream,
      * PRINT OVERVIEW *
      ******************/
 
-    HDfprintf(stream, "TOTAL READS: %llu  (%llu meta, %llu raw)\n",
-              count_raw + count_meta, count_meta, count_raw);
-    HDfprintf(stream, "TOTAL BYTES: %llu  (%llu meta, %llu raw)\n",
-              bytes_raw + bytes_meta, bytes_meta, bytes_raw);
+    HDfprintf(stream, "TOTAL READS: %llu  (%llu meta, %llu raw)\n", count_raw + count_meta, count_meta,
+              count_raw);
+    HDfprintf(stream, "TOTAL BYTES: %llu  (%llu meta, %llu raw)\n", bytes_raw + bytes_meta, bytes_meta,
+              bytes_raw);
 
     if (count_raw + count_meta == 0)
         goto done;
@@ -1040,7 +994,8 @@ ros3_fprint_stats(FILE              *stream,
     HDfprintf(stream, "  min ");
     if (count_meta == 0) {
         HDfprintf(stream, "   0.000  ");
-    } else {
+    }
+    else {
         re_dub = (double)min_meta;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
@@ -1050,7 +1005,8 @@ ros3_fprint_stats(FILE              *stream,
 
     if (count_raw == 0) {
         HDfprintf(stream, "   0.000 \n");
-    } else {
+    }
+    else {
         re_dub = (double)min_raw;
         for (suffix_i = 0; re_dub >= 1024.0; suffix_i++)
             re_dub /= 1024.0;
@@ -1088,10 +1044,8 @@ ros3_fprint_stats(FILE              *stream,
      * PRINT INDIVIDUAL BIN STATS *
      ******************************/
 
-    HDfprintf(stream,
-        "BINS             # of reads      total bytes         average size\n");
-    HDfprintf(stream,
-        "    up-to      meta     raw     meta      raw       meta      raw\n");
+    HDfprintf(stream, "BINS             # of reads      total bytes         average size\n");
+    HDfprintf(stream, "    up-to      meta     raw     meta      raw       meta      raw\n");
 
     for (i = 0; i <= ROS3_STATS_BIN_COUNT; i++) {
         const ros3_statsbin *m;
@@ -1114,9 +1068,10 @@ ros3_fprint_stats(FILE              *stream,
         range_end = ros3_stats_boundaries[i];
 
         if (i == ROS3_STATS_BIN_COUNT) {
-            range_end = ros3_stats_boundaries[i-1];
+            range_end = ros3_stats_boundaries[i - 1];
             HDfprintf(stream, ">");
-        } else {
+        }
+        else {
             HDfprintf(stream, " ");
         }
 
@@ -1151,15 +1106,14 @@ ros3_fprint_stats(FILE              *stream,
             re_dub /= 1024.0;
         HDassert(suffix_i < sizeof(suffixes));
 
-        HDfprintf(stream,
-                  " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n",
-                  re_dub, suffixes[suffix_i], /* bin ceiling      */
-                  m->count,                   /* metadata reads   */
-                  r->count,                   /* rawdata reads    */
-                  bm_val, bm_suffix,          /* metadata bytes   */
-                  br_val, br_suffix,          /* rawdata bytes    */
-                  am_val, am_suffix,          /* metadata average */
-                  ar_val, ar_suffix);         /* rawdata average  */
+        HDfprintf(stream, " %8.3f%c %7d %7d %8.3f%c %8.3f%c %8.3f%c %8.3f%c\n", re_dub,
+                  suffixes[suffix_i], /* bin ceiling      */
+                  m->count,           /* metadata reads   */
+                  r->count,           /* rawdata reads    */
+                  bm_val, bm_suffix,  /* metadata bytes   */
+                  br_val, br_suffix,  /* rawdata bytes    */
+                  am_val, am_suffix,  /* metadata average */
+                  ar_val, ar_suffix); /* rawdata average  */
 
         fflush(stream);
     }
@@ -1169,7 +1123,6 @@ done:
 
 } /* ros3_fprint_stats */
 #endif /* ROS3_STATS */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1208,15 +1161,13 @@ H5FD_ros3_close(H5FD_t H5_ATTR_UNUSED *_file)
     /* Close the underlying request handle
      */
     if (FAIL == H5FD_s3comms_s3r_close(file->s3r_handle)) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL,
-                    "unable to close S3 request handle")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, FAIL, "unable to close S3 request handle")
     }
 
 #if ROS3_STATS
     /* TODO: mechanism to re-target stats printout */
     if (ros3_fprint_stats(stdout, file) == FAIL) {
-        HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL,
-                    "problem while writing file statistics")
+        HGOTO_ERROR(H5E_INTERNAL, H5E_ERROR, FAIL, "problem while writing file statistics")
     }
 #endif /* ROS3_STATS */
 
@@ -1230,7 +1181,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_ros3_close() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1263,12 +1213,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static int
-H5FD_ros3_cmp(
-        const H5FD_t *_f1,
-        const H5FD_t *_f2)
+H5FD_ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
 {
-    const H5FD_ros3_t  *f1        = (const H5FD_ros3_t *)_f1;
-    const H5FD_ros3_t  *f2        = (const H5FD_ros3_t *)_f2;
+    const H5FD_ros3_t * f1        = (const H5FD_ros3_t *)_f1;
+    const H5FD_ros3_t * f2        = (const H5FD_ros3_t *)_f2;
     const parsed_url_t *purl1     = NULL;
     const parsed_url_t *purl2     = NULL;
     int                 ret_value = 0;
@@ -1307,12 +1255,10 @@ H5FD_ros3_cmp(
             HGOTO_DONE(-1);
         }
     }
-    else
-    if (purl1->port) {
+    else if (purl1->port) {
         HGOTO_DONE(-1);
     }
-    else
-    if (purl2->port) {
+    else if (purl2->port) {
         HGOTO_DONE(-1);
     }
 
@@ -1322,12 +1268,10 @@ H5FD_ros3_cmp(
             HGOTO_DONE(-1);
         }
     }
-    else
-    if (purl1->path && !purl2->path) {
+    else if (purl1->path && !purl2->path) {
         HGOTO_DONE(-1);
     }
-    else
-    if (purl2->path && !purl1->path) {
+    else if (purl2->path && !purl1->path) {
         HGOTO_DONE(-1);
     }
 
@@ -1337,12 +1281,10 @@ H5FD_ros3_cmp(
             HGOTO_DONE(-1);
         }
     }
-    else
-    if (purl1->query && !purl2->query) {
+    else if (purl1->query && !purl2->query) {
         HGOTO_DONE(-1);
     }
-    else
-    if (purl2->query && !purl1->query) {
+    else if (purl2->query && !purl1->query) {
         HGOTO_DONE(-1);
     }
 
@@ -1352,12 +1294,10 @@ H5FD_ros3_cmp(
             HGOTO_DONE(-1);
         }
     }
-    else
-    if (f1->fa.aws_region[0] != '\0') {
+    else if (f1->fa.aws_region[0] != '\0') {
         HGOTO_DONE(-1);
     }
-    else
-    if (f2->fa.aws_region[0] != '\0') {
+    else if (f2->fa.aws_region[0] != '\0') {
         HGOTO_DONE(-1);
     }
 
@@ -1367,12 +1307,10 @@ H5FD_ros3_cmp(
             HGOTO_DONE(-1);
         }
     }
-    else
-    if (f1->fa.secret_id[0] != '\0') {
+    else if (f1->fa.secret_id[0] != '\0') {
         HGOTO_DONE(-1);
     }
-    else
-    if (f2->fa.secret_id[0] != '\0') {
+    else if (f2->fa.secret_id[0] != '\0') {
         HGOTO_DONE(-1);
     }
 
@@ -1382,12 +1320,10 @@ H5FD_ros3_cmp(
             HGOTO_DONE(-1);
         }
     }
-    else
-    if (f1->fa.secret_key[0] != '\0') {
+    else if (f1->fa.secret_key[0] != '\0') {
         HGOTO_DONE(-1);
     }
-    else
-    if (f2->fa.secret_key[0] != '\0') {
+    else if (f2->fa.secret_key[0] != '\0') {
         HGOTO_DONE(-1);
     }
 
@@ -1395,7 +1331,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5FD_ros3_cmp() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ros3_query
@@ -1417,8 +1352,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_query(const H5FD_t H5_ATTR_UNUSED *_file,
-                unsigned long *flags /* out */)
+H5FD_ros3_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out */)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
@@ -1436,7 +1370,6 @@ H5FD_ros3_query(const H5FD_t H5_ATTR_UNUSED *_file,
     FUNC_LEAVE_NOAPI(SUCCEED)
 
 } /* H5FD_ros3_query() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1458,8 +1391,7 @@ H5FD_ros3_query(const H5FD_t H5_ATTR_UNUSED *_file,
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_ros3_get_eoa(const H5FD_t                *_file,
-                  H5FD_mem_t   H5_ATTR_UNUSED  type)
+H5FD_ros3_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_ros3_t *file = (const H5FD_ros3_t *)_file;
 
@@ -1472,7 +1404,6 @@ H5FD_ros3_get_eoa(const H5FD_t                *_file,
     FUNC_LEAVE_NOAPI(file->eoa)
 
 } /* end H5FD_ros3_get_eoa() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1492,9 +1423,7 @@ H5FD_ros3_get_eoa(const H5FD_t                *_file,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_set_eoa(H5FD_t                    *_file,
-                  H5FD_mem_t H5_ATTR_UNUSED  type,
-                  haddr_t                    addr)
+H5FD_ros3_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t addr)
 {
     H5FD_ros3_t *file = (H5FD_ros3_t *)_file;
 
@@ -1509,7 +1438,6 @@ H5FD_ros3_set_eoa(H5FD_t                    *_file,
     FUNC_LEAVE_NOAPI(SUCCEED)
 
 } /* H5FD_ros3_set_eoa() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1530,8 +1458,7 @@ H5FD_ros3_set_eoa(H5FD_t                    *_file,
  *-------------------------------------------------------------------------
  */
 static haddr_t
-H5FD_ros3_get_eof(const H5FD_t                *_file,
-                  H5FD_mem_t   H5_ATTR_UNUSED  type)
+H5FD_ros3_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
     const H5FD_ros3_t *file = (const H5FD_ros3_t *)_file;
 
@@ -1544,7 +1471,6 @@ H5FD_ros3_get_eof(const H5FD_t                *_file,
     FUNC_LEAVE_NOAPI(H5FD_s3comms_s3r_get_filesize(file->s3r_handle))
 
 } /* end H5FD_ros3_get_eof() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1564,9 +1490,7 @@ H5FD_ros3_get_eof(const H5FD_t                *_file,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_get_handle(H5FD_t                *_file,
-                     hid_t H5_ATTR_UNUSED   fapl,
-                     void                 **file_handle)
+H5FD_ros3_get_handle(H5FD_t *_file, hid_t H5_ATTR_UNUSED fapl, void **file_handle)
 {
     H5FD_ros3_t *file      = (H5FD_ros3_t *)_file;
     herr_t       ret_value = SUCCEED;
@@ -1587,7 +1511,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_ros3_get_handle() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1612,12 +1535,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_read(H5FD_t                    *_file,
-               H5FD_mem_t H5_ATTR_UNUSED  type,
-               hid_t      H5_ATTR_UNUSED  dxpl_id,
-               haddr_t                    addr, /* start offset   */
-               size_t                     size, /* length of read */
-               void                      *buf)  /* out            */
+H5FD_ros3_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
+               haddr_t addr, /* start offset   */
+               size_t  size, /* length of read */
+               void *  buf)    /* out            */
 {
     H5FD_ros3_t *file      = (H5FD_ros3_t *)_file;
     size_t       filesize  = 0;
@@ -1627,7 +1548,6 @@ H5FD_ros3_read(H5FD_t                    *_file,
     ros3_statsbin *bin   = NULL;
     unsigned       bin_i = 0;
 #endif /* ROS3_STATS */
-
 
     FUNC_ENTER_NOAPI_NOINIT
 
@@ -1658,9 +1578,7 @@ H5FD_ros3_read(H5FD_t                    *_file,
             break;
         }
     }
-    bin = (type == H5FD_MEM_DRAW)
-        ? &file->raw[bin_i]
-        : &file->meta[bin_i];
+    bin = (type == H5FD_MEM_DRAW) ? &file->raw[bin_i] : &file->meta[bin_i];
 
     /* Store collected stats in appropriate bin
      */
@@ -1686,7 +1604,6 @@ done:
 
 } /* end H5FD_ros3_read() */
 
-
 /*-------------------------------------------------------------------------
  *
  * Function: H5FD_ros3_write()
@@ -1706,12 +1623,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_write(H5FD_t     H5_ATTR_UNUSED *_file,
-                H5FD_mem_t H5_ATTR_UNUSED  type,
-                hid_t      H5_ATTR_UNUSED  dxpl_id,
-                haddr_t    H5_ATTR_UNUSED  addr,
-                size_t     H5_ATTR_UNUSED  size,
-                const void H5_ATTR_UNUSED *buf)
+H5FD_ros3_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id,
+                haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf)
 {
     herr_t ret_value = FAIL;
 
@@ -1721,14 +1634,12 @@ H5FD_ros3_write(H5FD_t     H5_ATTR_UNUSED *_file,
     HDfprintf(stdout, "H5FD_ros3_write() called.\n");
 #endif
 
-    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL,
-                "cannot write to read-only file.")
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot write to read-only file.")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* H5FD_ros3_write() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1751,9 +1662,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_truncate(H5FD_t  H5_ATTR_UNUSED *_file,
-                   hid_t   H5_ATTR_UNUSED  dxpl_id,
-                   hbool_t H5_ATTR_UNUSED  closing)
+H5FD_ros3_truncate(H5FD_t H5_ATTR_UNUSED *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
     herr_t ret_value = SUCCEED;
 
@@ -1763,14 +1672,12 @@ H5FD_ros3_truncate(H5FD_t  H5_ATTR_UNUSED *_file,
     HDfprintf(stdout, "H5FD_ros3_truncate() called.\n");
 #endif
 
-    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL,
-                "cannot truncate read-only file.")
+    HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, FAIL, "cannot truncate read-only file.")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_ros3_truncate() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1794,14 +1701,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD_ros3_lock(H5FD_t  H5_ATTR_UNUSED *_file,
-               hbool_t H5_ATTR_UNUSED  rw)
+H5FD_ros3_lock(H5FD_t H5_ATTR_UNUSED *_file, hbool_t H5_ATTR_UNUSED rw)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
     FUNC_LEAVE_NOAPI(SUCCEED)
 
 } /* end H5FD_ros3_lock() */
-
 
 /*-------------------------------------------------------------------------
  *
@@ -1830,4 +1735,3 @@ H5FD_ros3_unlock(H5FD_t H5_ATTR_UNUSED *_file)
 } /* end H5FD_ros3_unlock() */
 
 #endif /* H5_HAVE_ROS3_VFD */
-

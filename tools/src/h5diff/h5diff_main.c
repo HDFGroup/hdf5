@@ -17,7 +17,6 @@
 #include "h5tools.h"
 #include "h5tools_utils.h"
 
-
 /*-------------------------------------------------------------------------
  * Function: main
  *
@@ -65,20 +64,20 @@
  *-------------------------------------------------------------------------
  */
 
-
-int main(int argc, const char *argv[])
+int
+main(int argc, const char *argv[])
 {
-    int        ret;
-    H5E_auto2_t         func;
-    H5E_auto2_t         tools_func;
-    void               *edata;
-    void               *tools_edata;
-    const char *fname1 = NULL;
-    const char *fname2 = NULL;
-    const char *objname1  = NULL;
-    const char *objname2  = NULL;
-    hsize_t    nfound=0;
-    diff_opt_t opts;
+    int         ret;
+    H5E_auto2_t func;
+    H5E_auto2_t tools_func;
+    void *      edata;
+    void *      tools_edata;
+    const char *fname1   = NULL;
+    const char *fname2   = NULL;
+    const char *objname1 = NULL;
+    const char *objname2 = NULL;
+    hsize_t     nfound   = 0;
+    diff_opt_t  opts;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -95,9 +94,9 @@ int main(int argc, const char *argv[])
     H5Eset_auto2(H5tools_ERR_STACK_g, NULL, NULL);
 
     /*-------------------------------------------------------------------------
-    * process the command-line
-    *-------------------------------------------------------------------------
-    */
+     * process the command-line
+     *-------------------------------------------------------------------------
+     */
     parse_command_line(argc, argv, &fname1, &fname2, &objname1, &objname2, &opts);
 
     if (enable_error_stack > 0) {
@@ -106,19 +105,19 @@ int main(int argc, const char *argv[])
     }
 
     /*-------------------------------------------------------------------------
-    * do the diff
-    *-------------------------------------------------------------------------
-    */
+     * do the diff
+     *-------------------------------------------------------------------------
+     */
 
     nfound = h5diff(fname1, fname2, objname1, objname2, &opts);
 
     print_info(&opts);
 
-   /*-------------------------------------------------------------------------
-    * exit code
-    *   1 if differences, 0 if no differences, 2 if error
-    *-------------------------------------------------------------------------
-    */
+    /*-------------------------------------------------------------------------
+     * exit code
+     *   1 if differences, 0 if no differences, 2 if error
+     *-------------------------------------------------------------------------
+     */
 
     ret = (nfound == 0 ? 0 : 1);
 
@@ -156,4 +155,3 @@ h5diff_exit(int status)
 
     HDexit(status);
 }
-

@@ -23,59 +23,63 @@ namespace H5 {
 */
 //  Inheritance: AtomType -> DataType -> H5Object -> H5Location -> IdComponent
 class H5_DLLCPP FloatType : public AtomType {
-   public:
-        // Creates a floating-point type using a predefined type.
-        FloatType(const PredType& pred_type);
+  public:
+    // Creates a floating-point type using a predefined type.
+    FloatType(const PredType &pred_type);
 
-        // Gets the floating-point datatype of the specified dataset.
-        FloatType(const DataSet& dataset);
+    // Gets the floating-point datatype of the specified dataset.
+    FloatType(const DataSet &dataset);
 
-        // Constructors that open an HDF5 float datatype, given a location.
-        FloatType(const H5Location& loc, const char* name);
-        FloatType(const H5Location& loc, const H5std_string& name);
+    // Constructors that open an HDF5 float datatype, given a location.
+    FloatType(const H5Location &loc, const char *name);
+    FloatType(const H5Location &loc, const H5std_string &name);
 
-        // Returns an FloatType object via DataType* by decoding the
-        // binary object description of this type.
-        virtual DataType* decode() const;
+    // Returns an FloatType object via DataType* by decoding the
+    // binary object description of this type.
+    virtual DataType *decode() const;
 
-        // Retrieves the exponent bias of a floating-point type.
-        size_t getEbias() const;
+    // Retrieves the exponent bias of a floating-point type.
+    size_t getEbias() const;
 
-        // Sets the exponent bias of a floating-point type.
-        void setEbias(size_t ebias) const;
+    // Sets the exponent bias of a floating-point type.
+    void setEbias(size_t ebias) const;
 
-        // Retrieves floating point datatype bit field information.
-        void getFields(size_t& spos, size_t& epos, size_t& esize, size_t& mpos, size_t& msize) const;
+    // Retrieves floating point datatype bit field information.
+    void getFields(size_t &spos, size_t &epos, size_t &esize, size_t &mpos, size_t &msize) const;
 
-        // Sets locations and sizes of floating point bit fields.
-        void setFields(size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize) const;
+    // Sets locations and sizes of floating point bit fields.
+    void setFields(size_t spos, size_t epos, size_t esize, size_t mpos, size_t msize) const;
 
-        // Retrieves the internal padding type for unused bits in floating-point datatypes.
-        H5T_pad_t getInpad(H5std_string& pad_string) const;
+    // Retrieves the internal padding type for unused bits in floating-point datatypes.
+    H5T_pad_t getInpad(H5std_string &pad_string) const;
 
-        // Fills unused internal floating point bits.
-        void setInpad(H5T_pad_t inpad) const;
+    // Fills unused internal floating point bits.
+    void setInpad(H5T_pad_t inpad) const;
 
-        // Retrieves mantissa normalization of a floating-point datatype.
-        H5T_norm_t getNorm(H5std_string& norm_string) const;
+    // Retrieves mantissa normalization of a floating-point datatype.
+    H5T_norm_t getNorm(H5std_string &norm_string) const;
 
-        // Sets the mantissa normalization of a floating-point datatype.
-        void setNorm(H5T_norm_t norm) const;
+    // Sets the mantissa normalization of a floating-point datatype.
+    void setNorm(H5T_norm_t norm) const;
 
-        ///\brief Returns this class name.
-        virtual H5std_string fromClass () const { return("FloatType"); }
+    ///\brief Returns this class name.
+    virtual H5std_string
+    fromClass() const
+    {
+        return ("FloatType");
+    }
 
-        // Default constructor
-        FloatType();
+    // Default constructor
+    FloatType();
 
-        // Creates a floating-point datatype using an existing id.
-        FloatType(const hid_t existing_id);
+    // Creates a floating-point datatype using an existing id.
+    FloatType(const hid_t existing_id);
 
-        // Copy constructor: same as the original FloatType.
-        FloatType(const FloatType& original);
+    // Copy constructor: same as the original FloatType.
+    FloatType(const FloatType &original);
 
-        // Noop destructor.
-        virtual ~FloatType();
+    // Noop destructor.
+    virtual ~FloatType();
 
 }; // end of FloatType
 } // namespace H5

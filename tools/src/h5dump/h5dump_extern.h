@@ -26,61 +26,62 @@
  **/
 /* the table of dump functions */
 typedef struct dump_functions_t {
-    void     (*dump_group_function) (hid_t, const char *);
-    void     (*dump_named_datatype_function) (hid_t, const char *);
-    void     (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
-    void     (*dump_dataspace_function) (hid_t);
-    void     (*dump_datatype_function) (hid_t);
-    herr_t   (*dump_attribute_function) (hid_t, const char *, const H5A_info_t *, void *);
-    void     (*dump_data_function) (hid_t, int, struct subset_t *, int);
+    void (*dump_group_function)(hid_t, const char *);
+    void (*dump_named_datatype_function)(hid_t, const char *);
+    void (*dump_dataset_function)(hid_t, const char *, struct subset_t *);
+    void (*dump_dataspace_function)(hid_t);
+    void (*dump_datatype_function)(hid_t);
+    herr_t (*dump_attribute_function)(hid_t, const char *, const H5A_info_t *, void *);
+    void (*dump_data_function)(hid_t, int, struct subset_t *, int);
 } dump_functions;
 
 /* List of table structures.  There is one table structure for each file */
 typedef struct h5dump_table_list_t {
-    size_t      nalloc;
-    size_t      nused;
+    size_t nalloc;
+    size_t nused;
     struct {
-        unsigned long   fileno;         /* File number that these tables refer to */
-        hid_t           oid;            /* ID of an object in this file, held open so fileno is consistent */
-        table_t         *group_table;   /* Table of groups */
-        table_t         *dset_table;    /* Table of datasets */
-        table_t         *type_table;    /* Table of datatypes */
-    } *tables;
+        unsigned long fileno;      /* File number that these tables refer to */
+        hid_t         oid;         /* ID of an object in this file, held open so fileno is consistent */
+        table_t *     group_table; /* Table of groups */
+        table_t *     dset_table;  /* Table of datasets */
+        table_t *     type_table;  /* Table of datatypes */
+    } * tables;
 } h5dump_table_list_t;
 
-extern h5dump_table_list_t  table_list;
-extern table_t             *group_table, *dset_table, *type_table;
-extern unsigned                  dump_indent;              /*how far in to indent the line         */
+extern h5dump_table_list_t table_list;
+extern table_t *           group_table, *dset_table, *type_table;
+extern unsigned            dump_indent; /*how far in to indent the line         */
 
-extern int          unamedtype;     /* shared datatype with no name */
-extern hbool_t      hit_elink;  /* whether we have traversed an external link */
-extern size_t       prefix_len;
-extern char         *prefix;
-extern const char   *fp_format;
+extern int         unamedtype; /* shared datatype with no name */
+extern hbool_t     hit_elink;  /* whether we have traversed an external link */
+extern size_t      prefix_len;
+extern char *      prefix;
+extern const char *fp_format;
 
 /* things to display or which are set via command line parameters */
-extern int          display_all;
-extern int          display_oid;
-extern int          display_data;
-extern int          display_attr_data;
-extern int          display_char; /*print 1-byte numbers as ASCII */
-extern int          usingdasho;
-extern int          display_bb; /*superblock */
-extern int          display_dcpl; /*dcpl */
-extern int          display_fi; /*file index */
-extern int          display_ai;  /*array index */
-extern int          display_escape; /*escape non printable characters */
-extern int          display_region; /*print region reference data */
-extern int          disable_compact_subset; /* disable compact form of subset notation */
-extern int          display_packed_bits; /*print 1-8 byte numbers as packed bits*/
-extern int          include_attrs; /* Display attributes */
-extern int          display_vds_first; /* vds display to first missing */
-extern int          vds_gap_size; /* vds skip missing files */
+extern int display_all;
+extern int display_oid;
+extern int display_data;
+extern int display_attr_data;
+extern int display_char; /*print 1-byte numbers as ASCII */
+extern int usingdasho;
+extern int display_bb;             /*superblock */
+extern int display_dcpl;           /*dcpl */
+extern int display_fi;             /*file index */
+extern int display_ai;             /*array index */
+extern int display_escape;         /*escape non printable characters */
+extern int display_region;         /*print region reference data */
+extern int disable_compact_subset; /* disable compact form of subset notation */
+extern int display_packed_bits;    /*print 1-8 byte numbers as packed bits*/
+extern int include_attrs;          /* Display attributes */
+extern int display_vds_first;      /* vds display to first missing */
+extern int vds_gap_size;           /* vds skip missing files */
 
-#define PACKED_BITS_MAX         8  /* Maximum number of packed-bits to display */
-#define PACKED_BITS_SIZE_MAX    8*sizeof(long long)  /* Maximum bits size of integer types of packed-bits */
+#define PACKED_BITS_MAX      8                     /* Maximum number of packed-bits to display */
+#define PACKED_BITS_SIZE_MAX 8 * sizeof(long long) /* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */
-extern unsigned long long packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 8*sizeof(llong) bytes */
+extern unsigned long long
+    packed_mask[PACKED_BITS_MAX]; /* packed bits are restricted to 8*sizeof(llong) bytes */
 
 /* packed bits display parameters */
 extern unsigned packed_offset[PACKED_BITS_MAX];
@@ -96,13 +97,13 @@ extern const dump_functions *dump_function_table;
 extern "C" {
 #endif
 
-void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
-hid_t    h5_fileaccess(void);
-ssize_t  table_list_add(hid_t oid, unsigned long file_no);
-ssize_t  table_list_visited(unsigned long file_no);
+void    add_prefix(char **prfx, size_t *prfx_len, const char *name);
+hid_t   h5_fileaccess(void);
+ssize_t table_list_add(hid_t oid, unsigned long file_no);
+ssize_t table_list_visited(unsigned long file_no);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* !H5DUMP_EXTERN_H__ */
+#endif /* !H5DUMP_EXTERN_H__ */

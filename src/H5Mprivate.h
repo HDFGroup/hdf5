@@ -21,11 +21,10 @@
 #include "H5Mpublic.h"
 
 /* Private headers needed by this file */
-#include "H5FDprivate.h"       /* File drivers                */
-#include "H5Oprivate.h"        /* Object headers              */
-#include "H5Sprivate.h"        /* Dataspaces                  */
-#include "H5Zprivate.h"        /* Data filters                */
-
+#include "H5FDprivate.h" /* File drivers                */
+#include "H5Oprivate.h"  /* Object headers              */
+#include "H5Sprivate.h"  /* Dataspaces                  */
+#include "H5Zprivate.h"  /* Data filters                */
 
 /**************************/
 /* Library Private Macros */
@@ -37,45 +36,43 @@
  *        to have any effect.
  */
 #ifdef NDEBUG
-#  undef H5M_DEBUG
+#undef H5M_DEBUG
 #endif
 
 /* ========  Map creation property names ======== */
 
 /* ========  Map access property names ======== */
-#define H5M_ACS_KEY_PREFETCH_SIZE_NAME      "key_prefetch_size" /* Number of keys to prefetch during map iteration */
-#define H5M_ACS_KEY_ALLOC_SIZE_NAME         "key_alloc_size" /* Initial allocation size for keys prefetched during map iteration */
+#define H5M_ACS_KEY_PREFETCH_SIZE_NAME                                                                       \
+    "key_prefetch_size" /* Number of keys to prefetch during map iteration */
+#define H5M_ACS_KEY_ALLOC_SIZE_NAME                                                                          \
+    "key_alloc_size" /* Initial allocation size for keys prefetched during map iteration */
 
 /* Default temporary buffer size */
-#define H5D_TEMP_BUF_SIZE       (1024 * 1024)
+#define H5D_TEMP_BUF_SIZE (1024 * 1024)
 
 /* Default I/O vector size */
-#define H5D_IO_VECTOR_SIZE      1024
+#define H5D_IO_VECTOR_SIZE 1024
 
 /* Default VL allocation & free info */
-#define H5D_VLEN_ALLOC          NULL
-#define H5D_VLEN_ALLOC_INFO     NULL
-#define H5D_VLEN_FREE           NULL
-#define H5D_VLEN_FREE_INFO      NULL
+#define H5D_VLEN_ALLOC      NULL
+#define H5D_VLEN_ALLOC_INFO NULL
+#define H5D_VLEN_FREE       NULL
+#define H5D_VLEN_FREE_INFO  NULL
 
 /* Default virtual dataset list size */
 #define H5D_VIRTUAL_DEF_LIST_SIZE 8
-
 
 /****************************/
 /* Library Private Typedefs */
 /****************************/
 H5_DLL herr_t H5M_init(void);
 
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
-
 
 /******************************/
 /* Library Private Prototypes */
 /******************************/
 
 #endif /* _H5Mprivate_H */
-

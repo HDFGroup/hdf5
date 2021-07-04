@@ -23,42 +23,46 @@ namespace H5 {
 */
 //  Inheritance: LinkAccPropList -> PropList -> IdComponent
 class H5_DLLCPP DSetAccPropList : public LinkAccPropList {
-   public:
-        ///\brief Default dataset creation property list.
-        static const DSetAccPropList& DEFAULT;
+  public:
+    ///\brief Default dataset creation property list.
+    static const DSetAccPropList &DEFAULT;
 
-        // Creates a dataset creation property list.
-        DSetAccPropList();
+    // Creates a dataset creation property list.
+    DSetAccPropList();
 
-        // Sets the raw data chunk cache parameters.
-        void setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0) const;
+    // Sets the raw data chunk cache parameters.
+    void setChunkCache(size_t rdcc_nslots, size_t rdcc_nbytes, double rdcc_w0) const;
 
-        // Retrieves the raw data chunk cache parameters.
-        void getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double &rdcc_w0) const;
+    // Retrieves the raw data chunk cache parameters.
+    void getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double &rdcc_w0) const;
 
-        ///\brief Returns this class name.
-        virtual H5std_string fromClass () const { return("DSetAccPropList"); }
+    ///\brief Returns this class name.
+    virtual H5std_string
+    fromClass() const
+    {
+        return ("DSetAccPropList");
+    }
 
-        // Copy constructor - same as the original DSetAccPropList.
-        DSetAccPropList(const DSetAccPropList& orig);
+    // Copy constructor - same as the original DSetAccPropList.
+    DSetAccPropList(const DSetAccPropList &orig);
 
-        // Creates a copy of an existing dataset creation property list
-        // using the property list id.
-        DSetAccPropList(const hid_t plist_id);
+    // Creates a copy of an existing dataset creation property list
+    // using the property list id.
+    DSetAccPropList(const hid_t plist_id);
 
-        // Noop destructor.
-        virtual ~DSetAccPropList();
+    // Noop destructor.
+    virtual ~DSetAccPropList();
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
-        // Deletes the global constant, should only be used by the library
-        static void deleteConstants();
+    // Deletes the global constant, should only be used by the library
+    static void deleteConstants();
 
-    private:
-        static DSetAccPropList* DEFAULT_;
+  private:
+    static DSetAccPropList *DEFAULT_;
 
-        // Creates the global constant, should only be used by the library
-        static DSetAccPropList* getConstant();
+    // Creates the global constant, should only be used by the library
+    static DSetAccPropList *getConstant();
 
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 

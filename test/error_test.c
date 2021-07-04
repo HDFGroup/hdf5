@@ -21,65 +21,61 @@
 #include "H5srcdir.h"
 
 #ifdef H5_USE_16_API
-int main(void)
+int
+main(void)
 {
     HDfprintf(stderr, "Test skipped because backward compatibility with v1.6 is configured in\n");
     return 0;
 }
 #else /* H5_USE_16_API */
 
-const char *FILENAME[] = {
-    "errors",
-    NULL
-};
+const char *FILENAME[] = {"errors", NULL};
 
 #define DATAFILE "filter_error"
 
-#define DIM0    100
-#define DIM1    200
+#define DIM0 100
+#define DIM1 200
 
-int    ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
+int ipoints2[DIM0][DIM1], icheck2[DIM0][DIM1];
 
-hid_t   ERR_CLS;
-hid_t   ERR_CLS2;
-hid_t   ERR_STACK;
+hid_t ERR_CLS;
+hid_t ERR_CLS2;
+hid_t ERR_STACK;
 
-hid_t   ERR_MAJ_TEST;
-hid_t   ERR_MAJ_IO;
-hid_t   ERR_MAJ_API;
+hid_t ERR_MAJ_TEST;
+hid_t ERR_MAJ_IO;
+hid_t ERR_MAJ_API;
 
-hid_t   ERR_MIN_SUBROUTINE;
-hid_t   ERR_MIN_ERRSTACK;
-hid_t   ERR_MIN_CREATE;
-hid_t   ERR_MIN_WRITE;
-hid_t   ERR_MIN_GETNUM;
+hid_t ERR_MIN_SUBROUTINE;
+hid_t ERR_MIN_ERRSTACK;
+hid_t ERR_MIN_CREATE;
+hid_t ERR_MIN_WRITE;
+hid_t ERR_MIN_GETNUM;
 
-#define DSET_NAME               "a_dataset"
-#define FAKE_ID                 (hid_t)0
+#define DSET_NAME "a_dataset"
+#define FAKE_ID   (hid_t)0
 
-#define ERR_CLS_NAME            "Error Test"
-#define ERR_CLS2_NAME           "Second Test"
-#define PROG_NAME               "Error Program"
-#define PROG2_NAME              "Second Program"
-#define PROG_VERS               "1.0"
+#define ERR_CLS_NAME  "Error Test"
+#define ERR_CLS2_NAME "Second Test"
+#define PROG_NAME     "Error Program"
+#define PROG2_NAME    "Second Program"
+#define PROG_VERS     "1.0"
 
-#define ERR_MAJ_TEST_MSG             "Error in test"
-#define ERR_MAJ_IO_MSG               "Error in IO"
-#define ERR_MAJ_API_MSG              "Error in API"
-#define ERR_MIN_SUBROUTINE_MSG       "Error in subroutine"
-#define ERR_MIN_ERRSTACK_MSG         "Error in error stack"
-#define ERR_MIN_CREATE_MSG           "Error in H5Dcreate2"
-#define ERR_MIN_WRITE_MSG            "Error in H5Dwrite"
-#define ERR_MIN_GETNUM_MSG           "Error in H5Eget_num"
+#define ERR_MAJ_TEST_MSG       "Error in test"
+#define ERR_MAJ_IO_MSG         "Error in IO"
+#define ERR_MAJ_API_MSG        "Error in API"
+#define ERR_MIN_SUBROUTINE_MSG "Error in subroutine"
+#define ERR_MIN_ERRSTACK_MSG   "Error in error stack"
+#define ERR_MIN_CREATE_MSG     "Error in H5Dcreate2"
+#define ERR_MIN_WRITE_MSG      "Error in H5Dwrite"
+#define ERR_MIN_GETNUM_MSG     "Error in H5Eget_num"
 
-#define MSG_SIZE                64
-#define LONG_DESC_SIZE          8192
+#define MSG_SIZE       64
+#define LONG_DESC_SIZE 8192
 
-#define DSET_FILTER_NAME    "dataset_with_filter"
+#define DSET_FILTER_NAME "dataset_with_filter"
 
-static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
-    void *client_data);
-
+static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data);
 
 /*-------------------------------------------------------------------------
  * Function:    test_error
@@ -94,13 +90,13 @@ static herr_t custom_print_cb(unsigned n, const H5E_error2_t *err_desc,
 static herr_t
 test_error(hid_t file)
 {
-    hid_t        dataset = -1;
-    hid_t       space = -1;
+    hid_t       dataset   = -1;
+    hid_t       space     = -1;
     hid_t       estack_id = -1;
-    hsize_t        dims[2];
-    const char          *FUNC_test_error = "test_error";
-    H5E_auto2_t         old_func;
-    void                *old_data = NULL;
+    hsize_t     dims[2];
+    const char *FUNC_test_error = "test_error";
+    H5E_auto2_t old_func;
+    void *      old_data = NULL;
 
     HDfprintf(stderr, "\nTesting error API based on data I/O\n");
 
@@ -111,12 +107,15 @@ test_error(hid_t file)
         TEST_ERROR;
 
     /* Test H5E_BEGIN_TRY */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         dataset = H5Dcreate2(FAKE_ID, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     /* Create the dataset */
-    if ((dataset = H5Dcreate2(file, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+    if ((dataset = H5Dcreate2(file, DSET_NAME, H5T_STD_I32BE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) <
+        0) {
         H5Epush(H5E_DEFAULT, __FILE__, FUNC_test_error, __LINE__, ERR_CLS, ERR_MAJ_IO, ERR_MIN_CREATE,
                 "H5Dcreate2 failed");
         goto error;
@@ -130,7 +129,7 @@ test_error(hid_t file)
 #ifdef H5_USE_16_API
     if (old_func != (H5E_auto_t)H5Eprint)
         TEST_ERROR;
-#else /* H5_USE_16_API */
+#else  /* H5_USE_16_API */
     if (old_func != (H5E_auto2_t)H5Eprint2)
         TEST_ERROR;
 #endif /* H5_USE_16_API */
@@ -160,15 +159,14 @@ test_error(hid_t file)
     }
 
     /* In case program comes to this point, close dataset */
-    if(H5Dclose(dataset) < 0)
+    if (H5Dclose(dataset) < 0)
         TEST_ERROR;
 
     TEST_ERROR;
 
-  error:
+error:
     return -1;
 } /* end test_error() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    init_error
@@ -183,10 +181,10 @@ test_error(hid_t file)
 static herr_t
 init_error(void)
 {
-    ssize_t cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME) + 1;
-    ssize_t msg_size = (ssize_t)HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1;
-    char   *cls_name = NULL;
-    char   *msg = NULL;
+    ssize_t    cls_size = (ssize_t)HDstrlen(ERR_CLS_NAME) + 1;
+    ssize_t    msg_size = (ssize_t)HDstrlen(ERR_MIN_SUBROUTINE_MSG) + 1;
+    char *     cls_name = NULL;
+    char *     msg      = NULL;
     H5E_type_t msg_type;
 
     if (NULL == (cls_name = (char *)HDmalloc(HDstrlen(ERR_CLS_NAME) + 1)))
@@ -245,7 +243,6 @@ error:
     return -1;
 } /* end init_error() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    error_stack
  *
@@ -259,8 +256,8 @@ error:
 static herr_t
 error_stack(void)
 {
-    ssize_t err_num;
-    const char          *FUNC_error_stack = "error_stack";
+    ssize_t     err_num;
+    const char *FUNC_error_stack = "error_stack";
 
     if ((err_num = H5Eget_num(H5E_DEFAULT)) < 0)
         TEST_ERROR;
@@ -287,7 +284,6 @@ error:
     return -1;
 } /* end error_stack() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    long_desc_cb
  *
@@ -301,14 +297,13 @@ error:
 static herr_t
 long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *client_data)
 {
-    char *real_desc  = (char *)client_data;
+    char *real_desc = (char *)client_data;
 
     if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, real_desc) == 0)
         return 0;
     else
         return -1;
 } /* end long_desc_cb() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_long_desc
@@ -326,15 +321,15 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
  *      'full_desc' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format-nonliteral)
+H5_GCC_DIAG_OFF(format - nonliteral)
 static herr_t
 test_long_desc(void)
 {
-    const char          *format = "Testing very long description string, %s";
-    char                *long_desc = NULL;
-    char                *full_desc = NULL;
-    size_t              u;
-    const char          *test_FUNC = "test_long_desc";
+    const char *format    = "Testing very long description string, %s";
+    char *      long_desc = NULL;
+    char *      full_desc = NULL;
+    size_t      u;
+    const char *test_FUNC = "test_long_desc";
 
     /* Allocate space for the error description info */
     if (NULL == (long_desc = (char *)HDmalloc(LONG_DESC_SIZE)))
@@ -352,7 +347,8 @@ test_long_desc(void)
         TEST_ERROR;
 
     /* Push an error with a long description */
-    if (H5Epush(H5E_DEFAULT, __FILE__, test_FUNC, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, format, long_desc) < 0)
+    if (H5Epush(H5E_DEFAULT, __FILE__, test_FUNC, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, format,
+                long_desc) < 0)
         TEST_ERROR;
 
     /* Create the string that should be in the description. Must use HDsnprintf here
@@ -381,8 +377,7 @@ error:
 
     return -1;
 } /* end test_long_desc() */
-H5_GCC_DIAG_ON(format-nonliteral)
-
+H5_GCC_DIAG_ON(format - nonliteral)
 
 /*-------------------------------------------------------------------------
  * Function:    dump_error
@@ -413,7 +408,6 @@ error:
     return -1;
 } /* end dump_error() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    custom_print_cb
  *
@@ -425,13 +419,13 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void* client_data)
+custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
 {
-    FILE                *stream  = (FILE *)client_data;
-    char                maj[MSG_SIZE];
-    char                min[MSG_SIZE];
-    char                cls[MSG_SIZE];
-    const int           indent = 4;
+    FILE *    stream = (FILE *)client_data;
+    char      maj[MSG_SIZE];
+    char      min[MSG_SIZE];
+    char      cls[MSG_SIZE];
+    const int indent = 4;
 
     /* Get descriptions for the major and minor error numbers */
     if (H5Eget_class_name(err_desc->cls_id, cls, MSG_SIZE) < 0)
@@ -443,9 +437,8 @@ custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void* client_data)
     if (H5Eget_msg(err_desc->min_num, NULL, min, MSG_SIZE) < 0)
         TEST_ERROR;
 
-    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n",
-        indent, "", n, err_desc->file_name,
-        err_desc->func_name, err_desc->line);
+    HDfprintf(stream, "%*serror #%03d: %s in %s(): line %u\n", indent, "", n, err_desc->file_name,
+              err_desc->func_name, err_desc->line);
     HDfprintf(stream, "%*sclass: %s\n", indent * 2, "", cls);
     HDfprintf(stream, "%*smajor: %s\n", indent * 2, "", maj);
     HDfprintf(stream, "%*sminor: %s\n", indent * 2, "", min);
@@ -455,7 +448,6 @@ custom_print_cb(unsigned n, const H5E_error2_t *err_desc, void* client_data)
 error:
     return -1;
 } /* end custom_print_cb() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_create
@@ -470,10 +462,10 @@ error:
 static herr_t
 test_create(void)
 {
-    const char *err_func = "test_create";       /* Function name for pushing error */
-    const char *err_msg = "Error message";      /* Error message for pushing error */
-    ssize_t     err_num;                        /* Number of errors on stack */
-    hid_t       estack_id = -1;                 /* Error stack ID */
+    const char *err_func = "test_create";   /* Function name for pushing error */
+    const char *err_msg  = "Error message"; /* Error message for pushing error */
+    ssize_t     err_num;                    /* Number of errors on stack */
+    hid_t       estack_id = -1;             /* Error stack ID */
 
     /* Create an empty error stack */
     if ((estack_id = H5Ecreate_stack()) < 0)
@@ -485,7 +477,8 @@ test_create(void)
         TEST_ERROR
 
     /* Push an error with a long description */
-    if (H5Epush(estack_id, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s", err_msg) < 0)
+    if (H5Epush(estack_id, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+                err_msg) < 0)
         TEST_ERROR;
 
     /* Check the number of errors on stack */
@@ -503,7 +496,7 @@ test_create(void)
         TEST_ERROR
 
     /* Close error stack */
-    if(H5Eclose_stack(estack_id) < 0)
+    if (H5Eclose_stack(estack_id) < 0)
         TEST_ERROR
 
     return 0;
@@ -525,14 +518,15 @@ error:
 static herr_t
 test_copy(void)
 {
-    const char *err_func = "test_copy";         /* Function name for pushing error */
-    const char *err_msg = "Error message";      /* Error message for pushing error */
-    ssize_t     err_num;                        /* Number of errors on stack */
-    hid_t       estack_id = -1;                 /* Error stack ID */
-    herr_t      ret;                            /* Generic return value */
+    const char *err_func = "test_copy";     /* Function name for pushing error */
+    const char *err_msg  = "Error message"; /* Error message for pushing error */
+    ssize_t     err_num;                    /* Number of errors on stack */
+    hid_t       estack_id = -1;             /* Error stack ID */
+    herr_t      ret;                        /* Generic return value */
 
     /* Push an error with a long description */
-    if (H5Epush(H5E_DEFAULT, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s", err_msg) < 0)
+    if (H5Epush(H5E_DEFAULT, __FILE__, err_func, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_SUBROUTINE, "%s",
+                err_msg) < 0)
         TEST_ERROR;
 
     /* Check the number of errors on stack */
@@ -566,9 +560,11 @@ test_copy(void)
     /* Try to close error stack copy.  Should fail because
      * the current H5Eset_current_stack closes the stack to be set.
      */
-    H5E_BEGIN_TRY {
-       ret = H5Eclose_stack(estack_id);
-    } H5E_END_TRY
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id);
+    }
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
 
@@ -577,7 +573,6 @@ test_copy(void)
 error:
     return -1;
 } /* end test_copy() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    close_error
@@ -614,7 +609,6 @@ error:
     return -1;
 } /* end close_error() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_filter_error
  *
@@ -632,8 +626,8 @@ static herr_t
 test_filter_error(const char *fname)
 {
     const char *pathname = H5_get_srcdir_filename(fname); /* Corrected test file name */
-    hid_t       file = -1;
-    hid_t       dataset = -1;
+    hid_t       file     = -1;
+    hid_t       dataset  = -1;
     int         buf[20];
 
     HDfprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
@@ -662,7 +656,6 @@ error:
     return -1;
 } /* end test_filter_error() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -673,11 +666,11 @@ error:
 int
 main(void)
 {
-    hid_t       file = -1;
-    hid_t       fapl = -1;
+    hid_t       file      = -1;
+    hid_t       fapl      = -1;
     hid_t       estack_id = -1;
     char        filename[1024];
-    const char  *FUNC_main = "main";
+    const char *FUNC_main = "main";
 
     HDfprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
 
@@ -696,7 +689,7 @@ main(void)
     if (error_stack() < 0) {
         /* Push an error onto error stack */
         if (H5Epush(ERR_STACK, __FILE__, FUNC_main, __LINE__, ERR_CLS, ERR_MAJ_TEST, ERR_MIN_ERRSTACK,
-                "Error stack test failed") < 0)
+                    "Error stack test failed") < 0)
             TEST_ERROR;
 
         /* Delete an error from the top of error stack */
@@ -762,4 +755,3 @@ error:
     return 1;
 }
 #endif /* H5_USE_16_API */
-

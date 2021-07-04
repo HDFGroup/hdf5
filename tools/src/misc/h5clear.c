@@ -24,64 +24,60 @@
 #include "h5tools_utils.h"
 
 /* Name of tool */
-#define PROGRAMNAME     "h5clear"
+#define PROGRAMNAME "h5clear"
 
 /* Make these private properties (defined in H5Fprivate.h) available to h5clear. */
-#define H5F_ACS_CLEAR_STATUS_FLAGS_NAME         "clear_status_flags"
-#define H5F_ACS_NULL_FSM_ADDR_NAME              "null_fsm_addr"
-#define H5F_ACS_SKIP_EOF_CHECK_NAME             "skip_eof_check"
+#define H5F_ACS_CLEAR_STATUS_FLAGS_NAME "clear_status_flags"
+#define H5F_ACS_NULL_FSM_ADDR_NAME      "null_fsm_addr"
+#define H5F_ACS_SKIP_EOF_CHECK_NAME     "skip_eof_check"
 
 /* Default increment is 1 megabytes for the --increment option */
-#define DEFAULT_INCREMENT   1024*1024
+#define DEFAULT_INCREMENT 1024 * 1024
 
-static char *fname_g = NULL;
+static char *  fname_g            = NULL;
 static hbool_t clear_status_flags = FALSE;
 static hbool_t remove_cache_image = FALSE;
-static hbool_t print_filesize = FALSE;
-static hbool_t increment_eoa_eof = FALSE;
-static hsize_t increment = DEFAULT_INCREMENT;
+static hbool_t print_filesize     = FALSE;
+static hbool_t increment_eoa_eof  = FALSE;
+static hsize_t increment          = DEFAULT_INCREMENT;
 
 /*
  * Command-line options: only publicize long options
  */
-static const char *s_opts = "hVsmzi*";
-static struct long_options l_opts[] = {
-        { "help", no_arg, 'h' },
-        { "hel", no_arg, 'h'},
-        { "he", no_arg, 'h'},
-        { "version", no_arg, 'V' },
-        { "version", no_arg, 'V' },
-        { "versio", no_arg, 'V' },
-        { "versi", no_arg, 'V' },
-        { "vers", no_arg, 'V' },
-        { "status", no_arg, 's' },
-        { "statu", no_arg, 's' },
-        { "stat", no_arg, 's' },
-        { "sta", no_arg, 's' },
-        { "st", no_arg, 's' },
-        { "image", no_arg, 'm' },
-        { "imag", no_arg, 'm' },
-        { "ima", no_arg, 'm' },
-        { "im", no_arg, 'm' },
-        { "filesize", no_arg, 'z' },
-        { "filesiz", no_arg, 'z' },
-        { "filesi", no_arg, 'z' },
-        { "files", no_arg, 'z' },
-        { "file", no_arg, 'z' },
-        { "fil", no_arg, 'z' },
-        { "fi", no_arg, 'z' },
-        { "increment", optional_arg, 'i' },
-        { "incremen", optional_arg, 'i' },
-        { "increme", optional_arg, 'i' },
-        { "increm", optional_arg, 'i' },
-        { "incre", optional_arg, 'i' },
-        { "incr", optional_arg, 'i' },
-        { "inc", optional_arg, 'i' },
-        { "in", optional_arg, 'i' },
-        { NULL, 0, '\0' }
-};
-
-
+static const char *        s_opts   = "hVsmzi*";
+static struct long_options l_opts[] = {{"help", no_arg, 'h'},
+                                       {"hel", no_arg, 'h'},
+                                       {"he", no_arg, 'h'},
+                                       {"version", no_arg, 'V'},
+                                       {"version", no_arg, 'V'},
+                                       {"versio", no_arg, 'V'},
+                                       {"versi", no_arg, 'V'},
+                                       {"vers", no_arg, 'V'},
+                                       {"status", no_arg, 's'},
+                                       {"statu", no_arg, 's'},
+                                       {"stat", no_arg, 's'},
+                                       {"sta", no_arg, 's'},
+                                       {"st", no_arg, 's'},
+                                       {"image", no_arg, 'm'},
+                                       {"imag", no_arg, 'm'},
+                                       {"ima", no_arg, 'm'},
+                                       {"im", no_arg, 'm'},
+                                       {"filesize", no_arg, 'z'},
+                                       {"filesiz", no_arg, 'z'},
+                                       {"filesi", no_arg, 'z'},
+                                       {"files", no_arg, 'z'},
+                                       {"file", no_arg, 'z'},
+                                       {"fil", no_arg, 'z'},
+                                       {"fi", no_arg, 'z'},
+                                       {"increment", optional_arg, 'i'},
+                                       {"incremen", optional_arg, 'i'},
+                                       {"increme", optional_arg, 'i'},
+                                       {"increm", optional_arg, 'i'},
+                                       {"incre", optional_arg, 'i'},
+                                       {"incr", optional_arg, 'i'},
+                                       {"inc", optional_arg, 'i'},
+                                       {"in", optional_arg, 'i'},
+                                       {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -92,7 +88,8 @@ static struct long_options l_opts[] = {
  *
  *-------------------------------------------------------------------------
  */
-static void usage(const char *prog)
+static void
+usage(const char *prog)
 {
     HDfprintf(stdout, "usage: %s [OPTIONS] file_name\n", prog);
     HDfprintf(stdout, "  OPTIONS\n");
@@ -101,8 +98,10 @@ static void usage(const char *prog)
     HDfprintf(stdout, "   -s, --status              Clear the status_flags field in the file's superblock\n");
     HDfprintf(stdout, "   -m, --image               Remove the metadata cache image from the file\n");
     HDfprintf(stdout, "   --filesize                Print the file's EOA and EOF\n");
-    HDfprintf(stdout, "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for the file <file_name>\n");
-    HDfprintf(stdout, "                             C is >= 0; C is optional and will default to 1M when not set");
+    HDfprintf(stdout, "   --increment=C             Set the file's EOA to the maximum of (EOA, EOF) + C for "
+                      "the file <file_name>\n");
+    HDfprintf(stdout,
+              "                             C is >= 0; C is optional and will default to 1M when not set");
     HDfprintf(stdout, "\n");
     HDfprintf(stdout, "Examples of use:\n");
     HDfprintf(stdout, "\n");
@@ -118,7 +117,6 @@ static void usage(const char *prog)
     HDfprintf(stdout, "h5clear --increment=512 file_name\n");
     HDfprintf(stdout, "  Set the EOA to the maximum of (EOA, EOF) + 512 for the file <file_name>.\n");
 } /* usage() */
-
 
 /*-------------------------------------------------------------------------
  * Function: parse_command_line
@@ -136,7 +134,7 @@ parse_command_line(int argc, const char **argv)
 {
     int opt;
 
-     /* no arguments */
+    /* no arguments */
     if (argc == 1) {
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
@@ -144,8 +142,8 @@ parse_command_line(int argc, const char **argv)
     }
 
     /* parse command line options */
-    while((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
-        switch((char)opt) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+        switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
                 h5tools_setstatus(EXIT_SUCCESS);
@@ -170,7 +168,7 @@ parse_command_line(int argc, const char **argv)
 
             case 'i':
                 increment_eoa_eof = TRUE;
-                if(opt_arg != NULL) {
+                if (opt_arg != NULL) {
                     if (HDatoi(opt_arg) < 0) {
                         usage(h5tools_getprogname());
                         goto done;
@@ -184,10 +182,10 @@ parse_command_line(int argc, const char **argv)
                 h5tools_setstatus(EXIT_FAILURE);
                 goto error;
         } /* end switch */
-    } /* end while */
+    }     /* end while */
 
     /* check for file name to be processed */
-    if(argc <= opt_ind) {
+    if (argc <= opt_ind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
@@ -197,7 +195,7 @@ parse_command_line(int argc, const char **argv)
     fname_g = HDstrdup(argv[opt_ind]);
 
 done:
-    return(0);
+    return (0);
 
 error:
     return -1;
@@ -218,8 +216,6 @@ leave(int ret)
     h5tools_close();
     HDexit(ret);
 } /* leave() */
-
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -249,14 +245,14 @@ leave(int ret)
  *-------------------------------------------------------------------------
  */
 int
-main (int argc, const char *argv[])
+main(int argc, const char *argv[])
 {
-    char *fname = NULL;             /* File name */
-    hid_t fapl = H5I_INVALID_HID;                /* File access property list */
-    hid_t fid = H5I_INVALID_HID;                 /* File ID */
-    haddr_t image_addr;
-    hsize_t image_len;
-    unsigned flags = H5F_ACC_RDWR;    /* file access flags */
+    char *   fname = NULL;            /* File name */
+    hid_t    fapl  = H5I_INVALID_HID; /* File access property list */
+    hid_t    fid   = H5I_INVALID_HID; /* File ID */
+    haddr_t  image_addr;
+    hsize_t  image_len;
+    unsigned flags = H5F_ACC_RDWR; /* file access flags */
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
@@ -268,23 +264,21 @@ main (int argc, const char *argv[])
     h5tools_init();
 
     /* Parse command line options */
-    if(parse_command_line(argc, argv) < 0)
+    if (parse_command_line(argc, argv) < 0)
         goto done;
 
-    if(fname_g == NULL)
+    if (fname_g == NULL)
         goto done;
 
     /* Print usage/exit if not using at least one of the options */
-    if(!clear_status_flags && !remove_cache_image &&
-       !increment_eoa_eof && !print_filesize) {
+    if (!clear_status_flags && !remove_cache_image && !increment_eoa_eof && !print_filesize) {
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     /* Cannot combine the --filesize option with other options */
-    if(print_filesize &&
-       (clear_status_flags || remove_cache_image || increment_eoa_eof)) {
+    if (print_filesize && (clear_status_flags || remove_cache_image || increment_eoa_eof)) {
         error_msg("Cannot combine --filesize with other options\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -294,17 +288,17 @@ main (int argc, const char *argv[])
     fname = HDstrdup(fname_g);
 
     /* Get a copy of the file access property list */
-    if((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
+    if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
         error_msg("H5Pcreate\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
-     }
+    }
 
     /* -s option */
-    if(clear_status_flags) {
+    if (clear_status_flags) {
         /* Set to clear the status_flags in the file's superblock */
         /* Activate this private property */
-        if(H5Pset(fapl, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear_status_flags) < 0) {
+        if (H5Pset(fapl, H5F_ACS_CLEAR_STATUS_FLAGS_NAME, &clear_status_flags) < 0) {
             error_msg("H5Pset\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -312,15 +306,15 @@ main (int argc, const char *argv[])
     }
 
     /* --increment option */
-    if(increment_eoa_eof) {
+    if (increment_eoa_eof) {
         /* Activate this private property */
-        if(H5Pset(fapl, H5F_ACS_SKIP_EOF_CHECK_NAME, &increment_eoa_eof) < 0) {
+        if (H5Pset(fapl, H5F_ACS_SKIP_EOF_CHECK_NAME, &increment_eoa_eof) < 0) {
             error_msg("H5Pset\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
         /* Activate this private property */
-        if(H5Pset(fapl, H5F_ACS_NULL_FSM_ADDR_NAME, &increment_eoa_eof) < 0) {
+        if (H5Pset(fapl, H5F_ACS_NULL_FSM_ADDR_NAME, &increment_eoa_eof) < 0) {
             error_msg("H5Pset\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -328,9 +322,9 @@ main (int argc, const char *argv[])
     }
 
     /* --filesize option; open the file read-only */
-    if(print_filesize) {
+    if (print_filesize) {
         /* Activate this private property */
-        if(H5Pset(fapl, H5F_ACS_SKIP_EOF_CHECK_NAME, &print_filesize) < 0) {
+        if (H5Pset(fapl, H5F_ACS_SKIP_EOF_CHECK_NAME, &print_filesize) < 0) {
             error_msg("H5Pset\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -339,19 +333,19 @@ main (int argc, const char *argv[])
     }
 
     /* Open the file */
-    if((fid = h5tools_fopen(fname, flags, fapl, NULL, NULL, (size_t)0)) < 0) {
+    if ((fid = h5tools_fopen(fname, flags, fapl, NULL, NULL, (size_t)0)) < 0) {
         error_msg("h5tools_fopen\n");
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
     }
 
     /* --filesize option */
-    if(print_filesize) {
-        h5_stat_t st;   /* Stat info call */
-        haddr_t eoa;    /* The EOA value */
+    if (print_filesize) {
+        h5_stat_t st;  /* Stat info call */
+        haddr_t   eoa; /* The EOA value */
 
         /* Get the file's EOA and EOF */
-        if(H5Fget_eoa(fid, &eoa) < 0 || HDstat(fname, &st) < 0) {
+        if (H5Fget_eoa(fid, &eoa) < 0 || HDstat(fname, &st) < 0) {
             error_msg("H5Fget_eoa or HDstat\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -360,9 +354,9 @@ main (int argc, const char *argv[])
     }
 
     /* --increment option */
-    if(increment_eoa_eof) {
+    if (increment_eoa_eof) {
         /* Set the file's EOA to the maximum of (EOA, EOF) + increment */
-        if(H5Fincrement_filesize(fid, increment) < 0) {
+        if (H5Fincrement_filesize(fid, increment) < 0) {
             error_msg("H5Fset_eoa\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
@@ -370,30 +364,30 @@ main (int argc, const char *argv[])
     }
 
     /* -m option */
-    if(remove_cache_image) {
-        if(H5Fget_mdc_image_info(fid, &image_addr, &image_len) < 0) {
+    if (remove_cache_image) {
+        if (H5Fget_mdc_image_info(fid, &image_addr, &image_len) < 0) {
             error_msg("H5Fget_mdc_image_info\n");
             h5tools_setstatus(EXIT_FAILURE);
             goto done;
         }
-        if(image_addr == HADDR_UNDEF && image_len == 0)
+        if (image_addr == HADDR_UNDEF && image_len == 0)
             warn_msg("No cache image in the file\n");
     }
-
 
     h5tools_setstatus(EXIT_SUCCESS);
 
 done:
-    if(fname)
+    if (fname)
         HDfree(fname);
-    if(fname_g)
+    if (fname_g)
         HDfree(fname_g);
 
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(fapl);
         H5Fclose(fid);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     leave(h5tools_getstatus());
 } /* main() */
-
