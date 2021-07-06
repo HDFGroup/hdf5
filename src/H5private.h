@@ -103,21 +103,20 @@
 #define H5_DEFAULT_VFD H5FD_SEC2
 
 #ifdef H5_HAVE_WIN32_API
+
 /* The following two defines must be before any windows headers are included */
 #define WIN32_LEAN_AND_MEAN /* Exclude rarely-used stuff from Windows headers */
 #define NOGDI               /* Exclude Graphic Display Interface macros */
 
-#ifdef H5_HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
+#include <windows.h>
+
+#include <direct.h>   /* For _getcwd() */
+#include <io.h>       /* POSIX I/O */
+#include <winsock2.h> /* For GetUserName() */
 
 #ifdef H5_HAVE_THREADSAFE
 #include <process.h> /* For _beginthread() */
 #endif
-
-#include <windows.h>
-#include <direct.h> /* For _getcwd() */
-#include <io.h>     /* POSIX I/O */
 
 #endif /*H5_HAVE_WIN32_API*/
 
