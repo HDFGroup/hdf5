@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,15 +15,15 @@
  *
  * Created:		H5HFprivate.h
  *			Feb 24 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Private header for library accessible fractal heap routines.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5HFprivate_H
-#define _H5HFprivate_H
+#ifndef H5HFprivate_H
+#define H5HFprivate_H
 
 /* Private headers needed by this file */
 #include "H5Fprivate.h" /* File access				*/
@@ -86,8 +86,10 @@ typedef struct H5HF_stat_t {
     hsize_t tiny_nobjs; /* Number of 'tiny' objects in heap           */
 } H5HF_stat_t;
 
-/* Fractal heap info (forward decl - defined in H5HFpkg.h) */
-typedef struct H5HF_t H5HF_t;
+/* Fractal heap info (forward decls - defined in H5HFpkg.h) */
+typedef struct H5HF_t          H5HF_t;
+typedef struct H5HF_hdr_t      H5HF_hdr_t;
+typedef struct H5HF_indirect_t H5HF_indirect_t;
 
 /* Typedef for 'op' operations */
 typedef herr_t (*H5HF_operator_t)(const void *obj /*in*/, size_t obj_len, void *op_data /*in,out*/);
@@ -125,4 +127,15 @@ H5_DLL herr_t H5HF_id_print(H5HF_t *fh, const void *id, FILE *stream, int indent
 H5_DLL herr_t H5HF_sects_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth);
 #endif /* H5HF_DEBUGGING */
 
-#endif /* _H5HFprivate_H */
+/* Debugging routines for dumping file structures */
+H5_DLL void   H5HF_hdr_print(const H5HF_hdr_t *hdr, hbool_t dump_internal, FILE *stream, int indent,
+                             int fwidth);
+H5_DLL herr_t H5HF_hdr_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth);
+H5_DLL herr_t H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
+                                haddr_t hdr_addr, size_t nrec);
+H5_DLL void H5HF_iblock_print(const H5HF_indirect_t *iblock, hbool_t dump_internal, FILE *stream, int indent,
+                              int fwidth);
+H5_DLL herr_t H5HF_iblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth,
+                                haddr_t hdr_addr, unsigned nrows);
+
+#endif /* H5HFprivate_H */

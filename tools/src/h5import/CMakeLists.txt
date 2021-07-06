@@ -5,8 +5,8 @@ project (HDF5_TOOLS_SRC_H5IMPORT C)
 # Add the h5import executables
 # --------------------------------------------------------------------
 if (NOT ONLY_SHARED_LIBS)
-  add_executable (h5import ${HDF5_TOOLS_SRC_H5IMPORT_SOURCE_DIR}/h5import.c)
-  target_include_directories (h5import PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  add_executable (h5import ${HDF5_TOOLS_SRC_H5IMPORT_SOURCE_DIR}/h5import.c ${HDF5_TOOLS_SRC_H5IMPORT_SOURCE_DIR}/h5import.h)
+  target_include_directories (h5import PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5import STATIC)
   target_link_libraries (h5import PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET})
   #set_target_properties (h5import PROPERTIES COMPILE_DEFINITIONS H5DEBUGIMPORT)
@@ -17,8 +17,8 @@ if (NOT ONLY_SHARED_LIBS)
 endif ()
 
 if (BUILD_SHARED_LIBS)
-  add_executable (h5import-shared ${HDF5_TOOLS_SRC_H5IMPORT_SOURCE_DIR}/h5import.c)
-  target_include_directories (h5import-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  add_executable (h5import-shared ${HDF5_TOOLS_SRC_H5IMPORT_SOURCE_DIR}/h5import.c ${HDF5_TOOLS_SRC_H5IMPORT_SOURCE_DIR}/h5import.h)
+  target_include_directories (h5import-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   TARGET_C_PROPERTIES (h5import-shared SHARED)
   target_link_libraries (h5import-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
   #set_target_properties (h5import-shared PROPERTIES COMPILE_DEFINITIONS H5DEBUGIMPORT)
@@ -26,6 +26,17 @@ if (BUILD_SHARED_LIBS)
   set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5import-shared")
 
   set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5import-shared)
+endif ()
+
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT ONLY_SHARED_LIBS)
+    clang_format (HDF5_H5IMPORT_SRC_FORMAT h5import)
+  else ()
+    clang_format (HDF5_H5IMPORT_SRC_FORMAT h5import-shared)
+  endif ()
 endif ()
 
 ##############################################################################

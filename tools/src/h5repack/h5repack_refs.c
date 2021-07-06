@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -538,7 +538,7 @@ copy_refs_attr(hid_t loc_in, hid_t loc_out, trav_table_t *travt, hid_t fidout) /
                ref_comp_field_n may be >0 for the next attribute, which may not be
                the reference type and will be accidently treated as the reference type.
                It will then cause the H5Acreate2 failed since that attribute is already created.
-               KY 2020-02-10
+               KY 2020-02-07
             */
             is_ref_comp = (ref_comp_field_n > 0);
         }

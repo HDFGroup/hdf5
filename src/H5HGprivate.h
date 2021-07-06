@@ -6,17 +6,17 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, March 27, 1998
  */
-#ifndef _H5HGprivate_H
-#define _H5HGprivate_H
+#ifndef H5HGprivate_H
+#define H5HGprivate_H
 
 /* Private headers needed by this file. */
 #include "H5Fprivate.h" /* File access				*/
@@ -70,4 +70,4 @@ H5_DLL size_t  H5HG_get_free_size(const H5HG_heap_t *h);
 /* Debugging functions */
 H5_DLL herr_t H5HG_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5HGprivate_H */
+#endif /* H5HGprivate_H */

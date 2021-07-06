@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -259,7 +259,7 @@ H5VL_term_package(void)
         else {
             if (H5I_nmembers(H5I_VOL) > 0) {
                 /* Unregister all VOL connectors */
-                (void)H5I_clear_type(H5I_VOL, FALSE, FALSE);
+                (void)H5I_clear_type(H5I_VOL, TRUE, FALSE);
                 n++;
             } /* end if */
             else {
@@ -303,7 +303,7 @@ H5VL__free_cls(H5VL_class_t *cls)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCLOSEOBJ, FAIL, "VOL connector did not terminate cleanly")
 
     /* Release the class */
-    H5MM_xfree((void *)cls->name); /* Casting away const OK -QAK */
+    H5MM_xfree_const(cls->name);
     H5FL_FREE(H5VL_class_t, cls);
 
 done:
@@ -570,6 +570,7 @@ H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector, hbool_t 
     } /* end if */
     else
         new_vol_obj->data = object;
+    new_vol_obj->rc = 1;
 
     /* Bump the reference count on the VOL connector */
     H5VL__conn_inc_rc(vol_connector);
@@ -665,16 +666,15 @@ H5VL_conn_free(const H5VL_connector_prop_t *connector_prop)
         if (connector_prop->connector_id > 0) {
             if (connector_prop->connector_info)
                 /* Free the connector info */
-                if (H5VL_free_connector_info(connector_prop->connector_id,
-                                             (void *)connector_prop->connector_info) <
-                    0) /* Casting away const OK - QAK */
+                if (H5VL_free_connector_info(connector_prop->connector_id, connector_prop->connector_info) <
+                    0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "unable to release VOL connector info object")
 
             /* Decrement reference count for connector ID */
             if (H5I_dec_ref(connector_prop->connector_id) < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "can't decrement reference count for connector ID")
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -817,6 +817,46 @@ done:
 } /* end H5VL_register_using_vol_id() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_create_object
+ *
+ * Purpose:     Similar to H5VL_register but does not create an ID.
+ *              Creates a new VOL object for the provided generic object
+ *              using the provided vol connector.  Should only be used for
+ *              internal objects returned from the connector such as
+ *              requests.
+ *
+ * Return:      Success:    A valid VOL object
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_object_t *
+H5VL_create_object(void *object, H5VL_t *vol_connector)
+{
+    H5VL_object_t *ret_value = NULL; /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Check arguments */
+    HDassert(object);
+    HDassert(vol_connector);
+
+    /* Set up VOL object for the passed-in data */
+    /* (Does not wrap object, since it's from a VOL callback) */
+    if (NULL == (ret_value = H5FL_CALLOC(H5VL_object_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate memory for VOL object")
+    ret_value->connector = vol_connector;
+    ret_value->data      = object;
+    ret_value->rc        = 1;
+
+    /* Bump the reference count on the VOL connector */
+    H5VL__conn_inc_rc(vol_connector);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_create_object() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_create_object_using_vol_id
  *
  * Purpose:     Similar to H5VL_register_using_vol_id but does not create
@@ -940,6 +980,27 @@ done:
 } /* end H5VL__conn_dec_rc() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_object_inc_rc
+ *
+ * Purpose:     Wrapper to increment the ref count on a VOL object.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+hsize_t
+H5VL_object_inc_rc(H5VL_object_t *vol_obj)
+{
+    FUNC_ENTER_NOAPI_NOERR_NOFS
+
+    /* Check arguments */
+    HDassert(vol_obj);
+
+    /* Increment refcount for object and return */
+    FUNC_LEAVE_NOAPI(++vol_obj->rc)
+} /* end H5VL_object_inc_rc() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_free_object
  *
  * Purpose:     Wrapper to unregister an object ID with a VOL aux struct
@@ -959,11 +1020,13 @@ H5VL_free_object(H5VL_object_t *vol_obj)
     /* Check arguments */
     HDassert(vol_obj);
 
-    /* Decrement refcount on connector */
-    if (H5VL__conn_dec_rc(vol_obj->connector) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
+    if (--vol_obj->rc == 0) {
+        /* Decrement refcount on connector */
+        if (H5VL__conn_dec_rc(vol_obj->connector) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
 
-    vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
+        vol_obj = H5FL_FREE(H5VL_object_t, vol_obj);
+    } /* end if */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1076,7 +1139,7 @@ done:
 } /* end H5VL_file_is_same() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_register_connector
+ * Function:    H5VL__register_connector
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
@@ -1092,13 +1155,13 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
+H5VL__register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 {
     const H5VL_class_t *cls       = (const H5VL_class_t *)_cls;
     H5VL_class_t *      saved     = NULL;
     hid_t               ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(cls);
@@ -1123,16 +1186,16 @@ H5VL_register_connector(const void *_cls, hbool_t app_ref, hid_t vipl_id)
 done:
     if (ret_value < 0 && saved) {
         if (saved->name)
-            H5MM_xfree((void *)(saved->name)); /* Casting away const OK -QAK */
+            H5MM_xfree_const(saved->name);
 
         H5FL_FREE(H5VL_class_t, saved);
     } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_register_connector() */
+} /* end H5VL__register_connector() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL__register_connector
+ * Function:    H5VL__register_connector_by_class
  *
  * Purpose:     Registers a new VOL connector as a member of the virtual object
  *              layer class.
@@ -1149,12 +1212,33 @@ done:
  *-------------------------------------------------------------------------
  */
 hid_t
-H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id)
+H5VL__register_connector_by_class(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id)
 {
     H5VL_get_connector_ud_t op_data;                     /* Callback info for connector search */
     hid_t                   ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_PACKAGE
+
+    /* Check arguments */
+    if (!cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_UNINITIALIZED, H5I_INVALID_HID,
+                    "VOL connector class pointer cannot be NULL")
+    if (H5VL_VERSION != cls->version)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "VOL connector has incompatible version")
+    if (!cls->name)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector class name cannot be the NULL pointer")
+    if (0 == HDstrlen(cls->name))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector class name cannot be the empty string")
+    if (cls->info_cls.copy && !cls->info_cls.free)
+        HGOTO_ERROR(
+            H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+            "VOL connector must provide free callback for VOL info objects when a copy callback is provided")
+    if (cls->wrap_cls.get_wrap_ctx && !cls->wrap_cls.free_wrap_ctx)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID,
+                    "VOL connector must provide free callback for object wrapping contexts when a get "
+                    "callback is provided")
 
     /* Set up op data for iteration */
     op_data.kind     = H5VL_GET_CONNECTOR_BY_NAME;
@@ -1174,13 +1258,13 @@ H5VL__register_connector(const H5VL_class_t *cls, hbool_t app_ref, hid_t vipl_id
     } /* end if */
     else {
         /* Create a new class ID */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector")
     } /* end else */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL__register_connector() */
+} /* end H5VL__register_connector_by_class() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__register_connector_by_name
@@ -1234,7 +1318,7 @@ H5VL__register_connector_by_name(const char *name, hbool_t app_ref, hid_t vipl_i
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
 
         /* Register the connector we loaded */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
     } /* end else */
 
@@ -1294,7 +1378,7 @@ H5VL__register_connector_by_value(H5VL_class_value_t value, hbool_t app_ref, hid
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, H5I_INVALID_HID, "unable to load VOL connector")
 
         /* Register the connector we loaded */
-        if ((ret_value = H5VL_register_connector(cls, app_ref, vipl_id)) < 0)
+        if ((ret_value = H5VL__register_connector(cls, app_ref, vipl_id)) < 0)
             HGOTO_ERROR(H5E_VOL, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register VOL connector ID")
     } /* end else */
 
@@ -2316,23 +2400,24 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
     /* Sanity check */
     HDassert(obj);
 
-    /* If the datatype is already VOL-managed, the datatype's vol_obj
-     * field will get clobbered later, so disallow this.
-     */
-    if (type == H5I_DATATYPE)
-        if (TRUE == H5T_already_vol_managed((const H5T_t *)obj))
-            HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype")
-
-    /* Wrap the object with VOL connector info */
-    if (NULL == (new_obj = H5VL__wrap_obj(obj, type)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't wrap library object")
-
     /* Retrieve the VOL object wrapping context */
     if (H5CX_get_vol_wrap_ctx((void **)&vol_wrap_ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, H5I_INVALID_HID, "can't get VOL object wrap context")
     if (NULL == vol_wrap_ctx || NULL == vol_wrap_ctx->connector)
         HGOTO_ERROR(H5E_VOL, H5E_BADVALUE, H5I_INVALID_HID,
                     "VOL object wrap context or its connector is NULL???")
+
+    /* If the datatype is already VOL-managed, the datatype's vol_obj
+     * field will get clobbered later, so disallow this.
+     */
+    if (type == H5I_DATATYPE)
+        if (vol_wrap_ctx->connector->id == H5VL_NATIVE)
+            if (TRUE == H5T_already_vol_managed((const H5T_t *)obj))
+                HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "can't wrap an uncommitted datatype")
+
+    /* Wrap the object with VOL connector info */
+    if (NULL == (new_obj = H5VL__wrap_obj(obj, type)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't wrap library object")
 
     /* Get an ID for the object */
     if ((ret_value = H5VL_register_using_vol_id(type, new_obj, vol_wrap_ctx->connector->id, app_ref)) < 0)
@@ -2341,3 +2426,55 @@ H5VL_wrap_register(H5I_type_t type, void *obj, hbool_t app_ref)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_wrap_register() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_check_plugin_load
+ *
+ * Purpose:     Check if a VOL connector matches the search criteria, and
+ *              can be loaded.
+ *
+ * Note:        Matching the connector's name / value, but the connector
+ *              having an incompatible version is not an error, but means
+ *              that the connector isn't a "match".  Setting the SUCCEED
+ *              value to FALSE and not failing for that case allows the
+ *              plugin framework to keep looking for other DLLs that match
+ *              and have a compatible version.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *success)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(cls);
+    HDassert(key);
+    HDassert(success);
+
+    /* Which kind of key are we looking for? */
+    if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
+        /* Check if plugin name matches VOL connector class name */
+        if (cls->name && !HDstrcmp(cls->name, key->vol.u.name))
+            *success = TRUE;
+    } /* end if */
+    else {
+        /* Sanity check */
+        HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+
+        /* Check if plugin value matches VOL connector class value */
+        if (cls->value == key->vol.u.value)
+            *success = TRUE;
+    } /* end else */
+
+    /* Connector is a match, but might not be a compatible version */
+    if (*success && cls->version != H5VL_VERSION)
+        *success = FALSE;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_check_plugin_load() */

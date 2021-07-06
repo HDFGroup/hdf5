@@ -1254,10 +1254,42 @@ position        opaque3D of </dset> opaque3D of </dset> difference
 [ 3 2 1 ]          24              0               24             
 24 differences found
 attribute: <reference of </dset>> and <reference of </dset>>
+Not comparable: <reference of </dset>> or <reference of </dset>> is an empty dataset
+Not comparable: <reference of </dset>> or <reference of </dset>> is an empty dataset
 0 differences found
 attribute: <reference2D of </dset>> and <reference2D of </dset>>
+Not comparable: <reference2D of </dset>> or <reference2D of </dset>> is an empty dataset
+Not comparable: <reference2D of </dset>> or <reference2D of </dset>> is an empty dataset
+Not comparable: <reference2D of </dset>> or <reference2D of </dset>> is an empty dataset
+Not comparable: <reference2D of </dset>> or <reference2D of </dset>> is an empty dataset
+Not comparable: <reference2D of </dset>> or <reference2D of </dset>> is an empty dataset
+Not comparable: <reference2D of </dset>> or <reference2D of </dset>> is an empty dataset
 0 differences found
 attribute: <reference3D of </dset>> and <reference3D of </dset>>
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
+Not comparable: <reference3D of </dset>> or <reference3D of </dset>> is an empty dataset
 0 differences found
 attribute: <string of </dset>> and <string of </dset>>
 size:           [2]           [2]

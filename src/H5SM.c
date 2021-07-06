@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -56,6 +56,7 @@ static herr_t  H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t
                                   size_t *list_pos);
 static herr_t  H5SM__convert_list_to_btree(H5F_t *f, H5SM_index_header_t *header, H5SM_list_t **_list,
                                            H5HF_t *fheap, H5O_t *open_oh);
+static herr_t  H5SM__bt2_convert_to_list_op(const void *record, void *op_data);
 static herr_t  H5SM__convert_btree_to_list(H5F_t *f, H5SM_index_header_t *header);
 static herr_t  H5SM__incr_ref(void *record, void *_op_data, hbool_t *changed);
 static herr_t  H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t defer,
@@ -265,7 +266,7 @@ H5SM__type_to_flag(unsigned type_id, unsigned *type_flag)
     switch (type_id) {
         case H5O_FILL_ID:
             type_id = H5O_FILL_NEW_ID;
-            /* Fall through... */
+            /* FALLTHROUGH */
             H5_ATTR_FALLTHROUGH
 
         case H5O_SDSPACE_ID:
@@ -285,7 +286,7 @@ done:
 } /* end H5SM__type_to_flag() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5SM_get_index
+ * Function:    H5SM__get_index
  *
  * Purpose:     Get the index number for a given message type.
  *
@@ -301,13 +302,13 @@ done:
  *-------------------------------------------------------------------------
  */
 ssize_t
-H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
+H5SM__get_index(const H5SM_master_table_t *table, unsigned type_id)
 {
     size_t   x;
     unsigned type_flag;
     ssize_t  ret_value = FAIL;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_PACKAGE
 
     /* Translate the H5O type_id into an H5SM type flag */
     if (H5SM__type_to_flag(type_id, &type_flag) < 0)
@@ -325,7 +326,7 @@ H5SM_get_index(const H5SM_master_table_t *table, unsigned type_id)
      */
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SM_get_index() */
+} /* end H5SM__get_index() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5SM_type_shared
@@ -419,7 +420,7 @@ H5SM_get_fheap_addr(H5F_t *f, unsigned type_id, haddr_t *fheap_addr)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Look up index for message type */
-    if ((index_num = H5SM_get_index(table, type_id)) < 0)
+    if ((index_num = H5SM__get_index(table, type_id)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to find correct SOHM index")
 
     /* Retrieve heap address for index */
@@ -628,7 +629,7 @@ H5SM__create_list(H5F_t *f, H5SM_index_header_t *header)
     haddr_t      addr      = HADDR_UNDEF; /* Address of the list on disk */
     haddr_t      ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(header);
@@ -670,7 +671,7 @@ done:
             H5MF_xfree(f, H5FD_MEM_SOHM_INDEX, addr, (hsize_t)header->list_size);
     } /* end if */
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__create_list */
 
 /*-------------------------------------------------------------------------
@@ -788,6 +789,47 @@ done:
 } /* H5SM__convert_list_to_btree() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5SM__bt2_convert_to_list_op
+ *
+ * Purpose:	An H5B2_remove_t callback function to convert a SOHM
+ *              B-tree index to a list.
+ *
+ *              Inserts this record into the list passed through op_data.
+ *
+ * Return:	Non-negative on success
+ *              Negative on failure
+ *
+ * Programmer:	James Laird
+ *              Monday, November 6, 2006
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5SM__bt2_convert_to_list_op(const void *record, void *op_data)
+{
+    const H5SM_sohm_t *message = (const H5SM_sohm_t *)record;
+    const H5SM_list_t *list    = (const H5SM_list_t *)op_data;
+    size_t             mesg_idx; /* Index of message to modify */
+
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Sanity checks */
+    HDassert(record);
+    HDassert(op_data);
+
+    /* Get the message index, and increment the # of messages in list */
+    mesg_idx = list->header->num_messages++;
+    HDassert(list->header->num_messages <= list->header->list_max);
+
+    /* Insert this message at the end of the list */
+    HDassert(list->messages[mesg_idx].location == H5SM_NO_LOC);
+    HDassert(message->location != H5SM_NO_LOC);
+    H5MM_memcpy(&(list->messages[mesg_idx]), message, sizeof(H5SM_sohm_t));
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5SM__bt2_convert_to_list_op() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5SM__convert_btree_to_list
  *
  * Purpose:     Given a B-tree index, turns it into a list index.  This is
@@ -809,7 +851,7 @@ H5SM__convert_btree_to_list(H5F_t *f, H5SM_index_header_t *header)
     haddr_t              btree_addr;
     herr_t               ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     /* Remember the address of the old B-tree, but change the header over to be
      * a list..
@@ -835,7 +877,7 @@ H5SM__convert_btree_to_list(H5F_t *f, H5SM_index_header_t *header)
     /* Delete the B-tree and have messages copy themselves to the
      * list as they're deleted
      */
-    if (H5B2_delete(f, btree_addr, f, H5SM_bt2_convert_to_list_op, list) < 0)
+    if (H5B2_delete(f, btree_addr, f, H5SM__bt2_convert_to_list_op, list) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete B-tree")
 
 done:
@@ -843,11 +885,11 @@ done:
     if (list && H5AC_unprotect(f, H5AC_SOHM_LIST, header->index_addr, list, H5AC__DIRTIED_FLAG) < 0)
         HDONE_ERROR(H5E_SOHM, H5E_CANTUNPROTECT, FAIL, "unable to unprotect SOHM index")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__convert_btree_to_list() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5SM_can_share_common
+ * Function:    H5SM__can_share_common
  *
  * Purpose:     "trivial" checks for determining if a message can be shared.
  *
@@ -865,11 +907,11 @@ done:
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5SM_can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
+H5SM__can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check whether this message ought to be shared or not */
     /* If sharing is disabled in this file, don't share the message */
@@ -888,7 +930,7 @@ H5SM_can_share_common(const H5F_t *f, unsigned type_id, const void *mesg)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SM_can_share_common() */
+} /* end H5SM__can_share_common() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5SM_can_share
@@ -920,7 +962,7 @@ H5SM_can_share(H5F_t *f, H5SM_master_table_t *table, ssize_t *sohm_index_num, un
     FUNC_ENTER_NOAPI_TAG(H5AC__SOHM_TAG, FAIL)
 
     /* "trivial" sharing checks */
-    if ((tri_ret = H5SM_can_share_common(f, type_id, mesg)) < 0)
+    if ((tri_ret = H5SM__can_share_common(f, type_id, mesg)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'trivial' sharing checks returned error")
     if (tri_ret == FALSE)
         HGOTO_DONE(FALSE)
@@ -943,7 +985,7 @@ H5SM_can_share(H5F_t *f, H5SM_master_table_t *table, ssize_t *sohm_index_num, un
     /* Find the right index for this message type.  If there is no such index
      * then this type of message isn't shareable
      */
-    if ((index_num = H5SM_get_index(my_table, type_id)) < 0) {
+    if ((index_num = H5SM__get_index(my_table, type_id)) < 0) {
         H5E_clear_stack(NULL); /*ignore error*/
         HGOTO_DONE(FALSE)
     } /* end if */
@@ -1059,7 +1101,7 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags, unsigned type_id,
     /* "trivial" sharing checks */
     if (mesg_flags && (*mesg_flags & H5O_MSG_FLAG_DONTSHARE))
         HGOTO_DONE(FALSE)
-    if ((tri_ret = H5SM_can_share_common(f, type_id, mesg)) < 0)
+    if ((tri_ret = H5SM__can_share_common(f, type_id, mesg)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_BADTYPE, FAIL, "'trivial' sharing checks returned error")
     if (tri_ret == FALSE)
         HGOTO_DONE(FALSE)
@@ -1220,19 +1262,19 @@ static herr_t
 H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t defer, unsigned type_id,
                  void *mesg, unsigned *cache_flags_ptr)
 {
-    H5SM_list_t *        list = NULL;          /* List index */
-    H5SM_mesg_key_t      key;                  /* Key used to search the index */
-    H5SM_list_cache_ud_t cache_udata;          /* User-data for metadata cache callback */
-    H5O_shared_t         shared;               /* Shared H5O message */
-    hbool_t              found = FALSE;        /* Was the message in the index? */
-    H5HF_t *             fheap = NULL;         /* Fractal heap handle */
-    H5B2_t *             bt2   = NULL;         /* v2 B-tree handle for index */
-    size_t               buf_size;             /* Size of the encoded message */
-    void *               encoding_buf = NULL;  /* Buffer for encoded message */
-    size_t               empty_pos    = UFAIL; /* Empty entry in list */
+    H5SM_list_t *        list = NULL;             /* List index */
+    H5SM_mesg_key_t      key;                     /* Key used to search the index */
+    H5SM_list_cache_ud_t cache_udata;             /* User-data for metadata cache callback */
+    H5O_shared_t         shared;                  /* Shared H5O message */
+    hbool_t              found = FALSE;           /* Was the message in the index? */
+    H5HF_t *             fheap = NULL;            /* Fractal heap handle */
+    H5B2_t *             bt2   = NULL;            /* v2 B-tree handle for index */
+    size_t               buf_size;                /* Size of the encoded message */
+    void *               encoding_buf = NULL;     /* Buffer for encoded message */
+    size_t               empty_pos    = SIZE_MAX; /* Empty entry in list */
     herr_t               ret_value    = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(header);
@@ -1283,11 +1325,11 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
             HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to search for message in list")
 
         if (defer) {
-            if (list_pos != UFAIL)
+            if (list_pos != SIZE_MAX)
                 found = TRUE;
         } /* end if */
         else {
-            if (list_pos != UFAIL) {
+            if (list_pos != SIZE_MAX) {
                 /* If the message was previously shared in an object header, share
                  * it in the heap now.
                  */
@@ -1442,13 +1484,13 @@ H5SM__write_mesg(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, hbool_t 
             /* Insert the new message into the SOHM index */
             if (header->index_type == H5SM_LIST) {
                 /* Index is a list.  Find an empty spot if we haven't already */
-                if (empty_pos == UFAIL) {
+                if (empty_pos == SIZE_MAX) {
                     size_t pos;
 
                     if (H5SM__find_in_list(list, NULL, &empty_pos, &pos) < 0)
                         HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to search for message in list")
 
-                    if (pos == UFAIL || empty_pos == UFAIL)
+                    if (pos == SIZE_MAX || empty_pos == SIZE_MAX)
                         HGOTO_ERROR(H5E_SOHM, H5E_CANTINSERT, FAIL, "unable to find empty entry in list")
                 }
                 /* Insert message into list */
@@ -1499,7 +1541,7 @@ done:
     if (encoding_buf)
         encoding_buf = H5MM_xfree(encoding_buf);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__write_mesg() */
 
 /*-------------------------------------------------------------------------
@@ -1551,7 +1593,7 @@ H5SM_delete(H5F_t *f, H5O_t *open_oh, H5O_shared_t *sh_mesg)
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Find the correct index and try to delete from it */
-    if ((index_num = H5SM_get_index(table, type_id)) < 0)
+    if ((index_num = H5SM__get_index(table, type_id)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index")
 
     /* If mesg_buf is not NULL, the message's reference count has reached
@@ -1608,9 +1650,14 @@ done:
  *
  *              If EMPTY_POS is NULL, don't store anything in it.
  *
- * Return:      Message's position in the list on success
- *              UFAIL if message couldn't be found
- *              empty_pos set to position of empty message or UFAIL.
+ * Return:      Success:    SUCCEED
+ *                          pos = position (if found)
+ *                          pos = SIZE_MAX (if not found)
+ *                          empty_pos = indeterminate (if found)
+ *                          empty_pos = 1st empty position (if not found)
+ *
+ *              Failure:    FAIL
+ *                          pos & empty_pos indeterminate
  *
  * Programmer:  James Laird
  *              Tuesday, May 2, 2006
@@ -1631,7 +1678,7 @@ H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *
 
     /* Initialize empty_pos to an invalid value */
     if (empty_pos)
-        *empty_pos = UFAIL;
+        *empty_pos = SIZE_MAX;
 
     /* Find the first (only) message equal to the key passed in.
      * Also record the first empty position we find.
@@ -1654,42 +1701,15 @@ H5SM__find_in_list(const H5SM_list_t *list, const H5SM_mesg_key_t *key, size_t *
 
             /* Found earlier position possible, don't check any more */
             empty_pos = NULL;
-        } /* end if */
-    }     /* end for */
+        }
+    }
 
     /* If we reached this point, we didn't find the message */
-    *pos = UFAIL;
+    *pos = SIZE_MAX;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__find_in_list */
-
-/*-------------------------------------------------------------------------
- * Function:	H5SM_get_hash_fh_cb
- *
- * Purpose:	Callback for fractal heap operator, to make copy of link when
- *              when lookup up a link by index
- *
- * Return:	SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
- *		Nov  7 2006
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5SM_get_hash_fh_cb(const void *obj, size_t obj_len, void *_udata)
-{
-    H5SM_fh_ud_gh_t *udata = (H5SM_fh_ud_gh_t *)_udata; /* User data for fractal heap 'op' callback */
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Compute hash value on raw message */
-    udata->hash = H5_checksum_lookup3(obj, obj_len, udata->type_id);
-
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_get_hash_fh_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5SM__decr_ref
@@ -1755,7 +1775,7 @@ H5SM__decr_ref(void *record, void *op_data, hbool_t *changed)
  */
 static herr_t
 H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, const H5O_shared_t *mesg,
-                        unsigned *cache_flags, size_t * /*out*/ mesg_size, void ** /*out*/ encoded_mesg)
+                        unsigned *cache_flags, size_t *mesg_size /*out*/, void **encoded_mesg /*out*/)
 {
     H5SM_list_t *   list = NULL;
     H5SM_mesg_key_t key;
@@ -1768,7 +1788,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, c
     unsigned        type_id;             /* Message type to operate on */
     herr_t          ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -1827,7 +1847,7 @@ H5SM__delete_from_index(H5F_t *f, H5O_t *open_oh, H5SM_index_header_t *header, c
         /* Find the message in the list */
         if (H5SM__find_in_list(list, &key, NULL, &list_pos) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to search for message in list")
-        if (list_pos == UFAIL)
+        if (list_pos == SIZE_MAX)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         if (list->messages[list_pos].location == H5SM_IN_HEAP)
@@ -1934,7 +1954,7 @@ done:
         *mesg_size   = 0;
     }
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__delete_from_index() */
 
 /*-------------------------------------------------------------------------
@@ -2093,7 +2113,7 @@ H5SM_reconstitute(H5O_shared_t *sh_mesg, H5F_t *f, unsigned msg_type_id, H5O_fhe
 } /* end H5SM_reconstitute() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_get_refcount_bt2_cb
+ * Function:	H5SM__get_refcount_bt2_cb
  *
  * Purpose:	v2 B-tree 'find' callback to retrieve the record for a message
  *
@@ -2105,12 +2125,12 @@ H5SM_reconstitute(H5O_shared_t *sh_mesg, H5F_t *f, unsigned msg_type_id, H5O_fhe
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_get_refcount_bt2_cb(const void *_record, void *_op_data)
+H5SM__get_refcount_bt2_cb(const void *_record, void *_op_data)
 {
     const H5SM_sohm_t *record  = (const H5SM_sohm_t *)_record; /* v2 B-tree record for message */
     H5SM_sohm_t *      op_data = (H5SM_sohm_t *)_op_data;      /* "op data" from v2 B-tree find */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /*
      * Check arguments.
@@ -2122,7 +2142,7 @@ H5SM_get_refcount_bt2_cb(const void *_record, void *_op_data)
     *op_data = *record;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_get_refcount_bt2_cb() */
+} /* end H5SM__get_refcount_bt2_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5SM_get_refcount
@@ -2168,7 +2188,7 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg, hsize
         HGOTO_ERROR(H5E_SOHM, H5E_CANTPROTECT, FAIL, "unable to load SOHM master table")
 
     /* Find the correct index and find the message in it */
-    if ((index_num = H5SM_get_index(table, type_id)) < 0)
+    if ((index_num = H5SM__get_index(table, type_id)) < 0)
         HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to find correct SOHM index")
     header = &(table->indexes[index_num]);
 
@@ -2209,7 +2229,7 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg, hsize
         /* Find the message in the list */
         if (H5SM__find_in_list(list, &key, NULL, &list_pos) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "unable to search for message in list")
-        if (list_pos == UFAIL)
+        if (list_pos == SIZE_MAX)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
 
         /* Copy the message */
@@ -2226,7 +2246,7 @@ H5SM_get_refcount(H5F_t *f, unsigned type_id, const H5O_shared_t *sh_mesg, hsize
             HGOTO_ERROR(H5E_SOHM, H5E_CANTOPENOBJ, FAIL, "unable to open v2 B-tree for SOHM index")
 
         /* Look up the message in the v2 B-tree */
-        if ((msg_exists = H5B2_find(bt2, &key, H5SM_get_refcount_bt2_cb, &message)) < 0)
+        if ((msg_exists = H5B2_find(bt2, &key, H5SM__get_refcount_bt2_cb, &message)) < 0)
             HGOTO_ERROR(H5E_SOHM, H5E_CANTGET, FAIL, "error finding message in index")
         if (!msg_exists)
             HGOTO_ERROR(H5E_SOHM, H5E_NOTFOUND, FAIL, "message not in index")
@@ -2369,7 +2389,7 @@ H5SM__read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap, H5O_t *open_oh
     H5O_t *           oh        = NULL; /* Object header for message in object header */
     herr_t            ret_value = SUCCEED;
 
-    FUNC_ENTER_STATIC_TAG(H5AC__SOHM_TAG)
+    FUNC_ENTER_STATIC
 
     HDassert(f);
     HDassert(mesg);
@@ -2443,11 +2463,11 @@ done:
     if (ret_value < 0 && udata.encoding_buf)
         udata.encoding_buf = H5MM_xfree(udata.encoding_buf);
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SM__read_mesg */
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_table_free
+ * Function:	H5SM__table_free
  *
  * Purpose:	Frees memory used by the SOHM table.
  *
@@ -2459,9 +2479,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_table_free(H5SM_master_table_t *table)
+H5SM__table_free(H5SM_master_table_t *table)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Sanity check */
     HDassert(table);
@@ -2472,10 +2492,10 @@ H5SM_table_free(H5SM_master_table_t *table)
     table = H5FL_FREE(H5SM_master_table_t, table);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_table_free() */
+} /* end H5SM__table_free() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_list_free
+ * Function:	H5SM__list_free
  *
  * Purpose:	Frees all memory used by the list.
  *
@@ -2487,9 +2507,9 @@ H5SM_table_free(H5SM_master_table_t *table)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5SM_list_free(H5SM_list_t *list)
+H5SM__list_free(H5SM_list_t *list)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     HDassert(list);
     HDassert(list->messages);
@@ -2499,14 +2519,14 @@ H5SM_list_free(H5SM_list_t *list)
     list = H5FL_FREE(H5SM_list_t, list);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_list_free() */
+} /* end H5SM__list_free() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5SM_table_debug
  *
  * Purpose:     Print debugging information for the master table.
  *
- *              If table_vers and num_indexes are not UFAIL, they are used
+ *              If table_vers and num_indexes are not UINT_MAX, they are used
  *              instead of the values in the superblock.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -2533,14 +2553,14 @@ H5SM_table_debug(H5F_t *f, haddr_t table_addr, FILE *stream, int indent, int fwi
     HDassert(indent >= 0);
     HDassert(fwidth >= 0);
 
-    /* If table_vers and num_indexes are UFAIL, replace them with values from
+    /* If table_vers and num_indexes are UINT_MAX, replace them with values from
      * userblock
      */
-    if (table_vers == UFAIL)
+    if (table_vers == UINT_MAX)
         table_vers = H5F_SOHM_VERS(f);
     else if (table_vers != H5F_SOHM_VERS(f))
         HDfprintf(stream, "*** SOHM TABLE VERSION DOESN'T MATCH VERSION IN SUPERBLOCK!\n");
-    if (num_indexes == UFAIL)
+    if (num_indexes == UINT_MAX)
         num_indexes = H5F_SOHM_NINDEXES(f);
     else if (num_indexes != H5F_SOHM_NINDEXES(f))
         HDfprintf(stream, "*** NUMBER OF SOHM INDEXES DOESN'T MATCH VALUE IN SUPERBLOCK!\n");
@@ -2568,19 +2588,19 @@ H5SM_table_debug(H5F_t *f, haddr_t table_addr, FILE *stream, int indent, int fwi
                        ? "List"
                        : (table->indexes[x].index_type == H5SM_BTREE ? "B-Tree" : "Unknown")));
 
-        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", fwidth,
                   "Address of index:", table->indexes[x].index_addr);
-        HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", fwidth,
                   "Address of index's heap:", table->indexes[x].heap_addr);
         HDfprintf(stream, "%*s%-*s 0x%08x\n", indent + 3, "", fwidth,
                   "Message type flags:", table->indexes[x].mesg_types);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", fwidth,
                   "Minimum size of messages:", table->indexes[x].min_mesg_size);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", fwidth,
                   "Number of messages:", table->indexes[x].num_messages);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", fwidth,
                   "Maximum list size:", table->indexes[x].list_max);
-        HDfprintf(stream, "%*s%-*s %Zu\n", indent + 3, "", fwidth,
+        HDfprintf(stream, "%*s%-*s %zu\n", indent + 3, "", fwidth,
                   "Minimum B-tree size:", table->indexes[x].btree_min);
     } /* end for */
 
@@ -2668,16 +2688,16 @@ H5SM_list_debug(H5F_t *f, haddr_t list_addr, FILE *stream, int indent, int fwidt
             HDassert(fh);
 
             HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth, "Location:", "in heap");
-            HDfprintf(stream, "%*s%-*s 0x%Zx\n", indent + 3, "", fwidth,
-                      "Heap ID:", list->messages[x].u.heap_loc.fheap_id);
-            HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", fwidth,
+            HDfprintf(stream, "%*s%-*s 0x%" PRIx64 "\n", indent + 3, "", fwidth,
+                      "Heap ID:", list->messages[x].u.heap_loc.fheap_id.val);
+            HDfprintf(stream, "%*s%-*s %" PRIuHSIZE "\n", indent + 3, "", fwidth,
                       "Reference count:", list->messages[x].u.heap_loc.ref_count);
         } /* end if */
         else if (list->messages[x].location == H5SM_IN_OH) {
             HDfprintf(stream, "%*s%-*s %s\n", indent + 3, "", fwidth, "Location:", "in object header");
-            HDfprintf(stream, "%*s%-*s %a\n", indent + 3, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", fwidth,
                       "Object header address:", list->messages[x].u.mesg_loc.oh_addr);
-            HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent + 3, "", fwidth,
                       "Message creation index:", list->messages[x].u.mesg_loc.oh_addr);
             HDfprintf(stream, "%*s%-*s %u\n", indent + 3, "", fwidth,
                       "Message type ID:", list->messages[x].msg_type_id);

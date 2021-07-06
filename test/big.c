@@ -6,16 +6,16 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Wednesday, April  8, 1998
- * Modified:	Albert Cheng <acheng@hdfgroup.org>
- * 		September 11, 2010
+ * Modified:    Albert Cheng
+ *         September 11, 2010
  */
 /*
  * The purpose of this test is to verify if a virtual file driver can handle:
@@ -93,17 +93,17 @@ static int  test_family(hid_t fapl);
 static hsize_t values_used[WRT_N];
 
 /*-------------------------------------------------------------------------
- * Function:	randll
+ * Function:    randll
  *
- * Purpose:	Create a random long long value.
- * 		Ensures that a write at this value doesn't overlap any
- *		previous write.
+ * Purpose:    Create a random long long value.
+ *         Ensures that a write at this value doesn't overlap any
+ *         previous write.
  *
- * Return:	Success:	Random value
+ * Return:    Success:    Random value
  *
- *		Failure:	Random value which overlaps another write
+ *            Failure:    Random value which overlaps another write
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Tuesday, November 24, 1998
  *
  * Modifications:
@@ -141,17 +141,17 @@ randll(hsize_t limit, int current_index)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	is_sparse
+ * Function:    is_sparse
  *
- * Purpose:	Determines if the file system of the current working
- *		directory supports holes.
+ * Purpose:    Determines if the file system of the current working
+ *             directory supports holes.
  *
- * Return:	Success:	Non-zero if holes are supported; zero
- *				otherwise.
+ * Return:    Success:    Non-zero if holes are supported; zero
+ *                otherwise.
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, July 15, 1998
  *
  * Modifications:
@@ -184,17 +184,17 @@ is_sparse(void)
 }
 
 /*-------------------------------------------------------------------------
- * Function:	supports_big
+ * Function:    supports_big
  *
- * Purpose:	Determines if the file system of the current working
- *		directory supports big files.
+ * Purpose:    Determines if the file system of the current working
+ *             directory supports big files.
  *
- * Return:	Success:	Non-zero if big files are supported; zero
- *				otherwise.
+ * Return:    Success:    Non-zero if big files are supported; zero
+ *                otherwise.
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Raymond Lu
+ * Programmer:    Raymond Lu
  *              Wednesday, April 18, 2007
  *
  * Modifications:
@@ -254,17 +254,17 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	enough_room
+ * Function:    enough_room
  *
- * Purpose:	Tries to create a bunch of sparse files to see if quotas will
- *		get in the way.  Some systems also have problems opening
- *		enough files and we'll check that too.
+ * Purpose:    Tries to create a bunch of sparse files to see if quotas will
+ *        get in the way.  Some systems also have problems opening
+ *        enough files and we'll check that too.
  *
- * Return:	Success:	Non-zero
+ * Return:    Success:    Non-zero
  *
- *		Failure:	zero
+ *            Failure:    zero
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Thursday, August  6, 1998
  *
  * Modifications:
@@ -277,7 +277,7 @@ error:
  *      'name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format - nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 static int
 enough_room(hid_t fapl)
 {
@@ -319,23 +319,23 @@ done:
 
     return ret_value;
 }
-H5_GCC_DIAG_ON(format - nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
- * Function:	writer
+ * Function:    writer
  *
- * Purpose:	Creates a *big* dataset.
+ * Purpose:    Creates a *big* dataset.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- *		Failure:	>0
+ *            Failure:    >0
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Wednesday, April  8, 1998
  *
  * Modifications:
- * 	Robb Matzke, 15 Jul 1998
- *	Addresses are written to the file DNAME instead of stdout.
+ *     Robb Matzke, 15 Jul 1998
+ *     Addresses are written to the file DNAME instead of stdout.
  *
  *-------------------------------------------------------------------------
  */
@@ -429,7 +429,7 @@ writer(char *filename, hid_t fapl, fsizes_t testsize, int wrt_n)
     for (i = 0; i < wrt_n; i++) {
         /* start position must be at least hs_size from the end */
         hs_start[0] = randll(size2[0] - hs_size[0], i);
-        HDfprintf(out, "#%03d 0x%016Hx\n", i, hs_start[0]);
+        HDfprintf(out, "#%03d 0x%016" PRIxHSIZE "\n", i, hs_start[0]);
         if (H5Sselect_hyperslab(space2, H5S_SELECT_SET, hs_start, NULL, hs_size, NULL) < 0)
             goto error;
         for (j = 0; j < WRT_SIZE; j++) {
@@ -475,15 +475,15 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	reader
+ * Function:    reader
  *
- * Purpose:	Reads some data from random locations in the dataset.
+ * Purpose:    Reads some data from random locations in the dataset.
  *
- * Return:	Success:	0
+ * Return:    Success:    0
  *
- * 		Failure:	>0
+ *            Failure:    >0
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
  *
  * Modifications:
@@ -524,7 +524,7 @@ reader(char *filename, hid_t fapl)
             break;
         i            = (int)HDstrtol(ln + 1, &s, 10);
         hs_offset[0] = HDstrtoull(s, NULL, 0);
-        HDfprintf(stdout, "#%03d 0x%016Hx%47s", i, hs_offset[0], "");
+        HDfprintf(stdout, "#%03d 0x%016" PRIxHSIZE "%47s", i, hs_offset[0], "");
         HDfflush(stdout);
 
         if (H5Sselect_hyperslab(fspace, H5S_SELECT_SET, hs_offset, NULL, hs_size, NULL) < 0)
@@ -583,13 +583,13 @@ error:
 }
 
 /*-------------------------------------------------------------------------
- * Function:	usage
+ * Function:    usage
  *
- * Purpose:	Print command usage
+ * Purpose:    Print command usage
  *
- * Return:	void
+ * Return:    void
  *
- * Programmer:	Albert Chent
+ * Programmer:    Albert Chent
  *              Mar 28, 2002
  *
  * Modifications:
@@ -605,7 +605,7 @@ usage(void)
               "\t-c\tFile system Checking skipped.  Caution: this test generates\n"
               "\t\tmany big files and may fill up the file system.\n"
               "\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
-              "\t\ta positive float point number.  Default value is %Hu.\n"
+              "\t\ta positive float point number.  Default value is %" PRIuHSIZE ".\n"
               "Examples:\n"
               "\tbig -fsize 2.1e9 \t# test with file size just under 2GB\n"
               "\tbig -fsize 2.2e9 \t# test with file size just above 2GB\n"
@@ -747,22 +747,22 @@ error:
 } /* end test_family() */
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
  * Purpose:
  *
- * Return:	Success:
+ * Return:    Success:
  *
- *		Failure:
+ *            Failure:
  *
- * Programmer:	Robb Matzke
+ * Programmer:    Robb Matzke
  *              Friday, April 10, 1998
  *
  * Modifications:
- *		Albert Cheng, 2002/03/28
- *		Added command option -fsize.
- *		Albert Cheng, 2002/04/19
- *		Added command option -c.
+ *        Albert Cheng, 2002/03/28
+ *        Added command option -fsize.
+ *        Albert Cheng, 2002/04/19
+ *        Added command option -c.
  *
  *              Raymond Lu, 2007/05/25
  *              Added similar tests for SEC2 and STDIO drivers.
@@ -819,10 +819,10 @@ main(int ac, char **av)
 
     /* Choose random # seed */
     seed = (unsigned long)HDtime(NULL);
-#ifdef QAK
+#if 0
     /* seed = (unsigned long)1155438845; */
     HDfprintf(stderr, "Random # seed was: %lu\n", seed);
-#endif /* QAK */
+#endif
     HDsrandom((unsigned)seed);
 
     /* run VFD-specific test */

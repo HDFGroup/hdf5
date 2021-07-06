@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <slu@ncsa.uiuc.edu>
+ * Programmer:  Raymond Lu
  *              Thursday, March 23, 2006
  *
  *  This program writes floating-point data to the HDF5 file.  It generates
@@ -295,7 +295,7 @@ create_scale_offset_dsets_double(hid_t fid, hid_t fsid, hid_t msid)
     hid_t   dataset = -1; /* dataset handles */
     hid_t   dcpl    = -1;
     double  data[NX][NY]; /* data to write */
-    double  fillvalue   = -2.2f;
+    double  fillvalue   = -2.2;
     hsize_t chunk[RANK] = {CHUNK0, CHUNK1};
     int     i, j;
 
@@ -928,7 +928,7 @@ create_deflate_dsets_float(hid_t fid, hid_t fsid, hid_t msid)
 #else  /* H5_HAVE_FILTER_DEFLATE */
     const char *not_supported = "Deflate filter is not enabled. Can't create the dataset.";
 
-    puts(not_supported);
+    HDputs(not_supported);
 #endif /* H5_HAVE_FILTER_DEFLATE */
 
     return 0;

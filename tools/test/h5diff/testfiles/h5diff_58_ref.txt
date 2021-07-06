@@ -1,32 +1,32 @@
 
 dataset: </g1/reference2D> and </g1/reference2D>
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              
 size:           [2]           [2]
-position                                        difference          
+position        reference2D     reference2D     difference          
 ------------------------------------------------------------
 [ 0 ]          1               0               1              
 [ 1 ]          2               0               2              

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -257,10 +257,6 @@ H5AC_flush_dependency_exists(H5F_t *f, haddr_t parent_addr, haddr_t child_addr, 
  *
  * Programmer:  John Mainzer, 5/30/14
  *
- * Changes:	None.
- *
- *						JRM -- 9/17/16
- *
  *-------------------------------------------------------------------------
  */
 #ifndef NDEBUG
@@ -334,8 +330,6 @@ H5AC_get_serialization_in_progress(H5F_t *f)
  * Return:      TRUE if the indicated ring(s) are clean, and FALSE otherwise.
  *
  * Programmer:  John Mainzer, 6/18/16
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */

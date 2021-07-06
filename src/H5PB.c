@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,20 +24,20 @@
 /* Module Setup */
 /****************/
 
-#define H5F_FRIEND      /*suppress error about including H5Fpkg	  */
+#define H5F_FRIEND      /* Suppress error about including H5Fpkg            */
 #include "H5PBmodule.h" /* This source code file is part of the H5PB module */
 
 /***********/
 /* Headers */
 /***********/
-#include "H5private.h"   /* Generic Functions			*/
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5Fpkg.h"      /* Files				*/
-#include "H5FDprivate.h" /* File drivers				*/
-#include "H5Iprivate.h"  /* IDs			  		*/
-#include "H5MMprivate.h" /* Memory management			*/
-#include "H5PBpkg.h"     /* File access				*/
-#include "H5SLprivate.h" /* Skip List				*/
+#include "H5private.h"   /* Generic Functions                */
+#include "H5Eprivate.h"  /* Error handling                   */
+#include "H5Fpkg.h"      /* Files                            */
+#include "H5FDprivate.h" /* File drivers                     */
+#include "H5Iprivate.h"  /* IDs                              */
+#include "H5MMprivate.h" /* Memory management                */
+#include "H5PBpkg.h"     /* File access                      */
+#include "H5SLprivate.h" /* Skip List                        */
 
 /****************/
 /* Local Macros */
@@ -148,7 +148,7 @@ H5FL_DEFINE_STATIC(H5PB_t);
 H5FL_DEFINE_STATIC(H5PB_entry_t);
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_reset_stats
+ * Function:    H5PB_reset_stats
  *
  * Purpose:     This function was created without documentation.
  *              What follows is my best understanding of Mohamad's intent.
@@ -157,7 +157,7 @@ H5FL_DEFINE_STATIC(H5PB_entry_t);
  *
  * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -184,7 +184,7 @@ H5PB_reset_stats(H5PB_t *page_buf)
 } /* H5PB_reset_stats() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_get_stats
+ * Function:    H5PB_get_stats
  *
  * Purpose:     This function was created without documentation.
  *              What follows is my best understanding of Mohamad's intent.
@@ -196,9 +196,9 @@ H5PB_reset_stats(H5PB_t *page_buf)
  *              --evictions: the number of metadata and raw data evictions from the page buffer layer
  *              --bypasses: the number of metadata and raw data accesses that bypass the page buffer layer
  *
- * Return:	    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -226,16 +226,16 @@ H5PB_get_stats(const H5PB_t *page_buf, unsigned accesses[2], unsigned hits[2], u
 } /* H5PB_get_stats */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_print_stats()
+ * Function:    H5PB_print_stats()
  *
  * Purpose:     This function was created without documentation.
  *              What follows is my best understanding of Mohamad's intent.
  *
  *              Print out statistics collected for the page buffer layer.
  *
- * Return:	    Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -272,13 +272,13 @@ H5PB_print_stats(const H5PB_t *page_buf)
 } /* H5PB_print_stats */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_create
+ * Function:    H5PB_create
  *
- * Purpose:	Create and setup the PB on the file.
+ * Purpose:     Create and setup the PB on the file.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -348,13 +348,13 @@ done:
 } /* H5PB_create */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB__flush_cb
+ * Function:    H5PB__flush_cb
  *
- * Purpose:	Callback to flush PB skiplist entries.
+ * Purpose:     Callback to flush PB skiplist entries.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -381,13 +381,13 @@ done:
 } /* H5PB__flush_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_flush
+ * Function:    H5PB_flush
  *
- * Purpose:	Flush/Free all the PB entries to the file.
+ * Purpose:     Flush/Free all the PB entries to the file.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -415,13 +415,13 @@ done:
 } /* H5PB_flush */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB__dest_cb
+ * Function:    H5PB__dest_cb
  *
- * Purpose:	Callback to free PB skiplist entries.
+ * Purpose:     Callback to free PB skiplist entries.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -451,13 +451,13 @@ H5PB__dest_cb(void *item, void H5_ATTR_UNUSED *key, void *_op_data)
 } /* H5PB__dest_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_dest
+ * Function:    H5PB_dest
  *
- * Purpose:	Flush and destroy the PB on the file if it exists.
+ * Purpose:     Flush and destroy the PB on the file if it exists.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -504,16 +504,16 @@ done:
 } /* H5PB_dest */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_add_new_page
+ * Function:    H5PB_add_new_page
  *
- * Purpose:	Add a new page to the new page skip list. This is called
+ * Purpose:     Add a new page to the new page skip list. This is called
  *              from the MF layer when a new page is allocated to
  *              indicate to the page buffer layer that a read of the page
  *              from the file is not necessary since it's an empty page.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -563,16 +563,16 @@ done:
 } /* H5PB_add_new_page */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_update_entry
+ * Function:    H5PB_update_entry
  *
- * Purpose:	In PHDF5, entries that are written by other processes and just
+ * Purpose:     In PHDF5, entries that are written by other processes and just
  *              marked clean by this process have to have their corresponding
  *              pages updated if they exist in the page buffer.
  *              This routine checks and update the pages.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -661,14 +661,14 @@ done:
 } /* H5PB_remove_entry */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_read
+ * Function:    H5PB_read
  *
- * Purpose:	Reads in the data from the page containing it if it exists
+ * Purpose:     Reads in the data from the page containing it if it exists
  *              in the PB cache; otherwise reads in the page through the VFD.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -682,8 +682,8 @@ H5PB_read(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, void *
     haddr_t       offset;
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
-    size_t        access_size;
-    hbool_t       bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    size_t        access_size = 0;
+    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -961,15 +961,15 @@ done:
 } /* end H5PB_read() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB_write
+ * Function:    H5PB_write
  *
- * Purpose: Write data into the Page Buffer. If the page exists in the
- *          cache, update it; otherwise read it from disk, update it, and
- *          insert into cache.
+ * Purpose:     Write data into the Page Buffer. If the page exists in the
+ *              cache, update it; otherwise read it from disk, update it, and
+ *              insert into cache.
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -983,8 +983,8 @@ H5PB_write(H5F_shared_t *f_sh, H5FD_mem_t type, haddr_t addr, size_t size, const
     haddr_t       offset;
     haddr_t       search_addr;       /* Address of current page */
     hsize_t       num_touched_pages; /* Number of pages accessed */
-    size_t        access_size;
-    hbool_t       bypass_pb = FALSE;   /* Whether to bypass page buffering */
+    size_t        access_size = 0;
+    hbool_t       bypass_pb   = FALSE; /* Whether to bypass page buffering */
     hsize_t       i;                   /* Local index variable */
     herr_t        ret_value = SUCCEED; /* Return value */
 
@@ -1306,26 +1306,24 @@ done:
 } /* end H5PB_write() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB__insert_entry()
+ * Function:    H5PB__insert_entry()
  *
- * Purpose: ???
+ * Purpose:     This function was created without documentation.
+ *              What follows is my best understanding of Mohamad's intent.
  *
- *          This function was created without documentation.
- *          What follows is my best understanding of Mohamad's intent.
+ *              Insert the supplied page into the page buffer, both the
+ *              skip list and the LRU.
  *
- *	    Insert the supplied page into the page buffer, both the
- *          skip list and the LRU.
- *
- *          As best I can tell, this function imposes no limit on the
- *          number of entries in the page buffer beyond an assertion
- *          failure it the page count exceeds the limit.
+ *              As best I can tell, this function imposes no limit on the
+ *              number of entries in the page buffer beyond an assertion
+ *              failure it the page count exceeds the limit.
  *
  *                                               JRM -- 12/22/16
  *
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -1355,16 +1353,21 @@ done:
 } /* end H5PB__insert_entry() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB__make_space()
+ * Function:    H5PB__make_space()
  *
- * Purpose: If necessary and if possible, evict a page from the page
- *          buffer to make space for the supplied page.  Depending on
- *	    the page buffer configuration and contents, and the page
- *          supplied this may or may not be possible.
+ * Purpose:     This function was created without documentation.
+ *              What follows is my best understanding of Mohamad's intent.
  *
- * Return:	Non-negative on success/Negative on failure
+ *              If necessary and if possible, evict a page from the page
+ *              buffer to make space for the supplied page.  Depending on
+ *              the page buffer configuration and contents, and the page
+ *              supplied this may or may not be possible.
  *
- * Programmer:	Mohamad Chaarawi
+ *                                             JRM -- 12/22/16
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */
@@ -1453,17 +1456,16 @@ done:
 } /* end H5PB__make_space() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5PB__write_entry()
+ * Function:    H5PB__write_entry()
  *
- * Purpose: ???
+ * Purpose:     ???
  *
- *          This function was created without documentation.
- *          What follows is my best understanding of Mohamad's intent.
+ *              This function was created without documentation.
+ *              What follows is my best understanding of Mohamad's intent.
  *
+ * Return:      Non-negative on success/Negative on failure
  *
- * Return:	Non-negative on success/Negative on failure
- *
- * Programmer:	Mohamad Chaarawi
+ * Programmer:  Mohamad Chaarawi
  *
  *-------------------------------------------------------------------------
  */

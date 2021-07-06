@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -887,7 +887,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
 
                 /* Iterate over all elements, calling memcmp() for each */
                 for (elmt = 0; elmt < nelmts; elmt++) {
-                    if (HDmemcmp(memb1, memb2, memb_size))
+                    if (HDmemcmp(memb1, memb2, memb_size) != 0)
                         TEST_ERROR
 
                     /* Update member pointers */
@@ -1035,7 +1035,7 @@ compare_data(hid_t parent1, hid_t parent2, hid_t pid, hid_t tid, size_t nelmts, 
         else
             TEST_ERROR
     } /* end else */
-    else if (HDmemcmp(buf1, buf2, (elmt_size * nelmts)))
+    else if (HDmemcmp(buf1, buf2, (elmt_size * nelmts)) != 0)
         TEST_ERROR
 
     /* Data should be the same. :-) */
@@ -1306,7 +1306,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
             if (H5Lget_name_by_idx(gid2, ".", H5_INDEX_NAME, H5_ITER_INC, idx, objname2,
                                    (size_t)NAME_BUF_SIZE, H5P_DEFAULT) < 0)
                 TEST_ERROR
-            if (HDstrcmp(objname, objname2))
+            if (HDstrcmp(objname, objname2) != 0)
                 TEST_ERROR
 
             /* Get link info */
@@ -1420,7 +1420,7 @@ compare_groups(hid_t gid, hid_t gid2, hid_t pid, int depth, unsigned copy_flags)
                         TEST_ERROR
 
                     /* Compare link data */
-                    if (HDmemcmp(linkval, linkval2, linfo.u.val_size))
+                    if (HDmemcmp(linkval, linkval2, linfo.u.val_size) != 0)
                         TEST_ERROR
                 } /* end else-if */
                 else {

@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -58,7 +58,7 @@ SUBROUTINE test_table1()
   USE TSTTABLE ! module for testing table support routines
 
   IMPLICIT NONE
-  
+
   CHARACTER(len=8), PARAMETER :: filename = "f1tab.h5"   ! File name
   CHARACTER(LEN=5), PARAMETER :: dsetname1 = "dset1"     ! Dataset name
   INTEGER(HID_T) :: file_id                              ! File identifier
@@ -106,7 +106,7 @@ SUBROUTINE test_table1()
   SIZEOF_X = SIZEOF(bufd(1))
 #endif
 
-  ! If Fortran DOUBLE PRECISION and C DOUBLE sizeofs don't match then disable 
+  ! If Fortran DOUBLE PRECISION and C DOUBLE sizeofs don't match then disable
   ! creating a DOUBLE RECISION field, and instead create a REAL field. This
   ! is needed to handle when DOUBLE PRECISION is promoted via a compiler flag.
   Exclude_double = .FALSE.
@@ -511,7 +511,7 @@ SUBROUTINE test_table1()
 
   IF ( maxlen .NE. 8 ) THEN
      WRITE(*,'(/,5X,"H5TBGET_FIELD_INFO_F: INCORRECT MAXIMUM CHARACTER LENGTH OF THE FIELD NAMES")')
-     WRITE(*,'(5X,"RETURNED VALUE = ", I0, ", CORRECT VALUE = ", I0)') maxlen, 8 
+     WRITE(*,'(5X,"RETURNED VALUE = ", I0, ", CORRECT VALUE = ", I0)') maxlen, 8
      STOP
   ENDIF
 
@@ -552,7 +552,7 @@ SUBROUTINE test_table2()
   USE TSTTABLE ! module for testing table support routines
 
   IMPLICIT NONE
-  
+
   INTEGER, PARAMETER :: i8 = SELECTED_INT_KIND(9)   !should map to INTEGER*4 on most modern processors
   INTEGER, PARAMETER :: i16 = SELECTED_INT_KIND(9) ! (18) !should map to INTEGER*8 on most modern processors
   INTEGER, PARAMETER :: sp = SELECTED_REAL_KIND(5)  ! This should map to REAL*4 on most modern processors
@@ -605,7 +605,7 @@ SUBROUTINE test_table2()
   test_txt = "Testing H5TBread_table_f and H5TBmake_table_f (F2003)"
   CALL test_begin(test_txt)
 
-  
+
   ! Define an array of Particles
   p_data(1:nrecords) = (/ &
        particle_t("zero       ",0_i8,0_i16,0.0_sp,0.0_dp),     &
@@ -641,7 +641,7 @@ SUBROUTINE test_table2()
        /)
 #endif
 
-  dst_offset(1:nfields) = (/ & 
+  dst_offset(1:nfields) = (/ &
        H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(1)%name(1:1))), &
        H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(1)%lati)), &
        H5OFFSETOF(C_LOC(dst_buf(1)), C_LOC(dst_buf(1)%long)), &
@@ -693,7 +693,7 @@ SUBROUTINE test_table2()
 
   f_ptr1 = C_LOC(p_data(1)%name(1:1))
   f_ptr2 = C_NULL_PTR
-  
+
   CALL h5tbmake_table_f("Table Title",file_id, table_name, nfields, nrecords, &
        dst_size, field_names, dst_offset, field_type, &
        chunk_size, f_ptr2, compress, f_ptr1, errcode )

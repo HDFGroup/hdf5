@@ -6,16 +6,11 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#include <stdlib.h>
-#include <string.h>
-#include <stdio.h>
-#include <errno.h>
-#include <setjmp.h>
 #include "h5hltest.h"
 #include "H5srcdir.h"
 #include "H5LDpublic.h"
@@ -162,7 +157,8 @@ static herr_t test_LD_elmts_invalid(const char *file);
 static herr_t test_LD_elmts_one(const char *file, const char *dname, const char *fields);
 static herr_t test_LD_elmts_two(const char *file, const char *dname, const char *fields);
 
-static herr_t verify_elmts_two(int type, hsize_t *ext_dims, hsize_t *prev_dims, void *_ldbuf, void *_buf);
+static herr_t verify_elmts_two(int type, const hsize_t *ext_dims, const hsize_t *prev_dims, void *_ldbuf,
+                               void *_buf);
 
 /* data structures for compound data type */
 typedef struct sub22_t {
@@ -1152,7 +1148,7 @@ error:
  **************************************************************************************
  */
 static herr_t
-verify_elmts_two(int type, hsize_t *ext_dims, hsize_t *prev_dims, void *_ldbuf, void *_buf)
+verify_elmts_two(int type, const hsize_t *ext_dims, const hsize_t *prev_dims, void *_ldbuf, void *_buf)
 {
     int k, m; /* Local index variable */
 

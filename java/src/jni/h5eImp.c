@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -508,7 +507,7 @@ H5E_walk_cb(int nindx, const H5E_error2_t *info, void *cb_data)
     jobject     cb_info_t = NULL;
     jvalue      args[7];
     JNIEnv *    cbenv = NULL;
-    jclass      cls;
+    jclass      cbcls;
     void *      op_data = (void *)wrapper->op_data;
     jint        status  = FAIL;
 
@@ -517,11 +516,11 @@ H5E_walk_cb(int nindx, const H5E_error2_t *info, void *cb_data)
         H5_JNI_FATAL_ERROR(CBENVONLY, "H5E_walk_cb: failed to attach current thread to JVM");
     }
 
-    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+    if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
     if (NULL == (mid = CBENVPTR->GetMethodID(
-                     CBENVONLY, cls, "callback",
+                     CBENVONLY, cbcls, "callback",
                      "(ILhdf/hdf5lib/structs/H5E_error2_t;Lhdf/hdf5lib/callbacks/H5E_walk_t;)I")))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 

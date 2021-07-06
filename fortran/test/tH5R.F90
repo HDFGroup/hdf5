@@ -15,13 +15,13 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
 !
 ! NOTES
-!  Tests h5rcreate_f, h5rdereference_f, h5rget_name_f 
+!  Tests h5rcreate_f, h5rdereference_f, h5rget_name_f
 !  and H5Rget_object_type functions
 !
 ! CONTAINS SUBROUTINES
@@ -262,20 +262,20 @@ SUBROUTINE refregtest(cleanup, total_error)
   INTEGER(HID_T) :: dsetv_id      ! Dataset identifier
   INTEGER(HID_T) :: dsetr_id      ! Dataset identifier
   INTEGER     ::   error
-!  TYPE(hdset_reg_ref_t_f) , DIMENSION(1:2), TARGET :: ref 
-  TYPE(hdset_reg_ref_t_f) , DIMENSION(1:2) :: ref 
+!  TYPE(hdset_reg_ref_t_f) , DIMENSION(1:2), TARGET :: ref
+  TYPE(hdset_reg_ref_t_f) , DIMENSION(1:2) :: ref
   TYPE(hdset_reg_ref_t_f) , DIMENSION(1:2) :: ref_out
   INTEGER(HSIZE_T), DIMENSION(2) :: ref_dim   = (/0,0/)
   INTEGER(HSIZE_T), DIMENSION(2) :: data_dims ! = (/0,0/)
   INTEGER(HSIZE_T), DIMENSION(2) :: dims      = (/2,9/)  ! Datasets dimensions
-  INTEGER(HSIZE_T), DIMENSION(1) :: dimsr     = (/2/)    ! 
+  INTEGER(HSIZE_T), DIMENSION(1) :: dimsr     = (/2/)    !
   INTEGER(HSIZE_T), DIMENSION(2) :: start     ! = (/0,0/)
   INTEGER(HSIZE_T), DIMENSION(2) :: count     ! = (/0,0/)
 
   INTEGER :: rankr = 1
   INTEGER :: rank = 2
-!  INTEGER , DIMENSION(2,9), TARGET ::  DATA 
-  INTEGER , DIMENSION(2,9) ::  DATA 
+!  INTEGER , DIMENSION(2,9), TARGET ::  DATA
+  INTEGER , DIMENSION(2,9) ::  DATA
   INTEGER , DIMENSION(2,9) ::  data_out = 0
   INTEGER(HSIZE_T) , DIMENSION(2,3) :: coord
   INTEGER(SIZE_T) ::num_points = 3  ! Number of selected points
@@ -353,7 +353,7 @@ SUBROUTINE refregtest(cleanup, total_error)
   CALL check("h5sselect_hyperslab_f", error, total_error)
   ref(1)%ref(:) = 0
 !  f_ptr = C_LOC(ref(1))
-!  CALL h5rcreate_f(file_id, dsetnamev, 1, space_id, f_ptr, error) 
+!  CALL h5rcreate_f(file_id, dsetnamev, 1, space_id, f_ptr, error)
   CALL h5rcreate_f(file_id, dsetnamev, space_id, ref(1), error)
   CALL check("h5rcreate_f", error, total_error)
 

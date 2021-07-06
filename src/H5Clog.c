@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -269,8 +269,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5C_get_logging_status(const H5C_t *cache, /*OUT*/ hbool_t *is_enabled,
-                       /*OUT*/ hbool_t *is_currently_logging)
+H5C_get_logging_status(const H5C_t *cache, hbool_t *is_enabled, hbool_t *is_currently_logging)
 {
     FUNC_ENTER_NOAPI_NOERR
 

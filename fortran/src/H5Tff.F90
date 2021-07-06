@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -28,7 +28,7 @@
 ! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
 ! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
 !      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
-!                             
+!
 !  If you add a new function here then you MUST add the function name to the
 !  Windows dll file 'hdf5_fortrandll.def.in' in the fortran/src directory.
 !  This is needed for Windows based operating systems.
@@ -41,7 +41,7 @@ MODULE H5T
   USE H5GLOBAL
   IMPLICIT NONE
 
-  PRIVATE h5tenum_insert_f03, h5tenum_insert_f90 
+  PRIVATE h5tenum_insert_f03, h5tenum_insert_f90
 
 !****t* H5T/hvl_t
 ! Fortran2003 Derived Type:
@@ -92,7 +92,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5topen_f(loc_id, name, type_id, hdferr, tapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id 
+    INTEGER(HID_T), INTENT(IN) :: loc_id
     CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(HID_T), INTENT(OUT) :: type_id
     INTEGER, INTENT(OUT) :: hdferr
@@ -231,7 +231,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5tcopy_f(type_id, new_type_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: type_id 
+    INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER(HID_T), INTENT(OUT) :: new_type_id
     INTEGER, INTENT(OUT) :: hdferr
 !*****
@@ -242,7 +242,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(OUT) :: new_type_id
        END FUNCTION h5tcopy_c
     END INTERFACE
-    
+
     hdferr = h5tcopy_c(type_id, new_type_id)
   END SUBROUTINE h5tcopy_f
 !
@@ -288,7 +288,7 @@ CONTAINS
          INTEGER :: c_flag
        END FUNCTION h5tequal_c
     END INTERFACE
-    
+
     flag = .FALSE.
     hdferr = h5tequal_c(type1_id, type2_id, c_flag)
     IF(c_flag .GT. 0) flag = .TRUE.
@@ -329,7 +329,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: type_id
        END FUNCTION h5tclose_c
     END INTERFACE
-    
+
     hdferr = h5tclose_c(type_id)
   END SUBROUTINE h5tclose_f
 !
@@ -356,7 +356,7 @@ CONTAINS
 !            H5T_REFERENCE_F (7)
 !            H5T_ENUM_F (8)
 !            H5T_VLEN_F (9)
-!            H5T_ARRAY_F (10)  
+!            H5T_ARRAY_F (10)
 !  hdferr  - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
@@ -372,7 +372,7 @@ CONTAINS
   SUBROUTINE h5tget_class_f(type_id, class, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
-    INTEGER, INTENT(OUT) :: class         
+    INTEGER, INTENT(OUT) :: class
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTERFACE
@@ -425,7 +425,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(OUT) :: size
        END FUNCTION h5tget_size_c
     END INTERFACE
-    
+
     hdferr = h5tget_size_c(type_id, size)
   END SUBROUTINE h5tget_size_f
 
@@ -469,7 +469,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(IN) :: size
        END FUNCTION h5tset_size_c
     END INTERFACE
-    
+
     hdferr = h5tset_size_c(type_id, size)
   END SUBROUTINE h5tset_size_f
 
@@ -519,7 +519,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: order
        END FUNCTION h5tget_order_c
     END INTERFACE
-    
+
     hdferr = h5tget_order_c(type_id, order)
   END SUBROUTINE h5tget_order_f
 !
@@ -567,7 +567,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: order
        END FUNCTION h5tset_order_c
     END INTERFACE
-    
+
     hdferr = h5tset_order_c(type_id, order)
   END SUBROUTINE h5tset_order_f
 
@@ -600,7 +600,7 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER(SIZE_T), INTENT(OUT) :: precision
-    INTEGER, INTENT(OUT) :: hdferr        
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTERFACE
        INTEGER FUNCTION h5tget_precision_c(type_id, PRECISION) BIND(C,NAME='h5tget_precision_c')
@@ -642,7 +642,7 @@ CONTAINS
   SUBROUTINE h5tset_precision_f(type_id, PRECISION, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
-    INTEGER(SIZE_T), INTENT(IN) :: PRECISION 
+    INTEGER(SIZE_T), INTENT(IN) :: PRECISION
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTERFACE
@@ -653,7 +653,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(IN) :: PRECISION
        END FUNCTION h5tset_precision_c
     END INTERFACE
-    
+
     hdferr = h5tset_precision_c(type_id, PRECISION)
   END SUBROUTINE h5tset_precision_f
 
@@ -695,10 +695,10 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(OUT) :: offset
        END FUNCTION h5tget_offset_c
     END INTERFACE
-    
+
     hdferr = h5tget_offset_c(type_id, offset)
   END SUBROUTINE h5tget_offset_f
-  
+
 !
 !****s* H5T/h5tset_offset_f
 !
@@ -737,10 +737,10 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(IN) :: offset
        END FUNCTION h5tset_offset_c
     END INTERFACE
-    
+
     hdferr = h5tset_offset_c(type_id, offset)
   END SUBROUTINE h5tset_offset_f
-  
+
 !
 !****s* H5T/h5tget_pad_f
 !
@@ -757,7 +757,7 @@ CONTAINS
 !  lsbpad 	 - least-significant bit padding type
 !  msbpad 	 - most-significant bit padding type
 !                  Possible values of padding type are:
-!                    H5T_PAD_ERROR_F 
+!                    H5T_PAD_ERROR_F
 !                    H5T_PAD_ZERO_F
 !                    H5T_PAD_ONE_F
 !                    H5T_PAD_BACKGROUND_F
@@ -790,7 +790,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: msbpad
        END FUNCTION h5tget_pad_c
     END INTERFACE
-    
+
     hdferr = h5tget_pad_c(type_id, lsbpad, msbpad)
   END SUBROUTINE h5tget_pad_f
 
@@ -841,10 +841,10 @@ CONTAINS
          INTEGER, INTENT(IN) :: msbpad
        END FUNCTION h5tset_pad_c
     END INTERFACE
-    
+
     hdferr = h5tset_pad_c(type_id, lsbpad, msbpad)
   END SUBROUTINE h5tset_pad_f
-  
+
 !
 !****s* H5T/h5tget_sign_f
 !
@@ -859,7 +859,7 @@ CONTAINS
 ! OUTPUTS
 !  sign 	 - sign type
 !                  Possible values are:
-!                    - Unsigned integer type 
+!                    - Unsigned integer type
 !                        H5T_SGN_NONE_F = 0
 !                    - Two's complement signed integer type
 !                        H5T_SGN_2_F = 1
@@ -877,7 +877,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5tget_sign_f(type_id, sign, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: type_id 
+    INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER, INTENT(OUT) :: sign
     INTEGER, INTENT(OUT) :: hdferr
 !*****
@@ -890,10 +890,10 @@ CONTAINS
          INTEGER, INTENT(OUT) :: sign
        END FUNCTION h5tget_sign_c
     END INTERFACE
-    
+
     hdferr = h5tget_sign_c(type_id, sign)
   END SUBROUTINE h5tget_sign_f
-  
+
 !
 !****s* H5T/h5tset_sign_f
 !
@@ -907,7 +907,7 @@ CONTAINS
 !  type_id 	 - datatype identifier
 !  sign 	 - sign type
 !                  Possible values are:
-!                    - Unsigned integer type 
+!                    - Unsigned integer type
 !                        H5T_SGN_NONE_F = 0
 !                    - Two's complement signed integer type
 !                        H5T_SGN_2_F = 1
@@ -938,7 +938,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: sign
        END FUNCTION h5tset_sign_c
     END INTERFACE
-    
+
     hdferr = h5tset_sign_c(type_id, sign)
   END SUBROUTINE h5tset_sign_f
 
@@ -994,7 +994,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(OUT) :: msize
        END FUNCTION h5tget_fields_c
     END INTERFACE
-    
+
     hdferr = h5tget_fields_c(type_id, spos, epos, esize, mpos, msize)
   END SUBROUTINE h5tget_fields_f
 
@@ -1028,7 +1028,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5tset_fields_f(type_id, spos, epos, esize, mpos, msize, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: type_id 
+    INTEGER(HID_T), INTENT(IN) :: type_id
     INTEGER(SIZE_T), INTENT(IN) :: spos
     INTEGER(SIZE_T), INTENT(IN) :: epos
     INTEGER(SIZE_T), INTENT(IN) :: esize
@@ -1050,10 +1050,10 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(IN) :: msize
        END FUNCTION h5tset_fields_c
     END INTERFACE
-    
+
     hdferr = h5tset_fields_c(type_id, spos, epos, esize, mpos, msize)
   END SUBROUTINE h5tset_fields_f
-  
+
 !
 !****s* H5T/h5tget_ebias_f
 !
@@ -1084,7 +1084,7 @@ CONTAINS
     INTEGER(SIZE_T), INTENT(OUT) :: ebias
     INTEGER, INTENT(OUT) :: hdferr
 !*****
-    
+
     INTERFACE
        INTEGER FUNCTION h5tget_ebias_c(type_id, ebias) BIND(C,NAME='h5tget_ebias_c')
          IMPORT :: HID_T, SIZE_T
@@ -1093,7 +1093,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(OUT) :: ebias
        END FUNCTION h5tget_ebias_c
     END INTERFACE
-    
+
     hdferr = h5tget_ebias_c(type_id, ebias)
   END SUBROUTINE h5tget_ebias_f
 
@@ -1135,7 +1135,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(IN) :: ebias
        END FUNCTION h5tset_ebias_c
     END INTERFACE
-    
+
     hdferr = h5tset_ebias_c(type_id, ebias)
   END SUBROUTINE h5tset_ebias_f
 
@@ -1182,7 +1182,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: norm
        END FUNCTION h5tget_norm_c
     END INTERFACE
-    
+
     hdferr = h5tget_norm_c(type_id, norm)
   END SUBROUTINE h5tget_norm_f
 
@@ -1228,7 +1228,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: norm
        END FUNCTION h5tset_norm_c
     END INTERFACE
-    
+
     hdferr = h5tset_norm_c(type_id, norm)
   END SUBROUTINE h5tset_norm_f
 
@@ -1275,7 +1275,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: padtype
        END FUNCTION h5tget_inpad_c
     END INTERFACE
-    
+
     hdferr = h5tget_inpad_c(type_id, padtype)
   END SUBROUTINE h5tget_inpad_f
 
@@ -1321,7 +1321,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: padtype
        END FUNCTION h5tset_inpad_c
     END INTERFACE
-    
+
     hdferr = h5tset_inpad_c(type_id, padtype)
   END SUBROUTINE h5tset_inpad_f
 
@@ -1366,7 +1366,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: cset
        END FUNCTION h5tget_cset_c
     END INTERFACE
-    
+
     hdferr = h5tget_cset_c(type_id, cset)
   END SUBROUTINE h5tget_cset_f
 
@@ -1411,7 +1411,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: cset
        END FUNCTION h5tset_cset_c
     END INTERFACE
-    
+
     hdferr = h5tset_cset_c(type_id, cset)
   END SUBROUTINE h5tset_cset_f
 !
@@ -1457,7 +1457,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: strpad
        END FUNCTION h5tget_strpad_c
     END INTERFACE
-    
+
     hdferr = h5tget_strpad_c(type_id, strpad)
   END SUBROUTINE h5tget_strpad_f
 
@@ -1547,7 +1547,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: num_members
        END FUNCTION h5tget_nmembers_c
     END INTERFACE
-    
+
     hdferr = h5tget_nmembers_c(type_id, num_members)
   END SUBROUTINE h5tget_nmembers_f
 
@@ -1596,7 +1596,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: namelen
        END FUNCTION h5tget_member_name_c
     END INTERFACE
-    
+
     hdferr = h5tget_member_name_c(type_id, index, member_name, namelen)
   END SUBROUTINE h5tget_member_name_f
 
@@ -1641,7 +1641,7 @@ CONTAINS
          INTEGER(SIZE_T), INTENT(OUT) :: offset
        END FUNCTION h5tget_member_offset_c
     END INTERFACE
-    
+
     hdferr = h5tget_member_offset_c(type_id, member_no, offset )
   END SUBROUTINE h5tget_member_offset_f
 !
@@ -1686,11 +1686,11 @@ CONTAINS
          INTEGER, INTENT(OUT) :: index
        END FUNCTION h5tget_member_index_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     hdferr = h5tget_member_index_c(type_id, name, namelen, index)
   END SUBROUTINE h5tget_member_index_f
-  
+
 
 !  !$!
 !  !$!****s* H5T/h5tget_member_dim_f
@@ -1774,9 +1774,9 @@ CONTAINS
          INTEGER(HSIZE_T),DIMENSION(*), INTENT(OUT) ::  dims
        END FUNCTION h5tget_array_dims_c
     END INTERFACE
-    
+
     hdferr = h5tget_array_dims_c(type_id, dims)
-    
+
   END SUBROUTINE h5tget_array_dims_f
 
 !
@@ -1817,9 +1817,9 @@ CONTAINS
          INTEGER, INTENT(OUT) ::  ndims
        END FUNCTION h5tget_array_ndims_c
     END INTERFACE
-    
+
     hdferr = h5tget_array_ndims_c(type_id, ndims)
-    
+
   END SUBROUTINE h5tget_array_ndims_f
 
 !
@@ -1860,9 +1860,9 @@ CONTAINS
          INTEGER(HID_T), INTENT(OUT) :: base_type_id
        END FUNCTION h5tget_super_c
     END INTERFACE
-    
+
     hdferr = h5tget_super_c(type_id, base_type_id)
-    
+
   END SUBROUTINE h5tget_super_f
 
 !
@@ -1908,7 +1908,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(OUT) :: datatype
        END FUNCTION h5tget_member_type_c
     END INTERFACE
-    
+
     hdferr = h5tget_member_type_c(type_id, field_idx , datatype)
   END SUBROUTINE h5tget_member_type_f
 
@@ -1992,7 +1992,7 @@ CONTAINS
   SUBROUTINE h5tinsert_f(type_id,  name, offset, field_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
-    CHARACTER(LEN=*), INTENT(IN) :: name 
+    CHARACTER(LEN=*), INTENT(IN) :: name
     INTEGER(SIZE_T), INTENT(IN) :: offset
     INTEGER(HID_T), INTENT(IN) :: field_id
     INTEGER, INTENT(OUT) :: hdferr
@@ -2011,11 +2011,11 @@ CONTAINS
          INTEGER :: namelen
        END FUNCTION h5tinsert_c
     END INTERFACE
-            
+
     namelen = LEN(name)
     hdferr = h5tinsert_c(type_id, name, namelen, offset, field_id )
   END SUBROUTINE h5tinsert_f
-  
+
 !
 !****s* H5T/h5tpack_f
 !
@@ -2051,10 +2051,10 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: type_id
        END FUNCTION h5tpack_c
     END INTERFACE
-    
+
     hdferr = h5tpack_c(type_id)
   END SUBROUTINE h5tpack_f
-  
+
 !  !$!
 !  !$!****s* H5T/h5tinsert_array_f
 !  !$!
@@ -2150,9 +2150,9 @@ CONTAINS
          INTEGER(HID_T), INTENT(OUT) :: type_id
        END FUNCTION h5tarray_create_c
     END INTERFACE
-    
+
     hdferr = h5tarray_create_c(base_id, rank, dims, type_id)
-    
+
   END SUBROUTINE h5tarray_create_f
 
 !
@@ -2194,7 +2194,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(OUT) :: new_type_id
        END FUNCTION h5tenum_create_c
     END INTERFACE
-    
+
     hdferr = h5tenum_create_c(parent_id, new_type_id)
   END SUBROUTINE h5tenum_create_f
 !
@@ -2225,9 +2225,9 @@ CONTAINS
 !  port).  March 7, 2001
 !
 ! NOTE
-!   According to the standard: Because an INTENT(OUT) variable is considered undefined 
-!   on entry to the procedure, any default initialization specified for its type will 
-!   be applied. So we need to blank out the "name" to be portable and eliminate any 
+!   According to the standard: Because an INTENT(OUT) variable is considered undefined
+!   on entry to the procedure, any default initialization specified for its type will
+!   be applied. So we need to blank out the "name" to be portable and eliminate any
 !   characters the "name' may contain upon entry, depending on compiler implementation.
 ! SOURCE
   SUBROUTINE h5tenum_nameof_f(type_id,  value, namelen, name, hdferr)
@@ -2249,7 +2249,7 @@ CONTAINS
          INTEGER, INTENT(IN) :: value
        END FUNCTION h5tenum_nameof_c
     END INTERFACE
-    
+
     name(1:LEN(name)) = ' '
 
     hdferr = h5tenum_nameof_c(type_id, value, name, namelen)
@@ -2302,7 +2302,7 @@ CONTAINS
          INTEGER, INTENT(OUT) :: value
        END FUNCTION h5tenum_valueof_c
     END INTERFACE
-    
+
     namelen = LEN(name)
     hdferr = h5tenum_valueof_c(type_id, name, namelen,  value)
   END SUBROUTINE h5tenum_valueof_f
@@ -2349,10 +2349,10 @@ CONTAINS
          INTEGER, INTENT(OUT) :: value
        END FUNCTION h5tget_member_value_c
     END INTERFACE
-    
+
     hdferr = h5tget_member_value_c(type_id, member_no, value)
   END SUBROUTINE h5tget_member_value_f
-          
+
 !
 !****s* H5T/h5tset_tag_f
 !
@@ -2385,7 +2385,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTEGER :: taglen
-    
+
     INTERFACE
        INTEGER FUNCTION h5tset_tag_c(type_id, tag, taglen) BIND(C,NAME='h5tset_tag_c')
          IMPORT :: C_CHAR
@@ -2396,11 +2396,11 @@ CONTAINS
          INTEGER :: taglen
        END FUNCTION h5tset_tag_c
     END INTERFACE
-    
+
     taglen = LEN(tag)
     hdferr = h5tset_tag_c(type_id, tag, taglen)
   END SUBROUTINE h5tset_tag_f
-  
+
 !
 !****s* H5T/h5tget_tag_f
 !
@@ -2434,7 +2434,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: taglen
     INTEGER, INTENT(OUT) :: hdferr
 !*****
-    INTEGER(SIZE_T):: tag_size      ! Declared character length of tab 
+    INTEGER(SIZE_T):: tag_size      ! Declared character length of tab
     INTERFACE
        INTEGER FUNCTION h5tget_tag_c(type_id, tag, tag_size, taglen) &
             BIND(C,NAME='h5tget_tag_c')
@@ -2447,11 +2447,11 @@ CONTAINS
          INTEGER, INTENT(OUT) :: taglen
        END FUNCTION h5tget_tag_c
     END INTERFACE
-    
+
     tag_size = LEN(tag)
     hdferr = h5tget_tag_c(type_id, tag, tag_size, taglen )
   END SUBROUTINE h5tget_tag_f
-  
+
 !
 !****s* H5T/h5tvlen_create_f
 !
@@ -2489,7 +2489,7 @@ CONTAINS
          INTEGER(HID_T), INTENT(OUT) :: vltype_id
        END FUNCTION h5tvlen_create_c
     END INTERFACE
-    
+
     hdferr = h5tvlen_create_c(type_id, vltype_id)
   END SUBROUTINE h5tvlen_create_f
 
@@ -2517,11 +2517,11 @@ CONTAINS
   SUBROUTINE h5tis_variable_str_f(type_id, status, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: type_id
-    LOGICAL, INTENT(OUT) :: status 
+    LOGICAL, INTENT(OUT) :: status
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTEGER :: flag                     ! "TRUE/FALSE/ERROR from C"
-    
+
     INTERFACE
        INTEGER FUNCTION h5tis_variable_str_c(type_id, flag) &
             BIND(C,NAME='h5tis_variable_str_c')
@@ -2531,13 +2531,13 @@ CONTAINS
          INTEGER :: flag
        END FUNCTION h5tis_variable_str_c
     END INTERFACE
-    
+
     hdferr = h5tis_variable_str_c(type_id, flag)
     status = .TRUE.
     IF (flag .EQ. 0) status = .FALSE.
-    
+
   END SUBROUTINE h5tis_variable_str_f
-  
+
 !
 !****s* H5T/h5tget_member_class_f
 !
@@ -2728,7 +2728,7 @@ CONTAINS
   SUBROUTINE h5tdecode_f(buf, obj_id, hdferr)
     IMPLICIT NONE
     CHARACTER(LEN=*), INTENT(IN) :: buf
-    INTEGER(HID_T), INTENT(OUT) :: obj_id 
+    INTEGER(HID_T), INTENT(OUT) :: obj_id
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTERFACE
@@ -2811,7 +2811,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5tget_create_plist_f(dtype_id, dtpl_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: dtype_id 
+    INTEGER(HID_T), INTENT(IN) :: dtype_id
     INTEGER(HID_T), INTENT(OUT) :: dtpl_id
     INTEGER, INTENT(OUT) :: hdferr
 !*****
@@ -2884,7 +2884,7 @@ CONTAINS
 !
 ! INPUTS
 !  dtype_id 	 - Datatype identifier for the dataset datatype.
-!  
+!
 !  direction 	 - Direction of search:
 !                  H5T_DIR_DEFAULT,   default direction is inscendent,
 !                  H5T_DIR_ASCEND ,   in inscendent order,
@@ -2901,8 +2901,8 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5tget_native_type_f(dtype_id, direction, native_dtype_id, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: dtype_id 
-    INTEGER, INTENT(IN) :: direction 
+    INTEGER(HID_T), INTENT(IN) :: dtype_id
+    INTEGER, INTENT(IN) :: direction
     INTEGER(HID_T), INTENT(OUT) :: native_dtype_id
     INTEGER, INTENT(OUT) :: hdferr
 !*****
@@ -3025,7 +3025,7 @@ CONTAINS
          INTEGER :: namelen
        END FUNCTION h5tenum_insert_c
     END INTERFACE
-            
+
     namelen = LEN(name)
     hdferr = h5tenum_insert_c(type_id, name, namelen, value)
   END SUBROUTINE h5tenum_insert_f90
@@ -3061,7 +3061,7 @@ CONTAINS
     INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTEGER :: namelen
-    
+
     INTERFACE
        INTEGER FUNCTION h5tenum_insert_ptr_c(type_id, name, namelen, value) &
             BIND(C, NAME='h5tenum_insert_ptr_c')
@@ -3074,7 +3074,7 @@ CONTAINS
          TYPE(C_PTR), VALUE :: value
        END FUNCTION h5tenum_insert_ptr_c
     END INTERFACE
-            
+
     namelen = LEN(name)
     hdferr = h5tenum_insert_ptr_c(type_id, name, namelen, value)
   END SUBROUTINE h5tenum_insert_f03

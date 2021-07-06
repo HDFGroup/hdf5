@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
  * Purpose:	The public header file for the native VOL connector.
  */
 
-#ifndef _H5VLnative_H
-#define _H5VLnative_H
+#ifndef H5VLnative_H
+#define H5VLnative_H
 
 /* Public headers needed by this file */
 #include "H5VLpublic.h" /* Virtual Object Layer                 */
@@ -123,7 +123,13 @@ extern "C" {
 #endif
 
 /* Token <--> address converters */
+/**
+ * \ingroup H5VLNAT
+ */
 H5_DLL herr_t H5VLnative_addr_to_token(hid_t loc_id, haddr_t addr, H5O_token_t *token);
+/**
+ * \ingroup H5VLNAT
+ */
 H5_DLL herr_t H5VLnative_token_to_addr(hid_t loc_id, H5O_token_t token, haddr_t *addr);
 
 /* Not really public but must be included here */
@@ -133,4 +139,4 @@ H5_DLL hid_t H5VL_native_register(void);
 }
 #endif
 
-#endif /* _H5VLnative_H */
+#endif /* H5VLnative_H */

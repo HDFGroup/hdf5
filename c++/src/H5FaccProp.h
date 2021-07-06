@@ -7,13 +7,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5FileAccPropList_H
-#define __H5FileAccPropList_H
+#ifndef H5FileAccPropList_H
+#define H5FileAccPropList_H
 
 namespace H5 {
 
@@ -122,6 +122,12 @@ class H5_DLLCPP FileAccPropList : public PropList {
     // Returns garbage collecting references setting.
     unsigned getGcReferences() const;
 
+    // Sets file locking parameters.
+    void setFileLocking(hbool_t use_file_locking, hbool_t ignore_when_disabled) const;
+
+    // Gets file locking parameters.
+    void getFileLocking(hbool_t &use_file_locking, hbool_t &ignore_when_disabled) const;
+
     // Sets bounds on versions of library format to be used when creating
     // or writing objects.
     void setLibverBounds(H5F_libver_t libver_low, H5F_libver_t libver_high) const;
@@ -162,4 +168,4 @@ class H5_DLLCPP FileAccPropList : public PropList {
 }; // end of FileAccPropList
 } // namespace H5
 
-#endif // __H5FileAccPropList_H
+#endif // H5FileAccPropList_H

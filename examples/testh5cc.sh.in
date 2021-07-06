@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -48,6 +48,9 @@ verbose=${HDF5_VERBOSE:-1}      # 0: none; 1: default; 2: chatty; 3: everything
 test $verbose -gt 2 && set -x
 H5_NO_DEPRECATED_SYMBOLS=`grep '#define H5_NO_DEPRECATED_SYMBOLS ' ../src/H5pubconf.h`
 H5_USE_16_API_DEFAULT=`grep '#define H5_USE_16_API_DEFAULT ' ../src/H5pubconf.h`
+H5_USE_18_API_DEFAULT=`grep '#define H5_USE_18_API_DEFAULT ' ../src/H5pubconf.h`
+H5_USE_110_API_DEFAULT=`grep '#define H5_USE_110_API_DEFAULT ' ../src/H5pubconf.h`
+H5_USE_112_API_DEFAULT=`grep '#define H5_USE_112_API_DEFAULT ' ../src/H5pubconf.h`
 
 # setup my machine information.
 myos=`uname -s`
@@ -61,6 +64,10 @@ v16main=${H5TOOL}_v16main.$suffix
 v16main_o=${H5TOOL}_v16main.o
 v18main=${H5TOOL}_v18main.$suffix
 v18main_o=${H5TOOL}_v18main.o
+v110main=${H5TOOL}_v110main.$suffix
+v110main_o=${H5TOOL}_v110main.o
+v112main=${H5TOOL}_v112main.$suffix
+v112main_o=${H5TOOL}_v112main.o
 appmain=${H5TOOL}_appmain.$suffix
 appmain_o=${H5TOOL}_appmain.o
 prog1=${H5TOOL}_prog1.$suffix
@@ -74,7 +81,7 @@ applib=libapp${H5TOOL}.a
 # Don't use the wildcard form of *.h5 as it will wipe out even *.h5 generated
 # by otehr test programs. This will cause a racing condition error when
 # parallel make (e.g., gmake -j 4) is used.
-temp_SRC="$hdf5main $v16main $v18main $appmain $prog1 $prog2"
+temp_SRC="$hdf5main $v16main $v18main $v110main $v112main $appmain $prog1 $prog2"
 temp_OBJ=`echo $temp_SRC | sed -e "s/\.${suffix}/.o/g"`
 temp_FILES="a.out $applib"
 
@@ -83,6 +90,8 @@ temp_FILES="a.out $applib"
 cat > $appmain <<EOF
 #include "hdf5.h"
 #define H5FILE_NAME        "tmp.h5"
+extern void sub1(void);
+extern void sub2(void);
 int
 main (void)
 {
@@ -100,13 +109,15 @@ main (void)
 
     printf("HDF5 C Sample program ran successfully. File %s generated.\n", H5FILE_NAME);
     remove(H5FILE_NAME);
- 
+
     return 0;
-}     
+}
 EOF
 
 # generate prog1
 cat > $prog1 <<EOF
+#include <stdio.h>
+void
 sub1(void)
 {
     printf("in sub1\n");
@@ -115,6 +126,8 @@ EOF
 
 # generate prog2
 cat > $prog2 <<EOF
+#include <stdio.h>
+void
 sub2(void)
 {
     printf("in sub2\n");
@@ -143,7 +156,7 @@ main (void)
     remove(H5FILE_NAME);
 
     return 0;
-}     
+}
 EOF
 
 # Generate HDF5 v1.6 Main Program:
@@ -192,6 +205,82 @@ main (void)
     printf("HDF5 C program created with V1.8 API ran successfully. "
        "File %s generated.\n", H5FILE_NAME);
     remove(H5FILE_NAME);
+    return 0;
+}
+EOF
+
+# Generate HDF5 v1.10 Main Program:
+# This makes unique V1.10 API calls.
+cat > $v110main <<EOF
+/* This is a V1.10 API calls example Program. */
+#include "hdf5.h"
+#define H5FILE_NAME        "tmp.h5"
+int
+main (void)
+{
+    hid_t       file, group, group2, dset, dset2;    /* file and group handles */
+
+    file = H5Fcreate(H5FILE_NAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    group = H5Gcreate(file, "/Group", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    group2 = H5Gcreate2(file, "/Group1.8", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    dset = H5Dopen(group, "Dataset", H5P_DEFAULT);
+    dset2 = H5Dopen2(group2, "Dataset2", H5P_DEFAULT);
+    H5Dclose(dset);
+    H5Dclose(dset2);
+    H5Gclose(group2);
+    H5Gclose(group);
+    H5Fclose(file);
+
+    printf("HDF5 C program created with V1.10 API ran successfully. "
+       "File %s generated.\n", H5FILE_NAME);
+    remove(H5FILE_NAME);
+    return 0;
+}
+EOF
+
+# Generate HDF5 v1.12 Main Program:
+# This makes unique V1.12 API calls.
+cat > $v112main <<EOF
+/* This is a V1.12 API calls example Program. */
+#include "hdf5.h"
+#define H5FILE_NAME        "tmp.h5"
+#define SPACE1_RANK    3
+int
+main (void)
+{
+    hid_t       sid;                  /* Dataspace ID */
+    hid_t       fapl = -1;            /* File access property list ID */
+    int         rank;                 /* Logical rank of dataspace    */
+    hsize_t     dims[] = {3, 3, 15};
+    size_t      sbuf_size=0;
+    herr_t      ret;                  /* Generic return value        */
+    hsize_t             start[] = {0, 0, 0};
+    hsize_t             stride[] = {2, 5, 3};
+    hsize_t             count[] = {2, 2, 2};
+    hsize_t             block[] = {1, 3, 1};
+
+    /* Create the file access property list */
+    fapl = H5Pcreate(H5P_FILE_ACCESS);
+
+    /* Set low/high bounds in the fapl */
+    ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_EARLIEST,
+                               H5F_LIBVER_LATEST);
+
+    /* Create the dataspace */
+    sid = H5Screate_simple(SPACE1_RANK, dims, NULL);
+
+    /* Set the hyperslab selection */
+    ret = H5Sselect_hyperslab(sid, H5S_SELECT_SET, start, stride, count, block);
+
+    /* Encode simple dataspace in a buffer with the fapl setting */
+    ret = H5Sencode(sid, NULL, &sbuf_size, fapl);
+
+    /* Encode simple dataspace in a buffer with the fapl setting */
+    ret = H5Sencode2(sid, NULL, &sbuf_size, fapl);
+
+    printf("HDF5 C program created with V1.12 API ran successfully. ");
+/*       "File %s generated.\n", H5FILE_NAME);
+      remove(H5FILE_NAME); */
     return 0;
 }
 EOF
@@ -304,17 +393,28 @@ TOOLTEST -E $appmain $prog1 $prog2
 
 # Group5: Version compatibility tests.
 echo "***"Version compatibility tests.
-# Test these two cases now. More later.
+# 20200610 Updated for versions 1.10 - 1.14.
 # If H5_NO_DEPRECATED_SYMBOLS;
-# then only v18main works.
+# then versions v18main, v110main, and v112main work.
+# -DH5_USE_<N>_API_DEFAULT flags cannot be used with H5_NO_DEPRECATED_SYMBOLS;
 # else if H5_USE_16_API_DEFAULT;
 #      then v16main works.
 # else v18main works and -DH5_USE_16_API_DEFAULT v16main also works.
+# as new versions with versioned functions are added, they will work with and 
+# should be added to H5_NO_DEPRECATED_SYMBOLS and to the else section, with and 
+# without the -DH5_USE_<N>_API_DEFAULT flag. A new H5_USE_<N>_API_DEFAULT section 
+# should also be added.
 #
 if [ -n "$H5_USE_16_API_DEFAULT" ]; then
     echo "H5_USE_16_API_DEFAULT is defined."
+elif [ -n "$H5_USE_18_API_DEFAULT" ]; then
+    echo "H5_USE_18_API_DEFAULT is defined."
+elif [ -n "$H5_USE_110_API_DEFAULT" ]; then
+    echo "H5_USE_110_API_DEFAULT is defined."
+elif [ -n "$H5_USE_112_API_DEFAULT" ]; then
+    echo "H5_USE_112_API_DEFAULT is defined."
 else
-    echo "H5_USE_16_API_DEFAULT is not defined."
+    echo "No H5 API_DEFAULT is defined."
 fi
 if [ -n "$H5_NO_DEPRECATED_SYMBOLS" ]; then
     echo "H5_NO_DEPRECATED_SYMBOLS is defined."
@@ -324,11 +424,29 @@ fi
 if [ -n "$H5_NO_DEPRECATED_SYMBOLS" ]; then
     echo "Skipping $v16main test"
     TOOLTEST $v18main
+    TOOLTEST $v18main
+    TOOLTEST $v110main
+    TOOLTEST $v112main
 elif [ -n "$H5_USE_16_API_DEFAULT" ]; then
+    echo "Testing HDF5  with 16_API_DEFAULT"
     TOOLTEST $v16main
-else
+elif [ -n "$H5_USE_18_API_DEFAULT" ]; then
+    echo "Testing HDF5  with 18_API_DEFAULT"
     TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
     TOOLTEST $v18main
+elif [ -n "$H5_USE_110_API_DEFAULT" ]; then
+    echo "Testing HDF5  with 110_API_DEFAULT"
+    TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
+    TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
+    TOOLTEST $v110main
+else
+    echo "Testing HDF5  with 112_API_DEFAULT"
+    TOOLTEST -DH5_USE_16_API_DEFAULT $v16main
+    TOOLTEST -DH5_USE_18_API_DEFAULT $v18main
+    TOOLTEST -DH5_USE_110_API_DEFAULT $v110main
+    TOOLTEST $v18main
+    TOOLTEST $v110main
+    TOOLTEST $v112main
 fi
 
 ##############################################################################

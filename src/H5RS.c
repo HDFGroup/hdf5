@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -18,9 +18,21 @@
  *
  */
 
-#include "H5Eprivate.h"  /* Error handling		  	*/
-#include "H5FLprivate.h" /* Free lists                           */
-#include "H5RSprivate.h" /* Reference-counted strings            */
+/***********/
+/* Headers */
+/***********/
+#include "H5private.h"   /* Generic Functions                        */
+#include "H5Eprivate.h"  /* Error handling                           */
+#include "H5FLprivate.h" /* Free lists                               */
+#include "H5RSprivate.h" /* Reference-counted strings                */
+
+/****************/
+/* Local Macros */
+/****************/
+
+/******************/
+/* Local Typedefs */
+/******************/
 
 /* Private typedefs & structs */
 struct H5RS_str_t {
@@ -28,6 +40,25 @@ struct H5RS_str_t {
     unsigned wrapped; /* Indicates that the string to be ref-counted is not copied */
     unsigned n;       /* Reference count of number of pointers sharing string */
 };
+
+/********************/
+/* Package Typedefs */
+/********************/
+
+/********************/
+/* Local Prototypes */
+/********************/
+/*********************/
+/* Package Variables */
+/*********************/
+
+/*****************************/
+/* Library Private Variables */
+/*****************************/
+
+/*******************/
+/* Local Variables */
+/*******************/
 
 /* Declare a free list to manage the H5RS_str_t struct */
 H5FL_DEFINE_STATIC(H5RS_str_t);
@@ -37,11 +68,11 @@ H5FL_BLK_DEFINE(str_buf);
 
 /*--------------------------------------------------------------------------
  NAME
-    H5RS_xstrdup
+    H5RS__xstrdup
  PURPOSE
     Duplicate the string being reference counted
  USAGE
-    char *H5RS_xstrdup(s)
+    char *H5RS__xstrdup(s)
         const char *s;          IN: String to duplicate
 
  RETURNS
@@ -55,11 +86,11 @@ H5FL_BLK_DEFINE(str_buf);
  REVISION LOG
 --------------------------------------------------------------------------*/
 static char *
-H5RS_xstrdup(const char *s)
+H5RS__xstrdup(const char *s)
 {
     char *ret_value; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     if (s) {
         size_t len = HDstrlen(s) + 1;
@@ -72,7 +103,7 @@ H5RS_xstrdup(const char *s)
         ret_value = NULL;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5RS_xstrdup() */
+} /* end H5RS__xstrdup() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -105,7 +136,7 @@ H5RS_create(const char *s)
         HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
 
     /* Set the internal fields */
-    ret_value->s       = H5RS_xstrdup(s);
+    ret_value->s       = H5RS__xstrdup(s);
     ret_value->wrapped = 0;
     ret_value->n       = 1;
 
@@ -135,13 +166,13 @@ done:
 H5RS_str_t *
 H5RS_wrap(const char *s)
 {
-    H5RS_str_t *ret_value; /* Return value */
+    H5RS_str_t *ret_value = NULL; /* Return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
     /* Allocate ref-counted string structure */
     if (NULL == (ret_value = H5FL_MALLOC(H5RS_str_t)))
-        HGOTO_ERROR(H5E_RS, H5E_NOSPACE, NULL, "memory allocation failed")
+        HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, NULL, "memory allocation failed")
 
     /* Set the internal fields */
     ret_value->s       = (char *)s;
@@ -263,7 +294,7 @@ H5RS_incr(H5RS_str_t *rs)
      * scope appropriately.
      */
     if (rs->wrapped) {
-        rs->s       = H5RS_xstrdup(rs->s);
+        rs->s       = H5RS__xstrdup(rs->s);
         rs->wrapped = 0;
     } /* end if */
 

@@ -5,7 +5,7 @@
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5O APIs which are dependent on FORTRAN 2003
-!  features. 
+!  features.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -16,7 +16,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -28,9 +28,9 @@
 ! *****************************************
 MODULE visit_cb
 
-  USE HDF5 
+  USE HDF5
   USE, INTRINSIC :: ISO_C_BINDING
-  
+
   IMPLICIT NONE
 
   INTEGER, PARAMETER :: info_size = 9
@@ -283,7 +283,7 @@ CONTAINS
 
 SUBROUTINE test_h5o_refcount(total_error)
 
-  USE HDF5 
+  USE HDF5
   USE TH5_MISC
   USE ISO_C_BINDING
   IMPLICIT NONE
@@ -301,7 +301,7 @@ SUBROUTINE test_h5o_refcount(total_error)
 
   ! Create a new HDF5 file
   CALL h5fcreate_f(FILENAME,H5F_ACC_TRUNC_F,fid,error)
-  CALL check("h5fcreate_f", error, total_error) 
+  CALL check("h5fcreate_f", error, total_error)
 
   ! Create a group, dataset, and committed datatype within the file
   ! Create the group
@@ -567,13 +567,13 @@ SUBROUTINE test_obj_info(total_error)
 
   INTEGER, INTENT(INOUT) :: total_error
 
-  INTEGER(hid_t) :: fid = -1             ! File ID 
-  INTEGER(hid_t) :: gid = -1, gid2 = -1  ! Group IDs 
-  INTEGER(hid_t) :: did                  ! Dataset ID 
-  INTEGER(hid_t) :: sid                  ! Dataspace ID 
-  TYPE(hobj_ref_t_f), TARGET :: wref     ! Reference to write 
+  INTEGER(hid_t) :: fid = -1             ! File ID
+  INTEGER(hid_t) :: gid = -1, gid2 = -1  ! Group IDs
+  INTEGER(hid_t) :: did                  ! Dataset ID
+  INTEGER(hid_t) :: sid                  ! Dataspace ID
+  TYPE(hobj_ref_t_f), TARGET :: wref     ! Reference to write
   TYPE(hobj_ref_t_f), TARGET :: rref     ! Reference to read
-  TYPE(H5O_info_t) :: oinfo              ! Object info struct 
+  TYPE(H5O_info_t) :: oinfo              ! Object info struct
   INTEGER :: error
   TYPE(C_PTR) :: f_ptr
 
@@ -595,7 +595,7 @@ SUBROUTINE test_obj_info(total_error)
   CALL h5gcreate_f(fid,  GROUPNAME, gid, error)
   CALL check("h5gcreate_f",error,total_error)
 
-  ! Create nested groups 
+  ! Create nested groups
   CALL h5gcreate_f(gid,  GROUPNAME2, gid2, error)
   CALL check("h5gcreate_f",error,total_error)
   CALL h5gclose_f(gid2, error)
@@ -630,7 +630,7 @@ SUBROUTINE test_obj_info(total_error)
   CALL h5dwrite_f(did, H5T_STD_REF_OBJ, f_ptr, error)
   CALL check("h5dwrite_f",error, total_error)
 
-  ! Close objects 
+  ! Close objects
   CALL h5dclose_f(did, error)
   CALL check("h5dclose_f", error, total_error)
   CALL h5sclose_f(sid, error)
@@ -718,7 +718,7 @@ SUBROUTINE build_visit_file(fid)
   USE TH5_MISC
   IMPLICIT NONE
 
-  INTEGER(hid_t) :: fid                   ! File ID 
+  INTEGER(hid_t) :: fid                   ! File ID
   INTEGER(hid_t) :: gid = -1, gid2 = -1   ! Group IDs
   INTEGER(hid_t) :: sid = -1              ! Dataspace ID
   INTEGER(hid_t) :: did = -1              ! Dataset ID
@@ -726,7 +726,7 @@ SUBROUTINE build_visit_file(fid)
   INTEGER(hid_t) :: aid = -1, aid2 = -1, aid3 = -1 ! Attribute ID
   CHARACTER(LEN=20) :: filename = 'visit.h5'
   INTEGER :: error
-  
+
   ! Create file for visiting
   CALL H5Fcreate_f(filename, H5F_ACC_TRUNC_F, fid, error)
 

@@ -7,13 +7,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __H5PropList_H
-#define __H5PropList_H
+#ifndef H5PropList_H
+#define H5PropList_H
 
 namespace H5 {
 
@@ -144,4 +144,4 @@ class H5_DLLCPP PropList : public IdComponent {
 }; // end of PropList
 } // namespace H5
 
-#endif // __H5PropList_H
+#endif // H5PropList_H

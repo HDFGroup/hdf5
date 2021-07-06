@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -49,7 +49,7 @@ CONTAINS
 ! NAME
 !  h5screate_simple_f
 !
-! PURPOSE 	
+! PURPOSE
 !  Creates a new simple data space and opens it for access	.
 !
 ! INPUTS
@@ -104,7 +104,7 @@ CONTAINS
     ENDIF
     hdferr = h5screate_simple_c(rank, dims, f_maxdims, space_id)
     DEALLOCATE(f_maxdims)
-    
+
   END SUBROUTINE h5screate_simple_f
 
 !
@@ -142,9 +142,9 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: space_id
        END FUNCTION h5sclose_c
     END INTERFACE
-    
+
     hdferr = h5sclose_c(space_id)
-    
+
   END SUBROUTINE h5sclose_f
 
 !
@@ -193,9 +193,9 @@ CONTAINS
          INTEGER(HID_T), INTENT(OUT) :: space_id
        END FUNCTION h5screate_c
     END INTERFACE
-    
+
     hdferr = h5screate_c(classtype, space_id)
-    
+
   END SUBROUTINE h5screate_f
 
 !
@@ -287,7 +287,7 @@ CONTAINS
     END INTERFACE
 
     hdferr =  h5sget_select_hyper_nblocks_c (space_id, num_blocks)
-    
+
   END SUBROUTINE h5sget_select_hyper_nblocks_f
 
 !
@@ -319,7 +319,7 @@ CONTAINS
   SUBROUTINE h5sget_select_hyper_blocklist_f(space_id, startblock, &
                                                     num_blocks, buf, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: space_id 
+    INTEGER(HID_T), INTENT(IN) :: space_id
     INTEGER(HSIZE_T), INTENT(IN) :: startblock
     INTEGER(HSIZE_T), INTENT(IN) :: num_blocks
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf
@@ -432,7 +432,7 @@ CONTAINS
     END INTERFACE
 
     hdferr =  h5sget_select_elem_npoints_c (space_id, num_points)
-    
+
   END SUBROUTINE h5sget_select_elem_npoints_f
 
 !
@@ -481,10 +481,10 @@ CONTAINS
          INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: buf
        END FUNCTION h5sget_select_elem_pointlist_c
     END INTERFACE
-    
+
     hdferr =  h5sget_select_elem_pointlist_c(space_id, startpoint, &
          num_points, buf )
-    
+
   END SUBROUTINE h5sget_select_elem_pointlist_f
 
 !
@@ -500,8 +500,8 @@ CONTAINS
 ! INPUTS
 !  space_id 	 - dataspace identifier
 !  operator 	 - flag, valid values are:
-!                   H5S_SELECT_SET_F 
-!                   H5S_SELECT_APPEND_F 
+!                   H5S_SELECT_SET_F
+!                   H5S_SELECT_APPEND_F
 !                   H5S_SELECT_PREPEND_F
 !  rank 	 - number of dataspace dimensions
 !  num_elements  - number of elements to be selected
@@ -527,7 +527,7 @@ CONTAINS
     INTEGER,          INTENT(IN)                                :: rank
     INTEGER(SIZE_T),  INTENT(IN)                                :: num_elements
     INTEGER(HSIZE_T), INTENT(IN) , DIMENSION(rank,num_elements) :: coord
-    INTEGER,          INTENT(OUT)                               :: hdferr 
+    INTEGER,          INTENT(OUT)                               :: hdferr
 !*****
     INTEGER(HSIZE_T), ALLOCATABLE, DIMENSION(:,:) :: c_coord
     INTEGER :: error, i
@@ -595,7 +595,7 @@ CONTAINS
   SUBROUTINE h5sselect_all_f(space_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: space_id
-    INTEGER, INTENT(OUT) :: hdferr 
+    INTEGER, INTENT(OUT) :: hdferr
 !*****
     INTERFACE
        INTEGER FUNCTION h5sselect_all_c(space_id) BIND(C,NAME='h5sselect_all_c')
@@ -604,9 +604,9 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: space_id
        END FUNCTION h5sselect_all_c
     END INTERFACE
-    
+
     hdferr = h5sselect_all_c(space_id)
-    
+
   END SUBROUTINE h5sselect_all_f
 
 !
@@ -646,9 +646,9 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: space_id
        END FUNCTION h5sselect_none_c
     END INTERFACE
-    
+
     hdferr = h5sselect_none_c(space_id)
-    
+
   END SUBROUTINE h5sselect_none_f
 
 !
@@ -665,8 +665,8 @@ CONTAINS
 !  space_id - identifier for the dataspace for which
 !                  selection is verified
 ! OUTPUTS
-!  status   - TRUE if the selection is contained within 
-!             the extent, FALSE otherwise. 
+!  status   - TRUE if the selection is contained within
+!             the extent, FALSE otherwise.
 !  hdferr   - Returns 0 if successful and -1 if fails
 !
 ! AUTHOR
@@ -695,11 +695,11 @@ CONTAINS
          INTEGER :: flag
        END FUNCTION h5sselect_valid_c
     END INTERFACE
-    
+
     hdferr = h5sselect_valid_c(space_id, flag)
     status = .TRUE.
     IF (flag .EQ. 0) status = .FALSE.
-    
+
   END SUBROUTINE h5sselect_valid_f
 
 !
@@ -729,7 +729,7 @@ CONTAINS
 ! SOURCE
   SUBROUTINE h5sget_simple_extent_npoints_f(space_id, npoints, hdferr)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: space_id 
+    INTEGER(HID_T), INTENT(IN) :: space_id
     INTEGER(HSIZE_T), INTENT(OUT) :: npoints
     INTEGER, INTENT(OUT) :: hdferr
 !*****
@@ -783,7 +783,7 @@ CONTAINS
          INTEGER(HSSIZE_T), INTENT(OUT) :: npoints
        END FUNCTION h5sget_select_npoints_c
     END INTERFACE
-    
+
     hdferr = h5sget_select_npoints_c(space_id, npoints)
 
   END SUBROUTINE h5sget_select_npoints_f
@@ -826,9 +826,9 @@ CONTAINS
          INTEGER, INTENT(OUT) :: rank
        END FUNCTION h5sget_simple_extent_ndims_c
     END INTERFACE
-    
+
     hdferr = h5sget_simple_extent_ndims_c(space_id, rank)
-    
+
   END SUBROUTINE h5sget_simple_extent_ndims_f
 !
 !****s* H5S/h5sget_simple_extent_dims_f
@@ -873,9 +873,9 @@ CONTAINS
          INTEGER(HSIZE_T), DIMENSION(*), INTENT(OUT) :: maxdims
        END FUNCTION h5sget_simple_extent_dims_c
     END INTERFACE
-    
+
     hdferr = h5sget_simple_extent_dims_c(space_id, dims, maxdims)
-    
+
   END SUBROUTINE h5sget_simple_extent_dims_f
 
 !
@@ -920,9 +920,9 @@ CONTAINS
          INTEGER, INTENT(OUT) :: classtype
        END FUNCTION h5sget_simple_extent_type_c
     END INTERFACE
-    
+
     hdferr = h5sget_simple_extent_type_c(space_id, classtype)
-    
+
   END SUBROUTINE h5sget_simple_extent_type_f
   !
 !****s* H5S/h5sset_extent_simple_f
@@ -970,7 +970,7 @@ CONTAINS
          INTEGER(HSIZE_T), DIMENSION(rank), INTENT(IN) :: maximum_size
        END FUNCTION h5sset_extent_simple_c
     END INTERFACE
-    
+
     hdferr = h5sset_extent_simple_c(space_id, rank, current_size, &
          maximum_size)
 
@@ -1016,11 +1016,11 @@ CONTAINS
          INTEGER :: flag
        END FUNCTION h5sis_simple_c
     END INTERFACE
-    
+
     hdferr = h5sis_simple_c(space_id, flag)
     status = .TRUE.
     IF (flag .EQ. 0) status = .FALSE.
-    
+
   END SUBROUTINE h5sis_simple_f
 
 !
@@ -1156,9 +1156,9 @@ CONTAINS
          INTEGER(HID_T), INTENT(IN) :: space_id
        END FUNCTION h5sset_extent_none_c
     END INTERFACE
-    
+
     hdferr = h5sset_extent_none_c(space_id)
-    
+
   END SUBROUTINE h5sset_extent_none_f
 !
 !****s* H5S/h5sselect_hyperslab_f
@@ -1196,7 +1196,7 @@ CONTAINS
   SUBROUTINE h5sselect_hyperslab_f(space_id, OPERATOR, start, count, &
        hdferr, stride, BLOCK)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: space_id 
+    INTEGER(HID_T), INTENT(IN) :: space_id
     INTEGER, INTENT(IN) :: OPERATOR
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: start
     INTEGER(HSIZE_T), DIMENSION(*), INTENT(IN) :: count
@@ -1208,7 +1208,7 @@ CONTAINS
     INTEGER(HSIZE_T), DIMENSION(:), ALLOCATABLE :: def_stride
     INTEGER :: rank
     INTEGER :: error1, error2
-    
+
     INTERFACE
        INTEGER FUNCTION h5sselect_hyperslab_c(space_id, OPERATOR, &
             start, count, stride, BLOCK) BIND(C,NAME='h5sselect_hyperslab_c')
@@ -1248,7 +1248,7 @@ CONTAINS
        DEALLOCATE(def_block)
        RETURN
     ENDIF
-    
+
     IF (.NOT.PRESENT(stride).AND. PRESENT(BLOCK)) THEN
        ALLOCATE(def_stride(rank), stat=error2)
        IF (error2.NE.0) THEN
@@ -1273,7 +1273,7 @@ CONTAINS
          def_stride, def_block)
     DEALLOCATE(def_block)
     DEALLOCATE(def_stride)
-    
+
   END SUBROUTINE h5sselect_hyperslab_f
 !  !$!
 !  !$!****s* H5S/h5scombine_hyperslab_f
@@ -1618,10 +1618,10 @@ CONTAINS
          INTEGER, INTENT(OUT) :: TYPE
        END FUNCTION h5sget_select_type_c
     END INTERFACE
-    
+
     hdferr = h5sget_select_type_c(space_id, TYPE)
     RETURN
-    
+
   END SUBROUTINE h5sget_select_type_f
 
 !
@@ -1779,7 +1779,7 @@ CONTAINS
 !  January, 28 2016
 ! SOURCE
   SUBROUTINE h5sget_regular_hyperslab_f(space_id, start, stride, count, block, hdferr)
-    
+
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) ::  space_id
     INTEGER(HSIZE_T), INTENT(OUT), DIMENSION(*), TARGET ::  start
@@ -1790,7 +1790,7 @@ CONTAINS
 !*****
     TYPE(C_PTR) :: start_c, stride_c, count_c, block_c
     INTEGER :: n
-    
+
     INTERFACE
        INTEGER FUNCTION h5sget_regular_hyperslab(space_id, start, stride, count, block) BIND(C,NAME='H5Sget_regular_hyperslab')
          IMPORT :: HID_T, C_PTR
@@ -1809,7 +1809,7 @@ CONTAINS
 
     IF(INT(h5sget_regular_hyperslab(space_id, start_c, stride_c, count_c, block_c)).LT.0) hdferr = -1
 
-    ! Reverse the C arrays description values of the hyperslab because 
+    ! Reverse the C arrays description values of the hyperslab because
     ! the hyperslab was for a C stored hyperslab
 
     CALL H5Sget_simple_extent_ndims_f(space_id,n,hdferr)
@@ -1848,8 +1848,8 @@ CONTAINS
     LOGICAL :: IsRegular
     INTEGER, INTENT(OUT) :: hdferr
 !*****
-    INTEGER(C_INT) :: status 
-    
+    INTEGER(C_INT) :: status
+
     INTERFACE
        INTEGER(C_INT) FUNCTION H5Sis_regular_hyperslab(space_id) BIND(C,NAME='H5Sis_regular_hyperslab')
          IMPORT :: HID_T, C_INT

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -118,32 +118,32 @@ static herr_t H5C__json_write_remove_entry_log_msg(void *udata, const H5C_cache_
 /* Note that there's no cache set up call since that's the
  * place where this struct is wired into the cache.
  */
-static H5C_log_class_t H5C_json_log_class_g = {"json",
-                                               H5C__json_tear_down_logging,
-                                               NULL, /* start logging */
-                                               NULL, /* stop logging */
-                                               H5C__json_write_start_log_msg,
-                                               H5C__json_write_stop_log_msg,
-                                               H5C__json_write_create_cache_log_msg,
-                                               H5C__json_write_destroy_cache_log_msg,
-                                               H5C__json_write_evict_cache_log_msg,
-                                               H5C__json_write_expunge_entry_log_msg,
-                                               H5C__json_write_flush_cache_log_msg,
-                                               H5C__json_write_insert_entry_log_msg,
-                                               H5C__json_write_mark_entry_dirty_log_msg,
-                                               H5C__json_write_mark_entry_clean_log_msg,
-                                               H5C__json_write_mark_unserialized_entry_log_msg,
-                                               H5C__json_write_mark_serialized_entry_log_msg,
-                                               H5C__json_write_move_entry_log_msg,
-                                               H5C__json_write_pin_entry_log_msg,
-                                               H5C__json_write_create_fd_log_msg,
-                                               H5C__json_write_protect_entry_log_msg,
-                                               H5C__json_write_resize_entry_log_msg,
-                                               H5C__json_write_unpin_entry_log_msg,
-                                               H5C__json_write_destroy_fd_log_msg,
-                                               H5C__json_write_unprotect_entry_log_msg,
-                                               H5C__json_write_set_cache_config_log_msg,
-                                               H5C__json_write_remove_entry_log_msg};
+static const H5C_log_class_t H5C_json_log_class_g = {"json",
+                                                     H5C__json_tear_down_logging,
+                                                     NULL, /* start logging */
+                                                     NULL, /* stop logging */
+                                                     H5C__json_write_start_log_msg,
+                                                     H5C__json_write_stop_log_msg,
+                                                     H5C__json_write_create_cache_log_msg,
+                                                     H5C__json_write_destroy_cache_log_msg,
+                                                     H5C__json_write_evict_cache_log_msg,
+                                                     H5C__json_write_expunge_entry_log_msg,
+                                                     H5C__json_write_flush_cache_log_msg,
+                                                     H5C__json_write_insert_entry_log_msg,
+                                                     H5C__json_write_mark_entry_dirty_log_msg,
+                                                     H5C__json_write_mark_entry_clean_log_msg,
+                                                     H5C__json_write_mark_unserialized_entry_log_msg,
+                                                     H5C__json_write_mark_serialized_entry_log_msg,
+                                                     H5C__json_write_move_entry_log_msg,
+                                                     H5C__json_write_pin_entry_log_msg,
+                                                     H5C__json_write_create_fd_log_msg,
+                                                     H5C__json_write_protect_entry_log_msg,
+                                                     H5C__json_write_resize_entry_log_msg,
+                                                     H5C__json_write_unpin_entry_log_msg,
+                                                     H5C__json_write_destroy_fd_log_msg,
+                                                     H5C__json_write_unprotect_entry_log_msg,
+                                                     H5C__json_write_set_cache_config_log_msg,
+                                                     H5C__json_write_remove_entry_log_msg};
 
 /*-------------------------------------------------------------------------
  * Function:    H5C__json_write_log_message
@@ -173,7 +173,7 @@ H5C__json_write_log_message(H5C_log_json_udata_t *json_udata)
 
     /* Write the log message and flush */
     n_chars = HDstrlen(json_udata->message);
-    if ((int)n_chars != HDfprintf(json_udata->outfile, json_udata->message))
+    if ((int)n_chars != HDfprintf(json_udata->outfile, "%s", json_udata->message))
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "error writing log message")
     HDmemset((void *)(json_udata->message), 0, (size_t)(n_chars * sizeof(char)));
 

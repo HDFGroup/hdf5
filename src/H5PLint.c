@@ -5,7 +5,7 @@
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -253,7 +253,7 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
 
     /* Search in the table of already loaded plugin libraries */
     if (H5PL__find_plugin_in_cache(&search_params, &found, &plugin_info) < 0)
-        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in plugin cache  failed")
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, NULL, "search in plugin cache failed")
 
     /* If not found, try iterating through the path table to find an appropriate plugin */
     if (!found)
@@ -290,15 +290,17 @@ done:
  *       get_plugin_info function pointer, but early (4.4.7, at least) gcc
  *       only allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(pedantic)
+H5_GCC_DIAG_OFF("pedantic")
 herr_t
 H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *success,
-           const void **plugin_info)
+           H5PL_type_t *plugin_type, const void **plugin_info)
 {
     H5PL_HANDLE            handle          = NULL;
     H5PL_get_plugin_type_t get_plugin_type = NULL;
     H5PL_get_plugin_info_t get_plugin_info = NULL;
-    herr_t                 ret_value       = SUCCEED;
+    H5PL_type_t            loaded_plugin_type;
+    H5PL_key_t             tmp_key;
+    herr_t                 ret_value = SUCCEED;
 
     FUNC_ENTER_PACKAGE
 
@@ -310,6 +312,8 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
     /* Initialize out parameters */
     *success     = FALSE;
     *plugin_info = NULL;
+    if (plugin_type)
+        *plugin_type = H5PL_TYPE_ERROR;
 
     /* There are different reasons why a library can't be open, e.g. wrong architecture.
      * If we can't open the library, just return.
@@ -332,11 +336,12 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
         HGOTO_DONE(SUCCEED)
 
     /* Check the plugin type and return if it doesn't match the one passed in */
-    if (type != (H5PL_type_t)(*get_plugin_type)())
+    loaded_plugin_type = (H5PL_type_t)(*get_plugin_type)();
+    if ((type != H5PL_TYPE_NONE) && (type != loaded_plugin_type))
         HGOTO_DONE(SUCCEED)
 
     /* Get the plugin information */
-    switch (type) {
+    switch (loaded_plugin_type) {
         case H5PL_TYPE_FILTER: {
             const H5Z_class2_t *filter_info;
 
@@ -344,8 +349,16 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
             if (NULL == (filter_info = (const H5Z_class2_t *)(*get_plugin_info)()))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get filter info from plugin")
 
+            /* Setup temporary plugin key if one wasn't supplied */
+            if (!key) {
+                tmp_key.id = filter_info->id;
+                key        = &tmp_key;
+            }
+
             /* If the filter IDs match, we're done. Set the output parameters. */
             if (filter_info->id == key->id) {
+                if (plugin_type)
+                    *plugin_type = H5PL_TYPE_FILTER;
                 *plugin_info = (const void *)filter_info;
                 *success     = TRUE;
             }
@@ -354,30 +367,29 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
         }
 
         case H5PL_TYPE_VOL: {
-            const H5VL_class_t *cls;
+            const void *cls;
 
             /* Get the plugin info */
-            if (NULL == (cls = (const H5VL_class_t *)(*get_plugin_info)()))
+            if (NULL == (cls = (const void *)(*get_plugin_info)()))
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get VOL connector info from plugin")
 
-            /* Which kind of key are we looking for? */
-            if (key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
-                /* If the plugin names match, we're done. Set the output parameters. */
-                if (cls->name && !HDstrcmp(cls->name, key->vol.u.name)) {
-                    *plugin_info = (const void *)cls;
-                    *success     = TRUE;
-                } /* end if */
-            }     /* end if */
-            else {
-                /* Sanity check */
-                HDassert(key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+            /* Setup temporary plugin key if one wasn't supplied */
+            if (!key) {
+                tmp_key.vol.kind   = H5VL_GET_CONNECTOR_BY_NAME;
+                tmp_key.vol.u.name = ((const H5VL_class_t *)cls)->name;
+                key                = &tmp_key;
+            }
 
-                /* If the plugin values match, we're done. Set the output parameters. */
-                if (cls->value == key->vol.u.value) {
-                    *plugin_info = (const void *)cls;
-                    *success     = TRUE;
-                } /* end if */
-            }     /* end else */
+            /* Ask VOL interface if this class is the one we are looking for and is compatible, etc */
+            if (H5VL_check_plugin_load(cls, key, success) < 0)
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, FAIL, "VOL connector compatibility check failed")
+
+            /* Check for finding the correct plugin */
+            if (*success) {
+                if (plugin_type)
+                    *plugin_type = H5PL_TYPE_VOL;
+                *plugin_info = cls;
+            }
 
             break;
         }
@@ -390,7 +402,7 @@ H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *s
 
     /* If we found the correct plugin, store it in the cache */
     if (*success)
-        if (H5PL__add_plugin(type, key, handle))
+        if (H5PL__add_plugin(loaded_plugin_type, key, handle))
             HGOTO_ERROR(H5E_PLUGIN, H5E_CANTINSERT, FAIL, "unable to add new plugin to plugin cache")
 
 done:
@@ -400,7 +412,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */
-H5_GCC_DIAG_ON(pedantic)
+H5_GCC_DIAG_ON("pedantic")
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__close
@@ -420,3 +432,29 @@ H5PL__close(H5PL_HANDLE handle)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5PL__close() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5PL_iterate
+ *
+ * Purpose:     Iterates over all the available plugins and calls the
+ *              specified callback function on each plugin.
+ *
+ * Return:      H5_ITER_CONT if all plugins are processed successfully
+ *              H5_ITER_STOP if short-circuit success occurs while
+ *                  processing plugins
+ *              H5_ITER_ERROR if an error occurs while processing plugins
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_data)
+{
+    herr_t ret_value = H5_ITER_CONT;
+
+    FUNC_ENTER_NOAPI(H5_ITER_ERROR)
+
+    ret_value = H5PL__path_table_iterate(iter_type, iter_op, op_data);
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5PL_iterate() */

@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -80,7 +80,7 @@ static int clean_file_g = -1; /*whether to cleanup temporary test     */
 /*0 is no cleanup; 1 is do cleanup      */
 
 /* the different types of file descriptors we can expect */
-typedef union _file_descr {
+typedef union {
     int   posixfd; /* POSIX file handle*/
     hid_t h5fd;    /* HDF5 file        */
 } file_descr;
@@ -783,7 +783,7 @@ do_read(results *res, file_descr *fd, parameters *parms, void *buffer)
 
     /* Allocate data verification buffer */
     if (NULL == (buffer2 = (char *)malloc(linear_buf_size))) {
-        HDfprintf(stderr, "malloc for data verification buffer size (%Zu) failed\n", linear_buf_size);
+        HDfprintf(stderr, "malloc for data verification buffer size (%zu) failed\n", linear_buf_size);
         GOTOERROR(FAIL);
     } /* end if */
 
@@ -1272,7 +1272,7 @@ done:
  *      'temp' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF(format - nonliteral)
+H5_GCC_DIAG_OFF("format-nonliteral")
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
@@ -1335,4 +1335,4 @@ do_cleanupfile(iotype iot, char *filename)
         }
     }
 }
-H5_GCC_DIAG_ON(format - nonliteral)
+H5_GCC_DIAG_ON("format-nonliteral")

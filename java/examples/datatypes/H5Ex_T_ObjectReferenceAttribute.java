@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -67,11 +66,11 @@ public class H5Ex_T_ObjectReferenceAttribute {
     }
 
     private static void CreateDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long group_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long group_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         byte[][] dset_data = new byte[DIM0][8];
 
@@ -92,9 +91,9 @@ public class H5Ex_T_ObjectReferenceAttribute {
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 if (dataset_id >= 0)
                     H5.H5Dclose(dataset_id);
-                dataset_id = -1;
+                dataset_id = HDF5Constants.H5I_INVALID_HID;
                 H5.H5Sclose(dataspace_id);
-                dataspace_id = -1;
+                dataspace_id = HDF5Constants.H5I_INVALID_HID;
             }
         }
         catch (Exception e) {
@@ -108,7 +107,7 @@ public class H5Ex_T_ObjectReferenceAttribute {
                         HDF5Constants.H5P_DEFAULT);
             if (group_id >= 0)
                 H5.H5Gclose(group_id);
-            group_id = -1;
+            group_id = HDF5Constants.H5I_INVALID_HID;
         }
         catch (Exception e) {
             e.printStackTrace();
@@ -139,7 +138,7 @@ public class H5Ex_T_ObjectReferenceAttribute {
                 dataset_id = H5.H5Dcreate(file_id, DATASETNAME, HDF5Constants.H5T_STD_I32LE, dataspace_id,
                         HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                 H5.H5Sclose(dataspace_id);
-                dataspace_id = -1;
+                dataspace_id = HDF5Constants.H5I_INVALID_HID;
             }
         }
         catch (Exception e) {
@@ -212,12 +211,12 @@ public class H5Ex_T_ObjectReferenceAttribute {
     }
 
     private static void ReadDataset() {
-        long file_id = -1;
-        long dataspace_id = -1;
-        long dataset_id = -1;
-        long attribute_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long dataspace_id = HDF5Constants.H5I_INVALID_HID;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
         int object_type = -1;
-        long object_id = -1;
+        long object_id = HDF5Constants.H5I_INVALID_HID;
         long[] dims = { DIM0 };
         byte[][] dset_data;
 

@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:    Robb Matzke <matzke@llnl.gov>
+/* Programmer:    Robb Matzke
  *        Friday, October 10, 1997
  *
  * Purpose:    Hyperslab operations are rather complex, so this file
@@ -177,7 +177,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
     } /* end else */
     HDsprintf(s, "Testing hyperslab fill %-11s variable hyperslab", dim);
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Allocate array */
     if (NULL == (dst = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz)))
@@ -257,7 +257,7 @@ test_fill(size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_t dk, size
         }                         /* end for */
     }                             /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(dst);
 
@@ -366,7 +366,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
 
     HDsprintf(s, "Testing hyperslab copy %-11s %s", dim, sub);
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /*
      * Allocate arrays
@@ -526,7 +526,7 @@ test_copy(int mode, size_t nx, size_t ny, size_t nz, size_t di, size_t dj, size_
         }                     /* end for */
     }                         /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -575,7 +575,7 @@ test_multifill(size_t nx)
     hsize_t i, j;
 
     HDprintf("%-70s", "Testing multi-byte fill value");
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Initialize the source and destination */
     if (NULL == (src = (struct a_struct *)HDmalloc(nx * sizeof(*src))))
@@ -644,7 +644,7 @@ test_multifill(size_t nx)
         } /* end if */
     }     /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -687,7 +687,7 @@ test_endian(size_t nx)
     hsize_t  i, j;
 
     HDprintf("%-70s", "Testing endian conversion by stride");
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Initialize arrays */
     if (NULL == (src = (uint8_t *)HDmalloc(nx * 4)))
@@ -730,7 +730,7 @@ test_endian(size_t nx)
         }     /* end for */
     }         /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -773,7 +773,7 @@ test_transpose(size_t nx, size_t ny)
 
     HDsprintf(s, "Testing 2d transpose by stride %4lux%-lud", (unsigned long)nx, (unsigned long)ny);
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Initialize */
     if (NULL == (src = (int *)HDmalloc(nx * ny * sizeof(*src))))
@@ -824,7 +824,7 @@ test_transpose(size_t nx, size_t ny)
         }     /* end for */
     }         /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(src);
     HDfree(dst);
@@ -872,7 +872,7 @@ test_sub_super(size_t nx, size_t ny)
     HDsprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)(2 * nx),
               (unsigned long)(2 * ny), (unsigned long)nx, (unsigned long)ny);
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Initialize */
     if (NULL == (full = (uint8_t *)HDmalloc(4 * nx * ny)))
@@ -913,7 +913,7 @@ test_sub_super(size_t nx, size_t ny)
             } /* end if */
         }     /* end for */
     }         /* end for */
-    PASSED()
+    PASSED();
 
     /*
      * Test replicating pixels to produce an image twice as large in each
@@ -922,7 +922,7 @@ test_sub_super(size_t nx, size_t ny)
     HDsprintf(s, "Testing image sampling %4lux%-4lu to %4lux%-4lu ", (unsigned long)nx, (unsigned long)ny,
               (unsigned long)(2 * nx), (unsigned long)(2 * ny));
     HDprintf("%-70s", s);
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* Setup stride */
     size[0]       = nx;
@@ -971,7 +971,7 @@ test_sub_super(size_t nx, size_t ny)
         }     /* end for */
     }         /* end for */
 
-    PASSED()
+    PASSED();
 
     HDfree(full);
     HDfree(half);
@@ -1117,8 +1117,8 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
         /* Check computed coordinates */
         for (v = 0; v < ARRAY_OFFSET_NDIMS; v++)
             if (coords[v] != new_coords[v]) {
-                HDfprintf(stderr, "coords[%u]=%Hu, new_coords[%u]=%Hu\n", (unsigned)v, coords[v], (unsigned)v,
-                          new_coords[v]);
+                HDfprintf(stderr, "coords[%zu]=%" PRIuHSIZE ", new_coords[%zu]=%" PRIuHSIZE "\n", v,
+                          coords[v], v, new_coords[v]);
                 TEST_ERROR;
             } /* end if */
     }         /* end for */

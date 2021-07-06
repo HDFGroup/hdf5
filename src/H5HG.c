@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, March 27, 1998
  *
  * Purpose:	Operations on the global heap.  The global heap is the set of
@@ -132,7 +132,7 @@ H5HG__create(H5F_t *f, size_t size)
     size_t       n;
     haddr_t      ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_STATIC_TAG(H5AC__GLOBALHEAP_TAG)
+    FUNC_ENTER_STATIC
 
     /* Check args */
     HDassert(f);
@@ -221,7 +221,7 @@ done:
         } /* end if */
     }     /* end if */
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value);
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* H5HG__create() */
 
 /*-------------------------------------------------------------------------

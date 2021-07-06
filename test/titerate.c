@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -580,7 +580,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
     H5O_info2_t      oinfo;
     herr_t           ret; /* Generic return value        */
 
-    if (HDstrcmp(name, test_info->name)) {
+    if (HDstrcmp(name, test_info->name) != 0) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
         return (H5_ITER_ERROR);
     } /* end if */
@@ -947,7 +947,7 @@ test_links(hid_t fapl)
         else if (!HDstrcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
-            CHECK(0, 0, "unknown object name");
+            ERROR("unknown object name");
     } /* end for */
 
     ret = H5Gclose(gid);
@@ -981,7 +981,7 @@ find_err_msg_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *_
         return H5_ITER_ERROR;
 
     /* If the searched error message is found, stop the iteration */
-    if (err_desc->desc != NULL && strcmp(err_desc->desc, searched_err->message) == 0) {
+    if (err_desc->desc != NULL && HDstrcmp(err_desc->desc, searched_err->message) == 0) {
         searched_err->found = true;
         status              = H5_ITER_STOP;
     }
@@ -1117,7 +1117,7 @@ test_links_deprec(hid_t fapl)
         else if (!HDstrcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
-            CHECK(0, 0, "unknown object name");
+            ERROR("unknown object name");
     } /* end for */
 
     ret = H5Gclose(gid);

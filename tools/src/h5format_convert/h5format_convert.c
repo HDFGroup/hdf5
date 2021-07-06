@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -39,16 +39,27 @@ static int   verbose_g = 0;
  * parameters.
  */
 static const char *        s_opts   = "hVvd:n";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},       {"hel", no_arg, 'h'},
-                                       {"he", no_arg, 'h'},         {"version", no_arg, 'V'},
-                                       {"version", no_arg, 'V'},    {"versio", no_arg, 'V'},
-                                       {"versi", no_arg, 'V'},      {"vers", no_arg, 'V'},
-                                       {"verbose", no_arg, 'v'},    {"verbos", no_arg, 'v'},
-                                       {"verbo", no_arg, 'v'},      {"verb", no_arg, 'v'},
-                                       {"dname", require_arg, 'd'}, {"dnam", require_arg, 'd'},
-                                       {"dna", require_arg, 'd'},   {"dn", require_arg, 'd'},
-                                       {"noop", no_arg, 'n'},       {"noo", no_arg, 'n'},
-                                       {"no", no_arg, 'n'},         {NULL, 0, '\0'}};
+static struct long_options l_opts[] = {{"help", no_arg, 'h'},
+                                       {"hel", no_arg, 'h'},
+                                       {"he", no_arg, 'h'},
+                                       {"version", no_arg, 'V'},
+                                       {"version", no_arg, 'V'},
+                                       {"versio", no_arg, 'V'},
+                                       {"versi", no_arg, 'V'},
+                                       {"vers", no_arg, 'V'},
+                                       {"verbose", no_arg, 'v'},
+                                       {"verbos", no_arg, 'v'},
+                                       {"verbo", no_arg, 'v'},
+                                       {"verb", no_arg, 'v'},
+                                       {"dname", require_arg, 'd'},
+                                       {"dnam", require_arg, 'd'},
+                                       {"dna", require_arg, 'd'},
+                                       {"dn", require_arg, 'd'},
+                                       {"noop", no_arg, 'n'},
+                                       {"noo", no_arg, 'n'},
+                                       {"no", no_arg, 'n'},
+                                       {"enable-error-stack", no_arg, 'E'},
+                                       {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function: usage
@@ -95,7 +106,7 @@ usage(const char *prog)
  * Purpose: parse command line input
  *
  * Return: Success: 0
- *  	   Failure: 1
+ *         Failure: 1
  *
  *-------------------------------------------------------------------------
  */
@@ -144,6 +155,10 @@ parse_command_line(int argc, const char **argv)
                 noop_g = TRUE;
                 break;
 
+            case 'E':
+                enable_error_stack = 1;
+                break;
+
             default:
                 h5tools_setstatus(EXIT_FAILURE);
                 usage(h5tools_getprogname());
@@ -189,17 +204,17 @@ leave(int ret)
  * Function: convert()
  *
  * Purpose: To downgrade a dataset's indexing type or layout version:
- *		For chunked:
- *		  Downgrade the chunk indexing type to version 1 B-tree
- *	    	  If type is already version 1 B-tree, no further action
- *		For compact/contiguous:
- *		  Downgrade the layout version from 4 to 3
- *		  If version is already <= 3, no further action
- *		For virtual:
- *		  No further action
+ *        For chunked:
+ *          Downgrade the chunk indexing type to version 1 B-tree
+ *              If type is already version 1 B-tree, no further action
+ *        For compact/contiguous:
+ *          Downgrade the layout version from 4 to 3
+ *          If version is already <= 3, no further action
+ *        For virtual:
+ *          No further action
  *
  * Return: Success: 0
- *  	   Failure: 1
+ *         Failure: 1
  *
  *-------------------------------------------------------------------------
  */
@@ -377,26 +392,20 @@ error:
  * Function: main
  *
  * Purpose: To convert the chunk indexing type of a dataset in a file to
- *	    version 1 B-tree.
+ *        version 1 B-tree.
  *
  * Return: Success: 0
- *  	   Failure: 1
+ *         Failure: 1
  *
  *-------------------------------------------------------------------------
  */
 int
 main(int argc, const char *argv[])
 {
-    H5E_auto2_t func;
-    void *      edata;
-    hid_t       fid = H5I_INVALID_HID;
+    hid_t fid = H5I_INVALID_HID;
 
     h5tools_setprogname(PROGRAMNAME);
     h5tools_setstatus(EXIT_SUCCESS);
-
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
 
     /* Initialize h5tools lib */
     h5tools_init();
@@ -410,8 +419,11 @@ main(int argc, const char *argv[])
     if (noop_g && verbose_g)
         HDfprintf(stdout, "It is noop...\n");
 
+    /* enable error reporting if command line option */
+    h5tools_error_report();
+
     /* Open the HDF5 file */
-    if ((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, NULL, NULL, 0)) < 0) {
+    if ((fid = h5tools_fopen(fname_g, H5F_ACC_RDWR, H5P_DEFAULT, FALSE, NULL, 0)) < 0) {
         error_msg("unable to open file \"%s\"\n", fname_g);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
@@ -455,8 +467,9 @@ done:
             error_msg("unable to close file \"%s\"\n", fname_g);
             h5tools_setstatus(EXIT_FAILURE);
         }
-        else if (verbose_g)
+        else if (verbose_g) {
             HDfprintf(stdout, "Close the file\n");
+        }
     } /* end if */
 
     if (fname_g)
@@ -464,7 +477,6 @@ done:
     if (dname_g)
         HDfree(dname_g);
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
     leave(h5tools_getstatus());
 
 } /* end main() */

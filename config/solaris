@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -29,7 +29,9 @@ fi
 
 # Try solaris native compiler flags
 if test "X-" = "X-$cc_flags_set"; then
-  H5_CFLAGS="$H5_CFLAGS -erroff=%none -DBSD_COMP"
+  # HDF5 must be built with a C99 compiler on Solaris
+  # -erroff=%none turns on all warnings
+  H5_CFLAGS="$H5_CFLAGS -xc99=all -erroff=%none"
 
   # Production
   # NDEBUG is handled explicitly by the configure script
@@ -41,17 +43,26 @@ if test "X-" = "X-$cc_flags_set"; then
   DEBUG_CFLAGS=
 
   # Symbols
+  # -g produces output for dbx, NOT gdb. You can use "gdb on" from
+  # inside gdb to use gdb commands if you need to debug.
+  # If you want a LOT of debugging information (at the expense of
+  # really slow code), try using -g3. That will even let you debug
+  # into macros.
+  # -s strips symbols, as in gcc
   NO_SYMBOLS_CFLAGS="-s"
   SYMBOLS_CFLAGS="-g"
 
   # Profile
+  # This produces profiling output for gprof. If you want to use
+  # the Solaris profiler, use -xprofile instead.
   PROFILE_CFLAGS="-xpg"
 
   # Optimization
-  # -g produces rather slow code. "-g -O" produces much faster code with some
-  # loss of debugger functions such as not able to print local variables.
-  HIGH_OPT_CFLAGS="-O"
-  DEBUG_OPT_CFLAGS="-O"
+  # -O has switched to -xO{1|2|3|4|5}. -xO3 is probably a good compromise
+  # for the daily tests, but you might want to switch to -xO2 or lower
+  # if you are actively debugging.
+  HIGH_OPT_CFLAGS="-xO5"
+  DEBUG_OPT_CFLAGS="-xO3"
   NO_OPT_CFLAGS=
 
   cc_flags_set=yes

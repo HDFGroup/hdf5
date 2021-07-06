@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5T module
  */
-#ifndef _H5Tprivate_H
-#define _H5Tprivate_H
+#ifndef H5Tprivate_H
+#define H5Tprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5T_t H5T_t;
@@ -24,7 +24,7 @@ typedef struct H5T_t H5T_t;
 #include "H5Tpublic.h"
 
 /* Other public headers needed by this file */
-#include "H5MMpublic.h" /* Memory management                    */
+#include "H5MMpublic.h" /* Memory management                        */
 
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions                        */
@@ -41,11 +41,13 @@ typedef struct H5T_t H5T_t;
 #define H5T_GET_SHARED(T)           ((T)->shared)
 #define H5T_GET_MEMBER_OFFSET(T, I) ((T)->u.compnd.memb[I].offset)
 #define H5T_GET_MEMBER_SIZE(T, I)   ((T)->u.compnd.memb[I].shared->size)
+#define H5T_GET_FORCE_CONV(T)       ((T)->shared->force_conv)
 #else /* H5T_MODULE */
 #define H5T_GET_SIZE(T)             (H5T_get_size(T))
 #define H5T_GET_SHARED(T)           (H5T_get_shared(T))
 #define H5T_GET_MEMBER_OFFSET(T, I) (H5T_get_member_offset((T), (I)))
 #define H5T_GET_MEMBER_SIZE(T, I)   (H5T_get_member_size((T), (I)))
+#define H5T_GET_FORCE_CONV(T)       (H5T_get_force_conv(T))
 #endif /* H5T_MODULE */
 
 /* Forward references of package typedefs (declared in H5Tpkg.h) */
@@ -56,10 +58,7 @@ typedef struct H5T_path_t  H5T_path_t;
 struct H5S_t;
 
 /* How to copy a datatype */
-typedef enum H5T_copy_t {
-    H5T_COPY_TRANSIENT,
-    H5T_COPY_ALL,
-} H5T_copy_t;
+typedef enum H5T_copy_t { H5T_COPY_TRANSIENT, H5T_COPY_ALL } H5T_copy_t;
 
 /* Location of datatype information */
 typedef enum {
@@ -117,6 +116,7 @@ H5_DLL H5T_t *     H5T_get_super(const H5T_t *dt);
 H5_DLL H5T_class_t H5T_get_class(const H5T_t *dt, htri_t internal);
 H5_DLL htri_t      H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api);
 H5_DLL size_t      H5T_get_size(const H5T_t *dt);
+H5_DLL hbool_t     H5T_get_force_conv(const H5T_t *dt);
 H5_DLL int         H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset);
 H5_DLL herr_t      H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
 H5_DLL H5T_t *           H5T_decode(size_t buf_size, const unsigned char *buf);
@@ -135,8 +135,6 @@ H5_DLL herr_t H5T_convert(H5T_path_t *tpath, hid_t src_id, hid_t dst_id, size_t 
                           size_t bkg_stride, void *buf, void *bkg);
 H5_DLL herr_t H5T_reclaim(hid_t type_id, struct H5S_t *space, void *buf);
 H5_DLL herr_t H5T_reclaim_cb(void *elem, const H5T_t *dt, unsigned ndim, const hsize_t *point, void *op_data);
-H5_DLL herr_t H5T_ref_reclaim(void *elem, const H5T_t *dt);
-H5_DLL herr_t H5T_vlen_reclaim(void *elem, const H5T_t *dt, H5T_vlen_alloc_info_t *alloc_info);
 H5_DLL herr_t H5T_vlen_reclaim_elmt(void *elem, H5T_t *dt);
 H5_DLL htri_t H5T_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc);
 H5_DLL htri_t H5T_is_sensible(const H5T_t *dt);
@@ -175,4 +173,4 @@ H5_DLL int         H5T_get_offset(const H5T_t *dt);
 /* Fixed-point functions */
 H5_DLL H5T_sign_t H5T_get_sign(H5T_t const *dt);
 
-#endif /* _H5Tprivate_H */
+#endif /* H5Tprivate_H */

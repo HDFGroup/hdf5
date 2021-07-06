@@ -9,12 +9,11 @@ project (HDF5_FORTRAN_TESTS C Fortran)
 add_executable (H5_test_buildiface ${HDF5_F90_SRC_DIR}/test/H5_test_buildiface.F90)
 target_include_directories (H5_test_buildiface
     PRIVATE
-        ${HDF5_BINARY_DIR} ${HDF5_F90_BINARY_DIR}
+        ${HDF5_SRC_BINARY_DIR} ${HDF5_F90_BINARY_DIR}
 )
 #if (BUILD_SHARED_LIBS)
 #  target_compile_definitions(H5_test_buildiface
-#      PRIVATE
-#          $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
+#      PRIVATE $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:/MT>
 #  )
 #endif ()
 if(MSVC)
@@ -43,12 +42,13 @@ endif ()
 # Add Test Lib
 #-----------------------------------------------------------------------------
 if (NOT BUILD_SHARED_LIBS)
-  add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c)
+  add_library (${HDF5_F90_C_TEST_LIB_TARGET} STATIC t.c t.h)
   set_source_files_properties (t.c PROPERTIES LANGUAGE C)
   target_include_directories (${HDF5_F90_C_TEST_LIB_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
+  target_compile_options(${HDF5_F90_C_TEST_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIB_TARGET} STATIC)
   target_link_libraries (${HDF5_F90_C_TEST_LIB_TARGET}
       PRIVATE ${HDF5_F90_C_LIB_TARGET}
@@ -60,14 +60,13 @@ if (NOT BUILD_SHARED_LIBS)
       LINKER_LANGUAGE C
   )
 else ()
-  add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c)
+  add_library (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED t.c t.h)
   target_include_directories (${HDF5_F90_C_TEST_LIBSH_TARGET}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared;$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
       INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include>"
   )
-  target_compile_definitions(${HDF5_F90_C_TEST_LIBSH_TARGET}
-      PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
-  )
+  target_compile_options(${HDF5_F90_C_TEST_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  target_compile_definitions(${HDF5_F90_C_TEST_LIBSH_TARGET} PUBLIC "H5_BUILT_AS_DYNAMIC_LIB")
   TARGET_C_PROPERTIES (${HDF5_F90_C_TEST_LIBSH_TARGET} SHARED)
   target_link_libraries (${HDF5_F90_C_TEST_LIBSH_TARGET}
       PRIVATE ${HDF5_F90_C_LIBSH_TARGET}
@@ -80,28 +79,39 @@ else ()
   )
 endif ()
 
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  if (NOT BUILD_SHARED_LIBS)
+    clang_format (HDF5_FORTRAN_TESTS_FORMAT ${HDF5_F90_C_TEST_LIB_TARGET})
+  else ()
+    clang_format (HDF5_FORTRAN_TESTS_FORMAT ${HDF5_F90_C_TEST_LIBSH_TARGET})
+  endif ()
+endif ()
+
 if (NOT BUILD_SHARED_LIBS)
-  add_custom_command (
-      OUTPUT ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
+  add_custom_command (TARGET H5_test_buildiface POST_BUILD
+      BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static
       DEPENDS H5_test_buildiface
-      COMMENT "Generating the tf_gen.F90 file"
+      COMMENT "Generating the tf_gen.F90 static file"
   )
   add_custom_target (H5testgen ALL
-      DEPENDS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
+      DEPENDS H5_test_buildiface ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
   )
   set_source_files_properties (${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90 PROPERTIES GENERATED TRUE)
 else ()
-  add_custom_command (
-      OUTPUT ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
+  add_custom_command (TARGET H5_test_buildiface POST_BUILD
+      BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared
       DEPENDS H5_test_buildiface
       COMMENT "Generating the tf_gen.F90 shared file"
   )
   add_custom_target (H5testgenSH ALL
-      DEPENDS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
+      DEPENDS H5_test_buildiface ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
   )
   set_source_files_properties (${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90 PROPERTIES GENERATED TRUE)
 endif ()
@@ -129,26 +139,18 @@ endif ()
 if (NOT BUILD_SHARED_LIBS)
   add_library (${HDF5_F90_TEST_LIB_TARGET} STATIC ${HDF5_F90_TF_SOURCES})
   target_include_directories (${HDF5_F90_TEST_LIB_TARGET}
-      PRIVATE
-          "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
-      INTERFACE
-          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/static>"
+      PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
+      INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/static>"
   )
+  target_compile_options(${HDF5_F90_TEST_LIB_TARGET} PRIVATE "${HDF5_CMAKE_Fortran_FLAGS}")
   target_compile_definitions(${HDF5_F90_TEST_LIB_TARGET}
       PRIVATE
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:HDF5F90_WINDOWS>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
-  target_link_libraries (${HDF5_F90_TEST_LIB_TARGET}
-      PUBLIC
-          ${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET}
-  )
-#  set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#  )
-#  set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#  )
+  target_link_libraries (${HDF5_F90_TEST_LIB_TARGET} PUBLIC ${HDF5_F90_C_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET})
+#  set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#  set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
   if(MSVC)
     set_property(TARGET ${HDF5_F90_TEST_LIB_TARGET} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
   endif()
@@ -162,31 +164,20 @@ if (NOT BUILD_SHARED_LIBS)
 else ()
   add_library (${HDF5_F90_TEST_LIBSH_TARGET} SHARED ${HDF5_F90_TF_SOURCES_SHARED})
   target_include_directories (${HDF5_F90_TEST_LIBSH_TARGET}
-      PRIVATE
-          "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
-      INTERFACE
-          "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/shared>"
+      PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
+      INTERFACE "$<INSTALL_INTERFACE:$<INSTALL_PREFIX>/include/shared>"
   )
+  target_compile_options(${HDF5_F90_TEST_LIBSH_TARGET} PRIVATE "${HDF5_CMAKE_Fortran_FLAGS}")
   target_compile_definitions(${HDF5_F90_TEST_LIBSH_TARGET}
-      PUBLIC
-          "H5_BUILT_AS_DYNAMIC_LIB"
+      PUBLIC "H5_BUILT_AS_DYNAMIC_LIB"
       PRIVATE
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:BUILD_HDF5_TEST_DLL;HDF5F90_WINDOWS>
           $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
   )
-  target_link_libraries (${HDF5_F90_TEST_LIBSH_TARGET}
-      PUBLIC
-          ${HDF5_F90_C_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET}
-  )
-#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#  )
-#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#  )
-#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY
-#      LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-DLL">
-#  )
+  target_link_libraries (${HDF5_F90_TEST_LIBSH_TARGET} PUBLIC ${HDF5_F90_C_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
+#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
+#  set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-DLL">)
   if(MSVC)
     set_property(TARGET ${HDF5_F90_TEST_LIBSH_TARGET} PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS} -DLL")
   endif()
@@ -223,26 +214,17 @@ add_executable (testhdf5_fortran
 )
 target_compile_options(testhdf5_fortran
     PRIVATE
+        "${HDF5_CMAKE_Fortran_FLAGS}"
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
-#set_property(TARGET testhdf5_fortran APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-#set_property(TARGET testhdf5_fortran APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#)
+#set_property(TARGET testhdf5_fortran APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#set_property(TARGET testhdf5_fortran APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
 if(MSVC)
   set_property(TARGET testhdf5_fortran  PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()
 if (NOT BUILD_SHARED_LIBS)
-  target_include_directories (testhdf5_fortran
-      PRIVATE
-          "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
-  )
-  target_link_libraries (testhdf5_fortran
-      PRIVATE
-          ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (testhdf5_fortran PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
+  target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (testhdf5_fortran PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -250,14 +232,8 @@ if (NOT BUILD_SHARED_LIBS)
   )
   add_dependencies (testhdf5_fortran ${HDF5_F90_TEST_LIB_TARGET})
 else ()
-  target_include_directories (testhdf5_fortran
-      PRIVATE
-          "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
-  )
-  target_link_libraries (testhdf5_fortran
-      PRIVATE
-          ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (testhdf5_fortran PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
+  target_link_libraries (testhdf5_fortran PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (testhdf5_fortran PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -277,26 +253,17 @@ add_executable (testhdf5_fortran_1_8
 )
 target_compile_options(testhdf5_fortran_1_8
     PRIVATE
+        "${HDF5_CMAKE_Fortran_FLAGS}"
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
-#set_property(TARGET testhdf5_fortran_1_8 APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-#set_property(TARGET testhdf5_fortran_1_8 APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#)
+#set_property(TARGET testhdf5_fortran_1_8 APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#set_property(TARGET testhdf5_fortran_1_8 APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
 if(MSVC)
   set_property(TARGET testhdf5_fortran_1_8 PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()
 if (NOT BUILD_SHARED_LIBS)
-  target_include_directories (testhdf5_fortran_1_8
-      PRIVATE
-          "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
-  )
-  target_link_libraries (testhdf5_fortran_1_8
-      PRIVATE
-          ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (testhdf5_fortran_1_8 PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
+  target_link_libraries (testhdf5_fortran_1_8 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (testhdf5_fortran_1_8 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -304,14 +271,8 @@ if (NOT BUILD_SHARED_LIBS)
   )
   add_dependencies (testhdf5_fortran_1_8 ${HDF5_F90_TEST_LIB_TARGET})
 else ()
-  target_include_directories (testhdf5_fortran_1_8
-      PRIVATE
-          "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
-  )
-  target_link_libraries (testhdf5_fortran_1_8
-      PRIVATE
-          ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (testhdf5_fortran_1_8 PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
+  target_link_libraries (testhdf5_fortran_1_8 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (testhdf5_fortran_1_8 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -333,26 +294,17 @@ add_executable (fortranlib_test_F03
 )
 target_compile_options(fortranlib_test_F03
     PRIVATE
+        "${HDF5_CMAKE_Fortran_FLAGS}"
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
-#set_property(TARGET fortranlib_test_F03 APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-#set_property(TARGET fortranlib_test_F03 APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#)
+#set_property(TARGET fortranlib_test_F03 APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#set_property(TARGET fortranlib_test_F03 APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
 if(MSVC)
   set_property(TARGET fortranlib_test_F03 PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()
 if (NOT BUILD_SHARED_LIBS)
-  target_include_directories (fortranlib_test_F03
-      PRIVATE
-          "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static"
-  )
-  target_link_libraries (fortranlib_test_F03
-      PRIVATE
-          ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (fortranlib_test_F03 PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/static;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/static")
+  target_link_libraries (fortranlib_test_F03 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (fortranlib_test_F03 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -360,14 +312,8 @@ if (NOT BUILD_SHARED_LIBS)
   )
   add_dependencies (fortranlib_test_F03 ${HDF5_F90_TEST_LIB_TARGET})
 else ()
-  target_include_directories (fortranlib_test_F03
-      PRIVATE
-          "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared"
-  )
-  target_link_libraries (fortranlib_test_F03
-      PRIVATE
-          ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (fortranlib_test_F03 PRIVATE "${CMAKE_Fortran_MODULE_DIRECTORY}/shared;${HDF5_F90_BINARY_DIR};${HDF5_F90_BINARY_DIR}/shared")
+  target_link_libraries (fortranlib_test_F03 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (fortranlib_test_F03 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -380,26 +326,17 @@ endif ()
 add_executable (fflush1 fflush1.F90)
 target_compile_options(fflush1
     PRIVATE
+        "${HDF5_CMAKE_Fortran_FLAGS}"
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
-#set_property(TARGET fflush1 APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-#set_property(TARGET fflush1 APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#)
+#set_property(TARGET fflush1 APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#set_property(TARGET fflush1 APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
 if(MSVC)
   set_property(TARGET fflush1 PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()
 if (NOT BUILD_SHARED_LIBS)
-  target_include_directories (fflush1
-      PRIVATE
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-  )
-  target_link_libraries (fflush1
-      PRIVATE
-          ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (fflush1 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  target_link_libraries (fflush1 PRIVATE ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (fflush1 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -407,14 +344,8 @@ if (NOT BUILD_SHARED_LIBS)
   )
   add_dependencies (fflush1 ${HDF5_F90_TEST_LIB_TARGET})
 else ()
-  target_include_directories (fflush1
-      PRIVATE
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-  )
-  target_link_libraries (fflush1
-      PRIVATE
-          ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (fflush1 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  target_link_libraries (fflush1 PRIVATE ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (fflush1 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -427,26 +358,17 @@ endif ()
 add_executable (fflush2 fflush2.F90)
 target_compile_options (fflush2
     PRIVATE
+        "${HDF5_CMAKE_Fortran_FLAGS}"
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
-#set_property(TARGET fflush2 APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-#set_property(TARGET fflush2 APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#)
+#set_property(TARGET fflush2 APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#set_property(TARGET fflush2 APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
 if(MSVC)
   set_property(TARGET fflush2 PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()
 if (NOT BUILD_SHARED_LIBS)
-  target_include_directories (fflush2
-      PRIVATE
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-  )
-  target_link_libraries (fflush2
-      PRIVATE
-          ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (fflush2 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  target_link_libraries (fflush2 PRIVATE ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_F90_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (fflush2 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -454,14 +376,8 @@ if (NOT BUILD_SHARED_LIBS)
   )
   add_dependencies (fflush2 ${HDF5_F90_TEST_LIB_TARGET})
 else ()
-  target_include_directories (fflush2
-      PRIVATE
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-  )
-  target_link_libraries (fflush2
-      PRIVATE
-          ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (fflush2 PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  target_link_libraries (fflush2 PRIVATE ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_F90_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (fflush2 PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -474,26 +390,17 @@ endif ()
 add_executable (vol_connector vol_connector.F90)
 target_compile_options(vol_connector
     PRIVATE
+        "${HDF5_CMAKE_Fortran_FLAGS}"
         $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_COMPILE_FLAGS}>
 )
-#set_property(TARGET vol_connector APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">
-#)
-#set_property(TARGET vol_connector APPEND PROPERTY
-#    LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>
-#)
+#set_property(TARGET vol_connector APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:"-SUBSYSTEM:CONSOLE">)
+#set_property(TARGET vol_connector APPEND PROPERTY LINK_FLAGS $<$<STREQUAL:"x${CMAKE_Fortran_SIMULATE_ID}","xMSVC">:${WIN_LINK_FLAGS}>)
 if(MSVC)
   set_property(TARGET vol_connector PROPERTY LINK_FLAGS "/SUBSYSTEM:CONSOLE ${WIN_LINK_FLAGS}")
 endif()
 if (NOT BUILD_SHARED_LIBS)
-  target_include_directories (vol_connector
-      PRIVATE
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/static
-  )
-  target_link_libraries (vol_connector
-      PRIVATE
-          ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (vol_connector PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/static)
+  target_link_libraries (vol_connector PRIVATE ${HDF5_F90_LIB_TARGET} ${HDF5_F90_TEST_LIB_TARGET} ${HDF5_LIB_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (vol_connector PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran
@@ -501,14 +408,8 @@ if (NOT BUILD_SHARED_LIBS)
   )
   add_dependencies (vol_connector ${HDF5_F90_TEST_LIB_TARGET})
 else ()
-  target_include_directories (vol_connector
-      PRIVATE
-          ${CMAKE_Fortran_MODULE_DIRECTORY}/shared
-  )
-  target_link_libraries (vol_connector
-      PRIVATE
-          ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>
-  )
+  target_include_directories (vol_connector PRIVATE ${CMAKE_Fortran_MODULE_DIRECTORY}/shared)
+  target_link_libraries (vol_connector PRIVATE ${HDF5_F90_LIBSH_TARGET} ${HDF5_F90_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} $<$<PLATFORM_ID:Windows>:ws2_32.lib>)
   set_target_properties (vol_connector PROPERTIES
       LINKER_LANGUAGE Fortran
       FOLDER test/fortran

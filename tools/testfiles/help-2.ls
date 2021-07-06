@@ -46,6 +46,12 @@ usage: h5ls [OPTIONS] file[/OBJECT] [file[/[OBJECT]...]
                    ...<kerberos cache path>,<username>,<buffer size>)
                    If absent or A == '(,,,,)', all default values are used.
                    Has no effect if vfd flag is not 'hdfs'.
+   --vol-value     Value (ID) of the VOL connector to use for opening the
+                   HDF5 file specified
+   --vol-name      Name of the VOL connector to use for opening the
+                   HDF5 file specified
+   --vol-info      VOL-specific info to pass to the VOL connector used for
+                   opening the HDF5 file specified
 
   file/OBJECT
     Each object consists of an HDF5 file name optionally followed by a

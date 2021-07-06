@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -25,7 +25,7 @@
 !
 !*****
 MODULE TH5P
-  USE HDF5 ! This module contains all necessary modules 
+  USE HDF5 ! This module contains all necessary modules
   USE TH5_MISC
   USE TH5_MISC_GEN
 
@@ -37,11 +37,11 @@ SUBROUTINE external_test(cleanup, total_error)
 !   h5pset_external_f,  h5pget_external_count_f,
 !   h5pget_external_f
 
-  
+
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
-  
+
   CHARACTER(LEN=8), PARAMETER :: filename = "external"
   CHARACTER(LEN=80) :: fix_filename
   INTEGER(HID_T) :: file_id
@@ -75,7 +75,7 @@ SUBROUTINE external_test(cleanup, total_error)
   ENDIF
   CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
   CALL check("h5fcreate_f",error,total_error)
-  
+
   CALL h5pcreate_f(H5P_DATASET_XFER_F, plist_id, error)
   CALL check("h5pcreate_f", error, total_error)
   CALL h5pset_buffer_f(plist_id, buf_size, error)
@@ -88,7 +88,7 @@ SUBROUTINE external_test(cleanup, total_error)
   ENDIF
   CALL h5pclose_f(plist_id, error)
   CALL check("h5pclose_f", error, total_error)
-  
+
   CALL h5pcreate_f(H5P_DATASET_CREATE_F, plist_id, error)
   CALL check("h5pcreate_f",error,total_error)
   cur_size(1) =100
@@ -103,7 +103,7 @@ SUBROUTINE external_test(cleanup, total_error)
   CALL h5dcreate_f(file_id, "dset1", H5T_NATIVE_INTEGER, space_id, &
        dataset_id, error, plist_id)
   CALL check("h5dcreate_f", error, total_error)
-  
+
   CALL h5dclose_f(dataset_id, error)
   CALL check("h5dclose_f", error, total_error)
   CALL h5pclose_f(plist_id, error)
@@ -111,11 +111,11 @@ SUBROUTINE external_test(cleanup, total_error)
   CALL h5sclose_f(space_id, error)
   CALL check("h5sclose_f", error, total_error)
   CALL h5fclose_f(file_id, error)
-  
+
   CALL h5fopen_f(fix_filename, H5F_ACC_RDWR_F, file_id, error)
   CALL h5dopen_f(file_id, "dset1", dataset_id, error)
   CALL check("h5dopen_f",error,total_error)
-  
+
   ! Read dataset creation information
   CALL h5dget_create_plist_f(dataset_id, plist_id, error)
   CALL check("h5dget_create_plist_f",error,total_error)
@@ -138,7 +138,7 @@ SUBROUTINE external_test(cleanup, total_error)
      WRITE (*,*) "got external file size is not correct"
      total_error = total_error + 1
   END IF
-  
+
   CALL h5dclose_f(dataset_id, error)
   CALL check("h5dclose_f", error, total_error)
   CALL h5pclose_f(plist_id, error)
@@ -152,15 +152,15 @@ SUBROUTINE external_test(cleanup, total_error)
 END SUBROUTINE external_test
 
 SUBROUTINE multi_file_test(cleanup, total_error)
-  
+
   IMPLICIT NONE
   LOGICAL, INTENT(IN) :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
-  
+
   CHARACTER(LEN=9), PARAMETER :: filename = "multidset" ! File name
   CHARACTER(LEN=80) :: fix_filename
   CHARACTER(LEN=4), PARAMETER :: dsetname = "dset"     ! Dataset name
-  
+
   INTEGER(HID_T) :: file_id       ! File identifier
   INTEGER(HID_T) :: dset_id       ! Dataset identifier
   INTEGER(HID_T) :: dspace_id     ! Dataspace identifier
@@ -173,10 +173,10 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   !INTEGER(HADDR_T), DIMENSION(0:H5FD_MEM_NTYPES_F) :: memb_addr
   LOGICAL :: relax  = .TRUE.
   LOGICAL :: relax_out = .TRUE.
-  
+
   INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/4,6/) ! Dataset dimensions
   INTEGER     ::   rank = 2                        ! Dataset rank
-  
+
   INTEGER, DIMENSION(4,6) :: dset_data, data_out ! Data buffers
   INTEGER     ::   error ! Error flag
   INTEGER(HID_T) :: driver
@@ -201,7 +201,7 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   memb_addr(H5FD_MEM_LHEAP_F) = 0.3
   memb_map(H5FD_MEM_OHDR_F)  = H5FD_MEM_OHDR_F
   memb_addr(H5FD_MEM_OHDR_F) = 0.4
-  
+
   memb_name = ' '
   memb_name(H5FD_MEM_SUPER_F) = '%s-s.h5'
   memb_name(H5FD_MEM_BTREE_F) = '%s-b.h5'
@@ -218,7 +218,7 @@ SUBROUTINE multi_file_test(cleanup, total_error)
         dset_data(i,j) = (i-1)*6 + j
      END DO
   END DO
-  
+
   !
   ! Create a new file using default properties.
   !
@@ -244,8 +244,8 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   !
   CALL h5pget_cache_f(fapl, mdc_nelmts, rdcc_nelmts, rdcc_nbytes, &
        rdcc_w0, error)
-  CALL check("h5pget_cache_f", error, total_error)  
-  
+  CALL check("h5pget_cache_f", error, total_error)
+
   !
   ! Set cache to some number
   !
@@ -284,13 +284,13 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   !
   CALL h5dclose_f(dset_id, error)
   CALL check("h5dclose_f", error, total_error)
-  
+
   !
   ! Terminate access to the data space.
   !
   CALL h5sclose_f(dspace_id, error)
   CALL check("h5sclose_f", error, total_error)
-  
+
   !
   ! Close the file.
   !
@@ -318,31 +318,31 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   ! write(*,*)  memb_name_out
   ! write(*,*)  memb_addr_out
   !    CALL check("h5pget_fapl_multi_f", error, total_error)
-  
+
   !
   ! Open the existing dataset.
   !
   CALL h5dopen_f(file_id, dsetname, dset_id, error)
   CALL check("h5dopen_f", error, total_error)
-  
+
   !
   ! Get the dataset type.
   !
   CALL h5dget_type_f(dset_id, dtype_id, error)
   CALL check("h5dget_type_f", error, total_error)
-  
+
   !
   ! Get the data space.
   !
   CALL h5dget_space_f(dset_id, dspace_id, error)
   CALL check("h5dget_space_f", error, total_error)
-  
+
   !
   ! Read the dataset.
   !
   CALL h5dread_f(dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error)
   CALL check("h5dread_f", error, total_error)
-  
+
   !
   !Compare the data.
   !
@@ -354,19 +354,19 @@ SUBROUTINE multi_file_test(cleanup, total_error)
         END IF
      END DO
   END DO
-  
+
   !
   ! End access to the dataset and release resources used by it.
   !
   CALL h5dclose_f(dset_id, error)
   CALL check("h5dclose_f", error, total_error)
-  
+
   !
   ! Terminate access to the data space.
   !
   CALL h5sclose_f(dspace_id, error)
   CALL check("h5sclose_f", error, total_error)
-  
+
   !
   ! Terminate access to the data type.
   !
@@ -383,7 +383,7 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   CALL check("h5pclose_f", error, total_error)
   IF(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
-  
+
   IF(cleanup) CALL h5_cleanup_f(filename//'.h5-b', H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
   IF(cleanup) CALL h5_cleanup_f(filename//'.h5-g', H5P_DEFAULT_F, error)
@@ -396,7 +396,7 @@ SUBROUTINE multi_file_test(cleanup, total_error)
   CALL check("h5_cleanup_f", error, total_error)
   IF(cleanup) CALL h5_cleanup_f(filename//'.h5-s', H5P_DEFAULT_F, error)
   CALL check("h5_cleanup_f", error, total_error)
-  
+
   RETURN
 END SUBROUTINE multi_file_test
 
@@ -419,27 +419,27 @@ END SUBROUTINE multi_file_test
 !-------------------------------------------------------------------------
 !
 SUBROUTINE test_chunk_cache(cleanup, total_error)
-  
+
   IMPLICIT NONE
   LOGICAL, INTENT(IN)  :: cleanup
   INTEGER, INTENT(INOUT) :: total_error
-  
+
   CHARACTER(LEN=14), PARAMETER :: filename="chunk_cache"
   CHARACTER(LEN=80) :: fix_filename
-  INTEGER(hid_t) :: fid = -1        ! File ID 
-  INTEGER(hid_t) :: fapl_local = -1 !  Local fapl 
-  INTEGER(hid_t) :: fapl_def = -1  !  Default fapl 
-  INTEGER(hid_t) :: dcpl = -1      ! Dataset creation property list ID 
-  INTEGER(hid_t) :: dapl1 = -1     ! Dataset access property list ID 
-  INTEGER(hid_t) :: dapl2 = -1     ! Dataset access property list ID 
-  INTEGER(hid_t) :: sid = -1       ! Dataspace ID 
-  INTEGER(hid_t) :: dsid = -1      ! Dataset ID 
-  INTEGER(hsize_t), DIMENSION(1:1) :: chunk_dim, NDIM = (/100/) ! Dataset and chunk dimensions 
-  INTEGER(size_t) :: nslots_1, nslots_2, nslots_3, nslots_4 ! rdcc number of elements 
-  INTEGER(size_t) :: nbytes_1, nbytes_2, nbytes_3, nbytes_4 ! rdcc number of bytes 
+  INTEGER(hid_t) :: fid = -1        ! File ID
+  INTEGER(hid_t) :: fapl_local = -1 !  Local fapl
+  INTEGER(hid_t) :: fapl_def = -1  !  Default fapl
+  INTEGER(hid_t) :: dcpl = -1      ! Dataset creation property list ID
+  INTEGER(hid_t) :: dapl1 = -1     ! Dataset access property list ID
+  INTEGER(hid_t) :: dapl2 = -1     ! Dataset access property list ID
+  INTEGER(hid_t) :: sid = -1       ! Dataspace ID
+  INTEGER(hid_t) :: dsid = -1      ! Dataset ID
+  INTEGER(hsize_t), DIMENSION(1:1) :: chunk_dim, NDIM = (/100/) ! Dataset and chunk dimensions
+  INTEGER(size_t) :: nslots_1, nslots_2, nslots_3, nslots_4 ! rdcc number of elements
+  INTEGER(size_t) :: nbytes_1, nbytes_2, nbytes_3, nbytes_4 ! rdcc number of bytes
   INTEGER :: mdc_nelmts
-  INTEGER(size_t) ::nlinks         ! Number of link traversals 
-  REAL :: w0_1, w0_2, w0_3, w0_4 ! rdcc preemption policy 
+  INTEGER(size_t) ::nlinks         ! Number of link traversals
+  REAL :: w0_1, w0_2, w0_3, w0_4 ! rdcc preemption policy
   INTEGER :: error
   INTEGER(size_t) rdcc_nelmts
   INTEGER(size_t) rdcc_nbytes
@@ -452,7 +452,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
      STOP
   ENDIF
 
-  ! Create a default fapl and dapl 
+  ! Create a default fapl and dapl
   CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl_def, error)
   CALL check("H5Pcreate_f", error, total_error)
   CALL H5Pcreate_f(H5P_DATASET_ACCESS_F, dapl1, error)
@@ -460,7 +460,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
 
   !  Verify that H5Pget_chunk_cache(dapl) returns the same values as are in
   !  the default fapl.
-  ! 
+  !
   CALL H5Pget_cache_f(fapl_def, mdc_nelmts, nslots_1, nbytes_1, w0_1, error)
   CALL check("H5Pget_cache_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl1, nslots_4, nbytes_4, w0_4, error)
@@ -469,7 +469,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL verify("H5Pget_chunk_cache_f", nbytes_1, nbytes_4, total_error)
   CALL verify("H5Pget_chunk_cache_f", w0_1, w0_4, total_error)
 
-  !  Set a lapl property on dapl1 (to verify inheritance) 
+  !  Set a lapl property on dapl1 (to verify inheritance)
   CALL H5Pset_nlinks_f(dapl1, 134_size_t , error)
   CALL check("H5Pset_nlinks_f", error, total_error)
   CALL H5Pget_nlinks_f(dapl1, nlinks, error)
@@ -494,29 +494,29 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Pset_cache_f(fapl_local, 0, nslots_2, nbytes_2, w0_2, error)
   CALL check("H5Pset_cache_f", error, total_error)
 
-  ! Create file 
+  ! Create file
   CALL H5Fcreate_f(fix_filename, H5F_ACC_TRUNC_F, fid, error,  H5P_DEFAULT_F, fapl_local)
   CALL check("H5Fcreate_f", error, total_error)
 
-  ! Create dataset creation property list 
+  ! Create dataset creation property list
   CALL H5Pcreate_f(H5P_DATASET_CREATE_F, dcpl, error)
   CALL check("H5Pcreate_f", error, total_error)
 
-  ! Set chunking 
+  ! Set chunking
   chunk_dim(1) = 10
   CALL H5Pset_chunk_f(dcpl, 1, chunk_dim, error)
   CALL check("H5Pset_chunk_f", error, total_error)
 
-  ! Create 1-D dataspace 
+  ! Create 1-D dataspace
   ndim(1) = 100
   CALL H5Screate_simple_f(1, ndim, sid, error)
   CALL check("H5Pcreate_f", error, total_error)
 
-  !  Create dataset with default dapl 
+  !  Create dataset with default dapl
   CALL H5Dcreate_f(fid, "dset", H5T_NATIVE_INTEGER, sid, dsid, error,  dcpl, H5P_DEFAULT_F,  dapl1)
   CALL check("H5Pcreate_f", error, total_error)
- 
-  !  Retrieve dapl from dataset, verify cache values are the same as on fapl_local 
+
+  !  Retrieve dapl from dataset, verify cache values are the same as on fapl_local
   CALL H5Dget_access_plist_f(dsid, dapl2, error)
   CALL check("H5Dget_access_plist_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
@@ -524,9 +524,9 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL verify("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
   CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
   CALL verify("H5Pget_chunk_cache_f", w0_2, w0_4, total_error)
-  CALL H5Pclose_f(dapl2,error) 
+  CALL H5Pclose_f(dapl2,error)
   CALL check("H5Pclose_f", error, total_error)
-  
+
   ! Set new values on dapl1.  nbytes will be set to default, so the file
   ! property will override this setting
 
@@ -537,7 +537,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Pset_chunk_cache_f(dapl1, nslots_3, nbytes_3, w0_3, error)
   CALL check("H5Pset_chunk_cache_f", error, total_error)
 
-  ! Close dataset, reopen with dapl1.  Note the use of a dapl with H5Oopen 
+  ! Close dataset, reopen with dapl1.  Note the use of a dapl with H5Oopen
   CALL H5Dclose_f(dsid, error)
   CALL H5Oopen_f(fid, "dset", dsid, error, dapl1)
 
@@ -572,11 +572,11 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL verify("H5Pget_chunk_cache_f", INT(nslots_2), INT(nslots_4), total_error)
   CALL verify("H5Pget_chunk_cache_f", INT(nbytes_2), INT(nbytes_4), total_error)
   CALL verify("H5Pget_chunk_cache_f", w0_2, w0_4, total_error)
-  CALL H5Pclose_f(dapl2,error) 
+  CALL H5Pclose_f(dapl2,error)
   CALL check("H5Pclose_f", error, total_error)
 
   ! Similary, test use of H5Dcreate2 with H5P_DEFAULT
-  CALL H5Dclose_f(dsid, error) 
+  CALL H5Dclose_f(dsid, error)
   CALL check("H5Dclose_f", error, total_error)
 
   CALL H5Dcreate_f(fid, "dset2", H5T_NATIVE_INTEGER, sid, dsid, error,  dcpl, H5P_DEFAULT_F,  H5P_DEFAULT_F)
@@ -599,7 +599,7 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("H5Pset_cache_f", error, total_error)
 
   !  Close and reopen file with new fapl_local
-  
+
   CALL H5Dclose_f(dsid, error)
   CALL check("H5Dclose_f", error, total_error)
   CALL H5Fclose_f(fid,error)
@@ -611,13 +611,13 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   ! Verify that dapl2 retrieved earlier (using values from the old fapl)
   ! sets its values in the new file (test use of H5Dopen2 with a dapl)
   !
-  
+
   CALL h5dopen_f (fid, "dset", dsid, error, dapl2)
   CALL check("h5dopen_f", error, total_error)
-  
+
   CALL H5Pclose_f(dapl2,error)
   CALL check("H5Pclose_f", error, total_error) ! Close dapl2, to avoid id leak
-  
+
   CALL H5Dget_access_plist_f(dsid, dapl2, error)
   CALL check("H5Dget_access_plist_f", error, total_error)
   CALL H5Pget_chunk_cache_f(dapl2, nslots_4, nbytes_4, w0_4, error)
@@ -707,15 +707,15 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL H5Sclose_f(sid,error)
   CALL check("H5Sclose_f", error, total_error)
   CALL H5Pclose_f(fapl_local,error)
-  CALL check("H5Pclose_f", error, total_error) 
+  CALL check("H5Pclose_f", error, total_error)
   CALL H5Pclose_f(fapl_def,error)
-  CALL check("H5Pclose_f", error, total_error) 
+  CALL check("H5Pclose_f", error, total_error)
   CALL H5Pclose_f(dapl1,error)
-  CALL check("H5Pclose_f", error, total_error) 
+  CALL check("H5Pclose_f", error, total_error)
   CALL H5Pclose_f(dapl2,error)
-  CALL check("H5Pclose_f", error, total_error) 
+  CALL check("H5Pclose_f", error, total_error)
   CALL H5Pclose_f(dcpl,error)
-  CALL check("H5Pclose_f", error, total_error) 
+  CALL check("H5Pclose_f", error, total_error)
   CALL H5Fclose_f(fid,error)
   CALL check("H5Fclose_f", error, total_error)
 
@@ -723,5 +723,78 @@ SUBROUTINE test_chunk_cache(cleanup, total_error)
   CALL check("h5_cleanup_f", error, total_error)
 
 END SUBROUTINE test_chunk_cache
+
+!-------------------------------------------------------------------------
+! Function: test_misc_properties
+!
+! Purpose:  Tests setting and getting of miscellaneous properties. Does
+!           not test the underlying functionality as that is done in
+!           the C library tests.
+!
+!           Tests APIs:
+!               H5P_GET/SET_FILE_LOCKING_F
+!
+! Return:   Success:    0
+!           Failure:    -1
+!
+!-------------------------------------------------------------------------
+!
+SUBROUTINE test_misc_properties(cleanup, total_error)
+
+  IMPLICIT NONE
+  LOGICAL, INTENT(IN)  :: cleanup
+  INTEGER, INTENT(INOUT) :: total_error
+
+  INTEGER(hid_t) :: fapl_id = -1 !  Local fapl
+  LOGICAL :: use_file_locking           ! (H5Pset/get_file_locking_f)
+  LOGICAL :: ignore_disabled_locks      ! (H5Pset/get_file_locking_f)
+  INTEGER :: error
+
+  ! Create a default fapl
+  CALL H5Pcreate_f(H5P_FILE_ACCESS_F, fapl_id, error)
+  CALL check("H5Pcreate_f", error, total_error)
+
+  ! Test H5Pset/get_file_locking_f
+  ! true values
+  use_file_locking = .TRUE.
+  ignore_disabled_locks = .TRUE.
+  CALL h5pset_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, error)
+  CALL check("h5pset_set_file_locking_f", error, total_error)
+  use_file_locking = .FALSE.
+  ignore_disabled_locks = .FALSE.
+  CALL h5pget_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, error)
+  CALL check("h5pget_set_file_locking_f", error, total_error)
+  if(use_file_locking .neqv. .TRUE.) then
+    total_error = total_error + 1
+    write(*,*) "Got wrong use_file_locking flag from h5pget_file_locking_f"
+  endif
+  if(ignore_disabled_locks .neqv. .TRUE.) then
+    total_error = total_error + 1
+    write(*,*) "Got wrong ignore_disabled_locks flag from h5pget_file_locking_f"
+  endif
+
+  ! false values
+  use_file_locking = .FALSE.
+  ignore_disabled_locks = .FALSE.
+  CALL h5pset_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, error)
+  CALL check("h5pset_set_file_locking_f", error, total_error)
+  use_file_locking = .TRUE.
+  ignore_disabled_locks = .TRUE.
+  CALL h5pget_file_locking_f(fapl_id, use_file_locking, ignore_disabled_locks, error)
+  CALL check("h5pget_set_file_locking_f", error, total_error)
+  if(use_file_locking .neqv. .FALSE.) then
+    total_error = total_error + 1
+    write(*,*) "Got wrong use_file_locking flag from h5pget_file_locking_f"
+  endif
+  if(ignore_disabled_locks .neqv. .FALSE.) then
+    total_error = total_error + 1
+    write(*,*) "Got wrong ignore_disabled_locks flag from h5pget_file_locking_f"
+  endif
+
+  ! Close the fapl
+  CALL H5Pclose_f(fapl_id, error)
+  CALL check("H5Pclose_f", error, total_error)
+
+END SUBROUTINE test_misc_properties
 
 END MODULE TH5P

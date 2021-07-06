@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:	Quincey Koziol
  *		Friday, November 16, 2001
  *
  * Purpose:	This file contains declarations which are visible only within
@@ -23,8 +23,8 @@
 #error "Do not include this file outside the H5P package!"
 #endif
 
-#ifndef _H5Ppkg_H
-#define _H5Ppkg_H
+#ifndef H5Ppkg_H
+#define H5Ppkg_H
 
 /* Get package's private header */
 #include "H5Pprivate.h"
@@ -198,4 +198,4 @@ H5_DLL char *H5P__get_class_path_test(hid_t pclass_id);
 H5_DLL hid_t H5P__open_class_path_test(const char *path);
 #endif /* H5P_TESTING */
 
-#endif /* _H5Ppkg_H */
+#endif /* H5Ppkg_H */

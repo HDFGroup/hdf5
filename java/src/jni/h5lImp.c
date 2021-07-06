@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -676,7 +675,7 @@ H5L_iterate_cb(hid_t g_id, const char *name, const H5L_info2_t *info, void *cb_d
     jobject     visit_callback = wrapper->visit_callback;
     jstring     str;
     JNIEnv *    cbenv = NULL;
-    jclass      cls;
+    jclass      cbcls;
     jvalue      args[5];
     void *      op_data = (void *)wrapper->op_data;
     jint        status  = -1;
@@ -687,10 +686,10 @@ H5L_iterate_cb(hid_t g_id, const char *name, const H5L_info2_t *info, void *cb_d
     }
 
     /* Get the Method ID for the "callback" function of the H5L_iterate_t class */
-    if (NULL == (cls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
+    if (NULL == (cbcls = CBENVPTR->GetObjectClass(CBENVONLY, visit_callback)))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);
 
-    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cls, "callback",
+    if (NULL == (mid = CBENVPTR->GetMethodID(CBENVONLY, cbcls, "callback",
                                              "(JLjava/lang/String;Lhdf/hdf5lib/structs/H5L_info_t;Lhdf/"
                                              "hdf5lib/callbacks/H5L_iterate_opdata_t;)I")))
         CHECK_JNI_EXCEPTION(CBENVONLY, JNI_FALSE);

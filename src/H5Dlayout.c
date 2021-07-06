@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -503,6 +503,7 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
         H5HL_t *   heap;                                /* Pointer to local heap for EFL file names */
         size_t     heap_size = H5HL_ALIGN(1);
         size_t     u;
+        size_t     name_offset;
 
         /* Determine size of heap needed to stored the file names */
         for (u = 0; u < efl->nused; ++u)
@@ -517,24 +518,22 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTPROTECT, FAIL, "unable to protect EFL file name heap")
 
         /* Insert "empty" name first */
-        if (UFAIL == H5HL_insert(file, heap, (size_t)1, "")) {
+        if (H5HL_insert(file, heap, (size_t)1, "", &name_offset) < 0) {
             H5HL_unprotect(heap);
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
-        } /* end if */
+        }
 
         for (u = 0; u < efl->nused; ++u) {
-            size_t offset; /* Offset of file name in heap */
-
             /* Insert file name into heap */
-            if (UFAIL ==
-                (offset = H5HL_insert(file, heap, HDstrlen(efl->slot[u].name) + 1, efl->slot[u].name))) {
+            if (H5HL_insert(file, heap, HDstrlen(efl->slot[u].name) + 1, efl->slot[u].name, &name_offset) <
+                0) {
                 H5HL_unprotect(heap);
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTINSERT, FAIL, "unable to insert file name into heap")
-            } /* end if */
+            }
 
             /* Store EFL file name offset */
-            efl->slot[u].name_offset = offset;
-        } /* end for */
+            efl->slot[u].name_offset = name_offset;
+        }
 
         /* Release the heap */
         if (H5HL_unprotect(heap) < 0)
@@ -547,11 +546,11 @@ H5D__layout_oh_create(H5F_t *file, H5O_t *oh, H5D_t *dset, hid_t dapl_id)
     } /* end if */
 
     /* Create layout message */
-    /* (Don't make layout message constant unless allocation time is early and non-filtered, since space may
-     * not be allocated) */
+    /* (Don't make layout message constant unless allocation time is early and
+     *  non-filtered and has >0 elements, since space may not be allocated -QAK) */
     /* (Note: this is relying on H5D__alloc_storage not calling H5O_msg_write during dataset creation) */
     if (fill_prop->alloc_time == H5D_ALLOC_TIME_EARLY && H5D_COMPACT != layout->type &&
-        !dset->shared->dcpl_cache.pline.nused)
+        !dset->shared->dcpl_cache.pline.nused && (0 != H5S_GET_EXTENT_NPOINTS(dset->shared->space)))
         layout_mesg_flags = H5O_MSG_FLAG_CONSTANT;
     else
         layout_mesg_flags = 0;
@@ -579,13 +578,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_oh_read
  *
- * Purpose:    Read layout/pline/efl information for dataset
+ * Purpose:     Read layout/pline/efl information for dataset
  *
- * Return:    Success:    SUCCEED
- *        Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:    Quincey Koziol
- *        Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */
@@ -673,13 +672,13 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5D__layout_oh_write
  *
- * Purpose:    Write layout information for dataset
+ * Purpose:     Write layout information for dataset
  *
- * Return:    Success:    SUCCEED
- *        Failure:    FAIL
+ * Return:      Success:    SUCCEED
+ *              Failure:    FAIL
  *
- * Programmer:    Quincey Koziol
- *        Monday, July 27, 2009
+ * Programmer:  Quincey Koziol
+ *              Monday, July 27, 2009
  *
  *-------------------------------------------------------------------------
  */

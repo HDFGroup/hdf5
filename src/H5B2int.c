@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5B2int.c
  *			Feb 27 2006
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Internal routines for managing v2 B-trees.
  *
@@ -87,7 +87,6 @@ H5FL_SEQ_EXTERN(H5B2_node_info_t);
  *              record to locate is greater than all records to search).
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
@@ -130,7 +129,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2006
  *
  *-------------------------------------------------------------------------
@@ -140,15 +138,15 @@ H5B2__split1(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
              unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal, unsigned *internal_flags_ptr,
              unsigned idx)
 {
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
-    uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
-    uint8_t *           left_native, *right_native;             /* Pointers to childs' native records */
-    H5B2_node_ptr_t *   left_node_ptrs = NULL,
-                    *right_node_ptrs   = NULL; /* Pointers to childs' node pointer info */
-    uint16_t mid_record;                       /* Index of "middle" record in current node */
-    uint16_t old_node_nrec;                    /* Number of records in internal node split */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
+    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
+    H5B2_node_ptr_t *left_node_ptrs  = NULL,
+                    *right_node_ptrs = NULL; /* Pointers to childs' node pointer info */
+    uint16_t mid_record;                     /* Index of "middle" record in current node */
+    uint16_t old_node_nrec;                  /* Number of records in internal node split */
     unsigned left_child_flags  = H5AC__NO_FLAGS_SET,
              right_child_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
     herr_t ret_value           = SUCCEED;            /* Return value */
@@ -336,7 +334,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  3 2005
  *
  *-------------------------------------------------------------------------
@@ -419,7 +416,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
@@ -427,13 +423,13 @@ done:
 herr_t
 H5B2__redistribute2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, unsigned idx)
 {
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
-    uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
-    uint8_t *           left_native, *right_native;             /* Pointers to childs' native records */
-    H5B2_node_ptr_t *   left_node_ptrs = NULL,
-                    *right_node_ptrs   = NULL;          /* Pointers to childs' node pointer info */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
+    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
+    H5B2_node_ptr_t *left_node_ptrs  = NULL,
+                    *right_node_ptrs = NULL;            /* Pointers to childs' node pointer info */
     hssize_t left_moved_nrec = 0, right_moved_nrec = 0; /* Number of records moved, for internal redistrib */
     unsigned left_child_flags  = H5AC__NO_FLAGS_SET,
              right_child_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
@@ -691,7 +687,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb  9 2005
  *
  *-------------------------------------------------------------------------
@@ -701,20 +696,20 @@ H5B2__redistribute3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_internal_t *internal, 
                     unsigned idx)
 {
     H5B2_node_ptr_t *left_node_ptrs      = NULL,
-                    *right_node_ptrs     = NULL;                /* Pointers to childs' node pointer info */
-    H5B2_node_ptr_t *   middle_node_ptrs = NULL;                /* Pointers to childs' node pointer info */
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    haddr_t             middle_addr;                            /* Address of middle child node */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to child nodes */
-    void *              middle_child = NULL;                    /* Pointers to middle child node */
-    uint16_t *          left_nrec, *right_nrec;                 /* Pointers to child # of records */
-    uint16_t *          middle_nrec;                            /* Pointers to middle child # of records */
-    uint8_t *           left_native, *right_native;             /* Pointers to childs' native records */
-    uint8_t *           middle_native;                  /* Pointers to middle child's native records */
-    hssize_t left_moved_nrec = 0, right_moved_nrec = 0; /* Number of records moved, for internal split */
-    hssize_t middle_moved_nrec  = 0;                    /* Number of records moved, for internal split */
-    unsigned left_child_flags   = H5AC__NO_FLAGS_SET,
+                    *right_node_ptrs     = NULL;                 /* Pointers to childs' node pointer info */
+    H5B2_node_ptr_t *   middle_node_ptrs = NULL;                 /* Pointers to childs' node pointer info */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    haddr_t   middle_addr = HADDR_UNDEF;                         /* Address of middle child node */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to child nodes */
+    void *    middle_child = NULL;                               /* Pointers to middle child node */
+    uint16_t *left_nrec, *right_nrec;                            /* Pointers to child # of records */
+    uint16_t *middle_nrec;                                       /* Pointers to middle child # of records */
+    uint8_t * left_native, *right_native;                        /* Pointers to childs' native records */
+    uint8_t * middle_native;                             /* Pointers to middle child's native records */
+    hssize_t  left_moved_nrec = 0, right_moved_nrec = 0; /* Number of records moved, for internal split */
+    hssize_t  middle_moved_nrec = 0;                     /* Number of records moved, for internal split */
+    unsigned  left_child_flags  = H5AC__NO_FLAGS_SET,
              right_child_flags  = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
     unsigned middle_child_flags = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
     herr_t   ret_value          = SUCCEED;            /* Return value */
@@ -1118,7 +1113,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
@@ -1128,16 +1122,16 @@ H5B2__merge2(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
              unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal, unsigned *internal_flags_ptr,
              unsigned idx)
 {
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to left & right child nodes */
-    uint16_t *          left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
-    uint8_t *           left_native, *right_native; /* Pointers to left & right children's native records */
-    H5B2_node_ptr_t *   left_node_ptrs = NULL,
-                    *right_node_ptrs   = NULL; /* Pointers to childs' node pointer info */
-    unsigned left_child_flags          = H5AC__NO_FLAGS_SET,
-             right_child_flags         = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
-    herr_t ret_value                   = SUCCEED;            /* Return value */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to left & right child nodes */
+    uint16_t *left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
+    uint8_t * left_native, *right_native; /* Pointers to left & right children's native records */
+    H5B2_node_ptr_t *left_node_ptrs  = NULL,
+                    *right_node_ptrs = NULL; /* Pointers to childs' node pointer info */
+    unsigned left_child_flags        = H5AC__NO_FLAGS_SET,
+             right_child_flags       = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
+    herr_t ret_value                 = SUCCEED;            /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -1294,7 +1288,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  4 2005
  *
  *-------------------------------------------------------------------------
@@ -1304,19 +1297,19 @@ H5B2__merge3(H5B2_hdr_t *hdr, uint16_t depth, H5B2_node_ptr_t *curr_node_ptr,
              unsigned *parent_cache_info_flags_ptr, H5B2_internal_t *internal, unsigned *internal_flags_ptr,
              unsigned idx)
 {
-    const H5AC_class_t *child_class;                            /* Pointer to child node's class info */
-    haddr_t             left_addr, right_addr;                  /* Addresses of left & right child nodes */
-    haddr_t             middle_addr;                            /* Address of middle child node */
-    void *              left_child = NULL, *right_child = NULL; /* Pointers to left & right child nodes */
-    void *              middle_child = NULL;                    /* Pointer to middle child node */
-    uint16_t *          left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
-    uint16_t *          middle_nrec;                /* Pointer to middle child # of records */
-    uint8_t *           left_native, *right_native; /* Pointers to left & right children's native records */
-    uint8_t *           middle_native;              /* Pointer to middle child's native records */
-    H5B2_node_ptr_t *   left_node_ptrs = NULL,
-                    *right_node_ptrs   = NULL; /* Pointers to childs' node pointer info */
-    H5B2_node_ptr_t *middle_node_ptrs  = NULL; /* Pointer to child's node pointer info */
-    hsize_t          middle_moved_nrec;        /* Number of records moved, for internal split */
+    const H5AC_class_t *child_class;                             /* Pointer to child node's class info */
+    haddr_t   left_addr = HADDR_UNDEF, right_addr = HADDR_UNDEF; /* Addresses of left & right child nodes */
+    haddr_t   middle_addr = HADDR_UNDEF;                         /* Address of middle child node */
+    void *    left_child = NULL, *right_child = NULL;            /* Pointers to left & right child nodes */
+    void *    middle_child = NULL;                               /* Pointer to middle child node */
+    uint16_t *left_nrec, *right_nrec;     /* Pointers to left & right child # of records */
+    uint16_t *middle_nrec;                /* Pointer to middle child # of records */
+    uint8_t * left_native, *right_native; /* Pointers to left & right children's native records */
+    uint8_t * middle_native;              /* Pointer to middle child's native records */
+    H5B2_node_ptr_t *left_node_ptrs   = NULL,
+                    *right_node_ptrs  = NULL; /* Pointers to childs' node pointer info */
+    H5B2_node_ptr_t *middle_node_ptrs = NULL; /* Pointer to child's node pointer info */
+    hsize_t          middle_moved_nrec;       /* Number of records moved, for internal split */
     unsigned         left_child_flags = H5AC__NO_FLAGS_SET,
              right_child_flags        = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
     unsigned middle_child_flags       = H5AC__NO_FLAGS_SET; /* Flags for unprotecting child nodes */
@@ -1561,7 +1554,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Dec 23 2015
  *
  *-------------------------------------------------------------------------
@@ -1620,7 +1612,6 @@ done:
  * Return:	Value from callback, non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Feb 11 2005
  *
  *-------------------------------------------------------------------------
@@ -1743,7 +1734,6 @@ done:
  * Return:	Value from callback, non-negative on success, negative on error
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Mar  9 2005
  *
  *-------------------------------------------------------------------------
@@ -1915,7 +1905,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *		koziol@lbl.gov
  *		Dec  1 2016
  *
  *-------------------------------------------------------------------------
@@ -1944,7 +1933,7 @@ H5B2__update_flush_depend(H5B2_hdr_t *hdr, unsigned depth, const H5B2_node_ptr_t
 
     /* If the node is in the cache, check for retargeting its parent */
     if (node_status & H5AC_ES__IN_CACHE) {
-        void ** parent_ptr;          /* Pointer to child node's parent */
+        void ** parent_ptr  = NULL;  /* Pointer to child node's parent */
         hbool_t update_deps = FALSE; /* Whether to update flush dependencies */
 
         /* Get child node pointer */
@@ -2016,7 +2005,6 @@ done:
  * Return:      SUCCEED/FAIL
  *
  * Programmer:  Quincey Koziol
- *		koziol@lbl.gov
  *		Dec  1 2016
  *
  *-------------------------------------------------------------------------

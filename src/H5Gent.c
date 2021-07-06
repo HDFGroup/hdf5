@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer: Robb Matzke <matzke@llnl.gov>
+ * Programmer: Robb Matzke
  *             Friday, September 19, 1997
  */
 
@@ -53,9 +53,6 @@
 /* Package Variables */
 /*********************/
 
-/* Declare extern the PQ free list for the wrapped strings */
-H5FL_BLK_EXTERN(str_buf);
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -76,7 +73,6 @@ H5FL_BLK_EXTERN(str_buf);
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -117,7 +113,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -182,7 +177,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -221,7 +215,6 @@ done:
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul 18 1997
  *
  *-------------------------------------------------------------------------
@@ -292,7 +285,6 @@ done:
  *		Failure:	Negative
  *
  * Programmer:	Pedro Vicente
- *              pvn@ncsa.uiuc.edu
  *              ???day, August ??, 2002
  *
  * Notes:       'depth' parameter determines how much of the group entry
@@ -370,7 +362,6 @@ H5G__ent_reset(H5G_entry_t *ent)
  *		Failure:	Negative
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -393,11 +384,8 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
     /* Reset the new entry */
     H5G__ent_reset(ent);
 
-    /*
-     * Add the new name to the heap.
-     */
-    name_offset = H5HL_insert(f, heap, HDstrlen(name) + 1, name);
-    if (0 == name_offset || UFAIL == name_offset)
+    /* Add the new name to the heap */
+    if (H5HL_insert(f, heap, HDstrlen(name) + 1, name, &name_offset) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "unable to insert symbol name into heap")
     ent->name_off = name_offset;
 
@@ -485,14 +473,12 @@ H5G__ent_convert(H5F_t *f, H5HL_t *heap, const char *name, const H5O_link_t *lnk
             size_t lnk_offset; /* Offset to sym-link value	*/
 
             /* Insert link value into local heap */
-            if (UFAIL ==
-                (lnk_offset = H5HL_insert(f, heap, HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name)))
+            if (H5HL_insert(f, heap, HDstrlen(lnk->u.soft.name) + 1, lnk->u.soft.name, &lnk_offset) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to write link value to local heap")
 
             ent->type                    = H5G_CACHED_SLINK;
             ent->cache.slink.lval_offset = lnk_offset;
-        } /* end case */
-        break;
+        } break;
 
         case H5L_TYPE_ERROR:
         case H5L_TYPE_EXTERNAL:
@@ -513,7 +499,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Aug 29 1997
  *
  *-------------------------------------------------------------------------
@@ -533,7 +518,7 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth, con
     HDfprintf(stream, "%*s%-*s %lu\n", indent, "", fwidth,
               "Name offset into private heap:", (unsigned long)(ent->name_off));
 
-    HDfprintf(stream, "%*s%-*s %a\n", indent, "", fwidth, "Object header address:", ent->header);
+    HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", indent, "", fwidth, "Object header address:", ent->header);
 
     HDfprintf(stream, "%*s%-*s ", indent, "", fwidth, "Cache info type:");
     switch (ent->type) {
@@ -545,10 +530,10 @@ H5G__ent_debug(const H5G_entry_t *ent, FILE *stream, int indent, int fwidth, con
             HDfprintf(stream, "Symbol Table\n");
 
             HDfprintf(stream, "%*s%-*s\n", indent, "", fwidth, "Cached entry information:");
-            HDfprintf(stream, "%*s%-*s %a\n", nested_indent, "", nested_fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
                       "B-tree address:", ent->cache.stab.btree_addr);
 
-            HDfprintf(stream, "%*s%-*s %a\n", nested_indent, "", nested_fwidth,
+            HDfprintf(stream, "%*s%-*s %" PRIuHADDR "\n", nested_indent, "", nested_fwidth,
                       "Heap address:", ent->cache.stab.heap_addr);
             break;
 

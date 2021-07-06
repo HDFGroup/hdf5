@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -101,6 +101,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tfamily.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tfill.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tfletcher32.ddl
+      #${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.ddl #native
+      #${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.wddl #special for windows
       ${HDF5_TOOLS_DIR}/testfiles/tfpformat.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tgroup-2.ddl
@@ -127,7 +129,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.ddl
-      #${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tldouble.ddl
+      ${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tloop-1.ddl
       ${HDF5_TOOLS_DIR}/testfiles/tmulti.ddl
@@ -282,6 +285,7 @@
       ${HDF5_TOOLS_DIR}/testfiles/tfcontents1.h5
       ${HDF5_TOOLS_DIR}/testfiles/tfcontents2.h5
       ${HDF5_TOOLS_DIR}/testfiles/tfilters.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.h5
       ${HDF5_TOOLS_DIR}/testfiles/tfpformat.h5
       ${HDF5_TOOLS_DIR}/testfiles/tfvalues.h5
       ${HDF5_TOOLS_DIR}/testfiles/tgroup.h5
@@ -293,7 +297,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tintsattrs.h5
       ${HDF5_TOOLS_DIR}/testfiles/tintsnodata.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlarge_objname.h5
-      #${HDF5_TOOLS_DIR}/testfiles/tldouble.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tldouble.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tldouble_scalar.h5
       ${HDF5_TOOLS_DIR}/testfiles/tlonglinks.h5
       ${HDF5_TOOLS_DIR}/testfiles/tloop.h5
       ${HDF5_TOOLS_DIR}/testfiles/tmulti-b.h5
@@ -331,6 +336,8 @@
       ${HDF5_TOOLS_DIR}/testfiles/tvlstr.h5
       ${HDF5_TOOLS_DIR}/testfiles/tvms.h5
       ${HDF5_TOOLS_DIR}/testfiles/t128bit_float.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tCVE_2018_11206_fill_old.h5
+      ${HDF5_TOOLS_DIR}/testfiles/tCVE_2018_11206_fill_new.h5
       ${HDF5_TOOLS_DIR}/testfiles/zerodim.h5
       #STD_REF_OBJ files
       ${HDF5_TOOLS_DIR}/testfiles/trefer_attr.h5
@@ -405,12 +412,14 @@
   # --------------------------------------------------------------------
   HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbin1.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tbin1LE.ddl" "h5dump_std_files")
 
-  if (WIN32 OR MINGW)
+  if (WIN32)
     configure_file(${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp NEWLINE_STYLE CRLF)
     #file (READ ${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp TEST_STREAM)
     #file (WRITE ${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp "${TEST_STREAM}")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.wddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
   else ()
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tbinregR.exp" "${PROJECT_BINARY_DIR}/testfiles/std/tbinregR.exp" "h5dump_std_files")
+    HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/tfloatsattrs.ddl" "${PROJECT_BINARY_DIR}/testfiles/std/tfloatsattrs.ddl" "h5dump_std_files")
   endif ()
   add_custom_target(h5dump_std_files ALL COMMENT "Copying files needed by h5dump_std tests" DEPENDS ${h5dump_std_files_list})
 
@@ -1085,7 +1094,9 @@
   ADD_H5_TEST (zerodim 0 --enable-error-stack zerodim.h5)
 
   # test for long double (some systems do not have long double)
-  #ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
+  ADD_H5_TEST (tfloatsattrs 0 -p --enable-error-stack tfloatsattrs.h5)
+  ADD_H5_TEST (tldouble 0 --enable-error-stack tldouble.h5)
+  ADD_H5_TEST (tldouble_scalar 0 -p --enable-error-stack tldouble_scalar.h5)
 
   # test for vms
   ADD_H5_TEST (tvms 0 --enable-error-stack tvms.h5)
@@ -1170,7 +1181,11 @@
   ADD_H5_TEST (err_attr_dspace 1 err_attr_dspace.h5)
 
   # test to verify HDFFV-9407: long double full precision
-  ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lf t128bit_float.h5)
+#  ADD_H5_GREP_TEST (t128bit_float 1 "1.123456789012345" -m %.35Lg t128bit_float.h5)
+
+  # test to verify HDFFV-10480: out of bounds read in H5O_fill_new[old]_decode
+  ADD_H5_TEST (tCVE_2018_11206_fill_old 1 tCVE_2018_11206_fill_old.h5)
+  ADD_H5_TEST (tCVE_2018_11206_fill_new 1 tCVE_2018_11206_fill_new.h5)
 
 ##############################################################################
 ###    P L U G I N  T E S T S

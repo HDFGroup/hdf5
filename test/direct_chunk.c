@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,7 +43,7 @@
 #define CHUNK_NX 4
 #define CHUNK_NY 4
 
-#define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * H5_DOUBLE(1.001)) + H5_DOUBLE(12.0))
+#define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * 1.001) + 12.0)
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS1 305
@@ -2326,7 +2326,7 @@ main(void)
             need_comma = TRUE;
         } /* end if */
         HDprintf(":\n");
-        fflush(stdout);
+        HDfflush(stdout);
 
         nerrors += test_single_chunk(config);
     } /* end for */

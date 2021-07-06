@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -35,7 +35,7 @@
 /* Local Typedefs */
 /******************/
 
-/* Udata struct for calls to H5SM_compare_cb and H5SM_compare_iter_op*/
+/* Udata struct for calls to H5SM__compare_cb and H5SM__compare_iter_op*/
 typedef struct H5SM_compare_udata_t {
     const H5SM_mesg_key_t *key; /* Key; compare this against stored message */
     H5O_msg_crt_idx_t      idx; /* Index of the message in the OH, if applicable */
@@ -45,9 +45,9 @@ typedef struct H5SM_compare_udata_t {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5SM_compare_cb(const void *obj, size_t obj_len, void *udata);
-static herr_t H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence, unsigned *oh_modified,
-                                   void *udata);
+static herr_t H5SM__compare_cb(const void *obj, size_t obj_len, void *udata);
+static herr_t H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequence, unsigned *oh_modified,
+                                    void *udata);
 
 /*********************/
 /* Package Variables */
@@ -62,7 +62,7 @@ static herr_t H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequenc
 /*******************/
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_compare_cb
+ * Function:	H5SM__compare_cb
  *
  * Purpose:	Callback for H5HF_op, used in H5SM__message_compare below.
  *              Determines whether the search key passed in in _UDATA is
@@ -78,11 +78,11 @@ static herr_t H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg, unsigned sequenc
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_compare_cb(const void *obj, size_t obj_len, void *_udata)
+H5SM__compare_cb(const void *obj, size_t obj_len, void *_udata)
 {
     H5SM_compare_udata_t *udata = (H5SM_compare_udata_t *)_udata;
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    FUNC_ENTER_STATIC_NOERR
 
     /* If the encoding sizes are different, it's not the same object */
     if (udata->key->encoding_size > obj_len)
@@ -94,10 +94,10 @@ H5SM_compare_cb(const void *obj, size_t obj_len, void *_udata)
         udata->ret = HDmemcmp(udata->key->encoding, obj, obj_len);
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5SM_compare_cb() */
+} /* end H5SM__compare_cb() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5SM_compare_iter_op
+ * Function:	H5SM__compare_iter_op
  *
  * Purpose:	OH iteration callback to compare a key against a message in
  *              an OH
@@ -113,13 +113,13 @@ H5SM_compare_cb(const void *obj, size_t obj_len, void *_udata)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
-                     unsigned H5_ATTR_UNUSED *oh_modified, void *_udata /*in,out*/)
+H5SM__compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
+                      unsigned H5_ATTR_UNUSED *oh_modified, void *_udata /*in,out*/)
 {
     H5SM_compare_udata_t *udata     = (H5SM_compare_udata_t *)_udata;
     herr_t                ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /*
      * Check arguments.
@@ -156,7 +156,7 @@ H5SM_compare_iter_op(H5O_t *oh, H5O_mesg_t *mesg /*in,out*/, unsigned sequence,
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SM_compare_iter_op() */
+} /* end H5SM__compare_iter_op() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5SM__message_compare
@@ -227,7 +227,7 @@ H5SM__message_compare(const void *rec1, const void *rec2, int *result)
          */
         if (mesg->location == H5SM_IN_HEAP) {
             /* Call heap op routine with comparison callback */
-            if (H5HF_op(key->fheap, &(mesg->u.heap_loc.fheap_id), H5SM_compare_cb, &udata) < 0)
+            if (H5HF_op(key->fheap, &(mesg->u.heap_loc.fheap_id), H5SM__compare_cb, &udata) < 0)
                 HGOTO_ERROR(H5E_HEAP, H5E_CANTCOMPARE, FAIL, "can't compare btree2 records")
         } /* end if */
         else {
@@ -251,7 +251,7 @@ H5SM__message_compare(const void *rec1, const void *rec2, int *result)
 
             /* Locate the right message and compare with it */
             op.op_type  = H5O_MESG_OP_LIB;
-            op.u.lib_op = H5SM_compare_iter_op;
+            op.u.lib_op = H5SM__compare_iter_op;
             if (H5O_msg_iterate(&oloc, mesg->msg_type_id, &op, &udata) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_NOTFOUND, FAIL, "error iterating over links")
         } /* end else */

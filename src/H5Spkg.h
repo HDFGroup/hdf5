@@ -6,25 +6,25 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:	Quincey Koziol <koziol@ncsa.uiuc.edu>
- *		Thursday, September 28, 2000
+ * Programmer:    Quincey Koziol
+ *        Thursday, September 28, 2000
  *
- * Purpose:	This file contains declarations which are visible only within
- *		the H5S package.  Source files outside the H5S package should
- *		include H5Sprivate.h instead.
+ * Purpose:    This file contains declarations which are visible only within
+ *        the H5S package.  Source files outside the H5S package should
+ *        include H5Sprivate.h instead.
  */
 #if !(defined H5S_FRIEND || defined H5S_MODULE)
 #error "Do not include this file outside the H5S package!"
 #endif
 
-#ifndef _H5Spkg_H
-#define _H5Spkg_H
+#ifndef H5Spkg_H
+#define H5Spkg_H
 
 /* Get package's private header */
 #include "H5Sprivate.h"
@@ -47,14 +47,17 @@
 #define H5S_HYPER_VERSION_LATEST H5S_HYPER_VERSION_3
 
 /* Versions for H5S_SEL_POINTS selection info */
-#define H5S_POINT_VERSION_1 1
-#define H5S_POINT_VERSION_2 2
+#define H5S_POINT_VERSION_1      1
+#define H5S_POINT_VERSION_2      2
+#define H5S_POINT_VERSION_LATEST H5S_POINT_VERSION_2
 
 /* Versions for H5S_SEL_NONE selection info */
-#define H5S_NONE_VERSION_1 1
+#define H5S_NONE_VERSION_1      1
+#define H5S_NONE_VERSION_LATEST H5S_NONE_VERSION_1
 
 /* Versions for H5S_SEL_ALL selection info */
-#define H5S_ALL_VERSION_1 1
+#define H5S_ALL_VERSION_1      1
+#define H5S_ALL_VERSION_LATEST H5S_ALL_VERSION_1
 
 /* Encoded size of selection info for H5S_SEL_POINTS/H5S_SEL_HYPER */
 #define H5S_SELECT_INFO_ENC_SIZE_2 0x02 /* 2 bytes: 16 bits */
@@ -134,6 +137,11 @@ struct H5S_pnt_list_t {
 
     H5S_pnt_node_t *head; /* Pointer to head of point list */
     H5S_pnt_node_t *tail; /* Pointer to tail of point list */
+
+    hsize_t last_idx; /* Index of the point after the last returned from H5S__get_select_elem_pointlist() */
+    H5S_pnt_node_t *last_idx_pnt; /* Point after the last returned from H5S__get_select_elem_pointlist().
+                                   * If we ever add a way to remove points or add points in the middle of
+                                   * the pointlist we will need to invalidate these fields. */
 };
 
 /* Information about hyperslab spans */
@@ -409,4 +417,4 @@ H5_DLL herr_t H5S__get_diminfo_status_test(hid_t space_id, H5S_diminfo_valid_t *
 H5_DLL htri_t H5S__internal_consistency_test(hid_t space_id);
 #endif /* H5S_TESTING */
 
-#endif /*_H5Spkg_H*/
+#endif /*H5Spkg_H*/

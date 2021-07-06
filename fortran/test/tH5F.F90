@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -25,10 +25,10 @@
 !
 !*****
 !
-!  In the mountingtest subroutine we create one file with a group in it, 
+!  In the mountingtest subroutine we create one file with a group in it,
 !  and another file with a dataset. Mounting is used to
-!  access the dataset from the second file as a member of a group 
-!  in the first file. 
+!  access the dataset from the second file as a member of a group
+!  in the first file.
 
 MODULE TH5F
 
@@ -148,7 +148,7 @@ CONTAINS
           CALL check(" h5tcopy_f",error,total_error)
           CALL h5tcopy_f(H5T_NATIVE_CHARACTER, t4, error)
           CALL check(" h5tcopy_f",error,total_error)
-          
+
           CALL h5fget_obj_count_f(INT(H5F_OBJ_ALL_F,HID_T), H5F_OBJ_ALL_F, obj_count,  error)
           CALL check(" h5fget_obj_count_f",error,total_error)
 
@@ -280,7 +280,7 @@ CONTAINS
 
           IF(obj_count.NE.1)THEN
              total_error = total_error + 1
-          ENDIF  
+          ENDIF
 
           CALL h5fopen_f (fix_filename2, H5F_ACC_RDWR_F, file2_id, error)
               CALL check("h5fopen_f",error,total_error)
@@ -290,7 +290,7 @@ CONTAINS
 
           IF(obj_count.NE.2)THEN
              total_error = total_error + 1
-          ENDIF  
+          ENDIF
 
           !
           !Check file numbers

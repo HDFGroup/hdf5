@@ -5,13 +5,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@lbl.gov>
+ * Programmer:  Quincey Koziol
  *              Monday, February 19, 2018
  *
  * Purpose:
@@ -31,11 +31,11 @@
 /***********/
 #include "H5private.h"   /* Generic Functions                    */
 #include "H5CXprivate.h" /* API Contexts                         */
-#include "H5Dprivate.h"  /* Datasets				*/
+#include "H5Dprivate.h"  /* Datasets                             */
 #include "H5Eprivate.h"  /* Error handling                       */
 #include "H5FLprivate.h" /* Free Lists                           */
 #include "H5Iprivate.h"  /* IDs                                  */
-#include "H5Lprivate.h"  /* Links		  		*/
+#include "H5Lprivate.h"  /* Links                                */
 #include "H5MMprivate.h" /* Memory management                    */
 #include "H5Pprivate.h"  /* Property lists                       */
 
@@ -932,9 +932,11 @@ H5CX_retrieve_state(H5CX_state_t **api_state)
 
     /* Keep a reference to the current VOL wrapping context */
     (*api_state)->vol_wrap_ctx = (*head)->ctx.vol_wrap_ctx;
-    if (NULL != (*api_state)->vol_wrap_ctx)
+    if (NULL != (*api_state)->vol_wrap_ctx) {
+        HDassert((*head)->ctx.vol_wrap_ctx_valid);
         if (H5VL_inc_vol_wrapper((*api_state)->vol_wrap_ctx) < 0)
             HGOTO_ERROR(H5E_CONTEXT, H5E_CANTINC, FAIL, "can't increment refcount on VOL wrapping context")
+    } /* end if */
 
     /* Keep a copy of the VOL connector property, if there is one */
     if ((*head)->ctx.vol_connector_prop_valid && (*head)->ctx.vol_connector_prop.connector_id > 0) {
@@ -1023,6 +1025,8 @@ H5CX_restore_state(const H5CX_state_t *api_state)
 
     /* Restore the VOL wrapper context */
     (*head)->ctx.vol_wrap_ctx = api_state->vol_wrap_ctx;
+    if (NULL != (*head)->ctx.vol_wrap_ctx)
+        (*head)->ctx.vol_wrap_ctx_valid = TRUE;
 
     /* Restore the VOL connector info */
     if (api_state->vol_connector_prop.connector_id) {

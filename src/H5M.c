@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,7 +38,6 @@
 /********************/
 /* Local Prototypes */
 /********************/
-
 static herr_t H5M__close_cb(H5VL_object_t *map_vol_obj);
 
 /*********************/
@@ -873,7 +872,7 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
     /* Iterate over keys */
     if ((ret_value = H5VL_optional(vol_obj, H5VL_MAP_SPECIFIC, dxpl_id, H5_REQUEST_NULL, &loc_params,
                                    H5VL_MAP_ITER, idx, key_mem_type_id, op, op_data)) < 0)
-        HGOTO_ERROR(H5E_MAP, H5E_BADITER, ret_value, "unable to ierate over keys")
+        HGOTO_ERROR(H5E_MAP, H5E_BADITER, ret_value, "unable to iterate over keys")
 
 done:
     FUNC_LEAVE_API(ret_value)

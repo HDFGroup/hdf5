@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -55,12 +55,12 @@ GIFBYTE *Raster; /* The raster data stream, unblocked            */
 
 /* The hash table used by the decompressor */
 
-int Prefix[4096];
-int Suffix[4096];
+int *Prefix;
+int *Suffix;
 
 /* An output array used by the decompressor */
 
-int OutCode[1025];
+int *OutCode;
 
 /* The color map, read from the GIF header */
 
@@ -155,6 +155,19 @@ GIFBYTE *
 Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
 {
     int i;
+
+    if (!(Prefix = calloc(4096, sizeof(int)))) {
+        printf("Out of memory");
+        exit(EXIT_FAILURE);
+    }
+    if (!(Suffix = calloc(4096, sizeof(int)))) {
+        printf("Out of memory");
+        exit(EXIT_FAILURE);
+    }
+    if (!(OutCode = calloc(1024, sizeof(int)))) {
+        printf("Out of memory");
+        exit(EXIT_FAILURE);
+    }
 
     XC        = 0;
     YC        = 0;
@@ -306,6 +319,10 @@ Decompress(GIFIMAGEDESC *GifImageDesc, GIFHEAD *GifHead)
 
         Code = ReadCode();
     }
+
+    free(Prefix);
+    free(Suffix);
+    free(OutCode);
 
     return Image;
 }

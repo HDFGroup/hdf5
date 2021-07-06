@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_DEFINES_H__
-#define H5DUMP_DEFINES_H__
+#ifndef H5DUMP_DEFINES_H
+#define H5DUMP_DEFINES_H
 
 #define H5DUMP_MAX_RANK H5S_MAX_RANK
 
@@ -50,4 +50,4 @@
 #define H5_SZIP_MSB_OPTION_MASK 16
 #define H5_SZIP_RAW_OPTION_MASK 128
 
-#endif /* !H5DUMP_DEFINES_H__ */
+#endif /* H5DUMP_DEFINES_H */

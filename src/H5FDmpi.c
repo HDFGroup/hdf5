@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Friday, January 30, 2004
  *
  * Purpose:	Common routines for all MPI-based VFL drivers.
@@ -40,8 +40,6 @@
  *
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
@@ -79,8 +77,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 int
@@ -116,8 +112,6 @@ done:
  * Programmer:	Quincey Koziol
  *              Friday, January 30, 2004
  *
- * Modifications:
- *
  *-------------------------------------------------------------------------
  */
 MPI_Comm
@@ -142,43 +136,6 @@ done:
 } /* end H5FD_mpi_get_comm() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5FD_get_mpi_info
- *
- * Purpose:	Retrieves the file's mpi info
- *
- * Return:	Success:	SUCCEED
- *
- *		Failure:	FAIL
- *
- * Programmer:	John Mainzer
- *              4/4/17
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5FD_get_mpi_info(H5FD_t *file, void **mpi_info)
-{
-    const H5FD_class_mpi_t *cls;
-    herr_t                  ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI_NOINIT
-
-    HDassert(file);
-    cls = (const H5FD_class_mpi_t *)(file->cls);
-    HDassert(cls);
-    HDassert(cls->get_mpi_info); /* All MPI drivers must implement this */
-
-    /* Dispatch to driver */
-    if ((ret_value = (cls->get_mpi_info)(file, mpi_info)) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "driver get_mpi_info request failed")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FD_get_mpi_info() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_mpi_MPIOff_to_haddr
  *
  * Purpose:     Convert an MPI_Offset value to haddr_t.
@@ -191,13 +148,6 @@ done:
  * Programmer:  Unknown
  *              January 30, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1999-04-23
- *		An error is reported for address overflows. The ADDR output
- *		argument is optional.
- *
- * 		Robb Matzke, 1999-08-06
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 haddr_t
@@ -228,16 +178,6 @@ H5FD_mpi_MPIOff_to_haddr(MPI_Offset mpi_off)
  * Programmer:  Unknown
  *              January 30, 1998
  *
- * Modifications:
- * 		Robb Matzke, 1999-04-23
- *		An error is reported for address overflows. The ADDR output
- *		argument is optional.
- *
- * 		Robb Matzke, 1999-07-28
- *		The ADDR argument is passed by value.
- *
- * 		Robb Matzke, 1999-08-06
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -283,9 +223,6 @@ H5FD_mpi_haddr_to_MPIOff(haddr_t addr, MPI_Offset *mpi_off /*out*/)
  * Programmer:	rky
  *              19981207
  *
- * Modifications:
- *		Robb Matzke, 1999-08-09
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -337,9 +274,6 @@ done:
  * Programmer:	rky
  *              19981207
  *
- * Modifications:
- *		Robb Matzke, 1999-08-09
- *		Modified to work with the virtual file layer.
  *-------------------------------------------------------------------------
  */
 herr_t

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -142,7 +142,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
             /* failure, such as bad format */
             return NULL;
 
-        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s")))) {
+        if ((size_t)nchars >= avail || (0 == nchars && (HDstrcmp(fmt, "%s") != 0))) {
             /* Truncation return value as documented by C99, or zero return value with either of the
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
@@ -278,42 +278,24 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
  * Purpose: Renders the line prefix value into string STR.
  *
  * Return:  Success:    Pointer to the prefix.
- *
  *          Failure:    NULL
- *
- * Programmer:  Robb Matzke
- *              Thursday, July 23, 1998
  *-------------------------------------------------------------------------
  */
 char *
-h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, hsize_t elmtno, unsigned ndims,
+h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, hsize_t elmtno,
                    h5tools_context_t *ctx)
 {
-    size_t  i        = 0;
-    hsize_t curr_pos = elmtno;
+    size_t i = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
 
-    H5TOOLS_DEBUG("ndims=%d", ndims);
-    if (ndims > 0) {
-        /*
-         * Calculate the number of elements represented by a unit change in a
-         * certain index position.
-         */
-        for (i = 0; i < (size_t)ndims; i++) {
-            H5TOOLS_DEBUG("curr_pos=%ld - ctx->acc[%d]=%ld", curr_pos, i, ctx->acc[i]);
-            ctx->pos[i] = curr_pos / ctx->acc[i];
-            curr_pos -= ctx->acc[i] * ctx->pos[i];
-            H5TOOLS_DEBUG("curr_pos=%ld - ctx->pos[%d]=%ld - ctx->acc[%d]=%ld", curr_pos, i, ctx->pos[i], i,
-                          ctx->acc[i]);
-        }
-        HDassert(curr_pos == 0);
-
+    calc_acc_pos(ctx->ndims, elmtno, ctx->acc, ctx->pos);
+    if (ctx->ndims > 0) {
         /* Print the index values */
-        for (i = 0; i < (size_t)ndims; i++) {
+        for (i = 0; i < (size_t)ctx->ndims; i++) {
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
@@ -324,7 +306,7 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
         h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)elmtno);
     H5TOOLS_DEBUG("str=%s", str->s);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     /* Add prefix and suffix to the index */
     return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
@@ -337,50 +319,35 @@ h5tools_str_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, h
  *
  * Return:  Success:    Pointer to the prefix.
  *          Failure:    NULL
- *
- * In/Out:
- *      h5tools_context_t *ctx
- *      h5tools_str_t     *str
  *-------------------------------------------------------------------------
  */
 char *
-h5tools_str_region_prefix(h5tools_str_t *str, const h5tool_format_t *info, hsize_t elmtno, hsize_t *ptdata,
-                          unsigned ndims, hsize_t max_idx[], h5tools_context_t *ctx)
+h5tools_str_region_prefix(h5tools_str_t *str /*in,out*/, const h5tool_format_t *info, hsize_t elmtno,
+                          const hsize_t *ptdata, h5tools_context_t *ctx)
 {
-    size_t  i        = 0;
-    hsize_t curr_pos = elmtno;
-    hsize_t p_prod[H5S_MAX_RANK];
+    size_t i = 0;
 
+    H5TOOLS_START_DEBUG(" ");
+
+    H5TOOLS_DEBUG("elmtno=%ld, ctx->ndims=%d", elmtno, ctx->ndims);
     h5tools_str_reset(str);
 
-    if (ndims > 0) {
-        /*
-         * Calculate the number of elements represented by a unit change in a
-         * certain index position.
-         */
-        for (i = ndims - 1, p_prod[ndims - 1] = 1; i > 0; --i)
-            p_prod[i - 1] = (max_idx[i]) * p_prod[i];
-
-        for (i = 0; i < (size_t)ndims; i++) {
-            if (curr_pos > 0) {
-                ctx->pos[i] = curr_pos / p_prod[i];
-                curr_pos -= p_prod[i] * ctx->pos[i];
-            }
-            else
-                ctx->pos[i] = 0;
-            ctx->pos[i] += (unsigned long)ptdata[ctx->sm_pos + i];
-        }
-
+    calc_acc_pos(ctx->ndims, elmtno, ctx->acc, ctx->pos);
+    if (ctx->ndims > 0) {
         /* Print the index values */
-        for (i = 0; i < (size_t)ndims; i++) {
+        for (i = 0; i < (size_t)ctx->ndims; i++) {
+            ctx->pos[i] += (unsigned long)ptdata[ctx->sm_pos + i];
             if (i)
                 h5tools_str_append(str, "%s", OPT(info->idx_sep, ","));
 
             h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)ctx->pos[i]);
         }
-    }    /* if (ndims > 0) */
+    }
     else /* Scalar */
         h5tools_str_append(str, OPT(info->idx_n_fmt, HSIZE_T_FORMAT), (hsize_t)0);
+    H5TOOLS_DEBUG("str=%s", str->s);
+
+    H5TOOLS_ENDDEBUG(" ");
 
     /* Add prefix and suffix to the index */
     return h5tools_str_fmt(str, (size_t)0, OPT(info->idx_fmt, "%s: "));
@@ -690,7 +657,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     H5T_class_t    type_class;
     char *         ret_value = NULL;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* Build default formats for long long types */
     if (!fmt_llong[0]) {
         HDsnprintf(fmt_llong, sizeof(fmt_llong), "%%%sd", H5_PRINTF_LL_WIDTH);
@@ -705,6 +672,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
     if (info->raw) {
         size_t i;
 
+        H5TOOLS_DEBUG("info->raw");
         if (1 == nsize)
             h5tools_str_append(str, OPT(info->fmt_raw, "0x%02x"), ucp_vp[0]);
         else
@@ -715,8 +683,11 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
             }
     }
     else {
-        if ((type_class = H5Tget_class(type)) < 0)
+        H5TOOLS_DEBUG("H5Tget_class(type)");
+        if ((type_class = H5Tget_class(type)) < 0) {
+            H5TOOLS_ENDDEBUG(" with %s", "NULL");
             return NULL;
+        }
         switch (type_class) {
             case H5T_FLOAT:
                 H5TOOLS_DEBUG("H5T_FLOAT");
@@ -740,8 +711,17 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                     long double templdouble;
 
                     HDmemcpy(&templdouble, vp, sizeof(long double));
-                    h5tools_str_append(str, OPT(info->fmt_double, "%Lf"), templdouble);
+                    h5tools_str_append(str, "%Lg", templdouble);
 #endif
+                }
+                else {
+                    size_t i;
+
+                    for (i = 0; i < nsize; i++) {
+                        if (i)
+                            h5tools_str_append(str, ":");
+                        h5tools_str_append(str, OPT(info->fmt_raw, "%02x"), ucp_vp[i]);
+                    }
                 }
                 break;
 
@@ -1101,12 +1081,12 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
                             case H5R_OBJECT1: {
                                 /* Object references -- show the type and OID of the referenced object. */
                                 H5O_info2_t oi;
-                                char *      obj_addr_str = NULL;
+                                char *      obj_tok_str = NULL;
 
                                 H5TOOLS_DEBUG("ref_type is H5R_OBJECT1");
                                 if ((obj = H5Ropen_object(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                     H5Oget_info3(obj, &oi, H5O_INFO_BASIC);
-                                    H5Otoken_to_str(obj, &oi.token, &obj_addr_str);
+                                    H5Otoken_to_str(obj, &oi.token, &obj_tok_str);
                                 }
                                 else
                                     H5TOOLS_ERROR(NULL, "H5Ropen_object H5R_OBJECT1 failed");
@@ -1138,13 +1118,13 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                                 /* Print OID */
                                 if (info->obj_hidefileno)
-                                    h5tools_str_append(str, info->obj_format, obj_addr_str);
+                                    h5tools_str_append(str, info->obj_format, obj_tok_str);
                                 else
-                                    h5tools_str_append(str, info->obj_format, oi.fileno, obj_addr_str);
+                                    h5tools_str_append(str, info->obj_format, oi.fileno, obj_tok_str);
 
-                                if (obj_addr_str) {
-                                    H5free_memory(obj_addr_str);
-                                    obj_addr_str = NULL;
+                                if (obj_tok_str) {
+                                    H5free_memory(obj_tok_str);
+                                    obj_tok_str = NULL;
                                 }
 
                                 if (obj >= 0)
@@ -1359,7 +1339,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
 {
     ssize_t buf_size;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     h5tools_str_append(str, " \"");
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
@@ -1401,7 +1381,7 @@ h5tools_str_sprint_reference(h5tools_str_t *str, H5R_ref_t *ref_vp)
     }
     h5tools_str_append(str, "\"");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------

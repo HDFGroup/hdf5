@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -16,11 +16,7 @@
    tobject.cpp - HDF5 C++ testing object related functionality
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 
 #include <string>
 #include "H5Cpp.h" // C++ API header file
@@ -423,8 +419,7 @@ const H5std_string DSETNAME("dataset");
 static void
 test_open_object_header()
 {
-    hsize_t    dims[2];
-    H5G_info_t ginfo; /* Group info struct */
+    hsize_t dims[2];
 
     // Output message about test being performed
     SUBTEST("Group::getObjId");
@@ -479,6 +474,7 @@ test_open_object_header()
         dset.setId(obj_dset);
         dspace         = dset.getSpace();
         bool is_simple = dspace.isSimple();
+        verify_val(is_simple, true, "isSimple", __LINE__, __FILE__);
         dspace.close();
 
         // Open datatype object from the group

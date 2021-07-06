@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:		H5EA.c
  *			Jun 17 2008
- *			Quincey Koziol <koziol@hdfgroup.org>
+ *			Quincey Koziol
  *
  * Purpose:		Implements an "extensible array" for storing elements
  *                      in an array whose high bounds can extend and shrink.
@@ -112,7 +112,6 @@ H5FL_BLK_DEFINE(ea_native_elmt);
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
  *		Oct 10 2016
  *
  *-------------------------------------------------------------------------
@@ -176,7 +175,6 @@ END_FUNC(STATIC) /* end H5EA__new() */
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Jun 17 2008
  *
  *-------------------------------------------------------------------------
@@ -225,7 +223,6 @@ END_FUNC(PRIV) /* end H5EA_create() */
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2008
  *
  *-------------------------------------------------------------------------
@@ -264,7 +261,6 @@ END_FUNC(PRIV) /* end H5EA_open() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -292,7 +288,6 @@ END_FUNC(PRIV) /* end H5EA_get_nelmts() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -322,7 +317,6 @@ END_FUNC(PRIV) /* end H5EA_get_addr() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -514,10 +508,11 @@ BEGIN_FUNC(STATIC, ERR, herr_t, SUCCEED, FAIL,
                      */
                     if (will_extend && !sblock->has_hdr_depend) {
                         if (H5EA__create_flush_depend((H5AC_info_t *)sblock->hdr, (H5AC_info_t *)sblock) < 0)
-                            H5E_THROW(H5E_CANTDEPEND,
-                                      "unable to create flush dependency between super block and header, "
-                                      "address = %llu",
-                                      (unsigned long long)sblock->addr)
+                            H5E_THROW(
+                                H5E_CANTDEPEND,
+                                "unable to create flush dependency between super block and header, address "
+                                "= %llu",
+                                (unsigned long long)sblock->addr)
                         sblock->has_hdr_depend = TRUE;
                     } /* end if */
                 }     /* end if */
@@ -655,7 +650,6 @@ END_FUNC(STATIC) /* end H5EA__lookup_elmt() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep  9 2008
  *
  *-------------------------------------------------------------------------
@@ -719,7 +713,6 @@ END_FUNC(PRIV) /* end H5EA_set() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Sep 11 2008
  *
  *-------------------------------------------------------------------------
@@ -729,7 +722,8 @@ BEGIN_FUNC(PRIV, ERR, herr_t, SUCCEED, FAIL, H5EA_get(const H5EA_t *ea, hsize_t 
     /* Local variables */
     H5EA_hdr_t *hdr = ea->hdr; /* Header for EA */
     void *thing = NULL; /* Pointer to the array metadata containing the array index we are interested in */
-    H5EA__unprotect_func_t thing_unprot_func; /* Function pointer for unprotecting the array metadata */
+    H5EA__unprotect_func_t thing_unprot_func =
+        NULL; /* Function pointer for unprotecting the array metadata */
 
     /*
      * Check arguments.
@@ -783,7 +777,6 @@ END_FUNC(PRIV) /* end H5EA_get() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		May 27 2009
  *
  *-------------------------------------------------------------------------
@@ -830,7 +823,6 @@ END_FUNC(PRIV) /* end H5EA_depend() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 21 2008
  *
  *-------------------------------------------------------------------------
@@ -930,7 +922,6 @@ END_FUNC(PRIV) /* end H5EA_close() */
  * Return:	SUCCEED/FAIL
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Aug 28 2008
  *
  *-------------------------------------------------------------------------
@@ -982,11 +973,6 @@ END_FUNC(PRIV) /* end H5EA_delete() */
  *
  * Programmer:  Vailin Choi; Feb 2015
  *
- * Modification:
- *              Prototype changed (HDFFV-10661)
- *              - herr_t to int
- *              - SUCCEED/FAIL to H5_ITER_CONT/H5_ITER_ERROR
- *              June 6, 2019 -BMR
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR, int, H5_ITER_CONT, H5_ITER_ERROR,
@@ -997,9 +983,7 @@ BEGIN_FUNC(PRIV, ERR, int, H5_ITER_CONT, H5_ITER_ERROR,
     hsize_t  u;
     int      cb_ret = H5_ITER_CONT; /* Return value from callback */
 
-    /*
-     * Check arguments.
-     */
+    /* Check arguments */
     HDassert(ea);
     HDassert(op);
     HDassert(udata);

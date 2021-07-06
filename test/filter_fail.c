@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Raymond Lu <songyulu@hdfgroup.org>
+ * Programmer:  Raymond Lu
  *              7 September 2010
  *
  * Purpose:     Make sure dataset, file, and library can close properly when a
@@ -174,7 +174,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         H5E_END_TRY;
         if (ret >= 0) {
             H5_FAILED();
-            puts("    Data writing is supposed to fail because the chunk can't be written to file.");
+            HDputs("    Data writing is supposed to fail because the chunk can't be written to file.");
             TEST_ERROR
         }
     }
@@ -195,7 +195,7 @@ test_filter_write(char *file_name, hid_t my_fapl, hbool_t cache_enabled)
         H5E_END_TRY;
         if (ret >= 0) {
             H5_FAILED();
-            puts("    Dataset is supposed to fail because the chunk can't be flushed to file.");
+            HDputs("    Dataset is supposed to fail because the chunk can't be flushed to file.");
             TEST_ERROR
         }
     }

@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,6 +17,9 @@
 #include "H5IMpublic.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
+
+/* Name of tool */
+#define PROGRAMNAME "hdf2gif"
 
 #define IMAGE_WIDTH_MAX  65535 /* unsigned 16bits integer */
 #define IMAGE_HEIGHT_MAX 65535 /* unsigned 16bits integer */
@@ -40,13 +43,18 @@ usage(void)
     printf("h52gif expects *at least* one h5_image.\n");
 }
 
+static void
+leave(int ret)
+{
+    h5tools_close();
+    HDexit(ret);
+}
+
 FILE *fpGif = NULL;
 int
 main(int argc, char **argv)
 {
-    GIFBYTE *   Image;
-    void *      edata;
-    H5E_auto2_t func;
+    GIFBYTE *Image;
 
     /* compression structs */
     GIFCHAR *HDFName = NULL;
@@ -72,22 +80,21 @@ main(int argc, char **argv)
     char *image_name    = NULL;
     int   idx;
 
-    /* Disable error reporting */
-    H5Eget_auto2(H5E_DEFAULT, &func, &edata);
-    H5Eset_auto2(H5E_DEFAULT, NULL, NULL);
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
 
     /* Initialize h5tools lib */
     h5tools_init();
 
     if (argv[1] && (strcmp("-V", argv[1]) == 0)) {
         print_version("gif2h5");
-        exit(EXIT_SUCCESS);
+        h5tools_setstatus(EXIT_SUCCESS);
     }
 
     if (argc < 4) {
         /* they didn't supply at least one image -- bail */
         usage();
-        return EXIT_FAILURE;
+        h5tools_setstatus(EXIT_FAILURE);
     }
 
     HDFName = argv[1];
@@ -140,9 +147,11 @@ main(int argc, char **argv)
             goto out;
         }
 
-        /* read image */
-        if (H5IMget_image_info(fid, image_name, &width, &height, &planes, interlace, &npals) < 0)
+        /* get image's information */
+        if (H5IMget_image_info(fid, image_name, &width, &height, &planes, interlace, &npals) < 0) {
+            fprintf(stderr, "Unable to get information of the image. Aborting.\n");
             goto out;
+        }
 
         if (width > IMAGE_WIDTH_MAX || height > IMAGE_HEIGHT_MAX) {
             fprintf(stderr, "HDF5 image is too large. Limit is %d by %d.\n", IMAGE_WIDTH_MAX,
@@ -158,12 +167,16 @@ main(int argc, char **argv)
 
         Image = (GIFBYTE *)malloc((size_t)width * (size_t)height);
 
-        if (H5IMread_image(fid, image_name, Image) < 0)
+        if (H5IMread_image(fid, image_name, Image) < 0) {
+            fprintf(stderr, "Unable to read the image. Aborting.\n");
             goto out;
+        }
 
         if (npals) {
-            if (H5IMget_palette_info(fid, image_name, 0, pal_dims) < 0)
+            if (H5IMget_palette_info(fid, image_name, 0, pal_dims) < 0) {
+                fprintf(stderr, "Unable to get information of the palette. Aborting.\n");
                 goto out;
+            }
 
             pal = (GIFBYTE *)malloc((size_t)pal_dims[0] * (size_t)pal_dims[1]);
 
@@ -308,9 +321,7 @@ main(int argc, char **argv)
     if (image_name != NULL)
         free(image_name);
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
-
-    return EXIT_SUCCESS;
+    leave(h5tools_getstatus());
 
 out:
 
@@ -319,7 +330,6 @@ out:
     if (image_name != NULL)
         free(image_name);
 
-    H5Eset_auto2(H5E_DEFAULT, func, edata);
-
-    return EXIT_FAILURE;
+    h5tools_setstatus(EXIT_FAILURE);
+    leave(h5tools_getstatus());
 }

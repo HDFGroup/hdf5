@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -349,7 +349,7 @@ set_multi_split(const char *env_h5_drvr, hid_t fapl, hsize_t pagesize)
 
         /* Free memb_name */
         for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++)
-            free(memb_name[mt]);
+            HDfree(memb_name[mt]);
 
     } /* end if */
 
@@ -383,7 +383,6 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-
 static unsigned
 test_args(hid_t orig_fapl, const char *env_h5_drvr)
 {
@@ -528,7 +527,7 @@ test_args(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -803,7 +802,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     HDfree(data);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -1057,7 +1056,7 @@ test_lru_processing(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     HDfree(data);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -1688,7 +1687,7 @@ test_min_threshold(hid_t orig_fapl, const char *env_h5_drvr)
 
     HDfree(data);
 
-    PASSED()
+    PASSED();
 
     return 0;
 
@@ -1993,7 +1992,7 @@ test_stats_collection(hid_t orig_fapl, const char *env_h5_drvr)
         FAIL_STACK_ERROR;
     HDfree(data);
 
-    PASSED()
+    PASSED();
     return 0;
 
 error:
@@ -2111,7 +2110,7 @@ verify_page_buffering_disabled(hid_t orig_fapl, const char *env_h5_drvr)
     if (H5Pclose(fapl) < 0)
         FAIL_STACK_ERROR;
 
-    PASSED()
+    PASSED();
 
     return 0;
 

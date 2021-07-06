@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -18,7 +18,7 @@
 #
 
 #
-# Prepend `$srcdir/config/intel-` to the filename suffix(es) given as
+# Prepend `$srcdir/config/intel-warnings/` to the filename suffix(es) given as
 # subroutine argument(s), remove comments starting with # and ending
 # at EOL, replace spans of whitespace (including newlines) with spaces,
 # and re-emit the file(s) thus filtered on the standard output stream.
@@ -26,7 +26,7 @@
 load_intel_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/intel-${arg}
+        sed 's,#.*$,,' $srcdir/config/intel-warnings/${arg}
     done)
     IFS=' ' echo "$*"
 }
@@ -78,55 +78,101 @@ if test "X-icc" = "X-$cc_vendor"; then
     #        ;;
     #esac
 
-    # General
+    ###########
+    # General #
+    ###########
+
     # Default to C99 standard.
     H5_CFLAGS="$H5_CFLAGS $arch -std=c99"
-    H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments warnings-general)"
 
-    # Production
+    ##############
+    # Production #
+    ##############
+
     PROD_CFLAGS=
 
-    # Debug
+    #########
+    # Debug #
+    #########
+
     # NDEBUG is handled explicitly in configure
     DEBUG_CFLAGS=
 
-    # Symbols
-    SYMBOLS_CFLAGS="-g"
-    NO_SYMBOLS_CFLAGS="-Wl,-s"
+    ###########
+    # Symbols #
+    ###########
 
-    # Profiling
-    # Use this for profiling with gprof
+    NO_SYMBOLS_CFLAGS="-Wl,-s"
+    SYMBOLS_CFLAGS="-g"
+
+    #############
+    # Profiling #
+    #############
+
     PROFILE_CFLAGS="-p"
 
-    # Optimization
+    ################
+    # Optimization #
+    ################
+
     HIGH_OPT_CFLAGS="-O3"
     DEBUG_OPT_CFLAGS="-O0"
     NO_OPT_CFLAGS="-O0"
 
-    # Flags are set
-    cc_flags_set=yes
+    ############
+    # Warnings #
+    ############
 
-fi
+    ###########
+    # General #
+    ###########
 
-# Version specific ICC flags
-#
-# Please follow the pattern below by adding new versions at the top, copying
-# the information from the previous version and adding modifications to that.
-# The default at the bottom will apply if no earlier version matches.
-case "$cc_vendor-$cc_version" in
-    icc-1[5-6]*)
-        H5_CFLAGS="$H5_CFLAGS -Wcomment -Wdeprecated -Wextra-tokens -Wformat -Wformat-security -Wmain -Wmissing-declarations -Wmissing-prototypes -Wp64 -Wpointer-arith -Wreturn-type -Wshadow -Wstrict-prototypes -Wtrigraphs -Wuninitialized -Wunknown-pragmas -Wunused-function -Wunused-variable -Wwrite-strings"
-        ;;
-    icc-10*)
-        HIGH_OPT_CFLAGS="-O1"
-        ;;
-    icc-8.0*)
+    # Add various general warning flags in intel-warnings.
+    H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general)"
+
+    ######################
+    # Developer warnings #
+    ######################
+
+    #NO_DEVELOPER_WARNING_CFLAGS=$(load_intel_arguments no-developer-general)
+    #DEVELOPER_WARNING_CFLAGS=$(load_intel_arguments developer-general)
+
+    #############################
+    # Version-specific warnings #
+    #############################
+
+    # intel == 8.0
+    if test $cc_vers_major -eq 8 -a $cc_vers_minor -eq 0; then
         # v8.0 -O3 infinite loops when compiling test/tselect.c. Use -O2.
         HIGH_OPT_CFLAGS="-O2"
-        ;;
-    icc-*)
-        ;;
-esac
+    fi
+
+    # intel == 10
+    if test $cc_vers_major -eq 10; then
+        HIGH_OPT_CFLAGS="-O1"
+    fi
+
+    # intel >= 15
+    if test $cc_vers_major -ge 15; then
+        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments 15)"
+    fi
+
+    # intel >= 18
+    if test $cc_vers_major -ge 18; then
+        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments 18)"
+    fi
+
+    # intel <= 19
+    # this file has warnings only available before oneapi versions
+    if test $cc_vers_major -le 19; then
+        H5_CFLAGS="$H5_CFLAGS $(load_intel_arguments general-19)"
+    fi
+
+    #################
+    # Flags are set #
+    #################
+    cc_flags_set=yes
+fi
 
 # Clear cc info if no flags set
 if test "X-$cc_flags_set" = "X-"; then

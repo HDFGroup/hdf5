@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -69,7 +69,7 @@ external_link_env(hid_t fapl, hbool_t new_format)
 
     if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, ".:tmp_links_env"))
+    if (HDstrcmp(envval, ".:tmp_links_env") != 0)
         TEST_ERROR
 
     /* Set up name for main file:"extlinks_env0" */
@@ -115,7 +115,7 @@ external_link_env(hid_t fapl, hbool_t new_format)
     /* Should be able to find the target file from pathnames set via HDF5_EXT_PREFIX */
     if (gid < 0) {
         H5_FAILED();
-        puts("    Should have found the file in tmp_links_env directory.");
+        HDputs("    Should have found the file in tmp_links_env directory.");
         goto error;
     }
 

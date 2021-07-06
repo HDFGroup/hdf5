@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -86,8 +86,8 @@
 #include <H5config_f.inc>
 
 MODULE H5D
-  
-  USE, INTRINSIC :: ISO_C_BINDING
+
+  USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_CHAR
   USE H5GLOBAL
 
   PRIVATE h5dread_vl_integer, h5dread_vl_real, h5dread_vl_string
@@ -959,7 +959,7 @@ CONTAINS
   SUBROUTINE h5dwrite_vl_string(dset_id, mem_type_id, buf, dims, str_len, &
        hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING, ONLY : c_char
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_CHAR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1088,7 +1088,7 @@ CONTAINS
   SUBROUTINE h5dget_offset_f(dset_id, offset, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)    :: dset_id
-    INTEGER(HADDR_T), INTENT(OUT) :: offset 
+    INTEGER(HADDR_T), INTENT(OUT) :: offset
     INTEGER, INTENT(OUT)          :: hdferr
 !*****
     INTERFACE
@@ -1100,7 +1100,7 @@ CONTAINS
     END INTERFACE
 
     offset = h5dget_offset(dset_id)
-    
+
     hdferr = 0 ! never returns a function error because C API never returns a function error.
 
   END SUBROUTINE h5dget_offset_f
@@ -1164,7 +1164,7 @@ CONTAINS
 !  plist_id	 - Dataset access property list identifier
 !  hdferr 	 - Returns 0 if successful and -1 if fails
 !
-! AUTHOR   
+! AUTHOR
 !  M. Scot Breitenfeld
 !  April 13, 2009
 !
@@ -1172,8 +1172,8 @@ CONTAINS
   SUBROUTINE h5dget_access_plist_f(dset_id, plist_id, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN)  :: dset_id
-    INTEGER(HID_T), INTENT(OUT) :: plist_id 
-    INTEGER       , INTENT(OUT) :: hdferr  
+    INTEGER(HID_T), INTENT(OUT) :: plist_id
+    INTEGER       , INTENT(OUT) :: hdferr
     !*****
     INTERFACE
        INTEGER FUNCTION h5dget_access_plist_c(dset_id, plist_id) BIND(C,NAME='h5dget_access_plist_c')
@@ -1183,15 +1183,15 @@ CONTAINS
          INTEGER(HID_T), INTENT(OUT) :: plist_id
        END FUNCTION h5dget_access_plist_c
     END INTERFACE
-    
+
     hdferr = h5dget_access_plist_c(dset_id, plist_id)
-  
+
   END SUBROUTINE h5dget_access_plist_f
 
 
   SUBROUTINE h5dwrite_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1223,7 +1223,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_reference_dsetreg(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1285,7 +1285,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1295,7 +1295,7 @@ CONTAINS
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: mem_space_id  ! Memory dataspace identfier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: file_space_id ! File dataspace identfier
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: xfer_prp      ! Transfer property list identifier
-                                 
+
     CALL h5dwrite_char_scalar_fix(dset_id, mem_type_id, buf, LEN(buf), dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
 
@@ -1303,7 +1303,7 @@ CONTAINS
 
   SUBROUTINE h5dwrite_char_scalar_fix(dset_id, mem_type_id, buf, buf_len, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1336,7 +1336,7 @@ CONTAINS
 
   SUBROUTINE h5dread_reference_obj(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1431,7 +1431,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_scalar(dset_id, mem_type_id, buf, dims, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id         ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id   ! Memory datatype identifier
@@ -1461,7 +1461,7 @@ CONTAINS
 
   SUBROUTINE h5dread_char_scalar_fix(dset_id, mem_type_id, buf, buf_len, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1483,17 +1483,17 @@ CONTAINS
 
 !****s* H5D (F03)/h5dwrite_f_F03
 !
-! NAME		
+! NAME
 !  h5dwrite_f_F03
 !
 ! PURPOSE
-!  Writes raw data from a dataset into a buffer. 
+!  Writes raw data from a dataset into a buffer.
 !
 ! Inputs:
 !  dset_id	 - Identifier of the dataset to write to.
 !  mem_type_id	 - Identifier of the memory datatype.
 !  buf		 - Buffer with data to be written to the file.
-!  
+!
 ! Outputs:
 !  hdferr        - Returns 0 if successful and -1 if fails
 !
@@ -1519,7 +1519,7 @@ CONTAINS
 !*****
   SUBROUTINE h5dwrite_ptr(dset_id, mem_type_id, buf, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1548,16 +1548,16 @@ CONTAINS
 
 !****s* H5D (F03)/h5dread_f_F03
 !
-! NAME		
+! NAME
 !  h5dread_f_F03
 !
 ! PURPOSE
-!  Reads raw data from a dataset into a buffer. 
+!  Reads raw data from a dataset into a buffer.
 !
 ! Inputs:
 !  dset_id	 - Identifier of the dataset read from.
 !  mem_type_id	 - Identifier of the memory datatype.
-!  
+!
 ! Outputs:
 !  buf		 - Buffer to receive data read from file.
 !  hdferr        - Returns 0 if successful and -1 if fails
@@ -1584,7 +1584,7 @@ CONTAINS
 !*****
   SUBROUTINE h5dread_ptr(dset_id, mem_type_id, buf, hdferr, &
        mem_space_id, file_space_id, xfer_prp)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: dset_id     ! Dataset identifier
     INTEGER(HID_T), INTENT(IN) :: mem_type_id ! Memory datatype identifier
@@ -1612,10 +1612,10 @@ CONTAINS
   END SUBROUTINE h5dread_ptr
 
 !
-! NAME		
+! NAME
 !  h5dfill_integer
 !
-! PURPOSE 
+! PURPOSE
 !  Fills dataspace elements with a fill value in a memory buffer.
 !  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes
 !  of the fillvalues and buffers are supported. Buffer and fillvalue
@@ -1638,7 +1638,7 @@ CONTAINS
 !
 
   SUBROUTINE h5dfill_integer(fill_value, space_id, buf,  hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER, INTENT(IN), TARGET :: fill_value  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -1688,7 +1688,7 @@ CONTAINS
 !  March 12, 2003
 !
   SUBROUTINE h5dfill_c_float(fill_valuer, space_id, buf,  hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     REAL(KIND=C_FLOAT), INTENT(IN), TARGET :: fill_valuer  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -1786,10 +1786,10 @@ CONTAINS
   END SUBROUTINE h5dfill_c_long_double
 #endif
 !
-! NAME		
+! NAME
 !  h5dfill_char
 !
-! PURPOSE 
+! PURPOSE
 !  Fills dataspace elements with a fill value in a memory buffer.
 !  Only INTEGER, CHARACTER, REAL and DOUBLE PRECISION datatypes
 !  of the fillvalues and buffers are supported. Buffer and fillvalue
@@ -1810,7 +1810,7 @@ CONTAINS
 !  March 12, 2003
 !
   SUBROUTINE h5dfill_char(fill_value, space_id, buf,  hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     CHARACTER, INTENT(IN), TARGET :: fill_value  ! Fill value
     INTEGER(HID_T), INTENT(IN) :: space_id ! Memory dataspace selection identifier
@@ -1835,15 +1835,15 @@ CONTAINS
 ! NAME
 !  h5dvlen_reclaim_f
 !
-! PURPOSE 
-!  Reclaims VL datatype memory buffers. 
+! PURPOSE
+!  Reclaims VL datatype memory buffers.
 !
 ! Inputs:
 !
-!  type_id  - Identifier of the datatype. 
-!  space_id - Identifier of the dataspace. 
-!  plist_id - Identifier of the property list used to create the buffer. 
-!  buf      - Pointer to the buffer to be reclaimed. 
+!  type_id  - Identifier of the datatype.
+!  space_id - Identifier of the dataspace.
+!  plist_id - Identifier of the property list used to create the buffer.
+!  buf      - Pointer to the buffer to be reclaimed.
 !
 ! Outputs:
 !  hdferr   - Returns 0 if successful and -1 if fails

@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Friday, October 23, 1998
  *
  * Purpose:  This is the second half of a two-part test that makes sure
@@ -260,7 +260,7 @@ main(void)
     h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
     check_second_dset = FALSE;
     if (file_ok(filename, fapl_id, check_second_dset))
-        PASSED()
+        PASSED();
     else
         TEST_ERROR
 
@@ -273,7 +273,7 @@ main(void)
         if (clear_status_flags(filename, fapl_id) < 0)
             TEST_ERROR
         if (file_ok(filename, fapl_id, check_second_dset))
-            PASSED()
+            PASSED();
         else
             TEST_ERROR
     } /* end if */
@@ -299,7 +299,7 @@ main(void)
 #endif
     } /* end if */
     else
-        PASSED()
+        PASSED();
     /* Turn the error stack back on */
     if (H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
         FAIL_STACK_ERROR
@@ -326,7 +326,7 @@ main(void)
 #endif
         } /* end if */
         else
-            PASSED()
+            PASSED();
         /* Turn the error stack back on */
         if (H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
             FAIL_STACK_ERROR
@@ -342,7 +342,7 @@ main(void)
     check_second_dset = TRUE;
     h5_fixname(FILENAME[4], fapl_id, filename, sizeof(filename));
     if (file_ok(filename, fapl_id, check_second_dset))
-        PASSED()
+        PASSED();
     else
         TEST_ERROR
 
@@ -357,7 +357,7 @@ main(void)
         if (clear_status_flags(filename, fapl_id) < 0)
             TEST_ERROR
         if (file_ok(filename, fapl_id, check_second_dset))
-            PASSED()
+            PASSED();
         else
             TEST_ERROR
     } /* end if */
@@ -385,7 +385,7 @@ main(void)
 #endif
     } /* end if */
     else
-        PASSED()
+        PASSED();
     /* Turn the error stack back on */
     if (H5Eset_auto2(H5E_DEFAULT, func, NULL) < 0)
         FAIL_STACK_ERROR

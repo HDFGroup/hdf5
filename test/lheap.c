@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Tuesday, November 24, 1998
  *
  * Purpose:    Test local heaps used by symbol tables (groups).
@@ -103,7 +103,7 @@ main(void)
         if (j > 4)
             buf[j] = '\0';
 
-        if (UFAIL == (obj[i] = H5HL_insert(f, heap, strlen(buf) + 1, buf))) {
+        if (H5HL_insert(f, heap, HDstrlen(buf) + 1, buf, &obj[i]) < 0) {
             H5_FAILED();
             H5Eprint2(H5E_DEFAULT, stdout);
             goto error;
@@ -155,7 +155,7 @@ main(void)
             goto error;
         }
 
-        if (strcmp(s, buf)) {
+        if (HDstrcmp(s, buf) != 0) {
             H5_FAILED();
             HDprintf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
             HDprintf("    got: \"%s\"\n", s);

@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -61,7 +61,7 @@ MODULE H5R
   PRIVATE h5rcreate_object_f, h5rcreate_region_f, h5rcreate_ptr_f
   PRIVATE h5rdereference_object_f, h5rdereference_region_f, h5rdereference_ptr_f
   PRIVATE h5rget_name_object_f, h5rget_name_region_f, h5rget_name_ptr_f
-  
+
   INTERFACE h5rget_object_type_f
 
      MODULE PROCEDURE h5rget_object_type_obj_f
@@ -341,7 +341,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rcreate_object_f(loc_id, name, ref, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id   ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: name   ! Name of the object at location specified
@@ -450,7 +450,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rcreate_ptr_f(loc_id, name, ref_type, ref, hdferr, space_id)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id     ! Location identifier
     CHARACTER(LEN=*), INTENT(IN) :: name     ! Name of the dataset at location specified
@@ -498,7 +498,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rdereference_object_f(obj_id, ref, ref_obj_id, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id          ! Dataset identifier
     TYPE(hobj_ref_t_f), INTENT(IN), TARGET :: ref ! Object reference
@@ -541,7 +541,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rdereference_region_f(obj_id, ref, ref_obj_id, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id   ! Dataset identifier
     TYPE(hdset_reg_ref_t_f), INTENT(IN), TARGET :: ref   ! Object reference
@@ -582,7 +582,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rdereference_ptr_f(obj_id, ref_type, ref, ref_obj_id, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id  ! Valid identifier for the file containing the
                                           !  referenced object or any object in that file.
@@ -622,7 +622,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rget_name_object_f(loc_id,  ref, name, hdferr, size)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hobj_ref_t_f), INTENT(IN), TARGET :: ref
@@ -669,7 +669,7 @@ CONTAINS
 !
 ! Signature:
   SUBROUTINE h5rget_name_region_f(loc_id, ref, name, hdferr, size)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     TYPE(hdset_reg_ref_t_f), INTENT(IN), TARGET :: ref
@@ -718,7 +718,7 @@ CONTAINS
   !
   ! Signature:
   SUBROUTINE h5rget_name_ptr_f(loc_id, ref_type, ref, name, hdferr, size)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER, INTENT(IN) :: ref_type
@@ -767,7 +767,7 @@ CONTAINS
   !
   ! Signature:
   SUBROUTINE h5rget_obj_type_f(loc_id, ref_type, ref, obj_type, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: loc_id
     INTEGER, INTENT(IN) :: ref_type

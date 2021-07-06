@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -87,10 +87,10 @@ test_singleEnd_selElements(hid_t file, hbool_t is_chunked)
     }
 
     /* Construct dataset's name */
-    memset(dset_name, 0, (size_t)NAME_LEN);
-    strcat(dset_name, SINGLE_END_DSET);
+    HDmemset(dset_name, 0, (size_t)NAME_LEN);
+    HDstrcat(dset_name, SINGLE_END_DSET);
     if (is_chunked)
-        strcat(dset_name, "_chunked");
+        HDstrcat(dset_name, "_chunked");
 
     did = H5Dcreate2(file, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, plid, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dcreate2");
@@ -259,10 +259,10 @@ test_singleEnd_selHyperslab(hid_t file, hbool_t is_chunked)
     hsize_t mem3_block[4]  = {1, 3, 6, 1};
 
     /* Construct dataset's name */
-    memset(dset_name, 0, NAME_LEN);
-    strcat(dset_name, SINGLE_END_DSET);
+    HDmemset(dset_name, 0, NAME_LEN);
+    HDstrcat(dset_name, SINGLE_END_DSET);
     if (is_chunked)
-        strcat(dset_name, "_chunked");
+        HDstrcat(dset_name, "_chunked");
 
     /* Dataspace for the dataset in file */
     sid = H5Screate_simple(4, da_dims, da_dims);
@@ -436,10 +436,10 @@ test_multiple_ends(hid_t file, hbool_t is_chunked)
     }
 
     /* Construct dataset's name */
-    memset(dset_name, 0, NAME_LEN);
-    strcat(dset_name, MULTI_ENDS_SEL_HYPER_DSET);
+    HDmemset(dset_name, 0, NAME_LEN);
+    HDstrcat(dset_name, MULTI_ENDS_SEL_HYPER_DSET);
     if (is_chunked)
-        strcat(dset_name, "_chunked");
+        HDstrcat(dset_name, "_chunked");
 
     did = H5Dcreate2(file, dset_name, H5T_NATIVE_INT, sid, H5P_DEFAULT, plid, H5P_DEFAULT);
     CHECK(did, FAIL, "H5Dcreate2");
@@ -687,5 +687,5 @@ test_coords(void)
 void
 cleanup_coords(void)
 {
-    remove(FILENAME);
+    HDremove(FILENAME);
 }

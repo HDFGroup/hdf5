@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,7 +24,7 @@
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 09, 2004
  *
@@ -88,7 +88,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 09, 2004
  *
@@ -143,7 +143,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 09, 2004
  *
@@ -203,7 +203,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 09, 2004
  *
@@ -256,7 +256,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -358,7 +358,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -442,7 +442,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -512,7 +512,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 09, 2004
  *
@@ -567,7 +567,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 09, 2004
  *
@@ -613,7 +613,7 @@ h5ltfind_dataset_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 09, 2004
  *
@@ -686,7 +686,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -749,7 +749,7 @@ done:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 09, 2004
  *

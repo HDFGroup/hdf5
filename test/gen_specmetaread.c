@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@hdfgroup.org>
+ * Programmer:  Quincey Koziol
  *              Thursday, October  8, 2009
  *
  * Purpose:	Create a file with a dataset who's raw data immediately follows
@@ -23,8 +23,7 @@
  *      the library on the trunk as of when this file is checked in.
  */
 
-#include "hdf5.h"
-#include <assert.h>
+#include "h5test.h"
 
 #define FILENAME "specmetaread.h5"
 #define DIM      10
@@ -32,14 +31,14 @@
 int
 main(void)
 {
-    hid_t    fid;
-    hid_t    fapl;
-    hid_t    did;
-    hid_t    space;
-    hsize_t  dim[1] = {DIM};
-    unsigned data[DIM];
-    unsigned u;
-    herr_t   ret; /* Generic return value */
+    hid_t                        fid;
+    hid_t                        fapl;
+    hid_t                        did;
+    hid_t                        space;
+    hsize_t                      dim[1] = {DIM};
+    unsigned                     data[DIM];
+    unsigned                     u;
+    herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
     /* Initialize the data */
     for (u = 0; u < DIM; u++)

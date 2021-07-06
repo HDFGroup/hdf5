@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,36 +15,36 @@
  *
  * Created:		H5Oprivate.h
  *			Aug  5 1997
- *			Robb Matzke <matzke@llnl.gov>
+ *			Robb Matzke
  *
  * Purpose:		Object header private include file.
  *
  *-------------------------------------------------------------------------
  */
-#ifndef _H5Oprivate_H
-#define _H5Oprivate_H
+#ifndef H5Oprivate_H
+#define H5Oprivate_H
 
 /* Early typedefs to avoid circular dependencies */
 typedef struct H5O_t      H5O_t;
 typedef struct H5O_fill_t H5O_fill_t;
 
 /* Include the public header file for this API */
-#include "H5Opublic.h" /* Object header functions              */
+#include "H5Opublic.h" /* Object header functions             */
 
 /* Public headers needed by this file */
-#include "H5Dpublic.h" /* Dataset functions                    */
-#include "H5Lpublic.h" /* Link functions                       */
+#include "H5Dpublic.h" /* Dataset functions                   */
+#include "H5Lpublic.h" /* Link functions                      */
 #include "H5Spublic.h" /* Dataspace functions			*/
 
 /* Private headers needed by this file */
-#include "H5private.h"   /* Generic Functions                    */
-#include "H5ACprivate.h" /* Metadata cache                       */
+#include "H5private.h"   /* Generic Functions                   */
+#include "H5ACprivate.h" /* Metadata cache                      */
 #include "H5Fprivate.h"  /* File access				*/
-#include "H5HGprivate.h" /* Global Heaps                         */
+#include "H5HGprivate.h" /* Global Heaps                        */
 #include "H5SLprivate.h" /* Skip lists				*/
 #include "H5Tprivate.h"  /* Datatype functions			*/
-#include "H5VLprivate.h"
-#include "H5Zprivate.h" /* I/O pipeline filters			*/
+#include "H5VLprivate.h" /* Virtual Object Layer                */
+#include "H5Zprivate.h"  /* I/O pipeline filters		*/
 
 /* Forward references of package typedefs */
 typedef struct H5O_msg_class_t H5O_msg_class_t;
@@ -232,7 +232,7 @@ typedef struct H5O_copy_t {
 #define H5O_FSINFO_ID      0x0017 /* File space info message.  */
 #define H5O_MDCI_MSG_ID    0x0018 /* Metadata Cache Image Message */
 #define H5O_UNKNOWN_ID     0x0019 /* Placeholder message ID for unknown message.  */
-                                  /* (this should never exist in a file) */
+/* (this should never exist in a file) */
 /*
  * Note: Must increment H5O_MSG_TYPES in H5Opkg.h and update H5O_msg_class_g
  *      in H5O.c when creating a new message type.  Also bump the value of
@@ -903,13 +903,10 @@ struct H5P_genplist_t;
 H5_DLL herr_t H5O_init(void);
 H5_DLL herr_t H5O_create(H5F_t *f, size_t size_hint, size_t initial_rc, hid_t ocpl_id,
                          H5O_loc_t *loc /*out*/);
-H5_DLL H5O_t *H5O__create_ohdr(H5F_t *f, hid_t ocpl_id);
-H5_DLL herr_t H5O__apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t initial_rc,
-                              H5O_loc_t *loc_out);
+H5_DLL H5O_t *H5O_create_ohdr(H5F_t *f, hid_t ocpl_id);
+H5_DLL herr_t H5O_apply_ohdr(H5F_t *f, H5O_t *oh, hid_t ocpl_id, size_t size_hint, size_t initial_rc,
+                             H5O_loc_t *loc_out);
 H5_DLL herr_t H5O_open(H5O_loc_t *loc);
-H5_DLL void * H5O_open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
-                              H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type /*out*/);
-H5_DLL void * H5O_open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type /*out*/);
 H5_DLL void * H5O_open_by_loc(const H5G_loc_t *obj_loc, H5I_type_t *opened_type /*out*/);
 H5_DLL herr_t H5O_close(H5O_loc_t *loc, hbool_t *file_closed /*out*/);
 H5_DLL int    H5O_link(const H5O_loc_t *loc, int adjust);
@@ -999,8 +996,6 @@ H5_DLL herr_t H5O_copy_header_map(const H5O_loc_t *oloc_src, H5O_loc_t *oloc_dst
                                   void **udata);
 H5_DLL herr_t H5O_copy_expand_ref(H5F_t *file_src, hid_t tid_src, H5T_t *dt_src, void *buf_src,
                                   size_t nbytes_src, H5F_t *file_dst, void *buf_dst, H5O_copy_t *cpy_info);
-H5_DLL herr_t H5O_copy(const H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
-                       const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 
 /* Debugging routines */
 H5_DLL herr_t H5O_debug_id(unsigned type_id, H5F_t *f, const void *mesg, FILE *stream, int indent,
@@ -1037,4 +1032,4 @@ H5_DLL herr_t H5O_pline_set_version(H5F_t *f, H5O_pline_t *pline);
 /* Shared message operators */
 H5_DLL herr_t H5O_set_shared(H5O_shared_t *dst, const H5O_shared_t *src);
 
-#endif /* _H5Oprivate_H */
+#endif /* H5Oprivate_H */

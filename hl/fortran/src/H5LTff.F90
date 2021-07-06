@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -22,7 +22,7 @@
 ! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
 ! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
 !      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
-!                             
+!
 !  If you add a new function here then you MUST add the function name to the
 !  Windows dll file 'hdf5_hl_fortrandll.def.in' in the hl/fortran/src directory.
 !  This is needed for Windows based operating systems.
@@ -130,7 +130,7 @@ CONTAINS
   !
   ! Comments:
   !
-  ! Modifications: 
+  ! Modifications:
   !
   !-------------------------------------------------------------------------
 
@@ -164,7 +164,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 1, 2004
   !
@@ -321,7 +321,7 @@ CONTAINS
 
   SUBROUTINE h5ltmake_dataset_f_int7(loc_id, dset_name, rank, dims, &
        type_id, buf, errcode )
-    
+
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id             ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name          ! name of the dataset
@@ -371,7 +371,7 @@ CONTAINS
     INTEGER(hid_t),   INTENT(in) :: type_id             ! datatype identifier
     TYPE(C_PTR) :: buf                                  ! data buffer
     INTEGER :: errcode                                  ! error code
-    INTEGER(size_t) :: namelen 
+    INTEGER(size_t) :: namelen
 
     namelen = LEN(dset_name)
     errcode = h5ltread_dataset_c(loc_id,namelen,dset_name,type_id, buf)
@@ -385,7 +385,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 22, 2004
   !
@@ -409,7 +409,7 @@ CONTAINS
     INTEGER(hsize_t), DIMENSION(*), INTENT(in) :: dims  ! size of the buffer buf
     INTEGER, INTENT(inout), DIMENSION(*), TARGET :: buf ! data buffer
     INTEGER :: errcode                                  ! error code
-    INTEGER(size_t) :: namelen            
+    INTEGER(size_t) :: namelen
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1))
@@ -426,7 +426,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 22, 2004
   !
@@ -451,7 +451,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2)), TARGET :: buf                 
+         DIMENSION(dims(1),dims(2)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1))
@@ -476,7 +476,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1))
@@ -497,7 +497,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1))
@@ -518,7 +518,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1))
@@ -556,7 +556,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
@@ -577,7 +577,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
@@ -595,7 +595,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 22, 2004
   !
@@ -621,7 +621,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                         ! name length
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1))
 
     namelen = LEN(dset_name)
@@ -644,7 +644,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2)), TARGET :: buf                 
+         DIMENSION(dims(1),dims(2)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1))
@@ -669,7 +669,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1))
@@ -690,7 +690,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1))
@@ -711,7 +711,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1))
@@ -732,7 +732,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
@@ -753,7 +753,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER, INTENT(in), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
@@ -770,7 +770,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 22, 2004
   !
@@ -793,7 +793,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1)), TARGET :: buf                         
+         DIMENSION(dims(1)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1))
@@ -816,7 +816,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2)), TARGET :: buf                 
+         DIMENSION(dims(1),dims(2)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1))
@@ -839,7 +839,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1))
@@ -858,7 +858,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1))
@@ -877,7 +877,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1))
@@ -896,7 +896,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1,1))
@@ -915,7 +915,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER(size_t) :: namelen                                 ! name length
     INTEGER, INTENT(inout), &
-         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf         
+         DIMENSION(dims(1),dims(2),dims(3),dims(4),dims(5),dims(6),dims(7)), TARGET :: buf
     TYPE(C_PTR) :: f_ptr
 
     f_ptr = C_LOC(buf(1,1,1,1,1,1,1))
@@ -933,7 +933,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 22, 2004
   !
@@ -983,7 +983,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 22, 2004
   !
@@ -1059,14 +1059,14 @@ CONTAINS
     TYPE(C_PTR) :: buf                                 ! data buffer
     CHARACTER(LEN=*), INTENT(in) :: buf_type           ! valid data types are:
                                                        !   CHARACTER, INTEGER or REAL
-                                                       !   NOTE: only the first character matters and is case insensitive 
+                                                       !   NOTE: only the first character matters and is case insensitive
     INTEGER(size_t),  INTENT(in) :: size               ! size of attribute array
-    INTEGER(size_t),  INTENT(in) :: SizeOf_buf_type    ! size of buf's data type 
+    INTEGER(size_t),  INTENT(in) :: SizeOf_buf_type    ! size of buf's data type
     INTEGER, INTENT(out) :: errcode                    ! error code
 
     INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length 
-    CHARACTER(KIND=C_CHAR) :: buf_type_uppercase 
+    INTEGER(size_t) :: attrlen                         ! name length
+    CHARACTER(KIND=C_CHAR) :: buf_type_uppercase
 
     namelen = LEN(dset_name)
     attrlen = LEN(attr_name)
@@ -1092,7 +1092,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1117,7 +1117,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER, DIMENSION(*), TARGET :: buf   ! data buffer
     INTEGER(size_t) :: namelen                                 ! name length
-    INTEGER(size_t) :: attrlen                                 ! name length          
+    INTEGER(size_t) :: attrlen                                 ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf_type
 
@@ -1143,7 +1143,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1168,7 +1168,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     REAL(KIND=C_FLOAT), INTENT(in), DIMENSION(*), TARGET :: buf ! data buffer
     INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length             
+    INTEGER(size_t) :: attrlen                         ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf_type
 
@@ -1193,7 +1193,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1222,7 +1222,7 @@ CONTAINS
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf_type
 
-    f_ptr = C_LOC(buf(1)) 
+    f_ptr = C_LOC(buf(1))
 
 #if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
     SizeOf_buf_type = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
@@ -1245,7 +1245,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1269,7 +1269,7 @@ CONTAINS
     CHARACTER(LEN=*), DIMENSION(*), INTENT(in), TARGET :: buf    ! data buffer
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! name length
-    INTEGER(size_t) :: buflen                          ! data buffer length           
+    INTEGER(size_t) :: buflen                          ! data buffer length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf_type
 
@@ -1321,7 +1321,7 @@ CONTAINS
                                                        ! CHARACTER, INTEGER or REAL
                                                        ! NOTE: only the first character matters and is case insensitive
     INTEGER(size_t), INTENT(in) :: SizeOf_buf_type     ! size of buf's data type
-    INTEGER, INTENT(out) :: errcode                    ! error code 
+    INTEGER, INTENT(out) :: errcode                    ! error code
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! attr length
     CHARACTER(KIND=C_CHAR) :: buf_type_uppercase
@@ -1350,7 +1350,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1373,11 +1373,11 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     INTEGER, INTENT(inout), DIMENSION(*), TARGET :: buf! data buffer
     INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length       
+    INTEGER(size_t) :: attrlen                         ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf
 
-    f_ptr = C_LOC(buf(1))   
+    f_ptr = C_LOC(buf(1))
 
 #if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
     SizeOf_buf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
@@ -1397,7 +1397,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1420,7 +1420,7 @@ CONTAINS
     INTEGER :: errcode                                 ! error code
     REAL(KIND=C_FLOAT), INTENT(inout), DIMENSION(*), TARGET :: buf
     INTEGER(size_t) :: namelen                         ! name length
-    INTEGER(size_t) :: attrlen                         ! name length          
+    INTEGER(size_t) :: attrlen                         ! name length
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf
 
@@ -1443,7 +1443,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1470,7 +1470,7 @@ CONTAINS
     TYPE(C_PTR) :: f_ptr
     INTEGER(size_t) :: SizeOf_buf
 
-    f_ptr = C_LOC(buf(1))   
+    f_ptr = C_LOC(buf(1))
 #if H5_FORTRAN_HAVE_STORAGE_SIZE!=0
     SizeOf_buf = STORAGE_SIZE(buf(1), c_size_t)/STORAGE_SIZE(c_char_'a',c_size_t)
 #else
@@ -1490,7 +1490,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1514,7 +1514,7 @@ CONTAINS
     CHARACTER(LEN=*), INTENT(inout) :: buf
     INTEGER(size_t) :: namelen                         ! name length
     INTEGER(size_t) :: attrlen                         ! name length
-    INTEGER(size_t) :: buf_size                        ! buf size 
+    INTEGER(size_t) :: buf_size                        ! buf size
 
    INTERFACE
        INTEGER FUNCTION h5ltget_attribute_string_c(loc_id,namelen,dset_name,attrlen,attr_name,buf,buf_size) &
@@ -1551,7 +1551,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 30, 2004
   !
@@ -1600,7 +1600,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1644,7 +1644,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 30, 2004
   !
@@ -1703,7 +1703,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: October 05, 2004
   !
@@ -1757,7 +1757,7 @@ CONTAINS
   !
   ! Return: Success: 0, Failure: -1
   !
-  ! Programmer: pvn@ncsa.uiuc.edu
+  ! Programmer: Pedro Vicente
   !
   ! Date: September 30, 2004
   !
@@ -1812,7 +1812,7 @@ CONTAINS
   !-------------------------------------------------------------------------
   ! Function: h5ltpath_valid_f
   !
-  ! Purpose: Validates a path 
+  ! Purpose: Validates a path
   !
   ! Return: Success: 0, Failure: -1
   !
@@ -1831,8 +1831,8 @@ CONTAINS
     IMPLICIT NONE
     INTEGER(hid_t)  , INTENT(IN)  :: loc_id              ! An identifier of an object in the file.
     CHARACTER(LEN=*), INTENT(IN)  :: path                ! Path to the object to check, relative to loc_id.
-    LOGICAL         , INTENT(IN)  :: check_object_valid  ! Indicates whether to check if the final component 
-                                                         !  of the path resolves to a valid object 
+    LOGICAL         , INTENT(IN)  :: check_object_valid  ! Indicates whether to check if the final component
+                                                         !  of the path resolves to a valid object
     LOGICAL         , INTENT(OUT) :: path_valid          ! Object status
     INTEGER         , INTENT(OUT) :: errcode             ! Error code: 0 on success and -1 on failure
 
@@ -1846,7 +1846,7 @@ CONTAINS
          IMPORT :: C_CHAR
          IMPORT :: HID_T, SIZE_T, HSIZE_T
          IMPLICIT NONE
-         INTEGER(hid_t),   INTENT(in) :: loc_id  
+         INTEGER(hid_t),   INTENT(in) :: loc_id
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(in) :: path
          INTEGER(size_t) :: pathlen
          INTEGER :: check_object_valid_c
@@ -1856,7 +1856,7 @@ CONTAINS
     ! Initialize
     path_valid = .FALSE.
     errcode = 0
-    
+
     check_object_valid_c = 0
     IF(check_object_valid) check_object_valid_c = 1
 
@@ -1868,7 +1868,7 @@ CONTAINS
     ELSE IF(status.LT.0)THEN
        errcode = -1
     ENDIF
-    
+
   END SUBROUTINE h5ltpath_valid_f
 
 END MODULE H5LT_CONST

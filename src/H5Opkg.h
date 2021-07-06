@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,8 +15,8 @@
 #error "Do not include this file outside the H5O package!"
 #endif
 
-#ifndef _H5Opkg_H
-#define _H5Opkg_H
+#ifndef H5Opkg_H
+#define H5Opkg_H
 
 /* Get package's private header */
 #include "H5Oprivate.h" /* Object headers		  	*/
@@ -540,7 +540,12 @@ H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATASET[1];
 H5_DLLVAR const H5O_obj_class_t H5O_OBJ_DATATYPE[1];
 
 /* Package-local function prototypes */
+H5_DLL void *H5O__open_by_addr(const H5G_loc_t *loc, haddr_t addr, H5I_type_t *opened_type /*out*/);
+H5_DLL void *H5O__open_by_idx(const H5G_loc_t *loc, const char *name, H5_index_t idx_type,
+                              H5_iter_order_t order, hsize_t n, H5I_type_t *opened_type /*out*/);
 H5_DLL const H5O_obj_class_t *H5O__obj_class(const H5O_loc_t *loc);
+H5_DLL herr_t                 H5O__copy(const H5G_loc_t *src_loc, const char *src_name, H5G_loc_t *dst_loc,
+                                        const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id);
 H5_DLL int                    H5O__link_oh(H5F_t *f, int adjust, H5O_t *oh, hbool_t *deleted);
 H5_DLL herr_t H5O__visit(H5G_loc_t *loc, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                          H5O_iterate2_t op, void *op_data, unsigned fields);
@@ -639,4 +644,4 @@ H5_DLL herr_t H5O__assert(const H5O_t *oh);
 #endif /* H5O_DEBUG */
 H5_DLL herr_t H5O__debug_real(H5F_t *f, H5O_t *oh, haddr_t addr, FILE *stream, int indent, int fwidth);
 
-#endif /* _H5Opkg_H */
+#endif /* H5Opkg_H */

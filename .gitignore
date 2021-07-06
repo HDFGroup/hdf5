@@ -1,5 +1,8 @@
 # .gitignore file for HDF5
 
+# Makefile.in files
+**/Makefile.in
+
 # Java .classes files
 **/java/.classes
 
@@ -12,7 +15,29 @@
 
 # Other files, most of which are created by the Autotools though
 # some are created by scripts in bin/
+/aclocal.m4
 /autom4te.cache
+bin/compile
+bin/config.guess
+bin/config.sub
+bin/depcomp
+bin/install-sh
+bin/ltmain.sh
+bin/missing
+bin/test-driver
 /build*
+/configure
+m4/libtool.m4
+m4/ltoptions.m4
+m4/ltsugar.m4
+m4/ltversion.m4
+m4/lt~obsolete.m4
+src/H5Edefin.h
+src/H5Einit.h
+src/H5Epubgen.h
+src/H5Eterm.h
+src/H5config.h.in
+src/H5overflow.h
+src/H5version.h
 
 /.classpath

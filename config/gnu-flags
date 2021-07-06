@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -18,19 +18,36 @@
 #
 
 #
-# Prepend `$srcdir/config/gnu-` to the filename suffix(es) given as
+# For now, do not promote any warnings to errors.
+#
+PROMOTE_ERRORS_DFLT=no
+
+#
+# This filter rewrites -Werror= as -W, in that way demoting warnings
+# promoted to errors back to warnings, if PROMOTE_ERRORS is no.
+#
+demote_errors()
+{
+    if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
+        sed 's,-Werror=,-W,g'
+    else
+        cat
+    fi
+}
+
+#
+# Prepend `$srcdir/config/gnu-warnings/` to the filename suffix(es) given as
 # subroutine argument(s), remove comments starting with # and ending
 # at EOL, replace spans of whitespace (including newlines) with spaces,
 # and re-emit the file(s) thus filtered on the standard output stream.
 #
-load_gcc_arguments()
+load_gnu_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/gnu-${arg}
+        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg}
     done)
     IFS=' ' echo "$*"
 }
-
 
 # Get the compiler version in a way that works for gcc
 # unless a compiler version is already known
@@ -101,12 +118,16 @@ if test "X-gcc" = "X-$cc_vendor"; then
     esac
 
     case "$host_os-$host_cpu" in
-        # cygwin needs the "-std=c99" flag removed, so make
-        # a specific case for Cygwin without the flag and a default
-        # case to add the flag everywhere else
+        # Cygwin needs the "-std=c99" flag removed.
         cygwin-*)
             ;;
-
+        # On Solaris, gcc needs the gnu99 standard to pick up certain POSIX
+        # things. Do NOT use this as the gcc norm as this encourages the use
+        # of non-standard gcc extensions.
+        *solaris*)
+            H5_CFLAGS="$H5_CFLAGS -std=gnu99"
+            ;;
+        # Everybody else gets c99 as the standard.
         *)
             H5_CFLAGS="$H5_CFLAGS -std=c99"
             ;;
@@ -136,6 +157,15 @@ if test "X-gcc" = "X-$cc_vendor"; then
     else
         DEBUG_CFLAGS="-ftrapv -fno-common"
     fi
+
+    ########################
+    # Enhanced Diagnostics #
+    ########################
+
+    if test $cc_vers_major -ge 10; then
+        NO_DIAGS_CFLAGS="-fdiagnostics-urls=never -fno-diagnostics-color"
+    fi
+    DIAGS_CFLAGS=
 
     ###########
     # Symbols #
@@ -171,140 +201,86 @@ if test "X-gcc" = "X-$cc_vendor"; then
     # General #
     ###########
 
-    # Note that some of the flags listed here really should be developer
-    # flags (listed in a separate variable, below) but we put them here
-    # because they are not raised by the current code and we'd like to
-    # know if they do start showing up.
-    #
-    # NOTE: Don't add -Wpadded here since we can't/won't fix the (many)
-    # warnings that are emitted. If you need it, add it from the
-    # environment variable at configure time.
-    #
-    # NOTE: Disable the -Wformat-nonliteral from -Wformat=2 here and re-add
-    # it to the developer flags.
-    #
-    # NOTE: Due to the divergence in the C and C++, we're dropping support for
-    # compiling the C library with a C++ compiler and dropping the -Wc++-compat
-    # warning.
-    H5_CFLAGS="$H5_CFLAGS $(load_gcc_arguments warnings-general)"
-    H5_CFLAGS="$H5_CFLAGS -Wbad-function-cast -Wcast-align"
-    H5_CFLAGS="$H5_CFLAGS -Wdeclaration-after-statement -Wdisabled-optimization"
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-declarations"
-    H5_CFLAGS="$H5_CFLAGS -Wmissing-prototypes -Wnested-externs -Wold-style-definition -Wpacked"
-    H5_CFLAGS="$H5_CFLAGS -Wredundant-decls -Wstrict-prototypes -Wswitch-enum -Wswitch-default"
-    H5_CFLAGS="$H5_CFLAGS -Wunused-macros -Wunsafe-loop-optimizations"
+    # Add various general warning flags in gnu-warnings for gcc versions 4.8 and later.
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8 -o $cc_vers_major -gt 4; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments general)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-general)"
+        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-general)"
 
-    ######################
-    # Developer warnings #
-    ######################
+        ######################
+        # Developer warnings #
+        ######################
 
-    # (suggestions from gcc, not code problems)
-    # NOTE: -Wformat-nonliteral added back in here (from being disabled in H5_CFLAGS)
-    NO_DEVELOPER_WARNING_CFLAGS=$(load_gcc_arguments warnings-no-developer-general)
-    DEVELOPER_WARNING_CFLAGS=$(load_gcc_arguments warnings-developer-general)
+        NO_DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments no-developer-general)
+        DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments developer-general)
+
+    fi
 
     #######################
     # gcc 4 special cases #
     #######################
 
-    # Disable warnings about using the 'long long' type w/ gcc 4.6 and earlier
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
-        H5_CFLAGS="$H5_CFLAGS -Wno-long-long"
-    fi
-
-    # -Wvolatile-register-var was later incorporated into -Wall and
-    # only needs to be specified explicitly for gcc 4.2-4.3
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 3; then
-        H5_CFLAGS="$H5_CFLAGS -Wvolatile-register-var"
-    fi
-
-    # -Wstrict-aliasing was later incorporated into -Wall and
-    # only needs to be specified explicitly for gcc 4.5-4.6
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -le 6; then
-        H5_CFLAGS="$H5_CFLAGS -Wstrict-aliasing"
-    fi
-
-    # The non-valued form of -Wstrict-overflow is used in gcc 4.2-4.4
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2 -a $cc_vers_major -eq 4 -a $cc_vers_minor -le 4; then
-        H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow"
-    fi
-
-    # -Wvla was later incorporated into -Wpedantic and
-    # only needs to be specified explicitly for gcc 4
-    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 2; then
-        H5_CFLAGS="$H5_CFLAGS -Wvla"
+    # GCC 4.8 through the end of GCC 4 series
+    if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.8-4.last)"
     fi
 
     #############################
     # Version-specific warnings #
     #############################
 
-    # gcc 4.3
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 3; then
-        H5_CFLAGS="$H5_CFLAGS -Wlogical-op -Wlarger-than=2560"
-    fi
-
-    # gcc 4.4
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 4; then
-        H5_CFLAGS="$H5_CFLAGS -Wsync-nand -Wframe-larger-than=16384 -Wpacked-bitfield-compat"
-    fi
-
-    # gcc 4.5
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 5; then
-        H5_CFLAGS="$H5_CFLAGS -Wstrict-overflow=5 -Wjump-misses-init -Wunsuffixed-float-constants"
-    fi
-
-    # gcc 4.6
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 6; then
-        H5_CFLAGS="$H5_CFLAGS -Wdouble-promotion -Wtrampolines"
-        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=const"
-        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=const"
-    fi
-
-    # gcc 4.7
-    if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 7; then
-        H5_CFLAGS="$H5_CFLAGS -Wstack-usage=8192 -Wvector-operation-performance"
-        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=pure -Wsuggest-attribute=noreturn"
-        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=pure -Wno-suggest-attribute=noreturn"
-    fi
-
-    # gcc 4.8
+    # gcc >= 4.8
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8; then
-        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wsuggest-attribute=format"
-        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=format"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.8)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-4.8)"
+        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-4.8)"
     fi
 
-    # gcc 4.9
+    # gcc >= 4.9
     if test $cc_vers_major -ge 5 -o $cc_vers_major -eq 4 -a $cc_vers_minor -ge 9; then
-        H5_CFLAGS="$H5_CFLAGS -Wdate-time"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 4.9)"
     fi
 
-    # gcc 5
+    # gcc >= 5
     if test $cc_vers_major -ge 5; then
-        H5_CFLAGS="$H5_CFLAGS -Warray-bounds=2 -Wc99-c11-compat"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 5)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-5)"
+        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-5)"
     fi
 
-    # gcc 6
+    # gcc >= 6
     if test $cc_vers_major -ge 6; then
-        H5_CFLAGS="$H5_CFLAGS -Wnull-dereference -Wunused-const-variable -Wduplicated-cond -Whsa -Wnormalized"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 6)"
     fi
 
-    # gcc 7
+    # gcc >= 7
     if test $cc_vers_major -ge 7; then
-        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=2"
-        H5_CFLAGS="$H5_CFLAGS -Walloc-zero -Walloca -Wduplicated-branches -Wformat-overflow=2 -Wformat-truncation=2 -Wimplicit-fallthrough=5 -Wrestrict"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 7)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-7)"
     fi
 
     # gcc 8
     if test $cc_vers_major -ge 8; then
-        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS -Wstringop-overflow=4 -Wsuggest-attribute=cold -Wsuggest-attribute=malloc"
-        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS -Wno-suggest-attribute=cold -Wno-suggest-attribute=malloc"
-        H5_CFLAGS="$H5_CFLAGS -Wattribute-alias -Wcast-align=strict -Wshift-overflow=2"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 8)"
+        H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-8)"
+        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-8)"
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-8)"
+        NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-8)"
     fi
 
     # gcc 9
     if test $cc_vers_major -ge 9; then
-        H5_CFLAGS="$H5_CFLAGS -Wattribute-alias=2 -Wmissing-profile"
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 9)"
+    fi
+
+    # gcc >= 9.3
+    if test $cc_vers_major -ge 10 -o $cc_vers_major -eq 9 -a $cc_vers_minor -ge 3; then
+        H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 9.3)"
+    fi
+
+    # gcc >= 10
+    if test $cc_vers_major -ge 10; then
+        DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-10)"
     fi
 
     #################
@@ -318,3 +294,4 @@ if test "X$cc_flags_set" = "X"; then
     cc_vendor=
     cc_version=
 fi
+

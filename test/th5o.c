@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -247,7 +247,7 @@ test_h5o_open_by_addr(void)
 {
     hid_t       fid;                      /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
-    H5L_info2_t li;                       /* Buffer for H5Lget_info */
+    H5L_info2_t li;                       /* Buffer for H5Lget_info2 */
     haddr_t     grp_addr;                 /* Addresses for objects */
     haddr_t     dset_addr;
     haddr_t     dtype_addr;
@@ -1806,5 +1806,5 @@ test_h5o(void)
 void
 cleanup_h5o(void)
 {
-    remove(TEST_FILENAME);
+    HDremove(TEST_FILENAME);
 }

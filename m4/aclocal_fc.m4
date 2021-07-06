@@ -7,7 +7,7 @@ dnl
 dnl This file is part of HDF5.  The full HDF5 copyright notice, including
 dnl terms governing use, modification, and redistribution, is contained in
 dnl the COPYING file, which can be found at the root of the source code
-dnl distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+dnl distribution tree, or in https://www.hdfgroup.org/licenses.
 dnl If you do not have access to either file, you may request a copy from
 dnl help@hdfgroup.org
 dnl
@@ -30,7 +30,7 @@ dnl fortran compilers for use with AC_PROG_FC that is more suitable for HPC
 dnl software packages
 AC_DEFUN([PAC_FC_SEARCH_LIST],
          [gfortran ifort pgf90 pathf90 pathf95 xlf90 xlf95 xlf2003 f90 epcf90 f95 fort lf95 g95 ifc efc gfc])
-dnl 
+dnl
 dnl PAC_PROG_FC([COMPILERS])
 dnl
 dnl COMPILERS is a space separated list of Fortran compilers to search for.
@@ -54,10 +54,10 @@ dnl ifc - An older Intel compiler
 dnl fc  - A compiler on some unknown system.  This has been removed because
 dnl       it may also be the name of a command for something other than
 dnl       the Fortran compiler (e.g., fc=file system check!)
-dnl gfortran - The GNU Fortran compiler (not the same as g95) 
+dnl gfortran - The GNU Fortran compiler (not the same as g95)
 dnl gfc - An alias for gfortran recommended in cygwin installations
 dnl NOTE: this macro suffers from a basically intractable "expanded before it
-dnl was required" problem when libtool is also used 
+dnl was required" problem when libtool is also used
 dnl [1] MPICH.org
 dnl
 
@@ -66,7 +66,7 @@ dnl See if the fortran compiler supports the intrinsic module "ISO_FORTRAN_ENV"
 AC_DEFUN([PAC_PROG_FC_ISO_FORTRAN_ENV],[
   HAVE_ISO_FORTRAN_ENV="no"
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV])
-  TEST_SRC="`sed -n '/PROGRAM PROG_FC_ISO_FORTRAN_ENV/,/END PROGRAM PROG_FC_ISO_FORTRAN_ENV/p' $srcdir/m4/aclocal_fc.f90`"	
+  TEST_SRC="`sed -n '/PROGRAM PROG_FC_ISO_FORTRAN_ENV/,/END PROGRAM PROG_FC_ISO_FORTRAN_ENV/p' $srcdir/m4/aclocal_fc.f90`"
   AC_LINK_IFELSE([$TEST_SRC],[AC_MSG_RESULT([yes])
      	HAVE_ISO_FORTRAN_ENV="yes"],
       [AC_MSG_RESULT([no])])
@@ -122,11 +122,11 @@ dnl Check if C_LONG_DOUBLE is different from C_DOUBLE
 
 if  test "X$FORTRAN_HAVE_C_LONG_DOUBLE" = "Xyes"; then
 AC_DEFUN([PAC_PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE],[
-  C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="no"	
+  C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="no"
   AC_MSG_CHECKING([if Fortran C_LONG_DOUBLE is different from C_DOUBLE])
   TEST_SRC="`sed -n '/MODULE type_mod/,/END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE/p' $srcdir/m4/aclocal_fc.f90`"
-  AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes]) 
-            C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="yes"], 
+  AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
+            C_LONG_DOUBLE_IS_UNIQUE_FORTRAN="yes"],
          [AC_MSG_RESULT([no])])
 ])
 fi
@@ -138,8 +138,8 @@ AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
    HAVE_F2003_REQUIREMENTS="no"
    AC_MSG_CHECKING([if Fortran compiler version compatible with Fortran 2003 HDF])
    TEST_SRC="`sed -n '/PROG_FC_HAVE_F2003_REQUIREMENTS/,/END PROGRAM PROG_FC_HAVE_F2003_REQUIREMENTS/p' $srcdir/m4/aclocal_fc.f90`"
-   AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes]) 
-            HAVE_F2003_REQUIREMENTS="yes"], 
+   AC_COMPILE_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
+            HAVE_F2003_REQUIREMENTS="yes"],
          [AC_MSG_RESULT([no])])
 ])
 
@@ -262,7 +262,7 @@ TEST_SRC="`sed -n '/PROGRAM FC_AVAIL_KINDS/,/END PROGRAM FC_AVAIL_KINDS/p' $srcd
 AC_RUN_IFELSE([$TEST_SRC],
  [
     if test -s pac_fconftest.out ; then
-	
+
      dnl The output from the above program will be:
      dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
      dnl    -- LINE 2 --  valid real kinds (comma seperated list)
@@ -453,7 +453,7 @@ rm -f pac_Cconftest.out
                 #define C_FLT128_DIG 0
                 #endif
                 #if defined (__STDC_VERSION__) && __STDC_VERSION__ >= 199901L
-                #define C_LDBL_DIG DECIMAL_DIG 
+                #define C_LDBL_DIG DECIMAL_DIG
                 #else
                 #define C_LDBL_DIG LDBL_DIG
                 #endif
@@ -465,7 +465,7 @@ rm -f pac_Cconftest.out
         ])
         AC_RUN_IFELSE([],[
             if test -s pac_Cconftest.out ; then
-	        LDBL_DIG="`sed -n '1p' pac_Cconftest.out`" 
+	        LDBL_DIG="`sed -n '1p' pac_Cconftest.out`"
 	        FLT128_DIG="`sed -n '2p' pac_Cconftest.out`"
             else
                 AC_MSG_ERROR([No output from C decimal precision program!])

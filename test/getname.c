@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Pedro Vicente <pvn@ncsa.uiuc.edu>
+ * Programmer:  Pedro Vicente
  *              April 12, 2002
  *
  * Purpose:     Tests the "ID to name" functionality
@@ -68,11 +68,11 @@ check_name(hid_t id, const char *chk_name, const char *chk_user_path)
         TEST_ERROR
 
     /* Check on name from H5Iget_name() */
-    if (HDstrcmp(name, chk_name))
+    if (HDstrcmp(name, chk_name) != 0)
         goto error;
 
     /* Check on user path */
-    if (HDstrcmp(user_path, chk_user_path))
+    if (HDstrcmp(user_path, chk_user_path) != 0)
         goto error;
 
     /* Check that if user path is hidden, the name from H5Iget_name() and the user path should be different */
@@ -1439,7 +1439,7 @@ test_main(hid_t file_id, hid_t fapl)
             /* Check that name is longer */
             if (name_len <= SMALL_NAME_BUF_SIZE)
                 TEST_ERROR
-            if (HDstrcmp(name2, "/"))
+            if (HDstrcmp(name2, "/") != 0)
                 TEST_ERROR
         }
 
@@ -1481,7 +1481,7 @@ test_main(hid_t file_id, hid_t fapl)
             TEST_ERROR
 
         /* Verify */
-        if (HDstrcmp(name3, "/g17"))
+        if (HDstrcmp(name3, "/g17") != 0)
             TEST_ERROR
         *name3 = '\0';
 
@@ -1491,7 +1491,7 @@ test_main(hid_t file_id, hid_t fapl)
             TEST_ERROR
 
         /* Verify */
-        if (HDstrcmp(name3, "/g"))
+        if (HDstrcmp(name3, "/g") != 0)
             TEST_ERROR
 
         HDfree(name3);
@@ -3326,7 +3326,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[0], (char *)buf, sizeof(buf));
     if (!((HDstrcmp(buf, "/Dataset3") == 0) && (namelen == 9)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset in /Group1");
@@ -3342,7 +3342,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[1], (char *)buf, sizeof(buf));
     if (!((HDstrcmp(buf, "/Group1/Dataset2") == 0) && (namelen == 16)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to /Group1");
@@ -3358,7 +3358,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[2], (char *)buf, sizeof(buf));
     if (!((HDstrcmp(buf, "/Group1") == 0) && (namelen == 7)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to datatype in /Group1");
@@ -3374,7 +3374,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[3], (char *)buf, sizeof(buf));
     if (!((HDstrcmp(buf, "/Group1/Datatype1") == 0) && (namelen == 17)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset in nested group");
@@ -3390,7 +3390,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[4], (char *)buf, sizeof(buf));
     if (!((HDstrcmp(buf, "/Group1/Group2/Dataset4") == 0) && (namelen == 23)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to nested group");
@@ -3406,7 +3406,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[5], (char *)buf, sizeof(buf));
     if (!((HDstrcmp(buf, "/Group1/Group2") == 0) && (namelen == 14)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to dataset created via hard link");
@@ -3422,7 +3422,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[6], (char *)buf, sizeof(buf));
     if (!((HDstrcmp(buf, "/Group1/Dataset5") == 0) && (namelen == 16)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     HDmemset(buf, 0, sizeof(buf));
     TESTING("getting path to root group");
@@ -3438,7 +3438,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[7], (char *)buf, sizeof(buf));
     if (!((HDstrcmp(buf, "/") == 0) && (namelen == 1)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     /* Now we mount fid2 at /Group2 and look for dataset4.  It shouldn't be found */
     if (H5Fmount(fid1, "/Group1/Group2", fid2, H5P_DEFAULT) < 0)
@@ -3457,7 +3457,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[4], (char *)buf, sizeof(buf));
     if (namelen != 0)
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     /* Now we try unlinking dataset2 from the file and searching for it.  It shouldn't be found */
     if ((dataset2 = H5Rdereference2(dataset, H5P_DEFAULT, H5R_OBJECT, &wbuf[1])) < 0)
@@ -3476,7 +3476,7 @@ test_obj_ref(hid_t fapl)
     namelen = H5Rget_name(dataset, H5R_OBJECT, &wbuf[1], (char *)buf, sizeof(buf));
     if (namelen != 0)
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     /* Close disk dataspace */
     if (H5Sclose(sid1) < 0)
@@ -3606,7 +3606,7 @@ test_reg_ref(hid_t fapl)
     name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[0], (char *)buf1, NAME_BUF_SIZE);
     if (!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 7)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     TESTING("H5Iget_name to get name from region reference(hyperslab)");
 
@@ -3622,7 +3622,7 @@ test_reg_ref(hid_t fapl)
     if (H5Dclose(dsetv_id) < 0)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     /* Get name of the dataset the second region reference points to using H5Rget_name */
     TESTING("H5Rget_name to get name from region reference(pnt selec)");
@@ -3630,7 +3630,7 @@ test_reg_ref(hid_t fapl)
     name_size1 = H5Rget_name(dsetr_id, H5R_DATASET_REGION, &ref_out[1], (char *)buf1, NAME_BUF_SIZE);
     if (!((HDstrcmp(buf1, "/MATRIX") == 0) && (name_size1 == 7)))
         TEST_ERROR
-    PASSED()
+    PASSED();
 
     TESTING("H5Iget_name to get name from region reference(pnt selec)");
 
@@ -3647,7 +3647,7 @@ test_reg_ref(hid_t fapl)
     if (H5Dclose(dsetv_id) < 0)
         TEST_ERROR
 
-    PASSED()
+    PASSED();
 
     if (H5Dclose(dsetr_id) < 0)
         TEST_ERROR
@@ -3787,7 +3787,7 @@ main(void)
 
     if (nerrors)
         goto error;
-    puts("All getname tests passed.");
+    HDputs("All getname tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
@@ -3800,7 +3800,7 @@ error:
     }
     H5E_END_TRY;
 
-    puts("***** GET NAME TESTS FAILED *****");
+    HDputs("***** GET NAME TESTS FAILED *****");
 
     return 1;
 }

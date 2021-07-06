@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5S module
  */
-#ifndef _H5Sprivate_H
-#define _H5Sprivate_H
+#ifndef H5Sprivate_H
+#define H5Sprivate_H
 
 /* Include package's public header */
 #include "H5Spublic.h"
@@ -185,6 +185,7 @@ typedef struct H5S_sel_iter_op_t {
     (H5S_select_iter_get_seq_list(ITER, MAXSEQ, MAXBYTES, NSEQ, NBYTES, OFF, LEN))
 #define H5S_SELECT_ITER_RELEASE(ITER) (H5S_select_iter_release(ITER))
 #endif /* H5S_MODULE */
+
 /* Handle these callbacks in a special way, since they have prologs that need to be executed */
 #define H5S_SELECT_COPY(DST, SRC, SHARE)          (H5S_select_copy(DST, SRC, SHARE))
 #define H5S_SELECT_SHAPE_SAME(S1, S2)             (H5S_select_shape_same(S1, S2))
@@ -305,4 +306,4 @@ H5_DLL herr_t H5S_mpio_space_type(const H5S_t *space, size_t elmt_size,
                                   hbool_t do_permute, hsize_t **permute_map, hbool_t *is_permuted);
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* _H5Sprivate_H */
+#endif /* H5Sprivate_H */

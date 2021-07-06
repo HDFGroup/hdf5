@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+/* Programmer:  Quincey Koziol
  *              Tuesday, February  1, 2005
  */
 #include "h5test.h"
@@ -2961,10 +2961,10 @@ test_insert_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
-#ifdef QAK
-    curr_time = 1109170019;
-    HDfprintf(stderr, "curr_time=%lu\n", (unsigned long)curr_time);
-#endif /* QAK */
+#if 0
+curr_time=1109170019;
+HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
+#endif
     HDsrandom((unsigned)curr_time);
 
     /*
@@ -4964,10 +4964,10 @@ test_update_lots(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
-#ifdef QAK
-    curr_time = 1451342093;
-    HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
-#endif /* QAK */
+#if 0
+curr_time = 1451342093;
+HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+#endif
     HDsrandom((unsigned)curr_time);
 
     /*
@@ -8670,10 +8670,10 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
 
     /* Initialize random number seed */
     curr_time = HDtime(NULL);
-#ifdef QAK
-    curr_time = 1163537969;
-    HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
-#endif /* QAK */
+#if 0
+curr_time = 1163537969;
+HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
+#endif
     HDsrandom((unsigned)curr_time);
 
     /*
@@ -8706,8 +8706,8 @@ test_remove_lots(const char *env_h5_drvr, hid_t fapl, const H5B2_create_t *cpara
         TEST_ERROR
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                                HDstrcmp(env_h5_drvr, "family") != 0);
     if (single_file_vfd) {
         /* Make a copy of the file in memory, in order to speed up deletion testing */
 
@@ -10089,14 +10089,14 @@ main(void)
     if (nerrors)
         goto error;
 
-    puts("All v2 B-tree tests passed.");
+    HDputs("All v2 B-tree tests passed.");
 
     h5_cleanup(FILENAME, fapl);
 
     return 0;
 
 error:
-    puts("*** TESTS FAILED ***");
+    HDputs("*** TESTS FAILED ***");
 
     H5E_BEGIN_TRY
     {

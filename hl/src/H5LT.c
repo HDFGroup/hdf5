@@ -6,15 +6,10 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#include <assert.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
 
 #include "H5LTprivate.h"
 
@@ -495,7 +490,7 @@ static herr_t H5LT_get_attribute_mem(hid_t loc_id, const char *obj_name, const c
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Quincey Koziol, koziol@hdfgroup.org
+ * Programmer: Quincey Koziol
  *
  * Date: October 10, 2007
  *
@@ -559,7 +554,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 19, 2001
  *
@@ -585,7 +580,7 @@ H5LTmake_dataset(hid_t loc_id, const char *dset_name, int rank, const hsize_t *d
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 14, 2001
  *
@@ -610,7 +605,7 @@ H5LTmake_dataset_char(hid_t loc_id, const char *dset_name, int rank, const hsize
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 14, 2001
  *
@@ -635,7 +630,7 @@ H5LTmake_dataset_short(hid_t loc_id, const char *dset_name, int rank, const hsiz
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 14, 2001
  *
@@ -660,7 +655,7 @@ H5LTmake_dataset_int(hid_t loc_id, const char *dset_name, int rank, const hsize_
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 14, 2001
  *
@@ -685,7 +680,7 @@ H5LTmake_dataset_long(hid_t loc_id, const char *dset_name, int rank, const hsize
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 14, 2001
  *
@@ -710,7 +705,7 @@ H5LTmake_dataset_float(hid_t loc_id, const char *dset_name, int rank, const hsiz
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 14, 2001
  *
@@ -736,7 +731,7 @@ H5LTmake_dataset_double(hid_t loc_id, const char *dset_name, int rank, const hsi
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -827,7 +822,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     char     file_name[64];           /* Filename buffer */
     size_t   alloc_incr;              /* Buffer allocation increment */
     size_t   min_incr  = 65536;       /* Minimum buffer increment */
-    double   buf_prcnt = 0.1f;        /* Percentage of buffer size to set
+    double   buf_prcnt = 0.1;         /* Percentage of buffer size to set
                                           as increment */
     static long                 file_name_counter;
     H5FD_file_image_callbacks_t callbacks = {&image_malloc, &image_memcpy, &image_realloc, &image_free,
@@ -927,7 +922,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Quincey Koziol, koziol@hdfgroup.org
+ * Programmer: Quincey Koziol
  *
  * Date: October 8, 2007
  *
@@ -969,7 +964,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: June 13, 2001
  *
@@ -989,7 +984,7 @@ H5LTread_dataset(hid_t loc_id, const char *dset_name, hid_t tid, void *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 5, 2001
  *
@@ -1009,7 +1004,7 @@ H5LTread_dataset_char(hid_t loc_id, const char *dset_name, char *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 5, 2001
  *
@@ -1029,7 +1024,7 @@ H5LTread_dataset_short(hid_t loc_id, const char *dset_name, short *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 5, 2001
  *
@@ -1049,7 +1044,7 @@ H5LTread_dataset_int(hid_t loc_id, const char *dset_name, int *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 5, 2001
  *
@@ -1069,7 +1064,7 @@ H5LTread_dataset_long(hid_t loc_id, const char *dset_name, long *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 5, 2001
  *
@@ -1089,7 +1084,7 @@ H5LTread_dataset_float(hid_t loc_id, const char *dset_name, float *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 5, 2001
  *
@@ -1109,7 +1104,7 @@ H5LTread_dataset_double(hid_t loc_id, const char *dset_name, double *data)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: October 05, 2004
  *
@@ -1162,7 +1157,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 4, 2001
  *
@@ -1218,7 +1213,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 4, 2001
  *  Modified: February 28, 2006: checked for NULL parameters
@@ -1293,7 +1288,7 @@ out:
  *
  * Purpose: operator function used by H5LTfind_dataset
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: June 21, 2001
  *
@@ -1305,7 +1300,8 @@ out:
  */
 
 static herr_t
-find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_data)
+find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5L_info2_t *linfo,
+             void *op_data)
 {
     /* Define a default zero value for return. This will cause the iterator to continue if
      * the dataset is not found yet.
@@ -1317,8 +1313,8 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_
         return ret;
 
     /* Shut the compiler up */
-    loc_id = loc_id;
-    linfo  = linfo;
+    (void)loc_id;
+    (void)linfo;
 
     /* Define a positive value for return value if the dataset was found. This will
      * cause the iterator to immediately return that positive value,
@@ -1336,7 +1332,7 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_
  * Purpose:  Inquires if a dataset named dset_name exists attached
  *           to the object loc_id.
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: July 15, 2001
  *
@@ -1351,12 +1347,18 @@ find_dataset(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *op_
  *
  *-------------------------------------------------------------------------
  */
-
+/* H5Literate wants a non-const pointer but we have a const pointer in the API
+ * call. It's safe to ignore this because we control the callback, don't
+ * modify the op_data buffer (i.e.: dset_name) during the traversal, and the
+ * library never modifies that buffer.
+ */
+H5_GCC_DIAG_OFF("cast-qual")
 herr_t
 H5LTfind_dataset(hid_t loc_id, const char *dset_name)
 {
     return H5Literate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name);
 }
+H5_GCC_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  *
@@ -1373,7 +1375,7 @@ H5LTfind_dataset(hid_t loc_id, const char *dset_name)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: July 23, 2001
  *
@@ -1465,7 +1467,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: July 25, 2001
  *
@@ -1539,7 +1541,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 7, 2001
  *
@@ -1566,7 +1568,7 @@ H5LTset_attribute_char(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 8, 2004
  *
@@ -1593,7 +1595,7 @@ H5LTset_attribute_uchar(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 7, 2001
  *
@@ -1620,7 +1622,7 @@ H5LTset_attribute_short(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 8, 2004
  *
@@ -1647,7 +1649,7 @@ H5LTset_attribute_ushort(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 7, 2001
  *
@@ -1673,7 +1675,7 @@ H5LTset_attribute_int(hid_t loc_id, const char *obj_name, const char *attr_name,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 8, 2004
  *
@@ -1700,7 +1702,7 @@ H5LTset_attribute_uint(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 7, 2001
  *
@@ -1726,7 +1728,7 @@ H5LTset_attribute_long(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Elena Pourmal, epourmal@ncsa.uiuc.edu
+ * Programmer: Elena Pourmal
  *
  * Date: June 17, 2005
  *
@@ -1753,7 +1755,7 @@ H5LTset_attribute_long_long(hid_t loc_id, const char *obj_name, const char *attr
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 8, 2004
  *
@@ -1780,7 +1782,7 @@ H5LTset_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: July 25, 2001
  *
@@ -1807,7 +1809,7 @@ H5LTset_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 7, 2001
  *
@@ -1832,7 +1834,7 @@ H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Purpose: operator function used by H5LT_find_attribute
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: June 21, 2001
  *
@@ -1843,7 +1845,8 @@ H5LTset_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  *-------------------------------------------------------------------------
  */
 static herr_t
-find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data)
+find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5A_info_t *ainfo,
+          void *op_data)
 {
     int ret = H5_ITER_CONT;
 
@@ -1852,8 +1855,8 @@ find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data
         return H5_ITER_CONT;
 
     /* Shut compiler up */
-    loc_id = loc_id;
-    ainfo  = ainfo;
+    (void)loc_id;
+    (void)ainfo;
 
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,
@@ -1872,7 +1875,7 @@ find_attr(hid_t loc_id, const char *name, const H5A_info_t *ainfo, void *op_data
  * Purpose: Inquires if an attribute named attr_name exists attached to
  *          the object loc_id.
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: May 17, 2006
  *
@@ -1893,7 +1896,7 @@ H5LTfind_attribute(hid_t loc_id, const char *attr_name)
  *
  * Purpose: Inquires if an attribute named attr_name exists attached to the object loc_id.
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: June 21, 2001
  *
@@ -1911,12 +1914,18 @@ H5LTfind_attribute(hid_t loc_id, const char *attr_name)
  *
  *-------------------------------------------------------------------------
  */
-
+/* H5Aiterate wants a non-const pointer but we have a const pointer in the API
+ * call. It's safe to ignore this because we control the callback, don't
+ * modify the op_data buffer (i.e.: attr_name) during the traversal, and the
+ * library never modifies that buffer.
+ */
+H5_GCC_DIAG_OFF("cast-qual")
 herr_t
 H5LT_find_attribute(hid_t loc_id, const char *attr_name)
 {
     return H5Aiterate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name);
 }
+H5_GCC_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_ndims
@@ -1925,7 +1934,7 @@ H5LT_find_attribute(hid_t loc_id, const char *attr_name)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 4, 2001
  *
@@ -1991,7 +2000,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 4, 2001
  *
@@ -2072,7 +2081,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Raymond Lu, slu@ncsa.uiuc.edu
+ * Programmer: Raymond Lu
  *
  * Date: October 6, 2004
  *
@@ -2123,7 +2132,7 @@ out:
  *
  * Return:      void
  *
- * Programmer:  Raymond Lu, songyulu@hdfgroup.org
+ * Programmer:  Raymond Lu
  *
  * Date:        29 September 2011
  *
@@ -2186,7 +2195,7 @@ out:
  *
  * Return:      void
  *
- * Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+ * Programmer:  Raymond Lu
  *
  * Date:        December 6, 2005
  *
@@ -2352,7 +2361,7 @@ out:
  *
  * Return:      Success: 0, Failure: -1
  *
- * Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+ * Programmer:  Raymond Lu
  *
  * Date:        December 6, 2005
  *
@@ -2401,7 +2410,7 @@ out:
  *
  * Return:      Success: 0, Failure: -1
  *
- * Programmer:  Raymond Lu, slu@ncsa.uiuc.edu
+ * Programmer:  Raymond Lu
  *
  * Date:        December 20, 2005
  *
@@ -2997,7 +3006,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3044,7 +3053,7 @@ H5LTget_attribute_string(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3071,7 +3080,7 @@ H5LTget_attribute_char(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 8, 2004
  *
@@ -3098,7 +3107,7 @@ H5LTget_attribute_uchar(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3125,7 +3134,7 @@ H5LTget_attribute_short(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 8, 2004
  *
@@ -3152,7 +3161,7 @@ H5LTget_attribute_ushort(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3179,7 +3188,7 @@ H5LTget_attribute_int(hid_t loc_id, const char *obj_name, const char *attr_name,
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 8, 2004
  *
@@ -3206,7 +3215,7 @@ H5LTget_attribute_uint(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3233,7 +3242,7 @@ H5LTget_attribute_long(hid_t loc_id, const char *obj_name, const char *attr_name
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Elena Pourmal, epourmal@ncsa.uiuc.edu
+ * Programmer: Elena Pourmal
  *
  * Date: June 17, 2005
  *
@@ -3260,7 +3269,7 @@ H5LTget_attribute_long_long(hid_t loc_id, const char *obj_name, const char *attr
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 8, 2004
  *
@@ -3287,7 +3296,7 @@ H5LTget_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3315,7 +3324,7 @@ H5LTget_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_nam
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3343,7 +3352,7 @@ H5LTget_attribute_double(hid_t loc_id, const char *obj_name, const char *attr_na
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3376,7 +3385,7 @@ H5LTget_attribute(hid_t loc_id, const char *obj_name, const char *attr_name, hid
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3437,7 +3446,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: September 19, 2002
  *
@@ -3486,7 +3495,7 @@ out:
  *
  * Return: FAIL on error, SUCCESS on success
  *
- * Programmer: pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 04, 2005
  *

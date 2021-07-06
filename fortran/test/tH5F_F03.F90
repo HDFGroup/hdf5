@@ -5,7 +5,7 @@
 !
 ! FUNCTION
 !  Test FORTRAN HDF5 H5F APIs which are dependent on FORTRAN 2003
-!  features. 
+!  features.
 !
 ! COPYRIGHT
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -16,7 +16,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -37,8 +37,8 @@
 MODULE TH5F_F03
 
   USE HDF5
-  USE TH5_MISC 
-  USE TH5_MISC_GEN 
+  USE TH5_MISC
+  USE TH5_MISC_GEN
   USE ISO_C_BINDING
 
 CONTAINS
@@ -79,21 +79,21 @@ SUBROUTINE test_get_file_image(total_error)
   CALL h5fcreate_f("tget_file_image.h5", H5F_ACC_TRUNC_F, file_id, error, H5P_DEFAULT_F, fapl)
   CALL check("h5fcreate_f", error, total_error)
 
-  ! Set up data space for new data set 
+  ! Set up data space for new data set
   dims(1:2) = (/10,10/)
-    
+
   CALL h5screate_simple_f(2, dims,  space_id, error)
   CALL check("h5screate_simple_f", error, total_error)
 
-  ! Create a dataset 
+  ! Create a dataset
   CALL h5dcreate_f(file_id, "dset 0", H5T_NATIVE_INTEGER, space_id, dset_id, error)
   CALL check("h5dcreate_f", error, total_error)
 
-  ! Write some data to the data set 
+  ! Write some data to the data set
   DO i = 1, 100
      data(i) = INT(i)
   ENDDO
-  
+
   f_ptr = C_LOC(data(1))
   CALL h5dwrite_f(dset_id, H5T_NATIVE_INTEGER, f_ptr, error)
   CALL check("h5dwrite_f",error, total_error)
@@ -102,7 +102,7 @@ SUBROUTINE test_get_file_image(total_error)
   CALL h5fflush_f(file_id, H5F_SCOPE_GLOBAL_F, error)
   CALL check("h5fflush_f",error, total_error)
 
-  ! Open the test file using standard I/O calls 
+  ! Open the test file using standard I/O calls
   OPEN(UNIT=10,FILE='tget_file_image.h5', ACCESS='STREAM')
   ! Get the size of the test file
   !
@@ -110,8 +110,8 @@ SUBROUTINE test_get_file_image(total_error)
   ! may be larger.  This is OK, as long as (in this specialized instance)
   ! the remainder of the file is all '\0's.
   !
-  ! With latest mods to truncate call in core file drive, 
-  ! file size should match image size; get the file size 
+  ! With latest mods to truncate call in core file drive,
+  ! file size should match image size; get the file size
   INQUIRE(UNIT=10, SIZE=file_sz)
   CLOSE(UNIT=10)
 
@@ -131,7 +131,7 @@ SUBROUTINE test_get_file_image(total_error)
   CALL verify("h5fget_file_image_f", INT(itmp_a), 1, total_error) ! Routine should not change the value
   CALL verify("h5fget_file_image_f", file_sz, INT(image_size), total_error)
 
-  ! Allocate a buffer of the appropriate size 
+  ! Allocate a buffer of the appropriate size
   ALLOCATE(image_ptr(1:image_size))
 
   ! Load the image of the file into the buffer
@@ -139,7 +139,7 @@ SUBROUTINE test_get_file_image(total_error)
   CALL h5fget_file_image_f(file_id, f_ptr, image_size, error)
   CALL check("h5fget_file_image_f",error, total_error)
 
-  ! Close dset and space 
+  ! Close dset and space
   CALL h5dclose_f(dset_id, error)
   CALL check("h5dclose_f", error, total_error)
   CALL h5sclose_f(space_id, error)
@@ -151,7 +151,7 @@ SUBROUTINE test_get_file_image(total_error)
   ! Allocate a buffer for the test file image
   ALLOCATE(file_image_ptr(1:image_size))
 
-  ! Open the test file using standard I/O calls 
+  ! Open the test file using standard I/O calls
   OPEN(UNIT=10,FILE='tget_file_image.h5', FORM='UNFORMATTED', ACCESS='STREAM')
 
   ! Read the test file from disk into the buffer

@@ -22,7 +22,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -115,6 +115,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/ax_check_junit.m4 \
 	$(top_srcdir)/m4/ax_java_options.m4 \
 	$(top_srcdir)/m4/ax_jni_include_dir.m4 \
+	$(top_srcdir)/m4/ax_prog_doxygen.m4 \
 	$(top_srcdir)/m4/ax_prog_jar.m4 \
 	$(top_srcdir)/m4/ax_prog_java.m4 \
 	$(top_srcdir)/m4/ax_prog_java_works.m4 \
@@ -415,7 +416,7 @@ AMTAR = @AMTAR@
 
 # H5_CFLAGS holds flags that should be used when building hdf5,
 # but which should not be exported to h5cc for building other programs.
-# AM_CFLAGS is an automake construct which should be used by Makefiles 
+# AM_CFLAGS is an automake construct which should be used by Makefiles
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
 AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
@@ -442,6 +443,7 @@ CC = @CC@
 CCDEPMODE = @CCDEPMODE@
 CC_VERSION = @CC_VERSION@
 CFLAGS = @CFLAGS@
+CLANG_SANITIZE_CHECKS = @CLANG_SANITIZE_CHECKS@
 CODESTACK = @CODESTACK@
 CONFIG_DATE = @CONFIG_DATE@
 CONFIG_MODE = @CONFIG_MODE@
@@ -458,11 +460,54 @@ DEFAULT_API_VERSION = @DEFAULT_API_VERSION@
 DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
-DEV_WARNINGS = @DEV_WARNINGS@
+DESIRED_FILE_LOCKING = @DESIRED_FILE_LOCKING@
+DIAGS = @DIAGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
+DOXYGEN_EXAMPLES_DIRECTORY = @DOXYGEN_EXAMPLES_DIRECTORY@
+DOXYGEN_EXTERNAL_SEARCH = @DOXYGEN_EXTERNAL_SEARCH@
+DOXYGEN_HTML_EXTRA_FILES = @DOXYGEN_HTML_EXTRA_FILES@
+DOXYGEN_HTML_EXTRA_STYLESHEET = @DOXYGEN_HTML_EXTRA_STYLESHEET@
+DOXYGEN_HTML_FOOTER = @DOXYGEN_HTML_FOOTER@
+DOXYGEN_HTML_HEADER = @DOXYGEN_HTML_HEADER@
+DOXYGEN_INCLUDE_ALIASES = @DOXYGEN_INCLUDE_ALIASES@
+DOXYGEN_INPUT_DIRECTORY = @DOXYGEN_INPUT_DIRECTORY@
+DOXYGEN_LAYOUT_FILE = @DOXYGEN_LAYOUT_FILE@
+DOXYGEN_MACRO_EXPANSION = @DOXYGEN_MACRO_EXPANSION@
+DOXYGEN_OPTIMIZE_OUTPUT_FOR_C = @DOXYGEN_OPTIMIZE_OUTPUT_FOR_C@
+DOXYGEN_OUTPUT_DIRECTORY = @DOXYGEN_OUTPUT_DIRECTORY@
+DOXYGEN_PACKAGE = @DOXYGEN_PACKAGE@
+DOXYGEN_PAPER_SIZE = @DOXYGEN_PAPER_SIZE@
+DOXYGEN_PROJECT_BRIEF = @DOXYGEN_PROJECT_BRIEF@
+DOXYGEN_PROJECT_LOGO = @DOXYGEN_PROJECT_LOGO@
+DOXYGEN_SEARCHENGINE_URL = @DOXYGEN_SEARCHENGINE_URL@
+DOXYGEN_SERVER_BASED_SEARCH = @DOXYGEN_SERVER_BASED_SEARCH@
+DOXYGEN_VERSION_STRING = @DOXYGEN_VERSION_STRING@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
+DX_CONFIG = @DX_CONFIG@
+DX_DOCDIR = @DX_DOCDIR@
+DX_DOT = @DX_DOT@
+DX_DOXYGEN = @DX_DOXYGEN@
+DX_DVIPS = @DX_DVIPS@
+DX_EGREP = @DX_EGREP@
+DX_ENV = @DX_ENV@
+DX_FLAG_chi = @DX_FLAG_chi@
+DX_FLAG_chm = @DX_FLAG_chm@
+DX_FLAG_doc = @DX_FLAG_doc@
+DX_FLAG_dot = @DX_FLAG_dot@
+DX_FLAG_html = @DX_FLAG_html@
+DX_FLAG_man = @DX_FLAG_man@
+DX_FLAG_pdf = @DX_FLAG_pdf@
+DX_FLAG_ps = @DX_FLAG_ps@
+DX_FLAG_rtf = @DX_FLAG_rtf@
+DX_FLAG_xml = @DX_FLAG_xml@
+DX_HHC = @DX_HHC@
+DX_LATEX = @DX_LATEX@
+DX_MAKEINDEX = @DX_MAKEINDEX@
+DX_PDFLATEX = @DX_PDFLATEX@
+DX_PERL = @DX_PERL@
+DX_PROJECT = @DX_PROJECT@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -496,6 +541,7 @@ H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
+H5_IS_DARWIN = @H5_IS_DARWIN@
 H5_JAVACFLAGS = @H5_JAVACFLAGS@
 H5_JAVAFLAGS = @H5_JAVAFLAGS@
 H5_JNIFLAGS = @H5_JNIFLAGS@
@@ -506,6 +552,7 @@ HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
 HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
+HDF5_DOXYGEN = @HDF5_DOXYGEN@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF5_TESTS = @HDF5_TESTS@
@@ -518,6 +565,7 @@ HL = @HL@
 HL_FOR = @HL_FOR@
 HSIZE_T = @HSIZE_T@
 HSSIZE_T = @HSSIZE_T@
+IGNORE_DISABLED_FILE_LOCKS = @IGNORE_DISABLED_FILE_LOCKS@
 INSTALL = @INSTALL@
 INSTALL_DATA = @INSTALL_DATA@
 INSTALL_PROGRAM = @INSTALL_PROGRAM@
@@ -555,6 +603,7 @@ MAKEINFO = @MAKEINFO@
 MANIFEST_TOOL = @MANIFEST_TOOL@
 MAP_API = @MAP_API@
 MEMORYALLOCSANITYCHECK = @MEMORYALLOCSANITYCHECK@
+MIRROR_VFD = @MIRROR_VFD@
 MKDIR_P = @MKDIR_P@
 MPE = @MPE@
 NM = @NM@
@@ -591,6 +640,7 @@ PATH_SEPARATOR = @PATH_SEPARATOR@
 PREADWRITE = @PREADWRITE@
 PROFILING = @PROFILING@
 RANLIB = @RANLIB@
+RECURSIVE_RW_LOCKS = @RECURSIVE_RW_LOCKS@
 ROOT = @ROOT@
 ROS3_VFD = @ROS3_VFD@
 RUNPARALLEL = @RUNPARALLEL@
@@ -614,6 +664,7 @@ TIME = @TIME@
 TR = @TR@
 TRACE_API = @TRACE_API@
 UNAME_INFO = @UNAME_INFO@
+USE_FILE_LOCKING = @USE_FILE_LOCKING@
 USE_FILTER_DEFLATE = @USE_FILTER_DEFLATE@
 USE_FILTER_SZIP = @USE_FILTER_SZIP@
 USINGMEMCHECKER = @USINGMEMCHECKER@
@@ -706,15 +757,15 @@ LIBH5_HL = $(top_builddir)/hl/src/libhdf5_hl.la
 LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
-# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below  
-# has been removed. According to the official description of DESTDIR by Gnu at 
-# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is 
-# prepended to the normal and complete install path that it precedes for the 
-# purpose of installing in a temporary directory which is useful for building 
-# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another 
-# '/' at the beginning of the normal install path.  When DESTDIR is empty the  
-# path then begins with '//', which is incorrect and causes problems at least for 
-# Cygwin.   
+# Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below
+# has been removed. According to the official description of DESTDIR by Gnu at
+# http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is
+# prepended to the normal and complete install path that it precedes for the
+# purpose of installing in a temporary directory which is useful for building
+# rpms and other packages.  The '/' after ${DESTDIR} will be followed by another
+# '/' at the beginning of the normal install path.  When DESTDIR is empty the
+# path then begins with '//', which is incorrect and causes problems at least for
+# Cygwin.
 
 # Scripts used to build examples
 # If only shared libraries have been installed, have h5cc build examples with
@@ -760,7 +811,7 @@ LIB = $(lib_LIBRARIES) $(lib_LTLIBRARIES) $(noinst_LIBRARIES)                 \
 PROGS = $(bin_PROGRAMS) $(bin_SCRIPTS) $(noinst_PROGRAMS) $(noinst_SCRIPTS)   \
         $(EXTRA_PROG)
 
-chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST) 
+chk_TESTS = $(check_PROGRAMS) $(check_SCRIPTS) $(EXTRA_TEST)
 TEST_EXTENSIONS = .sh
 SH_LOG_COMPILER = $(SHELL)
 AM_SH_LOG_FLAGS = 
@@ -1240,9 +1291,9 @@ uninstall-am:
 # commands that should be executed even if a file with the same name already
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
-        build-tests check-clean check-install check-p check-s check-vfd \
-        check-passthrough-vol install-doc lib progs tests uninstall-doc \
-        _exec_check-s _test help
+	build-tests check-clean check-install check-p check-s check-vfd \
+	check-passthrough-vol install-doc lib progs tests uninstall-doc \
+	_exec_check-s _test help trace doxygen
 
 help:
 	@$(top_srcdir)/bin/makehelp

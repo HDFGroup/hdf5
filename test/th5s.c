@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -1246,7 +1246,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 
     if (sbuf_size > 0) {
         sbuf = (unsigned char *)HDcalloc((size_t)1, sbuf_size);
-        CHECK(sbuf, NULL, "HDcalloc");
+        CHECK_PTR(sbuf, "HDcalloc");
     }
 
     /* Try decoding bogus buffer */
@@ -1308,7 +1308,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 
     if (null_size > 0) {
         null_sbuf = (unsigned char *)HDcalloc((size_t)1, null_size);
-        CHECK(null_sbuf, NULL, "HDcalloc");
+        CHECK_PTR(null_sbuf, "HDcalloc");
     }
 
     /* Encode the null dataspace in the buffer */
@@ -1344,7 +1344,7 @@ test_h5s_encode(H5F_libver_t low, H5F_libver_t high)
 
     if (scalar_size > 0) {
         scalar_buf = (unsigned char *)HDcalloc((size_t)1, scalar_size);
-        CHECK(scalar_buf, NULL, "HDcalloc");
+        CHECK_PTR(scalar_buf, "HDcalloc");
     }
 
     /* Encode the scalar dataspace in the buffer */
@@ -1438,7 +1438,7 @@ test_h5s_encode1(void)
 
     if (sbuf_size > 0) {
         sbuf = (unsigned char *)HDcalloc((size_t)1, sbuf_size);
-        CHECK(sbuf, NULL, "HDcalloc");
+        CHECK_PTR(sbuf, "HDcalloc");
     }
 
     /* Try decoding bogus buffer */
@@ -1500,7 +1500,7 @@ test_h5s_encode1(void)
 
     if (null_size > 0) {
         null_sbuf = (unsigned char *)HDcalloc((size_t)1, null_size);
-        CHECK(null_sbuf, NULL, "HDcalloc");
+        CHECK_PTR(null_sbuf, "HDcalloc");
     }
 
     /* Encode the null dataspace in the buffer */
@@ -1536,7 +1536,7 @@ test_h5s_encode1(void)
 
     if (scalar_size > 0) {
         scalar_buf = (unsigned char *)HDcalloc((size_t)1, scalar_size);
-        CHECK(scalar_buf, NULL, "HDcalloc");
+        CHECK_PTR(scalar_buf, "HDcalloc");
     }
 
     /* Encode the scalar dataspace in the buffer */
@@ -1623,7 +1623,7 @@ test_h5s_check_encoding(hid_t in_fapl, hid_t in_sid, uint32_t expected_version, 
 
         /* Allocate the buffer for encoding */
         buf = (char *)HDmalloc(buf_size);
-        CHECK(buf, NULL, "H5Dmalloc");
+        CHECK_PTR(buf, "H5Dmalloc");
 
         /* Encode according to the setting in in_fapl */
         ret = H5Sencode2(in_sid, buf, &buf_size, in_fapl);
@@ -1984,7 +1984,7 @@ test_h5s_encode_irregular_hyper(H5F_libver_t low, H5F_libver_t high)
                 break;
 
             default:
-                assert(0);
+                HDassert(0);
                 break;
         }
 
@@ -2149,7 +2149,7 @@ test_h5s_encode_length(void)
     /* Allocate the buffer */
     if (sbuf_size > 0) {
         sbuf = (unsigned char *)HDcalloc((size_t)1, sbuf_size);
-        CHECK(sbuf, NULL, "H5Sencode2");
+        CHECK_PTR(sbuf, "H5Sencode2");
     }
 
     /* Encode the dataspace */
@@ -2449,7 +2449,7 @@ test_h5s_compound_scalar_read(void)
 
     ret = H5Dread(dataset, type, H5S_ALL, H5S_ALL, H5P_DEFAULT, &rdata);
     CHECK(ret, FAIL, "H5Dread");
-    if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct))) {
+    if (HDmemcmp(&space4_data, &rdata, sizeof(struct space4_struct)) != 0) {
         HDprintf("scalar data different: space4_data.c1=%c, read_data4.c1=%c\n", space4_data.c1, rdata.c1);
         HDprintf("scalar data different: space4_data.u=%u, read_data4.u=%u\n", space4_data.u, rdata.u);
         HDprintf("scalar data different: space4_data.f=%f, read_data4.f=%f\n", (double)space4_data.f,
@@ -2473,11 +2473,11 @@ test_h5s_compound_scalar_read(void)
     /* Close file */
     ret = H5Fclose(fid1);
     CHECK(ret, FAIL, "H5Fclose");
-} /* test_h5s_compound_scalar_read() */
+} /* end test_h5s_compound_scalar_read() */
 
-/* Data arrays for chunk test */
-double chunk_data_dbl[50000][3];
-float  chunk_data_flt[50000][3];
+/* Data array sizes for chunk test */
+#define CHUNK_DATA_NX 50000
+#define CHUNK_DATA_NY 3
 
 /****************************************************************
 **
@@ -2489,13 +2489,32 @@ float  chunk_data_flt[50000][3];
 static void
 test_h5s_chunk(void)
 {
-    herr_t  status;
-    hid_t   fileID, dsetID;
-    hid_t   plist_id;
-    hid_t   space_id;
-    hsize_t dims[2];
-    hsize_t csize[2];
-    int     i, j;
+    herr_t   status;
+    hid_t    fileID, dsetID;
+    hid_t    plist_id;
+    hid_t    space_id;
+    hsize_t  dims[2];
+    hsize_t  csize[2];
+    double **chunk_data_dbl      = NULL;
+    double * chunk_data_dbl_data = NULL;
+    float ** chunk_data_flt      = NULL;
+    float *  chunk_data_flt_data = NULL;
+    int      i, j;
+
+    /* Allocate memory */
+    chunk_data_dbl_data = (double *)HDcalloc(CHUNK_DATA_NX * CHUNK_DATA_NY, sizeof(double));
+    CHECK_PTR(chunk_data_dbl_data, "HDcalloc");
+    chunk_data_dbl = (double **)HDcalloc(CHUNK_DATA_NX, sizeof(chunk_data_dbl_data));
+    CHECK_PTR(chunk_data_dbl, "HDcalloc");
+    for (i = 0; i < CHUNK_DATA_NX; i++)
+        chunk_data_dbl[i] = chunk_data_dbl_data + (i * CHUNK_DATA_NY);
+
+    chunk_data_flt_data = (float *)HDcalloc(CHUNK_DATA_NX * CHUNK_DATA_NY, sizeof(float));
+    CHECK_PTR(chunk_data_flt_data, "HDcalloc");
+    chunk_data_flt = (float **)HDcalloc(CHUNK_DATA_NX, sizeof(chunk_data_flt_data));
+    CHECK_PTR(chunk_data_flt, "HDcalloc");
+    for (i = 0; i < CHUNK_DATA_NX; i++)
+        chunk_data_flt[i] = chunk_data_flt_data + (i * CHUNK_DATA_NY);
 
     fileID = H5Fcreate(DATAFILE, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fileID, FAIL, "H5Fcreate");
@@ -2503,14 +2522,14 @@ test_h5s_chunk(void)
     plist_id = H5Pcreate(H5P_DATASET_CREATE);
     CHECK(plist_id, FAIL, "H5Pcreate");
 
-    csize[0] = 50000;
-    csize[1] = 3;
+    csize[0] = CHUNK_DATA_NX;
+    csize[1] = CHUNK_DATA_NY;
     status   = H5Pset_chunk(plist_id, 2, csize);
     CHECK(status, FAIL, "H5Pset_chunk");
 
     /* Create the dataspace */
-    dims[0]  = 50000;
-    dims[1]  = 3;
+    dims[0]  = CHUNK_DATA_NX;
+    dims[1]  = CHUNK_DATA_NY;
     space_id = H5Screate_simple(2, dims, NULL);
     CHECK(space_id, FAIL, "H5Screate_simple");
 
@@ -2518,11 +2537,11 @@ test_h5s_chunk(void)
     CHECK(dsetID, FAIL, "H5Dcreate2");
 
     /* Initialize float array */
-    for (i = 0; i < 50000; i++)
-        for (j = 0; j < 3; j++)
+    for (i = 0; i < CHUNK_DATA_NX; i++)
+        for (j = 0; j < CHUNK_DATA_NY; j++)
             chunk_data_flt[i][j] = (float)(i + 1) * 2.5F - (float)j * 100.3F;
 
-    status = H5Dwrite(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
+    status = H5Dwrite(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt_data);
     CHECK(status, FAIL, "H5Dwrite");
 
     status = H5Pclose(plist_id);
@@ -2535,17 +2554,17 @@ test_h5s_chunk(void)
     CHECK(status, FAIL, "H5Fclose");
 
     /* Reset/initialize the data arrays to read in */
-    HDmemset(chunk_data_dbl, 0, sizeof(double) * 50000 * 3);
-    HDmemset(chunk_data_flt, 0, sizeof(float) * 50000 * 3);
+    HDmemset(chunk_data_dbl_data, 0, sizeof(double) * CHUNK_DATA_NX * CHUNK_DATA_NY);
+    HDmemset(chunk_data_flt_data, 0, sizeof(float) * CHUNK_DATA_NX * CHUNK_DATA_NY);
 
     fileID = H5Fopen(DATAFILE, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fileID, FAIL, "H5Fopen");
     dsetID = H5Dopen2(fileID, "coords", H5P_DEFAULT);
     CHECK(dsetID, FAIL, "H5Dopen2");
 
-    status = H5Dread(dsetID, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_dbl);
+    status = H5Dread(dsetID, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_dbl_data);
     CHECK(status, FAIL, "H5Dread");
-    status = H5Dread(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt);
+    status = H5Dread(dsetID, H5T_NATIVE_FLOAT, H5S_ALL, H5S_ALL, H5P_DEFAULT, chunk_data_flt_data);
     CHECK(status, FAIL, "H5Dread");
 
     status = H5Dclose(dsetID);
@@ -2553,15 +2572,20 @@ test_h5s_chunk(void)
     status = H5Fclose(fileID);
     CHECK(status, FAIL, "H5Fclose");
 
-    for (i = 0; i < 50000; i++) {
-        for (j = 0; j < 3; j++) {
+    for (i = 0; i < CHUNK_DATA_NX; i++) {
+        for (j = 0; j < CHUNK_DATA_NY; j++) {
             /* Check if the two values are within 0.001% range. */
-            if (!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], (double)chunk_data_flt[i][j], (double)0.00001F))
+            if (!H5_DBL_REL_EQUAL(chunk_data_dbl[i][j], (double)chunk_data_flt[i][j], 0.00001))
                 TestErrPrintf("%u: chunk_data_dbl[%d][%d]=%e, chunk_data_flt[%d][%d]=%e\n",
                               (unsigned)__LINE__, i, j, chunk_data_dbl[i][j], i, j,
                               (double)chunk_data_flt[i][j]);
         } /* end for */
     }     /* end for */
+
+    HDfree(chunk_data_dbl);
+    HDfree(chunk_data_dbl_data);
+    HDfree(chunk_data_flt);
+    HDfree(chunk_data_flt_data);
 } /* test_h5s_chunk() */
 
 /****************************************************************
@@ -3280,7 +3304,7 @@ test_versionbounds(void)
 
     /* Its version should be H5O_SDSPACE_VERSION_1 */
     spacep = (H5S_t *)H5I_object(space);
-    CHECK(spacep, NULL, "H5I_object");
+    CHECK_PTR(spacep, "H5I_object");
     VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
 
     /* Set high bound to V18 */
@@ -3301,7 +3325,7 @@ test_versionbounds(void)
         dset_space = H5Dget_space(dset);
         CHECK(dset_space, FAIL, "H5Dget_space");
         spacep = (H5S_t *)H5I_object(dset_space);
-        CHECK(spacep, NULL, "H5I_object");
+        CHECK_PTR(spacep, "H5I_object");
 
         /* Dataspace version should remain as H5O_SDSPACE_VERSION_1 */
         VERIFY(spacep->extent.version, H5O_SDSPACE_VERSION_1, "basic dataspace version bound");
@@ -3338,7 +3362,7 @@ test_versionbounds(void)
     dset_space = H5Dget_space(dset);
     CHECK(dset_space, FAIL, "H5Dget_space");
     spacep = (H5S_t *)H5I_object(dset_space);
-    CHECK(spacep, NULL, "H5I_object");
+    CHECK_PTR(spacep, "H5I_object");
 
     /* Verify the dataspace version */
     VERIFY(spacep->extent.version, H5O_sdspace_ver_bounds[low], "upgraded dataspace version");
@@ -3427,9 +3451,9 @@ test_h5s(void)
 void
 cleanup_h5s(void)
 {
-    remove(DATAFILE);
-    remove(NULLFILE);
-    remove(BASICFILE);
-    remove(ZEROFILE);
-    remove(VERBFNAME);
+    HDremove(DATAFILE);
+    HDremove(NULLFILE);
+    HDremove(BASICFILE);
+    HDremove(ZEROFILE);
+    HDremove(VERBFNAME);
 }

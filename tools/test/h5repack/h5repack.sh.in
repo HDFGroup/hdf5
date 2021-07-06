@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -92,10 +92,18 @@ $SRC_H5REPACK_TESTFILES/h5repack_attr_refs.h5
 $SRC_H5REPACK_TESTFILES/h5repack_deflate.h5
 $SRC_H5REPACK_TESTFILES/h5repack_early.h5
 $SRC_H5REPACK_TESTFILES/h5repack_ext.h5
+$SRC_H5REPACK_TESTFILES/h5repack_f32le.h5
+$SRC_H5REPACK_TESTFILES/h5repack_f32le_ex.h5
 $SRC_H5REPACK_TESTFILES/h5repack_fill.h5
 $SRC_H5REPACK_TESTFILES/h5repack_filters.h5
 $SRC_H5REPACK_TESTFILES/h5repack_fletcher.h5
 $SRC_H5REPACK_TESTFILES/h5repack_hlink.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_1d.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_1d_ex.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_2d.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_2d_ex.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_3d.h5
+$SRC_H5REPACK_TESTFILES/h5repack_int32le_3d_ex.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layouto.h5
 $SRC_H5REPACK_TESTFILES/h5repack_layout2.h5
@@ -109,23 +117,29 @@ $SRC_H5REPACK_TESTFILES/h5repack_refs.h5
 $SRC_H5REPACK_TESTFILES/h5repack_shuffle.h5
 $SRC_H5REPACK_TESTFILES/h5repack_soffset.h5
 $SRC_H5REPACK_TESTFILES/h5repack_szip.h5
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be.h5
+$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex.h5
+########fsm#files########
 $SRC_H5REPACK_TESTFILES/h5repack_aggr.h5
 $SRC_H5REPACK_TESTFILES/h5repack_fsm_aggr_nopersist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_fsm_aggr_persist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_none.h5
 $SRC_H5REPACK_TESTFILES/h5repack_paged_nopersist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_paged_persist.h5
-$SRC_H5REPACK_TESTFILES/h5repack_f32le.h5
-$SRC_H5REPACK_TESTFILES/h5repack_f32le_ex.h5
-$SRC_H5REPACK_TESTFILES/h5repack_int32le_1d.h5
-$SRC_H5REPACK_TESTFILES/h5repack_int32le_1d_ex.h5
-$SRC_H5REPACK_TESTFILES/h5repack_int32le_2d.h5
-$SRC_H5REPACK_TESTFILES/h5repack_int32le_2d_ex.h5
-$SRC_H5REPACK_TESTFILES/h5repack_int32le_3d.h5
-$SRC_H5REPACK_TESTFILES/h5repack_int32le_3d_ex.h5
-$SRC_H5REPACK_TESTFILES/h5repack_uint8be.h5
-$SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex.h5
+########h5diff/testfile########
 $SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
+########test#HDFFV-10590########
+$SRC_H5REPACK_TESTFILES/h5repack_CVE-2018-17432.h5
+$SRC_H5REPACK_TESTFILES/h5repack_CVE-2018-14460.h5
+########tools/testfiles#for#external#links########
+$SRC_TOOLS_TESTFILES/tsoftlinks.h5
+$SRC_TOOLS_TESTFILES/textlinkfar.h5
+$SRC_TOOLS_TESTFILES/textlinksrc.h5
+$SRC_TOOLS_TESTFILES/textlinktar.h5
+$SRC_TOOLS_TESTFILES/textlink.h5
+$SRC_H5REPACK_TESTFILES/h5copy_extlinks_src.h5
+$SRC_H5REPACK_TESTFILES/h5copy_extlinks_trg.h5
+########tools/testfiles########
 $SRC_TOOLS_TESTFILES/tfamily00000.h5
 $SRC_TOOLS_TESTFILES/tfamily00001.h5
 $SRC_TOOLS_TESTFILES/tfamily00002.h5
@@ -138,6 +152,8 @@ $SRC_TOOLS_TESTFILES/tfamily00008.h5
 $SRC_TOOLS_TESTFILES/tfamily00009.h5
 $SRC_TOOLS_TESTFILES/tfamily00010.h5
 $SRC_TOOLS_TESTFILES/tordergr.h5
+########reference#conversion#files########
+########tools/testfiles/vds########
 $SRC_TOOLS_TESTFILES/vds/1_a.h5
 $SRC_TOOLS_TESTFILES/vds/1_b.h5
 $SRC_TOOLS_TESTFILES/vds/1_c.h5
@@ -168,33 +184,73 @@ $SRC_H5REPACK_TESTFILES/h5repack-help.txt
 $SRC_H5REPACK_TESTFILES/h5repack_ext.bin
 $SRC_H5REPACK_TESTFILES/ublock.bin
 $SRC_H5REPACK_TESTFILES/h5repack.info
-$SRC_H5REPACK_TESTFILES/crtorder.tordergr.h5.ddl
-$SRC_H5REPACK_TESTFILES/deflate_limit.h5repack_layout.h5.ddl
+########dat#files########
 $SRC_H5REPACK_TESTFILES/h5repack_f32le_ex-0.dat
 $SRC_H5REPACK_TESTFILES/h5repack_int32le_1d_ex-0.dat
 $SRC_H5REPACK_TESTFILES/h5repack_int32le_1d_ex-1.dat
 $SRC_H5REPACK_TESTFILES/h5repack_int32le_2d_ex-0.dat
 $SRC_H5REPACK_TESTFILES/h5repack_int32le_3d_ex-0.dat
-$SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
-$SRC_H5REPACK_TESTFILES/h5repack_filters.h5-gzip_verbose_filters.tst
-$SRC_H5REPACK_TESTFILES/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
-$SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-0.dat
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-1.dat
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-2.dat
 $SRC_H5REPACK_TESTFILES/h5repack_uint8be_ex-3.dat
-$SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
-$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
-$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_chunk3x6x9-v.ddl
-$SRC_H5REPACK_TESTFILES/3_1_vds.h5-vds_chunk2x5x8-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa-v.ddl
-$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti-v.ddl
+###############
+$SRC_H5REPACK_TESTFILES/crtorder.tordergr.h5.ddl
+$SRC_H5REPACK_TESTFILES/deflate_limit.h5repack_layout.h5.ddl
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5.ddl
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5-plugin_test.ddl
+########fsm#files########
 $SRC_H5REPACK_TESTFILES/SP.h5repack_fsm_aggr_nopersist.h5.ddl
 $SRC_H5REPACK_TESTFILES/S.h5repack_fsm_aggr_persist.h5.ddl
 $SRC_H5REPACK_TESTFILES/STG.h5repack_none.h5.ddl
 $SRC_H5REPACK_TESTFILES/GS.h5repack_paged_nopersist.h5.ddl
 $SRC_H5REPACK_TESTFILES/SP.h5repack_paged_persist.h5.ddl
 $SRC_H5REPACK_TESTFILES/SPT.h5repack_aggr.h5.ddl
+########vds#files########
+$SRC_H5REPACK_TESTFILES/1_vds.h5-vds_dset_chunk20x10x5-v.ddl
+$SRC_H5REPACK_TESTFILES/2_vds.h5-vds_chunk3x6x9-v.ddl
+$SRC_H5REPACK_TESTFILES/3_1_vds.h5-vds_chunk2x5x8-v.ddl
+$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_compa-v.ddl
+$SRC_H5REPACK_TESTFILES/4_vds.h5-vds_conti-v.ddl
+########refs#files########
+$SRC_H5REPACK_TESTFILES/attrregion.tattrreg.h5.ddl
+$SRC_H5REPACK_TESTFILES/dataregion.tdatareg.h5.ddl
+########external#links#files########
+$SRC_H5REPACK_TESTFILES/textlinkfar-base.textlinkfar.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlinksrc-base.textlinksrc.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlinktar-base.textlinktar.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlink-base.textlink.h5.ddl
+$SRC_H5REPACK_TESTFILES/tsoftlinks-base.tsoftlinks.h5.ddl
+$SRC_H5REPACK_TESTFILES/h5copy_extlinks_src-base.h5copy_extlinks_src.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlinkfar-merge.textlinkfar.h5.tst
+$SRC_H5REPACK_TESTFILES/textlinksrc-merge.textlinksrc.h5.tst
+$SRC_H5REPACK_TESTFILES/textlinktar-merge.textlinktar.h5.tst
+$SRC_H5REPACK_TESTFILES/textlink-merge.textlink.h5.tst
+$SRC_H5REPACK_TESTFILES/tsoftlinks-merge.tsoftlinks.h5.tst
+$SRC_H5REPACK_TESTFILES/h5copy_extlinks_src-merge.h5copy_extlinks_src.h5.tst
+$SRC_H5REPACK_TESTFILES/textlinkfar-prune.textlinkfar.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlinksrc-prune.textlinksrc.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlinktar-prune.textlinktar.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlink-prune.textlink.h5.ddl
+$SRC_H5REPACK_TESTFILES/tsoftlinks-prune.tsoftlinks.h5.ddl
+$SRC_H5REPACK_TESTFILES/h5copy_extlinks_src-prune.h5copy_extlinks_src.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlinkfar-mergeprune.textlinkfar.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlinksrc-mergeprune.textlinksrc.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlinktar-mergeprune.textlinktar.h5.ddl
+$SRC_H5REPACK_TESTFILES/textlink-mergeprune.textlink.h5.ddl
+$SRC_H5REPACK_TESTFILES/tsoftlinks-mergeprune.tsoftlinks.h5.ddl
+$SRC_H5REPACK_TESTFILES/h5copy_extlinks_src-mergeprune.h5copy_extlinks_src.h5.ddl
+########tst#files########
+$SRC_H5REPACK_TESTFILES/h5repack_filters.h5-gzip_verbose_filters.tst
+$SRC_H5REPACK_TESTFILES/h5repack_layout.h5-dset2_chunk_20x10-errstk.tst
+$SRC_H5REPACK_TESTFILES/plugin_test.h5repack_layout.h5.tst
+########external#links#tst#files########
+$SRC_H5REPACK_TESTFILES/tsoftlinks-merge.tsoftlinks.h5.tst
+$SRC_H5REPACK_TESTFILES/textlinkfar-merge.textlinkfar.h5.tst
+$SRC_H5REPACK_TESTFILES/textlinksrc-merge.textlinksrc.h5.tst
+$SRC_H5REPACK_TESTFILES/textlinktar-merge.textlinktar.h5.tst
+$SRC_H5REPACK_TESTFILES/textlink-merge.textlink.h5.tst
+$SRC_H5REPACK_TESTFILES/h5copy_extlinks_src-merge.h5copy_extlinks_src.h5.tst
 "
 
 #
@@ -270,6 +326,12 @@ SKIP() {
     TESTING $H5REPACK $@
     echo " -SKIP-"
 }
+
+##############################################################################
+##############################################################################
+###           T H E   T E S T S  M A C R O S                               ###
+##############################################################################
+##############################################################################
 
 # Call the h5diff tool
 #
@@ -620,6 +682,7 @@ VERIFY_INVALIDBOUNDS()
 
 # -----------------------------------------------------------------------------
 # Expect h5diff to fail
+# Use only by VERIFY_EXTERNAL_CONSOLIDATION
 # -----------------------------------------------------------------------------
 DIFFFAIL()
 {
@@ -629,7 +692,7 @@ DIFFFAIL()
         $RUNSERIAL $H5DIFF_BIN -q  "$@"
     )
     RET=$?
-    if [ $RET == 0 ] ; then
+    if [ $RET -eq 0 ] ; then
          echo "*FAILED*"
          nerrors="`expr $nerrors + 1`"
     else
@@ -745,7 +808,7 @@ TOOLTEST1()
     TESTING $H5REPACK $@
     (
         cd $TESTDIR
-        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
     )
     RET=$?
     if [ $RET != 0 ] ; then
@@ -785,6 +848,149 @@ TOOLTESTV()
     else
     echo " PASSED"
     DIFFTEST $infile $outfile
+    fi
+
+    # display output compare
+    STDOUT_FILTER $actual
+    cat $actual_err >> $actual
+
+    VERIFY output from $H5REPACK $@
+    if cmp -s $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.tst) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
+    fi
+
+   rm -f $actual $actual_err
+   rm -f $outfile
+}
+
+# Same as TOOLTEST, but expects h5repack fails
+#
+TOOLTEST_FAIL()
+{
+    infile=$1
+    outfile=$2
+    expect="$TESTDIR/$2-$1.ddl"
+    actual="$TESTDIR/$2-$1.out"
+    actual_err="$TESTDIR/$2-$1.err"
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >$actual
+    RET=$?
+    if [ $RET == 0 ] ; then
+        nerrors="`expr $nerrors + 1`"
+        echo " FAILED"
+    else
+        echo " PASSED"
+    fi
+    rm -f $outfile
+}
+
+# This is same as TOOLTESTV() with comparing display output
+# with actual filename swapped
+#
+TOOLTESTSV()
+{
+    expect="$TESTDIR/$1.$2.tst"
+    actual="$TESTDIR/`basename $2 .ddl`.out"
+    actual_err="$TESTDIR/`basename $2 .ddl`.err"
+
+    infile=$2
+    outfile=out-$1.$2
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >$actual 2>$actual_err
+    RET=$?
+    if [ $RET != 0 ] ; then
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
+    else
+    echo " PASSED"
+    VERIFY h5diff equal $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5DIFF_BIN -v $infile $outfile
+    ) >$actual 2>$actual_err
+    RET=$?
+    if [ $RET != 0 ] ; then
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
+    fi
+    fi
+
+    # display output compare
+    STDOUT_FILTER $actual
+    cat $actual_err >> $actual
+
+    VERIFY output from $H5REPACK $@
+    if cmp -s $expect $actual; then
+     echo " PASSED"
+    else
+     echo "*FAILED*"
+     echo "    Expected result (*.tst) differs from actual result (*.out)"
+     nerrors="`expr $nerrors + 1`"
+     test yes = "$verbose" && diff -c $expect $actual |sed 's/^/    /'
+    fi
+
+   rm -f $actual $actual_err
+   rm -f $outfile
+}
+
+# This is same as TOOLTESTSV() but expects a diff fail
+#
+TOOLFAILSV()
+{
+    expect="$TESTDIR/$1.$2.tst"
+    actual="$TESTDIR/`basename $2 .ddl`.out"
+    actual_err="$TESTDIR/`basename $2 .ddl`.err"
+
+    infile=$2
+    outfile=out-$1.$2
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >$actual 2>$actual_err
+    RET=$?
+    if [ $RET != 0 ] ; then
+    echo "*FAILED*"
+    nerrors="`expr $nerrors + 1`"
+    else
+    echo " PASSED"
+    VERIFY h5diff unequal $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5DIFF_BIN -v $infile $outfile
+    ) >$actual 2>$actual_err
+    RET=$?
+    if [ $RET == 0 ] ; then
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
+    fi
     fi
 
     # display output compare
@@ -1356,44 +1562,28 @@ TOOLTEST_STAT SPT $arg
 # layout options (these files have no filters)
 #########################################################
 VERIFY_LAYOUT_DSET dset2_chunk_20x10 h5repack_layout.h5 dset2 CHUNKED --layout dset2:CHUNK=20x10
-
 VERIFY_LAYOUT_ALL chunk_20x10 h5repack_layout.h5 CHUNKED -l CHUNK=20x10
-
 VERIFY_LAYOUT_DSET dset2_conti h5repack_layout.h5 dset2 CONTIGUOUS -l dset2:CONTI
-
 VERIFY_LAYOUT_ALL conti h5repack_layout.h5 CONTIGUOUS -l CONTI
-
 VERIFY_LAYOUT_DSET dset2_compa h5repack_layout.h5 dset2 COMPACT -l dset2:COMPA
-
 VERIFY_LAYOUT_ALL compa h5repack_layout.h5 COMPACT -l COMPA
-
 TOOLTESTM dset2_chunk_20x10-errstk h5repack_layout.h5 --layout=dset2:CHUNK=20x10x5 --enable-error-stack
 
 ################################################################
 # layout conversions (file has no filters)
 ###############################################################
-
 VERIFY_LAYOUT_DSET dset_compa_conti h5repack_layout.h5 dset_compact CONTIGUOUS -l dset_compact:CONTI
-
 VERIFY_LAYOUT_DSET dset_compa_chunk h5repack_layout.h5 dset_compact CHUNKED -l dset_compact:CHUNK=2x5
-
 VERIFY_LAYOUT_DSET dset_compa_compa h5repack_layout.h5 dset_compact COMPACT -l dset_compact:COMPA
-
 VERIFY_LAYOUT_DSET dset_conti_compa h5repack_layout.h5 dset_contiguous COMPACT -l dset_contiguous:COMPA
-
 VERIFY_LAYOUT_DSET dset_conti_chunk h5repack_layout.h5 dset_contiguous CHUNKED -l dset_contiguous:CHUNK=3x6
-
 VERIFY_LAYOUT_DSET dset_conti_conti h5repack_layout.h5 dset_contiguous CONTIGUOUS -l dset_contiguous:CONTI
-
 VERIFY_LAYOUT_DSET chunk_compa h5repack_layout.h5 dset_chunk COMPACT -l dset_chunk:COMPA
-
 VERIFY_LAYOUT_DSET chunk_conti h5repack_layout.h5 dset_chunk CONTIGUOUS -l dset_chunk:CONTI
-
 VERIFY_LAYOUT_DSET chunk_18x13 h5repack_layout.h5 dset_chunk CHUNKED -l dset_chunk:CHUNK=18x13
 
 # test convert small size dataset ( < 1k) to compact layout without -m
 VERIFY_LAYOUT_DSET contig_small_compa h5repack_layout2.h5 contig_small COMPACT -l contig_small:COMPA
-
 VERIFY_LAYOUT_DSET contig_small_fixed_compa h5repack_layout2.h5 chunked_small_fixed COMPACT -l chunked_small_fixed:COMPA
 
 #---------------------------------------------------------------------------
@@ -1421,6 +1611,7 @@ VERIFY_LAYOUT_DSET chunk2compa h5repack_layout3.h5 chunk_unlimit1 CHUNK -l chunk
 # chunk dim is bigger than dataset dim. ( dset size < 64k )
 VERIFY_LAYOUT_DSET error1 h5repack_layout3.h5 chunk_unlimit1 H5S_UNLIMITED -f chunk_unlimit1:NONE
 # chunk dim is bigger than dataset dim. ( dset size > 64k )
+
 VERIFY_LAYOUT_DSET error2 h5repack_layout3.h5 chunk_unlimit2 H5S_UNLIMITED -f chunk_unlimit2:NONE
 
 # chunk dims are smaller than dataset dims. ( dset size < 64k )
@@ -1435,7 +1626,6 @@ TOOLTEST error4 h5repack_layout3.h5 -f NONE
 # (dset size < 64K) and with unlimited max dims on a condition as follow.
 # (HDFFV-8214)
 #--------------------------------------------------------------------------
-
 # chunk dim is bigger than dataset dim. should succeed.
 VERIFY_LAYOUT_DSET ckdim_biger h5repack_layout3.h5 chunk_unlimit2 CONTI -l chunk_unlimit2:CONTI
 # chunk dim is smaller than dataset dim. should succeed.
@@ -1466,7 +1656,6 @@ else
 fi
 
 # several global filters
-
 arg="h5repack_layout.h5 --filter GZIP=1 --filter SHUF"
 if test $USE_FILTER_DEFLATE != "yes" ; then
  SKIP $arg
@@ -1523,6 +1712,14 @@ TOOLTEST HDFFV-5932 h5repack_attr_refs.h5
 # Note: this test is experimental for sharing test file among tools
 TOOLTEST HDFFV-7840 h5diff_attr1.h5
 
+# test HDFFV-10590
+arg="h5repack_CVE-2018-17432.h5 h5repack_CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6"
+TOOLTEST_FAIL $arg
+
+# test HDFFV-11223
+arg="h5repack_CVE-2018-14460.h5 h5repack_CVE-2018-14460_out.h5"
+TOOLTEST_FAIL $arg
+
 # tests for metadata block size option
 TOOLTEST_META meta_short h5repack_layout.h5 -M 8192
 TOOLTEST_META meta_long h5repack_layout.h5 --metadata_block_size=8192
@@ -1562,9 +1759,15 @@ else
  VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 fi
 
-#########################################################
-# Testing version bounds
-#########################################################
+################################################################
+# reference new api conversions
+###############################################################
+#TOOLTEST_DUMP attrregion tattrreg.h5
+#TOOLTEST_DUMP dataregion tdatareg.h5
+
+##############################################################################
+###    V E R S I O N  B O U N D S  T E S T S
+##############################################################################
 # -j 0 -k 2, superblock will be 0
 VERIFY_SUPERBLOCK 0 2 0 h5repack_layout.h5 -j 0 -k 2 h5repack_layout.h5
 # -j 1 -k 2, superblock will be 2
@@ -1574,10 +1777,48 @@ VERIFY_SUPERBLOCK 2 2 3 h5repack_layout.h5 -j 2 -k 2 h5repack_layout.h5
 # -j 0 -k 1, file cannot be opened
 VERIFY_INVALIDBOUNDS 0 1 bounds_latest_latest.h5
 
-########################################
-# Testing external storage
-########################################
+##############################################################################
+###    E X T E R N A L  S T O R A G E  T E S T S
+##############################################################################
 VERIFY_EXTERNAL_CONSOLIDATION -l CONTI
+
+##############################################################################
+###    E X T E R N A L  L I N K  T E S T S
+##############################################################################
+### HDFFV-11128 needs fixed to enable the following test
+#TOOLTEST_DUMP h5copy_extlinks_src-base h5copy_extlinks_src.h5 --enable-error-stack
+TOOLTEST_DUMP tsoftlinks-base tsoftlinks.h5 --enable-error-stack
+TOOLTEST_DUMP textlink-base textlink.h5 --enable-error-stack
+TOOLTEST_DUMP textlinkfar-base textlinkfar.h5 --enable-error-stack
+TOOLTEST_DUMP textlinksrc-base textlinksrc.h5 --enable-error-stack
+TOOLTEST_DUMP textlinktar-base textlinktar.h5 --enable-error-stack
+
+TOOLTESTSV h5copy_extlinks_src-merge h5copy_extlinks_src.h5 --merge
+TOOLFAILSV tsoftlinks-merge tsoftlinks.h5 --merge
+TOOLTESTSV textlink-merge textlink.h5 --merge
+### HDFFV-11128 needs fixed to enable the following test
+#TOOLFAILSV textlinkfar-merge textlinkfar.h5 --merge
+### HDFFV-11128 needs fixed to enable the following test
+#TOOLFAILSV textlinksrc-merge textlinksrc.h5 --merge
+### HDFFV-11128 needs fixed to enable the following test
+#TOOLFAILSV textlinktar-merge textlinktar.h5 --merge
+
+TOOLTEST_DUMP h5copy_extlinks_src-prune h5copy_extlinks_src.h5 --prune --enable-error-stack
+TOOLTEST_DUMP tsoftlinks-prune tsoftlinks.h5 --prune --enable-error-stack
+TOOLTEST_DUMP textlink-prune textlink.h5 --prune --enable-error-stack
+TOOLTEST_DUMP textlinkfar-prune textlinkfar.h5 --prune --enable-error-stack
+TOOLTEST_DUMP textlinksrc-prune textlinksrc.h5 --prune --enable-error-stack
+TOOLTEST_DUMP textlinktar-prune textlinktar.h5 --prune --enable-error-stack
+
+TOOLTEST_DUMP h5copy_extlinks_src-mergeprune h5copy_extlinks_src.h5 --merge --prune --enable-error-stack
+TOOLTEST_DUMP tsoftlinks-mergeprune tsoftlinks.h5 --merge --prune --enable-error-stack
+TOOLTEST_DUMP textlink-mergeprune textlink.h5 --merge --prune --enable-error-stack
+### HDFFV-11128 needs fixed to enable the following test
+#TOOLTEST_DUMP textlinkfar-mergeprune textlinkfar.h5 --merge --prune --enable-error-stack
+### HDFFV-11128 needs fixed to enable the following test
+#TOOLTEST_DUMP textlinksrc-mergeprune textlinksrc.h5 --merge --prune --enable-error-stack
+### HDFFV-11128 needs fixed to enable the following test
+#TOOLTEST_DUMP textlinktar-mergeprune textlinktar.h5 --merge --prune --enable-error-stack
 
 # Clean up temporary files/directories
 CLEAN_TESTFILES_AND_TESTDIR

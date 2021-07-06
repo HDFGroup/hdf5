@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -24,8 +24,14 @@
 
 const char *FILENAME[] = {"efc0", "efc1", "efc2", "efc3", "efc4", "efc5", NULL};
 
+/* Windows doesn't have PATH_MAX */
+#ifndef PATH_MAX
+#define PATH_MAX 4096
+#endif /* !PATH_MAX */
+
 /* Global patched filename buffer */
-static char filename[6][128];
+#define N_FILENAMES 6
+static char *filename[N_FILENAMES];
 
 /* Global property lists - just copies of the defaults (necessary to use
  * internal functions */
@@ -2647,8 +2653,9 @@ main(void)
 {
     unsigned              nerrors = 0;            /* track errors */
     H5P_genplist_t *      plist;                  /* Property list pointer for FAPL */
-    H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info        */
+    H5VL_connector_prop_t connector_prop;         /* Property for VOL connector ID & info */
     hbool_t               api_ctx_pushed = FALSE; /* Whether API context pushed */
+    int                   i;                      /* iterator */
 
     /* Test Setup */
     HDputs("Testing the external file cache");
@@ -2657,13 +2664,18 @@ main(void)
     fcpl_id = H5Pcreate(H5P_FILE_CREATE);
     fapl_id = h5_fileaccess();
 
+    /* Allocate memory for filenames */
+    for (i = 0; i < N_FILENAMES; i++) {
+        filename[i] = (char *)HDcalloc(PATH_MAX, sizeof(char));
+    }
+
     /* Patch filenames */
-    h5_fixname(FILENAME[0], fapl_id, filename[0], sizeof(filename[0]));
-    h5_fixname(FILENAME[1], fapl_id, filename[1], sizeof(filename[1]));
-    h5_fixname(FILENAME[2], fapl_id, filename[2], sizeof(filename[2]));
-    h5_fixname(FILENAME[3], fapl_id, filename[3], sizeof(filename[3]));
-    h5_fixname(FILENAME[4], fapl_id, filename[4], sizeof(filename[4]));
-    h5_fixname(FILENAME[5], fapl_id, filename[5], sizeof(filename[5]));
+    h5_fixname(FILENAME[0], fapl_id, filename[0], PATH_MAX);
+    h5_fixname(FILENAME[1], fapl_id, filename[1], PATH_MAX);
+    h5_fixname(FILENAME[2], fapl_id, filename[2], PATH_MAX);
+    h5_fixname(FILENAME[3], fapl_id, filename[3], PATH_MAX);
+    h5_fixname(FILENAME[4], fapl_id, filename[4], PATH_MAX);
+    h5_fixname(FILENAME[5], fapl_id, filename[5], PATH_MAX);
 
     /* Push API context */
     if (H5CX_push() < 0)
@@ -2703,6 +2715,10 @@ main(void)
 
     h5_clean_files(FILENAME, fapl_id);
 
+    for (i = 0; i < N_FILENAMES; i++) {
+        HDfree(filename[i]);
+    }
+
     return EXIT_SUCCESS;
 
 error:
@@ -2716,6 +2732,10 @@ error:
 
     if (api_ctx_pushed)
         H5CX_pop();
+
+    for (i = 0; i < N_FILENAMES; i++) {
+        HDfree(filename[i]);
+    }
 
     return EXIT_FAILURE;
 } /* end main() */

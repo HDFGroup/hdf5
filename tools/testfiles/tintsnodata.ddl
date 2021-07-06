@@ -6,7 +6,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE
@@ -35,7 +35,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE
@@ -64,7 +64,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE
@@ -101,7 +101,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE
@@ -154,7 +154,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE
@@ -183,7 +183,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE
@@ -212,7 +212,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE
@@ -249,7 +249,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE
@@ -302,7 +302,7 @@ GROUP "/" {
       STORAGE_LAYOUT {
          CONTIGUOUS
          SIZE 0
-         OFFSET 18446744073709551615
+         OFFSET HADDR_UNDEF
       }
       FILTERS {
          NONE

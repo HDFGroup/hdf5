@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -53,7 +53,7 @@ fi
 )
 
 # Where the tool is installed.
-# default is relative path to installed location of the tools 
+# default is relative path to installed location of the tools
 prefix="${prefix:-../${prefix_relto_examplesdir}}"
 PARALLEL=@PARALLEL@             # Am I in parallel mode?
 AR="@AR@"
@@ -149,6 +149,11 @@ then
         rm h5_extlink &&\
         RunTest h5_elink_unix2win &&\
         rm h5_elink_unix2win &&\
+        OLD_DEBUG_STRING=$HDF5_DEBUG &&\
+        export HDF5_DEBUG="+all +trace +ttimes" &&\
+        RunTest h5_debug_trace &&\
+        HDF5_DEBUG=$OLD_DEBUG_STRING &&\
+        rm h5_debug_trace &&\
         RunTest h5_shared_mesg &&\
         rm h5_shared_mesg &&\
         RunTest h5_vds-eiger &&\
@@ -179,5 +184,5 @@ rm *.h5
 rm -rf red blue u2w
 echo
 
-exit $EXIT_VALUE 
+exit $EXIT_VALUE
 

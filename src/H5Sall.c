@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, June 16, 1998
  *
  * Purpose:	"All" selection dataspace I/O functions.
@@ -28,7 +28,7 @@
 /* Headers */
 /***********/
 #include "H5private.h"   /* Generic Functions                        */
-#include "H5Eprivate.h"  /* Error handling			    */
+#include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Iprivate.h"  /* ID Functions                             */
 #include "H5Spkg.h"      /* Dataspace functions                      */
 #include "H5VMprivate.h" /* Vector functions                         */
@@ -576,7 +576,7 @@ H5S__all_serial_size(const H5S_t H5_ATTR_UNUSED *space)
  PURPOSE
     Serialize the current selection into a user-provided buffer.
  USAGE
-    herr_t H5S_all_serialize(space, p)
+    herr_t H5S__all_serialize(space, p)
         const H5S_t *space;     IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
@@ -665,6 +665,9 @@ H5S__all_deserialize(H5S_t **space, const uint8_t **p)
 
     /* Decode version */
     UINT32DECODE(*p, version);
+
+    if (version < H5S_ALL_VERSION_1 || version > H5S_ALL_VERSION_LATEST)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADVALUE, FAIL, "bad version number for all selection")
 
     /* Skip over the remainder of the header */
     *p += 8;

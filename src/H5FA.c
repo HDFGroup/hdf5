@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:     H5FA.c
  *              April 2009
- *              Vailin Choi <vchoi@hdfgroup.org>
+ *              Vailin Choi
  *
  * Purpose:     Implements a Fixed Array for storing elements
  *              of datasets with fixed dimensions.
@@ -101,7 +101,6 @@ H5FL_BLK_DEFINE(fa_native_elmt);
  *              NULL on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@lbl.gov
  *		Oct 17 2016
  *
  *-------------------------------------------------------------------------
@@ -670,11 +669,6 @@ END_FUNC(PRIV) /* end H5FA_delete() */
  * Programmer:  Vailin Choi
  *              Thursday, April 30, 2009
  *
- * Modification:
- *              Prototype changed (HDFFV-10661)
- *              - herr_t to int
- *              - SUCCEED/FAIL to H5_ITER_CONT/H5_ITER_ERROR
- *              June 6, 2019 -BMR
  *-------------------------------------------------------------------------
  */
 BEGIN_FUNC(PRIV, ERR, int, H5_ITER_CONT, H5_ITER_ERROR,

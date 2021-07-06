@@ -6,29 +6,29 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke <matzke@llnl.gov>
+ * Programmer:  Robb Matzke
  *              Monday, July 26, 1999
  */
-#ifndef _H5FDprivate_H
-#define _H5FDprivate_H
+#ifndef H5FDprivate_H
+#define H5FDprivate_H
 
 /* Include package's public header */
 #include "H5FDpublic.h"
 
 /* Private headers needed by this file */
-#include "H5Pprivate.h" /* Property lists			*/
+#include "H5Pprivate.h" /* Property lists            */
 
 /*
  * The MPI drivers are needed because there are
  * places where we check for things that aren't handled by these drivers.
  */
-#include "H5FDmpi.h" /* MPI-based file drivers		*/
+#include "H5FDmpi.h" /* MPI-based file drivers        */
 
 /**************************/
 /* Library Private Macros */
@@ -46,11 +46,10 @@
 
 /* Sub-class the H5FD_class_t to add more specific functions for MPI-based VFDs */
 typedef struct H5FD_class_mpi_t {
-    H5FD_class_t super;                                    /* Superclass information & methods */
-    int (*get_rank)(const H5FD_t *file);                   /* Get the MPI rank of a process */
-    int (*get_size)(const H5FD_t *file);                   /* Get the MPI size of a communicator */
-    MPI_Comm (*get_comm)(const H5FD_t *file);              /* Get the communicator for a file */
-    herr_t (*get_mpi_info)(H5FD_t *file, void **mpi_info); /* get MPI_Info for a file */
+    H5FD_class_t super;                       /* Superclass information & methods */
+    int (*get_rank)(const H5FD_t *file);      /* Get the MPI rank of a process */
+    int (*get_size)(const H5FD_t *file);      /* Get the MPI size of a communicator */
+    MPI_Comm (*get_comm)(const H5FD_t *file); /* Get the communicator for a file */
 } H5FD_class_mpi_t;
 #endif
 
@@ -75,10 +74,16 @@ typedef struct {
 /* Define default file image info */
 #define H5FD_DEFAULT_FILE_IMAGE_INFO                                                                         \
     {                                                                                                        \
-        /* file image buffer */ NULL, /* buffer size */ 0,                                                   \
-        { /* Callbacks */                                                                                    \
-            /* image_malloc */ NULL, /* image_memcpy */ NULL, /* image_realloc */ NULL,                      \
-                /* image_free */ NULL, /* udata_copy */ NULL, /* udata_free */ NULL, /* udata */ NULL,       \
+        NULL,         /* file image buffer */                                                                \
+            0,        /* buffer size */                                                                      \
+        {             /* Callbacks */                                                                        \
+            NULL,     /* image_malloc */                                                                     \
+                NULL, /* image_memcpy */                                                                     \
+                NULL, /* image_realloc */                                                                    \
+                NULL, /* image_free */                                                                       \
+                NULL, /* udata_copy */                                                                       \
+                NULL, /* udata_free */                                                                       \
+                NULL, /* udata */                                                                            \
         }                                                                                                    \
     }
 
@@ -106,7 +111,7 @@ H5_DLL hsize_t       H5FD_sb_size(H5FD_t *file);
 H5_DLL herr_t        H5FD_sb_encode(H5FD_t *file, char *name /*out*/, uint8_t *buf);
 H5_DLL herr_t        H5FD_sb_load(H5FD_t *file, const char *name, const uint8_t *buf);
 H5_DLL void *        H5FD_fapl_get(H5FD_t *file);
-H5_DLL herr_t        H5FD_fapl_close(hid_t driver_id, const void *fapl);
+H5_DLL herr_t        H5FD_free_driver_info(hid_t driver_id, const void *driver_info);
 H5_DLL hid_t         H5FD_register(const void *cls, size_t size, hbool_t app_ref);
 H5_DLL H5FD_t *H5FD_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 H5_DLL herr_t  H5FD_close(H5FD_t *file);
@@ -152,7 +157,6 @@ H5_DLL herr_t H5FD_get_mpio_atomicity(H5FD_t *file, hbool_t *flag);
 H5_DLL int      H5FD_mpi_get_rank(const H5FD_t *file);
 H5_DLL int      H5FD_mpi_get_size(const H5FD_t *file);
 H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
-H5_DLL herr_t   H5FD_get_mpi_info(H5FD_t *file, void **file_info);
 #endif /* H5_HAVE_PARALLEL */
 
-#endif /* !_H5FDprivate_H */
+#endif /* H5FDprivate_H */

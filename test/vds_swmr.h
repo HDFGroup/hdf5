@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -94,6 +94,4 @@ H5TEST_DLLVAR char VDS_FILE_NAME[NAME_LEN];
 /* Dataset names */
 H5TEST_DLLVAR char SOURCE_DSET_PATH[NAME_LEN];
 H5TEST_DLLVAR char VDS_DSET_NAME[NAME_LEN];
-
-/* Fill values */
 #endif /* VDS_SWMR_H */

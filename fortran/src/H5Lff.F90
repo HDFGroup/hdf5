@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -64,10 +64,10 @@ MODULE H5L
 !     	H5L_TYPE_HARD 	  Hard link
 !     	H5L_TYPE_SOFT 	  Soft link
 !     	H5L_TYPE_EXTERNAL External link
-!     	H5L_TYPE_ERROR 	  Error 
+!     	H5L_TYPE_ERROR 	  Error
 !cset specifies the character set in which the link name is encoded. Valid values include the following:
 !     	H5T_CSET_ASCII 	US ASCII
-!     	H5T_CSET_UTF8   UTF-8 Unicode encoding 
+!     	H5T_CSET_UTF8   UTF-8 Unicode encoding
 
 CONTAINS
 
@@ -593,7 +593,7 @@ CONTAINS
 !  link_loc_id 	 - File or group identifier.
 !  link_name 	 - Name of the link for which information is being sought
 !
-! OUTPUTS  
+! OUTPUTS
 !            NOTE: In C these are contained in the structure H5L_info_t
 !
 !  cset 	 - indicates the character set used for link’s name.
@@ -605,8 +605,8 @@ CONTAINS
 !                    H5L_TYPE_EXTERNAL_F - External link
 !                    H5L_TYPE_ERROR_ F   - Error
 !  token 	 - If the link is a hard link, token specifies the object token that the link points to
-!  val_size 	 - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
-!                  the length of the name of the pointed-to object with a null terminator. 
+!  val_size 	 - If the link is a symbolic link, val_size will be the length of the link value, e.g.,
+!                  the length of the name of the pointed-to object with a null terminator.
 !  hdferr 	 - Returns 0 if successful and -1 if fails
 !
 ! OPTIONAL PARAMETERS
@@ -642,8 +642,8 @@ CONTAINS
      	                              !  H5L_TYPE_EXTERNAL_F  - External link
      	                              !  H5L_TYPE_ERROR _F    - Error
     TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token ! If the link is a hard link, token specifies the object token that the link points to
-    INTEGER(SIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value, e.g., 
-                                             ! the length of the name of the pointed-to object with a null terminator. 
+    INTEGER(SIZE_T), INTENT(OUT) :: val_size ! If the link is a symbolic link, val_size will be the length of the link value, e.g.,
+                                             ! the length of the name of the pointed-to object with a null terminator.
     INTEGER, INTENT(OUT) :: hdferr       ! Error code:
                                          ! 0 on success and -1 on failure
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
@@ -701,13 +701,13 @@ CONTAINS
 !  order 	 - Order within field or index
 !  n 	         - Link for which to retrieve information
 !
-! OUTPUTS  
+! OUTPUTS
 !            NOTE: In C these are defined as a structure: H5L_info_t
 !  corder_valid  - Indicates whether the creation order data is valid for this attribute
 !  corder 	 - Is a positive integer containing the creation order of the attribute
-!  cset 	 - Indicates the character set used for the attribute’s name 
+!  cset 	 - Indicates the character set used for the attribute’s name
 !  token         - If the link is a hard link, token specifies the object token that the link points to
-!  val_size      - If the link is a symbolic link, val_size will be the length of the link value, e.g., 
+!  val_size      - If the link is a symbolic link, val_size will be the length of the link value, e.g.,
 !                  the length of the name of the pointed-to object with a null terminator.
 ! hdferr 	 - Returns 0 if successful and -1 if fails
 !
@@ -723,13 +723,13 @@ CONTAINS
 !   H5L_LINK_HARD_F, H5L_LINK_SOFT_F,H5L_LINK_EXTERNAL_F,H5L_LINK_ERROR_F
 !   to
 !   H5L_TYPE_HARD_F, H5L_TYPE_SOFT_F,H5L_TYPE_EXTERNAL_F,H5L_TYPE_ERROR_F
-!   MSB January 8, 2010.  
+!   MSB January 8, 2010.
 !
 ! SOURCE
   SUBROUTINE h5lget_info_by_idx_f(loc_id, group_name, index_field, order, n, &
        link_type, f_corder_valid, corder, cset, token, val_size, hdferr, lapl_id)
     IMPLICIT NONE
-    INTEGER(HID_T), INTENT(IN) :: loc_id       ! File or group identifier specifying location of subject group  
+    INTEGER(HID_T), INTENT(IN) :: loc_id       ! File or group identifier specifying location of subject group
     CHARACTER(LEN=*), INTENT(IN) :: group_name ! Name of subject group
     INTEGER, INTENT(IN) :: index_field  ! Index or field which determines the order
                                         !    H5_INDEX_UNKNOWN_F   - Unknown index type
@@ -747,12 +747,12 @@ CONTAINS
      	                              !  H5L_TYPE_SOFT_F      - Soft link
      	                              !  H5L_TYPE_EXTERNAL_F  - External link
      	                              !  H5L_TYPE_ERROR _F    - Error
-    LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute 
+    LOGICAL, INTENT(OUT) :: f_corder_valid ! Indicates whether the creation order data is valid for this attribute
     INTEGER, INTENT(OUT) :: corder         ! Is a positive integer containing the creation order of the attribute
     INTEGER, INTENT(OUT) :: cset           ! Indicates the character set used for the attribute’s name
     TYPE(H5O_TOKEN_T_F), INTENT(OUT), TARGET :: token  ! If the link is a hard link, token specifies the object token that the link points to
-    INTEGER(SIZE_T), INTENT(OUT) :: val_size  ! If the link is a symbolic link, val_size will be the length of the link value, e.g., 
-                                              ! the length of the name of the pointed-to object with a null terminator. 
+    INTEGER(SIZE_T), INTENT(OUT) :: val_size  ! If the link is a symbolic link, val_size will be the length of the link value, e.g.,
+                                              ! the length of the name of the pointed-to object with a null terminator.
     INTEGER, INTENT(OUT) :: hdferr       ! Error code:
                                          ! 0 on success and -1 on failure
     INTEGER(HID_T), OPTIONAL, INTENT(IN) :: lapl_id  ! Link access property list
@@ -1343,7 +1343,7 @@ CONTAINS
 !
 ! Fortran2003 Interface:
   SUBROUTINE h5literate_f(group_id, index_type, order, idx, op, op_data, return_value, hdferr)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)    :: group_id
     INTEGER         , INTENT(IN)    :: index_type
@@ -1423,14 +1423,14 @@ CONTAINS
 ! Fortran2003 Interface:
   SUBROUTINE h5literate_by_name_f(loc_id, group_name, index_type, order, &
        idx, op, op_data, return_value, hdferr, lapl_id)
-    USE, INTRINSIC :: ISO_C_BINDING
+    USE, INTRINSIC :: ISO_C_BINDING, ONLY : C_PTR, C_FUNPTR
     IMPLICIT NONE
     INTEGER(HID_T)  , INTENT(IN)           :: loc_id
-    CHARACTER(LEN=*), INTENT(IN)           :: group_name 
+    CHARACTER(LEN=*), INTENT(IN)           :: group_name
     INTEGER         , INTENT(IN)           :: index_type
     INTEGER         , INTENT(IN)           :: order
     INTEGER(HSIZE_T), INTENT(INOUT)        :: idx
-    TYPE(C_FUNPTR)  , INTENT(IN)           :: op  
+    TYPE(C_FUNPTR)  , INTENT(IN)           :: op
     TYPE(C_PTR)     , INTENT(IN)           :: op_data
     INTEGER         , INTENT(OUT)          :: return_value
     INTEGER         , INTENT(OUT)          :: hdferr

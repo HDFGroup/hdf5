@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _H5LTf90proto_H
-#define _H5LTf90proto_H
+#ifndef H5LTf90proto_H
+#define H5LTf90proto_H
 
 #include "H5public.h"
 #include "H5f90i.h"
@@ -206,4 +206,4 @@ int_f h5tbget_field_info_c(hid_t_f *loc_id, size_t_f *namelen, _fcd name, hsize_
                            size_t_f *field_sizes, size_t_f *field_offsets, size_t_f *type_size,
                            size_t_f *namelen2, size_t_f *lenmax, _fcd field_names, size_t_f *maxlen_out);
 
-#endif /* _H5LTf90proto_H */
+#endif /* H5LTf90proto_H */

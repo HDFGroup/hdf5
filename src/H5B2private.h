@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,15 +15,15 @@
  *
  * Created:		H5B2private.h
  *			Jan 31 2005
- *			Quincey Koziol <koziol@ncsa.uiuc.edu>
+ *			Quincey Koziol
  *
  * Purpose:		Private header for library accessible B-tree routines.
  *
  *-------------------------------------------------------------------------
  */
 
-#ifndef _H5B2private_H
-#define _H5B2private_H
+#ifndef H5B2private_H
+#define H5B2private_H
 
 /* Private headers needed by this file */
 #include "H5ACprivate.h" /* Metadata cache                   */
@@ -149,4 +149,4 @@ H5_DLL herr_t  H5B2_patch_file(H5B2_t *fa, H5F_t *f);
 /* Statistics routines */
 H5_DLL herr_t H5B2_stat_info(H5B2_t *bt2, H5B2_stat_t *info);
 
-#endif /* _H5B2private_H */
+#endif /* H5B2private_H */

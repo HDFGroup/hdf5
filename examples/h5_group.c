@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -171,9 +171,9 @@ static herr_t
 file_info(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *opdata)
 {
     /* avoid compiler warnings */
-    loc_id = loc_id;
-    opdata = opdata;
-    linfo  = linfo;
+    (void)loc_id;
+    (void)opdata;
+    (void)linfo;
 
     /*
      * Display group name. The name is passed to the function by
@@ -198,8 +198,8 @@ group_info(hid_t loc_id, const char *name, const H5L_info2_t *linfo, void *opdat
     int         rank_chunk;
 
     /* avoid warnings */
-    opdata = opdata;
-    linfo  = linfo;
+    (void)opdata;
+    (void)linfo;
 
     /*
      * Open the datasets using their names.

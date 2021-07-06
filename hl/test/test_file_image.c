@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -51,7 +51,7 @@
  *-------------------------------------------------------------------------
  */
 static int
-test_file_image(size_t open_images, size_t nflags, unsigned *flags)
+test_file_image(size_t open_images, size_t nflags, const unsigned *flags)
 {
     hid_t * file_id, *dset_id, file_space, plist; /* HDF5 ids */
     hsize_t dims1[RANK]    = {2, 3};              /* original dimension of datasets */
@@ -482,7 +482,7 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
             FAIL_PUTS_ERROR("H5Dclose() failed");
     } /* end for */
 
-    PASSED()
+    PASSED();
 
     HL_TESTING2("close file images");
 
@@ -509,6 +509,8 @@ test_file_image(size_t open_images, size_t nflags, unsigned *flags)
     } /* end for */
 
     /* release temporary working buffers */
+    for (i = 0; i < open_images; i++)
+        HDfree(filename[i]);
     HDfree(filename);
     HDfree(file_id);
     HDfree(dset_id);

@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -53,7 +53,7 @@ MODULE H5LIB
   !
   INTEGER, PARAMETER :: H5generic_FLAGS_LEN = 9
   INTEGER, DIMENSION(1:H5generic_FLAGS_LEN) :: H5generic_flags
-  
+
   INTEGER, PARAMETER :: H5generic_haddr_FLAGS_LEN = 1
   INTEGER(HADDR_T), DIMENSION(1:H5generic_haddr_FLAGS_LEN) :: H5generic_haddr_flags
   !
@@ -81,7 +81,7 @@ MODULE H5LIB
   INTEGER, PARAMETER :: H5FD_FLAGS_LEN = 11
   INTEGER, DIMENSION(1:H5FD_FLAGS_LEN) :: H5FD_flags
   !
-  ! H5FD file drivers flags declaration 
+  ! H5FD file drivers flags declaration
   !
   INTEGER, PARAMETER :: H5FD_HID_FLAGS_LEN = 7
   INTEGER(HID_T), DIMENSION(1:H5FD_HID_FLAGS_LEN) :: H5FD_hid_flags
@@ -170,7 +170,7 @@ CONTAINS
 ! October 13, 2011
 ! Fortran90 Interface:
   SUBROUTINE h5open_f(error)
-    USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ 
+    USE H5F, ONLY : h5fget_obj_count_f, H5OPEN_NUM_OBJ
     IMPLICIT NONE
     INTEGER, INTENT(OUT) :: error
     INTEGER(SIZE_T) :: H5OPEN_NUM_OBJ_LOC = 0
@@ -249,13 +249,13 @@ CONTAINS
        END FUNCTION h5init1_flags_c
 
     END INTERFACE
-    
+
     error = h5init_types_c(predef_types, floating_types, integer_types)
 
-    H5T_NATIVE_INTEGER_KIND(1:5)  = predef_types(1:5) 
+    H5T_NATIVE_INTEGER_KIND(1:5)  = predef_types(1:5)
     H5T_NATIVE_INTEGER            = predef_types(6)
     H5T_NATIVE_REAL               = predef_types(7)
-    H5T_NATIVE_DOUBLE             = predef_types(8) 
+    H5T_NATIVE_DOUBLE             = predef_types(8)
     H5T_NATIVE_CHARACTER          = predef_types(9)
     H5T_STD_REF_OBJ               = predef_types(10)
     H5T_STD_REF_DSETREG           = predef_types(11)
@@ -267,12 +267,12 @@ CONTAINS
     H5T_NATIVE_B32                = predef_types(17)
     H5T_NATIVE_B64                = predef_types(18)
     H5T_NATIVE_FLOAT_128          = predef_types(19)
-    
+
     H5T_IEEE_F32BE = floating_types(1)
     H5T_IEEE_F32LE = floating_types(2)
     H5T_IEEE_F64BE = floating_types(3)
-    H5T_IEEE_F64LE = floating_types(4) 
-    
+    H5T_IEEE_F64LE = floating_types(4)
+
     H5T_STD_I8BE   = integer_types(1)
     H5T_STD_I8LE   = integer_types(2)
     H5T_STD_I16BE  = integer_types(3)
@@ -361,12 +361,12 @@ CONTAINS
     H5_ITER_DEC_F        = H5generic_flags(7)
     H5_ITER_NATIVE_F     = H5generic_flags(8)
     H5_ITER_N_F          = H5generic_flags(9)
-    
+
     HADDR_UNDEF_F = H5generic_haddr_flags(1)
     !
     ! H5G flags
     !
-    H5G_UNKNOWN_F                   = H5G_flags(1) 
+    H5G_UNKNOWN_F                   = H5G_flags(1)
     H5G_GROUP_F                     = H5G_flags(2)
     H5G_DATASET_F                   = H5G_flags(3)
     H5G_TYPE_F                      = H5G_flags(4)
@@ -410,7 +410,7 @@ CONTAINS
     H5D_VDS_FIRST_MISSING_F        = H5D_flags(27)
     H5D_VDS_LAST_AVAILABLE_F       = H5D_flags(28)
     H5D_VIRTUAL_F                  = H5D_flags(29)
-    
+
     H5D_CHUNK_CACHE_NSLOTS_DFLT_F = H5D_size_flags(1)
     H5D_CHUNK_CACHE_NBYTES_DFLT_F = H5D_size_flags(2)
     !
@@ -419,7 +419,7 @@ CONTAINS
     H5E_DEFAULT_F = H5E_hid_flags(1)
 
     H5E_MAJOR_F         = H5E_flags(1)
-    H5E_MINOR_F         = H5E_flags(2) 
+    H5E_MINOR_F         = H5E_flags(2)
     H5E_WALK_UPWARD_F   = H5E_flags(3)
     H5E_WALK_DOWNWARD_F = H5E_flags(4)
     !
@@ -438,7 +438,7 @@ CONTAINS
     H5FD_MEM_NTYPES_F       = H5FD_flags(11)
     !
     ! H5FD file driver flags
-    !    
+    !
     H5FD_CORE_F   = H5FD_hid_flags(1)
     H5FD_FAMILY_F = H5FD_hid_flags(2)
     H5FD_LOG_F    = H5FD_hid_flags(3)
@@ -468,7 +468,7 @@ CONTAINS
     H5I_INVALID_HID_F = H5I_flags(17)
     !
     ! H5L flags
-    !    
+    !
     H5L_TYPE_ERROR_F        = H5L_flags(1)
     H5L_TYPE_HARD_F         = H5L_flags(2)
     H5L_TYPE_SOFT_F         = H5L_flags(3)
@@ -485,25 +485,25 @@ CONTAINS
     H5O_COPY_WITHOUT_ATTR_FLAG_F   = h5o_flags(5)
     H5O_COPY_PRESERVE_NULL_FLAG_F  = h5o_flags(6)
     H5O_COPY_ALL_F                 = h5o_flags(7)
-    H5O_SHMESG_NONE_FLAG_F         = h5o_flags(8) 
+    H5O_SHMESG_NONE_FLAG_F         = h5o_flags(8)
     H5O_SHMESG_SDSPACE_FLAG_F      = h5o_flags(9)
     H5O_SHMESG_DTYPE_FLAG_F        = h5o_flags(10)
-    H5O_SHMESG_FILL_FLAG_F         = h5o_flags(11) 
-    H5O_SHMESG_PLINE_FLAG_F        = h5o_flags(12) 
-    H5O_SHMESG_ATTR_FLAG_F         = h5o_flags(13) 
-    H5O_SHMESG_ALL_FLAG_F          = h5o_flags(14) 
-    H5O_HDR_CHUNK0_SIZE_F          = h5o_flags(15) 
-    H5O_HDR_ATTR_CRT_ORDER_TRACK_F = h5o_flags(16) 
-    H5O_HDR_ATTR_CRT_ORDER_INDEX_F = h5o_flags(17) 
-    H5O_HDR_ATTR_STORE_PHASE_CHA_F = h5o_flags(18) 
-    H5O_HDR_STORE_TIMES_F          = h5o_flags(19) 
+    H5O_SHMESG_FILL_FLAG_F         = h5o_flags(11)
+    H5O_SHMESG_PLINE_FLAG_F        = h5o_flags(12)
+    H5O_SHMESG_ATTR_FLAG_F         = h5o_flags(13)
+    H5O_SHMESG_ALL_FLAG_F          = h5o_flags(14)
+    H5O_HDR_CHUNK0_SIZE_F          = h5o_flags(15)
+    H5O_HDR_ATTR_CRT_ORDER_TRACK_F = h5o_flags(16)
+    H5O_HDR_ATTR_CRT_ORDER_INDEX_F = h5o_flags(17)
+    H5O_HDR_ATTR_STORE_PHASE_CHA_F = h5o_flags(18)
+    H5O_HDR_STORE_TIMES_F          = h5o_flags(19)
     H5O_HDR_ALL_FLAGS_F            = h5o_flags(20)
-    H5O_SHMESG_MAX_NINDEXES_F      = h5o_flags(21) 
-    H5O_SHMESG_MAX_LIST_SIZE_F     = h5o_flags(22) 
-    H5O_TYPE_UNKNOWN_F             = h5o_flags(23) 
-    H5O_TYPE_GROUP_F               = h5o_flags(24) 
-    H5O_TYPE_DATASET_F             = h5o_flags(25) 
-    H5O_TYPE_NAMED_DATATYPE_F      = h5o_flags(26) 
+    H5O_SHMESG_MAX_NINDEXES_F      = h5o_flags(21)
+    H5O_SHMESG_MAX_LIST_SIZE_F     = h5o_flags(22)
+    H5O_TYPE_UNKNOWN_F             = h5o_flags(23)
+    H5O_TYPE_GROUP_F               = h5o_flags(24)
+    H5O_TYPE_DATASET_F             = h5o_flags(25)
+    H5O_TYPE_NAMED_DATATYPE_F      = h5o_flags(26)
     H5O_TYPE_NTYPES_F              = h5o_flags(27)
     H5O_INFO_ALL_F                 = h5o_flags(28)
     H5O_INFO_BASIC_F               = h5o_flags(29)
@@ -513,7 +513,7 @@ CONTAINS
     H5O_INFO_META_SIZE_F           = h5o_flags(33)
     !
     ! H5P flags
-    !    
+    !
     H5P_FILE_CREATE_F      = H5P_flags(1)
     H5P_FILE_ACCESS_F      = H5P_flags(2)
     H5P_DATASET_CREATE_F   = H5P_flags(3)
@@ -534,21 +534,21 @@ CONTAINS
     H5P_LINK_ACCESS_F      = H5P_flags(18)
     !
     ! H5P integers flags
-    !    
+    !
     H5P_CRT_ORDER_INDEXED_F = H5P_flags_int(1)
     H5P_CRT_ORDER_TRACKED_F = H5P_flags_int(2)
     !
     ! H5R flags
-    !    
+    !
     H5R_OBJECT_F         = H5R_flags(1)
     H5R_DATASET_REGION_F = H5R_flags(2)
     !
     ! H5S flags
-    !    
+    !
     H5S_ALL_F = H5S_hid_flags(1)
-    
+
     H5S_UNLIMITED_F = H5S_hsize_flags(1)
-    
+
     H5S_SCALAR_F         = H5S_flags(1)
     H5S_SIMPLE_F         = H5S_flags(2)
     H5S_NULL_F           = H5S_flags(3)
@@ -569,7 +569,7 @@ CONTAINS
     H5S_SEL_ALL_F        = H5S_flags(18)
     !
     ! H5T flags declaration
-    !    
+    !
     H5T_NO_CLASS_F       = H5T_flags(1)
     H5T_INTEGER_F        = H5T_flags(2)
     H5T_FLOAT_F          = H5T_flags(3)

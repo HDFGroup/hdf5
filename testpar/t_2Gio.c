@@ -1,11 +1,12 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
+ * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -157,6 +158,9 @@ parse_options(int argc, char **argv)
                     }
                     paraprefix = *argv;
                     break;
+                case 'i': /* Collective MPI-IO access with independent IO  */
+                    dxfer_coll_type = DXFER_INDEPENDENT_IO;
+                    break;
                 case '2': /* Use the split-file driver with MPIO access */
                     /* Can use $HDF5_METAPREFIX to define the */
                     /* meta-file-prefix. */
@@ -255,14 +259,37 @@ create_faccess_plist(MPI_Comm comm, MPI_Info info, int l_facc_type)
     if (l_facc_type == FACC_DEFAULT)
         return (ret_pl);
 
-    /* set Parallel access with communicator */
-    ret = H5Pset_fapl_mpio(ret_pl, comm, info);
-    VRFY((ret >= 0), "");
-    ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
-    VRFY((ret >= 0), "");
-    ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
-    VRFY((ret >= 0), "");
+    if (l_facc_type == FACC_MPIO) {
+        /* set Parallel access with communicator */
+        ret = H5Pset_fapl_mpio(ret_pl, comm, info);
+        VRFY((ret >= 0), "");
+        ret = H5Pset_all_coll_metadata_ops(ret_pl, TRUE);
+        VRFY((ret >= 0), "");
+        ret = H5Pset_coll_metadata_write(ret_pl, TRUE);
+        VRFY((ret >= 0), "");
+        return (ret_pl);
+    }
 
+    if (l_facc_type == (FACC_MPIO | FACC_SPLIT)) {
+        hid_t mpio_pl;
+
+        mpio_pl = H5Pcreate(H5P_FILE_ACCESS);
+        VRFY((mpio_pl >= 0), "");
+        /* set Parallel access with communicator */
+        ret = H5Pset_fapl_mpio(mpio_pl, comm, info);
+        VRFY((ret >= 0), "");
+
+        /* setup file access template */
+        ret_pl = H5Pcreate(H5P_FILE_ACCESS);
+        VRFY((ret_pl >= 0), "");
+        /* set Parallel access with communicator */
+        ret = H5Pset_fapl_split(ret_pl, ".meta", mpio_pl, ".raw", mpio_pl);
+        VRFY((ret >= 0), "H5Pset_fapl_split succeeded");
+        H5Pclose(mpio_pl);
+        return (ret_pl);
+    }
+
+    /* unknown file access types */
     return (ret_pl);
 }
 
@@ -518,37 +545,42 @@ dataset_vrfy(hsize_t start[], hsize_t count[], hsize_t stride[], hsize_t block[]
 #define DATASETNAME "dataset"
 
 static int
-MpioTest2G(MPI_Comm comm, int mpi_rank)
+MpioTest2G(MPI_Comm comm)
 {
     /*
      * HDF5 APIs definitions
      */
-    herr_t  status;
-    hid_t   dcpl_id;
-    hid_t   filedataspace;
-    hid_t   memorydataspace;
-    hid_t   file_id, dset_id; /* file and dataset identifiers */
-    hid_t   plist_id;         /* property list identifier */
-    hid_t   filespace;        /* file and memory dataspace identifiers */
-    int *   data;             /* pointer to data buffer to write */
+    herr_t status;
+    hid_t  file_id, dset_id; /* file and dataset identifiers */
+    hid_t  plist_id;         /* property list identifier */
+    hid_t  filespace;        /* file and memory dataspace identifiers */
+    int *  data;             /* pointer to data buffer to write */
+    size_t tot_size_bytes;
+    hid_t  dcpl_id;
+    hid_t  memorydataspace;
+    hid_t  filedataspace;
+    size_t slice_per_process;
+    size_t data_size;
+    size_t data_size_bytes;
+
+    hsize_t chunk[3];
+    hsize_t h5_counts[3];
+    hsize_t h5_offsets[3];
     hsize_t shape[3] = {1024, 1024, 1152};
-    size_t  data_size, data_size_bytes, slice_per_process = shape[0] / 2;
-    size_t  tot_size_bytes = sizeof(int);
-    hsize_t chunk[3]       = {4, shape[1], shape[2]};
-    hsize_t h5_counts[3]   = {slice_per_process, shape[1], shape[2]};
-    hsize_t h5_offsets[3]  = {(size_t)mpi_rank * slice_per_process, 0, 0};
 
     /*
      * MPI variables
      */
-    int      mpi_size;
+    int      mpi_size, mpi_rank;
     MPI_Info info = MPI_INFO_NULL;
 
     MPI_Comm_size(comm, &mpi_size);
+    MPI_Comm_rank(comm, &mpi_rank);
 
     if (mpi_rank == 0) {
-        HDprintf("Using %d process on dataset shape [%llu, %llu, %llu]\n", mpi_size, shape[0], shape[1],
-                 shape[2]);
+        HDprintf("Using %d process on dataset shape "
+                 "[%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "]\n",
+                 mpi_size, shape[0], shape[1], shape[2]);
     }
 
     /*
@@ -570,11 +602,12 @@ MpioTest2G(MPI_Comm comm, int mpi_rank)
     /*
      * Create the dataspace for the dataset.
      */
+    tot_size_bytes = sizeof(int);
     for (int i = 0; i < 3; i++) {
         tot_size_bytes *= shape[i];
     }
     if (mpi_rank == 0) {
-        HDprintf("Dataset of %llu bytes\n", tot_size_bytes);
+        HDprintf("Dataset of %zu bytes\n", tot_size_bytes);
     }
     filespace = H5Screate_simple(3, shape, NULL);
     VRFY((filespace >= 0), "H5Screate_simple succeeded");
@@ -584,14 +617,17 @@ MpioTest2G(MPI_Comm comm, int mpi_rank)
      */
     dcpl_id = H5Pcreate(H5P_DATASET_CREATE);
     VRFY((dcpl_id >= 0), "H5P_DATASET_CREATE");
-    status = H5Pset_chunk(dcpl_id, 3, chunk);
+    chunk[0] = 4;
+    chunk[1] = shape[1];
+    chunk[2] = shape[2];
+    status   = H5Pset_chunk(dcpl_id, 3, chunk);
     VRFY((status >= 0), "H5Pset_chunk succeeded");
 
     /*
      * Create the dataset with default properties and close filespace.
      */
     dset_id = H5Dcreate2(file_id, DATASETNAME, H5T_NATIVE_INT, filespace, H5P_DEFAULT, dcpl_id, H5P_DEFAULT);
-    VRFY((dset_id >= 0), "H5Dcreate succeeded");
+    VRFY((dset_id >= 0), "H5Dcreate2 succeeded");
     H5Sclose(filespace);
 
     /*
@@ -602,6 +638,8 @@ MpioTest2G(MPI_Comm comm, int mpi_rank)
     status = H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE);
     VRFY((status >= 0), "");
 
+    H5_CHECKED_ASSIGN(slice_per_process, size_t, (shape[0] + (hsize_t)mpi_size - 1) / (hsize_t)mpi_size,
+                      hsize_t);
     data_size       = slice_per_process * shape[1] * shape[2];
     data_size_bytes = sizeof(int) * data_size;
     data            = HDmalloc(data_size_bytes);
@@ -611,6 +649,12 @@ MpioTest2G(MPI_Comm comm, int mpi_rank)
         data[i] = mpi_rank;
     }
 
+    h5_counts[0]  = slice_per_process;
+    h5_counts[1]  = shape[1];
+    h5_counts[2]  = shape[2];
+    h5_offsets[0] = (size_t)mpi_rank * slice_per_process;
+    h5_offsets[1] = 0;
+    h5_offsets[2] = 0;
     filedataspace = H5Screate_simple(3, shape, NULL);
     VRFY((filedataspace >= 0), "H5Screate_simple succeeded");
 
@@ -638,8 +682,7 @@ MpioTest2G(MPI_Comm comm, int mpi_rank)
     H5Fclose(file_id);
 
     free(data);
-    HDprintf("Proc %d - MpioTest2G test succeeded\n", mpi_rank, data_size_bytes);
-    HDfflush(stdout);
+    HDprintf("Proc %d - MpioTest2G test succeeded\n", mpi_rank);
 
     if (mpi_rank == 0)
         HDremove(FILENAME[1]);
@@ -4378,9 +4421,9 @@ no_collective_cause_tests(void)
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_COMPACT);
     test_no_collective_cause_mode(TEST_NOT_CONTIGUOUS_OR_CHUNKED_DATASET_EXTERNAL);
 #ifdef LATER /* fletcher32 */
-             /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
-              * H5Dwrite is ready for mpio + filter feature.
-              */
+    /* TODO: use this instead of below TEST_FILTERS_READ when H5Dcreate and
+     * H5Dwrite is ready for mpio + filter feature.
+     */
     /* test_no_collective_cause_mode (TEST_FILTERS); */
     test_no_collective_cause_mode_filter(TEST_FILTERS_READ);
 #endif /* LATER */
@@ -4827,6 +4870,9 @@ main(int argc, char **argv)
         h5_show_hostname();
     }
 
+    if (H5dont_atexit() < 0) {
+        HDprintf("Failed to turn off atexit processing. Continue.\n");
+    };
     H5open();
     /* Set the internal transition size to allow use of derived datatypes
      * without having to actually read or write large datasets (>2GB).
@@ -4884,7 +4930,7 @@ main(int argc, char **argv)
 
     express_test = GetTestExpress();
     if ((express_test == 0) && (mpi_rank < 2)) {
-        MpioTest2G(test_comm, mpi_rank);
+        MpioTest2G(test_comm);
     }
 
     MPI_Barrier(MPI_COMM_WORLD);

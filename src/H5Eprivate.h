@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  *  Header file for error values, etc.
  */
-#ifndef _H5Eprivate_H
-#define _H5Eprivate_H
+#ifndef H5Eprivate_H
+#define H5Eprivate_H
 
 #include "H5Epublic.h"
 
@@ -111,18 +111,54 @@ typedef struct H5E_t H5E_t;
 /* Retrieve the error code description string and push it onto the error
  * stack.
  */
+#ifndef H5_HAVE_WIN32_API
 #define HSYS_DONE_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
+        /* Other projects may rely on the description format to get the errno and any changes should be      \
+         * considered as an API change                                                                       \
+         */                                                                                                  \
         HDONE_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
                     HDstrerror(myerrno));                                                                    \
     }
 #define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
     {                                                                                                        \
         int myerrno = errno;                                                                                 \
+        /* Other projects may rely on the description format to get the errno and any changes should be      \
+         * considered as an API change                                                                       \
+         */                                                                                                  \
         HGOTO_ERROR(majorcode, minorcode, retcode, "%s, errno = %d, error message = '%s'", str, myerrno,     \
                     HDstrerror(myerrno));                                                                    \
     }
+#else /* H5_HAVE_WIN32_API */
+/* On Windows we also emit the result of GetLastError(). This call returns a DWORD, which is always a
+ * 32-bit unsigned type. Note that on Windows, either errno or GetLastError() (but probably not both) will
+ * be useful depending on whether a C/POSIX or Win32 call failed. The other value will likely be zero,
+ * though I wouldn't count on that.
+ */
+#define HSYS_DONE_ERROR(majorcode, minorcode, retcode, str)                                                  \
+    {                                                                                                        \
+        int   myerrno   = errno;                                                                             \
+        DWORD win_error = GetLastError();                                                                    \
+        /* Other projects may rely on the description format to get the errno and any changes should be      \
+         * considered as an API change                                                                       \
+         */                                                                                                  \
+        HDONE_ERROR(majorcode, minorcode, retcode,                                                           \
+                    "%s, errno = %d, error message = '%s', Win32 GetLastError() = %" PRIu32 "", str,         \
+                    myerrno, HDstrerror(myerrno), win_error);                                                \
+    }
+#define HSYS_GOTO_ERROR(majorcode, minorcode, retcode, str)                                                  \
+    {                                                                                                        \
+        int   myerrno   = errno;                                                                             \
+        DWORD win_error = GetLastError();                                                                    \
+        /* Other projects may rely on the description format to get the errno and any changes should be      \
+         * considered as an API change                                                                       \
+         */                                                                                                  \
+        HGOTO_ERROR(majorcode, minorcode, retcode,                                                           \
+                    "%s, errno = %d, error message = '%s', Win32 GetLastError() = %" PRIu32 "", str,         \
+                    myerrno, HDstrerror(myerrno), win_error);                                                \
+    }
+#endif /* H5_HAVE_WIN32_API */
 
 #ifdef H5_HAVE_PARALLEL
 /*
@@ -132,20 +168,15 @@ typedef struct H5E_t H5E_t;
 extern char H5E_mpi_error_str[MPI_MAX_ERROR_STRING];
 extern int  H5E_mpi_error_str_len;
 
-#define HMPI_ERROR(mpierr)                                                                                   \
-    {                                                                                                        \
-        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
-        HERROR(H5E_INTERNAL, H5E_MPIERRSTR, "%s", H5E_mpi_error_str);                                        \
-    }
 #define HMPI_DONE_ERROR(retcode, str, mpierr)                                                                \
     {                                                                                                        \
-        HMPI_ERROR(mpierr);                                                                                  \
-        HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                                                    \
+        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
+        HDONE_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str); \
     }
 #define HMPI_GOTO_ERROR(retcode, str, mpierr)                                                                \
     {                                                                                                        \
-        HMPI_ERROR(mpierr);                                                                                  \
-        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, str);                                                    \
+        MPI_Error_string(mpierr, H5E_mpi_error_str, &H5E_mpi_error_str_len);                                 \
+        HGOTO_ERROR(H5E_INTERNAL, H5E_MPI, retcode, "%s: MPI error string is '%s'", str, H5E_mpi_error_str); \
     }
 #endif /* H5_HAVE_PARALLEL */
 
@@ -203,4 +234,4 @@ H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func
 H5_DLL herr_t H5E_clear_stack(H5E_t *estack);
 H5_DLL herr_t H5E_dump_api_stack(hbool_t is_api);
 
-#endif /* _H5Eprivate_H */
+#endif /* H5Eprivate_H */

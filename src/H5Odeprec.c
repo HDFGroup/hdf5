@@ -6,14 +6,14 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*-------------------------------------------------------------------------
  *
- * Purpose:	Deprecated functions from the H5O interface.  These
+ * Purpose:     Deprecated functions from the H5O interface.  These
  *              functions are here for compatibility purposes and may be
  *              removed in the future.  Applications should switch to the
  *              newer APIs.
@@ -182,10 +182,10 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
 
         /* Set the native fields */
         if (shim_data->fields & H5O_INFO_HDR)
-            HDmemcpy(&(oinfo.hdr), &(nat_info.hdr), sizeof(H5O_hdr_info_t));
+            H5MM_memcpy(&(oinfo.hdr), &(nat_info.hdr), sizeof(H5O_hdr_info_t));
         if (shim_data->fields & H5O_INFO_META_SIZE) {
-            HDmemcpy(&(oinfo.meta_size.obj), &(nat_info.meta_size.obj), sizeof(H5_ih_info_t));
-            HDmemcpy(&(oinfo.meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
+            H5MM_memcpy(&(oinfo.meta_size.obj), &(nat_info.meta_size.obj), sizeof(H5_ih_info_t));
+            H5MM_memcpy(&(oinfo.meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
         }
     }
 
@@ -274,10 +274,10 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
 
         /* Set the native fields */
         if (fields & H5O_INFO_HDR)
-            HDmemcpy(&(oinfo->hdr), &(nat_info.hdr), sizeof(H5O_hdr_info_t));
+            H5MM_memcpy(&(oinfo->hdr), &(nat_info.hdr), sizeof(H5O_hdr_info_t));
         if (fields & H5O_INFO_META_SIZE) {
-            HDmemcpy(&(oinfo->meta_size.obj), &(nat_info.meta_size.obj), sizeof(H5_ih_info_t));
-            HDmemcpy(&(oinfo->meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
+            H5MM_memcpy(&(oinfo->meta_size.obj), &(nat_info.meta_size.obj), sizeof(H5_ih_info_t));
+            H5MM_memcpy(&(oinfo->meta_size.attr), &(nat_info.meta_size.attr), sizeof(H5_ih_info_t));
         } /* end if */
     }     /* end if */
 

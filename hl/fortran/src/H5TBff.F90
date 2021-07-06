@@ -6,7 +6,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -23,7 +23,7 @@
 ! ****   | | | |\/| |  ___/| |  | |  _  /  | | / /\ \ | . ` |  | |    ****
 ! ****  _| |_| |  | | |    | |__| | | \ \  | |/ ____ \| |\  |  | |    ****
 !      |_____|_|  |_|_|     \____/|_|  \_\ |_/_/    \_\_| \_|  |_|
-!                             
+!
 !  If you add a new function here then you MUST add the function name to the
 !  Windows dll file 'hdf5_hl_fortrandll.def.in' in the hl/fortran/src directory.
 !  This is needed for Windows based operating systems.
@@ -31,7 +31,7 @@
 #include "H5config_f.inc"
 
 MODULE h5tb_CONST
-  
+
   USE, INTRINSIC :: ISO_C_BINDING
   USE h5fortran_types
   USE hdf5
@@ -40,22 +40,22 @@ MODULE h5tb_CONST
      MODULE PROCEDURE h5tbwrite_field_name_f_int
      MODULE PROCEDURE h5tbwrite_field_name_f_string
   END INTERFACE
-  
+
   INTERFACE h5tbread_field_name_f
      MODULE PROCEDURE h5tbread_field_name_f_int
      MODULE PROCEDURE h5tbread_field_name_f_string
   END INTERFACE
-  
+
   INTERFACE h5tbwrite_field_index_f
      MODULE PROCEDURE h5tbwrite_field_index_f_int
      MODULE PROCEDURE h5tbwrite_field_index_f_string
   END INTERFACE
-  
+
   INTERFACE h5tbread_field_index_f
      MODULE PROCEDURE h5tbread_field_index_f_int
      MODULE PROCEDURE h5tbread_field_index_f_string
   END INTERFACE
-  
+
   INTERFACE h5tbinsert_field_f
      MODULE PROCEDURE h5tbinsert_field_f_int
      MODULE PROCEDURE h5tbinsert_field_f_string
@@ -162,7 +162,7 @@ MODULE h5tb_CONST
        INTEGER(size_t) :: namelen1                                      ! name length length
      END FUNCTION h5tbinsert_field_c
   END INTERFACE
-  
+
 CONTAINS
 
 !-------------------------------------------------------------------------
@@ -172,7 +172,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 06, 2004
 !
@@ -251,16 +251,16 @@ CONTAINS
          INTEGER(size_t) :: max_char_size_field_names                     ! character len of field names
        END FUNCTION h5tbmake_table_c
     END INTERFACE
- 
+
     namelen  = LEN(dset_name)
     namelen1 = LEN(table_title)
- 
+
     ! Find the size of each character string in the array
     DO i = 1, nfields
        char_len_field_names(i) = LEN_TRIM(field_names(i))
     END DO
-    
-    max_char_size_field_names = LEN(field_names(1)) 
+
+    max_char_size_field_names = LEN(field_names(1))
 
     errcode = h5tbmake_table_c(namelen1, table_title, loc_id, namelen, dset_name, nfields, nrecords,&
          type_size, field_offset, field_types, chunk_size, compress, char_len_field_names, &
@@ -346,16 +346,16 @@ CONTAINS
          TYPE(C_PTR), INTENT(in), VALUE :: data
        END FUNCTION h5tbmake_table_ptr_c
     END INTERFACE
- 
+
     namelen  = LEN(dset_name)
     namelen1 = LEN(table_title)
- 
+
     ! Find the size of each character string in the array
     DO i = 1, nfields
        char_len_field_names(i) = LEN_TRIM(field_names(i))
     END DO
-    
-    max_char_size_field_names = LEN(field_names(1)) 
+
+    max_char_size_field_names = LEN(field_names(1))
 
     errcode = h5tbmake_table_ptr_c(namelen1, table_title, loc_id, namelen, dset_name, nfields, nrecords,&
          type_size, field_offset, field_types, chunk_size, fill_data, compress, char_len_field_names, &
@@ -395,7 +395,7 @@ CONTAINS
          IMPLICIT NONE
          INTEGER(hid_t),   INTENT(in) :: loc_id                    ! file or group identifier
          CHARACTER(LEN=1), INTENT(in) :: table_name                ! name of the dataset
-         INTEGER(hsize_t), INTENT(in) :: nfields 
+         INTEGER(hsize_t), INTENT(in) :: nfields
          INTEGER(size_t),  INTENT(in) :: dst_size                  ! type size
          INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_offset  ! An array containing the sizes of the fields
          INTEGER(size_t),  DIMENSION(1:nfields), INTENT(in) :: dst_sizes   ! An array containing the sizes of the fields
@@ -404,7 +404,7 @@ CONTAINS
 
        END FUNCTION h5tbread_table_c
     END INTERFACE
- 
+
     namelen = LEN(table_name)
 
     errcode = h5tbread_table_c(loc_id,&
@@ -424,7 +424,7 @@ CONTAINS
 !
 ! Purpose: Writes one field
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 12, 2004
 !
@@ -442,7 +442,7 @@ CONTAINS
        type_size,&
        buf,&
        errcode )
-    
+
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
@@ -455,14 +455,14 @@ CONTAINS
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1))
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
-    
+
     errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
          start,nrecords,type_size,f_ptr)
-    
+
   END SUBROUTINE h5tbwrite_field_name_f_int
 
 
@@ -488,15 +488,15 @@ CONTAINS
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1)(1:1))
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
-    
+
     errcode = h5tbwrite_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
          start,nrecords,type_size,f_ptr)
-    
+
   END SUBROUTINE h5tbwrite_field_name_f_string
 
 
@@ -505,7 +505,7 @@ CONTAINS
 !
 ! Purpose: Reads one field
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 12, 2004
 !
@@ -537,15 +537,15 @@ CONTAINS
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1))                                    ! name length
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
-    
+
     errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
          start,nrecords,type_size,f_ptr)
-    
+
   END SUBROUTINE h5tbread_field_name_f_int
 
   SUBROUTINE h5tbread_field_name_f_string(loc_id,&
@@ -569,15 +569,15 @@ CONTAINS
     INTEGER(size_t) :: namelen                                       ! name length
     INTEGER(size_t) :: namelen1                                      ! name length
     TYPE(C_PTR) :: f_ptr
-    
-    f_ptr = C_LOC(buf(1)(1:1)) 
+
+    f_ptr = C_LOC(buf(1)(1:1))
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
-    
+
     errcode = h5tbread_field_name_c(loc_id,namelen,dset_name,namelen1,field_name,&
          start,nrecords,type_size,f_ptr)
-    
+
   END SUBROUTINE h5tbread_field_name_f_string
 
 
@@ -586,7 +586,7 @@ CONTAINS
 !
 ! Purpose: Writes one field
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 12, 2004
 !
@@ -595,7 +595,7 @@ CONTAINS
 ! Modifications:
 !
 !-------------------------------------------------------------------------
-  
+
   SUBROUTINE h5tbwrite_field_index_f_int(loc_id,&
        dset_name,&
        field_index,&
@@ -604,7 +604,7 @@ CONTAINS
        type_size,&
        buf,&
        errcode )
-    
+
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
@@ -616,14 +616,14 @@ CONTAINS
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1))
 
     namelen  = LEN(dset_name)
-    
+
     errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
          start,nrecords,type_size,f_ptr)
-    
+
   END SUBROUTINE h5tbwrite_field_index_f_int
 
   SUBROUTINE h5tbwrite_field_index_f_string(loc_id,&
@@ -634,7 +634,7 @@ CONTAINS
        type_size,&
        buf,&
        errcode )
-    
+
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
@@ -646,13 +646,13 @@ CONTAINS
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1)(1:1))
     namelen  = LEN(dset_name)
-    
+
     errcode = h5tbwrite_field_index_c(loc_id,namelen,dset_name,field_index,&
          start,nrecords,type_size,f_ptr)
-    
+
   END SUBROUTINE h5tbwrite_field_index_f_string
 
 
@@ -661,7 +661,7 @@ CONTAINS
 !
 ! Purpose: Reads one field
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 12, 2004
 !
@@ -679,7 +679,7 @@ CONTAINS
        type_size,&
        buf,&
        errcode )
-    
+
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id                           ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                        ! name of the dataset
@@ -691,13 +691,13 @@ CONTAINS
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1))
     namelen  = LEN(dset_name)
-    
+
     errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
          start,nrecords,type_size,f_ptr)
-    
+
   END SUBROUTINE h5tbread_field_index_f_int
 
   SUBROUTINE h5tbread_field_index_f_string(loc_id,&
@@ -720,13 +720,13 @@ CONTAINS
     INTEGER :: errcode                                               ! error code
     INTEGER(size_t) :: namelen                                       ! name length
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1)(1:1))
     namelen  = LEN(dset_name)
-    
+
     errcode = h5tbread_field_index_c(loc_id,namelen,dset_name,field_index,&
          start,nrecords,type_size,f_ptr)
-    
+
   END SUBROUTINE h5tbread_field_index_f_string
 
 !-------------------------------------------------------------------------
@@ -734,7 +734,7 @@ CONTAINS
 !
 ! Purpose: Inserts one field
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 13, 2004
 !
@@ -762,12 +762,12 @@ CONTAINS
     INTEGER(size_t) :: namelen1                                      ! name length
     INTEGER :: errcode                                               ! error code
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1))
 
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
-    
+
     errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
          field_type,field_index,f_ptr)
 
@@ -791,15 +791,15 @@ CONTAINS
     INTEGER(size_t) :: namelen1                                      ! name length
     INTEGER :: errcode                                               ! error code
     TYPE(C_PTR) :: f_ptr
-    
+
     f_ptr = C_LOC(buf(1)(1:1))
-    
+
     namelen  = LEN(dset_name)
     namelen1 = LEN(field_name)
-    
+
     errcode = h5tbinsert_field_c(loc_id,namelen,dset_name,namelen1,field_name,&
          field_type,field_index,f_ptr)
-    
+
   END SUBROUTINE h5tbinsert_field_f_string
 
 !-------------------------------------------------------------------------
@@ -807,7 +807,7 @@ CONTAINS
 !
 ! Purpose: Inserts one field
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 13, 2004
 !
@@ -858,7 +858,7 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 13, 2004
 !
@@ -898,9 +898,9 @@ CONTAINS
 
     namelen = LEN(dset_name)
     errcode = h5tbget_table_info_c(loc_id,namelen,dset_name,nfields,nrecords)
-    
+
   END SUBROUTINE h5tbget_table_info_f
-  
+
 
 !-------------------------------------------------------------------------
 ! Function: h5tbget_field_info_f
@@ -909,15 +909,15 @@ CONTAINS
 !
 ! Return: Success: 0, Failure: -1
 !
-! Programmer: pvn@ncsa.uiuc.edu
+! Programmer: Pedro Vicente
 !
 ! Date: October 13, 2004
 !
 ! Comments:
 !
-! Modifications: 
+! Modifications:
 !  Added optional parameter for returning the maximum character length
-!  in the field name array. March 3, 2011 
+!  in the field name array. March 3, 2011
 !
 !-------------------------------------------------------------------------
 
@@ -929,7 +929,7 @@ CONTAINS
        field_offsets,&
        type_size,&
        errcode, maxlen_out )
-    
+
     IMPLICIT NONE
     INTEGER(hid_t),   INTENT(in) :: loc_id                                ! file or group identifier
     CHARACTER(LEN=*), INTENT(in) :: dset_name                             ! name of the dataset
@@ -945,7 +945,7 @@ CONTAINS
     INTEGER(hsize_t) :: i                                                 ! general purpose integer
     INTEGER(size_t) :: maxlen
     INTEGER(size_t) :: c_maxlen_out
-    
+
     INTERFACE
        INTEGER FUNCTION h5tbget_field_info_c(loc_id,namelen,dset_name,nfields,&
             field_sizes,field_offsets,type_size,namelen2, maxlen, field_names, c_maxlen_out) &
@@ -963,7 +963,7 @@ CONTAINS
          INTEGER(size_t) :: namelen                                             ! name length
          INTEGER(size_t) :: maxlen                                              ! maxiumum length of input field names
          INTEGER(size_t), DIMENSION(1:nfields) :: namelen2                      ! name lengths
-         INTEGER(size_t) :: c_maxlen_out                  ! maximum character length of a field array element 
+         INTEGER(size_t) :: c_maxlen_out                  ! maximum character length of a field array element
        END FUNCTION h5tbget_field_info_c
     END INTERFACE
 
@@ -973,14 +973,14 @@ CONTAINS
     END DO
     maxlen = LEN(field_names(1))
     c_maxlen_out = 0
-    
+
     errcode = h5tbget_field_info_c(loc_id, namelen,dset_name, nfields, &
          field_sizes, field_offsets, type_size, namelen2, maxlen, field_names, c_maxlen_out)
-    
+
     IF(PRESENT(maxlen_out)) maxlen_out = c_maxlen_out
-    
+
   END SUBROUTINE h5tbget_field_info_f
-  
+
 END MODULE H5TB_CONST
 
 

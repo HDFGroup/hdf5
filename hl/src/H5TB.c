@@ -6,13 +6,10 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-
-#include <stdlib.h>
-#include <string.h>
 
 #include "H5LTprivate.h"
 #include "H5TBprivate.h"
@@ -46,7 +43,7 @@ static hid_t H5TB_create_type(hid_t loc_id, const char *dset_name, size_t type_s
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *             Quincey Koziol
  *
  * Date: January 17, 2001
@@ -60,11 +57,11 @@ H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsi
                hsize_t nrecords, size_t type_size, const char *field_names[], const size_t *field_offset,
                const hid_t *field_types, hsize_t chunk_size, void *fill_data, int compress, const void *buf)
 {
-    hid_t          did         = H5I_BADID;
-    hid_t          sid         = H5I_BADID;
-    hid_t          mem_type_id = H5I_BADID;
-    hid_t          plist_id    = H5I_BADID;
-    hid_t          attr_id     = H5I_BADID;
+    hid_t          did         = H5I_INVALID_HID;
+    hid_t          sid         = H5I_INVALID_HID;
+    hid_t          mem_type_id = H5I_INVALID_HID;
+    hid_t          plist_id    = H5I_INVALID_HID;
+    hid_t          attr_id     = H5I_INVALID_HID;
     hsize_t        dims[1];
     hsize_t        dims_chunk[1];
     hsize_t        maxdims[1] = {H5S_UNLIMITED};
@@ -132,17 +129,17 @@ H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsi
     /* terminate access to the data space. */
     if (H5Sclose(sid) < 0)
         goto out;
-    sid = H5I_BADID;
+    sid = H5I_INVALID_HID;
 
     /* end access to the dataset */
     if (H5Dclose(did) < 0)
         goto out;
-    did = H5I_BADID;
+    did = H5I_INVALID_HID;
 
     /* end access to the property list */
     if (H5Pclose(plist_id) < 0)
         goto out;
-    plist_id = H5I_BADID;
+    plist_id = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
      * set the conforming table attributes
@@ -199,24 +196,24 @@ H5TBmake_table(const char *table_title, hid_t loc_id, const char *dset_name, hsi
 
             if (H5Aclose(attr_id) < 0)
                 goto out;
-            attr_id = H5I_BADID;
+            attr_id = H5I_INVALID_HID;
         } /* end for */
 
         /* terminate access to the data space. */
         if (H5Sclose(sid) < 0)
             goto out;
-        sid = H5I_BADID;
+        sid = H5I_INVALID_HID;
 
         /* end access to the dataset */
         if (H5Dclose(did) < 0)
             goto out;
-        did = H5I_BADID;
+        did = H5I_INVALID_HID;
     } /* end if */
 
     /* release the datatype. */
     if (H5Tclose(mem_type_id) < 0)
         goto out;
-    mem_type_id = H5I_BADID;
+    mem_type_id = H5I_INVALID_HID;
 
     ret_val = 0;
 
@@ -257,7 +254,7 @@ out:
  * Return: Success: 0, Failure: -1
  *
  * Programmers:
- *  Pedro Vicente, pvn@ncsa.uiuc.edu
+ *  Pedro Vicente
  *  Quincey Koziol
  *
  * Date: November 19, 2001
@@ -270,9 +267,9 @@ herr_t
 H5TBappend_records(hid_t loc_id, const char *dset_name, hsize_t nrecords, size_t type_size,
                    const size_t *field_offset, const size_t *field_sizes, const void *buf)
 {
-    hid_t   did         = H5I_BADID;
-    hid_t   tid         = H5I_BADID;
-    hid_t   mem_type_id = H5I_BADID;
+    hid_t   did         = H5I_INVALID_HID;
+    hid_t   tid         = H5I_INVALID_HID;
+    hid_t   mem_type_id = H5I_INVALID_HID;
     hsize_t nrecords_orig;
     hsize_t nfields;
     herr_t  ret_val = -1;
@@ -323,7 +320,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -335,11 +332,11 @@ herr_t
 H5TBwrite_records(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nrecords, size_t type_size,
                   const size_t *field_offset, const size_t *field_sizes, const void *buf)
 {
-    hid_t   did         = H5I_BADID;
-    hid_t   tid         = H5I_BADID;
-    hid_t   sid         = H5I_BADID;
-    hid_t   m_sid       = H5I_BADID;
-    hid_t   mem_type_id = H5I_BADID;
+    hid_t   did         = H5I_INVALID_HID;
+    hid_t   tid         = H5I_INVALID_HID;
+    hid_t   sid         = H5I_INVALID_HID;
+    hid_t   m_sid       = H5I_INVALID_HID;
+    hid_t   mem_type_id = H5I_INVALID_HID;
     hsize_t count[1];
     hsize_t offset[1];
     hsize_t mem_size[1];
@@ -415,7 +412,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 21, 2001
  *
@@ -428,14 +425,14 @@ H5TBwrite_fields_name(hid_t loc_id, const char *dset_name, const char *field_nam
                       hsize_t nrecords, size_t type_size, const size_t *field_offset,
                       const size_t *field_sizes, const void *buf)
 {
-    hid_t    did            = H5I_BADID;
-    hid_t    tid            = H5I_BADID;
-    hid_t    write_type_id  = H5I_BADID;
-    hid_t    member_type_id = H5I_BADID;
-    hid_t    nmtype_id      = H5I_BADID;
-    hid_t    m_sid          = H5I_BADID;
-    hid_t    file_space_id  = H5I_BADID;
-    hid_t    preserve_id    = H5I_BADID;
+    hid_t    did            = H5I_INVALID_HID;
+    hid_t    tid            = H5I_INVALID_HID;
+    hid_t    write_type_id  = H5I_INVALID_HID;
+    hid_t    member_type_id = H5I_INVALID_HID;
+    hid_t    nmtype_id      = H5I_INVALID_HID;
+    hid_t    m_sid          = H5I_INVALID_HID;
+    hid_t    file_space_id  = H5I_INVALID_HID;
+    hid_t    preserve_id    = H5I_INVALID_HID;
     hssize_t nfields;
     hssize_t i, j;
     hsize_t  count[1];
@@ -513,10 +510,10 @@ H5TBwrite_fields_name(hid_t loc_id, const char *dset_name, const char *field_nam
             /* close */
             if (H5Tclose(member_type_id) < 0)
                 goto out;
-            member_type_id = H5I_BADID;
+            member_type_id = H5I_INVALID_HID;
             if (H5Tclose(nmtype_id) < 0)
                 goto out;
-            nmtype_id = H5I_BADID;
+            nmtype_id = H5I_INVALID_HID;
         } /* end if */
 
         H5free_memory(member_name);
@@ -573,7 +570,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 21, 2001
  *
@@ -586,14 +583,14 @@ H5TBwrite_fields_index(hid_t loc_id, const char *dset_name, hsize_t nfields, con
                        hsize_t start, hsize_t nrecords, size_t type_size, const size_t *field_offset,
                        const size_t *field_sizes, const void *buf)
 {
-    hid_t   did            = H5I_BADID;
-    hid_t   tid            = H5I_BADID;
-    hid_t   write_type_id  = H5I_BADID;
-    hid_t   member_type_id = H5I_BADID;
-    hid_t   nmtype_id      = H5I_BADID;
-    hid_t   m_sid          = H5I_BADID;
-    hid_t   file_space_id  = H5I_BADID;
-    hid_t   preserve_id    = H5I_BADID;
+    hid_t   did            = H5I_INVALID_HID;
+    hid_t   tid            = H5I_INVALID_HID;
+    hid_t   write_type_id  = H5I_INVALID_HID;
+    hid_t   member_type_id = H5I_INVALID_HID;
+    hid_t   nmtype_id      = H5I_INVALID_HID;
+    hid_t   m_sid          = H5I_INVALID_HID;
+    hid_t   file_space_id  = H5I_INVALID_HID;
+    hid_t   preserve_id    = H5I_INVALID_HID;
     hsize_t count[1];
     hsize_t offset[1];
     hsize_t i;
@@ -666,10 +663,10 @@ H5TBwrite_fields_index(hid_t loc_id, const char *dset_name, hsize_t nfields, con
         /* close */
         if (H5Tclose(member_type_id) < 0)
             goto out;
-        member_type_id = H5I_BADID;
+        member_type_id = H5I_INVALID_HID;
         if (H5Tclose(nmtype_id) < 0)
             goto out;
-        nmtype_id = H5I_BADID;
+        nmtype_id = H5I_INVALID_HID;
 
         H5free_memory(member_name);
         member_name = NULL;
@@ -738,7 +735,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 20, 2001
  *
@@ -750,10 +747,10 @@ herr_t
 H5TBread_table(hid_t loc_id, const char *dset_name, size_t type_size, const size_t *field_offset,
                const size_t *field_sizes, void *dst_buf)
 {
-    hid_t   did         = H5I_BADID;
-    hid_t   ftype_id    = H5I_BADID;
-    hid_t   mem_type_id = H5I_BADID;
-    hid_t   sid         = H5I_BADID;
+    hid_t   did         = H5I_INVALID_HID;
+    hid_t   ftype_id    = H5I_INVALID_HID;
+    hid_t   mem_type_id = H5I_INVALID_HID;
+    hid_t   sid         = H5I_INVALID_HID;
     hsize_t dims[1];
     herr_t  ret_val = -1;
 
@@ -811,7 +808,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -823,9 +820,9 @@ herr_t
 H5TBread_records(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nrecords, size_t type_size,
                  const size_t *field_offset, const size_t *field_sizes, void *buf)
 {
-    hid_t   did         = H5I_BADID;
-    hid_t   ftype_id    = H5I_BADID;
-    hid_t   mem_type_id = H5I_BADID;
+    hid_t   did         = H5I_INVALID_HID;
+    hid_t   ftype_id    = H5I_INVALID_HID;
+    hid_t   mem_type_id = H5I_INVALID_HID;
     hsize_t nrecords_orig;
     hsize_t nfields;
     herr_t  ret_val = -1;
@@ -877,7 +874,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -890,13 +887,13 @@ H5TBread_fields_name(hid_t loc_id, const char *dset_name, const char *field_name
                      hsize_t nrecords, size_t type_size, const size_t *field_offset,
                      const size_t *field_sizes, void *buf)
 {
-    hid_t    did         = H5I_BADID;
-    hid_t    ftype_id    = H5I_BADID;
-    hid_t    mem_type_id = H5I_BADID;
-    hid_t    mtype_id    = H5I_BADID;
-    hid_t    nmtype_id   = H5I_BADID;
-    hid_t    sid         = H5I_BADID;
-    hid_t    m_sid       = H5I_BADID;
+    hid_t    did         = H5I_INVALID_HID;
+    hid_t    ftype_id    = H5I_INVALID_HID;
+    hid_t    mem_type_id = H5I_INVALID_HID;
+    hid_t    mtype_id    = H5I_INVALID_HID;
+    hid_t    nmtype_id   = H5I_INVALID_HID;
+    hid_t    sid         = H5I_INVALID_HID;
+    hid_t    m_sid       = H5I_INVALID_HID;
     hssize_t nfields;
     hsize_t  count[1];
     hsize_t  offset[1];
@@ -963,10 +960,10 @@ H5TBread_fields_name(hid_t loc_id, const char *dset_name, const char *field_name
             /* close */
             if (H5Tclose(mtype_id) < 0)
                 goto out;
-            mtype_id = H5I_BADID;
+            mtype_id = H5I_INVALID_HID;
             if (H5Tclose(nmtype_id) < 0)
                 goto out;
-            nmtype_id = H5I_BADID;
+            nmtype_id = H5I_INVALID_HID;
             j++;
         } /* end if */
 
@@ -1034,7 +1031,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -1047,13 +1044,13 @@ H5TBread_fields_index(hid_t loc_id, const char *dset_name, hsize_t nfields, cons
                       hsize_t start, hsize_t nrecords, size_t type_size, const size_t *field_offset,
                       const size_t *field_sizes, void *buf)
 {
-    hid_t   did            = H5I_BADID;
-    hid_t   tid            = H5I_BADID;
-    hid_t   read_type_id   = H5I_BADID;
-    hid_t   member_type_id = H5I_BADID;
-    hid_t   nmtype_id      = H5I_BADID;
-    hid_t   sid            = H5I_BADID;
-    hid_t   m_sid          = H5I_BADID;
+    hid_t   did            = H5I_INVALID_HID;
+    hid_t   tid            = H5I_INVALID_HID;
+    hid_t   read_type_id   = H5I_INVALID_HID;
+    hid_t   member_type_id = H5I_INVALID_HID;
+    hid_t   nmtype_id      = H5I_INVALID_HID;
+    hid_t   sid            = H5I_INVALID_HID;
+    hid_t   m_sid          = H5I_INVALID_HID;
     hsize_t count[1];
     hsize_t offset[1];
     hsize_t mem_size[1];
@@ -1120,10 +1117,10 @@ H5TBread_fields_index(hid_t loc_id, const char *dset_name, hsize_t nfields, cons
         /* close the member type */
         if (H5Tclose(member_type_id) < 0)
             goto out;
-        member_type_id = H5I_BADID;
+        member_type_id = H5I_INVALID_HID;
         if (H5Tclose(nmtype_id) < 0)
             goto out;
-        nmtype_id = H5I_BADID;
+        nmtype_id = H5I_INVALID_HID;
 
         H5free_memory(member_name);
         member_name = NULL;
@@ -1192,7 +1189,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 26, 2001
  *
@@ -1201,11 +1198,11 @@ out:
 herr_t
 H5TBdelete_record(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nrecords)
 {
-    hid_t          did         = H5I_BADID;
-    hid_t          tid         = H5I_BADID;
-    hid_t          sid         = H5I_BADID;
-    hid_t          m_sid       = H5I_BADID;
-    hid_t          mem_type_id = H5I_BADID;
+    hid_t          did         = H5I_INVALID_HID;
+    hid_t          tid         = H5I_INVALID_HID;
+    hid_t          sid         = H5I_INVALID_HID;
+    hid_t          m_sid       = H5I_INVALID_HID;
+    hid_t          mem_type_id = H5I_INVALID_HID;
     hsize_t        nfields;
     hsize_t        ntotal_records;
     hsize_t        read_start;
@@ -1297,16 +1294,16 @@ H5TBdelete_record(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nr
         /* close */
         if (H5Sclose(m_sid) < 0)
             goto out;
-        m_sid = H5I_BADID;
+        m_sid = H5I_INVALID_HID;
         if (H5Tclose(mem_type_id) < 0)
             goto out;
-        mem_type_id = H5I_BADID;
+        mem_type_id = H5I_INVALID_HID;
         if (H5Sclose(sid) < 0)
             goto out;
-        sid = H5I_BADID;
+        sid = H5I_INVALID_HID;
         if (H5Tclose(tid) < 0)
             goto out;
-        tid = H5I_BADID;
+        tid = H5I_INVALID_HID;
     } /* read_nrecords */
 
     /*-------------------------------------------------------------------------
@@ -1352,7 +1349,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 26, 2001
  *
@@ -1364,11 +1361,11 @@ herr_t
 H5TBinsert_record(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nrecords, size_t type_size,
                   const size_t *field_offset, const size_t *field_sizes, void *buf)
 {
-    hid_t          did         = H5I_BADID;
-    hid_t          tid         = H5I_BADID;
-    hid_t          mem_type_id = H5I_BADID;
-    hid_t          sid         = H5I_BADID;
-    hid_t          m_sid       = H5I_BADID;
+    hid_t          did         = H5I_INVALID_HID;
+    hid_t          tid         = H5I_INVALID_HID;
+    hid_t          mem_type_id = H5I_INVALID_HID;
+    hid_t          sid         = H5I_INVALID_HID;
+    hid_t          m_sid       = H5I_INVALID_HID;
     hsize_t        nfields;
     hsize_t        ntotal_records;
     hsize_t        read_nrecords;
@@ -1445,10 +1442,10 @@ H5TBinsert_record(hid_t loc_id, const char *dset_name, hsize_t start, hsize_t nr
     /* terminate access to the dataspace */
     if (H5Sclose(m_sid) < 0)
         goto out;
-    m_sid = H5I_BADID;
+    m_sid = H5I_INVALID_HID;
     if (H5Sclose(sid) < 0)
         goto out;
-    sid = H5I_BADID;
+    sid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
      * write the "pushed down" records
@@ -1504,7 +1501,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 5, 2001
  *
@@ -1516,10 +1513,10 @@ herr_t
 H5TBadd_records_from(hid_t loc_id, const char *dset_name1, hsize_t start1, hsize_t nrecords,
                      const char *dset_name2, hsize_t start2)
 {
-    hid_t          did   = H5I_BADID;
-    hid_t          tid   = H5I_BADID;
-    hid_t          sid   = H5I_BADID;
-    hid_t          m_sid = H5I_BADID;
+    hid_t          did   = H5I_INVALID_HID;
+    hid_t          tid   = H5I_INVALID_HID;
+    hid_t          sid   = H5I_INVALID_HID;
+    hid_t          m_sid = H5I_INVALID_HID;
     hsize_t        count[1];
     hsize_t        offset[1];
     hsize_t        mem_size[1];
@@ -1633,7 +1630,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 10, 2001
  *
@@ -1646,24 +1643,24 @@ H5TBcombine_tables(hid_t loc_id1, const char *dset_name1, hid_t loc_id2, const c
                    const char *dset_name3)
 {
     /* identifiers for the 1st dataset. */
-    hid_t did_1 = H5I_BADID;
-    hid_t tid_1 = H5I_BADID;
-    hid_t sid_1 = H5I_BADID;
-    hid_t pid_1 = H5I_BADID;
+    hid_t did_1 = H5I_INVALID_HID;
+    hid_t tid_1 = H5I_INVALID_HID;
+    hid_t sid_1 = H5I_INVALID_HID;
+    hid_t pid_1 = H5I_INVALID_HID;
     /* identifiers for the 2nd dataset. */
-    hid_t did_2 = H5I_BADID;
-    hid_t tid_2 = H5I_BADID;
-    hid_t sid_2 = H5I_BADID;
-    hid_t pid_2 = H5I_BADID;
+    hid_t did_2 = H5I_INVALID_HID;
+    hid_t tid_2 = H5I_INVALID_HID;
+    hid_t sid_2 = H5I_INVALID_HID;
+    hid_t pid_2 = H5I_INVALID_HID;
     /* identifiers for the 3rd dataset. */
-    hid_t          did_3          = H5I_BADID;
-    hid_t          tid_3          = H5I_BADID;
-    hid_t          sid_3          = H5I_BADID;
-    hid_t          pid_3          = H5I_BADID;
-    hid_t          sid            = H5I_BADID;
-    hid_t          m_sid          = H5I_BADID;
-    hid_t          member_type_id = H5I_BADID;
-    hid_t          attr_id        = H5I_BADID;
+    hid_t          did_3          = H5I_INVALID_HID;
+    hid_t          tid_3          = H5I_INVALID_HID;
+    hid_t          sid_3          = H5I_INVALID_HID;
+    hid_t          pid_3          = H5I_INVALID_HID;
+    hid_t          sid            = H5I_INVALID_HID;
+    hid_t          m_sid          = H5I_INVALID_HID;
+    hid_t          member_type_id = H5I_INVALID_HID;
+    hid_t          attr_id        = H5I_INVALID_HID;
     hsize_t        count[1];
     hsize_t        offset[1];
     hsize_t        mem_size[1];
@@ -1810,17 +1807,17 @@ H5TBcombine_tables(hid_t loc_id1, const char *dset_name1, hid_t loc_id2, const c
 
             if (H5Aclose(attr_id) < 0)
                 goto out;
-            attr_id = H5I_BADID;
+            attr_id = H5I_INVALID_HID;
 
             if (H5Tclose(member_type_id) < 0)
                 goto out;
-            member_type_id = H5I_BADID;
+            member_type_id = H5I_INVALID_HID;
         } /* end for */
 
         /* close data space. */
         if (H5Sclose(sid) < 0)
             goto out;
-        sid = H5I_BADID;
+        sid = H5I_INVALID_HID;
     } /* end if */
 
     /*-------------------------------------------------------------------------
@@ -1859,7 +1856,7 @@ H5TBcombine_tables(hid_t loc_id1, const char *dset_name1, hid_t loc_id2, const c
      */
     if (H5Sclose(m_sid) < 0)
         goto out;
-    m_sid = H5I_BADID;
+    m_sid = H5I_INVALID_HID;
     HDfree(tmp_buf);
     tmp_buf = NULL;
 
@@ -1989,7 +1986,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 30, 2002
  *
@@ -2002,25 +1999,25 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
                  hsize_t position, const void *fill_data, const void *buf)
 {
     /* identifiers for the 1st, original dataset */
-    hid_t did_1  = H5I_BADID;
-    hid_t tid_1  = H5I_BADID;
-    hid_t sid_1  = H5I_BADID;
-    hid_t pid_1  = H5I_BADID;
-    hid_t msid_1 = H5I_BADID;
+    hid_t did_1  = H5I_INVALID_HID;
+    hid_t tid_1  = H5I_INVALID_HID;
+    hid_t sid_1  = H5I_INVALID_HID;
+    hid_t pid_1  = H5I_INVALID_HID;
+    hid_t msid_1 = H5I_INVALID_HID;
     /* identifiers for the 2nd, new dataset */
-    hid_t did_2  = H5I_BADID;
-    hid_t tid_2  = H5I_BADID;
-    hid_t sid_2  = H5I_BADID;
-    hid_t pid_2  = H5I_BADID;
-    hid_t msid_2 = H5I_BADID;
+    hid_t did_2  = H5I_INVALID_HID;
+    hid_t tid_2  = H5I_INVALID_HID;
+    hid_t sid_2  = H5I_INVALID_HID;
+    hid_t pid_2  = H5I_INVALID_HID;
+    hid_t msid_2 = H5I_INVALID_HID;
     /* identifiers for the 3rd, final dataset */
-    hid_t          did_3          = H5I_BADID;
-    hid_t          tid_3          = H5I_BADID;
-    hid_t          sid_3          = H5I_BADID;
-    hid_t          member_type_id = H5I_BADID;
-    hid_t          write_type_id  = H5I_BADID;
-    hid_t          preserve_id    = H5I_BADID;
-    hid_t          attr_id        = H5I_BADID;
+    hid_t          did_3          = H5I_INVALID_HID;
+    hid_t          tid_3          = H5I_INVALID_HID;
+    hid_t          sid_3          = H5I_INVALID_HID;
+    hid_t          member_type_id = H5I_INVALID_HID;
+    hid_t          write_type_id  = H5I_INVALID_HID;
+    hid_t          preserve_id    = H5I_INVALID_HID;
+    hid_t          attr_id        = H5I_INVALID_HID;
     size_t         member_size;
     size_t         new_member_size = 0;
     size_t         total_size;
@@ -2160,7 +2157,7 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
             /* close the member type */
             if (H5Tclose(member_type_id) < 0)
                 goto out;
-            member_type_id = H5I_BADID;
+            member_type_id = H5I_INVALID_HID;
         } /* end else */
     }     /* end for */
 
@@ -2310,12 +2307,12 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
 
         if (H5Aclose(attr_id) < 0)
             goto out;
-        attr_id = H5I_BADID;
+        attr_id = H5I_INVALID_HID;
 
         /* close the member type */
         if (H5Tclose(member_type_id) < 0)
             goto out;
-        member_type_id = H5I_BADID;
+        member_type_id = H5I_INVALID_HID;
     } /* end for */
 
     /*-------------------------------------------------------------------------
@@ -2337,11 +2334,11 @@ H5TBinsert_field(hid_t loc_id, const char *dset_name, const char *field_name, hi
 
         if (H5Aclose(attr_id) < 0)
             goto out;
-        attr_id = H5I_BADID;
+        attr_id = H5I_INVALID_HID;
 
         if (H5Tclose(member_type_id) < 0)
             goto out;
-        member_type_id = H5I_BADID;
+        member_type_id = H5I_INVALID_HID;
     } /* end fill_data */
 
     ret_val = 0;
@@ -2406,7 +2403,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 30, 2002
  *
@@ -2418,23 +2415,23 @@ herr_t
 H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
 {
     /* identifiers for the 1st original dataset */
-    hid_t did_1 = H5I_BADID;
-    hid_t tid_1 = H5I_BADID;
-    hid_t sid_1 = H5I_BADID;
-    hid_t pid_1 = H5I_BADID;
+    hid_t did_1 = H5I_INVALID_HID;
+    hid_t tid_1 = H5I_INVALID_HID;
+    hid_t sid_1 = H5I_INVALID_HID;
+    hid_t pid_1 = H5I_INVALID_HID;
     /* identifiers for the 2nd new dataset */
-    hid_t did_2 = H5I_BADID;
-    hid_t tid_2 = H5I_BADID;
-    hid_t sid_2 = H5I_BADID;
-    hid_t pid_2 = H5I_BADID;
+    hid_t did_2 = H5I_INVALID_HID;
+    hid_t tid_2 = H5I_INVALID_HID;
+    hid_t sid_2 = H5I_INVALID_HID;
+    hid_t pid_2 = H5I_INVALID_HID;
     /* identifiers for the 3rd final dataset */
-    hid_t          did_3          = H5I_BADID;
-    hid_t          tid_3          = H5I_BADID;
-    hid_t          member_type_id = H5I_BADID;
-    hid_t          preserve_id    = H5I_BADID;
-    hid_t          read_type_id   = H5I_BADID;
-    hid_t          write_type_id  = H5I_BADID;
-    hid_t          attr_id        = H5I_BADID;
+    hid_t          did_3          = H5I_INVALID_HID;
+    hid_t          tid_3          = H5I_INVALID_HID;
+    hid_t          member_type_id = H5I_INVALID_HID;
+    hid_t          preserve_id    = H5I_INVALID_HID;
+    hid_t          read_type_id   = H5I_INVALID_HID;
+    hid_t          write_type_id  = H5I_INVALID_HID;
+    hid_t          attr_id        = H5I_INVALID_HID;
     size_t         member_size;
     size_t         type_size1;
     size_t         type_size2;
@@ -2518,7 +2515,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
             /* close the member type */
             if (H5Tclose(member_type_id) < 0)
                 goto out;
-            member_type_id = H5I_BADID;
+            member_type_id = H5I_INVALID_HID;
 
             H5free_memory(member_name);
             member_name = NULL;
@@ -2601,7 +2598,7 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
             /* close the member type */
             if (H5Tclose(member_type_id) < 0)
                 goto out;
-            member_type_id = H5I_BADID;
+            member_type_id = H5I_INVALID_HID;
         } /* end if */
 
         H5free_memory(member_name);
@@ -2685,22 +2682,22 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
             /* end access to the property list */
             if (H5Pclose(preserve_id) < 0)
                 goto out;
-            preserve_id = H5I_BADID;
+            preserve_id = H5I_INVALID_HID;
 
             /* close the member type */
             if (H5Tclose(member_type_id) < 0)
                 goto out;
-            member_type_id = H5I_BADID;
+            member_type_id = H5I_INVALID_HID;
 
             /* close the read type */
             if (H5Tclose(read_type_id) < 0)
                 goto out;
-            read_type_id = H5I_BADID;
+            read_type_id = H5I_INVALID_HID;
 
             /* close the write type */
             if (H5Tclose(write_type_id) < 0)
                 goto out;
-            write_type_id = H5I_BADID;
+            write_type_id = H5I_INVALID_HID;
 
             HDfree(tmp_buf);
             tmp_buf = NULL;
@@ -2772,18 +2769,18 @@ H5TBdelete_field(hid_t loc_id, const char *dset_name, const char *field_name)
 
             if (H5Aclose(attr_id) < 0)
                 goto out;
-            attr_id = H5I_BADID;
+            attr_id = H5I_INVALID_HID;
 
             /* close the member type */
             if (H5Tclose(member_type_id) < 0)
                 goto out;
-            member_type_id = H5I_BADID;
+            member_type_id = H5I_INVALID_HID;
         } /* end for */
 
         /* close data space. */
         if (H5Sclose(sid_1) < 0)
             goto out;
-        sid_1 = H5I_BADID;
+        sid_1 = H5I_INVALID_HID;
     } /* end if */
 
     ret_val = 0;
@@ -2858,7 +2855,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 30, 2001
  *
@@ -2884,7 +2881,7 @@ H5TBAget_title(hid_t loc_id, char *table_title)
  *
  * Return: Success: TRUE/FALSE, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: January 30, 2002
  *
@@ -2954,7 +2951,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -2965,9 +2962,9 @@ out:
 herr_t
 H5TBget_table_info(hid_t loc_id, const char *dset_name, hsize_t *nfields, hsize_t *nrecords)
 {
-    hid_t   tid = H5I_BADID;
-    hid_t   sid = H5I_BADID;
-    hid_t   did = H5I_BADID;
+    hid_t   tid = H5I_INVALID_HID;
+    hid_t   sid = H5I_INVALID_HID;
+    hid_t   did = H5I_INVALID_HID;
     hsize_t dims[1];
     int     num_members;
     herr_t  ret_val = -1;
@@ -3011,7 +3008,7 @@ H5TBget_table_info(hid_t loc_id, const char *dset_name, hsize_t *nfields, hsize_
         /* terminate access to the dataspace */
         if (H5Sclose(sid) < 0)
             goto out;
-        sid = H5I_BADID;
+        sid = H5I_INVALID_HID;
 
         *nrecords = dims[0];
     } /* end if */
@@ -3039,7 +3036,7 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -3051,11 +3048,11 @@ herr_t
 H5TBget_field_info(hid_t loc_id, const char *dset_name, char *field_names[], size_t *field_sizes,
                    size_t *field_offsets, size_t *type_size)
 {
-    hid_t    did    = H5I_BADID; /* dataset ID */
-    hid_t    tid    = H5I_BADID; /* file type ID */
-    hid_t    n_tid  = H5I_BADID; /* native type ID */
-    hid_t    m_tid  = H5I_BADID; /* member type ID */
-    hid_t    nm_tid = H5I_BADID; /* native member ID */
+    hid_t    did    = H5I_INVALID_HID; /* dataset ID */
+    hid_t    tid    = H5I_INVALID_HID; /* file type ID */
+    hid_t    n_tid  = H5I_INVALID_HID; /* native type ID */
+    hid_t    m_tid  = H5I_INVALID_HID; /* member type ID */
+    hid_t    nm_tid = H5I_INVALID_HID; /* native member ID */
     hssize_t nfields;
     hssize_t i;
     herr_t   ret_val = -1;
@@ -3114,10 +3111,10 @@ H5TBget_field_info(hid_t loc_id, const char *dset_name, char *field_names[], siz
         /* close the member types */
         if (H5Tclose(m_tid) < 0)
             goto out;
-        m_tid = H5I_BADID;
+        m_tid = H5I_INVALID_HID;
         if (H5Tclose(nm_tid) < 0)
             goto out;
-        nm_tid = H5I_BADID;
+        nm_tid = H5I_INVALID_HID;
     } /* end for */
 
     ret_val = 0;
@@ -3156,7 +3153,7 @@ out:
  *
  * Return: Success: TRUE/FALSE, Failure: N/A
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: November 19, 2001
  *
@@ -3197,7 +3194,7 @@ H5TB_find_field(const char *field, const char *field_list)
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: December 6, 2001
  *
@@ -3258,7 +3255,7 @@ out:
  *
  * Return: Success: the memory type ID, Failure: -1
  *
- * Programmer: Pedro Vicente, pvn@ncsa.uiuc.edu
+ * Programmer: Pedro Vicente
  *
  * Date: March 31, 2004
  *
@@ -3270,9 +3267,9 @@ static hid_t
 H5TB_create_type(hid_t loc_id, const char *dset_name, size_t type_size, const size_t *field_offset,
                  const size_t *field_sizes, hid_t ftype_id)
 {
-    hid_t    mem_type_id = H5I_BADID;
-    hid_t    mtype_id    = H5I_BADID;
-    hid_t    nmtype_id   = H5I_BADID;
+    hid_t    mem_type_id = H5I_INVALID_HID;
+    hid_t    mtype_id    = H5I_INVALID_HID;
+    hid_t    nmtype_id   = H5I_INVALID_HID;
     size_t   size_native;
     hsize_t  nfields = 0;
     char **  fnames  = NULL;
@@ -3313,10 +3310,10 @@ H5TB_create_type(hid_t loc_id, const char *dset_name, size_t type_size, const si
             goto out;
         if (H5Tclose(mtype_id) < 0)
             goto out;
-        mtype_id = H5I_BADID;
+        mtype_id = H5I_INVALID_HID;
         if (H5Tclose(nmtype_id) < 0)
             goto out;
-        nmtype_id = H5I_BADID;
+        nmtype_id = H5I_INVALID_HID;
     } /* end for */
 
     ret_val = mem_type_id;
@@ -3354,8 +3351,8 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Nat Furrer, nfurrer@ncsa.uiuc.edu
- *             James Laird, jlaird@ncsa.uiuc.edu
+ * Programmer: Nat Furrer
+ *             James Laird
  *
  * Date: March 8, 2004
  *
@@ -3367,8 +3364,8 @@ herr_t
 H5TB_common_append_records(hid_t dataset_id, hid_t mem_type_id, size_t nrecords, hsize_t orig_table_size,
                            const void *buf)
 {
-    hid_t   sid   = H5I_BADID;
-    hid_t   m_sid = H5I_BADID;
+    hid_t   sid   = H5I_INVALID_HID;
+    hid_t   m_sid = H5I_INVALID_HID;
     hsize_t count[1];
     hsize_t offset[1];
     hsize_t dims[1];
@@ -3419,8 +3416,8 @@ out:
  *
  * Return: Success: 0, Failure: -1
  *
- * Programmer: Nat Furrer, nfurrer@ncsa.uiuc.edu
- *             James Laird, jlaird@ncsa.uiuc.edu
+ * Programmer: Nat Furrer
+ *             James Laird
  *
  * Date: March 8, 2004
  *
@@ -3432,8 +3429,8 @@ herr_t
 H5TB_common_read_records(hid_t dataset_id, hid_t mem_type_id, hsize_t start, size_t nrecords,
                          hsize_t table_size, void *buf)
 {
-    hid_t   sid   = H5I_BADID;
-    hid_t   m_sid = H5I_BADID;
+    hid_t   sid   = H5I_INVALID_HID;
+    hid_t   m_sid = H5I_INVALID_HID;
     hsize_t count[1];
     hsize_t offset[1];
     hsize_t mem_size[1];

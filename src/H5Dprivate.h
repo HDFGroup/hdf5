@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,8 +14,8 @@
 /*
  * This file contains private information about the H5D module
  */
-#ifndef _H5Dprivate_H
-#define _H5Dprivate_H
+#ifndef H5Dprivate_H
+#define H5Dprivate_H
 
 /* Include package's public header */
 #include "H5Dpublic.h"
@@ -186,4 +186,4 @@ H5_DLL herr_t H5D_virtual_free_parsed_name(H5O_storage_virtual_name_seg_t *name_
 H5_DLL herr_t H5D_btree_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, unsigned ndims,
                               const uint32_t *dim);
 
-#endif /* _H5Dprivate_H */
+#endif /* H5Dprivate_H */

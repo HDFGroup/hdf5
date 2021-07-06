@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -181,7 +181,7 @@ H5G__init_package(void)
 
     FUNC_ENTER_PACKAGE
 
-    /* Initialize the atom group for the group IDs */
+    /* Initialize the ID group for the group IDs */
     if (H5I_register_type(H5I_GROUP_CLS) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
@@ -370,9 +370,9 @@ H5Gcreate2(hid_t loc_id, const char *name, hid_t lcpl_id, hid_t gcpl_id, hid_t g
                                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
-    /* Get an atom for the group */
+    /* Get an ID for the group */
     if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get ID for group handle")
 
 done:
     if (H5I_INVALID_HID == ret_value)
@@ -417,9 +417,9 @@ done:
 hid_t
 H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
 {
-    void *            grp     = NULL; /* Structure for new group */
-    H5VL_object_t *   vol_obj = NULL; /* Object for loc_id */
-    H5VL_loc_params_t loc_params;
+    void *            grp     = NULL;              /* Structure for new group */
+    H5VL_object_t *   vol_obj = NULL;              /* Object for loc_id */
+    H5VL_loc_params_t loc_params;                  /* Location parameters for object access */
     hid_t             ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
@@ -448,9 +448,9 @@ H5Gcreate_anon(hid_t loc_id, hid_t gcpl_id, hid_t gapl_id)
                                          gapl_id, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)))
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, H5I_INVALID_HID, "unable to create group")
 
-    /* Get an atom for the group */
+    /* Get an ID for the group */
     if ((ret_value = H5VL_register(H5I_GROUP, grp, vol_obj->connector, TRUE)) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to atomize group handle")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to get ID for group handle")
 
 done:
     /* Cleanup on failure */
@@ -726,15 +726,15 @@ H5Gclose(hid_t group_id)
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", group_id);
 
-    /* Check args */
-    if (NULL == H5I_object_verify(group_id, H5I_GROUP))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group")
+    /* Check arguments */
+    if (H5I_GROUP != H5I_get_type(group_id))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a group ID")
 
-    /* Decrement the counter on the group atom. It will be freed if the count
+    /* Decrement the counter on the group ID. It will be freed if the count
      * reaches zero.
      */
     if (H5I_dec_app_ref(group_id) < 0)
-        HGOTO_ERROR(H5E_SYM, H5E_CANTRELEASE, FAIL, "unable to close group")
+        HGOTO_ERROR(H5E_SYM, H5E_CANTDEC, FAIL, "decrementing group ID failed")
 
 done:
     FUNC_LEAVE_API(ret_value)

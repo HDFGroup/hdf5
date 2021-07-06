@@ -10,7 +10,7 @@ use warnings;
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -44,7 +44,27 @@ foreach $arg (@ARGV) {
     #
     # If a user specifies one file, process it no matter what so people
     # can inspect files we normally skip (like H5system.c).
+
+    $ignore = 0;
+
+    # Ignored files in src/
     if($#ARGV gt 0 and $filename =~ /H5FDmulti|H5FDstdio|H5VLpassthru|H5system|H5detect|H5make_libsettings/) {
+        $ignore = 1;
+    }
+    # Ignored atomic test files in test/
+    if($#ARGV gt 0 and $filename =~ /atomic_reader|atomic_writer/) {
+        $ignore = 1;
+    }
+    # Ignored filter plugins in test/
+    if($#ARGV gt 0 and $filename =~ /^filter_plugin\d_/) {
+        $ignore = 1;
+    }
+    # Ignored generators in test/
+    if($#ARGV gt 0 and $filename =~ /^gen_/) {
+        $ignore = 1;
+    }
+
+    if($ignore) {
         print "$filename is exempt from using Standard library macro wrappers\n";
         next;
     }
@@ -95,13 +115,13 @@ foreach $arg (@ARGV) {
 
             # These are really HDF5 functions/macros even though they don't
             # start with `h' or `H'.
-            next if $name =~ /^FUNC_(ENTER|LEAVE)(_(NO)?API|_PACKAGE|_STATIC)?(_NOFS|_NOCLEAR|_NOINIT)?(_NOFUNC|_TAG)?$/;
+            next if $name =~ /^FUNC_(ENTER|LEAVE)(_(NO)?API|_PACKAGE|_STATIC)?(_NOFS|_NOCLEAR|_NOINIT|_NOPUSH)?(_NOFUNC|_TAG)?$/;
             next if $name =~ /^(BEGIN|END)_FUNC$/;
             next if $name =~ /^U?INT(8|16|32|64)(ENCODE|DECODE)(_VAR)?$/;
             next if $name =~ /^CI_(PRINT_STATS|INC_SRC|INC_DST)$/;
             next if $name =~ /^(ABS|ADDR_OVERFLOW|ALL_MEMBERS|BOUND|CONSTR|DETECT_[I|F|M]|DOWN)$/;
             next if $name =~ /^(MIN3?|MAX3?|NELMTS|POWER_OF_TWO|REGION_OVERFLOW)$/;
-            next if $name =~ /^(UNIQUE_MEMBERS|S_ISDIR)$/;
+            next if $name =~ /^(SIZE_OVERFLOW|UNIQUE_MEMBERS|S_ISDIR)$/;
             next if $name =~ /^addr_defined$/;
 
             # These functions/macros are exempt.
@@ -140,15 +160,38 @@ foreach $arg (@ARGV) {
                 next if $name =~ /^(pow_fun|round_fun|abs_fun|lround_fun|llround_fun)$/;
             }
 
+            # This is a macro parameter in H5Rint.c. Ignore it in this file.
+            if($filename =~ /H5Rint/) {
+                next if $name =~ /^(func)$/;
+            }
+
+            # Internal calls in the HDFS VFD (H5FDhdfs.c). Ignore it in this file.
+            if($filename =~ /H5FDhdfs/) {
+                next if $name =~ /^(hdfs)/;
+            }
+
+            # Macros, etc. from the mirror VFD (H5FDmirror.c). Ignore in this file.
+            if($filename =~ /H5FDmirror/) {
+                next if $name =~ /^(LOG)/;
+                next if $name =~ /^(BSWAP_64|is_host_little_endian)$/;
+            }
+
+            # These are things in H5FDs3comms.c and H5FDros3.c. Ignore them in these files.
+            if($filename =~ /H5FDs3comms|H5FDros3/) {
+                next if $name =~ /^(curl_|curlwritecallback|gmnow)/;
+                next if $name =~ /^(ros3_|ROS3_|S3COMMS_)/;
+                next if $name =~ /^(EVP_sha256|SHA256|ISO8601NOW)$/;
+            }
+
             # TESTING (not comprehensive - just noise reduction)
             
             # Test macros and functions (testhdf5.h)
             next if $name =~ /^(AddTest|TestErrPrintf|TestSummary|TestCleanup|TestShutdown)$/;
             next if $name =~ /^(CHECK|CHECK_PTR|CHECK_PTR_NULL|CHECK_PTR_EQ|CHECK_I)$/;
-            next if $name =~ /^(VERIFY|VERIFY_STR|VERIFY|TYPE|MESSAGE|ERROR)$/;
+            next if $name =~ /^(VERIFY|VERIFY_STR|VERIFY_TYPE|MESSAGE|ERROR)$/;
 
             # Test macros and functions (h5test.h)
-            next if $name =~ /^(TESTING|PASSED|SKIPPED|FAIL_PUTS_ERROR|FAIL_STACK_ERROR|TEST_ERROR)$/;
+            next if $name =~ /^(TESTING|PASSED|SKIPPED|PUTS_ERROR|FAIL_PUTS_ERROR|FAIL_STACK_ERROR|TEST_ERROR|AT)$/;
             next if $name =~ /^(GetTestExpress)$/;
 
             # Ignore functions that start with test_ or check_
@@ -158,8 +201,48 @@ foreach $arg (@ARGV) {
             # Ignore functions that start with h5_
             next if $name =~ /^h5_/;
 
+            # Ignore process completed status
+            next if $name =~ /(WIFEXITED|WEXITSTATUS|WIFSIGNALED|WTERMSIG|WCOREDUMP|WIFSTOPPED|WSTOPSIG)/;
+
             # Ignore usage functions
             next if $name =~ /^usage$/;
+
+            # Ignore callbacks
+            next if $name =~ /(_cb\d?)$/;
+
+            # Specific tests (not even remotely comprehensive)
+
+            # accum test code
+            if($filename =~ /accum/) {
+                next if $name =~ /^(accum_)/;
+            }
+
+            # cache test code
+            if($filename =~ /cache/) {
+                next if $name =~ /(_entry|_entries|_cache|_check|_dependency|_status|_op)$/;
+                next if $name =~ /^(verify_|smoke_check_|row_major_|col_major_)/;
+                next if $name =~ /^(resize_configs_are_equal|CACHE_ERROR)$/
+            }
+
+            # Splitter VFD test code. Ignore in vfd.c.
+            if($filename =~ /vfd/) {
+                next if $name =~ /^(SPLITTER_|splitter_)/;
+                next if $name =~ /(_splitter_)/;
+                next if $name =~ /^(file_exists)$/;
+            }
+
+            # S3 VFD test code. Ignore in ros3.c and s3comms.c.
+            # HDFS VFD test code. Ignore in hdfs.c.
+            if($filename =~ /ros3|s3comms|hdfs/) {
+                next if $name =~ /^(JSVERIFY|JSFAILED_|JSERR_|jserr_|FAIL_)/;
+                next if $name =~ /^(curl_)/;
+                next if $name =~ /^(S3COMMS_FORMAT_CREDENTIAL|ISO8601NOW|gmnow)$/;
+            }
+
+            # VDS test code. Ignore in vds.c.
+            if($filename =~ /vds/) {
+                next if $name =~ /^(vds_)/;
+            }
 
             print "$filename:$.: $name\n";
         }

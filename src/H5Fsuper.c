@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -309,7 +309,6 @@ done:
  *              Failure:        FAIL
  *
  * Programmer:  Bill Wendling
- *              wendling@ncsa.uiuc.edu
  *              Sept 12, 2003
  *
  *-------------------------------------------------------------------------
@@ -882,12 +881,12 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
 
                     /* Do the same kluge until we know for sure.  VC */
 #if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
-                                                               /* KLUGE ALERT!!
-                                                                *
-                                                                * H5F__super_ext_write_msg() expects f->shared->sblock to
-                                                                * be set -- verify that it is NULL, and then set it.
-                                                                * Set it back to NULL when we are done.
-                                                                */
+                    /* KLUGE ALERT!!
+                     *
+                     * H5F__super_ext_write_msg() expects f->shared->sblock to
+                     * be set -- verify that it is NULL, and then set it.
+                     * Set it back to NULL when we are done.
+                     */
                     HDassert(f->shared->sblock == NULL);
                     f->shared->sblock = sblock;
 #endif /* JRM */
@@ -899,9 +898,14 @@ H5F__super_read(H5F_t *f, H5P_genplist_t *fa_plist, hbool_t initial_read)
                                         "error in writing fsinfo message to superblock extension")
                     }
                     else {
-                        if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0)
+                        if (H5F__super_ext_remove_msg(f, H5O_FSINFO_ID) < 0) {
+#if 1 /* bug fix test code -- tidy this up if all goes well */ /* JRM */
+                            f->shared->sblock = NULL;
+#endif /* JRM */
+
                             HGOTO_ERROR(H5E_FILE, H5E_CANTDELETE, FAIL,
                                         "error in removing message from superblock extension")
+                        }
 
                         if (H5F__super_ext_write_msg(f, H5O_FSINFO_ID, &fsinfo, TRUE,
                                                      H5O_MSG_FLAG_MARK_IF_UNKNOWN) < 0)
@@ -1068,7 +1072,6 @@ done:
  *              Failure:        FAIL
  *
  * Programmer:  Quincey Koziol
- *              koziol@ncsa.uiuc.edu
  *              Sept 15, 2003
  *
  *-------------------------------------------------------------------------

@@ -16,7 +16,7 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-/*
+/**
  * Java representation of the ROS3 VFD file access property list (fapl)
  * structure.
  *
@@ -46,10 +46,15 @@ import java.io.Serializable;
 public class H5FD_ros3_fapl_t implements Serializable {
     private static final long serialVersionUID = 8985533001471224030L;
 
+    /** Version number of the H5FD_ros3_fapl_t structure */
     private int   version;
+    /** Flag TRUE or FALSE whether or not requests are to be authenticated with the AWS4 algorithm. */
     private boolean authenticate;
+    /** region "aws region" for authenticating request */
     private String aws_region;
+    /** id "secret id" or "access id" for authenticating request */
     private String secret_id;
+    /** key "secret key" or "access key" for authenticating request */
     private String secret_key;
 
     /**

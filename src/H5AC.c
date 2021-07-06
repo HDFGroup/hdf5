@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,7 +15,7 @@
  *
  * Created:             H5AC.c
  *                      Jul  9 1997
- *                      Robb Matzke <matzke@llnl.gov>
+ *                      Robb Matzke
  *
  * Purpose:             Functions in this file implement a cache for
  *                      things which exist on disk.  All "things" associated
@@ -127,14 +127,14 @@ static const H5AC_class_t *const H5AC_class_s[] = {
 };
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC_init
+ * Function:    H5AC_init
  *
- * Purpose:	Initialize the interface from some other layer.
+ * Purpose:     Initialize the interface from some other layer.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:        non-negative
+ *              Failure:        negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, January 18, 2003
  *
  *-------------------------------------------------------------------------
@@ -152,13 +152,13 @@ done:
 } /* end H5AC_init() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC__init_package
+ * Function:    H5AC__init_package
  *
- * Purpose:	Initialize interface-specific information
+ * Purpose:     Initialize interface-specific information
  *
- * Return:	Non-negative on success/Negative on failure
+ * Return:      Non-negative on success/Negative on failure
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 18, 2002
  *
  *-------------------------------------------------------------------------
@@ -187,15 +187,15 @@ H5AC__init_package(void)
 } /* end H5AC__init_package() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5AC_term_package
+ * Function:    H5AC_term_package
  *
- * Purpose:	Terminate this interface.
+ * Purpose:     Terminate this interface.
  *
- * Return:	Success:	Positive if anything was done that might
- *				affect other interfaces; zero otherwise.
- * 		Failure:	Negative.
+ * Return:      Success:        Positive if anything was done that might
+ *                              affect other interfaces; zero otherwise.
+ *              Failure:        Negative.
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Thursday, July 18, 2002
  *
  *-------------------------------------------------------------------------
@@ -226,8 +226,6 @@ H5AC_term_package(void)
  * Return:      TRUE if a cache image load is pending, and FALSE otherwise.
  *
  * Programmer:  John Mainzer, 1/10/17
- *
- * Changes:     None.
  *
  *-------------------------------------------------------------------------
  */
@@ -262,7 +260,6 @@ H5AC_cache_image_pending(const H5F_t *f)
  *              Failure:        Negative
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -353,19 +350,14 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if (NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create candidate entry list")
 
-        if (aux_ptr != NULL)
-            if (aux_ptr->mpi_rank == 0)
-                f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
-                                              (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
-                                              TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
-            else
-                f->shared->cache =
-                    H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                               H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
+        if (aux_ptr->mpi_rank == 0)
+            f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
+                                          (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
+                                          TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
         else
             f->shared->cache =
                 H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, NULL);
+                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
     } /* end if */
     else {
 #endif /* H5_HAVE_PARALLEL */
@@ -450,8 +442,15 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
+ *
+ * Changes:
+ *
+ *             In the parallel case, added code to setup the MDC slist
+ *             before the call to H5AC__flush_entries() and take it down
+ *             afterwards.
+ *
+ *                                            JRM -- 7/29/20
  *
  *-------------------------------------------------------------------------
  */
@@ -479,57 +478,108 @@ H5AC_dest(H5F_t *f)
 
     /* Check if log messages are being emitted */
     if (H5C_get_logging_status(f->shared->cache, &log_enabled, &curr_logging) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to get logging status")
-    if (log_enabled && curr_logging)
+    if (log_enabled && curr_logging) {
+
         if (H5C_log_write_destroy_cache_msg(f->shared->cache) < 0)
+
             HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    }
+
     /* Tear down logging */
-    if (log_enabled)
+    if (log_enabled) {
+
         if (H5C_log_tear_down(f->shared->cache) < 0)
+
             HGOTO_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "mdc logging tear-down failed")
+    }
 
 #ifdef H5_HAVE_PARALLEL
+
     /* destroying the cache, so clear all collective entries */
     if (H5C_clear_coll_entries(f->shared->cache, FALSE) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
-    if (aux_ptr)
+
+    if (aux_ptr) {
+
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    /* If the file was opened R/W, attempt to flush all entries
-     * from rank 0 & Bcast clean list to other ranks.
-     *
-     * Must not flush in the R/O case, as this will trigger the
-     * free space manager settle routines.
-     */
-    if (H5F_ACC_RDWR & H5F_INTENT(f))
-        if (H5AC__flush_entries(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+        /* If the file was opened R/W, attempt to flush all entries
+         * from rank 0 & Bcast clean list to other ranks.
+         *
+         * Must not flush in the R/O case, as this will trigger the
+         * free space manager settle routines.
+         *
+         * Must also enable the skip list before the call to
+         * H5AC__flush_entries() and disable it afterwards, as the
+         * skip list will be disabled after the previous flush.
+         *
+         * Note that H5C_dest() does slist setup and take down as well.
+         * Unfortunately, we can't do the setup and take down just once,
+         * as H5C_dest() is called directly in the test code.
+         *
+         * Fortunately, the cache should be clean or close to it at this
+         * point, so the overhead should be minimal.
+         */
+        if (H5F_ACC_RDWR & H5F_INTENT(f)) {
+
+            /* enable and load the slist */
+            if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
+            if (H5AC__flush_entries(f) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+
+            /* disable the slist -- should be empty */
+            if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
+        }
+    }
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
     if (H5C_dest(f) < 0)
+
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't destroy cache")
+
     f->shared->cache = NULL;
 
 #ifdef H5_HAVE_PARALLEL
+
     if (aux_ptr != NULL) {
+
         if (aux_ptr->d_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->d_slist_ptr) == 0);
             H5SL_close(aux_ptr->d_slist_ptr);
+
         } /* end if */
+
         if (aux_ptr->c_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->c_slist_ptr) == 0);
             H5SL_close(aux_ptr->c_slist_ptr);
+
         } /* end if */
+
         if (aux_ptr->candidate_slist_ptr != NULL) {
+
             HDassert(H5SL_count(aux_ptr->candidate_slist_ptr) == 0);
             H5SL_close(aux_ptr->candidate_slist_ptr);
+
         } /* end if */
+
         aux_ptr->magic = 0;
         aux_ptr        = H5FL_FREE(H5AC_aux_t, aux_ptr);
+
     }  /* end if */
 #endif /* H5_HAVE_PARALLEL */
 
@@ -541,12 +591,12 @@ done:
  * Function:    H5AC_evict
  *
  * Purpose:     Evict all entries except the pinned entries
- *		in the cache.
+ *              in the cache.
  *
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Vailin Choi
- *		Dec 2013
+ *              Dec 2013
  *
  *-------------------------------------------------------------------------
  */
@@ -567,7 +617,6 @@ H5AC_evict(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTFREE, FAIL, "can't evict cache")
 
 done:
-
     /* If currently logging, generate a message */
     if (f->shared->cache->log_info->logging)
         if (H5C_log_write_evict_cache_msg(f->shared->cache, ret_value) < 0)
@@ -579,9 +628,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_expunge_entry
  *
- * Purpose:	Expunge the target entry from the cache without writing it
- * 		to disk even if it is dirty.  The entry must not be either
- * 		pinned or protected.
+ * Purpose:     Expunge the target entry from the cache without writing it
+ *              to disk even if it is dirty.  The entry must not be either
+ *              pinned or protected.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -620,19 +669,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_flush
  *
- * Purpose:	Flush (and possibly destroy) the metadata cache associated
- *		with the specified file.
+ * Purpose:     Flush (and possibly destroy) the metadata cache associated
+ *              with the specified file.
  *
- *		If the cache contains protected entries, the function will
- *		fail, as protected entries cannot be flushed.  However
- *		all unprotected entries should be flushed before the
- *		function returns failure.
+ *              If the cache contains protected entries, the function will
+ *              fail, as protected entries cannot be flushed.  However
+ *              all unprotected entries should be flushed before the
+ *              function returns failure.
  *
  * Return:      Non-negative on success/Negative on failure if there was a
  *              request to flush all items and something was protected.
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -677,15 +725,15 @@ done:
  * Function:    H5AC_get_entry_status
  *
  * Purpose:     Given a file address, determine whether the metadata
- * 		cache contains an entry at that location.  If it does,
- * 		also determine whether the entry is dirty, protected,
- * 		pinned, etc. and return that information to the caller
- * 		in *status.
+ *              cache contains an entry at that location.  If it does,
+ *              also determine whether the entry is dirty, protected,
+ *              pinned, etc. and return that information to the caller
+ *              in *status.
  *
- * 		If the specified entry doesn't exist, set *status_ptr
- * 		to zero.
+ *              If the specified entry doesn't exist, set *status_ptr
+ *              to zero.
  *
- * 		On error, the value of *status is undefined.
+ *              On error, the value of *status is undefined.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -750,7 +798,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -847,8 +894,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_mark_entry_dirty
  *
- * Purpose:	Mark a pinned or protected entry as dirty.  The target
- * 		entry MUST be either pinned, protected, or both.
+ * Purpose:     Mark a pinned or protected entry as dirty.  The target
+ *              entry MUST be either pinned, protected, or both.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -890,9 +937,10 @@ H5AC_mark_entry_dirty(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_entry_dirty_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_entry_dirty_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_dirty() */
@@ -900,8 +948,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_mark_entry_clean
  *
- * Purpose:	Mark a pinned entry as clean.  The target
- * 		entry MUST be pinned.
+ * Purpose:     Mark a pinned entry as clean.  The target
+ *              entry MUST be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -942,9 +990,10 @@ H5AC_mark_entry_clean(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_entry_clean_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_entry_clean_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_clean() */
@@ -952,8 +1001,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_mark_entry_unserialized
  *
- * Purpose:	Mark a pinned or protected entry as unserialized.  The target
- * 		entry MUST be either pinned, protected, or both.
+ * Purpose:     Mark a pinned or protected entry as unserialized.  The target
+ *              entry MUST be either pinned, protected, or both.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -983,9 +1032,10 @@ H5AC_mark_entry_unserialized(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_unserialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_unserialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_unserialized() */
@@ -993,8 +1043,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_mark_entry_serialized
  *
- * Purpose:	Mark a pinned entry as serialized.  The target
- * 		entry MUST be pinned.
+ * Purpose:     Mark a pinned entry as serialized.  The target
+ *              entry MUST be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1023,9 +1073,10 @@ H5AC_mark_entry_serialized(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_mark_serialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_mark_serialized_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_mark_entry_serialized() */
@@ -1039,7 +1090,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Jul  9 1997
  *
  *-------------------------------------------------------------------------
@@ -1091,7 +1141,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_pin_protected_entry()
  *
- * Purpose:	Pin a protected cache entry.  The entry must be protected
+ * Purpose:     Pin a protected cache entry.  The entry must be protected
  *              at the time of call, and must be unpinned.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1123,9 +1173,10 @@ H5AC_pin_protected_entry(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_pin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_pin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_pin_protected_entry() */
@@ -1168,9 +1219,110 @@ done:
 } /* H5AC_prep_for_file_close() */
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_prep_for_file_flush
+ *
+ * Purpose:     This function should be called just prior to the first
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to handly any setup required prior to
+ *              metadata cache flush.
+ *
+ *              Initially, this means setting up the slist prior to the
+ *              flush.  We do this in a seperate call because
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid
+ *              the overhead of setting up and taking down the skip list
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_prep_for_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_prep_for_file_flush() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_secure_from_file_flush
+ *
+ * Purpose:     This function should be called just after the last
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to perform any necessary cleanup after the
+ *              metadata cache flush.
+ *
+ *              The objective of the call is to allow the metadata cache
+ *              to do any necessary necessary cleanup work after a cache
+ *              flush.
+ *
+ *              Initially, this means taking down the slist after the
+ *              flush.  We do this in a seperate call because
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid
+ *              the overhead of setting up and taking down the skip list
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_secure_from_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_secure_from_file_flush() */
+
+/*-------------------------------------------------------------------------
+ *
  * Function:    H5AC_create_flush_dependency()
  *
- * Purpose:	Create a flush dependency between two entries in the metadata
+ * Purpose:     Create a flush dependency between two entries in the metadata
  *              cache.
  *
  * Return:      Non-negative on success/Negative on failure
@@ -1203,10 +1355,11 @@ H5AC_create_flush_dependency(void *parent_thing, void *child_thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_create_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing,
-                                        ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_create_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing,
+                                            (H5AC_info_t *)child_thing, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_create_flush_dependency() */
@@ -1215,22 +1368,21 @@ done:
  * Function:    H5AC_protect
  *
  * Purpose:     If the target entry is not in the cache, load it.  If
- *		necessary, attempt to evict one or more entries to keep
- *		the cache within its maximum size.
+ *              necessary, attempt to evict one or more entries to keep
+ *              the cache within its maximum size.
  *
- *		Mark the target entry as protected, and return its address
- *		to the caller.  The caller must call H5AC_unprotect() when
- *		finished with the entry.
+ *              Mark the target entry as protected, and return its address
+ *              to the caller.  The caller must call H5AC_unprotect() when
+ *              finished with the entry.
  *
- *		While it is protected, the entry may not be either evicted
- *		or flushed -- nor may it be accessed by another call to
- *		H5AC_protect.  Any attempt to do so will result in a failure.
+ *              While it is protected, the entry may not be either evicted
+ *              or flushed -- nor may it be accessed by another call to
+ *              H5AC_protect.  Any attempt to do so will result in a failure.
  *
  * Return:      Success:        Ptr to the object.
  *              Failure:        NULL
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Sep  2 1997
  *
  *-------------------------------------------------------------------------
@@ -1293,7 +1445,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_resize_entry
  *
- * Purpose:	Resize a pinned or protected entry.
+ * Purpose:     Resize a pinned or protected entry.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1335,9 +1487,10 @@ H5AC_resize_entry(void *thing, size_t new_size)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_resize_entry_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_resize_entry_msg(cache_ptr, entry_ptr, new_size, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_resize_entry() */
@@ -1345,8 +1498,8 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_unpin_entry()
  *
- * Purpose:	Unpin a cache entry.  The entry must be unprotected at
- * 		the time of call, and must be pinned.
+ * Purpose:     Unpin a cache entry.  The entry must be unprotected at
+ *              the time of call, and must be pinned.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1377,9 +1530,10 @@ H5AC_unpin_entry(void *thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_unpin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_unpin_entry_msg(cache_ptr, entry_ptr, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_unpin_entry() */
@@ -1387,7 +1541,7 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_destroy_flush_dependency()
  *
- * Purpose:	Destroy a flush dependency between two entries.
+ * Purpose:     Destroy a flush dependency between two entries.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1419,10 +1573,11 @@ H5AC_destroy_flush_dependency(void *parent_thing, void *child_thing)
 
 done:
     /* If currently logging, generate a message */
-    if (cache_ptr->log_info->logging)
-        if (H5C_log_write_destroy_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing, (H5AC_info_t *)child_thing,
-                                         ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache_ptr != NULL && cache_ptr->log_info != NULL)
+        if (cache_ptr->log_info->logging)
+            if (H5C_log_write_destroy_fd_msg(cache_ptr, (H5AC_info_t *)parent_thing,
+                                             (H5AC_info_t *)child_thing, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_destroy_flush_dependency() */
@@ -1430,27 +1585,27 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5AC_unprotect
  *
- * Purpose:	Undo an H5AC_protect() call -- specifically, mark the
- *		entry as unprotected, remove it from the protected list,
- *		and give it back to the replacement policy.
+ * Purpose:     Undo an H5AC_protect() call -- specifically, mark the
+ *              entry as unprotected, remove it from the protected list,
+ *              and give it back to the replacement policy.
  *
- *		The TYPE and ADDR arguments must be the same as those in
- *		the corresponding call to H5AC_protect() and the THING
- *		argument must be the value returned by that call to
- *		H5AC_protect().
+ *              The TYPE and ADDR arguments must be the same as those in
+ *              the corresponding call to H5AC_protect() and the THING
+ *              argument must be the value returned by that call to
+ *              H5AC_protect().
  *
- *		If the deleted flag is TRUE, simply remove the target entry
- *		from the cache, clear it, and free it without writing it to
- *		disk.
+ *              If the deleted flag is TRUE, simply remove the target entry
+ *              from the cache, clear it, and free it without writing it to
+ *              disk.
  *
- *		This version of the function is a complete re-write to
- *		use the new metadata cache.  While there isn't all that
- *		much difference between the old and new Purpose sections,
- *		the original version is given below.
+ *              This version of the function is a complete re-write to
+ *              use the new metadata cache.  While there isn't all that
+ *              much difference between the old and new Purpose sections,
+ *              the original version is given below.
  *
- *		Original purpose section:
+ *              Original purpose section:
  *
- *		This function should be called to undo the effect of
+ *              This function should be called to undo the effect of
  *              H5AC_protect().  The TYPE and ADDR arguments should be the
  *              same as the corresponding call to H5AC_protect() and the
  *              THING argument should be the value returned by H5AC_protect().
@@ -1460,7 +1615,6 @@ done:
  * Return:      Non-negative on success/Negative on failure
  *
  * Programmer:  Robb Matzke
- *              matzke@llnl.gov
  *              Sep  2 1997
  *
  *-------------------------------------------------------------------------
@@ -1831,16 +1985,16 @@ done:
  * Function:    H5AC_validate_config()
  *
  * Purpose:     Run a sanity check on the contents of the supplied
- *		instance of H5AC_cache_config_t.
+ *              instance of H5AC_cache_config_t.
  *
  *              Do nothing and return SUCCEED if no errors are detected,
  *              and flag an error and return FAIL otherwise.
  *
- *		At present, this function operates by packing the data
- *		from the instance of H5AC_cache_config_t into an instance
- *		of H5C_auto_size_ctl_t, and then calling
- *		H5C_validate_resize_config().  As H5AC_cache_config_t and
- *		H5C_auto_size_ctl_t diverge, we may have to change this.
+ *              At present, this function operates by packing the data
+ *              from the instance of H5AC_cache_config_t into an instance
+ *              of H5C_auto_size_ctl_t, and then calling
+ *              H5C_validate_resize_config().  As H5AC_cache_config_t and
+ *              H5C_auto_size_ctl_t diverge, we may have to change this.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1906,17 +2060,17 @@ done:
  * Function:    H5AC_validate_cache_image_config()
  *
  * Purpose:     Run a sanity check on the contents of the supplied
- *		instance of H5AC_cache_image_config_t.
+ *              instance of H5AC_cache_image_config_t.
  *
  *              Do nothing and return SUCCEED if no errors are detected,
  *              and flag an error and return FAIL otherwise.
  *
- *		At present, this function operates by packing the data
- *		from the instance of H5AC_cache_image_config_t into an
- *		instance of H5C_cache_image_ctl_t, and then calling
- *		H5C_validate_cache_image_config().  If and when
+ *              At present, this function operates by packing the data
+ *              from the instance of H5AC_cache_image_config_t into an
+ *              instance of H5C_cache_image_ctl_t, and then calling
+ *              H5C_validate_cache_image_config().  If and when
  *              H5AC_cache_image_config_t and H5C_cache_image_ctl_t
- *		diverge, we may have to change this.
+ *              diverge, we may have to change this.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -1961,13 +2115,13 @@ done:
  * Function:    H5AC__check_if_write_permitted
  *
  * Purpose:     Determine if a write is permitted under the current
- *		circumstances, and set *write_permitted_ptr accordingly.
- *		As a general rule it is, but when we are running in parallel
- *		mode with collective I/O, we must ensure that a read cannot
- *		cause a write.
+ *              circumstances, and set *write_permitted_ptr accordingly.
+ *              As a general rule it is, but when we are running in parallel
+ *              mode with collective I/O, we must ensure that a read cannot
+ *              cause a write.
  *
- *		In the event of failure, the value of *write_permitted_ptr
- *		is undefined.
+ *              In the event of failure, the value of *write_permitted_ptr
+ *              is undefined.
  *
  * Return:      Non-negative on success/Negative on failure.
  *
@@ -2016,12 +2170,12 @@ H5AC__check_if_write_permitted(const H5F_t
  * Function:    H5AC__ext_config_2_int_config()
  *
  * Purpose:     Utility function to translate an instance of
- *		H5AC_cache_config_t to an instance of H5C_auto_size_ctl_t.
+ *              H5AC_cache_config_t to an instance of H5C_auto_size_ctl_t.
  *
- *		Places translation in *int_conf_ptr and returns SUCCEED
- *		if successful.  Returns FAIL on failure.
+ *              Places translation in *int_conf_ptr and returns SUCCEED
+ *              if successful.  Returns FAIL on failure.
  *
- *		Does only minimal sanity checking.
+ *              Does only minimal sanity checking.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2392,7 +2546,7 @@ done:
  * Purpose:     Given a file address, retrieve the ring for an entry at that
  *              address.
  *
- * 		On error, the value of *ring is not modified.
+ *              On error, the value of *ring is not modified.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2468,11 +2622,11 @@ H5AC_set_ring(H5AC_ring_t ring, H5AC_ring_t *orig_ring)
  *              are in the process of a file shutdown, post an error
  *              message, and return FAIL.
  *
- *		Note that this function simply passes the call on to
- *		the metadata cache proper, and returns the result.
+ *              Note that this function simply passes the call on to
+ *              the metadata cache proper, and returns the result.
  *
- * Return:	Success:	Non-negative
- *		Failure:	Negative
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
  *
  * Programmer:  Quincey Koziol
  *              September 17, 2016
@@ -2543,7 +2697,7 @@ done:
  * Function:    H5AC_remove_entry()
  *
  * Purpose:     Remove an entry from the cache.  Must be not protected, pinned,
- *		dirty, involved in flush dependencies, etc.
+ *              dirty, involved in flush dependencies, etc.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2572,9 +2726,10 @@ H5AC_remove_entry(void *_entry)
 
 done:
     /* If currently logging, generate a message */
-    if (cache->log_info->logging)
-        if (H5C_log_write_remove_entry_msg(cache, entry, ret_value) < 0)
-            HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
+    if (cache != NULL && cache->log_info != NULL)
+        if (cache->log_info->logging)
+            if (H5C_log_write_remove_entry_msg(cache, entry, ret_value) < 0)
+                HDONE_ERROR(H5E_CACHE, H5E_LOGGING, FAIL, "unable to emit log message")
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5AC_remove_entry() */

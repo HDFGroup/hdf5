@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Programmer: Robb Matzke <matzke@llnl.gov>
+/* Programmer: Robb Matzke
  *	       Friday, September 19, 1997
  *
  */
@@ -117,7 +117,6 @@ typedef struct H5G_bt_it_lbi_t {
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Nov  7 2005
  *
  *-------------------------------------------------------------------------
@@ -151,11 +150,10 @@ H5G__stab_create_components(H5F_t *f, H5O_stab_t *stab, size_t size_hint)
         HGOTO_ERROR(H5E_SYM, H5E_PROTECT, FAIL, "unable to protect symbol table heap")
 
     /* Insert name into the heap */
-    if (UFAIL == (name_offset = H5HL_insert(f, heap, (size_t)1, "")))
+    if (H5HL_insert(f, heap, (size_t)1, "", &name_offset) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert name into heap")
 
-    /*
-     * B-tree's won't work if the first name isn't at the beginning
+    /* B-trees won't work if the first name isn't at the beginning
      * of the heap.
      */
     HDassert(0 == name_offset);
@@ -183,7 +181,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  1 1997
  *
  *-------------------------------------------------------------------------
@@ -240,7 +237,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@uiuc.edu
  *		Nov  7 2005
  *
  *-------------------------------------------------------------------------
@@ -294,7 +290,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Robb Matzke
- *		matzke@llnl.gov
  *		Aug  1 1997
  *
  *-------------------------------------------------------------------------
@@ -306,7 +301,7 @@ H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_ln
     H5O_stab_t stab;                /* Symbol table message		*/
     herr_t     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(grp_oloc->addr)
+    FUNC_ENTER_PACKAGE
 
     /* check arguments */
     HDassert(grp_oloc && grp_oloc->file);
@@ -321,7 +316,7 @@ H5G__stab_insert(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *obj_ln
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, H5_ITER_ERROR, "unable to insert the name")
 
 done:
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__stab_insert() */
 
 /*-------------------------------------------------------------------------
@@ -511,7 +506,7 @@ H5G__stab_iterate(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t skip, hs
     H5G_link_table_t ltable    = {0, NULL}; /* Link table */
     herr_t           ret_value = FAIL;      /* Return value */
 
-    FUNC_ENTER_PACKAGE_TAG(oloc->addr)
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(oloc);
@@ -578,7 +573,7 @@ done:
     if (ltable.lnks && H5G__link_release_table(&ltable) < 0)
         HDONE_ERROR(H5E_SYM, H5E_CANTFREE, FAIL, "unable to release link table")
 
-    FUNC_LEAVE_NOAPI_TAG(ret_value)
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5G__stab_iterate() */
 
 /*-------------------------------------------------------------------------
@@ -665,7 +660,7 @@ done:
 } /* end H5G__stab_bh_size() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_stab_get_name_by_idx_cb
+ * Function:	H5G__stab_get_name_by_idx_cb
  *
  * Purpose:     Callback for B-tree iteration 'by index' info query to
  *              retrieve the name of a link
@@ -679,14 +674,14 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
+H5G__stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 {
     H5G_bt_it_gnbi_t *udata = (H5G_bt_it_gnbi_t *)_udata;
     size_t            name_off;            /* Offset of name in heap */
     const char *      name;                /* Pointer to name string in heap */
     herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(ent);
@@ -703,7 +698,7 @@ H5G_stab_get_name_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_stab_get_name_by_idx_cb */
+} /* end H5G__stab_get_name_by_idx_cb */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G__stab_get_name_by_idx
@@ -758,7 +753,7 @@ H5G__stab_get_name_by_idx(const H5O_loc_t *oloc, H5_iter_order_t order, hsize_t 
     /* Set iteration information */
     udata.common.idx      = n;
     udata.common.num_objs = 0;
-    udata.common.op       = H5G_stab_get_name_by_idx_cb;
+    udata.common.op       = H5G__stab_get_name_by_idx_cb;
     udata.heap            = heap;
     udata.name            = NULL;
     udata_valid           = TRUE;
@@ -794,7 +789,7 @@ done:
 } /* end H5G__stab_get_name_by_idx() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_stab_lookup_cb
+ * Function:	H5G__stab_lookup_cb
  *
  * Purpose:     B-tree 'find' callback to retrieve location for an object
  *
@@ -808,12 +803,12 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
+H5G__stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
 {
     H5G_stab_fnd_ud_t *udata     = (H5G_stab_fnd_ud_t *)_udata; /* 'User data' passed in */
     herr_t             ret_value = SUCCEED;                     /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Check for setting link info */
     if (udata->lnk)
@@ -823,7 +818,7 @@ H5G_stab_lookup_cb(const H5G_entry_t *ent, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_stab_lookup_cb() */
+} /* end H5G__stab_lookup_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G__stab_lookup
@@ -833,7 +828,6 @@ done:
  * Return:	Non-negative (TRUE/FALSE) on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@ncsa.uiuc.edu
  *		Sep 20 2005
  *
  *-------------------------------------------------------------------------
@@ -870,7 +864,7 @@ H5G__stab_lookup(const H5O_loc_t *grp_oloc, const char *name, H5O_link_t *lnk)
     /* Set up the user data for actual B-tree find operation */
     bt_udata.common.name = name;
     bt_udata.common.heap = heap;
-    bt_udata.op          = H5G_stab_lookup_cb;
+    bt_udata.op          = H5G__stab_lookup_cb;
     bt_udata.op_data     = &udata;
 
     /* Search the B-tree */
@@ -886,7 +880,7 @@ done:
 } /* end H5G__stab_lookup() */
 
 /*-------------------------------------------------------------------------
- * Function:	H5G_stab_lookup_by_idx_cb
+ * Function:	H5G__stab_lookup_by_idx_cb
  *
  * Purpose:     Callback for B-tree iteration 'by index' info query to
  *              retrieve the link
@@ -900,13 +894,13 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
+H5G__stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 {
     H5G_bt_it_lbi_t *udata = (H5G_bt_it_lbi_t *)_udata;
     const char *     name;                /* Pointer to name string in heap */
     herr_t           ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(ent);
@@ -923,7 +917,7 @@ H5G_stab_lookup_by_idx_cb(const H5G_entry_t *ent, void *_udata)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5G_stab_lookup_by_idx_cb */
+} /* end H5G__stab_lookup_by_idx_cb */
 
 /*-------------------------------------------------------------------------
  * Function:	H5G__stab_lookup_by_idx
@@ -933,7 +927,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Quincey Koziol
- *		koziol@hdfgroup.org
  *		Nov  7 2006
  *
  *-------------------------------------------------------------------------
@@ -975,7 +968,7 @@ H5G__stab_lookup_by_idx(const H5O_loc_t *grp_oloc, H5_iter_order_t order, hsize_
     /* Set iteration information */
     udata.common.idx      = n;
     udata.common.num_objs = 0;
-    udata.common.op       = H5G_stab_lookup_by_idx_cb;
+    udata.common.op       = H5G__stab_lookup_by_idx_cb;
     udata.heap            = heap;
     udata.lnk             = lnk;
     udata.found           = FALSE;
@@ -1015,7 +1008,6 @@ done:
  * Return:	Non-negative on success/Negative on failure
  *
  * Programmer:	Neil Fortner
- *		nfortne2@hdfgroup.org
  *		Mar 17, 2009
  *
  *-------------------------------------------------------------------------

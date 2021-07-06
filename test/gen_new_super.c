@@ -6,13 +6,13 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Quincey Koziol <koziol@ncsa.uiuc.edu>
+ * Programmer:  Quincey Koziol
  *              Tuesday, July 15, 2003
  *
  * Purpose:	Create a file which will have the newer superblock format.
@@ -23,40 +23,36 @@
  *      put into the 'test' directory in the 1.4+ branch of the library.
  */
 
-#include <assert.h>
-#include "hdf5.h"
+#include "h5test.h"
 
 #define TESTFILE  "tsupern.h5"
 #define ISTORE_IK 64
 
 /*-------------------------------------------------------------------------
- * Function:	main
+ * Function:    main
  *
- * Purpose:	Create a file with a new version (>0) of the superblock
+ * Purpose:     Create a file with a new version (>0) of the superblock
  *
- * Return:	Success:
- *		Failure:
+ * Return:      EXIT_SUCCESS
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Tuesday, July 15, 2003
- *
- * Modifications:
  *
  *-------------------------------------------------------------------------
  */
 int
 main(void)
 {
-    hid_t  file; /* File IDs for old & new files */
-    hid_t  fcpl; /* File creation property list */
-    herr_t ret;  /* Generic return value */
+    hid_t                        file; /* File IDs for old & new files */
+    hid_t                        fcpl; /* File creation property list */
+    herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
     /* Create a file creation property list */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
-    assert(fcpl >= 0);
+    HDassert(fcpl >= 0);
 
     ret = H5Pset_istore_k(fcpl, ISTORE_IK);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     /* Creating a file with the non-default file creation property list should
      * create a version 1 superblock
@@ -64,15 +60,15 @@ main(void)
 
     /* Create file with custom file creation property list */
     file = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
-    assert(file >= 0);
+    HDassert(file >= 0);
 
     /* Close FCPL */
     ret = H5Pclose(fcpl);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
     /* Close file */
     ret = H5Fclose(file);
-    assert(ret >= 0);
+    HDassert(ret >= 0);
 
-    return 0;
+    return EXIT_SUCCESS;
 }
