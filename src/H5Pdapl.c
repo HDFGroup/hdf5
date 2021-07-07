@@ -1453,7 +1453,7 @@ H5Pget_efile_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
         /* Copy to user's buffer, if given */
         len = HDstrlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, MIN(len + 1, size));
+            HDstrncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
@@ -1543,7 +1543,7 @@ H5Pget_virtual_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
         /* Copy to user's buffer, if given */
         len = HDstrlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, MIN(len + 1, size));
+            HDstrncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
