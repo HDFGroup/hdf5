@@ -844,7 +844,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
        END FUNCTION h5fget_name_c
     END INTERFACE
-    buflen = LEN_TRIM(buf)
+    buflen = LEN(buf)
     hdferr = h5fget_name_c(obj_id, size, buf, buflen)
   END SUBROUTINE h5fget_name_f
 !****s* H5F/h5fget_filesize_f
