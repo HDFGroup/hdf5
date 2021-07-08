@@ -365,7 +365,7 @@ Wsetenv(const char *name, const char *value, int overwrite)
     return (int)_putenv_s(name, value);
 } /* end Wsetenv() */
 
-#ifdef H5_HAVE_WINSOCK2_H
+#ifdef H5_HAVE_WIN32_API
 #pragma comment(lib, "advapi32.lib")
 #endif
 
@@ -450,12 +450,12 @@ char *
 Wgetlogin(void)
 {
 
-#ifdef H5_HAVE_WINSOCK2_H
+#ifdef H5_HAVE_WIN32_API
     DWORD bufferCount = WloginBuffer_count;
     if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
         return (Wlogin_buffer);
     else
-#endif /* H5_HAVE_WINSOCK2_H */
+#endif
         return NULL;
 }
 

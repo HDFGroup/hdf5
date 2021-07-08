@@ -388,9 +388,6 @@
 /* Define if your system has window style path name. */
 #cmakedefine H5_HAVE_WINDOW_PATH @H5_HAVE_WINDOW_PATH@
 
-/* Define to 1 if you have the <winsock2.h> header file. */
-#cmakedefine H5_HAVE_WINSOCK2_H @H5_HAVE_WINSOCK2_H@
-
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine H5_HAVE_ZLIB_H @H5_HAVE_ZLIB_H@
 
