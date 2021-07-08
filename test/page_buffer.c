@@ -1167,7 +1167,7 @@ test_raw_data_handling(hid_t orig_fapl, const char *env_h5_drvr, bool vfd_swmr_m
     int *          data    = NULL;
     H5F_t *        f       = NULL;
     const uint32_t max_lag = 5;
-    char   s[256];
+    char           s[256];
 
     HDsprintf(s, "%sRaw Data Handling", vfd_swmr_mode ? "VFD SWMR " : "");
     TESTING(s);
@@ -2911,7 +2911,7 @@ md_entry_splitting_smoke_check(hid_t orig_fapl, const char *env_h5_drvr, bool vf
     haddr_t        p2_addr;
     H5F_t *        f       = NULL;
     const uint32_t max_lag = 5;
-    char   s[256];
+    char           s[256];
 
     HDsprintf(s, "%sMetadata Entry Splitting Smoke Check", vfd_swmr_mode ? "VFD SWMR " : "");
     TESTING(s);
@@ -3206,7 +3206,7 @@ md_entry_splitting_boundary_test(hid_t orig_fapl, const char *env_h5_drvr, bool 
     haddr_t        first_page_addr = HADDR_UNDEF;
     haddr_t        start_addr      = HADDR_UNDEF;
     size_t         test_len;
-    char   s[256];
+    char           s[256];
 
     HDsprintf(s, "%sMetadata Entry Splitting Boundary Test", vfd_swmr_mode ? "VFD SWMR " : "");
     TESTING(s);
