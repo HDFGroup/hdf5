@@ -95,7 +95,7 @@
  * X is the beginning time; Y is the ending time.
  * Expects X, Y to be struct timespec from the function call HDclock_gettime.
  */
-#define TIME_PASSED(X,Y)	\
+#define TIME_PASSED(X, Y)                                                                                    \
     ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
 
 typedef struct _base {
@@ -122,13 +122,13 @@ typedef struct _sources {
 #define MANY_FILES 4
 
 typedef struct {
-    hid_t      *dataset;
-    sources_t  *sources;
-    hid_t      file[MANY_FILES];
-    hid_t      dapl, filetype, memspace, one_by_one_sid, quadrant_dcpl;
-    unsigned   ndatasets;
+    hid_t *     dataset;
+    sources_t * sources;
+    hid_t       file[MANY_FILES];
+    hid_t       dapl, filetype, memspace, one_by_one_sid, quadrant_dcpl;
+    unsigned    ndatasets;
     const char *filename[MANY_FILES];
-    char       progname[PATH_MAX];
+    char        progname[PATH_MAX];
     struct {
         quadrant_t ul, ur, bl, br, src;
     } quadrants;
@@ -138,25 +138,25 @@ typedef struct {
     bool         expand_2d;
     bool         test_3d;
     enum { vds_off, vds_single, vds_multi } vds;
-    bool    use_vfd_swmr;
-    bool    use_named_pipe;
-    bool    do_perf;
-    bool    cross_chunks;
-    bool    writer;
-    bool    fixed_array;
-    hsize_t chunk_dims[RANK2];
-    hsize_t one_dee_max_dims[RANK2];
+    bool            use_vfd_swmr;
+    bool            use_named_pipe;
+    bool            do_perf;
+    bool            cross_chunks;
+    bool            writer;
+    bool            fixed_array;
+    hsize_t         chunk_dims[RANK2];
+    hsize_t         one_dee_max_dims[RANK2];
     struct timespec ival;
 } state_t;
 
 /* Structure to hold info for named pipes */
 typedef struct {
-    const char *fifo_writer_to_reader;  /* Name of fifo for writer to reader */
-    const char *fifo_reader_to_writer;  /* Name of fifo for reader to writer */
-    int        fd_writer_to_reader;     /* File ID for fifo from writer to reader */
-    int        fd_reader_to_writer;     /* File ID for fifo from reader to writer */
-    int        notify;                  /* Value to notify between writer and reader */
-    int        verify;                  /* Value to verify between writer and reader */
+    const char *fifo_writer_to_reader; /* Name of fifo for writer to reader */
+    const char *fifo_reader_to_writer; /* Name of fifo for reader to writer */
+    int         fd_writer_to_reader;   /* File ID for fifo from writer to reader */
+    int         fd_reader_to_writer;   /* File ID for fifo from reader to writer */
+    int         notify;                /* Value to notify between writer and reader */
+    int         verify;                /* Value to verify between writer and reader */
 } np_state_t;
 
 typedef struct {
@@ -165,14 +165,13 @@ typedef struct {
 } exchange_info_t;
 
 /* Initializations for np_state_t */
-#define NP_INITIALIZER (np_state_t) {		                        \
-	.fifo_writer_to_reader = "./fifo_bigset_writer_to_reader",      \
-	.fifo_reader_to_writer = "./fifo_bigset_reader_to_writer",      \
-	.fd_writer_to_reader = -1,                                      \
-	.fd_reader_to_writer = -1,                                      \
-        .notify = 0,                                                    \
-        .verify = 0                                                     \
-}
+#define NP_INITIALIZER                                                                                       \
+    (np_state_t)                                                                                             \
+    {                                                                                                        \
+        .fifo_writer_to_reader = "./fifo_bigset_writer_to_reader",                                           \
+        .fifo_reader_to_writer = "./fifo_bigset_reader_to_writer", .fd_writer_to_reader = -1,                \
+        .fd_reader_to_writer = -1, .notify = 0, .verify = 0                                                  \
+    }
 
 static inline state_t
 state_initializer(void)
@@ -291,7 +290,7 @@ static bool
 make_quadrant_dataspace(state_t *s, quadrant_t *q)
 {
     if ((q->space = H5Screate_simple(NELMTS(s->chunk_dims), s->chunk_dims,
-                                s->expand_2d ? two_dee_max_dims : s->one_dee_max_dims)) < 0) {
+                                     s->expand_2d ? two_dee_max_dims : s->one_dee_max_dims)) < 0) {
         fprintf(stderr, "H5Screate_simple failed\n");
         TEST_ERROR;
     }
@@ -304,9 +303,11 @@ make_quadrant_dataspace(state_t *s, quadrant_t *q)
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Sclose(q->space);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return false;
 }
@@ -317,8 +318,8 @@ state_init(state_t *s, int argc, char **argv)
     unsigned long     tmp;
     int               ch;
     unsigned          i;
-    const hsize_t     dims = 1;
-    char              *tfile = NULL;
+    const hsize_t     dims  = 1;
+    char *            tfile = NULL;
     char *            end;
     quadrant_t *const ul = &s->quadrants.ul, *const ur = &s->quadrants.ur, *const bl = &s->quadrants.bl,
                       *const br = &s->quadrants.br, *const src = &s->quadrants.src;
@@ -406,12 +407,13 @@ state_init(state_t *s, int argc, char **argv)
                 else if (ch == 'l') {
                     /* Translate the tick number to time represented by the timespec struct */
                     float    time = (float)(((unsigned)tmp * TICK_LEN) / 10.0);
-                    unsigned sec = (unsigned)time;
+                    unsigned sec  = (unsigned)time;
                     unsigned nsec = (unsigned)((time - sec) * 10 * 1000 * 1000);
 
-                    s->ival.tv_sec = sec;
+                    s->ival.tv_sec  = sec;
                     s->ival.tv_nsec = nsec;
-                } else if (ch == 'n')
+                }
+                else if (ch == 'n')
                     s->nsteps = (unsigned)tmp;
                 else if (ch == 'r')
                     s->rows = (unsigned)tmp;
@@ -463,8 +465,8 @@ state_init(state_t *s, int argc, char **argv)
         }
     }
 
-    s->chunk_dims[0]       = s->rows;
-    s->chunk_dims[1]       = s->cols;
+    s->chunk_dims[0] = s->rows;
+    s->chunk_dims[1] = s->cols;
 
     s->one_dee_max_dims[0] = s->rows;
     if (s->fixed_array) {
@@ -472,16 +474,17 @@ state_init(state_t *s, int argc, char **argv)
         two_dee_max_dims[0]    = s->rows * s->nsteps;
         two_dee_max_dims[1]    = s->cols * s->nsteps;
 
-        if(s->test_3d) {
+        if (s->test_3d) {
             three_dee_max_dims[0] = s->nsteps;
             three_dee_max_dims[1] = s->rows;
             three_dee_max_dims[2] = s->cols;
         }
-    } else {
+    }
+    else {
         s->one_dee_max_dims[1] = H5S_UNLIMITED;
         two_dee_max_dims[0] = two_dee_max_dims[1] = H5S_UNLIMITED;
 
-        if(s->test_3d) {
+        if (s->test_3d) {
             three_dee_max_dims[0] = H5S_UNLIMITED;
             three_dee_max_dims[1] = s->rows;
             three_dee_max_dims[2] = s->cols;
@@ -561,7 +564,8 @@ state_init(state_t *s, int argc, char **argv)
             TEST_ERROR;
         }
 
-        if (H5Sselect_hyperslab(src->space, H5S_SELECT_SET, src->start, src->stride, src->count, src->block) < 0) {
+        if (H5Sselect_hyperslab(src->space, H5S_SELECT_SET, src->start, src->stride, src->count, src->block) <
+            0) {
             fprintf(stderr, "H5Sselect_hyperslab failed\n");
             TEST_ERROR;
         }
@@ -609,13 +613,14 @@ state_init(state_t *s, int argc, char **argv)
     }
 
     if (s->test_3d) {
-         hsize_t dims3[RANK3] = {1, s->chunk_dims[0], s->chunk_dims[1]};
+        hsize_t dims3[RANK3] = {1, s->chunk_dims[0], s->chunk_dims[1]};
 
-         if ((s->memspace = H5Screate_simple(RANK3, dims3, NULL)) < 0) {
+        if ((s->memspace = H5Screate_simple(RANK3, dims3, NULL)) < 0) {
             fprintf(stderr, "H5Screate_simple failed\n");
             TEST_ERROR;
-         }
-    } else {
+        }
+    }
+    else {
         if ((s->memspace = H5Screate_simple(RANK2, s->chunk_dims, NULL)) < 0) {
             fprintf(stderr, "H5Screate_simple failed\n");
             TEST_ERROR;
@@ -663,7 +668,8 @@ state_init(state_t *s, int argc, char **argv)
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(s->quadrant_dcpl);
         H5Sclose(ul->space);
         H5Sclose(ur->space);
@@ -676,7 +682,8 @@ error:
         H5Sclose(src->space);
         H5Sclose(s->one_by_one_sid);
         H5Sclose(s->memspace);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     HDfree(tfile);
 
@@ -690,7 +697,7 @@ error:
 static bool
 state_destroy(state_t *s)
 {
-    size_t i;
+    size_t          i;
     struct timespec start_time, end_time;
 
     if (H5Pclose(s->dapl) < 0) {
@@ -759,7 +766,8 @@ state_destroy(state_t *s)
             TEST_ERROR;
         }
 
-        fprintf(stdout, "File close time (for running the writer alone) = %lf\n", TIME_PASSED(start_time, end_time));
+        fprintf(stdout, "File close time (for running the writer alone) = %lf\n",
+                TIME_PASSED(start_time, end_time));
     }
 
     HDfree(s->dataset);
@@ -769,11 +777,13 @@ state_destroy(state_t *s)
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(s->quadrant_dcpl);
         H5Sclose(s->one_by_one_sid);
         H5Sclose(s->memspace);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     HDfree(s->dataset);
 
@@ -861,13 +871,13 @@ np_close(np_state_t *np, bool writer)
     }
 
     /* Reader finishes last and deletes the named pipes */
-    if(!writer) {
-        if(HDremove(np->fifo_writer_to_reader) != 0) {
+    if (!writer) {
+        if (HDremove(np->fifo_writer_to_reader) != 0) {
             fprintf(stderr, "HDremove fifo_writer_to_reader failed\n");
             TEST_ERROR;
         }
 
-        if(HDremove(np->fifo_reader_to_writer) != 0) {
+        if (HDremove(np->fifo_reader_to_writer) != 0) {
             fprintf(stderr, "HDremove fifo_reader_to_writer failed\n");
             TEST_ERROR;
         }
@@ -926,9 +936,11 @@ notify_and_wait_for_reader(state_t *s, np_state_t *np)
     for (i = 0; i < MAX_LAG + 1; i++) {
         decisleep(TICK_LEN);
 
-        H5E_BEGIN_TRY {
+        H5E_BEGIN_TRY
+        {
             H5Aexists(s->file[0], "nonexistent");
-        } H5E_END_TRY;
+        }
+        H5E_END_TRY;
     }
 
     /* Wait until the reader finishes validating creation */
@@ -1017,7 +1029,7 @@ create_extensible_dset(state_t *s, unsigned int which)
     char dname[sizeof("/dataset-9999999999")];
     char ul_dname[sizeof("/ul-dataset-9999999999")], ur_dname[sizeof("/ur-dataset-9999999999")],
         bl_dname[sizeof("/bl-dataset-9999999999")], br_dname[sizeof("/br-dataset-9999999999")];
-    hid_t dcpl = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, filespace = H5I_INVALID_HID;
+    hid_t   dcpl = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, filespace = H5I_INVALID_HID;
     hsize_t dims3[3] = {1, s->chunk_dims[0], s->chunk_dims[1]};
 
     esnprintf(dname, sizeof(dname), "/dataset-%d", which);
@@ -1033,7 +1045,8 @@ create_extensible_dset(state_t *s, unsigned int which)
             fprintf(stderr, "H5Pset_chunk for 3D dataset failed\n");
             TEST_ERROR;
         }
-    } else {
+    }
+    else {
         if (H5Pset_chunk(dcpl, RANK2, s->chunk_dims) < 0) {
             fprintf(stderr, "H5Pset_chunk for 2D dataset failed\n");
             TEST_ERROR;
@@ -1048,22 +1061,26 @@ create_extensible_dset(state_t *s, unsigned int which)
         esnprintf(bl_dname, sizeof(bl_dname), "/bl-dataset-%d", which);
         esnprintf(br_dname, sizeof(br_dname), "/br-dataset-%d", which);
 
-        if ((srcs->ul = H5Dcreate2(s->file[0], ul_dname, s->filetype, ul->src_space, H5P_DEFAULT, s->quadrant_dcpl, s->dapl)) < 0) {
+        if ((srcs->ul = H5Dcreate2(s->file[0], ul_dname, s->filetype, ul->src_space, H5P_DEFAULT,
+                                   s->quadrant_dcpl, s->dapl)) < 0) {
             fprintf(stderr, "H5Dcreate2 failed\n");
             TEST_ERROR;
         }
 
-        if ((srcs->ur = H5Dcreate2(s->file[1], ur_dname, s->filetype, ur->src_space, H5P_DEFAULT, s->quadrant_dcpl, s->dapl)) < 0) {
+        if ((srcs->ur = H5Dcreate2(s->file[1], ur_dname, s->filetype, ur->src_space, H5P_DEFAULT,
+                                   s->quadrant_dcpl, s->dapl)) < 0) {
             fprintf(stderr, "H5Dcreate2 failed\n");
             TEST_ERROR;
         }
 
-        if ((srcs->bl = H5Dcreate2(s->file[2], bl_dname, s->filetype, bl->src_space, H5P_DEFAULT, s->quadrant_dcpl, s->dapl)) < 0) {
+        if ((srcs->bl = H5Dcreate2(s->file[2], bl_dname, s->filetype, bl->src_space, H5P_DEFAULT,
+                                   s->quadrant_dcpl, s->dapl)) < 0) {
             fprintf(stderr, "H5Dcreate2 failed\n");
             TEST_ERROR;
         }
 
-        if ((srcs->br = H5Dcreate2(s->file[3], br_dname, s->filetype, br->src_space, H5P_DEFAULT, s->quadrant_dcpl, s->dapl)) < 0) {
+        if ((srcs->br = H5Dcreate2(s->file[3], br_dname, s->filetype, br->src_space, H5P_DEFAULT,
+                                   s->quadrant_dcpl, s->dapl)) < 0) {
             fprintf(stderr, "H5Dcreate2 failed\n");
             TEST_ERROR;
         }
@@ -1094,9 +1111,10 @@ create_extensible_dset(state_t *s, unsigned int which)
             fprintf(stderr, "H5Screate_simple 3D dataspace failed\n");
             TEST_ERROR;
         }
-    } else {
+    }
+    else {
         if ((filespace = H5Screate_simple(RANK2, s->chunk_dims,
-                                     s->expand_2d ? two_dee_max_dims : s->one_dee_max_dims)) < 0) {
+                                          s->expand_2d ? two_dee_max_dims : s->one_dee_max_dims)) < 0) {
             fprintf(stderr, "H5Screate_simple 2D dataspace failed\n");
             TEST_ERROR;
         }
@@ -1122,11 +1140,13 @@ create_extensible_dset(state_t *s, unsigned int which)
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dset_id);
         H5Pclose(dcpl);
         H5Sclose(filespace);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return false;
 }
@@ -1166,9 +1186,11 @@ close_extensible_dset(state_t *s, unsigned int which)
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dset_id);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return false;
 }
@@ -1190,9 +1212,11 @@ open_extensible_dset(state_t *s)
          * NUM_ATTEMPTS times without success, report it as a failure
          */
         for (i = 0; i < NUM_ATTEMPTS; i++) {
-            H5E_BEGIN_TRY {
+            H5E_BEGIN_TRY
+            {
                 dset_id = H5Dopen2(s->file[0], dname, s->dapl);
-            } H5E_END_TRY;
+            }
+            H5E_END_TRY;
 
             if (dset_id >= 0)
                 break;
@@ -1235,7 +1259,8 @@ open_extensible_dset(state_t *s)
                 fprintf(stderr, "H5Sget_simple_extent_dims failed\n");
                 TEST_ERROR;
             }
-        } else {
+        }
+        else {
             if (H5Sget_simple_extent_dims(filespace, dims2, maxdims2) < 0) {
                 fprintf(stderr, "H5Sget_simple_extent_dims failed\n");
                 TEST_ERROR;
@@ -1256,22 +1281,25 @@ open_extensible_dset(state_t *s)
             if (maxdims3[0] != three_dee_max_dims[0] || maxdims3[1] != three_dee_max_dims[1] ||
                 maxdims3[2] != three_dee_max_dims[2]) {
                 fprintf(stderr, "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE " x %" PRIuHSIZE,
-                     maxdims3[0], maxdims3[1], maxdims3[2]);
+                        maxdims3[0], maxdims3[1], maxdims3[2]);
                 TEST_ERROR;
             }
-        } else {
+        }
+        else {
             if (s->expand_2d) {
                 if (maxdims2[0] != two_dee_max_dims[0] || maxdims2[1] != two_dee_max_dims[1] ||
                     maxdims2[0] != maxdims2[1]) {
                     fprintf(stderr, "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE, maxdims2[0],
-                         maxdims2[1]);
+                            maxdims2[1]);
                     TEST_ERROR;
                 }
-            } else if (maxdims2[0] != s->one_dee_max_dims[0] || maxdims2[1] != s->one_dee_max_dims[1] ||
-                    dims2[0] != s->chunk_dims[0]) {
+            }
+            else if (maxdims2[0] != s->one_dee_max_dims[0] || maxdims2[1] != s->one_dee_max_dims[1] ||
+                     dims2[0] != s->chunk_dims[0]) {
                 fprintf(stderr,
-                     "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE " or columns %" PRIuHSIZE,
-                    maxdims2[0], maxdims2[1], dims2[1]);
+                        "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE
+                        " or columns %" PRIuHSIZE,
+                        maxdims2[0], maxdims2[1], dims2[1]);
             }
         }
 
@@ -1281,11 +1309,13 @@ open_extensible_dset(state_t *s)
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(dset_id);
         H5Tclose(dtype);
         H5Sclose(filespace);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return false;
 }
@@ -1294,7 +1324,7 @@ static bool
 create_dsets(state_t s)
 {
     struct timespec start_time, end_time;
-    unsigned int which;
+    unsigned int    which;
 
     /* For checking the time spent in dataset creation.  It's for running the writer alone */
     if (s.do_perf) {
@@ -1320,7 +1350,8 @@ create_dsets(state_t s)
             TEST_ERROR;
         }
 
-        fprintf(stdout, "Dataset creation time (for running the writer alone) = %lf\n", TIME_PASSED(start_time, end_time));
+        fprintf(stdout, "Dataset creation time (for running the writer alone) = %lf\n",
+                TIME_PASSED(start_time, end_time));
     }
 
     return true;
@@ -1378,7 +1409,8 @@ set_or_verify_matrix(mat_t *mat, unsigned int which, base_t base, bool do_set)
                     ret = false;
                     break;
                 }
-            } else if (matget(mat, row, col) != v) {
+            }
+            else if (matget(mat, row, col) != v) {
                 /* If the data doesn't match, simply return false and
                  * let the caller repeat this step
                  */
@@ -1408,7 +1440,7 @@ verify_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, base_t bas
 {
     hsize_t offset2[RANK2] = {base.row, base.col};
     hsize_t offset3[RANK3] = {base.depth, base.row, base.col};
-    hsize_t count3[RANK3] = {1, s->chunk_dims[0], s->chunk_dims[1]};
+    hsize_t count3[RANK3]  = {1, s->chunk_dims[0], s->chunk_dims[1]};
     herr_t  status;
     hid_t   dset_id;
 
@@ -1418,7 +1450,8 @@ verify_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, base_t bas
     }
 
     if (s->test_3d)
-        dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "\n", base.row, base.col, base.depth);
+        dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "\n", base.row, base.col,
+             base.depth);
     else
         dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n", base.row, base.col);
 
@@ -1429,19 +1462,22 @@ verify_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, base_t bas
             fprintf(stderr, "H5Sselect_hyperslab failed\n");
             TEST_ERROR;
         }
-    } else {
+    }
+    else {
         if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset2, NULL, s->chunk_dims, NULL) < 0) {
             fprintf(stderr, "H5Sselect_hyperslab failed\n");
             TEST_ERROR;
         }
     }
 
-    /* A failure to read the data may indicate the data isn't ready yet.  Instead of displaying the error stack,
-     * simply return false and let the caller repeat this step.
+    /* A failure to read the data may indicate the data isn't ready yet.  Instead of displaying the error
+     * stack, simply return false and let the caller repeat this step.
      */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         status = H5Dread(dset_id, H5T_NATIVE_UINT32, s->memspace, filespace, H5P_DEFAULT, mat->elt);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     if (status < 0)
         TEST_ERROR;
@@ -1490,7 +1526,7 @@ init_and_write_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, ba
 {
     hsize_t offset2[RANK2] = {base.row, base.col};
     hsize_t offset3[RANK3] = {base.depth, base.row, base.col};
-    hsize_t count3[RANK3] = {1, s->chunk_dims[0], s->chunk_dims[1]};
+    hsize_t count3[RANK3]  = {1, s->chunk_dims[0], s->chunk_dims[1]};
     hid_t   dset_id;
 
     dset_id = s->dataset[which];
@@ -1501,12 +1537,13 @@ init_and_write_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, ba
     }
 
     if (s->test_3d) {
-        /* The chunk dimensions are 1 x M x N.  It grows along the first dimension */ 
+        /* The chunk dimensions are 1 x M x N.  It grows along the first dimension */
         if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset3, NULL, count3, NULL) < 0) {
             fprintf(stderr, "H5Sselect_hyperslab for 2D dataset failed\n");
             TEST_ERROR;
         }
-    } else {
+    }
+    else {
         if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset2, NULL, s->chunk_dims, NULL) < 0) {
             fprintf(stderr, "H5Sselect_hyperslab for 2D dataset failed\n");
             TEST_ERROR;
@@ -1558,9 +1595,11 @@ verify_dset_attribute(hid_t dset_id, unsigned int which, unsigned int step)
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Aclose(aid);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return false;
 }
@@ -1600,7 +1639,8 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
             }
 
             nchunks = (unsigned)size3[0];
-        } else {
+        }
+        else {
             if (H5Sget_simple_extent_dims(filespace, size2, NULL) < 0) {
                 fprintf(stderr, "H5Sget_simple_extent_dims failed\n");
                 TEST_ERROR;
@@ -1632,34 +1672,40 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
                 ofs = 0;
             else
                 ofs = step % 2;
-        } else
+        }
+        else
             ofs = 0;
 
         if (s->test_3d) {
-            size3[0]  = 1 + step;
-            size3[1]  = s->chunk_dims[0];
-            size3[2]  = s->chunk_dims[1];
+            size3[0]   = 1 + step;
+            size3[1]   = s->chunk_dims[0];
+            size3[2]   = s->chunk_dims[1];
             last.depth = step;
-            last.row = 0;
-            last.col = 0;
-        } else {
+            last.row   = 0;
+            last.col   = 0;
+        }
+        else {
             if (s->expand_2d) {
-                size2[0]  = s->chunk_dims[0] * (1 + step);
-                size2[1]  = s->chunk_dims[1] * (1 + step);
+                size2[0] = s->chunk_dims[0] * (1 + step);
+                size2[1] = s->chunk_dims[1] * (1 + step);
                 last.row = s->chunk_dims[0] * step + ofs;
                 last.col = s->chunk_dims[1] * step + ofs;
-            } else {
-                size2[0]  = s->chunk_dims[0];
-                size2[1]  = s->chunk_dims[1] * (1 + step);
+            }
+            else {
+                size2[0] = s->chunk_dims[0];
+                size2[1] = s->chunk_dims[1] * (1 + step);
                 last.row = 0;
                 last.col = s->chunk_dims[1] * step + ofs;
             }
         }
 
         if (s->test_3d) {
-            dbgf(1, "new size3 %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "\n", size3[0], size3[1], size3[2]);
-            dbgf(1, "last row %" PRIuHSIZE " col %" PRIuHSIZE " depth %" PRIuHSIZE "\n", last.row, last.col, last.depth);
-        } else {
+            dbgf(1, "new size3 %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "\n", size3[0], size3[1],
+                 size3[2]);
+            dbgf(1, "last row %" PRIuHSIZE " col %" PRIuHSIZE " depth %" PRIuHSIZE "\n", last.row, last.col,
+                 last.depth);
+        }
+        else {
             dbgf(1, "new size2 %" PRIuHSIZE ", %" PRIuHSIZE "\n", size2[0], size2[1]);
             dbgf(1, "last row %" PRIuHSIZE " col %" PRIuHSIZE "\n", last.row, last.col);
         }
@@ -1669,7 +1715,8 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
                 fprintf(stderr, "chunk verification failed\n");
                 TEST_ERROR;
             }
-        } else {
+        }
+        else {
             /* Down the right side, intersecting the bottom row. */
             base.col = last.col;
             for (base.row = 0; base.row <= last.row; base.row += s->chunk_dims[0]) {
@@ -1702,9 +1749,11 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Sclose(filespace);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return false;
 }
@@ -1714,7 +1763,7 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
 {
     unsigned        finished_step = 0;
     unsigned        which;
-    unsigned        counter = 0;
+    unsigned        counter     = 0;
     double          passed_time = 0.0, total_time = 0.0, min_time = 1000000.0, max_time = 0.0;
     exchange_info_t last;
     struct timespec end_time;
@@ -1773,7 +1822,8 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
 
     /* Print out the performance information */
     if (s.use_named_pipe && s.do_perf && counter)
-        fprintf(stdout, "Dataset verification: mean time = %lf, max time = %lf, min time = %lf\n", total_time / (double)counter, max_time, min_time);
+        fprintf(stdout, "Dataset verification: mean time = %lf, max time = %lf, min time = %lf\n",
+                total_time / (double)counter, max_time, min_time);
 
     return true;
 
@@ -1809,9 +1859,11 @@ add_dset_attribute(const state_t *s, hid_t ds, hid_t sid, unsigned int which, un
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Aclose(aid);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return false;
 }
@@ -1843,21 +1895,23 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
     }
 
     if (s->test_3d) {
-        size3[0] = 1 + step;
-        size3[1] = s->chunk_dims[0];
-        size3[2] = s->chunk_dims[1];
+        size3[0]   = 1 + step;
+        size3[1]   = s->chunk_dims[0];
+        size3[2]   = s->chunk_dims[1];
         last.depth = step;
-        last.row = 0;
-        last.col = 0;
-    } else {
+        last.row   = 0;
+        last.col   = 0;
+    }
+    else {
         if (s->expand_2d) {
-            size2[0]  = s->chunk_dims[0] * (1 + step);
-            size2[1]  = s->chunk_dims[1] * (1 + step);
+            size2[0] = s->chunk_dims[0] * (1 + step);
+            size2[1] = s->chunk_dims[1] * (1 + step);
             last.row = s->chunk_dims[0] * step;
             last.col = s->chunk_dims[1] * step;
-        } else {
-            size2[0]  = s->chunk_dims[0];
-            size2[1]  = s->chunk_dims[1] * (1 + step);
+        }
+        else {
+            size2[0] = s->chunk_dims[0];
+            size2[1] = s->chunk_dims[1] * (1 + step);
             last.row = 0;
             last.col = s->chunk_dims[1] * step;
         }
@@ -1871,7 +1925,7 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
 
     if (s->vds != vds_off) {
         const hsize_t    half_size[RANK2] = {size2[0] / 2, size2[1] / 2};
-        sources_t *const srcs            = &s->sources[which];
+        sources_t *const srcs             = &s->sources[which];
 
         if (H5Dset_extent(srcs->ul, half_size) < 0) {
             fprintf(stderr, "H5Dset_extent failed\n");
@@ -1892,13 +1946,15 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
             fprintf(stderr, "H5Dset_extent failed\n");
             TEST_ERROR;
         }
-    } else {
+    }
+    else {
         if (s->test_3d) {
             if (H5Dset_extent(dset_id, size3) < 0) {
                 fprintf(stderr, "H5Dset_extent for 3D dataset failed\n");
                 TEST_ERROR;
             }
-        } else {
+        }
+        else {
             if (H5Dset_extent(dset_id, size2) < 0) {
                 fprintf(stderr, "H5Dset_extent for 2D dataset failed\n");
                 TEST_ERROR;
@@ -1916,8 +1972,9 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
             fprintf(stderr, "init_and_write_chunk failed\n");
             TEST_ERROR;
         }
-    } else if (s->expand_2d) {
-        base.col = last.col;
+    }
+    else if (s->expand_2d) {
+        base.col   = last.col;
         base.depth = 0;
         for (base.row = 0; base.row <= last.row; base.row += s->chunk_dims[0]) {
             dbgf(1, "writing chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n", base.row, base.col);
@@ -1945,9 +2002,11 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
     return true;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Sclose(filespace);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     return false;
 }
@@ -1955,10 +2014,10 @@ error:
 static bool
 write_dsets(state_t s, np_state_t *np, mat_t *mat)
 {
-    unsigned last_step, step, which;
+    unsigned           last_step, step, which;
     unsigned long long old_tick_num;
-    H5F_t *f = NULL;
-    struct timespec start_time, end_time;
+    H5F_t *            f = NULL;
+    struct timespec    start_time, end_time;
 
     if (NULL == (f = (H5F_t *)H5VL_object(s.file[0]))) {
         fprintf(stderr, "H5VL_object failed\n");
@@ -1992,13 +2051,13 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
 
         /* After finishing writing all the chunks, end the tick */
         if (s.use_vfd_swmr && step == (s.nsteps - 1)) {
-           unsigned long i;
+            unsigned long i;
 
-           if (s.vds != vds_multi)
-               H5Fvfd_swmr_end_tick(s.file[0]);
-           else
-               for (i = 0; i < NELMTS(s.file); i++)
-                   H5Fvfd_swmr_end_tick(s.file[i]);
+            if (s.vds != vds_multi)
+                H5Fvfd_swmr_end_tick(s.file[0]);
+            else
+                for (i = 0; i < NELMTS(s.file); i++)
+                    H5Fvfd_swmr_end_tick(s.file[i]);
         }
 
         /* Notify the reader to start verification by
@@ -2022,7 +2081,8 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
             TEST_ERROR;
         }
 
-        fprintf(stdout, "Dataset write time (for running the writer alone) = %lf\n", TIME_PASSED(start_time, end_time));
+        fprintf(stdout, "Dataset write time (for running the writer alone) = %lf\n",
+                TIME_PASSED(start_time, end_time));
     }
 
     return true;
@@ -2034,7 +2094,7 @@ error:
 int
 main(int argc, char **argv)
 {
-    mat_t      *mat;
+    mat_t *    mat;
     hid_t      fcpl = H5I_INVALID_HID;
     unsigned   which;
     state_t    s;
@@ -2115,20 +2175,21 @@ main(int argc, char **argv)
 
         /* Call H5Fvfd_swmr_end_tick to end the tick.  No communication with the reader in this step */
         if (s.use_vfd_swmr && s.use_named_pipe) {
-           unsigned long j;
+            unsigned long j;
 
-           if (s.vds != vds_multi) {
-               if (H5Fvfd_swmr_end_tick(s.file[0]) < 0) {
-                   fprintf(stderr, "H5Fvfd_swmr_end_tick failed\n");
-                   TEST_ERROR;
-               }
-           } else {
-               for (j = 0; j < NELMTS(s.file); j++)
-                   if (H5Fvfd_swmr_end_tick(s.file[j]) < 0) {
-                       fprintf(stderr, "H5Fvfd_swmr_end_tick failed\n");
-                       TEST_ERROR;
-                   }
-           }
+            if (s.vds != vds_multi) {
+                if (H5Fvfd_swmr_end_tick(s.file[0]) < 0) {
+                    fprintf(stderr, "H5Fvfd_swmr_end_tick failed\n");
+                    TEST_ERROR;
+                }
+            }
+            else {
+                for (j = 0; j < NELMTS(s.file); j++)
+                    if (H5Fvfd_swmr_end_tick(s.file[j]) < 0) {
+                        fprintf(stderr, "H5Fvfd_swmr_end_tick failed\n");
+                        TEST_ERROR;
+                    }
+            }
         }
 
         /* Notify the reader of finishing dataset creation by sending the timestamp
@@ -2145,7 +2206,8 @@ main(int argc, char **argv)
             fprintf(stderr, "write_dsets failed");
             TEST_ERROR;
         }
-    } else {
+    }
+    else {
         /* Wait for the writer's notice before starting the validation of dataset creation */
         np.verify = 1;
         if (s.use_named_pipe && reader_verify(np, np.verify) < 0) {
@@ -2206,12 +2268,14 @@ main(int argc, char **argv)
     return EXIT_SUCCESS;
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(fcpl);
 
         for (i = 0; i < NELMTS(s.file); i++)
             H5Fclose(s.file[i]);
-    } H5E_END_TRY;
+    }
+    H5E_END_TRY;
 
     if (s.use_named_pipe && np.fd_writer_to_reader >= 0)
         HDclose(np.fd_writer_to_reader);
