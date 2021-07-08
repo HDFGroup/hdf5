@@ -1006,9 +1006,6 @@ for options in ${os_grp_op_list[*]}; do
 	rm -f vfd_swmr_group_reader.*.{out,rc}
 done
 
-# bigset test for smaller chunks
-=======
-
 ###############################################################################
 #
 # Setting for bigset (few_big and many_small) tests
@@ -1026,8 +1023,8 @@ BIGSET_many_s=100                   # -s option: # of datasets (for many_small t
 # Setting for exhaustive and quick runs
 #
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
-    BIGSET_n=50
-    BIGSET_few_s=40
+    BIGSET_n=200
+    BIGSET_few_s=100
     BIGSET_many_s=1000
 elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # quick run
     BIGSET_n=10
@@ -1036,15 +1033,14 @@ elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # quick run
 fi
 #
 #
-
-for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
+for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -t" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	if [ ${do_many_small:-no} = no ]; then
 		continue
 	fi
 	#
 	# Test many small datasets of one and two dimensions.
 	#
-	# Perform 25 iterations on 200 extensible datasets configured with
+	# Perform 25 iterations on 100 extensible datasets configured with
 	# 16x16 chunks of 32-bit unsigned integer elements,
 	# expanding each dataset by a chunk in one dimension (up to 50x1
 	# 16x16 chunks) on each iteration.
@@ -1061,8 +1057,8 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_many_s -r 16 -c 16 -q -l 6 &
 	pid_reader=$!
 
-	# Wait for the reader to finish before the
-	# writer quits: the writer holds the file open so that the
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
 	# reader will find the shadow file when it opens
 	# the .h5 file.
 	wait $pid_reader
@@ -1086,11 +1082,11 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 done
 
 # bigset test for bigger chunks
-for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
+for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -t" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	#
 	# Test a few big datasets of one and two dimensions.
 	#
-	# Perform 25 iterations on 20 extensible datasets configured with
+	# Perform 25 iterations on 10 extensible datasets configured with
 	# 256x256 chunks of 32-bit unsigned integer elements,
 	# expanding each dataset by a chunk in one dimension (up to 50x1
 	# 256x256 chunks) on each iteration.
@@ -1110,8 +1106,8 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F
 	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_few_s -r 256 -c 256 -q -l 3 &
 	pid_reader=$!
 
-	# Wait for the reader to finish before the
-	# writer quits: the writer holds the file open so that the
+	# Wait for the reader to finish before signalling the
+	# writer to quit: the writer holds the file open so that the
 	# reader will find the shadow file when it opens
 	# the .h5 file.
 	wait $pid_reader
