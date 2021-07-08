@@ -4498,6 +4498,10 @@ test_copy_dataset_compressed(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, hid
     TESTING("H5Ocopy(): compressed dataset");
 
 #ifndef H5_HAVE_FILTER_DEFLATE
+    (void)fcpl_src;
+    (void)fcpl_dst;
+    (void)src_fapl;
+    (void)dst_fapl; /* Silence compiler */
     SKIPPED();
     HDputs("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
@@ -4923,6 +4927,10 @@ test_copy_dataset_no_edge_filt(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, h
     }
 
 #ifndef H5_HAVE_FILTER_DEFLATE
+    (void)fcpl_src;
+    (void)fcpl_dst;
+    (void)src_fapl;
+    (void)dst_fapl; /* Silence compiler */
     SKIPPED();
     HDputs("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
@@ -7277,6 +7285,10 @@ test_copy_dataset_compressed_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl, 
     TESTING("H5Ocopy(): compressed dataset with VLEN datatype");
 
 #ifndef H5_HAVE_FILTER_DEFLATE
+    (void)fcpl_src;
+    (void)fcpl_dst;
+    (void)src_fapl;
+    (void)dst_fapl; /* Silence compiler */
     SKIPPED();
     HDputs("    Deflation filter not available");
 #else  /* H5_HAVE_FILTER_DEFLATE */
