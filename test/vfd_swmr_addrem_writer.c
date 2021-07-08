@@ -45,8 +45,6 @@
 
 #ifndef H5_HAVE_WIN32_API
 
-#include <err.h> /* errx(3) */
-
 static hid_t open_skeleton(const char *filename, unsigned verbose);
 static int   addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long flush_count);
 static void  usage(void);
@@ -82,14 +80,18 @@ open_skeleton(const char *filename, unsigned verbose)
 
     HDassert(filename);
 
-    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0)
-        errx(EXIT_FAILURE, "%s.%d: H5Pcreate failed", __func__, __LINE__);
+    if ((dapl = H5Pcreate(H5P_DATASET_ACCESS)) < 0) {
+        HDfprintf(stderr, "%s.%d: H5Pcreate failed", __func__, __LINE__);
+        goto error;
+    }
 
-    if (H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 0, H5D_CHUNK_CACHE_W0_DEFAULT) < 0)
-        errx(EXIT_FAILURE, "H5Pset_chunk_cache failed");
+    if (H5Pset_chunk_cache(dapl, H5D_CHUNK_CACHE_NSLOTS_DEFAULT, 0, H5D_CHUNK_CACHE_W0_DEFAULT) < 0) {
+        HDfprintf(stderr, "H5Pset_chunk_cache failed");
+        goto error;
+    }
 
     /* Allocate memory for the configuration structure */
-    if ((config = calloc(1, sizeof(*config))) == NULL)
+    if ((config = HDcalloc(1, sizeof(*config))) == NULL)
         goto error;
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
@@ -213,7 +215,7 @@ addrem_records(hid_t fid, unsigned verbose, unsigned long nops, unsigned long fl
         symbol_info_t *symbol; /* Symbol to write record to */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* Decide whether to shrink or expand, and by how much */
         count[1] = (hsize_t)HDrandom() % (MAX_SIZE_CHANGE * 2) + 1;
@@ -314,20 +316,20 @@ error:
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: vfd_swmr_addrem_writer [-q] [-f <# of operations between flushing\n");
-    printf("    file contents>] [-r <random seed>] <# of operations>\n");
-    printf("\n");
-    printf("<# of operations between flushing file contents> should be 0 (for\n");
-    printf("no flushing) or between 1 and (<# of operations> - 1).\n");
-    printf("\n");
-    printf("<# of operations> must be specified.\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), flushing every 1000 operations\n");
-    printf("('-f 1000'), and will generate a random seed (no -r given).\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: vfd_swmr_addrem_writer [-q] [-f <# of operations between flushing\n");
+    HDprintf("    file contents>] [-r <random seed>] <# of operations>\n");
+    HDprintf("\n");
+    HDprintf("<# of operations between flushing file contents> should be 0 (for\n");
+    HDprintf("no flushing) or between 1 and (<# of operations> - 1).\n");
+    HDprintf("\n");
+    HDprintf("<# of operations> must be specified.\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), flushing every 1000 operations\n");
+    HDprintf("('-f 1000'), and will generate a random seed (no -r given).\n");
+    HDprintf("\n");
     HDexit(1);
 } /* usage() */
 

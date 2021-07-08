@@ -43,7 +43,6 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
-#include "H5FDprivate.h" /* File drivers                             */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5SLprivate.h" /* Skip Lists                               */
@@ -61,8 +60,8 @@
 /********************/
 
 static herr_t H5AC__check_if_write_permitted(const H5F_t *f, hbool_t *write_permitted_ptr);
-static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
-                                            H5C_auto_size_ctl_t *int_conf_ptr);
+static herr_t H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr,
+                                            H5C_auto_size_ctl_t *      int_conf_ptr);
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
@@ -94,29 +93,27 @@ hbool_t H5_coll_api_sanity_check_g = false;
  */
 
 static const H5AC_class_t *const H5AC_class_s[] = {
-    H5AC_BT,               /* ( 0) B-tree nodes                     */
-    H5AC_SNODE,            /* ( 1) symbol table nodes               */
-    H5AC_LHEAP_PRFX,       /* ( 2) local heap prefix                */
-    H5AC_LHEAP_DBLK,       /* ( 3) local heap data block            */
-    H5AC_GHEAP,            /* ( 4) global heap                      */
-    H5AC_OHDR,             /* ( 5) object header                    */
-    H5AC_OHDR_CHK,         /* ( 6) object header chunk              */
-    H5AC_BT2_HDR,          /* ( 7) v2 B-tree header                 */
-    H5AC_BT2_INT,          /* ( 8) v2 B-tree internal node          */
-    H5AC_BT2_LEAF,         /* ( 9) v2 B-tree leaf node              */
-    H5AC_FHEAP_HDR,        /* (10) fractal heap header              */
-    H5AC_FHEAP_DBLOCK,     /* (11) fractal heap direct block        */
-    H5AC_FHEAP_IBLOCK,     /* (12) fractal heap indirect block      */
-    H5AC_FSPACE_HDR,       /* (13) free space header                */
-    H5AC_FSPACE_SINFO,     /* (14) free space sections              */
-    H5AC_SOHM_TABLE,       /* (15) shared object header message     */
-                           /*      master table                     */
-    H5AC_SOHM_LIST,        /* (16) shared message index stored as   */
-                           /*      a list                           */
-    H5AC_EARRAY_HDR,       /* (17) extensible array header          */
-    H5AC_EARRAY_IBLOCK,    /* (18) extensible array index block     */
-    H5AC_EARRAY_SBLOCK,    /* (19) extensible array super block     */
-    H5AC_EARRAY_DBLOCK,    /* (20) extensible array data block      */
+    H5AC_BT,               /* ( 0) B-tree nodes                    */
+    H5AC_SNODE,            /* ( 1) symbol table nodes              */
+    H5AC_LHEAP_PRFX,       /* ( 2) local heap prefix               */
+    H5AC_LHEAP_DBLK,       /* ( 3) local heap data block           */
+    H5AC_GHEAP,            /* ( 4) global heap                     */
+    H5AC_OHDR,             /* ( 5) object header                   */
+    H5AC_OHDR_CHK,         /* ( 6) object header chunk             */
+    H5AC_BT2_HDR,          /* ( 7) v2 B-tree header                */
+    H5AC_BT2_INT,          /* ( 8) v2 B-tree internal node         */
+    H5AC_BT2_LEAF,         /* ( 9) v2 B-tree leaf node             */
+    H5AC_FHEAP_HDR,        /* (10) fractal heap header             */
+    H5AC_FHEAP_DBLOCK,     /* (11) fractal heap direct block       */
+    H5AC_FHEAP_IBLOCK,     /* (12) fractal heap indirect block     */
+    H5AC_FSPACE_HDR,       /* (13) free space header               */
+    H5AC_FSPACE_SINFO,     /* (14) free space sections             */
+    H5AC_SOHM_TABLE,       /* (15) shared object header message master table */
+    H5AC_SOHM_LIST,        /* (16) shared message index stored as a list */
+    H5AC_EARRAY_HDR,       /* (17) extensible array header         */
+    H5AC_EARRAY_IBLOCK,    /* (18) extensible array index block    */
+    H5AC_EARRAY_SBLOCK,    /* (19) extensible array super block    */
+    H5AC_EARRAY_DBLOCK,    /* (20) extensible array data block     */
     H5AC_EARRAY_DBLK_PAGE, /* (21) extensible array data block page */
     H5AC_FARRAY_HDR,       /* (22) fixed array header              */
     H5AC_FARRAY_DBLOCK,    /* (23) fixed array data block          */
@@ -359,19 +356,14 @@ H5AC_create(const H5F_t *f, H5AC_cache_config_t *config_ptr, H5AC_cache_image_co
         if (NULL == (aux_ptr->candidate_slist_ptr = H5SL_create(H5SL_TYPE_HADDR, NULL)))
             HGOTO_ERROR(H5E_CACHE, H5E_CANTCREATE, FAIL, "can't create candidate entry list")
 
-        if (aux_ptr != NULL)
-            if (aux_ptr->mpi_rank == 0)
-                f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
-                                              (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
-                                              TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
-            else
-                f->shared->cache =
-                    H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                               H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
+        if (aux_ptr->mpi_rank == 0)
+            f->shared->cache = H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE,
+                                          (H5AC_NTYPES - 1), H5AC_class_s, H5AC__check_if_write_permitted,
+                                          TRUE, H5AC__log_flushed_entry, (void *)aux_ptr);
         else
             f->shared->cache =
                 H5C_create(H5AC__DEFAULT_MAX_CACHE_SIZE, H5AC__DEFAULT_MIN_CLEAN_SIZE, (H5AC_NTYPES - 1),
-                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, NULL);
+                           H5AC_class_s, H5AC__check_if_write_permitted, TRUE, NULL, (void *)aux_ptr);
     } /* end if */
     else {
 #endif /* H5_HAVE_PARALLEL */
@@ -471,6 +463,14 @@ done:
  * Programmer:  Robb Matzke
  *              Jul  9 1997
  *
+ * Changes:
+ *
+ *             In the parallel case, added code to setup the MDC slist
+ *             before the call to H5AC__flush_entries() and take it down
+ *             afterwards.
+ *
+ *                                            JRM -- 7/29/20
+ *
  *-------------------------------------------------------------------------
  */
 herr_t
@@ -522,19 +522,46 @@ H5AC_dest(H5F_t *f)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "H5C_clear_coll_entries() failed")
 
     aux_ptr = (H5AC_aux_t *)H5C_get_aux_ptr(f->shared->cache);
-    if (aux_ptr)
+
+    if (aux_ptr) {
+
         /* Sanity check */
         HDassert(aux_ptr->magic == H5AC__H5AC_AUX_T_MAGIC);
 
-    /* If the file was opened R/W, attempt to flush all entries
-     * from rank 0 & Bcast clean list to other ranks.
-     *
-     * Must not flush in the R/O case, as this will trigger the
-     * free space manager settle routines.
-     */
-    if (H5F_ACC_RDWR & H5F_INTENT(f))
-        if (H5AC__flush_entries(f) < 0)
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+        /* If the file was opened R/W, attempt to flush all entries
+         * from rank 0 & Bcast clean list to other ranks.
+         *
+         * Must not flush in the R/O case, as this will trigger the
+         * free space manager settle routines.
+         *
+         * Must also enable the skip list before the call to
+         * H5AC__flush_entries() and disable it afterwards, as the
+         * skip list will be disabled after the previous flush.
+         *
+         * Note that H5C_dest() does slist setup and take down as well.
+         * Unfortunately, we can't do the setup and take down just once,
+         * as H5C_dest() is called directly in the test code.
+         *
+         * Fortunately, the cache should be clean or close to it at this
+         * point, so the overhead should be minimal.
+         */
+        if (H5F_ACC_RDWR & H5F_INTENT(f)) {
+
+            /* enable and load the slist */
+            if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "set slist enabled failed")
+
+            if (H5AC__flush_entries(f) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush")
+
+            /* disable the slist -- should be empty */
+            if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+                HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "disable slist failed")
+        }
+    }
 #endif /* H5_HAVE_PARALLEL */
 
     /* Destroy the cache */
@@ -1211,6 +1238,107 @@ done:
 } /* H5AC_prep_for_file_close() */
 
 /*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_prep_for_file_flush
+ *
+ * Purpose:     This function should be called just prior to the first
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to handly any setup required prior to
+ *              metadata cache flush.
+ *
+ *              Initially, this means setting up the slist prior to the
+ *              flush.  We do this in a seperate call because
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid
+ *              the overhead of setting up and taking down the skip list
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_prep_for_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_prep_for_file_flush() */
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5AC_secure_from_file_flush
+ *
+ * Purpose:     This function should be called just after the last
+ *              call to H5AC_flush() during a file flush.
+ *
+ *              Its purpose is to perform any necessary cleanup after the
+ *              metadata cache flush.
+ *
+ *              The objective of the call is to allow the metadata cache
+ *              to do any necessary necessary cleanup work after a cache
+ *              flush.
+ *
+ *              Initially, this means taking down the slist after the
+ *              flush.  We do this in a seperate call because
+ *              H5F__flush_phase2() make repeated calls to H5AC_flush().
+ *              Handling this detail in separate calls allows us to avoid
+ *              the overhead of setting up and taking down the skip list
+ *              repeatedly.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  John Mainzer
+ *              5/5/20
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5AC_secure_from_file_flush(H5F_t *f)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(f);
+    HDassert(f->shared);
+    HDassert(f->shared->cache);
+
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, FALSE) < 0)
+
+        HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "slist enabled failed")
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* H5AC_secure_from_file_flush() */
+
+/*-------------------------------------------------------------------------
+ *
  * Function:    H5AC_create_flush_dependency()
  *
  * Purpose:     Create a flush dependency between two entries in the metadata
@@ -1688,14 +1816,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr, size_t *cur_size_ptr,
-                    uint32_t *cur_num_entries_ptr)
+H5AC_get_cache_size(const H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+                    size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_cache_size((H5C_t *)cache_ptr, max_size_ptr, min_clean_size_ptr, cur_size_ptr,
+    if (H5C_get_cache_size((const H5C_t *)cache_ptr, max_size_ptr, min_clean_size_ptr, cur_size_ptr,
                            cur_num_entries_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_size() failed")
 
@@ -1742,13 +1870,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_hit_rate(H5AC_t *cache_ptr, double *hit_rate_ptr)
+H5AC_get_cache_hit_rate(const H5AC_t *cache_ptr, double *hit_rate_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_cache_hit_rate((H5C_t *)cache_ptr, hit_rate_ptr) < 0)
+    if (H5C_get_cache_hit_rate((const H5C_t *)cache_ptr, hit_rate_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_hit_rate() failed")
 
 done:
@@ -1794,7 +1922,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config_ptr)
+H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, const H5AC_cache_config_t *config_ptr)
 {
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED; /* Return value */
@@ -1895,7 +2023,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_validate_config(H5AC_cache_config_t *config_ptr)
+H5AC_validate_config(const H5AC_cache_config_t *config_ptr)
 {
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED; /* Return value */
@@ -2076,7 +2204,7 @@ H5AC__check_if_write_permitted(const H5F_t
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr, H5C_auto_size_ctl_t *int_conf_ptr)
+H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr, H5C_auto_size_ctl_t *int_conf_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2637,13 +2765,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len)
+H5AC_get_mdc_image_info(const H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_mdc_image_info((H5C_t *)cache_ptr, image_addr, image_len) < 0)
+    if (H5C_get_mdc_image_info((const H5C_t *)cache_ptr, image_addr, image_len) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
 
 done:

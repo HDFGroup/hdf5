@@ -187,7 +187,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
         hid_t          file_sid; /* Dataset's space ID */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* Set the record's ID (equal to its position) */
         record.rec_id = symbol->nrecords;
@@ -254,20 +254,20 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: vfd_swmr_writer [-q] [-o] [-f <# of records to write between flushing\n");
-    printf("    file contents>] [-r <random seed>] <# of records>\n");
-    printf("\n");
-    printf("<# of records to write between flushing file contents> should be 0\n");
-    printf("(for no flushing) or between 1 and (<# of records> - 1).\n");
-    printf("\n");
-    printf("<# of records> must be specified.\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
-    printf("flushing every 10000 records ('-f 10000'), and will generate a random seed (no -r given).\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: vfd_swmr_writer [-q] [-o] [-f <# of records to write between flushing\n");
+    HDprintf("    file contents>] [-r <random seed>] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("<# of records to write between flushing file contents> should be 0\n");
+    HDprintf("(for no flushing) or between 1 and (<# of records> - 1).\n");
+    HDprintf("\n");
+    HDprintf("<# of records> must be specified.\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
+    HDprintf("flushing every 10000 records ('-f 10000'), and will generate a random seed (no -r given).\n");
+    HDprintf("\n");
     HDexit(1);
 }
 

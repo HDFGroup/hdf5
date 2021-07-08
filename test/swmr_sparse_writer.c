@@ -177,7 +177,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
         hbool_t        corked;   /* Whether the dataset was corked */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* If this is the first time the dataset has been opened, extend it and
          * add the sequence attribute */

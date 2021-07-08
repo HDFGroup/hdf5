@@ -106,7 +106,7 @@ open_skeleton(const char *filename, unsigned verbose)
 
     /* Emit informational message */
     if (verbose)
-        fprintf(stderr, "WRITER: Opening datasets\n");
+        HDfprintf(stderr, "WRITER: Opening datasets\n");
 
     /* Seed the random number generator with the attribute in the file */
     if ((aid = H5Aopen(fid, "seed", H5P_DEFAULT)) < 0)
@@ -206,7 +206,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
         symbol_info_t *symbol; /* Symbol to write record to */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* If this is the first time the dataset has been opened, extend it and
          * add the sequence attribute */
@@ -299,7 +299,7 @@ add_records(hid_t fid, unsigned verbose, unsigned long nrecords, unsigned long f
 
     /* Emit informational message */
     if (verbose)
-        fprintf(stderr, "WRITER: Closing datasets\n");
+        HDfprintf(stderr, "WRITER: Closing datasets\n");
 
     /* Close the datasets */
     for (u = 0; u < NLEVELS; u++)
@@ -329,18 +329,18 @@ error:
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: vfd_swmr_sparse_writer [-q] [-f <# of records to write between\n");
-    printf("    flushing file contents>] <# of records>\n");
-    printf("\n");
-    printf("<# of records to write between flushing file contents> should be 0\n");
-    printf("(for no flushing) or between 1 and (<# of records> - 1)\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given) and flushing every 1000 records\n");
-    printf("('-f 1000')\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: vfd_swmr_sparse_writer [-q] [-f <# of records to write between\n");
+    HDprintf("    flushing file contents>] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("<# of records to write between flushing file contents> should be 0\n");
+    HDprintf("(for no flushing) or between 1 and (<# of records> - 1)\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given) and flushing every 1000 records\n");
+    HDprintf("('-f 1000')\n");
+    HDprintf("\n");
     HDexit(1);
 } /* usage() */
 

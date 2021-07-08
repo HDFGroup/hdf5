@@ -80,7 +80,7 @@ H5_GCC_DIAG_OFF("cast-align")
 #define H5SETJMP(buf)       HDsigsetjmp(buf, 1)
 #define H5LONGJMP(buf, val) HDsiglongjmp(buf, val)
 #define H5HAVE_SIGJMP       /* sigsetjmp/siglongjmp are supported. */
-#elif defined(H5_HAVE_LONGJMP)
+#else
 #define H5JMP_BUF           jmp_buf
 #define H5SETJMP(buf)       HDsetjmp(buf)
 #define H5LONGJMP(buf, val) HDlongjmp(buf, val)
@@ -149,12 +149,8 @@ static int          sigbus_handler_called_g  = 0; /* how many times called */
 static int          sigsegv_handler_called_g = 0; /* how many times called */
 static int          sigill_handler_called_g  = 0; /* how many times called */
 static int          signal_handler_tested_g  = 0; /* how many times tested */
-#if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
-static int verify_signal_handlers(int signum, void (*handler)(int));
-#endif
-#ifdef H5JMP_BUF
-static H5JMP_BUF jbuf_g;
-#endif
+static int          verify_signal_handlers(int signum, void (*handler)(int));
+static H5JMP_BUF    jbuf_g;
 
 /*-------------------------------------------------------------------------
  * Function:    precision
@@ -388,7 +384,6 @@ precision(detected_t *d)
         COMP_ALIGN = (unsigned int)((char *)(&(s.x)) - (char *)(&s));                                        \
     }
 
-#if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
 #define ALIGNMENT(TYPE, INFO)                                                                                \
     {                                                                                                        \
         char *volatile _buf    = NULL;                                                                       \
@@ -435,15 +430,6 @@ precision(detected_t *d)
         HDsignal(SIGSEGV, _handler2); /*restore original handler*/                                           \
         HDsignal(SIGILL, _handler3);  /*restore original handler*/                                           \
     }
-#else
-#define ALIGNMENT(TYPE, INFO)                                                                                \
-    {                                                                                                        \
-        align_status_g |= STA_NoALIGNMENT;                                                                   \
-        (INFO.align) = 0;                                                                                    \
-    }
-#endif
-
-#if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 
 /*-------------------------------------------------------------------------
  * Function:    sigsegv_handler
@@ -473,9 +459,6 @@ sigsegv_handler(int H5_ATTR_UNUSED signo)
     HDsignal(SIGSEGV, sigsegv_handler);
     H5LONGJMP(jbuf_g, SIGSEGV);
 }
-#endif
-
-#if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 
 /*-------------------------------------------------------------------------
  * Function:    sigbus_handler
@@ -505,9 +488,6 @@ sigbus_handler(int H5_ATTR_UNUSED signo)
     HDsignal(SIGBUS, sigbus_handler);
     H5LONGJMP(jbuf_g, SIGBUS);
 }
-#endif
-
-#if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 
 /*-------------------------------------------------------------------------
  * Function:    sigill_handler
@@ -537,7 +517,6 @@ sigill_handler(int H5_ATTR_UNUSED signo)
     HDsignal(SIGILL, sigill_handler);
     H5LONGJMP(jbuf_g, SIGILL);
 }
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    print_results
@@ -777,21 +756,6 @@ done:\n\
         fprintf(rawoutstream, "/* Signal handlers verify test is not available */\n");
         /* The following is available in H5pubconf.h. Printing them here for */
         /* convenience. */
-#ifdef H5_HAVE_SIGNAL
-    fprintf(rawoutstream, "/* Signal() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* Signal() support: no */\n");
-#endif
-#ifdef H5_HAVE_SETJMP
-    fprintf(rawoutstream, "/* setjmp() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* setjmp() support: no */\n");
-#endif
-#ifdef H5_HAVE_LONGJMP
-    fprintf(rawoutstream, "/* longjmp() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* longjmp() support: no */\n");
-#endif
 #ifdef H5_HAVE_SIGSETJMP
     fprintf(rawoutstream, "/* sigsetjmp() support: yes */\n");
 #else
@@ -1314,60 +1278,18 @@ detect_C89_floats(void)
 static void HDF_NO_UBSAN
 detect_C99_integers8(void)
 {
-#if H5_SIZEOF_INT8_T > 0
-#if H5_SIZEOF_INT8_T == 1
     DETECT_BYTE(int8_t, INT8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(int8_t, INT8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_UINT8_T > 0
-#if H5_SIZEOF_UINT8_T == 1
     DETECT_BYTE(uint8_t, UINT8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(uint8_t, UINT8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_INT_LEAST8_T > 0
-#if H5_SIZEOF_INT_LEAST8_T == 1
     DETECT_BYTE(int_least8_t, INT_LEAST8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(int_least8_t, INT_LEAST8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_UINT_LEAST8_T > 0
-#if H5_SIZEOF_UINT_LEAST8_T == 1
     DETECT_BYTE(uint_least8_t, UINT_LEAST8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(uint_least8_t, UINT_LEAST8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_INT_FAST8_T > 0
-#if H5_SIZEOF_INT_FAST8_T == 1
     DETECT_BYTE(int_fast8_t, INT_FAST8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(int_fast8_t, INT_FAST8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
-#if H5_SIZEOF_UINT_FAST8_T > 0
-#if H5_SIZEOF_UINT_FAST8_T == 1
     DETECT_BYTE(uint_fast8_t, UINT_FAST8, d_g[nd_g]);
     nd_g++;
-#else
-    DETECT_I(uint_fast8_t, UINT_FAST8, d_g[nd_g]);
-    nd_g++;
-#endif
-#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -1381,30 +1303,18 @@ detect_C99_integers8(void)
 static void HDF_NO_UBSAN
 detect_C99_integers16(void)
 {
-#if H5_SIZEOF_INT16_T > 0
     DETECT_I(int16_t, INT16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT16_T > 0
     DETECT_I(uint16_t, UINT16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_LEAST16_T > 0
     DETECT_I(int_least16_t, INT_LEAST16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_LEAST16_T > 0
     DETECT_I(uint_least16_t, UINT_LEAST16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_FAST16_T > 0
     DETECT_I(int_fast16_t, INT_FAST16, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_FAST16_T > 0
     DETECT_I(uint_fast16_t, UINT_FAST16, d_g[nd_g]);
     nd_g++;
-#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -1418,30 +1328,18 @@ detect_C99_integers16(void)
 static void HDF_NO_UBSAN
 detect_C99_integers32(void)
 {
-#if H5_SIZEOF_INT32_T > 0
     DETECT_I(int32_t, INT32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT32_T > 0
     DETECT_I(uint32_t, UINT32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_LEAST32_T > 0
     DETECT_I(int_least32_t, INT_LEAST32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_LEAST32_T > 0
     DETECT_I(uint_least32_t, UINT_LEAST32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_FAST32_T > 0
     DETECT_I(int_fast32_t, INT_FAST32, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_FAST32_T > 0
     DETECT_I(uint_fast32_t, UINT_FAST32, d_g[nd_g]);
     nd_g++;
-#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -1456,47 +1354,23 @@ detect_C99_integers32(void)
 static void HDF_NO_UBSAN
 detect_C99_integers64(void)
 {
-#if H5_SIZEOF_INT64_T > 0
     DETECT_I(int64_t, INT64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT64_T > 0
     DETECT_I(uint64_t, UINT64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_LEAST64_T > 0
     DETECT_I(int_least64_t, INT_LEAST64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_LEAST64_T > 0
     DETECT_I(uint_least64_t, UINT_LEAST64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_INT_FAST64_T > 0
     DETECT_I(int_fast64_t, INT_FAST64, d_g[nd_g]);
     nd_g++;
-#endif
-#if H5_SIZEOF_UINT_FAST64_T > 0
     DETECT_I(uint_fast64_t, UINT_FAST64, d_g[nd_g]);
     nd_g++;
-#endif
 
-#if H5_SIZEOF_LONG_LONG > 0
     DETECT_I(long long, LLONG, d_g[nd_g]);
     nd_g++;
     DETECT_I(unsigned long long, ULLONG, d_g[nd_g]);
     nd_g++;
-#else
-    /*
-     * This architecture doesn't support an integer type larger than `long'
-     * so we'll just make H5T_NATIVE_LLONG the same as H5T_NATIVE_LONG since
-     * `long long' is probably equivalent to `long' here anyway.
-     */
-    DETECT_I(long, LLONG, d_g[nd_g]);
-    nd_g++;
-    DETECT_I(unsigned long, ULLONG, d_g[nd_g]);
-    nd_g++;
-#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -1568,7 +1442,6 @@ detect_alignments(void)
     na_g++;
 }
 
-#if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
 /* Verify the signal handler for signal signum works correctly multiple times.
  * One possible cause of failure is that the signal handling is blocked or
  * changed to SIG_DFL after H5LONGJMP.
@@ -1625,7 +1498,6 @@ verify_signal_handlers(int signum, void (*handler)(int))
         return 0;
     }
 }
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -1655,22 +1527,6 @@ main(int argc, char *argv[])
     if (!rawoutstream)
         rawoutstream = stdout;
 
-#if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
-#if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
-    /*
-     * Make sure unaligned access generates SIGBUS and doesn't print warning
-     * messages so that we can detect alignment constraints on the DEC Alpha.
-     */
-    int nvpairs[2];
-    nvpairs[0] = SSIN_UACPROC;
-    nvpairs[1] = UAC_NOPRINT | UAC_SIGBUS;
-    if (setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0) < 0) {
-        fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n", HDstrerror(errno));
-    }
-#endif
-#endif
-
-#if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
     /* verify the SIGBUS and SIGSEGV handlers work properly */
     if (verify_signal_handlers(SIGBUS, sigbus_handler) != 0) {
         fprintf(stderr, "Signal handler %s for signal %d failed\n", "sigbus_handler", SIGBUS);
@@ -1681,9 +1537,6 @@ main(int argc, char *argv[])
     if (verify_signal_handlers(SIGILL, sigill_handler) != 0) {
         fprintf(stderr, "Signal handler %s for signal %d failed\n", "sigill_handler", SIGILL);
     }
-#else
-    align_status_g |= STA_NoHandlerVerify;
-#endif
 
     print_header();
 

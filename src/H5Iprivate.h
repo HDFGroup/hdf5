@@ -20,8 +20,9 @@
 #ifndef H5Iprivate_H
 #define H5Iprivate_H
 
-/* Include package's public header */
+/* Include package's public headers */
 #include "H5Ipublic.h"
+#include "H5Idevelop.h"
 
 /* Private headers needed by this file */
 #include "H5private.h"

@@ -185,7 +185,7 @@ remove_records(hid_t fid, unsigned verbose, unsigned long nshrinks, unsigned lon
         hsize_t        remove_size; /* Size to reduce dataset dimension by */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* Shrink the dataset's dataspace */
         remove_size = (hsize_t)HDrandom() % MAX_REMOVE_SIZE + 1;
@@ -237,18 +237,18 @@ error:
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_remove_writer [-q] [-o] [-f <# of shrinks between flushing\n");
-    printf("    file contents>] [-r <random seed>] <# of shrinks>\n");
-    printf("\n");
-    printf("<# of shrinks between flushing file contents> should be 0 (for no\n");
-    printf("flushing) or between 1 and (<# of shrinks> - 1)\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
-    printf("flushing every 1000 shrinks ('-f 1000'), and will generate a random seed (no -r given).\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_remove_writer [-q] [-o] [-f <# of shrinks between flushing\n");
+    HDprintf("    file contents>] [-r <random seed>] <# of shrinks>\n");
+    HDprintf("\n");
+    HDprintf("<# of shrinks between flushing file contents> should be 0 (for no\n");
+    HDprintf("flushing) or between 1 and (<# of shrinks> - 1)\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
+    HDprintf("flushing every 1000 shrinks ('-f 1000'), and will generate a random seed (no -r given).\n");
+    HDprintf("\n");
     HDexit(1);
 } /* usage() */
 
