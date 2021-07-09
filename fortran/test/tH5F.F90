@@ -535,7 +535,7 @@ CONTAINS
 
          ! Populate filename buffer with whitespace
          do i = 1,80
-            filename(i:i) = " "
+            file_name(i:i) = " "
          end do
 
          !
