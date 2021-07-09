@@ -21,9 +21,6 @@
 
 #include "H5f90.h"
 
-/* Include package's developer header */
-#include "H5Tdevelop.h"
-
 /****if* H5Tf/h5topen_c
  * NAME
  *  h5topen_c
