@@ -545,9 +545,11 @@ CONTAINS
               CALL check("h5fget_name_f",error,total_error)
               IF(name_size /= 9) THEN
                  write(*,*) "file name obtained from the dataset id has wrong length"
+                 call check("h5fget_name_f",-1,total_error)
               END IF
-              IF(file_name(1:name_size) .NE. fix_filename(1:name_size)) THEN
+              IF(file_name(1:name_size) /= fix_filename(1:name_size)) THEN
                  write(*,*) "file name obtained from the dataset id is incorrect"
+                 call check("h5fget_name_f",-1,total_error)
               END IF
 
          !
