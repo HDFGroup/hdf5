@@ -532,6 +532,12 @@ CONTAINS
          !
          CALL h5dopen_f(reopen_id, dsetname, dset_id, error)
               CALL check("h5dopen_f",error,total_error)
+
+         ! Populate filename buffer with whitespace
+         do i = 1,80
+            filename(i:i) = " "
+         end do
+
          !
          !Get file name from the dataset identifier
          !
