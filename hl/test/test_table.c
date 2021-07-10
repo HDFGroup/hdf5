@@ -199,7 +199,7 @@ test_table(hid_t fid, int do_write)
     hsize_t    chunk_size   = 10;
     int        compress     = 0;
     int *      fill         = NULL;
-    particle_t fill1[1]     = {{"no data", -1, -99.0f, -99.0f, -1}};
+    particle_t fill1[1]     = {{"no data", -1, -99.0, -99.0, -1}};
     int        fill1_new[1] = {-100};
     hsize_t    position;
     char       tname[20];
@@ -227,23 +227,23 @@ test_table(hid_t fid, int do_write)
     particle2_t rbuf2[NRECORDS];
     particle3_t rbuf3[NRECORDS];
     particle_t  rbufc[NRECORDS * 2];
-    particle_t  abuf[2] = {{"eight", 80, 8.0f, 80.0f, 80}, {"nine", 90, 9.0f, 90.0f, 90}};
-    particle_t  ibuf[2] = {{"zero", 0, 0.0f, 0.0f, 0}, {"zero", 0, 0.0f, 0.0f, 0}};
+    particle_t  abuf[2] = {{"eight", 80, 8.0, 80.0, 80}, {"nine", 90, 9.0, 90.0, 90}};
+    particle_t  ibuf[2] = {{"zero", 0, 0.0, 0.0, 0}, {"zero", 0, 0.0, 0.0, 0}};
     particle_t  wbufd[NRECORDS];
     particle_t  wbuf[NRECORDS] = {{
                                      "zero",
                                      0,
-                                     0.0f,
-                                     0.0f,
+                                     0.0,
+                                     0.0,
                                      0,
                                  },
-                                 {"one", 10, 1.0f, 10.0f, 10},
-                                 {"two", 20, 2.0f, 20.0f, 20},
-                                 {"three", 30, 3.0f, 30.0f, 30},
-                                 {"four", 40, 4.0f, 40.0f, 40},
-                                 {"five", 50, 5.0f, 50.0f, 50},
-                                 {"six", 60, 6.0f, 60.0f, 60},
-                                 {"seven", 70, 7.0f, 70.0f, 70}};
+                                 {"one", 10, 1.0, 10.0, 10},
+                                 {"two", 20, 2.0, 20.0, 20},
+                                 {"three", 30, 3.0, 30.0, 30},
+                                 {"four", 40, 4.0, 40.0, 40},
+                                 {"five", 50, 5.0, 50.0, 50},
+                                 {"six", 60, 6.0, 60.0, 60},
+                                 {"seven", 70, 7.0, 70.0, 70}};
     /* buffers for the field "Pressure" and "New_field" */
     float pressure_in[NRECORDS] = {0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f};
     float pressure_out[NRECORDS];
@@ -332,14 +332,14 @@ test_table(hid_t fid, int do_write)
                                       HOFFSET(particle4_t, aty),   HOFFSET(particle4_t, rro)};
 
     /* Define an array of Particles */
-    particle4_t p_data[NRECORDS] = {{12112, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12113, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12114, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12115, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12116, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12117, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12118, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}},
-                                    {12119, 1.4f, 2.5f, {1, 2, 3}, {4, 5, 6}, {99, 100}}};
+    particle4_t p_data[NRECORDS] = {{12112, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12113, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12114, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12115, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12116, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12117, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12118, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}},
+                                    {12119, 1.4, 2.5, {1, 2, 3}, {4, 5, 6}, {99, 100}}};
 
     /*-------------------------------------------------------------------------
      * initialize table parameters
