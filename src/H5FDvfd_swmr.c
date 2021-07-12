@@ -24,14 +24,13 @@
 #include "H5Iprivate.h"      /* IDs                      */
 #include "H5MMprivate.h"     /* Memory management        */
 #include "H5Pprivate.h"      /* Property lists           */
-#include "H5retry_private.h" /* Retry loops.		*/
+#include "H5retry_private.h" /* Retry loops.		     */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_VFD_SWMR_g = 0;
 
 typedef struct H5FD_vfd_swmr_t {
-    H5FD_t pub; /* public stuff, must be      */
-                /* first                      */
+    H5FD_t pub; /* public stuff, must be first      */
 
     /* HDF5 file */
     char hdf5_filename[H5FD_MAX_FILENAME_LEN]; /* Name of the HDF5 file from */
@@ -76,7 +75,7 @@ static herr_t  H5FD_vfd_swmr_term(void);
 static H5FD_t *H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD_vfd_swmr_close(H5FD_t *_file);
 static int     H5FD_vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
-static H5FD_t *H5FD_vfd_swmr_dedup(H5FD_t *, H5FD_t *, hid_t);
+static H5FD_t *H5FD__vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id);
 static herr_t  H5FD_vfd_swmr_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_vfd_swmr_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_vfd_swmr_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
@@ -129,7 +128,7 @@ static const H5FD_class_t H5FD_vfd_swmr_g = {
     H5FD_vfd_swmr_lock,       /* lock                 */
     H5FD_vfd_swmr_unlock,     /* unlock               */
     NULL,                     /* del                  */
-    H5FD_vfd_swmr_dedup,      /* dedup                */
+    H5FD__vfd_swmr_dedup,     /* dedup                */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
@@ -483,42 +482,55 @@ H5FD_vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_vfd_swmr_cmp() */
 
-/* Compare the already-opened VFD instance `_self` with the
- * VFD instance `_other` newly-opened with file-access properties `fapl`
- * and indicate whether the instances duplicate each other, if they conflict
- * with each other, or if they are dissimilar.
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__vfd_swmr_dedup
  *
- * If `_self` duplicates `_other`, return `_self`.
+ * Purpose:     Compare the already-opened VFD instance `_self` with the
+ *              VFD instance `_other` newly-opened with file-access properties
+ *              `fapl_id` and indicate whether the instances duplicate each
+ *              other, if they conflict with each other, or if they are
+ *              dissimilar.
  *
- * Return NULL on error, or if `_other` and `_self` refer to the same file
- * but the file-access properties, `fapl`, conflict with the properties of
- * `_self`.
+ *              If `_self` duplicates `_other`, return `_self`.
  *
- * If `_other` neither duplicates nor conflicts with `_self`, then return
- * `_other`.
+ *              Return NULL on error, or if `_other` and `_self` refer to the
+ *              same file but the file-access properties, `fapl_id`, conflict
+ *              with the properties of `_self`.
  *
- * # Judging duplicate/conflicting/dissimilar VFD instances
+ *              If `_other` neither duplicates nor conflicts with `_self`,
+ *              then return `_other`.
  *
- * `_self` duplicates `_other` if `_other` is also an instance of SWMR
- * class, the instances' lower files are equal under `H5FD_cmp()`, and
- * the file-access properties of `_self` match `fapl`.
- * The wildcard `fapl` value, `H5P_FILE_ACCESS_ANY_VFD`, matches all.
+ * NOTE:        Judging duplicate/conflicting/dissimilar VFD instances
  *
- * `_self` also duplicates `_other` if `_other` is not a SWMR instance, but
- * it equals the lower file of `_self` under `H5FD_cmp()`, and `fapl` is
- * `H5P_FILE_ACCESS_ANY_VFD`.
+ *              `_self` DUPLICATES `_other` if `_other` is also an instance
+ *              of SWMR class, the instances' lower files are equal under
+ *              `H5FD_cmp()`, and the file-access properties of `_self` match
+ *              `fapl_id`. The wildcard `fapl_id` value,
+ *              `H5P_FILE_ACCESS_ANY_VFD`, matches all.
  *
- * `_self` and `_other` conflict if both are SWMR instances referring to
- * the same lower file, and their file-access properties differ.
+ *              `_self` also DUPLICATES `_other` if `_other` is not a SWMR
+ *              instance, but it equals the lower file of `_self` under
+ *              `H5FD_cmp()`, and `fapl_id` is `H5P_FILE_ACCESS_ANY_VFD`.
  *
- * `_self` and `_other` conflict if `_other` is not a SWMR instance, it
- * equals the lower file of `_self`, and `fapl` is not equal to
- * `H5P_FILE_ACCESS_ANY_VFD`.
+ *              `_self` and `_other` CONFLICT if both are SWMR instances
+ *              referring to the same lower file, and their file-access
+ *              properties differ.
+ *
+ *              `_self` and `_other` CONFLICT if `_other` is not a SWMR
+ *              instance, it equals the lower file of `_self`, and `fapl_id`
+ *              is not equal to `H5P_FILE_ACCESS_ANY_VFD`.
+ *
+ * Return:      Success:    `_self' or `_other', as described above
+ *              Failure:    NULL
+ *-------------------------------------------------------------------------
  */
 static H5FD_t *
-H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
+H5FD__vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id)
 {
-    H5FD_vfd_swmr_t *self = (H5FD_vfd_swmr_t *)_self;
+    H5FD_vfd_swmr_t *self      = (H5FD_vfd_swmr_t *)_self;
+    H5FD_t *         ret_value = NULL;
+
+    FUNC_ENTER_STATIC
 
     HDassert(_self->driver_id == H5FD_VFD_SWMR_g);
 
@@ -529,50 +541,44 @@ H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl)
         hbool_t                equal_configs;
 
         if (H5FD_cmp(self->hdf5_file_lf, other->hdf5_file_lf) != 0)
-            return _other;
+            HGOTO_DONE(_other)
 
-        /* If fapl == _ANY_VFD, then the match between lower files is
+        /* If fapl_id == _ANY_VFD, then the match between lower files is
          * sufficient.
          */
-        if (fapl == H5P_FILE_ACCESS_ANY_VFD)
-            return _self;
+        if (fapl_id == H5P_FILE_ACCESS_ANY_VFD)
+            HGOTO_DONE(_self)
 
-        /* If fapl != _ANY_VFD, then we have either a duplicate or
+        /* If fapl_id != _ANY_VFD, then we have either a duplicate or
          * a conflict.  If the VFD SWMR parameters match, then
          * return `self` to indicate a duplicate.  Otherwise, return
          * NULL to indicate a mismatch.
          */
-        if (NULL == (plist = H5I_object(fapl))) {
-            HERROR(H5E_ARGS, H5E_BADTYPE, "could not get fapl");
-            return NULL;
-        }
+        if (NULL == (plist = H5I_object(fapl_id)))
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "could not get fapl")
 
-        if ((config = H5MM_malloc(sizeof(*config))) == NULL) {
-            HERROR(H5E_ARGS, H5E_BADTYPE, "could not allocate config");
-            return NULL;
-        }
-        if (H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, config) < 0) {
-            HERROR(H5E_PLIST, H5E_CANTGET, "cannot get VFD SWMR config");
-            return NULL;
-        }
+        if ((config = H5MM_malloc(sizeof(*config))) == NULL)
+            HGOTO_ERROR(H5E_VFL, H5E_BADTYPE, NULL, "could not allocate config")
+        if (H5P_get(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, config) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "cannot get VFD SWMR config")
 
         equal_configs = HDmemcmp(&self->config, config, sizeof(*config)) == 0;
 
         H5MM_xfree(config);
 
         if (equal_configs)
-            return _self;
+            HGOTO_DONE(_self)
 
-        HERROR(H5E_PLIST, H5E_CANTGET, "inconsistent VFD SWMR config");
-        return NULL;
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "inconsistent VFD SWMR config")
     }
-    else if (H5FD_cmp(self->hdf5_file_lf, _other) == 0) {
-        return (fapl == H5P_FILE_ACCESS_ANY_VFD) ? _self : NULL;
-    }
-    else {
-        return _other;
-    }
-}
+    else if (H5FD_cmp(self->hdf5_file_lf, _other) == 0)
+        ret_value = (fapl_id == H5P_FILE_ACCESS_ANY_VFD) ? _self : NULL;
+    else
+        ret_value = _other;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5FD__vfd_swmr_dedup() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_vfd_swmr_query

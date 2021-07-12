@@ -60,8 +60,9 @@ typedef struct H5FD_wrap_t {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t H5FD__free_cls(H5FD_class_t *cls);
-static herr_t H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
+static herr_t  H5FD__free_cls(H5FD_class_t *cls);
+static herr_t  H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
+static H5FD_t *H5FD__dedup(H5FD_t *self, H5FD_t *other, hid_t fapl_id);
 
 /*********************/
 /* Package Variables */
@@ -668,68 +669,95 @@ done:
     FUNC_LEAVE_API(ret_value)
 }
 
-/* Helper routine for H5FD_deduplicate(): compare `self` and `other` using
- * the deduplication method of `self`, if it has one; otherwise compare using
- * `H5FDcmp()`.
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__dedup
  *
- * If `self` has no de-duplication method, compare `self` and `other`
- * using `H5FDcmp()` and return `self` if they're equal and `other` if
- * unequal.
+ * Purpose:     Helper routine for H5FD_deduplicate
  *
- * If `self` does have a de-duplication method, call it and return the
- * method's result: `other` if it duplicates `self`, `self` if `other`
- * does NOT duplicate it, NULL if `other` conflicts with `self` or if
- * there is an error.
+ *              Compares `self` and `other` using the dedup callback of
+ *              `self` (if it has one); otherwise compares using `H5FDcmp()`.
  *
- * Unlike H5FD_deduplicate(), this routine does not free `self` under any
- * circumstances.
+ *      No `dedup' callback:
+ *
+ *              If `self` has no de-duplication method, compare `self` and
+ *              `other` using `H5FDcmp()` and return `self` if they're equal
+ *              and `other` if unequal.
+ *
+ *      `dedup' callback present:
+ *
+ *              If `self` does have a de-duplication callback, invoke it and
+ *              return the method's result: `other` if it duplicates `self`,
+ *              `self` if `other` does NOT duplicate it, NULL if `other`
+ *              conflicts with `self` or if there is an error.
+ *
+ * Return:      Success:    `self' or `other', as described above
+ *
+ *              Failure:    NULL
+ *
+ * Note:        Unlike H5FD_deduplicate(), this routine does not free `self`
+ *              under any circumstances.
+ *
+ *-------------------------------------------------------------------------
+ *
  */
 static H5FD_t *
-H5FD_dedup(H5FD_t *self, H5FD_t *other, hid_t fapl)
+H5FD__dedup(H5FD_t *self, H5FD_t *other, hid_t fapl_id)
 {
-    H5FD_t *(*dedup)(H5FD_t *, H5FD_t *, hid_t);
+    H5FD_t *ret_value = other;
 
-    if ((dedup = self->cls->dedup) != NULL)
-        return (*dedup)(self, other, fapl);
+    FUNC_ENTER_STATIC_NOERR
 
-    if (H5FDcmp(self, other) == 0)
-        return self;
+    if (self->cls->dedup != NULL)
+        ret_value = (self->cls->dedup)(self, other, fapl_id);
+    else if (H5FD_cmp(self, other) == 0)
+        ret_value = self;
 
-    return other;
-}
+    FUNC_LEAVE_NOAPI(ret_value);
+} /* end H5FD__dedup() */
 
-/* Search the already-opened VFD instances for an instance similar to the
- * instance `file` newly-opened using file-access properties given by `fapl`.
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_deduplicate
  *
- * If there is an already-open instance that is functionally
- * identical to `file`, close `file` and return the already-open instance.
+ * Purpose:     Search the already-opened VFD instances for an instance
+ *              similar to the instance `file` newly-opened using file access
+ *              properties given by `fapl_id`.
  *
- * If there is an already-open instance that conflicts with `file` because,
- * for example, its file-access properties are incompatible with `fapl`'s
- * or, for another example, it is under exclusive control by a third VFD
- * instance, then close `file` and return `NULL`.
+ * Return:      It's complicated...
  *
- * Otherwise, return `file` to indicate that there are no identical or
- * conflicting VFD instances already open.
+ *              If there is an already-open instance that is functionally
+ *              identical to `file`, close `file` and return the already
+ *              open instance.
+ *
+ *              If there is an already open instance that conflicts with
+ *              `file` because, for example, its file-access properties are
+ *              incompatible with `fapl_id`'s or, for another example, it is
+ *              under exclusive control by a third VFD instance, then close
+ *              `file` and return `NULL`.
+ *
+ *              Otherwise, return `file` to indicate that there are no
+ *              identical or conflicting VFD instances already open.
+ *-------------------------------------------------------------------------
  */
 H5FD_t *
-H5FD_deduplicate(H5FD_t *file, hid_t fapl)
+H5FD_deduplicate(H5FD_t *file, hid_t fapl_id)
 {
-    H5FD_t *     deduped = file;
     H5FD_wrap_t *item;
+    H5FD_t *     ret_value = file;
+
+    FUNC_ENTER_NOAPI(NULL)
 
     TAILQ_FOREACH(item, &all_vfds, link)
     {
-        /* skip "self" */
+        /* Skip "self" */
         if (item->file == file)
             continue;
 
-        /* skip files with exclusive owners, for now */
+        /* Skip files with exclusive owners, for now */
         if (item->file->exc_owner != NULL)
             continue;
 
-        if ((deduped = H5FD_dedup(item->file, file, fapl)) != file)
-            goto finish;
+        if ((ret_value = H5FD__dedup(item->file, file, fapl_id)) != file)
+            goto done;
     }
 
     /* If we reach this stage, then we identified neither a conflict nor a
@@ -741,19 +769,17 @@ H5FD_deduplicate(H5FD_t *file, hid_t fapl)
         if (item->file == file || item->file->exc_owner == NULL)
             continue;
 
-        if (H5FDcmp(file, item->file) == 0) {
-            deduped = NULL;
-            break;
-        }
+        if (H5FD_cmp(file, item->file) == 0)
+            HGOTO_ERROR(H5E_VFL, H5E_FILEOPEN, NULL,
+                        "found a conflicting open file when searching for duplicates")
     }
 
-finish:
-    if (deduped != file && H5FD_close(file) < 0) {
-        HERROR(H5E_FILE, H5E_CANTOPENFILE, "could not close file");
-        return NULL;
-    }
-    return deduped;
-}
+done:
+    if (ret_value != file && H5FD_close(file) < 0)
+        HDONE_ERROR(H5E_VFL, H5E_CANTCLOSEFILE, NULL, "could not close file")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD_deduplicate() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_open
