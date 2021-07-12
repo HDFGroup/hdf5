@@ -604,8 +604,6 @@ H5D__get_chunk_storage_size(H5D_t *dset, const hsize_t *offset, hsize_t *storage
     HDassert(offset);
     HDassert(storage_size);
 
-    *storage_size = 0;
-
     /* Allocate dataspace and initialize it if it hasn't been. */
     if (!(*layout->ops->is_space_alloc)(&layout->storage))
         HGOTO_DONE(SUCCEED)
@@ -5031,7 +5029,7 @@ H5D__chunk_collective_fill(const H5D_t *dset, H5D_chunk_coll_info_t *chunk_info,
          * order of offset in the file.
          */
         if (need_addr_sort)
-            HDqsort(chunk_disp_array, blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
+            HDqsort(chunk_disp_array, (size_t)blocks, sizeof(MPI_Aint), H5D__chunk_cmp_addr);
 
         /* MSC - should use this if MPI_type_create_hindexed block is working:
          * mpi_code = MPI_Type_create_hindexed_block(blocks, block_len, chunk_disp_array, MPI_BYTE,
@@ -6066,6 +6064,7 @@ H5D__chunk_copy_cb(const H5D_chunk_rec_t *chunk_rec, void *_udata)
 
         if (udata->chunk_in_cache) {
             HDassert(H5F_addr_defined(chunk_rec->chunk_addr));
+            HDassert(ent);
             HDassert(H5F_addr_defined(ent->chunk_block.offset));
 
             H5_CHECKED_ASSIGN(nbytes, size_t, shared_fo->layout.u.chunk.size, uint32_t);
@@ -7499,6 +7498,36 @@ done:
 } /* end H5D__get_chunk_info_by_coord() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_iter_cb
+ *
+ * Purpose:     Call the user-defined function with the chunk data. The iterator continues if
+ *              the user-defined function returns H5_ITER_CONT, and stops if H5_ITER_STOP is
+ *              returned.
+ *
+ * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
+ *              Failure:    Negative (H5_ITER_ERROR)
+ *
+ * Programmer:  Gaute Hope
+ *              August 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
+{
+    int ret_value = 0;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    const H5D_chunk_iter_cb_data_t *data = (H5D_chunk_iter_cb_data_t *)udata;
+
+    ret_value = (data->cb)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
+                           chunk_rec->nbytes, data->op_data);
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__chunk_iter_cb */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__chunk_iter
  *
  * Purpose:     Iterate over all the chunks in the dataset with given callbak.
@@ -7537,7 +7566,7 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data)
     for (ent = rdcc->head; ent; ent = ent->next)
         /* Flush the chunk out to disk, to make certain the size is correct later */
         if (H5D__chunk_flush_entry(dset, ent, FALSE) < 0)
-            HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "cannot flush indexed storage buffer")
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "cannot flush indexed storage buffer")
 
     /* Compose chunked index info struct */
     idx_info.f       = dset->oloc.file;
@@ -7559,33 +7588,3 @@ H5D__chunk_iter(const H5D_t *dset, H5D_chunk_iter_op_t cb, void *op_data)
 done:
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5D__chunk_iter() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5D__chunk_iter_cb
- *
- * Purpose:     Call the user-defined function with the chunk data. The iterator continues if
- *              the user-defined function returns H5_ITER_CONT, and stops if H5_ITER_STOP is
- *              returned.
- *
- * Return:      Success:    H5_ITER_CONT or H5_ITER_STOP
- *              Failure:    Negative (H5_ITER_ERROR)
- *
- * Programmer:  Gaute Hope
- *              August 2020
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5D__chunk_iter_cb(const H5D_chunk_rec_t *chunk_rec, void *udata)
-{
-    int ret_value = 0;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    const H5D_chunk_iter_cb_data_t *data = (H5D_chunk_iter_cb_data_t *)udata;
-
-    ret_value = (data->cb)(chunk_rec->scaled, chunk_rec->filter_mask, chunk_rec->chunk_addr,
-                           chunk_rec->nbytes, data->op_data);
-
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__chunk_iter_cb */

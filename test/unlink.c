@@ -1493,7 +1493,7 @@ test_create_unlink(const char *msg, hid_t fapl)
     char     groupname[1024];
     char     filename[1024];
 
-    TESTING("%s", msg);
+    TESTING(msg);
 
     /* Create file */
     h5_fixname(FILENAME[3], fapl, filename, sizeof filename);
