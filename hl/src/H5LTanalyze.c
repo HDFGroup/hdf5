@@ -1947,7 +1947,7 @@ static int yy_get_next_buffer (void)
 					yyrestart( yyin );
 
 					/*FALLTHROUGH*/
-
+                                        __attribute__((fallthrough)); 
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( yywrap(  ) )
@@ -1961,6 +1961,7 @@ static int yy_get_next_buffer (void)
 					return input();
 #endif
 					}
+
 
 				case EOB_ACT_CONTINUE_SCAN:
 					(yy_c_buf_p) = (yytext_ptr) + offset;
