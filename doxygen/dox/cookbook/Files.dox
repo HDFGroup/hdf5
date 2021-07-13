@@ -25,10 +25,21 @@ You would like to include certain ancillary, non-HDF5 content in an
 HDF5 file such that it can be accessed without the HDF5 library
 
 \par Solution
-The to-the-point solution, i.e., the solution w/o any background or explanation
+Use a file creation property list in which the user block size is set via
+H5Pset_userblock(). In the example below, we create an 8 MiB user block.
+\snippet Files.c user_block
 
 \par Discussion
-A discussion of the fine points and variants of the solution
+The user block begins at offset 0 and must be at least 512 bytes and a power
+of 2. The HDF5 library ignores any content between the beginning of the
+file and the end of the user block.\n
+You can add or strip a user block to/from an existing HDF5 file with the
+\Code{h5jam}/\Code{h5unjam} tool, respectively.
+\warning
+If you try to embed content into the user block for use by other applications,
+pay close attention to how they handle space beyond the last used byte in the
+user block or the user block in general. In the worst case, applications might
+try to truncate the rest of the file and destroy the HDF5 portion of the file.
 
 \par See Also
 References to related recipes

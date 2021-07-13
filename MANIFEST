@@ -213,10 +213,6 @@
 
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
-./doxygen/cookbook/Accessibility.dox
-./doxygen/cookbook/Attributes.dox
-./doxygen/cookbook/Files.dox
-./doxygen/cookbook/Performance.dox
 ./doxygen/dox/About.dox
 ./doxygen/dox/Cookbook.dox
 ./doxygen/dox/DDLBNF110.dox
@@ -249,6 +245,11 @@
 ./doxygen/dox/api-compat-macros.dox
 ./doxygen/dox/maybe_metadata_reads.dox
 ./doxygen/dox/rm-template.dox
+./doxygen/dox/cookbook/Accessibility.dox
+./doxygen/dox/cookbook/Attributes.dox
+./doxygen/dox/cookbook/Files.dox
+./doxygen/dox/cookbook/Files.c
+./doxygen/dox/cookbook/Performance.dox
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
 ./doxygen/examples/FileFormatSpecChunkDiagram.jpg
