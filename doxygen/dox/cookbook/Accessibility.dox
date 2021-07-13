@@ -1,0 +1,20 @@
+/** \page Accessibility
+
+\section Accessibility
+
+\subsection CB_MaintainCompat Maintaining Compatibility with other HDF5 Library Versions
+
+\par Problem
+You want to ensure that the HDF5 files you produce are accessible by your and
+all relevant third-party tools
+
+\par Solution
+The to-the-point solution, i.e., the solution w/o any background or explanation
+
+\par Discussion
+A discussion of the fine points and variants of the solution
+
+\par See Also
+References to related recipes
+
+ */

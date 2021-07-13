@@ -1,0 +1,36 @@
+/** \page Files
+
+\section Files
+
+\subsection CB_FreeSpace Tracking Free Space in HDF5 Files
+
+\par Problem
+You sometimes delete objects in HDF5 files and don't have new content to use the
+free space, but would like to reuse it in the future
+
+\par Solution
+The to-the-point solution, i.e., the solution w/o any backgroundor explanation
+
+\par Discussion
+A discussion of the fine points and variants of the solution
+
+\par See Also
+References to related recipes
+
+
+\subsection CB_UserBlock Creating an HDF5 File User Block
+
+\par Problem
+You would like to include certain ancillary, non-HDF5 content in an
+HDF5 file such that it can be accessed without the HDF5 library
+
+\par Solution
+The to-the-point solution, i.e., the solution w/o any background or explanation
+
+\par Discussion
+A discussion of the fine points and variants of the solution
+
+\par See Also
+References to related recipes
+
+ */

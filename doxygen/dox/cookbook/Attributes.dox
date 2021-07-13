@@ -1,0 +1,20 @@
+/** \page Attributes
+
+\section Attributes
+
+\subsection CB_LargeAttributes Creating "Large" HDF5 Attributes
+
+\par Problem
+You would like to use HDF5 attributes to store descriptive metadata whose
+size exceeds a few dozen kilobytes
+
+\par Solution
+The to-the-point solution, i.e., the solution w/o any background or explanation
+
+\par Discussion
+A discussion of the fine points and variants of the solution
+
+\par See Also
+References to related recipes
+
+ */
