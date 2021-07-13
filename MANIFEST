@@ -213,6 +213,10 @@
 
 ./doxygen/aliases
 ./doxygen/Doxyfile.in
+./doxygen/cookbook/Accessibility.dox
+./doxygen/cookbook/Attributes.dox
+./doxygen/cookbook/Files.dox
+./doxygen/cookbook/Performance.dox
 ./doxygen/dox/About.dox
 ./doxygen/dox/Cookbook.dox
 ./doxygen/dox/DDLBNF110.dox
@@ -239,6 +243,7 @@
 ./doxygen/dox/OtherSpecs.dox
 ./doxygen/dox/Overview.dox
 ./doxygen/dox/ReferenceManual.dox
+./doxygen/dox/RFC.dox
 ./doxygen/dox/Specifications.dox
 ./doxygen/dox/TechnicalNotes.dox
 ./doxygen/dox/api-compat-macros.dox
