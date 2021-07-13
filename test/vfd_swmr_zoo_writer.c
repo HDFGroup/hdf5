@@ -506,7 +506,6 @@ main(int argc, char **argv)
         goto error;
     }
 
-
     if (writer)
         fid = H5Fcreate("vfd_swmr_zoo.h5", H5F_ACC_TRUNC, fcpl, fapl);
     else

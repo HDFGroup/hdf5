@@ -379,8 +379,8 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
  * --configure for VFD SWMR or not
  */
 hid_t
-vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages,
-                     size_t page_buf_size,H5F_vfd_swmr_config_t *config)
+vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages, size_t page_buf_size,
+                     H5F_vfd_swmr_config_t *config)
 {
     hid_t fapl = H5I_INVALID_HID;
 

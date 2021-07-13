@@ -1616,10 +1616,10 @@ error:
 static bool
 verify_dsets_chunks(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
 {
-    hsize_t       start[2]  = {0, 0};
-    hsize_t       stride[2] = {0, 0};
-    hsize_t       count[2]  = {0, 0};
-    hsize_t       block[2]  = {0, 0};
+    hsize_t start[2]  = {0, 0};
+    hsize_t stride[2] = {0, 0};
+    hsize_t count[2]  = {0, 0};
+    hsize_t block[2]  = {0, 0};
 
     HDassert(s->implicit_index || s->fa_index || s->ea_index || s->bt2_index);
 
