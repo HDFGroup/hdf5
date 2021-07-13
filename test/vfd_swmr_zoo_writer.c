@@ -477,8 +477,8 @@ main(int argc, char **argv)
     init_vfd_swmr_config(&vfd_swmr_config, TICK_LEN, 7, writer, FALSE, 128, "./zoo-shadow");
 
     /* ? turn off use latest format argument via 1st argument? since later on it reset to early format */
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    if ((fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, true, &vfd_swmr_config)) < 0) {
+    /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+    if ((fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, true, 4096, &vfd_swmr_config)) < 0) {
         H5_FAILED();
         AT();
         HDprintf("vfd_swmr_create_fapl");
@@ -499,19 +499,13 @@ main(int argc, char **argv)
         goto error;
     }
 
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0) {
         H5_FAILED();
         AT();
-        HDprintf("H5Pcreate failed");
+        HDprintf("vfd_swmr_create_fcpl() failed");
         goto error;
     }
 
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0) {
-        H5_FAILED();
-        AT();
-        HDprintf("H5Pset_file_space_strategy failed");
-        goto error;
-    }
 
     if (writer)
         fid = H5Fcreate("vfd_swmr_zoo.h5", H5F_ACC_TRUNC, fcpl, fapl);
