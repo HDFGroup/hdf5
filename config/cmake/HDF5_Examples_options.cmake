@@ -42,8 +42,11 @@
 ### enable JAVA builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_JAVA:BOOL=ON")
 
+#############################################################################################
 ### enable FILTERS builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_BUILD_FILTERS:BOOL=ON")
+### default HDF5_PLUGIN_PATH to where the filter libraries are located
+#set(ENV{HDF5_PLUGIN_PATH} "${INSTALLDIR}/lib/plugin")
 
 #############################################################################################
 ### enable parallel program builds
