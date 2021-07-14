@@ -71,9 +71,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /*****************************/
 
 /* Library incompatible release versions */
-const unsigned VERS_RELEASE_EXCEPTIONS[] = {
-    VERS_RELEASE_EXCEPTIONS_SIZE
-};
+const unsigned VERS_RELEASE_EXCEPTIONS[] = {VERS_RELEASE_EXCEPTIONS_SIZE};
 
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
@@ -966,9 +964,10 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 /* 2 or higher: continue silently */
                 break;
         } /* end switch */
-    } /* end if */
+
+    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) */
     if (H5_VERS_RELEASE != relnum) {
-        for (int i = 0; i < VERS_RELEASE_EXCEPTIONS_SIZE; i++)) {
+        for (int i = 0; i < VERS_RELEASE_EXCEPTIONS_SIZE; i++) {
             /* Check for incompatible headers or incompatible library */
             if (VERS_RELEASE_EXCEPTIONS[i] == relnum || VERS_RELEASE_EXCEPTIONS[i] == H5_VERS_RELEASE) {
                 switch (disable_version_check) {
@@ -1000,9 +999,12 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                         /* 2 or higher: continue silently */
                         break;
                 } /* end switch */
+
             } /* end if */
+
         } /* end for */
-    } /* end if */
+
+    } /* end if (H5_VERS_RELEASE != relnum) */
 
     /* Indicate that the version check has been performed */
     checked = 1;
