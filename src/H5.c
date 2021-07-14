@@ -975,11 +975,11 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             if (VERS_RELEASE_EXCEPTIONS[i] == relnum || VERS_RELEASE_EXCEPTIONS[i] == H5_VERS_RELEASE) {
                 switch (disable_version_check) {
                     case 0:
-                        HDfprintf(stderr,
-                                "%s%s", version_mismatch_warning,
-                                  "You can, at your own risk, disable this warning by setting the environment\n"
-                                  "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
-                                  "Setting it to 2 or higher will suppress the warning messages totally.\n");
+                        HDfprintf(
+                            stderr,  "%s%s", version_mismatch_warning,
+                            "You can, at your own risk, disable this warning by setting the environment\n"
+                            "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+                            "Setting it to 2 or higher will suppress the warning messages totally.\n");
                         /* Mention the versions we are referring to */
                         HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
                                   relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
