@@ -71,7 +71,7 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /*****************************/
 
 /* Library incompatible release versions */
-const unsigned VERS_RELEASE_EXCEPTIONS[] = {0};
+const unsigned VERS_RELEASE_EXCEPTIONS[]    = {0};
 const unsigned VERS_RELEASE_EXCEPTIONS_SIZE = 0;
 
 /* statically initialize block for pthread_once call used in initializing */
@@ -930,7 +930,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             disable_version_check = (unsigned int)HDstrtol(s, NULL, 0);
     }
 
-    /* H5_VERS_RELEASE should be compatible, we will only add checks for exceptions */
+    /* H5_VERS_MAJOR and H5_VERS_MINOR must match */
     if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) {
         switch (disable_version_check) {
             case 0:
@@ -967,20 +967,23 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
         } /* end switch */
 
     } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) */
+
+    /* H5_VERS_RELEASE should be compatible, we will only add checks for exceptions */
     if (H5_VERS_RELEASE != relnum) {
         for (unsigned i = 0; i < VERS_RELEASE_EXCEPTIONS_SIZE; i++) {
             /* Check for incompatible headers or incompatible library */
             if (VERS_RELEASE_EXCEPTIONS[i] == relnum || VERS_RELEASE_EXCEPTIONS[i] == H5_VERS_RELEASE) {
                 switch (disable_version_check) {
                     case 0:
-                        HDfprintf(stderr, "%s%s", version_mismatch_warning,
-                                "You can, at your own risk, disable this warning by setting the environment\n"
-                                "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
-                                "Setting it to 2 or higher will suppress the warning messages totally.\n");
+                        HDfprintf(stderr,
+                                "%s%s", version_mismatch_warning,
+                                  "You can, at your own risk, disable this warning by setting the environment\n"
+                                  "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+                                  "Setting it to 2 or higher will suppress the warning messages totally.\n");
                         /* Mention the versions we are referring to */
                         HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
-                                relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
-                                (unsigned)H5_VERS_RELEASE);
+                                  relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
+                                  (unsigned)H5_VERS_RELEASE);
 
                         /* Bail out now. */
                         HDfputs("Bye...\n", stderr);
@@ -995,8 +998,8 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                                   version_mismatch_warning, disable_version_check);
                         /* Mention the versions we are referring to */
                         HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum,
-                                relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
-                                (unsigned)H5_VERS_RELEASE);
+                                  relnum, (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR,
+                                  (unsigned)H5_VERS_RELEASE);
                         break;
                     default:
                         /* 2 or higher: continue silently */
