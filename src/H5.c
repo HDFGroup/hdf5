@@ -976,7 +976,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 switch (disable_version_check) {
                     case 0:
                         HDfprintf(
-                            stderr,  "%s%s", version_mismatch_warning,
+                            stderr, "%s%s", version_mismatch_warning,
                             "You can, at your own risk, disable this warning by setting the environment\n"
                             "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
                             "Setting it to 2 or higher will suppress the warning messages totally.\n");
