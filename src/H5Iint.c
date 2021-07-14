@@ -636,7 +636,7 @@ H5I_subst(hid_t id, const void *new_object)
 
     /* Get the old object pointer to return */
     H5_GCC_DIAG_OFF("cast-qual")
-    ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+    ret_value = (void *)info->object;
     H5_GCC_DIAG_ON("cast-qual")
 
     /* Set the new object pointer for the ID */
@@ -670,7 +670,7 @@ H5I_object(hid_t id)
     if (NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
         H5_GCC_DIAG_OFF("cast-qual")
-        ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+        ret_value = (void *)info->object;
         H5_GCC_DIAG_ON("cast-qual")
     }
 
@@ -706,7 +706,7 @@ H5I_object_verify(hid_t id, H5I_type_t type)
     if (type == H5I_TYPE(id) && NULL != (info = H5I__find_id(id))) {
         /* Get the object pointer to return */
         H5_GCC_DIAG_OFF("cast-qual")
-        ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+        ret_value = (void *)info->object;
         H5_GCC_DIAG_ON("cast-qual")
     }
 
@@ -815,7 +815,7 @@ H5I__remove_verify(hid_t id, H5I_type_t type)
 {
     void *ret_value = NULL; /*return value            */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_PACKAGE_NOERR
 
     /* Argument checking will be performed by H5I_remove() */
 
@@ -869,7 +869,7 @@ H5I__remove_common(H5I_type_info_t *type_info, hid_t id)
         type_info->last_id_info = NULL;
 
     H5_GCC_DIAG_OFF("cast-qual")
-    ret_value = (void *)info->object; /* (Casting away const OK -QAK) */
+    ret_value = (void *)info->object;
     H5_GCC_DIAG_ON("cast-qual")
 
     if (!H5I_marking_g)
@@ -1163,7 +1163,7 @@ H5I__inc_type_ref(H5I_type_t type)
     H5I_type_info_t *type_info = NULL; /* Pointer to the type */
     int              ret_value = -1;   /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(type > 0 && (int)type < H5I_next_type_g);
@@ -1249,7 +1249,7 @@ H5I__get_type_ref(H5I_type_t type)
     H5I_type_info_t *type_info = NULL; /* Pointer to the type  */
     int              ret_value = -1;   /* Return value         */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(type >= 0);
