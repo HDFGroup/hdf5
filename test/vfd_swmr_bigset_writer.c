@@ -2111,15 +2111,9 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
-        fprintf(stderr, "H5Pcreate failed\n");
-        TEST_ERROR;
-    }
-
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0) {
-        fprintf(stderr, "H5Pset_file_space_strategy failed\n");
-        TEST_ERROR;
-    }
+    /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0)
+        errx(EXIT_FAILURE, "H5Pcreate");
 
     for (i = 0; i < NELMTS(s.file); i++) {
         hid_t                 fapl;
@@ -2133,11 +2127,11 @@ main(int argc, char **argv)
         /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
         init_vfd_swmr_config(&config, TICK_LEN, MAX_LAG, s.writer, FALSE, 128, "./bigset-shadow-%zu", i);
 
-        /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-        if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, &config)) < 0) {
-            fprintf(stderr, "vfd_swmr_create_fapl failed\n");
-            TEST_ERROR;
-        }
+        /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+        fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config);
+
+        if (fapl < 0)
+            errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 
         s.file[i] = s.writer ? H5Fcreate(s.filename[i], H5F_ACC_TRUNC, fcpl, fapl)
                              : H5Fopen(s.filename[i], H5F_ACC_RDONLY, fapl);

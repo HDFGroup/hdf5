@@ -1014,7 +1014,8 @@ test_array_fill(size_t lo, size_t hi)
     size_t u, v, w;              /* Local index variables        */
     char   s[256];
 
-    TESTING("array filling %4zu-%-4zu elements", lo, hi);
+    HDsprintf(s, "array filling %4lu-%-4lu elements", (unsigned long)lo, (unsigned long)hi);
+    TESTING(s);
 
     /* Initialize */
     if (NULL == (dst = (int *)HDcalloc(sizeof(int), ARRAY_FILL_SIZE * hi)))
@@ -1077,7 +1078,9 @@ test_array_offset_n_calc(size_t n, size_t x, size_t y, size_t z)
     hsize_t  new_coords[ARRAY_OFFSET_NDIMS]; /* X, Y & X coordinates of offset */
     char     s[256];
 
-    TESTING("array offset %4zux%4zux%4zu elements", z, y, x);
+    HDsprintf(s, "array offset %4lux%4lux%4lu elements", (unsigned long)z, (unsigned long)y,
+              (unsigned long)x);
+    TESTING(s);
 
     /* Initialize */
     if (NULL == (a = (hsize_t *)HDmalloc(sizeof(hsize_t) * x * y * z)))

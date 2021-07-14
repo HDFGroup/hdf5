@@ -783,9 +783,12 @@ test_compound_2(void)
         FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
-    buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt));
-    orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st));
+    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+        goto error;
+    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+        goto error;
+    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+        goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
         s_ptr->a    = i * 8 + 0;
@@ -857,6 +860,10 @@ test_compound_2(void)
     return 0;
 
 error:
+    HDfree(buf);
+    HDfree(bkg);
+    HDfree(orig);
+
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
 
@@ -903,9 +910,12 @@ test_compound_3(void)
         FAIL_STACK_ERROR
 
     /* Initialize */
-    buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt));
-    orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st));
+    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+        goto error;
+    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+        goto error;
+    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+        goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
         s_ptr->a    = i * 8 + 0;
@@ -973,6 +983,10 @@ test_compound_3(void)
     return 0;
 
 error:
+    HDfree(buf);
+    HDfree(bkg);
+    HDfree(orig);
+
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
 
@@ -1023,9 +1037,12 @@ test_compound_4(void)
         FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
-    buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt));
-    orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st));
+    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+        goto error;
+    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+        goto error;
+    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+        goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
         s_ptr->a    = i * 8 + 0;
@@ -1096,6 +1113,10 @@ test_compound_4(void)
     return 0;
 
 error:
+    HDfree(buf);
+    HDfree(bkg);
+    HDfree(orig);
+
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
 
@@ -1145,6 +1166,12 @@ test_compound_5(void)
     int         retval = 1;
 
     TESTING("optimized struct converter");
+
+    if (!buf || !bkg) {
+        HDfree(buf);
+        HDfree(bkg);
+        return 1;
+    }
 
     /* Build datatypes */
     short_array = H5Tcreate(H5T_COMPOUND, 4 * sizeof(short));
@@ -1238,9 +1265,12 @@ test_compound_6(void)
         FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
-    buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt));
-    orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st));
+    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+        goto error;
+    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+        goto error;
+    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+        goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr    = ((struct st *)((void *)orig)) + i;
         s_ptr->b = (int16_t)((i * 8 + 1) & 0x7fff);
@@ -2290,6 +2320,8 @@ test_compound_11(void)
         ((big_t *)buf)[u].i1 = (int)(u * 3);
         ((big_t *)buf)[u].i2 = (int)(u * 5);
         ((big_t *)buf)[u].s1 = (char *)HDmalloc((size_t)32);
+        if (!((big_t *)buf)[u].s1)
+            TEST_ERROR
         HDsprintf(((big_t *)buf)[u].s1, "%u", (unsigned)u);
     } /* end for */
 

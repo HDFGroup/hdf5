@@ -100,7 +100,11 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  * spaces.  If the h5_errors() is used for automatic error handling then
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
-#define TESTING(...) h5_testing(__VA_ARGS__);
+#define TESTING(WHAT)                                                                                        \
+    {                                                                                                        \
+        HDprintf("Testing %-62s", WHAT);                                                                     \
+        HDfflush(stdout);                                                                                    \
+    }
 #define TESTING_2(WHAT)                                                                                      \
     {                                                                                                        \
         HDprintf("  Testing %-60s", WHAT);                                                                   \
@@ -155,13 +159,6 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
         H5_FAILED();                                                                                         \
         AT();                                                                                                \
         HDputs(s);                                                                                           \
-        goto error;                                                                                          \
-    }
-#define FAIL_PRINTF_ERROR(fmt, ...)                                                                          \
-    {                                                                                                        \
-        H5_FAILED();                                                                                         \
-        AT();                                                                                                \
-        HDprintf(fmt, __VA_ARGS__);                                                                          \
         goto error;                                                                                          \
     }
 
@@ -235,7 +232,6 @@ extern "C" {
 #endif
 
 /* Generally useful testing routines */
-H5TEST_DLL void        h5_testing(const char *, ...) H5_ATTR_FORMAT(printf, 1, 2);
 H5TEST_DLL void        h5_clean_files(const char *base_name[], hid_t fapl);
 H5TEST_DLL int         h5_cleanup(const char *base_name[], hid_t fapl);
 H5TEST_DLL char *      h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);
