@@ -1195,7 +1195,7 @@ h5_set_info_object(void)
                 valp++;
 
             /* copy key/value pair into temporary buffer */
-            len  = strcspn(valp, ";");
+            len  = HDstrcspn(valp, ";");
             next = &valp[len];
             if (NULL == (key_val = (char *)HDcalloc(1, len + 1)))
                 return -1;
