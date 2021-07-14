@@ -70,6 +70,11 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Library Private Variables */
 /*****************************/
 
+/* Library incompatible release versions */
+const unsigned VERS_RELEASE_EXCEPTIONS[] = {
+    VERS_RELEASE_EXCEPTIONS_SIZE
+};
+
 /* statically initialize block for pthread_once call used in initializing */
 /* the first global mutex                                                 */
 #ifdef H5_HAVE_THREADSAFE
@@ -870,6 +875,9 @@ done:
  *        called from user to verify that the versions of header files
  *        compiled into the application match the version of the hdf5
  *        library.
+ *        Within major.minor.release version, the expectation
+ *        is that all release versions are compatible, exceptions to
+ *        this rule must be added to the VERS_RELEASE_EXCEPTIONS list.
  *
  * Return:    Success:    SUCCEED
  *
@@ -884,6 +892,15 @@ done:
     "Data corruption or segmentation faults may occur if the application continues.\n"                       \
     "This can happen when an application was compiled by one version of HDF5 but\n"                          \
     "linked with a different version of static or shared HDF5 library.\n"                                    \
+    "You should recompile the application or check your shared library related\n"                            \
+    "settings such as 'LD_LIBRARY_PATH'.\n"
+#define RELEASE_MISMATCH_WARNING                                                                             \
+    "Warning! ***HDF5 library release mismatched error***\n"                                                 \
+    "The HDF5 header files used to compile this application are not compatible with\n"                       \
+    "the version used by the HDF5 library to which this application is linked.\n"                            \
+    "Data corruption or segmentation faults may occur if the application continues.\n"                       \
+    "This can happen when an application was compiled by one version of HDF5 but\n"                          \
+    "linked with an incompatible version of static or shared HDF5 library.\n"                                \
     "You should recompile the application or check your shared library related\n"                            \
     "settings such as 'LD_LIBRARY_PATH'.\n"
 
@@ -914,7 +931,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             disable_version_check = (unsigned int)HDstrtol(s, NULL, 0);
     }
 
-    /* develop releases are by definition compatible */
+    /* H5_VERS_RELEASE should be compatible, we will only add checks for exceptions */
     if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) {
         switch (disable_version_check) {
             case 0:
@@ -949,7 +966,42 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 /* 2 or higher: continue silently */
                 break;
         } /* end switch */
+    } /* end if */
+    if (H5_VERS_RELEASE != relnum) {
+        for (int i = 0; i < VERS_RELEASE_EXCEPTIONS_SIZE; i++)) {
+            /* Check for incompatible headers or incompatible library */
+            if (VERS_RELEASE_EXCEPTIONS[i] == relnum || VERS_RELEASE_EXCEPTIONS[i] == H5_VERS_RELEASE) {
+                switch (disable_version_check) {
+                    case 0:
+                        HDfprintf(stderr, "%s%s", version_mismatch_warning,
+                                "You can, at your own risk, disable this warning by setting the environment\n"
+                                "variable 'HDF5_DISABLE_VERSION_CHECK' to a value of '1'.\n"
+                                "Setting it to 2 or higher will suppress the warning messages totally.\n");
+                        /* Mention the versions we are referring to */
+                        HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
+                                (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
 
+                        /* Bail out now. */
+                        HDfputs("Bye...\n", stderr);
+                        HDabort();
+                    case 1:
+                        /* continue with a warning */
+                        /* Note that the warning message is embedded in the format string.*/
+                        HDfprintf(stderr,
+                                "%s'HDF5_DISABLE_VERSION_CHECK' "
+                                "environment variable is set to %d, application will\n"
+                                "continue at your own risk.\n",
+                                version_mismatch_warning, disable_version_check);
+                        /* Mention the versions we are referring to */
+                        HDfprintf(stderr, "Headers are %u.%u.%u, library is %u.%u.%u\n", majnum, minnum, relnum,
+                                (unsigned)H5_VERS_MAJOR, (unsigned)H5_VERS_MINOR, (unsigned)H5_VERS_RELEASE);
+                        break;
+                    default:
+                        /* 2 or higher: continue silently */
+                        break;
+                } /* end switch */
+            } /* end if */
+        } /* end for */
     } /* end if */
 
     /* Indicate that the version check has been performed */

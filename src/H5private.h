@@ -2164,7 +2164,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, or push themselves on the function
  *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
- *	API name itself.  Examples are: H5TSmutex_acquire,
+ *    API name itself.  Examples are: H5TSmutex_acquire,
  *
  */
 #define FUNC_ENTER_API_NAMECHECK_ONLY                                                                        \
@@ -2260,7 +2260,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  * Use this macro for non-API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, or push themselves on the function
  *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
- *	API name itself.  Examples are private routines in the H5TS package.
+ *    API name itself.  Examples are private routines in the H5TS package.
  *
  */
 #define FUNC_ENTER_NOAPI_NAMECHECK_ONLY                                                                      \
@@ -2338,7 +2338,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  * Use this macro for non-API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, or push themselves on the function
  *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
- *	API name itself.  Examples are static routines in the H5TS package.
+ *    API name itself.  Examples are static routines in the H5TS package.
  *
  */
 #define FUNC_ENTER_STATIC_NAMECHECK_ONLY                                                                     \
