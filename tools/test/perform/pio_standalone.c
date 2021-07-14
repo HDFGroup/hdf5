@@ -26,11 +26,6 @@ MPI_Info h5_io_info_g = MPI_INFO_NULL; /* MPI INFO object for IO */
 /* global variables */
 int nCols = 80;
 
-/* ``get_option'' variables */
-int         H5_opterr = 1; /*get_option prints errors if this is on */
-int         H5_optind = 1; /*token pointer                          */
-const char *H5_optarg;     /*flag argument (or value)               */
-
 int
 get_option(int argc, const char **argv, const char *opts, const struct h5_long_options *l_opts)
 {
