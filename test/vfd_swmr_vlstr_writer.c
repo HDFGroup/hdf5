@@ -187,18 +187,15 @@ main(int argc, char **argv)
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
     init_vfd_swmr_config(&config, 4, 7, true, FALSE, 128, "./vlstr-shadow");
 
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, &config);
+    /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, 4096, &config);
 
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        errx(EXIT_FAILURE, "H5Pcreate");
-
-    ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1);
-    if (ret < 0)
-        errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
+    /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0)
+        errx(EXIT_FAILURE, "vfd_swmr_create_fcpl");
 
     fid = H5Fcreate("vfd_swmr_vlstr.h5", H5F_ACC_TRUNC, fcpl, fapl);
 
