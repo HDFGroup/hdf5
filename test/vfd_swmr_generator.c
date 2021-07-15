@@ -112,10 +112,6 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write, int 
     if (!HDstrcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
-    /* Create file creation property list */
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        return -1;
-
     /* Emit informational message */
     if (verbose)
         HDfprintf(stderr, "Creating file\n");
@@ -133,12 +129,12 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write, int 
         init_vfd_swmr_config(config, 4, 10, vfd_swmr_write, FALSE, 128, "generator-shadow");
     }
 
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    if ((fapl = vfd_swmr_create_fapl(TRUE, vfd_swmr_write, FALSE, config)) < 0)
+    /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+    if ((fapl = vfd_swmr_create_fapl(TRUE, vfd_swmr_write, FALSE, 4096, config)) < 0)
         return -1;
 
-    /* Set file space strategy to paged aggregation in fcpl */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
+    /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0)
         return -1;
 
     /* Create the file with VFD SWMR write configured */

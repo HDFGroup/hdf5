@@ -23,7 +23,9 @@
 #define FILE_NAME "direct_chunk.h5"
 
 /* Datasets for Direct Write tests */
+#ifdef H5_HAVE_FILTER_DEFLATE
 #define DATASETNAME1 "direct_write"
+#endif
 #define DATASETNAME2 "skip_one_filter"
 #define DATASETNAME3 "skip_two_filters"
 #define DATASETNAME4 "data_conv"
@@ -31,9 +33,11 @@
 #define DATASETNAME6 "invalid_argue"
 #define DATASETNAME7 "overwrite_chunk"
 /* Datasets for Direct Read tests */
+#ifdef H5_HAVE_FILTER_DEFLATE
 #define DATASETNAME8  "disabled_chunk_cache"
 #define DATASETNAME9  "flush_chunk_cache"
 #define DATASETNAME10 "read_w_valid_cache"
+#endif
 #define DATASETNAME11 "unallocated_chunk"
 #define DATASETNAME12 "unfiltered_data"
 
@@ -43,7 +47,9 @@
 #define CHUNK_NX 4
 #define CHUNK_NY 4
 
+#ifdef H5_HAVE_FILTER_DEFLATE
 #define DEFLATE_SIZE_ADJUST(s) (HDceil(((double)(s)) * 1.001) + 12.0)
+#endif
 
 /* Temporary filter IDs used for testing */
 #define H5Z_FILTER_BOGUS1 305
@@ -1990,23 +1996,23 @@ test_read_unallocated_chunk(hid_t file)
 
     /* Create the data space with unlimited dimensions. */
     if ((dataspace = H5Screate_simple(RANK, dims, maxdims)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if ((mem_space = H5Screate_simple(RANK, chunk_dims, NULL)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /* Modify dataset creation properties, i.e. enable chunking, no compression */
     if ((cparms = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if ((status = H5Pset_chunk(cparms, RANK, chunk_dims)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /* Create a new dataset within the file using cparms creation properties. */
     if ((dataset = H5Dcreate2(file, DATASETNAME11, H5T_NATIVE_INT, dataspace, H5P_DEFAULT, cparms,
                               H5P_DEFAULT)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     if ((dxpl = H5Pcreate(H5P_DATASET_XFER)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /* Write a single chunk to intialize the chunk storage */
     HDmemset(direct_buf, 0, CHUNK_NX * CHUNK_NY * sizeof(int));
@@ -2014,7 +2020,7 @@ test_read_unallocated_chunk(hid_t file)
     offset[1] = 0;
 
     if (H5Dwrite_chunk(dataset, dxpl, filter_mask, offset, chunk_nbytes, direct_buf) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /* Attempt to read each chunk in the dataset. Chunks are not allocated,
      * therefore we expect the result of H5Dread_chunk to fail. Chunk idx starts
@@ -2034,7 +2040,7 @@ test_read_unallocated_chunk(hid_t file)
 
             /* Check that the chunk read call does not succeed. */
             if (status != -1)
-                goto error;
+                TEST_ERROR
 
             /* Query the size of the non-existant chunk */
             direct_chunk_nbytes = ULONG_MAX;
@@ -2046,18 +2052,23 @@ test_read_unallocated_chunk(hid_t file)
 
             /* Check that the chunk storage size call does not succeed. */
             if (status != -1)
-                goto error;
-            if (direct_chunk_nbytes != 0)
-                goto error;
+                TEST_ERROR
+            if (direct_chunk_nbytes != ULONG_MAX)
+                TEST_ERROR
         }
     }
 
     /* Close/release resources. */
-    H5Dclose(dataset);
-    H5Sclose(mem_space);
-    H5Sclose(dataspace);
-    H5Pclose(cparms);
-    H5Pclose(dxpl);
+    if (H5Dclose(dataset) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(mem_space) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Sclose(dataspace) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(cparms) < 0)
+        FAIL_STACK_ERROR;
+    if (H5Pclose(dxpl) < 0)
+        FAIL_STACK_ERROR;
 
     PASSED();
     return 0;
@@ -2121,103 +2132,100 @@ test_single_chunk(unsigned config)
     TESTING("Single chunk I/O");
 
     /* Initialize data */
-    for (i = 0; i < DIM0; i++) {
+    for (i = 0; i < DIM0; i++)
         for (j = 0; j < DIM1; j++)
             wdata[i][j] = j / CHUNK0;
-    }
 
     /* Create a new file with the latest format  */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if (config & CONFIG_LATEST)
         if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
-            goto error;
+            FAIL_STACK_ERROR;
     if ((fid = H5Fcreate(FILE, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /* Create dataspace */
     if ((sid = H5Screate_simple(2, dims, NULL)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /* Create the dataset creation property list and set the chunk size */
     if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /* Create the dataset */
     if ((did = H5Dcreate2(fid, DATASET, H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     if (config & CONFIG_DIRECT_WRITE) {
         /* Write the data directly to the dataset */
         if (H5Dwrite_chunk(did, H5P_DEFAULT, 0, offset, CHUNK0 * CHUNK1 * 4, (void *)wdata) < 0)
-            goto error;
+            FAIL_STACK_ERROR;
     } /* end if */
     else
         /* Write the data to the dataset */
         if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, (void *)wdata) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /*
      * Close and release resources.
      */
     if (H5Pclose(dcpl) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if (config & CONFIG_REOPEN_DSET)
         if (H5Dclose(did) < 0)
-            goto error;
+            FAIL_STACK_ERROR;
     if (H5Sclose(sid) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if (H5Pclose(fapl) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if (config & CONFIG_REOPEN_FILE)
         if (H5Fclose(fid) < 0)
-            goto error;
+            FAIL_STACK_ERROR;
 
     /* Open the file and dataset with default properties  */
     if (config & CONFIG_REOPEN_FILE)
         if ((fid = H5Fopen(FILE, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-            goto error;
+            FAIL_STACK_ERROR;
     if (config & CONFIG_REOPEN_DSET)
         if ((did = H5Dopen2(fid, DATASET, H5P_DEFAULT)) < 0)
-            goto error;
+            FAIL_STACK_ERROR;
 
     /* Retrieve dataset creation property list */
     if ((dcpl = H5Dget_create_plist(did)) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     if (config & CONFIG_DIRECT_READ) {
         /* Read the data directly */
         if (H5Dread_chunk(did, H5P_DEFAULT, offset, &filters, rdata) < 0)
-            goto error;
+            FAIL_STACK_ERROR;
 
         /* Verify returned filter mask */
         if (filters != 0)
-            goto error;
+            TEST_ERROR
     } /* end if */
     else
         /* Read the data */
         if (H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     /* Verify that the data read was correct.  */
-    for (i = 0; i < DIM0; i++) {
-        for (j = 0; j < DIM1; j++) {
+    for (i = 0; i < DIM0; i++)
+        for (j = 0; j < DIM1; j++)
             if (rdata[i][j] != wdata[i][j])
-                goto error;
-        }
-    }
+                TEST_ERROR
 
     /*
      * Close and release resources
      */
     if (H5Pclose(dcpl) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if (H5Dclose(did) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
     if (H5Fclose(fid) < 0)
-        goto error;
+        FAIL_STACK_ERROR;
 
     PASSED();
     return 0;

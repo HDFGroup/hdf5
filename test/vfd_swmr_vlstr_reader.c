@@ -118,8 +118,8 @@ main(int argc, char **argv)
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
     init_vfd_swmr_config(&config, 4, 7, false, FALSE, 128, "./vlstr-shadow");
 
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, &config);
+    /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, 4096, &config);
 
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");

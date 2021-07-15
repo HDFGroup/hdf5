@@ -1,11 +1,5 @@
 # .gitignore file for HDF5
 
-# ctags
-**/tags
-
-# vim swap files
-**/.*.swp
-
 # Makefile.in files
 **/Makefile.in
 

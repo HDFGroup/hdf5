@@ -4991,19 +4991,15 @@ main(int argc, char **argv)
      * as the second parameter of H5Pset_libver_bound() that is called by
      * vfd_swmr_create_fapl. Otherwise, the latest file format(H5F_LIBVER_LATEST)
      * should be used as the second parameter of H5Pset_libver_bound().
-     * Also pass the use_vfd_swmr, only_meta_page, config to vfd_swmr_create_fapl().*/
-    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, &config)) < 0) {
+     * Also pass the use_vfd_swmr, only_meta_page, page_buf_size, config to vfd_swmr_create_fapl().*/
+    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, 4096, &config)) < 0) {
         HDprintf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
 
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
-        HDprintf("H5Pcreate failed\n");
-        TEST_ERROR;
-    }
-
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0) {
-        HDprintf("H5Pset_file_space_strategy failed\n");
+    /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0) {
+        HDprintf("vfd_swmr_create_fcpl() failed");
         TEST_ERROR;
     }
 
