@@ -737,6 +737,17 @@ state_destroy(state_t *s)
         TEST_ERROR;
     }
 
+    /* The writer ends the tick before closing the file to make the data visible to the reader */
+    if (s->writer && s->use_vfd_swmr) {
+        unsigned long j;
+
+        if (s->vds != vds_multi)
+            H5Fvfd_swmr_end_tick(s->file[0]);
+        else
+            for (j = 0; j < NELMTS(s->file); j++)
+                H5Fvfd_swmr_end_tick(s->file[j]);
+    }
+
     /* For checking the time spent in file close.  It's for running the writer alone */
     if (s->do_perf) {
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
@@ -2047,17 +2058,6 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
                     TEST_ERROR;
                 }
             }
-        }
-
-        /* After finishing writing all the chunks, end the tick */
-        if (s.use_vfd_swmr && step == (s.nsteps - 1)) {
-            unsigned long i;
-
-            if (s.vds != vds_multi)
-                H5Fvfd_swmr_end_tick(s.file[0]);
-            else
-                for (i = 0; i < NELMTS(s.file); i++)
-                    H5Fvfd_swmr_end_tick(s.file[i]);
         }
 
         /* Notify the reader to start verification by
