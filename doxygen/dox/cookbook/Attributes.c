@@ -13,7 +13,7 @@ main(void)
 
     //! <!-- [large_attribute] -->
     {
-      __label__ fail_attr, fail_aspace, fail_fapl, fail_file;
+        __label__ fail_attr, fail_aspace, fail_fapl, fail_file;
         hid_t fapl, file, aspace, attr;
 
         if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0) {
@@ -24,20 +24,18 @@ main(void)
             ret_val = EXIT_FAILURE;
             goto fail_file;
         }
-        if ((file = H5Fcreate("large_attribute.h5", H5F_ACC_TRUNC, H5P_DEFAULT,
-                              fapl)) < 0) {
+        if ((file = H5Fcreate("large_attribute.h5", H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_file;
         }
 
-        if ((aspace = H5Screate_simple(1, (hsize_t[]) {1024*1024}, NULL)) < 0) {
-          ret_val = EXIT_FAILURE;
-          goto fail_aspace;
+        if ((aspace = H5Screate_simple(1, (hsize_t[]){1024 * 1024}, NULL)) < 0) {
+            ret_val = EXIT_FAILURE;
+            goto fail_aspace;
         }
-        if ((attr = H5Acreate(file, "4MiB", H5T_IEEE_F32LE, aspace, H5P_DEFAULT,
-                              H5P_DEFAULT)) < 0) {
-          ret_val = EXIT_FAILURE;
-          goto fail_attr;
+        if ((attr = H5Acreate(file, "4MiB", H5T_IEEE_F32LE, aspace, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+            ret_val = EXIT_FAILURE;
+            goto fail_attr;
         }
 
         H5Aclose(attr);
