@@ -374,11 +374,12 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
  */
 /* Set up the file-access property list:
  * --configure for latest format or not
+ * --configure the page buffer size to page_buf_size
  * --configure page buffering with only_meta_pages or not
  * --configure for VFD SWMR or not
  */
 hid_t
-vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages,
+vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_pages, size_t page_buf_size,
                      H5F_vfd_swmr_config_t *config)
 {
     hid_t fapl = H5I_INVALID_HID;
@@ -397,7 +398,7 @@ vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_p
     }
 
     /* Enable page buffering */
-    if (H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0)
+    if (H5Pset_page_buffer_size(fapl, page_buf_size, only_meta_pages ? 100 : 0, 0) < 0)
         return H5I_INVALID_HID;
 
     /*
@@ -410,6 +411,28 @@ vfd_swmr_create_fapl(bool use_latest_format, bool use_vfd_swmr, bool only_meta_p
     return fapl;
 
 } /* vfd_swmr_create_fapl() */
+
+/* Create the file creation property list:
+ * --Set the file space strategy to fs_strategy
+ * --Set the file space page size to fs_page_size
+ */
+hid_t
+vfd_swmr_create_fcpl(H5F_fspace_strategy_t fs_strategy, hsize_t fs_page_size)
+{
+    hid_t fcpl = H5I_INVALID_HID;
+
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+        return H5I_INVALID_HID;
+
+    if (H5Pset_file_space_strategy(fcpl, fs_strategy, false, 1) < 0)
+        return H5I_INVALID_HID;
+
+    if (H5Pset_file_space_page_size(fcpl, fs_page_size) < 0)
+        return H5I_INVALID_HID;
+
+    return fcpl;
+
+} /* vfd_swmr_create_fcpl() */
 
 /* Fetch a variable from the environment and parse it for unsigned long
  * content.  Return 0 if the variable is not present, -1 if it is present

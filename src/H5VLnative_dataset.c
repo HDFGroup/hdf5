@@ -49,6 +49,10 @@
 /* Local Prototypes */
 /********************/
 
+/* Helper routines for read/write API calls */
+static herr_t H5VL__native_dataset_io_setup(H5D_t *dset, hid_t dxpl_id, hid_t file_space_id,
+                                            hid_t mem_space_id, H5S_t **file_space, H5S_t **mem_space);
+
 /*********************/
 /* Package Variables */
 /*********************/
@@ -60,6 +64,100 @@
 /*******************/
 /* Local Variables */
 /*******************/
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__native_dataset_io_setup
+ *
+ * Purpose:     Set up file and memory dataspaces for dataset I/O operation
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__native_dataset_io_setup(H5D_t *dset, hid_t dxpl_id, hid_t file_space_id, hid_t mem_space_id,
+                              H5S_t **file_space, H5S_t **mem_space)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(dset);
+    HDassert(file_space && NULL == *file_space);
+    HDassert(mem_space && NULL == *mem_space);
+
+    /* Set up file dataspace */
+    if (H5S_ALL == file_space_id)
+        /* Use dataspace for dataset */
+        *file_space = dset->shared->space;
+    else if (H5S_BLOCK == file_space_id)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "H5S_BLOCK is not allowed for file dataspace")
+    else if (H5S_PLIST == file_space_id) {
+        H5P_genplist_t *plist; /* Property list pointer */
+        H5S_t *         space; /* Dataspace to hold selection */
+
+        /* Get the plist structure */
+        if (NULL == (plist = H5P_object_verify(dxpl_id, H5P_DATASET_XFER)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADID, FAIL, "bad dataset transfer property list")
+
+        /* See if a dataset I/O selection is already set, and free it if it is */
+        if (H5P_peek(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "error getting dataset I/O selection")
+
+        /* Use dataspace for dataset */
+        *file_space = dset->shared->space;
+
+        /* Copy, but share, selection from property list to dataset's dataspace */
+        if (H5S_SELECT_COPY(*file_space, space, TRUE) < 0)
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTCOPY, FAIL, "can't copy dataset I/O selection")
+    } /* end else-if */
+    else {
+        /* Get the dataspace pointer */
+        if (NULL == (*file_space = (H5S_t *)H5I_object_verify(file_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "file_space_id is not a dataspace ID")
+    } /* end else */
+
+    /* Get dataspace for memory buffer */
+    if (H5S_ALL == mem_space_id)
+        *mem_space = *file_space;
+    else if (H5S_BLOCK == mem_space_id) {
+        hsize_t nelmts; /* # of selected elements in file */
+
+        /* Get the # of elements selected */
+        nelmts = H5S_GET_SELECT_NPOINTS(*file_space);
+
+        /* Check for any elements */
+        if (nelmts > 0) {
+            /* Create a 1-D dataspace of the same # of elements */
+            if (NULL == (*mem_space = H5S_create_simple(1, &nelmts, NULL)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create simple memory dataspace")
+        } /* end if */
+        else {
+            /* Create a NULL dataspace of the same # of elements */
+            if (NULL == (*mem_space = H5S_create(H5S_NULL)))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTCREATE, FAIL, "unable to create NULL memory dataspace")
+        } /* end else */
+    }     /* end if */
+    else if (H5S_PLIST == mem_space_id)
+        HGOTO_ERROR(H5E_DATASET, H5E_BADTYPE, FAIL, "H5S_PLIST is not allowed for memory dataspace")
+    else {
+        /* Get the dataspace pointer */
+        if (NULL == (*mem_space = (H5S_t *)H5I_object_verify(mem_space_id, H5I_DATASPACE)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "mem_space_id is not a dataspace ID")
+    } /* end else */
+
+    /* Check for valid selections */
+    if (H5S_SELECT_VALID(*file_space) != TRUE)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
+                    "selection + offset not within extent for file dataspace")
+    if (H5S_SELECT_VALID(*mem_space) != TRUE)
+        HGOTO_ERROR(H5E_DATASPACE, H5E_BADRANGE, FAIL,
+                    "selection + offset not within extent for memory dataspace")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__native_dataset_io_setup() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__native_dataset_create
@@ -172,10 +270,10 @@ herr_t
 H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                           hid_t dxpl_id, void *buf, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *      dset       = (H5D_t *)obj;
-    const H5S_t *mem_space  = NULL;
-    const H5S_t *file_space = NULL;
-    herr_t       ret_value  = SUCCEED; /* Return value */
+    H5D_t *dset       = (H5D_t *)obj;
+    H5S_t *mem_space  = NULL;
+    H5S_t *file_space = NULL;
+    herr_t ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -183,11 +281,10 @@ H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_
     if (NULL == dset->oloc.file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
 
-    /* Get validated dataspace pointers */
-    if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
-    if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
+    /* Get file & memory dataspaces */
+    if (H5VL__native_dataset_io_setup(dset, dxpl_id, file_space_id, mem_space_id, &file_space, &mem_space) <
+        0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up file and memory dataspaces")
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
@@ -197,6 +294,17 @@ H5VL__native_dataset_read(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_
         HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "can't read data")
 
 done:
+    /* Clean up */
+    if (H5S_BLOCK == mem_space_id && mem_space) {
+        if (H5S_close(mem_space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
+                        "unable to release temporary memory dataspace for H5S_BLOCK")
+    } /* end if */
+    else if (H5S_PLIST == file_space_id && file_space)
+        if (H5S_select_all(file_space, TRUE) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
+                        "unable to release file dataspace selection for H5S_PLIST")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_dataset_read() */
 
@@ -213,10 +321,10 @@ herr_t
 H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id,
                            hid_t dxpl_id, const void *buf, void H5_ATTR_UNUSED **req)
 {
-    H5D_t *      dset       = (H5D_t *)obj;
-    const H5S_t *mem_space  = NULL;
-    const H5S_t *file_space = NULL;
-    herr_t       ret_value  = SUCCEED; /* Return value */
+    H5D_t *dset       = (H5D_t *)obj;
+    H5S_t *mem_space  = NULL;
+    H5S_t *file_space = NULL;
+    herr_t ret_value  = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -224,11 +332,10 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid
     if (NULL == dset->oloc.file)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "dataset is not associated with a file")
 
-    /* Get validated dataspace pointers */
-    if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
-    if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
+    /* Get file & memory dataspaces */
+    if (H5VL__native_dataset_io_setup(dset, dxpl_id, file_space_id, mem_space_id, &file_space, &mem_space) <
+        0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to set up file and memory dataspaces")
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
@@ -238,6 +345,17 @@ H5VL__native_dataset_write(void *obj, hid_t mem_type_id, hid_t mem_space_id, hid
         HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "can't write data")
 
 done:
+    /* Clean up */
+    if (H5S_BLOCK == mem_space_id && mem_space) {
+        if (H5S_close(mem_space) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
+                        "unable to release temporary memory dataspace for H5S_BLOCK")
+    } /* end if */
+    else if (H5S_PLIST == file_space_id && file_space)
+        if (H5S_select_all(file_space, TRUE) < 0)
+            HDONE_ERROR(H5E_DATASET, H5E_CANTRELEASE, FAIL,
+                        "unable to release file dataspace selection for H5S_PLIST")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__native_dataset_write() */
 

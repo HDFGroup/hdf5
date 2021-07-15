@@ -2087,7 +2087,7 @@ test_set_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, h
     /*
      * Display testing message
      */
-    TESTING("%s", test_str);
+    TESTING(test_str);
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
@@ -2261,7 +2261,7 @@ test_skip_elmts(hid_t fapl, H5EA_create_t *cparam, earray_test_param_t *tparam, 
     /*
      * Display testing message
      */
-    TESTING("%s", test_str);
+    TESTING(test_str);
 
     /* Create file & retrieve pointer to internal file object */
     if (create_file(H5F_ACC_TRUNC, fapl, &file, &f) < 0)
