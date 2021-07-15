@@ -75,7 +75,6 @@ static herr_t  H5FD_vfd_swmr_term(void);
 static H5FD_t *H5FD_vfd_swmr_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD_vfd_swmr_close(H5FD_t *_file);
 static int     H5FD_vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
-static H5FD_t *H5FD__vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id);
 static herr_t  H5FD_vfd_swmr_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD_vfd_swmr_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD_vfd_swmr_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
@@ -128,7 +127,6 @@ static const H5FD_class_t H5FD_vfd_swmr_g = {
     H5FD_vfd_swmr_lock,       /* lock                 */
     H5FD_vfd_swmr_unlock,     /* unlock               */
     NULL,                     /* del                  */
-    H5FD__vfd_swmr_dedup,     /* dedup                */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
@@ -524,16 +522,23 @@ H5FD_vfd_swmr_cmp(const H5FD_t *_f1, const H5FD_t *_f2)
  *              Failure:    NULL
  *-------------------------------------------------------------------------
  */
-static H5FD_t *
-H5FD__vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id)
+H5FD_t *
+H5FD_vfd_swmr_dedup(H5FD_t *_self, H5FD_t *_other, hid_t fapl_id)
 {
     H5FD_vfd_swmr_t *self      = (H5FD_vfd_swmr_t *)_self;
     H5FD_t *         ret_value = NULL;
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(NULL);
 
-    HDassert(_self->driver_id == H5FD_VFD_SWMR_g);
+    /* Not VFD SWMR */
+    if (_self->driver_id != H5FD_VFD_SWMR_g) {
+        if (H5FD_cmp(_self, _other) == 0)
+            HGOTO_DONE(_self)
+        else
+            HGOTO_DONE(_other)
+    }
 
+    /* VFD SWMR */
     if (_self->cls == _other->cls) {
         H5FD_vfd_swmr_t *      other = (H5FD_vfd_swmr_t *)_other;
         H5P_genplist_t *       plist;

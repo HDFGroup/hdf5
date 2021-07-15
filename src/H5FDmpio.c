@@ -127,7 +127,6 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
         NULL,                  /* lock                  */
         NULL,                  /* unlock                */
         H5FD__mpio_delete,     /* del                   */
-        NULL,                  /* dedup                 */
         H5FD_FLMAP_DICHOTOMY   /* fl_map                */
     },                         /* End of superclass information */
     H5FD__mpio_mpi_rank,       /* get_rank              */

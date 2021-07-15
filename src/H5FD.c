@@ -62,7 +62,6 @@ typedef struct H5FD_wrap_t {
 /********************/
 static herr_t  H5FD__free_cls(H5FD_class_t *cls);
 static herr_t  H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
-static H5FD_t *H5FD__dedup(H5FD_t *self, H5FD_t *other, hid_t fapl_id);
 
 /*********************/
 /* Package Variables */
@@ -700,20 +699,6 @@ done:
  *-------------------------------------------------------------------------
  *
  */
-static H5FD_t *
-H5FD__dedup(H5FD_t *self, H5FD_t *other, hid_t fapl_id)
-{
-    H5FD_t *ret_value = other;
-
-    FUNC_ENTER_STATIC_NOERR
-
-    if (self->cls->dedup != NULL)
-        ret_value = (self->cls->dedup)(self, other, fapl_id);
-    else if (H5FD_cmp(self, other) == 0)
-        ret_value = self;
-
-    FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__dedup() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_deduplicate
@@ -756,7 +741,7 @@ H5FD_deduplicate(H5FD_t *file, hid_t fapl_id)
         if (item->file->exc_owner != NULL)
             continue;
 
-        if ((ret_value = H5FD__dedup(item->file, file, fapl_id)) != file)
+        if ((ret_value = H5FD_vfd_swmr_dedup(item->file, file, fapl_id)) != file)
             goto done;
     }
 
