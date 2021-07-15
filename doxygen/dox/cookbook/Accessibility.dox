@@ -9,12 +9,21 @@ You want to ensure that the HDF5 files you produce are accessible by your and
 all relevant third-party tools
 
 \par Solution
-The to-the-point solution, i.e., the solution w/o any background or explanation
+1. For HDF5 items (objects, attributes, etc.) that you would like to create in new or
+existing HDF5 files, define the supported range of HDF5 library versions as lower
+and upper bounds.
+2. When creating new or opening existing HDF5 files, use a file access property list
+and configure the supported range via the H5Pset_libver_bounds() function.
+
+In the example below, we restrict HDF5 item creation to the HDF5 1.8.x family of
+library versions.
+\snippet{lineno} Accessibility.c set_libver_bounds
 
 \par Discussion
 A discussion of the fine points and variants of the solution
 
 \par See Also
-References to related recipes
+See \ref CB_LargeAttributes for an example where we use HDF5 compatibility settings
+to enable the creation of large HDF5 attributes.
 
- */
+*/

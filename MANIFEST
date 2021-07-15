@@ -245,10 +245,12 @@
 ./doxygen/dox/api-compat-macros.dox
 ./doxygen/dox/maybe_metadata_reads.dox
 ./doxygen/dox/rm-template.dox
+./doxygen/dox/cookbook/Accessibility.c
 ./doxygen/dox/cookbook/Accessibility.dox
+./doxygen/dox/cookbook/Attributes.c
 ./doxygen/dox/cookbook/Attributes.dox
-./doxygen/dox/cookbook/Files.dox
 ./doxygen/dox/cookbook/Files.c
+./doxygen/dox/cookbook/Files.dox
 ./doxygen/dox/cookbook/Performance.dox
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif

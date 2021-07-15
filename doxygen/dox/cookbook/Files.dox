@@ -27,7 +27,7 @@ HDF5 file such that it can be accessed without the HDF5 library
 \par Solution
 Use a file creation property list in which the user block size is set via
 H5Pset_userblock(). In the example below, we create an 8 MiB user block.
-\snippet Files.c user_block
+\snippet{lineno} Files.c user_block
 
 \par Discussion
 The user block begins at offset 0 and must be at least 512 bytes and a power
