@@ -220,22 +220,22 @@ H5TOOLS_DLLVAR hid_t H5E_tools_min_dbg_id_g;
 /* Macro for "catching" flow of control when an error occurs.  Note that the
  *      H5_LEAVE macro won't jump back here once it's past this point.
  */
-#define CATCH                                                                                                \
-catch_except:;                                                                                               \
-    past_catch = TRUE;
+/* #define CATCH catch_except:; past_catch = TRUE; defined in H5Eprivate.h */
 
 /*
- * H5_LEAVE macro, used to facilitate control flow in a function. The argument
- * is the return value. The return value is assigned to a variable `ret_value'
- * and control branches to the `catch_except' label, if we're not already past
- * it.
+ * H5_LEAVE macro, used to facilitate control flow between a
+ * BEGIN_FUNC() and an END_FUNC() within a function body.  The argument is
+ * the return value.
+ * The return value is assigned to a variable `ret_value' and control branches
+ * to the `catch_except' label, if we're not already past it.
  */
-#define H5_LEAVE(v)                                                                                          \
-    {                                                                                                        \
-        ret_value = v;                                                                                       \
-        if (!past_catch)                                                                                     \
-            goto catch_except;                                                                               \
-    }
+/*
+ *  #define H5_LEAVE(v) {                           \
+ *   ret_value = v;                              \
+ *   if(!past_catch)                             \
+ *        goto catch_except;                      \
+ * }
+ * defined in H5Eprivate.h */
 
 /*
  * H5TOOLS_THROW macro, used to facilitate error reporting within a function body.

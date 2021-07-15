@@ -185,6 +185,53 @@ extern int  H5E_mpi_error_str_len;
     }
 #endif /* H5_HAVE_PARALLEL */
 
+/******************************************************************************/
+/* Revisions to Error Macros, to go with Revisions to FUNC_ENTER/LEAVE Macros */
+/******************************************************************************/
+
+/*
+ * H5E_PRINTF macro, used to facilitate error reporting between a BEGIN_FUNC()
+ * and an END_FUNC() within a function body.  The arguments are the minor
+ * error number, a description of the error (as a printf-like format string),
+ * and an optional set of arguments for the printf format arguments.
+ */
+#define H5E_PRINTF(...)                                                                                      \
+    H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, H5_MY_PKG_ERR, __VA_ARGS__)
+
+/*
+ * H5_LEAVE macro, used to facilitate control flow between a
+ * BEGIN_FUNC() and an END_FUNC() within a function body.  The argument is
+ * the return value.
+ * The return value is assigned to a variable `ret_value' and control branches
+ * to the `catch_except' label, if we're not already past it.
+ */
+#define H5_LEAVE(v)                                                                                          \
+    {                                                                                                        \
+        ret_value = v;                                                                                       \
+        if (!past_catch)                                                                                     \
+            goto catch_except;                                                                               \
+    }
+
+/*
+ * H5E_THROW macro, used to facilitate error reporting between a
+ * FUNC_ENTER() and a FUNC_LEAVE() within a function body.  The arguments are
+ * the minor error number, and an error string.
+ * The return value is assigned to a variable `ret_value' and control branches
+ * to the `catch_except' label, if we're not already past it.
+ */
+#define H5E_THROW(...)                                                                                       \
+    {                                                                                                        \
+        H5E_PRINTF(__VA_ARGS__);                                                                             \
+        H5_LEAVE(fail_value)                                                                                 \
+    }
+
+/* Macro for "catching" flow of control when an error occurs.  Note that the
+ *      H5_LEAVE macro won't jump back here once it's past this point.
+ */
+#define CATCH                                                                                                \
+catch_except:;                                                                                               \
+    past_catch = TRUE;
+
 /* Library-private functions defined in H5E package */
 H5_DLL herr_t H5E_init(void);
 H5_DLL herr_t H5E_printf_stack(H5E_t *estack, const char *file, const char *func, unsigned line, hid_t cls_id,

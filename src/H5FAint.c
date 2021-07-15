@@ -79,12 +79,8 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5FA__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
+BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
+           H5FA__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
 
     /* Sanity check */
     HDassert(parent_entry);
@@ -92,11 +88,11 @@ H5FA__create_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
 
     /* Create a flush dependency between parent and child entry */
     if (H5AC_create_flush_dependency(parent_entry, child_entry) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTDEPEND, FAIL, "unable to create flush dependency")
+        H5E_THROW(H5E_CANTDEPEND, "unable to create flush dependency")
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FA__create_flush_depend() */
+    CATCH
+
+END_FUNC(PKG) /* end H5FA__create_flush_depend() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FA__destroy_flush_depend
@@ -110,12 +106,8 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5FA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
+BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
+           H5FA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry))
 
     /* Sanity check */
     HDassert(parent_entry);
@@ -123,8 +115,8 @@ H5FA__destroy_flush_depend(H5AC_info_t *parent_entry, H5AC_info_t *child_entry)
 
     /* Destroy a flush dependency between parent and child entry */
     if (H5AC_destroy_flush_dependency(parent_entry, child_entry) < 0)
-        HGOTO_ERROR(H5E_FARRAY, H5E_CANTUNDEPEND, FAIL, "unable to destroy flush dependency")
+        H5E_THROW(H5E_CANTUNDEPEND, "unable to destroy flush dependency")
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5FA__destroy_flush_depend() */
+    CATCH
+
+END_FUNC(PKG) /* end H5FA__destroy_flush_depend() */

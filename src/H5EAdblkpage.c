@@ -84,25 +84,22 @@ H5FL_DEFINE_STATIC(H5EA_dblk_page_t);
  *
  *-------------------------------------------------------------------------
  */
-H5EA_dblk_page_t *
-H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent)
-{
-    H5EA_dblk_page_t *dblk_page = NULL; /* Extensible array data block page */
-    H5EA_dblk_page_t *ret_value = NULL;
+BEGIN_FUNC(PKG, ERR, H5EA_dblk_page_t *, NULL, NULL,
+           H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent))
 
-    FUNC_ENTER_PACKAGE
+    /* Local variables */
+    H5EA_dblk_page_t *dblk_page = NULL; /* Extensible array data block page */
 
     /* Check arguments */
     HDassert(hdr);
 
     /* Allocate memory for the data block */
     if (NULL == (dblk_page = H5FL_CALLOC(H5EA_dblk_page_t)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for extensible array data block page")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block page")
 
     /* Share common array information */
     if (H5EA__hdr_incr(hdr) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINC, NULL, "can't increment reference count on shared array header")
+        H5E_THROW(H5E_CANTINC, "can't increment reference count on shared array header")
     dblk_page->hdr = hdr;
 
     /* Set non-zero internal fields */
@@ -110,19 +107,17 @@ H5EA__dblk_page_alloc(H5EA_hdr_t *hdr, H5EA_sblock_t *parent)
 
     /* Allocate buffer for elements in data block page */
     if (NULL == (dblk_page->elmts = H5EA__hdr_alloc_elmts(hdr, hdr->dblk_page_nelmts)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, NULL,
-                    "memory allocation failed for data block page element buffer")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for data block page element buffer")
 
     /* Set the return value */
     ret_value = dblk_page;
 
-done:
+    CATCH
     if (!ret_value)
         if (dblk_page && H5EA__dblk_page_dest(dblk_page) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, NULL, "unable to destroy extensible array data block page")
+            H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array data block page")
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5EA__dblk_page_alloc() */
+END_FUNC(PKG) /* end H5EA__dblk_page_alloc() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5EA__dblk_page_create
@@ -136,22 +131,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
-{
+BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
+           H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr))
+
+    /* Local variables */
     H5EA_dblk_page_t *dblk_page = NULL;  /* Extensible array data block page */
     hbool_t           inserted  = FALSE; /* Whether the header was inserted into cache */
-    herr_t            ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(hdr);
 
     /* Allocate the data block page */
     if (NULL == (dblk_page = H5EA__dblk_page_alloc(hdr, parent)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTALLOC, FAIL,
-                    "memory allocation failed for extensible array data block page")
+        H5E_THROW(H5E_CANTALLOC, "memory allocation failed for extensible array data block page")
 
     /* Set info about data block page on disk */
     dblk_page->addr = addr;
@@ -159,39 +151,34 @@ H5EA__dblk_page_create(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t addr)
 
     /* Clear any elements in data block page to fill value */
     if ((hdr->cparam.cls->fill)(dblk_page->elmts, (size_t)hdr->dblk_page_nelmts) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, FAIL,
-                    "can't set extensible array data block page elements to class's fill value")
+        H5E_THROW(H5E_CANTSET, "can't set extensible array data block page elements to class's fill value")
 
     /* Cache the new extensible array data block page */
     if (H5AC_insert_entry(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTINSERT, FAIL, "can't add extensible array data block page to cache")
+        H5E_THROW(H5E_CANTINSERT, "can't add extensible array data block page to cache")
     inserted = TRUE;
 
     /* Add data block page as child of 'top' proxy */
     if (hdr->top_proxy) {
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblk_page) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, FAIL,
-                        "unable to add extensible array entry as child of array proxy")
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
         dblk_page->top_proxy = hdr->top_proxy;
     } /* end if */
 
-done:
+    CATCH
     if (ret_value < 0)
         if (dblk_page) {
             /* Remove from cache, if inserted */
             if (inserted)
                 if (H5AC_remove_entry(dblk_page) < 0)
-                    HDONE_ERROR(H5E_EARRAY, H5E_CANTREMOVE, FAIL,
-                                "unable to remove extensible array data block page from cache")
+                    H5E_THROW(H5E_CANTREMOVE, "unable to remove extensible array data block page from cache")
 
             /* Destroy data block page */
             if (H5EA__dblk_page_dest(dblk_page) < 0)
-                HDONE_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL,
-                            "unable to destroy extensible array data block page")
+                H5E_THROW(H5E_CANTFREE, "unable to destroy extensible array data block page")
         } /* end if */
 
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5EA__dblk_page_create() */
+END_FUNC(PKG) /* end H5EA__dblk_page_create() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5EA__dblk_page_protect
@@ -206,14 +193,13 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-H5EA_dblk_page_t *
-H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t dblk_page_addr, unsigned flags)
-{
+BEGIN_FUNC(PKG, ERR, H5EA_dblk_page_t *, NULL, NULL,
+           H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t dblk_page_addr,
+                                   unsigned flags))
+
+    /* Local variables */
     H5EA_dblk_page_t *        dblk_page = NULL; /* Extensible array data block page */
     H5EA_dblk_page_cache_ud_t udata;            /* Information needed for loading data block page */
-    H5EA_dblk_page_t *        ret_value = NULL;
-
-    FUNC_ENTER_PACKAGE
 
     /* Sanity check */
     HDassert(hdr);
@@ -230,34 +216,32 @@ H5EA__dblk_page_protect(H5EA_hdr_t *hdr, H5EA_sblock_t *parent, haddr_t dblk_pag
     /* Protect the data block page */
     if (NULL == (dblk_page = (H5EA_dblk_page_t *)H5AC_protect(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page_addr,
                                                               &udata, flags)))
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTPROTECT, NULL,
-                    "unable to protect extensible array data block page, address = %llu",
-                    (unsigned long long)dblk_page_addr)
+        H5E_THROW(H5E_CANTPROTECT, "unable to protect extensible array data block page, address = %llu",
+                  (unsigned long long)dblk_page_addr)
 
     /* Create top proxy, if it doesn't exist */
     if (hdr->top_proxy && NULL == dblk_page->top_proxy) {
         /* Add data block page as child of 'top' proxy */
         if (H5AC_proxy_entry_add_child(hdr->top_proxy, hdr->f, dblk_page) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTSET, NULL,
-                        "unable to add extensible array entry as child of array proxy")
+            H5E_THROW(H5E_CANTSET, "unable to add extensible array entry as child of array proxy")
         dblk_page->top_proxy = hdr->top_proxy;
     } /* end if */
 
     /* Set return value */
     ret_value = dblk_page;
 
-done:
+    CATCH
     /* Clean up on error */
     if (!ret_value) {
         /* Release the data block page, if it was protected */
         if (dblk_page &&
             H5AC_unprotect(hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, H5AC__NO_FLAGS_SET) < 0)
-            HDONE_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, NULL,
-                        "unable to unprotect extensible array data block page, address = %llu",
-                        (unsigned long long)dblk_page->addr)
+            H5E_THROW(H5E_CANTUNPROTECT,
+                      "unable to unprotect extensible array data block page, address = %llu",
+                      (unsigned long long)dblk_page->addr)
     } /* end if */
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5EA__dblk_page_protect() */
+
+END_FUNC(PKG) /* end H5EA__dblk_page_protect() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5EA__dblk_page_unprotect
@@ -272,25 +256,22 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, unsigned cache_flags)
-{
-    herr_t ret_value = SUCCEED;
+BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL,
+           H5EA__dblk_page_unprotect(H5EA_dblk_page_t *dblk_page, unsigned cache_flags))
 
-    FUNC_ENTER_PACKAGE
+    /* Local variables */
 
     /* Sanity check */
     HDassert(dblk_page);
 
     /* Unprotect the data block page */
     if (H5AC_unprotect(dblk_page->hdr->f, H5AC_EARRAY_DBLK_PAGE, dblk_page->addr, dblk_page, cache_flags) < 0)
-        HGOTO_ERROR(H5E_EARRAY, H5E_CANTUNPROTECT, FAIL,
-                    "unable to unprotect extensible array data block page, address = %llu",
-                    (unsigned long long)dblk_page->addr)
+        H5E_THROW(H5E_CANTUNPROTECT, "unable to unprotect extensible array data block page, address = %llu",
+                  (unsigned long long)dblk_page->addr)
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5EA__dblk_page_unprotect() */
+    CATCH
+
+END_FUNC(PKG) /* end H5EA__dblk_page_unprotect() */
 
 /*-------------------------------------------------------------------------
  * Function:	H5EA__dblk_page_dest
@@ -304,12 +285,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_PACKAGE
+BEGIN_FUNC(PKG, ERR, herr_t, SUCCEED, FAIL, H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page))
 
     /* Sanity check */
     HDassert(dblk_page);
@@ -321,15 +297,13 @@ H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page)
         if (dblk_page->elmts) {
             /* Free buffer for data block page elements */
             if (H5EA__hdr_free_elmts(dblk_page->hdr, dblk_page->hdr->dblk_page_nelmts, dblk_page->elmts) < 0)
-                HGOTO_ERROR(H5E_EARRAY, H5E_CANTFREE, FAIL,
-                            "unable to free extensible array data block element buffer")
+                H5E_THROW(H5E_CANTFREE, "unable to free extensible array data block element buffer")
             dblk_page->elmts = NULL;
         } /* end if */
 
         /* Decrement reference count on shared info */
         if (H5EA__hdr_decr(dblk_page->hdr) < 0)
-            HGOTO_ERROR(H5E_EARRAY, H5E_CANTDEC, FAIL,
-                        "can't decrement reference count on shared array header")
+            H5E_THROW(H5E_CANTDEC, "can't decrement reference count on shared array header")
         dblk_page->hdr = NULL;
     } /* end if */
 
@@ -339,6 +313,6 @@ H5EA__dblk_page_dest(H5EA_dblk_page_t *dblk_page)
     /* Free the data block page itself */
     dblk_page = H5FL_FREE(H5EA_dblk_page_t, dblk_page);
 
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5EA__dblk_page_dest() */
+    CATCH
+
+END_FUNC(PKG) /* end H5EA__dblk_page_dest() */

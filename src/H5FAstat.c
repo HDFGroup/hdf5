@@ -78,21 +78,21 @@
  *
  *-------------------------------------------------------------------------
  */
-herr_t
-H5FA_get_stats(const H5FA_t *fa, H5FA_stat_t *stats)
-{
-    FUNC_ENTER_NOAPI_NOERR
+BEGIN_FUNC(PRIV, NOERR, herr_t, SUCCEED, -, H5FA_get_stats(const H5FA_t *fa, H5FA_stat_t *stats))
+
+/* Local variables */
 
 #ifdef H5FA_DEBUG
     HDfprintf(stderr, "%s: Called\n", FUNC);
 #endif /* H5FA_DEBUG */
 
-    /* Check arguments */
+    /*
+     * Check arguments.
+     */
     HDassert(fa);
     HDassert(stats);
 
     /* Copy fixed array statistics */
     H5MM_memcpy(stats, &fa->hdr->stats, sizeof(fa->hdr->stats));
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5FA_get_stats() */
+END_FUNC(PRIV) /* end H5FA_get_stats() */
