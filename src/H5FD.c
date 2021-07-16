@@ -60,7 +60,7 @@ typedef struct H5FD_wrap_t {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t  H5FD__free_cls(H5FD_class_t *cls);
+static herr_t  H5FD__free_cls(H5FD_class_t *cls, void **request);
 static herr_t  H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
 
 /*********************/
@@ -180,7 +180,7 @@ H5FD_term_package(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5FD__free_cls(H5FD_class_t *cls)
+H5FD__free_cls(H5FD_class_t *cls, void H5_ATTR_UNUSED **request)
 {
     herr_t ret_value = SUCCEED;
 
