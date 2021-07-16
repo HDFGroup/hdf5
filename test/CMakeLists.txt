@@ -285,6 +285,7 @@ set (H5_TESTS
     swmr
     thread_id # special link
     timer
+    cmpd_dtransform
     version_bounds_1_10
 )
 
