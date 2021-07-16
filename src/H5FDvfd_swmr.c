@@ -34,12 +34,12 @@ typedef struct H5FD_vfd_swmr_t {
     H5FD_t pub; /* public stuff, must be first      */
 
     /* HDF5 file */
-    char hdf5_filename[H5FD_MAX_FILENAME_LEN]; /* Name of the HDF5 file from open */
-    H5FD_t *hdf5_file_lf;                      /* Driver info for the HDF5 file */
+    char    hdf5_filename[H5FD_MAX_FILENAME_LEN]; /* Name of the HDF5 file from open */
+    H5FD_t *hdf5_file_lf;                         /* Driver info for the HDF5 file */
 
     /* Metadata file */
-    int md_fd;                                                   /* File descriptor for the metadata file */
-    uint32_t md_pages_reserved;                                  /* # of pages reserved at the head of the metadata file */
+    int                     md_fd;             /* File descriptor for the metadata file */
+    uint32_t                md_pages_reserved; /* # of pages reserved at the head of the metadata file */
     char                    md_file_path[H5FD_MAX_FILENAME_LEN]; /* Name of the metadate file */
     H5FD_vfd_swmr_md_header md_header;                           /* Metadata file header */
     H5FD_vfd_swmr_md_index  md_index;                            /* Metadata file index */
@@ -48,18 +48,18 @@ typedef struct H5FD_vfd_swmr_t {
      * api_elapsed_ticks[elapsed] is the number of times
      * `elapsed' ticks passed during an API call in the
      * program's lifetime.
-     */ 
-    uint64_t *api_elapsed_ticks;   /* Array of histogram buckets */
-    uint32_t api_elapsed_nbuckets; /* Number of histogram buckets. */
+     */
+    uint64_t *api_elapsed_ticks;    /* Array of histogram buckets */
+    uint32_t  api_elapsed_nbuckets; /* Number of histogram buckets. */
 
-    hbool_t pb_configured; /* Sanity-checking flag set when page buffer is configured */
-    H5F_vfd_swmr_config_t config; /* VFD SWMR configuration */
+    hbool_t               pb_configured; /* Sanity-checking flag set when page buffer is configured */
+    H5F_vfd_swmr_config_t config;        /* VFD SWMR configuration */
 
     /* Flag set if the file is a SWMR writer.
      * All methods on a write-mode SWMR VFD instance are passed
      * to the lower VFD instance.
      */
-    hbool_t               writer;
+    hbool_t writer;
 
 } H5FD_vfd_swmr_t;
 
@@ -76,9 +76,9 @@ static herr_t  H5FD__vfd_swmr_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t ad
 static haddr_t H5FD__vfd_swmr_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t  H5FD__vfd_swmr_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
 static herr_t  H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
-                                  void *buf);
+                                   void *buf);
 static herr_t  H5FD__vfd_swmr_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
-                                   const void *buf);
+                                    const void *buf);
 static herr_t  H5FD__vfd_swmr_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__vfd_swmr_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__vfd_swmr_unlock(H5FD_t *_file);
@@ -90,39 +90,39 @@ static htri_t H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD
 static herr_t H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *, hbool_t);
 
 static const H5FD_class_t H5FD_vfd_swmr_g = {
-    "vfd_swmr",               /* name                 */
-    MAXADDR,                  /* maxaddr              */
-    H5F_CLOSE_WEAK,           /* fc_degree            */
-    H5FD__vfd_swmr_term,      /* terminate            */
-    NULL,                     /* sb_size              */
-    NULL,                     /* sb_encode            */
-    NULL,                     /* sb_decode            */
-    0,                        /* fapl_size            */
-    NULL,                     /* fapl_get             */
-    NULL,                     /* fapl_copy            */
-    NULL,                     /* fapl_free            */
-    0,                        /* dxpl_size            */
-    NULL,                     /* dxpl_copy            */
-    NULL,                     /* dxpl_free            */
-    H5FD__vfd_swmr_open,      /* open                 */
-    H5FD__vfd_swmr_close,     /* close                */
-    H5FD__vfd_swmr_cmp,       /* cmp                  */
-    H5FD__vfd_swmr_query,     /* query                */
-    NULL,                     /* get_type_map         */
-    NULL,                     /* alloc                */
-    NULL,                     /* free                 */
-    H5FD__vfd_swmr_get_eoa,   /* get_eoa              */
-    H5FD__vfd_swmr_set_eoa,   /* set_eoa              */
-    H5FD__vfd_swmr_get_eof,   /* get_eof              */
-    H5FD__vfd_swmr_get_handle,/* get_handle           */
-    H5FD__vfd_swmr_read,      /* read                 */
-    H5FD__vfd_swmr_write,     /* write                */
-    NULL,                     /* flush                */
-    H5FD__vfd_swmr_truncate,  /* truncate             */
-    H5FD__vfd_swmr_lock,      /* lock                 */
-    H5FD__vfd_swmr_unlock,    /* unlock               */
-    NULL,                     /* del                  */
-    H5FD_FLMAP_DICHOTOMY      /* fl_map               */
+    "vfd_swmr",                /* name                 */
+    MAXADDR,                   /* maxaddr              */
+    H5F_CLOSE_WEAK,            /* fc_degree            */
+    H5FD__vfd_swmr_term,       /* terminate            */
+    NULL,                      /* sb_size              */
+    NULL,                      /* sb_encode            */
+    NULL,                      /* sb_decode            */
+    0,                         /* fapl_size            */
+    NULL,                      /* fapl_get             */
+    NULL,                      /* fapl_copy            */
+    NULL,                      /* fapl_free            */
+    0,                         /* dxpl_size            */
+    NULL,                      /* dxpl_copy            */
+    NULL,                      /* dxpl_free            */
+    H5FD__vfd_swmr_open,       /* open                 */
+    H5FD__vfd_swmr_close,      /* close                */
+    H5FD__vfd_swmr_cmp,        /* cmp                  */
+    H5FD__vfd_swmr_query,      /* query                */
+    NULL,                      /* get_type_map         */
+    NULL,                      /* alloc                */
+    NULL,                      /* free                 */
+    H5FD__vfd_swmr_get_eoa,    /* get_eoa              */
+    H5FD__vfd_swmr_set_eoa,    /* set_eoa              */
+    H5FD__vfd_swmr_get_eof,    /* get_eof              */
+    H5FD__vfd_swmr_get_handle, /* get_handle           */
+    H5FD__vfd_swmr_read,       /* read                 */
+    H5FD__vfd_swmr_write,      /* write                */
+    NULL,                      /* flush                */
+    H5FD__vfd_swmr_truncate,   /* truncate             */
+    H5FD__vfd_swmr_lock,       /* lock                 */
+    H5FD__vfd_swmr_unlock,     /* unlock               */
+    NULL,                      /* del                  */
+    H5FD_FLMAP_DICHOTOMY       /* fl_map               */
 };
 
 /* Declare a free list to manage the H5FD_vfd_swmr_t struct */
@@ -766,7 +766,7 @@ done:
  */
 static herr_t
 H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, const haddr_t addr,
-                   size_t size, void *const buf /*out*/)
+                    size_t size, void *const buf /*out*/)
 {
     const size_t               init_size = size;
     haddr_t                    target_page;
@@ -883,7 +883,7 @@ done:
  */
 static herr_t
 H5FD__vfd_swmr_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
-                    const void *buf)
+                     const void *buf)
 {
     H5FD_vfd_swmr_t *file = (H5FD_vfd_swmr_t *)_file;
 
@@ -1025,12 +1025,12 @@ H5FD__vfd_swmr_load_hdr_and_idx(H5FD_vfd_swmr_t *file, hbool_t open)
 {
     hbool_t                 do_try;
     h5_retry_t              retry;
-    H5FD_vfd_swmr_md_header md_header;           /* Metadata file header, take 1 */
-    H5FD_vfd_swmr_md_header md_header_two;       /* Metadata file header, take 2 */
-    H5FD_vfd_swmr_md_index  md_index;            /* Metadata file index           */
+    H5FD_vfd_swmr_md_header md_header;     /* Metadata file header, take 1 */
+    H5FD_vfd_swmr_md_header md_header_two; /* Metadata file header, take 2 */
+    H5FD_vfd_swmr_md_index  md_index;      /* Metadata file index           */
     htri_t                  rc;
     static uint64_t         last_index_offset = 0;
-    herr_t                  ret_value = SUCCEED; /* Return value */
+    herr_t                  ret_value         = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1251,8 +1251,7 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_i
 
     /* Allocate buffer for reading index */
     if (NULL == (image = H5MM_malloc(md_header->index_length)))
-        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL,
-                    "memory allocation failed for index's on disk image buffer")
+        HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "memory allocation failed for index's on disk image buffer")
 
     /* We may seek past EOF.  That's ok, the read(2) will catch that. */
     if (HDlseek(file->md_fd, (HDoff_t)md_header->index_offset, SEEK_SET) < 0)

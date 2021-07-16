@@ -60,8 +60,8 @@ typedef struct H5FD_wrap_t {
 /********************/
 /* Local Prototypes */
 /********************/
-static herr_t  H5FD__free_cls(H5FD_class_t *cls, void **request);
-static herr_t  H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
+static herr_t H5FD__free_cls(H5FD_class_t *cls, void **request);
+static herr_t H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
 
 /*********************/
 /* Package Variables */
