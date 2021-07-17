@@ -5,8 +5,8 @@
 \subsection CB_LargeAttributes Creating "Large" HDF5 Attributes
 
 \par Problem
-You would like to use HDF5 attributes to store descriptive metadata whose
-size exceeds a few dozen kilobytes
+You would like to use HDF5 attributes the size of whose values
+exceeds a few dozen kilobytes
 
 \par Solution
 A file format change in the HDF5 1.8.x family of library releases made it
@@ -14,13 +14,18 @@ possible to have attributes larger than about 64 KiB. Ensure that the lower
 library version bound for new HDF5 item creation is at least 1.8.x, and create
 larger attributes as usual.\n
 In the example below, we create an attribute whose value occupies 4 MiB.
-\snippet{lineno} Attributes.c large_attribute
 
+\note This feature is only supported in HDF5 1.8.x+
+
+\snippet{lineno} Attributes.c large_attribute
 
 \par Discussion
 A discussion of the fine points and variants of the solution
+\li Large attributes might look like datasets, but there are important
+    differences...
+
 
 \par See Also
-See recipe \ref CB_MaintainCompat for HDF5 compatibility implications.
+See \ref CB_MaintainCompat for HDF5 compatibility implications.
 
  */

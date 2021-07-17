@@ -21,6 +21,9 @@ library versions.
 
 \par Discussion
 A discussion of the fine points and variants of the solution
+\li What's versioned (API, library, file format specs., ...)
+\li There's no such thing as a file format version
+\li Forward- and backward-compatibility
 
 \par See Also
 See \ref CB_LargeAttributes for an example where we use HDF5 compatibility settings

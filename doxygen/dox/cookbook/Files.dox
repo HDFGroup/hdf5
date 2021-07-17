@@ -9,14 +9,21 @@ You sometimes delete objects in HDF5 files and don't have new content to use the
 free space, but would like to reuse it in the future
 
 \par Solution
-The to-the-point solution, i.e., the solution w/o any backgroundor explanation
+At file creation time, set the file space management strategy and persistence of
+free space tracking information via H5Pset_file_space_strategy().
+
+\note This feature is only supported in HDF5 1.10.1+.
+
+\snippet{lineno} Files.c free_space
 
 \par Discussion
 A discussion of the fine points and variants of the solution
+\li We have to use H5Pset_libver_bounds() to use a newer file format
+\li Reference the RFC(s)
+\li Use paged allocation and page buffering
 
 \par See Also
-References to related recipes
-
+See \ref CB_MaintainCompat for HDF5 compatibility implications.
 
 \subsection CB_UserBlock Creating an HDF5 File User Block
 
