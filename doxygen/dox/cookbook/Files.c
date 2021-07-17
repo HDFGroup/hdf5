@@ -20,7 +20,7 @@ main(void)
             ret_val = EXIT_FAILURE;
             goto fail_fcpl;
         }
-#if H5_VERSION_GE(1,10,1)
+#if H5_VERSION_GE(1, 10, 1)
         if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_FSM_AGGR, 1, 4096) < 0) {
 #else
 #error HDF5 1.10.1+ required
@@ -33,8 +33,8 @@ main(void)
             ret_val = EXIT_FAILURE;
             goto fail_fapl;
         }
-#if H5_VERSION_GE(1,10,0)
-        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_V110, H5F_LIBVER_LATEST) <0) {
+#if H5_VERSION_GE(1, 10, 0)
+        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_V110, H5F_LIBVER_LATEST) < 0) {
 #else
 #error HDF5 1.10.x+ required
 #endif
@@ -55,7 +55,6 @@ fail_fapl:
 fail_fcpl:;
     }
     //! <!-- [free_space] -->
-
 
     //! <!-- [user_block] -->
     {
