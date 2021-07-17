@@ -192,7 +192,6 @@ typedef struct H5FD_class_t {
     herr_t (*lock)(H5FD_t *file, hbool_t rw);
     herr_t (*unlock)(H5FD_t *file);
     herr_t (*del)(const char *name, hid_t fapl);
-    H5FD_t *(*dedup)(H5FD_t *, H5FD_t *, hid_t);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
 
