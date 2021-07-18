@@ -230,24 +230,24 @@
 #endif /* HDF5_HL_F90CSTUBDLL */
 
 #else
-#define H5_DLL
-#define H5_DLLVAR extern
-#define H5TEST_DLL
-#define H5TEST_DLLVAR extern
-#define H5TOOLS_DLL
-#define H5TOOLS_DLLVAR extern
-#define H5_DLLCPP
-#define H5_DLLCPPVAR extern
-#define H5_HLDLL
-#define H5_HLDLLVAR extern
-#define H5_HLCPPDLL
-#define H5_HLCPPDLLVAR extern
-#define H5_FCDLL
-#define H5_FCDLLVAR extern
-#define H5_FCTESTDLL
-#define H5_FCTESTDLLVAR extern
-#define HDF5_HL_F90CSTUBDLL
-#define HDF5_HL_F90CSTUBDLLVAR extern
+#define H5_DLL __attribute__((visibility("default")))
+#define H5_DLLVAR extern __attribute__((visibility("default")))
+#define H5TEST_DLL __attribute__((visibility("default")))
+#define H5TEST_DLLVAR extern __attribute__((visibility("default")))
+#define H5TOOLS_DLL __attribute__((visibility("default")))
+#define H5TOOLS_DLLVAR extern __attribute__((visibility("default")))
+#define H5_DLLCPP __attribute__((visibility("default")))
+#define H5_DLLCPPVAR extern __attribute__((visibility("default")))
+#define H5_HLDLL __attribute__((visibility("default")))
+#define H5_HLDLLVAR extern __attribute__((visibility("default")))
+#define H5_HLCPPDLL __attribute__((visibility("default")))
+#define H5_HLCPPDLLVAR extern __attribute__((visibility("default")))
+#define H5_FCDLL __attribute__((visibility("default")))
+#define H5_FCDLLVAR extern __attribute__((visibility("default")))
+#define H5_FCTESTDLL __attribute__((visibility("default")))
+#define H5_FCTESTDLLVAR extern __attribute__((visibility("default")))
+#define HDF5_HL_F90CSTUBDLL __attribute__((visibility("default")))
+#define HDF5_HL_F90CSTUBDLLVAR extern __attribute__((visibility("default")))
 #endif /* H5_BUILT_AS_DYNAMIC_LIB */
 
 #endif /* H5API_ADPT_H */
