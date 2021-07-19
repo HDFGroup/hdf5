@@ -43,7 +43,6 @@
 #include "H5CXprivate.h" /* API Contexts                             */
 #include "H5Eprivate.h"  /* Error handling                           */
 #include "H5Fpkg.h"      /* Files                                    */
-#include "H5FDprivate.h" /* File drivers                             */
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5SLprivate.h" /* Skip Lists                               */
@@ -61,8 +60,8 @@
 /********************/
 
 static herr_t H5AC__check_if_write_permitted(const H5F_t *f, hbool_t *write_permitted_ptr);
-static herr_t H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr,
-                                            H5C_auto_size_ctl_t *int_conf_ptr);
+static herr_t H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr,
+                                            H5C_auto_size_ctl_t *      int_conf_ptr);
 #if H5AC_DO_TAGGING_SANITY_CHECKS
 static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 #endif /* H5AC_DO_TAGGING_SANITY_CHECKS */
@@ -1797,14 +1796,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_size(H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr, size_t *cur_size_ptr,
-                    uint32_t *cur_num_entries_ptr)
+H5AC_get_cache_size(const H5AC_t *cache_ptr, size_t *max_size_ptr, size_t *min_clean_size_ptr,
+                    size_t *cur_size_ptr, uint32_t *cur_num_entries_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_cache_size((H5C_t *)cache_ptr, max_size_ptr, min_clean_size_ptr, cur_size_ptr,
+    if (H5C_get_cache_size((const H5C_t *)cache_ptr, max_size_ptr, min_clean_size_ptr, cur_size_ptr,
                            cur_num_entries_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_size() failed")
 
@@ -1851,13 +1850,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_cache_hit_rate(H5AC_t *cache_ptr, double *hit_rate_ptr)
+H5AC_get_cache_hit_rate(const H5AC_t *cache_ptr, double *hit_rate_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_cache_hit_rate((H5C_t *)cache_ptr, hit_rate_ptr) < 0)
+    if (H5C_get_cache_hit_rate((const H5C_t *)cache_ptr, hit_rate_ptr) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "H5C_get_cache_hit_rate() failed")
 
 done:
@@ -1903,7 +1902,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, H5AC_cache_config_t *config_ptr)
+H5AC_set_cache_auto_resize_config(H5AC_t *cache_ptr, const H5AC_cache_config_t *config_ptr)
 {
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED; /* Return value */
@@ -2004,7 +2003,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_validate_config(H5AC_cache_config_t *config_ptr)
+H5AC_validate_config(const H5AC_cache_config_t *config_ptr)
 {
     H5C_auto_size_ctl_t internal_config;
     herr_t              ret_value = SUCCEED; /* Return value */
@@ -2185,7 +2184,7 @@ H5AC__check_if_write_permitted(const H5F_t
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5AC__ext_config_2_int_config(H5AC_cache_config_t *ext_conf_ptr, H5C_auto_size_ctl_t *int_conf_ptr)
+H5AC__ext_config_2_int_config(const H5AC_cache_config_t *ext_conf_ptr, H5C_auto_size_ctl_t *int_conf_ptr)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2746,13 +2745,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5AC_get_mdc_image_info(H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len)
+H5AC_get_mdc_image_info(const H5AC_t *cache_ptr, haddr_t *image_addr, hsize_t *image_len)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5C_get_mdc_image_info((H5C_t *)cache_ptr, image_addr, image_len) < 0)
+    if (H5C_get_mdc_image_info((const H5C_t *)cache_ptr, image_addr, image_len) < 0)
         HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, FAIL, "can't retrieve cache image info")
 
 done:

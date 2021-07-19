@@ -23,31 +23,27 @@
 
 #if !defined(WIN32) && !defined(__MINGW32__)
 
-#include <math.h>
-
-#ifdef H5_STDC_HEADERS
 #include <errno.h>
 #include <fcntl.h>
+#include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
-#endif
-
-#ifdef H5_HAVE_UNISTD_H
-#include <sys/types.h>
-#include <unistd.h>
-#endif
+#include <time.h>
 
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 
-#if defined(H5_TIME_WITH_SYS_TIME)
+#ifdef H5_HAVE_SYS_TIME_H
 #include <sys/time.h>
-#include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#else
-#include <time.h>
+#endif
+
+#ifdef H5_HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
@@ -55,8 +51,7 @@ const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
 /*
  * Print the current location on the standard output stream.
  */
-#define FUNC __func__
-#define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
+#define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
 #define H5_FAILED()                                                                                          \
     {                                                                                                        \
         puts("*FAILED*");                                                                                    \

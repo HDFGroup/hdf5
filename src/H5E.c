@@ -996,11 +996,12 @@ H5E__get_current_stack(void)
         if (H5I_inc_ref(current_error->min_num, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, NULL, "unable to increment ref count on error message")
         new_error->min_num = current_error->min_num;
-        if (NULL == (new_error->func_name = H5MM_xstrdup(current_error->func_name)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        if (NULL == (new_error->file_name = H5MM_xstrdup(current_error->file_name)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
-        new_error->line = current_error->line;
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * there's no need to duplicate them.
+         */
+        new_error->func_name = current_error->func_name;
+        new_error->file_name = current_error->file_name;
+        new_error->line      = current_error->line;
         if (NULL == (new_error->desc = H5MM_xstrdup(current_error->desc)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed")
     } /* end for */
@@ -1116,11 +1117,12 @@ H5E__set_current_stack(H5E_t *estack)
         if (H5I_inc_ref(new_error->min_num, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error class")
         current_error->min_num = new_error->min_num;
-        if (NULL == (current_error->func_name = H5MM_xstrdup(new_error->func_name)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        if (NULL == (current_error->file_name = H5MM_xstrdup(new_error->file_name)))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
-        current_error->line = new_error->line;
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * there's no need to duplicate them.
+         */
+        current_error->func_name = new_error->func_name;
+        current_error->file_name = new_error->file_name;
+        current_error->line      = new_error->line;
         if (NULL == (current_error->desc = H5MM_xstrdup(new_error->desc)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     } /* end for */
@@ -1813,11 +1815,12 @@ H5E__append_stack(H5E_t *dst_stack, const H5E_t *src_stack)
         if (H5I_inc_ref(src_error->min_num, FALSE) < 0)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTINC, FAIL, "unable to increment ref count on error message")
         dst_error->min_num = src_error->min_num;
-        if (NULL == (dst_error->func_name = H5MM_xstrdup(src_error->func_name)))
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
-        if (NULL == (dst_error->file_name = H5MM_xstrdup(src_error->file_name)))
-            HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
-        dst_error->line = src_error->line;
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * there's no need to duplicate them.
+         */
+        dst_error->func_name = src_error->func_name;
+        dst_error->file_name = src_error->file_name;
+        dst_error->line      = src_error->line;
         if (NULL == (dst_error->desc = H5MM_xstrdup(src_error->desc)))
             HGOTO_ERROR(H5E_ERROR, H5E_CANTALLOC, FAIL, "memory allocation failed")
 

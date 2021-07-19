@@ -1892,19 +1892,24 @@ H5Tcopy(hid_t obj_id)
             break;
 
         case H5I_DATASET: {
-            H5VL_object_t *vol_obj = NULL; /* Dataset structure */
+            H5VL_object_t *         vol_obj;     /* Object for obj_id */
+            H5VL_dataset_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
             /* The argument is a dataset handle */
             if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_DATASET)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "type_id is not a dataset ID")
 
+            /* Set up VOL callback arguments */
+            vol_cb_args.op_type               = H5VL_DATASET_GET_TYPE;
+            vol_cb_args.args.get_type.type_id = H5I_INVALID_HID;
+
             /* Get the datatype from the dataset
              * NOTE: This will have to be closed after we're done with it.
              */
-            if (H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                                 &dset_tid) < 0)
+            if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID,
                             "unable to get datatype from the dataset")
+            dset_tid = vol_cb_args.args.get_type.type_id;
 
             /* Unwrap the type ID */
             if (NULL == (dt = (H5T_t *)H5I_object(dset_tid)))
@@ -2040,7 +2045,7 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
+                        H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:

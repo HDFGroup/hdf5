@@ -336,7 +336,7 @@ done:
  * Signature: ([BJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Ropen_1object(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong oapl_id)
+Java_hdf_hdf5lib_H5__1H5Ropen_1object(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong oapl_id)
 {
     jboolean isCopy;
     jbyte *  refBuf = NULL;
@@ -371,7 +371,7 @@ done:
  * Signature: ([BJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Ropen_1region(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong oapl_id)
+Java_hdf_hdf5lib_H5__1H5Ropen_1region(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong oapl_id)
 {
     jboolean isCopy;
     jbyte *  refBuf = NULL;
@@ -406,7 +406,7 @@ done:
  * Signature: ([BJJ)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Ropen_1attr(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong aapl_id)
+Java_hdf_hdf5lib_H5__1H5Ropen_1attr(JNIEnv *env, jclass clss, jbyteArray ref, jlong rapl_id, jlong aapl_id)
 {
     jboolean isCopy;
     jbyte *  refBuf = NULL;

@@ -236,11 +236,13 @@ H5PL_load(H5PL_type_t type, const H5PL_key_t *key)
             if ((H5PL_plugin_control_mask_g & H5PL_FILTER_PLUGIN) == 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL, "filter plugins disabled")
             break;
+
         case H5PL_TYPE_VOL:
             if ((H5PL_plugin_control_mask_g & H5PL_VOL_PLUGIN) == 0)
                 HGOTO_ERROR(H5E_PLUGIN, H5E_CANTLOAD, NULL,
                             "Virtual Object Layer (VOL) driver plugins disabled")
             break;
+
         case H5PL_TYPE_ERROR:
         case H5PL_TYPE_NONE:
         default:

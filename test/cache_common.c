@@ -1487,12 +1487,6 @@ add_flush_op(int target_type, int target_idx, int op_code, int type, int idx, hb
     HDassert((0 <= type) && (type < NUMBER_OF_ENTRY_TYPES));
     HDassert((0 <= idx) && (idx <= max_indices[type]));
     HDassert(new_size <= VARIABLE_ENTRY_SIZE);
-#ifndef H5_HAVE_STDBOOL_H
-    /* Check for TRUE or FALSE if we're using an integer type instead
-     * of a real Boolean type.
-     */
-    HDassert((flag == TRUE) || (flag == FALSE));
-#endif /* H5_HAVE_STDBOOL_H */
 
     if (pass) {
 
@@ -1692,12 +1686,6 @@ execute_flush_op(H5F_t *file_ptr, struct test_entry_t *entry_ptr, struct flush_o
     HDassert((0 <= op_ptr->type) && (op_ptr->type < NUMBER_OF_ENTRY_TYPES));
     HDassert((0 <= op_ptr->idx) && (op_ptr->idx <= max_indices[op_ptr->type]));
     HDassert(flags_ptr != NULL);
-#ifndef H5_HAVE_STDBOOL_H
-    /* Check for TRUE or FALSE if we're using an integer type instead
-     * of a real Boolean type.
-     */
-    HDassert((op_ptr->flag == FALSE) || (op_ptr->flag == TRUE));
-#endif /* H5_HAVE_STDBOOL_H */
 
     if (pass) {
 
@@ -2782,7 +2770,7 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
 
             if (verbose) {
 
-                HDfprintf(stdout, "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n", FUNC,
+                HDfprintf(stdout, "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n", __func__,
                           (long long)(cache_ptr->index_len), (long long)(cache_ptr->index_size),
                           (long long)(cache_ptr->clean_index_size), (long long)(cache_ptr->dirty_index_size));
             }
@@ -3536,7 +3524,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", FUNC);
+        HDfprintf(stdout, "%s(): entering.\n", __func__);
 
     if (pass) {
         cache_ptr = file_ptr->shared->cache;
@@ -3868,7 +3856,7 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", FUNC);
+        HDfprintf(stdout, "%s(): entering.\n", __func__);
 
     if (pass) {
 
@@ -3960,7 +3948,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): Entering.\n", FUNC);
+        HDfprintf(stdout, "%s(): Entering.\n", __func__);
 
     if (pass) {
 
@@ -4220,7 +4208,7 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", FUNC);
+        HDfprintf(stdout, "%s(): entering.\n", __func__);
 
     if (pass) {
 
@@ -4311,7 +4299,7 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
     int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", FUNC);
+        HDfprintf(stdout, "%s: entering.\n", __func__);
 
     if (pass) {
         int i;
@@ -4405,7 +4393,7 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", FUNC);
+        HDfprintf(stdout, "%s: entering.\n", __func__);
 
     if (pass) {
 
@@ -4504,10 +4492,10 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     int     mile_stone = 1;
     int32_t type;
     int32_t idx;
-    int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
+    int32_t local_max_index[NUMBER_OF_ENTRY_TYPES] = {0};
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", FUNC);
+        HDfprintf(stdout, "%s: entering.\n", __func__);
 
     if (pass) {
         int i;
@@ -4530,7 +4518,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     idx = local_max_index[NUMBER_OF_ENTRY_TYPES - 1] + lag;
 
     if (verbose) /* 1 */
-        HDfprintf(stdout, "%s: point %d.\n", FUNC, mile_stone++);
+        HDfprintf(stdout, "%s: point %d.\n", __func__, mile_stone++);
 
     while ((pass) && ((idx + lag) >= 0)) {
         type = NUMBER_OF_ENTRY_TYPES - 1;
@@ -4572,7 +4560,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     }
 
     if (verbose) /* 2 */
-        HDfprintf(stdout, "%s: point %d.\n", FUNC, mile_stone++);
+        HDfprintf(stdout, "%s: point %d.\n", __func__, mile_stone++);
 
     if ((pass) && (display_stats)) {
 
@@ -4580,7 +4568,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     }
 
     if (verbose)
-        HDfprintf(stdout, "%s: exiting.\n", FUNC);
+        HDfprintf(stdout, "%s: exiting.\n", __func__);
 
 } /* col_major_scan_backward() */
 
@@ -4612,7 +4600,7 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
     int32_t local_max_index = -1;
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", FUNC);
+        HDfprintf(stdout, "%s: entering.\n", __func__);
 
     if (pass) {
 

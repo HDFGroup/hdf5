@@ -22,16 +22,17 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
-#include "H5ACpublic.h"
-#include "H5Dpublic.h"
-#include "H5Fpublic.h"
-#include "H5FDpublic.h"
-#include "H5Ipublic.h"
-#include "H5Lpublic.h"
-#include "H5Opublic.h"
-#include "H5MMpublic.h"
-#include "H5Tpublic.h"
-#include "H5Zpublic.h"
+#include "H5ACpublic.h" /* Metadata cache                           */
+#include "H5Dpublic.h"  /* Datasets                                 */
+#include "H5Fpublic.h"  /* Files                                    */
+#include "H5FDpublic.h" /* File drivers                             */
+#include "H5Ipublic.h"  /* ID management                            */
+#include "H5Lpublic.h"  /* Links                                    */
+#include "H5MMpublic.h" /* Memory management                        */
+#include "H5Opublic.h"  /* Object headers                           */
+#include "H5Spublic.h"  /* Dataspaces                               */
+#include "H5Tpublic.h"  /* Datatypes                                */
+#include "H5Zpublic.h"  /* Data filters                             */
 
 /*****************/
 /* Public Macros */
@@ -5206,6 +5207,34 @@ H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
  */
 H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
 
+/**
+ * \ingroup FAPL
+ *
+ * \brief Query the capability flags for the VOL connector that will be used
+ *              with this file access property list (FAPL).
+ *
+ * \fapl_id{plist_id}
+ * \param[out]  cap_flags  Flags that indicate the VOL connector capabilities
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_vol_cap_flags() queries the current VOL connector information
+ *              for a FAPL to retrieve the capability flags for the VOL
+ *              connector stack, as will be used by a file open or create
+ *              operation that uses this FAPL.
+ *
+ * \note This routine supports the use of the HDF5_VOL_CONNECTOR environment
+ *       variable to override the VOL connector set programmatically for the
+ *       FAPL (with H5Pset_vol).
+ *
+ * \note The H5VL_CAP_FLAG_ASYNC flag can be checked to see if asynchronous
+ *              operations are supported by the VOL connector stack.
+ *
+ * \since 1.13.0
+ *
+ */
+H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
+
 #ifdef H5_HAVE_PARALLEL
 /**
  * \ingroup GACPL
@@ -7999,6 +8028,44 @@ H5_DLL herr_t H5Pget_mpio_actual_io_mode(hid_t plist_id, H5D_mpio_actual_io_mode
 H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no_collective_cause,
                                               uint32_t *global_no_collective_cause);
 #endif /* H5_HAVE_PARALLEL */
+/**
+ *
+ * \ingroup DXPL
+ *
+ * \brief Sets a hyperslab file selection for a dataset I/O operation
+ *
+ * \param[in] plist_id Property list identifier
+ * \param[in] rank     Number of dimensions of selection
+ * \param[in] op       Operation to perform on current selection
+ * \param[in] start    Offset of start of hyperslab
+ * \param[in] stride   Hyperslab stride
+ * \param[in] count    Number of blocks included in hyperslab
+ * \param[in] block    Size of block in hyperslab
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_dataset_io_hyperslab_selection() is designed to be used
+ *          in conjunction with using #H5S_PLIST for the file dataspace
+ *          ID when making a call to H5Dread() or H5Dwrite().  When used
+ *          with #H5S_PLIST, the selection created by one or more calls to
+ *          this routine is used for determining which dataset elements to
+ *          access.
+ *
+ *          \p rank is the dimensionality of the selection and determines
+ *          the size of the \p start, \p stride, \p count, and \p block arrays.
+ *          \p rank must be between 1 and #H5S_MAX_RANK, inclusive.
+ *
+ *          The \op, \p start, \p stride, \p count, and \p block parameters
+ *          behave identically to their behavior for H5Sselect_hyperslab(),
+ *          please see the documentation for that routine for details about
+ *          their use.
+ *
+ * \since 1.13.0
+ *
+ */
+H5_DLL herr_t H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op,
+                                                    const hsize_t start[], const hsize_t stride[],
+                                                    const hsize_t count[], const hsize_t block[]);
 
 /* Link creation property list (LCPL) routines */
 /**

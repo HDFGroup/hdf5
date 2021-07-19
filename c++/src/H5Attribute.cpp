@@ -14,7 +14,6 @@
 #include <iostream>
 #include <string>
 
-#include "H5private.h" // for HDfree
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -313,7 +312,7 @@ Attribute::getName() const
     H5std_string attr_name; // attribute name to return
 
     // Preliminary call to get the size of the attribute name
-    ssize_t name_size = H5Aget_name(id, static_cast<size_t>(0), NULL);
+    ssize_t name_size = H5Aget_name(id, 0, NULL);
 
     // If H5Aget_name failed, throw exception
     if (name_size < 0) {
@@ -324,8 +323,8 @@ Attribute::getName() const
     }
     // Attribute's name exists, retrieve it
     else if (name_size > 0) {
-        char *name_C = new char[name_size + 1]; // temporary C-string
-        HDmemset(name_C, 0, name_size + 1);     // clear buffer
+        // Create buffer for C string
+        char *name_C = new char[name_size + 1]();
 
         // Use overloaded function
         name_size = getName(name_C, name_size + 1);
@@ -336,6 +335,7 @@ Attribute::getName() const
         // Clean up resource
         delete[] name_C;
     }
+
     // Return attribute's name
     return (attr_name);
 }
@@ -393,8 +393,8 @@ Attribute::getName(H5std_string &attr_name, size_t len) const
     }
     // If length is provided, get that number of characters in name
     else {
-        char *name_C = new char[len + 1]; // temporary C-string
-        HDmemset(name_C, 0, len + 1);     // clear buffer
+        // Create buffer for C string
+        char *name_C = new char[len + 1]();
 
         // Use overloaded function
         name_size = getName(name_C, len + 1);
@@ -551,7 +551,7 @@ Attribute::p_read_variable_len(const DataType &mem_type, H5std_string &strg) con
 
     // Get string from the C char* and release resource allocated by C API
     strg = strg_C;
-    HDfree(strg_C);
+    free(strg_C);
 }
 
 #ifndef DOXYGEN_SHOULD_SKIP_THIS

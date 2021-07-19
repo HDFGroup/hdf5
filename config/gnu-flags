@@ -207,9 +207,9 @@ if test "X-gcc" = "X-$cc_vendor"; then
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-general)"
         H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-general)"
 
-    ######################
-    # Developer warnings #
-    ######################
+        ######################
+        # Developer warnings #
+        ######################
 
         NO_DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments no-developer-general)
         DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments developer-general)

@@ -21,15 +21,12 @@
  */
 
 /* See H5private.h for how to include headers */
-#undef NDEBUG
 #include "hdf5.h"
 
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /* Solaris Studio defines attribute, but for the attributes we need */
 #if !defined(H5_HAVE_ATTRIBUTE) || defined __cplusplus || defined(__SUNPRO_C)

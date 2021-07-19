@@ -207,7 +207,7 @@ H5FL_term_package(void)
         /* Dump information about all the outstanding allocations */
         while (trk != NULL) {
             /* Print information about the outstanding block */
-            HDfprintf(stderr, "%s: Outstanding allocation:\n", FUNC);
+            HDfprintf(stderr, "%s: Outstanding allocation:\n", __func__);
             HDfprintf(stderr, "\tPtr: %p, File: %s, Function: %s, Line: %d\n",
                       (((unsigned char *)trk) + sizeof(H5FL_track_t)), trk->file, trk->func, trk->line);
             H5CS_print_stack(trk->stack, stderr);
@@ -337,8 +337,11 @@ H5FL_reg_free(H5FL_reg_head_t *head, void *obj)
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk->stack);
-        trk->file = H5MM_xfree(trk->file);
-        trk->func = H5MM_xfree(trk->func);
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        trk->file = NULL;
+        trk->func = NULL;
 
         /* Remove from "outstanding allocations" list */
         if (trk == H5FL_out_head_g) {
@@ -443,8 +446,11 @@ H5FL_reg_malloc(H5FL_reg_head_t *head H5FL_TRACK_PARAMS)
     /* Copy allocation location information */
     ((H5FL_track_t *)ret_value)->stack = H5CS_copy_stack();
     HDassert(((H5FL_track_t *)ret_value)->stack);
-    ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
-    ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
+    /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    ((H5FL_track_t *)ret_value)->file = call_file;
+    ((H5FL_track_t *)ret_value)->func = call_func;
     ((H5FL_track_t *)ret_value)->line = call_line;
 
     /* Add to "outstanding allocations" list */
@@ -625,7 +631,7 @@ H5FL__reg_term(void)
         tmp = H5FL_reg_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-        HDprintf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_reg_gc_head.first->list->name,
+        HDprintf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_reg_gc_head.first->list->name,
                  (int)H5FL_reg_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
         /* Check if the list has allocations outstanding */
@@ -908,8 +914,11 @@ H5FL_blk_malloc(H5FL_blk_head_t *head, size_t size H5FL_TRACK_PARAMS)
     /* Copy allocation location information */
     ((H5FL_track_t *)ret_value)->stack = H5CS_copy_stack();
     HDassert(((H5FL_track_t *)ret_value)->stack);
-    ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
-    ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
+    /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    ((H5FL_track_t *)ret_value)->file = call_file;
+    ((H5FL_track_t *)ret_value)->func = call_func;
     ((H5FL_track_t *)ret_value)->line = call_line;
 
     /* Add to "outstanding allocations" list */
@@ -1004,8 +1013,11 @@ H5FL_blk_free(H5FL_blk_head_t *head, void *block)
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk->stack);
-        trk->file = H5MM_xfree(trk->file);
-        trk->func = H5MM_xfree(trk->func);
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        trk->file = NULL;
+        trk->func = NULL;
 
         /* Remove from "outstanding allocations" list */
         if (trk == H5FL_out_head_g) {
@@ -1120,14 +1132,20 @@ H5FL_blk_realloc(H5FL_blk_head_t *head, void *block, size_t new_size H5FL_TRACK_
 
                 /* Release previous tracking information */
                 H5CS_close_stack(trk->stack);
-                trk->file = H5MM_xfree(trk->file);
-                trk->func = H5MM_xfree(trk->func);
+                /* The 'func' & 'file' strings are statically allocated (by the compiler)
+                 * and are not allocated, so there's no need to free them.
+                 */
+                trk->file = NULL;
+                trk->func = NULL;
 
                 /* Store new tracking information */
                 trk->stack = H5CS_copy_stack();
                 HDassert(trk->stack);
-                trk->file = H5MM_strdup(call_file);
-                trk->func = H5MM_strdup(call_func);
+                /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+                 * there's no need to duplicate them.
+                 */
+                trk->file = call_file;
+                trk->func = call_func;
                 trk->line = call_line;
             }
 #endif /* H5FL_TRACK */
@@ -1303,7 +1321,7 @@ H5FL__blk_term(void)
         tmp = H5FL_blk_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-        HDprintf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_blk_gc_head.first->pq->name,
+        HDprintf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_blk_gc_head.first->pq->name,
                  (int)H5FL_blk_gc_head.first->pq->allocated);
 #endif /* H5FL_DEBUG */
 
@@ -1763,7 +1781,7 @@ H5FL__arr_term(void)
 
         /* Check if the list has allocations outstanding */
 #ifdef H5FL_DEBUG
-        HDprintf("%s: head->name = %s, head->allocated = %d\n", FUNC, H5FL_arr_gc_head.first->list->name,
+        HDprintf("%s: head->name = %s, head->allocated = %d\n", __func__, H5FL_arr_gc_head.first->list->name,
                  (int)H5FL_arr_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
         if (H5FL_arr_gc_head.first->list->allocated > 0) {
@@ -2017,8 +2035,11 @@ H5FL_fac_free(H5FL_fac_head_t *head, void *obj)
 
         /* Free tracking information about the allocation location */
         H5CS_close_stack(trk->stack);
-        trk->file = H5MM_xfree(trk->file);
-        trk->func = H5MM_xfree(trk->func);
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        trk->file = NULL;
+        trk->func = NULL;
 
         /* Remove from "outstanding allocations" list */
         if (trk == H5FL_out_head_g) {
@@ -2120,8 +2141,11 @@ H5FL_fac_malloc(H5FL_fac_head_t *head H5FL_TRACK_PARAMS)
     /* Copy allocation location information */
     ((H5FL_track_t *)ret_value)->stack = H5CS_copy_stack();
     HDassert(((H5FL_track_t *)ret_value)->stack);
-    ((H5FL_track_t *)ret_value)->file = H5MM_strdup(call_file);
-    ((H5FL_track_t *)ret_value)->func = H5MM_strdup(call_func);
+    /* The 'call_func' & 'call_file' strings are statically allocated (by the compiler)
+     * there's no need to duplicate them.
+     */
+    ((H5FL_track_t *)ret_value)->file = call_file;
+    ((H5FL_track_t *)ret_value)->func = call_func;
     ((H5FL_track_t *)ret_value)->line = call_line;
 
     /* Add to "outstanding allocations" list */
@@ -2348,8 +2372,8 @@ H5FL__fac_term_all(void)
         tmp = H5FL_fac_gc_head.first->next;
 
 #ifdef H5FL_DEBUG
-        HDprintf("%s: head->size = %d, head->allocated = %d\n", FUNC, (int)H5FL_fac_gc_head.first->list->size,
-                 (int)H5FL_fac_gc_head.first->list->allocated);
+        HDprintf("%s: head->size = %d, head->allocated = %d\n", __func__,
+                 (int)H5FL_fac_gc_head.first->list->size, (int)H5FL_fac_gc_head.first->list->allocated);
 #endif /* H5FL_DEBUG */
 
         /* The list cannot have any allocations outstanding */

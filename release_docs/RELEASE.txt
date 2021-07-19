@@ -49,6 +49,39 @@ New Features
 
     Configuration:
     -------------
+    - Adds C++ Autotools configuration file for Intel
+
+      * Checks for icpc as the compiler
+      * Sets std=c++11
+      * Copies most non-warning flags from intel-flags
+
+      (DER - 2021/06/02)
+
+    - Adds C++ Autotools configuration file for PGI
+
+      * Checks for pgc++ as the compiler name (was: pgCC)
+      * Sets -std=c++11
+      * Other options basically match new C options (below)
+
+      (DER - 2021/06/02)
+
+    - Updates PGI C options
+
+      * -Minform set to warn (was: inform) to suppress spurious messages
+      * Sets -gopt -O2 as debug options
+      * Sets -O4 as 'high optimization' option
+      * Sets -O0 as 'no optimization' option
+      * Removes specific settings for PGI 9 and 10
+
+      (DER - 2021/06/02)
+
+    - A C++11-compliant compiler is now required to build the C++ wrappers
+
+      CMAKE_CXX_STANDARD is now set to 11 when building with CMake and
+      -std=c++11 is added when building with clang/gcc via the Autotools.
+
+      (DER - 2021/05/27)
+
     - CMake will now run the shell script tests in test/ by default
 
       The test directory includes several shell script tests that previously
@@ -100,7 +133,7 @@ New Features
 
       To do so, set CMAKE_OSX_ARCHITECTURES="x86_64;arm64"
 
-      (SAM - 2021/02/07, https://github.com/HDFGroup/hdf5/issues/311)
+      (SAM - 2021/02/07, github-311)
 
     - Added a configure-time option to control certain compiler warnings
       diagnostics
@@ -430,6 +463,19 @@ New Features
 
     Library:
     --------
+    - gcc warning suppression macros were moved out of H5public.h
+
+      The HDF5 library uses a set of macros to suppress warnings on gcc.
+      These warnings were originally located in H5public.h so that the
+      multi VFD (which only uses public headers) could also make use of them
+      but internal macros should not be publicly exposed like this.
+
+      These macros have now been moved to H5private.h. Pending future multi
+      VFD refactoring, the macros have been duplicated in H5FDmulti.c to
+      suppress the format string warnings there.
+
+        (DER - 2021/06/03)
+
     - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
 
       The size_hint value is ultimately stored in a uint32_t struct field,
@@ -1014,6 +1060,44 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Better support for libaec (open-source Szip library) in CMake
+ 
+      Implemented better support for libaec 1.0.5 (or later) library. This version 
+      of libaec contains improvements for better integration with HDF5. Furthermore,
+      the variable USE_LIBAEC_STATIC has been introduced to allow to make use of 
+      static version of libaec library. Use libaec_DIR or libaec_ROOT to set
+      the location in which libaec can be found.
+
+      Be aware, the Szip library of libaec 1.0.4 depends on another library within
+      libaec library. This dependency is not specified in the current CMake
+      configuration which means that one can not use the static Szip library of
+      libaec 1.0.4 when building HDF5. This has been resolved in libaec 1.0.5.
+
+      (JWSB - 2021/06/22)
+
+    - Refactor CMake configure for Fortran
+
+      The Fortran configure tests for KINDs reused a single output file that was
+      read to form the Integer and Real Kinds defines. However, if config was run
+      more then once, the CMake completed variable prevented the tests from executing
+      again and the last value saved in the file was used to create the define.
+      Creating separate files for each KIND solved the issue.
+
+      In addition the test for H5_PAC_C_MAX_REAL_PRECISION was not pulling in
+      defines for proper operation and did not define H5_PAC_C_MAX_REAL_PRECISION
+      correctly for a zero value. This was fixed by supplying the required defines.
+      In addition it was moved from the Fortran specific HDF5UseFortran.camke file
+      to the C centric ConfigureChecks.cmake file.
+
+      (ADB - 2021/06/03)
+
+    - Move emscripten flag to compile flags
+
+      The emscripten flag, -O0, was removed from target_link_libraries command
+      to the correct target_compile_options command.
+
+      (ADB - 2021/04/26 HDFFV-11083)
+
     - Remove arbitrary warning flag groups from CMake builds
 
       The arbitrary groups were created to reduce the quantity of warnings being
@@ -1050,6 +1134,14 @@ Bug Fixes since HDF5-1.12.0 release
 
       (DER - 2021/01/07, HDFFV-11201)
 
+    - Add missing ENV variable line to hdfoptions.cmake file
+
+      Using the build options to use system SZIP/ZLIB libraries need to also
+      specify the library root directory. Setting the {library}_ROOT ENV
+      variable was added to the hdfoptions.cmake file.
+
+      (ADB - 2020/10/19 HDFFV-11108)
+
 
     Tools
     -----
@@ -1062,7 +1154,7 @@ Bug Fixes since HDF5-1.12.0 release
         also show the number of bits for precision.
         These files are also used in the java tests.
 
-        (ADB - 2021/03/24, HDFFV-11229)
+        (ADB - 2021/03/24, HDFFV-11229,HDFFV-11113)
 
     - Fixed tools argument parsing.
 
@@ -1109,7 +1201,7 @@ Bug Fixes since HDF5-1.12.0 release
           2 : All level 1 information plus extended attribute status report
           3 : All level 2 information plus file names
 
-        (ADB - 2020/07/20, HDFFV-10005)
+        (ADB - 2020/07/20, HDFFV-1005)
 
     - h5repack was fixed to repack the reference attributes properly.
 
@@ -1356,6 +1448,9 @@ Known Problems
 
     CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
     issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+
+    The subsetting option in ph5diff currently will fail and should be avoided.
+    The subsetting option works correctly in serial h5diff.
 
     Known problems in previous releases can be found in the HISTORY*.txt files
     in the HDF5 source. Please report any new problems found to

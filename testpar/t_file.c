@@ -952,9 +952,8 @@ test_file_properties(void)
 void
 test_delete(void)
 {
-    hid_t       fid     = H5I_INVALID_HID; /* HDF5 file ID */
-    hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
-    hbool_t     is_coll;
+    hid_t       fid      = H5I_INVALID_HID; /* HDF5 file ID */
+    hid_t       fapl_id  = H5I_INVALID_HID; /* File access plist */
     const char *filename = NULL;
     MPI_Comm    comm     = MPI_COMM_WORLD;
     MPI_Info    info     = MPI_INFO_NULL;

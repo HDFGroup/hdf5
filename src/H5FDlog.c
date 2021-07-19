@@ -1218,7 +1218,6 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pread) */
     if (addr != file->pos || OP_READ != file->op) {
-
         H5_timer_t    seek_timer; /* Timer for seek operation */
         H5_timevals_t seek_times; /* Elapsed time for seek operation */
 
@@ -1441,7 +1440,6 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
     if (addr != file->pos || OP_WRITE != file->op) {
-
         H5_timer_t    seek_timer; /* Timer for seek operation */
         H5_timevals_t seek_times; /* Elapsed time for seek operation */
 

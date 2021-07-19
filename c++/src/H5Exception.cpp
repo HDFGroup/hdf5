@@ -25,7 +25,7 @@ const char Exception::DEFAULT_MSG[] = "No detailed information provided";
 ///\brief       Default constructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Exception::Exception()
+Exception::Exception() : detail_message{""}, func_name{""}
 {
 }
 
