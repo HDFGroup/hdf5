@@ -3,8 +3,28 @@
 <table>
 <tr><th>RFC ID</th><th>Title</th><th>Comments</th></tr>
 <tr>
+  <td>2007-08-01</td>
+  <td>\ref_rfc20070801</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2011-07-26</td>
+  <td>\ref_rfc20110726</td>
+  <td></td>
+</tr>
+<tr>
   <td>2011-08-11</td>
   <td>\ref_rfc20110811</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2012-01-04</td>
+  <td>\ref_rfc20120104</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2012-03-05</td>
+  <td>\ref_rfc20120305</td>
   <td></td>
 </tr>
 <tr>
@@ -18,6 +38,11 @@
   <td></td>
 </tr>
 <tr>
+  <td>2012-08-28</td>
+  <td>\ref_rfc20120828</td>
+  <td></td>
+</tr>
+<tr>
   <td>2012-10-24</td>
   <td>\ref_rfc20121024</td>
   <td></td>
@@ -25,6 +50,11 @@
 <tr>
   <td>2013-09-19</td>
   <td>\ref_rfc20130919</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2014-03-18</td>
+  <td>\ref_rfc20140707</td>
   <td></td>
 </tr>
 <tr>
@@ -43,8 +73,18 @@
   <td></td>
 </tr>
 <tr>
+  <td>2014-07-29</td>
+  <td>\ref_rfc20140729</td>
+  <td></td>
+</tr>
+<tr>
   <td>2014-12-10</td>
   <td>\ref_rfc20141210</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2015-02-12</td>
+  <td>\ref_rfc20150212</td>
   <td></td>
 </tr>
 <tr>
@@ -55,6 +95,16 @@
 <tr>
   <td>2015-04-24</td>
   <td>\ref_rfc20150424</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2015-04-29</td>
+  <td>\ref_rfc20150429</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2015-06-15</td>
+  <td>\ref_rfc20150615</td>
   <td></td>
 </tr>
 <tr>
@@ -70,6 +120,11 @@
 <tr>
   <td>2016-01-05</td>
   <td>\ref_rfc20160105</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2017-07-07</td>
+  <td>\ref_rfc20170707</td>
   <td></td>
 </tr>
 <tr>
@@ -95,6 +150,11 @@
 <tr>
   <td>2018-12-31</td>
   <td>\ref_rfc20181231</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2019-04-10</td>
+  <td>\ref_rfc20190410</td>
   <td></td>
 </tr>
 <tr>
