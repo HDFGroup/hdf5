@@ -241,6 +241,19 @@ ALIASES += ref_sencode_fmt_change="<a href=\"https://portal.hdfgroup.org/pages/v
 ALIASES += ref_vlen_strings="\Emph{Creating variable-length string datatypes}"
 ALIASES += ref_vol_doc="VOL documentation"
 
+# RFCs
+ALIASES += ref_rfc20120501="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5FileImageOperations.pdf\">HDF5 File Image Operations</a>"
+ALIASES += ref_rfc20120523="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/paged_aggregation.pdf\">HDF5 File Space Management: Paged Aggregation</a>"
+ALIASES += ref_rfc20121024="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/FileSpaceManagement.pdf\">HDF5 File Space Management</a>"
+ALIASES += ref_rfc20140707="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2014-08-28-RFC_VOL.pdf\">Virtual Object Layer</a>"
+ALIASES += ref_rfc20141210="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/HDF5-VDS-requirements-use-cases-2014-12-10.pdf\">HDF5 Virtual Dataset</a>"
+ALIASES += ref_rfc20150423="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-CollectiveMetadataReads.pdf\">Enabling Collective Metadata Reads</a>"
+ALIASES += ref_rfc20150424="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-CollectiveMetadataWrites.pdf\">Collective Metadata Writes</a>"
+ALIASES += ref_rfc20150709="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-Page_Buffering.pdf\">Page Buffering</a>"
+ALIASES += ref_rfc20160105="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-bounds.pdf\">Setting Bounds for Object Creation in HDF5 1.10.0</a>"
+ALIASES += ref_rfc20180610="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/VFD_SWMR_RFC_191027.pdf\">VFD SWMR</a>"
+ALIASES += ref_rfc20190923="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2019-09-23-RFC_VOL_feature_flags.pdf\">Virtual Object Layer (VOL) API Compatibility</a>"
+
 ################################################################################
 # The Usual Suspects
 ################################################################################
