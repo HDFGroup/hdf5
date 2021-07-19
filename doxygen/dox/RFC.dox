@@ -3,6 +3,11 @@
 <table>
 <tr><th>RFC ID</th><th>Title</th><th>Comments</th></tr>
 <tr>
+  <td>2011-08-11</td>
+  <td>\ref_rfc20110811</td>
+  <td></td>
+</tr>
+<tr>
   <td>2012-05-01</td>
   <td>\ref_rfc20120501</td>
   <td></td>
@@ -18,8 +23,23 @@
   <td></td>
 </tr>
 <tr>
+  <td>2013-09-19</td>
+  <td>\ref_rfc20130919</td>
+  <td></td>
+</tr>
+<tr>
   <td>2014-07-07</td>
   <td>\ref_rfc20140707</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2014-07-17</td>
+  <td>\ref_rfc20140717</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2014-07-22</td>
+  <td>\ref_rfc20140722</td>
   <td></td>
 </tr>
 <tr>
@@ -43,13 +63,38 @@
   <td></td>
 </tr>
 <tr>
+  <td>2015-09-15</td>
+  <td>\ref_rfc20150915</td>
+  <td></td>
+</tr>
+<tr>
   <td>2016-01-05</td>
   <td>\ref_rfc20160105</td>
   <td></td>
 </tr>
 <tr>
+  <td>2018-01-25</td>
+  <td>\ref_rfc20180125</td>
+  <td></td>
+</tr>
+<tr>
   <td>2018-06-10</td>
   <td>\ref_rfc20180610</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2018-06-20</td>
+  <td>\ref_rfc20180620</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2018-12-20</td>
+  <td>\ref_rfc20181220</td>
+  <td></td>
+</tr>
+<tr>
+  <td>2018-12-31</td>
+  <td>\ref_rfc20181231</td>
   <td></td>
 </tr>
 <tr>
