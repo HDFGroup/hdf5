@@ -655,7 +655,7 @@ CONTAINS
           CHARACTER(LEN=*), PARAMETER :: filename = "filename"
           CHARACTER(LEN=80)  :: fix_filename
 
-          INTEGER(HID_T) :: file_id, reopen_id  ! File identifiers
+          INTEGER(HID_T) :: file_id             ! File identifier
           INTEGER(HID_T) :: dset_id             ! Dataset identifier
 
           !
@@ -686,27 +686,7 @@ CONTAINS
           INTEGER     ::   error
 
           !
-          !general purpose integer
-          !
-          INTEGER     ::  i, j
-
-          !
-          !array to store data
-          !
-          INTEGER, DIMENSION(4,6) :: dset_data
-          INTEGER(HSIZE_T)  :: file_size
-
-          !
-          !initialize the dset_data array which will be written to the "/dset"
-          !
-          do j = 1, NY
-               do i = 1, NX
-                    dset_data(i,j) = (i-1)*6 + j;
-               end do
-          end do
-
-          !
-          !Create file "reopen.h5" using default properties.
+          !Create file "filename.h5" using default properties.
           !
           CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
           if (error .ne. 0) then
@@ -729,35 +709,6 @@ CONTAINS
                dset_id, error)
               CALL check("h5dcreate_f",error,total_error)
 
-         !
-         !close the dataset.
-         !
-         CALL h5dclose_f(dset_id, error)
-              CALL check("h5dclose_f",error,total_error)
-
-         !
-         !close the dataspace.
-         !
-         CALL h5sclose_f(dataspace, error)
-              CALL check("h5sclose_f",error,total_error)
-
-         !
-         !Reopen file dsetf.h5.
-         !
-         CALL h5freopen_f(file_id, reopen_id, error)
-              CALL check("h5freopen_f",error,total_error)
-         !
-         !Check file size
-         !
-         CALL h5fget_filesize_f(file_id, file_size, error)
-              CALL check("h5fget_filesize_f",error,total_error)
-
-         !
-         !Open the dataset based on the reopen_id.
-         !
-         CALL h5dopen_f(reopen_id, dsetname, dset_id, error)
-              CALL check("h5dopen_f",error,total_error)
-
          CALL check_get_name(file_id, fix_filename, total_error)
          CALL check_get_name(dset_id, fix_filename, total_error)
 
@@ -771,9 +722,6 @@ CONTAINS
          !
          CALL h5fclose_f(file_id, error)
               CALL check("h5fclose_f",error,total_error)
-         CALL h5fclose_f(reopen_id, error)
-              CALL check("h5fclose_f",error,total_error)
-
 
           if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
               CALL check("h5_cleanup_f", error, total_error)
