@@ -30,20 +30,39 @@
 #define H5_MY_PKG_INIT YES
 
 /**\defgroup H5P H5P
- * \brief Property List Interface
  *
- * \details The HDF5 Property List Interface provides a mechanism to take
- *          advantage of more powerful or unusual features in HDF5.
+ * Use the functions in this module to manage HDF5 property lists and property
+ * list classes.
  *
- *          HDF5 objects have properties or characteristics associated with
- *          them, and there are default properties that handle the most
- *          common needs. These default properties can be modified using the
- *          HDF5 Property List Interface. For example, the data storage
- *          layout property of a dataset is contiguous by default. For better
- *          performance, the layout can be modified to be chunked or chunked
- *          and compressed.
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5P_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet H5P_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet H5P_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet H5P_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
  *
- * \todo Describe concisely what the functions in this module are about.
+ * The HDF5 Property List Interface provides a mechanism to take advantage of
+ * more powerful or unusual features in HDF5.
+ *
+ * HDF5 objects have properties or characteristics associated with them, and
+ * there are default properties that handle the most common needs. These default
+ * properties can be modified using the HDF5 Property List Interface. For
+ * example, the data storage layout property of a dataset is contiguous by
+ * default. For better performance, the layout can be modified to be chunked or
+ * chunked and compressed.
  *
  * \defgroup GPLO General Property List Operations
  * \ingroup H5P

@@ -1105,6 +1105,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   AC_SUBST([DOXYGEN_SERVER_BASED_SEARCH])
   AC_SUBST([DOXYGEN_EXTERNAL_SEARCH])
   AC_SUBST([DOXYGEN_SEARCHENGINE_URL])
+  AC_SUBST([DOXYGEN_PREDEFINED])
 
 # SRCDIR Environment variables used inside doxygen macro for the source location:
   DOXYGEN_PACKAGE=${PACKAGE_NAME}
@@ -1116,7 +1117,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
   DOXYGEN_MACRO_EXPANSION=YES
   DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
-  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/examples $(SRCDIR)/test'
+  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/dox/cookbook $(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/examples $(SRCDIR)/test'
   DOXYGEN_LAYOUT_FILE='$(SRCDIR)/doxygen/hdf5doxy_layout.xml'
   DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
   DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
@@ -1125,6 +1126,7 @@ if test "X$HDF5_DOXYGEN" = "Xyes"; then
   DOXYGEN_SERVER_BASED_SEARCH=NO
   DOXYGEN_EXTERNAL_SEARCH=NO
   DOXYGEN_SEARCHENGINE_URL=
+  DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
 
   DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
 
