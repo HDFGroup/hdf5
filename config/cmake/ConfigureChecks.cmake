@@ -86,14 +86,6 @@ else ()
   set (HDF5_FILE_LOCKING_SETTING "no")
 endif ()
 
-#-----------------------------------------------------------------------------
-#  Are we going to use HSIZE_T
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_HSIZET "Enable datasets larger than memory" ON)
-if (HDF5_ENABLE_HSIZET)
-  set (${HDF_PREFIX}_HAVE_LARGE_HSIZET 1)
-endif ()
-
 # so far we have no check for this
 set (${HDF_PREFIX}_HAVE_TMPFILE 1)
 
