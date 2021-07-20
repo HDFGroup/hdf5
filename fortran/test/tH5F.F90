@@ -580,6 +580,155 @@ CONTAINS
 
         END SUBROUTINE reopentest
 
+!    The following subroutine checks that h5fget_name_f produces
+!    correct output for a given obj_id and filename.
+!
+
+        SUBROUTINE check_get_name(obj_id, fix_filename, total_error)
+        USE HDF5  ! This module contains all necessary modules
+        USE TH5_MISC
+          IMPLICIT NONE
+          INTEGER(HID_T) :: obj_id                          ! Object identifier
+          CHARACTER(LEN=80), INTENT(IN) :: fix_filename     ! Expected filename
+          INTEGER, INTENT(INOUT) :: total_error             ! Error count
+
+          CHARACTER(LEN=80)  ::file_name ! Filename buffer
+          INTEGER::error                 ! HDF5 error code
+          INTEGER(SIZE_T)::name_size             ! Filename length
+         !
+         !Get file name from the dataset identifier
+         !
+
+         ! Use an uninitialized buffer
+         CALL h5fget_name_f(obj_id, file_name, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. LEN_TRIM(fix_filename))THEN
+            WRITE(*,*) "  file name size obtained from the dataset id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
+            total_error = total_error + 1
+         END IF
+
+         ! Use a buffer initialized with spaces
+         file_name(:) = " "
+         CALL h5fget_name_f(obj_id, file_name, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. LEN_TRIM(fix_filename))THEN
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
+            WRITE(*,*) "  file name obtained from the dataset id is incorrect"
+            total_error = total_error + 1
+         END IF
+
+         ! Use a buffer initialized with non-whitespace characters
+         file_name(:) = "a"
+         CALL h5fget_name_f(obj_id, file_name, name_size, error)
+         CALL check("h5fget_name_f",error,total_error)
+         IF(name_size .NE. LEN_TRIM(fix_filename))THEN
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
+            total_error = total_error + 1
+         ENDIF
+         IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
+            total_error = total_error + 1
+         END IF
+
+        END SUBROUTINE check_get_name
+
+!    The following subroutine tests h5fget_name_f.
+!    It creates the file which has name "filename.h5" and
+!    tests that h5fget_name_f also returns the name "filename.h5"
+!
+
+        SUBROUTINE get_name_test(cleanup, total_error)
+        USE HDF5  ! This module contains all necessary modules
+        USE TH5_MISC
+          IMPLICIT NONE
+          LOGICAL, INTENT(IN) :: cleanup
+          INTEGER, INTENT(INOUT) :: total_error
+
+          !
+          CHARACTER(LEN=*), PARAMETER :: filename = "filename"
+          CHARACTER(LEN=80)  :: fix_filename
+
+          INTEGER(HID_T) :: file_id             ! File identifier
+          INTEGER(HID_T) :: dset_id             ! Dataset identifier
+
+          !
+          !dataset name is "dset"
+          !
+          CHARACTER(LEN=4), PARAMETER :: dsetname = "dset"
+
+          !
+          !data space rank and dimensions
+          !
+          INTEGER, PARAMETER :: RANK = 2
+          INTEGER, PARAMETER :: NX = 4
+          INTEGER, PARAMETER :: NY = 6
+
+          !
+          ! data space identifier
+          !
+          INTEGER(HID_T) :: dataspace
+
+          !
+          !The dimensions for the dataset.
+          !
+          INTEGER(HSIZE_T), DIMENSION(2) :: dims = (/NX,NY/)
+
+          !
+          !flag to check operation success
+          !
+          INTEGER     ::   error
+
+          !
+          !Create file "filename.h5" using default properties.
+          !
+          CALL h5_fixname_f(filename, fix_filename, H5P_DEFAULT_F, error)
+          if (error .ne. 0) then
+              write(*,*) "Cannot modify filename"
+              stop
+          endif
+          CALL h5fcreate_f(fix_filename, H5F_ACC_TRUNC_F, file_id, error)
+               CALL check("h5fcreate_f",error,total_error)
+
+          !
+          !Create data space for the dataset.
+          !
+          CALL h5screate_simple_f(RANK, dims, dataspace, error)
+               CALL check("h5screate_simple_f",error,total_error)
+
+          !
+          !Create dataset "/dset" inside the file .
+          !
+          CALL h5dcreate_f(file_id, dsetname, H5T_NATIVE_INTEGER, dataspace, &
+               dset_id, error)
+              CALL check("h5dcreate_f",error,total_error)
+
+         CALL check_get_name(file_id, fix_filename, total_error)
+         CALL check_get_name(dset_id, fix_filename, total_error)
+
+         !Close the dataset.
+         !
+         CALL h5dclose_f(dset_id, error)
+              CALL check("h5dclose_f",error,total_error)
+
+         !
+         !Close the file identifiers.
+         !
+         CALL h5fclose_f(file_id, error)
+              CALL check("h5fclose_f",error,total_error)
+
+          if(cleanup) CALL h5_cleanup_f(filename, H5P_DEFAULT_F, error)
+              CALL check("h5_cleanup_f", error, total_error)
+          RETURN
+
+        END SUBROUTINE get_name_test
+
 !
 !    The following example demonstrates how to get creation property list,
 !    and access property list.
