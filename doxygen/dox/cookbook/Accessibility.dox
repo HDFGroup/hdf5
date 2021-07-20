@@ -21,7 +21,10 @@ library versions.
 \par Discussion
 See RFC \ref_rfc20160105 for a detailed and comprehensive account of HDF5
 versioning (library, file format spec., etc.) and the H5Pset_libver_bounds()
-function is given.\n
+function.\n
+The default range #H5F_LIBVER_EARLIEST (low) - #H5F_LIBVER_LATEST (high) offers the
+widest compatibility range, but may not be suitable for certain (feature-)use
+cases.\n
 The HDF5 library comes with a \Emph{forward-} and \Emph{backward-compatibility}
 guarantee: This means that the latest version of the library can always read
 HDF5 files created by a version realesed earlier (backward compatibility).

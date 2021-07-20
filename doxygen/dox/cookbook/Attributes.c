@@ -20,7 +20,13 @@ main(void)
             ret_val = EXIT_FAILURE;
             goto fail_fapl;
         }
-        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_V18) < 0) {
+#if H5_VERSION_GE(1, 10, 0)
+        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_V18, H5F_LIBVER_LATEST) < 0) {
+#elif H5_VERSION_GE(1, 8, 0)
+        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
+#else
+#error Only HDF5 1.8.x and later supported.
+#endif
             ret_val = EXIT_FAILURE;
             goto fail_file;
         }
