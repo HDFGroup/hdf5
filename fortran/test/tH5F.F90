@@ -607,7 +607,7 @@ CONTAINS
             total_error = total_error + 1
          ENDIF
          IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
-            WRITE(*,*) "  file name obtained from the dataset id is incorrect"
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
             total_error = total_error + 1
          END IF
 
@@ -616,7 +616,7 @@ CONTAINS
          CALL h5fget_name_f(obj_id, file_name, name_size, error)
          CALL check("h5fget_name_f",error,total_error)
          IF(name_size .NE. LEN_TRIM(fix_filename))THEN
-            WRITE(*,*) "  file name size obtained from the dataset id is incorrect"
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
             total_error = total_error + 1
          ENDIF
          IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
@@ -629,11 +629,11 @@ CONTAINS
          CALL h5fget_name_f(obj_id, file_name, name_size, error)
          CALL check("h5fget_name_f",error,total_error)
          IF(name_size .NE. LEN_TRIM(fix_filename))THEN
-            WRITE(*,*) "  file name size obtained from the dataset id is incorrect"
+            WRITE(*,*) "  file name size obtained from the object id is incorrect"
             total_error = total_error + 1
          ENDIF
          IF(file_name(1:name_size) .NE. TRIM(fix_filename)) THEN
-            WRITE(*,*) "  file name obtained from the dataset id is incorrect"
+            WRITE(*,*) "  file name obtained from the object id is incorrect"
             total_error = total_error + 1
          END IF
 
