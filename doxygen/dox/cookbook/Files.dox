@@ -6,7 +6,7 @@
 
 \par Problem
 You sometimes delete objects in HDF5 files and don't have new content to use the
-free space, but would like to reuse it in the future
+free space, but would like to reuse it in the future.
 
 \par Solution
 At file creation time, set the file space management strategy and persistence of
@@ -17,19 +17,36 @@ free space tracking information via H5Pset_file_space_strategy().
 \snippet{lineno} Files.c free_space
 
 \par Discussion
-A discussion of the fine points and variants of the solution
-\li We have to use H5Pset_libver_bounds() to use a newer file format
-\li Reference the RFC(s)
-\li Use paged allocation and page buffering
+Free space tracking is supported only in HDF5 versions 1.10.x and higher.
+This has implications for the accessibility of your HDF5 files and
+should be considered carefully. If compatibility with previous versions of
+HDF5 must be maintained, space reclamation via \Code{h5repack} might be an option.\n
+The file space strategy #H5F_FSPACE_STRATEGY_FSM_AGGR is not the only option
+that supports free-space tracking. #H5F_FSPACE_STRATEGY_PAGE is another option,
+which adds paged allocation and is used most effectively with page buffering.\n
+For an in-depth account of HDF5 file space management, paged-allocation, and
+page buffering, see the following documents:
+\li \ref_rfc20121024
+\li \ref_rfc20120523
+\li \ref_rfc20150709
 
 \par See Also
 See \ref CB_MaintainCompat for HDF5 compatibility implications.
+
+
+\subsection CB_RemoveUnusedSpace Removing Unused Space from HDF5 Files
+
+\par Problem
+Based on estimates or \Code{h5stat} output you know that a large portion
+of an HDF5 file consists of free or unaccounted space, and you would like
+to remove it.
+
 
 \subsection CB_UserBlock Creating an HDF5 File User Block
 
 \par Problem
 You would like to include certain ancillary, non-HDF5 content in an
-HDF5 file such that it can be accessed without the HDF5 library
+HDF5 file such that it can be accessed without the HDF5 library.
 
 \par Solution
 Use a file creation property list in which the user block size is set via

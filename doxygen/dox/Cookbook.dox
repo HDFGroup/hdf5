@@ -4,6 +4,7 @@
 
 \ref Files
 \li \ref CB_FreeSpace
+\li \ref CB_RemoveUnusedSpace
 \li \ref CB_UserBlock
 
 \ref Attributes
