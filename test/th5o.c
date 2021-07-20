@@ -43,14 +43,17 @@ test_h5o_open(void)
 {
     hid_t       fid;                      /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
+    char        filename[1024];
     hsize_t     dims[RANK];
     H5I_type_t  id_type;    /* Type of IDs returned from H5Oopen */
     H5G_info_t  ginfo;      /* Group info struct */
     H5T_class_t type_class; /* Class of the datatype */
     herr_t      ret;        /* Value returned from API calls */
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group, dataset, and committed datatype within the file */
@@ -155,11 +158,14 @@ test_h5o_close(void)
 {
     hid_t   fid;                      /* HDF5 File ID      */
     hid_t   grp, dset, dtype, dspace; /* Object identifiers */
+    char    filename[1024];
     hsize_t dims[RANK];
     herr_t  ret; /* Value returned from API calls */
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group, dataset, and committed datatype within the file */
@@ -247,8 +253,9 @@ test_h5o_open_by_addr(void)
 {
     hid_t       fid;                      /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
-    H5L_info2_t li;                       /* Buffer for H5Lget_info2 */
-    haddr_t     grp_addr;                 /* Addresses for objects */
+    char        filename[1024];
+    H5L_info2_t li;       /* Buffer for H5Lget_info2 */
+    haddr_t     grp_addr; /* Addresses for objects */
     haddr_t     dset_addr;
     haddr_t     dtype_addr;
     hsize_t     dims[RANK];
@@ -257,8 +264,10 @@ test_h5o_open_by_addr(void)
     H5T_class_t type_class; /* Class of the datatype */
     herr_t      ret;        /* Value returned from API calls */
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group, dataset, and committed datatype within the file */
@@ -397,15 +406,18 @@ test_h5o_open_by_token(void)
 {
     hid_t       fid;                      /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
-    H5L_info2_t li;                       /* Buffer for H5Lget_info */
+    char        filename[1024];
+    H5L_info2_t li; /* Buffer for H5Lget_info */
     hsize_t     dims[RANK];
     H5I_type_t  id_type;    /* Type of IDs returned from H5Oopen */
     H5G_info_t  ginfo;      /* Group info struct */
     H5T_class_t type_class; /* Class of the datatype */
     herr_t      ret;        /* Value returned from API calls */
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group, dataset, and committed datatype within the file */
@@ -515,12 +527,15 @@ test_h5o_refcount(void)
 {
     hid_t       fid;                      /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
-    H5O_info2_t oinfo;                    /* Object info struct */
+    char        filename[1024];
+    H5O_info2_t oinfo; /* Object info struct */
     hsize_t     dims[RANK];
     herr_t      ret; /* Value returned from API calls */
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group, dataset, and committed datatype within the file */
@@ -612,7 +627,7 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file and check that the reference counts were really incremented */
-    fid = H5Fopen(TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     grp = H5Gopen2(fid, "group", H5P_DEFAULT);
@@ -650,7 +665,7 @@ test_h5o_refcount(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file and check that the reference counts were really decremented */
-    fid = H5Fopen(TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     grp = H5Gopen2(fid, "group", H5P_DEFAULT);
@@ -709,10 +724,11 @@ test_h5o_refcount(void)
 static void
 test_h5o_plist(void)
 {
-    hid_t    fid;                            /* HDF5 File ID      */
-    hid_t    grp, dset, dtype, dspace;       /* Object identifiers */
-    hid_t    fapl;                           /* File access property list */
-    hid_t    gcpl, dcpl, tcpl;               /* Object creation properties */
+    hid_t    fid;                      /* HDF5 File ID      */
+    hid_t    grp, dset, dtype, dspace; /* Object identifiers */
+    hid_t    fapl;                     /* File access property list */
+    hid_t    gcpl, dcpl, tcpl;         /* Object creation properties */
+    char     filename[1024];
     unsigned def_max_compact, def_min_dense; /* Default phase change parameters */
     unsigned max_compact, min_dense;         /* Actual phase change parameters */
     herr_t   ret;                            /* Value returned from API calls */
@@ -725,8 +741,10 @@ test_h5o_plist(void)
     ret = H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST);
     CHECK(ret, FAIL, "H5Pset_libver_bounds");
 
+    h5_fixname(TEST_FILENAME, fapl, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create group, dataset & named datatype creation property lists */
@@ -840,7 +858,7 @@ test_h5o_plist(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Re-open the file and check that the object creation properties persist */
-    fid = H5Fopen(TEST_FILENAME, H5F_ACC_RDONLY, fapl);
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Re-open objects */
@@ -909,13 +927,16 @@ test_h5o_link(void)
     hid_t        type_id  = -1;
     hid_t        fapl_id  = -1;
     hid_t        lcpl_id  = -1;
-    hsize_t      dims[2]  = {TEST6_DIM1, TEST6_DIM2};
+    char         filename[1024];
+    hsize_t      dims[2] = {TEST6_DIM1, TEST6_DIM2};
     htri_t       committed; /* Whether the named datatype is committed */
     H5F_libver_t low, high; /* File format bounds */
     int *        wdata;
     int *        rdata;
     int          i, n;
     herr_t       ret; /* Value returned from API calls */
+
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
     /* Allocate memory buffers */
     /* (These are treated as 2-D buffers) */
@@ -957,7 +978,7 @@ test_h5o_link(void)
                 continue;
 
             /* Create a new HDF5 file */
-            file_id = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
+            file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id);
             CHECK(file_id, FAIL, "H5Fcreate");
 
             /* Close the FAPL */
@@ -1060,6 +1081,7 @@ test_h5o_comment(void)
     hid_t       fid;                      /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
     hid_t       attr_space, attr_id;
+    char        filename[1024];
     hsize_t     dims[RANK];
     hsize_t     attr_dims     = 1;
     int         attr_value    = 5;
@@ -1073,8 +1095,10 @@ test_h5o_comment(void)
     herr_t      ret; /* Value returned from API calls */
     int         ret_value;
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create an attribute for the file */
@@ -1152,7 +1176,7 @@ test_h5o_comment(void)
 
     /* Now make sure that the comments are correct all 4 types of objects */
     /* Open file */
-    fid = H5Fopen(TEST_FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Getting the comment on the file and verify it */
@@ -1232,6 +1256,7 @@ test_h5o_comment_by_name(void)
     hid_t       fid;                      /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
     hid_t       attr_space, attr_id;
+    char        filename[1024];
     hsize_t     dims[RANK];
     hsize_t     attr_dims     = 1;
     int         attr_value    = 5;
@@ -1245,8 +1270,10 @@ test_h5o_comment_by_name(void)
     herr_t      ret; /* Value returned from API calls */
     int         ret_value;
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create an attribute for the file */
@@ -1324,7 +1351,7 @@ test_h5o_comment_by_name(void)
 
     /* Now make sure that the comments are correct all 4 types of objects */
     /* Open file */
-    fid = H5Fopen(TEST_FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fopen");
 
     /* Getting the comment on the file and verify it */
@@ -1390,13 +1417,16 @@ test_h5o_comment_by_name(void)
 static void
 test_h5o_getinfo_same_file(void)
 {
-    hid_t       fid1, fid2;     /* HDF5 File ID */
-    hid_t       gid1, gid2;     /* Group IDs */
+    hid_t       fid1, fid2; /* HDF5 File ID */
+    hid_t       gid1, gid2; /* Group IDs */
+    char        filename[1024];
     H5O_info2_t oinfo1, oinfo2; /* Object info structs */
     herr_t      ret;            /* Value returned from API calls */
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid1 = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid1 = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fcreate");
 
     /* Create two groups in the file */
@@ -1438,9 +1468,9 @@ test_h5o_getinfo_same_file(void)
     CHECK(ret, FAIL, "H5Fclose");
 
     /* Open file twice */
-    fid1 = H5Fopen(TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid1 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid1, FAIL, "H5Fopen");
-    fid2 = H5Fopen(TEST_FILENAME, H5F_ACC_RDWR, H5P_DEFAULT);
+    fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
     CHECK(fid2, FAIL, "H5Fopen");
 
     /* Open the two groups in the file */
@@ -1497,8 +1527,9 @@ test_h5o_open_by_addr_deprec(void)
 {
     hid_t       fid;                      /* HDF5 File ID      */
     hid_t       grp, dset, dtype, dspace; /* Object identifiers */
-    H5L_info1_t li;                       /* Buffer for H5Lget_info1 */
-    haddr_t     grp_addr;                 /* Addresses for objects */
+    char        filename[1024];
+    H5L_info1_t li;       /* Buffer for H5Lget_info1 */
+    haddr_t     grp_addr; /* Addresses for objects */
     haddr_t     dset_addr;
     haddr_t     dtype_addr;
     hsize_t     dims[RANK];
@@ -1507,8 +1538,10 @@ test_h5o_open_by_addr_deprec(void)
     H5T_class_t type_class; /* Class of the datatype */
     herr_t      ret;        /* Value returned from API calls */
 
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+
     /* Create a new HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create a group, dataset, and committed datatype within the file */
@@ -1682,13 +1715,16 @@ test_h5o_getinfo_visit(void)
     hid_t       gid1 = -1, gid2 = -1; /* Group IDs */
     hid_t       sid = -1;             /* Dataspace ID */
     hid_t       aid = -1;             /* Attribute ID */
-    H5O_info1_t oinfo1, oinfo2;       /* Object info structs */
-    char        attrname[25];         /* Attribute name */
-    int         j;                    /* Local index variable */
-    herr_t      ret;                  /* Value returned from API calls */
+    char        filename[1024];
+    H5O_info1_t oinfo1, oinfo2; /* Object info structs */
+    char        attrname[25];   /* Attribute name */
+    int         j;              /* Local index variable */
+    herr_t      ret;            /* Value returned from API calls */
+
+    h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
 
     /* Create an HDF5 file */
-    fid = H5Fcreate(TEST_FILENAME, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(fid, FAIL, "H5Fcreate");
 
     /* Create "group1" in the file */
@@ -1806,5 +1842,12 @@ test_h5o(void)
 void
 cleanup_h5o(void)
 {
-    HDremove(TEST_FILENAME);
+    char filename[1024];
+
+    H5E_BEGIN_TRY
+    {
+        h5_fixname(TEST_FILENAME, H5P_DEFAULT, filename, sizeof filename);
+        H5Fdelete(filename, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 }

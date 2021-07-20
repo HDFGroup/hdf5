@@ -26,7 +26,8 @@ static const char *           s_opts   = "hlpvV";
 static struct h5_long_options l_opts[] = {
     {"help", no_arg, 'h'},          {"latest", no_arg, 'l'},        {"parents", no_arg, 'p'},
     {"verbose", no_arg, 'v'},       {"version", no_arg, 'V'},       {"vol-value", require_arg, '1'},
-    {"vol-name", require_arg, '2'}, {"vol-info", require_arg, '3'}, {NULL, 0, '\0'}};
+    {"vol-name", require_arg, '2'}, {"vol-info", require_arg, '3'}, {"vfd-value", require_arg, '4'},
+    {"vfd-name", require_arg, '5'}, {"vfd-info", require_arg, '6'}, {NULL, 0, '\0'}};
 
 /* Command line parameter settings */
 typedef struct mkgrp_opt_t {
@@ -105,6 +106,14 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream,
                    "      --vol-info         VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "      --vfd-value        Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "      --vfd-name         Name of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                         HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "      --vfd-info         VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                         opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "\n");
 } /* end usage() */
 
@@ -126,8 +135,10 @@ parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
 {
     int                opt;        /* Option from command line */
     size_t             curr_group; /* Current group name to copy */
-    hbool_t            custom_fapl = FALSE;
+    hbool_t            custom_vol = FALSE;
+    hbool_t            custom_vfd = FALSE;
     h5tools_vol_info_t vol_info;
+    h5tools_vfd_info_t vfd_info;
     hid_t              tmp_fapl_id = H5I_INVALID_HID;
 
     /* Check for empty command line */
@@ -136,8 +147,9 @@ parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
         leave(EXIT_SUCCESS);
     }
 
-    /* Initialize fapl info struct */
+    /* Initialize fapl info structs */
     HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
+    HDmemset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* Parse command line options */
     while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
@@ -172,17 +184,33 @@ parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
             case '1':
                 vol_info.type    = VOL_BY_VALUE;
                 vol_info.u.value = (H5VL_class_value_t)HDatoi(H5_optarg);
-                custom_fapl      = TRUE;
+                custom_vol       = TRUE;
                 break;
 
             case '2':
                 vol_info.type   = VOL_BY_NAME;
                 vol_info.u.name = H5_optarg;
-                custom_fapl     = TRUE;
+                custom_vol      = TRUE;
                 break;
 
             case '3':
                 vol_info.info_string = H5_optarg;
+                break;
+
+            case '4':
+                vfd_info.type    = VFD_BY_VALUE;
+                vfd_info.u.value = (H5FD_class_value_t)HDatoi(H5_optarg);
+                custom_vfd       = TRUE;
+                break;
+
+            case '5':
+                vfd_info.type   = VFD_BY_NAME;
+                vfd_info.u.name = H5_optarg;
+                custom_vfd      = TRUE;
+                break;
+
+            case '6':
+                vfd_info.info = (const void *)H5_optarg;
                 break;
 
             /* Bad command line argument */
@@ -223,8 +251,9 @@ parse_command_line(int argc, const char *argv[], mkgrp_opt_t *options)
     }
 
     /* Setup a custom fapl for file accesses */
-    if (custom_fapl) {
-        if ((tmp_fapl_id = h5tools_get_fapl(options->fapl_id, &vol_info, NULL)) < 0) {
+    if (custom_vol || custom_vfd) {
+        if ((tmp_fapl_id = h5tools_get_fapl(options->fapl_id, custom_vol ? &vol_info : NULL,
+                                            custom_vfd ? &vfd_info : NULL)) < 0) {
             error_msg("failed to setup file access property list (fapl) for file\n");
             leave(EXIT_FAILURE);
         }
@@ -296,7 +325,8 @@ main(int argc, const char *argv[])
     }
 
     /* Attempt to open an existing HDF5 file first */
-    fid = h5tools_fopen(params_g.fname, H5F_ACC_RDWR, params_g.fapl_id, FALSE, NULL, 0);
+    fid = h5tools_fopen(params_g.fname, H5F_ACC_RDWR, params_g.fapl_id, (params_g.fapl_id != H5P_DEFAULT),
+                        NULL, 0);
 
     /* If we couldn't open an existing file, try creating file */
     /* (use "EXCL" instead of "TRUNC", so we don't blow away existing non-HDF5 file) */

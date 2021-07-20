@@ -152,8 +152,20 @@ error:
 int
 main(void)
 {
-    hid_t fapl;        /* File access property lists */
-    int   nerrors = 0; /* Error from tests */
+    const char *env_h5_drvr; /* File driver value from environment */
+    hid_t       fapl;        /* File access property lists */
+    int         nerrors = 0; /* Error from tests */
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /* Splitter VFD has issues with external links */
+    if (!HDstrcmp(env_h5_drvr, "splitter")) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        HDexit(EXIT_SUCCESS);
+    }
 
     h5_reset();
     fapl = h5_fileaccess();

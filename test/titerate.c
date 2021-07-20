@@ -1175,8 +1175,10 @@ test_iterate(void)
 #endif
     } /* end for */
 
-    /* Test the fix for issue HDFFV-10588 */
-    test_corrupted_attnamelen();
+    if (!h5_driver_uses_modified_filename()) {
+        /* Test the fix for issue HDFFV-10588 */
+        test_corrupted_attnamelen();
+    }
 
     /* Close FAPLs */
     ret = H5Pclose(fapl);

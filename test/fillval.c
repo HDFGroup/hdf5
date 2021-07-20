@@ -2722,7 +2722,10 @@ main(int argc, char *argv[])
             nerrors += test_create(my_fapl, FILENAME[1], H5D_CONTIGUOUS);
             nerrors += test_rdwr(my_fapl, FILENAME[3], H5D_CONTIGUOUS);
             nerrors += test_extend(my_fapl, FILENAME[5], H5D_CONTIGUOUS);
-            nerrors += test_compatible();
+
+            if (!h5_driver_uses_modified_filename()) {
+                nerrors += test_compatible();
+            }
         } /* end if */
 
         /* Compact dataset storage tests */

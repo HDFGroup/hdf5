@@ -412,20 +412,22 @@ static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
 }};
 
 /*-------------------------------------------------------------------------
- * Function:	H5P_init
+ * Function:    H5P_init_phase1
  *
- * Purpose:	Initialize the interface from some other layer.
+ * Purpose:     Initialize the interface from some other layer. This should
+ *              be followed with a call to H5P_init_phase2 after the H5P
+ *              interface is completely setup.
  *
- * Return:	Success:	non-negative
- *		Failure:	negative
+ * Return:      Success:    non-negative
+ *              Failure:    negative
  *
- * Programmer:	Quincey Koziol
+ * Programmer:  Quincey Koziol
  *              Saturday, March 4, 2000
  *
  *-------------------------------------------------------------------------
  */
 herr_t
-H5P_init(void)
+H5P_init_phase1(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -434,7 +436,36 @@ H5P_init(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_init() */
+} /* end H5P_init_phase1() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_init_phase2
+ *
+ * Purpose:     Finish initializing the interface from some other package.
+ *
+ * Note:        This is broken out as a separate routine so that the
+ *              library's default VFL driver can be chosen and initialized
+ *              after the entire H5P interface has been initialized.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_init_phase2(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Set up the default VFL driver */
+    if (H5P__facc_set_def_driver() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "unable to set default VFL driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_init_phase2() */
 
 /*--------------------------------------------------------------------------
 NAME
@@ -449,8 +480,9 @@ DESCRIPTION
 herr_t
 H5P__init_package(void)
 {
-    size_t tot_init;            /* Total # of classes initialized */
-    size_t pass_init;           /* # of classes initialized in each pass */
+    size_t tot_init = 0; /* Total # of classes initialized */
+    size_t pass_init;    /* # of classes initialized in each pass */
+    size_t u;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -472,8 +504,6 @@ H5P__init_package(void)
      */
     tot_init = 0;
     do {
-        size_t u; /* Local index variable */
-
         /* Reset pass initialization counter */
         pass_init = 0;
 
@@ -523,6 +553,28 @@ H5P__init_package(void)
     HDassert(tot_init == NELMTS(init_class));
 
 done:
+    if (ret_value < 0 && tot_init > 0) {
+        /* First uninitialize all default property lists */
+        H5I_clear_type(H5I_GENPROP_LST, FALSE, FALSE);
+
+        /* Then uninitialize any initialized libclass */
+        for (u = 0; u < NELMTS(init_class); u++) {
+            H5P_libclass_t const *lib_class = init_class[u]; /* Current class to operate on */
+
+            HDassert(lib_class->class_id);
+            if (*lib_class->class_id >= 0) {
+                /* Close the class ID */
+                if (H5I_dec_ref(*lib_class->class_id) < 0)
+                    HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to close property list class ID")
+            }
+            else if (lib_class->pclass && *lib_class->pclass) {
+                /* Close a half-initialized pclass */
+                if (H5P__close_class(*lib_class->pclass) < 0)
+                    HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to close property list class")
+            }
+        }
+    }
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5P__init_package() */
 

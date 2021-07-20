@@ -25,9 +25,28 @@ set (VFD_LIST
     split
     multi
     family
+    splitter
+    #log - log VFD currently has file space allocation bugs
 )
+
 if (H5_HAVE_DIRECT)
   set (VFD_LIST ${VFD_LIST} direct)
+endif ()
+if (H5_HAVE_PARALLEL)
+  # MPI I/O VFD is currently incompatible with too many tests in the VFD test set
+  # set (VFD_LIST ${VFD_LIST} mpio)
+endif ()
+if (H5_HAVE_MIRROR_VFD)
+  set (VFD_LIST ${VFD_LIST} mirror)
+endif ()
+if (H5_HAVE_ROS3_VFD)
+  set (VFD_LIST ${VFD_LIST} ros3)
+endif ()
+if (H5_HAVE_LIBHDFS)
+  set (VFD_LIST ${VFD_LIST} hdfs)
+endif ()
+if (H5_HAVE_WINDOWS)
+  set (VFD_LIST ${VFD_LIST} windows)
 endif ()
 
 foreach (vfdtest ${VFD_LIST})
@@ -208,3 +227,22 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
   foreach (h5_vfd ${VFD_LIST})
     ADD_VFD_TEST (${h5_vfd} 0)
   endforeach ()
+
+  ##############################################################################
+  ###    V F D  P L U G I N  T E S T S
+  ##############################################################################
+  if (BUILD_SHARED_LIBS)
+    if (WIN32)
+      set (CMAKE_SEP "\;")
+      set (BIN_REL_PATH "../../")
+    else ()
+      set (CMAKE_SEP ":")
+      set (BIN_REL_PATH "../")
+    endif ()
+
+    add_test (NAME H5PLUGIN-vfd_plugin COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:vfd_plugin>)
+    set_tests_properties (H5PLUGIN-vfd_plugin PROPERTIES
+        ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/null_vfd_plugin_dir;srcdir=${HDF5_TEST_BINARY_DIR}"
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+    )
+  endif ()

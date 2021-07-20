@@ -393,10 +393,10 @@ test/cork.c -text
 test/corrupt_stab_msg.h5 -text
 test/deflate.h5 -text
 test/dynlib4.c -text
-test/family_v16_00000.h5 -text
-test/family_v16_00001.h5 -text
-test/family_v16_00002.h5 -text
-test/family_v16_00003.h5 -text
+test/family_v16-000000.h5 -text
+test/family_v16-000001.h5 -text
+test/family_v16-000002.h5 -text
+test/family_v16-000003.h5 -text
 test/file_image_core_test.h5 -text
 test/filespace_1_6.h5 -text
 test/filespace_1_8.h5 -text

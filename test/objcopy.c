@@ -17305,13 +17305,18 @@ error:
 int
 main(void)
 {
-    int      nerrors = 0;
-    hid_t    fapl, fapl2;
-    hid_t    fcpl_shared, ocpl;
-    unsigned max_compact, min_dense;
-    int      configuration; /* Configuration of tests. */
-    int      ExpressMode;
-    hbool_t  same_file; /* Whether to run tests that only use one file */
+    int         nerrors = 0;
+    hid_t       fapl, fapl2;
+    hid_t       fcpl_shared, ocpl;
+    unsigned    max_compact, min_dense;
+    int         configuration; /* Configuration of tests. */
+    int         ExpressMode;
+    const char *env_h5_drvr; /* File Driver value from environment */
+    hbool_t     same_file;   /* Whether to run tests that only use one file */
+
+    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     /* Setup */
     h5_reset();
@@ -17468,9 +17473,14 @@ main(void)
                                     FALSE, "H5Ocopy(): expand soft link");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl, H5O_COPY_EXPAND_EXT_LINK_FLAG,
                                     FALSE, "H5Ocopy(): expand external link");
-        nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
-                                    H5O_COPY_EXPAND_SOFT_LINK_FLAG | H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE,
-                                    "H5Ocopy(): expand soft and external links");
+
+        /* Splitter VFD currently has external link-related bugs */
+        if (HDstrcmp(env_h5_drvr, "splitter")) {
+            nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl,
+                                        H5O_COPY_EXPAND_SOFT_LINK_FLAG | H5O_COPY_EXPAND_EXT_LINK_FLAG, FALSE,
+                                        "H5Ocopy(): expand soft and external links");
+        }
+
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl, H5O_COPY_SHALLOW_HIERARCHY_FLAG,
                                     FALSE, "H5Ocopy(): shallow group copy");
         nerrors += test_copy_option(fcpl_src, fcpl_dst, src_fapl, dst_fapl, H5O_COPY_EXPAND_REFERENCE_FLAG,
@@ -17548,9 +17558,14 @@ main(void)
 
             nerrors += test_copy_same_file_named_datatype(fcpl_src, src_fapl);
 
-            /* Test with dataset opened in the file or not */
-            nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, FALSE);
-            nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, TRUE);
+            /* Check if current driver might modify the filename. Skip these tests
+             * if so, since the file is pre-generated.
+             */
+            if (!h5_driver_uses_modified_filename()) {
+                /* Test with dataset opened in the file or not */
+                nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, FALSE);
+                nerrors += test_copy_old_layout(fcpl_dst, dst_fapl, TRUE);
+            }
 
             /* Test with dataset opened in the file or not */
             nerrors += test_copy_null_ref(fcpl_src, fcpl_dst, src_fapl, dst_fapl);

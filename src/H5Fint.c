@@ -454,9 +454,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set initial metadata cache resize config.")
 
     /* Prepare the driver property */
-    driver_prop.driver_id   = f->shared->lf->driver_id;
-    driver_prop.driver_info = H5FD_fapl_get(f->shared->lf);
-    driver_prop_copied      = TRUE;
+    driver_prop.driver_id         = f->shared->lf->driver_id;
+    driver_prop.driver_info       = H5FD_fapl_get(f->shared->lf);
+    driver_prop.driver_config_str = H5P_peek_driver_config_str(old_plist);
+    driver_prop_copied            = TRUE;
 
     /* Set the driver property */
     if (H5P_set(new_plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)

@@ -167,7 +167,7 @@ main(int argc, char *argv[])
             HDputs("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
-        HDexit(EXIT_FAILURE);
+        HDexit(EXIT_SUCCESS);
     }
 
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)
