@@ -69,36 +69,40 @@ the writer makes HDF5 library API calls with sufficient regularity, and
 that both reader and writer avoid long running HDF5 API calls.
 
 For further details on VFD SWMR design and implementation, see 
-VFD_SWMR_RFC_200916.pdf or VFD_SWMR_RFC_200916.docx in the 
-doc directory.
+`VFD_SWMR_RFC_2020-02-03.docx` in the doc directory.
 
 # Quick start
 
 Follow these instructions to download, configure, and build the
-VFD SWMR project in a jiffy.  Then install the HDF5 library and
+VFD SWMR project, then install the HDF5 library and
 utilities built by the VFD SWMR project.
 
 ## Download
 
 Clone the HDF5 repository in a new directory, then switch to the 
-features/vfd_swmr_alpa_1 branch as follows:
+`feature/vfd_swmr_beta_1` branch as follows:
 
 ```
-% git clone https://@bitbucket.hdfgroup.org/scm/hdffv/hdf5.git swmr
+% git clone https://github.com/HDFGroup/hdf5 swmr
 % cd swmr
-% git checkout feature/vfd_swmr_alpha_1
+% git checkout feature/vfd_swmr_beta_1
 ```
 
 ## Build
 
 Create a build directory, change to that directory, and run the
-configure script:
+configure script (The Autotools are shown here. VFD SWMR can also
+be built using CMake.):
 
 ```
 % mkdir -p ../build/swmr
 % cd ../build/swmr
 % ../../swmr/configure
 ```
+
+Note that the mirror VFD tests require some rework, so enabling that feature
+will cause the build step to fail. This will be fixed in a future beta release.
+
 
 Build the project:
 
@@ -114,6 +118,9 @@ SWMR works correctly on your system.  To test the library, utilities, run
 ```
 % make check
 ```
+
+This will take some time to run, particularly the VFD SWMR shell script tests.
+Note that CMake currently does not run the shell script tests. 
 
 If the tests don't pass, please let the developers know!
 
@@ -191,8 +198,8 @@ The reader and writer programs support several command-line options:
 
 ## The VFD SWMR demos
 
-The VFD SWMR demos are in a [separate
-repository](https://bitbucket.hdfgroup.org/scm/~dyoung/swmr-demo.git).
+The VFD SWMR demos are located in the `examples` directory of this source
+tree.
 
 Before you build the demos, you will need to install the HDF5 library
 and utilities built from the VFD SWMR branch in your home directory
@@ -564,7 +571,7 @@ seconds.
 
 # Reporting bugs
 
-VFD SWMR is still under development, so we expect that you will encounter 
+VFD SWMR is still under development, so it is possible that you will encounter 
 bugs.  Please report them, along with any performance or design issues you 
 encounter.
 
