@@ -1060,6 +1060,21 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Better support for libaec (open-source Szip library) in CMake
+ 
+      Implemented better support for libaec 1.0.5 (or later) library. This version 
+      of libaec contains improvements for better integration with HDF5. Furthermore,
+      the variable USE_LIBAEC_STATIC has been introduced to allow to make use of 
+      static version of libaec library. Use libaec_DIR or libaec_ROOT to set
+      the location in which libaec can be found.
+
+      Be aware, the Szip library of libaec 1.0.4 depends on another library within
+      libaec library. This dependency is not specified in the current CMake
+      configuration which means that one can not use the static Szip library of
+      libaec 1.0.4 when building HDF5. This has been resolved in libaec 1.0.5.
+
+      (JWSB - 2021/06/22)
+
     - Refactor CMake configure for Fortran
 
       The Fortran configure tests for KINDs reused a single output file that was

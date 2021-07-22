@@ -365,7 +365,7 @@ Wsetenv(const char *name, const char *value, int overwrite)
     return (int)_putenv_s(name, value);
 } /* end Wsetenv() */
 
-#ifdef H5_HAVE_WINSOCK2_H
+#ifdef H5_HAVE_WIN32_API
 #pragma comment(lib, "advapi32.lib")
 #endif
 
@@ -450,12 +450,12 @@ char *
 Wgetlogin(void)
 {
 
-#ifdef H5_HAVE_WINSOCK2_H
+#ifdef H5_HAVE_WIN32_API
     DWORD bufferCount = WloginBuffer_count;
     if (GetUserName(Wlogin_buffer, &bufferCount) != 0)
         return (Wlogin_buffer);
     else
-#endif /* H5_HAVE_WINSOCK2_H */
+#endif
         return NULL;
 }
 
@@ -936,3 +936,167 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_expand_windows_env_vars() */
 #endif /* H5_HAVE_WIN32_API */
+
+/* Global variables */
+int         H5_opterr = 1; /* Get_option prints errors if this is on */
+int         H5_optind = 1; /* Token pointer                          */
+const char *H5_optarg;     /* Flag argument (or value)               */
+
+/*-------------------------------------------------------------------------
+ * Function: H5_get_option
+ *
+ * Purpose:  Determine the command-line options a user specified. We can
+ *           accept both short and long type command-lines.
+ *
+ * Return:  Success:    The short valued "name" of the command line
+ *                      parameter or EOF if there are no more
+ *                      parameters to process.
+ *
+ *          Failure:    A question mark.
+ *-------------------------------------------------------------------------
+ */
+int
+H5_get_option(int argc, const char **argv, const char *opts, const struct h5_long_options *l_opts)
+{
+    static int sp     = 1;   /* character index in current token */
+    int        optopt = '?'; /* option character passed back to user */
+
+    if (sp == 1) {
+        /* check for more flag-like tokens */
+        if (H5_optind >= argc || argv[H5_optind][0] != '-' || argv[H5_optind][1] == '\0') {
+            return EOF;
+        }
+        else if (HDstrcmp(argv[H5_optind], "--") == 0) {
+            H5_optind++;
+            return EOF;
+        }
+    }
+
+    if (sp == 1 && argv[H5_optind][0] == '-' && argv[H5_optind][1] == '-') {
+        /* long command line option */
+        int        i;
+        const char ch      = '=';
+        char *     arg     = HDstrdup(&argv[H5_optind][2]);
+        size_t     arg_len = 0;
+
+        H5_optarg = strchr(&argv[H5_optind][2], ch);
+        arg_len   = HDstrlen(&argv[H5_optind][2]);
+        if (H5_optarg) {
+            arg_len -= HDstrlen(H5_optarg);
+            H5_optarg++; /* skip the equal sign */
+        }
+        arg[arg_len] = 0;
+
+        for (i = 0; l_opts && l_opts[i].name; i++) {
+            if (HDstrcmp(arg, l_opts[i].name) == 0) {
+                /* we've found a matching long command line flag */
+                optopt = l_opts[i].shortval;
+
+                if (l_opts[i].has_arg != no_arg) {
+                    if (H5_optarg == NULL) {
+                        if (l_opts[i].has_arg != optional_arg) {
+                            if (H5_optind < (argc - 1))
+                                if (argv[H5_optind + 1][0] != '-')
+                                    H5_optarg = argv[++H5_optind];
+                        }
+                        else if (l_opts[i].has_arg == require_arg) {
+                            if (H5_opterr)
+                                HDfprintf(stderr, "%s: option required for \"--%s\" flag\n", argv[0], arg);
+
+                            optopt = '?';
+                        }
+                    }
+                }
+                else {
+                    if (H5_optarg) {
+                        if (H5_opterr)
+                            HDfprintf(stderr, "%s: no option required for \"%s\" flag\n", argv[0], arg);
+
+                        optopt = '?';
+                    }
+                }
+                break;
+            }
+        }
+
+        if (l_opts[i].name == NULL) {
+            /* exhausted all of the l_opts we have and still didn't match */
+            if (H5_opterr)
+                HDfprintf(stderr, "%s: unknown option \"%s\"\n", argv[0], arg);
+
+            optopt = '?';
+        }
+
+        H5_optind++;
+        sp = 1;
+
+        HDfree(arg);
+    }
+    else {
+        register char *cp; /* pointer into current token */
+
+        /* short command line option */
+        optopt = argv[H5_optind][sp];
+
+        if (optopt == ':' || (cp = HDstrchr(opts, optopt)) == 0) {
+            if (H5_opterr)
+                HDfprintf(stderr, "%s: unknown option \"%c\"\n", argv[0], optopt);
+
+            /* if no chars left in this token, move to next token */
+            if (argv[H5_optind][++sp] == '\0') {
+                H5_optind++;
+                sp = 1;
+            }
+            return '?';
+        }
+
+        if (*++cp == ':') {
+            /* if a value is expected, get it */
+            if (argv[H5_optind][sp + 1] != '\0') {
+                /* flag value is rest of current token */
+                H5_optarg = &argv[H5_optind++][sp + 1];
+            }
+            else if (++H5_optind >= argc) {
+                if (H5_opterr)
+                    HDfprintf(stderr, "%s: value expected for option \"%c\"\n", argv[0], optopt);
+
+                optopt = '?';
+            }
+            else {
+                /* flag value is next token */
+                H5_optarg = argv[H5_optind++];
+            }
+
+            sp = 1;
+        }
+        /* wildcard argument */
+        else if (*cp == '*') {
+            /* check the next argument */
+            H5_optind++;
+            /* we do have an extra argument, check if not last */
+            if ((H5_optind + 1) < argc) {
+                if (argv[H5_optind][0] != '-') {
+                    H5_optarg = argv[H5_optind++];
+                }
+                else {
+                    H5_optarg = NULL;
+                }
+            }
+            else {
+                H5_optarg = NULL;
+            }
+        }
+        else {
+            /* set up to look at next char in token, next time */
+            if (argv[H5_optind][++sp] == '\0') {
+                /* no more in current token, so setup next token */
+                H5_optind++;
+                sp = 1;
+            }
+            H5_optarg = NULL;
+        }
+    }
+
+    /* return the current flag character found */
+    return optopt;
+}

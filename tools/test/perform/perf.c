@@ -31,23 +31,22 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-#ifdef H5_HAVE_UNISTD_H
-#include <sys/types.h>
-#include <unistd.h>
-#endif
+#include <time.h>
 
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
 #endif
 
-#if defined(H5_TIME_WITH_SYS_TIME)
+#ifdef H5_HAVE_SYS_TIME_H
 #include <sys/time.h>
-#include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#else
-#include <time.h>
+#endif
+
+#ifdef H5_HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #include <mpi.h>
@@ -136,12 +135,11 @@ main(int argc, char **argv)
     if (mynod == 0)
         printf("# Using hdf5-io calls.\n");
 
-        /* kindof a weird hack- if the location of the pvfstab file was
-         * specified on the command line, then spit out this location into
-         * the appropriate environment variable: */
-
-#if H5_HAVE_SETENV
-    /* no setenv or unsetenv */
+#ifdef H5_HAVE_UNISTD_H
+    /* Kind of a weird hack- if the location of the pvfstab file was
+     * specified on the command line, then spit out this location into
+     * the appropriate environment variable.
+     */
     if (opt_pvfstab_set) {
         if ((setenv("PVFSTAB_FILE", opt_pvfstab, 1)) < 0) {
             perror("setenv");
@@ -372,9 +370,8 @@ main(int argc, char **argv)
 
 die_jar_jar_die:
 
-#if H5_HAVE_SETENV
-    /* no setenv or unsetenv */
-    /* clear the environment variable if it was set earlier */
+#ifdef H5_HAVE_UNISTD
+    /* Clear the environment variable if it was set earlier */
     if (opt_pvfstab_set) {
         unsetenv("PVFSTAB_FILE");
     }

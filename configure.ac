@@ -476,14 +476,8 @@ esac
 ## Data types and their sizes.
 ##
 AC_TYPE_OFF_T
-AC_CHECK_TYPE([size_t], [],
-        [AC_DEFINE_UNQUOTED([size_t], [unsigned long],
-                [Define to `unsigned long' if <sys/types.h> does not define.])])
 AC_CHECK_TYPE([ssize_t], [],
         [AC_DEFINE_UNQUOTED([ssize_t], [long],
-                [Define to `long' if <sys/types.h> does not define.])])
-AC_CHECK_TYPE([ptrdiff_t], [],
-        [AC_DEFINE_UNQUOTED([ptrdiff_t], [long],
                 [Define to `long' if <sys/types.h> does not define.])])
 AC_C_BIGENDIAN
 AC_CHECK_SIZEOF([char])
@@ -1234,15 +1228,11 @@ AC_CHECK_LIB([dl], [dlopen])
 ## ----------------------------------------------------------------------
 ## Check for system header files.
 ##
-AC_HEADER_STDC
-AC_HEADER_TIME
 
 ## Unix
-AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
-AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
-AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
-AC_CHECK_HEADERS([dirent.h])
-AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
+AC_CHECK_HEADERS([dirent.h features.h unistd.h])
+AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/resource.h])
+AC_CHECK_HEADERS([sys/stat.h sys/time.h sys/types.h])
 
 ## Darwin
 AC_SUBST([H5_IS_DARWIN])
@@ -1256,18 +1246,13 @@ esac
 
 ## Windows
 case "`uname`" in
-  CYGWIN*)
-    AC_CHECK_HEADERS([sys/timeb.h])
-    UNAME_CYGWIN="yes"
-    ;;
   MINGW*)
-    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     AC_HAVE_LIBRARY([ws2_32])
     ;;
-  *)
-    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
-    ;;
 esac
+
+# Mirror VFD networking
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h])
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
@@ -2097,18 +2082,16 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## NOTE: clock_gettime may require linking to the rt or posix4 library
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
-AC_CHECK_FUNCS([frexpl gethostname getrusage gettimeofday])
+AC_CHECK_FUNCS([alarm asprintf clock_gettime fcntl flock fork])
+AC_CHECK_FUNCS([gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
-AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
+AC_CHECK_FUNCS([siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([srandom strdup symlink])
-AC_CHECK_FUNCS([tmpfile asprintf vasprintf waitpid])
+AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics
 ##
-AC_C_CONST
-
 AC_MSG_CHECKING([for __attribute__ extension])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                [AC_DEFINE([HAVE_ATTRIBUTE], [1],
@@ -2116,18 +2099,6 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[int __attribute__((unused)) x]])],
                  AC_MSG_RESULT([yes])],
                [AC_MSG_RESULT([no])])
 
-AC_MSG_CHECKING([for __func__ extension])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],[[ const char *fname = __func__; ]])],
-               [AC_DEFINE([HAVE_C99_FUNC], [1],
-                         [Define if the compiler understands the __func__ keyword])
-                 AC_MSG_RESULT([yes])],
-               [AC_MSG_RESULT([no])])
-AC_MSG_CHECKING([for __FUNCTION__ extension])
-AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]],,[[ const char *fname = __FUNCTION__; ]])],
-               [AC_DEFINE([HAVE_FUNCTION], [1],
-                         [Define if the compiler understands the __FUNCTION__ keyword])
-                 AC_MSG_RESULT([yes])],
-               [AC_MSG_RESULT([no])])
 AC_MSG_CHECKING([for C99 designated initialization support])
 AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[]], [[
                 typedef struct {

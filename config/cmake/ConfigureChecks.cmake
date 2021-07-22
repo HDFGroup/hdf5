@@ -117,8 +117,6 @@ endif ()
 # END of WINDOWS Hard code Values
 # ----------------------------------------------------------------------
 
-CHECK_FUNCTION_EXISTS (difftime          ${HDF_PREFIX}_HAVE_DIFFTIME)
-
 # Find the library containing clock_gettime()
 if (MINGW OR NOT WINDOWS)
   CHECK_FUNCTION_EXISTS (clock_gettime CLOCK_GETTIME_IN_LIBC)
@@ -263,7 +261,7 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
 
     if (${COMPILE_RESULT_VAR})
       if (${RUN_RESULT_VAR} MATCHES 0)
-        set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+        set (${RETURN_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
           message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
         endif ()
@@ -275,7 +273,7 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
           message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
         endif ()
-        set (${RUN_RESULT_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+        set (${RETURN_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
             "${OUTPUT_VAR}\n\n")

@@ -116,6 +116,7 @@ static const H5VL_class_t null_vol_g = {
     {
         /* introspect_cls */
         NULL, /* get_conn_cls     */
+        NULL, /* get_cap_flags    */
         NULL, /* opt_query        */
     },
     {

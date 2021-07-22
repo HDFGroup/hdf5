@@ -84,7 +84,7 @@ H5FA_get_stats(const H5FA_t *fa, H5FA_stat_t *stats)
     FUNC_ENTER_NOAPI_NOERR
 
 #ifdef H5FA_DEBUG
-    HDfprintf(stderr, "%s: Called\n", FUNC);
+    HDfprintf(stderr, "%s: Called\n", __func__);
 #endif /* H5FA_DEBUG */
 
     /* Check arguments */
