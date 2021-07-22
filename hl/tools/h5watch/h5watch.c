@@ -58,27 +58,27 @@ static void   parse_command_line(int argc, const char *argv[]);
  * The long-named ones can be partially spelled. When
  * adding more, make sure that they don't clash with each other.
  */
-static const char *        s_opts   = "?";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel", no_arg, 'h'},
-                                       {"dim", no_arg, 'd'},          {"di", no_arg, 'd'},
-                                       {"label", no_arg, 'l'},        {"labe", no_arg, 'l'},
-                                       {"lab", no_arg, 'l'},          {"la", no_arg, 'l'},
-                                       {"simple", no_arg, 'S'},       {"simpl", no_arg, 'S'},
-                                       {"simp", no_arg, 'S'},         {"sim", no_arg, 'S'},
-                                       {"si", no_arg, 'S'},           {"hexdump", no_arg, 'x'},
-                                       {"hexdum", no_arg, 'x'},       {"hexdu", no_arg, 'x'},
-                                       {"hexd", no_arg, 'x'},         {"hex", no_arg, 'x'},
-                                       {"width", require_arg, 'w'},   {"widt", require_arg, 'w'},
-                                       {"wid", require_arg, 'w'},     {"wi", require_arg, 'w'},
-                                       {"polling", require_arg, 'p'}, {"pollin", require_arg, 'p'},
-                                       {"polli", require_arg, 'p'},   {"poll", require_arg, 'p'},
-                                       {"pol", require_arg, 'p'},     {"po", require_arg, 'p'},
-                                       {"fields", require_arg, 'f'},  {"field", require_arg, 'f'},
-                                       {"fiel", require_arg, 'f'},    {"fie", require_arg, 'f'},
-                                       {"fi", require_arg, 'f'},      {"version", no_arg, 'V'},
-                                       {"versio", no_arg, 'V'},       {"versi", no_arg, 'V'},
-                                       {"vers", no_arg, 'V'},         {"ver", no_arg, 'V'},
-                                       {"ve", no_arg, 'V'},           {NULL, 0, '\0'}};
+static const char *           s_opts   = "?";
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel", no_arg, 'h'},
+                                          {"dim", no_arg, 'd'},          {"di", no_arg, 'd'},
+                                          {"label", no_arg, 'l'},        {"labe", no_arg, 'l'},
+                                          {"lab", no_arg, 'l'},          {"la", no_arg, 'l'},
+                                          {"simple", no_arg, 'S'},       {"simpl", no_arg, 'S'},
+                                          {"simp", no_arg, 'S'},         {"sim", no_arg, 'S'},
+                                          {"si", no_arg, 'S'},           {"hexdump", no_arg, 'x'},
+                                          {"hexdum", no_arg, 'x'},       {"hexdu", no_arg, 'x'},
+                                          {"hexd", no_arg, 'x'},         {"hex", no_arg, 'x'},
+                                          {"width", require_arg, 'w'},   {"widt", require_arg, 'w'},
+                                          {"wid", require_arg, 'w'},     {"wi", require_arg, 'w'},
+                                          {"polling", require_arg, 'p'}, {"pollin", require_arg, 'p'},
+                                          {"polli", require_arg, 'p'},   {"poll", require_arg, 'p'},
+                                          {"pol", require_arg, 'p'},     {"po", require_arg, 'p'},
+                                          {"fields", require_arg, 'f'},  {"field", require_arg, 'f'},
+                                          {"fiel", require_arg, 'f'},    {"fie", require_arg, 'f'},
+                                          {"fi", require_arg, 'f'},      {"version", no_arg, 'V'},
+                                          {"versio", no_arg, 'V'},       {"versi", no_arg, 'V'},
+                                          {"vers", no_arg, 'V'},         {"ver", no_arg, 'V'},
+                                          {"ve", no_arg, 'V'},           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function: doprint()
@@ -677,7 +677,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* parse command line options */
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case '?':
             case 'h': /* --help */
@@ -691,7 +691,7 @@ parse_command_line(int argc, const char *argv[])
                 break;
 
             case 'w': /* --width=N */
-                g_display_width = (int)HDstrtol(opt_arg, NULL, 0);
+                g_display_width = (int)HDstrtol(H5_optarg, NULL, 0);
                 if (g_display_width < 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
@@ -711,8 +711,8 @@ parse_command_line(int argc, const char *argv[])
                 break;
 
             case 'p': /* --polling=N */
-                /* g_polling_interval = HDstrtod(opt_arg, NULL); */
-                if ((tmp = (int)HDstrtol(opt_arg, NULL, 10)) <= 0) {
+                /* g_polling_interval = HDstrtod(H5_optarg, NULL); */
+                if ((tmp = (int)HDstrtol(H5_optarg, NULL, 10)) <= 0) {
                     usage(h5tools_getprogname());
                     leave(EXIT_FAILURE);
                 }
@@ -721,7 +721,7 @@ parse_command_line(int argc, const char *argv[])
 
             case 'f': /* --fields=<list_of_fields> */
                 if (g_list_of_fields == NULL) {
-                    if ((g_list_of_fields = HDstrdup(opt_arg)) == NULL) {
+                    if ((g_list_of_fields = HDstrdup(H5_optarg)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
@@ -729,7 +729,7 @@ parse_command_line(int argc, const char *argv[])
                 else {
                     char *str;
 
-                    if ((str = HDstrdup(opt_arg)) == NULL) {
+                    if ((str = HDstrdup(H5_optarg)) == NULL) {
                         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
                         leave(EXIT_FAILURE);
                     }
@@ -751,7 +751,7 @@ parse_command_line(int argc, const char *argv[])
     }
 
     /* check for object to be processed */
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing dataset name\n");
         usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
@@ -821,7 +821,7 @@ main(int argc, const char *argv[])
     /* parse command line options */
     parse_command_line(argc, argv);
 
-    if (argc <= opt_ind) {
+    if (argc <= H5_optind) {
         error_msg("missing dataset name\n");
         usage(h5tools_getprogname());
         leave(EXIT_FAILURE);
@@ -845,7 +845,7 @@ main(int argc, const char *argv[])
      * then there must have been something wrong with the file (perhaps it
      * doesn't exist).
      */
-    if ((fname = HDstrdup(argv[opt_ind])) == NULL) {
+    if ((fname = HDstrdup(argv[H5_optind])) == NULL) {
         error_msg("memory allocation failed (file %s:line %d)\n", __FILE__, __LINE__);
         h5tools_setstatus(EXIT_FAILURE);
         goto done;
