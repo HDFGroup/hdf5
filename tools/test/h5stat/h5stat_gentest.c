@@ -51,7 +51,7 @@
  * Generate HDF5 file with latest format with
  * NUM_GRPS groups and NUM_ATTRS attributes for the dataset
  */
-static void
+static herr_t
 gen_newgrat_file(const char *fname)
 {
     hid_t fcpl    = H5I_INVALID_HID; /* File creation property */
@@ -117,6 +117,21 @@ gen_newgrat_file(const char *fname)
     } /* end for */
 
     /* Close dataset, dataspace, datatype, file */
+    if (H5Pclose(fapl) < 0)
+        goto error;
+    if (H5Pclose(fcpl) < 0)
+        goto error;
+    if (H5Dclose(did) < 0)
+        goto error;
+    if (H5Tclose(tid) < 0)
+        goto error;
+    if (H5Sclose(sid) < 0)
+        goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    return SUCCEED;
+
 error:
     H5E_BEGIN_TRY
     {
@@ -130,6 +145,8 @@ error:
         H5Fclose(fid);
     }
     H5E_END_TRY;
+
+    return FAIL;
 } /* gen_newgrat_file() */
 
 /*
@@ -139,7 +156,7 @@ error:
  * datasets. -a N (--numattrs=N): Set the threshold for the # of attributes when printing information for
  * small # of attributes.
  */
-static void
+static herr_t
 gen_threshold_file(const char *fname)
 {
     hid_t    fid         = H5I_INVALID_HID; /* File ID */
@@ -302,6 +319,23 @@ gen_threshold_file(const char *fname)
             goto error;
     }
 
+    if (H5Gclose(gid) < 0)
+        goto error;
+    if (H5Sclose(sid0) < 0)
+        goto error;
+    if (H5Sclose(sid1) < 0)
+        goto error;
+    if (H5Sclose(sid2) < 0)
+        goto error;
+    if (H5Sclose(sid3) < 0)
+        goto error;
+    if (H5Sclose(sid4) < 0)
+        goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    return SUCCEED;
+
 error:
     H5E_BEGIN_TRY
     {
@@ -317,6 +351,8 @@ error:
     }
     H5E_END_TRY;
 
+    return FAIL;
+
 } /* gen_threshold_file() */
 
 /*
@@ -327,18 +363,21 @@ error:
  *         one dataset: fixed dimension, chunked layout, w/ filters
  *
  */
-static void
+static herr_t
 gen_idx_file(const char *fname)
 {
-    hid_t   fapl = H5I_INVALID_HID;           /* file access property id */
-    hid_t   fid  = H5I_INVALID_HID;           /* file id */
-    hid_t   sid  = H5I_INVALID_HID;           /* space id */
-    hid_t   dcpl = H5I_INVALID_HID;           /* dataset creation property id */
-    hid_t   did = -1, did2 = H5I_INVALID_HID; /* dataset id */
-    hsize_t dims[1]   = {10};                 /* dataset dimension */
-    hsize_t c_dims[1] = {2};                  /* chunk dimension */
-    int     i;                                /* local index variable */
-    int     buf[10];                          /* data buffer */
+    hid_t fapl = H5I_INVALID_HID; /* file access property id */
+    hid_t fid  = H5I_INVALID_HID; /* file id */
+    hid_t sid  = H5I_INVALID_HID; /* space id */
+    hid_t dcpl = H5I_INVALID_HID; /* dataset creation property id */
+    hid_t did  = H5I_INVALID_HID; /* dataset id */
+#if defined(H5_HAVE_FILTER_DEFLATE)
+    hid_t did2 = H5I_INVALID_HID; /* dataset id (compressed) */
+#endif
+    hsize_t dims[1]   = {10}; /* dataset dimension */
+    hsize_t c_dims[1] = {2};  /* chunk dimension */
+    int     i;                /* local index variable */
+    int     buf[10];          /* data buffer */
 
     /* Get a copy of the file access property */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -390,6 +429,19 @@ gen_idx_file(const char *fname)
 #endif
 
     /* closing: dataspace, dataset, file */
+    if (H5Pclose(fapl) < 0)
+        goto error;
+    if (H5Pclose(dcpl) < 0)
+        goto error;
+    if (H5Sclose(sid) < 0)
+        goto error;
+    if (H5Dclose(did) < 0)
+        goto error;
+    if (H5Fclose(fid) < 0)
+        goto error;
+
+    return SUCCEED;
+
 error:
     H5E_BEGIN_TRY
     {
@@ -403,6 +455,8 @@ error:
 #endif
     }
     H5E_END_TRY;
+
+    return FAIL;
 
 } /* gen_idx_file() */
 
@@ -419,20 +473,21 @@ error:
  *          H5O_refcount_decode in the jira issue.
  *
  */
-static void
+static herr_t
 gen_err_refcount(const char *fname)
 {
-    hid_t          fid  = H5I_INVALID_HID;            /* File identifier */
-    hid_t          sid  = H5I_INVALID_HID;            /* Dataspace message */
-    hid_t          did  = H5I_INVALID_HID;            /* Dataset identifier */
-    hid_t          gid  = H5I_INVALID_HID;            /* Group identifier */
-    hid_t          aid1 = -1, aid2 = H5I_INVALID_HID; /* Attribute identifier */
-    hid_t          tid = H5I_INVALID_HID;             /* Datatype identifier */
-    int            i, n;                              /* Local index variables */
-    int            buf[10];                           /* Data buffer */
-    hsize_t        dims[1];                           /* Dimension size */
-    int            fd  = -1;                          /* File descriptor */
-    unsigned short val = 22;                          /* The refcount message ID */
+    hid_t          fid  = H5I_INVALID_HID; /* File identifier */
+    hid_t          sid  = H5I_INVALID_HID; /* Dataspace message */
+    hid_t          did  = H5I_INVALID_HID; /* Dataset identifier */
+    hid_t          gid  = H5I_INVALID_HID; /* Group identifier */
+    hid_t          aid1 = H5I_INVALID_HID; /* Attribute identifier */
+    hid_t          aid2 = H5I_INVALID_HID; /* Attribute identifier */
+    hid_t          tid  = H5I_INVALID_HID; /* Datatype identifier */
+    int            i, n;                   /* Local index variables */
+    int            buf[10];                /* Data buffer */
+    hsize_t        dims[1];                /* Dimension size */
+    int            fd  = -1;               /* File descriptor */
+    unsigned short val = 22;               /* The refcount message ID */
 
     /* Initialize data buffer */
     n = 0;
@@ -485,6 +540,10 @@ gen_err_refcount(const char *fname)
         goto error;
     if (H5Tclose(tid) < 0)
         goto error;
+
+    /* Be sure to close this before opening the file again via open(), below,
+     * or you'll possibly trip over the file locking.
+     */
     if (H5Fclose(fid) < 0)
         goto error;
 
@@ -495,11 +554,16 @@ gen_err_refcount(const char *fname)
              with the committed datatype */
     /* 24: the offset in the object header containing the version of the
            attribute message */
-    if ((fd = HDopen(fname, O_RDWR, 0633)) >= 0) {
-        HDlseek(fd, 4520 + 24, SEEK_SET);
-        (void)HDwrite(fd, &val, 2);
-        HDclose(fd);
-    }
+    if ((fd = HDopen(fname, O_RDWR, 0633)) < 0)
+        goto error;
+    if (HDlseek(fd, 4520 + 24, SEEK_SET) < 0)
+        goto error;
+    if (HDwrite(fd, &val, 2) < 0)
+        goto error;
+    if (HDclose(fd) < 0)
+        goto error;
+
+    return SUCCEED;
 
 error:
     H5E_BEGIN_TRY
@@ -513,6 +577,11 @@ error:
         H5Fclose(fid);
     }
     H5E_END_TRY;
+
+    if (fd >= 0)
+        HDclose(fd);
+
+    return FAIL;
 } /* gen_err_refcount() */
 
 /*
@@ -542,14 +611,22 @@ error:
 int
 main(void)
 {
-    gen_newgrat_file(NEWGRAT_FILE);
-    gen_threshold_file(THRESHOLD_FILE);
+    if (gen_newgrat_file(NEWGRAT_FILE) < 0)
+        goto error;
+    if (gen_threshold_file(THRESHOLD_FILE) < 0)
+        goto error;
 
     /* Generate an HDF file to test for datasets with Fixed Array indexing */
-    gen_idx_file(IDX_FILE);
+    if (gen_idx_file(IDX_FILE) < 0)
+        goto error;
 
     /* Generate a file with a refcount message ID */
-    gen_err_refcount(ERR_REFCOUNT_FILE);
+    if (gen_err_refcount(ERR_REFCOUNT_FILE) < 0)
+        goto error;
 
-    return 0;
+    return EXIT_SUCCESS;
+
+error:
+    HDfprintf(stderr, "h5stat test generator FAILED\n");
+    return EXIT_FAILURE;
 }
