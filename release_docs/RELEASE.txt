@@ -262,22 +262,6 @@ New Features
 
     Library:
     --------
-    - Fixes a segfault when H5Pset_mdc_log_options() is called multiple times
-
-      The call incorrectly attempts to free an internal copy of the previous
-      log location string, which causes a segfault. This only happens
-      when the call is invoked multiple times on the same property list.
-      On the first call to a given fapl, the log location is set to NULL so
-      the segfault does not occur.
-
-      The string is now handled properly and the segfault no longer occurs.
-
-<<<<<<< HEAD
-        (DER - 2021/04/27, HDFFV-11239)
-      
-=======
-    Library:
-    --------
     - H5Gcreate1() now rejects size_hint parameters larger than UINT32_MAX
 
       The size_hint value is ultimately stored in a uint32_t struct field,
@@ -309,7 +293,18 @@ New Features
 
         (DER - 2021/04/28, HDFFV-11240)
 
->>>>>>> 138bc52... Fix for a segfault when H5Pset_fapl_log is passed an invalid fapl ID (#607)
+    - Fixes a segfault when H5Pset_mdc_log_options() is called multiple times
+
+      The call incorrectly attempts to free an internal copy of the previous
+      log location string, which causes a segfault. This only happens
+      when the call is invoked multiple times on the same property list.
+      On the first call to a given fapl, the log location is set to NULL so
+      the segfault does not occur.
+
+      The string is now handled properly and the segfault no longer occurs.
+
+        (DER - 2021/04/27, HDFFV-11239)
+
     - HSYS_GOTO_ERROR now emits the results of GetLastError() on Windows
 
       HSYS_GOTO_ERROR is an internal macro that is used to produce error
