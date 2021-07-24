@@ -56,9 +56,8 @@
 #define __STDC_FORMAT_MACROS
 #endif
 
-#ifdef H5_HAVE_INTTYPES_H
 #include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
-#endif
+
 #ifdef H5_HAVE_STDDEF_H
 #include <stddef.h>
 #endif
