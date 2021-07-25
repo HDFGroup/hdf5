@@ -31,24 +31,7 @@
 #define UBTXT3 "u511.txt"
 #define UBTXT4 "u512.txt"
 #define UBTXT5 "u513.txt"
-/* not used yet
-#define UBTXT6 "u1023.txt"
-#define UBTXT7 "u1024.txt"
-#define UBTXT8 "u1025.txt"
-#define UBTXT9 "u2047.txt"
-#define UBTXT10 "u2048.txt"
-#define UBTXT11 "u2049.txt"
-#define UBBIN1 "u0.dat"
-#define UBBIN2 "u10.dat"
-#define UBBIN3 "u511.dat"
-#define UBBIN4 "u512.dat"
-#define UBBIN5 "u513.dat"
-*/
 
-/* not used yet
-#define FILE1 "tnull.h5"
-#define FILE2 "tnullwithub.h5"
-*/
 /* tall is same as dumper test */
 #define FILE7 "tall.h5"
 #define FILE8 "twithub.h5"
@@ -65,17 +48,6 @@ char pattern[11] = "abcdefghij";
  */
 
 #define BUF_SIZE 1024
-
-/* Element selection information */
-
-typedef enum { RED, GREEN, BLUE, WHITE, BLACK } enumtype;
-
-/* Compound datatype */
-typedef struct s1_t {
-    unsigned int a;
-    unsigned int b;
-    float        c;
-} s1_t;
 
 /* A UD link traversal function.  Shouldn't actually be called. */
 static hid_t
@@ -115,7 +87,6 @@ g1.2.1 : slink
 g2 : dset2.1  dset2.2 udlink
 
 */
-
 static herr_t
 gent_ub(const char *filename, size_t ub_size, size_t ub_fill)
 {
@@ -423,47 +394,14 @@ error:
     return FAIL;
 }
 
-#ifdef notdef
-/* not used yet */
-void
-create_binfile(char *name, off_t size)
-{
-    char *buf;
-    int   fd;
-    int   i;
-    char *bp;
-
-    fd = HDcreat(name, 0777);
-    HDassert(fd >= 0);
-
-    buf = HDcalloc(size, 1);
-    HDassert(buf);
-
-    /* Fill buf with pattern */
-    bp = buf;
-    for (i = 0; i < size; i++)
-        *bp++ = (char)i & 0xff;
-
-    (void)HDwrite(fd, buf, size);
-
-    HDfree(buf);
-    HDclose(fd);
-}
-#endif
-
 /*-------------------------------------------------------------------------
  * Function: main
  *
  *-------------------------------------------------------------------------
  */
-
 int
 main(void)
 {
-    /*
-    create_textfile(UBTXT1, (size_t)0);
-    */
-
     if (create_textfile(UBTXT2, 10) < 0)
         goto error;
     if (create_textfile(UBTXT3, 511) < 0)
@@ -472,21 +410,6 @@ main(void)
         goto error;
     if (create_textfile(UBTXT5, 513) < 0)
         goto error;
-
-    /*
-    create_textfile(UBTXT6, (size_t)1023);
-    create_textfile(UBTXT7, (size_t)1024);
-    create_textfile(UBTXT8, (size_t)1025);
-    create_textfile(UBTXT9, (size_t)2047);
-    create_textfile(UBTXT10, (size_t)2048);
-    create_textfile(UBTXT11, (size_t)2049);
-
-    create_binfile(UBBIN1, (off_t)0);
-    create_binfile(UBBIN2, (off_t)10);
-    create_binfile(UBBIN3, (off_t)511);
-    create_binfile(UBBIN4, (off_t)512);
-    create_binfile(UBBIN5, (off_t)513);
-    */
 
     if (gent_ub(FILE7, 0, 0) < 0)
         goto error;
