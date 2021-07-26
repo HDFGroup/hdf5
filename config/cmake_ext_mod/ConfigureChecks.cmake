@@ -72,7 +72,6 @@ if (WINDOWS)
   set (${HDF_PREFIX}_HAVE_WIN32_API 1)
   set (${HDF_PREFIX}_HAVE_LIBM 1)
   set (${HDF_PREFIX}_HAVE_STRDUP 1)
-  set (${HDF_PREFIX}_HAVE_SYSTEM 1)
   set (${HDF_PREFIX}_HAVE_LONGJMP 1)
   if (NOT MINGW)
     set (${HDF_PREFIX}_HAVE_GETHOSTNAME 1)
@@ -499,25 +498,14 @@ CHECK_FUNCTION_EXISTS (siglongjmp        ${HDF_PREFIX}_HAVE_SIGLONGJMP)
 CHECK_FUNCTION_EXISTS (sigsetjmp         ${HDF_PREFIX}_HAVE_SIGSETJMP)
 CHECK_FUNCTION_EXISTS (sigprocmask       ${HDF_PREFIX}_HAVE_SIGPROCMASK)
 
-CHECK_FUNCTION_EXISTS (snprintf          ${HDF_PREFIX}_HAVE_SNPRINTF)
 CHECK_FUNCTION_EXISTS (srandom           ${HDF_PREFIX}_HAVE_SRANDOM)
 CHECK_FUNCTION_EXISTS (strdup            ${HDF_PREFIX}_HAVE_STRDUP)
-CHECK_FUNCTION_EXISTS (strtoll           ${HDF_PREFIX}_HAVE_STRTOLL)
-CHECK_FUNCTION_EXISTS (strtoull          ${HDF_PREFIX}_HAVE_STRTOULL)
 CHECK_FUNCTION_EXISTS (symlink           ${HDF_PREFIX}_HAVE_SYMLINK)
-CHECK_FUNCTION_EXISTS (system            ${HDF_PREFIX}_HAVE_SYSTEM)
 
 CHECK_FUNCTION_EXISTS (tmpfile           ${HDF_PREFIX}_HAVE_TMPFILE)
 CHECK_FUNCTION_EXISTS (asprintf          ${HDF_PREFIX}_HAVE_ASPRINTF)
 CHECK_FUNCTION_EXISTS (vasprintf         ${HDF_PREFIX}_HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS (waitpid           ${HDF_PREFIX}_HAVE_WAITPID)
-
-CHECK_FUNCTION_EXISTS (vsnprintf         ${HDF_PREFIX}_HAVE_VSNPRINTF)
-if (MINGW OR NOT WINDOWS)
-  if (${HDF_PREFIX}_HAVE_VSNPRINTF)
-    HDF_FUNCTION_TEST (VSNPRINTF_WORKS)
-  endif ()
-endif ()
 
 #-----------------------------------------------------------------------------
 # sigsetjmp is special; may actually be a macro
@@ -608,14 +596,6 @@ if (WINDOWS)
   endif ()
   endif ()
 endif ()
-
-#-----------------------------------------------------------------------------
-# Determine how 'inline' is used
-#-----------------------------------------------------------------------------
-foreach (inline_test inline __inline__ __inline)
-  string (TOUPPER ${inline_test} INLINE_TEST_MACRO)
-  HDF_FUNCTION_TEST (HAVE_${INLINE_TEST_MACRO})
-endforeach ()
 
 #-----------------------------------------------------------------------------
 # Check how to print a Long Long integer

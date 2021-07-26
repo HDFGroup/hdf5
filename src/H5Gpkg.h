@@ -35,7 +35,6 @@
 #include "H5HFprivate.h" /* Fractal heaps            */
 #include "H5HLprivate.h" /* Local Heaps                */
 #include "H5Oprivate.h"  /* Object headers              */
-#include "H5SLprivate.h" /* Skip lists                */
 
 /**************************/
 /* Package Private Macros */

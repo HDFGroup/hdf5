@@ -26,21 +26,6 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
-/* include the pthread header */
-#ifdef H5_HAVE_THREADSAFE
-#ifdef H5_HAVE_WIN32_API
-#ifndef H5_HAVE_WIN_THREADS
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
-#endif /* H5_HAVE_WIN_THREADS */
-#else  /* H5_HAVE_WIN32_API */
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
-#endif /* H5_HAVE_WIN32_API */
-#endif /* H5_HAVE_THREADSAFE */
-
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -49,51 +34,33 @@
 #include <limits.h>
 #include <math.h>
 #include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <time.h>
 
-/*
- * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
- * compliant. Otherwise all bets are off.
- */
+/* POSIX headers */
 #ifdef H5_HAVE_UNISTD_H
-#include <sys/types.h>
-#include <unistd.h>
-#endif
-#ifdef _POSIX_VERSION
-#include <sys/wait.h>
 #include <pwd.h>
+#include <unistd.h>
+#include <sys/time.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 #endif
 
-#include <stdint.h>
+/* Include the Pthreads header, if necessary */
+#if defined(H5_HAVE_THREADSAFE) && defined(H5_HAVE_PTHREAD_H)
+#include <pthread.h>
+#endif
 
 /*
- * The `struct stat' data type for stat() and fstat(). This is a Posix file
- * but often apears on non-Posix systems also.  The `struct stat' is required
- * for hdf5 to compile, although only a few fields are actually used.
+ * The `struct stat' data type for stat() and fstat(). This is a POSIX file
+ * but often apears on non-POSIX systems also.  The `struct stat' is required
+ * for HDF5 to compile, although only a few fields are actually used.
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
-#endif
-
-/*
- * If a program may include both `time.h' and `sys/time.h' then
- * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.ac).
- * On some older systems, `sys/time.h' includes `time.h' but `time.h' is not
- * protected against multiple inclusion, so programs should not explicitly
- * include both files. This macro is useful in programs that use, for example,
- * `struct timeval' or `struct timezone' as well as `struct tm'.  It is best
- * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
- * by `AC_CHECK_HEADERS(sys/time.h)' in configure.ac.
- */
-#if defined(H5_TIME_WITH_SYS_TIME)
-#include <sys/time.h>
-#include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
-#include <sys/time.h>
-#else
-#include <time.h>
 #endif
 
 /*
@@ -1449,11 +1416,7 @@ H5_DLL void HDsrand(unsigned int seed);
 #define HDstrtol(S, R, N) strtol(S, R, N)
 #endif /* HDstrtol */
 #ifndef HDstrtoll
-#ifdef H5_HAVE_STRTOLL
 #define HDstrtoll(S, R, N) strtoll(S, R, N)
-#else
-H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
-#endif /* H5_HAVE_STRTOLL */
 #endif /* HDstrtoll */
 #ifndef HDstrtoul
 #define HDstrtoul(S, R, N) strtoul(S, R, N)
@@ -1551,7 +1514,7 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif /* H5_HAVE_VASPRINTF */
 #endif /* HDvasprintf */
 #ifndef HDva_arg
