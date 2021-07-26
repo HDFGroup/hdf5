@@ -1962,7 +1962,6 @@ static int yy_get_next_buffer (void)
 #endif
 					}
 
-
 				case EOB_ACT_CONTINUE_SCAN:
 					(yy_c_buf_p) = (yytext_ptr) + offset;
 					break;
