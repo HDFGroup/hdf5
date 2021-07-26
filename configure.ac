@@ -1358,6 +1358,7 @@ AC_CHECK_SIZEOF([uint_least64_t])
 AC_CHECK_SIZEOF(  [int_fast64_t])
 AC_CHECK_SIZEOF( [uint_fast64_t])
 
+
 AC_CHECK_SIZEOF([bool], [], [#include <stdbool.h>])
 AC_CHECK_SIZEOF([off_t])
 AC_CHECK_SIZEOF([ptrdiff_t])
