@@ -40,6 +40,7 @@ extern int H5Fis_accessible(const char *name, hid_t fapl);
 static char *user_cmd = NULL;
 static char  mpierrstr[MPI_MAX_ERROR_STRING];
 static int   mpierrlen;
+static int   sg_mpi_rank;
 
 static void dh5tool_flist_write_text(const char *name, mfu_flist bflist);
 
@@ -563,7 +564,8 @@ dh5tool_flist_write_text(const char *name, mfu_flist bflist)
     // uint64_t maxwrite = 128 * 1024 * 1024;
     uint64_t maxwrite    = 0;
     size_t   local_total = get_local_bufsize(&maxwrite);
-    uint64_t iters       = (uint64_t)local_total / maxwrite;
+    uint64_t iters       = 0;
+	if (local_total > 0) (uint64_t)local_total / maxwrite;
 
     if (iters * maxwrite < (uint64_t)local_total) {
         iters++;
@@ -621,6 +623,14 @@ dh5tool_flist_write_text(const char *name, mfu_flist bflist)
         /* compute number of bytes left to write */
         uint64_t remaining = (uint64_t)local_total - written;
 
+        /* maybe Incr pointer to our next buffer */
+        if (remaining == 0) {
+            idx++;
+            if (buf_cache[idx]->buf == NULL) {
+               
+            }
+		}
+
         /* compute count we'll write in this iteration */
         int write_count = (int)maxwrite;
         if (remaining < maxwrite) {
@@ -644,9 +654,6 @@ dh5tool_flist_write_text(const char *name, mfu_flist bflist)
 
         /* update pointer into our buffer */
         ptr += write_count;
-
-        /* Incr pointer to our next buffer */
-        idx++;
 
         /* decrement our collective write loop counter */
         all_iters--;
@@ -721,27 +728,40 @@ filter_hdf_files(mfu_flist *pflist, char *regex_exp, int exclude, int name)
 }
 
 static int
-count_paths(int argc, int startcnt, char **argv, int **index_out)
+count_dirpaths(int argc, int startcnt, char **argv, int **index_out)
 {
     int  k;
     int  path_cnt = 0;
-    int *index    = (int *)MFU_MALLOC((size_t)(argc - startcnt) * sizeof(int));
-    assert(index);
+    int  idx_count= (argc - startcnt);
+    int *index    = NULL;
+    if (idx_count > 0) {
+        index = (int *)malloc((size_t)(argc - startcnt) * sizeof(int));
+        assert(index);
+    }
+	else return 0;
+
     for (k = startcnt; k < argc; k++) {
+        char *slash = NULL;
         int c = *argv[k];
         if ((c == '.') || (c == '/')) {
             index[path_cnt++] = k;
         }
+        else if ((slash = strchr(argv[k],'/')) != NULL) {
+            struct stat pathcheck;
+            if (stat(argv[k],&pathcheck) == 0) {
+                if (S_ISDIR(pathcheck.st_mode))
+                   index[path_cnt++] = k;
+            }
+        }
     }
-    if (path_cnt == 0) {
-        mfu_free(index);
+    if ((path_cnt == 0) && (index != NULL)) {
+        free(index);
         return 0;
     }
     *index_out = index;
     return path_cnt;
 }
 
-#if 1
 static char **
 copy_args(int argc, char **argv, int *mfu_argc, int *copy_len)
 {
@@ -765,39 +785,6 @@ copy_args(int argc, char **argv, int *mfu_argc, int *copy_len)
     *copy_len = bytes_copied;
     return argv_copy;
 }
-
-#else
-static char **
-copy_args(int argc, char **argv, int *argc_out, int *copy_len)
-{
-    int    i, bytes_copied = 0;
-    int    copy_arg    = 1;
-    int    args_copied = 0;
-    char **argv_copy   = (char **)MFU_MALLOC((size_t)argc * sizeof(char **));
-    assert(argv_copy);
-    assert(copy_len);
-    save_command(argv[0]);
-
-    for (i = 0; i < argc; i++) {
-        if (copy_arg) {
-            argv_copy[i] = strdup(argv[i]);
-            args_copied++;
-            if (strncmp(argv[i], "-T", 2) == 0) {
-                i++;
-                bytes_copied += (int)(strlen(argv[i]) + 1);
-                argv_copy[i] = strdup(argv[i]);
-                args_copied++;
-                copy_arg = 0;
-            }
-        }
-        else
-            argv_copy[i] = NULL;
-    }
-    *copy_len = bytes_copied;
-    *argc_out = args_copied;
-    return argv_copy;
-}
-#endif
 
 static int
 check_path_count(char *h5tool)
@@ -828,11 +815,8 @@ int
 MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
 {
     /* get file name for this item */
-    int         file_substituted = 0;
-    const char *fname            = mfu_flist_file_get_name(flist, idx);
-
-    // flist_t *thisFlist = (flist_t *)flist;
-    // elem_t *elem = thisFlist->list_index[idx];
+    int file_substituted = 0;
+    const char *fname = mfu_flist_file_get_name(flist, idx);
 
     char *toolname = NULL;
     char  filepath[1024];
@@ -844,7 +828,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     char *buf       = (char *)arg + sizeof(int);
 
     /* get number of argv parameters */
-    int k, count = *count_ptr;
+    int k = 0, count = *count_ptr;
     toolname = buf;
 
     /* Get a copy of fname */
@@ -859,27 +843,30 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
 
     char   cmdline[2048];
     char **argv = (char **)MFU_CALLOC((size_t)(count + 2), sizeof(char *));
-    argv[0]     = strdup(toolname);
+    argv[k++]   = strdup(toolname);
 
     memset(cmdline, 0, sizeof(cmdline));
     buf += strlen(toolname) + 1;
-
+    /* Reconstruct the command line that the user provided for the h5tool */
     for (k = 1; k < count; k++) {
         if (buf[0] == '&') {
-            void *     check_ptr[2] = {NULL, NULL};
+            char *fname_arg = NULL;
+            void *check_ptr[2] = {NULL, NULL};
             mfu_flist *check_flist  = memcpy(&check_ptr[0], &buf[1], sizeof(mfu_flist *));
-            mfu_flist  flist1       = (mfu_flist)check_ptr[0];
-            buf += sizeof(mfu_flist *) + 1;
-            if (file_substituted > 0) {
-                char *fname1 = mfu_flist_file_get_name(flist1, idx);
-                argv[k]      = strdup(fname1);
-                file_substituted++;
-            }
-            else if (flist1 == flist) {
+            mfu_flist flist_arg  = (mfu_flist)check_ptr[0];
+
+            /* +2 (see below) accounts for the '&' and the trailing zero pad */
+            buf += sizeof(mfu_flist *) + 2;
+            fname_arg = mfu_flist_file_get_name(flist_arg, idx);
+            if (fname_arg == NULL) {
+                printf("[%d] Warning: Unable to resolve file_substitution %d (idx=%ld)\n", sg_mpi_rank, file_substituted, idx);
                 argv[k] = strdup(fname);
+			}
+			else {
+                argv[k] = strdup(fname_arg);
                 file_substituted++;
             }
-        }
+		}
         else {
             argv[k] = strdup(buf);
             buf += strlen(argv[k]) + 1;
@@ -902,7 +889,12 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         if (bufs == NULL) {
             bufs = (buf_t **)MFU_CALLOC(buft_max, sizeof(buf_t *));
             assert((bufs != NULL));
-            buf_cache          = bufs;
+            buf_cache = bufs;
+#if 0
+			if (buft_count == 0) {
+                printf("[%d] Initial buf_cache allocation: buft_count=%d\n", sg_mpi_rank, buft_count);
+			}
+#endif
             bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
             assert((thisbuft != NULL));
         }
@@ -961,6 +953,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
                 thisbuft->chars += remaining;
 
                 /* Create a new read buffer */
+                printf("[%d] Allocate-1 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
                 bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
                 assert(thisbuft != NULL);
                 thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
@@ -984,6 +977,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
                     thisbuft->chars += read_bytes;
 
                     /* Create a new read buffer */
+                    printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
                     bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
                     assert(thisbuft != NULL);
                     thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
@@ -1078,6 +1072,8 @@ main(int argc, char **argv)
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &ranks);
 
+	/* Assign the static global mpi_rank (for debugging) */
+    sg_mpi_rank = rank;
     /* pointer to mfu_walk_opts */
     mfu_walk_opts_t *walk_opts = mfu_walk_opts_new();
 
@@ -1112,23 +1108,28 @@ main(int argc, char **argv)
      * struct option { char * name; int has_arg; int *flag; int val};
      */
     int                  option_index   = 0;
-    static struct option long_options[] = {{"input", required_argument, 0, 'i'},
-                                           {"output", required_argument, 0, 'o'},
-                                           {"error", optional_argument, 0, 'E'},
-                                           {"tool", required_argument, 0, 'T'},
-                                           {"log_text", optional_argument, 0, 'l'},
-                                           {"help", no_argument, 0, 'h'},
-                                           {0, 0, 0, 0}};
+    static struct option long_options[] = {
+        {"input",          required_argument, 0, 'i'},
+        {"output",         required_argument, 0, 'o'},
+        {"error",          optional_argument, 0, 'E'},
+        {"tool",           required_argument, 0, 'T'},
+        {"log_text",       optional_argument, 0, 'l'},
+        {"help",           no_argument,       0, 'h'},
+        {0, 0, 0, 0}
+    };
 
-    int       usage           = 0;
-    int       tool_selected   = 0;
-    int       tool_paths      = 0;
-    int       tool_args_start = -1;
-    int       last_mfu_arg    = 0;
-    mfu_pred *pred_head       = NULL;
+    int usage = 0;
+    int tool_selected = 0;
+    int tool_paths = 0;
+    int tool_args_start = -1;
+    int last_mfu_arg = 0;
+    mfu_pred* pred_head = NULL;
 
     while (!tool_selected) {
-        int c = getopt_long(mfu_argc + 1, h5tool_argv, "h:i:o:E::T:l::", long_options, &option_index);
+        int c = getopt_long(
+                    mfu_argc+1, h5tool_argv, "h:i:o:E::T:l::",
+                    long_options, &option_index
+                );
         if (c == -1) {
             break;
         }
@@ -1165,13 +1166,12 @@ main(int argc, char **argv)
                  * We also want to avoid any misinterpretations if
                  * HDF5 tool options conflict with the MFU options.
                  */
-                tool_paths      = check_path_count(h5toolname);
+                // tool_paths      = check_path_count(h5toolname);
                 tool_selected   = 1;
                 tool_args_start = mfu_argc;
                 h5tool_argc     = argc - mfu_argc;
                 last_mfu_arg    = optind;
                 /* Don't allow any further parsing of arguments */
-                // h5tool_argc = optind;
                 break;
             case 'h':
                 usage = 1;
@@ -1221,7 +1221,7 @@ show_help:
     /**************************************************************/
 
     int *path_indices = NULL;
-    int  numpaths     = count_paths(argc, tool_args_start + 1, argv, &path_indices);
+    int  numpaths     = count_dirpaths(argc, tool_args_start + 1, argv, &path_indices);
 
     char **argpaths = NULL;
 
@@ -1304,6 +1304,7 @@ show_help:
         path2        = destpath->path;
         pathlen_total += strlen(path2);
         mfu_flist_walk_param_paths(1, destpath, walk_opts, flist2, mfu_dst_file);
+
     }
 
     if (tool_selected && (args_byte_length > 0)) {
@@ -1327,23 +1328,23 @@ show_help:
         *(int *)args_buf = h5tool_argc;
         for (i = tool_args_start; i < argc; i++) {
             if (i == path_indices[k]) {
+                /* The '&' indicates that what follows is a pointer */
+                *ptr++ = '&';
+                /* Select which argument list should be used */
                 if (k == 0) {
-                    *ptr++ = '&';
-                    memcpy(ptr, &flist1, sizeof(mfu_flist *));
-                    ptr += sizeof(mfu_flist *);
+					memcpy(ptr, &flist1, sizeof(mfu_flist *));
                 }
                 if (k == 1) {
-                    *ptr++ = '&';
                     memcpy(ptr, &flist2, sizeof(mfu_flist *));
-                    ptr += sizeof(mfu_flist *);
                 }
+                ptr += sizeof(mfu_flist *);
                 k++;
             }
             else {
                 strcpy(ptr, argv[i]);
                 ptr += strlen(argv[i]);
-                *ptr++ = 0;
             }
+            *ptr++ = 0;
         }
         *ptr++ = 0;
 

@@ -22,10 +22,22 @@ also defined, but not for general use are
   CIRCLE_LIBRARY, where to find the CIRCLE library.
 #]=======================================================================]
 
-find_path(CIRCLE_INCLUDE_DIR
-  NAMES libcircle.h)
+if(DEFINED ENV{MFU_ROOT})
+  set(ENV{MFU_INCLUDE} "$ENV{MFU_ROOT}/include")
+  set(ENV{MFU_LIB} "$ENV{MFU_ROOT}/lib")
+  set(ENV{MFU_LIB64} "$ENV{MFU_ROOT}/lib64")
+else()
+  message("MFU_ROOT is not set!?")
+endif()
 
-find_library(CIRCLE_LIBRARY circle)
+find_path(CIRCLE_INCLUDE_DIR
+  NAMES libcircle.h
+  HINTS ENV MFU_INCLUDE)
+
+find_library(CIRCLE_LIBRARY
+  NAMES circle
+  HINTS ENV MFU_LIB ENV MFU_LIB64
+  )
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(CIRCLE REQUIRED_VARS CIRCLE_LIBRARY CIRCLE_INCLUDE_DIR)

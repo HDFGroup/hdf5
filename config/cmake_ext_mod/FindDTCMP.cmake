@@ -22,11 +22,21 @@ also defined, but not for general use are
   DTCMP_LIBRARY, where to find the DTCMP library.
 #]=======================================================================]
 
+if(DEFINED ENV{MFU_ROOT})
+  set(ENV{MFU_INCLUDE} "$ENV{MFU_ROOT}/include")
+  set(ENV{MFU_LIB} "$ENV{MFU_ROOT}/lib")
+  set(ENV{MFU_LIB64} "$ENV{MFU_ROOT}/lib64")
+else()
+  message("MFU_ROOT is not set!?")
+endif()
+
 find_path(DTCMP_INCLUDE_DIR
-  NAMES dtcmp.h)
+  NAMES dtcmp.h
+  HINTS ENV MFU_INCLUDE)
 
-find_library(DTCMP_LIBRARY dtcmp)
-
+find_library(DTCMP_LIBRARY
+  NAMES dtcmp
+  HINTS ENV MFU_LIB ENV MFU_LIB64)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(DTCMP REQUIRED_VARS DTCMP_LIBRARY DTCMP_INCLUDE_DIR)
