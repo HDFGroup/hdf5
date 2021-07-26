@@ -74,16 +74,41 @@
  * \ingroup H5P
  * \defgroup GCPL Group Creation Properties
  * \ingroup H5P
+ *
  * \defgroup ALCAPL Attribute and Link Creation Properties
  * \ingroup H5P
+ * Currently, there are only two creation properties that you can use to control
+ * the creation of HDF5 attributes and links. The first creation property, the
+ * choice of a character encoding, applies to both attributes and links.
+ * The second creation property applies to links only, and advises the library
+ * to automatically create missing intermediate groups when creating new objects.
+ *
  * \defgroup LAPL Link Access Properties
  * \ingroup H5P
+ *
  * \defgroup DCPL Dataset Creation Properties
  * \ingroup H5P
+ * Use dataset creation properties to control aspects of dataset creation such
+ * as fill time, storage layout, compression methods, etc.
+ * Unlike dataset access and transfer properties, creation properties \Emph{are}
+ * stored with the dataset, and cannot be changed once a dataset has been
+ * created.
+ *
  * \defgroup DAPL Dataset Access Properties
  * \ingroup H5P
+ * Use dataset access properties to modify the behavior of the HDF5
+ * library when accessing datasets. The properties include adjusting the size
+ * of the chunk cache, providing prefixes for external content and virtual
+ * dataset file paths, and controlling flush behavior, etc. These properties
+ * are \Emph{not} persisted with datasets, and can be adjusted at runtime.
+ *
  * \defgroup DXPL Dataset Transfer Properties
  * \ingroup H5P
+ * Use dataset transfer properties to customize certain aspects of reading
+ * and writing datasets such as transformations, MPI-IO I/O mode, error
+ * detection, etc. These properties are \Emph{not} persisted with datasets,
+ * and can be adjusted at runtime.
+ *
  * \defgroup OCPL Object Creation Properties
  * \ingroup H5P
  * \defgroup OCPPL Object Copy Properties
