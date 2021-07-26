@@ -100,7 +100,9 @@
 #define H5P_CRT_ORDER_TRACKED 0x0001
 #define H5P_CRT_ORDER_INDEXED 0x0002
 
-/* Default value for all property list classes */
+/**
+ * Default value of type \ref hid_t for all property list classes
+ */
 #define H5P_DEFAULT 0 /* (hid_t) */
 
 #ifdef __cplusplus
@@ -113,14 +115,23 @@ extern "C" {
 
 /* Define property list class callback function pointer types */
 //! <!-- [H5P_cls_create_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
 //! <!-- [H5P_cls_create_func_t_snip] -->
 
 //! <!-- [H5P_cls_copy_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void *copy_data);
 //! <!-- [H5P_cls_copy_func_t_snip] -->
 
 //! <!-- [H5P_cls_close_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 //! <!-- [H5P_cls_close_func_t_snip] -->
 
@@ -159,12 +170,25 @@ typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, vo
 typedef H5P_prp_cb1_t H5P_prp_create_func_t;
 typedef H5P_prp_cb2_t H5P_prp_set_func_t;
 typedef H5P_prp_cb2_t H5P_prp_get_func_t;
+//! <!-- [H5P_prp_encode_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *size);
+//! <!-- [H5P_prp_encode_func_t_snip] -->
+//! <!-- [H5P_prp_decode_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_prp_decode_func_t)(const void **buf, void *value);
+//! <!-- [H5P_prp_decode_func_t_snip] -->
 typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
 
 //! <!-- [H5P_prp_compare_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 //! <!-- [H5P_prp_compare_func_t_snip] -->
 
@@ -172,6 +196,9 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
 //! <!-- [H5P_iterate_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 //! <!-- [H5P_iterate_t_snip] -->
 
@@ -5237,7 +5264,7 @@ H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
 
 #ifdef H5_HAVE_PARALLEL
 /**
- * \ingroup GACPL
+ * \ingroup GAPL
  *
  * \brief Sets metadata I/O mode for read operations to collective or independent (default)
  *
@@ -5306,7 +5333,7 @@ H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
  */
 H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
 /**
- * \ingroup GACPL
+ * \ingroup GAPL
  *
  * \brief Retrieves metadata read mode setting
  *
@@ -9455,9 +9482,6 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
  *
- *
- * \cpp_c_api_note
- *
  */
 
 /* Function prototypes */
@@ -9571,8 +9595,7 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
-
- * \cpp_c_api_note
+ *
  */
 H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
                          H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,
