@@ -35,7 +35,7 @@ with results that become visible to the VFD SWMR readers.
 In particular, VFD SWMR allows the writer to create and delete 
 both groups and datasets, and to create and delete attributes on 
 both groups and datasets while operating in VFD SWMR mode -- 
-which is not possible in the original SWMR.  
+which is not possible using the original SWMR implementation.  
 
 We say that VFD SWMR is almost "full SWMR" because there are a 
 few limitations -- most notably:
@@ -69,7 +69,7 @@ the writer makes HDF5 library API calls with sufficient regularity, and
 that both reader and writer avoid long running HDF5 API calls.
 
 For further details on VFD SWMR design and implementation, see 
-`VFD_SWMR_RFC_2020-02-03.docx` in the doc directory.
+`VFD_SWMR_RFC_200916.pdf` in the doc directory.
 
 # Quick start
 
@@ -90,54 +90,16 @@ Clone the HDF5 repository in a new directory, then switch to the
 
 ## Build
 
-Create a build directory, change to that directory, and run the
-configure script (The Autotools are shown here. VFD SWMR can also
-be built using CMake.):
+There are no special instructions for building VFD SWMR. Simply follow
+the usual build procedure for CMake or the Autotools using the guides
+in the `release_docs` directory.
 
-```
-% mkdir -p ../build/swmr
-% cd ../build/swmr
-% ../../swmr/configure
-```
+Some notes:
 
-Note that the mirror VFD tests require some rework, so enabling that feature
-will cause the build step to fail. This will be fixed in a future beta release.
-
-
-Build the project:
-
-```
-% make
-```
-
-## Test
-
-We recommend that you run the full HDF5 test suite to make sure that VFD
-SWMR works correctly on your system.  To test the library, utilities, run
-
-```
-% make check
-```
-
-This will take some time to run, particularly the VFD SWMR shell script tests.
-Note that CMake currently does not run the shell script tests. 
-
-If the tests don't pass, please let the developers know!
-
-Note that due to reader and writer process drifting out of sync, you 
-are likely to see several messages such as:
-
-```
-    vfd_swmr_zoo_reader: tend_zoo: vrfy_ns_grp_c: H5Gopen2() failed
-```
-or 
-```
-    vfd_swmr_zoo_reader: tend_zoo: H5Lexists unexpectedly true.
-```
-
-These are expected transient failues.  In addition, there will be 
-expected errors in the variable length data tests until we are able 
-to re-implement variable length data storage in HDF5.
+- The mirror VFD tests require some rework, so enabling that feature will cause the build step to fail. This will be fixed in a future beta release.
+- The VFD SWMR tests can take some time to run.
+- The VFD SWMR acceptance tests will typically emit some output about "expected errors" that you can ignore. Real errors are clearly flagged.
+- If the tests do not pass on your system, please let the developers know via the email address given at the end of this document.
 
 # Sample programs
 
@@ -177,48 +139,51 @@ and in the other window, run the reader:
 % ./vfd_swmr_bigset_reader -n 50 -d 2 -W
 ```
 
-The writer will wait for a signal before it quits.  You may tap
-Control-C to make it quit.
+The writer will wait for a signal before it quits.  You can tap CTRL-C to make
+it quit.
 
 The reader and writer programs support several command-line options:
 
-* `-h`: show program usage
+```
+usage: vfd_swmr_bigset_writer [-F] [-M] [-S] [-V] [-W] [-a steps] [-b] [-c cols]
+    [-d dims]
+    [-n iterations] [-r rows] [-s datasets]
+    [-u milliseconds]
 
-* `-W`: stop the program from waiting for a signal before it quits.
-
-* `-q`: suppress the progress messages that the programs write to the
-  standard error stream.
-
-* `-V`: create a virtual dataset with content in three source datasets
-  in the same HDF5 file---only available when the writer creates a
-  dataset extensible in one dimension (`-d 1`)
-
-* `-M`: like `-V`, the writer creates the virtual dataset on three
-   source datasets, but each source dataset is in a different HDF5 file.
+-F:                   fixed maximal dimension for the chunked datasets
+-M:                   use virtual datasets and many source files
+-S:                   do not use VFD SWMR
+-V:                   use virtual datasets and a single source file
+-W:                   do not wait for a signal before exiting
+-a steps:             `steps` between adding attributes
+-b:                   write data in big-endian byte order
+-c cols:              `cols` columns per chunk
+-d 1|one|2|two|both:  select dataset expansion in one or
+                      both dimensions
+-n iterations:        how many times to expand each dataset
+-r rows:              `rows` rows per chunk
+-s datasets:          number of datasets to create
+-u ms:                milliseconds interval between updates
+                      to vfd_swmr_bigset_writer.h5
+```
 
 ## The VFD SWMR demos
 
 The VFD SWMR demos are located in the `examples` directory of this source
-tree.
+tree. Instructions for building the example programs are given in the README
+file in that directory. These programs are NOT installed via `make install`
+and have to built by hand with h5cc as described in the README.
 
-Before you build the demos, you will need to install the HDF5 library
-and utilities built from the VFD SWMR branch in your home directory
-somewhere.  In the ./configure step, use the command-line option
-`--prefix=$HOME/path/for/library` to set the directory you prefer.
-In the demo Makefiles, update the `H5CC` variable with the path to
-the `h5cc` installed from the VFD SWMR branch.  Then you should be
-able to `make` and `make clean` the demos.
-
-Under `gaussians/`, two programs are built, `wgaussians` and
-`rgaussians`.  If you start both from the same directory in different
-terminals, you should see the "bouncing 2-D Gaussian distributions"
-in the `rgaussians` terminal.  This demo uses curses, so you may need
-to install the curses developers library to build.
+Two Gaussian programs are built, `wgaussians` and `rgaussians`.  If you start
+both from the same directory in different terminals, you should see the
+"bouncing 2-D Gaussian distributions" in the `rgaussians` terminal.  This demo
+uses curses, so you may need to install the curses developers library to build
+(and this is probably not going to be easy to build on Windows).
 
 The creation-deletion (`credel`) demo is also run in two terminals.
-The two command lines are given in `credel/README.md`.  You need
-to use the `h5ls` installed from the VFD SWMR branch, since only
-that version has the `--poll` option.
+The two command lines are given in the README. You need to use the `h5ls`
+installed from the VFD SWMR branch, since only that version has the `--poll`
+option. Be careful to not use a non-VFD-SWMR system h5ls here.
 
 # Developer tips
 
@@ -226,7 +191,7 @@ that version has the `--poll` option.
 
 ### File-creation properties
 
-To use VFD SWMR, creating your HDF5 file with paged allocation strategy
+To use VFD SWMR, creating your HDF5 file with a paged allocation strategy
 is mandatory.  This call enables the paged allocation strategy:
 
 ```
@@ -240,74 +205,40 @@ allocation strategy.
 
 ### File-access properties
 
-In this section we dissect `vfd_swmr_create_fapl()`, a helper routine in
-the VFD SWMR tests, to show how to configure your application to use VFD
+In this section we show how to configure your application to use VFD
 SWMR.
 
-```
-hid_t
-vfd_swmr_create_fapl(bool writer, bool only_meta_pages, bool use_vfd_swmr)
-{   
-    H5F_vfd_swmr_config_t config;
-    hid_t fapl;
-
-```
-
-`h5_fileaccess()` is also a helper routine for the tests.  In your
-program, you can replace the `h5_fileaccess()` call with a call to
-`H5Pcreate(H5P_FILE_ACCESS)`.
-
-```
-    /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0) {
-        warnx("h5_fileaccess");
-        return badhid;
-    }
-```
-
-
-VFD SWMR has only been tested with the latest file format.  It may
-malfunction with older formats, we just don't know.  We force the
-latest version here.
-
-```
-    /* FOR NOW: set to use latest format, the "old" parameter is not used */
-    if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0) {
-        warnx("H5Pset_libver_bounds");
-        return badhid;
-    }
-
-    /*
-     * Set up to open the file with VFD SWMR configured.
-     */
-```
+1. Create a file access property list using `H5Pcreate(H5P_FILE_ACCESS)`.
+2. Set the latest file format using `H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST)`. 
+3. Enable page buffering using `H5Pset_page_buffer_size()`.
+4. Set any VFD SWMR configuration properties using `H5Pset_vfd_swmr_config()`. The struct is documented in H5Fpublic.h, with some additional documentation below. (In the near future, this struct will be documented in the library's Doxygen documentation.)
 
 VFD SWMR relies on metadata reads and writes to go through the
-page buffer.  Note that the default page size is 4096 bytes.  This
-call sets the total page buffer size to 4096 bytes.  So we have
-effectively created a one-page page buffer!  That is adequate for
-testing, but it may not be best for your application.
-
-If `only_meta_pages` is true, then the entire page buffer is
-dedicated to metadata.  That's fine for VFD SWMR.
+page buffer.  Note that the default page size is 4096 bytes. Finding good
+values for `buf_size` may take some experimentation. We use 4096 (giving a
+single page buffer) for `buf_size` in our test code.
 
 *Note well*: when VFD SWMR is enabled, the meta-/raw-data pages proportion 
 set by `H5Pset_page_buffer_size()` does not actually control the
 pages reserved for raw data.  *All* pages are dedicated to buffering
 metadata.
 
+### `H5F_vfd_swmr_config_t` fields discussion
+
+Example code:
 
 ```
-    /* Enable page buffering */
-    if(H5Pset_page_buffer_size(fapl, 4096, only_meta_pages ? 100 : 0, 0) < 0) {
-        warnx("H5Pset_page_buffer_size");
-        return badhid;
-    }
+    memset(&config, 0, sizeof(config));
+
+    config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
+    config.tick_len = 4;
+    config.max_lag = 7;
+    config.writer = true;
+    config.md_pages_reserved = 128;
+    strcpy(config.md_file_path, "./my_md_file");
+
+    H5Pset_vfd_swmr_config(fapl, &config);
 ```
-
-
-Add VFD SWMR-specific configuration to the file-access property list
-(`fapl`) using an `H5Pset_vfd_swmr_config()` call.
 
 When VFD SWMR is enabled, changes to the HDF5 metadata accumulate in
 RAM until a configurable unit of time known as a *tick* has passed.
@@ -315,11 +246,11 @@ At the end of each tick, a snapshot of the metadata at the end of
 the tick is "published"---that is, made visible to the readers.
 
 The length of a *tick* is configurable in units of 100 milliseconds
-using the `tick_len` parameter.  Below, `tick_len` is set to `4` to
+using the `tick_len` parameter.  Here, `tick_len` is set to `4` to
 select a tick length of 400ms.
 
 A snapshot does not persist forever, but it expires after a number
-of ticks, given by the *maximum lag*, has passed.  Below, `max_lag`
+of ticks, given by the *maximum lag*, has passed.  Here, `max_lag`
 is set to `7` to select a maximum lag of 7 ticks.  After a snapshot
 has expired, the writer may overwrite it.
 
@@ -358,25 +289,6 @@ must be at least 2.
 The `version` parameter tells what version of VFD SWMR configuration
 the parameter struct `config` contains.  For now, it should be
 initialized to `H5F__CURR_VFD_SWMR_CONFIG_VERSION`.
-
-```
-    memset(&config, 0, sizeof(config));
-
-    config.version = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
-    config.tick_len = 4;
-    config.max_lag = 7;
-    config.writer = writer;
-    config.md_pages_reserved = 128;
-    HDstrcpy(config.md_file_path, "./my_md_file");
-
-    /* Enable VFD SWMR configuration */
-    if(use_vfd_swmr && H5Pset_vfd_swmr_config(fapl, &config) < 0) {
-        warnx("H5Pset_vfd_swmr_config");
-        return badhid;
-    }
-    return fapl;
-}
-```
 
 ## Using virtual datasets (VDS)
 
@@ -419,14 +331,14 @@ user configurable in the first production release.
 
 With the currently hard coded flush of raw data at the end of each tick, 
 it should not be necessary to call H5Fflush().  In fact, when VFD SWMR is 
-active, H5Fflush() may require up to 'max_lag' ticks to complete due to 
+active, H5Fflush() may require up to `max_lag` ticks to complete due to 
 metadata consistency issues.
 
 Instead, a writer can make its last changes to HDF5 file visible to all
 readers immediately using the new call, `H5Fvfd_swmr_end_tick()`.  Note
 that this call should be used sparingly, as it terminates the current 
-tick early, thus effectively reducing 'max_lag'.  Repeated calls in 
-quick succession can force a reader to overrun 'max_lag', and 
+tick early, thus effectively reducing `max_lag`.  Repeated calls in 
+quick succession can force a reader to overrun `max_lag`, and 
 read stale metadata.
 
 When the flush of raw data at end of tick is disabled (not possible at present), 
@@ -534,14 +446,6 @@ object---while the writer deletes it, then reading content through
 the handle may yield corrupted data or the data from some other
 object, or the library may crash.
 
-## Microsoft Windows 
-
-VFD SWMR is not officially supported on Microsoft Windows at this time.  The
-feature should in theory work on Windows and NTFS, however it has not been
-tested as the existing VFD SWMR tests rely on shell scripts.  Note that Windows
-file shares are not supported as there is no write ordering guarantee (as with
-NFS, et al.).
-
 ## Supported filesystems
 
 A VFD SWMR writer and readers share a couple of files, the HDF5 (`.h5`)
@@ -554,12 +458,20 @@ ordering should take effect, regardless of the underlying filesystem.
 
 If the VFD SWMR reader and the writer run on *different* hosts, then
 the write-ordering rules depend on the shared filesystem.  VFD SWMR is
-not generally expected to work with NFS at this time.  GPFS is reputed
-to order writes according to POSIX convention, so we expect VFD SWMR
-to work with GPFS.  (Caveat: we are still looking for an authoritative
-description of GPFS I/O semantics.)
+not generally expected to work with NFS at this time.  Parallel file systems
+like GPFS and Lustre should order writes according to POSIX convention, so we
+expect VFD SWMR to work on those file systems but we have not tested this.
 
-The HDF Group plans to add support for NFS to VFD SWMR in the future.
+The HDF Group plans to add support for networked file systems like NFS and
+Windows SMB to VFD SWMR in the future.
+
+## Microsoft Windows 
+
+VFD SWMR is not officially supported on Microsoft Windows at this time.  The
+feature should in theory work on Windows and NTFS, however it has not been
+tested as the existing VFD SWMR tests rely on shell scripts.  Note that Windows
+file shares are not supported as there is no write ordering guarantee (as with
+NFS, et al.).
 
 ## File-opening order
 
