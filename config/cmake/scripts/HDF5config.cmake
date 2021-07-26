@@ -11,7 +11,7 @@
 #
 #############################################################################################
 ### ${CTEST_SCRIPT_ARG} is of the form OPTION=VALUE                                       ###
-### BUILD_GENERATOR required [Unix, VS2017, VS201764, VS2015, VS201564, VS2013, VS201364] ###
+### BUILD_GENERATOR required [Unix, VS2019, VS201964, VS2017, VS201764, VS2015, VS201564] ###
 ### ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -VV -O hdf5.log         ###
 #############################################################################################
 
@@ -38,7 +38,7 @@ cmake_minimum_required (VERSION 3.12)
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "1.10.8")
-set (CTEST_SOURCE_VERSEXT "-1")
+set (CTEST_SOURCE_VERSEXT "-2")
 
 ##############################################################################
 # handle input parameters to script.
@@ -68,7 +68,7 @@ endif ()
 
 # build generator must be defined
 if (NOT DEFINED BUILD_GENERATOR)
-  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
+  message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
 endif ()
 
 ###################################################################
@@ -105,7 +105,7 @@ endif ()
 #########       Following describes compiler           ############
 if (NOT DEFINED HPC)
   if (NOT DEFINED BUILD_GENERATOR)
-    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2017, or VS201764, VS2015, VS201564, VS2013, VS201364")
+    message (FATAL_ERROR "BUILD_GENERATOR must be defined - Unix, VS2019, VS201964, VS2017, or VS201764, VS2015, VS201564")
   endif ()
   if (WIN32 AND NOT MINGW)
     set (SITE_OS_NAME "Windows")

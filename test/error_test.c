@@ -129,7 +129,7 @@ test_error(hid_t file)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-    if (old_func != (H5E_auto2_t)H5Eprint2)
+    if (old_func == NULL)
         TEST_ERROR;
 
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)

@@ -17,7 +17,7 @@
 
 if (UNIX)
 
-  find_program (SH_PROGRAM sh)
+  find_program (SH_PROGRAM bash)
   if (SH_PROGRAM)
 
     ##############################################################################

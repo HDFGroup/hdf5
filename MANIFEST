@@ -1114,6 +1114,7 @@
 ./test/cache_tagging.c
 ./test/chunk_info.c
 ./test/cmpd_dset.c
+./test/cmpd_dtransform.c
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
 ./test/cross_read.c
