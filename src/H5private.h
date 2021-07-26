@@ -41,10 +41,6 @@
 #endif /* H5_HAVE_WIN32_API */
 #endif /* H5_HAVE_THREADSAFE */
 
-/*
- * Include ANSI-C header files.
- */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -56,7 +52,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /*
  * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
@@ -71,14 +66,7 @@
 #include <pwd.h>
 #endif
 
-/*
- * C9x integer types
- */
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
 #include <stdint.h>
-#endif
-#endif
 
 /*
  * The `struct stat' data type for stat() and fstat(). This is a Posix file
@@ -139,21 +127,6 @@
 #endif
 
 /*
- * System information. These are needed on the DEC Alpha to turn off fixing
- * of unaligned accesses by the operating system during detection of
- * alignment constraints in H5detect.c:main().
- */
-#ifdef H5_HAVE_SYS_SYSINFO_H
-#include <sys/sysinfo.h>
-#endif
-#ifdef H5_HAVE_SYS_PROC_H
-#include <sys/proc.h>
-#endif
-#ifdef H5_HAVE_IO_H
-#include <io.h>
-#endif
-
-/*
  * Dynamic library handling.  These are needed for dynamically loading I/O
  * filters and VFDs.
  */
@@ -184,6 +157,7 @@
 
 #include <windows.h>
 #include <direct.h> /* For _getcwd() */
+#include <io.h>     /* POSIX I/O */
 
 #endif /*H5_HAVE_WIN32_API*/
 
