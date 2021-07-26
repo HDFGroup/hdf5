@@ -1947,7 +1947,7 @@ static int yy_get_next_buffer (void)
 					yyrestart( yyin );
 
 					/*FALLTHROUGH*/
-                                        __attribute__((fallthrough)); 
+                                         
 				case EOB_ACT_END_OF_FILE:
 					{
 					if ( yywrap(  ) )
