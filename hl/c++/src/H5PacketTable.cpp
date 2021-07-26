@@ -31,8 +31,9 @@
 /* Null constructor
  * Sets table_id to "invalid"
  */
-PacketTable::PacketTable() : table_id{H5I_INVALID_HID}
+PacketTable::PacketTable()
 {
+    table_id = H5I_INVALID_HID;
 }
 
 /* "Open" Constructor
