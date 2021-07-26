@@ -355,7 +355,8 @@ print_usage(void)
     printf("  -i, --input <file>      - read list from file\n");
     printf("  -o, --output <file>     - write output summary to the named file.\n");
     printf("  -E, --error  <file>     - write processed errors to file in text format\n");
-    printf("  -l, --log_text <dir>    - write individual tool outputs to a file. Logs can be written to an optional named directory.\n");
+    printf("  -l, --log_text <dir>    - write individual tool outputs to a file. Logs can be written to an "
+           "optional named directory.\n");
     printf("  -T, --tool <executable> - name of the HDF5 tool to invoke\n");
     printf("  -h, --help              - print usage\n");
     printf("\n");
