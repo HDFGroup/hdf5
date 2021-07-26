@@ -3985,7 +3985,7 @@ test_vector_io(const char *vfd_name)
     void *     f_read_bufs_1[VECTOR_LEN];  /* fixed read bufs vector       */
     void *     f_read_bufs_2[VECTOR_LEN];  /* fixed read bufs vector       */
 
-    sprintf(test_title, "vector I/O with %s VFD", vfd_name);
+    HDsnprintf(test_title, sizeof(test_title), "vector I/O with %s VFD", vfd_name);
 
     TESTING(test_title);
 
@@ -3994,14 +3994,14 @@ test_vector_io(const char *vfd_name)
     if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
 
-    if (strcmp(vfd_name, "sec2") == 0) {
+    if (HDstrcmp(vfd_name, "sec2") == 0) {
 
         if (H5Pset_fapl_sec2(fapl_id) < 0)
             TEST_ERROR;
 
         h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
     }
-    else if (strcmp(vfd_name, "stdio") == 0) {
+    else if (HDstrcmp(vfd_name, "stdio") == 0) {
 
         if (H5Pset_fapl_stdio(fapl_id) < 0)
             TEST_ERROR;
@@ -4353,6 +4353,984 @@ error:
 } /* end test_vector_io() */
 
 /*-------------------------------------------------------------------------
+ * Function:    test_selection_io_write
+ *
+ * Purpose:     Updates write buffers to ensure a unique value is written
+ *              to each element and issues a selection write call.
+ *
+ * Return:      Success:        TRUE
+ *              Failure:        FALSE
+ *
+ * Programmer:  Neil Fortner
+ *              7/1/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+/* Array dimensions, used for all selection I/O tests.  Currently both must be
+ * even.  1-Dimensional arrays have a size of SEL_IO_DIM0 * SEL_IO_DIM1. */
+#define SEL_IO_DIM0 8
+#define SEL_IO_DIM1 10
+
+static hbool_t
+test_selection_io_write(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[], hid_t file_spaces[],
+                        haddr_t offsets[], size_t element_sizes[], int *wbufs[])
+{
+    int     i;
+    int     j;
+    hbool_t result = TRUE;
+
+    /* Update write buffer */
+    for (i = 0; i < (int)count; i++)
+        if (wbufs[i] && (i == 0 || wbufs[i] != wbufs[i - 1]))
+            for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++)
+                wbufs[i][j] += 2 * SEL_IO_DIM0 * SEL_IO_DIM1;
+
+    /* Issue write call */
+    if (H5FDwrite_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
+                            (const void **)wbufs) < 0)
+        TEST_ERROR
+
+    return result;
+
+error:
+    return FALSE;
+} /* end test_selection_io_write() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_selection_io_read_verify
+ *
+ * Purpose:     Issues a selection read call and compares the result to
+ *              the arrays provided in erbufs.  If rbufcount is less than
+ *              count the last element in erbufs will be repeated to make
+ *              up the difference.
+ *
+ * Return:      Success:        TRUE
+ *              Failure:        FALSE
+ *
+ * Programmer:  Neil Fortner
+ *              7/1/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static hbool_t
+test_selection_io_read_verify(H5FD_t *lf, H5FD_mem_t type, uint32_t count, hid_t mem_spaces[],
+                              hid_t file_spaces[], haddr_t offsets[], size_t element_sizes[],
+                              uint32_t rbufcount, int *erbufs[], hbool_t shorten_rbufs)
+{
+    int     rbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];
+    int     rbuf2[SEL_IO_DIM0 * SEL_IO_DIM1];
+    int *   rbufs[2] = {rbuf1, rbuf2};
+    int     i;
+    int     j;
+    hbool_t result = TRUE;
+
+    /* Initialize read buffer */
+    for (i = 0; i < (int)rbufcount; i++)
+        for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++)
+            rbufs[i][j] = -1;
+
+    /* Handle elements in count that are not part of rbufcount */
+    for (i = (int)rbufcount; i < (int)count; i++)
+        if (shorten_rbufs)
+            rbufs[i] = NULL;
+        else
+            rbufs[i] = rbufs[rbufcount - 1];
+
+    /* Issue read call */
+    if (H5FDread_selection(lf, type, H5P_DEFAULT, count, mem_spaces, file_spaces, offsets, element_sizes,
+                           (void **)rbufs) < 0)
+        TEST_ERROR
+
+    /* Verify result */
+    for (i = 0; i < (int)rbufcount; i++)
+        for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++)
+            if (rbufs[i][j] != erbufs[i][j]) {
+                H5_FAILED()
+                AT()
+                printf("data read from file does not match expected values at mapping array location %d\n",
+                       i);
+                printf("expected data: \n");
+                for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++) {
+                    printf("%6d", erbufs[i][j]);
+                    if (!((j + 1) % SEL_IO_DIM1))
+                        printf("\n");
+                }
+                printf("read data: \n");
+                for (j = 0; j < SEL_IO_DIM0 * SEL_IO_DIM1; j++) {
+                    printf("%6d", rbufs[i][j]);
+                    if (!((j + 1) % SEL_IO_DIM1))
+                        printf("\n");
+                }
+                goto error;
+            }
+
+    return result;
+
+error:
+    return FALSE;
+} /* end test_selection_io_read_verify() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_selection_io
+ *
+ * Purpose:     Test I/O using the selection I/O VFD public VFD calls.
+ *
+ *              Tests various combinations of 1D, 2D, contiguous, and
+ *              strided selections with different file data types and
+ *              with and without shortened arrays.
+ *
+ * Return:      Success:        0
+ *              Failure:        -1
+ *
+ * Programmer:  Neil Fortner
+ *              7/1/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_selection_io(const char *vfd_name)
+{
+    char       test_title[80];
+    hid_t      fapl_id = -1;                                        /* file access property list ID */
+    char       filename[1024];                                      /* filename                     */
+    unsigned   flags = 0;                                           /* file open flags              */
+    H5FD_t *   lf;                                                  /* VFD struct ptr               */
+    int        i;                                                   /* index                        */
+    int        j;                                                   /* index                        */
+    int        i2;                                                  /* index                        */
+    int        j2;                                                  /* index                        */
+    hid_t      mem_spaces[2]  = {H5I_INVALID_HID, H5I_INVALID_HID}; /* memory dataspaces vector */
+    hid_t      file_spaces[2] = {H5I_INVALID_HID, H5I_INVALID_HID}; /* file dataspaces vecotr */
+    hsize_t    dims1[1]       = {SEL_IO_DIM0 * SEL_IO_DIM1};        /* 1D dataspace dimensions */
+    hsize_t    dims2[2]       = {SEL_IO_DIM0, SEL_IO_DIM1};         /* 1D dataspace dimensions */
+    hsize_t    start[2];                                            /* start for hyperslab          */
+    hsize_t    stride[2];                                           /* stride for hyperslab         */
+    hsize_t    count[2];                                            /* count for hyperslab          */
+    hsize_t    block[2];                                            /* block for hyperslab          */
+    H5FD_mem_t type;                                                /* file data type               */
+    haddr_t    addrs[2];                                            /* addresses vector             */
+    size_t     element_sizes[2] = {sizeof(int), sizeof(int)};       /* element sizes vector */
+    int        wbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                    /* 1D write buffer        */
+    int        wbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                     /* 2D write buffer         */
+    int *      wbufs[2] = {wbuf1, wbuf2[0]};                        /* Array of write buffers    */
+    int        fbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                    /* 1D file buffer         */
+    int        fbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                     /* 2D file buffer          */
+    int *      fbufs[2] = {fbuf1, fbuf2[0]};                        /* Array of file buffers     */
+    int        erbuf1[SEL_IO_DIM0 * SEL_IO_DIM1];                   /* 1D expected read buffer */
+    int        erbuf2[SEL_IO_DIM0][SEL_IO_DIM1];                    /* 2D expected read buffer */
+    int *      erbufs[2] = {erbuf1, erbuf2[0]};                     /* Array of expected read buffers */
+    int        shorten_element_sizes; /* Whether to shorten the element sizes array */
+
+    HDsnprintf(test_title, sizeof(test_title), "selection I/O with %s VFD", vfd_name);
+
+    TESTING(test_title);
+
+    /* Set property list and file name for target driver */
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        TEST_ERROR
+
+    if (HDstrcmp(vfd_name, "sec2") == 0) {
+
+        if (H5Pset_fapl_sec2(fapl_id) < 0)
+            TEST_ERROR
+
+        h5_fixname(FILENAME[0], fapl_id, filename, sizeof(filename));
+    }
+    else if (HDstrcmp(vfd_name, "stdio") == 0) {
+
+        if (H5Pset_fapl_stdio(fapl_id) < 0)
+            TEST_ERROR
+
+        h5_fixname(FILENAME[7], fapl_id, filename, sizeof filename);
+    }
+    else {
+
+        HDfprintf(stdout, "un-supported VFD\n");
+        TEST_ERROR
+    }
+
+    /* Initialize write buffers */
+    for (i = 0; i < SEL_IO_DIM0; i++)
+        for (j = 0; j < SEL_IO_DIM1; j++) {
+            wbuf1[(i * SEL_IO_DIM1) + j] = (i * SEL_IO_DIM1) + j;
+            wbuf2[i][j]                  = (i * SEL_IO_DIM1) + j + (SEL_IO_DIM0 * SEL_IO_DIM1);
+        }
+
+    /* Create dataspaces - location 0 will be 1D and location 1 will be 2D */
+    if ((mem_spaces[0] = H5Screate_simple(1, dims1, NULL)) < 0)
+        TEST_ERROR
+    if ((mem_spaces[1] = H5Screate_simple(2, dims2, NULL)) < 0)
+        TEST_ERROR
+    if ((file_spaces[0] = H5Screate_simple(1, dims1, NULL)) < 0)
+        TEST_ERROR
+    if ((file_spaces[1] = H5Screate_simple(2, dims2, NULL)) < 0)
+        TEST_ERROR
+
+    /* Create file */
+    flags = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
+
+    if (NULL == (lf = H5FDopen(filename, flags, fapl_id, HADDR_UNDEF)))
+        TEST_ERROR;
+
+    /* Loop over memory types */
+    for (type = 1; type < H5FD_MEM_NTYPES; type++) {
+        /* Allocate space for I/O */
+        addrs[0] = H5FDalloc(lf, type, H5P_DEFAULT, (hsize_t)(sizeof(int) * SEL_IO_DIM0 * SEL_IO_DIM1));
+        addrs[1] = H5FDalloc(lf, type, H5P_DEFAULT, (hsize_t)(sizeof(int) * SEL_IO_DIM0 * SEL_IO_DIM1));
+
+        /*
+         * Test 1: Simple 1D contiguous I/O
+         */
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
+                                     (int **)&wbufs[0]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0; i < SEL_IO_DIM0 * SEL_IO_DIM1; i++)
+            fbuf1[i] = wbuf1[i];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&fbufs[0], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 2: Simple 2D contiguous I/O
+         */
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
+                                     (int **)&wbufs[1]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0; i < SEL_IO_DIM0; i++)
+            for (j = 0; j < SEL_IO_DIM1; j++)
+                fbuf2[i][j] = wbuf2[i][j];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&fbufs[1], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 3: Strided <> Contiguous 1D I/O
+         */
+        /* SEL_IO_DIM1 must be even */
+        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+
+        /* Strided selection in memory */
+        start[0]  = 1;
+        stride[0] = 2;
+        count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
+        block[0]  = 1;
+        if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Contiguous selection in file */
+        if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+            TEST_ERROR
+
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
+                                     (int **)&wbufs[0]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
+            fbuf1[i + 1] = wbuf1[(2 * i) + 1];
+
+        /* Update expected read buf */
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i++)
+            erbuf1[i] = -1;
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
+            erbuf1[(2 * i) + 1] = wbuf1[(2 * i) + 1];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&erbufs[0], FALSE))
+            TEST_ERROR
+
+        /* Reset selections */
+        if (H5Sselect_all(mem_spaces[0]) < 0)
+            TEST_ERROR
+        if (H5Sselect_all(file_spaces[0]) < 0)
+            TEST_ERROR
+
+        /* Read entire file buffer and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&fbufs[0], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 4: Contiguous <> Strided 1D I/O
+         */
+        /* SEL_IO_DIM1 must be even */
+        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+
+        /* Contiguous selection in memory */
+        start[0]  = 1;
+        stride[0] = 2;
+        if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+            TEST_ERROR
+
+        /* Strided selection in file */
+        count[0] = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
+        block[0] = 1;
+        if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
+                                     (int **)&wbufs[0]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
+            fbuf1[(2 * i) + 1] = wbuf1[i + 1];
+
+        /* Update expected read buf */
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i++)
+            erbuf1[i] = -1;
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
+            erbuf1[i + 1] = wbuf1[i + 1];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&erbufs[0], FALSE))
+            TEST_ERROR
+
+        /* Reset selections */
+        if (H5Sselect_all(mem_spaces[0]) < 0)
+            TEST_ERROR
+        if (H5Sselect_all(file_spaces[0]) < 0)
+            TEST_ERROR
+
+        /* Read entire file buffer and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&fbufs[0], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 5: Strided <> Strided 1D I/O
+         */
+        /* SEL_IO_DIM1 must be even */
+        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+
+        /* Strided selection in memory */
+        start[0]  = 1;
+        stride[0] = 2;
+        count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
+        block[0]  = 1;
+        if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Strided selection in file */
+        start[0] = 0;
+        if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0], element_sizes,
+                                     (int **)&wbufs[0]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
+            fbuf1[2 * i] = wbuf1[(2 * i) + 1];
+
+        /* Update expected read buf */
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i++)
+            erbuf1[i] = -1;
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
+            erbuf1[(2 * i) + 1] = wbuf1[(2 * i) + 1];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&erbufs[0], FALSE))
+            TEST_ERROR
+
+        /* Reset selections */
+        if (H5Sselect_all(mem_spaces[0]) < 0)
+            TEST_ERROR
+        if (H5Sselect_all(file_spaces[0]) < 0)
+            TEST_ERROR
+
+        /* Read entire file buffer and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&fbufs[0], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 6: Strided <> Contiguous 2D I/O
+         */
+        /* Strided selection in memory */
+        start[0]  = 1;
+        start[1]  = 0;
+        stride[0] = 2;
+        stride[1] = 1;
+        count[0]  = SEL_IO_DIM0 / 2;
+        count[1]  = SEL_IO_DIM1;
+        block[0]  = 1;
+        block[1]  = 1;
+        if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Contiguous selection in file */
+        if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+            TEST_ERROR
+
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
+                                     (int **)&wbufs[1]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0; i < SEL_IO_DIM0 / 2; i++)
+            for (j = 0; j < SEL_IO_DIM1; j++)
+                fbuf2[i + 1][j] = wbuf2[(2 * i) + 1][j];
+
+        /* Update expected read buf */
+        for (i = 0; i < SEL_IO_DIM0; i++)
+            for (j = 0; j < SEL_IO_DIM1; j++)
+                erbuf2[i][j] = -1;
+        for (i = 0; i < SEL_IO_DIM0 / 2; i++)
+            for (j = 0; j < SEL_IO_DIM1; j++)
+                erbuf2[(2 * i) + 1][j] = wbuf2[(2 * i) + 1][j];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&erbufs[1], FALSE))
+            TEST_ERROR
+
+        /* Reset selections */
+        if (H5Sselect_all(mem_spaces[1]) < 0)
+            TEST_ERROR
+        if (H5Sselect_all(file_spaces[1]) < 0)
+            TEST_ERROR
+
+        /* Read entire file buffer and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&fbufs[1], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 7: Contiguous <> Strided 2D I/O
+         */
+        /* Contiguous selection in memory */
+        start[0] = 0;
+        start[1] = 1;
+        count[0] = SEL_IO_DIM0;
+        count[1] = SEL_IO_DIM1 / 2;
+        if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, NULL, count, NULL) < 0)
+            TEST_ERROR
+
+        /* Strided selection in file */
+        stride[0] = 1;
+        stride[1] = 2;
+        block[0]  = 1;
+        block[1]  = 1;
+        if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
+                                     (int **)&wbufs[1]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0; i < SEL_IO_DIM0; i++)
+            for (j = 0; j < SEL_IO_DIM1 / 2; j++)
+                fbuf2[i][(2 * j) + 1] = wbuf2[i][j + 1];
+
+        /* Update expected read buf */
+        for (i = 0; i < SEL_IO_DIM0; i++)
+            for (j = 0; j < SEL_IO_DIM1; j++)
+                erbuf2[i][j] = -1;
+        for (i = 0; i < SEL_IO_DIM0; i++)
+            for (j = 0; j < SEL_IO_DIM1 / 2; j++)
+                erbuf2[i][j + 1] = wbuf2[i][j + 1];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&erbufs[1], FALSE))
+            TEST_ERROR
+
+        /* Reset selections */
+        if (H5Sselect_all(mem_spaces[1]) < 0)
+            TEST_ERROR
+        if (H5Sselect_all(file_spaces[1]) < 0)
+            TEST_ERROR
+
+        /* Read entire file buffer and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&fbufs[1], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 8: Strided <> Strided 2D I/O
+         */
+        /* SEL_IO_DIM0 and SEL_IO_DIM1 must be even */
+        HDassert(SEL_IO_DIM0 / 2 == (SEL_IO_DIM0 + 1) / 2);
+        HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+
+        /* Strided selection (across dim 1) in memory */
+        start[0]  = 0;
+        start[1]  = 1;
+        stride[0] = 1;
+        stride[1] = 2;
+        count[0]  = SEL_IO_DIM0;
+        count[1]  = SEL_IO_DIM1 / 2;
+        block[0]  = 1;
+        block[1]  = 1;
+        if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Strided selection (across dim 0) in file */
+        start[0]  = 1;
+        start[1]  = 0;
+        stride[0] = 2;
+        stride[1] = 1;
+        count[0]  = SEL_IO_DIM0 / 2;
+        count[1]  = SEL_IO_DIM1;
+        block[0]  = 1;
+        block[1]  = 1;
+        if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1], element_sizes,
+                                     (int **)&wbufs[1]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0, i2 = 1, j2 = 0; i < SEL_IO_DIM0; i++)
+            for (j = 1; j < SEL_IO_DIM1; j += 2) {
+                fbuf2[i2][j2] = wbuf2[i][j];
+                if (++j2 == SEL_IO_DIM1) {
+                    i2 += 2;
+                    j2 = 0;
+                }
+            }
+
+        /* Update expected read buf */
+        for (i = 0; i < SEL_IO_DIM0; i++)
+            for (j = 0; j < SEL_IO_DIM1; j++)
+                erbuf2[i][j] = -1;
+        for (i = 0; i < SEL_IO_DIM0; i++)
+            for (j = 1; j < SEL_IO_DIM1; j += 2)
+                erbuf2[i][j] = wbuf2[i][j];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&erbufs[1], FALSE))
+            TEST_ERROR
+
+        /* Reset selections */
+        if (H5Sselect_all(mem_spaces[1]) < 0)
+            TEST_ERROR
+        if (H5Sselect_all(file_spaces[1]) < 0)
+            TEST_ERROR
+
+        /* Read entire file buffer and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&fbufs[1], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 9: Strided 1D <> Strided 2D I/O
+         */
+        /* Strided selection in memory */
+        start[0]  = 1;
+        stride[0] = 2;
+        count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
+        block[0]  = 1;
+        if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Strided selection (across dim 1) in file */
+        start[0]  = 0;
+        start[1]  = 1;
+        stride[0] = 1;
+        stride[1] = 2;
+        count[0]  = SEL_IO_DIM0;
+        count[1]  = SEL_IO_DIM1 / 2;
+        block[0]  = 1;
+        block[1]  = 1;
+        if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1], element_sizes,
+                                     (int **)&wbufs[0]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 1, i2 = 0, j2 = 1; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i += 2) {
+            fbuf2[i2][j2] = wbuf1[i];
+            j2 += 2;
+            if (j2 == SEL_IO_DIM1) {
+                i2++;
+                j2 = 1;
+            }
+        }
+
+        /* Update expected read buf */
+        for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i++)
+            erbuf1[i] = -1;
+        for (i = 1; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i += 2)
+            erbuf1[i] = wbuf1[i];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&erbufs[0], FALSE))
+            TEST_ERROR
+
+        /* Reset selections */
+        if (H5Sselect_all(mem_spaces[0]) < 0)
+            TEST_ERROR
+        if (H5Sselect_all(file_spaces[1]) < 0)
+            TEST_ERROR
+
+        /* Read entire file buffer and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[0], &file_spaces[1], &addrs[1],
+                                           element_sizes, 1, (int **)&fbufs[1], FALSE))
+            TEST_ERROR
+
+        /*
+         * Test 10: Strided 2D <> Strided 1D I/O
+         */
+        /* Strided selection (across dim 0) in memory */
+        start[0]  = 0;
+        start[1]  = 0;
+        stride[0] = 2;
+        stride[1] = 1;
+        count[0]  = SEL_IO_DIM0 / 2;
+        count[1]  = SEL_IO_DIM1;
+        block[0]  = 1;
+        block[1]  = 1;
+        if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Strided selection in file */
+        start[0]  = 0;
+        stride[0] = 2;
+        count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
+        block[0]  = 1;
+        if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+            TEST_ERROR
+
+        /* Issue write call */
+        if (!test_selection_io_write(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0], element_sizes,
+                                     (int **)&wbufs[1]))
+            TEST_ERROR
+
+        /* Update file buf */
+        for (i = 0, i2 = 0; i < SEL_IO_DIM0; i += 2)
+            for (j = 0; j < SEL_IO_DIM1; j++) {
+                fbuf1[i2] = wbuf2[i][j];
+                i2 += 2;
+            }
+
+        /* Update expected read buf */
+        for (i = 0; i < SEL_IO_DIM0; i++)
+            for (j = 0; j < SEL_IO_DIM1; j++)
+                erbuf2[i][j] = -1;
+        for (i = 0; i < SEL_IO_DIM0; i += 2)
+            for (j = 0; j < SEL_IO_DIM1; j++)
+                erbuf2[i][j] = wbuf2[i][j];
+
+        /* Read and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&erbufs[1], FALSE))
+            TEST_ERROR
+
+        /* Reset selections */
+        if (H5Sselect_all(mem_spaces[1]) < 0)
+            TEST_ERROR
+        if (H5Sselect_all(file_spaces[0]) < 0)
+            TEST_ERROR
+
+        /* Read entire file buffer and verify */
+        if (!test_selection_io_read_verify(lf, type, 1, &mem_spaces[1], &file_spaces[0], &addrs[0],
+                                           element_sizes, 1, (int **)&fbufs[0], FALSE))
+            TEST_ERROR
+
+        /* Run tests with full and partial element sizes array */
+        for (shorten_element_sizes = 0; shorten_element_sizes <= 1; shorten_element_sizes++) {
+            /*
+             * Test 11: Strided <> Strided 1D and 2D I/O
+             */
+            /* SEL_IO_DIM1 must be even */
+            HDassert(SEL_IO_DIM1 / 2 == (SEL_IO_DIM1 + 1) / 2);
+
+            /* Strided selection in memory (1D) */
+            start[0]  = 0;
+            stride[0] = 2;
+            count[0]  = (SEL_IO_DIM0 * SEL_IO_DIM1) / 2;
+            block[0]  = 1;
+            if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+                TEST_ERROR
+
+            /* Strided selection in file (1D) */
+            start[0] = 1;
+            if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+                TEST_ERROR
+
+            /* Strided selection (across dim 0) in memory (2D) */
+            start[0]  = 1;
+            start[1]  = 0;
+            stride[0] = 2;
+            stride[1] = 1;
+            count[0]  = SEL_IO_DIM0 / 2;
+            count[1]  = SEL_IO_DIM1;
+            block[0]  = 1;
+            block[1]  = 1;
+            if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+                TEST_ERROR
+
+            /* Strided selection (across dim 1) in file (2D) */
+            start[0]  = 0;
+            start[1]  = 1;
+            stride[0] = 1;
+            stride[1] = 2;
+            count[0]  = SEL_IO_DIM0;
+            count[1]  = SEL_IO_DIM1 / 2;
+            block[0]  = 1;
+            block[1]  = 1;
+            if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+                TEST_ERROR
+
+            /* Issue write call */
+            if (!test_selection_io_write(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes,
+                                         (int **)wbufs))
+                TEST_ERROR
+
+            /* Update file bufs */
+            for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
+                fbuf1[(2 * i) + 1] = wbuf1[2 * i];
+            for (i = 1, i2 = 0, j2 = 1; i < SEL_IO_DIM0; i += 2)
+                for (j = 0; j < SEL_IO_DIM1; j++) {
+                    fbuf2[i2][j2] = wbuf2[i][j];
+                    j2 += 2;
+                    if (j2 >= SEL_IO_DIM1) {
+                        i2++;
+                        j2 = 1;
+                    }
+                }
+
+            /* Update expected read bufs */
+            for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1); i++)
+                erbuf1[i] = -1;
+            for (i = 0; i < (SEL_IO_DIM0 * SEL_IO_DIM1) / 2; i++)
+                erbuf1[2 * i] = wbuf1[2 * i];
+            for (i = 0; i < SEL_IO_DIM0; i++)
+                for (j = 0; j < SEL_IO_DIM1; j++)
+                    erbuf2[i][j] = -1;
+            for (i = 1; i < SEL_IO_DIM0; i += 2)
+                for (j = 0; j < SEL_IO_DIM1; j++)
+                    erbuf2[i][j] = wbuf2[i][j];
+
+            /* Read and verify */
+            if (!test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
+                                               (int **)erbufs, FALSE))
+                TEST_ERROR
+
+            /* Reset selections */
+            if (H5Sselect_all(mem_spaces[0]) < 0)
+                TEST_ERROR
+            if (H5Sselect_all(file_spaces[0]) < 0)
+                TEST_ERROR
+            if (H5Sselect_all(mem_spaces[1]) < 0)
+                TEST_ERROR
+            if (H5Sselect_all(file_spaces[1]) < 0)
+                TEST_ERROR
+
+            /* Read entire file buffer and verify */
+            if (!test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
+                                               (int **)fbufs, FALSE))
+                TEST_ERROR
+
+            /*
+             * Test 12: Strided <> Strided 2D I/O, 2 different selections in the same memory buffer
+             */
+            /* Switch mem and file spaces to both be 2D */
+            if (H5Sset_extent_simple(mem_spaces[0], 2, dims2, NULL) < 0)
+                TEST_ERROR
+            if (H5Sset_extent_simple(file_spaces[0], 2, dims2, NULL) < 0)
+                TEST_ERROR
+
+            /* Strided selection in memory (1st) */
+            start[0]  = 0;
+            start[1]  = 0;
+            stride[0] = 2;
+            stride[1] = 1;
+            count[0]  = SEL_IO_DIM0 / 2;
+            count[1]  = SEL_IO_DIM1;
+            block[0]  = 1;
+            block[1]  = 1;
+            if (H5Sselect_hyperslab(mem_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+                TEST_ERROR
+
+            /* Strided selection (across dim 0) in memory (2nd) */
+            start[0] = 1;
+            if (H5Sselect_hyperslab(mem_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+                TEST_ERROR
+
+            /* Strided selection in file (1st) */
+            start[0]  = 0;
+            start[1]  = 0;
+            stride[0] = 1;
+            stride[1] = 2;
+            count[0]  = SEL_IO_DIM0;
+            count[1]  = SEL_IO_DIM1 / 2;
+            block[0]  = 1;
+            block[1]  = 1;
+            if (H5Sselect_hyperslab(file_spaces[0], H5S_SELECT_SET, start, stride, count, block) < 0)
+                TEST_ERROR
+
+            /* Strided selection (across dim 1) in file (2nd) */
+            start[0]  = 0;
+            start[1]  = 1;
+            stride[0] = 1;
+            stride[1] = 2;
+            count[0]  = SEL_IO_DIM0;
+            count[1]  = SEL_IO_DIM1 / 2;
+            block[0]  = 1;
+            block[1]  = 1;
+            if (H5Sselect_hyperslab(file_spaces[1], H5S_SELECT_SET, start, stride, count, block) < 0)
+                TEST_ERROR
+
+            /* Use the same memory buffer for both selections */
+            wbufs[0] = wbuf2[0];
+
+            /* Shorten wbuf array */
+            if (shorten_element_sizes)
+                wbufs[1] = NULL;
+            else
+                wbufs[1] = wbufs[0];
+
+            /* Issue write call */
+            if (!test_selection_io_write(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes,
+                                         (int **)wbufs))
+                TEST_ERROR
+
+            /* Update file bufs - need to reuse 1D array so data stays consistent, so use math to
+             * find 1D index into 2D array */
+            for (i = 0, i2 = 0, j2 = 0; i < SEL_IO_DIM0; i += 2)
+                for (j = 0; j < SEL_IO_DIM1; j++) {
+                    fbuf1[(i2 * SEL_IO_DIM1) + j2] = wbuf2[i][j];
+                    j2 += 2;
+                    if (j2 >= SEL_IO_DIM1) {
+                        i2++;
+                        j2 = 0;
+                    }
+                }
+            for (i = 1, i2 = 0, j2 = 1; i < SEL_IO_DIM0; i += 2)
+                for (j = 0; j < SEL_IO_DIM1; j++) {
+                    fbuf2[i2][j2] = wbuf2[i][j];
+                    j2 += 2;
+                    if (j2 >= SEL_IO_DIM1) {
+                        i2++;
+                        j2 = 1;
+                    }
+                }
+
+            /* Update expected read buf */
+            for (i = 0; i < SEL_IO_DIM0; i++)
+                for (j = 0; j < SEL_IO_DIM1; j++)
+                    erbuf2[i][j] = -1;
+            for (i = 0; i < SEL_IO_DIM0; i += 2)
+                for (j = 0; j < SEL_IO_DIM1; j++)
+                    erbuf2[i][j] = wbuf2[i][j];
+            for (i = 1; i < SEL_IO_DIM0; i += 2)
+                for (j = 0; j < SEL_IO_DIM1; j++)
+                    erbuf2[i][j] = wbuf2[i][j];
+
+            /* Read and verify */
+            if (!test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 1,
+                                               (int **)&erbufs[1], shorten_element_sizes ? TRUE : FALSE))
+                TEST_ERROR
+
+            /* Reset selections */
+            if (H5Sselect_all(mem_spaces[0]) < 0)
+                TEST_ERROR
+            if (H5Sselect_all(file_spaces[0]) < 0)
+                TEST_ERROR
+            if (H5Sselect_all(mem_spaces[1]) < 0)
+                TEST_ERROR
+            if (H5Sselect_all(file_spaces[1]) < 0)
+                TEST_ERROR
+
+            /* Read entire file buffer and verify */
+            if (!test_selection_io_read_verify(lf, type, 2, mem_spaces, file_spaces, addrs, element_sizes, 2,
+                                               (int **)fbufs, FALSE))
+                TEST_ERROR
+
+            /* Reset first spaces to 1D */
+            if (H5Sset_extent_simple(mem_spaces[0], 1, dims1, NULL) < 0)
+                TEST_ERROR
+            if (H5Sset_extent_simple(file_spaces[0], 1, dims1, NULL) < 0)
+                TEST_ERROR
+
+            /* Reset write buffer array */
+            wbufs[0] = wbuf1;
+            wbufs[1] = wbuf2[0];
+
+            /* Change to shortened element sizes array */
+            element_sizes[1] = 0;
+        }
+
+        /* Reset element sizes array */
+        element_sizes[1] = element_sizes[0];
+    }
+
+    /*
+     * Cleanup
+     */
+    /* Close file */
+    if (H5FDclose(lf) < 0)
+        TEST_ERROR;
+
+    h5_delete_test_file(FILENAME[0], fapl_id);
+
+    /* Close the fapl */
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    /* Close dataspaces */
+    for (i = 0; i < 2; i++) {
+        if (H5Sclose(mem_spaces[i]) < 0)
+            TEST_ERROR
+        if (H5Sclose(file_spaces[i]) < 0)
+            TEST_ERROR
+    }
+
+    PASSED();
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+        H5FDclose(lf);
+        for (i = 0; i < 2; i++) {
+            H5Sclose(mem_spaces[i]);
+            H5Sclose(file_spaces[i]);
+        }
+    }
+    H5E_END_TRY;
+    return -1;
+} /* end test_selection_io() */
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the basic features of Virtual File Drivers
@@ -4387,6 +5365,8 @@ main(void)
     nerrors += test_splitter() < 0 ? 1 : 0;
     nerrors += test_vector_io("sec2") < 0 ? 1 : 0;
     nerrors += test_vector_io("stdio") < 0 ? 1 : 0;
+    nerrors += test_selection_io("sec2") < 0 ? 1 : 0;
+    nerrors += test_selection_io("stdio") < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");
