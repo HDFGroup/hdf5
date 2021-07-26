@@ -49,6 +49,16 @@ New Features
 
     Configuration:
     -------------
+    - Adds support for building parallel tools based on libmfu
+      (mpiFileUtils)
+
+      * Checks for libmfu and other library dependencies.
+      * Adds a new HDF5 tool (dh5walk) which links against libmfu
+        to allow file directories with large numbers of HDF5 files
+        to be processed in parallel.
+
+      (RAW - 2021/07/26)
+
     - Adds C++ Autotools configuration file for Intel
 
       * Checks for icpc as the compiler

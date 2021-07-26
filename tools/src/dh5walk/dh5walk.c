@@ -353,9 +353,9 @@ print_usage(void)
     printf("\n");
     printf("Options:\n");
     printf("  -i, --input <file>      - read list from file\n");
-    printf("  -o, --output <file>     - write processed output summary to file in text format\n");
+    printf("  -o, --output <file>     - write output summary to the named file.\n");
     printf("  -E, --error  <file>     - write processed errors to file in text format\n");
-    printf("  -l, --log_text <file>   - write processed output to file in text format\n");
+    printf("  -l, --log_text <dir>    - write individual tool outputs to a file. Logs can be written to an optional named directory.\n");
     printf("  -T, --tool <executable> - name of the HDF5 tool to invoke\n");
     printf("  -h, --help              - print usage\n");
     printf("\n");
@@ -953,7 +953,9 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
                 thisbuft->chars += remaining;
 
                 /* Create a new read buffer */
+#if 0
                 printf("[%d] Allocate-1 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
+#endif
                 bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
                 assert(thisbuft != NULL);
                 thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
@@ -977,7 +979,9 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
                     thisbuft->chars += read_bytes;
 
                     /* Create a new read buffer */
+#if 0
                     printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
+#endif
                     bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
                     assert(thisbuft != NULL);
                     thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
