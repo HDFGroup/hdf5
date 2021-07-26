@@ -95,8 +95,8 @@ fail_dcpl:;
     //! <!-- [create_class] -->
     {
         __label__ fail_cls, fail_prop;
-        hid_t plist_cls, plist;
-        int izero = 0;
+        hid_t  plist_cls, plist;
+        int    izero = 0;
         double dzero = 0.0;
 
         // create a new property list class
@@ -106,12 +106,14 @@ fail_dcpl:;
             goto fail_cls;
         }
         // add a permanent integer property
-        if (H5Pregister2(plist_cls, "int", sizeof(int), &izero, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0) {
+        if (H5Pregister2(plist_cls, "int", sizeof(int), &izero, NULL, NULL, NULL, NULL, NULL, NULL, NULL) <
+            0) {
             ret_val = EXIT_FAILURE;
             goto fail_prop;
         }
         // add a permanent double property
-        if (H5Pregister2(plist_cls, "double", sizeof(double), &dzero, NULL, NULL, NULL, NULL, NULL, NULL, NULL) < 0) {
+        if (H5Pregister2(plist_cls, "double", sizeof(double), &dzero, NULL, NULL, NULL, NULL, NULL, NULL,
+                         NULL) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_prop;
         }
@@ -133,7 +135,7 @@ fail_cls:;
     //! <!-- [read_class] -->
     {
         __label__ fail_cls, fail_prop, fail_plist;
-        hid_t plist_cls, plist;
+        hid_t  plist_cls, plist;
         size_t nprops;
 
         if ((plist_cls = H5Pcreate_class(H5P_ROOT, "ud_plist", NULL, NULL, NULL, NULL, NULL, NULL)) ==
