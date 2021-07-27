@@ -28,13 +28,16 @@
 /**
  * \defgroup H5R H5R
  *
- * Use the functions in this module to manage HDF5 references.
+ * Use the functions in this module to manage HDF5 references. Referents can
+ * be HDF5 objects, attributes, and selections on datasets a.k.a. dataset
+ * regions.
+ *
  *
  * <table>
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5R_examples.c create
+ *   \snippet{lineno} H5R_examples.c create
  *   </td>
  *   <td>
  *   \snippet H5R_examples.c read

@@ -74,7 +74,8 @@ fail_dcpl:;
 fail_prop:
         H5Pclose(dcpl);
 fail_dcpl:;
-    } //! <!-- [update] -->
+    }
+    //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {

@@ -45,18 +45,18 @@
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5P_examples.c create
+ *   \snippet{lineno} H5P_examples.c create
  *   </td>
  *   <td>
- *   \snippet H5P_examples.c read
+ *   \snippet{lineno} H5P_examples.c read
  *   </td>
  * <tr><th>Update</th><th>Delete</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5P_examples.c update
+ *   \snippet{lineno} H5P_examples.c update
  *   </td>
  *   <td>
- *   \snippet H5P_examples.c delete
+ *   \snippet{lineno} H5P_examples.c delete
  *   </td>
  * </tr>
  * </table>
@@ -130,18 +130,18 @@
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5P_examples.c create
+ *   \snippet{lineno} H5P_examples.c create
  *   </td>
  *   <td>
- *   \snippet H5P_examples.c read
+ *   \snippet{lineno} H5P_examples.c read
  *   </td>
  * <tr><th>Update</th><th>Delete</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5P_examples.c update
+ *   \snippet{lineno} H5P_examples.c update
  *   </td>
  *   <td>
- *   \snippet H5P_examples.c delete
+ *   \snippet{lineno} H5P_examples.c delete
  *   </td>
  * </tr>
  * </table>
@@ -158,18 +158,18 @@
  *
  * <tr valign="top">
  *   <td>
- *   \snippet H5P_examples.c create_class
+ *   \snippet{lineno} H5P_examples.c create_class
  *   </td>
  *   <td>
- *   \snippet H5P_examples.c read_class
+ *   \snippet{lineno} H5P_examples.c read_class
  *   </td>
  * <tr><th>Update</th><th>Delete</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5P_examples.c update_class
+ *   \snippet{lineno} H5P_examples.c update_class
  *   </td>
  *   <td>
- *   \snippet H5P_examples.c delete_class
+ *   \snippet{lineno} H5P_examples.c delete_class
  *   </td>
  * </tr>
  * </table>
