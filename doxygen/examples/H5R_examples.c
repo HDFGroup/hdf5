@@ -2,6 +2,7 @@
 
 #include "hdf5.h"
 
+#include <assert.h>
 #include <stdio.h>
 #include <stdlib.h>
 
@@ -66,17 +67,102 @@ fail_file:;
 
     //! <!-- [read] -->
     {
-        // show how to query/de-reference a reference
-    } //! <!-- [read] -->
+        __label__ fail_file, fail_attr, fail_aread;
+        hid_t  file, attr;
+        H5R_ref_t ref;
+
+        if ((file = H5Fopen("reference.h5", H5F_ACC_RDONLY, H5P_DEFAULT)) == H5I_INVALID_HID) {
+            ret_val = EXIT_FAILURE;
+            goto fail_file;
+        }
+
+        // read the dataset region reference from the attribute
+        if ((attr = H5Aopen(file, "region", H5P_DEFAULT)) == H5I_INVALID_HID) {
+            ret_val = EXIT_FAILURE;
+            goto fail_attr;
+        }
+        if (H5Aread(attr, H5T_STD_REF, &ref) < 0) {
+            ret_val = EXIT_FAILURE;
+            goto fail_aread;
+        }
+        assert(H5Rget_type(&ref) == H5R_DATASET_REGION2);
+
+        // get an HDF5 path name for the dataset of the region reference
+        {
+            char buf[255];
+            if (H5Rget_obj_name(&ref, H5P_DEFAULT, buf, 255) < 0) {
+                ret_val = EXIT_FAILURE;
+            }
+            printf("Object name: \"%s\"\n", buf);
+        }
+
+        H5Rdestroy(&ref);
+fail_aread:
+        H5Aclose(attr);
+fail_attr:
+        H5Fclose(file);
+fail_file:;
+    }
+    //! <!-- [read] -->
 
     //! <!-- [update] -->
     {
-        // show how to update a reference (?)
-    } //! <!-- [update] -->
+        __label__ fail_file, fail_attr, fail_ref;
+        hid_t  file, attr;
+        H5R_ref_t ref;
+
+        if ((file = H5Fopen("reference.h5", H5F_ACC_RDWR, H5P_DEFAULT)) == H5I_INVALID_HID) {
+            ret_val = EXIT_FAILURE;
+            goto fail_file;
+        }
+
+        // H5T_STD_REF is a generic reference type
+        // we can "update" the attribute value to refer to the attribute itself
+        if ((attr = H5Aopen(file, "region", H5P_DEFAULT)) == H5I_INVALID_HID) {
+            ret_val = EXIT_FAILURE;
+            goto fail_attr;
+        }
+        if (H5Rcreate_attr(file, "data", "region", H5P_DEFAULT, &ref) < 0) {
+            ret_val = EXIT_FAILURE;
+            goto fail_ref;
+        }
+
+        assert(H5Rget_type(&ref) == H5R_ATTR);
+
+        if (H5Awrite(attr, H5T_STD_REF, &ref) < 0) {
+            ret_val = EXIT_FAILURE;
+        }
+
+        H5Rdestroy(&ref);
+fail_ref:
+        H5Aclose(attr);
+fail_attr:
+        H5Fclose(file);
+fail_file:;
+    }
+    //! <!-- [update] -->
 
     //! <!-- [delete] -->
     {
-        // show how to destroy a reference
+        __label__ fail_file, fail_ref;
+        hid_t  file;
+        H5R_ref_t ref;
+
+        // create an HDF5 object reference to the root group
+        if ((file = H5Fopen("reference.h5", H5F_ACC_RDONLY, H5P_DEFAULT)) == H5I_INVALID_HID) {
+            ret_val = EXIT_FAILURE;
+            goto fail_file;
+        }
+        if (H5Rcreate_object(file, ".", H5P_DEFAULT, &ref) < 0) {
+            ret_val = EXIT_FAILURE;
+            goto fail_ref;
+        }
+
+        // H5Rdestroy() releases all resources associated with an HDF5 reference
+        H5Rdestroy(&ref);
+fail_ref:
+        H5Fclose(file);
+fail_file:;
     }
     //! <!-- [delete] -->
 

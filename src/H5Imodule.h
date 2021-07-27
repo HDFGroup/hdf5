@@ -53,18 +53,18 @@
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5I_examples.c create
+ *   \snippet{lineno} H5I_examples.c create
  *   </td>
  *   <td>
- *   \snippet H5I_examples.c read
+ *   \snippet{lineno} H5I_examples.c read
  *   </td>
  * <tr><th>Update</th><th>Delete</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5I_examples.c update
+ *   \snippet{lineno} H5I_examples.c update
  *   </td>
  *   <td>
- *   \snippet H5I_examples.c delete
+ *   \snippet{lineno} H5I_examples.c delete
  *   </td>
  * </tr>
  * </table>
@@ -93,18 +93,18 @@
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5I_examples.c create_ud
+ *   \snippet{lineno} H5I_examples.c create_ud
  *   </td>
  *   <td>
- *   \snippet H5I_examples.c read_ud
+ *   \snippet{lineno} H5I_examples.c read_ud
  *   </td>
  * <tr><th>Update</th><th>Delete</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5I_examples.c update_ud
+ *   \snippet{lineno} H5I_examples.c update_ud
  *   </td>
  *   <td>
- *   \snippet H5I_examples.c delete_ud
+ *   \snippet{lineno} H5I_examples.c delete_ud
  *   </td>
  * </tr>
  * </table>

@@ -47,20 +47,20 @@
  * <tr><th>Create</th><th>Read</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5Z_examples.c filter
- *   \snippet H5Z_examples.c create
+ *   \snippet{lineno} H5Z_examples.c filter
+ *   \snippet{lineno} H5Z_examples.c create
  *   </td>
  *   <td>
- *   \snippet H5Z_examples.c read
+ *   \snippet{lineno} H5Z_examples.c read
  *   </td>
  * </tr>
  * <tr><th>Update</th><th>Delete</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5Z_examples.c update
+ *   \snippet{lineno} H5Z_examples.c update
  *   </td>
  *   <td>
- *   \snippet H5Z_examples.c delete
+ *   \snippet{lineno} H5Z_examples.c delete
  * </tr>
  * </table>
  *

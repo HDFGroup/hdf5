@@ -40,15 +40,15 @@
  *   \snippet{lineno} H5R_examples.c create
  *   </td>
  *   <td>
- *   \snippet H5R_examples.c read
+ *   \snippet{lineno} H5R_examples.c read
  *   </td>
  * <tr><th>Update</th><th>Delete</th></tr>
  * <tr valign="top">
  *   <td>
- *   \snippet H5R_examples.c update
+ *   \snippet{lineno} H5R_examples.c update
  *   </td>
  *   <td>
- *   \snippet H5R_examples.c delete
+ *   \snippet{lineno} H5R_examples.c delete
  *   </td>
  * </tr>
  * </table>
