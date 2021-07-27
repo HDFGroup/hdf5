@@ -463,6 +463,23 @@ New Features
 
     Library:
     --------
+    - Change how release part of version is checked for compatibility
+
+      The HDF5 library uses a function, H5check_version, to check that the
+      version in the header files used to compile an application are compatible
+      with the version in the library to which it links at runtime. This
+      previously required an exact match or the library would print a warning,
+      dump the build settings and then abort or continue. An environment
+      variable controlled the logic.
+
+      Now the function first checks that the library release is newer then
+      the version in the headers. Secondly, if the release version is different,
+      it checks if the either the library version or the header version is
+      in the exception list (only compatible with itself). An environment
+      variable controls the logic.
+
+        (ADB - 2021/07/27)
+
     - gcc warning suppression macros were moved out of H5public.h
 
       The HDF5 library uses a set of macros to suppress warnings on gcc.

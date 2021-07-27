@@ -966,7 +966,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
                 break;
         } /* end switch */
 
-    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum) */
+    } /* end if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > relnum) */
 
     /* H5_VERS_RELEASE should be compatible, we will only add checks for exceptions */
     if (H5_VERS_RELEASE != relnum) {
