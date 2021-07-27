@@ -1349,8 +1349,8 @@ show_help:
         filter_hdf_files(&flist2, NULL, 0, 0);
     }
 
-    /* if (numpaths > 1) 
-     * In a case where we requeire the list indices of files from multiple 
+    /* if (numpaths > 1)
+     * In a case where we requeire the list indices of files from multiple
      * directories to match, we must utilize a mapping function.
      * The question to answer is how does the mapping function work?
      * The most probable is a sort function, e.g.
