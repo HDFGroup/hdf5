@@ -1347,8 +1347,16 @@ show_help:
     if (flist2) {
         filter_hdf_files(&flist2, NULL, 0, 0);
     }
-    fflush(stdout);
 
+    /* if (numpaths > 1) 
+     * In a case where we requeire the list indices of files from multiple 
+     * directories to match, we must utilize a mapping function.
+     * The question to answer is how does the mapping function work?
+     * The most probable is a sort function, e.g.
+     *   1)  an alphabet sort?
+     *   2)  sort by file size?
+     *   3)  something else?
+     */
     if (args_buf != NULL) {
         int   k          = 0;
         char *ptr        = args_buf + sizeof(int);
