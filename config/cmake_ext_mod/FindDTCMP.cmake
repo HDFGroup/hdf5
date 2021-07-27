@@ -27,7 +27,7 @@ if(DEFINED ENV{MFU_ROOT})
   set(ENV{MFU_LIB} "$ENV{MFU_ROOT}/lib")
   set(ENV{MFU_LIB64} "$ENV{MFU_ROOT}/lib64")
 else()
-  message("MFU_ROOT is not set!?")
+  message("DTCMP_LIBRARY: If you have problems building this library,\nconsider setting the MFU_ROOT environment variable to indicate\nwhere to find the support libraries and header files!")
 endif()
 
 find_path(DTCMP_INCLUDE_DIR

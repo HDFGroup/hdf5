@@ -888,6 +888,10 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         int     pipefd[2];
         buf_t * thisbuft = NULL;
         buf_t **bufs     = buf_cache;
+#if 0
+        printf("[%d] starting: %s\n", sg_mpi_rank, cmdline);
+        fflush(stdout);
+#endif
         if (bufs == NULL) {
             bufs = (buf_t **)MFU_CALLOC(buft_max, sizeof(buf_t *));
             assert((bufs != NULL));
@@ -932,6 +936,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             execvp(argv[0], argv);
         }
         else {
+            int      w_status;
             size_t   nbytes;
             size_t   read_bytes = 0;
             uint64_t remaining, offset;
@@ -971,28 +976,32 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
                 thisbuft->count = BUFT_SIZE - thisbuft->chars;
             }
             offset = thisbuft->chars;
-            while ((nbytes = (size_t)read(pipefd[0], &buf[offset], remaining)) > 0) {
-                offset += nbytes;
-                read_bytes += nbytes;
-                remaining -= nbytes;
-                if (remaining == 0) {
-                    /* update the curent buffer */
-                    thisbuft->count = 0;
-                    thisbuft->chars += read_bytes;
 
-                    /* Create a new read buffer */
+            do {
+				pid_t wpid;
+                wpid = waitpid(pid, &w_status, WNOHANG);
+                if ((nbytes = (size_t)read(pipefd[0], &buf[offset], remaining)) > 0) {
+                     offset += nbytes;
+                     read_bytes += nbytes;
+                     remaining -= nbytes;
+                     if (remaining == 0) {
+                        /* Update the current buffer prior to allocating the new one */
+                        thisbuft->count = 0;
+                        thisbuft->chars += read_bytes;
 #if 0
-                    printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
+                        printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
 #endif
-                    bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
-                    assert(thisbuft != NULL);
-                    thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
-                    thisbuft->bufsize = BUFT_SIZE;
-                    thisbuft->dt      = MPI_CHAR;
-                    thisbuft->chars   = BUFT_SIZE;
-                    offset            = 0;
+                        bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
+                        assert(thisbuft != NULL);
+                        thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
+                        thisbuft->bufsize = BUFT_SIZE;
+                        thisbuft->dt      = MPI_CHAR;
+                        thisbuft->chars   = BUFT_SIZE;
+                        offset            = 0;
+                        remaining         = BUFT_SIZE;
+                    }
                 }
-            }
+            } while(!WIFEXITED(w_status));
             close(pipefd[0]);
             wait(NULL);
 
@@ -1002,28 +1011,46 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     }
     else if (log_stdout_in_file) {
         pid_t pid;
+        size_t log_len;        
         char  logpath[2048];
+        char  logErrors[2048];
         char  current_dir[2048];
         char *logbase = strdup(basename(filepath));
         char *thisapp = strdup(basename(toolname));
+
         if (txtlog == NULL)
             sprintf(logpath, "%s/%s_%s.log", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
         else {
-            size_t log_len = strlen(txtlog);
+            log_len = strlen(txtlog);
             if (txtlog[log_len - 1] == '/')
                 sprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
             else
                 sprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
         }
+        if (log_errors_in_file) {
+            /* We co-locate the error logs in the same directories as the regular log files.
+             * The easiest way to do this is to simply replace the .log with .err in a
+             * copy of the logpath variable.
+             */
+            log_len = strlen(logpath);
+            strcpy(logErrors, logpath);
+            strcpy(&logErrors[log_len -3], "err");
+		}
         if (mfu_debug_level == MFU_LOG_VERBOSE) {
             printf("\tCreating logfile: %s\n", logpath);
             fflush(stdout);
         }
         pid = fork();
         if (pid == 0) {
+            int efd;
             int fd = open(logpath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
             dup2(fd, fileno(stdout));
-            dup2(fd, fileno(stderr));
+            if (log_errors_in_file) {
+               efd = open(logErrors, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+               dup2(efd, fileno(stderr));
+               close(efd);
+            }
+			else dup2(fd, fileno(stderr));
             close(fd);
             execvp(argv[0], argv);
         }
