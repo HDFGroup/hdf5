@@ -14,7 +14,7 @@ main(void)
     //! <!-- [create] -->
     {
         __label__ fail_file, fail_fspace, fail_dset, fail_sel, fail_aspace, fail_attr, fail_awrite;
-        hid_t  file, fspace, dset, aspace, attr;
+        hid_t     file, fspace, dset, aspace, attr;
         H5R_ref_t ref;
 
         if ((file = H5Fcreate("reference.h5", H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) == H5I_INVALID_HID) {
@@ -26,21 +26,22 @@ main(void)
             ret_val = EXIT_FAILURE;
             goto fail_fspace;
         }
-        if ((dset = H5Dcreate(file, "data", H5T_STD_I32LE, fspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) == H5I_INVALID_HID) {
+        if ((dset = H5Dcreate(file, "data", H5T_STD_I32LE, fspace, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) ==
+            H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_dset;
         }
-        if (H5Sselect_all(fspace) < 0 ||
-            H5Rcreate_region(file, "data", fspace, H5P_DEFAULT, &ref) < 0) {
+        if (H5Sselect_all(fspace) < 0 || H5Rcreate_region(file, "data", fspace, H5P_DEFAULT, &ref) < 0) {
             ret_val = EXIT_FAILURE;
             goto fail_sel;
         }
         // store the region reference in a scalar attribute of the root group called "region"
-        if ((aspace = H5Screate(H5S_SCALAR))== H5I_INVALID_HID) {
+        if ((aspace = H5Screate(H5S_SCALAR)) == H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_aspace;
         }
-        if ((attr = H5Acreate(file, "region", H5T_STD_REF, aspace, H5P_DEFAULT, H5P_DEFAULT)) == H5I_INVALID_HID) {
+        if ((attr = H5Acreate(file, "region", H5T_STD_REF, aspace, H5P_DEFAULT, H5P_DEFAULT)) ==
+            H5I_INVALID_HID) {
             ret_val = EXIT_FAILURE;
             goto fail_attr;
         }
