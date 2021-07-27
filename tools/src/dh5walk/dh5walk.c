@@ -979,13 +979,13 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             offset = thisbuft->chars;
 
             do {
-				pid_t wpid;
+                pid_t wpid;
                 wpid = waitpid(pid, &w_status, WNOHANG);
                 if ((nbytes = (size_t)read(pipefd[0], &buf[offset], remaining)) > 0) {
-                     offset += nbytes;
-                     read_bytes += nbytes;
-                     remaining -= nbytes;
-                     if (remaining == 0) {
+                    offset += nbytes;
+                    read_bytes += nbytes;
+                    remaining -= nbytes;
+                    if (remaining == 0) {
                         /* Update the current buffer prior to allocating the new one */
                         thisbuft->count = 0;
                         thisbuft->chars += read_bytes;
@@ -1002,7 +1002,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
                         remaining         = BUFT_SIZE;
                     }
                 }
-            } while(!WIFEXITED(w_status));
+            } while (!WIFEXITED(w_status));
             close(pipefd[0]);
             wait(NULL);
 
@@ -1011,13 +1011,13 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         }
     }
     else if (log_stdout_in_file) {
-        pid_t pid;
-        size_t log_len;        
-        char  logpath[2048];
-        char  logErrors[2048];
-        char  current_dir[2048];
-        char *logbase = strdup(basename(filepath));
-        char *thisapp = strdup(basename(toolname));
+        pid_t  pid;
+        size_t log_len;
+        char   logpath[2048];
+        char   logErrors[2048];
+        char   current_dir[2048];
+        char * logbase = strdup(basename(filepath));
+        char * thisapp = strdup(basename(toolname));
 
         if (txtlog == NULL)
             sprintf(logpath, "%s/%s_%s.log", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
@@ -1035,8 +1035,8 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
              */
             log_len = strlen(logpath);
             strcpy(logErrors, logpath);
-            strcpy(&logErrors[log_len -3], "err");
-		}
+            strcpy(&logErrors[log_len - 3], "err");
+        }
         if (mfu_debug_level == MFU_LOG_VERBOSE) {
             printf("\tCreating logfile: %s\n", logpath);
             fflush(stdout);
@@ -1047,11 +1047,12 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             int fd = open(logpath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
             dup2(fd, fileno(stdout));
             if (log_errors_in_file) {
-               efd = open(logErrors, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-               dup2(efd, fileno(stderr));
-               close(efd);
+                efd = open(logErrors, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+                dup2(efd, fileno(stderr));
+                close(efd);
             }
-			else dup2(fd, fileno(stderr));
+            else
+                dup2(fd, fileno(stderr));
             close(fd);
             execvp(argv[0], argv);
         }
