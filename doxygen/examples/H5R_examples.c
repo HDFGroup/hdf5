@@ -69,7 +69,7 @@ fail_file:;
     //! <!-- [read] -->
     {
         __label__ fail_file, fail_attr, fail_aread;
-        hid_t  file, attr;
+        hid_t     file, attr;
         H5R_ref_t ref;
 
         if ((file = H5Fopen("reference.h5", H5F_ACC_RDONLY, H5P_DEFAULT)) == H5I_INVALID_HID) {
@@ -109,7 +109,7 @@ fail_file:;
     //! <!-- [update] -->
     {
         __label__ fail_file, fail_attr, fail_ref;
-        hid_t  file, attr;
+        hid_t     file, attr;
         H5R_ref_t ref;
 
         if ((file = H5Fopen("reference.h5", H5F_ACC_RDWR, H5P_DEFAULT)) == H5I_INVALID_HID) {
@@ -146,7 +146,7 @@ fail_file:;
     //! <!-- [delete] -->
     {
         __label__ fail_file, fail_ref;
-        hid_t  file;
+        hid_t     file;
         H5R_ref_t ref;
 
         // create an HDF5 object reference to the root group
