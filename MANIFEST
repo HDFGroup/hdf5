@@ -1720,7 +1720,6 @@
 ./tools/test/h5copy/dynlib_copy.c
 
 # dh5walk sources
-./tools/src/dh5walk
 ./tools/src/dh5walk/CMakeLists.txt
 ./tools/src/dh5walk/Makefile.am
 ./tools/src/dh5walk/dh5walk.c
@@ -3594,7 +3593,6 @@
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
 ./config/cmake_ext_mod/CTestCustom.cmake
-./config/cmake_ext_mod/.cmake
 ./config/cmake_ext_mod/FindCIRCLE.cmake
 ./config/cmake_ext_mod/FindDTCMP.cmake
 ./config/cmake_ext_mod/FindMFU.cmake
