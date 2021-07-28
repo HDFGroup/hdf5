@@ -478,6 +478,16 @@ Bug Fixes since HDF5-1.10.7 release
 
     Configuration
     -------------
+    - Autotools clang debug optimization level change
+
+      HDF5 1.10.7 erroneously sets the debug optimization level to "-g" when
+      building with clang via the Autotools. This has now been set to:
+
+        -Og     clang 4+ or Xcode 9+
+        -O1     otherwise
+
+      (DER - 2021/07/28, HDFFV-11192)
+
     - Refactor CMake configure for Fortran
 
       The Fortran configure tests for KINDs reused a single output file that was
