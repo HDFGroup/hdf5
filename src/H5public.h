@@ -34,13 +34,14 @@
 #ifdef H5_HAVE_FEATURES_H
 #include <features.h> /* For setting POSIX, BSD, etc. compatibility */
 #endif
+
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef H5_STDC_HEADERS
+
 #include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
 #include <stdarg.h> /* For variadic functions   */
-#endif
+
 #ifndef __cplusplus
 #ifdef H5_HAVE_STDINT_H
 #include <stdint.h> /* For C9x types */
@@ -50,9 +51,13 @@
 #include <stdint.h> /* For C9x types (when included from C++) */
 #endif
 #endif
-#ifdef H5_HAVE_INTTYPES_H
-#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
+
+#ifdef __cplusplus
+#define __STDC_FORMAT_MACROS
 #endif
+
+#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
+
 #ifdef H5_HAVE_STDDEF_H
 #include <stddef.h>
 #endif
@@ -217,19 +222,7 @@ typedef int herr_t;
  * }
  * \endcode
  */
-#ifdef H5_HAVE_STDBOOL_H
 #include <stdbool.h>
-#else /* H5_HAVE_STDBOOL_H */
-#ifndef __cplusplus
-#if defined(H5_SIZEOF_BOOL) && (H5_SIZEOF_BOOL != 0)
-#define bool _Bool
-#else
-#define bool unsigned int
-#endif
-#define true 1
-#define false 0
-#endif /* __cplusplus */
-#endif /* H5_HAVE_STDBOOL_H */
 typedef bool hbool_t;
 typedef int  htri_t;
 
