@@ -227,7 +227,7 @@ copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, t
 {
     named_dt_t *dt     = *named_dt_head_p; /* Stack pointer */
     named_dt_t *dt_ret = NULL;             /* Datatype to return */
-    H5O_info_t oinfo;                      /* Object info of input dtype */
+    H5O_info_t  oinfo;                     /* Object info of input dtype */
     hid_t       ret_value = H5I_INVALID_HID;
 
     if (H5Oget_info2(type_in, &oinfo, H5O_INFO_BASIC) < 0)
