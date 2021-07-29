@@ -21,10 +21,6 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
-/*
- * Include ANSI-C header files.
- */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -37,7 +33,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /*
  * Redefine all the POSIX functions.  We should never see a POSIX

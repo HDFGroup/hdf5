@@ -35,6 +35,10 @@
 /* Define if dev_t is a scalar */
 #cmakedefine H5_DEV_T_IS_SCALAR @H5_DEV_T_IS_SCALAR@
 
+/* Define if your system is IBM ppc64le and cannot convert some long double
+   values correctly. */
+#cmakedefine H5_DISABLE_SOME_LDOUBLE_CONV @H5_DISABLE_SOME_LDOUBLE_CONV@
+
 /* Define to dummy `main' function (if any) required to link to the Fortran
    libraries. */
 #cmakedefine H5_FC_DUMMY_MAIN @H5_FC_DUMMY_MAIN@
@@ -111,7 +115,7 @@
 #cmakedefine H5_HAVE_CODESTACK @H5_HAVE_CODESTACK@
 
 /* Define to 1 if you have the <curl/curl.h> header file. */
-#cmakedefine H5_HAVE_CURL_H @H5_HAVE_CURL_H@
+#cmakedefine H5_HAVE_CURL_CURL_H @H5_HAVE_CURL_H@
 
 /* Define if Darwin or Mac OS X */
 #cmakedefine H5_HAVE_DARWIN @H5_HAVE_DARWIN@
@@ -191,21 +195,12 @@
 /* Define to 1 if you have the <hdfs.h> header file. */
 #cmakedefine H5_HAVE_HDFS_H @H5_HAVE_HDFS_H@
 
-/* Define if the compiler understands inline */
-#cmakedefine H5_HAVE_INLINE @H5_HAVE_INLINE@
-
 /* Define if parallel library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
 
-/* Define to 1 if you have the <inttypes.h> header file. */
-#cmakedefine H5_HAVE_INTTYPES_H @H5_HAVE_INTTYPES_H@
-
 /* Define to 1 if you have the `ioctl' function. */
 #cmakedefine H5_HAVE_IOCTL @H5_HAVE_IOCTL@
-
-/* Define to 1 if you have the <io.h> header file. */
-#cmakedefine H5_HAVE_IO_H @H5_HAVE_IO_H@
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #cmakedefine H5_HAVE_LIBCRYPTO @H5_HAVE_LIBCRYPTO@
@@ -346,29 +341,17 @@
 /* Define to 1 if you have the `sigsetjmp' function. */
 #cmakedefine H5_HAVE_SIGSETJMP @H5_HAVE_SIGSETJMP@
 
-/* Define to 1 if you have the `snprintf' function. */
-#cmakedefine H5_HAVE_SNPRINTF @H5_HAVE_SNPRINTF@
-
 /* Define to 1 if you have the `srandom' function. */
 #cmakedefine H5_HAVE_SRANDOM @H5_HAVE_SRANDOM@
 
 /* Define to 1 if you have the `stat64' function. */
 #cmakedefine H5_HAVE_STAT64 @H5_HAVE_STAT64@
 
-/* Define if `struct stat' has the `st_blocks' field */
+/* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
-
-/* Define to 1 if you have the <stdbool.h> header file. */
-#cmakedefine H5_HAVE_STDBOOL_H @H5_HAVE_STDBOOL_H@
 
 /* Define to 1 if you have the <stddef.h> header file. */
 #cmakedefine H5_HAVE_STDDEF_H @H5_HAVE_STDDEF_H@
-
-/* Define to 1 if you have the <stdint.h> header file. */
-#cmakedefine H5_HAVE_STDINT_H @H5_HAVE_STDINT_H@
-
-/* Define to 1 if you have the <stdint.h> header file for Cplusplus. */
-#cmakedefine H5_HAVE_STDINT_H_CXX @H5_HAVE_STDINT_H_CXX@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
@@ -382,12 +365,6 @@
 /* Define to 1 if you have the <string.h> header file. */
 #cmakedefine H5_HAVE_STRING_H @H5_HAVE_STRING_H@
 
-/* Define to 1 if you have the `strtoll' function. */
-#cmakedefine H5_HAVE_STRTOLL @H5_HAVE_STRTOLL@
-
-/* Define to 1 if you have the `strtoull' function. */
-#cmakedefine H5_HAVE_STRTOULL @H5_HAVE_STRTOULL@
-
 /* Define if struct text_info is defined */
 #cmakedefine H5_HAVE_STRUCT_TEXT_INFO @H5_HAVE_STRUCT_TEXT_INFO@
 
@@ -396,9 +373,6 @@
 
 /* Define to 1 if you have the `symlink' function. */
 #cmakedefine H5_HAVE_SYMLINK @H5_HAVE_SYMLINK@
-
-/* Define to 1 if you have the `system' function. */
-#cmakedefine H5_HAVE_SYSTEM @H5_HAVE_SYSTEM@
 
 /* Define to 1 if you have the <sys/file.h> header file. */
 #cmakedefine H5_HAVE_SYS_FILE_H @H5_HAVE_SYS_FILE_H@
@@ -453,9 +427,6 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
 
-/* Define to 1 if you have the `vsnprintf' function. */
-#cmakedefine H5_HAVE_VSNPRINTF @H5_HAVE_VSNPRINTF@
-
 /* Define to 1 if you have the `waitpid' function. */
 #cmakedefine H5_HAVE_WAITPID @H5_HAVE_WAITPID@
 
@@ -476,12 +447,6 @@
 
 /* Define to 1 if you have the `_scrsize' function. */
 #cmakedefine H5_HAVE__SCRSIZE @H5_HAVE__SCRSIZE@
-
-/* Define if the compiler understands __inline */
-#cmakedefine H5_HAVE___INLINE @H5_HAVE___INLINE@
-
-/* Define if the compiler understands __inline__ */
-#cmakedefine H5_HAVE___INLINE__ @H5_HAVE___INLINE__@
 
 /* Define if the library will ignore file locks when disabled */
 #cmakedefine H5_IGNORE_DISABLED_FILE_LOCKS @H5_IGNORE_DISABLED_FILE_LOCKS@
@@ -504,9 +469,6 @@
 /* Define if your system can convert (unsigned) long to long double values
    with special algorithm. */
 #cmakedefine H5_LONG_TO_LDOUBLE_SPECIAL @H5_LONG_TO_LDOUBLE_SPECIAL@
-
-/* Define if your system is power6 and cannot convert some long double values. */
-#cmakedefine H5_DISABLE_SOME_LDOUBLE_CONV @H5_DISABLE_SOME_LDOUBLE_CONV@
 
 /* Define to the sub-directory where libtool stores uninstalled libraries. */
 #cmakedefine H5_LT_OBJDIR @H5_LT_OBJDIR@
@@ -713,9 +675,6 @@
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 @H5_SIZEOF___INT64@
 
-/* Define to 1 if you have the ANSI C header files. */
-#cmakedefine H5_STDC_HEADERS @H5_STDC_HEADERS@
-
 /* Define if strict file format checks are enabled */
 #cmakedefine H5_STRICT_FORMAT_CHECKS @H5_STRICT_FORMAT_CHECKS@
 
@@ -726,14 +685,14 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #cmakedefine H5_TIME_WITH_SYS_TIME @H5_TIME_WITH_SYS_TIME@
 
+/* Define using v1.10 public API symbols by default */
+#cmakedefine H5_USE_110_API_DEFAULT @H5_USE_110_API_DEFAULT@
+
 /* Define using v1.6 public API symbols by default */
 #cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
 
 /* Define using v1.8 public API symbols by default */
 #cmakedefine H5_USE_18_API_DEFAULT @H5_USE_18_API_DEFAULT@
-
-/* Define using v1.10 public API symbols by default */
-#cmakedefine H5_USE_110_API_DEFAULT @H5_USE_110_API_DEFAULT@
 
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@

@@ -726,8 +726,11 @@ test_named()
 
         // It should be possible to define an attribute for the named type
         Attribute attr1 = itype.createAttribute("attr1", PredType::NATIVE_UCHAR, space);
-        for (i = 0; i < ds_size[0] * ds_size[1]; i++)
-            attr_data[0][i] = (int)i; /*tricky*/
+        for (hsize_t i = 0; i < ds_size[0]; i++) {
+            for (hsize_t j = 0; j < ds_size[1]; j++) {
+                attr_data[i][j] = static_cast<unsigned>(i * ds_size[1] + j);
+            }
+        }
         attr1.write(PredType::NATIVE_UINT, attr_data);
         attr1.close();
 
