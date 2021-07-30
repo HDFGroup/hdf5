@@ -162,11 +162,24 @@ typedef herr_t (*H5D_gather_func_t)(const void *dst_buf, size_t dst_buf_bytes_us
 
 //! <!-- [H5D_chunk_iter_op_t_snip] -->
 /**
- * Define the operator function pointer for H5Dchunk_iter()
+ * \brief Callback for H5Dchunk_iter()
+ *
+ * \param[in]     offset      Array of starting logical coordinates of chunk.
+ * \param[in]     filter_mask Filter mask of chunk.
+ * \param[in]     addr        Offset in file of chunk data.
+ * \param[in]     nbytes      Size in bytes of chunk data in file.
+ * \param[in,out] op_data     Pointer to any user-defined data associated with
+ *                            the operation.
+ * \returns \li Zero (#H5_ITER_CONT) causes the iterator to continue, returning
+ *              zero when all elements have been processed.
+ *          \li A positive value (#H5_ITER_STOP) causes the iterator to
+ *              immediately return that value, indicating short-circuit success.
+ *          \li A negative (#H5_ITER_ERROR) causes the iterator to immediately
+ *              return that value, indicating failure.
  */
-//! <!-- [H5D_chunk_iter_op_t_snip] -->
 typedef int (*H5D_chunk_iter_op_t)(const hsize_t *offset, uint32_t filter_mask, haddr_t addr, uint32_t nbytes,
                                    void *op_data);
+//! <!-- [H5D_chunk_iter_op_t_snip] -->
 
 /********************/
 /* Public Variables */
@@ -638,7 +651,7 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  * --------------------------------------------------------------------------
  * \ingroup H5D
  *
- * \brief Iterate over all chunks
+ * \brief Iterate over all chunks of a chunked dataset
  *
  * \dset_id
  * \param[in] dxpl_id       Identifier of a transfer property list
@@ -649,33 +662,11 @@ H5_DLL herr_t H5Dget_chunk_info_by_coord(hid_t dset_id, const hsize_t *offset, u
  *
  * \details H5Dget_chunk_iter iterates over all chunks in the dataset, calling the
  *          user supplied callback with the details of the chunk and the supplied
- *          \p op_data.
+ *          \p op_data.\n
+ *          \ref H5D_chunk_iter_op_t is defined as:
+ *          \snippet this H5D_chunk_iter_op_t_snip
  *
- *          Callback information:
- *            H5D_chunk_iter_op_t is defined as:
- *
- *              typedef int (*H5D_chunk_iter_op_t)(
- *                const hsize_t *offset,
- *                uint32_t filter_mask,
- *                haddr_t addr,
- *                uint32_t nbytes,
- *                void *op_data);
- *
- *          H5D_chunk_iter_op_t parameters:
- *              hsize_t *offset;        IN/OUT: Array of starting logical coordinates of chunk.
- *              uint32_t filter_mask;   IN: Filter mask of chunk.
- *              haddr_t addr;           IN: Offset in file of chunk data.
- *              uint32_t nbytes;        IN: Size in number of bytes of chunk data in file.
- *              void *op_data;          IN/OUT: Pointer to any user-defined data
- *                                      associated with the operation.
- *
- *          The return values from an operator are:
- *              Zero (H5_ITER_CONT) causes the iterator to continue, returning zero when all
- *                  elements have been processed.
- *              Positive (H5_ITER_STOP) causes the iterator to immediately return that positive
- *                  value, indicating short-circuit success.
- *              Negative (H5_ITER_ERROR) causes the iterator to immediately return that value,
- *                  indicating failure.
+ * \todo When was this function introduced?
  *
  */
 H5_DLL herr_t H5Dchunk_iter(hid_t dset_id, hid_t dxpl_id, H5D_chunk_iter_op_t cb, void *op_data);
@@ -1232,15 +1223,10 @@ H5_DLL herr_t H5Dvlen_get_buf_size(hid_t dset_id, hid_t type_id, hid_t space_id,
  *
  * \note Applications sometimes write data only to portions of an
  *          allocated dataset. It is often useful in such cases to fill
- *          the unused space with a known fill value. See the following
- *          function for more information:
- *          - H5Pset_fill_value()
- *          - H5Pget_fill_value()
- *          - H5Pfill_value_defined()
- *          - H5Pset_fill_time()
- *          - H5Pget_fill_time()
- *          - H5Pcreate()
- *          - H5Pcreate_anon()
+ *          the unused space with a known fill value.
+ *
+ * \see H5Pset_fill_value(), H5Pget_fill_value(), H5Pfill_value_defined(),
+ *      H5Pset_fill_time(), H5Pget_fill_time(), H5Pcreate(), H5Dcreate_anon()
  *
  */
 H5_DLL herr_t H5Dfill(const void *fill, hid_t fill_type_id, void *buf, hid_t buf_type_id, hid_t space_id);
