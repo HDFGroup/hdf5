@@ -84,9 +84,9 @@ static herr_t   H5FD__mpio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
 static haddr_t  H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t type);
 static herr_t   H5FD__mpio_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
 static herr_t   H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-                               void *buf);
+                                void *buf);
 static herr_t   H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-                                const void *buf);
+                                 const void *buf);
 static herr_t   H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t   H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static int      H5FD__mpio_mpi_rank(const H5FD_t *_file);
@@ -100,39 +100,39 @@ static const H5FD_class_mpi_t H5FD_mpio_g = {
         "mpio",                   /*name            */
         HADDR_MAX,                /*maxaddr        */
         H5F_CLOSE_SEMI,           /* fc_degree        */
-        H5FD__mpio_term,           /*terminate             */
+        H5FD__mpio_term,          /*terminate             */
         NULL,                     /*sb_size        */
         NULL,                     /*sb_encode        */
         NULL,                     /*sb_decode        */
         sizeof(H5FD_mpio_fapl_t), /*fapl_size        */
-        H5FD__mpio_fapl_get,       /*fapl_get        */
-        H5FD__mpio_fapl_copy,      /*fapl_copy        */
-        H5FD__mpio_fapl_free,      /*fapl_free        */
+        H5FD__mpio_fapl_get,      /*fapl_get        */
+        H5FD__mpio_fapl_copy,     /*fapl_copy        */
+        H5FD__mpio_fapl_free,     /*fapl_free        */
         0,                        /*dxpl_size        */
         NULL,                     /*dxpl_copy        */
         NULL,                     /*dxpl_free        */
-        H5FD__mpio_open,           /*open            */
-        H5FD__mpio_close,          /*close            */
+        H5FD__mpio_open,          /*open            */
+        H5FD__mpio_close,         /*close            */
         NULL,                     /*cmp            */
-        H5FD__mpio_query,          /*query            */
+        H5FD__mpio_query,         /*query            */
         NULL,                     /*get_type_map        */
         NULL,                     /*alloc            */
         NULL,                     /*free            */
-        H5FD__mpio_get_eoa,        /*get_eoa        */
-        H5FD__mpio_set_eoa,        /*set_eoa        */
-        H5FD__mpio_get_eof,        /*get_eof        */
-        H5FD__mpio_get_handle,     /*get_handle            */
-        H5FD__mpio_read,           /*read            */
-        H5FD__mpio_write,          /*write            */
-        H5FD__mpio_flush,          /*flush            */
-        H5FD__mpio_truncate,       /*truncate        */
+        H5FD__mpio_get_eoa,       /*get_eoa        */
+        H5FD__mpio_set_eoa,       /*set_eoa        */
+        H5FD__mpio_get_eof,       /*get_eof        */
+        H5FD__mpio_get_handle,    /*get_handle            */
+        H5FD__mpio_read,          /*read            */
+        H5FD__mpio_write,         /*write            */
+        H5FD__mpio_flush,         /*flush            */
+        H5FD__mpio_truncate,      /*truncate        */
         NULL,                     /*lock                  */
         NULL,                     /*unlock                */
         H5FD_FLMAP_DICHOTOMY      /*fl_map                */
     },                            /* End of superclass information */
-    H5FD__mpio_mpi_rank,           /*get_rank              */
-    H5FD__mpio_mpi_size,           /*get_size              */
-    H5FD__mpio_communicator        /*get_comm              */
+    H5FD__mpio_mpi_rank,          /*get_rank              */
+    H5FD__mpio_mpi_size,          /*get_size              */
+    H5FD__mpio_communicator       /*get_comm              */
 };
 
 #ifdef H5FDmpio_DEBUG
@@ -935,16 +935,16 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
 {
     const H5FD_mpio_fapl_t *fa = NULL;
     H5FD_mpio_fapl_t        _fa;
-    H5FD_mpio_t *   file = NULL;          /* VFD File struct for new file */
-    H5P_genplist_t *plist;                /* Property list pointer */
-    MPI_Comm        comm = MPI_COMM_NULL; /* MPI Communicator, from plist */
-    MPI_Info        info = MPI_INFO_NULL; /* MPI Info, from plist */
-    MPI_File        fh;                   /* MPI file handle */
-    hbool_t         file_opened = FALSE;  /* Flag to indicate that the file was successfully opened */
-    int             mpi_amode;            /* MPI file access flags */
-    int             mpi_rank = INT_MAX;   /* MPI rank of this process */
-    int             mpi_size;             /* Total number of MPI processes */
-    MPI_Offset      file_size;            /* File size (of existing files) */
+    H5FD_mpio_t *           file = NULL;          /* VFD File struct for new file */
+    H5P_genplist_t *        plist;                /* Property list pointer */
+    MPI_Comm                comm = MPI_COMM_NULL; /* MPI Communicator, from plist */
+    MPI_Info                info = MPI_INFO_NULL; /* MPI Info, from plist */
+    MPI_File                fh;                   /* MPI file handle */
+    hbool_t                 file_opened = FALSE;  /* Flag to indicate that the file was successfully opened */
+    int                     mpi_amode;            /* MPI file access flags */
+    int                     mpi_rank = INT_MAX;   /* MPI rank of this process */
+    int                     mpi_size;             /* Total number of MPI processes */
+    MPI_Offset              file_size;            /* File size (of existing files) */
 #ifdef H5FDmpio_DEBUG
     hbool_t H5FD_mpio_debug_t_flag = FALSE;
 #endif
@@ -1332,7 +1332,7 @@ done:
  */
 static herr_t
 H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr,
-               size_t size, void *buf /*out*/)
+                size_t size, void *buf /*out*/)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
     MPI_Offset   mpi_off;
@@ -1572,7 +1572,7 @@ done:
  */
 static herr_t
 H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
-                const void *buf)
+                 const void *buf)
 {
     H5FD_mpio_t *file = (H5FD_mpio_t *)_file;
     MPI_Offset   mpi_off;
