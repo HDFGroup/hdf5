@@ -912,8 +912,6 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     static unsigned int disable_version_check    = 0; /* Set if the version check should be disabled */
     static const char * version_mismatch_warning = VERSION_MISMATCH_WARNING;
     herr_t              ret_value                = SUCCEED; /* Return value */
-    int                 releasenum               = relnum;  /* To avoid warning for unsigned < 0
-                                                               comparison in first release versions */
 
     FUNC_ENTER_API_NOINIT_NOERR_NOFS
     H5TRACE3("e", "IuIuIu", majnum, minnum, relnum);
@@ -933,7 +931,10 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
     }
 
     /* H5_VERS_MAJOR and H5_VERS_MINOR must match */
-    if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > releasenum) {
+    /* Cast relnum to int to avoid warning for unsigned < 0 comparison
+     * in first release versions */
+    if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > (int)relnum) {
+
         switch (disable_version_check) {
             case 0:
                 HDfprintf(stderr, "%s%s", version_mismatch_warning,
