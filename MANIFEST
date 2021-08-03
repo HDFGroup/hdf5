@@ -220,17 +220,6 @@
 ./doxygen/dox/FileFormatSpec.dox
 ./doxygen/dox/GettingStarted.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
-./doxygen/dox/H5Lget_info_by_idx.dox
-./doxygen/dox/H5Lget_info.dox
-./doxygen/dox/H5Literate_by_name.dox
-./doxygen/dox/H5Literate.dox
-./doxygen/dox/H5Lvisit_by_name.dox
-./doxygen/dox/H5Lvisit.dox
-./doxygen/dox/H5Oget_info_by_idx.dox
-./doxygen/dox/H5Oget_info_by_name.dox
-./doxygen/dox/H5Oget_info.dox
-./doxygen/dox/H5Ovisit_by_name.dox
-./doxygen/dox/H5Ovisit.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
 ./doxygen/dox/OtherSpecs.dox
 ./doxygen/dox/Overview.dox
