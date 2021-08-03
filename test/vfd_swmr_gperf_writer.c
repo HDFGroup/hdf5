@@ -10,17 +10,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Description of this program: 
+/* Description of this program:
  * This program checks the performance of group creations for VFD SWMR.
  * Currently the group creation time, H5Fopen and H5Fclose time are measured.
- * After compiling the program, 
+ * After compiling the program,
  *     ./vfd_swmr_gperf_writer -n 1000 -P -N 5 -a 1 -q
- * will generate 1000 groups, each group has 5 attributes. 
+ * will generate 1000 groups, each group has 5 attributes.
  *     ./vfd_swmr_gperf_writer -n 1000 -P -N 0 -q
  * will generate 1000 empty groups.
  *     ./vfd_swmr_gperf_writer -n 1000 -P -q
  * will generate 1000 groups,for every ten groups, an attribute is generated.
-*/
+ */
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
@@ -34,7 +34,7 @@
 
 #ifndef H5_HAVE_WIN32_API
 
-#define VS_ATTR_NAME_LEN  21
+#define VS_ATTR_NAME_LEN 21
 
 #define TIME_PASSED(X, Y)                                                                                    \
     ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
@@ -67,13 +67,10 @@ typedef struct {
     (state_t)                                                                                                \
     {                                                                                                        \
         .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
-        .filetype = H5T_NATIVE_UINT32, .asteps = 10, .nsteps = 100,                            \
-        .use_vfd_swmr = true, .old_style_grp = false,                  \
-        .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',             \
-        .attr_test = false, .tick_len = 4, .max_lag = 7,              \
-        .gperf = false, .min_time = 100., .max_time = 0.,.mean_time = 0.,  \
-        .total_time = 0., .fo_total_time = 0., \
-        .fc_total_time = 0., .num_attrs = 1  \
+        .filetype = H5T_NATIVE_UINT32, .asteps = 10, .nsteps = 100, .use_vfd_swmr = true,                    \
+        .old_style_grp = false, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',              \
+        .attr_test = false, .tick_len = 4, .max_lag = 7, .gperf = false, .min_time = 100., .max_time = 0.,   \
+        .mean_time = 0., .total_time = 0., .fo_total_time = 0., .fc_total_time = 0., .num_attrs = 1          \
     }
 
 static void
@@ -444,7 +441,6 @@ add_attr(state_t *s, hid_t oid, unsigned int which, unsigned num_attrs, const ch
                 TEST_ERROR;
             }
         }
-
 
     } /* end for */
 
@@ -1559,7 +1555,6 @@ write_group(state_t *s, unsigned int which)
             TEST_ERROR;
         }
     }
-
 
     /* Then carry out the attribute operation. */
     if (s->asteps != 0 && which % s->asteps == 0)
@@ -3585,7 +3580,6 @@ vrfy_create_group(state_t *s, unsigned int which)
         TEST_ERROR;
     }
 
-
     return true;
 
 error:
@@ -3746,7 +3740,6 @@ vrfy_close_group_id(state_t *s, hid_t g)
         TEST_ERROR;
     }
 
-
     return true;
 
 error:
@@ -3789,7 +3782,6 @@ vrfy_one_link_exist(state_t *s, hid_t obj_id, const char *name, bool expect_exis
 
     int        link_exists = 0;
     H5G_info_t group_info;
-
 
     link_exists = H5Lexists(obj_id, name, H5P_DEFAULT);
 
@@ -4298,7 +4290,6 @@ verify_group_operations(state_t *s, unsigned int which)
     return ret_value;
 }
 
-
 int
 main(int argc, char **argv)
 {
@@ -4384,17 +4375,16 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-
     if (writer) {
-    if (s.gperf) {
+        if (s.gperf) {
 
-        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
+            if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
 
-            fprintf(stderr, "HDclock_gettime failed");
+                fprintf(stderr, "HDclock_gettime failed");
 
-            TEST_ERROR;
+                TEST_ERROR;
+            }
         }
-    }
 
         for (step = 0; step < s.nsteps; step++) {
             dbgf(2, "writer: step %d\n", step);
@@ -4406,21 +4396,20 @@ main(int argc, char **argv)
                 TEST_ERROR;
             }
         }
-    if (s.gperf) {
+        if (s.gperf) {
 
-        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
+            if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
 
-            fprintf(stderr, "HDclock_gettime failed");
+                fprintf(stderr, "HDclock_gettime failed");
 
-            TEST_ERROR;
+                TEST_ERROR;
+            }
+
+            s.total_time = TIME_PASSED(start_time, end_time);
+            s.mean_time  = s.total_time / s.nsteps;
+            fprintf(stdout, "group creation +5 attrs total time = %lf\n", s.total_time);
+            fprintf(stdout, "group creation +5 attrs mean time = %lf\n", s.mean_time);
         }
-
-        s.total_time = TIME_PASSED(start_time, end_time);
-        s.mean_time = s.total_time / s.nsteps;
-        fprintf(stdout, "group creation +5 attrs total time = %lf\n", s.total_time);
-        fprintf(stdout, "group creation +5 attrs mean time = %lf\n", s.mean_time);
-    }
-
     }
     else {
         for (step = 0; step < s.nsteps; step++) {
