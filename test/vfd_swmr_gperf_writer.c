@@ -4310,7 +4310,7 @@ main(int argc, char **argv)
     H5F_vfd_swmr_config_t config;
     bool                  wg_ret = false;
     bool                  vg_ret = false;
-    struct timespec start_time, end_time;
+    struct timespec       start_time, end_time;
 
     if (!state_init(&s, argc, argv)) {
         printf("state_init failed\n");
@@ -4351,38 +4351,34 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if(s.gperf) {
+    if (s.gperf) {
 
-       if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
 
-                fprintf(stderr, "HDclock_gettime failed");
+            fprintf(stderr, "HDclock_gettime failed");
 
-                TEST_ERROR;
-
-       }    
+            TEST_ERROR;
+        }
     }
 
-    
     if (writer)
         s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
     else
         s.file = H5Fopen(s.filename, H5F_ACC_RDONLY, fapl);
 
-    if(s.gperf) {
+    if (s.gperf) {
 
-       if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
 
-                fprintf(stderr, "HDclock_gettime failed");
+            fprintf(stderr, "HDclock_gettime failed");
 
-                TEST_ERROR;
+            TEST_ERROR;
+        }
 
-            }    
-
-
-       s.fo_total_time = TIME_PASSED(start_time,end_time);
-       fprintf(stdout, "H5Fopen time = %lf\n", s.fo_total_time);
+        s.fo_total_time = TIME_PASSED(start_time, end_time);
+        fprintf(stdout, "H5Fopen time = %lf\n", s.fo_total_time);
     }
- 
+
     if (s.file < 0) {
         printf("H5Fcreate/open failed\n");
         TEST_ERROR;
@@ -4455,16 +4451,14 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if(s.gperf) {
+    if (s.gperf) {
 
-       if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
 
-                fprintf(stderr, "HDclock_gettime failed");
+            fprintf(stderr, "HDclock_gettime failed");
 
-                TEST_ERROR;
-
-            }    
-
+            TEST_ERROR;
+        }
     }
 
     if (H5Fclose(s.file) < 0) {
@@ -4472,18 +4466,17 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if(s.gperf) {
+    if (s.gperf) {
 
-       if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
 
-                fprintf(stderr, "HDclock_gettime failed");
+            fprintf(stderr, "HDclock_gettime failed");
 
-                TEST_ERROR;
+            TEST_ERROR;
+        }
 
-            }    
-
-       s.fc_total_time = TIME_PASSED(start_time,end_time);
-       fprintf(stdout, "H5Fclose time = %lf\n", s.fc_total_time);
+        s.fc_total_time = TIME_PASSED(start_time, end_time);
+        fprintf(stdout, "H5Fclose time = %lf\n", s.fc_total_time);
     }
 
     return EXIT_SUCCESS;
