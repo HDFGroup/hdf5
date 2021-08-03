@@ -10,6 +10,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/* Description of this program: 
+ * This program checks the performance of group creations for VFD SWMR.
+ * Currently the group creation time, H5Fopen and H5Fclose time are measured.
+ * After compiling the program, 
+ *     ./vfd_swmr_gperf_writer -n 1000 -P -N 5 -a 1 -q
+ * will generate 1000 groups, each group has 5 attributes. 
+ *     ./vfd_swmr_gperf_writer -n 1000 -P -N 0 -q
+ * will generate 1000 empty groups.
+ *     ./vfd_swmr_gperf_writer -n 1000 -P -q
+ * will generate 1000 groups,for every ten groups, an attribute is generated.
+*/
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
@@ -23,7 +34,6 @@
 
 #ifndef H5_HAVE_WIN32_API
 
-#define READER_WAIT_TICKS 3
 #define VS_ATTR_NAME_LEN  21
 
 #define TIME_PASSED(X, Y)                                                                                    \
@@ -34,22 +44,15 @@ typedef struct {
     char         filename[PATH_MAX];
     char         progname[PATH_MAX];
     unsigned int asteps;
-    unsigned int csteps;
     unsigned int nsteps;
-    unsigned int update_interval;
     bool         use_vfd_swmr;
     bool         old_style_grp;
-    bool         use_named_pipes;
     char         grp_op_pattern;
     bool         grp_op_test;
     char         at_pattern;
     bool         attr_test;
     uint32_t     max_lag;
     uint32_t     tick_len;
-    int          np_fd_w_to_r;
-    int          np_fd_r_to_w;
-    int          np_notify;
-    int          np_verify;
     bool         gperf;
     double       min_time;
     double       max_time;
@@ -64,11 +67,11 @@ typedef struct {
     (state_t)                                                                                                \
     {                                                                                                        \
         .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
-        .filetype = H5T_NATIVE_UINT32, .asteps = 10, .csteps = 10, .nsteps = 100,                            \
-        .update_interval = READER_WAIT_TICKS, .use_vfd_swmr = true, .old_style_grp = false,                  \
-        .use_named_pipes = true, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',             \
-        .attr_test = false, .tick_len = 4, .max_lag = 7, .np_fd_w_to_r = -1, .np_fd_r_to_w = -1,             \
-        .np_notify = 0, .np_verify = 0, .gperf = false, .min_time = 100., .max_time = 0.,.mean_time = 0.,  \
+        .filetype = H5T_NATIVE_UINT32, .asteps = 10, .nsteps = 100,                            \
+        .use_vfd_swmr = true, .old_style_grp = false,                  \
+        .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',             \
+        .attr_test = false, .tick_len = 4, .max_lag = 7,              \
+        .gperf = false, .min_time = 100., .max_time = 0.,.mean_time = 0.,  \
         .total_time = 0., .fo_total_time = 0., \
         .fc_total_time = 0., .num_attrs = 1  \
     }
@@ -77,18 +80,15 @@ static void
 usage(const char *progname)
 {
     fprintf(stderr,
-            "usage: %s [-S] [-G] [-a steps] [-b] [-c] [-n iterations]\n"
-            "    [-N] [-q] [-u numb_ticks] [-A at_pattern] [-O grp_op_pattern]\n"
+            "usage: %s [-S] [-G] [-a steps] [-b] [-n iterations]\n"
+            "    [-N num_attrs] [-q] [-A at_pattern] [-O grp_op_pattern]\n"
             "\n"
             "-S:             do not use VFD SWMR\n"
             "-G:             old-style type of group\n"
             "-a steps:       `steps` between adding attributes\n"
             "-b:             write data in big-endian byte order\n"
-            "-c steps:       `steps` between communication between the writer and reader\n"
             "-n ngroups:     the number of groups\n"
-            "-N:             do not use named pipes, \n"
-            "                mainly for running the writer and reader seperately\n"
-            "-u numb_ticks:  `numb_ticks` for the reader to wait before verification\n"
+            "-N:             the number of attributes \n"
             "-A at_pattern:  `at_pattern' for different attribute tests\n"
             "              The value of `at_pattern` is one of the following:\n"
             "              `compact`              - Attributes added in compact storage\n"
@@ -169,7 +169,7 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "PSGa:bc:n:Nqu:A:O:")) != -1) {
+    while ((ch = getopt(argc, argv, "PSGa:bn:qA:N:O:")) != -1) {
         switch (ch) {
             case 'P':
                 s->gperf = true;
@@ -181,9 +181,8 @@ state_init(state_t *s, int argc, char **argv)
                 s->old_style_grp = true;
                 break;
             case 'a':
-            case 'c':
             case 'n':
-            case 'u':
+            case 'N':
                 errno = 0;
                 tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0') {
@@ -201,18 +200,13 @@ state_init(state_t *s, int argc, char **argv)
 
                 if (ch == 'a')
                     s->asteps = (unsigned)tmp;
-                else if (ch == 'c')
-                    s->csteps = (unsigned)tmp;
                 else if (ch == 'n')
                     s->nsteps = (unsigned)tmp;
-                else if (ch == 'u')
-                    s->update_interval = (unsigned)tmp;
+                else if (ch == 'N')
+                    s->num_attrs = (unsigned)tmp;
                 break;
             case 'b':
                 s->filetype = H5T_STD_U32BE;
-                break;
-            case 'N':
-                s->use_named_pipes = false;
                 break;
             case 'O':
                 if (HDstrcmp(optarg, "grp-creation") == 0)
@@ -293,11 +287,6 @@ state_init(state_t *s, int argc, char **argv)
         printf("Attribute tests are ignored.\n");
     }
 
-    if (s->csteps < 1 || s->csteps > s->nsteps) {
-        printf("communication interval is out of bounds\n");
-        TEST_ERROR;
-    }
-
     if (argc > 0) {
         printf("unexpected command-line arguments\n");
         TEST_ERROR;
@@ -317,147 +306,6 @@ error:
     if (tfile)
         HDfree(tfile);
     return false;
-}
-
-/* Named Pipe Subroutine: np_wr_send_receive
- * Description:
- *   The writer sends a message to the reader,
- *   then waits for max_lag ticks,
- *   then checks the returned message from the reader.
- * Return:
- *   True  if succeed
- *   False if an error occurs in any step above.
- *         An error is mostly caused by an unexpected
- *         notification number from the message sent
- *         by the reader.
- */
-static bool
-np_wr_send_receive(state_t *s)
-{
-
-    unsigned int i;
-    /* Bump up the value of notify to notice the reader to start to read */
-    s->np_notify++;
-    if (HDwrite(s->np_fd_w_to_r, &(s->np_notify), sizeof(int)) < 0) {
-        printf("HDwrite failed\n");
-        TEST_ERROR;
-    }
-
-    /* During the wait, writer makes repeated HDF5 API calls
-     * to trigger EOT at approximately the correct time */
-    for (i = 0; i < s->max_lag + 1; i++) {
-        decisleep(s->tick_len);
-        H5E_BEGIN_TRY
-        {
-            H5Aexists(s->file, "nonexistent");
-        }
-        H5E_END_TRY;
-    }
-
-    /* Receive the same value from the reader and verify it before
-     * going to the next step */
-    (s->np_verify)++;
-    if (HDread(s->np_fd_r_to_w, &(s->np_notify), sizeof(int)) < 0) {
-        printf("HDread failed\n");
-        TEST_ERROR;
-    }
-
-    if (s->np_notify == -1) {
-        printf("reader failed to verify group or attribute operation.\n");
-        TEST_ERROR;
-    }
-
-    if (s->np_notify != s->np_verify) {
-        printf("received message %d, expecting %d\n", s->np_notify, s->np_verify);
-        TEST_ERROR;
-    }
-
-    return true;
-
-error:
-    return false;
-}
-
-/* Named Pipe Subroutine: np_rd_receive
- * Description:
- *   The reader receives a message from the writer,
- *   then checks if the notification number from
- *   the writer is expected.
- * Return:
- *   True  if succeed
- *   False if an error occurs in any step above.
- *         An error is mostly caused by an unexpected
- *         notification number from the message sent
- *         by the writer.
- */
-static bool
-np_rd_receive(state_t *s)
-{
-
-    /* The writer should have bumped up the value of notify.
-     * Do the same with verify and confirm it */
-    s->np_verify++;
-
-    /* Receive the notify that the writer bumped up the value */
-    if (HDread(s->np_fd_w_to_r, &(s->np_notify), sizeof(int)) < 0) {
-        printf("HDread failed\n");
-        TEST_ERROR;
-    }
-
-    if (s->np_notify == -1) {
-        printf("writer failed to create group or carry out an attribute operation.\n");
-        TEST_ERROR;
-    }
-
-    if (s->np_notify != s->np_verify) {
-        printf("received message %d, expecting %d\n", s->np_notify, s->np_verify);
-        TEST_ERROR;
-    }
-
-    return true;
-
-error:
-    return false;
-}
-
-/* Named Pipe Subroutine: np_rd_send
- * Description:
- *   The reader sends an acknowledgement to the writer
- * Return:
- *   True  if succeed
- *   False if an error occurs in sending the message.
- */
-static bool
-np_rd_send(state_t *s)
-{
-
-    if (HDwrite(s->np_fd_r_to_w, &(s->np_notify), sizeof(int)) < 0) {
-        H5_FAILED();
-        AT();
-        printf("HDwrite failed\n");
-        return false;
-    }
-    else
-        return true;
-}
-
-/* Named Pipe Subroutine: np_send_error
- * Description:
- *   An error (notification number is 1) message is sent
- *   either from the reader or the writer.
- *   A boolean input parameter is used to choose
- *   either reader or writer.
- * Return:
- *     None
- */
-static void
-np_send_error(state_t *s, bool writer)
-{
-    s->np_notify = -1;
-    if (writer)
-        HDwrite(s->np_fd_w_to_r, &(s->np_notify), sizeof(int));
-    else
-        HDwrite(s->np_fd_r_to_w, &(s->np_notify), sizeof(int));
 }
 
 /*-------------------------------------------------------------------------
@@ -597,20 +445,6 @@ add_attr(state_t *s, hid_t oid, unsigned int which, unsigned num_attrs, const ch
             }
         }
 
-        /* Writer sends a message to reader: an attribute is successfully generated.
-           then wait for the reader to verify and send an acknowledgement message back.*/
-        if (s->use_named_pipes && s->attr_test == true) {
-            dbgf(2, "writer: write attr - ready to send/receive message: %d\n", s->np_notify + 1);
-            if (np_wr_send_receive(s) == false) {
-                H5_FAILED();
-                AT();
-                dbgf(2, "writer: write attr - verification failed.\n");
-                /* Note: This is (mostly) because the verification failure message
-                 *       from the reader. So don't send the error message back to
-                 *       the reader. Just stop the test. */
-                goto error2;
-            }
-        }
 
     } /* end for */
 
@@ -621,11 +455,6 @@ add_attr(state_t *s, hid_t oid, unsigned int which, unsigned num_attrs, const ch
     return true;
 
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
-
-error2:
     H5E_BEGIN_TRY
     {
         H5Aclose(aid);
@@ -668,11 +497,12 @@ static bool
 add_default_group_attr(state_t *s, hid_t g, unsigned int which)
 {
 
-    const char *aname_format = "attr-%u";
+    const char *aname_format = "attr-%u-%u";
 
-    /* Note: Since we only add one attribute, the parameter for
-     *        the number of attributes is 1. */
-    return add_attr(s, g, which, 1, aname_format, which);
+    /* Note: the number of attributes can be configurable,
+     * the default number of attribute is 1.
+     */
+    return add_attr(s, g, which, s->num_attrs, aname_format, which);
 }
 
 /*-------------------------------------------------------------------------
@@ -757,24 +587,9 @@ add_vlstr_attr(state_t *s, hid_t g, unsigned int which)
 
     HDfree(astr_val);
 
-    /* Writer sends a message to reader: a VL string attribute is successfully generated.
-       then wait for the reader to verify and send an acknowledgement message back. */
-    if (s->use_named_pipes && s->attr_test == true) {
-        dbgf(2, "writer: write attr - ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            dbgf(2, "writer: write attr - verification failed.\n");
-            goto error2;
-        }
-    }
-
     return true;
 
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
     H5E_BEGIN_TRY
     {
         H5Aclose(aid);
@@ -785,7 +600,6 @@ error:
     if (astr_val)
         HDfree(astr_val);
 
-error2:
     return false;
 }
 
@@ -863,25 +677,9 @@ del_one_attr(state_t *s, hid_t obj_id, bool is_dense, bool is_vl_or_ohrc, unsign
             TEST_ERROR;
         }
     }
-    /* Writer sends a message to reader: an attribute is successfully generated.
-       then wait for the reader to verify and send an acknowledgement message back. */
-    if (s->use_named_pipes && s->attr_test == true) {
-        dbgf(2, "writer: delete attr - ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            dbgf(2, "writer: delete attr - verification failed.\n");
-            goto error2;
-        }
-    }
-
     return true;
 
 error:
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
-
-error2:
     return false;
 }
 
@@ -988,26 +786,8 @@ modify_attr(state_t *s, hid_t g, const char *aname_fmt, unsigned int which)
         TEST_ERROR;
     }
 
-    /* Writer sends a message to reader: an attribute is successfully modified.
-           then wait for the reader to verify and send an acknowledgement message back.*/
-    if (s->use_named_pipes && s->attr_test == true) {
-        dbgf(2, "writer: modify attr - ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            dbgf(2, "writer: write attr - verification failed.\n");
-            /* Note: This is (mostly) because the verification failure message
-             *       from the reader. So don't send the error message back to
-             *       the reader. Just stop the test. */
-            goto error2;
-        }
-    }
-
     return true;
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
     H5E_BEGIN_TRY
     {
         H5Aclose(aid);
@@ -1015,7 +795,6 @@ error:
     }
     H5E_END_TRY;
 
-error2:
     return false;
 }
 
@@ -1099,18 +878,6 @@ modify_vlstr_attr(state_t *s, hid_t g, unsigned int which)
 
     HDfree(astr_val);
 
-    /* Writer sends a message to reader: a VL string attribute is successfully generated.
-       then wait for the reader to verify and send an acknowledgement message back. */
-    if (s->use_named_pipes && s->attr_test == true) {
-        dbgf(2, "writer: modify vl attr - ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            dbgf(2, "writer: write attr - verification failed.\n");
-            goto error2;
-        }
-    }
-
     return true;
 
 error:
@@ -1124,10 +891,6 @@ error:
     if (astr_val)
         HDfree(astr_val);
 
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
-
-error2:
     return false;
 }
 
@@ -1228,8 +991,6 @@ add_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
     return add_attr(s, g, which, max_compact, aname_format, which);
 
 error:
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
     return false;
 }
 
@@ -1288,8 +1049,6 @@ add_attrs_compact_dense(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
     return ret_value;
 
 error:
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
     return false;
 }
 
@@ -1353,20 +1112,6 @@ del_attrs_compact_dense_compact(state_t *s, hid_t obj_id, hid_t gcpl, unsigned i
             printf("H5Adelete failed\n");
             TEST_ERROR;
         }
-
-        /* For each attribute deletion, we want to ensure the verification
-         * from the reader.
-         * So writer sends a message to reader: an attribute is successfully deleted.
-           then wait for reader to verify and send an acknowledgement message back. */
-        if (s->use_named_pipes && s->attr_test == true) {
-            dbgf(2, "writer: delete attr - ready to send the message: %d\n", s->np_notify + 1);
-            if (np_wr_send_receive(s) == false) {
-                H5_FAILED();
-                AT();
-                dbgf(2, "writer: delete attr - verification failed.\n");
-                goto error2;
-            }
-        }
     }
 
     /* The writer deletes another attribute, the storage is
@@ -1382,34 +1127,10 @@ del_attrs_compact_dense_compact(state_t *s, hid_t obj_id, hid_t gcpl, unsigned i
         printf("H5Adelete failed\n");
         TEST_ERROR;
     }
-    /* Again we need to notify the reader via Named pipe. */
-    if (s->use_named_pipes && s->attr_test == true) {
-        dbgf(2, "writer: delete attr - ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            dbgf(2, "writer: delete attr - verification failed.\n");
-            goto error2;
-        }
-    }
-
-    /* The following comments are left here in case in the future we want to
-     * use HDF5 function to verify the attribute storage */
-#if 0   
-    // May H5Oget_info3 -- obtain the number of attributes. 
-    //Check the number of attributes >=min_dense. 
-    //We may use the internal function  
-    //is_dense = H5O__is_attr_dense_test(dataset) to check if it is dense in the future. 
-    //
-#endif
 
     return true;
 
 error:
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
-
-error2:
     return false;
 }
 
@@ -1510,8 +1231,6 @@ add_del_attrs_compact_dense(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
     return ret_value;
 
 error:
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, true);
     return false;
 }
 
@@ -1753,7 +1472,6 @@ write_group(state_t *s, unsigned int which)
 
     esnprintf(name, sizeof(name), "/group-%u", which);
 
-#if 0
     if (s->old_style_grp)
         gcpl = H5P_DEFAULT;
     else {
@@ -1771,7 +1489,6 @@ write_group(state_t *s, unsigned int which)
             }
         }
     }
-#endif
 
     if (s->gperf) {
 
@@ -1782,7 +1499,8 @@ write_group(state_t *s, unsigned int which)
             TEST_ERROR;
         }
     }
-    if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+
+    if ((g = H5Gcreate2(s->file, name, H5P_DEFAULT, gcpl, H5P_DEFAULT)) < 0) {
         printf("H5Gcreate2 failed\n");
         TEST_ERROR;
     }
@@ -1804,7 +1522,6 @@ write_group(state_t *s, unsigned int which)
         s->total_time += temp_time;
     }
 
-#if 0
     /* We need to create a dummy dataset for the object header continuation block test. */
     if (s->at_pattern == 'a' || s->at_pattern == 'R') {
         if ((dummy_d = H5Dcreate2(g, "Dataset", H5T_NATIVE_INT, s->one_by_one_sid, H5P_DEFAULT, H5P_DEFAULT,
@@ -1843,23 +1560,6 @@ write_group(state_t *s, unsigned int which)
         }
     }
 
-    /* If an attribute test is turned on and named pipes are used,
-     * the writer should send and receive messages after the group creation.
-     * This will distinguish an attribute operation error from an
-     * group creation error.
-     * Writer sends a message to reader: an attribute is successfully generated.
-     * then wait for the reader to verify and send an acknowledgement message back.*/
-    if (s->use_named_pipes && s->attr_test == true) {
-        dbgf(2, "writer: ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            /* Note: This is (mostly) because the verification failure message
-             *       from the reader. So don't send the error message back to
-             *       the reader. Just stop the test. */
-            goto error2;
-        }
-    }
 
     /* Then carry out the attribute operation. */
     if (s->asteps != 0 && which % s->asteps == 0)
@@ -1871,9 +1571,14 @@ write_group(state_t *s, unsigned int which)
             TEST_ERROR;
         }
     }
-#endif
+
     if (H5Gclose(g) < 0) {
         printf("H5Gclose failed\n");
+        TEST_ERROR;
+    }
+
+    if (!s->old_style_grp && H5Pclose(gcpl) < 0) {
+        printf("H5Pclose failed\n");
         TEST_ERROR;
     }
 
@@ -1884,11 +1589,16 @@ error:
     H5E_BEGIN_TRY
     {
         H5Gclose(g);
+        if (s->at_pattern == 'a' || s->at_pattern == 'R')
+            H5Dclose(dummy_d);
+        if (!s->old_style_grp)
+            H5Pclose(gcpl);
     }
     H5E_END_TRY;
 
     return false;
 }
+
 /*-------------------------------------------------------------------------
  * Function:    check_attr_storage_type
  *
@@ -1987,22 +1697,6 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which, const char *aname, unsigned i
     hid_t        aid    = H5I_INVALID_HID;
     hid_t        amtype = H5I_INVALID_HID;
 
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if receiving an error
-     * message.
-     */
-    if (s->use_named_pipes && true == s->attr_test) {
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            /* Since receiving the error message from the writer,
-             * just stop the test. */
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "Reader: finish reading the message: %d\n", s->np_notify);
-    }
-
     /* Go ahead to read the attribute. */
     dbgf(1, "verifying attribute %s on group %u equals %u\n", aname, g_which, which);
 
@@ -2038,7 +1732,6 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which, const char *aname, unsigned i
             printf("The attribute storage type is wrong. \n");
             TEST_ERROR;
         }
-        dbgf(2, "reader: finish checking the storage type: %d\n", s->np_notify);
     }
 
     /* If coming to an "object header continuation block" test,
@@ -2052,14 +1745,6 @@ vrfy_attr(state_t *s, hid_t g, unsigned int which, const char *aname, unsigned i
         }
     }
 
-    /* If the read value is expected, send back an OK message to the writer. */
-    if (s->use_named_pipes && s->attr_test == true) {
-        if (np_rd_send(s) == false) {
-            printf("named pipe reader send message error\n");
-            TEST_ERROR;
-        }
-        dbgf(2, "reader: finish sending back the message: %d\n", s->np_notify);
-    }
     return true;
 
 error:
@@ -2069,11 +1754,6 @@ error:
         H5Aclose(aid);
     }
     H5E_END_TRY;
-
-    /* Send back an error message to the writer so that the writer can stop. */
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, false);
-error2:
     return false;
 }
 
@@ -2155,20 +1835,6 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which)
     /* Then the modified value */
     if (ret == true) {
 
-        /* The reader receives a message from the writer.Then sleep
-         * for a few ticks or stop the test if receiving an error
-         * message.
-         */
-        if (s->use_named_pipes && true == s->attr_test) {
-            if (false == np_rd_receive(s)) {
-                H5_FAILED();
-                AT();
-                goto error2;
-            }
-            decisleep(s->tick_len * s->update_interval);
-            dbgf(1, "Reader: finish reading the message: %d\n", s->np_notify);
-        }
-
         /* Go ahead to read the attribute. */
         esnprintf(attrname, sizeof(attrname), aname_fmt, which);
         if ((amtype = H5Tget_native_type(s->filetype, H5T_DIR_ASCEND)) < 0) {
@@ -2204,12 +1870,6 @@ verify_modify_attr(state_t *s, hid_t g, unsigned int which)
             TEST_ERROR;
         }
 
-        /* The reader sends an OK message back to the writer. */
-        if (s->use_named_pipes && s->attr_test == true) {
-            if (np_rd_send(s) == false)
-                goto error2;
-            dbgf(2, "reader: modify_attr finish sending back the message: %d\n", s->np_notify);
-        }
         return true;
     }
     return false;
@@ -2221,12 +1881,6 @@ error:
         H5Tclose(amtype);
     }
     H5E_END_TRY;
-
-    /* The reader needs to send an error message back to the writer to stop the test.*/
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, false);
-
-error2:
 
     return false;
 }
@@ -2269,20 +1923,6 @@ verify_group_vlstr_attr(state_t *s, hid_t g, unsigned int which, bool vrfy_mod)
 
     char *astr_val_exp;
     char *astr_val;
-
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if the received message
-     * is an error message.
-     */
-    if (s->use_named_pipes && true == s->attr_test) {
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "Reader: finish reading the message: %d\n", s->np_notify);
-    }
 
     /* Go ahead to read the VL string attribute. */
     astr_val_exp = HDmalloc(VS_ATTR_NAME_LEN);
@@ -2346,13 +1986,6 @@ verify_group_vlstr_attr(state_t *s, hid_t g, unsigned int which, bool vrfy_mod)
     H5free_memory(astr_val);
     HDfree(astr_val_exp);
 
-    /* Reader sends an OK message back to the reader */
-    if (s->use_named_pipes && s->attr_test == true) {
-        if (np_rd_send(s) == false)
-            goto error2;
-        dbgf(2, "reader: finish sending back the message: %d\n", s->np_notify);
-    }
-
     return true;
 
 error:
@@ -2366,12 +1999,6 @@ error:
         H5free_memory(astr_val);
     if (astr_val_exp)
         HDfree(astr_val_exp);
-
-    /* The reader sends an error message to the writer to stop the test.*/
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, false);
-
-error2:
 
     return false;
 }
@@ -2415,20 +2042,6 @@ verify_del_one_attr(state_t *s, hid_t g, const char *aname, bool check_storage, 
 
     htri_t attr_exists = FALSE;
 
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if the received message
-     * is an error message.
-     */
-    if (s->use_named_pipes && true == s->attr_test) {
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "Reader: finish reading the message: %d\n", s->np_notify);
-    }
-
     /* Check if the deleted attribute still exists. */
     attr_exists = H5Aexists_by_name(g, ".", aname, H5P_DEFAULT);
     if (attr_exists == FALSE) {
@@ -2450,7 +2063,6 @@ verify_del_one_attr(state_t *s, hid_t g, const char *aname, bool check_storage, 
             printf("The attribute storage type is wrong. \n");
             TEST_ERROR;
         }
-        dbgf(2, "reader: finish checking the storage type: %d\n", s->np_notify);
     }
 
     /* If coming to an "object header continuation block" test,
@@ -2464,20 +2076,8 @@ verify_del_one_attr(state_t *s, hid_t g, const char *aname, bool check_storage, 
         }
     }
 
-    /* Reader sends an OK message back to the reader */
-    if (s->use_named_pipes && s->attr_test == true) {
-        if (np_rd_send(s) == false)
-            TEST_ERROR;
-        dbgf(2, "reader: finish sending back the message: %d\n", s->np_notify);
-    }
-
     return true;
 error:
-    /* The reader sends an error message to the writer to stop the test.*/
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, false);
-
-error2:
     return false;
 }
 
@@ -3005,11 +2605,6 @@ verify_group_attribute(state_t *s, hid_t g, unsigned int which)
     return ret;
 
 error:
-    /* Still to finish the handshaking */
-    if (s->use_named_pipes && s->attr_test == true) {
-        np_rd_receive(s);
-        np_send_error(s, false);
-    }
     return false;
 }
 
@@ -3042,21 +2637,6 @@ verify_group(state_t *s, unsigned int which)
     hid_t      g      = H5I_INVALID_HID;
     bool       result = true;
     H5G_info_t group_info;
-
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if the received message
-     * is an error message.
-     */
-    if (s->use_named_pipes && true == s->attr_test) {
-
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "reader: finish reading the message: %d\n", s->np_notify);
-    }
 
     if (which >= s->nsteps) {
         printf("Number of created groups is out of bounds\n");
@@ -3102,14 +2682,6 @@ verify_group(state_t *s, unsigned int which)
         }
     }
 
-    /* Reader sends an OK message back to the writer */
-    if (s->use_named_pipes && s->attr_test == true) {
-
-        if (np_rd_send(s) == false)
-            TEST_ERROR;
-        dbgf(1, "Reader: finish sending back the message: %d\n", s->np_notify);
-    }
-
     /* Check if we need to skip the attribute test for this group. */
     if (s->asteps != 0 && which % s->asteps == 0)
         result = verify_group_attribute(s, g, which);
@@ -3130,12 +2702,6 @@ error:
         H5Gclose(g);
     }
     H5E_END_TRY;
-
-    /* The reader sends an error message to the writer to stop the test.*/
-    if (s->use_named_pipes && s->attr_test == true)
-        np_send_error(s, false);
-
-error2:
 
     return false;
 }
@@ -3220,30 +2786,9 @@ create_group_id(state_t *s, unsigned int which, bool dense_to_compact)
         TEST_ERROR;
     }
 
-    /* If a grp_op_test is turned on and named pipes are used,
-     * the writer should send and receive messages after the group creation.
-     * Writer sends a message to reader: a group is successfully created.
-     * then wait for the reader to verify and send an acknowledgement message back.*/
-    if (s->use_named_pipes && s->grp_op_test == true) {
-        dbgf(2, "Writer: ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            /* Note: This is (mostly) because the verification failure message
-             *       from the reader. So don't send the error message back to
-             *       the reader. Just stop the test. */
-            goto error2;
-        }
-    }
-
     return g;
 
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, true);
-
-error2:
 
     H5E_BEGIN_TRY
     {
@@ -3282,28 +2827,9 @@ close_group_id(state_t *s, hid_t g)
         TEST_ERROR;
     }
 
-    /* If a grp_op_test is turned on and named pipes are used, for
-     * link storage test,
-     * Writer sends a message to reader: the group is successfully closed.
-     * then wait for the reader to verify and send an acknowledgement message back.*/
-    if (s->use_named_pipes && s->grp_op_test == true) {
-        dbgf(2, "Writer: ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-    }
-
     return true;
 
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, true);
-
-error2:
-
     return false;
 }
 
@@ -3371,25 +2897,9 @@ create_group(state_t *s, unsigned int which)
         TEST_ERROR;
     }
 
-    /* Writer sends a message to reader,
-     * then wait for the reader to verify and send an acknowledgement message back.*/
-    if (s->use_named_pipes && s->grp_op_test == true) {
-        dbgf(2, "Writer: ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-    }
-
     return true;
 
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, true);
-
-error2:
 
     H5E_BEGIN_TRY
     {
@@ -3476,26 +2986,9 @@ delete_one_link(state_t *s, hid_t obj_id, const char *name, short link_storage, 
         }
     }
 
-    /* Writer sends a message to reader:
-     * then wait for the reader to verify and send an acknowledgement message back.*/
-    if (s->use_named_pipes && s->grp_op_test == true) {
-        dbgf(2, "writer: ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-    }
-
     return true;
 
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, true);
-
-error2:
-
     return false;
 }
 
@@ -3578,26 +3071,9 @@ move_one_group(state_t *s, hid_t obj_id, const char *name, const char *newname, 
         TEST_ERROR;
     }
 
-    /* Writer sends a message to reader:
-     * then wait for the reader to verify and send an acknowledgement message back.*/
-    if (s->use_named_pipes && s->grp_op_test == true) {
-        dbgf(2, "writer: ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-    }
-
     return true;
 
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, true);
-
-error2:
-
     return false;
 }
 
@@ -3745,26 +3221,9 @@ insert_one_link(state_t *s, hid_t obj_id, const char *name, const char *newname,
         }
     }
 
-    /* Writer sends a message to reader,
-     * then wait for the reader to verify and send an acknowledgement message back.*/
-    if (s->use_named_pipes && s->grp_op_test == true) {
-        dbgf(2, "writer: ready to send the message: %d\n", s->np_notify + 1);
-        if (np_wr_send_receive(s) == false) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-    }
-
     return true;
 
 error:
-    /* Writer needs to send an error message to the reader to stop the test*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, true);
-
-error2:
-
     return false;
 }
 
@@ -4088,23 +3547,6 @@ vrfy_create_group(state_t *s, unsigned int which)
     hid_t      g = H5I_INVALID_HID;
     H5G_info_t group_info;
 
-    dbgf(2, "reader: ready to send the message: \n");
-
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if the received message
-     * is an error message.
-     */
-    if (s->use_named_pipes && true == s->grp_op_test) {
-
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "reader: finish reading the message: %d\n", s->np_notify);
-    }
-
     if (which >= s->nsteps) {
         printf("Number of created groups is out of bounds\n");
         TEST_ERROR;
@@ -4143,13 +3585,6 @@ vrfy_create_group(state_t *s, unsigned int which)
         TEST_ERROR;
     }
 
-    /* Reader sends an OK message back to the writer */
-    if (s->use_named_pipes && s->grp_op_test == true) {
-
-        if (np_rd_send(s) == false)
-            TEST_ERROR;
-        dbgf(1, "Reader: finish sending back the message: %d\n", s->np_notify);
-    }
 
     return true;
 
@@ -4160,12 +3595,6 @@ error:
         H5Gclose(g);
     }
     H5E_END_TRY;
-
-    /* The reader sends an error message to the writer to stop the test.*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, false);
-
-error2:
 
     return false;
 }
@@ -4205,22 +3634,6 @@ vrfy_create_group_id(state_t *s, unsigned int which, bool dense_to_compact)
     H5G_info_t group_info;
     unsigned   max_compact = 0;
     unsigned   min_dense   = 0;
-
-    dbgf(2, "reader: ready to receive a message: \n");
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if the received message
-     * is an error message.
-     */
-    if (s->use_named_pipes && true == s->grp_op_test) {
-
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "reader: finish reading the message: %d\n", s->np_notify);
-    }
 
     if (which >= s->nsteps) {
         printf("Number of the created groups is out of bounds\n");
@@ -4291,14 +3704,6 @@ vrfy_create_group_id(state_t *s, unsigned int which, bool dense_to_compact)
 
     dbgf(2, "Storage info is %d\n", group_info.storage_type);
 
-    /* Reader sends an OK message back to the reader */
-    if (s->use_named_pipes && s->grp_op_test == true) {
-
-        if (np_rd_send(s) == false)
-            TEST_ERROR;
-        dbgf(1, "Reader: finish sending back the message: %d\n", s->np_notify);
-    }
-
     return g;
 
 error:
@@ -4309,12 +3714,6 @@ error:
         H5Pclose(gcpl);
     }
     H5E_END_TRY;
-
-    /* The reader sends an error message to the writer to stop the test.*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, false);
-
-error2:
 
     return -1;
 }
@@ -4342,43 +3741,16 @@ static bool
 vrfy_close_group_id(state_t *s, hid_t g)
 {
 
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if the received message
-     * is an error message.
-     */
-    if (s->use_named_pipes && true == s->grp_op_test) {
-
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "reader: finish reading the message: %d\n", s->np_notify);
-    }
-
     if (H5Gclose(g) < 0) {
         printf("H5Gclose failed\n");
         TEST_ERROR;
     }
 
-    /* Reader sends an OK message back to the reader */
-    if (s->use_named_pipes && s->grp_op_test == true) {
-
-        if (np_rd_send(s) == false)
-            TEST_ERROR;
-        dbgf(1, "Reader: finish sending back the message: %d\n", s->np_notify);
-    }
 
     return true;
 
 error:
 
-    /* The reader sends an error message to the writer to stop the test.*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, false);
-
-error2:
     return false;
 }
 
@@ -4418,21 +3790,6 @@ vrfy_one_link_exist(state_t *s, hid_t obj_id, const char *name, bool expect_exis
     int        link_exists = 0;
     H5G_info_t group_info;
 
-    dbgf(2, "reader: ready to send the message: \n");
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if the received message
-     * is an error message.
-     */
-    if (s->use_named_pipes && true == s->grp_op_test) {
-
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "reader: finish reading the message: %d\n", s->np_notify);
-    }
 
     link_exists = H5Lexists(obj_id, name, H5P_DEFAULT);
 
@@ -4479,23 +3836,9 @@ vrfy_one_link_exist(state_t *s, hid_t obj_id, const char *name, bool expect_exis
         }
     }
 
-    /* Reader sends an OK message back to the reader */
-    if (s->use_named_pipes && s->grp_op_test == true) {
-        if (np_rd_send(s) == false) {
-            TEST_ERROR;
-        }
-        dbgf(1, "Reader: finish sending back the message: %d\n", s->np_notify);
-    }
-
     return true;
 
 error:
-
-    /* The reader sends an error message to the writer to stop the test.*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, false);
-
-error2:
 
     return false;
 }
@@ -4572,22 +3915,6 @@ vrfy_move_one_group(state_t *s, hid_t obj_id, const char *name, const char *newn
     H5G_info_t group_info;
     int        link_exists = 0;
 
-    dbgf(2, "reader: ready to send the message: \n");
-    /* The reader receives a message from the writer.Then sleep
-     * for a few ticks or stop the test if the received message
-     * is an error message.
-     */
-    if (s->use_named_pipes && true == s->grp_op_test) {
-
-        if (false == np_rd_receive(s)) {
-            H5_FAILED();
-            AT();
-            goto error2;
-        }
-        decisleep(s->tick_len * s->update_interval);
-        dbgf(1, "reader: finish reading the message: %d\n", s->np_notify);
-    }
-
     if (which >= s->nsteps) {
         printf("Number of created groups is out of bounds\n");
         TEST_ERROR;
@@ -4634,15 +3961,6 @@ vrfy_move_one_group(state_t *s, hid_t obj_id, const char *name, const char *newn
         TEST_ERROR;
     }
 
-    /* Reader sends an OK message back to the reader */
-    if (s->use_named_pipes && s->grp_op_test == true) {
-
-        if (np_rd_send(s) == false) {
-            TEST_ERROR;
-        }
-        dbgf(1, "Reader: finish sending back the message: %d\n", s->np_notify);
-    }
-
     return true;
 
 error:
@@ -4652,12 +3970,6 @@ error:
         H5Gclose(g);
     }
     H5E_END_TRY;
-
-    /* The reader sends an error message to the writer to stop the test.*/
-    if (s->use_named_pipes && s->grp_op_test == true)
-        np_send_error(s, false);
-
-error2:
 
     return false;
 }
@@ -4986,6 +4298,7 @@ verify_group_operations(state_t *s, unsigned int which)
     return ret_value;
 }
 
+
 int
 main(int argc, char **argv)
 {
@@ -4995,10 +4308,6 @@ main(int argc, char **argv)
     state_t               s;
     const char *          personality;
     H5F_vfd_swmr_config_t config;
-    const char *          fifo_writer_to_reader = "./fifo_group_writer_to_reader";
-    const char *          fifo_reader_to_writer = "./fifo_group_reader_to_writer";
-    int                   fd_writer_to_reader = -1, fd_reader_to_writer = -1;
-    int                   notify = 0, verify = 0;
     bool                  wg_ret = false;
     bool                  vg_ret = false;
     struct timespec start_time, end_time;
@@ -5079,126 +4388,54 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    /* Use two named pipes(FIFO) to coordinate the writer and reader for
-     * two-way communication so that the two sides can move forward together.
-     * One is for the writer to write to the reader.
-     * The other one is for the reader to signal the writer.  */
-    if (s.use_named_pipes && writer) {
-        /* Writer creates two named pipes(FIFO) */
-        if (HDmkfifo(fifo_writer_to_reader, 0600) < 0) {
-            printf("HDmkfifo failed\n");
-            TEST_ERROR;
-        }
-
-        if (HDmkfifo(fifo_reader_to_writer, 0600) < 0) {
-            printf("HDmkfifo failed\n");
-            TEST_ERROR;
-        }
-    }
-
-    /* Both the writer and reader open the pipes */
-    if (s.use_named_pipes && (fd_writer_to_reader = HDopen(fifo_writer_to_reader, O_RDWR)) < 0) {
-        printf("HDopen failed\n");
-        TEST_ERROR;
-    }
-
-    if (s.use_named_pipes && (fd_reader_to_writer = HDopen(fifo_reader_to_writer, O_RDWR)) < 0) {
-        printf("HDopen failed\n");
-        TEST_ERROR;
-    }
-
-    /* Pass the named pipe information to the struct of state_t s, for attribute tests.*/
-    if (s.use_named_pipes) {
-        s.np_fd_w_to_r = fd_writer_to_reader;
-        s.np_fd_r_to_w = fd_reader_to_writer;
-        s.np_notify    = notify;
-        s.np_verify    = verify;
-        s.tick_len     = config.tick_len;
-        s.max_lag      = config.max_lag;
-    }
-
-    /* For attribute test, force the named pipe to communicate in every step.
-     * This will avoid the fake verification error from the reader when using the named pipe.
-     * If the named pipe is not forced to communicate in every step, the reader may go ahead
-     * to verify the group and the attribute operations before the writer has a chance to
-     * carry out the corresponding operations. */
-    if (s.attr_test && s.use_named_pipes)
-        s.csteps = 1;
-
-    /* For group operation test, force the named pipe to communicate in every step. */
-    if (s.grp_op_test && s.use_named_pipes)
-        s.csteps = 1;
 
     if (writer) {
+    if (s.gperf) {
+
+        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
+
+            fprintf(stderr, "HDclock_gettime failed");
+
+            TEST_ERROR;
+        }
+    }
+
         for (step = 0; step < s.nsteps; step++) {
             dbgf(2, "writer: step %d\n", step);
 
             wg_ret = group_operations(&s, step);
 
             if (wg_ret == false) {
-
-                /* At communication interval, notifies the reader about the failure and quit */
-                if (s.use_named_pipes && s.attr_test != true && s.grp_op_test != true && step % s.csteps == 0)
-                    np_send_error(&s, true);
                 printf("write_group failed at step %d\n", step);
                 TEST_ERROR;
             }
-            else {
-
-                /* At communication interval, notifies the reader and waits for its response */
-                if (s.use_named_pipes && s.attr_test != true && s.grp_op_test != true &&
-                    step % s.csteps == 0) {
-
-                    if (np_wr_send_receive(&s) == false) {
-                        printf("writer: write group - verification failed.\n");
-                        TEST_ERROR;
-                    }
-                }
-            }
         }
+    if (s.gperf) {
+
+        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
+
+            fprintf(stderr, "HDclock_gettime failed");
+
+            TEST_ERROR;
+        }
+
+        s.total_time = TIME_PASSED(start_time, end_time);
         s.mean_time = s.total_time / s.nsteps;
-        fprintf(stdout, "group creation min. time = %lf\n", s.min_time);
-        fprintf(stdout, "group creation max. time = %lf\n", s.max_time);
-        fprintf(stdout, "group creation mean time = %lf\n", s.mean_time);
-        fprintf(stdout, "group creation total time = %lf\n", s.total_time);
+        fprintf(stdout, "group creation +5 attrs total time = %lf\n", s.total_time);
+        fprintf(stdout, "group creation +5 attrs mean time = %lf\n", s.mean_time);
+    }
+
     }
     else {
         for (step = 0; step < s.nsteps; step++) {
             dbgf(1, "reader: step %d\n", step);
-
-            /* At communication interval, waits for the writer to finish creation before starting verification
-             */
-            if (s.use_named_pipes && s.attr_test != true && s.grp_op_test != true && step % s.csteps == 0) {
-                if (false == np_rd_receive(&s)) {
-                    TEST_ERROR;
-                }
-            }
-
-            /* For the default test, wait for a few ticks for the update to happen */
-            if (s.use_named_pipes && s.attr_test == false)
-                decisleep(config.tick_len * s.update_interval);
 
             vg_ret = verify_group_operations(&s, step);
 
             if (vg_ret == false) {
 
                 printf("verify_group_operations failed\n");
-
-                /* At communication interval, tell the writer about the failure and exit */
-                if (s.use_named_pipes && s.attr_test != true && s.grp_op_test != true && step % s.csteps == 0)
-                    np_send_error(&s, false);
                 TEST_ERROR;
-            }
-            else {
-
-                /* Send back the same nofity value for acknowledgement to tell the writer
-                 * move to the next step. */
-                if (s.use_named_pipes && s.attr_test != true && s.grp_op_test != true &&
-                    step % s.csteps == 0) {
-                    if (np_rd_send(&s) == false) {
-                        TEST_ERROR;
-                    }
-                }
             }
         }
     }
@@ -5249,31 +4486,6 @@ main(int argc, char **argv)
        fprintf(stdout, "H5Fclose time = %lf\n", s.fc_total_time);
     }
 
-
-    /* Both the writer and reader close the named pipes */
-    if (s.use_named_pipes && HDclose(fd_writer_to_reader) < 0) {
-        printf("HDclose failed\n");
-        TEST_ERROR;
-    }
-
-    if (s.use_named_pipes && HDclose(fd_reader_to_writer) < 0) {
-        printf("HDclose failed\n");
-        TEST_ERROR;
-    }
-
-    /* Reader finishes last and deletes the named pipes */
-    if (s.use_named_pipes && !writer) {
-        if (HDremove(fifo_writer_to_reader) != 0) {
-            printf("HDremove failed\n");
-            TEST_ERROR;
-        }
-
-        if (HDremove(fifo_reader_to_writer) != 0) {
-            printf("HDremove failed\n");
-            TEST_ERROR;
-        }
-    }
-
     return EXIT_SUCCESS;
 
 error:
@@ -5285,17 +4497,6 @@ error:
         H5Fclose(s.file);
     }
     H5E_END_TRY;
-
-    if (s.use_named_pipes && fd_writer_to_reader >= 0)
-        HDclose(fd_writer_to_reader);
-
-    if (s.use_named_pipes && fd_reader_to_writer >= 0)
-        HDclose(fd_reader_to_writer);
-
-    if (s.use_named_pipes && !writer) {
-        HDremove(fifo_writer_to_reader);
-        HDremove(fifo_reader_to_writer);
-    }
 
     return EXIT_FAILURE;
 }
