@@ -1,0 +1,83 @@
+/**
+ * \ingroup H5A
+ * \def H5Acreate
+ * \api_vers_2{H5Acreate,H5Acreate1,H5Acreate2}
+ */
+
+/**
+ * \ingroup H5A
+ * \def H5Aiterate
+ * \api_vers_2{H5Aiterate,H5Aiterate1,H5Aiterate2}
+ */
+
+/**
+ * \ingroup H5D
+ * \def H5Dcreate
+ * \api_vers_2{H5Dcreate,H5Dcreate1,H5Dcreate2}
+ */
+
+/**
+ * \ingroup H5E
+ * \def H5Eget_auto
+ * \api_vers_2{H5Eget_auto,H5Eget_auto1,H5Eget_auto2}
+ */
+
+/**
+ * \ingroup H5E
+ * \def H5Eprint
+ * \api_vers_2{H5Eprint,H5Eprint1,H5Eprint2}
+ */
+
+/**
+ * \ingroup H5E
+ * \def H5Epush
+ * \api_vers_2{H5Epush,H5Epush1,H5Epush2}
+ */
+
+/**
+ * \ingroup H5E
+ * \def H5Eset_auto
+ * \api_vers_2{H5Eset_auto,H5Eset_auto1,H5Eset_auto2}
+ */
+
+/**
+ * \ingroup H5E
+ * \def H5Ewalk
+ * \api_vers_2{H5Ewalk,H5Ewalk1,H5Ewalk2}
+ */
+
+/**
+ * \ingroup H5F
+ * \def H5Fget_info
+ * \api_vers_2{H5Fget_info,H5Fget_info1,H5Fget_info2}
+ */
+
+/**
+ * \ingroup H5G
+ * \def H5Gcreate
+ * \api_vers_2{H5Gcreate,H5Gcreate1,H5Gcreate2}
+ */
+
+/**
+ * \ingroup H5G
+ * \def H5Gopen
+ * \api_vers_2{H5Gopen,H5Gopen1,H5Gopen2}
+ */
+
+/**
+ * \ingroup H5S
+ * \def H5Sencode
+ * \api_vers_2{H5Sencode,H5Sencode1,H5Sencode2}
+ */
+
+/**
+ * \ingroup H5T
+ * \def H5Tcommit
+ * \api_vers_2{H5Tcommit,H5Tcommit1,H5Tcommit2}
+ */
+
+/**
+ * \ingroup H5T
+ * \def H5Topen
+ * \api_vers_2{H5Topen,H5Topen1,H5Topen2}
+ */
