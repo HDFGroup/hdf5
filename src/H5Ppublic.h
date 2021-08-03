@@ -2238,7 +2238,7 @@ H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flag
  */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
@@ -2246,6 +2246,8 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  * \param[in] level Compression level
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_deflate() sets the deflate compression method and the
  *          compression level, \p level, for a dataset or group creation
@@ -6293,6 +6295,8 @@ H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_shuffle() sets the shuffle filter, #H5Z_FILTER_SHUFFLE,
  *          in the dataset creation property list \p plist_id. The shuffle
  *          filter de-interlaces a block of data by reordering the bytes.
@@ -6363,6 +6367,8 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  * \dcpl_id{plist_id}
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_nbit() sets the N-Bit filter, #H5Z_FILTER_NBIT, in the
  *          dataset creation property list \p plist_id.
@@ -6456,6 +6462,8 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
  *                         non-negative
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_scaleoffset() sets the scale-offset filter,
  *          #H5Z_FILTER_SCALEOFFSET, for a dataset.
@@ -6565,6 +6573,8 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *            data block
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_szip() sets an SZIP compression filter, #H5Z_FILTER_SZIP,
  *          for a dataset. SZIP is a compression method designed for use with

@@ -944,6 +944,8 @@ H5_DLL herr_t H5Dread_async(const char *app_file, const char *app_func, unsigned
  *          time if the dataset's fill time is set to #H5D_FILL_TIME_IFSET
  *          or #H5D_FILL_TIME_ALLOC.
  *
+ * \par_compr_note
+ *
  * \attention If a dataset's storage layout is 'compact', care must be
  *          taken when writing data to the dataset in parallel. A compact
  *          dataset's raw data is cached in memory and may be flushed
