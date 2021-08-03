@@ -14,32 +14,9 @@
 
 # Make a release of hdf5.
 #
-# Programmer: Robb Matzke
-# Creation date: on or before 1998-01-29.
-#
-# Modifications
-#   Robb Matzke, 1999-07-16
-#   The SunOS 5.6 sed *must* have slashes as delimiters. I changed things like
-#   `sed s+/CVS++' to `sed 's/\/CVS//'
-#
-#   Albert Cheng, 1999-10-26
-#   Moved the MANIFEST checking to a separate command file so that
-#   it can be invoked individually.
-#
-#   Albert Cheng, 2004-08-14
-#   Added the --private option.
-#
-#   James Laird, 2005-09-07
-#   Added the md5 method.
-#
-#   Larry Knox, 2016-08-30
-#   Added the --revision option to create private releases with the 
-#   code revision hash in the version strings. Currently the version
-#   of this script with the --revision option is named bbrelease. It 
-#   can probably be merged into the original release script in the
-#   future.
-#   Commands to get the revision hash have now been converted to git
-#   to match the source repository change.
+#   Currently the version of this script with the --revision option is
+#   named bbrelease. It can probably be merged into the original release
+#   script in the future.
 
 # Function definitions
 #
@@ -47,14 +24,13 @@
 USAGE()
 {
 cat << EOF
-Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
+Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--private] <methods> ...
    -d DIR	The name of the directory where the releas(es) should be
                 placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
    -h           print the help page.
-   --nocheck	Ignore errors in MANIFEST file.
    --private	Make a private release with today's date in version information.
    --revision	Make a private release with the code revision number in version information.
          
@@ -182,7 +158,6 @@ VERS=`perl bin/h5vers`
 VERS_OLD=
 test "$VERS" || exit 1
 verbose=yes
-check=yes
 release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
@@ -213,9 +188,6 @@ while [ -n "$1" ]; do
 	    DEST=$1
 	    shift
 	    ;;
-	--nocheck)
-	    check=no
-	    ;;
 	-h)
 	    USAGE
 	    exit 0
@@ -244,6 +216,20 @@ done
 # Default method is tar
 if [ "X$methods" = "X" ]; then
     methods="tar"
+fi
+
+# Clean up files that aren't in git
+git clean -fdx
+
+# Run autogen to generate Autotools files
+./autogen.sh
+
+# Make the output directory
+if mkdir -p $DEST; then
+    echo "Created output directory $DEST"
+else
+    echo "Failed to mkdir $DEST"
+    exit 1
 fi
 
 # Create the temporay work directory.
@@ -299,20 +285,6 @@ if [ ! -d $DEST ]; then
     exit 1
 fi
 
-# Check the validity of the MANIFEST file.
-bin/chkmanifest || fail=yes
-if [ "X$fail" = "Xyes" ]; then
-    if [ $check = yes ]; then
-        exit 1
-    else
-	echo "Continuing anyway..."
-    fi
-fi
-
-# Create a manifest that contains only files for distribution.
-MANIFEST=$tmpdir/H5_MANIFEST
-grep '^\.' MANIFEST | grep -v _DO_NOT_DISTRIBUTE_ >$MANIFEST
-
 # Prepare the source tree for a release.
 #ln -s `pwd` $tmpdir/$HDF5_VERS || exit 1
 ln -s `pwd` $tmpdir/$HDF5_IN_VERS || exit 1
@@ -339,8 +311,7 @@ fi
 test "$verbose" && echo "   Running tar..." 1>&2
 ( \
     cd $tmpdir; \
-    tar cf $HDF5_VERS.tar $HDF5_IN_VERS/Makefile \
-	`sed 's/^\.\//'$HDF5_IN_VERS'\//' $MANIFEST` || exit 1 \
+    tar --exclude-vcs -cvvf $HDF5_VERS.tar $HDF5_VERS
 )
 
 # Compress
