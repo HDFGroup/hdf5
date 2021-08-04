@@ -22,7 +22,7 @@
 int d_status = EXIT_SUCCESS;
 
 /* command-line options: short and long-named parameters */
-static const char *        s_opts   = "hlpvV";
+static const char *           s_opts   = "hlpvV";
 static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},    {"latest", no_arg, 'l'},
                                           {"parents", no_arg, 'p'}, {"verbose", no_arg, 'v'},
                                           {"version", no_arg, 'V'}, {NULL, 0, '\0'}};
