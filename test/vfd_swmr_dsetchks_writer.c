@@ -265,10 +265,14 @@ state_init(state_t *s, int argc, char **argv)
     int           ch;
     char          tfile[PATH_MAX];
     char *        end;
+    char *        base;
+
+    if (H5_basename(tfile, base) < 0)
+        TEST_ERROR
 
     *s = ALL_HID_INITIALIZER;
     esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
+    esnprintf(s->progname, sizeof(s->progname), "%s", base);
 
     while ((ch = getopt(argc, argv, "siferom:n:x:y:g:p:t:l:bqSNu:c:")) != -1) {
         switch (ch) {
@@ -369,6 +373,8 @@ state_init(state_t *s, int argc, char **argv)
     }
     argc -= optind;
     argv += optind;
+
+    HDfree(base);
 
     /* Require to specify at least -s or -i or -f or -e or -r option */
     if (!s->single_index && !s->implicit_index && !s->fa_index && !s->ea_index && !s->bt2_index) {
