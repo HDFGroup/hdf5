@@ -29,7 +29,7 @@ static H5I_type_t H5PT_ptable_id_type = H5I_UNINIT;
 #define H5PT_HASH_TABLE_SIZE 64
 
 /* Packet Table private functions */
-static herr_t H5PT_free_id(void *id);
+static herr_t H5PT_free_id(void *id, void **_ctx);
 static herr_t H5PT_close(htbl_t *table);
 static herr_t H5PT_create_index(htbl_t *table_id);
 static herr_t H5PT_set_index(htbl_t *table_id, hsize_t pt_index);
@@ -402,7 +402,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5PT_free_id(void *id)
+H5PT_free_id(void *id, void H5_ATTR_UNUSED **_ctx)
 {
     HDfree(id);
     return SUCCEED;
