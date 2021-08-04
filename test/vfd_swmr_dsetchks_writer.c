@@ -267,7 +267,7 @@ state_init(state_t *s, int argc, char **argv)
     char *        end;
     char *        base;
 
-    if(H5_basename(tfile, base) < 0)
+    if (H5_basename(tfile, base) < 0)
         TEST_ERROR
 
     *s = ALL_HID_INITIALIZER;
