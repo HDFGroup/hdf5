@@ -1629,6 +1629,7 @@ H5_DLL herr_t H5Otoken_to_str(hid_t loc_id, const H5O_token_t *token, char **tok
  */
 H5_DLL herr_t H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_t *token);
 
+/// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
@@ -1652,6 +1653,7 @@ H5_DLL herr_t H5Otoken_from_str(hid_t loc_id, const char *token_str, H5O_token_t
 #define H5Orefresh_async_wrap          H5_NO_EXPAND(H5Orefresh_async)
 #define H5Ocopy_async_wrap             H5_NO_EXPAND(H5Ocopy_async)
 #endif
+/// \endcond
 
 /* The canonical 'undefined' token value */
 #define H5O_TOKEN_UNDEF (H5OPEN H5O_TOKEN_UNDEF_g)

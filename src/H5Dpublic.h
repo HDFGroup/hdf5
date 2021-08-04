@@ -1538,6 +1538,7 @@ H5_DLL herr_t H5Ddebug(hid_t dset_id);
 H5_DLL herr_t H5Dformat_convert(hid_t dset_id);
 H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 
+/// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
@@ -1561,6 +1562,7 @@ H5_DLL herr_t H5Dget_chunk_index_type(hid_t did, H5D_chunk_index_t *idx_type);
 #define H5Dset_extent_async_wrap H5_NO_EXPAND(H5Dset_extent_async)
 #define H5Dclose_async_wrap      H5_NO_EXPAND(H5Dclose_async)
 #endif /* H5D_MODULE */
+/// \endcond
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

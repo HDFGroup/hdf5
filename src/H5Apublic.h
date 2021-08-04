@@ -1100,6 +1100,7 @@ H5_DLL herr_t H5Awrite_async(const char *app_file, const char *app_func, unsigne
 H5_DLL herr_t H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *old_attr_name,
                                 const char *new_attr_name, hid_t lapl_id);
 
+/// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
@@ -1133,6 +1134,7 @@ H5_DLL herr_t H5Arename_by_name(hid_t loc_id, const char *obj_name, const char *
 #define H5Aexists_by_name_async_wrap H5_NO_EXPAND(H5Aexists_by_name_async)
 #define H5Aclose_async_wrap          H5_NO_EXPAND(H5Aclose_async)
 #endif /* H5A_MODULE */
+/// \endcond
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
