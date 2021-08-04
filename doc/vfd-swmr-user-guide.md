@@ -94,6 +94,13 @@ There are no special instructions for building VFD SWMR. Simply follow
 the usual build procedure for CMake or the Autotools using the guides
 in the `release_docs` directory.
 
+IMPORTANT:
+
+The VFD SWMR branches are maintenance branches and will default to a debug
+build. They also do not come with generated files, so Perl will be required
+when building with CMake and Perl and the Autotools (autoconf, etc.) will
+be required when building with the Autotools.
+
 Some notes:
 
 - The mirror VFD tests require some rework, so enabling that feature will cause the build step to fail. This will be fixed in a future beta release.
