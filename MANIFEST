@@ -1302,7 +1302,6 @@
 ./test/tsizeslheap.h5
 ./test/tskiplist.c
 ./test/tsohm.c
-./test/ttst.c
 ./test/ttsafe.c
 ./test/ttsafe.h
 ./test/ttsafe_acreate.c
