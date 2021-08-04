@@ -830,6 +830,15 @@ New Features
 
     Tools:
     ------
+    - Removed partial long exceptions
+
+        Some of the tools accepted shortened versions of the long options
+        (ex: --datas instead of --dataset). These were implemented inconsistently,
+        are difficult to maintian, and occasionally block useful long option
+        names. These partial long options have been removed from all the tools.
+
+        (DER - 2021/08/03)
+
     - h5repack added help text for user-defined filters.
 
         Added help text line that states the valid values of the filter flag
@@ -1465,6 +1474,10 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+    Setting a variable-length dataset fill value will leak the memory allocated
+    for the p field of the hvl_t struct. A fix is in progress for this.
+    HDFFV-10840
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
