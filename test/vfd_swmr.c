@@ -884,7 +884,7 @@ test_writer_md(void)
     hid_t          sid         = -1;                                   /* Dataspace ID */
     hid_t          did         = -1;                                   /* Dataset ID */
     int *          rwbuf       = NULL;                                 /* Data buffer for writing */
-    H5O_info_t     oinfo;                                              /* Object metadata information */
+    H5O_info2_t    oinfo;                                              /* Object metadata information */
     char           dname[100];                                         /* Name of dataset */
     hsize_t        dims[2]           = {50, 20};                       /* Dataset dimension sizes */
     hsize_t        max_dims[2]       = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
@@ -961,7 +961,7 @@ test_writer_md(void)
             FAIL_STACK_ERROR
 
         /* Get dataset object header address */
-        if (H5Oget_info(did, &oinfo, H5O_INFO_BASIC) < 0)
+        if (H5Oget_info3(did, &oinfo, H5O_INFO_BASIC) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -998,7 +998,7 @@ test_writer_md(void)
             FAIL_STACK_ERROR
 
         /* Get dataset object info */
-        if (H5Oget_info(did, &oinfo, H5O_INFO_BASIC) < 0)
+        if (H5Oget_info3(did, &oinfo, H5O_INFO_BASIC) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -1032,7 +1032,7 @@ test_writer_md(void)
             FAIL_STACK_ERROR
 
         /* Get dataset object info */
-        if (H5Oget_info(did, &oinfo, H5O_INFO_BASIC) < 0)
+        if (H5Oget_info3(did, &oinfo, H5O_INFO_BASIC) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
@@ -1166,16 +1166,16 @@ test_file_end_tick_concur(void)
 static unsigned
 test_reader_md_concur(void)
 {
-    unsigned   i     = 0;              /* Local index variables */
-    uint8_t *  buf   = NULL;           /* Data page from the page buffer */
-    hid_t      dcpl  = -1;             /* Dataset creation property list */
-    hid_t      sid   = -1;             /* Dataspace ID */
-    hid_t      did   = -1;             /* Dataset ID */
-    int *      rwbuf = NULL;           /* Data buffer for writing */
-    H5O_info_t oinfo;                  /* Object metadata information */
-    char       dname[100];             /* Name of dataset */
-    hsize_t    dims[2]     = {50, 20}; /* Dataset dimension sizes */
-    hsize_t    max_dims[2] =           /* Dataset maximum dimension sizes */
+    unsigned    i     = 0;              /* Local index variables */
+    uint8_t *   buf   = NULL;           /* Data page from the page buffer */
+    hid_t       dcpl  = -1;             /* Dataset creation property list */
+    hid_t       sid   = -1;             /* Dataspace ID */
+    hid_t       did   = -1;             /* Dataset ID */
+    int *       rwbuf = NULL;           /* Data buffer for writing */
+    H5O_info2_t oinfo;                  /* Object metadata information */
+    char        dname[100];             /* Name of dataset */
+    hsize_t     dims[2]     = {50, 20}; /* Dataset dimension sizes */
+    hsize_t     max_dims[2] =           /* Dataset maximum dimension sizes */
         {H5S_UNLIMITED, H5S_UNLIMITED};
     hsize_t                    chunk_dims[2] = {2, 5}; /* Dataset chunked dimension sizes */
     unsigned                   num_entries   = 0;      /* Number of entries in the index */
@@ -1519,7 +1519,7 @@ test_reader_md_concur(void)
             FAIL_STACK_ERROR
 
         /* Get dataset object header address */
-        if (H5Oget_info(did, &oinfo, H5O_INFO_BASIC) < 0)
+        if (H5Oget_info3(did, &oinfo, H5O_INFO_BASIC) < 0)
             FAIL_STACK_ERROR
 
         /* Close the dataset */
