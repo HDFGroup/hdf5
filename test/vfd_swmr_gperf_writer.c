@@ -10,17 +10,17 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/* Description of this program: 
+/* Description of this program:
  * This program checks the performance of group creations for VFD SWMR.
  * Currently the group creation time, H5Fopen and H5Fclose time are measured.
- * After compiling the program, 
+ * After compiling the program,
  *     ./vfd_swmr_gperf_writer -n 1000 -P -N 5 -a 1 -q
- * will generate 1000 groups, each group has 5 attributes. 
+ * will generate 1000 groups, each group has 5 attributes.
  *     ./vfd_swmr_gperf_writer -n 1000 -P -N 0 -q
  * will generate 1000 empty groups.
  *     ./vfd_swmr_gperf_writer -n 1000 -P -q
  * will generate 1000 groups,for every ten groups, an attribute is generated.
-*/
+ */
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
 
 #include "hdf5.h"
@@ -34,7 +34,7 @@
 
 #ifndef H5_HAVE_WIN32_API
 
-#define VS_ATTR_NAME_LEN  21
+#define VS_ATTR_NAME_LEN 21
 
 #define TIME_PASSED(X, Y)                                                                                    \
     ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
@@ -457,7 +457,6 @@ add_attr(state_t *s, hid_t oid, unsigned int which, unsigned num_attrs, const ch
                 TEST_ERROR;
             }
         }
-
 
     } /* end for */
 
@@ -1572,7 +1571,6 @@ write_group(state_t *s, unsigned int which)
             TEST_ERROR;
         }
     }
-
 
     /* Then carry out the attribute operation. */
     if (s->asteps != 0 && which % s->asteps == 0)
@@ -3599,7 +3597,6 @@ vrfy_create_group(state_t *s, unsigned int which)
         TEST_ERROR;
     }
 
-
     return true;
 
 error:
@@ -3760,7 +3757,6 @@ vrfy_close_group_id(state_t *s, hid_t g)
         TEST_ERROR;
     }
 
-
     return true;
 
 error:
@@ -3803,7 +3799,6 @@ vrfy_one_link_exist(state_t *s, hid_t obj_id, const char *name, bool expect_exis
 
     int        link_exists = 0;
     H5G_info_t group_info;
-
 
     link_exists = H5Lexists(obj_id, name, H5P_DEFAULT);
 
@@ -4527,7 +4522,6 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-
     if (writer) {
         if (s.gperf) {
 
@@ -4537,7 +4531,6 @@ main(int argc, char **argv)
 
                 TEST_ERROR;
             }
-
         }
 
         if (s.nglevels >0) {
@@ -4576,7 +4569,6 @@ main(int argc, char **argv)
             fprintf(stdout, "group creation +5 attrs total time = %lf\n", s.total_time);
             fprintf(stdout, "group creation +5 attrs mean time = %lf\n", s.mean_time);
         }
-
     }
     else {
 
