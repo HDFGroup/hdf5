@@ -1774,11 +1774,11 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
     ret_value = shared->mdf_idx = new_mdf_idx;
     shared->mdf_idx_len         = new_mdf_idx_len;
 
-    if(shared->old_mdf_idx)
-         H5MM_xfree(f->shared->old_mdf_idx);
+    if (shared->old_mdf_idx)
+        H5MM_xfree(f->shared->old_mdf_idx);
 
-    shared->old_mdf_idx         = old_mdf_idx;
-    f->shared->old_mdf_idx_len  = old_mdf_idx_len;
+    shared->old_mdf_idx        = old_mdf_idx;
+    f->shared->old_mdf_idx_len = old_mdf_idx_len;
 
     /* Postpone reclamation of the old index until max_lag ticks from now.
      * It's only necessary to wait until after the new index is in place,
