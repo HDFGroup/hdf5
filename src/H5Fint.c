@@ -1575,12 +1575,6 @@ H5F__dest(H5F_t *f, hbool_t flush)
             /* Push error, but keep going*/
             HDONE_ERROR(H5E_IO, H5E_CANTFLUSH, FAIL, "vfd swmr prep for flush or close failed")
 
-        if ((f->shared->vfd_swmr) && (!f->shared->vfd_swmr_writer))
-            HDfprintf(stdout,
-                      "The maximum jump in ticks is %" PRIu64
-                      "; The maximum expected lag configured is %" PRIu32 "\n",
-                      f->shared->max_jump_ticks, f->shared->vfd_swmr_config.max_lag);
-
         /* Shutdown the page buffer cache */
         if (H5PB_dest(f->shared) < 0)
             /* Push error, but keep going*/
@@ -1932,9 +1926,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Avoid reusing a virtual file opened exclusively by a second virtual
      * file, or opening the same file twice with different parameters.
      */
-    if ((lf = H5FD_deduplicate(lf, fapl_id)) == NULL) {
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "an already-open file conflicts with '%s'", name);
-    }
+    if ((lf = H5FD_deduplicate(lf, fapl_id)) == NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "an already-open file conflicts with '%s'", name)
 
     /* Is the file already open? */
     if ((shared = H5F__sfile_search(lf)) != NULL) {

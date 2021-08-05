@@ -284,7 +284,8 @@ test_extend(hid_t f, const char *prefix, size_t nx, size_t ny, size_t nz)
         HDsprintf(dims, "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
     }
 
-    TESTING("istore extend: %s", dims);
+    HDsprintf(s, "istore extend: %s", dims);
+    TESTING(s);
     buf   = (uint8_t *)HDmalloc(nx * ny * nz);
     check = (uint8_t *)HDmalloc(nx * ny * nz);
     whole = (uint8_t *)HDcalloc((size_t)1, nx * ny * nz);
@@ -499,7 +500,8 @@ test_sparse(hid_t f, const char *prefix, size_t nblocks, size_t nx, size_t ny, s
         HDsprintf(dims, "%lux%lux%lu", (unsigned long)nx, (unsigned long)ny, (unsigned long)nz);
     }
 
-    TESTING("istore sparse: %s", dims);
+    HDsprintf(s, "istore sparse: %s", dims);
+    TESTING(s);
     if (skip_test) {
         SKIPPED()
         return SUCCEED;

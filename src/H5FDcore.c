@@ -183,7 +183,6 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_lock,          /* lock                 */
     H5FD__core_unlock,        /* unlock               */
     H5FD__core_delete,        /* del                  */
-    NULL,                     /* dedup                */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
