@@ -1135,19 +1135,11 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
             io_info->io_ops.single_write = H5D__mpio_select_write;
         } /* end if */
         else {
-            int comm_size = 0;
-
-            /* Retrieve size of MPI communicator used for file */
-            if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
-
             /* Check if there are any filters in the pipeline. If there are,
-             * we cannot break to independent I/O if this is a write operation
-             * with multiple ranks involved; otherwise, there will be metadata
-             * inconsistencies in the file.
+             * we cannot break to independent I/O if this is a write operation;
+             * otherwise there will be metadata inconsistencies in the file.
              */
-            if (comm_size > 1 && io_info->op_type == H5D_IO_OP_WRITE &&
-                io_info->dset->shared->dcpl_cache.pline.nused > 0) {
+            if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->dcpl_cache.pline.nused > 0) {
                 H5D_mpio_no_collective_cause_t cause;
                 uint32_t                       local_no_collective_cause;
                 uint32_t                       global_no_collective_cause;
