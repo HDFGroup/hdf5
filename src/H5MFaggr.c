@@ -183,8 +183,7 @@ H5MF__aggr_alloc(H5F_t *f, H5F_blk_aggr_t *aggr, H5F_blk_aggr_t *other_aggr, H5F
         H5FD_mem_t alloc_type, other_alloc_type; /* Current aggregator & 'other' aggregator types */
 
 #ifdef H5MF_AGGR_DEBUG
-        HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", __func__, aggr->addr, aggr->tot_size,
-                  aggr->size);
+        HDfprintf(stderr, "%s: aggr = {%a, %Hu, %Hu}\n", __func__, aggr->addr, aggr->tot_size, aggr->size);
 #endif /* H5MF_AGGR_DEBUG */
 
         /* Turn off alignment if allocation < threshold */
