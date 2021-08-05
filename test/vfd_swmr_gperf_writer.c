@@ -61,6 +61,7 @@ typedef struct {
     double       fo_total_time;
     double       fc_total_time;
     unsigned int num_attrs;
+    unsigned int nglevels;
 } state_t;
 
 #define ALL_HID_INITIALIZER                                                                                  \
@@ -73,15 +74,17 @@ typedef struct {
         .attr_test = false, .tick_len = 4, .max_lag = 7,              \
         .gperf = false, .min_time = 100., .max_time = 0.,.mean_time = 0.,  \
         .total_time = 0., .fo_total_time = 0., \
-        .fc_total_time = 0., .num_attrs = 1  \
+        .fc_total_time = 0., .num_attrs = 1, .nglevels = 0  \
     }
+
+
 
 static void
 usage(const char *progname)
 {
     fprintf(stderr,
             "usage: %s [-S] [-G] [-a steps] [-b] [-n iterations]\n"
-            "    [-N num_attrs] [-q] [-A at_pattern] [-O grp_op_pattern]\n"
+            "    [-N num_attrs] [-l nested group levels] [-q] [-A at_pattern] [-O grp_op_pattern]\n"
             "\n"
             "-S:             do not use VFD SWMR\n"
             "-G:             old-style type of group\n"
@@ -89,6 +92,9 @@ usage(const char *progname)
             "-b:             write data in big-endian byte order\n"
             "-n ngroups:     the number of groups\n"
             "-N:             the number of attributes \n"
+            "-l:             the number of level of nested groups.  \n"
+            "                If all the groups are under the root group,  \n"
+            "                this number should be 0.\n"
             "-A at_pattern:  `at_pattern' for different attribute tests\n"
             "              The value of `at_pattern` is one of the following:\n"
             "              `compact`              - Attributes added in compact storage\n"
@@ -166,10 +172,14 @@ state_init(state_t *s, int argc, char **argv)
 
     esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
 
-    if (tfile)
+    if (tfile) {
         HDfree(tfile);
+        tfile = NULL;
+    }
 
-    while ((ch = getopt(argc, argv, "PSGa:bn:qA:N:O:")) != -1) {
+    if(argc == 1)
+        usage(s->progname);
+    while ((ch = getopt(argc, argv, "PSGa:bn:qA:N:l:O:")) != -1) {
         switch (ch) {
             case 'P':
                 s->gperf = true;
@@ -183,6 +193,7 @@ state_init(state_t *s, int argc, char **argv)
             case 'a':
             case 'n':
             case 'N':
+            case 'l':
                 errno = 0;
                 tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0') {
@@ -204,6 +215,8 @@ state_init(state_t *s, int argc, char **argv)
                     s->nsteps = (unsigned)tmp;
                 else if (ch == 'N')
                     s->num_attrs = (unsigned)tmp;
+                else if (ch == 'l')
+                    s->nglevels = (unsigned)tmp;
                 break;
             case 'b':
                 s->filetype = H5T_STD_U32BE;
@@ -1598,6 +1611,7 @@ error:
 
     return false;
 }
+
 
 /*-------------------------------------------------------------------------
  * Function:    check_attr_storage_type
@@ -4298,6 +4312,126 @@ verify_group_operations(state_t *s, unsigned int which)
     return ret_value;
 }
 
+static unsigned int grp_counter = 0;
+static unsigned int UI_Pow(unsigned int x,unsigned int n)
+{
+    unsigned int i; /* Variable used in loop grp_counter */
+    unsigned int number = 1;
+
+    for (i = 0; i < n; ++i)
+        number *= x;
+
+    return(number);
+}
+
+static unsigned int obtain_tree_level_elems(unsigned int total_ele,unsigned int level) {
+
+   assert(level <=total_ele);
+   if(level == 0)
+      return total_ele;
+   else  {
+        unsigned int test_elems_level = 0;
+        unsigned total = 0;
+        unsigned int i = 1;
+        while (total <total_ele) {
+          test_elems_level++;
+          total = 0;
+          for ( i = 1; i <=level+1; i++)
+               total += UI_Pow(test_elems_level,i);
+        }
+        if(total == total_ele)
+            printf("Perfectly match: Number of elements per level is %u\n",test_elems_level);
+        return test_elems_level;
+   }
+
+}
+
+
+static bool gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgrp_id) {
+    
+    char            name[sizeof("group-9999999999")];
+    unsigned int    i;
+    hid_t           grp_id;
+    bool            result = true;
+    H5G_info_t      group_info;
+
+    if(level >0 && grp_counter <s->nsteps) {
+
+        for(i = 0; i < ne_per_level; i++) {
+            esnprintf(name, sizeof(name), "group-%u", grp_counter);
+            if(grp_counter ==s->nsteps) 
+                break;
+            /* For each i a group is created.
+               Use grp_counter to generate the group name.
+            printf("id: %u,level: %u, index: %u\n",id,level,i);
+            */
+            if ((grp_id = H5Gcreate2(pgrp_id, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
+                printf("H5Gcreate2 failed\n");
+                TEST_ERROR;
+            }
+
+            /* Just check the first group information. */
+            if(grp_counter == 0) {
+                if (H5Gget_info(grp_id, &group_info) < 0) {
+                    printf("H5Gget_info failed\n");
+                    TEST_ERROR;
+                }
+
+                if (s->old_style_grp) {
+                    if (group_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+                        printf("Old-styled group test: but the group is not in old-style. \n");
+                        TEST_ERROR;
+                    }
+                    dbgf(2, "Writer: group is created with the old-style.\n");
+                }
+                else {
+                    if (group_info.storage_type == H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+                        printf("The created group should NOT be in old-style . \n");
+                        TEST_ERROR;
+                    }
+                    dbgf(2, "Writer: group is created with the new-style.\n");
+                }
+            }
+
+
+            /* Then carry out the attribute operation. */
+            if (s->asteps != 0 && grp_counter % s->asteps == 0)
+                result = add_default_group_attr(s, grp_id, grp_counter);
+
+            if (result == false) {
+                printf("Cannot create group attributes. \n");
+                TEST_ERROR;
+            }
+            grp_counter++;
+            result = gen_tree_struct(s,level-1,ne_per_level,grp_id);
+            if (result == false) {
+                printf("Cannot create nested groups. \n");
+                TEST_ERROR;
+            }
+ 
+            /*  close the group ID. No problem. */
+            if(H5Gclose(grp_id)<0) {
+                printf("H5Gclose failed. \n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    return true;
+
+error:
+
+    H5E_BEGIN_TRY
+    {
+        H5Gclose(grp_id);
+    }
+    H5E_END_TRY;
+
+    return false;
+}
+
+
+
 
 int
 main(int argc, char **argv)
@@ -4311,6 +4445,7 @@ main(int argc, char **argv)
     bool                  wg_ret = false;
     bool                  vg_ret = false;
     struct timespec       start_time, end_time;
+    unsigned int          num_elems_per_level;
 
     if (!state_init(&s, argc, argv)) {
         printf("state_init failed\n");
@@ -4351,6 +4486,14 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
+    if(s.nglevels >0) {
+        if(s.grp_op_pattern!=' ' || s.at_pattern!=' '){
+            printf("For nested group creation test, only the default option is supported.\n");
+            printf("Please re-run the tests with the appopriate option.\n");
+            TEST_ERROR;
+        }
+    }
+ 
     if (s.gperf) {
 
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
@@ -4386,43 +4529,67 @@ main(int argc, char **argv)
 
 
     if (writer) {
-    if (s.gperf) {
+        if (s.gperf) {
 
-        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
+            if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
 
-            fprintf(stderr, "HDclock_gettime failed");
+                fprintf(stderr, "HDclock_gettime failed");
 
-            TEST_ERROR;
+                TEST_ERROR;
+            }
+
         }
-    }
 
-        for (step = 0; step < s.nsteps; step++) {
-            dbgf(2, "writer: step %d\n", step);
+        if (s.nglevels >0) {
 
-            wg_ret = group_operations(&s, step);
-
-            if (wg_ret == false) {
-                printf("write_group failed at step %d\n", step);
+            num_elems_per_level = obtain_tree_level_elems(s.nsteps,s.nglevels);
+            //wg_ret = gen_tree_struct(&s,s.nsteps,s.nglevels,num_elems_per_level,s.file);
+            /* for the recursive call, the groups under the root is treated as one level */
+            wg_ret = gen_tree_struct(&s,s.nglevels+1,num_elems_per_level,s.file);
+            if(wg_ret == false) {
+                printf("write nested group failed at group counter  %u\n", grp_counter);
                 TEST_ERROR;
             }
         }
-    if (s.gperf) {
+        else {
+            for (step = 0; step < s.nsteps; step++) {
 
-        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
-
-            fprintf(stderr, "HDclock_gettime failed");
-
-            TEST_ERROR;
+                dbgf(2, "writer: step %d\n", step);
+                wg_ret = group_operations(&s, step);
+                if (wg_ret == false) {
+                    printf("write_group failed at step %d\n", step);
+                    TEST_ERROR;
+                }
+            }
         }
 
-        s.total_time = TIME_PASSED(start_time, end_time);
-        s.mean_time = s.total_time / s.nsteps;
-        fprintf(stdout, "group creation +5 attrs total time = %lf\n", s.total_time);
-        fprintf(stdout, "group creation +5 attrs mean time = %lf\n", s.mean_time);
-    }
+        if (s.gperf) {
+
+            if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
+
+                fprintf(stderr, "HDclock_gettime failed");
+                TEST_ERROR;
+            }
+
+            s.total_time = TIME_PASSED(start_time, end_time);
+            s.mean_time = s.total_time / s.nsteps;
+            fprintf(stdout, "group creation +5 attrs total time = %lf\n", s.total_time);
+            fprintf(stdout, "group creation +5 attrs mean time = %lf\n", s.mean_time);
+        }
 
     }
     else {
+
+        if (s.nglevels > 0) {
+            printf("Reader: The nested group creation test is not implemented. Stop!\n");
+            TEST_ERROR;
+        }
+        if(s.num_attrs >1) {
+            printf("Reader: number of attribute must be 1 for the default group test. Stop!\n");
+            printf("The current number of attributes per group is %u\n",s.num_attrs);
+            TEST_ERROR;
+        }
+
         for (step = 0; step < s.nsteps; step++) {
             dbgf(1, "reader: step %d\n", step);
 
