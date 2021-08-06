@@ -1991,9 +1991,10 @@ AC_SEARCH_LIBS([clock_gettime], [rt posix4])
 AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
 AC_CHECK_FUNCS([frexpl gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
-AC_CHECK_FUNCS([siglongjmp sigsetjmp sigprocmask])
-AC_CHECK_FUNCS([srandom strdup symlink])
-AC_CHECK_FUNCS([tmpfile vasprintf waitpid])
+AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
+AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
+AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
+AC_CHECK_FUNCS([roundf lroundf llroundf round lround llround])
 
 ## ----------------------------------------------------------------------
 ## Check compiler characteristics
