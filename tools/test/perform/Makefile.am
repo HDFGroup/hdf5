@@ -36,15 +36,15 @@ endif
 # List them in the order they should be run.
 # Parallel test programs.
 if BUILD_PARALLEL_CONDITIONAL
-    TEST_PROG_PARA=h5perf perf
+    TEST_PROG_PARA=
 endif
 # Serial test programs.
-TEST_PROG = iopipe chunk chunk_cache overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
+TEST_PROG = iopipe chunk chunk_cache overhead zip_perf perf_meta $(BUILD_ALL_PROGS)
 
 # check_PROGRAMS will be built but not installed.  Do not any executable
 # that is in bin_PROGRAMS already. Otherwise, it will be removed twice in
 # "make clean" and some systems, e.g., AIX, do not like it.
-check_PROGRAMS= iopipe chunk chunk_cache overhead zip_perf perf_meta $(BUILD_ALL_PROGS) perf
+check_PROGRAMS= $(TEST_PROG) $(BUILD_ALL_PROGS)
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
