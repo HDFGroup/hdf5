@@ -190,7 +190,7 @@ DESCRIPTION
     H5FD_direct_init currently).
 
 --------------------------------------------------------------------------*/
-static herr_t
+static herr_t __attribute__((constructor(200)))
 H5FD__init_package(void)
 {
     char * lock_env_var = NULL; /* Environment variable pointer */

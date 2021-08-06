@@ -55,7 +55,7 @@ typedef struct {
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */

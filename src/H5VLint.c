@@ -99,7 +99,7 @@ static herr_t         H5VL__free_vol_wrapper(H5VL_wrap_ctx_t *vol_wrap_ctx);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -146,7 +146,7 @@ static H5VL_connector_prop_t H5VL_def_conn_s = {-1, NULL};
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(103)))
 H5VL_init_phase1(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -156,6 +156,8 @@ H5VL_init_phase1(void)
     /* FUNC_ENTER() does all the work */
 
 done:
+    if (ret_value != SUCCEED)
+        abort();
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_init_phase1() */
 
@@ -172,7 +174,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(108)))
 H5VL_init_phase2(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -202,6 +204,8 @@ H5VL_init_phase2(void)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set default VOL connector")
 
 done:
+    if (ret_value != SUCCEED)
+        abort();
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_init_phase2() */
 
@@ -216,7 +220,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static __attribute__((constructor(107))) herr_t
 H5VL__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -228,6 +232,8 @@ H5VL__init_package(void)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize H5VL interface")
 
 done:
+    if (ret_value != SUCCEED)
+        abort();
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL__init_package() */
 

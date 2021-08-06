@@ -47,7 +47,7 @@
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -132,7 +132,7 @@ H5PL__set_plugin_control_mask(unsigned int mask)
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(200)))
 H5PL__init_package(void)
 {
     char * env_var   = NULL;

@@ -172,7 +172,7 @@ DESCRIPTION
     H5FD_mpio_init currently).
 
 --------------------------------------------------------------------------*/
-static herr_t
+static herr_t __attribute__((constructor(200)))
 H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;

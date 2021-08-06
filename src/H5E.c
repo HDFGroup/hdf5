@@ -93,7 +93,7 @@ static herr_t     H5E__append_stack(H5E_t *dst_estack, const H5E_t *src_stack);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -172,7 +172,7 @@ done:
  *
  *--------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(102)))
 H5E__init_package(void)
 {
     H5E_cls_t *cls;                 /* Pointer to error class */

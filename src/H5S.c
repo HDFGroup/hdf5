@@ -56,7 +56,7 @@ static htri_t H5S__is_simple(const H5S_t *sdim);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /* Format version bounds for dataspace */
 const unsigned H5O_sdspace_ver_bounds[] = {
@@ -130,7 +130,7 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t __attribute__((constructor(107)))
 H5S__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */

@@ -92,7 +92,7 @@ static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /* Based on the value of the HDF5_USE_FILE_LOCKING environment variable.
  * TRUE/FALSE have obvious meanings. FAIL means the environment variable was
@@ -155,7 +155,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t __attribute__((constructor(107)))
 H5F__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */

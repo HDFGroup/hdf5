@@ -62,7 +62,7 @@ static herr_t H5FD__query(const H5FD_t *f, unsigned long *flags /*out*/);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -103,7 +103,7 @@ static const H5I_class_t H5I_VFL_CLS[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(102)))
 H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */

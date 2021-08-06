@@ -369,7 +369,7 @@ H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*
  * Predefined data types. These are initialized at runtime in H5Tinit.c and
@@ -757,7 +757,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t __attribute__((constructor(107)))
 H5T__init_package(void)
 {
     H5T_t *native_schar  = NULL; /* Datatype structure for native signed char */
@@ -802,6 +802,9 @@ H5T__init_package(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT
+
+    if (H5_TERM_GLOBAL)
+            HGOTO_DONE(SUCCEED)
 
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_DATATYPE_CLS) < 0)

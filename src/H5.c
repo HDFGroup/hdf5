@@ -64,7 +64,7 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -111,7 +111,7 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t __attribute__((constructor(101)))
 H5__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -241,6 +241,7 @@ H5_init_library(void)
         H5_dont_atexit_g = TRUE;
     } /* end if */
 
+#if 0
     /*
      * Initialize interfaces that might not be able to initialize themselves
      * soon enough.  The file & dataset interfaces must be initialized because
@@ -275,6 +276,7 @@ H5_init_library(void)
     /* Finish initializing interfaces that depend on the interfaces above */
     if (H5VL_init_phase2() < 0)
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
+#endif
 
     /* Debugging? */
     H5__debug_mask("-all");

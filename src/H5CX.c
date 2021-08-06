@@ -429,7 +429,7 @@ static H5CX_node_t *H5CX__pop_common(hbool_t update_dxpl_props);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*******************/
 /* Local Variables */
@@ -473,7 +473,7 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t __attribute__((constructor(200)))
 H5CX__init_package(void)
 {
     H5P_genplist_t *dx_plist;            /* Data transfer property list */

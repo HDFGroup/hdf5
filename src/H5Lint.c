@@ -176,7 +176,7 @@ static herr_t H5L__get_name_by_idx_cb(H5G_loc_t *grp_loc /*in*/, const char *nam
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -229,7 +229,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(106)))
 H5L__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */

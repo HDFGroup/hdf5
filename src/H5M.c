@@ -59,7 +59,7 @@ static herr_t H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const voi
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -114,7 +114,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 ---------------------------------------------------------------------------
 */
-herr_t
+static herr_t __attribute__((constructor(107)))
 H5M__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */

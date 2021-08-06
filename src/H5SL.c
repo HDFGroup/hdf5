@@ -569,7 +569,7 @@ static herr_t       H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void
 static herr_t       H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /* Declare a free list to manage the H5SL_t struct */
 H5FL_DEFINE_STATIC(H5SL_t);
@@ -598,9 +598,11 @@ static size_t            H5SL_fac_nalloc_g;
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t __attribute__((constructor(103)))
 H5SL__init_package(void)
 {
+    herr_t ret_value = SUCCEED;
+
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Allocate space for array of factories */
@@ -613,7 +615,8 @@ H5SL__init_package(void)
     HDassert(H5SL_fac_g[0]);
     H5SL_fac_nused_g = 1;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5SL__init_package() */
 
 /*--------------------------------------------------------------------------

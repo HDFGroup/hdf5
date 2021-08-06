@@ -71,7 +71,7 @@ static herr_t H5AC__verify_tag(const H5AC_class_t *type);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -162,9 +162,10 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(105)))
 H5AC__init_package(void)
 {
+    herr_t                       ret_value     = SUCCEED; /* Return value */
     FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5_HAVE_PARALLEL
@@ -182,7 +183,8 @@ H5AC__init_package(void)
     }
 #endif /* H5_HAVE_PARALLEL */
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC__init_package() */
 
 /*-------------------------------------------------------------------------

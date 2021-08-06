@@ -180,7 +180,7 @@ H5FL_DEFINE_STATIC(H5FD_splitter_fapl_t);
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-static herr_t
+static herr_t __attribute__((constructor(200)))
 H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;

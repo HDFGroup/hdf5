@@ -57,7 +57,7 @@ typedef enum {
 } H5Z_prelude_type_t;
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /* Local variables */
 static size_t        H5Z_table_alloc_g = 0;
@@ -81,12 +81,15 @@ static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
  * Return:   Non-negative on success/Negative on failure
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(200)))
 H5Z__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
+
+    if (H5_TERM_GLOBAL)
+            HGOTO_DONE(SUCCEED)
 
     /* Internal filters */
     if (H5Z_register(H5Z_SHUFFLE) < 0)

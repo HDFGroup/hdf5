@@ -188,7 +188,7 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+static herr_t __attribute__((constructor(103)))
 H5FD__init_package(void)
 {
     char * lock_env_var = NULL; /* Environment variable pointer */
@@ -209,6 +209,8 @@ H5FD__init_package(void)
         HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize sec2 VFD")
 
 done:
+    if (ret_value != SUCCEED)
+        abort();
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5FD__init_package() */
 

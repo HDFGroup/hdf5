@@ -96,7 +96,7 @@ static int    H5ES__close_failed_cb(H5ES_event_t *ev, void *_ctx);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -129,7 +129,7 @@ H5FL_DEFINE_STATIC(H5ES_t);
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(200)))
 H5ES__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */

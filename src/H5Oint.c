@@ -83,7 +83,7 @@ static herr_t                 H5O__reset_info2(H5O_info2_t *oinfo);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /* Header message ID to class mapping
  *
@@ -189,9 +189,10 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(200)))
 H5O__init_package(void)
 {
+    herr_t  ret_value = SUCCEED; /* Return value */
     FUNC_ENTER_PACKAGE_NOERR
 
     /* H5O interface sanity checks */
@@ -200,7 +201,8 @@ H5O__init_package(void)
 
     HDcompile_assert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O__init_package() */
 
 /*-------------------------------------------------------------------------

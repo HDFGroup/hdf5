@@ -100,7 +100,7 @@ static herr_t H5A__iterate_common(hid_t loc_id, H5_index_t idx_type, H5_iter_ord
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /* Format version bounds for attribute */
 const unsigned H5O_attr_ver_bounds[] = {
@@ -176,7 +176,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-herr_t
+static herr_t __attribute__((constructor(107)))
 H5A__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
@@ -191,6 +191,7 @@ H5A__init_package(void)
 
     /* Mark "top" of interface as initialized, too */
     H5A_top_package_initialize_s = TRUE;
+    H5_PKG_INIT_VAR = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

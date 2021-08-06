@@ -92,7 +92,7 @@ static herr_t H5G__close_cb(H5VL_object_t *grp_vol_obj, void **request);
 /*********************/
 
 /* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
+hbool_t H5_PKG_INIT_VAR = true;
 
 /* Declare a free list to manage the H5G_t struct */
 H5FL_DEFINE(H5G_t);
@@ -161,7 +161,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t __attribute__((constructor(107)))
 H5G__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
