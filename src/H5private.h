@@ -773,15 +773,23 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
 #endif
+/* Check for Cray-specific 'frexpf()' and 'frexpl()' routines */
 #ifndef HDfrexpf
+#ifdef H5_HAVE_FREXPF
 #define HDfrexpf(X, N) frexpf(X, N)
 #endif
+#define HDfrexpf(X, N) frexp(X, N)
+#endif /* H5_HAVE_FREXPF */
+#endif /* HDfrexpf */
 #ifndef HDfrexpl
+#ifdef H5_HAVE_FREXPL
 #define HDfrexpl(X, N) frexpl(X, N)
-#endif
-#ifndef HDfscanf
-#define HDfscanf fscanf
-#endif
+=======
+#else /* H5_HAVE_FREXPL */
+#define HDfrexpl(X, N) frexp(X, N)
+#endif /* H5_HAVE_FREXPL */
+#endif /* HDfrexpl */
+/* fscanf() variable arguments */
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif
