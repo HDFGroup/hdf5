@@ -408,6 +408,7 @@ if (MINGW OR NOT WINDOWS)
   #-----------------------------------------------------------------------------
   CHECK_STRUCT_HAS_MEMBER("struct tm" tm_gmtoff "time.h" ${HDF_PREFIX}_HAVE_TM_GMTOFF)
   CHECK_STRUCT_HAS_MEMBER("struct tm" __tm_gmtoff "time.h" ${HDF_PREFIX}_HAVE___TM_GMTOFF)
+  CHECK_STRUCT_HAS_MEMBER("struct tm" tm_sec "sys/types.h;sys/time.h;time.h" ${HDF_PREFIX}_TIME_WITH_SYS_TIME)
   if (${HDF_PREFIX}_HAVE_SYS_TIME_H)
     CHECK_STRUCT_HAS_MEMBER("struct tm" tz_minuteswest "sys/types.h;sys/time.h;time.h" ${HDF_PREFIX}_HAVE_STRUCT_TIMEZONE)
   else ()
