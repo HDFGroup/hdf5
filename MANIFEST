@@ -2947,14 +2947,14 @@
 ./tools/testfiles/h5mkgrp_single_p.ls
 ./tools/testfiles/h5mkgrp_single_l.ls
 
-./tools/test/h5perf/Makefile.am
-./tools/test/h5perf/perf.c
-./tools/test/h5perf/pio_engine.c
-./tools/test/h5perf/pio_perf.c
-./tools/test/h5perf/pio_perf.h
-./tools/test/h5perf/sio_engine.c
-./tools/test/h5perf/sio_perf.c
-./tools/test/h5perf/sio_perf.h
+./tools/src/h5perf/Makefile.am
+./tools/src/h5perf/perf.c
+./tools/src/h5perf/pio_engine.c
+./tools/src/h5perf/pio_perf.c
+./tools/src/h5perf/pio_perf.h
+./tools/src/h5perf/sio_engine.c
+./tools/src/h5perf/sio_perf.c
+./tools/src/h5perf/sio_perf.h
 
 ./tools/test/perform/Makefile.am
 ./tools/test/perform/build_h5perf_alone.sh
