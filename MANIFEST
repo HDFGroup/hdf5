@@ -3710,7 +3710,7 @@
 ./tools/test/h5stat/CMakeLists.txt
 ./tools/test/h5stat/CMakeTests.cmake
 ./tools/src/misc/CMakeLists.txt
-./tools/test/h5perf/CMakeLists.txt
+./tools/src/h5perf/CMakeLists.txt
 ./tools/test/misc/CMakeLists.txt
 ./tools/test/misc/CMakeTestsClear.cmake
 ./tools/test/misc/CMakeTestsMkgrp.cmake
