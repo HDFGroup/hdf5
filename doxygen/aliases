@@ -252,7 +252,7 @@ ALIASES += ref_rfc20190410="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_VFD
 ALIASES += ref_rfc20181231="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Min_Obj_Headers_181231.pdf\">Dataset Object Header Size</a>"
 ALIASES += ref_rfc20181220="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/3.2.1_3.2.2_deliverable_181220_v4.pdf\">MS 3.2 – Addressing Scalability: Scalability of open, close, flush CASE STUDY: CGNS Hotspot analysis of CGNS cgp_open</a>"
 ALIASES += ref_rfc20180620="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-Chunking%20Functions-2018-06-20-v3.docx.pdf\">Chunk query functionality in HDF5</a>"
-ALIASES += ref_rfc20180610="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/VFD_SWMR_RFC_191027.pdf\">VFD SWMR</a>"
+ALIASES += ref_rfc20180610="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/VFD_SWMR_RFC_200916.pdf\">VFD SWMR</a>"
 ALIASES += ref_rfc20180321="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC-API_Contexts-2018-03-21.docx.pdf\">API Contexts</a>"
 ALIASES += ref_rfc20180125="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/enhance_h5clear.docx.pdf\">Enhancement to the tool <tt>h5clear</tt></a>"
 ALIASES += ref_rfc20170707="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/H5Sencode_format.docx.pdf\"><tt>H5Sencode/H5Sdecode</tt> Format Change</a>"
