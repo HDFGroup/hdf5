@@ -3031,8 +3031,8 @@ verify_group(state_t *s, unsigned int which)
 
     esnprintf(name, sizeof(name), "/group-%u", which);
 
-    if ((g = H5Gopen(s->file, name, H5P_DEFAULT)) < 0) {
-        HDprintf("H5Gopen failed\n");
+    if ((g = H5Gopen2(s->file, name, H5P_DEFAULT)) < 0) {
+        HDprintf("H5Gopen2 failed\n");
         TEST_ERROR;
     }
 
@@ -4078,8 +4078,8 @@ vrfy_create_group(state_t *s, unsigned int which)
 
     esnprintf(name, sizeof(name), "/group-%u", which);
 
-    if ((g = H5Gopen(s->file, name, H5P_DEFAULT)) < 0) {
-        HDprintf("H5Gopen failed\n");
+    if ((g = H5Gopen2(s->file, name, H5P_DEFAULT)) < 0) {
+        HDprintf("H5Gopen2 failed\n");
         TEST_ERROR;
     }
 
@@ -4195,8 +4195,8 @@ vrfy_create_group_id(state_t *s, unsigned int which, bool dense_to_compact)
 
     esnprintf(name, sizeof(name), "/group-%u", which);
 
-    if ((g = H5Gopen(s->file, name, H5P_DEFAULT)) < 0) {
-        HDprintf("H5Gopen failed\n");
+    if ((g = H5Gopen2(s->file, name, H5P_DEFAULT)) < 0) {
+        HDprintf("H5Gopen2 failed\n");
         TEST_ERROR;
     }
 
@@ -4569,8 +4569,8 @@ vrfy_move_one_group(state_t *s, hid_t obj_id, const char *name, const char *newn
         TEST_ERROR;
     }
 
-    if ((g = H5Gopen(obj_id, newname, H5P_DEFAULT)) < 0) {
-        HDprintf("H5Gopen failed\n");
+    if ((g = H5Gopen2(obj_id, newname, H5P_DEFAULT)) < 0) {
+        HDprintf("H5Gopen2 failed\n");
         TEST_ERROR;
     }
 
