@@ -1019,8 +1019,6 @@
 ./src/H5SMpkg.h
 ./src/H5SMprivate.h
 ./src/H5SMtest.c
-./src/H5ST.c
-./src/H5STprivate.h
 ./src/H5T.c
 ./src/H5Tarray.c
 ./src/H5Tbit.c
@@ -1304,7 +1302,6 @@
 ./test/tsizeslheap.h5
 ./test/tskiplist.c
 ./test/tsohm.c
-./test/ttst.c
 ./test/ttsafe.c
 ./test/ttsafe.h
 ./test/ttsafe_acreate.c
