@@ -777,19 +777,20 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfrexpf
 #ifdef H5_HAVE_FREXPF
 #define HDfrexpf(X, N) frexpf(X, N)
-#endif
+#else
 #define HDfrexpf(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPF */
-#endif /* HDfrexpf */
+#endif
+#endif
 #ifndef HDfrexpl
 #ifdef H5_HAVE_FREXPL
 #define HDfrexpl(X, N) frexpl(X, N)
-=======
-#else /* H5_HAVE_FREXPL */
+#else
 #define HDfrexpl(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPL */
-#endif /* HDfrexpl */
-/* fscanf() variable arguments */
+#endif
+#endif
+#ifndef HDfscanf
+#define HDfscanf fscanf
+#endif
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif
@@ -1341,7 +1342,11 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDstrtol(S, R, N) strtol(S, R, N)
 #endif
 #ifndef HDstrtoll
+#ifdef H5_HAVE_STRTOLL
 #define HDstrtoll(S, R, N) strtoll(S, R, N)
+#else
+H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
+#endif
 #endif
 #ifndef HDstrtoul
 #define HDstrtoul(S, R, N) strtoul(S, R, N)
@@ -1433,15 +1438,13 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
 #endif
-
 #ifndef HDvasprintf
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
-
 #ifndef HDva_arg
 #define HDva_arg(A, T) va_arg(A, T)
 #endif
