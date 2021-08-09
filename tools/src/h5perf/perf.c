@@ -110,11 +110,11 @@ extern char *optarg;
 #ifndef HDF5_PARAPREFIX
 #define HDF5_PARAPREFIX ""
 #endif
-char *paraprefix = NULL; /* for command line option para-prefix */
+char *   paraprefix   = NULL;          /* for command line option para-prefix */
 MPI_Info h5_io_info_g = MPI_INFO_NULL; /* MPI INFO object for IO */
 
-static char * h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
-                              size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);
+static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
+                             size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);
 
 int
 main(int argc, char **argv)
@@ -547,7 +547,6 @@ getenv_all(MPI_Comm comm, int root, const char *name)
 
     return env;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:  h5_fixname_real

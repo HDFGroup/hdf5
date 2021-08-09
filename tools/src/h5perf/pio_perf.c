@@ -116,7 +116,7 @@ static const char *progname = "h5perf";
 #ifndef HDF5_PARAPREFIX
 #define HDF5_PARAPREFIX ""
 #endif
-char *paraprefix = NULL; /* for command line option para-prefix */
+char *   paraprefix   = NULL;          /* for command line option para-prefix */
 MPI_Info h5_io_info_g = MPI_INFO_NULL; /* MPI INFO object for IO */
 
 /*
