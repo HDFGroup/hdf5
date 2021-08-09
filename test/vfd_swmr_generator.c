@@ -112,10 +112,6 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write, int 
     if (!HDstrcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
-    /* Create file creation property list */
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        return -1;
-
     /* Emit informational message */
     if (verbose)
         HDfprintf(stderr, "Creating file\n");
@@ -133,12 +129,12 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write, int 
         init_vfd_swmr_config(config, 4, 10, vfd_swmr_write, FALSE, 128, "generator-shadow");
     }
 
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    if ((fapl = vfd_swmr_create_fapl(TRUE, vfd_swmr_write, FALSE, config)) < 0)
+    /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+    if ((fapl = vfd_swmr_create_fapl(TRUE, vfd_swmr_write, FALSE, 4096, config)) < 0)
         return -1;
 
-    /* Set file space strategy to paged aggregation in fcpl */
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, FALSE, 1) < 0)
+    /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0)
         return -1;
 
     /* Create the file with VFD SWMR write configured */
@@ -197,7 +193,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write, int 
         HDfprintf(stderr, "Creating datasets\n");
 
 #if 0 /* delete this once the race condiditon bug is fixed */ /* JRM */
-    sleep(1);
+    HDsleep(1);
 #endif                                                        /* JRM */
 
     /* Create the datasets */
@@ -264,23 +260,23 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write, int 
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: swmr_generator [-q] [-s] [-c <deflate compression level>]\n");
-    printf("    [-i <index type>] [-r <random seed>]\n");
-    printf("\n");
-    printf("NOTE: The random seed option is only used by the sparse test.  Other\n");
-    printf("      tests specify the random seed as a reader/writer option.\n");
-    printf("\n");
-    printf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
-    printf("\n");
-    printf("<index type> should be b2 or ea\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), no VFD_SWMR_WRITE mode (no '-s' given) no\n");
-    printf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
-    printf("seed (no -r given).\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: swmr_generator [-q] [-s] [-c <deflate compression level>]\n");
+    HDprintf("    [-i <index type>] [-r <random seed>]\n");
+    HDprintf("\n");
+    HDprintf("NOTE: The random seed option is only used by the sparse test.  Other\n");
+    HDprintf("      tests specify the random seed as a reader/writer option.\n");
+    HDprintf("\n");
+    HDprintf("<deflate compression level> should be -1 (for no compression) or 0-9\n");
+    HDprintf("\n");
+    HDprintf("<index type> should be b2 or ea\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), no VFD_SWMR_WRITE mode (no '-s' given) no\n");
+    HDprintf("compression ('-c -1'), v1 b-tree indexing (-i b1), and will generate a random\n");
+    HDprintf("seed (no -r given).\n");
+    HDprintf("\n");
     HDexit(1);
 } /* end usage() */
 

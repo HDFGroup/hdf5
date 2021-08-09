@@ -2146,19 +2146,28 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
     size_t size_str_to_add, size_str;
 
     if (_no_user_buf) {
+        char *tmp_realloc;
+
+        if (!buf)
+            goto out;
+
         /* If the buffer isn't big enough, reallocate it.  Otherwise, go to do strcat. */
         if (str_to_add && ((ssize_t)(*len - (HDstrlen(buf) + HDstrlen(str_to_add) + 1)) < LIMIT)) {
             *len += ((HDstrlen(buf) + HDstrlen(str_to_add) + 1) / INCREMENT + 1) * INCREMENT;
-            buf = (char *)HDrealloc(buf, *len);
         }
         else if (!str_to_add && ((ssize_t)(*len - HDstrlen(buf) - 1) < LIMIT)) {
             *len += INCREMENT;
-            buf = (char *)HDrealloc(buf, *len);
         }
-    }
 
-    if (!buf)
-        goto out;
+        tmp_realloc = (char *)HDrealloc(buf, *len);
+        if (tmp_realloc == NULL) {
+            HDfree(buf);
+            buf = NULL;
+            goto out;
+        }
+        else
+            buf = tmp_realloc;
+    }
 
     if (str_to_add) {
         /* find the size of the buffer to add */
@@ -2374,9 +2383,9 @@ out:
 herr_t
 H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
 {
-    size_t str_len = INCREMENT;
-    char * text_str;
-    herr_t ret = SUCCEED;
+    size_t str_len  = INCREMENT;
+    char * text_str = NULL;
+    herr_t ret      = SUCCEED;
 
     if (lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
         goto out;
@@ -2400,6 +2409,8 @@ H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
     return ret;
 
 out:
+    HDfree(text_str);
+
     return FAIL;
 }
 
@@ -2779,10 +2790,14 @@ next:
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char *)HDcalloc(super_len, sizeof(char));
-            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
+            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
+                HDfree(stmp);
                 goto out;
-            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp)))
+            }
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
+                HDfree(stmp);
                 goto out;
+            }
 
             if (stmp)
                 HDfree(stmp);
@@ -2822,10 +2837,14 @@ next:
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char *)HDcalloc(super_len, sizeof(char));
-            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
+            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
+                HDfree(stmp);
                 goto out;
-            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp)))
+            }
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
+                HDfree(stmp);
                 goto out;
+            }
 
             if (stmp)
                 HDfree(stmp);
@@ -2879,10 +2898,14 @@ next:
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char *)HDcalloc(super_len, sizeof(char));
-            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
+            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
+                HDfree(stmp);
                 goto out;
-            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp)))
+            }
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
+                HDfree(stmp);
                 goto out;
+            }
             if (stmp)
                 HDfree(stmp);
             stmp = NULL;
@@ -2933,10 +2956,14 @@ next:
                 if (H5LTdtype_to_text(mtype, NULL, lang, &mlen) < 0)
                     goto out;
                 mtmp = (char *)HDcalloc(mlen, sizeof(char));
-                if (H5LTdtype_to_text(mtype, mtmp, lang, &mlen) < 0)
+                if (H5LTdtype_to_text(mtype, mtmp, lang, &mlen) < 0) {
+                    HDfree(mtmp);
                     goto out;
-                if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, mtmp)))
+                }
+                if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, mtmp))) {
+                    HDfree(mtmp);
                     goto out;
+                }
                 if (mtmp)
                     HDfree(mtmp);
                 mtmp = NULL;

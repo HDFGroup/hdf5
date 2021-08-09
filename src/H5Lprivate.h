@@ -18,8 +18,9 @@
 #ifndef H5Lprivate_H
 #define H5Lprivate_H
 
-/* Include package's public header */
+/* Include package's public headers */
 #include "H5Lpublic.h"
+#include "H5Ldevelop.h"
 
 /* Private headers needed by this file */
 #include "H5Gprivate.h" /* Groups                */

@@ -57,8 +57,10 @@ $Source = "";
                "herr_t"                     => "e",
                "H5E_auto1_t"                => "Ea",
                "H5E_auto2_t"                => "EA",
+               "H5ES_event_complete_func_t" => "EC",
                "H5E_direction_t"            => "Ed",
                "H5E_error_t"                => "Ee",
+               "H5ES_event_insert_func_t"   => "EI",
                "H5ES_status_t"              => "Es",
                "H5E_type_t"                 => "Et",
                "H5FD_class_t"               => "FC",
@@ -159,6 +161,8 @@ $Source = "";
                "H5VL_file_specific_t"       => "Vh",
                "H5VL_group_get_t"           => "Vi",
                "H5VL_group_specific_t"      => "Vj",
+               "H5VL_link_create_t"         => "Vk",
+# XXX: DELETE LATER - part of combo branch merge
                "H5VL_link_create_type_t"    => "Vk",
                "H5VL_link_get_t"            => "Vl",
                "H5VL_get_conn_lvl_t"        => "VL",
@@ -349,7 +353,7 @@ sub rewrite_func ($$$$$) {
 
     # Compose the trace macro
     $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
-    $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(FUNC, \"";
+    $argtrace = "H5ARG_TRACE" . scalar(@arg_str) . "(__func__, \"";
     $trace .= join("", @arg_str) . "\"";
     $argtrace .= join("", @arg_str) . "\"";
 

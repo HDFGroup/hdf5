@@ -148,29 +148,6 @@ h5_errors(hid_t estack, void H5_ATTR_UNUSED *client_data)
 }
 
 /*-------------------------------------------------------------------------
- * Function:    h5_testing
- *
- * Purpose:     Prints "Testing" + formatted options to stdout
- *              Used in the TESTING macro
- *
- * Return:      void
- *-------------------------------------------------------------------------
- */
-void
-h5_testing(const char *fmt, ...)
-{
-    va_list ap;
-    char    buf[62 + 1]; /* room for 62-char field + NUL */
-
-    HDva_start(ap, fmt);
-    HDvsnprintf(buf, sizeof(buf), fmt, ap);
-    HDva_end(ap);
-
-    HDprintf("Testing %s", buf);
-    HDfflush(stdout);
-}
-
-/*-------------------------------------------------------------------------
  * Function:  h5_clean_files
  *
  * Purpose:  Cleanup temporary test files (always).
@@ -1218,9 +1195,10 @@ h5_set_info_object(void)
                 valp++;
 
             /* copy key/value pair into temporary buffer */
-            len     = strcspn(valp, ";");
-            next    = &valp[len];
-            key_val = (char *)HDcalloc(1, len + 1);
+            len  = HDstrcspn(valp, ";");
+            next = &valp[len];
+            if (NULL == (key_val = (char *)HDcalloc(1, len + 1)))
+                return -1;
 
             /* increment the next pointer past the terminating semicolon */
             if (*next == ';')
@@ -1616,6 +1594,9 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
     void *      buf      = NULL;                                 /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
 
+    if (!filename)
+        goto error;
+
     /* Allocate copy buffer */
     if (NULL == (buf = HDcalloc((size_t)1, (size_t)READ_BUF_SIZE)))
         goto error;
@@ -1944,7 +1925,6 @@ static const H5FD_class_t H5FD_dummy_g = {
     NULL,                /* lock         */
     NULL,                /* unlock       */
     NULL,                /* del          */
-    NULL,                /* dedup        */
     H5FD_FLMAP_DICHOTOMY /* fl_map       */
 };
 

@@ -280,17 +280,17 @@ smoke_check_1(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -308,7 +308,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -326,7 +326,7 @@ smoke_check_1(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -344,7 +344,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -354,7 +354,7 @@ smoke_check_1(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -367,7 +367,7 @@ smoke_check_1(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -377,7 +377,7 @@ smoke_check_1(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -390,12 +390,12 @@ smoke_check_1(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -409,7 +409,7 @@ smoke_check_1(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -478,17 +478,17 @@ smoke_check_2(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -506,7 +506,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -524,7 +524,7 @@ smoke_check_2(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -542,7 +542,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -552,7 +552,7 @@ smoke_check_2(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -565,7 +565,7 @@ smoke_check_2(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -575,7 +575,7 @@ smoke_check_2(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -588,12 +588,12 @@ smoke_check_2(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -607,7 +607,7 @@ smoke_check_2(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -675,17 +675,17 @@ smoke_check_3(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -703,7 +703,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -721,7 +721,7 @@ smoke_check_3(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -739,7 +739,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -749,7 +749,7 @@ smoke_check_3(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -762,7 +762,7 @@ smoke_check_3(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -772,7 +772,7 @@ smoke_check_3(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -785,12 +785,12 @@ smoke_check_3(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -804,7 +804,7 @@ smoke_check_3(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -873,17 +873,17 @@ smoke_check_4(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -901,7 +901,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -919,7 +919,7 @@ smoke_check_4(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -937,7 +937,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -947,7 +947,7 @@ smoke_check_4(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr               */ file_ptr,
                            /* max_index              */ max_index,
@@ -960,7 +960,7 @@ smoke_check_4(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -970,7 +970,7 @@ smoke_check_4(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_backward(/* file_ptr               */ file_ptr,
                             /* max_index              */ max_index,
@@ -983,12 +983,12 @@ smoke_check_4(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1002,7 +1002,7 @@ smoke_check_4(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1116,12 +1116,12 @@ smoke_check_5(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1138,7 +1138,7 @@ smoke_check_5(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1149,7 +1149,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1160,7 +1160,7 @@ smoke_check_5(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1171,7 +1171,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1181,7 +1181,7 @@ smoke_check_5(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1193,7 +1193,7 @@ smoke_check_5(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1203,7 +1203,7 @@ smoke_check_5(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1215,12 +1215,12 @@ smoke_check_5(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1234,7 +1234,7 @@ smoke_check_5(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1348,12 +1348,12 @@ smoke_check_6(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1370,7 +1370,7 @@ smoke_check_6(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1381,7 +1381,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1392,7 +1392,7 @@ smoke_check_6(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1403,7 +1403,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1413,7 +1413,7 @@ smoke_check_6(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1425,7 +1425,7 @@ smoke_check_6(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1435,7 +1435,7 @@ smoke_check_6(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1447,12 +1447,12 @@ smoke_check_6(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1466,7 +1466,7 @@ smoke_check_6(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1581,12 +1581,12 @@ smoke_check_7(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1603,7 +1603,7 @@ smoke_check_7(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1614,7 +1614,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1625,7 +1625,7 @@ smoke_check_7(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1636,7 +1636,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1646,7 +1646,7 @@ smoke_check_7(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1658,7 +1658,7 @@ smoke_check_7(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1668,7 +1668,7 @@ smoke_check_7(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1680,12 +1680,12 @@ smoke_check_7(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1699,7 +1699,7 @@ smoke_check_7(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -1814,12 +1814,12 @@ smoke_check_8(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -1836,7 +1836,7 @@ smoke_check_8(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1847,7 +1847,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* do_inserts             */ FALSE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1858,7 +1858,7 @@ smoke_check_8(int express_test, unsigned paged)
                                /* do_inserts             */ FALSE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_row_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1869,7 +1869,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* do_inserts             */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -1879,7 +1879,7 @@ smoke_check_8(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_forward(/* file_ptr              */ file_ptr,
                               /* max_index              */ max_index,
@@ -1891,7 +1891,7 @@ smoke_check_8(int express_test, unsigned paged)
                               /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -1901,7 +1901,7 @@ smoke_check_8(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     hl_col_major_scan_backward(/* file_ptr              */ file_ptr,
                                /* max_index              */ max_index,
@@ -1913,12 +1913,12 @@ smoke_check_8(int express_test, unsigned paged)
                                /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -1932,7 +1932,7 @@ smoke_check_8(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -2011,12 +2011,12 @@ smoke_check_9(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
@@ -2024,7 +2024,7 @@ smoke_check_9(int express_test, unsigned paged)
     /* disable evictions */
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2038,7 +2038,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2058,7 +2059,7 @@ smoke_check_9(int express_test, unsigned paged)
     /* enable evictions */
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2072,7 +2073,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2090,7 +2092,7 @@ smoke_check_9(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2104,7 +2106,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled \n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2122,7 +2125,7 @@ smoke_check_9(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2136,7 +2139,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled \n", __func__, mile_stone++,
+                  (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2146,7 +2150,7 @@ smoke_check_9(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2160,7 +2164,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2173,7 +2178,7 @@ smoke_check_9(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -2183,7 +2188,7 @@ smoke_check_9(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2197,7 +2202,8 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2210,7 +2216,7 @@ smoke_check_9(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2224,12 +2230,13 @@ smoke_check_9(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2243,7 +2250,7 @@ smoke_check_9(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -2322,18 +2329,19 @@ smoke_check_10(int express_test, unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr  = setup_cache((size_t)(4 * 1024 * 1024), (size_t)(2 * 1024 * 1024), paged);
     cache_ptr = file_ptr->shared->cache;
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2351,7 +2359,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2365,7 +2373,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2383,7 +2392,7 @@ smoke_check_10(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2397,7 +2406,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2415,7 +2425,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2429,7 +2439,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2439,7 +2450,7 @@ smoke_check_10(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2453,7 +2464,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2466,7 +2478,7 @@ smoke_check_10(int express_test, unsigned paged)
                            /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2480,7 +2492,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     /* flush all entries in the cache: */
 
@@ -2490,7 +2503,7 @@ smoke_check_10(int express_test, unsigned paged)
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2504,7 +2517,8 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions enabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     col_major_scan_backward(/* file_ptr              */ file_ptr,
                             /* max_index              */ max_index,
@@ -2517,7 +2531,7 @@ smoke_check_10(int express_test, unsigned paged)
                             /* dirty_unprotects       */ dirty_unprotects);
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -2531,12 +2545,13 @@ smoke_check_10(int express_test, unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d -- evictions disabled\n", __func__, mile_stone++,
+                  (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2550,7 +2565,7 @@ smoke_check_10(int express_test, unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -2625,17 +2640,17 @@ write_permitted_check(int
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     reset_entries();
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     file_ptr = setup_cache((size_t)(1 * 1024 * 1024), (size_t)0, paged);
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     row_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2653,7 +2668,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = FALSE;
 
@@ -2673,7 +2688,7 @@ write_permitted_check(int
                             /* dirty_unprotects       */ NO_CHANGE);
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = TRUE;
 
@@ -2693,7 +2708,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* flush and destroy all entries in the cache: */
 
@@ -2703,7 +2718,7 @@ write_permitted_check(int
                 /* dump_detailed_stats */ FALSE);
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     col_major_scan_forward(/* file_ptr              */ file_ptr,
                            /* max_index              */ max_index,
@@ -2716,7 +2731,7 @@ write_permitted_check(int
                            /* dirty_unprotects       */ TRUE);
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     write_permitted = FALSE;
 
@@ -2733,12 +2748,12 @@ write_permitted_check(int
     write_permitted = TRUE;
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     takedown_cache(file_ptr, display_stats, TRUE);
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     verify_clean();
     verify_unprotected();
@@ -2752,7 +2767,7 @@ write_permitted_check(int
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
 #else /* H5C_MAINTAIN_CLEAN_AND_DIRTY_LRU_LISTS */
@@ -2770,20 +2785,24 @@ write_permitted_check(int
 /*-------------------------------------------------------------------------
  * Function:    check_insert_entry()
  *
- * Purpose:    Verify that H5C_insert_entry behaves as expected.
- *        Test the behaviour with different flags.
+ * Purpose:     Verify that H5C_insert_entry behaves as expected.
+ *              Test the behaviour with different flags.
  *
- *        This test was added primarily to test basic insert
- *        pinned entry functionallity, but I through in explicit
- *        tests for other functionallity that is tested implicitly
- *        elsewhere.
+ *              This test was added primarily to test basic insert
+ *              pinned entry functionallity, but I through in explicit
+ *              tests for other functionallity that is tested implicitly
+ *              elsewhere.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              8/10/06
  *
  * Modifications:
+ *
+ *              Updated tests to accommodate the case in which the
+ *              slist is disabled.
+ *                                           JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -2982,7 +3001,8 @@ check_insert_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != 4 * entry_sizes[entry_type]) ||
-            (cache_ptr->slist_len != 4) || (cache_ptr->slist_size != 4 * entry_sizes[entry_type]) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 4) || (cache_ptr->slist_size != 4 * entry_sizes[entry_type]))) ||
             (cache_ptr->pl_len != 0) || (cache_ptr->pl_size != (size_t)0) || (cache_ptr->pel_len != 2) ||
             (cache_ptr->pel_size != 2 * entry_sizes[entry_type]) || (cache_ptr->LRU_list_len != 2) ||
             (cache_ptr->LRU_list_size != 2 * entry_sizes[entry_type])
@@ -3007,10 +3027,11 @@ check_insert_entry(unsigned paged)
         if ((cache_ptr->insertions[entry_type] != 4) || (cache_ptr->pinned_insertions[entry_type] != 2) ||
             (cache_ptr->pins[entry_type] != 2) || (cache_ptr->unpins[entry_type] != 0) ||
             (cache_ptr->dirty_pins[entry_type] != 0) || (cache_ptr->max_index_len != 4) ||
-            (cache_ptr->max_index_size != 4 * entry_sizes[entry_type]) || (cache_ptr->max_slist_len != 4) ||
-            (cache_ptr->max_slist_size != 4 * entry_sizes[entry_type]) || (cache_ptr->max_pl_len != 0) ||
-            (cache_ptr->max_pl_size != (size_t)0) || (cache_ptr->max_pel_len != 2) ||
-            (cache_ptr->max_pel_size != 2 * entry_sizes[entry_type])) {
+            (cache_ptr->max_index_size != 4 * entry_sizes[entry_type]) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 4) || (cache_ptr->slist_size != 4 * entry_sizes[entry_type]))) ||
+            (cache_ptr->max_pl_len != 0) || (cache_ptr->max_pl_size != (size_t)0) ||
+            (cache_ptr->max_pel_len != 2) || (cache_ptr->max_pel_size != 2 * entry_sizes[entry_type])) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected insert results 11.";
@@ -3040,7 +3061,7 @@ check_insert_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -3129,7 +3150,7 @@ check_flush_cache(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -3137,17 +3158,24 @@ check_flush_cache(unsigned paged)
 } /* check_flush_cache() */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    check_flush_cache__empty_cache()
  *
- * Purpose:    Verify that flush_cache behaves as expected with an empty
+ * Purpose :    Verify that flush_cache behaves as expected with an empty
  *              cache.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              1/12/05
  *
  * Modifications:
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -3156,7 +3184,6 @@ static void
 check_flush_cache__empty_cache(H5F_t *file_ptr)
 {
     H5C_t *cache_ptr = file_ptr->shared->cache;
-    herr_t result;
 
     if (cache_ptr == NULL) {
 
@@ -3171,50 +3198,31 @@ check_flush_cache__empty_cache(H5F_t *file_ptr)
 
     /* Test behaviour on an empty cache.  Can't do much sanity
      * checking in this case, so simply check the return values.
+     *
+     * Check of return values is done in the H5C_FLUSH_CACHE() macro.
      */
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "flush with flags = 0x00 failed on empty cache.\n";
-        }
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "flush with flags = 0x00 failed on empty cache.\n")
     }
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
-
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "flush with flags = 0x04 failed on empty cache.\n";
-        }
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "flush with flags = 0x04 failed on empty cache.\n")
     }
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG);
-
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "flush with flags = 0x08 failed on empty cache.\n";
-        }
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_CLEAR_ONLY_FLAG,
+                        "flush with flags = 0x08 failed on empty cache.\n")
     }
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_MARKED_ENTRIES_FLAG);
-
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "flush with flags = 0x10 failed on empty cache.\n";
-        }
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_MARKED_ENTRIES_FLAG,
+                        "flush with flags = 0x10 failed on empty cache.\n")
     }
 
 } /* check_flush_cache__empty_cache() */
@@ -4418,21 +4426,25 @@ check_flush_cache__multi_entry(H5F_t *file_ptr)
         check_flush_cache__pe_multi_entry_test(file_ptr, test_num, flush_flags, spec_size, spec);
     }
 
-    return;
-
 } /* check_flush_cache__multi_entry() */
 
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__multi_entry_test()
  *
- * Purpose:    Run a multi entry flush cache test.
+ * Purpose :    Run a multi entry flush cache test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              1/13/05
  *
  * Modifications:
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -4443,7 +4455,6 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
-    herr_t        result;
     unsigned      u;
     size_t        total_entry_size = 0;
     test_entry_t *base_addr;
@@ -4453,7 +4464,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
     /* This gets used a lot, so lets leave it in. */
 
     HDfprintf(stdout, "check_flush_cache__multi_entry_test: test %d\n",
-        test_num);
+              test_num);
 #endif /* JRM */
 
     if (cache_ptr == NULL) {
@@ -4478,6 +4489,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         if (((unsigned)spec[u].entry_num != u) || (spec[u].entry_type < 0) ||
             (spec[u].entry_type >= NUMBER_OF_ENTRY_TYPES) || (spec[u].entry_index < 0) ||
             (spec[u].entry_index > max_indices[spec[u].entry_type])) {
@@ -4492,6 +4504,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         if (spec[u].insert_flag) {
 
             insert_entry(file_ptr, spec[u].entry_type, spec[u].entry_index, spec[u].flags);
@@ -4510,11 +4523,10 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure message.\n")
 
-        if (result < 0) {
+        if (!pass) {
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in multi entry test #%d.", flush_flags,
                        test_num);
             failure_mssg = msg;
@@ -4568,9 +4580,9 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
     /* clean up the cache to prep for the next test */
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy mssg.\n")
 
-        if (result < 0) {
+        if (!pass) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in multi entry test #%d.", test_num);
@@ -4587,6 +4599,7 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         base_addr = entries[spec[u].entry_type];
         entry_ptr = &(base_addr[spec[u].entry_index]);
 
@@ -4597,21 +4610,26 @@ check_flush_cache__multi_entry_test(H5F_t *file_ptr, int test_num, unsigned int 
         u++;
     }
 
-    return;
-
 } /* check_flush_cache__multi_entry_test() */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    check_flush_cache__pe_multi_entry_test()
  *
- * Purpose:    Run a multi entry flush cache test.
+ * Purpose:     Run a multi entry flush cache test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/5/06
  *
  * Modifications:
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                           JRM -- 5/16/20
  *
  *-------------------------------------------------------------------------
  */
@@ -4622,7 +4640,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
-    herr_t        result;
     unsigned      u;
     int           j;
     size_t        total_entry_size = 0;
@@ -4658,6 +4675,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         if (((unsigned)spec[u].entry_num != u) || (spec[u].entry_type < 0) ||
             (spec[u].entry_type >= NUMBER_OF_ENTRY_TYPES) || (spec[u].entry_index < 0) ||
             (spec[u].entry_index > max_indices[spec[u].entry_type]) || (spec[u].num_pins < 0) ||
@@ -4687,6 +4705,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
         total_entry_size += entry_sizes[spec[u].entry_type];
 
         for (j = 0; j < spec[u].num_pins; j++) {
+
             create_pinned_entry_dependency(file_ptr, spec[u].entry_type, spec[u].entry_index,
                                            spec[u].pin_type[j], spec[u].pin_idx[j]);
         }
@@ -4696,11 +4715,10 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure message.\n")
 
-        if (result < 0) {
+        if (!pass) {
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in pe multi entry test #%d.",
                        flush_flags, test_num);
             failure_mssg = msg;
@@ -4709,6 +4727,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         base_addr = entries[spec[u].entry_type];
         entry_ptr = &(base_addr[spec[u].entry_index]);
 
@@ -4754,9 +4773,9 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
     /* clean up the cache to prep for the next test */
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy mssg.\n")
 
-        if (result < 0) {
+        if (!pass) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in pe multi entry test #%d.", test_num);
@@ -4773,6 +4792,7 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
     u = 0;
     while (pass && (u < spec_size)) {
+
         base_addr = entries[spec[u].entry_type];
         entry_ptr = &(base_addr[spec[u].entry_index]);
 
@@ -4782,8 +4802,6 @@ check_flush_cache__pe_multi_entry_test(H5F_t *file_ptr, int test_num, unsigned i
 
         u++;
     }
-
-    return;
 
 } /* check_flush_cache__pe_multi_entry_test() */
 
@@ -7980,22 +7998,26 @@ check_flush_cache__flush_ops(H5F_t *file_ptr)
     /* finally finish up with the flush ops eviction test */
     check_flush_cache__flush_op_eviction_test(file_ptr);
 
-    return;
-
 } /* check_flush_cache__flush_ops() */
 
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__flush_op_test()
  *
- * Purpose:    Run a flush op flush cache test.  Of the nature of
- *         flush operations, this is a multi-entry test.
+ * Purpose:     Run a flush op flush cache test.  Of the nature of
+ *              flush operations, this is a multi-entry test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              9/3/06
  *
  * Modifications:
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                           JRM -- 5/16/20
  *
  *-------------------------------------------------------------------------
  */
@@ -8009,7 +8031,6 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
-    herr_t        result;
     int           i;
     int           j;
     test_entry_t *base_addr;
@@ -8042,6 +8063,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < spec_size)) {
+
         if ((spec[i].entry_num != i) || (spec[i].entry_type < 0) ||
             (spec[i].entry_type >= NUMBER_OF_ENTRY_TYPES) || (spec[i].entry_index < 0) ||
             (spec[i].entry_index > max_indices[spec[i].entry_type]) || (spec[i].num_pins < 0) ||
@@ -8057,6 +8079,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < check_size)) {
+
         if ((check[i].entry_num != i) || (check[i].entry_type < 0) ||
             (check[i].entry_type >= NUMBER_OF_ENTRY_TYPES) || (check[i].entry_index < 0) ||
             (check[i].entry_index > max_indices[check[i].entry_type]) ||
@@ -8071,6 +8094,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < spec_size)) {
+
         if (spec[i].insert_flag) {
 
             insert_entry(file_ptr, spec[i].entry_type, spec[i].entry_index, spec[i].flags);
@@ -8091,6 +8115,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
         }
 
         for (j = 0; j < spec[i].num_flush_ops; j++) {
+
             add_flush_op(spec[i].entry_type, spec[i].entry_index, spec[i].flush_ops[j].op_code,
                          spec[i].flush_ops[j].type, spec[i].flush_ops[j].idx, spec[i].flush_ops[j].flag,
                          spec[i].flush_ops[j].size, spec[i].flush_ops[j].order_ptr);
@@ -8113,9 +8138,9 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure message")
 
-        if (result < 0) {
+        if (!pass) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in flush op test #%d.", flush_flags,
@@ -8126,6 +8151,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < spec_size)) {
+
         base_addr = entries[spec[i].entry_type];
         entry_ptr = &(base_addr[spec[i].entry_index]);
 
@@ -8159,6 +8185,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
         i = 0;
         while (pass && (i < check_size)) {
+
             if (check[i].in_cache != entry_in_cache(cache_ptr, check[i].entry_type, check[i].entry_index)) {
 
                 pass = FALSE;
@@ -8186,74 +8213,104 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
 #if 0 /* This is useful debugging code.  Lets keep it around for a while. */
 
-        if(entry_ptr->size != check[i].expected_size) {
-            HDfprintf(stdout, "entry_ptr->size (expected) = %d (%d).\n",
-                (int)(entry_ptr->size),
-                (int)(check[i].expected_size));
-        }
-        if((!entry_ptr->header.destroy_in_progress) &&
-            (check[i].in_cache) &&
-                     (entry_ptr->header.size != check[i].expected_size)) {
-                    HDfprintf(stdout,
+                if ( entry_ptr->size != check[i].expected_size ) {
+
+                    HDfprintf(stdout, "entry_ptr->size (expected) = %d (%d).\n",
+                              (int)(entry_ptr->size),
+                              (int)(check[i].expected_size));
+                }
+
+                if ( ( ! entry_ptr->header.destroy_in_progress ) &&
+                     ( check[i].in_cache ) &&
+                     ( entry_ptr->header.size != check[i].expected_size ) ) {
+
+                        HDfprintf(stdout,
                               "(!destroy in progress and in cache and size (expected) = %d (%d).\n",
                               (int)(entry_ptr->header.size),
-                (int)(check[i].expected_size));
-        }
-        if(entry_ptr->at_main_addr != check[i].at_main_addr) {
-            HDfprintf(stdout, "(%d,%d) at main addr (expected) = %d (%d).\n",
-                (int)(check[i].entry_type),
-                (int)(check[i].entry_index),
-                              (int)(entry_ptr->at_main_addr),
-                (int)(check[i].at_main_addr));
+                              (int)(check[i].expected_size));
                 }
-        if(entry_ptr->is_dirty != check[i].is_dirty) {
-            HDfprintf(stdout, "entry_ptr->is_dirty (expected) = %d (%d).\n",
-                    (int)(entry_ptr->is_dirty),
-                (int)(check[i].is_dirty));
-        }
-        if(entry_ptr->header.is_dirty != check[i].is_dirty) {
-            HDfprintf(stdout, "entry_ptr->header.is_dirty (expected) = %d (%d).\n",
-                    (int)(entry_ptr->header.is_dirty),
-                (int)(check[i].is_dirty));
-        }
-            if(entry_ptr->is_protected != check[i].is_protected) {
-                    HDfprintf(stdout, "entry_ptr->is_protected (expected) = %d (%d).\n",
-                (int)(entry_ptr->is_protected),
-                (int)(check[i].is_protected));
-        }
-            if(entry_ptr->header.is_protected != check[i].is_protected) {
-                    HDfprintf(stdout, "entry_ptr->header.is_protected (expected) = %d (%d).\n",
-                (int)(entry_ptr->is_protected),
-                (int)(check[i].is_protected));
-        }
-        if(entry_ptr->is_pinned != check[i].is_pinned) {
-            HDfprintf(stdout, "entry_ptr->is_pinned (expected) = %d (%d).\n",
-                (int)(entry_ptr->is_pinned),
-                (int)(check[i].is_pinned));
-        }
-        if(entry_ptr->header.is_pinned != check[i].is_pinned) {
-            HDfprintf(stdout, "entry_ptr->header.is_pinned (expected) = %d (%d).\n",
-                (int)(entry_ptr->header.is_pinned),
-                (int)(check[i].is_pinned));
-        }
-        if(entry_ptr->deserialized !=
-                check[i].expected_deserialized) {
-            HDfprintf(stdout,
-                "entry_ptr->deserialized (expected) = %d (%d).\n",
-                (int)(entry_ptr->deserialized),
-                (int)(check[i].expected_deserialized));
-        }
-        if(entry_ptr->serialized != check[i].expected_serialized) {
-            HDfprintf(stdout,
-                "entry_ptr->serialized (expected) = %d (%d).\n",
-                (int)(entry_ptr->serialized),
-                (int)(check[i].expected_serialized));
-        }
-        if(entry_ptr->destroyed != check[i].expected_destroyed) {
-            HDfprintf(stdout, "entry_ptr->destroyed (expected) = %d (%d).\n",
-                (int)(entry_ptr->destroyed),
-                (int)(check[i].expected_destroyed));
-        }
+
+                if ( entry_ptr->at_main_addr != check[i].at_main_addr ) {
+
+                    HDfprintf(stdout,
+                              "(%d,%d) at main addr (expected) = %d (%d).\n",
+                              (int)(check[i].entry_type),
+                              (int)(check[i].entry_index),
+                              (int)(entry_ptr->at_main_addr),
+                              (int)(check[i].at_main_addr));
+                }
+
+                if ( entry_ptr->is_dirty != check[i].is_dirty ) {
+
+                    HDfprintf(stdout,
+                              "entry_ptr->is_dirty (expected) = %d (%d).\n",
+                              (int)(entry_ptr->is_dirty),
+                              (int)(check[i].is_dirty));
+                }
+
+                if ( entry_ptr->header.is_dirty != check[i].is_dirty ) {
+
+                    HDfprintf(stdout,
+                          "entry_ptr->header.is_dirty (expected) = %d (%d).\n",
+                          (int)(entry_ptr->header.is_dirty),
+                          (int)(check[i].is_dirty));
+                }
+
+                if ( entry_ptr->is_protected != check[i].is_protected ) {
+
+                    HDfprintf(stdout,
+                              "entry_ptr->is_protected (expected) = %d (%d).\n",
+                              (int)(entry_ptr->is_protected),
+                              (int)(check[i].is_protected));
+                }
+
+                if ( entry_ptr->header.is_protected != check[i].is_protected ) {
+
+                     HDfprintf(stdout,
+                       "entry_ptr->header.is_protected (expected) = %d (%d).\n",
+                       (int)(entry_ptr->is_protected),
+                       (int)(check[i].is_protected));
+                }
+
+                if ( entry_ptr->is_pinned != check[i].is_pinned ) {
+
+                     HDfprintf(stdout,
+                              "entry_ptr->is_pinned (expected) = %d (%d).\n",
+                              (int)(entry_ptr->is_pinned),
+                              (int)(check[i].is_pinned));
+                }
+
+                if ( entry_ptr->header.is_pinned != check[i].is_pinned ) {
+
+                    HDfprintf(stdout,
+                          "entry_ptr->header.is_pinned (expected) = %d (%d).\n",
+                          (int)(entry_ptr->header.is_pinned),
+                          (int)(check[i].is_pinned));
+                }
+
+                if ( entry_ptr->deserialized != check[i].expected_deserialized ) {
+
+                    HDfprintf(stdout,
+                              "entry_ptr->deserialized (expected) = %d (%d).\n",
+                              (int)(entry_ptr->deserialized),
+                              (int)(check[i].expected_deserialized));
+                }
+
+                if ( entry_ptr->serialized != check[i].expected_serialized ) {
+
+                    HDfprintf(stdout,
+                              "entry_ptr->serialized (expected) = %d (%d).\n",
+                              (int)(entry_ptr->serialized),
+                              (int)(check[i].expected_serialized));
+                }
+
+                if ( entry_ptr->destroyed != check[i].expected_destroyed ) {
+
+                    HDfprintf(stdout, \
+                              "entry_ptr->destroyed (expected) = %d (%d).\n",
+                              (int)(entry_ptr->destroyed),
+                              (int)(check[i].expected_destroyed));
+                }
 #endif
                 pass = FALSE;
                 HDsnprintf(msg, (size_t)128, "Check2 failed on entry %d after flush op test #%d.", i,
@@ -8282,11 +8339,10 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
     /* clean up the cache to prep for the next test */
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy mssg.")
 
-        if (result < 0) {
+        if (!pass) {
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in flush op test #%d.", test_num);
             failure_mssg = msg;
         }
@@ -8302,6 +8358,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < spec_size)) {
+
         base_addr = entries[spec[i].entry_type];
         entry_ptr = &(base_addr[spec[i].entry_index]);
 
@@ -8316,6 +8373,7 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
 
     i = 0;
     while (pass && (i < check_size)) {
+
         base_addr = entries[check[i].entry_type];
         entry_ptr = &(base_addr[check[i].entry_index]);
 
@@ -8328,29 +8386,33 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
         i++;
     }
 
-    return;
-
 } /* check_flush_cache__flush_op_test() */
 
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__flush_op_eviction_test()
  *
- * Purpose:    Verify that flush operations work as expected when an
+ * Purpose:     Verify that flush operations work as expected when an
  *              entry is evicted.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              10/3/06
  *
  * Modifications:
  *
- *        Updated test for minor changes in the behaviour
- *        of H5C__flush_single_entry().
+ *              Updated test for minor changes in the behaviour
+ *              of H5C__flush_single_entry().
  *
- *                    JRM -- 2/16/15
+ *                                          JRM -- 2/16/15
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                           JRM -- 5/16/20
  *
  *-------------------------------------------------------------------------
  */
@@ -8363,7 +8425,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
     int                          num_variable_entries = 10;
     int                          num_monster_entries  = 31;
     int                          num_large_entries    = 0;
-    herr_t                       result;
     test_entry_t *               entry_ptr;
     test_entry_t *               base_addr;
     struct expected_entry_status expected[10 + 31 + 14] = {
@@ -10377,14 +10438,10 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed after flush op eviction test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed after flush op eviction test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cleanup of flush op eviction test";
@@ -10478,8 +10535,6 @@ check_flush_cache__flush_op_eviction_test(H5F_t *file_ptr)
 
         reset_entries();
     }
-
-    return;
 
 } /* check_flush_cache__flush_op_eviction_test() */
 
@@ -12104,21 +12159,25 @@ check_flush_cache__single_entry(H5F_t *file_ptr)
         }
     }
 
-    return;
-
 } /* check_flush_cache__single_entry() */
 
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__single_entry_test()
  *
- * Purpose:    Run a single entry flush cache test.
+ * Purpose:     Run a single entry flush cache test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              1/12/05
  *
  * Modifications:
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -12131,7 +12190,6 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 {
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
-    herr_t        result;
     test_entry_t *base_addr;
     test_entry_t *entry_ptr = NULL;
 
@@ -12174,18 +12232,19 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure mssg.")
 
-        if (result < 0) {
+        if (!pass) { /* construct and set actual failure message */
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in single entry test #%d.",
                        flush_flags, test_num);
+
             failure_mssg = msg;
         }
         else if ((entry_ptr->deserialized != expected_deserialized) ||
                  (entry_ptr->serialized != expected_serialized) ||
                  (entry_ptr->destroyed != expected_destroyed)) {
+
 #if 0 /* This is useful debugging code -- lets keep it for a while */
 
             HDfprintf(stdout,
@@ -12217,11 +12276,10 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
     /* clean up the cache to prep for the next test */
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy failure mssg.")
 
-        if (result < 0) {
+        if (!pass) { /* construct and set actual failure message */
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in single entry test #%d.", test_num);
             failure_mssg = msg;
         }
@@ -12240,29 +12298,32 @@ check_flush_cache__single_entry_test(H5F_t *file_ptr, int test_num, int entry_ty
         }
     }
 
-    return;
-
 } /* check_flush_cache__single_entry_test() */
 
 /*-------------------------------------------------------------------------
  * Function:    check_flush_cache__pinned_single_entry_test()
  *
- * Purpose:    Run a pinned single entry flush cache test.
+ * Purpose:     Run a pinned single entry flush cache test.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              3/28/06
  *
  * Modifications:
  *
- *         JRM -- 5/17/06
- *         Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
- *         flags and supporting code to allow us to test the
- *         H5C_mark_entry_dirty() call.  Use the
- *         call to mark the entry dirty while the entry is protected
- *         if pop_mark_dirty_prot is TRUE, and to mark the entry
- *         dirty while it is pinned if pop_mark_dirty_pinned is TRUE.
+ *              JRM -- 5/17/06
+ *              Added the pop_mark_dirty_prot and pop_mark_dirty_pinned
+ *              flags and supporting code to allow us to test the
+ *              H5C_mark_entry_dirty() call.  Use the
+ *              call to mark the entry dirty while the entry is protected
+ *              if pop_mark_dirty_prot is TRUE, and to mark the entry
+ *              dirty while it is pinned if pop_mark_dirty_pinned is TRUE.
+ *
+ *              JRM -- 5/14/20
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
  *
  *-------------------------------------------------------------------------
  */
@@ -12278,7 +12339,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
     H5C_t *       cache_ptr = file_ptr->shared->cache;
     static char   msg[128];
     hbool_t       expected_deserialized = TRUE;
-    herr_t        result;
     test_entry_t *base_addr;
     test_entry_t *entry_ptr = NULL;
 
@@ -12332,11 +12392,10 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, flush_flags);
+        H5C_FLUSH_CACHE(file_ptr, flush_flags, "dummy failure message\n")
 
-        if (result < 0) {
+        if (!pass) { /* construct and set the correct failure message */
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "flush with flags 0x%x failed in pinned single entry test #%d.",
                        flush_flags, test_num);
             failure_mssg = msg;
@@ -12344,6 +12403,7 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
         else if ((entry_ptr->deserialized != expected_deserialized) ||
                  (entry_ptr->serialized != expected_serialized) ||
                  (entry_ptr->destroyed != expected_destroyed)) {
+
 #if 0 /* this is useful debugging code -- keep it around */
             HDfprintf(stdout,
               "desrlzd = %d(%d), srlzd = %d(%d), dest = %d(%d)\n",
@@ -12390,11 +12450,10 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG, "dummy mssg\n")
 
-        if (result < 0) {
+        if (!pass) {
 
-            pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Flush failed on cleanup in pinned single entry test #%d.",
                        test_num);
             failure_mssg = msg;
@@ -12413,8 +12472,6 @@ check_flush_cache__pinned_single_entry_test(H5F_t *file_ptr, int test_num, int e
             entry_ptr->destroyed    = FALSE;
         }
     }
-
-    return;
 
 } /* check_flush_cache__pinned_single_entry_test() */
 
@@ -12631,7 +12688,7 @@ check_get_entry_status(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -12912,7 +12969,7 @@ check_expunge_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -13303,7 +13360,7 @@ check_multiple_read_protect(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -13403,7 +13460,7 @@ check_move_entry(unsigned paged)
         H5_FAILED()
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 } /* check_move_entry() */
@@ -13564,8 +13621,6 @@ check_move_entry__run_test(H5F_t *file_ptr, unsigned test_num, struct move_entry
     /* put the entry back where it started from */
     move_entry(cache_ptr, spec_ptr->entry_type, spec_ptr->entry_index, TRUE);
 
-    return;
-
 } /* check_move_entry__run_test() */
 
 /*-------------------------------------------------------------------------
@@ -13663,7 +13718,7 @@ check_pin_protected_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -13673,13 +13728,19 @@ check_pin_protected_entry(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_resize_entry()
  *
- * Purpose:    Verify that H5C_resize_entry() and H5C_unprotect() resize
- *         entries as expected.
+ * Purpose:     Verify that H5C_resize_entry() and H5C_unprotect() resize
+ *              entries as expected.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              7/7/06
+ *
+ * Modifications:
+ *
+ *              Updated function to allow for disabling of the slist.
+ *
+ *                                             JRM -- 5/18/20
  *
  *-------------------------------------------------------------------------
  */
@@ -13845,7 +13906,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 1) || (cache_ptr->index_size != (LARGE_ENTRY_SIZE / 2)) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 2))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 2))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 3.");
@@ -13919,7 +13981,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 1) || (cache_ptr->index_size != LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 4.");
@@ -13975,7 +14038,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 1) || (cache_ptr->index_size != (LARGE_ENTRY_SIZE / 4)) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 4))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != (LARGE_ENTRY_SIZE / 4))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 5.");
@@ -14024,7 +14088,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 1) || (cache_ptr->index_size != LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 6.");
@@ -14092,8 +14157,8 @@ check_resize_entry(unsigned paged)
 
     if (pass) {
 
-        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) || (cache_ptr->slist_len != 0) ||
-            (cache_ptr->slist_size != 0)) {
+        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 7.");
@@ -14105,13 +14170,14 @@ check_resize_entry(unsigned paged)
 
     if (pass) {
 
-        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) || (cache_ptr->slist_len != 0) ||
-            (cache_ptr->slist_size != 0)) {
+        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 8.");
             failure_mssg = msg;
         }
+
         base_addr  = entries[LARGE_ENTRY_TYPE];
         entry_ptr  = &(base_addr[3]);
         entry_size = LARGE_ENTRY_SIZE;
@@ -14132,7 +14198,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 3) || (cache_ptr->index_size != 3 * LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 9.");
@@ -14148,7 +14215,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != 4 * LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 10.");
@@ -14217,8 +14285,9 @@ check_resize_entry(unsigned paged)
 
         if ((cache_ptr->index_len != 4) ||
             (cache_ptr->index_size != ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 2))) ||
-            (cache_ptr->slist_len != 2) ||
-            (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 2)))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) ||
+              (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 2)))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 11.");
@@ -14292,7 +14361,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != 4 * LARGE_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 12.");
@@ -14349,8 +14419,9 @@ check_resize_entry(unsigned paged)
 
         if ((cache_ptr->index_len != 4) ||
             (cache_ptr->index_size != ((3 * LARGE_ENTRY_SIZE) + (LARGE_ENTRY_SIZE / 4))) ||
-            (cache_ptr->slist_len != 2) ||
-            (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 4)))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) ||
+              (cache_ptr->slist_size != (LARGE_ENTRY_SIZE + (LARGE_ENTRY_SIZE / 4)))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 13.");
@@ -14399,7 +14470,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 4) || (cache_ptr->index_size != (4 * LARGE_ENTRY_SIZE)) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != (2 * LARGE_ENTRY_SIZE))) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != (2 * LARGE_ENTRY_SIZE))))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 14.");
@@ -14468,7 +14540,8 @@ check_resize_entry(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 3) || (cache_ptr->index_size != (3 * LARGE_ENTRY_SIZE)) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)) {
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != LARGE_ENTRY_SIZE)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 15.");
@@ -14490,8 +14563,8 @@ check_resize_entry(unsigned paged)
 
     if (pass) {
 
-        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) || (cache_ptr->slist_len != 0) ||
-            (cache_ptr->slist_size != 0)) {
+        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0)))) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 16.");
@@ -14513,7 +14586,7 @@ check_resize_entry(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -14523,16 +14596,19 @@ check_resize_entry(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_evictions_enabled()
  *
- * Purpose:    Verify that H5C_get_evictions_enabled() and
- *         H5C_set_evictions_enabled() functions perform as expected.
+ * Purpose:     Verify that H5C_get_evictions_enabled() and
+ *              H5C_set_evictions_enabled() functions perform as expected.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              8/2/07
  *
  * Modifications:
  *
+ *              Updated function to allow for disabling of the slist.
+ *
+ *                                             JRM -- 5/18/20
  *
  *-------------------------------------------------------------------------
  */
@@ -14595,7 +14671,7 @@ check_evictions_enabled(unsigned paged)
     pass = TRUE;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* create the cache */
     if (pass) {
@@ -14617,13 +14693,14 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that it is empty */
     if (pass) {
 
-        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) || (cache_ptr->slist_len != 0) ||
-            (cache_ptr->slist_size != 0) || (cache_ptr->evictions_enabled != TRUE)) {
+        if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))) ||
+            (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
             HDsnprintf(msg, (size_t)128, "Unexpected cache status 1.");
@@ -14632,7 +14709,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that H5C_get_evictions_enabled() returns the expected value */
     if (pass) {
@@ -14648,7 +14725,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14660,13 +14737,13 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache is full */
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14676,7 +14753,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14686,13 +14763,13 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that an entry has been evicted */
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0) ||
+            ((cache_ptr->slist_enabled) && ((cache_ptr->slist_len != 0) || (cache_ptr->slist_size != 0))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14702,7 +14779,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14732,7 +14809,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14741,13 +14818,14 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that another entry has been evicted */
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14757,7 +14835,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14787,7 +14865,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions */
     if (pass) {
@@ -14803,13 +14881,14 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 13 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that evictions are disabled */
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != FALSE)) {
 
             pass = FALSE;
@@ -14819,7 +14898,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 14 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14829,13 +14908,14 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 15 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entry has been evicted */
     if (pass) {
 
         if ((cache_ptr->index_len != 17) || (cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 1) || (cache_ptr->slist_size != MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != FALSE)) {
 
             pass = FALSE;
@@ -14845,7 +14925,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 16 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14854,13 +14934,14 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 17 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entry has been evicted */
     if (pass) {
 
         if ((cache_ptr->index_len != 18) || (cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != FALSE)) {
 
             pass = FALSE;
@@ -14870,7 +14951,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 18 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* re-enable evictions */
     if (pass) {
@@ -14886,7 +14967,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 19 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14896,13 +14977,14 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 20 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that no entries have been evicted */
     if (pass) {
 
         if ((cache_ptr->index_len != 18) || (cache_ptr->index_size != 18 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14912,7 +14994,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 21 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14922,7 +15004,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 22 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the entries have been evicted to bring the
      * cache back down to its normal size.
@@ -14931,7 +15013,8 @@ check_evictions_enabled(unsigned paged)
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -14941,7 +15024,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 23 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -14971,7 +15054,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 24 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -15001,7 +15084,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 25 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions again */
     if (pass) {
@@ -15017,7 +15100,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 26 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -15029,13 +15112,14 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 27 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache has grown */
     if (pass) {
 
         if ((cache_ptr->index_len != 17) || (cache_ptr->index_size != 17 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 2) || (cache_ptr->slist_size != 2 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != FALSE)) {
 
             pass = FALSE;
@@ -15045,7 +15129,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 28 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* re-enable evictions again */
     if (pass) {
@@ -15061,7 +15145,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 29 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -15070,13 +15154,14 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 30 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* verify that the cache has returned to its maximum size */
     if (pass) {
 
         if ((cache_ptr->index_len != 16) || (cache_ptr->index_size != 16 * MONSTER_ENTRY_SIZE) ||
-            (cache_ptr->slist_len != 3) || (cache_ptr->slist_size != 3 * MONSTER_ENTRY_SIZE) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->slist_len != 3) || (cache_ptr->slist_size != 3 * MONSTER_ENTRY_SIZE))) ||
             (cache_ptr->evictions_enabled != TRUE)) {
 
             pass = FALSE;
@@ -15086,7 +15171,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 31 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -15116,7 +15201,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 32 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* disable evictions one last time before we shut down */
     if (pass) {
@@ -15132,7 +15217,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 33 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -15140,7 +15225,7 @@ check_evictions_enabled(unsigned paged)
     }
 
     if (show_progress) /* 34 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         PASSED();
@@ -15151,7 +15236,7 @@ check_evictions_enabled(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15161,15 +15246,20 @@ check_evictions_enabled(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_flush_protected_err()
  *
- * Purpose:    Verify that an attempt to flush the cache when it contains
- *        a protected entry will generate an error.
+ * Purpose:     Verify that an attempt to flush the cache when it contains
+ *              a protected entry will generate an error.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              6/24/04
  *
  * Modifications:
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -15177,7 +15267,8 @@ check_evictions_enabled(unsigned paged)
 static unsigned
 check_flush_protected_err(unsigned paged)
 {
-    H5F_t *file_ptr = NULL;
+    H5F_t *file_ptr  = NULL;
+    H5C_t *cache_ptr = NULL;
 
     if (paged)
         TESTING("flush cache with protected entry error (paged aggregation)")
@@ -15197,27 +15288,41 @@ check_flush_protected_err(unsigned paged)
 
         file_ptr = setup_cache((size_t)(2 * 1024), (size_t)(1 * 1024), paged);
 
+        if (pass) {
+
+            cache_ptr = file_ptr->shared->cache;
+        }
+
         protect_entry(file_ptr, 0, 0);
 
-        if (H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET) >= 0) {
+        /* enable slist prior to flush */
+        if ((pass) && (H5C_set_slist_enabled(cache_ptr, TRUE, FALSE) < 0)) {
+
+            pass         = FALSE;
+            failure_mssg = "unable to enable slist prior to flush.\n";
+        }
+
+        if ((pass) && (H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET) >= 0)) {
 
             pass         = FALSE;
             failure_mssg = "flush succeeded on cache with protected entry.\n";
         }
-        else {
 
-            unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
+        /* disable the slist after the flush */
+        if ((pass) && (H5C_set_slist_enabled(cache_ptr, FALSE, FALSE) < 0)) {
 
-            if (H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET) < 0) {
-
-                pass         = FALSE;
-                failure_mssg = "flush failed after unprotect.\n";
-            }
-            else {
-
-                takedown_cache(file_ptr, FALSE, FALSE);
-            }
+            pass         = FALSE;
+            failure_mssg = "unable to disable slist after  flush.\n";
         }
+
+        unprotect_entry(file_ptr, 0, 0, H5C__DIRTIED_FLAG);
+
+        if (pass) {
+
+            H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "flush failed after unprotect.\n")
+        }
+
+        takedown_cache(file_ptr, FALSE, FALSE);
     }
 
     if (pass) {
@@ -15229,7 +15334,7 @@ check_flush_protected_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15318,7 +15423,7 @@ check_destroy_pinned_err(unsigned paged)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 
@@ -15414,7 +15519,7 @@ check_destroy_protected_err(unsigned paged)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 
@@ -15495,7 +15600,7 @@ check_duplicate_insert_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15584,7 +15689,7 @@ check_double_pin_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15682,7 +15787,7 @@ check_double_unpin_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15794,7 +15899,7 @@ check_pin_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15876,7 +15981,7 @@ check_double_protect_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -15954,7 +16059,7 @@ check_double_unprotect_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -16036,7 +16141,7 @@ check_mark_entry_dirty_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -16153,7 +16258,7 @@ check_expunge_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -16270,7 +16375,7 @@ check_move_entry_errs(unsigned paged)
     else {
         H5_FAILED()
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     } /* end else */
 
     return (unsigned)!pass;
@@ -16279,12 +16384,12 @@ check_move_entry_errs(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_resize_entry_errs()
  *
- * Purpose:    Verify that invalid calls to H5C_resize_entry()
- *         generates errors as expected.
+ * Purpose:     Verify that invalid calls to H5C_resize_entry()
+ *              generates errors as expected.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              7/7/06
  *
  *-------------------------------------------------------------------------
@@ -16370,7 +16475,7 @@ check_resize_entry_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -16491,7 +16596,7 @@ check_unprotect_ro_dirty_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -16578,7 +16683,7 @@ check_protect_ro_rw_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -16707,7 +16812,7 @@ check_protect_retries(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_msg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_msg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -16847,7 +16952,7 @@ check_check_evictions_enabled_err(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -20713,7 +20818,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
     } /* end else */
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return (unsigned)!pass;
 } /* check_auto_cache_resize() */
@@ -23313,7 +23418,7 @@ check_auto_cache_resize_disable(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -24000,7 +24105,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -26232,7 +26337,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -26728,7 +26833,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -26755,7 +26860,6 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
  * Return:    void
  *
  * Programmer:    Mike McGreevy
- *              <mamcgree@hdfgroup.org>
  *              12/16/08
  *
  * Modifications:
@@ -26783,2711 +26887,163 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     /* Set up the expected array. This is used to maintain a table of the
      * expected status of every entry used in this test.
      */
-    struct expected_entry_status expected[150] = {
-        /* entry        entry            in    at main                                                flush
-           dep flush dep child flush   flush       flush */
-        /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    dsrlzd:
-           srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:     corked: */
-        {HUGE_ENTRY_TYPE,
-         0,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         1,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         2,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         3,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         4,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         5,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         6,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         7,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         8,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         9,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         10,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         11,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         12,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         13,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         14,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         15,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         16,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         17,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         18,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         19,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         20,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         21,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         22,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         23,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         24,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         25,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         26,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         27,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         28,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         29,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         30,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         31,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         32,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         33,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         34,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         35,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         36,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         37,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         38,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         39,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         40,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         41,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         42,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         43,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         44,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         45,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         46,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         47,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         48,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         49,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         50,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         51,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         52,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         53,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         54,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         55,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         56,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         57,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         58,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         59,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         60,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         61,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         62,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         63,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         64,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         65,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         66,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         67,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         68,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         69,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         70,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         71,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         72,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         73,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         74,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         75,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         76,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         77,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         78,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         79,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         80,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         81,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         82,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         83,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         84,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         85,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         86,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         87,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         88,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         89,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         90,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         91,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         92,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         93,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         94,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         95,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         96,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         97,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         98,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         99,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         100,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         101,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         102,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         103,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         104,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         105,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         106,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         107,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         108,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         109,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         110,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         111,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         112,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         113,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         114,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         115,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         116,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         117,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         118,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         119,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         120,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         121,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         122,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         123,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         124,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         125,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         126,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         127,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         128,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         129,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         130,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         131,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         132,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         133,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         134,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         135,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         136,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         137,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         138,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         139,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         140,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         141,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         142,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         143,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         144,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         145,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         146,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         147,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         148,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         149,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE}};
+    /* clang-format off */
+    struct expected_entry_status expected[150] =
+    {
+      /* entry        entry            in    at main                                                flush dep flush dep child flush   flush       flush */
+      /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:     corked: */
+      { HUGE_ENTRY_TYPE, 0,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 1,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 2,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 3,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 4,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 5,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 6,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 7,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 8,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 9,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 10,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 11,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 12,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 13,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 14,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 15,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 16,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 17,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 18,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 19,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 20,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 21,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 22,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 23,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 24,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 25,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 26,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 27,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 28,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 29,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 30,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 31,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 32,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 33,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 34,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 35,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 36,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 37,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 38,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 39,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 40,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 41,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 42,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 43,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 44,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 45,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 46,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 47,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 48,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 49,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 50,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 51,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 52,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 53,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 54,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 55,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 56,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 57,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 58,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 59,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 60,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 61,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 62,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 63,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 64,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 65,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 66,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 67,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 68,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 69,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 70,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 71,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 72,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 73,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 74,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 75,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 76,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 77,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 78,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 79,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 80,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 81,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 82,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 83,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 84,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 85,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 86,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 87,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 88,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 89,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 90,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 91,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 92,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 93,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 94,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 95,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 96,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 97,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 98,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 99,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 100,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 101,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 102,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 103,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 104,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 105,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 106,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 107,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 108,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 109,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 110,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 111,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 112,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 113,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 114,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 115,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 116,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 117,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 118,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 119,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 120,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 121,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 122,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 123,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 124,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 125,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 126,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 127,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 128,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 129,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 130,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 131,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 132,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 133,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 134,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 135,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 136,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 137,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 138,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 139,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 140,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 141,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 142,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 143,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 144,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 145,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 146,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 147,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 148,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 149,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
+    };
+    /* clang-format on */
 
     pass = TRUE;
 
@@ -29507,7 +27063,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     } /* end else */
 
     if (show_progress) /* 0 */
-        HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "\n%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -29528,7 +27084,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -29591,7 +27147,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -29661,7 +27217,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -29715,13 +27271,13 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
         /* Fill out the rest of the cache with entries */
         /* Verify expected status of entries after each insertion */
-        for (entry_idx = entry_idx; entry_idx < 50; entry_idx++) {
+        for (; entry_idx < 50; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -29768,7 +27324,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -29843,7 +27399,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -29855,7 +27411,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
          * After each insertion, verify the expected status of the
          * entries in the cache.
          */
-        for (entry_idx = entry_idx; entry_idx < 100; entry_idx++) {
+        for (; entry_idx < 100; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -29914,7 +27470,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     /* ========================================================================
      * ========================================================================
@@ -29973,7 +27529,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -30021,7 +27577,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -30072,7 +27628,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 10 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
 
@@ -30118,7 +27674,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 11 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (cache_ptr) {
 
@@ -30128,7 +27684,7 @@ check_metadata_blizzard_absence(hbool_t fill_via_insertion, unsigned paged)
     }
 
     if (show_progress) /* 12 */
-        HDfprintf(stdout, "%s: check point %d -- pass %d\n", FUNC, checkpoint++, pass);
+        HDfprintf(stdout, "%s: check point %d -- pass %d\n", __func__, checkpoint++, pass);
 
     if (pass) {
         PASSED();
@@ -30162,101 +27718,19 @@ check_flush_deps(unsigned paged)
     test_entry_t *base_addr;               /* Base address of entries for test */
     int      entry_type = PICO_ENTRY_TYPE; /* Use very small entry size (size of entries doesn't matter) */
     unsigned u;                            /* Local index variable */
-    struct expected_entry_status expected[5] = {
-        /* entry            entry        in    at main flush dep flush dep child flush   flush       flush
-         */
-        /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    dsrlzd:
-           srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
-        {PICO_ENTRY_TYPE,
-         0,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {PICO_ENTRY_TYPE,
-         1,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {PICO_ENTRY_TYPE,
-         2,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {PICO_ENTRY_TYPE,
-         3,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {PICO_ENTRY_TYPE,
-         4,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE}};
+
+    /* clang-format off */
+    struct expected_entry_status expected[5] =
+    {
+      /* entry        entry     in              at main   flush    dep       flush     dep       child     flush     flush       flush */
+      /* type:        index:   size:            cache:    addr:    dirty:    prot:     pinned:   dsrlzd:   srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd:       order: corked: */
+      { PICO_ENTRY_TYPE, 0,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 1,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 2,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 3,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 4,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
+    };
+    /* clang-format on */
 
     if (paged)
         TESTING("flush dependencies (paged aggregation)")
@@ -32415,13 +29889,21 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    check_flush_deps_order()
  *
- * Purpose:    Verify that the order that entries with flush dependencies
+ * Purpose:     Verify that the order that entries with flush dependencies
  *              is correct
  *
- * Return:    0 on success, non-zero on failure
+ * Return:      0 on success, non-zero on failure
  *
- * Programmer:    Quincey Koziol
- *               3/17/09
+ * Programmer:  Quincey Koziol
+ *              3/17/09
+ *
+ * Modifications:
+ *
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -32433,102 +29915,19 @@ check_flush_deps_order(unsigned paged)
     H5C_t *  cache_ptr  = NULL;            /* Metadata cache for this test */
     int      entry_type = PICO_ENTRY_TYPE; /* Use very small entry size (size of entries doesn't matter) */
     unsigned u;                            /* Local index variable */
-    struct expected_entry_status expected[5] = {
-        /* entry            entry        in    at main flush dep flush dep child flush   flush       flush
-         */
-        /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    dsrlzd:
-           srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
-        {PICO_ENTRY_TYPE,
-         0,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {PICO_ENTRY_TYPE,
-         1,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {PICO_ENTRY_TYPE,
-         2,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {PICO_ENTRY_TYPE,
-         3,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {PICO_ENTRY_TYPE,
-         4,
-         PICO_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE}};
-    unsigned flush_order; /* Index for tracking flush order */
+    unsigned flush_order;                  /* Index for tracking flush order */
+    /* clang-format off */
+    struct expected_entry_status expected[5] =
+    {
+      /* entry            entry        in    at main                                                        flush dep flush dep child flush   flush       flush */
+      /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
+      { PICO_ENTRY_TYPE, 0,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 1,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 2,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 3,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { PICO_ENTRY_TYPE, 4,    PICO_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
+    };
+    /* clang-format on */
 
     if (paged)
         TESTING("flush dependencies flush order (paged aggregation)")
@@ -32603,8 +30002,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
 
@@ -32618,8 +30015,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32704,8 +30101,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
 
@@ -32731,8 +30126,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32819,8 +30214,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -32850,8 +30243,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -32946,8 +30339,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -32977,8 +30368,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -33118,8 +30509,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -33167,8 +30556,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -33345,8 +30734,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -33394,8 +30781,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -33521,8 +30908,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -33560,8 +30945,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -33659,8 +31044,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -33698,8 +31081,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -33851,8 +31234,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
 
@@ -33903,8 +31284,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -34106,8 +31487,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -34159,8 +31538,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -34382,8 +31761,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -34435,8 +31812,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -34697,8 +32074,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -34746,8 +32121,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -35041,8 +32416,6 @@ check_flush_deps_order(unsigned paged)
 
     /* Flush the cache and verify that the entries were flushed in correct order */
     {
-        herr_t result; /* Generic return value */
-
         add_flush_op(entry_type, 0, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 1, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
         add_flush_op(entry_type, 2, FLUSH_OP__ORDER, entry_type, 0, FALSE, (size_t)0, &flush_order);
@@ -35090,8 +32463,8 @@ check_flush_deps_order(unsigned paged)
         /* Reset index for tracking flush order */
         flush_order = 0;
 
-        result = H5C_flush_cache(file_ptr, H5C__NO_FLAGS_SET);
-        if (result < 0)
+        H5C_FLUSH_CACHE(file_ptr, H5C__NO_FLAGS_SET, "dummy mssg")
+        if (!pass)
             CACHE_ERROR("flushing entries with flush dependendices")
 
         /* Change expected values, and verify the status of the entries
@@ -35272,102 +32645,19 @@ check_notify_cb(unsigned paged)
     test_entry_t *base_addr;            /* Base address of entries for test */
     test_entry_t *entry_ptr;            /* Cache entry to examine/manipulate */
     int entry_type = NOTIFY_ENTRY_TYPE; /* Use entry w/notify callback (size of entries doesn't matter) */
-    unsigned                     u;     /* Local index variable */
-    struct expected_entry_status expected[5] = {
-        /* entry            entry           in     at main                                               flush
-           dep flush dep child flush   flush       flush */
-        /* type:        index:    size:           cache: addr:    dirty:    prot:    pinned:    dsrlzd:
-           srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
-        {NOTIFY_ENTRY_TYPE,
-         0,
-         NOTIFY_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {NOTIFY_ENTRY_TYPE,
-         1,
-         NOTIFY_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {NOTIFY_ENTRY_TYPE,
-         2,
-         NOTIFY_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {NOTIFY_ENTRY_TYPE,
-         3,
-         NOTIFY_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {NOTIFY_ENTRY_TYPE,
-         4,
-         NOTIFY_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE}};
+    unsigned u;                         /* Local index variable */
+    /* clang-format off */
+    struct expected_entry_status expected[5] =
+    {
+      /* entry            entry           in     at main                                               flush dep flush dep child flush   flush       flush */
+      /* type:        index:    size:           cache: addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
+      { NOTIFY_ENTRY_TYPE, 0,    NOTIFY_ENTRY_SIZE, FALSE, TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { NOTIFY_ENTRY_TYPE, 1,    NOTIFY_ENTRY_SIZE, FALSE, TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { NOTIFY_ENTRY_TYPE, 2,    NOTIFY_ENTRY_SIZE, FALSE, TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { NOTIFY_ENTRY_TYPE, 3,    NOTIFY_ENTRY_SIZE, FALSE, TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { NOTIFY_ENTRY_TYPE, 4,    NOTIFY_ENTRY_SIZE, FALSE, TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
+    };
+    /* clang-format on */
 
     if (paged)
         TESTING("'notify' callback (paged)")
@@ -35585,2711 +32875,163 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     /* Set up the expected array. This is used to maintain a table of the
      * expected status of every entry used in this test.
      */
-    struct expected_entry_status expected[150] = {
-        /* entry            entry        in    at main                                                flush
-           dep flush dep child flush   flush       flush */
-        /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    dsrlzd:
-           srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order: corked: */
-        {HUGE_ENTRY_TYPE,
-         0,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         1,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         2,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         3,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         4,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         5,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         6,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         7,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         8,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         9,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         10,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         11,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         12,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         13,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         14,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         15,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         16,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         17,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         18,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         19,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         20,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         21,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         22,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         23,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         24,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         25,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         26,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         27,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         28,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         29,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         30,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         31,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         32,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         33,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         34,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         35,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         36,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         37,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         38,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         39,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         40,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         41,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         42,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         43,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         44,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         45,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         46,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         47,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         48,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         49,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         50,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         51,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         52,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         53,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         54,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         55,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         56,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         57,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         58,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         59,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         60,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         61,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         62,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         63,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         64,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         65,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         66,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         67,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         68,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         69,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         70,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         71,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         72,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         73,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         74,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         75,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         76,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         77,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         78,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         79,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         80,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         81,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         82,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         83,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         84,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         85,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         86,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         87,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         88,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         89,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         90,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         91,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         92,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         93,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         94,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         95,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         96,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         97,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         98,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         99,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         100,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         101,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         102,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         103,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         104,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         105,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         106,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         107,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         108,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         109,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         110,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         111,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         112,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         113,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         114,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         115,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         116,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         117,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         118,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         119,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         120,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         121,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         122,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         123,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         124,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         125,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         126,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         127,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         128,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         129,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         130,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         131,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         132,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         133,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         134,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         135,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         136,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         137,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         138,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         139,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         140,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         141,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         142,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         143,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         144,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         145,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         146,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         147,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         148,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         149,
-         HUGE_ENTRY_SIZE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         FALSE,
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE}};
+    /* clang-format off */
+    struct expected_entry_status expected[150] =
+    {
+      /* entry            entry        in    at main                                                flush dep flush dep child flush   flush       flush */
+      /* type:        index:    size:        cache:    addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order: corked: */
+      { HUGE_ENTRY_TYPE, 0,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 1,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 2,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 3,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 4,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 5,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 6,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 7,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 8,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 9,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 10,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 11,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 12,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 13,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 14,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 15,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 16,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 17,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 18,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 19,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 20,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 21,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 22,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 23,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 24,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 25,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 26,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 27,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 28,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 29,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 30,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 31,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 32,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 33,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 34,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 35,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 36,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 37,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 38,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 39,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 40,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 41,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 42,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 43,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 44,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 45,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 46,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 47,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 48,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 49,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 50,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 51,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 52,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 53,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 54,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 55,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 56,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 57,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 58,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 59,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 60,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 61,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 62,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 63,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 64,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 65,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 66,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 67,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 68,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 69,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 70,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 71,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 72,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 73,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 74,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 75,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 76,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 77,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 78,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 79,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 80,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 81,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 82,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 83,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 84,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 85,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 86,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 87,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 88,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 89,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 90,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 91,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 92,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 93,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 94,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 95,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 96,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 97,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 98,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 99,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 100,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 101,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 102,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 103,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 104,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 105,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 106,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 107,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 108,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 109,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 110,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 111,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 112,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 113,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 114,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 115,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 116,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 117,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 118,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 119,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 120,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 121,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 122,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 123,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 124,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 125,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 126,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 127,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 128,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 129,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 130,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 131,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 132,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 133,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 134,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 135,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 136,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 137,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 138,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 139,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 140,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 141,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 142,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 143,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 144,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 145,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 146,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 147,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 148,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE},
+      { HUGE_ENTRY_TYPE, 149,    HUGE_ENTRY_SIZE, FALSE,    TRUE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE,    FALSE, {0,0,0,0,0,0,0,0},       {0,0,0,0,0,0,0,0},      0, 0, 0,          -1, FALSE}
+    } ;
+    /* clang-format on */
 
     pass = TRUE;
 
@@ -38481,7 +33223,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
 
         /* Fill out the rest of the cache with entries */
         /* Verify expected status of entries after each insertion */
-        for (entry_idx = entry_idx; entry_idx < 50; entry_idx++) {
+        for (; entry_idx < 50; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -38542,7 +33284,7 @@ check_metadata_cork(hbool_t fill_via_insertion, unsigned paged)
     if (pass) {
 
         /* Insert 50 more entries (indices 50-99) into the cache.  */
-        for (entry_idx = entry_idx; entry_idx < 100; entry_idx++) {
+        for (; entry_idx < 100; entry_idx++) {
 
             if (fill_via_insertion) {
                 insert_entry(file_ptr,           /* H5F_t * file_ptr */
@@ -38902,7 +33644,7 @@ check_entry_deletions_during_scans(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
     return (unsigned)!pass;
@@ -38910,30 +33652,35 @@ check_entry_deletions_during_scans(unsigned paged)
 } /* check_entry_deletions_during_scans() */
 
 /*-------------------------------------------------------------------------
+ *
  * Function:    cedds__expunge_dirty_entry_in_flush_test()
  *
- * Purpose:    Verify that H5C_flush_cache() can handle the removal of
- *        a dirty entry from the cache during its scan of the
- *        skip list.
+ * Purpose:     Verify that H5C_flush_cache() can handle the removal of
+ *              a dirty entry from the cache during its scan of the
+ *              skip list.
  *
- *        Do this by setting up a full cache, with the last entry
- *        on the LRU being both dirty and having a flush operation
- *        that deletes the second to last entry on the LRU.  Then
- *        flush the cache, triggering the flush of the last
- *        item, and thereby the deletion of the second to last item.
+ *              Do this by setting up a full cache, with the last entry
+ *              on the LRU being both dirty and having a flush operation
+ *              that deletes the second to last entry on the LRU.  Then
+ *              flush the cache, triggering the flush of the last
+ *              item, and thereby the deletion of the second to last item.
  *
- *        H5C_flush_cache() should handle this deletion gracefully.
+ *              H5C_flush_cache() should handle this deletion gracefully.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/4/15
  *
  * Modifications:
  *
- *        None.
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -38941,92 +33688,24 @@ check_entry_deletions_during_scans(unsigned paged)
 static void
 cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
 {
-    H5C_t *                      cache_ptr = file_ptr->shared->cache;
-    int                          i;
-    herr_t                       result;
-    struct expected_entry_status expected[36] = {
-        /* the expected array is used to maintain a table of the expected status of every
-         * entry used in this test.  Note that since the function that processes this
-         * array only processes as much of it as it is told to, we don't have to
-         * worry about maintaining the status of entries that we haven't used yet.
-         */
-        /* entry            entry                in    at main flush dep flush dep child flush   flush
-           flush */
-        /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned: dsrlzd:
-           srlzd:    dest:     par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:     corked:
-         */
-        {HUGE_ENTRY_TYPE,
-         0,
-         HUGE_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         1,
-         HUGE_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         2,
-         HUGE_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         3,
-         HUGE_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE}};
+    H5C_t *cache_ptr = file_ptr->shared->cache;
+    int    i;
+    /* clang-format off */
+    struct expected_entry_status expected[36] =
+    {
+      /* the expected array is used to maintain a table of the expected status of every
+       * entry used in this test.  Note that since the function that processes this
+       * array only processes as much of it as it is told to, we don't have to
+       * worry about maintaining the status of entries that we haven't used yet.
+       */
+      /* entry            entry                in    at main                                                   flush dep flush dep child flush   flush       flush */
+      /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:     par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:     corked: */
+      { HUGE_ENTRY_TYPE,     0,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,  {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { HUGE_ENTRY_TYPE,     1,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,  {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { HUGE_ENTRY_TYPE,     2,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,  {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { HUGE_ENTRY_TYPE,     3,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,  {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE}
+    };
+    /* clang-format on */
 
     if (pass) {
 
@@ -39109,15 +33788,15 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
          * are in cache with the following characteristics:
          *
          *         in
-         * entry:    cache?    size:    dirty?    pinned?    pins:    flush operations:
+         * entry:  cache?   size:  dirty?  pinned?    pins:    flush operations:
          *
-         * (HET, 0)     Y    16 KB    Y    N    -    expunge (HET 1)
+         * (HET, 0)    Y    16 KB    Y       N          -      expunge (HET 1)
          *
-         * (HET, 1)    Y    16 KB    Y    N    -    -
+         * (HET, 1)    Y    16 KB    Y       N          -      -
          *
-         * (HET, 2)    Y    16 KB    Y    N    -    -
+         * (HET, 2)    Y    16 KB    Y       N          -      -
          *
-         * (HET, 3)    Y    16 KB    Y    N    -    -
+         * (HET, 3)    Y    16 KB    Y       N          -      -
          *
          * Recall that in this test bed, flush operations are excuted the
          * first time the associated entry is flushed, and are then
@@ -39132,14 +33811,10 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush inval failed in cedds expunge dirty entry in flush test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed in cedds expunge dirty entry in flush test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cedds expunge dirty entry in flush test";
@@ -39185,37 +33860,39 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    return;
-
 } /* cedds__expunge_dirty_entry_in_flush_test() */
 
 /*-------------------------------------------------------------------------
  * Function:    cedds__H5C_make_space_in_cache()
  *
- * Purpose:    Verify that H5C__make_space_in_cache() can handle the
- *        removal from the cache of the next item in its reverse scan
- *        of the LRU list.
+ * Purpose:     Verify that H5C__make_space_in_cache() can handle the
+ *              removal from the cache of the next item in its reverse scan
+ *              of the LRU list.
  *
- *        Do this by setting up a full cache, with the last entry
- *        on the LRU being both dirty and having a flush operation
- *        that deleted the second to last entry on the LRU.  Then
- *        load an additional entry, triggering the flush of the last
- *        item, and thereby the deletion of the second to last item.
+ *              Do this by setting up a full cache, with the last entry
+ *              on the LRU being both dirty and having a flush operation
+ *              that deleted the second to last entry on the LRU.  Then
+ *              load an additional entry, triggering the flush of the last
+ *              item, and thereby the deletion of the second to last item.
  *
- *        H5C__make_space_in_cache() should detect this deletion, and
- *        restart its scan of the LRU from the tail, instead of
- *        examining the now deleted next item up on the LRU.
+ *              H5C__make_space_in_cache() should detect this deletion, and
+ *              restart its scan of the LRU from the tail, instead of
+ *              examining the now deleted next item up on the LRU.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/4/15
  *
  * Modifications:
  *
- *        None.
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -39223,670 +33900,58 @@ cedds__expunge_dirty_entry_in_flush_test(H5F_t *file_ptr)
 static void
 cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
 {
-    H5C_t *                      cache_ptr = file_ptr->shared->cache;
-    int                          i;
-    const int                    num_huge_entries    = 4;
-    const int                    num_monster_entries = 32;
-    herr_t                       result;
-    struct expected_entry_status expected[36] = {
-        /* the expected array is used to maintain a table of the expected status of every
-         * entry used in this test.  Note that since the function that processes this
-         * array only processes as much of it as it is told to, we don't have to
-         * worry about maintaining the status of entries that we haven't used yet.
-         */
-        /* entry            entry                in    at main flush dep flush dep child flush   flush
-           flush */
-        /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned: dsrlzd:
-           srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:     corked: */
-        {HUGE_ENTRY_TYPE,
-         0,
-         HUGE_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         1,
-         HUGE_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         2,
-         HUGE_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {HUGE_ENTRY_TYPE,
-         3,
-         HUGE_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         0,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         1,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         2,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         3,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         4,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         5,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         6,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         7,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         8,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         9,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         10,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         11,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         12,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         13,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         14,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         15,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         16,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         17,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         18,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         19,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         20,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         21,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         22,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         23,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         24,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         25,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         26,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         27,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         28,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         29,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         30,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         31,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
+    H5C_t *   cache_ptr = file_ptr->shared->cache;
+    int       i;
+    const int num_huge_entries    = 4;
+    const int num_monster_entries = 32;
+    /* clang-format off */
+    struct expected_entry_status expected[36] =
+    {
+      /* the expected array is used to maintain a table of the expected status of every
+       * entry used in this test.  Note that since the function that processes this
+       * array only processes as much of it as it is told to, we don't have to
+       * worry about maintaining the status of entries that we haven't used yet.
+       */
+      /* entry            entry                in    at main                                                flush dep flush dep child flush   flush       flush */
+      /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:     corked: */
+      { HUGE_ENTRY_TYPE,     0,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { HUGE_ENTRY_TYPE,     1,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { HUGE_ENTRY_TYPE,     2,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { HUGE_ENTRY_TYPE,     3,    HUGE_ENTRY_SIZE,     TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    0,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    1,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    2,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    3,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    4,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    5,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    6,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    7,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    8,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    9,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    10,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    11,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    12,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    13,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    14,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    15,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    16,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    17,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    18,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    19,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    20,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    21,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    22,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    23,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    24,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    25,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    26,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    27,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    28,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    29,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    30,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    31,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
     };
+    /* clang-format on */
 
     if (pass) {
 
@@ -40077,14 +34142,10 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed after flush op eviction test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed after flush op eviction test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cleanup of flush op eviction test";
@@ -40157,37 +34218,39 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    return;
-
 } /* cedds__H5C_make_space_in_cache() */
 
 /*-------------------------------------------------------------------------
  * Function:    cedds__H5C__autoadjust__ageout__evict_aged_out_entries()
  *
- * Purpose:    Verify that H5C__autoadjust__ageout__evict_aged_out_entries()
- *        can handle the removal from the cache of the next item in
- *        its reverse scan of the LRU list.
+ * Purpose:     Verify that H5C__autoadjust__ageout__evict_aged_out_entries()
+ *              can handle the removal from the cache of the next item in
+ *              its reverse scan of the LRU list.
  *
- *        Do this by setting up a full cache, with the last entry
- *        on the LRU being both dirty and having a flush operation
- *        that deletes the second to last entry on the LRU.  Then
- *        access the first item in the LRU repeatedly until the
- *        item, and thereby the deletion of the second to last item.
+ *              Do this by setting up a full cache, with the last entry
+ *              on the LRU being both dirty and having a flush operation
+ *              that deletes the second to last entry on the LRU.  Then
+ *              access the first item in the LRU repeatedly until the
+ *              item, and thereby the deletion of the second to last item.
  *
- *        H5C__make_space_in_cache() should detect this deletion, and
- *        restart its scan of the LRU from the tail, instead of
- *        examining the now deleted next item up on the LRU.
+ *              H5C__make_space_in_cache() should detect this deletion, and
+ *              restart its scan of the LRU from the tail, instead of
+ *              examining the now deleted next item up on the LRU.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/4/15
  *
  * Modifications:
  *
- *        None.
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -40195,596 +34258,53 @@ cedds__H5C_make_space_in_cache(H5F_t *file_ptr)
 static void
 cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
 {
-    H5C_t *                      cache_ptr = file_ptr->shared->cache;
-    int                          i;
-    herr_t                       result;
-    struct expected_entry_status expected[36] = {
-        /* the expected array is used to maintain a table of the expected status of every
-         * entry used in this test.  Note that since the function that processes this
-         * array only processes as much of it as it is told to, we don't have to
-         * worry about maintaining the status of entries that we haven't used yet.
-         */
-        /* entry            entry                in    at main flush dep flush dep child flush   flush
-           flush */
-        /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned: dsrlzd:
-           srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
-        {MONSTER_ENTRY_TYPE,
-         0,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         1,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         2,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         3,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         4,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         5,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         6,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         7,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         8,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         9,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         10,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         11,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         12,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         13,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         14,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         15,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         16,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         17,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         18,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         19,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         20,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         21,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         22,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         23,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         24,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         25,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         26,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         27,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         28,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         29,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         30,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         31,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         {-1, -1, -1, -1, -1, -1, -1, -1},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
+    H5C_t *cache_ptr = file_ptr->shared->cache;
+    int    i;
+    herr_t result;
+    /* clang-format off */
+    struct expected_entry_status expected[36] =
+    {
+      /* the expected array is used to maintain a table of the expected status of every
+       * entry used in this test.  Note that since the function that processes this
+       * array only processes as much of it as it is told to, we don't have to
+       * worry about maintaining the status of entries that we haven't used yet.
+       */
+      /* entry            entry                in    at main                                                flush dep flush dep child flush   flush       flush */
+      /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:  par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:    corked: */
+      { MONSTER_ENTRY_TYPE,    0,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    1,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    2,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    3,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    4,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    5,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    6,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    7,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    8,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    9,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    10,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    11,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    12,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    13,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    14,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    15,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    16,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    17,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    18,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    19,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    20,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    21,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    22,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    23,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    24,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    25,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    26,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    27,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    28,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    29,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    30,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,    31,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE, {-1,-1,-1,-1,-1,-1,-1,-1}, {-1,-1,-1,-1,-1,-1,-1,-1},     0, 0, 0, -1, FALSE},
     };
+    /* clang-format on */
     H5C_auto_size_ctl_t saved_auto_size_ctl;
     H5C_auto_size_ctl_t test_auto_size_ctl = {
         /* int32_t     version                = */ H5C__CURR_AUTO_SIZE_CTL_VER,
@@ -41038,14 +34558,10 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed after flush op eviction test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed after flush op eviction test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cleanup of flush op eviction test";
@@ -41098,98 +34614,100 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
 
-    return;
-
 } /* cedds__H5C__autoadjust__ageout__evict_aged_out_entries() */
 
 /*-------------------------------------------------------------------------
  * Function:    cedds__H5C_flush_invalidate_cache__bucket_scan()
  *
- * Purpose:    Note:      We now use the index list when we scan the
- *            contents of the metadata cache, so in principal,
- *            this test is obsolete.  However, even using the
- *            index list, restarts are possible, and must be
- *            handled gracefully.
+ * Purpose:     Note:      We now use the index list when we scan the
+ *              contents of the metadata cache, so in principal,
+ *              this test is obsolete.  However, even using the
+ *              index list, restarts are possible, and must be
+ *              handled gracefully.
  *
- *            As it turns out, this test triggers index list
- *            scan restarts, and thus with minor changes is
- *            still a useful test.
+ *              As it turns out, this test triggers index list
+ *              scan restarts, and thus with minor changes is
+ *              still a useful test.
  *
- *            For this reason, with the exception of changing
- *            to check the index_scan_restart stat instead of
- *            hash bucket restarts, I'm leaving the test
- *            alone.  If and when it starts to fail due to
- *            other changes, we can re-work it to test
- *            index list scan restarts explicitly.
+ *              For this reason, with the exception of changing
+ *              to check the index_scan_restart stat instead of
+ *              hash bucket restarts, I'm leaving the test
+ *              alone.  If and when it starts to fail due to
+ *              other changes, we can re-work it to test
+ *              index list scan restarts explicitly.
  *
- *                        JRM -- 11/2/16
+ *                                        JRM -- 11/2/16
  *
- *        Verify that H5C_flush_invalidate_cache() can handle
- *        the removal from the cache of the next item in
- *        its scans of hash buckets.
+ *              Verify that H5C_flush_invalidate_cache() can handle
+ *              the removal from the cache of the next item in
+ *              its scans of hash buckets.
  *
- *        !!!!!!!!!!WARNING !!!!!!!!!!
+ *              !!!!!!!!!!WARNING !!!!!!!!!!
  *
- *        This test may fail to function correctly if the hash
- *        table size or hash function is altered.
+ *              This test may fail to function correctly if the hash
+ *              table size or hash function is altered.
  *
- *        To setup the test, this function depends on the fact that
- *        H5C_flush_invalidate_cache() does alternating scans of the
- *        slist and the index.  If this changes, the test will likely
- *        also cease to function correctly.
+ *              To setup the test, this function depends on the fact that
+ *              H5C_flush_invalidate_cache() does alternating scans of the
+ *              slist and the index.  If this changes, the test will likely
+ *              also cease to function correctly.
  *
- *        The test relies on a known hash function and hash table
- *        size to select a set of test entries that will all hash
- *        to the same hash bucket -- call it the test hash bucket.
- *        It also relies on known behavior of the cache to place
- *        the entries in the test bucket in a known order.
+ *              The test relies on a known hash function and hash table
+ *              size to select a set of test entries that will all hash
+ *              to the same hash bucket -- call it the test hash bucket.
+ *              It also relies on known behavior of the cache to place
+ *              the entries in the test bucket in a known order.
  *
- *        To avoid pre-mature flushes of the entries in the
- *        test hash bucket, all entries are initially clean,
- *        with the exception of the first entry which is dirty.
- *        It avoids premature flushing by being the parent in
- *        a flush dependency.  The first entry in the test bucket
- *        also has a flush op which expunges the second entry --
- *        setting up the failure.
+ *              To avoid pre-mature flushes of the entries in the
+ *              test hash bucket, all entries are initially clean,
+ *              with the exception of the first entry which is dirty.
+ *              It avoids premature flushing by being the parent in
+ *              a flush dependency.  The first entry in the test bucket
+ *              also has a flush op which expunges the second entry --
+ *              setting up the failure.
  *
- *        An additional dirty entry is added (which must hash
- *        to a different bucket, and must have a higher address
- *        than at least the first entry in the test hash bucket.
- *        This entry is the child in a flush dependency with the
- *        first entry in the above hash bucket, and contains
- *        a flush op to destroy this flush dependency.
+ *              An additional dirty entry is added (which must hash
+ *              to a different bucket, and must have a higher address
+ *              than at least the first entry in the test hash bucket.
+ *              This entry is the child in a flush dependency with the
+ *              first entry in the above hash bucket, and contains
+ *              a flush op to destroy this flush dependency.
  *
- *        Since the first entry in the test hash bucket has a lower
- *        address that the other dirty entry, the scan of the
- *        slist encounters it first, and passes over it because
- *        it has a flush dependency height of 1.
+ *              Since the first entry in the test hash bucket has a lower
+ *              address that the other dirty entry, the scan of the
+ *              slist encounters it first, and passes over it because
+ *              it has a flush dependency height of 1.
  *
- *        The scan then encounters the second dirty entry and flushes
- *        it -- causing it to destroy the flush dependency and thus
- *        reducing the flush dependency height of the first entry in
- *        the test hash bucket to zero.
+ *              The scan then encounters the second dirty entry and flushes
+ *              it -- causing it to destroy the flush dependency and thus
+ *              reducing the flush dependency height of the first entry in
+ *              the test hash bucket to zero.
  *
- *        After completing a scan of the slist,
- *        H5C_flush_invalidate_cache() then scans the index,
- *        flushing all entries of flush dependency height zero.
+ *              After completing a scan of the slist,
+ *              H5C_flush_invalidate_cache() then scans the index,
+ *              flushing all entries of flush dependency height zero.
  *
- *        This sets up the potential error when the first entry
- *        in the test hash bucket is flushed -- expunging the
- *        second entry as a side effect.  If
- *        H5C_flush_invalidate_cache() fails to detect this,
- *        it will attempt to continue its scan of the bucket with
- *        an entry that has been deleted from the cache.
+ *              This sets up the potential error when the first entry
+ *              in the test hash bucket is flushed -- expunging the
+ *              second entry as a side effect.  If
+ *              H5C_flush_invalidate_cache() fails to detect this,
+ *              it will attempt to continue its scan of the bucket with
+ *              an entry that has been deleted from the cache.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/9/15
  *
  * Modifications:
  *
- *        None.
+ *              Added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
  *
  *-------------------------------------------------------------------------
  */
@@ -41197,116 +34715,30 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
 static void
 cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
 {
-    H5C_t *                      cache_ptr = file_ptr->shared->cache;
-    int                          i;
-    int                          expected_hash_bucket = 0;
-    herr_t                       result;
-    haddr_t                      entry_addr;
-    test_entry_t *               entry_ptr;
-    test_entry_t *               base_addr = NULL;
-    struct H5C_cache_entry_t *   scan_ptr;
-    struct expected_entry_status expected[5] = {
-        /* the expected array is used to maintain a table of the expected status of every
-         * entry used in this test.  Note that since the function that processes this
-         * array only processes as much of it as it is told to, we don't have to
-         * worry about maintaining the status of entries that we haven't used yet.
-         */
-        /* entry            entry                in    at main flush dep flush dep child flush   flush
-           flush */
-        /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned: dsrlzd:
-           srlzd:    dest:     par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:     corked:
-         */
-        {MONSTER_ENTRY_TYPE,
-         0,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, 0, 0, 0, 0, 0, 0, 0},
-         {-1, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         1,
-         1,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         8,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, 0, 0, 0, 0, 0, 0, 0},
-         {-1, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         16,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, 0, 0, 0, 0, 0, 0, 0},
-         {-1, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         24,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {-1, 0, 0, 0, 0, 0, 0, 0},
-         {-1, 0, 0, 0, 0, 0, 0, 0},
-         0,
-         0,
-         0,
-         -1,
-         FALSE},
-        {MONSTER_ENTRY_TYPE,
-         31,
-         MONSTER_ENTRY_SIZE,
-         TRUE,
-         TRUE,
-         TRUE,
-         FALSE,
-         FALSE,
-         TRUE,
-         FALSE,
-         FALSE,
-         {MONSTER_ENTRY_TYPE, 0, 0, 0, 0, 0, 0, 0},
-         {0, 0, 0, 0, 0, 0, 0, 0},
-         1,
-         0,
-         0,
-         -1,
-         FALSE},
+    H5C_t *                   cache_ptr = file_ptr->shared->cache;
+    int                       i;
+    int                       expected_hash_bucket = 0;
+    haddr_t                   entry_addr;
+    test_entry_t *            entry_ptr;
+    test_entry_t *            base_addr = NULL;
+    struct H5C_cache_entry_t *scan_ptr;
+    /* clang-format off */
+    struct expected_entry_status expected[5] =
+    {
+      /* the expected array is used to maintain a table of the expected status of every
+       * entry used in this test.  Note that since the function that processes this
+       * array only processes as much of it as it is told to, we don't have to
+       * worry about maintaining the status of entries that we haven't used yet.
+       */
+      /* entry            entry                in    at main                                                  flush dep flush dep child flush   flush       flush */
+      /* type:            index:    size:            cache:    addr:    dirty:    prot:    pinned:    dsrlzd:    srlzd:    dest:     par type[]: par idx[]: dep npart: dep nchd: dep ndirty chd: order:     corked: */
+      { MONSTER_ENTRY_TYPE,     0,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    TRUE,    TRUE,    FALSE,    FALSE,      {-1,0,0,0,0,0,0,0},                 {-1,0,0,0,0,0,0,0}, 0, 1, 1, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,     8,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,      {-1,0,0,0,0,0,0,0},                 {-1,0,0,0,0,0,0,0}, 0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,     16,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,      {-1,0,0,0,0,0,0,0},                 {-1,0,0,0,0,0,0,0}, 0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,     24,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    FALSE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,      {-1,0,0,0,0,0,0,0},                 {-1,0,0,0,0,0,0,0}, 0, 0, 0, -1, FALSE},
+      { MONSTER_ENTRY_TYPE,     31,    MONSTER_ENTRY_SIZE,    TRUE,    TRUE,    TRUE,    FALSE,    FALSE,    TRUE,    FALSE,    FALSE,         {MONSTER_ENTRY_TYPE,0,0,0,0,0,0,0}, {0,0,0,0,0,0,0,0},  1, 0, 0, -1, FALSE},
     };
+    /* clang-format on */
 
     if (pass) {
 
@@ -41499,14 +34931,10 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed after flush op eviction test")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed after flush op eviction test";
-        }
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after cleanup of flush op eviction test";
@@ -41561,8 +34989,6 @@ cedds__H5C_flush_invalidate_cache__bucket_scan(H5F_t *file_ptr)
     if (pass)
         /* reset cache min clean size to its expected value */
         cache_ptr->min_clean_size = (1 * 1024 * 1024);
-
-    return;
 
 } /* cedds__H5C_flush_invalidate_cache__bucket_scan() */
 
@@ -41629,7 +35055,7 @@ check_stats(unsigned paged)
 
     if (!pass) {
 
-        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s(): failure_mssg = \"%s\".\n", __func__, failure_mssg);
     }
 
 #else /* H5C_COLLECT_CACHE_STATS */
@@ -41647,26 +35073,34 @@ check_stats(unsigned paged)
 /*-------------------------------------------------------------------------
  * Function:    check_stats__smoke_check_1()
  *
- * Purpose:    Test to see if the statistics collection code is working
- *        more or less as expected.  Do this by performing a number
- *        of operations in the cache, and checking to verify that
- *        they result in the expected statistics.
+ * Purpose:     Test to see if the statistics collection code is working
+ *              more or less as expected.  Do this by performing a number
+ *              of operations in the cache, and checking to verify that
+ *              they result in the expected statistics.
  *
- *        Note that this function is not intended to be a full test
- *        of the statistics collection facility -- only a cursory
- *        check that will serve as a place holder until more complete
- *        tests are implemented.
+ *              Note that this function is not intended to be a full test
+ *              of the statistics collection facility -- only a cursory
+ *              check that will serve as a place holder until more complete
+ *              tests are implemented.
  *
  *              Do nothing if pass is FALSE on entry.
  *
- * Return:    void
+ * Return:      void
  *
- * Programmer:    John Mainzer
+ * Programmer:  John Mainzer
  *              4/22/15
  *
  * Modifications:
  *
- *        None.
+ *              Modified slist stats checks to allow for the case that
+ *              the slist is disabled.
+ *
+ *              Also added code to setup and take down the skip list before
+ *              and after calls to H5C_flush_cache().  Do this via the
+ *              H5C_FLUSH_CACHE macro.
+ *
+ *                                          JRM -- 5/14/20
+ *
  *
  *-------------------------------------------------------------------------
  */
@@ -41676,7 +35110,6 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
 {
     H5C_t *cache_ptr = file_ptr->shared->cache;
     int    i;
-    herr_t result;
 
     if (pass) {
         if (cache_ptr == NULL) {
@@ -41736,13 +35169,15 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(1).";
         } /* end if */
 
-    if (pass)
+    if (pass) {
+
         if ((cache_ptr->total_ht_insertions != 32) || (cache_ptr->total_ht_deletions != 0) ||
             (cache_ptr->successful_ht_searches != 0) || (cache_ptr->total_successful_ht_search_depth != 0) ||
             (cache_ptr->failed_ht_searches != 32) || (cache_ptr->total_failed_ht_search_depth != 48) ||
             (cache_ptr->max_index_len != 32) || (cache_ptr->max_index_size != 2 * 1024 * 1024) ||
             (cache_ptr->max_clean_index_size != 0) || (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) ||
-            (cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024))) ||
             (cache_ptr->max_pl_len != 0) || (cache_ptr->max_pl_size != 0) || (cache_ptr->max_pel_len != 0) ||
             (cache_ptr->max_pel_size != 0) || (cache_ptr->calls_to_msic != 0) ||
             (cache_ptr->total_entries_skipped_in_msic != 0) ||
@@ -41754,6 +35189,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(1).";
         } /* end if */
+    }
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if (pass)
@@ -41806,17 +35242,19 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(2).";
         } /* end if */
 
-    if (pass)
+    if (pass) {
+
         if ((cache_ptr->total_ht_insertions != 32) || (cache_ptr->total_ht_deletions != 0) ||
             (cache_ptr->successful_ht_searches != 32) ||
             (cache_ptr->total_successful_ht_search_depth != 96) || (cache_ptr->failed_ht_searches != 32) ||
             (cache_ptr->total_failed_ht_search_depth != 48) || (cache_ptr->max_index_len != 32) ||
             (cache_ptr->max_index_size != 2 * 1024 * 1024) || (cache_ptr->max_clean_index_size != 0) ||
-            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) || (cache_ptr->max_slist_len != 32) ||
-            (cache_ptr->max_slist_size != 2 * 1024 * 1024) || (cache_ptr->max_pl_len != 1) ||
-            (cache_ptr->max_pl_size != 64 * 1024) || (cache_ptr->max_pel_len != 0) ||
-            (cache_ptr->max_pel_size != 0) || (cache_ptr->calls_to_msic != 0) ||
-            (cache_ptr->total_entries_skipped_in_msic != 0) ||
+            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024))) ||
+            (cache_ptr->max_pl_len != 1) || (cache_ptr->max_pl_size != 64 * 1024) ||
+            (cache_ptr->max_pel_len != 0) || (cache_ptr->max_pel_size != 0) ||
+            (cache_ptr->calls_to_msic != 0) || (cache_ptr->total_entries_skipped_in_msic != 0) ||
             (cache_ptr->total_entries_scanned_in_msic != 0) ||
             (cache_ptr->max_entries_skipped_in_msic != 0) || (cache_ptr->max_entries_scanned_in_msic != 0) ||
             (cache_ptr->entries_scanned_to_make_space != 0) || (cache_ptr->slist_scan_restarts != 0) ||
@@ -41825,6 +35263,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(2).";
         } /* end if */
+    }
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if (pass)
@@ -41877,18 +35316,20 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(3).";
         } /* end if */
 
-    if (pass)
+    if (pass) {
+
         if ((cache_ptr->total_ht_insertions != 33) || (cache_ptr->total_ht_deletions != 1) ||
             (cache_ptr->successful_ht_searches != 32) ||
             (cache_ptr->total_successful_ht_search_depth != 96) || (cache_ptr->failed_ht_searches != 33) ||
             (cache_ptr->total_failed_ht_search_depth != 52) || (cache_ptr->max_index_len != 32) ||
             (cache_ptr->max_index_size != 2 * 1024 * 1024) ||
             (cache_ptr->max_clean_index_size != 2 * 1024 * 1024) ||
-            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) || (cache_ptr->max_slist_len != 32) ||
-            (cache_ptr->max_slist_size != 2 * 1024 * 1024) || (cache_ptr->max_pl_len != 1) ||
-            (cache_ptr->max_pl_size != 64 * 1024) || (cache_ptr->max_pel_len != 0) ||
-            (cache_ptr->max_pel_size != 0) || (cache_ptr->calls_to_msic != 1) ||
-            (cache_ptr->total_entries_skipped_in_msic != 0) ||
+            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024))) ||
+            (cache_ptr->max_pl_len != 1) || (cache_ptr->max_pl_size != 64 * 1024) ||
+            (cache_ptr->max_pel_len != 0) || (cache_ptr->max_pel_size != 0) ||
+            (cache_ptr->calls_to_msic != 1) || (cache_ptr->total_entries_skipped_in_msic != 0) ||
             (cache_ptr->total_entries_scanned_in_msic != 33) ||
             (cache_ptr->max_entries_skipped_in_msic != 0) || (cache_ptr->max_entries_scanned_in_msic != 33) ||
             (cache_ptr->entries_scanned_to_make_space != 33) || (cache_ptr->slist_scan_restarts != 0) ||
@@ -41897,6 +35338,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(3).";
         } /* end if */
+    }
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if (pass)
@@ -41926,14 +35368,10 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
 
     if (pass) {
 
-        result = H5C_flush_cache(file_ptr, H5C__FLUSH_INVALIDATE_FLAG);
+        H5C_FLUSH_CACHE(file_ptr, H5C__FLUSH_INVALIDATE_FLAG,
+                        "Cache flush invalidate failed in check_stats__smoke_check_1()")
 
-        if (result < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "Cache flush invalidate failed in check_stats__smoke_check_1()";
-        } /* end if */
-        else if ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0)) {
+        if ((pass) && ((cache_ptr->index_len != 0) || (cache_ptr->index_size != 0))) {
 
             pass         = FALSE;
             failure_mssg = "Unexpected cache len/size after check_stats__smoke_check_1()";
@@ -41967,18 +35405,20 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             failure_mssg = "Unexpected monster size entry stats in check_stats__smoke_check_1(4).";
         } /* end if */
 
-    if (pass)
+    if (pass) {
+
         if ((cache_ptr->total_ht_insertions != 33) || (cache_ptr->total_ht_deletions != 33) ||
             (cache_ptr->successful_ht_searches != 33) ||
             (cache_ptr->total_successful_ht_search_depth != 99) || (cache_ptr->failed_ht_searches != 33) ||
             (cache_ptr->total_failed_ht_search_depth != 52) || (cache_ptr->max_index_len != 32) ||
             (cache_ptr->max_index_size != 2 * 1024 * 1024) ||
             (cache_ptr->max_clean_index_size != 2 * 1024 * 1024) ||
-            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) || (cache_ptr->max_slist_len != 32) ||
-            (cache_ptr->max_slist_size != 2 * 1024 * 1024) || (cache_ptr->max_pl_len != 1) ||
-            (cache_ptr->max_pl_size != 64 * 1024) || (cache_ptr->max_pel_len != 0) ||
-            (cache_ptr->max_pel_size != 0) || (cache_ptr->calls_to_msic != 1) ||
-            (cache_ptr->total_entries_skipped_in_msic != 0) ||
+            (cache_ptr->max_dirty_index_size != 2 * 1024 * 1024) ||
+            ((cache_ptr->slist_enabled) &&
+             ((cache_ptr->max_slist_len != 32) || (cache_ptr->max_slist_size != 2 * 1024 * 1024))) ||
+            (cache_ptr->max_pl_len != 1) || (cache_ptr->max_pl_size != 64 * 1024) ||
+            (cache_ptr->max_pel_len != 0) || (cache_ptr->max_pel_size != 0) ||
+            (cache_ptr->calls_to_msic != 1) || (cache_ptr->total_entries_skipped_in_msic != 0) ||
             (cache_ptr->total_entries_scanned_in_msic != 33) ||
             (cache_ptr->max_entries_skipped_in_msic != 0) || (cache_ptr->max_entries_scanned_in_msic != 33) ||
             (cache_ptr->entries_scanned_to_make_space != 33) || (cache_ptr->slist_scan_restarts != 0) ||
@@ -41987,6 +35427,7 @@ check_stats__smoke_check_1(H5F_t *file_ptr)
             pass         = FALSE;
             failure_mssg = "Unexpected cache stats in check_stats__smoke_check_1(4).";
         } /* end if */
+    }
 
 #if H5C_COLLECT_CACHE_ENTRY_STATS
     if (pass)
@@ -42094,7 +35535,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     hid_t   fcpl_id = H5P_DEFAULT;
 
     if (show_progress) /* 1 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     saved_fid = -1;
 
@@ -42137,7 +35578,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 2 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass && try_core_file_driver) {
         if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) == FAIL) {
@@ -42154,7 +35595,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             core_file_driver_failed = TRUE;
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5Fcreate() with CFD failed.\n", __func__);
         }
         else {
             saved_fapl_id = fapl_id;
@@ -42162,7 +35603,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 3 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     /* if we either aren't using the core file driver, or a create
      * with the core file driver failed, try again with a regular file.
@@ -42177,7 +35618,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5Fcreate() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5Fcreate() failed.\n", __func__);
         } /* end if */
     }     /* end if */
 
@@ -42185,7 +35626,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     H5CX_push();
 
     if (show_progress) /* 4 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         HDassert(fid >= 0);
@@ -42195,7 +35636,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5Fflush() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5Fflush() failed.\n", __func__);
         }
         else {
             file_ptr = (H5F_t *)H5VL_object_verify(fid, H5I_FILE);
@@ -42204,13 +35645,13 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
                 failure_mssg = "Can't get file_ptr.";
 
                 if (verbose)
-                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", FUNC);
+                    HDfprintf(stdout, "%s: H5Fflush() failed.\n", __func__);
             }
         }
     }
 
     if (show_progress) /* 5 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
 
@@ -42253,7 +35694,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 6 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         if (cache_ptr == NULL) {
@@ -42261,19 +35702,19 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5C_create() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5C_create() failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5C_create() failed.\n", __func__);
         }
         else if (cache_ptr->magic != H5C__H5C_T_MAGIC) {
             pass         = FALSE;
             failure_mssg = "Bad cache_ptr magic.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", FUNC);
+                HDfprintf(stdout, "%s: Bad cache_ptr magic.\n", __func__);
         }
     }
 
     if (show_progress) /* 7 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) { /* allocate space for test entries */
         actual_base_addr = H5MF_alloc(file_ptr, H5FD_MEM_DEFAULT, (hsize_t)(ADDR_SPACE_SIZE + BASE_ADDR));
@@ -42283,7 +35724,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "H5MF_alloc() failed.";
 
             if (verbose)
-                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", FUNC);
+                HDfprintf(stdout, "%s: H5MF_alloc() failed.\n", __func__);
         }
         else if (actual_base_addr > BASE_ADDR) {
             /* If this happens, must increase BASE_ADDR so that the
@@ -42294,14 +35735,14 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
             failure_mssg = "actual_base_addr > BASE_ADDR";
 
             if (verbose)
-                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", FUNC);
+                HDfprintf(stdout, "%s: actual_base_addr > BASE_ADDR.\n", __func__);
         }
 
         saved_actual_base_addr = actual_base_addr;
     }
 
     if (show_progress) /* 8 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     if (pass) {
         /* Need to set this else all cache tests will fail */
@@ -42312,7 +35753,7 @@ setup_cache(size_t max_cache_size, size_t min_clean_size, unsigned paged)
     }
 
     if (show_progress) /* 9 */
-        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", FUNC, mile_stone++, (int)pass);
+        HDfprintf(stdout, "%s() - %0d -- pass = %d\n", __func__, mile_stone++, (int)pass);
 
     return (ret_val);
 } /* setup_cache() */

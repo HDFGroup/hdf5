@@ -91,8 +91,8 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
     init_vfd_swmr_config(config, 4, 5, TRUE, FALSE, 128, "./rw-shadow");
 
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    if ((fapl = vfd_swmr_create_fapl(TRUE, TRUE, FALSE, config)) < 0)
+    /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+    if ((fapl = vfd_swmr_create_fapl(TRUE, TRUE, FALSE, 4096, config)) < 0)
         return -1;
 
     if (use_log_vfd) {
@@ -187,7 +187,7 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
         hid_t          file_sid; /* Dataset's space ID */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(NULL, NULL);
+        symbol = choose_dataset(NULL, NULL, verbose);
 
         /* Set the record's ID (equal to its position) */
         record.rec_id = symbol->nrecords;
@@ -254,20 +254,20 @@ add_records(hid_t fid, hbool_t verbose, FILE *verbose_file, unsigned long nrecor
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: vfd_swmr_writer [-q] [-o] [-f <# of records to write between flushing\n");
-    printf("    file contents>] [-r <random seed>] <# of records>\n");
-    printf("\n");
-    printf("<# of records to write between flushing file contents> should be 0\n");
-    printf("(for no flushing) or between 1 and (<# of records> - 1).\n");
-    printf("\n");
-    printf("<# of records> must be specified.\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
-    printf("flushing every 10000 records ('-f 10000'), and will generate a random seed (no -r given).\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: vfd_swmr_writer [-q] [-o] [-f <# of records to write between flushing\n");
+    HDprintf("    file contents>] [-r <random seed>] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("<# of records to write between flushing file contents> should be 0\n");
+    HDprintf("(for no flushing) or between 1 and (<# of records> - 1).\n");
+    HDprintf("\n");
+    HDprintf("<# of records> must be specified.\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), latest format when opening file (no '-o' given),\n");
+    HDprintf("flushing every 10000 records ('-f 10000'), and will generate a random seed (no -r given).\n");
+    HDprintf("\n");
     HDexit(1);
 }
 

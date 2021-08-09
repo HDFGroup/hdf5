@@ -112,7 +112,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define SPACE1_DIM2 0
 
 /* Error macros */
-#define AT() HDprintf("ERROR at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
+#define AT() HDprintf("ERROR at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
 #define PROGRAM_ERROR                                                                                        \
     do {                                                                                                     \
         AT();                                                                                                \

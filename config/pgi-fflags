@@ -1,4 +1,4 @@
-#							-*- shell-script -*-
+#                            -*- shell-script -*-
 #
 # Copyright by The HDF Group.
 # Copyright by the Board of Trustees of the University of Illinois.
@@ -45,11 +45,12 @@ fi
 
 # Common PGI flags for various situations
 if test "X-pgf90" = "X-$f9x_vendor"; then
-    # Insert section about version specific problems from gnu-flags here, if
-    # necessary.
+
+    ###############################
+    # Architecture-specific flags #
+    ###############################
 
     arch=
-    # Architecture-specific flags
     # Nothing currently. (Uncomment code below and modify to add any)
     #case "$host_os-$host_cpu" in
     #    *-i686)
@@ -65,15 +66,10 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     #        ;;
     #esac
 
-    # General
-    FC_BASENAME=pgf90
-    Fortran_COMPILER_ID=PGI
-    F9XSUFFIXFLAG=""
-    FSEARCH_DIRS=""
-    # Uncomment the following to add something specific for FCFLAGS.
-    #FCFLAGS="$FCFLAGS"
+    ##############
+    # Production #
+    ##############
 
-    # Production
     # Check for MPI wrapper being used and tweak down compiler options
     # Comment out the Tweaking since it caused problems to mpich1.2.6.
     # Need to investigate the reasons to tweak.
@@ -84,24 +80,55 @@ if test "X-pgf90" = "X-$f9x_vendor"; then
     #fi
     PROD_FCFLAGS="-fast -Mnoframe"
 
-    # Debug
+    #########
+    # Debug #
+    #########
+
     DEBUG_FCFLAGS="-Mbounds -Mchkptr -Mdclchk"
 
-    # Symbols
-    SYMBOLS_FCFLAGS="-g"
-    NO_SYMBOLS_FCFLAGS="-s"
+    ###########
+    # Symbols #
+    ###########
 
-    # Profiling
+    NO_SYMBOLS_FCFLAGS="-s"
+    SYMBOLS_FCFLAGS="-g"
+
+    #############
+    # Profiling #
+    #############
+
     PROFILE_FCFLAGS="-Mprof=func,line"
     # Use this for profiling with gprof
     #PROFILE_FCFLAGS="-pg"
 
-    # Optimization
+    ################
+    # Optimization #
+    ################
+
     HIGH_OPT_FCFLAGS=
     DEBUG_OPT_FCFLAGS=
     NO_OPT_FCFLAGS=
 
-    # Flags are set
+    ############
+    # Warnings #
+    ############
+
+    ###########
+    # General #
+    ###########
+
+    FC_BASENAME=pgf90
+    Fortran_COMPILER_ID=PGI
+    F9XSUFFIXFLAG=""
+    FSEARCH_DIRS=""
+    # Uncomment the following to add something specific for FCFLAGS.
+    #FCFLAGS="$FCFLAGS"
+
+
+
+    #################
+    # Flags are set #
+    #################
     f9x_flags_set=yes
 fi
 
@@ -110,5 +137,4 @@ if test "X-$f9x_flags_set" = "X-"; then
   f9x_vendor=
   f9x_version=
 fi
-
 

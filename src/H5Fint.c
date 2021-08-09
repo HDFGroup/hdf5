@@ -81,6 +81,7 @@ static int    H5F__get_objects_cb(void *obj_ptr, hid_t obj_id, void *key);
 static herr_t H5F__build_name(const char *prefix, const char *file_name, char **full_name /*out*/);
 static char * H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
 static H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
+static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking);
 static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
                                      char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
@@ -414,14 +415,15 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         efc_size = H5F__efc_max_nfiles(f->shared->efc);
     if (H5P_set(new_plist, H5F_ACS_EFC_SIZE_NAME, &efc_size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set elink file cache size")
-    if (f->shared->pb_ptr != NULL) {
-        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &(f->shared->pb_ptr->max_size)) < 0)
+    if (f->shared->page_buf != NULL) {
+        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_SIZE_NAME, &(f->shared->page_buf->max_size)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set page buffer size")
-        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME, &(f->shared->pb_ptr->min_meta_perc)) <
-            0)
+        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_META_PERC_NAME,
+                    &(f->shared->page_buf->min_meta_perc)) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
                         "can't set minimum metadata fraction of page buffer")
-        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->pb_ptr->min_raw_perc)) < 0)
+        if (H5P_set(new_plist, H5F_ACS_PAGE_BUFFER_MIN_RAW_PERC_NAME, &(f->shared->page_buf->min_raw_perc)) <
+            0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID,
                         "can't set minimum raw data fraction of page buffer")
     } /* end if */
@@ -1924,9 +1926,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Avoid reusing a virtual file opened exclusively by a second virtual
      * file, or opening the same file twice with different parameters.
      */
-    if ((lf = H5FD_deduplicate(lf, fapl_id)) == NULL) {
-        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "an already-open file conflicts with '%s'", name);
-    }
+    if ((lf = H5FD_deduplicate(lf, fapl_id)) == NULL)
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "an already-open file conflicts with '%s'", name)
 
     /* Is the file already open? */
     if ((shared = H5F__sfile_search(lf)) != NULL) {
@@ -2309,6 +2310,11 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
     /* Sanity check arguments */
     HDassert(f);
 
+    /* Inform the metadata cache that we are about to flush */
+    if (H5AC_prep_for_file_flush(f) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed")
+
     /* Flush the entire metadata cache */
     if (H5AC_flush(f) < 0)
         /* Push error, but keep going*/
@@ -2340,6 +2346,11 @@ H5F__flush_phase2(H5F_t *f, hbool_t closing)
         /* Reset the "flushing the file" flag */
         H5CX_set_mpi_file_flushing(FALSE);
 #endif /* H5_HAVE_PARALLEL */
+
+    /* Inform the metadata cache that we are done with the flush */
+    if (H5AC_secure_from_file_flush(f) < 0)
+        /* Push error, but keep going*/
+        HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed")
 
     /* Flush out the metadata accumulator */
     if (H5F__accum_flush(f->shared) < 0)

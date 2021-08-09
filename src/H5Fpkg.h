@@ -32,8 +32,8 @@
 /* Other private headers needed by this file */
 #include "H5private.h"   /* Generic Functions                        */
 #include "H5ACprivate.h" /* Metadata cache                           */
-#include "H5FDprivate.h" /* VFD -- for VFD SWMR                      */
 #include "H5Bprivate.h"  /* B-trees                                  */
+#include "H5FDprivate.h" /* File drivers                             */
 #include "H5FLprivate.h" /* Free Lists                               */
 #include "H5FOprivate.h" /* File objects                             */
 #include "H5FSprivate.h" /* File free space                          */
@@ -305,9 +305,7 @@ struct H5F_shared_t {
     unsigned long feature_flags; /* VFL Driver feature Flags            */
     haddr_t       maxaddr;       /* Maximum address for file             */
 
-    H5PB_t *pb_ptr; /* pointer to the page buffer, or NULL  */
-                    /* if the page buffer is disabled.      */
-
+    H5PB_t *            page_buf;                    /* The page buffer cache                */
     H5AC_t *            cache;                       /* The object cache	 		*/
     H5AC_cache_config_t mdc_initCacheCfg;            /* initial configuration for the      */
                                                      /* metadata cache.  This structure is   */
@@ -410,6 +408,7 @@ struct H5F_shared_t {
                                             * not
                                             */
     uint64_t        tick_num;              /* Number of the current tick */
+    uint64_t        max_jump_ticks;        /* Max # of jumps in tick number */
     struct timespec end_of_tick;           /* End time of the current tick */
 
     lower_defree_queue_t lower_defrees; /* Records of lower-file space
@@ -472,7 +471,8 @@ struct H5F_shared_t {
 
     /* Delayed free space release doubly linked list */
     shadow_defree_queue_t shadow_defrees;
-    char *                extpath; /* Path for searching target external link file                 */
+
+    char *extpath; /* Path for searching target external link file                 */
 
 #ifdef H5_HAVE_PARALLEL
     H5P_coll_md_read_flag_t coll_md_read;  /* Do all metadata reads collectively */

@@ -17,8 +17,6 @@
 
 #include "H5Cpkg.h"
 #include "H5Fpkg.h"
-// #include "H5Iprivate.h"
-#include "H5HGprivate.h"
 #include "H5VLprivate.h"
 
 #include "testhdf5.h"
@@ -108,25 +106,15 @@ print_cache_hits(H5C_t H5_ATTR_UNUSED *cache)
 static void
 usage(const char *progname)
 {
-    fprintf(stderr, "usage: %s [-W] [-V]\n", progname);
-    fprintf(stderr, "\n  -W: do not wait for SIGINT or SIGUSR1\n");
-    fprintf(stderr, "\n  -S: do not use VFD SWMR\n");
-    fprintf(stderr, "  -f: use fixed-length string\n");
-    fprintf(stderr, "      (default: variable-length string)\n");
-    fprintf(stderr, "  -n: number of test steps to perform\n");
-    fprintf(stderr, "  -q: be quiet: few/no progress messages\n");
-    fprintf(stderr, "  -t (oob|null): select out-of-bounds or NULL test\n");
-    exit(EXIT_FAILURE);
-}
-
-bool
-H5HG_trap(const char *reason)
-{
-    if (strcmp(reason, "out of bounds") == 0) {
-        caught_out_of_bounds = true;
-        return false;
-    }
-    return true;
+    HDfprintf(stderr, "usage: %s [-W] [-V]\n", progname);
+    HDfprintf(stderr, "\n  -W: do not wait for SIGINT or SIGUSR1\n");
+    HDfprintf(stderr, "\n  -S: do not use VFD SWMR\n");
+    HDfprintf(stderr, "  -f: use fixed-length string\n");
+    HDfprintf(stderr, "      (default: variable-length string)\n");
+    HDfprintf(stderr, "  -n: number of test steps to perform\n");
+    HDfprintf(stderr, "  -q: be quiet: few/no progress messages\n");
+    HDfprintf(stderr, "  -t (oob|null): select out-of-bounds or NULL test\n");
+    HDexit(EXIT_FAILURE);
 }
 
 int
@@ -150,7 +138,7 @@ main(int argc, char **argv)
     testsel_t             sel          = TEST_NONE;
     H5F_vfd_swmr_config_t config;
 
-    assert(H5T_C_S1 != badhid);
+    HDassert(H5T_C_S1 != badhid);
 
     while ((ch = getopt(argc, argv, "SWfn:qt:")) != -1) {
         switch (ch) {
@@ -165,7 +153,7 @@ main(int argc, char **argv)
                 break;
             case 'n':
                 errno = 0;
-                tmp   = strtoul(optarg, &end, 0);
+                tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0')
                     errx(EXIT_FAILURE, "couldn't parse `-n` argument `%s`", optarg);
                 else if (errno != 0)
@@ -178,9 +166,9 @@ main(int argc, char **argv)
                 verbosity = 1;
                 break;
             case 't':
-                if (strcmp(optarg, "oob") == 0)
+                if (HDstrcmp(optarg, "oob") == 0)
                     sel = TEST_OOB;
-                else if (strcmp(optarg, "null") == 0)
+                else if (HDstrcmp(optarg, "null") == 0)
                     sel = TEST_NULL;
                 else
                     usage(argv[0]);
@@ -199,18 +187,15 @@ main(int argc, char **argv)
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
     init_vfd_swmr_config(&config, 4, 7, true, FALSE, 128, "./vlstr-shadow");
 
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, &config);
+    /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+    fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, 4096, &config);
 
     if (fapl < 0)
         errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
 
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
-        errx(EXIT_FAILURE, "H5Pcreate");
-
-    ret = H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1);
-    if (ret < 0)
-        errx(EXIT_FAILURE, "H5Pset_file_space_strategy");
+    /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0)
+        errx(EXIT_FAILURE, "vfd_swmr_create_fcpl");
 
     fid = H5Fcreate("vfd_swmr_vlstr.h5", H5F_ACC_TRUNC, fcpl, fapl);
 
@@ -258,19 +243,20 @@ main(int argc, char **argv)
         dbgf(2, "iteration %d which %d step %d seq %d\n", i, which, step, seq);
         switch (step) {
             case CREATE:
-                (void)snprintf(name[which], sizeof(name[which]), "dset-%d", which);
-                (void)snprintf(content[which], sizeof(content[which]), "content %d seq %d short", which, seq);
+                (void)HDsnprintf(name[which], sizeof(name[which]), "dset-%d", which);
+                (void)HDsnprintf(content[which], sizeof(content[which]), "content %d seq %d short", which,
+                                 seq);
                 dset[which] = create_vl_dset(fid, type, space, name[which]);
                 write_vl_dset(dset[which], type, space, content[which]);
                 break;
             case LENGTHEN:
-                (void)snprintf(content[which], sizeof(content[which]),
-                               "content %d seq %d long long long long long long long long", which, seq);
+                (void)HDsnprintf(content[which], sizeof(content[which]),
+                                 "content %d seq %d long long long long long long long long", which, seq);
                 write_vl_dset(dset[which], type, space, content[which]);
                 break;
             case SHORTEN:
-                (void)snprintf(content[which], sizeof(content[which]),
-                               "content %d seq %d medium medium medium", which, seq);
+                (void)HDsnprintf(content[which], sizeof(content[which]),
+                                 "content %d seq %d medium medium medium", which, seq);
                 write_vl_dset(dset[which], type, space, content[which]);
                 break;
             case DELETE:
@@ -284,7 +270,7 @@ main(int argc, char **argv)
                 errx(EXIT_FAILURE, "%s: unknown step %d", __func__, step);
         }
         if (caught_out_of_bounds) {
-            fprintf(stderr, "caught out of bounds\n");
+            HDfprintf(stderr, "caught out of bounds\n");
             break;
         }
         nanosleep(&delay, NULL);

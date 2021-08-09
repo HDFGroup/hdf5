@@ -89,7 +89,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 /*
  * Print the current location on the standard output stream.
  */
-#define AT() HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
+#define AT() HDprintf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
 
 /*
  * The name of the test is printed by saying TESTING("something") which will
@@ -100,7 +100,11 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
  * spaces.  If the h5_errors() is used for automatic error handling then
  * the H5_FAILED() macro is invoked automatically when an API function fails.
  */
-#define TESTING(...) h5_testing(__VA_ARGS__);
+#define TESTING(WHAT)                                                                                        \
+    {                                                                                                        \
+        HDprintf("Testing %-62s", WHAT);                                                                     \
+        HDfflush(stdout);                                                                                    \
+    }
 #define TESTING_2(WHAT)                                                                                      \
     {                                                                                                        \
         HDprintf("  Testing %-60s", WHAT);                                                                   \
@@ -157,20 +161,9 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
         HDputs(s);                                                                                           \
         goto error;                                                                                          \
     }
-#define FAIL_PRINTF_ERROR(fmt, ...)                                                                          \
-    {                                                                                                        \
-        H5_FAILED();                                                                                         \
-        AT();                                                                                                \
-        HDprintf(fmt, __VA_ARGS__);                                                                          \
-        goto error;                                                                                          \
-    }
 
-/*
- * Alarm definitions to wait up (terminate) a test that runs too long.
- */
+/* Number of seconds to wait before killing a test (requires alarm(2)) */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */
-#define ALARM_ON     TestAlarmOn()
-#define ALARM_OFF    HDalarm(0)
 
 /* Flags for h5_fileaccess_flags() */
 #define H5_FILEACCESS_VFD    0x01
@@ -239,7 +232,6 @@ extern "C" {
 #endif
 
 /* Generally useful testing routines */
-H5TEST_DLL void        h5_testing(const char *, ...) H5_ATTR_FORMAT(printf, 1, 2);
 H5TEST_DLL void        h5_clean_files(const char *base_name[], hid_t fapl);
 H5TEST_DLL int         h5_cleanup(const char *base_name[], hid_t fapl);
 H5TEST_DLL char *      h5_fixname(const char *base_name, hid_t fapl, char *fullname, size_t size);

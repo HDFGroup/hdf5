@@ -35,18 +35,23 @@
 #include <features.h> /* For setting POSIX, BSD, etc. compatibility */
 #endif
 
+/* C library header files for things that appear in HDF5 public headers */
+#ifdef __cplusplus
+#define __STDC_FORMAT_MACROS
+#endif
+#include <inttypes.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is avaible
+ * on Windows, though it doesn't necessarily contain all the POSIX types
+ * we need for HDF5 (e.g. ssize_t).
+ */
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
-#endif
-
-#include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
-#include <stdarg.h> /* For variadic functions in H5VLpublic.h   */
-
-#include <stdint.h>   /* For C9x types */
-#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
-
-#ifdef H5_HAVE_STDDEF_H
-#include <stddef.h>
 #endif
 
 #ifdef H5_HAVE_PARALLEL
@@ -57,31 +62,6 @@
 #ifndef MPI_FILE_NULL /* MPIO may be defined in mpi.h already */
 #include <mpio.h>
 #endif
-#endif
-
-/* Include the Windows API adapter header early */
-#include "H5api_adpt.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Macros for enabling/disabling particular GCC warnings */
-/* (see the following web-sites for more info:
- *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
- *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
- */
-/* These pragmas are only implemented usefully in gcc 4.6+ */
-#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
-#define H5_GCC_DIAG_JOINSTR(x, y) x y
-#define H5_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
-#define H5_GCC_DIAG_PRAGMA(x)     H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
-
-#define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR("-W", x))
-#define H5_GCC_DIAG_ON(x)  H5_GCC_DIAG_PRAGMA(pop)
-#else
-#define H5_GCC_DIAG_OFF(x)
-#define H5_GCC_DIAG_ON(x)
 #endif
 
 /* Macro to hide a symbol from further preprocessor substitutions */
@@ -213,7 +193,6 @@ typedef int herr_t;
  * }
  * \endcode
  */
-#include <stdbool.h>
 typedef bool hbool_t;
 typedef int  htri_t;
 
@@ -367,6 +346,13 @@ typedef struct H5_alloc_stats_t {
  * Library shutdown callback, used by H5atclose().
  */
 typedef void (*H5_atclose_func_t)(void *ctx);
+
+/* API adapter header (defines H5_DLL, etc.) */
+#include "H5api_adpt.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions in H5.c */
 /**

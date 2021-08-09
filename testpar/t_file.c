@@ -639,9 +639,9 @@ open_file(const char *filename, hid_t fapl, int metadata_write_strategy, hsize_t
 
     MPI_Barrier(MPI_COMM_WORLD);
 
-    VRFY((f->shared->pb_ptr != NULL), "");
-    VRFY((f->shared->pb_ptr->page_size == page_size), "");
-    VRFY((f->shared->pb_ptr->max_size == page_buffer_size), "");
+    VRFY((f->shared->page_buf != NULL), "");
+    VRFY((f->shared->page_buf->page_size == page_size), "");
+    VRFY((f->shared->page_buf->max_size == page_buffer_size), "");
 
     grp_id = H5Gopen2(file_id, "GROUP", H5P_DEFAULT);
     VRFY((grp_id >= 0), "");
@@ -954,9 +954,8 @@ test_file_properties(void)
 void
 test_delete(void)
 {
-    hid_t       fid     = H5I_INVALID_HID; /* HDF5 file ID */
-    hid_t       fapl_id = H5I_INVALID_HID; /* File access plist */
-    hbool_t     is_coll;
+    hid_t       fid      = H5I_INVALID_HID; /* HDF5 file ID */
+    hid_t       fapl_id  = H5I_INVALID_HID; /* File access plist */
     const char *filename = NULL;
     MPI_Comm    comm     = MPI_COMM_WORLD;
     MPI_Info    info     = MPI_INFO_NULL;

@@ -343,10 +343,19 @@ evict_entries(hid_t fid)
     /* Mark all entries investigated */
     mark_all_entries_investigated(fid);
 
+    /* setup the skip list prior to calling H5C_flush_cache() */
+    if (H5C_set_slist_enabled(f->shared->cache, TRUE, FALSE) < 0)
+        TEST_ERROR;
+
     /* Evict all we can from the cache to examine full tag creation tree */
     /* This function will likely return failure since the root group
-     * is still protected. Thus, don't check its return value. */
+     * is still protected. Thus, don't check its return value.
+     */
     H5C_flush_cache(f, H5C__FLUSH_INVALIDATE_FLAG);
+
+    /* shutdown the slist -- allow it to be non-empty */
+    if (H5C_set_slist_enabled(f->shared->cache, FALSE, TRUE) < 0)
+        TEST_ERROR;
 
     return 0;
 

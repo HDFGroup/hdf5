@@ -1452,6 +1452,7 @@ test_obj_count_and_id(hid_t fid1, hid_t fid2, hid_t did, hid_t gid1, hid_t gid2,
                     case H5I_ERROR_MSG:
                     case H5I_ERROR_STACK:
                     case H5I_SPACE_SEL_ITER:
+                    case H5I_EVENTSET:
                     case H5I_NTYPES:
                     default:
                         ERROR("H5Fget_obj_ids");

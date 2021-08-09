@@ -116,6 +116,62 @@
 #define MAX_ADDR               (haddr_t)(NOTIFY_ALT_BASE_ADDR + (NOTIFY_ENTRY_SIZE * NUM_NOTIFY_ENTRIES))
 #define ADDR_SPACE_SIZE        (haddr_t)(MAX_ADDR - BASE_ADDR)
 
+/***********************************************************************
+ *
+ * Macro:       H5C_FLUSH_CACHE
+ *
+ * Purpose:     Wrap a call to H5C_flush_cache() in calls to
+ *              H5C_set_slist_enabled() to setup and take down the slist.
+ *
+ *              This is necessary, as H5C_flush_cache() needs the
+ *              slist to be active.  Further, since it is called
+ *              repeatedly during file flush, it would be inefficient
+ *              for it to setup the slist on entry, and take it down
+ *              on exit.
+ *
+ *              Note that the slist need not be empty if the flags
+ *              indicate a partial flush (i.e.
+ *              H5C__FLUSH_MARKED_ENTRIES_FLAG).  Compute clear_slist
+ *              and pass it into H5C_set_slist_enabled as appropriate.
+ *
+ *              On error, set pass to FALSE, and set failure_mssg
+ *              to the supplied error message.
+ *
+ * Return:      N/A
+ *
+ * Programmer:  John Mainzer
+ *              5/14/20
+ *
+ * Changes:     None.
+ *
+ ***********************************************************************/
+
+#define H5C_FLUSH_CACHE(file, flags, fail_mssg)                                                              \
+    {                                                                                                        \
+        hbool_t clear_slist;                                                                                 \
+        herr_t  rslt;                                                                                        \
+                                                                                                             \
+        clear_slist = ((flags & H5C__FLUSH_MARKED_ENTRIES_FLAG) != 0);                                       \
+                                                                                                             \
+        rslt = H5C_set_slist_enabled((file)->shared->cache, TRUE, FALSE);                                    \
+                                                                                                             \
+        if (rslt >= 0) {                                                                                     \
+                                                                                                             \
+            rslt = H5C_flush_cache((file), (flags));                                                         \
+        }                                                                                                    \
+                                                                                                             \
+        if (rslt >= 0) {                                                                                     \
+                                                                                                             \
+            rslt = H5C_set_slist_enabled((file)->shared->cache, FALSE, clear_slist);                         \
+        }                                                                                                    \
+                                                                                                             \
+        if (rslt < 0) {                                                                                      \
+                                                                                                             \
+            pass         = FALSE;                                                                            \
+            failure_mssg = (fail_mssg);                                                                      \
+        }                                                                                                    \
+    } /* H5C_FLUSH_CACHE */
+
 #define MAX_PINS                                                                                             \
     8 /* Maximum number of entries that can be                                                               \
        * directly pinned by a single entry.                                                                  \

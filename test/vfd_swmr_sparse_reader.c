@@ -45,7 +45,7 @@
 /* Local Variables */
 /*******************/
 
-static hid_t symbol_tid = (-1);
+static hid_t symbol_tid = H5I_INVALID_HID;
 
 /********************/
 /* Local Prototypes */
@@ -116,7 +116,9 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
 
     /* Emit informational message */
     if (verbose)
-        HDfprintf(stderr, "READER: Symbol = '%s', nrecords = %Hu, name = %s, location = %Hu, %Hu\n",
+        HDfprintf(stderr,
+                  "READER: Symbol = '%s', nrecords = %" PRIuHSIZE ", name = %s, location = %" PRIuHSIZE
+                  ", %" PRIuHSIZE "\n",
                   symbol->name, symbol->nrecords, symbol->name, start[0], start[1]);
 
     /* Read record from dataset */
@@ -128,8 +130,9 @@ check_dataset(hid_t fid, unsigned verbose, const symbol_info_t *symbol, symbol_t
     if (record->rec_id != start[1]) {
         HDfprintf(stderr, "*** READER: ERROR ***\n");
         HDfprintf(stderr, "Incorrect record value!\n");
-        HDfprintf(stderr, "Symbol = '%s', location = %Hu, %Hu, record->rec_id = %" PRIu64 "\n", symbol->name,
-                  start[0], start[1], record->rec_id);
+        HDfprintf(stderr,
+                  "Symbol = '%s', location = %" PRIuHSIZE ", %" PRIuHSIZE ", record->rec_id = %" PRIu64 "\n",
+                  symbol->name, start[0], start[1], record->rec_id);
         goto error;
     } /* end if */
 
@@ -207,9 +210,9 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
     init_vfd_swmr_config(config, 4, 5, FALSE, FALSE, 128, "./rw-shadow");
 
-    /* use_latest_format, use_vfd_swmr, only_meta_page, config */
-    if ((fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, config)) < 0) {
-        fprintf(stderr, "%s.%d: vfd_swmr_create_fapl failed\n", __func__, __LINE__);
+    /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
+    if ((fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config)) < 0) {
+        HDfprintf(stderr, "%s.%d: vfd_swmr_create_fapl failed\n", __func__, __LINE__);
         goto error;
     }
 
@@ -263,7 +266,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
         unsigned long  file_u;        /* Attribute sequence number (writer's "u") */
 
         /* Get a random dataset, according to the symbol distribution */
-        symbol = choose_dataset(&level, &offset);
+        symbol = choose_dataset(&level, &offset, verbose);
 
         /* Fill in "nrecords" field.  Note that this depends on the writer
          * using the same algorithm and "nrecords" */
@@ -271,7 +274,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
 
         /* Get the starting time */
         if ((start_time = HDtime(NULL)) == (time_t)-1) {
-            fprintf(stderr, "READER: could not read time.\n");
+            HDfprintf(stderr, "READER: could not read time.\n");
             goto error;
         }
 
@@ -404,18 +407,18 @@ error:
 static void
 usage(void)
 {
-    printf("\n");
-    printf("Usage error!\n");
-    printf("\n");
-    printf("Usage: vfd_swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
-    printf("    [-n <# of reads between reopens>] <# of records>\n");
-    printf("\n");
-    printf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
-    printf("between reopens ('-r 1')\n");
-    printf("\n");
-    printf("Note that the # of records *must* be the same as that supplied to\n");
-    printf("vfd_swmr_sparse_writer\n");
-    printf("\n");
+    HDprintf("\n");
+    HDprintf("Usage error!\n");
+    HDprintf("\n");
+    HDprintf("Usage: vfd_swmr_sparse_reader [-q] [-s <# of seconds to wait for writer>]\n");
+    HDprintf("    [-n <# of reads between reopens>] <# of records>\n");
+    HDprintf("\n");
+    HDprintf("Defaults to verbose (no '-q' given), 1 second wait ('-s 1') and 1 read\n");
+    HDprintf("between reopens ('-r 1')\n");
+    HDprintf("\n");
+    HDprintf("Note that the # of records *must* be the same as that supplied to\n");
+    HDprintf("vfd_swmr_sparse_writer\n");
+    HDprintf("\n");
     HDexit(1);
 } /* end usage() */
 
