@@ -230,6 +230,10 @@ if (NOT MSVC AND NOT MINGW)
       endif ()
     endif ()
   endif ()
+else ()
+  if (NOT MINGW)
+    list (APPEND HDF5_CMAKE_CXX_FLAGS "/EHsc")
+  endif ()
 endif ()
 
 #-----------------------------------------------------------------------------
