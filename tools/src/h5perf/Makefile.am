@@ -56,8 +56,8 @@ h5perf_serial_SOURCES=sio_perf.c sio_engine.c
 # All of the programs depend on the main hdf5 library, and some of them
 # depend on test or tools library.
 LDADD=$(LIBHDF5)
-h5perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-h5perf_serial_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-perf_LDADD=$(LIBH5TEST) $(LIBHDF5)
+h5perf_LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+h5perf_serial_LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+perf_LDADD=$(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am
