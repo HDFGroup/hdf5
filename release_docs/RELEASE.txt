@@ -820,6 +820,17 @@ New Features
 
     Tools:
     ------
+    - Refactored the perform tools and removed depends on test library.
+
+        Moved the perf and h5perf tools from tools/test/perform to
+        tools/src/h5perf so that they can be installed. This required
+        that the test library dependency be removed by copying the
+        needed functions from h5test.c.
+        The standalone scripts and other perform tools remain in the
+        tools/test/perform folder.
+
+        (ADB - 2021/08/10)
+
     - Removed partial long exceptions
 
         Some of the tools accepted shortened versions of the long options
@@ -1089,10 +1100,10 @@ Bug Fixes since HDF5-1.12.0 release
     Configuration
     -------------
     - Better support for libaec (open-source Szip library) in CMake
- 
-      Implemented better support for libaec 1.0.5 (or later) library. This version 
+
+      Implemented better support for libaec 1.0.5 (or later) library. This version
       of libaec contains improvements for better integration with HDF5. Furthermore,
-      the variable USE_LIBAEC_STATIC has been introduced to allow to make use of 
+      the variable USE_LIBAEC_STATIC has been introduced to allow to make use of
       static version of libaec library. Use libaec_DIR or libaec_ROOT to set
       the location in which libaec can be found.
 
