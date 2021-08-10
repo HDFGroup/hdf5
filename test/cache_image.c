@@ -1466,7 +1466,7 @@ check_cache_image_ctl_flow_1(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -1705,7 +1705,7 @@ check_cache_image_ctl_flow_2(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -2072,7 +2072,7 @@ check_cache_image_ctl_flow_3(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -2401,7 +2401,7 @@ check_cache_image_ctl_flow_4(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -2683,7 +2683,7 @@ check_cache_image_ctl_flow_5(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -2927,7 +2927,7 @@ check_cache_image_ctl_flow_6(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -3369,7 +3369,7 @@ cache_image_smoke_check_1(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -3638,7 +3638,7 @@ cache_image_smoke_check_2(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -4019,7 +4019,7 @@ cache_image_smoke_check_3(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -4391,7 +4391,7 @@ cache_image_smoke_check_4(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 } /* cache_image_smoke_check_4() */
@@ -4884,7 +4884,7 @@ cache_image_smoke_check_5(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -5294,7 +5294,7 @@ cache_image_smoke_check_6(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -5643,7 +5643,7 @@ cache_image_api_error_check_1(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -6064,7 +6064,7 @@ cache_image_api_error_check_2(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -6312,7 +6312,7 @@ cache_image_api_error_check_3(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -6862,7 +6862,7 @@ cache_image_api_error_check_4(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -7325,7 +7325,7 @@ get_free_sections_test(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 
@@ -7691,7 +7691,7 @@ evict_on_close_test(void)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
 
     return !pass;
 #endif /* H5_HAVE_PARALLEL */

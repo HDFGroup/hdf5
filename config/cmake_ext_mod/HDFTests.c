@@ -64,31 +64,6 @@ main ()
 
 #endif
 
-#ifdef VSNPRINTF_WORKS
-#include <stdio.h>
-#include <stdlib.h>
-#include <stdarg.h>
-
-int test_vsnprintf(const char *fmt,...)
-{
-    va_list     ap;
-    char *s = malloc(16);
-    int ret;
-
-    va_start(ap, fmt);
-    ret=vsnprintf(s,16,"%s",ap);
-    va_end(ap);
-
-    return(ret!=42 ? 1 : 0);
-}
-
-int main(void)
-{
-    return(test_vsnprintf("%s","A string that is longer than 16 characters"));
-}
-#endif
-
-
 #ifdef HAVE_ATTRIBUTE
 
 #if 0
@@ -114,6 +89,26 @@ int __attribute__((unused)) x
 
 
 #endif /* HAVE_ATTRIBUTE */
+
+#ifdef HAVE_FUNCTION
+
+#ifdef FC_DUMMY_MAIN
+#ifndef FC_DUMMY_MAIN_EQ_F77
+#  ifdef __cplusplus
+     extern "C"
+#  endif
+   int FC_DUMMY_MAIN() { return 1; }
+#endif
+#endif
+int
+main ()
+{
+(void)__FUNCTION__
+  ;
+  return 0;
+}
+
+#endif /* HAVE_FUNCTION */
 
 #ifdef HAVE_TIMEZONE
 

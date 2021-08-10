@@ -2792,7 +2792,7 @@ flush_cache(H5F_t *file_ptr, hbool_t destroy_entries, hbool_t dump_stats, hbool_
 
             if (verbose) {
 
-                HDfprintf(stdout, "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n", __func__,
+                HDfprintf(stdout, "%s: unexpected il/is/cis/dis = %lld/%lld/%lld/%lld.\n", FUNC,
                           (long long)(cache_ptr->index_len), (long long)(cache_ptr->index_size),
                           (long long)(cache_ptr->clean_index_size), (long long)(cache_ptr->dirty_index_size));
             }
@@ -3546,7 +3546,7 @@ row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", __func__);
+        HDfprintf(stdout, "%s(): entering.\n", FUNC);
 
     if (pass) {
         cache_ptr = file_ptr->shared->cache;
@@ -3878,7 +3878,7 @@ hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", __func__);
+        HDfprintf(stdout, "%s(): entering.\n", FUNC);
 
     if (pass) {
 
@@ -3970,7 +3970,7 @@ row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): Entering.\n", __func__);
+        HDfprintf(stdout, "%s(): Entering.\n", FUNC);
 
     if (pass) {
 
@@ -4230,7 +4230,7 @@ hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s(): entering.\n", __func__);
+        HDfprintf(stdout, "%s(): entering.\n", FUNC);
 
     if (pass) {
 
@@ -4321,7 +4321,7 @@ col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t 
     int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", __func__);
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
 
     if (pass) {
         int i;
@@ -4415,7 +4415,7 @@ hl_col_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, h
     int32_t local_max_index;
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", __func__);
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
 
     if (pass) {
 
@@ -4517,7 +4517,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     int32_t local_max_index[NUMBER_OF_ENTRY_TYPES];
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", __func__);
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
 
     if (pass) {
         int i;
@@ -4540,7 +4540,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     idx = local_max_index[NUMBER_OF_ENTRY_TYPES - 1] + lag;
 
     if (verbose) /* 1 */
-        HDfprintf(stdout, "%s: point %d.\n", __func__, mile_stone++);
+        HDfprintf(stdout, "%s: point %d.\n", FUNC, mile_stone++);
 
     while ((pass) && ((idx + lag) >= 0)) {
         type = NUMBER_OF_ENTRY_TYPES - 1;
@@ -4582,7 +4582,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     }
 
     if (verbose) /* 2 */
-        HDfprintf(stdout, "%s: point %d.\n", __func__, mile_stone++);
+        HDfprintf(stdout, "%s: point %d.\n", FUNC, mile_stone++);
 
     if ((pass) && (display_stats)) {
 
@@ -4590,7 +4590,7 @@ col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, int32_t lag, hbool_t
     }
 
     if (verbose)
-        HDfprintf(stdout, "%s: exiting.\n", __func__);
+        HDfprintf(stdout, "%s: exiting.\n", FUNC);
 
 } /* col_major_scan_backward() */
 
@@ -4622,7 +4622,7 @@ hl_col_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose, 
     int32_t local_max_index = -1;
 
     if (verbose)
-        HDfprintf(stdout, "%s: entering.\n", __func__);
+        HDfprintf(stdout, "%s: entering.\n", FUNC);
 
     if (pass) {
 

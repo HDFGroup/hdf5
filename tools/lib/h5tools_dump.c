@@ -4104,8 +4104,8 @@ h5tools_dump_reference(FILE *stream, const h5tool_format_t *info, h5tools_contex
                 } /* if (region_id >= 0) */
                 else {
                     /* if (region_id < 0) - could mean that no reference was written do not throw failure */
-                    H5Epush2(H5tools_ERR_STACK_g, __FILE__, __func__, __LINE__, H5tools_ERR_CLS_g,
-                             H5E_tools_g, H5E_tools_min_id_g, "H5Rdereference failed");
+                    H5Epush2(H5tools_ERR_STACK_g, __FILE__, FUNC, __LINE__, H5tools_ERR_CLS_g, H5E_tools_g,
+                             H5E_tools_min_id_g, "H5Rdereference failed");
                 }
             }
         } /* end else to if (h5tools_is_zero(... */

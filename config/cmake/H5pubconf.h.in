@@ -105,6 +105,9 @@
    and unions */
 #cmakedefine H5_HAVE_C99_DESIGNATED_INITIALIZER @H5_HAVE_C99_DESIGNATED_INITIALIZER@
 
+/* Define if the compiler understands the __func__ keyword */
+#cmakedefine H5_HAVE_C99_FUNC @H5_HAVE_C99_FUNC@
+
 /* Define to 1 if you have the `clock_gettime' function. */
 #cmakedefine H5_HAVE_CLOCK_GETTIME @H5_HAVE_CLOCK_GETTIME@
 
@@ -161,6 +164,9 @@
 
 /* Define to 1 if you have the `fseeko' function. */
 #cmakedefine H5_HAVE_FSEEKO @H5_HAVE_FSEEKO@
+
+/* Define if the compiler understands the __FUNCTION__ keyword */
+#cmakedefine H5_HAVE_FUNCTION @H5_HAVE_FUNCTION@
 
 /* Determine if INTEGER*16 is available */
 #cmakedefine H5_HAVE_Fortran_INTEGER_SIZEOF_16 @H5_HAVE_Fortran_INTEGER_SIZEOF_16@

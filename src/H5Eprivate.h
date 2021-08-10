@@ -31,7 +31,7 @@ typedef struct H5E_t H5E_t;
  * error number, the minor error number, and a description of the error.
  */
 #define HERROR(maj_id, min_id, ...)                                                                          \
-    H5E_printf_stack(NULL, __FILE__, __func__, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, __VA_ARGS__)
+    H5E_printf_stack(NULL, __FILE__, FUNC, __LINE__, H5E_ERR_CLS_g, maj_id, min_id, __VA_ARGS__)
 
 /*
  * HCOMMON_ERROR macro, used by HDONE_ERROR and HGOTO_ERROR
