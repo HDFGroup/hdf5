@@ -80,7 +80,7 @@ if(USE_SANITIZER)
         message(
           FATAL_ERROR "Unsupported value of USE_SANITIZER: ${USE_SANITIZER}")
       endif()
-    elseif(MSVC)
+    elseif(MSVC AND NOT CMAKE_C_COMPILER_VERSION VERSION_LESS 19.29)
       if(USE_SANITIZER MATCHES "([Aa]ddress)")
         message(STATUS "Building with Address sanitizer")
         append("/fsanitize=address" CMAKE_C_SANITIZER_FLAGS CMAKE_CXX_SANITIZER_FLAGS)
