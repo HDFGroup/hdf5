@@ -3564,6 +3564,9 @@
 ./config/cmake/CPack.Info.plist.in
 ./config/cmake/CTestCustom.cmake
 ./config/cmake/fileCompareTest.cmake
+./config/cmake/FindCIRCLE.cmake
+./config/cmake/FindDTCMP.cmake
+./config/cmake/FindMFU.cmake
 ./config/cmake/FindHDFS.cmake
 ./config/cmake/H5pubconf.h.in
 ./config/cmake/hdf5-config.cmake.in
@@ -3593,9 +3596,6 @@
 
 ./config/cmake_ext_mod/ConfigureChecks.cmake
 ./config/cmake_ext_mod/CTestCustom.cmake
-./config/cmake_ext_mod/FindCIRCLE.cmake
-./config/cmake_ext_mod/FindDTCMP.cmake
-./config/cmake_ext_mod/FindMFU.cmake
 ./config/cmake_ext_mod/FindSZIP.cmake
 ./config/cmake_ext_mod/GetTimeOfDayTest.cpp
 ./config/cmake_ext_mod/grepTest.cmake
