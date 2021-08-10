@@ -210,7 +210,7 @@ H5MF_sects_dump(H5F_t *f, FILE *stream)
 
     FUNC_ENTER_PACKAGE_TAG(H5AC__FREESPACE_TAG, FAIL)
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: Dumping file free space sections\n", __func__);
+    HDfprintf(stderr, "%s: Dumping file free space sections\n", FUNC);
 #endif /* H5MF_ALLOC_DEBUG */
 
     /*
@@ -223,7 +223,7 @@ H5MF_sects_dump(H5F_t *f, FILE *stream)
     if (HADDR_UNDEF == (eoa = H5F_get_eoa(f, H5FD_MEM_DEFAULT)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTGET, FAIL, "driver get_eoa request failed")
 #ifdef H5MF_ALLOC_DEBUG
-    HDfprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %" PRIuHADDR "\n", __func__, eoa);
+    HDfprintf(stderr, "%s: for type = H5FD_MEM_DEFAULT, eoa = %" PRIuHADDR "\n", FUNC, eoa);
 #endif /* H5MF_ALLOC_DEBUG */
 
     if (H5F_PAGED_AGGR(f)) {  /* File space paging */
@@ -267,7 +267,7 @@ H5MF_sects_dump(H5F_t *f, FILE *stream)
 #ifdef H5MF_ALLOC_DEBUG
         HDfprintf(stderr,
                   "%s: ma_addr = %" PRIuHADDR ", ma_size = %" PRIuHSIZE ", end of ma = %" PRIuHADDR "\n",
-                  __func__, ma_addr, ma_size, (haddr_t)((ma_addr + ma_size) - 1));
+                  FUNC, ma_addr, ma_size, (haddr_t)((ma_addr + ma_size) - 1));
 #endif /* H5MF_ALLOC_DEBUG */
 
         /* Retrieve 'small data' aggregator info, if available */
@@ -275,7 +275,7 @@ H5MF_sects_dump(H5F_t *f, FILE *stream)
 #ifdef H5MF_ALLOC_DEBUG
         HDfprintf(stderr,
                   "%s: sda_addr = %" PRIuHADDR ", sda_size = %" PRIuHSIZE ", end of sda = %" PRIuHADDR "\n",
-                  __func__, sda_addr, sda_size, (haddr_t)((sda_addr + sda_size) - 1));
+                  FUNC, sda_addr, sda_size, (haddr_t)((sda_addr + sda_size) - 1));
 #endif /* H5MF_ALLOC_DEBUG */
 
         /* Iterate over all the free space types that have managers and dump each free list's space */
@@ -318,7 +318,7 @@ H5MF_sects_dump(H5F_t *f, FILE *stream)
     }     /* end else */
 
 done:
-    HDfprintf(stderr, "%s: Done dumping file free space sections\n", __func__);
+    HDfprintf(stderr, "%s: Done dumping file free space sections\n", FUNC);
     FUNC_LEAVE_NOAPI_TAG(ret_value)
 } /* end H5MF__sects_dump() */
 #endif /* H5MF_ALLOC_DEBUG_DUMP */

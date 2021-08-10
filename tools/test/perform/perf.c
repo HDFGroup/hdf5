@@ -136,11 +136,12 @@ main(int argc, char **argv)
     if (mynod == 0)
         printf("# Using hdf5-io calls.\n");
 
-#ifdef H5_HAVE_UNISTD_H
-    /* Kind of a weird hack- if the location of the pvfstab file was
-     * specified on the command line, then spit out this location into
-     * the appropriate environment variable.
-     */
+        /* kindof a weird hack- if the location of the pvfstab file was
+         * specified on the command line, then spit out this location into
+         * the appropriate environment variable: */
+
+#if H5_HAVE_SETENV
+    /* no setenv or unsetenv */
     if (opt_pvfstab_set) {
         if ((setenv("PVFSTAB_FILE", opt_pvfstab, 1)) < 0) {
             perror("setenv");
@@ -371,8 +372,9 @@ main(int argc, char **argv)
 
 die_jar_jar_die:
 
-#ifdef H5_HAVE_UNISTD
-    /* Clear the environment variable if it was set earlier */
+#if H5_HAVE_SETENV
+    /* no setenv or unsetenv */
+    /* clear the environment variable if it was set earlier */
     if (opt_pvfstab_set) {
         unsetenv("PVFSTAB_FILE");
     }

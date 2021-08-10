@@ -6093,7 +6093,7 @@ main(int argc, char **argv)
     if (VERBOSE_MED)
         h5_show_hostname();
 
-    TestAlarmOn();
+    ALARM_ON;
 
     /* Create test file */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -6172,7 +6172,7 @@ exit:
         if (MAINPROCESS)
             HDprintf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors, nerrors > 1 ? "S" : "");
 
-    TestAlarmOff();
+    ALARM_OFF;
 
     h5_clean_files(FILENAME, fapl);
 

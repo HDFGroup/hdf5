@@ -709,7 +709,7 @@ created) or if the wrong values were read back.
 <blockquote>
   <pre>
   #define H5_API_UNSET_CANCEL                                 \
-    if (H5_IS_API(__func__)) {                                \
+    if (H5_IS_API(FUNC)) {                                    \
       H5_cancel_count_inc();                                  \
     }
   </pre>
@@ -721,7 +721,7 @@ created) or if the wrong values were read back.
 <blockquote>
   <pre>
   #define H5_API_LOCK_BEGIN                                   \
-     if (H5_IS_API(__func__)) {                               \
+     if (H5_IS_API(FUNC)) {                                   \
        H5_mutex_lock(&amp;H5_g.init_lock);
   </pre>
 </blockquote>
@@ -755,7 +755,7 @@ created) or if the wrong values were read back.
 <blockquote>
   <pre>
   #define H5_API_UNLOCK_BEGIN                                 \
-    if (H5_IS_API(__func__)) {                                \
+    if (H5_IS_API(FUNC)) {                                    \
       H5_mutex_unlock(&amp;H5_g.init_lock);
   </pre>
 </blockquote>
@@ -774,7 +774,7 @@ created) or if the wrong values were read back.
 <blockquote>
   <pre>
   #define H5_API_SET_CANCEL                                   \
-    if (H5_IS_API(__func__)) {                                \
+    if (H5_IS_API(FUNC)) {                                    \
       H5_cancel_count_dec();                                  \
     }
   </pre>

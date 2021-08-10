@@ -52,7 +52,8 @@ const char *FILENAME[] = {"direct_write", "unix.raw", NULL};
 /*
  * Print the current location on the standard output stream.
  */
-#define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
+#define FUNC __func__
+#define AT() printf("   at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
 #define H5_FAILED()                                                                                          \
     {                                                                                                        \
         puts("*FAILED*");                                                                                    \
