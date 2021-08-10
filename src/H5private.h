@@ -589,231 +589,227 @@ typedef struct {
     haddr_t       addr;   /* The unique address of the object's header in that file */
 } H5_obj_t;
 
-#define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
-
-/* Put all Windows-specific definitions in H5win32defs.h so we
- * can (mostly) assume a POSIX platform. Not all of the POSIX calls
- * will have a Windows equivalent so some #ifdef protection is still
- * necessary (e.g., fork()).
+/*
+ * Redefine all the POSIX functions.  We should never see a POSIX
+ * function (or any other non-HDF5 function) in the source!
  */
-#include "H5win32defs.h"
 
-/* Platform-independent definitions for struct stat and off_t */
-#ifndef H5_HAVE_WIN32_API
-/* These definitions differ in Windows and are defined in
- * H5win32defs for that platform.
- */
-typedef struct stat h5_stat_t;
-typedef off_t       h5_stat_size_t;
-#define HDoff_t off_t
-#endif
-
-#/* Redefine all the POSIX and C functions.  We should never see an
- * undecorated POSIX or C function (or any other non-HDF5 function)
- * in the source.
- */
+/* Put all platform-specific definitions in the following file */
+/* so that the following definitions are platform free. */
+#include "H5win32defs.h" /* For Windows-specific definitions */
 
 #ifndef HDabort
 #define HDabort() abort()
-#endif
+#endif /* HDabort */
 #ifndef HDabs
 #define HDabs(X) abs(X)
-#endif
+#endif /* HDabs */
 #ifndef HDaccept
-#define HDaccept(A, B, C) accept((A), (B), (C))
-#endif
+#define HDaccept(A, B, C) accept((A), (B), (C)) /* mirror VFD */
+#endif                                          /* HDaccept */
 #ifndef HDaccess
 #define HDaccess(F, M) access(F, M)
-#endif
+#endif /* HDaccess */
 #ifndef HDacos
 #define HDacos(X) acos(X)
-#endif
+#endif /* HDacos */
 #ifndef HDalarm
+#ifdef H5_HAVE_ALARM
 #define HDalarm(N) alarm(N)
-#endif
+#else /* H5_HAVE_ALARM */
+#define HDalarm(N) (0)
+#endif /* H5_HAVE_ALARM */
+#endif /* HDalarm */
 #ifndef HDasctime
 #define HDasctime(T) asctime(T)
-#endif
+#endif /* HDasctime */
 #ifndef HDasin
 #define HDasin(X) asin(X)
-#endif
+#endif /* HDasin */
 #ifndef HDasprintf
 #define HDasprintf asprintf /*varargs*/
-#endif
+#endif                      /* HDasprintf */
 #ifndef HDassert
 #define HDassert(X) assert(X)
-#endif
+#endif /* HDassert */
 #ifndef HDatan
 #define HDatan(X) atan(X)
-#endif
+#endif /* HDatan */
 #ifndef HDatan2
 #define HDatan2(X, Y) atan2(X, Y)
-#endif
+#endif /* HDatan2 */
 #ifndef HDatexit
 #define HDatexit(F) atexit(F)
-#endif
+#endif /* HDatexit */
 #ifndef HDatof
 #define HDatof(S) atof(S)
-#endif
+#endif /* HDatof */
 #ifndef HDatoi
 #define HDatoi(S) atoi(S)
-#endif
+#endif /* HDatoi */
 #ifndef HDatol
 #define HDatol(S) atol(S)
-#endif
+#endif /* HDatol */
 #ifndef HDatoll
 #define HDatoll(S) atoll(S)
-#endif
+#endif /* HDatol */
 #ifndef HDbind
-#define HDbind(A, B, C) bind((A), (B), (C))
-#endif
+#define HDbind(A, B, C) bind((A), (B), (C)) /* mirror VFD */
+#endif                                      /* HDbind */
 #ifndef HDbsearch
 #define HDbsearch(K, B, N, Z, F) bsearch(K, B, N, Z, F)
-#endif
+#endif /* HDbsearch */
 #ifndef HDcalloc
 #define HDcalloc(N, Z) calloc(N, Z)
-#endif
+#endif /* HDcalloc */
 #ifndef HDceil
 #define HDceil(X) ceil(X)
-#endif
+#endif /* HDceil */
 #ifndef HDcfgetispeed
 #define HDcfgetispeed(T) cfgetispeed(T)
-#endif
+#endif /* HDcfgetispeed */
 #ifndef HDcfgetospeed
 #define HDcfgetospeed(T) cfgetospeed(T)
-#endif
+#endif /* HDcfgetospeed */
 #ifndef HDcfsetispeed
 #define HDcfsetispeed(T, S) cfsetispeed(T, S)
-#endif
+#endif /* HDcfsetispeed */
 #ifndef HDcfsetospeed
 #define HDcfsetospeed(T, S) cfsetospeed(T, S)
-#endif
+#endif /* HDcfsetospeed */
 #ifndef HDchdir
 #define HDchdir(S) chdir(S)
-#endif
+#endif /* HDchdir */
 #ifndef HDchmod
 #define HDchmod(S, M) chmod(S, M)
-#endif
+#endif /* HDchmod */
 #ifndef HDchown
 #define HDchown(S, O, G) chown(S, O, G)
-#endif
+#endif /* HDchown */
 #ifndef HDclearerr
 #define HDclearerr(F) clearerr(F)
-#endif
+#endif /* HDclearerr */
 #ifndef HDclock
 #define HDclock() clock()
-#endif
+#endif /* HDclock */
 #ifndef HDclock_gettime
 #define HDclock_gettime(CID, TS) clock_gettime(CID, TS)
-#endif
+#endif /* HDclock_gettime */
 #ifndef HDclose
 #define HDclose(F) close(F)
-#endif
+#endif /* HDclose */
 #ifndef HDclosedir
 #define HDclosedir(D) closedir(D)
-#endif
+#endif /* HDclosedir */
 #ifndef HDconnect
-#define HDconnect(A, B, C) connect((A), (B), (C))
-#endif
+#define HDconnect(A, B, C) connect((A), (B), (C)) /* mirror VFD */
+#endif                                            /* HDconnect */
 #ifndef HDcos
 #define HDcos(X) cos(X)
-#endif
+#endif /* HDcos */
 #ifndef HDcosh
 #define HDcosh(X) cosh(X)
-#endif
+#endif /* HDcosh */
 #ifndef HDcreat
 #define HDcreat(S, M) creat(S, M)
-#endif
+#endif /* HDcreat */
 #ifndef HDctermid
 #define HDctermid(S) ctermid(S)
-#endif
+#endif /* HDctermid */
 #ifndef HDctime
 #define HDctime(T) ctime(T)
-#endif
+#endif /* HDctime */
 #ifndef HDcuserid
 #define HDcuserid(S) cuserid(S)
-#endif
+#endif /* HDcuserid */
 #ifndef HDdifftime
+#ifdef H5_HAVE_DIFFTIME
 #define HDdifftime(X, Y) difftime(X, Y)
-#endif
+#else /* H5_HAVE_DIFFTIME */
+#define HDdifftime(X, Y) ((double)(X) - (double)(Y))
+#endif /* H5_HAVE_DIFFTIME */
+#endif /* HDdifftime */
 #ifndef HDdiv
 #define HDdiv(X, Y) div(X, Y)
-#endif
+#endif /* HDdiv */
 #ifndef HDdup
 #define HDdup(F) dup(F)
-#endif
+#endif /* HDdup */
 #ifndef HDdup2
 #define HDdup2(F, I) dup2(F, I)
-#endif
+#endif /* HDdup2 */
+/* execl() variable arguments */
+/* execle() variable arguments */
+/* execlp() variable arguments */
 #ifndef HDexecv
 #define HDexecv(S, AV) execv(S, AV)
-#endif
+#endif /* HDexecv */
 #ifndef HDexecve
 #define HDexecve(S, AV, E) execve(S, AV, E)
-#endif
+#endif /* HDexecve */
 #ifndef HDexecvp
 #define HDexecvp(S, AV) execvp(S, AV)
-#endif
+#endif /* HDexecvp */
 #ifndef HDexit
 #define HDexit(N) exit(N)
-#endif
+#endif /* HDexit */
 #ifndef HD_exit
 #define HD_exit(N) _exit(N)
-#endif
+#endif /* HD_exit */
 #ifndef HDexp
 #define HDexp(X) exp(X)
-#endif
+#endif /* HDexp */
 #ifndef HDexp2
 #define HDexp2(X) exp2(X)
-#endif
+#endif /* HDexp2 */
 #ifndef HDfabs
 #define HDfabs(X) fabs(X)
-#endif
+#endif /* HDfabs */
 #ifndef HDfabsf
 #define HDfabsf(X) fabsf(X)
-#endif
+#endif /* HDfabsf */
 #ifndef HDfabsl
 #define HDfabsl(X) fabsl(X)
-#endif
+#endif /* HDfabsl */
 #ifndef HDfclose
 #define HDfclose(F) fclose(F)
-#endif
+#endif /* HDfclose */
+#ifdef H5_HAVE_FCNTL
 #ifndef HDfcntl
 #define HDfcntl(F, C, ...) fcntl(F, C, __VA_ARGS__)
-#endif
+#endif /* HDfcntl */
+#endif /* H5_HAVE_FCNTL */
 #ifndef HDfdopen
 #define HDfdopen(N, S) fdopen(N, S)
-#endif
+#endif /* HDfdopen */
 #ifndef HDfeof
 #define HDfeof(F) feof(F)
-#endif
+#endif /* HDfeof */
 #ifndef HDferror
 #define HDferror(F) ferror(F)
-#endif
+#endif /* HDferror */
 #ifndef HDfflush
 #define HDfflush(F) fflush(F)
-#endif
+#endif /* HDfflush */
 #ifndef HDfgetc
 #define HDfgetc(F) fgetc(F)
-#endif
+#endif /* HDfgetc */
 #ifndef HDfgetpos
 #define HDfgetpos(F, P) fgetpos(F, P)
-#endif
+#endif /* HDfgetpos */
 #ifndef HDfgets
 #define HDfgets(S, N, F) fgets(S, N, F)
-#endif
+#endif /* HDfgets */
 #ifndef HDfileno
 #define HDfileno(F) fileno(F)
-#endif
-
+#endif /* HDfileno */
 /* Since flock is so prevalent, always build these functions
  * when possible to avoid them becoming dead code.
  */
 #ifdef H5_HAVE_FCNTL
 H5_DLL int Pflock(int fd, int operation);
-#endif
+#endif /* H5_HAVE_FCNTL */
 H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
-
 #ifndef HDflock
 /* NOTE: flock(2) is not present on all POSIX systems.
  * If it is not present, we try a flock() equivalent based on
@@ -827,43 +823,41 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDflock(F, L) Pflock(F, L)
 #else
 #define HDflock(F, L) Nflock(F, L)
-#endif
-
+#endif /* H5_HAVE_FLOCK */
 #endif /* HDflock */
-
 #ifndef HDfloor
 #define HDfloor(X) floor(X)
-#endif
+#endif /* HDfloor */
 #ifndef HDfmod
 #define HDfmod(X, Y) fmod(X, Y)
-#endif
+#endif /* HDfmod */
 #ifndef HDfopen
 #define HDfopen(S, M) fopen(S, M)
-#endif
+#endif /* HDfopen */
 #ifndef HDfork
 #define HDfork() fork()
-#endif
+#endif /* HDfork */
 #ifndef HDfprintf
 #define HDfprintf fprintf
 #endif
 #ifndef HDfpathconf
 #define HDfpathconf(F, N) fpathconf(F, N)
-#endif
+#endif /* HDfpathconf */
 #ifndef HDfputc
 #define HDfputc(C, F) fputc(C, F)
-#endif
+#endif /* HDfputc */
 #ifndef HDfputs
 #define HDfputs(S, F) fputs(S, F)
-#endif
+#endif /* HDfputs */
 #ifndef HDfread
 #define HDfread(M, Z, N, F) fread(M, Z, N, F)
-#endif
+#endif /* HDfread */
 #ifndef HDfree
 #define HDfree(M) free(M)
-#endif
+#endif /* HDfree */
 #ifndef HDfreopen
 #define HDfreopen(S, M, F) freopen(S, M, F)
-#endif
+#endif /* HDfreopen */
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
 #endif
@@ -887,554 +881,559 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
-#endif
+#endif /* HDfseek */
 #ifndef HDfsetpos
 #define HDfsetpos(F, P) fsetpos(F, P)
-#endif
+#endif /* HDfsetpos */
 #ifndef HDfstat
 #define HDfstat(F, B) fstat(F, B)
-#endif
+#endif /* HDfstat */
+#ifndef HDlstat
+#define HDlstat(S, B) lstat(S, B)
+#endif /* HDlstat */
+#ifndef HDstat
+#define HDstat(S, B) stat(S, B)
+#endif /* HDstat */
+
+#ifndef H5_HAVE_WIN32_API
+/* These definitions differ in Windows and are defined in
+ * H5win32defs for that platform.
+ */
+typedef struct stat h5_stat_t;
+typedef off_t       h5_stat_size_t;
+#define HDoff_t off_t
+#endif /* H5_HAVE_WIN32_API */
+
+#define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
+
 #ifndef HDftell
 #define HDftell(F) ftell(F)
-#endif
+#endif /* HDftell */
 #ifndef HDftruncate
 #define HDftruncate(F, L) ftruncate(F, L)
-#endif
+#endif /* HDftruncate */
 #ifndef HDfwrite
 #define HDfwrite(M, Z, N, F) fwrite(M, Z, N, F)
-#endif
+#endif /* HDfwrite */
 #ifndef HDgetc
 #define HDgetc(F) getc(F)
-#endif
+#endif /* HDgetc */
 #ifndef HDgetchar
 #define HDgetchar() getchar()
-#endif
+#endif /* HDgetchar */
 #ifndef HDgetcwd
 #define HDgetcwd(S, Z) getcwd(S, Z)
-#endif
+#endif /* HDgetcwd */
 #ifndef HDgetdcwd
 #define HDgetdcwd(D, S, Z) getcwd(S, Z)
-#endif
-
-/* Windows only - set to zero on other systems */
+#endif /* HDgetdcwd */
 #ifndef HDgetdrive
 #define HDgetdrive() 0
-#endif
-
+#endif /* HDgetdrive */
 #ifndef HDgetegid
 #define HDgetegid() getegid()
-#endif
+#endif /* HDgetegid() */
 #ifndef HDgetenv
 #define HDgetenv(S) getenv(S)
-#endif
+#endif /* HDgetenv */
 #ifndef HDgeteuid
 #define HDgeteuid() geteuid()
-#endif
+#endif /* HDgeteuid */
 #ifndef HDgetgid
 #define HDgetgid() getgid()
-#endif
+#endif /* HDgetgid */
 #ifndef HDgetgrgid
 #define HDgetgrgid(G) getgrgid(G)
-#endif
+#endif /* HDgetgrgid */
 #ifndef HDgetgrnam
 #define HDgetgrnam(S) getgrnam(S)
-#endif
+#endif /* HDgetgrnam */
 #ifndef HDgetgroups
 #define HDgetgroups(Z, G) getgroups(Z, G)
-#endif
+#endif /* HDgetgroups */
 #ifndef HDgethostbyaddr
-#define HDgethostbyaddr(A, B, C) gethostbyaddr((A), (B), (C))
-#endif
+#define HDgethostbyaddr(A, B, C) gethostbyaddr((A), (B), (C)) /* mirror VFD */
+#endif                                                        /* HDgethostbyaddr */
 #ifndef HDgethostname
 #define HDgethostname(N, L) gethostname(N, L)
-#endif
+#endif /* HDgethostname */
 #ifndef HDgetlogin
 #define HDgetlogin() getlogin()
-#endif
+#endif /* HDgetlogin */
 #ifndef HDgetpgrp
 #define HDgetpgrp() getpgrp()
-#endif
+#endif /* HDgetpgrp */
 #ifndef HDgetpid
 #define HDgetpid() getpid()
-#endif
+#endif /* HDgetpid */
 #ifndef HDgetppid
 #define HDgetppid() getppid()
-#endif
+#endif /* HDgetppid */
 #ifndef HDgetpwnam
 #define HDgetpwnam(S) getpwnam(S)
-#endif
+#endif /* HDgetpwnam */
 #ifndef HDgetpwuid
 #define HDgetpwuid(U) getpwuid(U)
-#endif
+#endif /* HDgetpwuid */
 #ifndef HDgetrusage
 #define HDgetrusage(X, S) getrusage(X, S)
-#endif
+#endif /* HDgetrusage */
 
 /* Don't define HDgets - gets() was deprecated in C99 and removed in C11 */
 #ifdef HDgets
 #undef HDgets
-#endif
+#endif /* HDgets */
 
 #ifndef HDgettimeofday
 #define HDgettimeofday(S, P) gettimeofday(S, P)
-#endif
+#endif /* HDgettimeofday */
 #ifndef HDgetuid
 #define HDgetuid() getuid()
-#endif
+#endif /* HDgetuid */
 #ifndef HDgmtime
 #define HDgmtime(T) gmtime(T)
-#endif
+#endif /* HDgmtime */
 #ifndef HDhtonl
-#define HDhtonl(X) htonl((X))
-#endif
+#define HDhtonl(X) htonl((X)) /* mirror VFD */
+#endif                        /* HDhtonl */
 #ifndef HDhtons
-#define HDhtons(X) htons((X))
-#endif
+#define HDhtons(X) htons((X)) /* mirror VFD */
+#endif                        /* HDhtons */
 #ifndef HDinet_addr
-#define HDinet_addr(C) inet_addr((C))
-#endif
+#define HDinet_addr(C) inet_addr((C)) /* mirror VFD */
+#endif                                /* HDinet_addr */
 #ifndef HDinet_ntoa
-#define HDinet_ntoa(C) inet_ntoa((C))
-#endif
+#define HDinet_ntoa(C) inet_ntoa((C)) /* mirror VFD */
+#endif                                /* HDinet_ntoa */
 #ifndef HDisalnum
-#define HDisalnum(C) isalnum((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDisalnum(C) isalnum((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDisalnum */
 #ifndef HDisalpha
-#define HDisalpha(C) isalpha((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDisalpha(C) isalpha((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDisalpha */
 #ifndef HDisatty
 #define HDisatty(F) isatty(F)
-#endif
+#endif /* HDisatty */
 #ifndef HDiscntrl
-#define HDiscntrl(C) iscntrl((int)(C)) /* Cast for solaris warning */
-#endif
+#define HDiscntrl(C) iscntrl((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDiscntrl */
 #ifndef HDisdigit
-#define HDisdigit(C) isdigit((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDisdigit(C) isdigit((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDisdigit */
 #ifndef HDisgraph
-#define HDisgraph(C) isgraph((int)(C)) /* Cast for Solaris warning*/
-#endif
+#define HDisgraph(C) isgraph((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDisgraph */
 #ifndef HDislower
-#define HDislower(C) islower((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDislower(C) islower((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDislower */
 #ifndef HDisnan
 #define HDisnan(X) isnan(X)
-#endif
+#endif /* HDisnan */
 #ifndef HDisprint
-#define HDisprint(C) isprint((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDisprint(C) isprint((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDisprint */
 #ifndef HDispunct
-#define HDispunct(C) ispunct((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDispunct(C) ispunct((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDispunct */
 #ifndef HDisspace
-#define HDisspace(C) isspace((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDisspace(C) isspace((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDisspace */
 #ifndef HDisupper
-#define HDisupper(C) isupper((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDisupper(C) isupper((int)(C)) /*cast for solaris warning*/
+#endif                                 /* HDisupper */
 #ifndef HDisxdigit
-#define HDisxdigit(C) isxdigit((int)(C)) /* Cast for Solaris warning */
-#endif
+#define HDisxdigit(C) isxdigit((int)(C)) /*cast for solaris warning*/
+#endif                                   /* HDisxdigit */
 #ifndef HDkill
 #define HDkill(P, S) kill(P, S)
-#endif
+#endif /* HDkill */
 #ifndef HDlabs
 #define HDlabs(X) labs(X)
-#endif
+#endif /* HDlabs */
 #ifndef HDldexp
 #define HDldexp(X, N) ldexp(X, N)
-#endif
+#endif /* HDldexp */
 #ifndef HDldiv
 #define HDldiv(X, Y) ldiv(X, Y)
-#endif
+#endif /* HDldiv */
 #ifndef HDlink
 #define HDlink(OLD, NEW) link(OLD, NEW)
-#endif
+#endif /* HDlink */
 #ifndef HDlisten
-#define HDlisten(A, B) listen((A), (B))
-#endif
+#define HDlisten(A, B) listen((A), (B)) /* mirror VFD */
+#endif                                  /* HDlisten */
 #ifndef HDllround
 #define HDllround(V) llround(V)
-#endif
+#endif /* HDround */
 #ifndef HDllroundf
 #define HDllroundf(V) llroundf(V)
-#endif
+#endif /* HDllroundf */
 #ifndef HDllroundl
 #define HDllroundl(V) llroundl(V)
-#endif
+#endif /* HDllroundl */
 #ifndef HDlocaleconv
 #define HDlocaleconv() localeconv()
-#endif
+#endif /* HDlocaleconv */
 #ifndef HDlocaltime
 #define HDlocaltime(T) localtime(T)
-#endif
+#endif /* HDlocaltime */
 #ifndef HDlog
 #define HDlog(X) log(X)
-#endif
+#endif /* HDlog */
 #ifndef HDlog10
 #define HDlog10(X) log10(X)
-#endif
+#endif /* HDlog10 */
 #ifndef HDlongjmp
 #define HDlongjmp(J, N) longjmp(J, N)
-#endif
+#endif /* HDlongjmp */
 #ifndef HDlround
 #define HDlround(V) lround(V)
-#endif
+#endif /* HDround */
 #ifndef HDlroundf
 #define HDlroundf(V) lroundf(V)
-#endif
+#endif /* HDlroundf */
 #ifndef HDlroundl
 #define HDlroundl(V) lroundl(V)
-#endif
+#endif /* HDroundl */
 #ifndef HDlseek
 #define HDlseek(F, O, W) lseek(F, O, W)
-#endif
-#ifndef HDlstat
-#define HDlstat(S, B) lstat(S, B)
-#endif
+#endif /* HDlseek */
 #ifndef HDmalloc
 #define HDmalloc(Z) malloc(Z)
-#endif
+#endif /* HDmalloc */
 #ifndef HDposix_memalign
 #define HDposix_memalign(P, A, Z) posix_memalign(P, A, Z)
-#endif
+#endif /* HDposix_memalign */
 #ifndef HDmblen
 #define HDmblen(S, N) mblen(S, N)
-#endif
+#endif /* HDmblen */
 #ifndef HDmbstowcs
 #define HDmbstowcs(P, S, Z) mbstowcs(P, S, Z)
-#endif
+#endif /* HDmbstowcs */
 #ifndef HDmbtowc
 #define HDmbtowc(P, S, Z) mbtowc(P, S, Z)
-#endif
+#endif /* HDmbtowc */
 #ifndef HDmemchr
 #define HDmemchr(S, C, Z) memchr(S, C, Z)
-#endif
+#endif /* HDmemchr */
 #ifndef HDmemcmp
 #define HDmemcmp(X, Y, Z) memcmp(X, Y, Z)
-#endif
+#endif /* HDmemcmp */
 #ifndef HDmemcpy
 #define HDmemcpy(X, Y, Z) memcpy(X, Y, Z)
-#endif
+#endif /* HDmemcpy */
 #ifndef HDmemmove
 #define HDmemmove(X, Y, Z) memmove((char *)(X), (const char *)(Y), Z)
-#endif
+#endif /* HDmemmove */
 #ifndef HDmemset
 #define HDmemset(X, C, Z) memset(X, C, Z)
-#endif
+#endif /* HDmemset */
 #ifndef HDmkdir
 #define HDmkdir(S, M) mkdir(S, M)
-#endif
+#endif /* HDmkdir */
 #ifndef HDmkfifo
 #define HDmkfifo(S, M) mkfifo(S, M)
-#endif
+#endif /* HDmkfifo */
 #ifndef HDmktime
 #define HDmktime(T) mktime(T)
-#endif
+#endif /* HDmktime */
 #ifndef HDmodf
 #define HDmodf(X, Y) modf(X, Y)
-#endif
+#endif /* HDmodf */
 #ifndef HDnanosleep
 #define HDnanosleep(N, O) nanosleep(N, O)
-#endif
+#endif /* HDnanosleep */
 #ifndef HDntohl
-#define HDntohl(A) ntohl((A))
-#endif
+#define HDntohl(A) ntohl((A)) /* mirror VFD */
+#endif                        /* HDntohl */
 #ifndef HDntohs
-#define HDntohs(A) ntohs((A))
-#endif
+#define HDntohs(A) ntohs((A)) /* mirror VFD */
+#endif                        /* HDntohs */
 #ifndef HDopen
 #define HDopen(F, ...) open(F, __VA_ARGS__)
-#endif
+#endif /* HDopen */
 #ifndef HDopendir
 #define HDopendir(S) opendir(S)
-#endif
+#endif /* HDopendir */
 #ifndef HDpathconf
 #define HDpathconf(S, N) pathconf(S, N)
-#endif
+#endif /* HDpathconf */
 #ifndef HDpause
 #define HDpause() pause()
-#endif
+#endif /* HDpause */
 #ifndef HDperror
 #define HDperror(S) perror(S)
-#endif
+#endif /* HDperror */
 #ifndef HDpipe
 #define HDpipe(F) pipe(F)
-#endif
+#endif /* HDpipe */
 #ifndef HDpow
 #define HDpow(X, Y) pow(X, Y)
-#endif
+#endif /* HDpow */
 #ifndef HDpowf
 #define HDpowf(X, Y) powf(X, Y)
-#endif
+#endif /* HDpowf */
 #ifndef HDpread
 #define HDpread(F, B, C, O) pread(F, B, C, O)
-#endif
+#endif /* HDpread */
 #ifndef HDprintf
 #define HDprintf printf
-#endif
+#endif /* HDprintf */
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)
-#endif
+#endif /* HDputc*/
 #ifndef HDputchar
 #define HDputchar(C) putchar(C)
-#endif
+#endif /* HDputchar */
 #ifndef HDputs
 #define HDputs(S) puts(S)
-#endif
+#endif /* HDputs */
 #ifndef HDpwrite
 #define HDpwrite(F, B, C, O) pwrite(F, B, C, O)
-#endif
+#endif /* HDpwrite */
 #ifndef HDqsort
 #define HDqsort(M, N, Z, F) qsort(M, N, Z, F)
-#endif
+#endif /* HDqsort*/
 #ifndef HDraise
 #define HDraise(N) raise(N)
-#endif
+#endif /* HDraise */
 
-/* clang-format off */
 #ifdef H5_HAVE_RAND_R
-#   ifndef HDrandom
-#   define HDrandom() HDrand()
-#   endif
-    H5_DLL int HDrand(void);
-#   ifndef HDsrandom
-#   define HDsrandom(S) HDsrand(S)
-#   endif
-    H5_DLL void HDsrand(unsigned int seed);
+#ifndef HDrandom
+#define HDrandom() HDrand()
+#endif /* HDrandom */
+H5_DLL int HDrand(void);
+#ifndef HDsrandom
+#define HDsrandom(S) HDsrand(S)
+#endif /* HDsrandom */
+H5_DLL void HDsrand(unsigned int seed);
 #elif defined(H5_HAVE_RANDOM)
-#   ifndef HDrand
-#   define HDrand() random()
-#   endif
-#   ifndef HDrandom
-#   define HDrandom() random()
-#   endif
-#   ifndef HDsrand
-#   define HDsrand(S) srandom(S)
-#   endif
-#   ifndef HDsrandom
-#   define HDsrandom(S) srandom(S)
-#   endif
-#else
-#   ifndef HDrand
-#   define HDrand() rand()
-#   endif
-#   ifndef HDrandom
-#   define HDrandom() rand()
-#   endif
-#   ifndef HDsrand
-#   define HDsrand(S) srand(S)
-#   endif
-#   ifndef HDsrandom
-#   define HDsrandom(S) srand(S)
-#   endif
-#endif
-/* clang-format on */
+#ifndef HDrand
+#define HDrand() random()
+#endif /* HDrand */
+#ifndef HDrandom
+#define HDrandom() random()
+#endif /* HDrandom */
+#ifndef HDsrand
+#define HDsrand(S) srandom(S)
+#endif /* HDsrand */
+#ifndef HDsrandom
+#define HDsrandom(S) srandom(S)
+#endif /* HDsrandom */
+#else  /* H5_HAVE_RANDOM */
+#ifndef HDrand
+#define HDrand() rand()
+#endif /* HDrand */
+#ifndef HDrandom
+#define HDrandom() rand()
+#endif /* HDrandom */
+#ifndef HDsrand
+#define HDsrand(S) srand(S)
+#endif /* HDsrand */
+#ifndef HDsrandom
+#define HDsrandom(S) srand(S)
+#endif /* HDsrandom */
+#endif /* H5_HAVE_RANDOM */
 
 #ifndef HDread
 #define HDread(F, M, Z) read(F, M, Z)
-#endif
+#endif /* HDread */
 #ifndef HDreaddir
 #define HDreaddir(D) readdir(D)
-#endif
+#endif /* HDreaddir */
 #ifndef HDrealloc
 #define HDrealloc(M, Z) realloc(M, Z)
-#endif
+#endif /* HDrealloc */
 #ifndef HDrealpath
 #define HDrealpath(F1, F2) realpath(F1, F2)
-#endif
+#endif /* HDrealloc */
 #ifndef HDremove
 #define HDremove(S) remove(S)
-#endif
+#endif /* HDremove */
 #ifndef HDrename
 #define HDrename(OLD, NEW) rename(OLD, NEW)
-#endif
+#endif /* HDrename */
 #ifndef HDrewind
 #define HDrewind(F) rewind(F)
-#endif
+#endif /* HDrewind */
 #ifndef HDrewinddir
 #define HDrewinddir(D) rewinddir(D)
-#endif
+#endif /* HDrewinddir */
 #ifndef HDround
 #define HDround(V) round(V)
-#endif
+#endif /* HDround */
 #ifndef HDroundf
 #define HDroundf(V) roundf(V)
-#endif
+#endif /* HDroundf */
 #ifndef HDroundl
 #define HDroundl(V) roundl(V)
-#endif
+#endif /* HDroundl */
 #ifndef HDrmdir
 #define HDrmdir(S) rmdir(S)
-#endif
-#ifndef HDscanf
-#define HDscanf scanf /*varargs*/
-#endif
+#endif /* HDrmdir */
+/* scanf() variable arguments */
 #ifndef HDselect
 #define HDselect(N, RD, WR, ER, T) select(N, RD, WR, ER, T)
-#endif
+#endif /* HDsetbuf */
 #ifndef HDsetbuf
 #define HDsetbuf(F, S) setbuf(F, S)
-#endif
+#endif /* HDsetbuf */
 #ifndef HDsetenv
 #define HDsetenv(N, V, O) setenv(N, V, O)
-#endif
+#endif /* HDsetenv */
 #ifndef HDsetgid
 #define HDsetgid(G) setgid(G)
-#endif
+#endif /* HDsetgid */
 #ifndef HDsetjmp
 #define HDsetjmp(J) setjmp(J)
-#endif
+#endif /* HDsetjmp */
 #ifndef HDsetlocale
 #define HDsetlocale(N, S) setlocale(N, S)
-#endif
+#endif /* HDsetlocale */
 #ifndef HDsetpgid
 #define HDsetpgid(P, PG) setpgid(P, PG)
-#endif
+#endif /* HDsetpgid */
 #ifndef HDsetsid
 #define HDsetsid() setsid()
-#endif
+#endif /* HDsetsid */
 #ifndef HDsetsockopt
-#define HDsetsockopt(A, B, C, D, E) setsockopt((A), (B), (C), (D), (E))
-#endif
+#define HDsetsockopt(A, B, C, D, E) setsockopt((A), (B), (C), (D), (E)) /* mirror VFD */
+#endif                                                                  /* HDsetsockopt */
 #ifndef HDsetuid
 #define HDsetuid(U) setuid(U)
-#endif
+#endif /* HDsetuid */
 #ifndef HDsetvbuf
 #define HDsetvbuf(F, S, M, Z) setvbuf(F, S, M, Z)
-#endif
+#endif /* HDsetvbuf */
 #ifndef HDshutdown
-#define HDshutdown(A, B) shutdown((A), (B))
-#endif
+#define HDshutdown(A, B) shutdown((A), (B)) /* mirror VFD */
+#endif                                      /* HDshutdown */
 #ifndef HDsigaction
 #define HDsigaction(S, A, O) sigaction((S), (A), (O))
-#endif
+#endif /* HDsigaction */
 #ifndef HDsigaddset
 #define HDsigaddset(S, N) sigaddset(S, N)
-#endif
+#endif /* HDsigaddset */
 #ifndef HDsigdelset
 #define HDsigdelset(S, N) sigdelset(S, N)
-#endif
+#endif /* HDsigdelset */
 #ifndef HDsigemptyset
 #define HDsigemptyset(S) sigemptyset(S)
-#endif
+#endif /* HDsigemptyset */
 #ifndef HDsigfillset
 #define HDsigfillset(S) sigfillset(S)
-#endif
+#endif /* HDsigfillset */
 #ifndef HDsigismember
 #define HDsigismember(S, N) sigismember(S, N)
-#endif
+#endif /* HDsigismember */
 #ifndef HDsiglongjmp
 #define HDsiglongjmp(J, N) siglongjmp(J, N)
-#endif
+#endif /* HDsiglongjmp */
 #ifndef HDsignal
 #define HDsignal(N, F) signal(N, F)
-#endif
+#endif /* HDsignal */
 #ifndef HDsigpending
 #define HDsigpending(S) sigpending(S)
-#endif
+#endif /* HDsigpending */
 #ifndef HDsigprocmask
 #define HDsigprocmask(H, S, O) sigprocmask(H, S, O)
-#endif
+#endif /* HDsigprocmask */
 #ifndef HDsigsetjmp
 #define HDsigsetjmp(J, N) sigsetjmp(J, N)
-#endif
+#endif /* HDsigsetjmp */
 #ifndef HDsigsuspend
 #define HDsigsuspend(S) sigsuspend(S)
-#endif
+#endif /* HDsigsuspend */
 #ifndef HDsin
 #define HDsin(X) sin(X)
-#endif
+#endif /* HDsin */
 #ifndef HDsinh
 #define HDsinh(X) sinh(X)
-#endif
+#endif /* HDsinh */
 #ifndef HDsleep
 #define HDsleep(N) sleep(N)
-#endif
+#endif /* HDsleep */
 #ifndef HDsnprintf
 #define HDsnprintf snprintf /*varargs*/
-#endif
+#endif                      /* HDsnprintf */
 #ifndef HDsocket
-#define HDsocket(A, B, C) socket((A), (B), (C))
-#endif
+#define HDsocket(A, B, C) socket((A), (B), (C)) /* mirror VFD */
+#endif                                          /* HDsocket */
 #ifndef HDsprintf
 #define HDsprintf sprintf /*varargs*/
-#endif
+#endif                    /* HDsprintf */
 #ifndef HDsqrt
 #define HDsqrt(X) sqrt(X)
-#endif
+#endif /* HDsqrt */
 #ifndef HDsscanf
-#define HDsscanf sscanf /*varargs*/
-#endif
-#ifndef HDstat
-#define HDstat(S, B) stat(S, B)
-#endif
+#define HDsscanf(S, FMT, ...) sscanf(S, FMT, __VA_ARGS__)
+#endif /* HDsscanf */
 #ifndef HDstrcat
 #define HDstrcat(X, Y) strcat(X, Y)
-#endif
+#endif /* HDstrcat */
 #ifndef HDstrchr
 #define HDstrchr(S, C) strchr(S, C)
-#endif
+#endif /* HDstrchr */
 #ifndef HDstrcmp
 #define HDstrcmp(X, Y) strcmp(X, Y)
-#endif
+#endif /* HDstrcmp */
 #ifndef HDstrcasecmp
 #define HDstrcasecmp(X, Y) strcasecmp(X, Y)
-#endif
+#endif /* HDstrcasecmp */
 #ifndef HDstrcoll
 #define HDstrcoll(X, Y) strcoll(X, Y)
-#endif
+#endif /* HDstrcoll */
 #ifndef HDstrcpy
 #define HDstrcpy(X, Y) strcpy(X, Y)
-#endif
+#endif /* HDstrcpy */
 #ifndef HDstrcspn
 #define HDstrcspn(X, Y) strcspn(X, Y)
-#endif
+#endif /* HDstrcspn */
 #ifndef HDstrdup
 #define HDstrdup(S) strdup(S)
-#endif
+#endif /* HDstrdup */
 #ifndef HDstrerror
 #define HDstrerror(N) strerror(N)
-#endif
+#endif /* HDstrerror */
 #ifndef HDstrftime
 #define HDstrftime(S, Z, F, T) strftime(S, Z, F, T)
-#endif
+#endif /* HDstrftime */
 #ifndef HDstrlen
 #define HDstrlen(S) strlen(S)
-#endif
+#endif /* HDstrlen */
 #ifndef HDstrncat
 #define HDstrncat(X, Y, Z) strncat(X, Y, Z)
-#endif
+#endif /* HDstrncat */
 #ifndef HDstrncmp
 #define HDstrncmp(X, Y, Z) strncmp(X, Y, Z)
-#endif
+#endif /* HDstrncmp */
 #ifndef HDstrncpy
 #define HDstrncpy(X, Y, Z) strncpy(X, Y, Z)
-#endif
+#endif /* HDstrncpy */
 #ifndef HDstrpbrk
 #define HDstrpbrk(X, Y) strpbrk(X, Y)
-#endif
+#endif /* HDstrpbrk */
 #ifndef HDstrrchr
 #define HDstrrchr(S, C) strrchr(S, C)
-#endif
+#endif /* HDstrrchr */
 #ifndef HDstrspn
 #define HDstrspn(X, Y) strspn(X, Y)
-#endif
+#endif /* HDstrspn */
 #ifndef HDstrstr
 #define HDstrstr(X, Y) strstr(X, Y)
-#endif
+#endif /* HDstrstr */
 #ifndef HDstrtod
 #define HDstrtod(S, R) strtod(S, R)
-#endif
+#endif /* HDstrtod */
 #ifndef HDstrtok
 #define HDstrtok(X, Y) strtok(X, Y)
-#endif
+#endif /* HDstrtok */
 #ifndef HDstrtok_r
 #define HDstrtok_r(X, Y, Z) strtok_r(X, Y, Z)
-#endif
+#endif /* HDstrtok */
 #ifndef HDstrtol
 #define HDstrtol(S, R, N) strtol(S, R, N)
-#endif
+#endif /* HDstrtol */
 #ifndef HDstrtoll
 #ifdef H5_HAVE_STRTOLL
 #define HDstrtoll(S, R, N) strtoll(S, R, N)
@@ -1444,91 +1443,93 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #endif
 #ifndef HDstrtoul
 #define HDstrtoul(S, R, N) strtoul(S, R, N)
-#endif
+#endif /* HDstrtoul */
 #ifndef HDstrtoull
 #define HDstrtoull(S, R, N) strtoull(S, R, N)
-#endif
+#endif /* HDstrtoul */
 #ifndef HDstrtoumax
 #define HDstrtoumax(S, R, N) strtoumax(S, R, N)
-#endif
+#endif /* HDstrtoumax */
 #ifndef HDstrxfrm
 #define HDstrxfrm(X, Y, Z) strxfrm(X, Y, Z)
-#endif
+#endif /* HDstrxfrm */
+#ifdef H5_HAVE_SYMLINK
 #ifndef HDsymlink
 #define HDsymlink(F1, F2) symlink(F1, F2)
-#endif
+#endif /* HDsymlink */
+#endif /* H5_HAVE_SYMLINK */
 #ifndef HDsysconf
 #define HDsysconf(N) sysconf(N)
-#endif
+#endif /* HDsysconf */
 #ifndef HDsystem
 #define HDsystem(S) system(S)
-#endif
+#endif /* HDsystem */
 #ifndef HDtan
 #define HDtan(X) tan(X)
-#endif
+#endif /* HDtan */
 #ifndef HDtanh
 #define HDtanh(X) tanh(X)
-#endif
+#endif /* HDtanh */
 #ifndef HDtcdrain
 #define HDtcdrain(F) tcdrain(F)
-#endif
+#endif /* HDtcdrain */
 #ifndef HDtcflow
 #define HDtcflow(F, A) tcflow(F, A)
-#endif
+#endif /* HDtcflow */
 #ifndef HDtcflush
 #define HDtcflush(F, N) tcflush(F, N)
-#endif
+#endif /* HDtcflush */
 #ifndef HDtcgetattr
 #define HDtcgetattr(F, T) tcgetattr(F, T)
-#endif
+#endif /* HDtcgetattr */
 #ifndef HDtcgetpgrp
 #define HDtcgetpgrp(F) tcgetpgrp(F)
-#endif
+#endif /* HDtcgetpgrp */
 #ifndef HDtcsendbreak
 #define HDtcsendbreak(F, N) tcsendbreak(F, N)
-#endif
+#endif /* HDtcsendbreak */
 #ifndef HDtcsetattr
 #define HDtcsetattr(F, O, T) tcsetattr(F, O, T)
-#endif
+#endif /* HDtcsetattr */
 #ifndef HDtcsetpgrp
 #define HDtcsetpgrp(F, N) tcsetpgrp(F, N)
-#endif
+#endif /* HDtcsetpgrp */
 #ifndef HDtime
 #define HDtime(T) time(T)
-#endif
+#endif /* HDtime */
 #ifndef HDtimes
 #define HDtimes(T) times(T)
-#endif
+#endif /* HDtimes*/
 #ifndef HDtmpfile
 #define HDtmpfile() tmpfile()
-#endif
+#endif /* HDtmpfile */
 #ifndef HDtmpnam
 #define HDtmpnam(S) tmpnam(S)
-#endif
+#endif /* HDtmpnam */
 #ifndef HDtolower
 #define HDtolower(C) tolower(C)
-#endif
+#endif /* HDtolower */
 #ifndef HDtoupper
 #define HDtoupper(C) toupper(C)
-#endif
+#endif /* HDtoupper */
 #ifndef HDttyname
 #define HDttyname(F) ttyname(F)
-#endif
+#endif /* HDttyname */
 #ifndef HDtzset
 #define HDtzset() tzset()
-#endif
+#endif /* HDtzset */
 #ifndef HDumask
 #define HDumask(N) umask(N)
-#endif
+#endif /* HDumask */
 #ifndef HDuname
 #define HDuname(S) uname(S)
-#endif
+#endif /* HDuname */
 #ifndef HDungetc
 #define HDungetc(C, F) ungetc(C, F)
-#endif
+#endif /* HDungetc */
 #ifndef HDunlink
 #define HDunlink(S) unlink(S)
-#endif
+#endif /* HDunlink */
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
 #endif
@@ -1541,43 +1542,43 @@ H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #ifndef HDva_arg
 #define HDva_arg(A, T) va_arg(A, T)
-#endif
+#endif /* HDva_arg */
 #ifndef HDva_copy
 #define HDva_copy(D, S) va_copy(D, S)
-#endif
+#endif /* HDva_copy */
 #ifndef HDva_end
 #define HDva_end(A) va_end(A)
-#endif
+#endif /* HDva_end */
 #ifndef HDva_start
 #define HDva_start(A, P) va_start(A, P)
-#endif
+#endif /* HDva_start */
 #ifndef HDvfprintf
 #define HDvfprintf(F, FMT, A) vfprintf(F, FMT, A)
-#endif
+#endif /* HDvfprintf */
 #ifndef HDvprintf
 #define HDvprintf(FMT, A) vprintf(FMT, A)
-#endif
+#endif /* HDvprintf */
 #ifndef HDvsprintf
 #define HDvsprintf(S, FMT, A) vsprintf(S, FMT, A)
-#endif
+#endif /* HDvsprintf */
 #ifndef HDvsnprintf
 #define HDvsnprintf(S, N, FMT, A) vsnprintf(S, N, FMT, A)
-#endif
+#endif /* HDvsnprintf */
 #ifndef HDwait
 #define HDwait(W) wait(W)
-#endif
+#endif /* HDwait */
 #ifndef HDwaitpid
 #define HDwaitpid(P, W, O) waitpid(P, W, O)
-#endif
+#endif /* HDwaitpid */
 #ifndef HDwcstombs
 #define HDwcstombs(S, P, Z) wcstombs(S, P, Z)
-#endif
+#endif /* HDwcstombs */
 #ifndef HDwctomb
 #define HDwctomb(S, C) wctomb(S, C)
-#endif
+#endif /* HDwctomb */
 #ifndef HDwrite
 #define HDwrite(F, M, Z) write(F, M, Z)
-#endif
+#endif /* HDwrite */
 
 /* Macro for "stringizing" an integer in the C preprocessor (use H5_TOSTRING) */
 /* (use H5_TOSTRING, H5_STRINGIZE is just part of the implementation) */

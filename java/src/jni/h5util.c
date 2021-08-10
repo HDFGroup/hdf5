@@ -224,7 +224,7 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                 case sizeof(float): {
                     float tmp_float = 0.0f;
 
-                    HDsscanf(token, "%f", &tmp_float);
+                    sscanf(token, "%f", &tmp_float);
                     HDmemcpy(cptr, &tmp_float, sizeof(float));
                     break;
                 }
@@ -232,7 +232,7 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                 case sizeof(double): {
                     double tmp_double = 0.0;
 
-                    HDsscanf(token, "%lf", &tmp_double);
+                    sscanf(token, "%lf", &tmp_double);
                     HDmemcpy(cptr, &tmp_double, sizeof(double));
                     break;
                 }
@@ -240,7 +240,7 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                 case sizeof(long double): {
                     long double tmp_ldouble = 0.0;
 
-                    HDsscanf(token, "%Lg", &tmp_ldouble);
+                    sscanf(token, "%Lg", &tmp_ldouble);
                     HDmemcpy(cptr, &tmp_ldouble, sizeof(long double));
                     break;
                 }
@@ -288,11 +288,11 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                     signed char   tmp_char  = 0;
 
                     if (H5T_SGN_NONE == nsign) {
-                        HDsscanf(token, "%hhu", &tmp_uchar);
+                        sscanf(token, "%hhu", &tmp_uchar);
                         HDmemcpy(cptr, &tmp_uchar, sizeof(unsigned char));
                     }
                     else {
-                        HDsscanf(token, "%hhd", &tmp_char);
+                        sscanf(token, "%hhd", &tmp_char);
                         HDmemcpy(cptr, &tmp_char, sizeof(char));
                     }
 
@@ -304,11 +304,11 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                     short          tmp_short  = 0;
 
                     if (H5T_SGN_NONE == nsign) {
-                        HDsscanf(token, "%hu", &tmp_ushort);
+                        sscanf(token, "%hu", &tmp_ushort);
                         HDmemcpy(&tmp_ushort, cptr, sizeof(unsigned short));
                     }
                     else {
-                        HDsscanf(token, "%hd", &tmp_short);
+                        sscanf(token, "%hd", &tmp_short);
                         HDmemcpy(&tmp_short, cptr, sizeof(short));
                     }
 
@@ -320,11 +320,11 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                     int          tmp_int  = 0;
 
                     if (H5T_SGN_NONE == nsign) {
-                        HDsscanf(token, "%u", &tmp_uint);
+                        sscanf(token, "%u", &tmp_uint);
                         HDmemcpy(cptr, &tmp_uint, sizeof(unsigned int));
                     }
                     else {
-                        HDsscanf(token, "%d", &tmp_int);
+                        sscanf(token, "%d", &tmp_int);
                         HDmemcpy(cptr, &tmp_int, sizeof(int));
                     }
 
@@ -337,11 +337,11 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                     long          tmp_long  = 0;
 
                     if (H5T_SGN_NONE == nsign) {
-                        HDsscanf(token, "%lu", &tmp_ulong);
+                        sscanf(token, "%lu", &tmp_ulong);
                         HDmemcpy(cptr, &tmp_ulong, sizeof(unsigned long));
                     }
                     else {
-                        HDsscanf(token, "%ld", &tmp_long);
+                        sscanf(token, "%ld", &tmp_long);
                         HDmemcpy(cptr, &tmp_long, sizeof(long));
                     }
 
@@ -354,11 +354,11 @@ h5str_convert(JNIEnv *env, char **in_str, hid_t container, hid_t tid, void *out_
                     long long          tmp_llong  = 0;
 
                     if (H5T_SGN_NONE == nsign) {
-                        HDsscanf(token, fmt_ullong, &tmp_ullong);
+                        sscanf(token, fmt_ullong, &tmp_ullong);
                         HDmemcpy(cptr, &tmp_ullong, sizeof(unsigned long long));
                     }
                     else {
-                        HDsscanf(token, fmt_llong, &tmp_llong);
+                        sscanf(token, fmt_llong, &tmp_llong);
                         HDmemcpy(cptr, &tmp_llong, sizeof(long long));
                     }
 

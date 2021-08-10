@@ -580,11 +580,11 @@ test_generate(void)
     !
     */
 
-    if (HDfscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && HDferror(f)) {
+    if (fscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
-    if (HDfscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && HDferror(f)) {
+    if (fscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
@@ -615,7 +615,7 @@ test_generate(void)
         goto out;
 
     for (i = 0; i < n_elements; i++) {
-        if (HDfscanf(f, "%f ", &value) < 0 && HDferror(f)) {
+        if (fscanf(f, "%f ", &value) < 0 && HDferror(f)) {
             HDprintf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
@@ -779,32 +779,32 @@ read_data(const char *fname, /*IN*/
         goto out;
     }
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (fscanf(f, "%s", str) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &color_planes) < 0 && HDferror(f)) {
+    if (fscanf(f, "%d", &color_planes) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (fscanf(f, "%s", str) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &h) < 0 && HDferror(f)) {
+    if (fscanf(f, "%d", &h) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (fscanf(f, "%s", str) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (HDfscanf(f, "%d", &w) < 0 && HDferror(f)) {
+    if (fscanf(f, "%d", &w) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
@@ -838,7 +838,7 @@ read_data(const char *fname, /*IN*/
 
     /* Read data elements */
     for (i = 0; i < n_elements; i++) {
-        if (HDfscanf(f, "%d", &n) < 0 && HDferror(f)) {
+        if (fscanf(f, "%d", &n) < 0 && HDferror(f)) {
             HDprintf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
@@ -936,7 +936,7 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
         return -1;
     }
 
-    if (HDsscanf(buffer, "%u", &nentries) != 1) {
+    if (sscanf(buffer, "%u", &nentries) != 1) {
         HDfclose(file);
         return -1;
     }
@@ -950,7 +950,7 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
     /* read the palette entries */
     for (u = 0; u < nentries; u++) {
         /* extract the red, green and blue color components.  */
-        if (HDfscanf(file, "%u %u %u", &red, &green, &blue) != 3) {
+        if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3) {
             HDfclose(file);
             return -1;
         }

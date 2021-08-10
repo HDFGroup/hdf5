@@ -29,35 +29,23 @@
 typedef struct _stati64 h5_stat_t;
 typedef __int64         h5_stat_size_t;
 
-#ifdef H5_HAVE_VISUAL_STUDIO
+#define HDaccess(F, M) _access(F, M)
+#define HDchdir(S)     _chdir(S)
+#define HDclose(F)     _close(F)
+#define HDcreat(S, M)  Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
+#define HDdup(F)       _dup(F)
+#define HDfdopen(N, S) _fdopen(N, S)
+#define HDfileno(F)    _fileno(F)
+#define HDfstat(F, B)  _fstati64(F, B)
+#define HDisatty(F)    _isatty(F)
 
-struct timezone {
-    int tz_minuteswest;
-    int tz_dsttime;
-};
-
-#endif /* H5_HAVE_VISUAL_STUDIO */
-
-#define HDaccess(F, M)       _access(F, M)
-#define HDchdir(S)           _chdir(S)
-#define HDclose(F)           _close(F)
-#define HDcreat(S, M)        Wopen_utf8(S, O_CREAT | O_TRUNC | O_RDWR, M)
-#define HDdup(F)             _dup(F)
-#define HDfdopen(N, S)       _fdopen(N, S)
-#define HDfileno(F)          _fileno(F)
-#define HDflock(F, L)        Wflock(F, L)
-#define HDfstat(F, B)        _fstati64(F, B)
-#define HDgetcwd(S, Z)       _getcwd(S, Z)
-#define HDgetdcwd(D, S, Z)   _getdcwd(D, S, Z)
-#define HDgetdrive()         _getdrive()
-#define HDgetlogin()         Wgetlogin()
-#define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
-#define HDisatty(F)          _isatty(F)
-#define HDlseek(F, O, W)     _lseeki64(F, O, W)
-#define HDlstat(S, B)        _lstati64(S, B)
-#define HDmemset(X, C, Z)    memset((void *)(X), C, Z) /* Cast avoids MSVC warning */
-#define HDmkdir(S, M)        _mkdir(S)
-#define HDoff_t              __int64
+#define HDgetcwd(S, Z)     _getcwd(S, Z)
+#define HDgetdcwd(D, S, Z) _getdcwd(D, S, Z)
+#define HDgetdrive()       _getdrive()
+#define HDlseek(F, O, W)   _lseeki64(F, O, W)
+#define HDlstat(S, B)      _lstati64(S, B)
+#define HDmkdir(S, M)      _mkdir(S)
+#define HDoff_t            __int64
 
 /* Note that the variadic HDopen macro is using a VC++ extension
  * where the comma is dropped if nothing is passed to the ellipsis.
@@ -67,11 +55,9 @@ struct timezone {
 #else
 #define HDopen(S, F, ...) Wopen_utf8(S, F, ##__VA_ARGS__)
 #endif
-
 #define HDread(F, M, Z)       _read(F, M, Z)
 #define HDremove(S)           Wremove_utf8(S)
 #define HDrmdir(S)            _rmdir(S)
-#define HDsetenv(N, V, O)     Wsetenv(N, V, O)
 #define HDsetvbuf(F, S, M, Z) setvbuf(F, S, M, (Z > 1 ? Z : 2))
 #define HDsleep(S)            Sleep(S * 1000)
 #define HDstat(S, B)          _stati64(S, B)
@@ -80,13 +66,21 @@ struct timezone {
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
 #define HDtzset()             _tzset()
 #define HDunlink(S)           _unlink(S)
-#define HDunsetenv(N, V, O)   Wsetenv(N, "", 1)
 #define HDwrite(F, M, Z)      _write(F, M, Z)
 
-#ifndef H5_HAVE_MINGW
-#define HDftruncate(F, L) _chsize_s(F, L)
-#define HDfseek(F, O, W)  _fseeki64(F, O, W)
-#endif /* H5_HAVE_MINGW */
+#ifdef H5_HAVE_VISUAL_STUDIO
+
+/*
+ * The (void*) cast just avoids a compiler warning in MSVC
+ */
+#define HDmemset(X, C, Z) memset((void *)(X), C, Z)
+
+struct timezone {
+    int tz_minuteswest;
+    int tz_dsttime;
+};
+
+#endif /* H5_HAVE_VISUAL_STUDIO */
 
 #ifdef __cplusplus
 extern "C" {
@@ -103,5 +97,17 @@ H5_DLL int      H5_get_win32_times(H5_timevals_t *tvs);
 #ifdef __cplusplus
 }
 #endif /* __cplusplus */
+
+#define HDgettimeofday(V, Z) Wgettimeofday(V, Z)
+#define HDsetenv(N, V, O)    Wsetenv(N, V, O)
+#define HDflock(F, L)        Wflock(F, L)
+#define HDgetlogin()         Wgetlogin()
+
+/* Non-POSIX functions */
+
+#ifndef H5_HAVE_MINGW
+#define HDftruncate(F, L) _chsize_s(F, L)
+#define HDfseek(F, O, W)  _fseeki64(F, O, W)
+#endif /* H5_HAVE_MINGW */
 
 #endif /* H5_HAVE_WIN32_API */

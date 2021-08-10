@@ -162,8 +162,12 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
         goto error;                                                                                          \
     }
 
-/* Number of seconds to wait before killing a test (requires alarm(2)) */
+/*
+ * Alarm definitions to wait up (terminate) a test that runs too long.
+ */
 #define H5_ALARM_SEC 1200 /* default is 20 minutes */
+#define ALARM_ON     TestAlarmOn()
+#define ALARM_OFF    HDalarm(0)
 
 /* Flags for h5_fileaccess_flags() */
 #define H5_FILEACCESS_VFD 0x01

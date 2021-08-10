@@ -1220,9 +1220,11 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 
 ## Unix
-AC_CHECK_HEADERS([dirent.h features.h unistd.h])
-AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/resource.h])
-AC_CHECK_HEADERS([sys/stat.h sys/time.h sys/types.h])
+AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
+AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
+AC_CHECK_HEADERS([features.h])
+AC_CHECK_HEADERS([dirent.h])
+AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
 AC_SUBST([H5_IS_DARWIN])
@@ -1236,13 +1238,18 @@ esac
 
 ## Windows
 case "`uname`" in
+  CYGWIN*)
+    AC_CHECK_HEADERS([sys/timeb.h])
+    UNAME_CYGWIN="yes"
+    ;;
   MINGW*)
+    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
     AC_HAVE_LIBRARY([ws2_32])
     ;;
+  *)
+    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
+    ;;
 esac
-
-# Mirror VFD networking
-AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h])
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
