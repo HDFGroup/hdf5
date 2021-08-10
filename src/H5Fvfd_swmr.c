@@ -1739,7 +1739,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "shadow-file allocation failed for index")
     }
 
-    new_mdf_idx = HDmalloc(new_mdf_idx_len * sizeof(new_mdf_idx[0]));
+    new_mdf_idx = H5MM_calloc(new_mdf_idx_len * sizeof(new_mdf_idx[0]));
 
     if (new_mdf_idx == NULL) {
         (void)H5MV_free(f, idx_addr, idx_size);
@@ -1756,6 +1756,11 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
     shared->writer_index_offset = idx_addr;
     ret_value = shared->mdf_idx = new_mdf_idx;
     shared->mdf_idx_len         = new_mdf_idx_len;
+
+    H5MM_xfree(f->shared->old_mdf_idx);
+
+    shared->old_mdf_idx        = old_mdf_idx;
+    f->shared->old_mdf_idx_len = old_mdf_idx_len;
 
     /* Postpone reclamation of the old index until max_lag ticks from now.
      * It's only necessary to wait until after the new index is in place,
