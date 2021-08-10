@@ -4985,7 +4985,7 @@ main(int argc, char **argv)
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
+    init_vfd_swmr_config(&config, 4, 7, writer, TRUE, 128, "./group-shadow");
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
      * as the second parameter of H5Pset_libver_bound() that is called by

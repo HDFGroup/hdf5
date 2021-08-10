@@ -46,8 +46,9 @@ typedef struct {
     unsigned int csteps;             /* For -c <csteps> option */
     bool         use_np;             /* For -N option */
     bool         use_vfd_swmr;       /* For -S option */
+    bool         flush_raw_data;     /* For -U option */
     bool         compact;            /* -p option: create compact dataset */
-    bool         compact_write;      /* -o option: write to the whole compact dataset */
+    bool         compact_write;      /* -t option: write to the whole compact dataset */
     unsigned int compact_elmts;      /* -e <elmts> option: # of elments for the compact dataset */
     bool         contig;             /* -g option: create contiguous dataset */
     bool         chunked;            /* -k option: create chunked datasets with 5 indexing types */
@@ -57,6 +58,7 @@ typedef struct {
     unsigned int rwrites; /* -r <rwrites> option: random writes to contiguous and/or chunked datasets */
     unsigned int lwrites; /* -l <lwrites> option: hyperslab writes to contiguous and/or chunked datasets */
     unsigned int wwrites; /* -w <wwrites> option: modify raw data to contiguous and/or chunked datasets */
+    unsigned int lastwrite;         /* The last operation (-s, -r, -l or -w) performed. */
 } state_t;
 
 /* Initializations for state_t */
@@ -65,8 +67,9 @@ typedef struct {
     {                                                                                                        \
         .filename = "", .file = H5I_INVALID_HID, .filetype = H5T_NATIVE_UINT32,                              \
         .update_interval = READER_WAIT_TICKS, .csteps = 1, .use_np = true, .use_vfd_swmr = true,             \
-        .compact = false, .compact_write = false, .compact_elmts = MAX_COMPACT_ELMS, .contig = false,        \
-        .rows = 256, .cols = 512, .swrites = 0, .rwrites = 0, .lwrites = 0, .wwrites = 0                     \
+        .flush_raw_data = true, .compact = false, .compact_write = false,                                    \
+        .compact_elmts = MAX_COMPACT_ELMS, .contig = false, .rows = 10, .cols = 5, .swrites = 0,             \
+        .rwrites = 0, .lwrites = 0, .wwrites = 0, .lastwrite = 0                                             \
     }
 
 /* Structure to hold info for different dataset types */
@@ -132,8 +135,7 @@ static bool open_dset_real(const state_t *s, hid_t *did, hid_t *sid, const char 
 static bool close_dsets(const dsets_state_t *ds);
 static bool close_dset_real(hid_t did, hid_t sid);
 
-static bool write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
-                                      np_state_t *np);
+static bool perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np);
 static bool dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned step);
 static bool dset_setup(unsigned action, unsigned which, const state_t *s, hsize_t *start, hsize_t *stride,
                        hsize_t *count, hsize_t *block, hid_t *mem_sid, unsigned int **buf);
@@ -141,12 +143,15 @@ static bool write_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsiz
                        hsize_t *count, hsize_t *block, unsigned int *buf);
 static bool write_dset_compact(const state_t *s, const dsets_state_t *ds);
 
-static bool verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
-                                             np_state_t *np);
-static bool verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
-static bool verify_read_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start,
-                             hsize_t *stride, hsize_t *count, hsize_t *block, unsigned int *vbuf);
-static bool verify_read_dset_compact(const state_t *s, const dsets_state_t *ds);
+static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, 
+    H5F_vfd_swmr_config_t *config, np_state_t *np, bool fileclosed);
+static bool verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
+    unsigned which, bool fileclosed);
+static bool verify_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start, hsize_t *stride, 
+    size_t *count, hsize_t *block, unsigned int *vbuf, bool fileclosed, bool flush_raw_data);
+static bool verify_dset_compact(const state_t *s, const dsets_state_t *ds, bool fileclosed, bool flush_raw_data);
+
+static bool closing_on_noflush(bool writer, state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np);
 
 static const hid_t badhid = H5I_INVALID_HID;
 
@@ -174,7 +179,7 @@ usage(const char *progname)
               "           [-p] [-e elmts] [-o]\n"
               "           [-g] [-k] [-m rows] [-n cols]\n"
               "           [-s swrites] [-r rwrites] [-l lwrites] [-w writes]\n"
-              "           [-u nticks] [-c csteps] [-S] [-N] [-q] [-b]\n"
+              "           [-u nticks] [-c csteps] [-U] [-S] [-N] [-q] [-b]\n"
               "\n"
               "-p:              create a dataset with compact layout\n"
               "-e elmts:        # of <elmts> for the compact dataset\n"
@@ -193,6 +198,7 @@ usage(const char *progname)
               "                 (default is 4)\n"
               "-c csteps:       `csteps` steps communication interval between reader and writer\n"
               "                 (default is 1)\n"
+              "-U:              disable flush of raw data (default is flushing raw data)\n"
               "-S:              do not use VFD SWMR\n"
               "-N:              do not use named pipes for test synchronization\n"
               "-q:              silence printouts, few messages\n"
@@ -215,7 +221,7 @@ state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
     int           ch;
-    char *        tfile;
+    char *        tfile = NULL;
     char *        end;
 
     *s = ALL_HID_INITIALIZER;
@@ -227,7 +233,10 @@ state_init(state_t *s, int argc, char **argv)
 
     esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
 
-    while ((ch = getopt(argc, argv, "pte:gkm:n:s:r:l:w:bqSNu:c:")) != -1) {
+    if (tfile)
+        HDfree(tfile);
+
+    while ((ch = getopt(argc, argv, "pte:gkm:n:s:r:l:w:bqSNUu:c:")) != -1) {
         switch (ch) {
 
             case 'p': /* compact dataset */
@@ -244,6 +253,10 @@ state_init(state_t *s, int argc, char **argv)
 
             case 'k': /* chunked datasets */
                 s->chunked = true;
+                break;
+
+            case 'U':   /* Disable flush of raw data */
+                s->flush_raw_data = false;
                 break;
 
             case 'q':
@@ -329,6 +342,20 @@ state_init(state_t *s, int argc, char **argv)
         TEST_ERROR;
     }
 
+    /* Enable compact write (-t) without compact dataset (-p) */
+    if (s->compact_write && !s->compact) {
+        printf("Enable compact write without compact dataset\n");
+        usage(s->progname);
+        goto error;
+    }
+
+    /* Enable sequential/random/hyperslab/raw data writes (-s/-r/-l/-w) without contiguous/chunked dataset (-g/-k) */
+    if ((s->swrites || s->rwrites || s->lwrites || s->wwrites) && !(s->contig || s->chunked)) {
+        printf("Enable sequential/random/hypuerslab/raw data writes without contiguous/chunked dataset\n");
+        usage(s->progname);
+        goto error;
+    }
+
     /* -c <csteps> cannot be zero */
     if (!s->csteps) {
         HDprintf("communication interval cannot be zero\n");
@@ -365,6 +392,9 @@ state_init(state_t *s, int argc, char **argv)
     return true;
 
 error:
+    if (tfile)
+        HDfree(tfile);
+
     return false;
 
 } /* state_init() */
@@ -818,6 +848,8 @@ error:
  */
 
 /*
+ * Write to whole compact dataset
+ *
  * Perform writes for contiguous and chunked datasets:
  *  --SEQ_WRITE: sequential writes
  *  --RANDOM_WRITE: random writes
@@ -825,86 +857,105 @@ error:
  *  --MODIFY_DATA: raw data modifications
  */
 static bool
-write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
     unsigned step;
     bool     result;
+    
+    /* Perform writes to the whole compact dataset */
+    if (s->compact) {
 
-    HDassert(s->contig || s->chunked);
+        if(s->compact_write) {
+            dbgf(2, "Writes all to compact dataset\n");
 
-    /* Perform sequential writes for contiguous and/or chunked datasets */
-    if (s->swrites) {
+            result = write_dset_compact(s, ds);
 
-        for (step = 0; (step < s->swrites && step < (s->rows * s->cols)); step++) {
-            dbgf(2, "Sequential writes %u to dataset\n", step);
-
-            result = dsets_action(SEQ_WRITE, s, ds, step);
-
-            if (s->use_np && !np_writer(result, step, s, np, config)) {
-                HDprintf("np_writer() for sequential writes failed\n");
+            if (s->use_np && !np_writer(result, 0, s, np, config)) {
+                printf("np_writer() for addition failed\n");
                 TEST_ERROR;
             }
         }
     }
 
-    /* Perform random writes for contiguous and/or chunked datasets */
-    if (s->rwrites) {
-        unsigned newstep;
+    /* Perform writes for contiguous and/or chunked datasets */
+    if (s->contig || s->chunked) {
 
-        /* Set up random seed which will be the same for both writer and reader */
-        HDsrandom(RANDOM_SEED);
+        /* Perform sequential writes */
+        if (s->swrites) {
 
-        for (step = 0; (step < s->rwrites && step < (s->rows * s->cols)); step++) {
-            dbgf(2, "Random writes %u to dataset\n", step);
+            for (step = 0; (step < s->swrites && step < (s->rows * s->cols)); step++) {
+                dbgf(2, "Sequential writes %u to dataset\n", step);
 
-            newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
-            HDprintf("Random step is %u\n", newstep);
-            result = dsets_action(RANDOM_WRITE, s, ds, newstep);
+                result = dsets_action(SEQ_WRITE, s, ds, step);
 
-            if (s->use_np && !np_writer(result, step, s, np, config)) {
-                HDprintf("np_writer() for random writes failed\n");
-                TEST_ERROR;
+                if (s->use_np && !np_writer(result, step, s, np, config)) {
+                    printf("np_writer() for sequential writes failed\n");
+                    TEST_ERROR;
+                }
             }
         }
-    }
 
-    /* Perform hyperslab writes for contiguous and/or chunked datasets */
-    if (s->lwrites) {
-        unsigned k;
+        /* Perform random writes */
+        if (s->rwrites) {
+            unsigned newstep;
 
-        for (step = 0, k = 0; (step < s->lwrites && k < (s->rows * s->cols)); step++, k += s->cols) {
-            dbgf(2, "Hyperslab writes %u to dataset\n", step);
+            /* Set up random seed which will be the same for both writer and reader */
+            HDsrandom(RANDOM_SEED);
 
-            result = dsets_action(HYPER_WRITE, s, ds, k);
+            for (step = 0; (step < s->rwrites && step < (s->rows * s->cols)); step++) {
+                dbgf(2, "Random writes %u to dataset\n", step);
 
-            if (s->use_np && !np_writer(result, step, s, np, config)) {
-                HDprintf("np_writer() for hyperslab writes failed\n");
-                TEST_ERROR;
+                newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
+                dbgf(2, "Random step is %u\n", newstep);
+                result = dsets_action(RANDOM_WRITE, s, ds, newstep);
+
+                if (s->use_np && !np_writer(result, step, s, np, config)) {
+                    printf("np_writer() for random writes failed\n");
+                    TEST_ERROR;
+                }
             }
         }
-    }
 
-    /* Perform raw data modifications for contiguous and/or chunked datasets */
-    if (s->wwrites) {
+        /* Perform hyperslab writes */
+        if (s->lwrites) {
+            unsigned k;
 
-        for (step = 0; (step < s->wwrites && step < (s->rows * s->cols)); step++) {
-            dbgf(2, "Modify raw data %u to dataset\n", step);
+            for (step = 0, k = 0; (step < s->lwrites && k < (s->rows * s->cols)); step++, k += s->cols) {
+                dbgf(2, "Hyperslab writes %u to dataset\n", step);
 
-            result = dsets_action(MODIFY_DATA, s, ds, step);
+                result = dsets_action(HYPER_WRITE, s, ds, k);
 
-            if (s->use_np && !np_writer(result, step, s, np, config)) {
-                HDprintf("np_writer() for modify raw data failed\n");
-                TEST_ERROR;
+                if (s->use_np && !np_writer(result, step, s, np, config)) {
+                    printf("np_writer() for hyperslab writes failed\n");
+                    TEST_ERROR;
+                }
             }
         }
-    }
 
+        /* Perform raw data modifications */
+        if (s->wwrites) {
+
+            for (step = 0; (step < s->wwrites && step < (s->rows * s->cols)); step++) {
+                dbgf(2, "Modify raw data %u to dataset\n", step);
+
+                result = dsets_action(MODIFY_DATA, s, ds, step);
+
+                if (s->use_np && !np_writer(result, step, s, np, config)) {
+                    printf("np_writer() for modify raw data failed\n");
+                    TEST_ERROR;
+                }
+            }
+        }
+
+    }
+    
     return true;
 
 error:
+
     return false;
 
-} /* write_dset_contig_chunked() */
+} /* perform_dsets_operations() */
 
 /*
  * Perform the "action" for each of the datasets specified on the command line:
@@ -1128,6 +1179,8 @@ error:
  */
 
 /*
+ * Verify writes to the compact dataset.
+ *
  * Verify writes for contiguous and chunked datasets:
  *  --SEQ_WRITE: sequential writes
  *  --RANDOM_WRITE: random writes
@@ -1135,109 +1188,156 @@ error:
  *  --MODIFY_DATA: raw data modifications
  */
 static bool
-verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np, bool fileclosed)
 {
     unsigned step;
     bool     result;
 
-    HDassert(s->contig || s->chunked);
+    /* Start verifying data written to the compact dataset */
+    if (s->compact) {
 
-    /* Start verifying sequential writes for contiguous and/or chunked datasets */
-    if (s->swrites) {
+        if(s->compact_write) {
+            dbgf(2, "Verify writes to compact dataset\n");
 
-        for (step = 0; (step < s->swrites && step < (s->rows * s->cols)); step++) {
-            dbgf(2, "Verify sequential writes %u to dataset\n", step);
-
-            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, 0, s, np)) {
+                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
 
             /* Wait for a few ticks for the update to happen */
-            decisleep(config->tick_len * s->update_interval);
+            if(!fileclosed)
+                decisleep(config->tick_len * s->update_interval);
 
-            result = verify_dsets_action(SEQ_WRITE, s, ds, step);
+            result = verify_dset_compact(s, ds, fileclosed, config->flush_raw_data);
 
-            if (s->use_np && !np_reader(result, step, s, np)) {
-                HDprintf("np_reader() for verifying addition failed\n");
+            if (s->use_np && !np_reader(result, 0, s, np)) {
+                printf("np_reader() for verifying addition failed\n");
                 TEST_ERROR;
-            }
+            } else if (!result)
+                TEST_ERROR;
         }
     }
 
-    /* Start verifying random writes for contiguous and/or chunked datasets */
-    if (s->rwrites) {
-        unsigned newstep;
+    /* Verify writes for contiguous and/or chunked datasets */
+    if (s->contig || s->chunked) {
 
-        /* Set up random seed which will be the same for both writer and reader */
-        HDsrandom(RANDOM_SEED);
+        /* Start verifying sequential writes */
+        /* When flush of raw data is disabled, only verify data for the last write operation on file close */
+        if ((s->swrites && !fileclosed) || (fileclosed && s->lastwrite == SEQ_WRITE)) {
 
-        for (step = 0; (step < s->rwrites && step < (s->rows * s->cols)); step++) {
-            dbgf(2, "Verify random writes %u to dataset\n", step);
+            s->lastwrite = SEQ_WRITE;
 
-            newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
-            HDprintf("Random step is %u\n", newstep);
+            for (step = 0; (step < s->swrites && step < (s->rows * s->cols)); step++) {
+                dbgf(2, "Verify sequential writes %u to dataset\n", step);
 
-            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                TEST_ERROR;
-            }
+                if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                    printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                    TEST_ERROR;
+                }
 
-            /* Wait for a few ticks for the update to happen */
-            decisleep(config->tick_len * s->update_interval);
+                /* Wait for a few ticks for the update to happen */
+                if(!fileclosed)
+                    decisleep(config->tick_len * s->update_interval);
 
-            result = verify_dsets_action(RANDOM_WRITE, s, ds, newstep);
+                result = verify_dsets_action(SEQ_WRITE, s, ds, step, fileclosed);
 
-            if (s->use_np && !np_reader(result, step, s, np)) {
-                HDprintf("np_reader() for verifying addition failed\n");
-                TEST_ERROR;
-            }
-        }
-    }
-
-    /* Start verifying hyperslab writes for contiguous and/or chunked datasets */
-    if (s->lwrites) {
-        unsigned k;
-
-        for (step = 0, k = 0; (step < s->lwrites && k < (s->rows * s->cols)); step++, k += s->cols) {
-            dbgf(2, "Verify hyperslab writes %u to dataset\n", step);
-
-            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                TEST_ERROR;
-            }
-
-            /* Wait for a few ticks for the update to happen */
-            decisleep(config->tick_len * s->update_interval);
-
-            result = verify_dsets_action(HYPER_WRITE, s, ds, k);
-
-            if (s->use_np && !np_reader(result, step, s, np)) {
-                HDprintf("np_reader() for verifying addition failed\n");
-                TEST_ERROR;
+                if (s->use_np && !np_reader(result, step, s, np)) {
+                    printf("np_reader() for verifying addition failed\n");
+                    TEST_ERROR;
+                } else if (!result)
+                    TEST_ERROR;
             }
         }
-    }
 
-    /* Start verifying raw data modifications for contiguous and/or chunked datasets */
-    if (s->wwrites) {
+        /* Start verifying random writes */
+        /* When flush of raw data is disabled, only verify data for the last write operation on file close */
+        if ((s->rwrites && !fileclosed) || (fileclosed && s->lastwrite == RANDOM_WRITE)) {
+            unsigned newstep;
 
-        for (step = 0; (step < s->wwrites && step < (s->rows * s->cols)); step++) {
-            dbgf(2, "Verify raw data modification %u to dataset\n", step);
+            s->lastwrite = RANDOM_WRITE;
 
-            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                TEST_ERROR;
+            /* Set up random seed which will be the same for both writer and reader */
+            HDsrandom(RANDOM_SEED);
+
+            for (step = 0; (step < s->rwrites && step < (s->rows * s->cols)); step++) {
+                dbgf(2, "Verify random writes %u to dataset\n", step);
+
+                newstep = (unsigned int)HDrandom() % (s->rows * s->cols);
+                dbgf(2, "Random step is %u\n", newstep);
+
+                if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                    printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                    TEST_ERROR;
+                }
+
+                /* Wait for a few ticks for the update to happen */
+                if(!fileclosed)
+                    decisleep(config->tick_len * s->update_interval);
+
+                result = verify_dsets_action(RANDOM_WRITE, s, ds, newstep, fileclosed);
+
+                if (s->use_np && !np_reader(result, step, s, np)) {
+                    printf("np_reader() for verifying addition failed\n");
+                    TEST_ERROR;
+                } else if (!result)
+                    TEST_ERROR;
             }
+        }
 
-            /* Wait for a few ticks for the update to happen */
-            decisleep(config->tick_len * s->update_interval);
+        /* Start verifying hyperslab writes */
+        /* When flush of raw data is disabled, only verify data for the last write operation on file close */
+        if ((s->lwrites && !fileclosed) || (fileclosed && s->lastwrite == HYPER_WRITE)) {
+            unsigned k;
 
-            result = verify_dsets_action(MODIFY_DATA, s, ds, step);
+            s->lastwrite = HYPER_WRITE;
 
-            if (s->use_np && !np_reader(result, step, s, np)) {
-                HDprintf("np_reader() for verifying addition failed\n");
-                TEST_ERROR;
+            for (step = 0, k = 0; (step < s->lwrites && k < (s->rows * s->cols)); step++, k += s->cols) {
+                dbgf(2, "Verify hyperslab writes %u to dataset\n", step);
+
+                if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                    printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                    TEST_ERROR;
+                }
+
+                /* Wait for a few ticks for the update to happen */
+                if(!fileclosed)
+                    decisleep(config->tick_len * s->update_interval);
+
+                result = verify_dsets_action(HYPER_WRITE, s, ds, k, fileclosed);
+
+                if (s->use_np && !np_reader(result, step, s, np)) {
+                    printf("np_reader() for verifying addition failed\n");
+                    TEST_ERROR;
+                } else if (!result)
+                    TEST_ERROR;
+            }
+        }
+
+        /* Start verifying raw data modifications */
+        /* When flush of raw data is disabled, only verify data for the last write operation on file close */
+        if ((s->wwrites && !fileclosed) || (fileclosed && s->lastwrite == MODIFY_DATA)) {
+
+            s->lastwrite = MODIFY_DATA;
+
+            for (step = 0; (step < s->wwrites && step < (s->rows * s->cols)); step++) {
+                dbgf(2, "Verify raw data modification %u to dataset\n", step);
+
+                if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                    printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                    TEST_ERROR;
+                }
+
+                /* Wait for a few ticks for the update to happen */
+                if(!fileclosed)
+                    decisleep(config->tick_len * s->update_interval);
+
+                result = verify_dsets_action(MODIFY_DATA, s, ds, step, fileclosed);
+
+                if (s->use_np && !np_reader(result, step, s, np)) {
+                    printf("np_reader() for verifying addition failed\n");
+                    TEST_ERROR;
+                } else if (!result)
+                    TEST_ERROR;
             }
         }
     }
@@ -1247,7 +1347,7 @@ verify_write_dset_contig_chunked(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_con
 error:
     return false;
 
-} /* verify_write_dset_contig_chunked() */
+} /* Verify_dsets_operations() */
 
 /*
  * Verify the data read from each of the datasets specified on the command line
@@ -1258,7 +1358,7 @@ error:
  *      MODIFY_DATA: `which` raw data modification
  */
 static bool
-verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
+verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which, bool fileclosed)
 {
     hsize_t       start[2];
     hsize_t       stride[2];
@@ -1275,9 +1375,9 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
 
     /* Verify the data read for the contiguous dataset */
     if (s->contig) {
-        if (!verify_read_dset(ds->contig_did, s->filetype, mem_sid, ds->contig_sid, start, stride, count,
-                              block, vbuf)) {
-            HDprintf("H5Dwrite to contiguous dataset failed\n");
+        if (!verify_dset(ds->contig_did, s->filetype, mem_sid, ds->contig_sid, start, stride, count,
+                              block, vbuf, fileclosed, s->flush_raw_data)) {
+            printf("verify_dset() to contiguous dataset failed\n");
             TEST_ERROR;
         }
     }
@@ -1285,33 +1385,33 @@ verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, 
     /* Verify the data read for the chunked datasets */
     if (s->chunked) {
 
-        if (!verify_read_dset(ds->single_did, s->filetype, mem_sid, ds->single_sid, start, stride, count,
-                              block, vbuf)) {
-            HDprintf("H5Dwrite to chunked dataset: single index dataset failed\n");
+        if (!verify_dset(ds->single_did, s->filetype, mem_sid, ds->single_sid, start, stride, count,
+                              block, vbuf, fileclosed, s->flush_raw_data)) {
+            printf("verify_dset() to chunked dataset: single index dataset failed\n");
             TEST_ERROR;
         }
 
-        if (!verify_read_dset(ds->implicit_did, s->filetype, mem_sid, ds->implicit_sid, start, stride, count,
-                              block, vbuf)) {
-            HDprintf("H5Dwrite to chunked dataset: implicit index dataset failed\n");
+        if (!verify_dset(ds->implicit_did, s->filetype, mem_sid, ds->implicit_sid, start, stride, count,
+                              block, vbuf, fileclosed, s->flush_raw_data)) {
+            printf("verify_dset() to chunked dataset: implicit index dataset failed\n");
             TEST_ERROR;
         }
 
-        if (!verify_read_dset(ds->fa_did, s->filetype, mem_sid, ds->fa_sid, start, stride, count, block,
-                              vbuf)) {
-            HDprintf("H5Dwrite to chunked dataset: fa index dataset failed\n");
+        if (!verify_dset(ds->fa_did, s->filetype, mem_sid, ds->fa_sid, start, stride, count, block,
+                              vbuf, fileclosed, s->flush_raw_data)) {
+            printf("verify_dset() to chunked dataset: fa index dataset failed\n");
             TEST_ERROR;
         }
 
-        if (!verify_read_dset(ds->ea_did, s->filetype, mem_sid, ds->ea_sid, start, stride, count, block,
-                              vbuf)) {
-            HDprintf("H5Dwrite to chunked dataset: ea index dataset failed\n");
+        if (!verify_dset(ds->ea_did, s->filetype, mem_sid, ds->ea_sid, start, stride, count, block,
+                              vbuf, fileclosed, s->flush_raw_data)) {
+            printf("verify_dset() to chunked dataset: ea index dataset failed\n");
             TEST_ERROR;
         }
 
-        if (!verify_read_dset(ds->bt2_did, s->filetype, mem_sid, ds->bt2_sid, start, stride, count, block,
-                              vbuf)) {
-            HDprintf("H5Dwrite to chunked dataset: bt2 index dataset failed\n");
+        if (!verify_dset(ds->bt2_did, s->filetype, mem_sid, ds->bt2_sid, start, stride, count, block,
+                              vbuf, fileclosed, s->flush_raw_data)) {
+            printf("verify_dset() to chunked dataset: bt2 index dataset failed\n");
             TEST_ERROR;
         }
     }
@@ -1329,13 +1429,14 @@ error:
 
 } /* verify_dsets_action() */
 
+
 /*
  * Verify the data read from the dataset is as expected.
  * `vbuf` contains the data expected from the read.
  */
 static bool
-verify_read_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start, hsize_t *stride,
-                 hsize_t *count, hsize_t *block, unsigned int *vbuf)
+verify_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start, hsize_t *stride,
+                 hsize_t *count, hsize_t *block, unsigned int *vbuf, bool fileclosed, bool flush_raw_data)
 {
     unsigned int *rbuf = NULL;
     unsigned      i;
@@ -1365,9 +1466,15 @@ verify_read_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *s
     }
 
     /* Verify the data read in `rbuf` is as `vbuf` */
-    for (i = 0; i < count[1]; i++)
-        if (rbuf[i] != vbuf[i])
-            TEST_ERROR;
+    for (i = 0; i < count[1]; i++) {
+        if(flush_raw_data || fileclosed) {
+            if (rbuf[i] != vbuf[i])
+                TEST_ERROR;
+        } else { /* No flush && not closing file */
+            if (rbuf[i] != vbuf[i] &&  rbuf[0] != 0) /* FILL VALUE ?? */
+                TEST_ERROR;
+        }
+    }
 
     if (rbuf)
         HDfree(rbuf);
@@ -1379,16 +1486,22 @@ error:
         HDfree(rbuf);
     return false;
 
-} /* verify_read_dset() */
+} /* verify_dset() */
 
 /*
  * Verify that the data read from the compact dataset is as unexpected.
  */
 static bool
-verify_read_dset_compact(const state_t *s, const dsets_state_t *ds)
+verify_dset_compact(const state_t *s, const dsets_state_t *ds, bool fileclosed, bool flush_raw_data)
 {
     unsigned int *rbuf;
     unsigned      i;
+
+    /* Refresh the dataset */
+    if (H5Drefresh(ds->compact_did) < 0) {
+        printf("H5Drefresh dataset failed\n");
+        TEST_ERROR;
+    }
 
     if ((rbuf = HDmalloc(s->compact_elmts * sizeof(unsigned int))) == NULL) {
         HDprintf("HDmalloc buffer for compact dataset failed\n");
@@ -1400,11 +1513,18 @@ verify_read_dset_compact(const state_t *s, const dsets_state_t *ds)
         TEST_ERROR;
     }
 
-    for (i = 0; i < s->compact_elmts; i++)
-        if (rbuf[i] != (i + 1)) {
-            HDprintf("Invalid value for compact dataset element\n");
-            TEST_ERROR;
+    for (i = 0; i < s->compact_elmts; i++) {
+        if(flush_raw_data || fileclosed) {
+            if (rbuf[i] != (i + 1)) {
+                printf("Invalid value for compact dataset element\n");
+                TEST_ERROR;
+            }
+        } else { /* No flush && not closing file */
+            if (rbuf[i] != (i + 1) && rbuf[0] != 0) /* FILL VALUE ?? */
+                TEST_ERROR;
+
         }
+    }
 
     if (rbuf)
         HDfree(rbuf);
@@ -1416,7 +1536,7 @@ error:
         HDfree(rbuf);
     return false;
 
-} /* verify_read_dset_compact() */
+} /* verify_dset_compact() */
 
 /*
  * Named pipes handling
@@ -1535,9 +1655,8 @@ np_writer(bool result, unsigned step, const state_t *s, np_state_t *np, H5F_vfd_
             HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int));
             goto error;
         }
-        /* The action succeeds */
     }
-    else {
+    else {  /* The action succeeds */
         /* At communication interval, notify the reader and wait for its response */
         if (step % s->csteps == 0) {
             /* Bump up the value of notify to tell the reader to start reading */
@@ -1642,6 +1761,91 @@ error:
 } /* np_confirm_verify_notify() */
 
 /*
+ *  When flush of raw data is disabled, the following is done by the writer and reader:
+ *  Writer:
+ *      Close the file
+ *      Notify the reader that the file is closed
+ *  Reader:
+ *      Confirm the message from the writer that the file is closed
+ *      Verify the data 
+ */
+static bool
+closing_on_noflush(bool writer, state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+{
+    HDassert(s->use_np);
+
+    if(writer) {
+        if (!close_dsets(ds)) {
+            printf("close_dsets() failed\n");
+            TEST_ERROR;
+        }
+
+        dbgf(2, "Writer closes the file (flush of raw data is disabled)\n");
+        if (H5Fclose(s->file) < 0) {
+            printf("H5Fclose failed\n");
+            TEST_ERROR;
+        }
+
+        /* Bump up the value of notify to tell the reader the file is closed */
+        dbgf(2, "Writer notifies reader that the file is closed (flush of raw data is disabled)\n");
+        np->notify++;
+        if (HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int)) < 0) {
+            printf("HDwrite failed\n");
+            TEST_ERROR;
+        }
+
+        if (!np_close(np, writer)) {
+            printf("np_close() failed\n");
+            TEST_ERROR;
+        }
+
+    } else {
+        /* Wait for a few ticks for the file to close in writer ?? need to this or not? */
+        decisleep(config->tick_len * s->update_interval);
+
+        dbgf(2, "Reader checks notify value from writer (flush of raw data is disabled)\n");
+        if (!np_confirm_verify_notify(np->fd_writer_to_reader, 0, s, np)) {
+            printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+            TEST_ERROR;
+        }
+
+        /* Close the named pipes */
+        if (!np_close(np, writer)) {
+            printf("np_close() failed\n");
+            TEST_ERROR;
+        }
+
+        /* Turn off named pipes */
+        s->use_np = false;
+    
+        /* Verify the dataset again without named pipes */
+        dbgf(2, "Reader verifies data after writer closes the file (flush of raw data is disabled)\n");
+        if(!verify_dsets_operations(s, ds, config, np, true)) {
+            printf("verify_dsets_operations() failed\n");
+            TEST_ERROR
+        }
+
+        if (!close_dsets(ds)) {
+            printf("close_dsets() failed\n");
+            TEST_ERROR;
+        }
+
+        dbgf(2, "Reader closes the file (flush of raw data is disabled)\n");
+        if (H5Fclose(s->file) < 0) {
+            printf("H5Fclose failed\n");
+            TEST_ERROR;
+        }
+
+    }
+
+    return true;
+
+error:
+    return false;
+
+} /* closing_on_noflush() */
+
+/*
  * Main
  */
 int
@@ -1655,7 +1859,6 @@ main(int argc, char **argv)
     H5F_vfd_swmr_config_t config;
     np_state_t            np;
     dsets_state_t         ds;
-    bool                  result;
 
     if (!state_init(&s, argc, argv)) {
         HDprintf("state_init() failed\n");
@@ -1674,7 +1877,7 @@ main(int argc, char **argv)
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./dsetops-shadow");
+    init_vfd_swmr_config(&config, 4, 7, writer, s.flush_raw_data, 128, "./dsetops-shadow");
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config)) < 0) {
@@ -1718,60 +1921,17 @@ main(int argc, char **argv)
 
     if (writer) {
 
-        /* Perform writes to the whole compact dataset */
-        if (s.compact && s.compact_write) {
-            dbgf(2, "Writes all to compact dataset\n");
-
-            result = write_dset_compact(&s, &ds);
-
-            if (s.use_np && !np_writer(result, 0, &s, &np, &config)) {
-                HDprintf("np_writer() for addition failed\n");
-                TEST_ERROR;
-            }
-        }
-
-        if (s.contig || s.chunked) {
-            /* Perform writes for contiguous and/or chunked datasets */
-            if (!write_dset_contig_chunked(&s, &ds, &config, &np)) {
-                HDprintf("write_dset_contig_chunked() failed\n");
-                TEST_ERROR;
-            }
+        if(!perform_dsets_operations(&s, &ds, &config, &np)) {
+            printf("perform_dsets_operations() failed\n");
+            TEST_ERROR;
         }
     }
     else {
 
-        /* Start verifying data written to the compact dataset */
-        if (s.compact && s.compact_write) {
-            dbgf(2, "Verify writes to compact dataset\n");
-
-            if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, 0, &s, &np)) {
-                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                TEST_ERROR;
-            }
-            /* Wait for a few ticks for the update to happen */
-            decisleep(config.tick_len * s.update_interval);
-
-            result = verify_read_dset_compact(&s, &ds);
-
-            if (s.use_np && !np_reader(result, 0, &s, &np)) {
-                HDprintf("np_reader() for verifying addition failed\n");
-                TEST_ERROR;
-            }
+        if(!verify_dsets_operations(&s, &ds, &config, &np, false)) {
+            printf("perform_dsets_operations() failed\n");
+            TEST_ERROR;
         }
-
-        if (s.contig || s.chunked) {
-
-            /* Verify writes for contiguous and/or chunked datasets */
-            if (!verify_write_dset_contig_chunked(&s, &ds, &config, &np)) {
-                HDprintf("verify_write_dset_contig_chunked() failed\n");
-                TEST_ERROR;
-            }
-        }
-    }
-
-    if (!close_dsets(&ds)) {
-        HDprintf("close_dsets() failed\n");
-        TEST_ERROR;
     }
 
     if (H5Pclose(fapl) < 0) {
@@ -1784,14 +1944,26 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if (H5Fclose(s.file) < 0) {
-        HDprintf("H5Fclose failed\n");
-        TEST_ERROR;
-    }
+    if(!s.flush_raw_data && s.use_np) {
 
-    if (s.use_np && !np_close(&np, writer)) {
-        HDprintf("np_close() failed\n");
-        TEST_ERROR;
+        if(!closing_on_noflush(writer, &s, &ds, &config, &np))
+            TEST_ERROR
+    } else {
+
+        if (!close_dsets(&ds)) {
+            printf("close_dsets() failed\n");
+            TEST_ERROR;
+        }
+
+        if (H5Fclose(s.file) < 0) {
+            printf("H5Fclose failed\n");
+            TEST_ERROR;
+        }
+
+        if (s.use_np && !np_close(&np, writer)) {
+            printf("np_close() failed\n");
+            TEST_ERROR;
+        }
     }
 
     return EXIT_SUCCESS;

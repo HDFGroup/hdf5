@@ -126,7 +126,7 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t vfd_swmr_write, int 
             return -1;
 
         /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-        init_vfd_swmr_config(config, 4, 10, vfd_swmr_write, FALSE, 128, "generator-shadow");
+        init_vfd_swmr_config(config, 4, 10, vfd_swmr_write, TRUE, 128, "generator-shadow");
     }
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */

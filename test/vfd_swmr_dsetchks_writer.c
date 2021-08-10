@@ -74,6 +74,7 @@ typedef struct {
     bool         use_np;             /* For -N option */
     bool         use_vfd_swmr;       /* For -S option */
     bool         use_filter;         /* For -o option */
+    bool         flush_raw_data;     /* For -U option */
 
     bool single_index;   /* -s option: create a chunked dataset with single chunk index */
     bool implicit_index; /* -i option: create a chunked datasets with implicit chunk index */
@@ -99,9 +100,9 @@ typedef struct {
     {                                                                                                        \
         .filename = "", .file = H5I_INVALID_HID, .filetype = H5T_NATIVE_UINT32,                              \
         .update_interval = READER_WAIT_TICKS, .csteps = 1, .use_np = true, .use_vfd_swmr = true,             \
-        .use_filter = false, .single_index = false, .implicit_index = false, .fa_index = false,              \
-        .ea_index = false, .bt2_index = false, .rows = 10, .cols = 5, .gwrites = 0, .pwrites = 0,            \
-        .twrites = 0, .lwrites = 0, .xincrs = 0, .ydecrs = 0                                                 \
+        .use_filter = false, .flush_raw_data = true, .single_index = false, .implicit_index = false,         \
+        .fa_index = false, .ea_index = false, .bt2_index = false, .rows = 10, .cols = 5, .gwrites = 0,       \
+        .pwrites = 0, .twrites = 0, .lwrites = 0, .xincrs = 0, .ydecrs = 0                                   \
     }
 
 /* Structure to hold info for different dataset types */
@@ -166,7 +167,7 @@ static void setup_selection(unsigned action, unsigned which, const state_t *s, c
 static void check_set_edge_block(const state_t *s, const dsets_state_t *ds, unsigned i, unsigned j,
                                  hsize_t *block);
 static void check_set_partial_block(unsigned action, const hsize_t *dims, hsize_t *block, hsize_t *start);
-static bool write_dset(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride, hsize_t *count,
+static bool write_chunks(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride, hsize_t *count,
                        hsize_t *block);
 static bool write_dset_single(unsigned action, const state_t *s, const dsets_state_t *ds);
 
@@ -174,12 +175,12 @@ static bool dsets_extent(unsigned action, const state_t *s, const dsets_state_t 
 static bool dset_extent_real(unsigned action, hid_t did, const hsize_t *chunk_dims);
 
 static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
-                                    np_state_t *np);
+                                    np_state_t *np, bool fileclosed);
 
-static bool verify_dsets_chunks(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
-static bool verify_read_dset(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride,
-                             hsize_t *count, hsize_t *block);
-static bool verify_read_dset_single(unsigned action, const state_t *s, const dsets_state_t *ds);
+static bool verify_dsets_chunks(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which, bool fileclosed);
+static bool verify_chunks(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride,
+                             hsize_t *count, hsize_t *block, bool fileclosed, bool flush_raw_data);
+static bool verify_dset_single(unsigned action, const state_t *s, const dsets_state_t *ds, bool fileclosed);
 
 static bool verify_dsets_extent(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
 static bool verify_dset_extent_real(unsigned action, hid_t did, unsigned rows, unsigned cols, unsigned which);
@@ -195,7 +196,7 @@ usage(const char *progname)
             "           [-m rows] [-n cols]\n"
             "           [-g gwrites] [-p pwrites] [-t twrites] [-l lwrites]\n"
             "           [-x xincrs] [-y decrs]\n"
-            "           [-u nticks] [-c csteps] [-S] [-N] [-q] [-b] [-o]\n",
+            "           [-u nticks] [-c csteps] [-U] [-S] [-N] [-q] [-b] [-o]\n",
             progname);
 
     fprintf(
@@ -218,6 +219,7 @@ usage(const char *progname)
         "                 (default is 4)\n"
         "-c csteps:       `csteps` steps communication interval between reader and writer\n"
         "                 (default is 1)\n"
+        "-U:              disable flush of raw data (default is flushing raw data)\n"
         "-S:              do not use VFD SWMR\n"
         "-N:              do not use named pipes for test synchronization\n"
         "-q:              silence printouts, few messages\n"
@@ -263,18 +265,22 @@ state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
     int           ch;
-    char          tfile[PATH_MAX];
+    char          *tfile = NULL;
     char *        end;
-    char *        base;
-
-    if (H5_basename(tfile, base) < 0)
-        TEST_ERROR
 
     *s = ALL_HID_INITIALIZER;
-    esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", base);
 
-    while ((ch = getopt(argc, argv, "siferom:n:x:y:g:p:t:l:bqSNu:c:")) != -1) {
+    if (H5_basename(argv[0], &tfile) < 0) {
+        HDprintf("H5_basename failed\n"); 
+        TEST_ERROR
+    }
+
+    esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
+
+    if (tfile)
+        HDfree(tfile);
+
+    while ((ch = getopt(argc, argv, "siferom:n:x:y:g:p:t:l:bqSNUu:c:")) != -1) {
         switch (ch) {
 
             case 's': /* A chunked dataset with single index */
@@ -311,6 +317,10 @@ state_init(state_t *s, int argc, char **argv)
 
             case 'S': /* Disable VFD SWMR */
                 s->use_vfd_swmr = false;
+                break;
+
+            case 'U':   /* Disable flush of raw data */
+                s->flush_raw_data = false;
                 break;
 
             case 'N': /* Disable named pipes synchronization */
@@ -373,8 +383,6 @@ state_init(state_t *s, int argc, char **argv)
     }
     argc -= optind;
     argv += optind;
-
-    HDfree(base);
 
     /* Require to specify at least -s or -i or -f or -e or -r option */
     if (!s->single_index && !s->implicit_index && !s->fa_index && !s->ea_index && !s->bt2_index) {
@@ -444,6 +452,8 @@ state_init(state_t *s, int argc, char **argv)
     return true;
 
 error:
+    if (tfile)
+        HDfree(tfile);
     return false;
 
 } /* state_init() */
@@ -1010,28 +1020,28 @@ write_dsets_chunks(unsigned action, const state_t *s, const dsets_state_t *ds, u
     setup_selection(action, which, s, ds, start, stride, count, block);
 
     if (s->implicit_index) {
-        if (!write_dset(action, ds->implicit_did, s->filetype, start, stride, count, block)) {
+        if (!write_chunks(action, ds->implicit_did, s->filetype, start, stride, count, block)) {
             printf("H5Dwrite to chunked dataset: implicit index dataset failed\n");
             TEST_ERROR;
         }
     }
 
     if (s->fa_index) {
-        if (!write_dset(action, ds->fa_did, s->filetype, start, stride, count, block)) {
+        if (!write_chunks(action, ds->fa_did, s->filetype, start, stride, count, block)) {
             printf("H5Dwrite to chunked dataset: fa index dataset failed\n");
             TEST_ERROR;
         }
     }
 
     if (s->ea_index) {
-        if (!write_dset(action, ds->ea_did, s->filetype, start, stride, count, block)) {
+        if (!write_chunks(action, ds->ea_did, s->filetype, start, stride, count, block)) {
             printf("H5Dwrite to chunked dataset: ea index dataset failed\n");
             TEST_ERROR;
         }
     }
 
     if (s->bt2_index) {
-        if (!write_dset(action, ds->bt2_did, s->filetype, start, stride, count, block)) {
+        if (!write_chunks(action, ds->bt2_did, s->filetype, start, stride, count, block)) {
             printf("H5Dwrite to chunked dataset: bt2 index dataset failed\n");
             TEST_ERROR;
         }
@@ -1169,7 +1179,7 @@ check_set_partial_block(unsigned action, const hsize_t *chunk_dims, hsize_t *blo
  * Make the selection and then write to the dataset.
  */
 static bool
-write_dset(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride, hsize_t *count,
+write_chunks(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride, hsize_t *count,
            hsize_t *block)
 {
     hid_t         sid     = badhid;
@@ -1238,7 +1248,7 @@ error:
 
     return false;
 
-} /* write_dset() */
+} /* write_chunks() */
 
 /*
  * Increase or decrease the dimenion sizes for the specified datasets.
@@ -1370,7 +1380,7 @@ write_dset_single(unsigned action, const state_t *s, const dsets_state_t *ds)
     if (action == PWRITES || action == LWRITES)
         check_set_partial_block(action, block, block, start);
 
-    if (!write_dset(action, ds->single_did, s->filetype, start, stride, count, block)) {
+    if (!write_chunks(action, ds->single_did, s->filetype, start, stride, count, block)) {
         printf("H5Dwrite to dataset with single index dataset failed\n");
         TEST_ERROR;
     }
@@ -1403,7 +1413,7 @@ error:
  * --DECR_EXT: verify the decrease to dataset dimensions sizes
  */
 static bool
-verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np, bool fileclosed)
 {
     unsigned step;
     unsigned allowed_writes;
@@ -1423,14 +1433,16 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
             }
 
             /* Wait for a few ticks for the update to happen */
-            decisleep(config->tick_len * s->update_interval);
+            if (!fileclosed)    
+                decisleep(config->tick_len * s->update_interval);
 
-            result = verify_read_dset_single(GWRITES, s, ds);
+            result = verify_dset_single(GWRITES, s, ds, fileclosed);
 
             if (s->use_np && !np_reader(result, 0, s, np)) {
                 printf("np_reader() for verifying addition failed\n");
                 TEST_ERROR;
-            }
+            } else if (!result)
+                TEST_ERROR;
         }
 
         /* Verify a single partial chunk write to dataset with single index */
@@ -1439,19 +1451,22 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
         if (s->pwrites || s->lwrites) {
             dbgf(2, "Verify single partial chunk write to dataset with single index; only verify 1 write\n");
 
-            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, 0, s, np)) {
+            if(s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, 0, s, np)) {
                 printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
+    
             /* Wait for a few ticks for the update to happen */
-            decisleep(config->tick_len * s->update_interval);
+            if (!fileclosed)
+                decisleep(config->tick_len * s->update_interval);
 
-            result = verify_read_dset_single(PWRITES, s, ds);
+            result = verify_dset_single(PWRITES, s, ds, fileclosed);
 
             if (s->use_np && !np_reader(result, 0, s, np)) {
                 printf("np_reader() for verifying addition failed\n");
                 TEST_ERROR;
-            }
+            } if (!result)
+                TEST_ERROR;
         }
     }
 
@@ -1471,15 +1486,18 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
                     printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                     TEST_ERROR;
                 }
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config->tick_len * s->update_interval);
 
-                result = verify_dsets_chunks(GWRITES, s, ds, step);
+                /* Wait for a few ticks for the update to happen */
+                if(!fileclosed) 
+                    decisleep(config->tick_len * s->update_interval);
+
+                result = verify_dsets_chunks(GWRITES, s, ds, step, fileclosed);
 
                 if (s->use_np && !np_reader(result, step, s, np)) {
                     printf("np_reader() for verification failed\n");
                     TEST_ERROR;
-                }
+                } else if (!result)
+                    TEST_ERROR;
             }
         }
 
@@ -1496,15 +1514,18 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
                     printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                     TEST_ERROR;
                 }
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config->tick_len * s->update_interval);
 
-                result = verify_dsets_chunks(PWRITES, s, ds, step);
+                /* Wait for a few ticks for the update to happen */
+                if(!fileclosed)
+                    decisleep(config->tick_len * s->update_interval);
+
+                result = verify_dsets_chunks(PWRITES, s, ds, step, fileclosed);
 
                 if (s->use_np && !np_reader(result, step, s, np)) {
                     printf("np_reader() for verification failed\n");
                     TEST_ERROR;
-                }
+                } else if (!result)
+                    TEST_ERROR;
             }
         }
 
@@ -1521,15 +1542,18 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
                     printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                     TEST_ERROR;
                 }
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config->tick_len * s->update_interval);
 
-                result = verify_dsets_chunks(TWRITES, s, ds, step);
+                /* Wait for a few ticks for the update to happen */
+                if(!fileclosed)
+                    decisleep(config->tick_len * s->update_interval);
+
+                result = verify_dsets_chunks(TWRITES, s, ds, step, fileclosed);
 
                 if (s->use_np && !np_reader(result, step, s, np)) {
                     printf("np_reader() for verification failed\n");
                     TEST_ERROR;
-                }
+                } else if (!result)
+                    TEST_ERROR;
             }
         }
 
@@ -1547,15 +1571,18 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
                     printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                     TEST_ERROR;
                 }
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config->tick_len * s->update_interval);
 
-                result = verify_dsets_chunks(LWRITES, s, ds, step);
+                /* Wait for a few ticks for the update to happen */
+                if(!fileclosed)
+                    decisleep(config->tick_len * s->update_interval);
+
+                result = verify_dsets_chunks(LWRITES, s, ds, step, fileclosed);
 
                 if (s->use_np && !np_reader(result, step, s, np)) {
                     printf("np_reader() for verification failed\n");
                     TEST_ERROR;
-                }
+                } else if (!result)
+                    TEST_ERROR;
             }
         }
 
@@ -1569,6 +1596,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
                     printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                     TEST_ERROR;
                 }
+
                 /* Wait for a few ticks for the update to happen */
                 decisleep(config->tick_len * s->update_interval);
 
@@ -1577,7 +1605,8 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
                 if (s->use_np && !np_reader(result, step, s, np)) {
                     printf("np_reader() for failed\n");
                     TEST_ERROR;
-                }
+                } else if (!result)
+                    TEST_ERROR;
             }
         }
 
@@ -1596,10 +1625,11 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
 
                 result = verify_dsets_extent(DECR_EXT, s, ds, step + 1);
 
-                if (s->use_np && !np_reader(result, step, s, np)) {
+                if (s->use_np && !np_reader(result, step, s, np)) { 
                     printf("np_reader() for verification failed\n");
                     TEST_ERROR;
-                }
+                } else if (!result)
+                    TEST_ERROR;
             }
         }
     }
@@ -1620,7 +1650,7 @@ error:
  *      LWRITEs: verify `which` write that covers multiple partial chunks
  */
 static bool
-verify_dsets_chunks(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
+verify_dsets_chunks(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which, bool fileclosed)
 {
     hsize_t start[2]  = {0, 0};
     hsize_t stride[2] = {0, 0};
@@ -1633,29 +1663,29 @@ verify_dsets_chunks(unsigned action, const state_t *s, const dsets_state_t *ds, 
     setup_selection(action, which, s, ds, start, stride, count, block);
 
     if (s->implicit_index) {
-        if (!verify_read_dset(action, ds->implicit_did, s->filetype, start, stride, count, block)) {
-            printf("verify_read_dset() to dataset with implicit index failed\n");
+        if (!verify_chunks(action, ds->implicit_did, s->filetype, start, stride, count, block, fileclosed, s->flush_raw_data)) {
+            printf("verify_chunks() to dataset with implicit index failed\n");
             TEST_ERROR;
         }
     }
 
     if (s->fa_index) {
-        if (!verify_read_dset(action, ds->fa_did, s->filetype, start, stride, count, block)) {
-            printf("verify_read_dset() to dataset with fixed array index failed\n");
+        if (!verify_chunks(action, ds->fa_did, s->filetype, start, stride, count, block, fileclosed, s->flush_raw_data)) {
+            printf("verify_chunks() to dataset with fixed array index failed\n");
             TEST_ERROR;
         }
     }
 
     if (s->ea_index) {
-        if (!verify_read_dset(action, ds->ea_did, s->filetype, start, stride, count, block)) {
-            printf("verify_read_dset() to dataset with extensible array index failed\n");
+        if (!verify_chunks(action, ds->ea_did, s->filetype, start, stride, count, block, fileclosed, s->flush_raw_data)) {
+            printf("verify_chunks() to dataset with extensible array index failed\n");
             TEST_ERROR;
         }
     }
 
     if (s->bt2_index) {
-        if (!verify_read_dset(action, ds->bt2_did, s->filetype, start, stride, count, block)) {
-            printf("verify_read_dset() to dataset with bt2 index failed\n");
+        if (!verify_chunks(action, ds->bt2_did, s->filetype, start, stride, count, block, fileclosed, s->flush_raw_data)) {
+            printf("verify_chunks() to dataset with bt2 index failed\n");
             TEST_ERROR;
         }
     }
@@ -1672,8 +1702,8 @@ error:
  * Verify the data read from the dataset is as expected.
  */
 static bool
-verify_read_dset(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride, hsize_t *count,
-                 hsize_t *block)
+verify_chunks(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t *stride, hsize_t *count,
+                 hsize_t *block, bool fileclosed, bool flush_raw_data)
 {
     hid_t         mem_sid = badhid;
     hid_t         sid     = badhid;
@@ -1719,17 +1749,32 @@ verify_read_dset(unsigned action, hid_t did, hid_t tid, hsize_t *start, hsize_t 
 
     /* Verify the data read in `rbuf` is as the fill value expected */
     for (i = 0; i < block[0] * block[1]; i++) {
-        if (action == GWRITES || action == TWRITES) {
-            if (rbuf[i] != FILL_FULL) {
-                printf("Invalid value for dataset for GWRITES/TWRITES\n");
-                TEST_ERROR;
+        if(flush_raw_data || fileclosed) {
+            if (action == GWRITES || action == TWRITES) {
+                if (rbuf[i] != FILL_FULL) {
+                    printf("Invalid value for dataset for GWRITES/TWRITES: %d\n", rbuf[i]);
+                    TEST_ERROR;
+                }
             }
-        }
-        else {
-            HDassert(action == PWRITES || action == LWRITES);
-            if (rbuf[i] != FILL_PARTIAL) {
-                printf("Invalid value for dataset for GWRITES/TWRITES\n");
-                TEST_ERROR;
+            else {
+                HDassert(action == PWRITES || action == LWRITES);
+                if (rbuf[i] != FILL_PARTIAL) {
+                    printf("Invalid value for dataset for GWRITES/TWRITES: %d\n", rbuf[i]);
+                    TEST_ERROR;
+                }
+            }
+        } else { /* No flush && not closing file */
+            if (action == GWRITES || action == TWRITES) {
+                if (rbuf[i] != FILL_FULL && rbuf[i] != FILL_INIT) {
+                    printf("Invalid value for dataset for GWRITES/TWRITES\n");
+                    TEST_ERROR;
+                }
+            }
+            else {
+                if (rbuf[i] != FILL_PARTIAL && rbuf[i] != FILL_INIT) {
+                    printf("Invalid value for dataset for GWRITES/TWRITES\n");
+                    TEST_ERROR;
+                }
             }
         }
     }
@@ -1762,7 +1807,7 @@ error:
 
     return false;
 
-} /* verify_read_dset() */
+} /* verify_chunks() */
 
 /*
  * Verify the increase or decrease of dimenion sizes for the specified datasets.
@@ -1877,7 +1922,7 @@ error:
  * Verify that the data read from the dataset with single index is as unexpected.
  */
 static bool
-verify_read_dset_single(unsigned action, const state_t *s, const dsets_state_t *ds)
+verify_dset_single(unsigned action, const state_t *s, const dsets_state_t *ds, bool fileclosed)
 {
     hsize_t block[2]  = {s->rows, s->cols};
     hsize_t count[2]  = {1, 1};
@@ -1890,7 +1935,7 @@ verify_read_dset_single(unsigned action, const state_t *s, const dsets_state_t *
     if (action == PWRITES)
         check_set_partial_block(action, block, block, start);
 
-    if (!verify_read_dset(action, ds->single_did, s->filetype, start, stride, count, block)) {
+    if (!verify_chunks(action, ds->single_did, s->filetype, start, stride, count, block, fileclosed, s->flush_raw_data)) {
         printf("verify_read_dset() to dataset with single index failed\n");
         TEST_ERROR;
     }
@@ -1900,7 +1945,7 @@ verify_read_dset_single(unsigned action, const state_t *s, const dsets_state_t *
 error:
     return false;
 
-} /* verify_read_dset_single() */
+} /* verify_dset_single() */
 
 /*
  * Named pipes handling
@@ -2126,6 +2171,90 @@ error:
 } /* np_confirm_verify_notify() */
 
 /*
+ *  When flush of raw data is disabled, the following is done by the writer and reader:
+ *  Writer:
+ *      Close the file
+ *      Notify the reader that the file is closed
+ *  Reader:
+ *      Confirm the message from the writer that the file is closed
+ *      Verify the data
+ */
+static bool
+closing_on_noflush(bool writer, state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+{
+    HDassert(s->use_np);
+
+    if(writer) {
+        if (!close_dsets(ds)) {
+            printf("close_dsets() failed\n");
+            TEST_ERROR;
+        }
+
+        dbgf(2, "Writer closes the file (flush of raw data is disabled)\n");
+        if (H5Fclose(s->file) < 0) {
+            printf("H5Fclose failed\n");
+            TEST_ERROR;
+        }
+
+        /* Bump up the value of notify to tell the reader the file is closed */
+        dbgf(2, "Writer notifies reader that the file is closed (flush of raw data is disabled)\n");
+        np->notify++;
+        if (HDwrite(np->fd_writer_to_reader, &np->notify, sizeof(int)) < 0) {
+            printf("HDwrite failed\n");
+            TEST_ERROR;
+        }
+
+        if (!np_close(np, writer)) {
+            printf("np_close() failed\n");
+            TEST_ERROR;
+        }
+
+    } else {
+        /* Wait for a few ticks for the file to close in writer */
+        decisleep(config->tick_len * s->update_interval);
+
+        dbgf(2, "Reader checks notify value from writer (flush of raw data is disabled)\n");
+        if (!np_confirm_verify_notify(np->fd_writer_to_reader, 0, s, np)) {
+            printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+            TEST_ERROR;
+        }
+
+        /* Close the named pipes */
+        if (!np_close(np, writer)) {
+            printf("np_close() failed\n");
+            TEST_ERROR;
+        }
+
+        /* Turn off named pipes */
+        s->use_np = false;
+    
+        /* Verify the dataset again without named pipes */
+        dbgf(2, "Reader verifies data after writer closes the file (flush of raw data is disabled)\n");
+        if(!verify_dsets_operations(s, ds, config, np, true)) {
+            printf("verify_dsets_operations() failed\n");
+            TEST_ERROR
+        }
+
+        if (!close_dsets(ds)) {
+            printf("close_dsets() failed\n");
+            TEST_ERROR;
+        }
+
+        dbgf(2, "Reader closes the file (flush of raw data is disabled)\n");
+        if (H5Fclose(s->file) < 0) {
+            printf("H5Fclose failed\n");
+            TEST_ERROR;
+        }
+
+    }
+
+    return true;
+
+error:
+    return false;
+
+} /* closing_on_noflush() */
+/*
  * Main
  */
 int
@@ -2156,7 +2285,7 @@ main(int argc, char **argv)
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./dsetchks-shadow");
+    init_vfd_swmr_config(&config, 4, 7, writer, s.flush_raw_data, 128, "./dsetchks-shadow");
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config)) < 0) {
@@ -2207,15 +2336,10 @@ main(int argc, char **argv)
     }
     else {
 
-        if (!verify_dsets_operations(&s, &ds, &config, &np)) {
+        if (!verify_dsets_operations(&s, &ds, &config, &np, false)) {
             printf("perform_dsets_operations() failed\n");
             TEST_ERROR;
         }
-    }
-
-    if (!close_dsets(&ds)) {
-        printf("close_dsets() failed\n");
-        TEST_ERROR;
     }
 
     if (H5Pclose(fapl) < 0) {
@@ -2228,14 +2352,31 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if (H5Fclose(s.file) < 0) {
-        printf("H5Fclose failed\n");
-        TEST_ERROR;
-    }
+    /* When flush of raw data is disabled, special handling is performed 
+     * via closing_on_noflush() when closing the file.
+     * Nothing needs to be done for -x or -y options 
+     * (increase and decrease dataset dimension sizes).
+     */
+    if(!s.flush_raw_data && !s.xincrs && !s.ydecrs && s.use_np) {
 
-    if (s.use_np && !np_close(&np, writer)) {
-        printf("np_close() failed\n");
-        TEST_ERROR;
+        if(!closing_on_noflush(writer, &s, &ds, &config, &np))
+            TEST_ERROR
+    } else {
+
+        if (!close_dsets(&ds)) {
+            printf("close_dsets() failed\n");
+            TEST_ERROR;
+        }
+
+        if (H5Fclose(s.file) < 0) {
+            printf("H5Fclose failed\n");
+            TEST_ERROR;
+        }
+
+        if (s.use_np && !np_close(&np, writer)) {
+            printf("np_close() failed\n");
+            TEST_ERROR;
+        }
     }
 
     return EXIT_SUCCESS;
