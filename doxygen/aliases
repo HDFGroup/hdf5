@@ -25,6 +25,8 @@ ALIASES += htri_t="Returns zero (false), a positive (true) or a negative (failur
 ALIASES += api_vers_2{3}="\1() is a macro that is mapped to either \2() or \3().\n\see \ref api-compat-macros"
 ALIASES += api_vers_3{4}="\1() is a macro that is mapped to either \2() or \3() or \4().\n\see \ref api-compat-macros"
 
+ALIASES += deprecation_note{1}="\deprecated Deprecated in favor of \1."
+
 ################################################################################
 # General
 ################################################################################
@@ -134,6 +136,8 @@ ALIASES += map_id{1}="\param[in] \1 Map identifier"
 ################################################################################
 # Property lists
 ################################################################################
+
+ALIASES += plist_unused{1}="\note The \p \1 parameter is currently not used; specify #H5P_DEFAULT."
 
 ALIASES += aapl_id="\param[in] aapl_id Attribute access property list identifier"
 ALIASES += aapl_id{1}="\param[in] \1 Attribute access property list identifier"
