@@ -1281,7 +1281,9 @@ h5_get_file_size(const char *filename, hid_t fapl)
             return (tot_size);
         } /* end if */
         else {
-            HDassert(0 && "Unknown VFD!");
+            /* Get the file's statistics */
+            if (0 == HDstat(filename, &sb))
+                return ((h5_stat_size_t)sb.st_size);
         } /* end else */
     }     /* end else */
 
