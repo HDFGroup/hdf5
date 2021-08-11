@@ -31,20 +31,20 @@
 #include <errno.h>
 #include <fcntl.h>
 #include <float.h>
-#include <limits.h>
 #include <math.h>
+#include <setjmp.h>
 #include <signal.h>
-#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <time.h>
 
 /* POSIX headers */
+#ifdef H5_HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef H5_HAVE_UNISTD_H
 #include <pwd.h>
 #include <unistd.h>
-#include <sys/time.h>
 #include <sys/types.h>
 #include <sys/wait.h>
 #endif
@@ -61,6 +61,25 @@
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
+#endif
+
+/*
+ * If a program may include both `time.h' and `sys/time.h' then
+ * TIME_WITH_SYS_TIME is defined (see AC_HEADER_TIME in configure.ac).
+ * On some older systems, `sys/time.h' includes `time.h' but `time.h' is not
+ * protected against multiple inclusion, so programs should not explicitly
+ * include both files. This macro is useful in programs that use, for example,
+ * `struct timeval' or `struct timezone' as well as `struct tm'.  It is best
+ * used in conjunction with `HAVE_SYS_TIME_H', whose existence is checked
+ * by `AC_CHECK_HEADERS(sys/time.h)' in configure.ac.
+ */
+#if defined(H5_TIME_WITH_SYS_TIME)
+#include <sys/time.h>
+#include <time.h>
+#elif defined(H5_HAVE_SYS_TIME_H)
+#include <sys/time.h>
+#else
+#include <time.h>
 #endif
 
 /*
@@ -110,21 +129,20 @@
 #define H5_DEFAULT_VFD H5FD_SEC2
 
 #ifdef H5_HAVE_WIN32_API
+
 /* The following two defines must be before any windows headers are included */
 #define WIN32_LEAN_AND_MEAN /* Exclude rarely-used stuff from Windows headers */
 #define NOGDI               /* Exclude Graphic Display Interface macros */
 
-#ifdef H5_HAVE_WINSOCK2_H
-#include <winsock2.h>
-#endif
+#include <windows.h>
+
+#include <direct.h>   /* For _getcwd() */
+#include <io.h>       /* POSIX I/O */
+#include <winsock2.h> /* For GetUserName() */
 
 #ifdef H5_HAVE_THREADSAFE
 #include <process.h> /* For _beginthread() */
 #endif
-
-#include <windows.h>
-#include <direct.h> /* For _getcwd() */
-#include <io.h>     /* POSIX I/O */
 
 #endif /*H5_HAVE_WIN32_API*/
 
@@ -747,12 +765,11 @@ typedef struct {
 #ifndef HDfabs
 #define HDfabs(X) fabs(X)
 #endif /* HDfabs */
-/* use ABS() because fabsf() fabsl() are not common yet. */
 #ifndef HDfabsf
-#define HDfabsf(X) ABS(X)
+#define HDfabsf(X) fabsf(X)
 #endif /* HDfabsf */
 #ifndef HDfabsl
-#define HDfabsl(X) ABS(X)
+#define HDfabsl(X) fabsl(X)
 #endif /* HDfabsl */
 #ifndef HDfclose
 #define HDfclose(F) fclose(F)
@@ -843,23 +860,25 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #endif /* HDfreopen */
 #ifndef HDfrexp
 #define HDfrexp(X, N) frexp(X, N)
-#endif /* HDfrexp */
+#endif
 /* Check for Cray-specific 'frexpf()' and 'frexpl()' routines */
 #ifndef HDfrexpf
 #ifdef H5_HAVE_FREXPF
 #define HDfrexpf(X, N) frexpf(X, N)
-#else /* H5_HAVE_FREXPF */
+#else
 #define HDfrexpf(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPF */
-#endif /* HDfrexpf */
+#endif
+#endif
 #ifndef HDfrexpl
 #ifdef H5_HAVE_FREXPL
 #define HDfrexpl(X, N) frexpl(X, N)
-#else /* H5_HAVE_FREXPL */
+#else
 #define HDfrexpl(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPL */
-#endif /* HDfrexpl */
-/* fscanf() variable arguments */
+#endif
+#endif
+#ifndef HDfscanf
+#define HDfscanf fscanf
+#endif
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif /* HDfseek */
@@ -1416,8 +1435,12 @@ H5_DLL void HDsrand(unsigned int seed);
 #define HDstrtol(S, R, N) strtol(S, R, N)
 #endif /* HDstrtol */
 #ifndef HDstrtoll
+#ifdef H5_HAVE_STRTOLL
 #define HDstrtoll(S, R, N) strtoll(S, R, N)
-#endif /* HDstrtoll */
+#else
+H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
+#endif
+#endif
 #ifndef HDstrtoul
 #define HDstrtoul(S, R, N) strtoul(S, R, N)
 #endif /* HDstrtoul */
@@ -1509,14 +1532,14 @@ H5_DLL void HDsrand(unsigned int seed);
 #endif /* HDunlink */
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
-#endif /* HDutime */
+#endif
 #ifndef HDvasprintf
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
-#endif /* H5_HAVE_VASPRINTF */
-#endif /* HDvasprintf */
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+#endif
+#endif
 #ifndef HDva_arg
 #define HDva_arg(A, T) va_arg(A, T)
 #endif /* HDva_arg */
@@ -2486,6 +2509,57 @@ H5_DLL double H5_get_time(void);
 /* Functions for building paths, etc. */
 H5_DLL herr_t H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
+
+/* getopt(3) equivalent that papers over the lack of long options on BSD
+ * and lack of Windows support.
+ */
+H5_DLLVAR int         H5_opterr; /* get_option prints errors if this is on */
+H5_DLLVAR int         H5_optind; /* token pointer */
+H5_DLLVAR const char *H5_optarg; /* flag argument (or value) */
+
+enum h5_arg_level {
+    no_arg = 0,  /* doesn't take an argument     */
+    require_arg, /* requires an argument          */
+    optional_arg /* argument is optional         */
+};
+
+/*
+ * get_option determines which options are specified on the command line and
+ * returns a pointer to any arguments possibly associated with the option in
+ * the ``H5_optarg'' variable. get_option returns the shortname equivalent of
+ * the option. The long options are specified in the following way:
+ *
+ * struct h5_long_options foo[] = {
+ *   { "filename", require_arg, 'f' },
+ *   { "append", no_arg, 'a' },
+ *   { "width", require_arg, 'w' },
+ *   { NULL, 0, 0 }
+ * };
+ *
+ * Long named options can have arguments specified as either:
+ *
+ *   ``--param=arg'' or ``--param arg''
+ *
+ * Short named options can have arguments specified as either:
+ *
+ *   ``-w80'' or ``-w 80''
+ *
+ * and can have more than one short named option specified at one time:
+ *
+ *   -aw80
+ *
+ * in which case those options which expect an argument need to come at the
+ * end.
+ */
+struct h5_long_options {
+    const char *      name;     /* Name of the long option */
+    enum h5_arg_level has_arg;  /* Whether we should look for an arg */
+    char              shortval; /* The shortname equivalent of long arg
+                                 * this gets returned from get_option
+                                 */
+};
+
+H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */

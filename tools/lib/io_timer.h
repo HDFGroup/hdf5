@@ -25,7 +25,7 @@
 #include <time.h>
 #endif
 
-#ifdef H5_HAVE_WINSOCK2_H
+#ifdef H5_HAVE_WIN32_API
 #include <winsock2.h>
 #endif /* H5_HAVE_WINSOCK2_H */
 

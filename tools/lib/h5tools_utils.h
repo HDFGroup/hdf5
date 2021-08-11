@@ -40,58 +40,6 @@ H5TOOLS_DLLVAR FILE *overflow_file;
 H5TOOLS_DLLVAR hsize_t H5TOOLS_MALLOCSIZE;
 /* size of hyperslab buffer when a dataset is bigger than H5TOOLS_MALLOCSIZE */
 H5TOOLS_DLLVAR hsize_t H5TOOLS_BUFSIZE;
-/*
- * begin get_option section
- */
-H5TOOLS_DLLVAR int         opt_err; /* getoption prints errors if this is on    */
-H5TOOLS_DLLVAR int         opt_ind; /* token pointer                            */
-H5TOOLS_DLLVAR const char *opt_arg; /* flag argument (or value)                 */
-
-enum {
-    no_arg = 0,  /* doesn't take an argument     */
-    require_arg, /* requires an argument          */
-    optional_arg /* argument is optional         */
-};
-
-/*
- * get_option determines which options are specified on the command line and
- * returns a pointer to any arguments possibly associated with the option in
- * the ``opt_arg'' variable. get_option returns the shortname equivalent of
- * the option. The long options are specified in the following way:
- *
- * struct long_options foo[] = {
- *   { "filename", require_arg, 'f' },
- *   { "append", no_arg, 'a' },
- *   { "width", require_arg, 'w' },
- *   { NULL, 0, 0 }
- * };
- *
- * Long named options can have arguments specified as either:
- *
- *   ``--param=arg'' or ``--param arg''
- *
- * Short named options can have arguments specified as either:
- *
- *   ``-w80'' or ``-w 80''
- *
- * and can have more than one short named option specified at one time:
- *
- *   -aw80
- *
- * in which case those options which expect an argument need to come at the
- * end.
- */
-typedef struct long_options {
-    const char *name;     /* name of the long option              */
-    int         has_arg;  /* whether we should look for an arg    */
-    char        shortval; /* the shortname equivalent of long arg
-                           * this gets returned from get_option   */
-} long_options;
-
-H5TOOLS_DLL int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
-/*
- * end get_option section
- */
 
 /*struct taken from the dumper. needed in table struct*/
 typedef struct obj_t {
