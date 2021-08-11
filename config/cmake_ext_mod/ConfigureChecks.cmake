@@ -53,7 +53,6 @@ if (MINGW)
   set (${HDF_PREFIX}_HAVE_MINGW 1)
   set (WINDOWS 1) # MinGW tries to imitate Windows
   set (CMAKE_REQUIRED_FLAGS "-DWIN32_LEAN_AND_MEAN=1 -DNOGDI=1")
-  set (${HDF_PREFIX}_HAVE_WINSOCK2_H 1)
   set (__USE_MINGW_ANSI_STDIO 1)
 endif ()
 
@@ -72,7 +71,6 @@ if (WINDOWS)
   set (${HDF_PREFIX}_HAVE_WIN32_API 1)
   set (${HDF_PREFIX}_HAVE_LIBM 1)
   set (${HDF_PREFIX}_HAVE_STRDUP 1)
-  set (${HDF_PREFIX}_HAVE_LONGJMP 1)
   if (NOT MINGW)
     set (${HDF_PREFIX}_HAVE_GETHOSTNAME 1)
     set (${HDF_PREFIX}_HAVE_FUNCTION 1)
@@ -117,14 +115,7 @@ CHECK_INCLUDE_FILE_CONCAT ("sys/time.h"      ${HDF_PREFIX}_HAVE_SYS_TIME_H)
 CHECK_INCLUDE_FILE_CONCAT ("sys/types.h"     ${HDF_PREFIX}_HAVE_SYS_TYPES_H)
 CHECK_INCLUDE_FILE_CONCAT ("features.h"      ${HDF_PREFIX}_HAVE_FEATURES_H)
 CHECK_INCLUDE_FILE_CONCAT ("dirent.h"        ${HDF_PREFIX}_HAVE_DIRENT_H)
-CHECK_INCLUDE_FILE_CONCAT ("setjmp.h"        ${HDF_PREFIX}_HAVE_SETJMP_H)
-CHECK_INCLUDE_FILE_CONCAT ("stddef.h"        ${HDF_PREFIX}_HAVE_STDDEF_H)
 CHECK_INCLUDE_FILE_CONCAT ("unistd.h"        ${HDF_PREFIX}_HAVE_UNISTD_H)
-
-# Windows
-if (NOT CYGWIN)
-  CHECK_INCLUDE_FILE_CONCAT ("winsock2.h"      ${HDF_PREFIX}_HAVE_WINSOCK2_H)
-endif ()
 
 CHECK_INCLUDE_FILE_CONCAT ("globus/common.h" ${HDF_PREFIX}_HAVE_GLOBUS_COMMON_H)
 CHECK_INCLUDE_FILE_CONCAT ("pdb.h"           ${HDF_PREFIX}_HAVE_PDB_H)
@@ -491,15 +482,15 @@ CHECK_FUNCTION_EXISTS (round             ${HDF_PREFIX}_HAVE_ROUND)
 CHECK_FUNCTION_EXISTS (roundf            ${HDF_PREFIX}_HAVE_ROUNDF)
 CHECK_FUNCTION_EXISTS (setsysinfo        ${HDF_PREFIX}_HAVE_SETSYSINFO)
 
-CHECK_FUNCTION_EXISTS (signal            ${HDF_PREFIX}_HAVE_SIGNAL)
-CHECK_FUNCTION_EXISTS (longjmp           ${HDF_PREFIX}_HAVE_LONGJMP)
-CHECK_FUNCTION_EXISTS (setjmp            ${HDF_PREFIX}_HAVE_SETJMP)
 CHECK_FUNCTION_EXISTS (siglongjmp        ${HDF_PREFIX}_HAVE_SIGLONGJMP)
 CHECK_FUNCTION_EXISTS (sigsetjmp         ${HDF_PREFIX}_HAVE_SIGSETJMP)
 CHECK_FUNCTION_EXISTS (sigprocmask       ${HDF_PREFIX}_HAVE_SIGPROCMASK)
 
+CHECK_FUNCTION_EXISTS (snprintf          ${HDF_PREFIX}_HAVE_SNPRINTF)
 CHECK_FUNCTION_EXISTS (srandom           ${HDF_PREFIX}_HAVE_SRANDOM)
 CHECK_FUNCTION_EXISTS (strdup            ${HDF_PREFIX}_HAVE_STRDUP)
+CHECK_FUNCTION_EXISTS (strtoll           ${HDF_PREFIX}_HAVE_STRTOLL)
+CHECK_FUNCTION_EXISTS (strtoull          ${HDF_PREFIX}_HAVE_STRTOULL)
 CHECK_FUNCTION_EXISTS (symlink           ${HDF_PREFIX}_HAVE_SYMLINK)
 
 CHECK_FUNCTION_EXISTS (tmpfile           ${HDF_PREFIX}_HAVE_TMPFILE)
@@ -507,15 +498,20 @@ CHECK_FUNCTION_EXISTS (asprintf          ${HDF_PREFIX}_HAVE_ASPRINTF)
 CHECK_FUNCTION_EXISTS (vasprintf         ${HDF_PREFIX}_HAVE_VASPRINTF)
 CHECK_FUNCTION_EXISTS (waitpid           ${HDF_PREFIX}_HAVE_WAITPID)
 
+CHECK_FUNCTION_EXISTS (vsnprintf         ${HDF_PREFIX}_HAVE_VSNPRINTF)
+if (MINGW OR NOT WINDOWS)
+  if (${HDF_PREFIX}_HAVE_VSNPRINTF)
+    HDF_FUNCTION_TEST (VSNPRINTF_WORKS)
+  endif ()
+endif ()
+
 #-----------------------------------------------------------------------------
 # sigsetjmp is special; may actually be a macro
 #-----------------------------------------------------------------------------
 if (NOT ${HDF_PREFIX}_HAVE_SIGSETJMP)
-  if (${HDF_PREFIX}_HAVE_SETJMP_H)
-    CHECK_SYMBOL_EXISTS (sigsetjmp "setjmp.h" ${HDF_PREFIX}_HAVE_MACRO_SIGSETJMP)
-    if (${HDF_PREFIX}_HAVE_MACRO_SIGSETJMP)
-      set (${HDF_PREFIX}_HAVE_SIGSETJMP 1)
-    endif ()
+  CHECK_SYMBOL_EXISTS (sigsetjmp "setjmp.h" ${HDF_PREFIX}_HAVE_MACRO_SIGSETJMP)
+  if (${HDF_PREFIX}_HAVE_MACRO_SIGSETJMP)
+    set (${HDF_PREFIX}_HAVE_SIGSETJMP 1)
   endif ()
 endif ()
 
@@ -596,6 +592,14 @@ if (WINDOWS)
   endif ()
   endif ()
 endif ()
+
+#-----------------------------------------------------------------------------
+# Determine how 'inline' is used
+#-----------------------------------------------------------------------------
+foreach (inline_test inline __inline__ __inline)
+  string (TOUPPER ${inline_test} INLINE_TEST_MACRO)
+  HDF_FUNCTION_TEST (HAVE_${INLINE_TEST_MACRO})
+endforeach ()
 
 #-----------------------------------------------------------------------------
 # Check how to print a Long Long integer

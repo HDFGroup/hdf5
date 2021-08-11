@@ -195,6 +195,9 @@
 /* Define to 1 if you have the <hdfs.h> header file. */
 #cmakedefine H5_HAVE_HDFS_H @H5_HAVE_HDFS_H@
 
+/* Define if the compiler understands inline */
+#cmakedefine H5_HAVE_INLINE @H5_HAVE_INLINE@
+
 /* Define if parallel library will contain instrumentation to detect correct
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
@@ -237,21 +240,6 @@
 
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
-
-/* Define to 1 if you have the `llround' function. */
-#cmakedefine H5_HAVE_LLROUND @H5_HAVE_LLROUND@
-
-/* Define to 1 if you have the `llroundf' function. */
-#cmakedefine H5_HAVE_LLROUNDF @H5_HAVE_LLROUNDF@
-
-/* Define to 1 if you have the `longjmp' function. */
-#cmakedefine H5_HAVE_LONGJMP @H5_HAVE_LONGJMP@
-
-/* Define to 1 if you have the `lround' function. */
-#cmakedefine H5_HAVE_LROUND @H5_HAVE_LROUND@
-
-/* Define to 1 if you have the `lroundf' function. */
-#cmakedefine H5_HAVE_LROUNDF @H5_HAVE_LROUNDF@
 
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
@@ -314,32 +302,20 @@
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
 
-/* Define to 1 if you have the `round' function. */
-#cmakedefine H5_HAVE_ROUND @H5_HAVE_ROUND@
-
-/* Define to 1 if you have the `roundf' function. */
-#cmakedefine H5_HAVE_ROUNDF @H5_HAVE_ROUNDF@
-
-/* Define to 1 if you have the `setjmp' function. */
-#cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
-
-/* Define to 1 if you have the <setjmp.h> header file. */
-#cmakedefine H5_HAVE_SETJMP_H @H5_HAVE_SETJMP_H@
-
 /* Define to 1 if you have the `setsysinfo' function. */
 #cmakedefine H5_HAVE_SETSYSINFO @H5_HAVE_SETSYSINFO@
 
 /* Define to 1 if you have the `siglongjmp' function. */
 #cmakedefine H5_HAVE_SIGLONGJMP @H5_HAVE_SIGLONGJMP@
 
-/* Define to 1 if you have the `signal' function. */
-#cmakedefine H5_HAVE_SIGNAL @H5_HAVE_SIGNAL@
-
 /* Define to 1 if you have the `sigprocmask' function. */
 #cmakedefine H5_HAVE_SIGPROCMASK @H5_HAVE_SIGPROCMASK@
 
 /* Define to 1 if you have the `sigsetjmp' function. */
 #cmakedefine H5_HAVE_SIGSETJMP @H5_HAVE_SIGSETJMP@
+
+/* Define to 1 if you have the `snprintf' function. */
+#cmakedefine H5_HAVE_SNPRINTF @H5_HAVE_SNPRINTF@
 
 /* Define to 1 if you have the `srandom' function. */
 #cmakedefine H5_HAVE_SRANDOM @H5_HAVE_SRANDOM@
@@ -349,9 +325,6 @@
 
 /* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
-
-/* Define to 1 if you have the <stddef.h> header file. */
-#cmakedefine H5_HAVE_STDDEF_H @H5_HAVE_STDDEF_H@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
@@ -364,6 +337,12 @@
 
 /* Define to 1 if you have the <string.h> header file. */
 #cmakedefine H5_HAVE_STRING_H @H5_HAVE_STRING_H@
+
+/* Define to 1 if you have the `strtoll' function. */
+#cmakedefine H5_HAVE_STRTOLL @H5_HAVE_STRTOLL@
+
+/* Define to 1 if you have the `strtoull' function. */
+#cmakedefine H5_HAVE_STRTOULL @H5_HAVE_STRTOULL@
 
 /* Define if struct text_info is defined */
 #cmakedefine H5_HAVE_STRUCT_TEXT_INFO @H5_HAVE_STRUCT_TEXT_INFO@
@@ -427,6 +406,9 @@
 /* Define to 1 if you have the `vasprintf' function. */
 #cmakedefine H5_HAVE_VASPRINTF @H5_HAVE_VASPRINTF@
 
+/* Define to 1 if you have the `vsnprintf' function. */
+#cmakedefine H5_HAVE_VSNPRINTF @H5_HAVE_VSNPRINTF@
+
 /* Define to 1 if you have the `waitpid' function. */
 #cmakedefine H5_HAVE_WAITPID @H5_HAVE_WAITPID@
 
@@ -436,9 +418,6 @@
 /* Define if your system has window style path name. */
 #cmakedefine H5_HAVE_WINDOW_PATH @H5_HAVE_WINDOW_PATH@
 
-/* Define to 1 if you have the <winsock2.h> header file. */
-#cmakedefine H5_HAVE_WINSOCK2_H @H5_HAVE_WINSOCK2_H@
-
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine H5_HAVE_ZLIB_H @H5_HAVE_ZLIB_H@
 
@@ -447,6 +426,12 @@
 
 /* Define to 1 if you have the `_scrsize' function. */
 #cmakedefine H5_HAVE__SCRSIZE @H5_HAVE__SCRSIZE@
+
+/* Define if the compiler understands __inline */
+#cmakedefine H5_HAVE___INLINE @H5_HAVE___INLINE@
+
+/* Define if the compiler understands __inline__ */
+#cmakedefine H5_HAVE___INLINE__ @H5_HAVE___INLINE__@
 
 /* Define if the library will ignore file locks when disabled */
 #cmakedefine H5_IGNORE_DISABLED_FILE_LOCKS @H5_IGNORE_DISABLED_FILE_LOCKS@

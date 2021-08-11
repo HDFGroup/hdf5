@@ -331,3 +331,20 @@ int main ()
 }
 
 #endif /* HAVE_IOEO */
+
+#if defined( HAVE_INLINE ) || defined( HAVE___INLINE__ ) || defined( HAVE___INLINE )
+#ifndef __cplusplus
+#if defined( HAVE_INLINE )
+#  define INLINE_KW inline
+#elif defined ( HAVE___INLINE__ )
+#  define INLINE_KW __inline__
+#elif defined ( HAVE___INLINE )
+#  define INLINE_KW __inline
+#endif /* HAVE_INLINE */
+typedef int foo_t;
+static INLINE_KW foo_t static_foo () { return 0; }
+INLINE_KW foo_t foo () {return 0; }
+int main(void) { return 0; }
+#endif /* __cplusplus */
+#endif /* defined( HAVE_INLINE ) || defined( HAVE___INLINE__ ) || defined( HAVE___INLINE ) */
+
