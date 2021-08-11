@@ -1829,7 +1829,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     else
         tent_flags = flags;
 
-    if (NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
+    H5E_BEGIN_TRY
+    {
+        lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
+    }
+    H5E_END_TRY;
+
+    if (NULL == lf) {
         if (tent_flags == flags)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
                         name, tent_flags)
