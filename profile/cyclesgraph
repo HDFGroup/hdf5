@@ -1,0 +1,13 @@
+#!/bin/sh
+
+base=$(basename $1)
+outfile=cpi.${base}.svg
+
+perf record -e cycles -e inst_retired.any \
+    --call-graph dwarf -F 999 -o ./perf.${base} "$@"
+perf script -i ./perf.${base} | ~/FlameGraph/stackcollapse-perf.pl --event-filter=cycles:u > perf.${base}.cycles.folded
+perf script -i ./perf.${base} | ~/FlameGraph/stackcollapse-perf.pl --event-filter=inst_retired.any:u > perf.${base}.insns.folded
+
+~/FlameGraph/difffolded.pl -n perf.${base}.insns.folded perf.${base}.cycles.folded  | ~/FlameGraph/flamegraph.pl --title "Cycles per instruction (CPI) :: blue -> below average, red -> above average" > $outfile
+
+echo ${outfile}
