@@ -167,9 +167,7 @@ H5_DLL hid_t H5Acreate_async(const char *app_file, const char *app_func, unsigne
  *          attached to the object specified by \p loc_id and \p obj_name.
  *
  *          \p loc_id is a location identifier; \p obj_name is the object
- *          name relative to \p loc_id. If \p loc_id fully specifies the
- *          object to which the attribute is to be attached, \p obj_name
- *          should be '.' (a dot).
+ *          name relative to \p loc_id.
  *
  *          The attribute name, \p attr_name, must be unique for the object.
  *
@@ -243,9 +241,7 @@ H5_DLL herr_t H5Adelete(hid_t loc_id, const char *attr_name);
  *
  *          The object from which the attribute is to be removed is
  *          specified by a location identifier and name, \p loc_id and
- *          \p obj_name, respectively. If \p loc_id fully specifies the
- *          object from which the attribute is to be removed, \p obj_name
- *          should be \Code{'.'} (a dot).
+ *          \p obj_name, respectively.
  *
  *          The attribute to be removed is specified by a position in an
  *          index, \p n. The type of index is specified by \p idx_type.
@@ -281,9 +277,6 @@ H5_DLL herr_t H5Adelete_by_idx(hid_t loc_id, const char *obj_name, H5_index_t id
  * \details H5Adelete_by_name() removes the attribute \p attr_name
  *          from an object specified by location and name, \p loc_id and
  *          \p obj_name, respectively.
- *
- *          If \p loc_id fully specifies the object from which the
- *          attribute is to be removed, \p obj_name should be \Code{'.'} (a dot).
  *
  *          The link access property list, \p lapl_id, may provide
  *          information regarding the properties of links required to
@@ -340,9 +333,7 @@ H5_DLL herr_t H5Aexists_async(const char *app_file, const char *app_func, unsign
  *          \p loc_id specifies a location in the file containing the object.
  *          \p obj_name is the name of the object to which the attribute is
  *          attached and can be a relative name, relative to \p loc_id,
- *          or an absolute name, based in the root group of the file. If
- *          \p loc_id fully specifies the object, \p obj_name should be \Code{'.'}
- *          (a dot).
+ *          or an absolute name, based in the root group of the file.
  *
  *          The link access property list, \p lapl_id, may provide
  *          information regarding the properties of links required to access
@@ -420,9 +411,6 @@ H5_DLL herr_t H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/);
  *          The attribute is located by its index position and the attribute
  *          information is returned in the \p ainfo struct.
  *
- *          If \p loc_id fully specifies the object to which the attribute
- *          is attached, \p obj_name should be \Code{'.'} (a dot).
- *
  *          The attribute is located by means of an index type, an index
  *          traversal order, and a position in the index, \p idx_type,
  *          \p order and \p n, respectively.
@@ -455,9 +443,6 @@ H5_DLL herr_t H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t 
  *          \p attr_name, that is attached to an object specified by its
  *          location and name, \p loc_id and \p obj_name, respectively.
  *          The attribute information is returned in the \p ainfo struct.
- *
- *          If \p loc_id fully specifies the object to which the attribute
- *          is attached, \p obj_name should be \Code{'.'} (a dot).
  *
  *          The link access property list, \p lapl_id, may provide
  *          information regarding the properties of links required to
@@ -521,9 +506,6 @@ H5_DLL ssize_t H5Aget_name(hid_t attr_id, size_t buf_size, char *buf);
  *          name, \p loc_id and \p obj_name, respectively. The attribute is
  *          located by its index position, the size of the name is specified
  *          in \p size, and the attribute name is returned in \p name.
- *
- *          If \p loc_id fully specifies the object to which the attribute
- *          is attached, \p obj_name should be \Code{'.'} (a dot).
  *
  *          The attribute is located by means of an index type, an index
  *          traversal order, and a position in the index, \p idx_type,
@@ -685,9 +667,6 @@ H5_DLL herr_t H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t ord
  *          additional information as defined below, is passed to a
  *          user-defined function, \p op, which operates on that attribute.
  *
- *          If \p loc_id fully specifies the object to which these
- *          attributes are attached, \p obj_name should be \Code{'.'} (a dot).
- *
  *          The order of the iteration and the attributes iterated over
  *          are specified by three parameters: the index type, \p idx_type;
  *          the order in which the index is to be traversed, \p order;
@@ -777,9 +756,7 @@ H5_DLL hid_t H5Aopen_async(const char *app_file, const char *app_func, unsigned 
  *
  * \details H5Aopen_by_idx() opens an existing attribute that is attached
  *          to an object specified by location and name, \p loc_id and
- *          \p obj_name, respectively. If \p loc_id fully specifies the
- *          object to which the attribute is attached, \p obj_name, should
- *          be  \Code{'.'}  (a dot).
+ *          \p obj_name, respectively.
  *
  *          The attribute is identified by an index type, an index traversal
  *          order, and a position in the index, \p idx_type, \p order and
@@ -832,8 +809,7 @@ H5_DLL hid_t H5Aopen_by_idx_async(const char *app_file, const char *app_func, un
  *
  *          \p loc_id specifies a location from which the target object can
  *          be located and \p obj_name is an object name relative to
- *          \p loc_id. If \p loc_id fully specifies the object to which the
- *          attribute is attached, \p obj_name should be \Code{'.'} (a dot).
+ *          \p loc_id.
  *
  *          \plist_unused{aapl_id}
  *
@@ -1114,8 +1090,7 @@ H5_DLL hid_t H5Acreate1(hid_t loc_id, const char *name, hid_t type_id, hid_t spa
  * \return Returns the number of attributes if successful; otherwise returns
  *         a negative value.
  *
- * \deprecated This function is deprecated in favor of the functions
- *             H5Oget_info(), H5Oget_info_by_name(), and H5Oget_info_by_idx().
+ * \deprecation_note{H5Oget_info(), H5Oget_info_by_name(), and H5Oget_info_by_idx()}
  *
  * \details H5Aget_num_attrs() returns the number of attributes attached to
  *          the object specified by its identifier, \p loc_id.
