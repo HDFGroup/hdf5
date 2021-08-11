@@ -757,8 +757,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(107)))
-H5T__init_package(void)
+static herr_t __attribute__((constructor(107))) H5T__init_package(void)
 {
     H5T_t *native_schar  = NULL; /* Datatype structure for native signed char */
     H5T_t *native_uchar  = NULL; /* Datatype structure for native unsigned char */
@@ -804,7 +803,7 @@ H5T__init_package(void)
     FUNC_ENTER_NOAPI_NOINIT
 
     if (H5_TERM_GLOBAL)
-            HGOTO_DONE(SUCCEED)
+        HGOTO_DONE(SUCCEED)
 
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_DATATYPE_CLS) < 0)

@@ -446,8 +446,7 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 --------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(104)))
-H5P__init_package(void)
+static herr_t __attribute__((constructor(104))) H5P__init_package(void)
 {
     size_t tot_init;            /* Total # of classes initialized */
     size_t pass_init;           /* # of classes initialized in each pass */

@@ -161,8 +161,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(107)))
-H5G__init_package(void)
+static herr_t __attribute__((constructor(107))) H5G__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

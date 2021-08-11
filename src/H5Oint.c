@@ -189,10 +189,9 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(200)))
-H5O__init_package(void)
+static herr_t __attribute__((constructor(200))) H5O__init_package(void)
 {
-    herr_t  ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
     FUNC_ENTER_PACKAGE_NOERR
 
     /* H5O interface sanity checks */

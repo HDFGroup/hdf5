@@ -162,10 +162,9 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(105)))
-H5AC__init_package(void)
+static herr_t __attribute__((constructor(105))) H5AC__init_package(void)
 {
-    herr_t                       ret_value     = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
     FUNC_ENTER_PACKAGE_NOERR
 
 #ifdef H5_HAVE_PARALLEL

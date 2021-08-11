@@ -103,8 +103,7 @@ static const H5I_class_t H5I_VFL_CLS[1] = {{
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(102)))
-H5FD__init_package(void)
+static herr_t __attribute__((constructor(102))) H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

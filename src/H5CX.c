@@ -473,8 +473,7 @@ RETURNS
 DESCRIPTION
     Initializes any interface-specific data or routines.
 --------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(200)))
-H5CX__init_package(void)
+static herr_t __attribute__((constructor(200))) H5CX__init_package(void)
 {
     H5P_genplist_t *dx_plist;            /* Data transfer property list */
     H5P_genplist_t *lc_plist;            /* Link creation property list */

@@ -132,8 +132,7 @@ H5PL__set_plugin_control_mask(unsigned int mask)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(200)))
-H5PL__init_package(void)
+static herr_t __attribute__((constructor(200))) H5PL__init_package(void)
 {
     char * env_var   = NULL;
     herr_t ret_value = SUCCEED;

@@ -176,8 +176,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(107)))
-H5A__init_package(void)
+static herr_t __attribute__((constructor(107))) H5A__init_package(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -191,7 +190,7 @@ H5A__init_package(void)
 
     /* Mark "top" of interface as initialized, too */
     H5A_top_package_initialize_s = TRUE;
-    H5_PKG_INIT_VAR = true;
+    H5_PKG_INIT_VAR              = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

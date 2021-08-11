@@ -152,8 +152,7 @@ DESCRIPTION
     H5FD_family_init currently).
 
 --------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(200)))
-H5FD__init_package(void)
+static herr_t __attribute__((constructor(200))) H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 

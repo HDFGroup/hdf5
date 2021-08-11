@@ -416,8 +416,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(200)))
-H5FD__init_package(void)
+static herr_t __attribute__((constructor(200))) H5FD__init_package(void)
 {
     char * lock_env_var = NULL; /* Environment variable pointer */
     herr_t ret_value    = SUCCEED;

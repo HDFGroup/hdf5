@@ -172,8 +172,7 @@ done:
  *
  *--------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(102)))
-H5E__init_package(void)
+static herr_t __attribute__((constructor(102))) H5E__init_package(void)
 {
     H5E_cls_t *cls;                 /* Pointer to error class */
     H5E_msg_t *msg;                 /* Pointer to new error message */

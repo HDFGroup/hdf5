@@ -167,8 +167,7 @@ DESCRIPTION
     Initializes any interface-specific data or routines.
 
 --------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(200)))
-H5R__init_package(void)
+static herr_t __attribute__((constructor(200))) H5R__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 

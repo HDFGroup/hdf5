@@ -146,8 +146,7 @@ static H5VL_connector_prop_t H5VL_def_conn_s = {-1, NULL};
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(103)))
-H5VL_init_phase1(void)
+static herr_t __attribute__((constructor(103))) H5VL_init_phase1(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -174,8 +173,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(108)))
-H5VL_init_phase2(void)
+static herr_t __attribute__((constructor(108))) H5VL_init_phase2(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

@@ -327,8 +327,7 @@ H5FL_DEFINE_STATIC(H5FD_hdfs_t);
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(200)))
-H5FD__init_package(void)
+static herr_t __attribute__((constructor(200))) H5FD__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 

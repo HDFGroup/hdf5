@@ -188,8 +188,7 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
  *
  *-------------------------------------------------------------------------
  */
-static herr_t __attribute__((constructor(103)))
-H5FD__init_package(void)
+static herr_t __attribute__((constructor(103))) H5FD__init_package(void)
 {
     char * lock_env_var = NULL; /* Environment variable pointer */
     herr_t ret_value    = SUCCEED;

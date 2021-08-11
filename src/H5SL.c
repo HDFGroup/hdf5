@@ -598,8 +598,7 @@ static size_t            H5SL_fac_nalloc_g;
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(103)))
-H5SL__init_package(void)
+static herr_t __attribute__((constructor(103))) H5SL__init_package(void)
 {
     herr_t ret_value = SUCCEED;
 

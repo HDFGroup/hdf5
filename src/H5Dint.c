@@ -184,8 +184,7 @@ NOTES
     a deadlock in the library when the library is attempting to terminate -QAK
 
 --------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(107)))
-H5D__init_package(void)
+static herr_t __attribute__((constructor(107))) H5D__init_package(void)
 {
     H5P_genplist_t *def_dcpl;            /* Default Dataset Creation Property list */
     herr_t          ret_value = SUCCEED; /* Return value */
