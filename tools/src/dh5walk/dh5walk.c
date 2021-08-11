@@ -72,8 +72,10 @@ char *txtlog             = NULL;
 int   log_errors_in_file = 0;
 char *errlog             = NULL;
 
-int   use_config_file    = 0;
-int   config_index[4]    = {0,};
+int use_config_file = 0;
+int config_index[4] = {
+    0,
+};
 
 #ifndef PATH_MAX
 #define PATH_MAX 4096
@@ -131,11 +133,7 @@ create_default_separators(struct distribute_option *option, mfu_flist *flist, ui
 }
 
 static int
-dh5walk_map_fn(
-    mfu_flist flist,
-    uint64_t idx,
-    int ranks,
-    void *args)
+dh5walk_map_fn(mfu_flist flist, uint64_t idx, int ranks, void *args)
 {
     int rank = (int)(idx % ranks);
     return rank;
@@ -712,11 +710,9 @@ filter_hdf_files(mfu_flist *pflist, char *regex_exp, int exclude, int name)
     uint64_t  files    = mfu_flist_size(flist);
     while (idx < files) {
         mfu_filetype type = mfu_flist_file_get_type(flist, idx);
-        if (type == MFU_TYPE_FILE ||
-			type == MFU_TYPE_LINK ||
-			type == MFU_TYPE_UNKNOWN) {
-            const char *file = mfu_flist_file_get_name(flist, idx);
-            int accessible = H5Fis_accessible(file, H5P_DEFAULT);
+        if (type == MFU_TYPE_FILE || type == MFU_TYPE_LINK || type == MFU_TYPE_UNKNOWN) {
+            const char *file       = mfu_flist_file_get_name(flist, idx);
+            int         accessible = H5Fis_accessible(file, H5P_DEFAULT);
             if (accessible)
                 mfu_flist_file_copy(flist, idx, eligible);
         }
@@ -747,34 +743,37 @@ filter_hdf_files(mfu_flist *pflist, char *regex_exp, int exclude, int name)
 static int
 fill_file_list(mfu_flist new_flist, char *config_filename, int myrank, int size)
 {
-    int index=0;
-	char linebuf[PATH_MAX] = {'\0',};
+    int  index             = 0;
+    char linebuf[PATH_MAX] = {
+        '\0',
+    };
     FILE *config = fopen(config_filename, "r");
-    if (config == NULL) return -1;
-    while(fgets(linebuf, sizeof(linebuf), config) != NULL)
-	{
-		struct stat statbuf;
-		char *eol = strchr(linebuf,'\n');
-		if (eol) *eol = '\0';
+    if (config == NULL)
+        return -1;
+    while (fgets(linebuf, sizeof(linebuf), config) != NULL) {
+        struct stat statbuf;
+        char *      eol = strchr(linebuf, '\n');
+        if (eol)
+            *eol = '\0';
         if (stat(linebuf, &statbuf) == 0) {
             if (myrank == (index % size)) {
-                mfu_flist_insert_stat((flist_t *)new_flist,linebuf,O_RDONLY,&statbuf);
+                mfu_flist_insert_stat((flist_t *)new_flist, linebuf, O_RDONLY, &statbuf);
             }
-			index++;
-		}
+            index++;
+        }
         linebuf[0] = 0;
     }
-	fclose(config);
-	return index;
+    fclose(config);
+    return index;
 }
 
 static int
 count_dirpaths(int argc, int startcnt, char **argv, int **index_out)
 {
-    int  k;
-    int  path_cnt  = 0;
-    int  idx_count = (argc - startcnt);
-    int *index     = NULL;
+    int         k;
+    int         path_cnt  = 0;
+    int         idx_count = (argc - startcnt);
+    int *       index     = NULL;
     struct stat pathcheck;
 
     if (idx_count > 0) {
@@ -790,8 +789,8 @@ count_dirpaths(int argc, int startcnt, char **argv, int **index_out)
         if ((c == '.') || (c == '/')) {
             index[path_cnt++] = k;
         }
-		else if ((c == '@')) {
-            char *configFile = argv[k] +1;
+        else if ((c == '@')) {
+            char *configFile = argv[k] + 1;
             if (stat(configFile, &pathcheck) == 0) {
                 if (S_ISREG(pathcheck.st_mode)) {
                     config_index[use_config_file++] = k;
@@ -1325,23 +1324,22 @@ show_help:
     mfu_flist flist2 = NULL;
 
     /* allocate structure to define walk options */
-	if (use_config_file > 0) {
+    if (use_config_file > 0) {
         int count1 = 0, count2 = 0;
-        for (i=0; i < use_config_file; i++) {
-            int index = config_index[i];
+        for (i = 0; i < use_config_file; i++) {
+            int   index       = config_index[i];
             char *config_file = argv[index];
             if (i == 0) {
-               flist1 = mfu_flist_new();
-               count1 = fill_file_list(flist1, config_file +1, rank, ranks);
+                flist1 = mfu_flist_new();
+                count1 = fill_file_list(flist1, config_file + 1, rank, ranks);
             }
-			else if (i == 1) {
-               flist2 = mfu_flist_new();
-               count2 = fill_file_list(flist2, config_file +1, rank, ranks);
+            else if (i == 1) {
+                flist2 = mfu_flist_new();
+                count2 = fill_file_list(flist2, config_file + 1, rank, ranks);
             }
         }
-		if (count1 != count2) {
-            printf("config files have different file counts: (1) %d and (2) %d\n",
-                   count1, count2 );
+        if (count1 != count2) {
+            printf("config files have different file counts: (1) %d and (2) %d\n", count1, count2);
         }
     }
     else if (numpaths > 0) {
@@ -1429,7 +1427,7 @@ show_help:
         char *cmdline    = ptr;
         *(int *)args_buf = h5tool_argc;
         for (i = tool_args_start; i < argc; i++) {
-			int copy_flist = -1;
+            int copy_flist = -1;
             if (i == config_index[k]) {
                 copy_flist = k;
             }
@@ -1438,7 +1436,7 @@ show_help:
             }
 
             /* Maybe copy one of the flist pointers */
-            if (copy_flist >= 0) {            
+            if (copy_flist >= 0) {
                 /* The '&' indicates that what follows is a pointer */
                 *ptr++ = '&';
                 /* Select which argument list should be used */
