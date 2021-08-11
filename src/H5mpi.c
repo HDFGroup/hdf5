@@ -523,7 +523,7 @@ H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datat
             MPI_Type_get_extent(old_type, &unused_lb_arg, &old_extent);
         }
 
-        /* Set up the arguments for MPI_Type_struct constructor */
+        /* Set up the arguments for MPI_Type_create_struct() */
         type[0]      = outer_type;
         type[1]      = leftover_type;
         block_len[0] = 1;
