@@ -824,11 +824,7 @@ H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
             disable_version_check = (unsigned int)HDstrtol(s, NULL, 0);
     }
 
-    /* H5_VERS_MAJOR and H5_VERS_MINOR must match */
-    /* Cast relnum to int to avoid warning for unsigned < 0 comparison
-     * in first release versions */
-    if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE > (int)relnum) {
-
+    if (H5_VERS_MAJOR != majnum || H5_VERS_MINOR != minnum || H5_VERS_RELEASE != relnum) {
         switch (disable_version_check) {
             case 0:
                 HDfprintf(stderr, "%s%s", version_mismatch_warning,
