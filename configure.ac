@@ -1222,7 +1222,7 @@ AC_HEADER_TIME
 ## Unix
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
-AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
+AC_CHECK_HEADERS([features.h])
 AC_CHECK_HEADERS([dirent.h])
 AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
@@ -1338,16 +1338,6 @@ CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
-## Write the confdefs.h header for checking sizes
-cat >>confdefs.h <<\EOF
-#include <stdbool.h>
-#include <stdint.h>
-#ifdef HAVE_UNISTD_H
-#include <sys/types.h>
-#endif
-#include <time.h>
-EOF
-
 AC_CHECK_SIZEOF(        [int8_t])
 AC_CHECK_SIZEOF(       [uint8_t])
 AC_CHECK_SIZEOF(  [int_least8_t])
@@ -1376,12 +1366,13 @@ AC_CHECK_SIZEOF([uint_least64_t])
 AC_CHECK_SIZEOF(  [int_fast64_t])
 AC_CHECK_SIZEOF( [uint_fast64_t])
 
-AC_CHECK_SIZEOF([bool])
+
+AC_CHECK_SIZEOF([bool], [], [#include <stdbool.h>])
 AC_CHECK_SIZEOF([off_t])
 AC_CHECK_SIZEOF([ptrdiff_t])
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([ssize_t])
-AC_CHECK_SIZEOF([time_t])
+AC_CHECK_SIZEOF([time_t], [], [#include <time.h>])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE

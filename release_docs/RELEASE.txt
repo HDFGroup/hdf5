@@ -478,6 +478,16 @@ Bug Fixes since HDF5-1.10.7 release
 
     Configuration
     -------------
+    - Autotools clang debug optimization level change
+
+      HDF5 1.10.7 erroneously sets the debug optimization level to "-g" when
+      building with clang via the Autotools. This has now been set to:
+
+        -Og     clang 4+ or Xcode 9+
+        -O1     otherwise
+
+      (DER - 2021/07/28, HDFFV-11192)
+
     - Refactor CMake configure for Fortran
 
       The Fortran configure tests for KINDs reused a single output file that was
@@ -578,7 +588,12 @@ Bug Fixes since HDF5-1.10.7 release
 
     C++ APIs
     --------
-    -
+    - Added DataSet::operator=
+
+        Some compilers complain if the copy constructor is given explicitly
+        but the assignment operator is implicitly set to default.
+
+        (2021/05/19)
 
 
     Testing
@@ -754,6 +769,10 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+    Setting a variable-length dataset fill value will leak the memory allocated
+    for the p field of the hvl_t struct. A fix is in progress for this.
+    HDFFV-10840
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.
