@@ -239,8 +239,10 @@ state_init(state_t *s, int argc, char **argv)
 
     esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
 
-    if (tfile)
+    if (tfile) {
         HDfree(tfile);
+        tfile = NULL;
+    }
 
     while ((ch = getopt(argc, argv, "pgkvmbqSNa:d:u:c:")) != -1) {
         switch (ch) {
@@ -930,7 +932,7 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
         result = attr_dsets_action(ADD_ATTR, s, ds, step);
 
         if (s->use_np && !np_writer(result, step, s, np, config)) {
-            printf("np_writer() for addition failed\n");
+            HDprintf("np_writer() for addition failed\n");
             TEST_ERROR;
         }
     }
@@ -939,7 +941,7 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
 
         /* Need to sync up writer/reader before moving onto the next phase */
         if (s->use_np && !np_writer(true, 0, s, np, config)) {
-            printf("np_writer() for modification failed\n");
+            HDprintf("np_writer() for modification failed\n");
             TEST_ERROR;
         }
 
@@ -950,7 +952,7 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
             result = attr_dsets_action(MODIFY_ATTR, s, ds, step);
 
             if (s->use_np && !np_writer(result, step, s, np, config)) {
-                printf("np_writer() for modification failed\n");
+                HDprintf("np_writer() for modification failed\n");
                 TEST_ERROR;
             }
         }
@@ -960,7 +962,7 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
 
         /* Need to sync up writer/reader before moving onto the next phase */
         if (s->use_np && !np_writer(true, 0, s, np, config)) {
-            printf("np_writer() for deletion failed\n");
+            HDprintf("np_writer() for deletion failed\n");
             TEST_ERROR;
         }
 
@@ -971,7 +973,7 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
             result = attr_dsets_action(DELETE_ATTR, s, ds, step);
 
             if (s->use_np && !np_writer(result, step, s, np, config)) {
-                printf("np_writer() for deletion failed\n");
+                HDprintf("np_writer() for deletion failed\n");
                 TEST_ERROR;
             }
         }
@@ -1291,7 +1293,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
         dbgf(2, "Verifying...attribute %d\n", step);
 
         if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-            printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+            HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
             TEST_ERROR;
         }
 
@@ -1301,7 +1303,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
         result = verify_attr_dsets_action(ADD_ATTR, s, ds, step);
 
         if (s->use_np && !np_reader(result, step, s, np)) {
-            printf("np_reader() for verifying addition failed\n");
+            HDprintf("np_reader() for verifying addition failed\n");
             TEST_ERROR;
         }
     }
@@ -1309,7 +1311,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
     if (s->mod_attr) {
         /* Need to sync up writer/reader before moving onto the next phase */
         if (!np_reader_no_verification(s, np, config)) {
-            printf("np_reader_no_verification() for verifying modification failed\n");
+            HDprintf("np_reader_no_verification() for verifying modification failed\n");
             TEST_ERROR;
         }
 
@@ -1318,7 +1320,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
             dbgf(2, "Verifying...modify attribute %d\n", step);
 
             if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
 
@@ -1328,7 +1330,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
             result = verify_attr_dsets_action(MODIFY_ATTR, s, ds, step);
 
             if (s->use_np && !np_reader(result, step, s, np)) {
-                printf("np_reader() for verifying modification failed\n");
+                HDprintf("np_reader() for verifying modification failed\n");
                 TEST_ERROR;
             }
         }
@@ -1338,7 +1340,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
 
         /* Need to sync up writer/reader before moving onto the next phase */
         if (!np_reader_no_verification(s, np, config)) {
-            printf("np_reader_no_verification() for verifying modification failed\n");
+            HDprintf("np_reader_no_verification() for verifying modification failed\n");
             TEST_ERROR;
         }
 
@@ -1347,7 +1349,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
             dbgf(2, "Verifying...delete attribute %d\n", step);
 
             if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
-                printf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
                 TEST_ERROR;
             }
 
@@ -1357,7 +1359,7 @@ verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *co
             result = verify_attr_dsets_action(DELETE_ATTR, s, ds, step);
 
             if (s->use_np && !np_reader(result, step, s, np)) {
-                printf("np_reader() for verifying deletion failed\n");
+                HDprintf("np_reader() for verifying deletion failed\n");
                 TEST_ERROR;
             }
         }
@@ -2030,14 +2032,14 @@ main(int argc, char **argv)
 
     if (writer) {
          if(!perform_dsets_operations(&s, &ds, &config, &np)) {
-            printf("perform_dsets_operations() failed\n");
+            HDprintf("perform_dsets_operations() failed\n");
             TEST_ERROR;
         }
 
     }
     else {
          if(!verify_dsets_operations(&s, &ds, &config, &np)) {
-            printf("verify_dsets_operations() failed\n");
+            HDprintf("verify_dsets_operations() failed\n");
             TEST_ERROR;
         }
 
