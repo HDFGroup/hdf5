@@ -1173,6 +1173,7 @@
 ./test/cork.c
 ./test/corrupt_stab_msg.h5
 ./test/cross_read.c
+./test/cve_2020_10810.h5
 ./test/dangle.c
 ./test/deflate.h5
 ./test/del_many_dense_attrs.c
