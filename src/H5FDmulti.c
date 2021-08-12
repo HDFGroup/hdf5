@@ -44,7 +44,7 @@
 #define my_strdup strdup
 #endif
 
-/* Macros for enabling/disabling particular GCC warnings
+/* Macros for enabling/disabling particular GCC / clang warnings
  *
  * These are (renamed) duplicates of macros in H5private.h. If you make changes
  * here, be sure to update those as well.
@@ -2019,6 +2019,7 @@ open_members(H5FD_multi_t *file)
 
     return 0;
 }
+H5_MULTI_GCC_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_multi_delete
@@ -2029,6 +2030,7 @@ open_members(H5FD_multi_t *file)
  *
  *-------------------------------------------------------------------------
  */
+H5_MULTI_GCC_DIAG_OFF("format-nonliteral")
 static herr_t
 H5FD_multi_delete(const char *filename, hid_t fapl_id)
 {
