@@ -93,9 +93,9 @@ static void *
 H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                    unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_fsinfo_t * fsinfo = NULL;    /* File space info message */
-    H5F_mem_page_t ptype;            /* Memory type for iteration */
-    unsigned       vers;             /* message version */
+    H5O_fsinfo_t * fsinfo = NULL; /* File space info message */
+    H5F_mem_page_t ptype;         /* Memory type for iteration */
+    unsigned       vers;          /* message version */
     const uint8_t *p_end     = p + p_size;
     void *         ret_value = NULL; /* Return value */
 
@@ -139,7 +139,8 @@ H5O__fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNU
                     HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "unable to get file size")
                 for (type = H5FD_MEM_SUPER; type < H5FD_MEM_NTYPES; type++) {
                     if (p + H5_SIZEOF_HADDR_T > p_end)
-                        HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, NULL, "ran off end of input buffer while decoding")
+                        HGOTO_ERROR(H5E_FILE, H5E_CANTDECODE, NULL,
+                                    "ran off end of input buffer while decoding")
                     H5F_addr_decode(f, &p, &(fsinfo->fs_addr[type - 1]));
                 }
                 break;

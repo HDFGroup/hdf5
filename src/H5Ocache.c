@@ -333,8 +333,8 @@ H5O__cache_deserialize(const void *image, size_t len, void *_udata, hbool_t *dir
         oh->proxy = NULL;
 
     /* Parse the first chunk */
-    if (H5O__chunk_deserialize(oh, udata->common.addr, udata->chunk0_size, (const uint8_t *)image,
-                               len, &(udata->common), dirty) < 0)
+    if (H5O__chunk_deserialize(oh, udata->common.addr, udata->chunk0_size, (const uint8_t *)image, len,
+                               &(udata->common), dirty) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize first object header chunk")
 
     /* Note that we've loaded the object header from the file */
@@ -763,8 +763,8 @@ H5O__cache_chk_deserialize(const void *image, size_t len, void *_udata, hbool_t 
         HDassert(udata->common.cont_msg_info);
 
         /* Parse the chunk */
-        if (H5O__chunk_deserialize(udata->oh, udata->common.addr, udata->size, (const uint8_t *)image,
-                                   len, &(udata->common), dirty) < 0)
+        if (H5O__chunk_deserialize(udata->oh, udata->common.addr, udata->size, (const uint8_t *)image, len,
+                                   &(udata->common), dirty) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTINIT, NULL, "can't deserialize object header chunk")
 
         /* Set the chunk number for the chunk proxy */
@@ -1275,8 +1275,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t *image,
-                       size_t len, H5O_common_cache_ud_t *udata, hbool_t *dirty)
+H5O__chunk_deserialize(H5O_t *oh, haddr_t addr, size_t chunk_size, const uint8_t *image, size_t len,
+                       H5O_common_cache_ud_t *udata, hbool_t *dirty)
 {
     const uint8_t *chunk_image;          /* Pointer into buffer to decode */
     uint8_t *      eom_ptr;              /* Pointer to end of messages for a chunk */
