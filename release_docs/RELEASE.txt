@@ -84,7 +84,14 @@ Bug Fixes since HDF5-1.12.1 release
 
     Configuration
     -------------
-    - 
+    - Fixed CMake C++ compiler flags
+
+      A recent refactoring of the C++ configure files accidently removed the
+      file that executed the enable_language command for C++ needed by the
+      HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
+      including adding support for windows platforms.
+
+      (ADB - 2021/08/10)
 
 
     Fortran API
