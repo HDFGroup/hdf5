@@ -150,16 +150,16 @@ static bool open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *ma
                            unsigned *min_dense);
 static bool close_dsets(const dsets_state_t *ds);
 
-static bool perform_dsets_operations(state_t *s, dsets_state_t *ds,
-    H5F_vfd_swmr_config_t *config, np_state_t *np);
+static bool perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+                                     np_state_t *np);
 static bool attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
 static bool attr_action(unsigned action, const state_t *s, hid_t did, unsigned which);
 static bool add_attr(const state_t *s, hid_t did, unsigned int which);
 static bool modify_attr(const state_t *s, hid_t did, unsigned int which);
 static bool delete_attr(hid_t did, unsigned int which);
 
-static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, 
-    H5F_vfd_swmr_config_t *config, np_state_t *np);
+static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+                                    np_state_t *np);
 static bool verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds,
                                      unsigned which);
 static bool verify_attr_action(unsigned action, hid_t did, unsigned which);
@@ -226,8 +226,8 @@ state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
     int           ch;
-    const hsize_t dims = 1;
-    char          *tfile = NULL;
+    const hsize_t dims  = 1;
+    char *        tfile = NULL;
     char *        end;
 
     *s = ALL_HID_INITIALIZER;
@@ -919,12 +919,12 @@ error:
  *      DELETE_ATTR : -d <dattrs> option
  */
 static bool
-perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np) 
+perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
-    unsigned              step;
-    bool                  result;
-    unsigned              dd;
-    bool ret     = true;
+    unsigned step;
+    bool     result;
+    unsigned dd;
+    bool     ret = true;
 
     for (step = 0; step < s->asteps; step++) {
         dbgf(2, "Adding attribute %d\n", step);
@@ -956,9 +956,9 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
                 TEST_ERROR;
             }
         }
-   }
+    }
 
-   if (s->dattrs) {
+    if (s->dattrs) {
 
         /* Need to sync up writer/reader before moving onto the next phase */
         if (s->use_np && !np_writer(true, 0, s, np, config)) {
@@ -1282,11 +1282,11 @@ error:
  *      --not appliable for -m option
  */
 static bool
-verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np) 
+verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
 {
-    unsigned              step;
-    bool                  result;
-    unsigned              dd;
+    unsigned step;
+    bool     result;
+    unsigned dd;
 
     /* Start verifying addition */
     for (step = 0; step < s->asteps; step++) {
@@ -1536,10 +1536,11 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
             HDprintf("HDmalloc failed\n");
             TEST_ERROR;
         }
-    } else {
+    }
+    else {
         if (action == MODIFY_ATTR)
             tmp_val = which + 1;
-        else 
+        else
             tmp_val = which;
     }
 
@@ -2031,18 +2032,16 @@ main(int argc, char **argv)
     }
 
     if (writer) {
-         if(!perform_dsets_operations(&s, &ds, &config, &np)) {
+        if (!perform_dsets_operations(&s, &ds, &config, &np)) {
             HDprintf("perform_dsets_operations() failed\n");
             TEST_ERROR;
         }
-
     }
     else {
-         if(!verify_dsets_operations(&s, &ds, &config, &np)) {
+        if (!verify_dsets_operations(&s, &ds, &config, &np)) {
             HDprintf("verify_dsets_operations() failed\n");
             TEST_ERROR;
         }
-
     }
 
     if (!close_dsets(&ds)) {

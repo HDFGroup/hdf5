@@ -769,7 +769,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     /* 1) If requested, flush all raw data to the HDF5 file.
      *
      */
-    if(shared->vfd_swmr_config.flush_raw_data) {
+    if (shared->vfd_swmr_config.flush_raw_data) {
 
         /* Test to see if b-tree corruption seen in VFD SWMR tests
          * is caused by client hiding data from the metadata cache.  Do
@@ -778,7 +778,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
          * when the above flush_raw_data flag is set.
          */
 
-         if (H5D_flush_all(f) < 0)
+        if (H5D_flush_all(f) < 0)
 
             HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
