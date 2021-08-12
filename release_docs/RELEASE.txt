@@ -478,6 +478,15 @@ Bug Fixes since HDF5-1.10.7 release
 
     Configuration
     -------------
+    - Fixed CMake C++ compiler flags
+
+      A recent refactoring of the C++ configure files accidently removed the
+      file that executed the enable_language command for C++ needed by the
+      HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
+      including adding support for windows platforms.
+
+      (ADB - 2021/08/10)
+
     - Autotools clang debug optimization level change
 
       HDF5 1.10.7 erroneously sets the debug optimization level to "-g" when
