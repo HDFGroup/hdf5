@@ -134,11 +134,11 @@ main(void)
         TEST_ERROR
 
     /* Set chunk cache so only part of the chunks can be cached on fapl */
-    if (H5Pset_cache(fapl, 0, (size_t)8, 256 * sizeof(int), 0.75F) < 0)
+    if (H5Pset_cache(fapl, 0, (size_t)8, 256 * sizeof(int), 0.75) < 0)
         TEST_ERROR
 
     /* Disable chunk caching on fapl2 */
-    if (H5Pset_cache(fapl2, 0, (size_t)0, (size_t)0, 0.0F) < 0)
+    if (H5Pset_cache(fapl2, 0, (size_t)0, (size_t)0, 0.0) < 0)
         TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */

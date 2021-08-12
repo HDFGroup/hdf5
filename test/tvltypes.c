@@ -2527,8 +2527,8 @@ test_vltypes_fill_value(void)
     hsize_t             large_dims[] = {SPACE4_DIM_LARGE};
     size_t              dset_elmts   = 0; /* Number of elements in a particular dataset */
     const dtype1_struct fill1        = {1, 2,    "foobar", "",   NULL,     "\0",   "dead",
-                                 3, 4.0F, 100.0F,   1.0F, "liquid", "meter"};
-    const dtype1_struct wdata = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0F, 200.0F, 2.0F, "solid", "yard"};
+                                 3, 4.0, 100.0,   1.0, "liquid", "meter"};
+    const dtype1_struct wdata = {3, 4, "", NULL, "\0", "foo", "two", 6, 8.0, 200.0, 2.0, "solid", "yard"};
     dtype1_struct *     rbuf  = NULL;                   /* Buffer for reading data */
     size_t              mem_used = 0;                   /* Memory used during allocation */
     H5D_layout_t        layout;                         /* Dataset storage layout */
