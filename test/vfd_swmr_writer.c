@@ -89,7 +89,7 @@ open_skeleton(const char *filename, hbool_t verbose, FILE *verbose_file, unsigne
         return -1;
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(config, 4, 5, TRUE, FALSE, 128, "./rw-shadow");
+    init_vfd_swmr_config(config, 4, 5, TRUE, TRUE, 128, "./rw-shadow");
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(TRUE, TRUE, FALSE, 4096, config)) < 0)

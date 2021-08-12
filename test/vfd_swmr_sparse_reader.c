@@ -208,7 +208,7 @@ read_records(const char *filename, unsigned verbose, unsigned long nrecords, uns
         goto error;
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(config, 4, 5, FALSE, FALSE, 128, "./rw-shadow");
+    init_vfd_swmr_config(config, 4, 5, FALSE, TRUE, 128, "./rw-shadow");
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(FALSE, TRUE, FALSE, 4096, config)) < 0) {
