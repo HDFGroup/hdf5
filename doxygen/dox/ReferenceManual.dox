@@ -51,7 +51,7 @@ The functions provided by the HDF5 C-API are grouped into the following
 </td></tr>
 <tr><th>Mind the gap</th></tr>
 <tr><td>
-Follow these simple rules to stay out of trouble:
+Follow these simple rules and stay out of trouble:
 
 \li \Bold{Handle discipline:} The HDF5 C-API is rife with handles or
     identifiers, which you typically obtain by creating new HDF5 items, copying
@@ -59,6 +59,8 @@ Follow these simple rules to stay out of trouble:
     (Colin Powell) In other words, you are responsible for releasing the underlying
     resources via the matching \Code{H5*close()} call, or deal with the consequences
     of resource leakage.
+\li \Bold{Closed means closed:} Do not pass identifiers that were previously
+    \Code{H5*close()}-d to other API functions! It will generate an error.
 \li \Bold{Dynamic memory allocation:} The API contains a few functions in which the
     HDF5 library dynamically allocates memory on the caller's behalf. The caller owns
     this memory and eventually must free it by calling H5free_memory(). (\Bold{Not}
