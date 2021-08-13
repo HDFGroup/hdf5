@@ -37,8 +37,9 @@
 /* verify if the sizeof(type) matches size defined in macro. */
 /* Needs this extra step so that we can print the macro name. */
 #define vrfy_macrosize(type, macro, macroname)                                                               \
-    if (sizeof(type) != (macro))                                                                               \
-        TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", #type, sizeof(type), macroname, (int)(macro));
+    if (sizeof(type) != (macro))                                                                             \
+        TestErrPrintf("Error: sizeof(%s) is %zu but %s is %d\n", #type, sizeof(type), macroname,             \
+                      (int)(macro));
 
 /* local routine prototypes */
 void test_config_ctypes(void);

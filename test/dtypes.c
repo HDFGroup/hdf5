@@ -70,7 +70,7 @@
         FAIL_STACK_ERROR                                                                                     \
     if ((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                                                            \
         H5_FAILED();                                                                                         \
-        HDprintf("    #dtype ids expected: %lld; found: %lld\n", (long long)(NMEMBS),                          \
+        HDprintf("    #dtype ids expected: %lld; found: %lld\n", (long long)(NMEMBS),                        \
                  (long long)H5I_nmembers(H5I_DATATYPE));                                                     \
         goto error;                                                                                          \
     }

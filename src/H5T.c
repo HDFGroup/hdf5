@@ -290,7 +290,7 @@
 #define H5T_INIT_TYPE_SET_SIZE(SIZE)                                                                         \
     {                                                                                                        \
         dt->shared->size          = SIZE;                                                                    \
-        dt->shared->u.atomic.prec = 8 * (SIZE);                                                                \
+        dt->shared->u.atomic.prec = 8 * (SIZE);                                                              \
     }
 
 #define H5T_INIT_TYPE_NOSET_SIZE(SIZE)                                                                       \
@@ -327,7 +327,7 @@
             H5_GLUE3(H5T_INIT_TYPE_, GUTS, _CORE)                                                            \
                                                                                                              \
             /* Register result */                                                                            \
-            if (((GLOBAL) = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                        \
+            if (((GLOBAL) = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                      \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")        \
     }
 
