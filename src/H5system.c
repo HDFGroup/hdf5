@@ -964,10 +964,7 @@ done:
  *              Note that commodity hardware is probably going to have a
  *              resolution of milliseconds, not nanoseconds.
  *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Quincey Koziol
- *              October 01, 2016
+ * Return:      void
  *--------------------------------------------------------------------------
  */
 void
@@ -976,21 +973,40 @@ H5_nanosleep(uint64_t nanosec)
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
 #ifdef H5_HAVE_WIN32_API
+    DWORD dwMilliseconds = (DWORD)HDceil(nanosec / 1.0e6);
+    DWORD ignore;
 
-    /* On Windows, Sleep() is in milliseconds. Passing 0 to Sleep()
-     * causes the thread to relinquish the rest of its time slice.
+    /* Windows can't sleep at a ns resolution. Best we can do is ~1 ms. We
+     * don't care about the return value since the second parameter
+     * (bAlertable) is FALSE, so it will always be zero.
      */
-    Sleep(nanosec / (1000 * 1000));
+    ignore = SleepEx(dwMilliseconds, FALSE);
 
 #else
-    {
-        struct timespec sleeptime; /* Struct to hold time to sleep */
 
-        /* Set up time to sleep */
-        sleeptime.tv_sec  = 0;
-        sleeptime.tv_nsec = (long)nanosec;
+    const uint64_t  nanosec_per_sec = 1000 * 1000 * 1000;
+    struct timespec sleeptime; /* Struct to hold time to sleep */
 
-        HDnanosleep(&sleeptime, NULL);
+    /* Set up time to sleep
+     *
+     * Assuming ILP32 or LP64 or wider architecture, (long)operand
+     * satisfies 0 <= operand < nanosec_per_sec < LONG_MAX.
+     *
+     * It's harder to be sure that we don't overflow time_t.
+     */
+    sleeptime.tv_sec  = (time_t)(nanosec / nanosec_per_sec);
+    sleeptime.tv_nsec = (long)(nanosec % nanosec_per_sec);
+
+    /* Sleep for up to `sleeptime` and, in the event of an interruption,
+     * save the unslept time back to `sleeptime`.
+     */
+    while (HDnanosleep(&sleeptime, &sleeptime) == -1) {
+        /* If we were just interrupted, sleep for the remaining time.
+         * Otherwise, the error was essentially impossible, so just stop
+         * sleeping.
+         */
+        if (errno != EINTR)
+            break;
     }
 #endif
 

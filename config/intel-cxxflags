@@ -122,19 +122,19 @@ if test "X-icpc" = "X-$cxx_vendor"; then
     # Warnings #
     ############
 
+# First load the C warnings then add CXX warnings (if needed)
+
     ###########
     # General #
     ###########
 
     # Add various general warning flags in intel-warnings.
-    # Use the C warnings as CXX warnings are the same
     H5_CXXFLAGS="$H5_CXXFLAGS $(load_intel_arguments general)"
 
     ######################
     # Developer warnings #
     ######################
 
-    # Use the C warnings as CXX warnings are the same
     #NO_DEVELOPER_WARNING_CXXFLAGS=$(load_intel_arguments no-developer-general)
     #DEVELOPER_WARNING_CXXFLAGS=$(load_intel_arguments developer-general)
 

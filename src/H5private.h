@@ -26,25 +26,6 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
-/* include the pthread header */
-#ifdef H5_HAVE_THREADSAFE
-#ifdef H5_HAVE_WIN32_API
-#ifndef H5_HAVE_WIN_THREADS
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
-#endif /* H5_HAVE_WIN_THREADS */
-#else  /* H5_HAVE_WIN32_API */
-#ifdef H5_HAVE_PTHREAD_H
-#include <pthread.h>
-#endif /* H5_HAVE_PTHREAD_H */
-#endif /* H5_HAVE_WIN32_API */
-#endif /* H5_HAVE_THREADSAFE */
-
-/*
- * Include ANSI-C header files.
- */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -53,37 +34,28 @@
 #include <limits.h>
 #include <math.h>
 #include <signal.h>
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
-/*
- * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
- * compliant. Otherwise all bets are off.
- */
+/* POSIX headers */
 #ifdef H5_HAVE_UNISTD_H
-#include <sys/types.h>
-#include <unistd.h>
-#endif
-#ifdef _POSIX_VERSION
-#include <sys/wait.h>
 #include <pwd.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
+#endif
+
+/* Include the Pthreads header, if necessary */
+#if defined(H5_HAVE_THREADSAFE) && defined(H5_HAVE_PTHREAD_H)
+#include <pthread.h>
 #endif
 
 /*
- * C9x integer types
- */
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
-#include <stdint.h>
-#endif
-#endif
-
-/*
- * The `struct stat' data type for stat() and fstat(). This is a Posix file
- * but often apears on non-Posix systems also.  The `struct stat' is required
- * for hdf5 to compile, although only a few fields are actually used.
+ * The `struct stat' data type for stat() and fstat(). This is a POSIX file
+ * but often apears on non-POSIX systems also.  The `struct stat' is required
+ * for HDF5 to compile, although only a few fields are actually used.
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -139,21 +111,6 @@
 #endif
 
 /*
- * System information. These are needed on the DEC Alpha to turn off fixing
- * of unaligned accesses by the operating system during detection of
- * alignment constraints in H5detect.c:main().
- */
-#ifdef H5_HAVE_SYS_SYSINFO_H
-#include <sys/sysinfo.h>
-#endif
-#ifdef H5_HAVE_SYS_PROC_H
-#include <sys/proc.h>
-#endif
-#ifdef H5_HAVE_IO_H
-#include <io.h>
-#endif
-
-/*
  * Dynamic library handling.  These are needed for dynamically loading I/O
  * filters and VFDs.
  */
@@ -187,6 +144,7 @@
 
 #include <windows.h>
 #include <direct.h> /* For _getcwd() */
+#include <io.h>     /* POSIX I/O */
 
 #endif /*H5_HAVE_WIN32_API*/
 
