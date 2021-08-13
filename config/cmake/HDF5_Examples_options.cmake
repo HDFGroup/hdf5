@@ -52,11 +52,13 @@
 ### enable parallel program builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_ENABLE_PARALLEL:BOOL=ON")
 
+#############################################################################################
+### match the hdf5 library namespace
+set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF5_NAMESPACE:STRING=hdf5::")
 
 #############################################################################################
 ### enable threadsafe program builds
 #set(ADD_BUILD_OPTIONS "${ADD_BUILD_OPTIONS} -DHDF_ENABLE_THREADSAFE:BOOL=ON")
-
 
 #############################################################################################
 ### enable test program builds, requires reference files in testfiles subdirectory

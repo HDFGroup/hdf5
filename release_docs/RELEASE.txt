@@ -934,6 +934,24 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed an invalid read and memory leak when parsing corrupt file space
+      info messages
+
+        When the corrupt file from CVE-2020-10810 was parsed by the library,
+        the code that imports the version 0 file space info object header
+        message to the version 1 struct could read past the buffer read from
+        the disk, causing an invalid memory read. Not catching this error would
+        cause downstream errors that eventually resulted in a previously
+        allocated buffer to be unfreed when the library shut down. In builds
+        where the free lists are in use, this could result in an infinite loop
+        and SIGABRT when the library shuts down.
+
+        We now track the buffer size and raise an error on attempts to read
+        past the end of it.
+
+        (DER - 2021/08/12, HDFFV-11053)
+
+
     - Fixed CVE-2018-14460
 
         The tool h5repack produced a segfault when the rank in dataspace
