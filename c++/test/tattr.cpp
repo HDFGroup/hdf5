@@ -1105,7 +1105,7 @@ test_attr_mult_read()
         verify_val(rank, ATTR2_RANK, "DataSpace::getSimpleExtentNdims", __LINE__, __FILE__);
 
         // Get the dims of the dataspace and verify them
-        ndims = space.getSimpleExtentDims(dims);
+        int ndims = space.getSimpleExtentDims(dims);
 
         verify_val((long)dims[0], (long)ATTR2_DIM1, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
         verify_val((long)dims[1], (long)ATTR2_DIM2, "DataSpace::getSimpleExtentDims", __LINE__, __FILE__);
