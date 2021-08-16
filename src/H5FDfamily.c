@@ -139,6 +139,7 @@ static const H5FD_class_t H5FD_family_g = {
     H5FD__family_truncate,      /* truncate        */
     H5FD__family_lock,          /* lock                 */
     H5FD__family_unlock,        /* unlock               */
+    NULL,                       /* ctl                  */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 
