@@ -1688,6 +1688,110 @@ done:
 } /* end H5FD_unlock() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FDctl
+ *
+ * Purpose:     Perform a CTL operation.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  JRM -- 8/3/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*#ULUL*x**x", file, op_code, flags, input, output);
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    /* Don't attempt to validate the op code.  If appropriate, that will
+     * be done by the underlying VFD callback, along with the input and
+     * output parameters.
+     */
+
+    /* Call private function */
+    if (H5FD_ctl(file, op_code, flags, input, output) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDctl() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ctl
+ *
+ * Purpose:     Private version of H5FDctl()
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  JRM -- 8/3/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+
+    /* Dispatch to driver if the ctl function exists.
+     *
+     * If it doesn't, fail if the H5FD_CTL__FAIL_IF_UNKNOWN_FLAG is set.
+     *
+     * Otherwise, report success.
+     */
+    if (file->cls->ctl) {
+
+        if ((file->cls->ctl)(file, op_code, flags, input, output) < 0)
+
+            HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+    }
+    else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed (no ctl and fail if unknown)")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_ctl() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FD_get_fileno
  *
  * Purpose:     Quick and dirty routine to retrieve the file's 'fileno' value
