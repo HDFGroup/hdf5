@@ -1,0 +1,4 @@
+export LD_LIBRARY_PATH=${HOME}/install/manydsets/lib:${LD_LIBRARY_PATH}
+export LD_LIBRARY_PATH=${HOME}/wrk/install/manydsets/lib:${LD_LIBRARY_PATH}
+
+exec $SHELL -l
