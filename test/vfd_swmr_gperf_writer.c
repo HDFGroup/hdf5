@@ -74,7 +74,7 @@ typedef struct {
         .old_style_grp = false, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',              \
         .attr_test = false, .tick_len = 4, .max_lag = 7, .gperf = false, .min_time = 100., .max_time = 0.,   \
         .mean_time = 0., .total_time = 0., .fo_total_time = 0., .fc_total_time = 0., .num_attrs = 1,         \
-        .ps=4096, .pbs = 4096, .nglevels = 0                                                                           \
+        .ps = 4096, .pbs = 4096, .nglevels = 0                                                               \
     }
 
 static void
@@ -90,7 +90,7 @@ usage(const char *progname)
             "-a steps:       `steps` between adding attributes\n"
             "-t tick_len:    length of a tick in tenths of a second.\n"
             "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
-            "-B pbs:         Page Buffer Size in bytes:\n" 
+            "-B pbs:         Page Buffer Size in bytes:\n"
             "                The default value is 4K(4096).\n"
             "-s ps:          Page size used by page aggregation, page buffer and \n"
             "                the metadata file. \n"
@@ -4473,7 +4473,7 @@ main(int argc, char **argv)
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    //init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
+    // init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
     init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, FALSE, 128, "./group-shadow");
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
@@ -4498,7 +4498,7 @@ main(int argc, char **argv)
     }
 #endif
 
-     /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
+    /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
     if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s.ps)) < 0) {
         HDprintf("vfd_swmr_create_fcpl() failed");
         TEST_ERROR;
