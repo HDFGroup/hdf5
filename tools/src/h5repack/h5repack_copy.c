@@ -626,7 +626,6 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     hid_t              wtype_id      = H5I_INVALID_HID; /* read/write type ID */
     hid_t              ocpl_id       = H5I_INVALID_HID; /* property to pass copy options */
     hid_t              lcpl_id       = H5I_INVALID_HID; /* link creation property list */
-    hid_t              dxpl_id       = H5I_INVALID_HID; /* dataset transfer property list */
     named_dt_t *       named_dt_head = NULL;            /* Pointer to the stack of named datatypes copied */
     size_t             msize;                           /* size of type */
     hsize_t            nelmts;                          /* number of elements in dataset */
@@ -996,27 +995,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     if (need < H5TOOLS_MALLOCSIZE)
                                         buf = HDmalloc(need);
 
-                                    /* Set up collective write if using filters in parallel */
-                                    {
-#ifdef H5_HAVE_PARALLEL
-                                        hbool_t parallel = (H5FD_MPIO == H5Pget_driver(options->fout_fapl));
-
-                                        if (parallel && apply_s && apply_f) {
-                                            if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
-                                                H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed");
-                                            if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
-                                                H5TOOLS_GOTO_ERROR((-1), "H5Pset_dxpl_mpio failed");
-                                        }
-                                        else
-#endif
-                                            dxpl_id = H5P_DEFAULT;
-                                    }
-
                                     if (buf != NULL) {
                                         if (H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) <
                                             0)
                                             H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
-                                        if (H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, dxpl_id, buf) < 0)
+                                        if (H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) <
+                                            0)
                                             H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                                         /* Check if we have VL data in the dataset's
@@ -1118,8 +1102,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                             if (H5Dread(dset_in, wtype_id, hslab_space, f_space_id,
                                                         H5P_DEFAULT, hslab_buf) < 0)
                                                 H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
-                                            if (H5Dwrite(dset_out, wtype_id, hslab_space, f_space_id, dxpl_id,
-                                                         hslab_buf) < 0)
+                                            if (H5Dwrite(dset_out, wtype_id, hslab_space, f_space_id,
+                                                         H5P_DEFAULT, hslab_buf) < 0)
                                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                                             /* reclaim any VL memory, if necessary */
@@ -1398,7 +1382,6 @@ done:
         H5Pclose(dcpl_in);
         H5Pclose(gcpl_in);
         H5Pclose(gcpl_out);
-        H5Pclose(dxpl_id);
         H5Sclose(f_space_id);
         H5Dclose(dset_in);
         H5Dclose(dset_out);

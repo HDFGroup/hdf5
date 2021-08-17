@@ -26,11 +26,13 @@
 
 #ifdef H5_HAVE_PARALLEL
 
+#ifdef H5_STDC_HEADERS
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#endif
 
 #ifdef H5_HAVE_UNISTD_H
 #include <sys/types.h>

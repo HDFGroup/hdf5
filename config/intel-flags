@@ -88,7 +88,7 @@ if test "X-icc" = "X-$cc_vendor"; then
     ##############
     # Production #
     ##############
-    
+
     PROD_CFLAGS=
 
     #########
@@ -179,4 +179,3 @@ if test "X-$cc_flags_set" = "X-"; then
     cc_vendor=
     cc_version=
 fi
-

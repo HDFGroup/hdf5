@@ -97,13 +97,13 @@ static const char *progname = "h5perf_serial";
  * It seems that only the options that accept additional information
  * such as dataset size (-e) require the colon next to it.
  */
-static const char *           s_opts   = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
-static struct h5_long_options l_opts[] = {{"align", require_arg, 'a'},
-                                          {"alig", require_arg, 'a'},
-                                          {"ali", require_arg, 'a'},
-                                          {"al", require_arg, 'a'},
-                                          {"api", require_arg, 'A'},
-                                          {"ap", require_arg, 'A'},
+static const char *        s_opts   = "a:A:B:c:Cd:D:e:F:ghi:Imno:p:P:r:stT:v:wx:X:";
+static struct long_options l_opts[] = {{"align", require_arg, 'a'},
+                                       {"alig", require_arg, 'a'},
+                                       {"ali", require_arg, 'a'},
+                                       {"al", require_arg, 'a'},
+                                       {"api", require_arg, 'A'},
+                                       {"ap", require_arg, 'A'},
 #if 0
     /* a sighting of the elusive binary option */
     { "binary", no_arg, 'b' },
@@ -112,156 +112,156 @@ static struct h5_long_options l_opts[] = {{"align", require_arg, 'a'},
     { "bin", no_arg, 'b' },
     { "bi", no_arg, 'b' },
 #endif /* 0 */
-                                          {"block-size", require_arg, 'B'},
-                                          {"block-siz", require_arg, 'B'},
-                                          {"block-si", require_arg, 'B'},
-                                          {"block-s", require_arg, 'B'},
-                                          {"block-", require_arg, 'B'},
-                                          {"block", require_arg, 'B'},
-                                          {"bloc", require_arg, 'B'},
-                                          {"blo", require_arg, 'B'},
-                                          {"bl", require_arg, 'B'},
-                                          {"chunk", no_arg, 'c'},
-                                          {"chun", no_arg, 'c'},
-                                          {"chu", no_arg, 'c'},
-                                          {"ch", no_arg, 'c'},
-                                          {"collective", no_arg, 'C'},
-                                          {"collectiv", no_arg, 'C'},
-                                          {"collecti", no_arg, 'C'},
-                                          {"collect", no_arg, 'C'},
-                                          {"collec", no_arg, 'C'},
-                                          {"colle", no_arg, 'C'},
-                                          {"coll", no_arg, 'C'},
-                                          {"col", no_arg, 'C'},
-                                          {"co", no_arg, 'C'},
-                                          {"debug", require_arg, 'D'},
-                                          {"debu", require_arg, 'D'},
-                                          {"deb", require_arg, 'D'},
-                                          {"de", require_arg, 'D'},
-                                          {"file-driver", require_arg, 'v'},
-                                          {"file-drive", require_arg, 'v'},
-                                          {"file-driv", require_arg, 'v'},
-                                          {"file-dri", require_arg, 'v'},
-                                          {"file-dr", require_arg, 'v'},
-                                          {"file-d", require_arg, 'v'},
-                                          {"file-", require_arg, 'v'},
-                                          {"file", require_arg, 'v'},
-                                          {"fil", require_arg, 'v'},
-                                          {"fi", require_arg, 'v'},
-                                          {"geometry", no_arg, 'g'},
-                                          {"geometr", no_arg, 'g'},
-                                          {"geomet", no_arg, 'g'},
-                                          {"geome", no_arg, 'g'},
-                                          {"geom", no_arg, 'g'},
-                                          {"geo", no_arg, 'g'},
-                                          {"ge", no_arg, 'g'},
-                                          {"help", no_arg, 'h'},
-                                          {"hel", no_arg, 'h'},
-                                          {"he", no_arg, 'h'},
-                                          {"interleaved", require_arg, 'I'},
-                                          {"interleave", require_arg, 'I'},
-                                          {"interleav", require_arg, 'I'},
-                                          {"interlea", require_arg, 'I'},
-                                          {"interle", require_arg, 'I'},
-                                          {"interl", require_arg, 'I'},
-                                          {"inter", require_arg, 'I'},
-                                          {"inte", require_arg, 'I'},
-                                          {"int", require_arg, 'I'},
-                                          {"in", require_arg, 'I'},
-                                          {"max-num-processes", require_arg, 'P'},
-                                          {"max-num-processe", require_arg, 'P'},
-                                          {"max-num-process", require_arg, 'P'},
-                                          {"max-num-proces", require_arg, 'P'},
-                                          {"max-num-proce", require_arg, 'P'},
-                                          {"max-num-proc", require_arg, 'P'},
-                                          {"max-num-pro", require_arg, 'P'},
-                                          {"max-num-pr", require_arg, 'P'},
-                                          {"max-num-p", require_arg, 'P'},
-                                          {"min-num-processes", require_arg, 'p'},
-                                          {"min-num-processe", require_arg, 'p'},
-                                          {"min-num-process", require_arg, 'p'},
-                                          {"min-num-proces", require_arg, 'p'},
-                                          {"min-num-proce", require_arg, 'p'},
-                                          {"min-num-proc", require_arg, 'p'},
-                                          {"min-num-pro", require_arg, 'p'},
-                                          {"min-num-pr", require_arg, 'p'},
-                                          {"min-num-p", require_arg, 'p'},
-                                          {"max-xfer-size", require_arg, 'X'},
-                                          {"max-xfer-siz", require_arg, 'X'},
-                                          {"max-xfer-si", require_arg, 'X'},
-                                          {"max-xfer-s", require_arg, 'X'},
-                                          {"max-xfer", require_arg, 'X'},
-                                          {"max-xfe", require_arg, 'X'},
-                                          {"max-xf", require_arg, 'X'},
-                                          {"max-x", require_arg, 'X'},
-                                          {"min-xfer-size", require_arg, 'x'},
-                                          {"min-xfer-siz", require_arg, 'x'},
-                                          {"min-xfer-si", require_arg, 'x'},
-                                          {"min-xfer-s", require_arg, 'x'},
-                                          {"min-xfer", require_arg, 'x'},
-                                          {"min-xfe", require_arg, 'x'},
-                                          {"min-xf", require_arg, 'x'},
-                                          {"min-x", require_arg, 'x'},
-                                          {"num-bytes", require_arg, 'e'},
-                                          {"num-byte", require_arg, 'e'},
-                                          {"num-byt", require_arg, 'e'},
-                                          {"num-by", require_arg, 'e'},
-                                          {"num-b", require_arg, 'e'},
-                                          {"num-dsets", require_arg, 'd'},
-                                          {"num-dset", require_arg, 'd'},
-                                          {"num-dse", require_arg, 'd'},
-                                          {"num-ds", require_arg, 'd'},
-                                          {"num-d", require_arg, 'd'},
-                                          {"num-files", require_arg, 'F'},
-                                          {"num-file", require_arg, 'F'},
-                                          {"num-fil", require_arg, 'F'},
-                                          {"num-fi", require_arg, 'F'},
-                                          {"num-f", require_arg, 'F'},
-                                          {"num-iterations", require_arg, 'i'},
-                                          {"num-iteration", require_arg, 'i'},
-                                          {"num-iteratio", require_arg, 'i'},
-                                          {"num-iterati", require_arg, 'i'},
-                                          {"num-iterat", require_arg, 'i'},
-                                          {"num-itera", require_arg, 'i'},
-                                          {"num-iter", require_arg, 'i'},
-                                          {"num-ite", require_arg, 'i'},
-                                          {"num-it", require_arg, 'i'},
-                                          {"num-i", require_arg, 'i'},
-                                          {"order", require_arg, 'r'},
-                                          {"orde", require_arg, 'r'},
-                                          {"ord", require_arg, 'r'},
-                                          {"or", require_arg, 'r'},
-                                          {"output", require_arg, 'o'},
-                                          {"outpu", require_arg, 'o'},
-                                          {"outp", require_arg, 'o'},
-                                          {"out", require_arg, 'o'},
-                                          {"ou", require_arg, 'o'},
-                                          {"extendable", no_arg, 't'},
-                                          {"extendabl", no_arg, 't'},
-                                          {"extendab", no_arg, 't'},
-                                          {"extenda", no_arg, 't'},
-                                          {"extend", no_arg, 't'},
-                                          {"exten", no_arg, 't'},
-                                          {"exte", no_arg, 't'},
-                                          {"ext", no_arg, 't'},
-                                          {"ex", no_arg, 't'},
-                                          {"threshold", require_arg, 'T'},
-                                          {"threshol", require_arg, 'T'},
-                                          {"thresho", require_arg, 'T'},
-                                          {"thresh", require_arg, 'T'},
-                                          {"thres", require_arg, 'T'},
-                                          {"thre", require_arg, 'T'},
-                                          {"thr", require_arg, 'T'},
-                                          {"th", require_arg, 'T'},
-                                          {"write-only", require_arg, 'w'},
-                                          {"write-onl", require_arg, 'w'},
-                                          {"write-on", require_arg, 'w'},
-                                          {"write-o", require_arg, 'w'},
-                                          {"write", require_arg, 'w'},
-                                          {"writ", require_arg, 'w'},
-                                          {"wri", require_arg, 'w'},
-                                          {"wr", require_arg, 'w'},
-                                          {NULL, 0, '\0'}};
+                                       {"block-size", require_arg, 'B'},
+                                       {"block-siz", require_arg, 'B'},
+                                       {"block-si", require_arg, 'B'},
+                                       {"block-s", require_arg, 'B'},
+                                       {"block-", require_arg, 'B'},
+                                       {"block", require_arg, 'B'},
+                                       {"bloc", require_arg, 'B'},
+                                       {"blo", require_arg, 'B'},
+                                       {"bl", require_arg, 'B'},
+                                       {"chunk", no_arg, 'c'},
+                                       {"chun", no_arg, 'c'},
+                                       {"chu", no_arg, 'c'},
+                                       {"ch", no_arg, 'c'},
+                                       {"collective", no_arg, 'C'},
+                                       {"collectiv", no_arg, 'C'},
+                                       {"collecti", no_arg, 'C'},
+                                       {"collect", no_arg, 'C'},
+                                       {"collec", no_arg, 'C'},
+                                       {"colle", no_arg, 'C'},
+                                       {"coll", no_arg, 'C'},
+                                       {"col", no_arg, 'C'},
+                                       {"co", no_arg, 'C'},
+                                       {"debug", require_arg, 'D'},
+                                       {"debu", require_arg, 'D'},
+                                       {"deb", require_arg, 'D'},
+                                       {"de", require_arg, 'D'},
+                                       {"file-driver", require_arg, 'v'},
+                                       {"file-drive", require_arg, 'v'},
+                                       {"file-driv", require_arg, 'v'},
+                                       {"file-dri", require_arg, 'v'},
+                                       {"file-dr", require_arg, 'v'},
+                                       {"file-d", require_arg, 'v'},
+                                       {"file-", require_arg, 'v'},
+                                       {"file", require_arg, 'v'},
+                                       {"fil", require_arg, 'v'},
+                                       {"fi", require_arg, 'v'},
+                                       {"geometry", no_arg, 'g'},
+                                       {"geometr", no_arg, 'g'},
+                                       {"geomet", no_arg, 'g'},
+                                       {"geome", no_arg, 'g'},
+                                       {"geom", no_arg, 'g'},
+                                       {"geo", no_arg, 'g'},
+                                       {"ge", no_arg, 'g'},
+                                       {"help", no_arg, 'h'},
+                                       {"hel", no_arg, 'h'},
+                                       {"he", no_arg, 'h'},
+                                       {"interleaved", require_arg, 'I'},
+                                       {"interleave", require_arg, 'I'},
+                                       {"interleav", require_arg, 'I'},
+                                       {"interlea", require_arg, 'I'},
+                                       {"interle", require_arg, 'I'},
+                                       {"interl", require_arg, 'I'},
+                                       {"inter", require_arg, 'I'},
+                                       {"inte", require_arg, 'I'},
+                                       {"int", require_arg, 'I'},
+                                       {"in", require_arg, 'I'},
+                                       {"max-num-processes", require_arg, 'P'},
+                                       {"max-num-processe", require_arg, 'P'},
+                                       {"max-num-process", require_arg, 'P'},
+                                       {"max-num-proces", require_arg, 'P'},
+                                       {"max-num-proce", require_arg, 'P'},
+                                       {"max-num-proc", require_arg, 'P'},
+                                       {"max-num-pro", require_arg, 'P'},
+                                       {"max-num-pr", require_arg, 'P'},
+                                       {"max-num-p", require_arg, 'P'},
+                                       {"min-num-processes", require_arg, 'p'},
+                                       {"min-num-processe", require_arg, 'p'},
+                                       {"min-num-process", require_arg, 'p'},
+                                       {"min-num-proces", require_arg, 'p'},
+                                       {"min-num-proce", require_arg, 'p'},
+                                       {"min-num-proc", require_arg, 'p'},
+                                       {"min-num-pro", require_arg, 'p'},
+                                       {"min-num-pr", require_arg, 'p'},
+                                       {"min-num-p", require_arg, 'p'},
+                                       {"max-xfer-size", require_arg, 'X'},
+                                       {"max-xfer-siz", require_arg, 'X'},
+                                       {"max-xfer-si", require_arg, 'X'},
+                                       {"max-xfer-s", require_arg, 'X'},
+                                       {"max-xfer", require_arg, 'X'},
+                                       {"max-xfe", require_arg, 'X'},
+                                       {"max-xf", require_arg, 'X'},
+                                       {"max-x", require_arg, 'X'},
+                                       {"min-xfer-size", require_arg, 'x'},
+                                       {"min-xfer-siz", require_arg, 'x'},
+                                       {"min-xfer-si", require_arg, 'x'},
+                                       {"min-xfer-s", require_arg, 'x'},
+                                       {"min-xfer", require_arg, 'x'},
+                                       {"min-xfe", require_arg, 'x'},
+                                       {"min-xf", require_arg, 'x'},
+                                       {"min-x", require_arg, 'x'},
+                                       {"num-bytes", require_arg, 'e'},
+                                       {"num-byte", require_arg, 'e'},
+                                       {"num-byt", require_arg, 'e'},
+                                       {"num-by", require_arg, 'e'},
+                                       {"num-b", require_arg, 'e'},
+                                       {"num-dsets", require_arg, 'd'},
+                                       {"num-dset", require_arg, 'd'},
+                                       {"num-dse", require_arg, 'd'},
+                                       {"num-ds", require_arg, 'd'},
+                                       {"num-d", require_arg, 'd'},
+                                       {"num-files", require_arg, 'F'},
+                                       {"num-file", require_arg, 'F'},
+                                       {"num-fil", require_arg, 'F'},
+                                       {"num-fi", require_arg, 'F'},
+                                       {"num-f", require_arg, 'F'},
+                                       {"num-iterations", require_arg, 'i'},
+                                       {"num-iteration", require_arg, 'i'},
+                                       {"num-iteratio", require_arg, 'i'},
+                                       {"num-iterati", require_arg, 'i'},
+                                       {"num-iterat", require_arg, 'i'},
+                                       {"num-itera", require_arg, 'i'},
+                                       {"num-iter", require_arg, 'i'},
+                                       {"num-ite", require_arg, 'i'},
+                                       {"num-it", require_arg, 'i'},
+                                       {"num-i", require_arg, 'i'},
+                                       {"order", require_arg, 'r'},
+                                       {"orde", require_arg, 'r'},
+                                       {"ord", require_arg, 'r'},
+                                       {"or", require_arg, 'r'},
+                                       {"output", require_arg, 'o'},
+                                       {"outpu", require_arg, 'o'},
+                                       {"outp", require_arg, 'o'},
+                                       {"out", require_arg, 'o'},
+                                       {"ou", require_arg, 'o'},
+                                       {"extendable", no_arg, 't'},
+                                       {"extendabl", no_arg, 't'},
+                                       {"extendab", no_arg, 't'},
+                                       {"extenda", no_arg, 't'},
+                                       {"extend", no_arg, 't'},
+                                       {"exten", no_arg, 't'},
+                                       {"exte", no_arg, 't'},
+                                       {"ext", no_arg, 't'},
+                                       {"ex", no_arg, 't'},
+                                       {"threshold", require_arg, 'T'},
+                                       {"threshol", require_arg, 'T'},
+                                       {"thresho", require_arg, 'T'},
+                                       {"thresh", require_arg, 'T'},
+                                       {"thres", require_arg, 'T'},
+                                       {"thre", require_arg, 'T'},
+                                       {"thr", require_arg, 'T'},
+                                       {"th", require_arg, 'T'},
+                                       {"write-only", require_arg, 'w'},
+                                       {"write-onl", require_arg, 'w'},
+                                       {"write-on", require_arg, 'w'},
+                                       {"write-o", require_arg, 'w'},
+                                       {"write", require_arg, 'w'},
+                                       {"writ", require_arg, 'w'},
+                                       {"wri", require_arg, 'w'},
+                                       {"wr", require_arg, 'w'},
+                                       {NULL, 0, '\0'}};
 
 struct options {
     long        io_types;            /* bitmask of which I/O types to test   */
@@ -993,19 +993,19 @@ parse_command_line(int argc, const char *argv[])
     cl_opts->h5_extendable = FALSE; /* Use extendable dataset */
     cl_opts->verify        = FALSE; /* No Verify data correctness by default */
 
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'a':
-                cl_opts->h5_alignment = parse_size_directive(H5_optarg);
+                cl_opts->h5_alignment = parse_size_directive(opt_arg);
                 break;
             case 'G':
-                cl_opts->page_size = parse_size_directive(H5_optarg);
+                cl_opts->page_size = parse_size_directive(opt_arg);
                 break;
             case 'b':
-                cl_opts->page_buffer_size = parse_size_directive(H5_optarg);
+                cl_opts->page_buffer_size = parse_size_directive(opt_arg);
                 break;
             case 'A': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
                 while (end && *end != '\0') {
                     char buf[10];
 
@@ -1043,7 +1043,7 @@ parse_command_line(int argc, const char *argv[])
                 /* Turn on chunked HDF5 dataset creation */
                 cl_opts->h5_use_chunks = 1;
                 {
-                    const char *end = H5_optarg;
+                    const char *end = opt_arg;
                     int         j   = 0;
 
                     while (end && *end != '\0') {
@@ -1070,7 +1070,7 @@ parse_command_line(int argc, const char *argv[])
                 break;
 
             case 'D': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
 
                 while (end && *end != '\0') {
                     char buf[10];
@@ -1126,7 +1126,7 @@ parse_command_line(int argc, const char *argv[])
 
             break;
             case 'e': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {
@@ -1153,38 +1153,38 @@ parse_command_line(int argc, const char *argv[])
             break;
 
             case 'i':
-                cl_opts->num_iters = HDatoi(H5_optarg);
+                cl_opts->num_iters = HDatoi(opt_arg);
                 break;
             case 'o':
-                cl_opts->output_file = H5_optarg;
+                cl_opts->output_file = opt_arg;
                 break;
             case 'T':
-                cl_opts->h5_threshold = parse_size_directive(H5_optarg);
+                cl_opts->h5_threshold = parse_size_directive(opt_arg);
                 break;
             case 'v':
-                if (!HDstrcasecmp(H5_optarg, "sec2")) {
+                if (!HDstrcasecmp(opt_arg, "sec2")) {
                     cl_opts->vfd = sec2;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "stdio")) {
+                else if (!HDstrcasecmp(opt_arg, "stdio")) {
                     cl_opts->vfd = stdio;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "core")) {
+                else if (!HDstrcasecmp(opt_arg, "core")) {
                     cl_opts->vfd = core;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "split")) {
+                else if (!HDstrcasecmp(opt_arg, "split")) {
                     cl_opts->vfd = split;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "multi")) {
+                else if (!HDstrcasecmp(opt_arg, "multi")) {
                     cl_opts->vfd = multi;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "family")) {
+                else if (!HDstrcasecmp(opt_arg, "family")) {
                     cl_opts->vfd = family;
                 }
-                else if (!HDstrcasecmp(H5_optarg, "direct")) {
+                else if (!HDstrcasecmp(opt_arg, "direct")) {
                     cl_opts->vfd = direct;
                 }
                 else {
-                    HDfprintf(stderr, "sio_perf: invalid --api option %s\n", H5_optarg);
+                    HDfprintf(stderr, "sio_perf: invalid --api option %s\n", opt_arg);
                     HDexit(EXIT_FAILURE);
                 }
                 break;
@@ -1195,7 +1195,7 @@ parse_command_line(int argc, const char *argv[])
                 cl_opts->h5_extendable = TRUE;
                 break;
             case 'x': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {
@@ -1222,7 +1222,7 @@ parse_command_line(int argc, const char *argv[])
             break;
 
             case 'r': {
-                const char *end = H5_optarg;
+                const char *end = opt_arg;
                 int         j   = 0;
 
                 while (end && *end != '\0') {

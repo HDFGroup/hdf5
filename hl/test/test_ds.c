@@ -5205,8 +5205,6 @@ test_attach_detach(void)
 
     HL_TESTING2("permutations of attaching and detaching");
 
-    gid = var1_id = var2_id = var3_id = H5I_INVALID_HID;
-
     if ((fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
 

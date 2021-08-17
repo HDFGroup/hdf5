@@ -26,36 +26,64 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
+/* include the pthread header */
+#ifdef H5_HAVE_THREADSAFE
+#ifdef H5_HAVE_WIN32_API
+#ifndef H5_HAVE_WIN_THREADS
+#ifdef H5_HAVE_PTHREAD_H
+#include <pthread.h>
+#endif /* H5_HAVE_PTHREAD_H */
+#endif /* H5_HAVE_WIN_THREADS */
+#else  /* H5_HAVE_WIN32_API */
+#ifdef H5_HAVE_PTHREAD_H
+#include <pthread.h>
+#endif /* H5_HAVE_PTHREAD_H */
+#endif /* H5_HAVE_WIN32_API */
+#endif /* H5_HAVE_THREADSAFE */
+
+/*
+ * Include ANSI-C header files.
+ */
+#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <float.h>
+#include <limits.h>
 #include <math.h>
 #include <signal.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-
-/* POSIX headers */
-#ifdef H5_HAVE_SYS_TIME_H
-#include <sys/time.h>
-#endif
-#ifdef H5_HAVE_UNISTD_H
-#include <pwd.h>
-#include <unistd.h>
-#include <sys/wait.h>
-#endif
-
-/* Include the Pthreads header, if necessary */
-#if defined(H5_HAVE_THREADSAFE) && defined(H5_HAVE_PTHREAD_H)
-#include <pthread.h>
 #endif
 
 /*
- * The `struct stat' data type for stat() and fstat(). This is a POSIX file
- * but often apears on non-POSIX systems also.  The `struct stat' is required
- * for HDF5 to compile, although only a few fields are actually used.
+ * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
+ * compliant. Otherwise all bets are off.
+ */
+#ifdef H5_HAVE_UNISTD_H
+#include <sys/types.h>
+#include <unistd.h>
+#endif
+#ifdef _POSIX_VERSION
+#include <sys/wait.h>
+#include <pwd.h>
+#endif
+
+/*
+ * C9x integer types
+ */
+#ifndef __cplusplus
+#ifdef H5_HAVE_STDINT_H
+#include <stdint.h>
+#endif
+#endif
+
+/*
+ * The `struct stat' data type for stat() and fstat(). This is a Posix file
+ * but often apears on non-Posix systems also.  The `struct stat' is required
+ * for hdf5 to compile, although only a few fields are actually used.
  */
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -111,6 +139,21 @@
 #endif
 
 /*
+ * System information. These are needed on the DEC Alpha to turn off fixing
+ * of unaligned accesses by the operating system during detection of
+ * alignment constraints in H5detect.c:main().
+ */
+#ifdef H5_HAVE_SYS_SYSINFO_H
+#include <sys/sysinfo.h>
+#endif
+#ifdef H5_HAVE_SYS_PROC_H
+#include <sys/proc.h>
+#endif
+#ifdef H5_HAVE_IO_H
+#include <io.h>
+#endif
+
+/*
  * Dynamic library handling.  These are needed for dynamically loading I/O
  * filters and VFDs.
  */
@@ -130,20 +173,20 @@
 #define H5_DEFAULT_VOL H5VL_NATIVE
 
 #ifdef H5_HAVE_WIN32_API
-
 /* The following two defines must be before any windows headers are included */
 #define WIN32_LEAN_AND_MEAN /* Exclude rarely-used stuff from Windows headers */
 #define NOGDI               /* Exclude Graphic Display Interface macros */
 
-#include <windows.h>
-
-#include <direct.h>   /* For _getcwd() */
-#include <io.h>       /* POSIX I/O */
-#include <winsock2.h> /* For GetUserName() */
+#ifdef H5_HAVE_WINSOCK2_H
+#include <winsock2.h>
+#endif
 
 #ifdef H5_HAVE_THREADSAFE
 #include <process.h> /* For _beginthread() */
 #endif
+
+#include <windows.h>
+#include <direct.h> /* For _getcwd() */
 
 #endif /*H5_HAVE_WIN32_API*/
 
@@ -2522,57 +2565,6 @@ H5_DLL double H5_get_time(void);
 /* Functions for building paths, etc. */
 H5_DLL herr_t H5_build_extpath(const char *name, char **extpath /*out*/);
 H5_DLL herr_t H5_combine_path(const char *path1, const char *path2, char **full_name /*out*/);
-
-/* getopt(3) equivalent that papers over the lack of long options on BSD
- * and lack of Windows support.
- */
-H5_DLLVAR int         H5_opterr; /* get_option prints errors if this is on */
-H5_DLLVAR int         H5_optind; /* token pointer */
-H5_DLLVAR const char *H5_optarg; /* flag argument (or value) */
-
-enum h5_arg_level {
-    no_arg = 0,  /* doesn't take an argument     */
-    require_arg, /* requires an argument          */
-    optional_arg /* argument is optional         */
-};
-
-/*
- * get_option determines which options are specified on the command line and
- * returns a pointer to any arguments possibly associated with the option in
- * the ``H5_optarg'' variable. get_option returns the shortname equivalent of
- * the option. The long options are specified in the following way:
- *
- * struct h5_long_options foo[] = {
- *   { "filename", require_arg, 'f' },
- *   { "append", no_arg, 'a' },
- *   { "width", require_arg, 'w' },
- *   { NULL, 0, 0 }
- * };
- *
- * Long named options can have arguments specified as either:
- *
- *   ``--param=arg'' or ``--param arg''
- *
- * Short named options can have arguments specified as either:
- *
- *   ``-w80'' or ``-w 80''
- *
- * and can have more than one short named option specified at one time:
- *
- *   -aw80
- *
- * in which case those options which expect an argument need to come at the
- * end.
- */
-struct h5_long_options {
-    const char *      name;     /* Name of the long option */
-    enum h5_arg_level has_arg;  /* Whether we should look for an arg */
-    char              shortval; /* The shortname equivalent of long arg
-                                 * this gets returned from get_option
-                                 */
-};
-
-H5_DLL int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
 
 #ifdef H5_HAVE_PARALLEL
 /* Generic MPI functions */

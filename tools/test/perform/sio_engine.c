@@ -16,10 +16,12 @@
 
 #include "hdf5.h"
 
+#ifdef H5_STDC_HEADERS
 #include <errno.h>
 #include <fcntl.h>
 #include <stdio.h>
 #include <stdlib.h>
+#endif
 
 #ifdef H5_HAVE_UNISTD_H
 #include <sys/types.h>
@@ -1264,6 +1266,13 @@ done:
  * Programmer:  Albert Cheng 2001/12/12
  * Modifications: Support for file drivers. Christian Chilan, April, 2008
  */
+/* Disable warning for "format not a string literal" here -QAK */
+/*
+ *      This pragma only needs to surround the snprintf() calls with
+ *      'temp' in the code below, but early (4.4.7, at least) gcc only
+ *      allows diagnostic pragmas to be toggled outside of functions.
+ */
+H5_GCC_DIAG_OFF("format-nonliteral")
 static void
 do_cleanupfile(iotype iot, char *filename)
 {
@@ -1326,3 +1335,4 @@ do_cleanupfile(iotype iot, char *filename)
         }
     }
 }
+H5_GCC_DIAG_ON("format-nonliteral")

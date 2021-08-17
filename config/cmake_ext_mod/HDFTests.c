@@ -88,6 +88,14 @@ int main(void)
 }
 #endif
 
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+int main() { return 0; }
+#endif /* STDC_HEADERS */
+
 
 #ifdef HAVE_ATTRIBUTE
 
