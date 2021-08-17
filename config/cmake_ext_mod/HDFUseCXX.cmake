@@ -32,68 +32,16 @@ endif ()
 include (CheckIncludeFileCXX)
 include (TestForSTDNamespace)
 
-# For other CXX specific tests, use this MACRO.
-macro (HDF_CXX_FUNCTION_TEST OTHER_TEST)
-  if (NOT DEFINED ${OTHER_TEST})
-    set (MACRO_CHECK_FUNCTION_DEFINITIONS "-D${OTHER_TEST} ${CMAKE_REQUIRED_FLAGS}")
-    set (OTHER_TEST_ADD_LIBRARIES)
-    if (HDF5_REQUIRED_LIBRARIES)
-      set (OTHER_TEST_ADD_LIBRARIES "-DLINK_LIBRARIES:STRING=${HDF5_REQUIRED_LIBRARIES}")
-    endif ()
-
-    foreach (def
-        HAVE_SYS_TIME_H
-        HAVE_UNISTD_H
-        HAVE_SYS_TYPES_H
-        HAVE_SYS_SOCKET_H
-        HAVE_SYS_FILE_H
-    )
-      if ("${${HDF_PREFIX}_${def}}")
-        set (MACRO_CHECK_FUNCTION_DEFINITIONS "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D${def}")
-      endif ()
-    endforeach ()
-
-    if (LARGEFILE)
-      set (MACRO_CHECK_FUNCTION_DEFINITIONS
-          "${MACRO_CHECK_FUNCTION_DEFINITIONS} -D_FILE_OFFSET_BITS=64 -D_LARGEFILE64_SOURCE -D_LARGEFILE_SOURCE"
-      )
-    endif ()
-
-    if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-      message (TRACE "Performing ${OTHER_TEST}")
-    endif ()
-    TRY_COMPILE (${OTHER_TEST}
-        ${CMAKE_BINARY_DIR}
-        ${HDF_RESOURCES_EXT_DIR}/HDFCXXTests.cpp
-        CMAKE_FLAGS -DCOMPILE_DEFINITIONS:STRING=${MACRO_CHECK_FUNCTION_DEFINITIONS}
-        "${OTHER_TEST_ADD_LIBRARIES}"
-        OUTPUT_VARIABLE OUTPUT
-    )
-    if (${OTHER_TEST} EQUAL 0)
-      set (${OTHER_TEST} 1 CACHE INTERNAL "CXX test ${FUNCTION}")
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "Performing CXX Test ${OTHER_TEST} - Success")
-      endif ()
-    else ()
-      if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
-        message (VERBOSE "Performing CXX Test ${OTHER_TEST} - Failed")
-      endif ()
-      set (${OTHER_TEST} "" CACHE INTERNAL "CXX test ${FUNCTION}")
-      file (APPEND ${CMAKE_BINARY_DIR}/CMakeFiles/CMakeError.log
-          "Performing CXX Test ${OTHER_TEST} failed with the following output:\n"
-          "${OUTPUT}\n"
-      )
-    endif ()
+# IF the c compiler found stdint, check the C++ as well. On some systems this
+# file will be found by C but not C++, only do this test IF the C++ compiler
+# has been initialized (e.g. the project also includes some c++)
+if (${HDF_PREFIX}_HAVE_STDINT_H AND CMAKE_CXX_COMPILER_LOADED)
+  CHECK_INCLUDE_FILE_CXX ("stdint.h" ${HDF_PREFIX}_HAVE_STDINT_H_CXX)
+  if (NOT ${HDF_PREFIX}_HAVE_STDINT_H_CXX)
+    set (${HDF_PREFIX}_HAVE_STDINT_H "" CACHE INTERNAL "Have includes HAVE_STDINT_H")
+    set (USE_INCLUDES ${USE_INCLUDES} "stdint.h")
   endif ()
-endmacro ()
-
-#-----------------------------------------------------------------------------
-# Check a bunch of cxx functions
-#-----------------------------------------------------------------------------
-if (CMAKE_CXX_COMPILER_LOADED)
-  foreach (cxx_test
-      CXX_HAVE_OFFSETOF
-  )
-    HDF_CXX_FUNCTION_TEST (${cxx_test})
-  endforeach ()
 endif ()
+
+#Always define
+set (${HDF_PREFIX}_CXX_HAVE_OFFSETOF 1)
