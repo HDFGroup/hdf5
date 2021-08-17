@@ -44,7 +44,9 @@
 #include <sys/time.h>
 #endif
 #ifdef H5_HAVE_UNISTD_H
+#ifdef H5_HAVE_GETPWUID
 #include <pwd.h>
+#endif
 #include <unistd.h>
 #include <sys/wait.h>
 #endif

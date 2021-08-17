@@ -631,6 +631,12 @@
    PTHREAD_SCOPE_SYSTEM) call. */
 #cmakedefine H5_SYSTEM_SCOPE_THREADS @H5_SYSTEM_SCOPE_THREADS@
 
+/* Define using v1.6 public API symbols by default */
+#cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
+
+/* Define using v1.8 public API symbols by default */
+#cmakedefine H5_USE_18_API_DEFAULT @H5_USE_18_API_DEFAULT@
+
 /* Define using v1.10 public API symbols by default */
 #cmakedefine H5_USE_110_API_DEFAULT @H5_USE_110_API_DEFAULT@
 
@@ -639,12 +645,6 @@
 
 /* Define using v1.14 public API symbols by default */
 #cmakedefine H5_USE_114_API_DEFAULT @H5_USE_114_API_DEFAULT@
-
-/* Define using v1.6 public API symbols by default */
-#cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
-
-/* Define using v1.8 public API symbols by default */
-#cmakedefine H5_USE_18_API_DEFAULT @H5_USE_18_API_DEFAULT@
 
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@
