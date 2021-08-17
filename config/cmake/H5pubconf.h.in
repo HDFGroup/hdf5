@@ -721,9 +721,6 @@
 /* Define using v1.12 public API symbols by default */
 #cmakedefine H5_USE_112_API_DEFAULT @H5_USE_112_API_DEFAULT@
 
-/* Define using v1.14 public API symbols by default */
-#cmakedefine H5_USE_114_API_DEFAULT @H5_USE_114_API_DEFAULT@
-
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@
 
