@@ -179,7 +179,7 @@ main(int argc, char **argv)
              scanned_content.tail);
         H5Dclose(dset[which]);
 
-        if(content[which] != NULL) {
+        if (content[which] != NULL) {
             HDfree(content[which]);
             content[which] = NULL;
         }

@@ -1507,10 +1507,10 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
     unsigned int tmp_val;
     char         tmp_vl_val[sizeof("attr-9999999999")];
     char *       read_vl_which;
-    bool         is_vl         = false;
-    hid_t        aid           = H5I_INVALID_HID;
-    hid_t        atid          = H5I_INVALID_HID;
-    bool         ret           = FALSE;
+    bool         is_vl = false;
+    hid_t        aid   = H5I_INVALID_HID;
+    hid_t        atid  = H5I_INVALID_HID;
+    bool         ret   = FALSE;
 
     HDassert(did != badhid);
     HDassert(action == ADD_ATTR || action == MODIFY_ATTR);
@@ -1954,8 +1954,8 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID;
-    hid_t                 fcpl = H5I_INVALID_HID;
+    hid_t                 fapl   = H5I_INVALID_HID;
+    hid_t                 fcpl   = H5I_INVALID_HID;
     bool                  writer = FALSE;
     state_t               s;
     const char *          personality;
