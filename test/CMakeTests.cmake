@@ -318,14 +318,6 @@ set (test_CLEANFILES
     tvlstr.h5
     tvlstr2.h5
     twriteorder.dat
-    flush.h5
-    flush-swmr.h5
-    noflush.h5
-    noflush-swmr.h5
-    flush_extend.h5
-    flush_extend-swmr.h5
-    noflush_extend.h5
-    noflush_extend-swmr.h5
     enum1.h5
     titerate.h5
     ttsafe.h5
@@ -654,10 +646,10 @@ set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     WILL_FAIL "true"
 )
+# release + 1 should pass
 add_test (NAME H5TEST-tcheck_version-release COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tr")
 set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-    WILL_FAIL "true"
 )
 
 ##############################################################################
@@ -869,7 +861,7 @@ if (BUILD_SHARED_LIBS)
 ##############################################################################
 endif ()
 
-option (TEST_SHELL_SCRIPTS "Enable shell script tests" OFF)
+option (TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()

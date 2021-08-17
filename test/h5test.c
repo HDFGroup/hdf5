@@ -1237,9 +1237,10 @@ h5_set_info_object(void)
                 valp++;
 
             /* copy key/value pair into temporary buffer */
-            len     = strcspn(valp, ";");
-            next    = &valp[len];
-            key_val = (char *)HDcalloc(1, len + 1);
+            len  = HDstrcspn(valp, ";");
+            next = &valp[len];
+            if (NULL == (key_val = (char *)HDcalloc(1, len + 1)))
+                return -1;
 
             /* increment the next pointer past the terminating semicolon */
             if (*next == ';')
