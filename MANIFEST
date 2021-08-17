@@ -203,7 +203,8 @@
 ./config/intel-warnings/18
 ./config/intel-warnings/developer-general
 ./config/intel-warnings/general
-./config/intel-warnings/general-19
+./config/intel-warnings/win-developer-general
+./config/intel-warnings/win-general
 ./config/intel-warnings/ifort-general
 
 ./config/site-specific/BlankForm

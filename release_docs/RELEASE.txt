@@ -182,6 +182,15 @@ Bug Fixes since HDF5-1.12.1 release
 
     Configuration
     -------------
+    - Fixed CMake C++ compiler flags
+
+      A recent refactoring of the C++ configure files accidently removed the
+      file that executed the enable_language command for C++ needed by the
+      HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
+      including adding support for windows platforms.
+
+      (ADB - 2021/08/10)
+
     - Better support for libaec (open-source Szip library) in CMake
 
       Implemented better support for libaec 1.0.5 (or later) library. This version
@@ -196,7 +205,6 @@ Bug Fixes since HDF5-1.12.1 release
       libaec 1.0.4 when building HDF5. This has been resolved in libaec 1.0.5.
 
       (JWSB - 2021/06/22)
-
 
 
     Fortran API
