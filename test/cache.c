@@ -1046,7 +1046,7 @@ smoke_check_5(int express_test, unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.1,
+        /* double      min_clean_fraction     = */ 0.1f,
 
         /* size_t      max_size               = */ (32 * 1024 * 1025),
         /* size_t      min_size               = */ (512 * 1024),
@@ -1055,23 +1055,23 @@ smoke_check_5(int express_test, unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.9,
+        /* double      decrement              = */ 0.9f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -1079,7 +1079,7 @@ smoke_check_5(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.5
+        /* double      empty_reserve          = */ 0.5f
     };
 
     if (paged)
@@ -1278,7 +1278,7 @@ smoke_check_6(int express_test, unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.1,
+        /* double      min_clean_fraction     = */ 0.1f,
 
         /* size_t      max_size               = */ (32 * 1024 * 1025),
         /* size_t      min_size               = */ (512 * 1024),
@@ -1287,23 +1287,23 @@ smoke_check_6(int express_test, unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.9,
+        /* double      decrement              = */ 0.9f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -1311,7 +1311,7 @@ smoke_check_6(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.05
+        /* double      empty_reserve          = */ 0.05f
     };
 
     if (paged)
@@ -1510,7 +1510,7 @@ smoke_check_7(int express_test, unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.1,
+        /* double      min_clean_fraction     = */ 0.1f,
 
         /* size_t      max_size               = */ (32 * 1024 * 1025),
         /* size_t      min_size               = */ (512 * 1024),
@@ -1519,24 +1519,24 @@ smoke_check_7(int express_test, unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (8 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */
         H5C_decr__age_out_with_threshold,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.9,
+        /* double      decrement              = */ 0.9f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -1544,7 +1544,7 @@ smoke_check_7(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.1
+        /* double      empty_reserve          = */ 0.1f
     };
 
     if (paged)
@@ -1743,7 +1743,7 @@ smoke_check_8(int express_test, unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.1,
+        /* double      min_clean_fraction     = */ 0.1f,
 
         /* size_t      max_size               = */ (32 * 1024 * 1025),
         /* size_t      min_size               = */ (512 * 1024),
@@ -1752,24 +1752,24 @@ smoke_check_8(int express_test, unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */
         H5C_decr__age_out_with_threshold,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.9,
+        /* double      decrement              = */ 0.9f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -1777,7 +1777,7 @@ smoke_check_8(int express_test, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.1
+        /* double      empty_reserve          = */ 0.1f
     };
 
     if (paged)
@@ -8068,6 +8068,19 @@ check_flush_cache__flush_op_test(H5F_t *file_ptr, int test_num, unsigned int flu
         if ((check[i].entry_num != i) || (check[i].entry_type < 0) ||
             (check[i].entry_type >= NUMBER_OF_ENTRY_TYPES) || (check[i].entry_index < 0) ||
             (check[i].entry_index > max_indices[check[i].entry_type]) ||
+#ifndef H5_HAVE_STDBOOL_H
+            /* Check for nonsense values if hbool_t is an integral
+             * type instead of a real Boolean.
+             */
+            ((check[i].in_cache != TRUE) && (check[i].in_cache != FALSE)) ||
+            ((check[i].at_main_addr != TRUE) && (check[i].at_main_addr != FALSE)) ||
+            ((check[i].is_dirty != TRUE) && (check[i].is_dirty != FALSE)) ||
+            ((check[i].is_protected != TRUE) && (check[i].is_protected != FALSE)) ||
+            ((check[i].is_pinned != TRUE) && (check[i].is_pinned != FALSE)) ||
+            ((check[i].expected_deserialized != TRUE) && (check[i].expected_deserialized != FALSE)) ||
+            ((check[i].expected_serialized != TRUE) && (check[i].expected_serialized != FALSE)) ||
+            ((check[i].expected_destroyed != TRUE) && (check[i].expected_destroyed != FALSE)) ||
+#endif /* H5_HAVE_STDBOOL_H */
             (check[i].expected_size <= (size_t)0)) {
 
             pass = FALSE;
@@ -16989,7 +17002,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (512 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.5,
+        /* double      min_clean_fraction     = */ 0.5f,
 
         /* size_t      max_size               = */ (14 * 1024 * 1024),
         /* size_t      min_size               = */ (512 * 1024),
@@ -16998,23 +17011,23 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.1,
+        /* double      decrement              = */ 0.1f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -17022,7 +17035,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.05};
+        /* double      empty_reserve          = */ 0.05f};
 
     if (paged)
         TESTING("automatic cache resizing (paged aggregation)")
@@ -17346,7 +17359,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1000 * 1000 + 10;
 
-        auto_size_ctl.min_clean_fraction = 0.1;
+        auto_size_ctl.min_clean_fraction = 0.1f;
 
         auto_size_ctl.max_size = 8 * 1000 * 1000;
         auto_size_ctl.min_size = 500 * 1000;
@@ -17355,22 +17368,22 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1000 * 1000);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1000 * 1000);
@@ -17378,7 +17391,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
         if (result != SUCCEED) {
@@ -17661,7 +17674,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -17670,22 +17683,22 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 4.0;
+        auto_size_ctl.increment = 4.0f;
 
         auto_size_ctl.apply_max_increment = FALSE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.25;
+        auto_size_ctl.decrement = 0.25f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -17693,7 +17706,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
         if (result != SUCCEED) {
@@ -17837,7 +17850,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -17846,22 +17859,22 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -17869,7 +17882,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = FALSE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
         if (result != SUCCEED) {
@@ -18205,7 +18218,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -18214,22 +18227,22 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -18237,7 +18250,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = FALSE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -18687,7 +18700,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -18696,22 +18709,22 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -18719,7 +18732,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.5; /* for ease of testing */
+        auto_size_ctl.empty_reserve       = 0.5f; /* for ease of testing */
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -19064,7 +19077,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -19073,16 +19086,16 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__off;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
@@ -19091,7 +19104,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
          */
         auto_size_ctl.upper_hr_threshold = 0.999; /* for ease of testing */
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -19099,7 +19112,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1; /* for ease of testing */
 
         auto_size_ctl.apply_empty_reserve = FALSE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
         if (result != SUCCEED) {
@@ -19311,7 +19324,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1000 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1000 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -19320,22 +19333,22 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.999; /* for ease of testing */
+        auto_size_ctl.upper_hr_threshold = 0.999f; /* for ease of testing */
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1000 * 1024);
@@ -19343,7 +19356,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1; /* for ease of testing */
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.5; /* for ease of testing */
+        auto_size_ctl.empty_reserve       = 0.5f; /* for ease of testing */
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
         if (result != SUCCEED) {
@@ -19853,7 +19866,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 64 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 1024 * 1024;
         auto_size_ctl.min_size = 5 * 1024;
@@ -19862,22 +19875,22 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (32 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__add_space;
-        auto_size_ctl.flash_multiple  = 1.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 1.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.999; /* for ease of testing */
+        auto_size_ctl.upper_hr_threshold = 0.999f; /* for ease of testing */
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1000 * 1024);
@@ -19885,7 +19898,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1; /* for ease of testing */
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.5; /* for ease of testing */
+        auto_size_ctl.empty_reserve       = 0.5f; /* for ease of testing */
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
         if (result != SUCCEED) {
@@ -20587,7 +20600,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 20 * 1024;
         auto_size_ctl.min_size = 4 * 1024;
@@ -20596,22 +20609,22 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__add_space;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.4;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.4f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.999; /* for ease of testing */
+        auto_size_ctl.upper_hr_threshold = 0.999f; /* for ease of testing */
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (2 * 1024);
@@ -20619,7 +20632,7 @@ check_auto_cache_resize(hbool_t cork_ageout, unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1; /* for ease of testing */
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.5; /* for ease of testing */
+        auto_size_ctl.empty_reserve       = 0.5f; /* for ease of testing */
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
         if (result != SUCCEED) {
@@ -20844,7 +20857,7 @@ check_auto_cache_resize_disable(unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (512 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.5,
+        /* double      min_clean_fraction     = */ 0.5f,
 
         /* size_t      max_size               = */ (14 * 1024 * 1024),
         /* size_t      min_size               = */ (512 * 1024),
@@ -20853,23 +20866,23 @@ check_auto_cache_resize_disable(unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 1.0,
-        /* double      flash_threshold        = */ 0.25,
+        /* double      flash_multiple         = */ 1.0f,
+        /* double      flash_threshold        = */ 0.25f,
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.1,
+        /* double      decrement              = */ 0.1f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -20877,7 +20890,7 @@ check_auto_cache_resize_disable(unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.05};
+        /* double      empty_reserve          = */ 0.05f};
 
     if (paged)
         TESTING("automatic cache resize disable (paged aggregation)")
@@ -20949,7 +20962,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -20958,22 +20971,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 1.0; /* disable size increases */
+        auto_size_ctl.increment = 1.0f; /* disable size increases */
 
         auto_size_ctl.apply_max_increment = FALSE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -20981,7 +20994,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -21101,7 +21114,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -21110,21 +21123,21 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.0; /* disable size increases */
+        auto_size_ctl.lower_hr_threshold = 0.0f; /* disable size increases */
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = FALSE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
-        auto_size_ctl.decrement          = 0.5;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
+        auto_size_ctl.decrement          = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -21132,7 +21145,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -21252,7 +21265,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -21261,22 +21274,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__off;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = FALSE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -21284,7 +21297,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -21403,7 +21416,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -21412,22 +21425,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 1.0; /* disable size decreases */
+        auto_size_ctl.decrement = 1.0f; /* disable size decreases */
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -21435,7 +21448,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -21557,7 +21570,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -21566,22 +21579,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 1.0; /* disable size decreases */
+        auto_size_ctl.upper_hr_threshold = 1.0f; /* disable size decreases */
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -21589,7 +21602,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -21707,7 +21720,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -21716,22 +21729,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__off;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -21739,7 +21752,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -21859,7 +21872,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -21868,22 +21881,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = 0; /* disable decrement */
@@ -21891,7 +21904,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -22076,7 +22089,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -22085,22 +22098,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -22108,7 +22121,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 1.0; /* disable decrement */
+        auto_size_ctl.empty_reserve       = 1.0f; /* disable decrement */
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -22300,7 +22313,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -22309,22 +22322,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
-        auto_size_ctl.upper_hr_threshold = 1.0;
+        auto_size_ctl.upper_hr_threshold = 1.0f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -22332,7 +22345,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -22526,7 +22539,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 2 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -22535,22 +22548,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.0; /* disable size increases */
+        auto_size_ctl.lower_hr_threshold = 0.0f; /* disable size increases */
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 1.0; /* disable size decreases */
+        auto_size_ctl.upper_hr_threshold = 1.0f; /* disable size decreases */
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -22558,7 +22571,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -22646,7 +22659,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.25;
+        auto_size_ctl.min_clean_fraction = 0.25f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -22655,22 +22668,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 1.0; /* disable size increment */
+        auto_size_ctl.increment = 1.0f; /* disable size increment */
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 1.0; /* disable size decrement */
+        auto_size_ctl.decrement = 1.0f; /* disable size decrement */
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -22678,7 +22691,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -22766,7 +22779,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = FALSE;
         auto_size_ctl.initial_size     = 2 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 6 * 1024 * 1024; /* no resize */
         auto_size_ctl.min_size = 6 * 1024 * 1024; /* no resize */
@@ -22775,22 +22788,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -22798,7 +22811,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -22886,7 +22899,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.25;
+        auto_size_ctl.min_clean_fraction = 0.25f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -22895,22 +22908,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 1.0; /* disable size increment */
+        auto_size_ctl.increment = 1.0f; /* disable size increment */
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 1.0; /* disable size decrement */
+        auto_size_ctl.upper_hr_threshold = 1.0f; /* disable size decrement */
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -22918,7 +22931,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -23006,7 +23019,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -23015,22 +23028,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.0; /* disable size increment */
+        auto_size_ctl.lower_hr_threshold = 0.0f; /* disable size increment */
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 1.0; /* disable size decrement */
+        auto_size_ctl.decrement = 1.0f; /* disable size decrement */
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -23038,7 +23051,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -23126,7 +23139,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 16 * 1024 * 1024;
         auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -23135,22 +23148,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__off;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__off;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -23158,7 +23171,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -23273,7 +23286,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 64 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 256 * 1024;
         auto_size_ctl.min_size = 32 * 1024;
@@ -23282,22 +23295,22 @@ check_auto_cache_resize_disable(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (2 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 1.0;
-        auto_size_ctl.flash_threshold = 0.25;
+        auto_size_ctl.flash_multiple  = 1.0f;
+        auto_size_ctl.flash_threshold = 0.25f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = TRUE;
         auto_size_ctl.max_decrement       = (1 * 1024);
@@ -23305,7 +23318,7 @@ check_auto_cache_resize_disable(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 3;
 
         auto_size_ctl.apply_empty_reserve = TRUE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -23443,7 +23456,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (512 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.5,
+        /* double      min_clean_fraction     = */ 0.5f,
 
         /* size_t      max_size               = */ (14 * 1024 * 1024),
         /* size_t      min_size               = */ (512 * 1024),
@@ -23452,23 +23465,23 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.1,
+        /* double      decrement              = */ 0.1f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -23476,7 +23489,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.05};
+        /* double      empty_reserve          = */ 0.05f};
 
     if (paged)
         TESTING("automatic cache resize epoch marker management (paged aggr)")
@@ -23530,7 +23543,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -23539,22 +23552,22 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__off;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -23562,7 +23575,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 10;
 
         auto_size_ctl.apply_empty_reserve = FALSE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -23694,7 +23707,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -23703,22 +23716,22 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__off;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -23726,7 +23739,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1;
 
         auto_size_ctl.apply_empty_reserve = FALSE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -23812,7 +23825,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -23821,22 +23834,22 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__off;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -23844,7 +23857,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 1;
 
         auto_size_ctl.apply_empty_reserve = FALSE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -23890,7 +23903,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -23899,22 +23912,22 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__off;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -23922,7 +23935,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 10;
 
         auto_size_ctl.apply_empty_reserve = FALSE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -23999,7 +24012,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.set_initial_size = TRUE;
         auto_size_ctl.initial_size     = 8 * 1024 * 1024;
 
-        auto_size_ctl.min_clean_fraction = 0.5;
+        auto_size_ctl.min_clean_fraction = 0.5f;
 
         auto_size_ctl.max_size = 8 * 1024 * 1024;
         auto_size_ctl.min_size = 512 * 1024;
@@ -24008,22 +24021,22 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
 
         auto_size_ctl.incr_mode = H5C_incr__off;
 
-        auto_size_ctl.lower_hr_threshold = 0.75;
+        auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        auto_size_ctl.increment = 2.0;
+        auto_size_ctl.increment = 2.0f;
 
         auto_size_ctl.apply_max_increment = TRUE;
         auto_size_ctl.max_increment       = (4 * 1024 * 1024);
 
         auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        auto_size_ctl.flash_multiple  = 2.0;
-        auto_size_ctl.flash_threshold = 0.5;
+        auto_size_ctl.flash_multiple  = 2.0f;
+        auto_size_ctl.flash_threshold = 0.5f;
 
         auto_size_ctl.decr_mode = H5C_decr__off;
 
-        auto_size_ctl.upper_hr_threshold = 0.995;
+        auto_size_ctl.upper_hr_threshold = 0.995f;
 
-        auto_size_ctl.decrement = 0.5;
+        auto_size_ctl.decrement = 0.5f;
 
         auto_size_ctl.apply_max_decrement = FALSE;
         auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24031,7 +24044,7 @@ check_auto_cache_resize_epoch_markers(unsigned paged)
         auto_size_ctl.epochs_before_eviction = 10;
 
         auto_size_ctl.apply_empty_reserve = FALSE;
-        auto_size_ctl.empty_reserve       = 0.05;
+        auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &auto_size_ctl);
 
@@ -24131,7 +24144,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (512 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.5,
+        /* double      min_clean_fraction     = */ 0.5f,
 
         /* size_t      max_size               = */ (16 * 1024 * 1024),
         /* size_t      min_size               = */ (512 * 1024),
@@ -24140,23 +24153,23 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__threshold,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.1,
+        /* double      decrement              = */ 0.1f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -24164,7 +24177,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.05};
+        /* double      empty_reserve          = */ 0.05f};
 
     H5C_auto_size_ctl_t invalid_auto_size_ctl;
     H5C_auto_size_ctl_t test_auto_size_ctl;
@@ -24234,7 +24247,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24243,22 +24256,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.7;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.7f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24266,7 +24279,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(NULL, &invalid_auto_size_ctl);
 
@@ -24303,7 +24316,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24312,22 +24325,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.7;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.7f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24335,7 +24348,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24373,7 +24386,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.initial_size     = 16 * 1024 * 1024 + 1;
         /* INVALID */
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24382,22 +24395,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24405,7 +24418,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24441,7 +24454,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.initial_size     = 1 * 1024 * 1024 - 1;
         /* INVALID */
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24450,22 +24463,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24473,7 +24486,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24510,7 +24523,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 1.00001; /* INVALID */
+        invalid_auto_size_ctl.min_clean_fraction = 1.00001f; /* INVALID */
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24519,22 +24532,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24542,7 +24555,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24577,7 +24590,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = -0.00001; /* INVALID */
+        invalid_auto_size_ctl.min_clean_fraction = -0.00001f; /* INVALID */
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24586,22 +24599,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24609,7 +24622,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24646,7 +24659,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = H5C__MAX_MAX_CACHE_SIZE + 1;
         /* INVALID */
@@ -24656,22 +24669,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24679,7 +24692,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24714,7 +24727,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 1 * 1024 * 1024;     /* INVALID */
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024 + 1; /*PAIR */
@@ -24723,22 +24736,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24746,7 +24759,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24781,7 +24794,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = H5C__MIN_MAX_CACHE_SIZE - 1;
@@ -24790,22 +24803,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24813,7 +24826,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24850,7 +24863,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24860,22 +24873,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24883,7 +24896,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24918,7 +24931,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24928,22 +24941,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -24951,7 +24964,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -24988,7 +25001,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -24997,22 +25010,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = (enum H5C_cache_incr_mode) - 1; /* INVALID */
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25020,7 +25033,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25055,7 +25068,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25064,22 +25077,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = (enum H5C_cache_incr_mode)2; /* INVALID */
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25087,7 +25100,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25124,7 +25137,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25133,22 +25146,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.7;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.7f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 1.01; /* INVALID */
+        invalid_auto_size_ctl.upper_hr_threshold = 1.01f; /* INVALID */
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25156,7 +25169,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25191,7 +25204,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25200,22 +25213,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.8; /* INVALID */
+        invalid_auto_size_ctl.lower_hr_threshold = 0.8f; /* INVALID */
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.7; /* INVALID */
+        invalid_auto_size_ctl.upper_hr_threshold = 0.7f; /* INVALID */
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25223,7 +25236,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25258,7 +25271,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.5;
+        invalid_auto_size_ctl.min_clean_fraction = 0.5f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25267,22 +25280,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = -0.0001; /* INVALID */
+        invalid_auto_size_ctl.lower_hr_threshold = -0.0001f; /* INVALID */
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25290,7 +25303,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25327,7 +25340,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25336,22 +25349,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 0.99999; /* INVALID */
+        invalid_auto_size_ctl.increment = 0.99999f; /* INVALID */
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.5;
+        invalid_auto_size_ctl.decrement = 0.5f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25359,7 +25372,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25396,7 +25409,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25405,22 +25418,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = (enum H5C_cache_flash_incr_mode) - 1; /* INVALID */
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25428,7 +25441,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25465,7 +25478,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25474,22 +25487,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__add_space;
-        invalid_auto_size_ctl.flash_multiple  = 0.09; /* INVALID */
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 0.09f; /* INVALID */
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25497,7 +25510,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25532,7 +25545,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25541,22 +25554,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__add_space;
-        invalid_auto_size_ctl.flash_multiple  = 10.01; /* INVALID */
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 10.01f; /* INVALID */
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25564,7 +25577,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25601,7 +25614,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25610,22 +25623,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__add_space;
-        invalid_auto_size_ctl.flash_multiple  = 1.0;
-        invalid_auto_size_ctl.flash_threshold = 0.09; /* INVALID */
+        invalid_auto_size_ctl.flash_multiple  = 1.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.09f; /* INVALID */
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25633,7 +25646,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25668,7 +25681,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25677,22 +25690,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__add_space;
-        invalid_auto_size_ctl.flash_multiple  = 1.0;
-        invalid_auto_size_ctl.flash_threshold = 1.001; /* INVALID */
+        invalid_auto_size_ctl.flash_multiple  = 1.0f;
+        invalid_auto_size_ctl.flash_threshold = 1.001f; /* INVALID */
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25700,7 +25713,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25737,7 +25750,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25746,22 +25759,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = (enum H5C_cache_decr_mode) - 1; /* INVALID */
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25769,7 +25782,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25804,7 +25817,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25813,22 +25826,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = (enum H5C_cache_decr_mode)4; /* INVALID */
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25836,7 +25849,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25873,7 +25886,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25882,22 +25895,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 1.000001; /* INVALID */
+        invalid_auto_size_ctl.decrement = 1.000001f; /* INVALID */
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25905,7 +25918,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -25940,7 +25953,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -25949,22 +25962,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = -0.000001; /* INVALID */
+        invalid_auto_size_ctl.decrement = -0.000001f; /* INVALID */
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -25972,7 +25985,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -26009,7 +26022,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -26018,22 +26031,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -26041,7 +26054,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 0; /* INVALID */
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -26076,7 +26089,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -26085,22 +26098,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -26108,7 +26121,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = H5C__MAX_EPOCH_MARKERS + 1; /* INVALID */
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -26145,7 +26158,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -26154,22 +26167,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__age_out;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -26177,7 +26190,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = 3;
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = -0.0000001; /* INVALID */
+        invalid_auto_size_ctl.empty_reserve       = -0.0000001f; /* INVALID */
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -26212,7 +26225,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.set_initial_size = TRUE;
         invalid_auto_size_ctl.initial_size     = 4 * 1024 * 1024;
 
-        invalid_auto_size_ctl.min_clean_fraction = 0.1;
+        invalid_auto_size_ctl.min_clean_fraction = 0.1f;
 
         invalid_auto_size_ctl.max_size = 16 * 1024 * 1024;
         invalid_auto_size_ctl.min_size = 1 * 1024 * 1024;
@@ -26221,22 +26234,22 @@ check_auto_cache_resize_input_errs(unsigned paged)
 
         invalid_auto_size_ctl.incr_mode = H5C_incr__threshold;
 
-        invalid_auto_size_ctl.lower_hr_threshold = 0.75;
+        invalid_auto_size_ctl.lower_hr_threshold = 0.75f;
 
-        invalid_auto_size_ctl.increment = 2.0;
+        invalid_auto_size_ctl.increment = 2.0f;
 
         invalid_auto_size_ctl.apply_max_increment = TRUE;
         invalid_auto_size_ctl.max_increment       = (2 * 1024 * 1024);
 
         invalid_auto_size_ctl.flash_incr_mode = H5C_flash_incr__off;
-        invalid_auto_size_ctl.flash_multiple  = 2.0;
-        invalid_auto_size_ctl.flash_threshold = 0.5;
+        invalid_auto_size_ctl.flash_multiple  = 2.0f;
+        invalid_auto_size_ctl.flash_threshold = 0.5f;
 
         invalid_auto_size_ctl.decr_mode = H5C_decr__age_out_with_threshold;
 
-        invalid_auto_size_ctl.upper_hr_threshold = 0.999;
+        invalid_auto_size_ctl.upper_hr_threshold = 0.999f;
 
-        invalid_auto_size_ctl.decrement = 0.9;
+        invalid_auto_size_ctl.decrement = 0.9f;
 
         invalid_auto_size_ctl.apply_max_decrement = TRUE;
         invalid_auto_size_ctl.max_decrement       = (1 * 1024 * 1024);
@@ -26244,7 +26257,7 @@ check_auto_cache_resize_input_errs(unsigned paged)
         invalid_auto_size_ctl.epochs_before_eviction = H5C__MAX_EPOCH_MARKERS + 1; /* INVALID */
 
         invalid_auto_size_ctl.apply_empty_reserve = TRUE;
-        invalid_auto_size_ctl.empty_reserve       = 0.05;
+        invalid_auto_size_ctl.empty_reserve       = 0.05f;
 
         result = H5C_set_cache_auto_resize_config(cache_ptr, &invalid_auto_size_ctl);
 
@@ -26372,7 +26385,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (1 * 1024 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.5,
+        /* double      min_clean_fraction     = */ 0.5f,
 
         /* size_t      max_size               = */ (16 * 1024 * 1025),
         /* size_t      min_size               = */ (512 * 1024),
@@ -26381,23 +26394,23 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__off,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__off,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.9,
+        /* double      decrement              = */ 0.9f,
 
         /* hbool_t     apply_max_decrement    = */ TRUE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -26405,7 +26418,7 @@ check_auto_cache_resize_aux_fcns(unsigned paged)
         /* int32_t     epochs_before_eviction = */ 3,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.5
+        /* double      empty_reserve          = */ 0.5f
     };
 
     if (paged)
@@ -34298,7 +34311,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* hbool_t     set_initial_size       = */ TRUE,
         /* size_t      initial_size           = */ (2 * 1024 * 1024),
 
-        /* double      min_clean_fraction     = */ 0.5,
+        /* double      min_clean_fraction     = */ 0.5f,
 
         /* size_t      max_size               = */ (8 * 1024 * 1024),
         /* size_t      min_size               = */ (1 * 1024 * 1024),
@@ -34307,23 +34320,23 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
 
         /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,
 
-        /* double     lower_hr_threshold      = */ 0.75,
+        /* double     lower_hr_threshold      = */ 0.75f,
 
-        /* double      increment              = */ 2.0,
+        /* double      increment              = */ 2.0f,
 
         /* hbool_t     apply_max_increment    = */ TRUE,
         /* size_t      max_increment          = */ (4 * 1024 * 1024),
 
         /* enum H5C_cache_flash_incr_mode       */
         /*                    flash_incr_mode = */ H5C_flash_incr__off,
-        /* double      flash_multiple         = */ 2.0,
-        /* double      flash_threshold        = */ 0.5,
+        /* double      flash_multiple         = */ 2.0f,
+        /* double      flash_threshold        = */ 0.5f,
 
         /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out,
 
-        /* double      upper_hr_threshold     = */ 0.995,
+        /* double      upper_hr_threshold     = */ 0.995f,
 
-        /* double      decrement              = */ 0.5,
+        /* double      decrement              = */ 0.5f,
 
         /* hbool_t     apply_max_decrement    = */ FALSE,
         /* size_t      max_decrement          = */ (1 * 1024 * 1024),
@@ -34331,7 +34344,7 @@ cedds__H5C__autoadjust__ageout__evict_aged_out_entries(H5F_t *file_ptr)
         /* int32_t     epochs_before_eviction = */ 1,
 
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.05};
+        /* double      empty_reserve          = */ 0.05f};
 
     if (pass) {
 

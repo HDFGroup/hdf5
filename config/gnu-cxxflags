@@ -268,13 +268,10 @@ if test "X-g++" = "X-$cxx_vendor"; then
     fi
 
     # gcc >= 9.3
-    if test $cc_vers_major -ge 10 -o $cc_vers_major -eq 9 -a $cc_vers_minor -ge 3; then
-        # do not use C warnings, $(load_gnu_arguments 9.3), no cxx warnings
-        # H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-9.3)"
-    fi
+        # no cxx warnings, do NOT use C warnings
 
     # gcc >= 10
-    if test $cc_vers_major -ge 10; then
+    if test $cxx_vers_major -ge 10; then
         # Use the C warnings as CXX warnings are the same
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-10)"
     fi

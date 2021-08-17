@@ -45,7 +45,7 @@ LIBH5CPP_HL=$(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 docdir = $(exec_prefix)/doc
 
 # Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below
-# has been removed. According to the official description of DESTDIR by GNU at
+# has been removed. According to the official description of DESTDIR by Gnu at
 # http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is
 # prepended to the normal and complete install path that it precedes for the
 # purpose of installing in a temporary directory which is useful for building

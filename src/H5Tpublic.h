@@ -245,7 +245,7 @@ typedef struct {
  * Indicate that a string is variable length (null-terminated in C, instead of
  * fixed length)
  */
-#define H5T_VARIABLE ((size_t)-1)
+#define H5T_VARIABLE ((size_t)(-1))
 
 /* Opaque information */
 /**

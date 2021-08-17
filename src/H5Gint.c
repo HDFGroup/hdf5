@@ -38,7 +38,6 @@
 #include "H5Iprivate.h"  /* IDs                                      */
 #include "H5Lprivate.h"  /* Links                                    */
 #include "H5MMprivate.h" /* Memory management                        */
-#include "H5SLprivate.h" /* Skip lists                               */
 
 /****************/
 /* Local Macros */

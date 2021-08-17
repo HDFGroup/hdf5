@@ -45,10 +45,10 @@ typedef struct particle_t {
  * a static array of particles for writing and checking reads
  *-------------------------------------------------------------------------
  */
-static particle_t testPart[NRECORDS] = {{"zero", 0, 0, 0.0f, 0.0},    {"one", 10, 10, 1.0f, 10.0},
-                                        {"two", 20, 20, 2.0f, 20.0},  {"three", 30, 30, 3.0f, 30.0},
-                                        {"four", 40, 40, 4.0f, 40.0}, {"five", 50, 50, 5.0f, 50.0},
-                                        {"six", 60, 60, 6.0f, 60.0},  {"seven", 70, 70, 7.0f, 70.0}};
+static particle_t testPart[NRECORDS] = {{"zero", 0, 0, 0.0f, 0.0f},    {"one", 10, 10, 1.0f, 10.0f},
+                                        {"two", 20, 20, 2.0f, 20.0f},  {"three", 30, 30, 3.0f, 30.0f},
+                                        {"four", 40, 40, 4.0f, 40.0f}, {"five", 50, 50, 5.0f, 50.0f},
+                                        {"six", 60, 60, 6.0f, 60.0f},  {"seven", 70, 70, 7.0f, 70.0f}};
 
 /*-------------------------------------------------------------------------
  * function that compares one particle

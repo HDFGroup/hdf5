@@ -24,18 +24,6 @@
 /* Public Macros */
 /*****************/
 
-/* Default value for "no event set" / synchronous execution */
-#define H5ES_NONE 0 /* (hid_t) */
-
-/* Special "wait" timeout values */
-#define H5ES_WAIT_FOREVER (UINT64_MAX) /* Wait until all operations complete */
-#define H5ES_WAIT_NONE                                                                                       \
-    (0) /* Don't wait for operations to complete,                                                            \
-         *  just check their status.                                                                         \
-         *  (this allows H5ESwait to behave                                                                  \
-         *   like a 'test' operation)                                                                        \
-         */
-
 /*******************/
 /* Public Typedefs */
 /*******************/
