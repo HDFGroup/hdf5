@@ -670,14 +670,14 @@
 /* Define to 1 if you can safely include both <sys/time.h> and <time.h>. */
 #cmakedefine H5_TIME_WITH_SYS_TIME @H5_TIME_WITH_SYS_TIME@
 
-/* Define using v1.10 public API symbols by default */
-#cmakedefine H5_USE_110_API_DEFAULT @H5_USE_110_API_DEFAULT@
-
 /* Define using v1.6 public API symbols by default */
 #cmakedefine H5_USE_16_API_DEFAULT @H5_USE_16_API_DEFAULT@
 
 /* Define using v1.8 public API symbols by default */
 #cmakedefine H5_USE_18_API_DEFAULT @H5_USE_18_API_DEFAULT@
+
+/* Define using v1.10 public API symbols by default */
+#cmakedefine H5_USE_110_API_DEFAULT @H5_USE_110_API_DEFAULT@
 
 /* Define if the library will use file locking */
 #cmakedefine H5_USE_FILE_LOCKING @H5_USE_FILE_LOCKING@
