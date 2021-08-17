@@ -61,6 +61,8 @@ typedef struct {
     double       fo_total_time;
     double       fc_total_time;
     unsigned int num_attrs;
+    unsigned int ps;
+    unsigned int pbs;
     unsigned int nglevels;
 } state_t;
 
@@ -72,23 +74,30 @@ typedef struct {
         .old_style_grp = false, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',              \
         .attr_test = false, .tick_len = 4, .max_lag = 7, .gperf = false, .min_time = 100., .max_time = 0.,   \
         .mean_time = 0., .total_time = 0., .fo_total_time = 0., .fc_total_time = 0., .num_attrs = 1,         \
-        .nglevels = 0                                                                                        \
+        .ps=4096, .pbs = 4096, .nglevels = 0                                                                           \
     }
 
 static void
 usage(const char *progname)
 {
     fprintf(stderr,
-            "usage: %s [-S] [-G] [-a steps] [-b] [-n iterations]\n"
-            "    [-N num_attrs] [-l nested group levels] [-q] [-A at_pattern] [-O grp_op_pattern]\n"
+            "usage: %s [-S] [-G] [-a steps] [-t tick_len] [-m max_lag][-B pbs] [-s ps]\n"
+            "    [-b] [-n iterations]\n"
+            "    [-N num_attrs] [-l ng_levels] [-q] [-A at_pattern] [-O grp_op_pattern]\n"
             "\n"
             "-S:             do not use VFD SWMR\n"
             "-G:             old-style type of group\n"
             "-a steps:       `steps` between adding attributes\n"
+            "-t tick_len:    length of a tick in tenths of a second.\n"
+            "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
+            "-B pbs:         Page Buffer Size in bytes:\n" 
+            "                The default value is 4K(4096).\n"
+            "-s ps:          Page size used by page aggregation, page buffer and \n"
+            "                the metadata file. \n"
             "-b:             write data in big-endian byte order\n"
             "-n ngroups:     the number of groups\n"
-            "-N:             the number of attributes \n"
-            "-l:             the number of level of nested groups.  \n"
+            "-N num_attrs:   the number of attributes \n"
+            "-l ng_levels:   the number of level of nested groups.  \n"
             "                If all the groups are under the root group,  \n"
             "                this number should be 0.\n"
             "-A at_pattern:  `at_pattern' for different attribute tests\n"
@@ -175,7 +184,7 @@ state_init(state_t *s, int argc, char **argv)
 
     if (argc == 1)
         usage(s->progname);
-    while ((ch = getopt(argc, argv, "PSGa:bn:qA:N:l:O:")) != -1) {
+    while ((ch = getopt(argc, argv, "PSGa:bt:m:B:s:n:qA:N:l:O:")) != -1) {
         switch (ch) {
             case 'P':
                 s->gperf = true;
@@ -190,6 +199,9 @@ state_init(state_t *s, int argc, char **argv)
             case 'n':
             case 'N':
             case 'l':
+            case 't':
+            case 'm':
+            case 'B':
                 errno = 0;
                 tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0') {
@@ -213,6 +225,14 @@ state_init(state_t *s, int argc, char **argv)
                     s->num_attrs = (unsigned)tmp;
                 else if (ch == 'l')
                     s->nglevels = (unsigned)tmp;
+                else if (ch == 't')
+                    s->tick_len = (unsigned)tmp;
+                else if (ch == 'm')
+                    s->max_lag = (unsigned)tmp;
+                else if (ch == 's')
+                    s->ps = (unsigned)tmp;
+                else if (ch == 'B')
+                    s->pbs = (unsigned)tmp;
                 break;
             case 'b':
                 s->filetype = H5T_STD_U32BE;
@@ -4453,18 +4473,20 @@ main(int argc, char **argv)
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
+    //init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
+    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, FALSE, 128, "./group-shadow");
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
      * as the second parameter of H5Pset_libver_bound() that is called by
      * vfd_swmr_create_fapl. Otherwise, the latest file format(H5F_LIBVER_LATEST)
      * should be used as the second parameter of H5Pset_libver_bound().
      * Also pass the use_vfd_swmr, only_meta_page, config to vfd_swmr_create_fapl().*/
-    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, &config)) < 0) {
+    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, s.pbs, &config)) < 0) {
         printf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
 
+#if 0
     if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
         printf("H5Pcreate failed\n");
         TEST_ERROR;
@@ -4472,6 +4494,13 @@ main(int argc, char **argv)
 
     if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0) {
         printf("H5Pset_file_space_strategy failed\n");
+        TEST_ERROR;
+    }
+#endif
+
+     /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s.ps)) < 0) {
+        HDprintf("vfd_swmr_create_fcpl() failed");
         TEST_ERROR;
     }
 
