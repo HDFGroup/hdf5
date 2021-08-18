@@ -656,7 +656,6 @@ static void
 test_named()
 {
     static hsize_t ds_size[2] = {10, 20};
-    hsize_t        i;
     unsigned       attr_data[10][20];
     DataType *     ds_type = NULL;
 
