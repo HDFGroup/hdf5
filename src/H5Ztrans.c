@@ -1551,7 +1551,7 @@ H5Z_xform_create(const char *expr)
 
             count++;
         } /* end if */
-    } /* end for */
+    }     /* end for */
 
     /* When there are no "x"'s in the equation (ie, simple transform case),
      * we don't need to allocate any space since no array will have to be
@@ -1757,11 +1757,11 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
         ret_value = FALSE;
 
         /* Check for trivial data tranformation: expression = "x" */
-        if ((HDstrlen(data_xform_prop->xform_exp) == 1) &&
-            data_xform_prop->dat_val_pointers && (data_xform_prop->dat_val_pointers->num_ptrs == 1)) {
+        if ((HDstrlen(data_xform_prop->xform_exp) == 1) && data_xform_prop->dat_val_pointers &&
+            (data_xform_prop->dat_val_pointers->num_ptrs == 1)) {
             ret_value = TRUE;
         } /* end if */
-    } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5Z_xform_noop() */
