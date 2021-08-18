@@ -22,10 +22,16 @@
 # exit codes are okay (0).
 
 srcdir=@srcdir@
+bindir=@bindir@
+
+# If the bindir directory is not set just use current (.).
+if test -z "$bindir"; then
+   bindir=.
+fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-./swmr_check_compat_vfd
+$bindir/swmr_check_compat_vfd
 rc=$?
 if [[ $rc != 0 ]] ; then
     echo
@@ -85,7 +91,7 @@ TOOLTEST() {
     # Run test.
     TESTING $program $@
     (
-      $RUNSERIAL ./$program "$@"
+      $RUNSERIAL $bindir/$program "$@"
     ) >$actual 2>$actual_err
     exit_code=$?
 
@@ -178,14 +184,14 @@ fi
 
 # main body
 for p in $USECASES_PROGRAMS; do
-    TOOLTEST ./$p
-    TOOLTEST ./$p -z 256
+    TOOLTEST $p
+    TOOLTEST $p -z 256
     tmpfile=/tmp/datatfile.$$
-    TOOLTEST ./$p -f $tmpfile; rm -f $tmpfile
-    TOOLTEST ./$p -l w
-    TOOLTEST ./$p -l r
+    TOOLTEST $p -f $tmpfile; rm -f $tmpfile
+    TOOLTEST $p -l w
+    TOOLTEST $p -l r
     # use case 1.9, testing with multi-planes chunks
-    TOOLTEST ./$p -z 256 -y 5    # 5 planes chunks
+    TOOLTEST $p -z 256 -y 5    # 5 planes chunks
     # cleanup temp datafile
     if test -z "$HDF5_NOCLEANUP"; then
     rm -f $p.h5
