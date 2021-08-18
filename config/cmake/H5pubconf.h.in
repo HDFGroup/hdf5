@@ -271,6 +271,9 @@
 /* Define to 1 if you have the <pthread.h> header file. */
 #cmakedefine H5_HAVE_PTHREAD_H @H5_HAVE_PTHREAD_H@
 
+/* Define to 1 if you have the <pwd.h> header file. */
+#cmakedefine H5_HAVE_PWD_H @H5_HAVE_PWD_H@
+
 /* Define to 1 if you have the <quadmath.h> header file. */
 #cmakedefine H5_HAVE_QUADMATH_H @H5_HAVE_QUADMATH_H@
 
