@@ -99,7 +99,7 @@ usage(const char *progname)
             "-b:             write data in big-endian byte order\n"
             "-n ngroups:     the number of groups\n"
             "-N num_attrs:   the number of attributes \n"
-            "-V vlstr attrs: Use variable length string attribute in the performance test. \n"  
+            "-V vlstr attrs: Use variable length string attribute in the performance test. \n"
             "-l ng_levels:   the number of level of nested groups.  \n"
             "                If all the groups are under the root group,  \n"
             "                this number should be 0.\n"
@@ -598,8 +598,6 @@ error:
     return false;
 }
 
-
-
 /*-------------------------------------------------------------------------
  * Function:    add_vlstr_attrs
  *
@@ -630,17 +628,15 @@ static bool
 add_vlstr_attrs(state_t *s, hid_t g, unsigned int which, unsigned int num_attrs)
 {
     unsigned u;
-    bool ret_value = true;
+    bool     ret_value = true;
     for (u = 0; u < num_attrs; u++) {
-        ret_value = add_vlstr_attr(s, g, u+which);
-        if(ret_value == false) 
+        ret_value = add_vlstr_attr(s, g, u + which);
+        if (ret_value == false)
             break;
     }
 
     return ret_value;
 }
-
-
 
 /*-------------------------------------------------------------------------
  * Function:    add_default_group_attr
@@ -680,12 +676,11 @@ add_default_group_attr(state_t *s, hid_t g, unsigned int which)
      * the default number of attribute is 1.
      */
     /* If the vl string attribute type is chosen. */
-    if(s->vlstr_test == true) 
+    if (s->vlstr_test == true)
         return add_vlstr_attrs(s, g, which, s->num_attrs);
-    else 
+    else
         return add_attr(s, g, which, s->num_attrs, aname_format, which);
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    del_one_attr
@@ -887,7 +882,7 @@ error:
  *
  * Purpose:     Modify the value of an VL string attribute in a group.
  *
- * Parameters: 
+ * Parameters:
  *              hid_t g
  *              HDF5 object ID (in this file: means group ID)
  *
@@ -2633,7 +2628,7 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if(writer == false) { 
+    if (writer == false) {
         printf("Reader is skipped for the performance tests.\n");
         return EXIT_SUCCESS;
     }
@@ -2757,9 +2752,8 @@ main(int argc, char **argv)
             fprintf(stdout, "group creation +5 attrs mean time = %lf\n", s.mean_time);
         }
     }
-    else 
+    else
         printf("Reader is skipped for the performance tests.\n");
-    
 
     if (H5Pclose(fapl) < 0) {
         printf("H5Pclose failed\n");
