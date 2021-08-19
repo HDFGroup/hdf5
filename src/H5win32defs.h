@@ -80,7 +80,7 @@ struct timezone {
 #define HDstrtok_r(X, Y, Z)   strtok_s(X, Y, Z)
 #define HDtzset()             _tzset()
 #define HDunlink(S)           _unlink(S)
-#define HDunsetenv(N, V, O)   Wsetenv(N, "", 1)
+#define HDunsetenv(N)   Wsetenv(N, "", 1)
 #define HDwrite(F, M, Z)      _write(F, M, Z)
 
 #ifndef H5_HAVE_MINGW
