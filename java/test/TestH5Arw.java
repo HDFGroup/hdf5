@@ -100,7 +100,7 @@ public class TestH5Arw {
         if (H5aid >= 0)
             try {H5.H5Aclose(H5aid);} catch (Exception ex) {}
         if (H5did >= 0)
-            try {H5.H5Aclose(H5did);} catch (Exception ex) {}
+            try {H5.H5Dclose(H5did);} catch (Exception ex) {}
         if (H5fid > 0)
             try {H5.H5Fclose(H5fid);} catch (Exception ex) {}
         H5fid = HDF5Constants.H5I_INVALID_HID;
