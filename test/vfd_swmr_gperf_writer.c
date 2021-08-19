@@ -54,10 +54,12 @@ typedef struct {
     uint32_t     max_lag;
     uint32_t     tick_len;
     bool         gperf;
-    double       min_time;
-    double       max_time;
-    double       mean_time;
+    double       min_gc_time;
+    double       max_gc_time;
+    double       mean_gc_time;
+    double       total_gc_time;
     double       total_time;
+    double       mean_time;
     double       fo_total_time;
     double       fc_total_time;
     unsigned int num_attrs;
@@ -71,38 +73,41 @@ typedef struct {
     (state_t)                                                                                                \
     {                                                                                                        \
         .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
-        .filetype = H5T_NATIVE_UINT32, .asteps = 10, .nsteps = 100, .use_vfd_swmr = true,                    \
+        .filetype = H5T_NATIVE_UINT32, .asteps = 1, .nsteps = 100, .use_vfd_swmr = true,                    \
         .old_style_grp = false, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',              \
-        .attr_test = false, .tick_len = 4, .max_lag = 7, .gperf = false, .min_time = 100., .max_time = 0.,   \
-        .mean_time = 0., .total_time = 0., .fo_total_time = 0., .fc_total_time = 0., .num_attrs = 1,         \
-        .vlstr_test = false, .ps = 4096, .pbs = 4096, .nglevels = 0                                          \
+        .attr_test = false, .tick_len = 4, .max_lag = 7, .gperf = false, .min_gc_time = 100.,                \
+        .max_gc_time = 0., .mean_gc_time = 0., .total_gc_time = 0., .total_time = 0., .mean_time = 0.,       \
+        .fo_total_time = 0., .fc_total_time = 0., .num_attrs = 1, .vlstr_test = false,                       \
+        .ps = 4096, .pbs = 4096, .nglevels =0  \
     }
 
 static void
 usage(const char *progname)
 {
     fprintf(stderr,
-            "usage: %s [-P] [-S] [-G] [-a steps] [-t tick_len] [-m max_lag][-B pbs] [-s ps]\n"
-            "    [-b] [-n ngroups]\n"
-            "    [-N num_attrs] [-l ng_levels] [-q] [-A at_pattern] [-O grp_op_pattern]\n"
+            "usage: ./%s -P -n 1000 -N 5 -q (create 1000 groups, each group has 5 attributes)\n"
+            "Options: \n"
+            " [-P] [-S] [-G] [-t tick_len] [-m max_lag][-B pbs] [-s ps]\n"
+            " [-n ngroups] [-l ng_levels] [-O grp_op_pattern]\n"
+            " [-N num_attrs] [-V] [-b] [-A at_pattern] [-a steps] [-q]\n"
             "\n"
             "-P:             carry out the performance test\n"
             "-S:             do not use VFD SWMR\n"
             "-G:             old-style type of group\n"
-            "-a steps:       `steps` between adding attributes\n"
             "-t tick_len:    length of a tick in tenths of a second.\n"
             "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
-            "-B pbs:         Page Buffer Size in bytes:\n"
+            "-B pbs:         page Buffer Size in bytes:\n"
             "                The default value is 4K(4096).\n"
-            "-s ps:          Page size used by page aggregation, page buffer and \n"
+            "-s ps:          page size used by page aggregation, page buffer and \n"
             "                the metadata file. \n"
-            "-b:             write data in big-endian byte order\n"
             "-n ngroups:     the number of groups\n"
-            "-N num_attrs:   the number of attributes \n"
-            "-V vlstr attrs: Use variable length string attribute in the performance test. \n"  
             "-l ng_levels:   the number of level of nested groups.  \n"
             "                If all the groups are under the root group,  \n"
             "                this number should be 0.\n"
+            "-N num_attrs:   the number of attributes \n"
+            "-V              use variable length string attributes for performance test\n"  
+            "-b:             write data in big-endian byte order\n"
+            "                (For the performance test, -V overwrites -b)\n"
             "-A at_pattern:  `at_pattern' for different attribute tests\n"
             "              The value of `at_pattern` is one of the following:\n"
             "              `compact`              - Attributes added in compact storage\n"
@@ -156,6 +161,8 @@ usage(const char *progname)
             "                                       dense to compact again.        \n"
             "                                       The links include both hard and\n"
             "                                       soft links.                    \n"
+            "-a steps:      `steps` between adding attributes\n"
+            "              (Don't recommend to use this option for performance test.)\n"
             "-q:             silence printouts, few messages\n"
             "\n",
             progname);
@@ -1592,11 +1599,11 @@ write_group(state_t *s, unsigned int which)
         }
 
         temp_time = TIME_PASSED(start_time, end_time);
-        if (temp_time < s->min_time)
-            s->min_time = temp_time;
-        if (temp_time > s->max_time)
-            s->max_time = temp_time;
-        s->total_time += temp_time;
+        if (temp_time < s->min_gc_time)
+            s->min_gc_time = temp_time;
+        if (temp_time > s->max_gc_time)
+            s->max_gc_time = temp_time;
+        s->total_gc_time += temp_time;
     }
 
     /* We need to create a dummy dataset for the object header continuation block test. */
@@ -1607,24 +1614,27 @@ write_group(state_t *s, unsigned int which)
             TEST_ERROR;
         }
     }
-    if (H5Gget_info(g, &group_info) < 0) {
-        printf("H5Gget_info failed\n");
-        TEST_ERROR;
-    }
-
-    if (s->old_style_grp) {
-        if (group_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) {
-            printf("Old-styled group test: but the group is not in old-style. \n");
+    /* We only need to check the first group */
+    if(which == 0) {
+        if (H5Gget_info(g, &group_info) < 0) {
+            printf("H5Gget_info failed\n");
             TEST_ERROR;
         }
-        dbgf(2, "Writer: group is created with the old-style.\n");
-    }
-    else {
-        if (group_info.storage_type == H5G_STORAGE_TYPE_SYMBOL_TABLE) {
-            printf("The created group should NOT be in old-style . \n");
-            TEST_ERROR;
+    
+        if (s->old_style_grp) {
+            if (group_info.storage_type != H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+                printf("Old-styled group test: but the group is not in old-style. \n");
+                TEST_ERROR;
+            }
+            dbgf(2, "Writer: group is created with the old-style.\n");
         }
-        dbgf(2, "Writer: group is created with the new-style.\n");
+        else {
+            if (group_info.storage_type == H5G_STORAGE_TYPE_SYMBOL_TABLE) {
+                printf("The created group should NOT be in old-style . \n");
+                TEST_ERROR;
+            }
+            dbgf(2, "Writer: group is created with the new-style.\n");
+        }
     }
 
     /* If coming to an "object header continuation block" test,
@@ -2485,6 +2495,24 @@ group_operations(state_t *s, unsigned int which)
 }
 
 static unsigned int grp_counter = 0;
+
+/*-------------------------------------------------------------------------
+ * Function:    UI_Pow
+ *
+ * Purpose:     Helper function to obtain the power 'n' of 
+ *              an unsigned integer 'x'
+ *              Similar to pow(x,y) but for an unsigned integer.
+ *
+ * Parameters:  unsigned int x 
+ *              unsigned int n
+ *
+ * Return:      Return an unsigned integer of value of pow(x,n)
+ * Note:        If the returned value is > 2^32-1, an overflow
+ *              may occur. For our testing purpose, this may never happen.
+ *
+ *-------------------------------------------------------------------------
+ */
+
 static unsigned int
 UI_Pow(unsigned int x, unsigned int n)
 {
@@ -2497,17 +2525,55 @@ UI_Pow(unsigned int x, unsigned int n)
     return (number);
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    obtain_tree_level_elems
+ *
+ * Purpose:     Helper function to obtain the maximum number of elements 
+ *              at one level.
+ *
+ * Parameters:  unsigned int total_ele 
+ *              The total number of elements of a tree(excluding the root)
+ *
+ *              unsigned int level
+ *              The number of nested levels
+ *              (If every element of the tree is under the root, 
+ *                  the level is 0.)
+ *
+ * Return:      Return the maximum number of elements at one level
+ *
+ * Example:     If the total number of elements is 6 and level is 1,
+ *                 the maximum number of elements is 2.The tree is
+ *                 a perfectly balanced tree.      
+ *              Such as: 
+ *                   0
+ *                1     2 
+ *              3  4  5   6
+ *
+ *              If the total number of elements is 5 and level is 1,
+ *                 the maximum number of elements is still 2. The 
+ *                 tree is not balanced, there is no element on the 
+ *                 right-most leaf but the level is still 1.      
+ *              Such as: 
+ *                   0
+ *                1     2 
+ *              3  4  5   
+ *
+ *-------------------------------------------------------------------------
+ */
+
 static unsigned int
 obtain_tree_level_elems(unsigned int total_ele, unsigned int level)
 {
 
     assert(level <= total_ele);
+    /* if every element is under the root, just return the total number of elements. */
     if (level == 0)
         return total_ele;
     else {
         unsigned int test_elems_level = 0;
         unsigned     total            = 0;
         unsigned int i                = 1;
+        /* Obtain the maximum number of elements for a level with the brutal force way. */
         while (total < total_ele) {
             test_elems_level++;
             total = 0;
@@ -2515,11 +2581,32 @@ obtain_tree_level_elems(unsigned int total_ele, unsigned int level)
                 total += UI_Pow(test_elems_level, i);
         }
         if (total == total_ele)
-            printf("Perfectly match: Number of elements per level is %u\n", test_elems_level);
+            dbgf(2, "Perfectly match: Number of elements per level is %u\n", test_elems_level);
         return test_elems_level;
     }
 }
 
+/*-------------------------------------------------------------------------
+ * Function:    gen_tree_struct
+ *
+ * Purpose:     Generate the nested groups  
+ *
+ * Parameters:  state_t *s
+ *              The struct that stores information of HDF5 file, named pipe
+ *              and some VFD SWMR configuration parameters
+ *
+ *              unsigned int level
+ *              The number of nested levels +1
+ *              (Note: If every element of the tree is under the root, 
+ *                     the level is 1 in this function.)
+ *              unsigned num_elems_per_level
+ *              The maximum number of element in a level
+ *              hid_t group_id
+ *              The ID of the parent group
+ *
+ * Return:      Success: true
+ *              Failure: false
+ */
 static bool
 gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgrp_id)
 {
@@ -2529,6 +2616,9 @@ gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgr
     hid_t        grp_id;
     bool         result = true;
     H5G_info_t   group_info;
+    struct timespec start_time, end_time;
+    double          temp_time;
+
 
     if (level > 0 && grp_counter < s->nsteps) {
 
@@ -2536,6 +2626,16 @@ gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgr
             esnprintf(name, sizeof(name), "group-%u", grp_counter);
             if (grp_counter == s->nsteps)
                 break;
+
+            dbgf(2, "writer in nested group: step %d\n", grp_counter);
+            if (s->gperf) {
+        
+                if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
+                    fprintf(stderr, "HDclock_gettime failed");
+                    TEST_ERROR;
+                }
+            }
+
             /* For each i a group is created.
                Use grp_counter to generate the group name.
             printf("id: %u,level: %u, index: %u\n",id,level,i);
@@ -2543,6 +2643,23 @@ gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgr
             if ((grp_id = H5Gcreate2(pgrp_id, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 printf("H5Gcreate2 failed\n");
                 TEST_ERROR;
+            }
+
+            if (s->gperf) {
+        
+                if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
+        
+                    fprintf(stderr, "HDclock_gettime failed");
+        
+                    TEST_ERROR;
+                }
+        
+                temp_time = TIME_PASSED(start_time, end_time);
+                if (temp_time < s->min_gc_time)
+                    s->min_gc_time = temp_time;
+                if (temp_time > s->max_gc_time)
+                    s->max_gc_time = temp_time;
+                s->total_gc_time += temp_time;
             }
 
             /* Just check the first group information. */
@@ -2645,23 +2762,11 @@ main(int argc, char **argv)
      * as the second parameter of H5Pset_libver_bound() that is called by
      * vfd_swmr_create_fapl. Otherwise, the latest file format(H5F_LIBVER_LATEST)
      * should be used as the second parameter of H5Pset_libver_bound().
-     * Also pass the use_vfd_swmr, only_meta_page, config to vfd_swmr_create_fapl().*/
+     * Also pass the use_vfd_swmr, only_meta_page, page buffer size, config to vfd_swmr_create_fapl().*/
     if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, s.pbs, &config)) < 0) {
         printf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
-
-#if 0
-    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0) {
-        printf("H5Pcreate failed\n");
-        TEST_ERROR;
-    }
-
-    if (H5Pset_file_space_strategy(fcpl, H5F_FSPACE_STRATEGY_PAGE, false, 1) < 0) {
-        printf("H5Pset_file_space_strategy failed\n");
-        TEST_ERROR;
-    }
-#endif
 
     /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
     if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s.ps)) < 0) {
@@ -2680,87 +2785,76 @@ main(int argc, char **argv)
     if (s.gperf) {
 
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
-
             fprintf(stderr, "HDclock_gettime failed");
-
             TEST_ERROR;
         }
     }
 
-    if (writer)
-        s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
-    else
-        s.file = H5Fopen(s.filename, H5F_ACC_RDONLY, fapl);
+    s.file = H5Fcreate(s.filename, H5F_ACC_TRUNC, fcpl, fapl);
+
+    if (s.gperf) {
+
+        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
+            fprintf(stderr, "HDclock_gettime failed");
+            TEST_ERROR;
+        }
+
+        s.fo_total_time = TIME_PASSED(start_time, end_time);
+    }
+    if (s.file < 0) {
+        printf("H5Fcreate failed\n");
+        TEST_ERROR;
+    }
+
+    /* If generating nested groups, calculate the maximum number of 
+          elements per level.  */
+    if (s.nglevels > 0) 
+        num_elems_per_level = obtain_tree_level_elems(s.nsteps, s.nglevels);
+
+
+    if (s.gperf) {
+
+        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
+            fprintf(stderr, "HDclock_gettime failed");
+            TEST_ERROR;
+        }
+    }
+
+    /* If generating nested groups */
+    if (s.nglevels > 0) {
+
+        /* for the recursive call, the groups under the root is treated as one level */
+        wg_ret = gen_tree_struct(&s, s.nglevels + 1, num_elems_per_level, s.file);
+        if (wg_ret == false) {
+            printf("write nested group failed at group counter  %u\n", grp_counter);
+            TEST_ERROR;
+        }
+    }
+    else {
+        for (step = 0; step < s.nsteps; step++) {
+
+            dbgf(2, "writer: step %d\n", step);
+            wg_ret = group_operations(&s, step);
+            if (wg_ret == false) {
+                printf("write_group failed at step %d\n", step);
+                TEST_ERROR;
+            }
+        }
+    }
 
     if (s.gperf) {
 
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
 
             fprintf(stderr, "HDclock_gettime failed");
-
             TEST_ERROR;
         }
 
-        s.fo_total_time = TIME_PASSED(start_time, end_time);
-        fprintf(stdout, "H5Fopen time = %lf\n", s.fo_total_time);
+        s.total_time = TIME_PASSED(start_time, end_time);
+        s.mean_time  = s.total_time / s.nsteps;
+        s.mean_gc_time = s.total_gc_time/s.nsteps;
     }
-
-    if (s.file < 0) {
-        printf("H5Fcreate/open failed\n");
-        TEST_ERROR;
-    }
-
-    if (writer) {
-        if (s.gperf) {
-
-            if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
-
-                fprintf(stderr, "HDclock_gettime failed");
-
-                TEST_ERROR;
-            }
-        }
-
-        if (s.nglevels > 0) {
-
-            num_elems_per_level = obtain_tree_level_elems(s.nsteps, s.nglevels);
-            /* for the recursive call, the groups under the root is treated as one level */
-            wg_ret = gen_tree_struct(&s, s.nglevels + 1, num_elems_per_level, s.file);
-            if (wg_ret == false) {
-                printf("write nested group failed at group counter  %u\n", grp_counter);
-                TEST_ERROR;
-            }
-        }
-        else {
-            for (step = 0; step < s.nsteps; step++) {
-
-                dbgf(2, "writer: step %d\n", step);
-                wg_ret = group_operations(&s, step);
-                if (wg_ret == false) {
-                    printf("write_group failed at step %d\n", step);
-                    TEST_ERROR;
-                }
-            }
-        }
-
-        if (s.gperf) {
-
-            if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) == -1) {
-
-                fprintf(stderr, "HDclock_gettime failed");
-                TEST_ERROR;
-            }
-
-            s.total_time = TIME_PASSED(start_time, end_time);
-            s.mean_time  = s.total_time / s.nsteps;
-            fprintf(stdout, "group creation +5 attrs total time = %lf\n", s.total_time);
-            fprintf(stdout, "group creation +5 attrs mean time = %lf\n", s.mean_time);
-        }
-    }
-    else 
-        printf("Reader is skipped for the performance tests.\n");
     
-
     if (H5Pclose(fapl) < 0) {
         printf("H5Pclose failed\n");
         TEST_ERROR;
@@ -2801,7 +2895,55 @@ main(int argc, char **argv)
         }
 
         s.fc_total_time = TIME_PASSED(start_time, end_time);
+    }
+
+    /* Performance statistics summary */
+    if(s.gperf) {
+
+        if (verbosity !=0) {
+
+            fprintf(stdout, "\nPerformance Test Configuration: ");
+            if(s.use_vfd_swmr) 
+                fprintf(stdout, " Using VFD SWMR \n");
+            else 
+                fprintf(stdout, " Not using VFD SWMR \n");
+
+            if(s.old_style_grp)
+                fprintf(stdout, " Groups: Created via the earlist file format(old-style) \n");
+            else
+                fprintf(stdout, " Groups: Created via the latest file format(new-style) \n");
+
+            fprintf(stdout, "\n");
+    
+            fprintf(stdout, "The length of a tick              = %u\n",s.tick_len);
+            fprintf(stdout, "The maximum expected log(in ticks)= %u\n",s.max_lag);
+            fprintf(stdout, "The page size(in bytes)           = %u\n",s.ps);
+            fprintf(stdout, "The page buffer size(in bytes)    = %u\n",s.pbs);
+            fprintf(stdout, "\n");
+            fprintf(stdout, "Number of groups                  = %u\n" ,s.nsteps);
+            fprintf(stdout, "Group Nested levels               = %u\n", s.nglevels);
+            fprintf(stdout, "Number of attributes              = %u\n", s.num_attrs);
+            fprintf(stdout, "Number of element per attribute   = 1\n");
+            if(s.vlstr_test) 
+                fprintf(stdout, "Attribute datatype is variable length string. \n");
+            else if(s.filetype == H5T_STD_U32BE)
+                fprintf(stdout, "Attribute datatype is big-endian unsigned 32-bit integer.\n");
+            else 
+                fprintf(stdout, "Attribute datatype is native unsigned 32-bit integer.\n");
+ 
+            fprintf(stdout, "\n");
+            fprintf(stdout, "(If the nested level is 0, all the groups are created directly under the root.)\n\n");
+            fprintf(stdout, "group creation maximum time                       =%lf\n", s.max_gc_time);
+            fprintf(stdout, "group creation minimum time                       =%lf\n", s.min_gc_time);
+        }
+
+        fprintf(stdout, "group creation total time                           = %lf\n", s.total_gc_time);
+        fprintf(stdout, "group creation mean time(per group)                 = %lf\n", s.mean_gc_time);
+        fprintf(stdout, "group creation and attributes generation total time = %lf\n", s.total_time);
+        fprintf(stdout, "group creation and attributes generation mean time(per group) = %lf\n",s.mean_time);
+        fprintf(stdout, "H5Fcreate time = %lf\n", s.fo_total_time);
         fprintf(stdout, "H5Fclose time = %lf\n", s.fc_total_time);
+
     }
 
     return EXIT_SUCCESS;
