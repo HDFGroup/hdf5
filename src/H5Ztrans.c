@@ -1757,7 +1757,7 @@ H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
         ret_value = FALSE;
 
         /* Check for trivial data tranformation: expression = "x" */
-        if ((HDstrlen(data_xform_prop->xform_exp) == 1) && data_xform_prop->dat_val_pointers && 
+        if ((HDstrlen(data_xform_prop->xform_exp) == 1) && data_xform_prop->dat_val_pointers &&
             (data_xform_prop->dat_val_pointers->num_ptrs == 1)) {
             ret_value = TRUE;
         } /* end if */
