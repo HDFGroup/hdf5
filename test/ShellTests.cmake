@@ -87,55 +87,55 @@ if (UNIX)
         TARGET     swmr_generator
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_generator>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_generator"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_generator>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_generator"
     )
     add_custom_command (
         TARGET     swmr_start_write
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_start_write>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_start_write"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_start_write>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_start_write"
     )
     add_custom_command (
         TARGET     swmr_reader
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_reader"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_reader"
     )
     add_custom_command (
         TARGET     swmr_writer
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_writer"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_writer"
     )
     add_custom_command (
         TARGET     swmr_remove_reader
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_remove_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_remove_reader"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_remove_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_remove_reader"
     )
     add_custom_command (
         TARGET     swmr_remove_writer
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_remove_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_remove_writer"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_remove_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_remove_writer"
     )
     add_custom_command (
         TARGET     swmr_addrem_writer
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_addrem_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_addrem_writer"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_addrem_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_addrem_writer"
     )
     add_custom_command (
         TARGET     swmr_sparse_reader
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_sparse_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_sparse_reader"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_sparse_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_sparse_reader"
     )
     add_custom_command (
         TARGET     swmr_sparse_writer
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_sparse_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_sparse_writer"
+        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_sparse_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_sparse_writer"
     )
 
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
