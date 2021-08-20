@@ -1225,7 +1225,7 @@ AC_CHECK_LIB([dl], [dlopen])
 ##
 
 ## Unix
-AC_CHECK_HEADERS([dirent.h features.h unistd.h])
+AC_CHECK_HEADERS([dirent.h features.h unistd.h pwd.h])
 AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/resource.h])
 AC_CHECK_HEADERS([sys/stat.h sys/time.h sys/types.h])
 
