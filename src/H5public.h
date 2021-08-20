@@ -53,6 +53,7 @@
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
+
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
 #define MPICH_SKIP_MPICXX 1

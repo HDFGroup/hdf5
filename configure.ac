@@ -1223,7 +1223,7 @@ AC_HEADER_TIME
 AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
 AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
 AC_CHECK_HEADERS([features.h])
-AC_CHECK_HEADERS([dirent.h])
+AC_CHECK_HEADERS([dirent.h pwd.h])
 AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
