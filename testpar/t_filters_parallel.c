@@ -1367,8 +1367,8 @@ test_write_transformed_filtered_dataset_no_overlap(void)
     /* Add test filter to the pipeline */
     VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
-    dset_id = H5Dcreate2(file_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME, filespace,
-                         H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    dset_id = H5Dcreate2(file_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
     VRFY((dset_id >= 0), "Dataset creation succeeded");
 
     VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
@@ -4470,7 +4470,8 @@ test_read_transformed_filtered_dataset_no_overlap(void)
         VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
 
         /* Create the dataspace for the dataset */
-        filespace = H5Screate_simple(READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+        filespace =
+            H5Screate_simple(READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
         VRFY((filespace >= 0), "File dataspace creation succeeded");
 
         /* Create chunked dataset */
@@ -4480,14 +4481,15 @@ test_read_transformed_filtered_dataset_no_overlap(void)
         plist_id = H5Pcreate(H5P_DATASET_CREATE);
         VRFY((plist_id >= 0), "DCPL creation succeeded");
 
-        VRFY((H5Pset_chunk(plist_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
-             "Chunk size set");
+        VRFY(
+            (H5Pset_chunk(plist_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+            "Chunk size set");
 
         /* Add test filter to the pipeline */
         VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
 
-        dset_id = H5Dcreate2(file_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
-                             filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+        dset_id = H5Dcreate2(file_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME,
+                             HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
         VRFY((dset_id >= 0), "Dataset creation succeeded");
 
         VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
