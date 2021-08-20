@@ -19,11 +19,11 @@
  *     ./vfd_swmr_gperf_writer -n 1000 -P -N 0 -q
  * will generate 1000 empty groups.
  *     ./vfd_swmr_gperf_writer -n 1000 -P -l 1 -q
- * will generate 1000 groups with 1 level of nested groups,(like /g1/g2) 
- *      each group has one attribute. 
+ * will generate 1000 groups with 1 level of nested groups,(like /g1/g2)
+ *      each group has one attribute.
  *     ./vfd_swmr_gperf_writer -n 1000 -P -S -G -V -N 5 -l 1 -m 8 -t 4 -B 16384 -s 8192
  * will generate 1000 groups with 1 level of nested groups,(like /g1/g2)
- *      each group has 5 attributes and the attribute type is variable length string. 
+ *      each group has 5 attributes and the attribute type is variable length string.
  *      The groups is created without using VFD SWMR;
  *      The groups are created with the earliest file format(old-styled)
  *      The program is run with max_lag = 8, tick_len = 4;
@@ -2698,7 +2698,7 @@ gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgr
                 TEST_ERROR;
             }
             grp_counter++;
-             
+
             /* Generate groups in the next level */
             result = gen_tree_struct(s, level - 1, ne_per_level, grp_id);
             if (result == false) {
