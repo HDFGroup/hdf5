@@ -21,6 +21,10 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
+/*
+ * Include ANSI-C header files.
+ */
+#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -33,6 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#endif
 
 /* maximum of two, three, or four values */
 #undef MAX
@@ -486,25 +491,24 @@ void h5_dump_info_object(MPI_Info info);
 
 /** From h5tools_utils.h **/
 
-H5_DLLVAR int         H5_opterr; /* getoption prints errors if this is on    */
-H5_DLLVAR int         H5_optind; /* token pointer                            */
-H5_DLLVAR const char *H5_optarg; /* flag argument (or value)                 */
+extern int         opt_err; /* getoption prints errors if this is on    */
+extern int         opt_ind; /* token pointer                            */
+extern const char *opt_arg; /* flag argument (or value)                 */
 
-enum h5_arg_level {
+enum {
     no_arg = 0,  /* doesn't take an argument     */
     require_arg, /* requires an argument          */
     optional_arg /* argument is optional         */
 };
 
-struct h5_long_options {
-    const char *      name;     /* Name of the long option */
-    enum h5_arg_level has_arg;  /* Whether we should look for an arg */
-    char              shortval; /* The shortname equivalent of long arg
-                                 * this gets returned from get_option
-                                 */
-};
+typedef struct long_options {
+    const char *name;     /* name of the long option              */
+    int         has_arg;  /* whether we should look for an arg    */
+    char        shortval; /* the shortname equivalent of long arg
+                           * this gets returned from get_option   */
+} long_options;
 
-extern int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
+extern int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
 
 extern int nCols; /*max number of columns for outputting  */
 

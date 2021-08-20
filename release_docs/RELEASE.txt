@@ -426,10 +426,6 @@ The following platforms are not supported but have been tested for this release.
 Known Problems
 ==============
 
-    Setting a variable-length dataset fill value will leak the memory allocated
-    for the p field of the hvl_t struct. A fix is in progress for this.
-    HDFFV-10840
-
     testflushrefresh.sh will fail when run with "make check-passthrough-vol"
     on centos7, with 3 Errors/Segmentation faults.  These will not occur when
     run with "make check".  See https://github.com/HDFGroup/hdf5/issues/673

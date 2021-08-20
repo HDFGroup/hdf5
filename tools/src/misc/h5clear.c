@@ -44,40 +44,40 @@ static hsize_t increment          = DEFAULT_INCREMENT;
 /*
  * Command-line options: only publicize long options
  */
-static const char *           s_opts   = "hVsmzi*";
-static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
-                                          {"hel", no_arg, 'h'},
-                                          {"he", no_arg, 'h'},
-                                          {"version", no_arg, 'V'},
-                                          {"version", no_arg, 'V'},
-                                          {"versio", no_arg, 'V'},
-                                          {"versi", no_arg, 'V'},
-                                          {"vers", no_arg, 'V'},
-                                          {"status", no_arg, 's'},
-                                          {"statu", no_arg, 's'},
-                                          {"stat", no_arg, 's'},
-                                          {"sta", no_arg, 's'},
-                                          {"st", no_arg, 's'},
-                                          {"image", no_arg, 'm'},
-                                          {"imag", no_arg, 'm'},
-                                          {"ima", no_arg, 'm'},
-                                          {"im", no_arg, 'm'},
-                                          {"filesize", no_arg, 'z'},
-                                          {"filesiz", no_arg, 'z'},
-                                          {"filesi", no_arg, 'z'},
-                                          {"files", no_arg, 'z'},
-                                          {"file", no_arg, 'z'},
-                                          {"fil", no_arg, 'z'},
-                                          {"fi", no_arg, 'z'},
-                                          {"increment", optional_arg, 'i'},
-                                          {"incremen", optional_arg, 'i'},
-                                          {"increme", optional_arg, 'i'},
-                                          {"increm", optional_arg, 'i'},
-                                          {"incre", optional_arg, 'i'},
-                                          {"incr", optional_arg, 'i'},
-                                          {"inc", optional_arg, 'i'},
-                                          {"in", optional_arg, 'i'},
-                                          {NULL, 0, '\0'}};
+static const char *        s_opts   = "hVsmzi*";
+static struct long_options l_opts[] = {{"help", no_arg, 'h'},
+                                       {"hel", no_arg, 'h'},
+                                       {"he", no_arg, 'h'},
+                                       {"version", no_arg, 'V'},
+                                       {"version", no_arg, 'V'},
+                                       {"versio", no_arg, 'V'},
+                                       {"versi", no_arg, 'V'},
+                                       {"vers", no_arg, 'V'},
+                                       {"status", no_arg, 's'},
+                                       {"statu", no_arg, 's'},
+                                       {"stat", no_arg, 's'},
+                                       {"sta", no_arg, 's'},
+                                       {"st", no_arg, 's'},
+                                       {"image", no_arg, 'm'},
+                                       {"imag", no_arg, 'm'},
+                                       {"ima", no_arg, 'm'},
+                                       {"im", no_arg, 'm'},
+                                       {"filesize", no_arg, 'z'},
+                                       {"filesiz", no_arg, 'z'},
+                                       {"filesi", no_arg, 'z'},
+                                       {"files", no_arg, 'z'},
+                                       {"file", no_arg, 'z'},
+                                       {"fil", no_arg, 'z'},
+                                       {"fi", no_arg, 'z'},
+                                       {"increment", optional_arg, 'i'},
+                                       {"incremen", optional_arg, 'i'},
+                                       {"increme", optional_arg, 'i'},
+                                       {"increm", optional_arg, 'i'},
+                                       {"incre", optional_arg, 'i'},
+                                       {"incr", optional_arg, 'i'},
+                                       {"inc", optional_arg, 'i'},
+                                       {"in", optional_arg, 'i'},
+                                       {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -150,7 +150,7 @@ parse_command_line(int argc, const char **argv)
     }
 
     /* parse command line options */
-    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) != EOF) {
+    while ((opt = get_option(argc, argv, s_opts, l_opts)) != EOF) {
         switch ((char)opt) {
             case 'h':
                 usage(h5tools_getprogname());
@@ -176,12 +176,12 @@ parse_command_line(int argc, const char **argv)
 
             case 'i':
                 increment_eoa_eof = TRUE;
-                if (H5_optarg != NULL) {
-                    if (HDatoi(H5_optarg) < 0) {
+                if (opt_arg != NULL) {
+                    if (HDatoi(opt_arg) < 0) {
                         usage(h5tools_getprogname());
                         goto done;
                     }
-                    increment = (hsize_t)HDatoi(H5_optarg);
+                    increment = (hsize_t)HDatoi(opt_arg);
                 }
                 break;
 
@@ -193,14 +193,14 @@ parse_command_line(int argc, const char **argv)
     }     /* end while */
 
     /* check for file name to be processed */
-    if (argc <= H5_optind) {
+    if (argc <= opt_ind) {
         error_msg("missing file name\n");
         usage(h5tools_getprogname());
         h5tools_setstatus(EXIT_FAILURE);
         goto error;
     } /* end if */
 
-    fname_g = HDstrdup(argv[H5_optind]);
+    fname_g = HDstrdup(argv[opt_ind]);
 
 done:
     return (0);

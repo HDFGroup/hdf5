@@ -34,6 +34,7 @@
 #include "H5B2private.h" /* v2 B-trees				*/
 #include "H5FLprivate.h" /* Free Lists                           */
 #include "H5FSprivate.h" /* Free space manager			*/
+#include "H5SLprivate.h" /* Skip lists				*/
 
 /**************************/
 /* Package Private Macros */
