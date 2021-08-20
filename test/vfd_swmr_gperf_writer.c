@@ -14,12 +14,21 @@
  * This program checks the performance of group creations for VFD SWMR.
  * Currently the group creation time, H5Fopen and H5Fclose time are measured.
  * After compiling the program,
- *     ./vfd_swmr_gperf_writer -n 1000 -P -N 5 -a 1 -q
+ *     ./vfd_swmr_gperf_writer -n 1000 -P -N 5 -q
  * will generate 1000 groups, each group has 5 attributes.
  *     ./vfd_swmr_gperf_writer -n 1000 -P -N 0 -q
  * will generate 1000 empty groups.
- *     ./vfd_swmr_gperf_writer -n 1000 -P -q
- * will generate 1000 groups,for every ten groups, an attribute is generated.
+ *     ./vfd_swmr_gperf_writer -n 1000 -P -l 1 -q
+ * will generate 1000 groups with 1 level of nested groups,(like /g1/g2) 
+ *      each group has one attribute. 
+ *     ./vfd_swmr_gperf_writer -n 1000 -P -S -G -V -N 5 -l 1 -m 8 -t 4 -B 16384 -s 8192
+ * will generate 1000 groups with 1 level of nested groups,(like /g1/g2)
+ *      each group has 5 attributes and the attribute type is variable length string. 
+ *      The groups is created without using VFD SWMR;
+ *      The groups are created with the earliest file format(old-styled)
+ *      The program is run with max_lag = 8, tick_len = 4;
+ *      The page buffer size is 16384 bytes. The page size is 8192 bytes.
+ *
  */
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
 
@@ -2617,6 +2626,11 @@ gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgr
     if (level > 0 && grp_counter < s->nsteps) {
 
         for (i = 0; i < ne_per_level; i++) {
+
+            /* For each i a group is created.
+               Use grp_counter to generate the group name.
+            printf("id: %u,level: %u, index: %u\n",id,level,i);
+            */
             esnprintf(name, sizeof(name), "group-%u", grp_counter);
             if (grp_counter == s->nsteps)
                 break;
@@ -2630,10 +2644,6 @@ gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgr
                 }
             }
 
-            /* For each i a group is created.
-               Use grp_counter to generate the group name.
-            printf("id: %u,level: %u, index: %u\n",id,level,i);
-            */
             if ((grp_id = H5Gcreate2(pgrp_id, name, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT)) < 0) {
                 printf("H5Gcreate2 failed\n");
                 TEST_ERROR;
@@ -2688,6 +2698,8 @@ gen_tree_struct(state_t *s, unsigned int level, unsigned ne_per_level, hid_t pgr
                 TEST_ERROR;
             }
             grp_counter++;
+             
+            /* Generate groups in the next level */
             result = gen_tree_struct(s, level - 1, ne_per_level, grp_id);
             if (result == false) {
                 printf("Cannot create nested groups. \n");
@@ -2795,6 +2807,7 @@ main(int argc, char **argv)
 
         s.fo_total_time = TIME_PASSED(start_time, end_time);
     }
+
     if (s.file < 0) {
         printf("H5Fcreate failed\n");
         TEST_ERROR;
@@ -2936,7 +2949,7 @@ main(int argc, char **argv)
         fprintf(stdout, "group creation and attributes generation total time = %lf\n", s.total_time);
         fprintf(stdout, "group creation and attributes generation mean time(per group) = %lf\n", s.mean_time);
         fprintf(stdout, "H5Fcreate time = %lf\n", s.fo_total_time);
-        fprintf(stdout, "H5Fclose time = %lf\n", s.fc_total_time);
+        fprintf(stdout, "H5Fclose time  = %lf\n", s.fc_total_time);
     }
 
     return EXIT_SUCCESS;
