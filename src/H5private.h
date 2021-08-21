@@ -63,6 +63,9 @@
  * compliant. Otherwise all bets are off.
  */
 #ifdef H5_HAVE_UNISTD_H
+#ifdef H5_HAVE_PWD_H
+#include <pwd.h>
+#endif
 #include <sys/types.h>
 #include <unistd.h>
 #endif
