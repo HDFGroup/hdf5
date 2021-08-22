@@ -58,10 +58,10 @@
 #include <string.h>
 #endif
 
-/*
- * If _POSIX_VERSION is defined in unistd.h then this system is Posix.1
- * compliant. Otherwise all bets are off.
- */
+/* POSIX headers */
+#ifdef H5_HAVE_SYS_TIME_H
+#include <sys/time.h>
+#endif
 #ifdef H5_HAVE_UNISTD_H
 #ifdef H5_HAVE_PWD_H
 #include <pwd.h>
@@ -942,6 +942,7 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #define HDfrexpl(X, N) frexpl(X, N)
 #else
 #define HDfrexpl(X, N) frexp(X, N)
+#endif
 #endif
 #ifndef HDfscanf
 #define HDfscanf fscanf
