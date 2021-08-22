@@ -1596,7 +1596,7 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #ifdef H5_HAVE_VASPRINTF
 #define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
 #else
-H5_DLL int HDvasprintf(char **bufp, const char *fmt, va_list _ap);
+H5_DLL int     HDvasprintf(char **bufp, const char *fmt, va_list _ap);
 #endif
 #endif
 
