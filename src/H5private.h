@@ -181,6 +181,9 @@
 #define WIN32_LEAN_AND_MEAN /* Exclude rarely-used stuff from Windows headers */
 #define NOGDI               /* Exclude Graphic Display Interface macros */
 
+#include <windows.h>
+
+#include <direct.h> /* For _getcwd() */
 #ifdef H5_HAVE_WINSOCK2_H
 #include <winsock2.h>
 #endif
@@ -188,9 +191,6 @@
 #ifdef H5_HAVE_THREADSAFE
 #include <process.h> /* For _beginthread() */
 #endif
-
-#include <windows.h>
-#include <direct.h> /* For _getcwd() */
 
 #endif /*H5_HAVE_WIN32_API*/
 
@@ -637,14 +637,29 @@ typedef struct {
     haddr_t       addr;   /* The unique address of the object's header in that file */
 } H5_obj_t;
 
-/*
- * Redefine all the POSIX functions.  We should never see a POSIX
- * function (or any other non-HDF5 function) in the source!
- */
+#define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
 
-/* Put all platform-specific definitions in the following file */
-/* so that the following definitions are platform free. */
-#include "H5win32defs.h" /* For Windows-specific definitions */
+/* Put all Windows-specific definitions in H5win32defs.h so we
+ * can (mostly) assume a POSIX platform. Not all of the POSIX calls
+ * will have a Windows equivalent so some #ifdef protection is still
+ * necessary (e.g., fork()).
+ */
+#include "H5win32defs.h"
+
+/* Platform-independent definitions for struct stat and off_t */
+#ifndef H5_HAVE_WIN32_API
+/* These definitions differ in Windows and are defined in
+ * H5win32defs for that platform.
+ */
+typedef struct stat h5_stat_t;
+typedef off_t       h5_stat_size_t;
+#define HDoff_t off_t
+#endif
+
+/* Redefine all the POSIX and C functions.  We should never see an
+ * undecorated POSIX or C function (or any other non-HDF5 function)
+ * in the source.
+ */
 
 #ifndef HDabort
 #define HDabort() abort()
@@ -928,8 +943,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #else
 #define HDfrexpl(X, N) frexp(X, N)
 #endif
+#ifndef HDfscanf
+#define HDfscanf fscanf
 #endif
-/* fscanf() variable arguments */
 #ifndef HDfseek
 #define HDfseek(F, O, W) fseeko(F, O, W)
 #endif
@@ -939,24 +955,6 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDfstat
 #define HDfstat(F, B) fstat(F, B)
 #endif
-#ifndef HDlstat
-#define HDlstat(S, B) lstat(S, B)
-#endif
-#ifndef HDstat
-#define HDstat(S, B) stat(S, B)
-#endif
-
-#ifndef H5_HAVE_WIN32_API
-/* These definitions differ in Windows and are defined in
- * H5win32defs for that platform.
- */
-typedef struct stat h5_stat_t;
-typedef off_t       h5_stat_size_t;
-#define HDoff_t off_t
-#endif /* H5_HAVE_WIN32_API */
-
-#define H5_SIZEOF_H5_STAT_SIZE_T H5_SIZEOF_OFF_T
-
 #ifndef HDftell
 #define HDftell(F) ftell(F)
 #endif
@@ -1152,6 +1150,9 @@ typedef off_t       h5_stat_size_t;
 #ifndef HDlseek
 #define HDlseek(F, O, W) lseek(F, O, W)
 #endif
+#ifndef HDlstat
+#define HDlstat(S, B) lstat(S, B)
+#endif
 #ifndef HDmalloc
 #define HDmalloc(Z) malloc(Z)
 #endif
@@ -1231,7 +1232,7 @@ typedef off_t       h5_stat_size_t;
 #define HDpread(F, B, C, O) pread(F, B, C, O)
 #endif
 #ifndef HDprintf
-#define HDprintf printf
+#define HDprintf printf /*varargs*/
 #endif
 #ifndef HDputc
 #define HDputc(C, F) putc(C, F)
@@ -1424,7 +1425,10 @@ typedef off_t       h5_stat_size_t;
 #define HDsqrt(X) sqrt(X)
 #endif
 #ifndef HDsscanf
-#define HDsscanf(S, FMT, ...) sscanf(S, FMT, __VA_ARGS__)
+#define HDsscanf sscanf /*varargs*/
+#endif
+#ifndef HDstat
+#define HDstat(S, B) stat(S, B)
 #endif
 #ifndef HDstrcat
 #define HDstrcat(X, Y) strcat(X, Y)
@@ -1587,6 +1591,9 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #endif
 #ifndef HDunlink
 #define HDunlink(S) unlink(S)
+#endif
+#ifndef HDunsetenv
+#define HDunsetenv(S) unsetenv(S)
 #endif
 #ifndef HDutime
 #define HDutime(S, T) utime(S, T)
@@ -2023,7 +2030,8 @@ typedef struct H5_api_struct {
 
 /* Macros for thread cancellation-safe mechanism */
 #define H5_API_UNSET_CANCEL H5TS_cancel_count_inc();
-#define H5_API_SET_CANCEL   H5TS_cancel_count_dec();
+
+#define H5_API_SET_CANCEL H5TS_cancel_count_dec();
 
 extern H5_api_t H5_g;
 
