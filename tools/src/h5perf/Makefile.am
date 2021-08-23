@@ -21,6 +21,17 @@ include $(top_srcdir)/config/commence.am
 
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
 
+# bin_PROGRAMS will be installed.
+if BUILD_PARALLEL_CONDITIONAL
+    bin_PROGRAMS=h5perf_serial perf h5perf
+else
+    bin_PROGRAMS=h5perf_serial
+endif
+
+# Add h5perf and h5perf_serial specific linker flags here
+h5perf_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+
 # Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
@@ -36,25 +47,17 @@ endif
 # List them in the order they should be run.
 # Parallel test programs.
 if BUILD_PARALLEL_CONDITIONAL
-    TEST_PROG_PARA=
+    TEST_PROG_PARA=h5perf perf
 endif
-# Serial test programs.
-TEST_PROG = iopipe chunk chunk_cache overhead zip_perf perf_meta $(BUILD_ALL_PROGS)
 
-# check_PROGRAMS will be built but not installed.  Do not any executable
-# that is in bin_PROGRAMS already. Otherwise, it will be removed twice in
-# "make clean" and some systems, e.g., AIX, do not like it.
-check_PROGRAMS= $(TEST_PROG) $(BUILD_ALL_PROGS)
-
-# These are the files that `make clean' (and derivatives) will remove from
-# this directory.
-CLEANFILES=*.h5 *.raw *.dat x-gnuplot perftest.out
+h5perf_SOURCES=pio_perf.c pio_engine.c
+h5perf_serial_SOURCES=sio_perf.c sio_engine.c
 
 # All of the programs depend on the main hdf5 library, and some of them
 # depend on test or tools library.
 LDADD=$(LIBHDF5)
-iopipe_LDADD=$(LIBH5TEST) $(LIBHDF5)
-zip_perf_LDADD=$(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-perf_meta_LDADD=$(LIBH5TEST) $(LIBHDF5)
+h5perf_LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+h5perf_serial_LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+perf_LDADD=$(LIBHDF5)
 
 include $(top_srcdir)/config/conclude.am

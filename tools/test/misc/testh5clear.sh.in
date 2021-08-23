@@ -315,7 +315,7 @@ TOOLTEST_ERR orig_h5clear_sec2_v0.h5 -s -m "" h5clear_no_mdc_image.err
 #
 # The following are tests to verify the expected exit code from h5clear:
 # "h5clear -m h5clear_mdc_image.h5"     (valid option, existing file, succeed exit code)
-# "h5clear --vers"                      (valid option, version #, succeed exit code)
+# "h5clear --version"                   (valid option, version #, succeed exit code)
 # "h5clear -k"                          (invalid 1 option, no file, fail exit code)
 # "h5clear -k junk.h5"                  (invalid 1 option, nonexisting file, fail exit code)
 # "h5clear -l h5clear_sec2_v2.h5"       (invalid 1 option, existing file, fail exit code)
@@ -326,7 +326,7 @@ TOOLTEST_ERR orig_h5clear_sec2_v0.h5 -s -m "" h5clear_no_mdc_image.err
 # "h5clear -m -l h5clear_sec2_v0.h5"    (valid/invalid 2 options, existing file, fail exit code)
 # "h5clear -l -m h5clear_sec2_v0.h5"    (invalid/valid 2 options, existing file, fail exit code)
 TOOLTEST h5clear_mdc_image.h5 -m "" $SUCCEED
-TOOLTEST "" --vers "" $SUCCEED
+TOOLTEST "" --version "" $SUCCEED
 TOOLTEST "" -k "" $FAIL
 TOOLTEST junk.h5 -k "" $FAIL
 TOOLTEST h5clear_sec2_v2.h5 -l "" $FAIL

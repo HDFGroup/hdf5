@@ -22,7 +22,6 @@
 
 #include "hdf5.h"
 #include "H5private.h"
-#include "h5test.h"
 
 #ifdef H5_HAVE_PARALLEL
 
@@ -32,12 +31,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
-
-#ifdef H5_HAVE_UNISTD_H
-#include <sys/types.h>
-#include <unistd.h>
-#endif
+#include <time.h>
 
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
@@ -50,6 +44,14 @@
 #include <sys/time.h>
 #else
 #include <time.h>
+#endif
+
+#ifdef H5_HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+
+#ifdef H5_HAVE_UNISTD_H
+#include <unistd.h>
 #endif
 
 #include <mpi.h>
@@ -111,6 +113,15 @@ static int parse_args(int argc, char **argv);
 extern char *optarg;
 #endif
 
+#ifndef HDF5_PARAPREFIX
+#define HDF5_PARAPREFIX ""
+#endif
+char *   paraprefix   = NULL;          /* for command line option para-prefix */
+MPI_Info h5_io_info_g = MPI_INFO_NULL; /* MPI INFO object for IO */
+
+static char *h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname,
+                             size_t size, hbool_t nest_printf, hbool_t subst_for_superblock);
+
 int
 main(int argc, char **argv)
 {
@@ -138,12 +149,11 @@ main(int argc, char **argv)
     if (mynod == 0)
         printf("# Using hdf5-io calls.\n");
 
-        /* kindof a weird hack- if the location of the pvfstab file was
-         * specified on the command line, then spit out this location into
-         * the appropriate environment variable: */
-
-#if H5_HAVE_SETENV
-    /* no setenv or unsetenv */
+#ifdef H5_HAVE_UNISTD_H
+    /* Kind of a weird hack- if the location of the pvfstab file was
+     * specified on the command line, then spit out this location into
+     * the appropriate environment variable.
+     */
     if (opt_pvfstab_set) {
         if ((setenv("PVFSTAB_FILE", opt_pvfstab, 1)) < 0) {
             perror("setenv");
@@ -210,7 +220,7 @@ main(int argc, char **argv)
         }
     }
 
-    h5_fixname_no_suffix(FILENAME[0], acc_tpl, filename, sizeof filename);
+    h5_fixname_real(FILENAME[0], acc_tpl, NULL, filename, sizeof filename, FALSE, FALSE);
 
     /* create the parallel file */
     fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, acc_tpl);
@@ -374,9 +384,8 @@ main(int argc, char **argv)
 
 die_jar_jar_die:
 
-#if H5_HAVE_SETENV
-    /* no setenv or unsetenv */
-    /* clear the environment variable if it was set earlier */
+#ifdef H5_HAVE_UNISTD
+    /* Clear the environment variable if it was set earlier */
     if (opt_pvfstab_set) {
         unsetenv("PVFSTAB_FILE");
     }
@@ -455,6 +464,323 @@ parse_args(int argc, char **argv)
     }
 
     return (0);
+}
+/*-------------------------------------------------------------------------
+ * Function:  getenv_all
+ *
+ * Purpose:  Used to get the environment that the root MPI task has.
+ *     name specifies which environment variable to look for
+ *     val is the string to which the value of that environment
+ *     variable will be copied.
+ *
+ *     NOTE: The pointer returned by this function is only
+ *     valid until the next call to getenv_all and the data
+ *     stored there must be copied somewhere else before any
+ *     further calls to getenv_all take place.
+ *
+ * Return:  pointer to a string containing the value of the environment variable
+ *     NULL if the varialbe doesn't exist in task 'root's environment.
+ *
+ * Programmer:  Leon Arber
+ *              4/4/05
+ *
+ * Modifications:
+ *    Use original getenv if MPI is not initialized. This happens
+ *    one uses the PHDF5 library to build a serial nature code.
+ *    Albert 2006/04/07
+ *
+ *-------------------------------------------------------------------------
+ */
+char *
+getenv_all(MPI_Comm comm, int root, const char *name)
+{
+    int          mpi_size, mpi_rank, mpi_initialized, mpi_finalized;
+    int          len;
+    static char *env = NULL;
+
+    HDassert(name);
+
+    MPI_Initialized(&mpi_initialized);
+    MPI_Finalized(&mpi_finalized);
+
+    if (mpi_initialized && !mpi_finalized) {
+        MPI_Comm_rank(comm, &mpi_rank);
+        MPI_Comm_size(comm, &mpi_size);
+        HDassert(root < mpi_size);
+
+        /* The root task does the getenv call
+         * and sends the result to the other tasks */
+        if (mpi_rank == root) {
+            env = HDgetenv(name);
+            if (env) {
+                len = (int)HDstrlen(env);
+                MPI_Bcast(&len, 1, MPI_INT, root, comm);
+                MPI_Bcast(env, len, MPI_CHAR, root, comm);
+            }
+            else {
+                /* len -1 indicates that the variable was not in the environment */
+                len = -1;
+                MPI_Bcast(&len, 1, MPI_INT, root, comm);
+            }
+        }
+        else {
+            MPI_Bcast(&len, 1, MPI_INT, root, comm);
+            if (len >= 0) {
+                if (env == NULL)
+                    env = (char *)HDmalloc((size_t)len + 1);
+                else if (HDstrlen(env) < (size_t)len)
+                    env = (char *)HDrealloc(env, (size_t)len + 1);
+
+                MPI_Bcast(env, len, MPI_CHAR, root, comm);
+                env[len] = '\0';
+            }
+            else {
+                if (env)
+                    HDfree(env);
+                env = NULL;
+            }
+        }
+#ifndef NDEBUG
+        MPI_Barrier(comm);
+#endif
+    }
+    else {
+        /* use original getenv */
+        if (env)
+            HDfree(env);
+        env = HDgetenv(name);
+    } /* end if */
+
+    return env;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:  h5_fixname_real
+ *
+ * Purpose:  Create a file name from a file base name like `test' and
+ *    return it through the FULLNAME (at most SIZE characters
+ *    counting the null terminator). The full name is created by
+ *    prepending the contents of HDF5_PREFIX (separated from the
+ *    base name by a slash) and appending a file extension based on
+ *    the driver supplied, resulting in something like
+ *    `ufs:/u/matzke/test.h5'.
+ *
+ * Return:  Success:  The FULLNAME pointer.
+ *
+ *    Failure:  NULL if BASENAME or FULLNAME is the null
+ *        pointer or if FULLNAME isn't large enough for
+ *        the result.
+ *
+ * Programmer:  Robb Matzke
+ *              Thursday, November 19, 1998
+ *
+ *-------------------------------------------------------------------------
+ */
+static char *
+h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fullname, size_t size,
+                hbool_t nest_printf, hbool_t subst_for_superblock)
+{
+    const char *prefix = NULL;
+    const char *env    = NULL; /* HDF5_DRIVER environment variable     */
+    char *      ptr, last = '\0';
+    const char *suffix = _suffix;
+    size_t      i, j;
+    hid_t       driver     = -1;
+    int         isppdriver = 0; /* if the driver is MPI parallel */
+
+    if (!base_name || !fullname || size < 1)
+        return NULL;
+
+    HDmemset(fullname, 0, size);
+
+    /* figure out the suffix */
+    if (H5P_DEFAULT != fapl) {
+        if ((driver = H5Pget_driver(fapl)) < 0)
+            return NULL;
+
+        if (suffix) {
+            if (H5FD_FAMILY == driver) {
+                if (subst_for_superblock)
+                    suffix = "00000.h5";
+                else
+                    suffix = nest_printf ? "%%05d.h5" : "%05d.h5";
+            }
+            else if (H5FD_MULTI == driver) {
+
+                /* Get the environment variable, if it exists, in case
+                 * we are using the split driver since both of those
+                 * use the multi VFD under the hood.
+                 */
+                env = HDgetenv("HDF5_DRIVER");
+#ifdef HDF5_DRIVER
+                /* Use the environment variable, then the compile-time constant */
+                if (!env)
+                    env = HDF5_DRIVER;
+#endif
+                if (env && !HDstrcmp(env, "split")) {
+                    /* split VFD */
+                    if (subst_for_superblock)
+                        suffix = "-m.h5";
+                    else
+                        suffix = NULL;
+                }
+                else {
+                    /* multi VFD */
+                    if (subst_for_superblock)
+                        suffix = "-s.h5";
+                    else
+                        suffix = NULL;
+                }
+            }
+        }
+    }
+
+    /* Must first check fapl is not H5P_DEFAULT (-1) because H5FD_XXX
+     * could be of value -1 if it is not defined.
+     */
+    isppdriver = H5P_DEFAULT != fapl && (H5FD_MPIO == driver);
+
+    /* Check what prefix to use for test files. Process HDF5_PARAPREFIX and
+     * HDF5_PREFIX.
+     * Use different ones depending on parallel or serial driver used.
+     * (The #ifdef is needed to prevent compile failure in case MPI is not
+     * configured.)
+     */
+    if (isppdriver) {
+        /*
+         * For parallel:
+         *      First use command line option, then the environment
+         *      variable, then try the constant
+         */
+        static int explained = 0;
+
+        prefix = (paraprefix ? paraprefix : getenv_all(MPI_COMM_WORLD, 0, "HDF5_PARAPREFIX"));
+
+        if (!prefix && !explained) {
+            /* print hint by process 0 once. */
+            int mpi_rank;
+
+            MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
+
+            if (mpi_rank == 0)
+                HDprintf("*** Hint ***\n"
+                         "You can use environment variable HDF5_PARAPREFIX to "
+                         "run parallel test files in a\n"
+                         "different directory or to add file type prefix. e.g.,\n"
+                         "   HDF5_PARAPREFIX=pfs:/PFS/user/me\n"
+                         "   export HDF5_PARAPREFIX\n"
+                         "*** End of Hint ***\n");
+
+            explained = TRUE;
+#ifdef HDF5_PARAPREFIX
+            prefix = HDF5_PARAPREFIX;
+#endif /* HDF5_PARAPREFIX */
+        }
+    }
+    else {
+        /*
+         * For serial:
+         *      First use the environment variable, then try the constant
+         */
+        prefix = HDgetenv("HDF5_PREFIX");
+
+#ifdef HDF5_PREFIX
+        if (!prefix)
+            prefix = HDF5_PREFIX;
+#endif /* HDF5_PREFIX */
+    }
+
+    /* Prepend the prefix value to the base name */
+    if (prefix && *prefix) {
+        if (isppdriver) {
+            /* This is a parallel system */
+            char *subdir;
+
+            if (!HDstrcmp(prefix, HDF5_PARAPREFIX)) {
+                /*
+                 * If the prefix specifies the HDF5_PARAPREFIX directory, then
+                 * default to using the "/tmp/$USER" or "/tmp/$LOGIN"
+                 * directory instead.
+                 */
+                char *user, *login;
+
+                user   = HDgetenv("USER");
+                login  = HDgetenv("LOGIN");
+                subdir = (user ? user : login);
+
+                if (subdir) {
+                    for (i = 0; i < size && prefix[i]; i++)
+                        fullname[i] = prefix[i];
+
+                    fullname[i++] = '/';
+
+                    for (j = 0; i < size && subdir[j]; ++i, ++j)
+                        fullname[i] = subdir[j];
+                }
+            }
+
+            if (!fullname[0]) {
+                /* We didn't append the prefix yet */
+                HDstrncpy(fullname, prefix, size);
+                fullname[size - 1] = '\0';
+            }
+
+            if (HDstrlen(fullname) + HDstrlen(base_name) + 1 < size) {
+                /*
+                 * Append the base_name with a slash first. Multiple
+                 * slashes are handled below.
+                 */
+                h5_stat_t buf;
+
+                if (HDstat(fullname, &buf) < 0)
+                    /* The directory doesn't exist just yet */
+                    if (HDmkdir(fullname, (mode_t)0755) < 0 && errno != EEXIST)
+                        /*
+                         * We couldn't make the "/tmp/${USER,LOGIN}"
+                         * subdirectory.  Default to PREFIX's original
+                         * prefix value.
+                         */
+                        HDstrcpy(fullname, prefix);
+
+                HDstrcat(fullname, "/");
+                HDstrcat(fullname, base_name);
+            }
+            else {
+                /* Buffer is too small */
+                return NULL;
+            }
+        }
+        else {
+            if (HDsnprintf(fullname, size, "%s/%s", prefix, base_name) == (int)size)
+                /* Buffer is too small */
+                return NULL;
+        }
+    }
+    else if (HDstrlen(base_name) >= size) {
+        /* Buffer is too small */
+        return NULL;
+    }
+    else {
+        HDstrcpy(fullname, base_name);
+    }
+
+    /* Append a suffix */
+    if (suffix) {
+        if (HDstrlen(fullname) + HDstrlen(suffix) >= size)
+            return NULL;
+
+        HDstrcat(fullname, suffix);
+    }
+
+    /* Remove any double slashes in the filename */
+    for (ptr = fullname, i = j = 0; ptr && i < size; i++, ptr++) {
+        if (*ptr != '/' || last != '/')
+            fullname[j++] = *ptr;
+
+        last = *ptr;
+    }
+
+    return fullname;
 }
 
 /*

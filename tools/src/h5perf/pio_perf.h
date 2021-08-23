@@ -15,12 +15,21 @@
 
 #ifndef STANDALONE
 #include "io_timer.h"
-#include "h5test.h"
+#include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #else
 #include "io_timer.h"
 #include "pio_standalone.h"
+#endif
+
+#ifdef H5_HAVE_PARALLEL
+extern MPI_Info h5_io_info_g; /* MPI INFO object for IO */
+#endif
+
+#ifdef H5_HAVE_PARALLEL
+int  h5_set_info_object(void);
+void h5_dump_info_object(MPI_Info info);
 #endif
 
 /* setup the dataset no fill option if this is v1.5 or more */
