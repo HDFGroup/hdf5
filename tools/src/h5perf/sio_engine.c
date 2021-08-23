@@ -1328,4 +1328,3 @@ do_cleanupfile(iotype iot, char *filename)
         }
     }
 }
-H5_GCC_DIAG_ON("format-nonliteral")
