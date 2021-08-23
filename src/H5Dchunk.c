@@ -2504,6 +2504,8 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info)
 
         HDassert(io_info->io_ops.single_write == H5D__select_write);
 
+        HDassert(io_info->io_ops.single_write == H5D__select_write);
+
         /* Check if the page buffer is enabled */
         if (H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW, &page_buf_enabled) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")

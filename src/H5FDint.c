@@ -691,8 +691,8 @@ done:
  */
 static herr_t
 H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                               H5S_t *mem_spaces[], H5S_t *file_spaces[], haddr_t offsets[],
-                               size_t element_sizes[], void *bufs[] /* out */)
+                               const H5S_t * const *mem_spaces, const H5S_t * const *file_spaces,
+                               haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
 {
     hbool_t        extend_sizes = FALSE;
     hbool_t        extend_bufs  = FALSE;
@@ -715,7 +715,9 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     size_t         file_nseq;
     size_t         mem_nseq;
     size_t         io_len;
-    size_t         dummy_nelem;
+    size_t         nelmts;
+    hssize_t       hss_nelmts;
+    size_t         seq_nelem;
     H5S_sel_iter_t file_iter;
     H5S_sel_iter_t mem_iter;
     H5FD_mem_t     types[2]       = {type, H5FD_MEM_NOLIST};
@@ -783,20 +785,52 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
         if (H5S_select_iter_init(&mem_iter, mem_spaces[i], element_size, 0) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for memory space")
 
-        /* Fill sequence lists */
-        if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq, &dummy_nelem,
-                                         file_off, file_len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-        if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &dummy_nelem,
-                                         mem_off, mem_len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-        if (file_nseq && !mem_nseq)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
-                        "memory selection is empty but file selection is not")
-        file_seq_i = 0;
-        mem_seq_i  = 0;
+        /* Get the number of elements in selection */
+        if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(file_spaces[i])) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+        H5_CHECKED_ASSIGN(nelmts, size_t, hss_nelmts, hssize_t);
 
-        while (file_seq_i < file_nseq) {
+#ifndef NDEBUG
+        /* Verify mem space has the same number of elements */
+        {
+            if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(mem_spaces[i])) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+            HDassert((hssize_t)nelmts == hss_nelmts);
+        }
+#endif /* NDEBUG */
+
+        /* Initialize values so sequence lists are retrieved on the first
+         * iteration */
+        file_seq_i = H5FD_SEQ_LIST_LEN;
+        mem_seq_i = H5FD_SEQ_LIST_LEN;
+        file_nseq = 0;
+        mem_nseq = 0;
+
+        /* Loop until all elements are processed */
+        while (file_seq_i < file_nseq || nelmts > 0) {
+            /* Fill/refill file sequence list if necessary */
+            if (file_seq_i == H5FD_SEQ_LIST_LEN) {
+                if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
+                                                 &seq_nelem, file_off, file_len) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                HDassert(file_nseq > 0);
+
+                nelmts -= seq_nelem;
+                file_seq_i = 0;
+            }
+            HDassert(file_seq_i < file_nseq);
+
+            /* Fill/refill memory sequence list if necessary */
+            if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
+                if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
+                                                 &seq_nelem, mem_off, mem_len) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                HDassert(mem_nseq > 0);
+
+                mem_seq_i = 0;
+            }
+            HDassert(mem_seq_i < mem_nseq);
+
             /* Calculate length of this IO */
             io_len = MIN(file_len[file_seq_i], mem_len[mem_seq_i]);
 
@@ -874,30 +908,6 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                 mem_off[mem_seq_i] += io_len;
                 mem_len[mem_seq_i] -= io_len;
             }
-
-            /* Refill file sequence list if necessary */
-            if (file_seq_i == H5FD_SEQ_LIST_LEN) {
-                if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
-                                                 &dummy_nelem, file_off, file_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-
-                file_seq_i = 0;
-            }
-            HDassert(file_seq_i <= file_nseq);
-
-            /* Refill memory sequence list if necessary */
-            if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
-                if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
-                                                 &dummy_nelem, mem_off, mem_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-
-                if (!mem_nseq && file_seq_i < file_nseq)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
-                                "memory selection terminated before file selection")
-
-                mem_seq_i = 0;
-            }
-            HDassert(mem_seq_i <= mem_nseq);
         }
 
         if (mem_seq_i < mem_nseq)
@@ -979,8 +989,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t *mem_spaces[], H5S_t *file_spaces[],
-                    haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
+H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t * const *mem_spaces,
+                    const H5S_t * const *file_spaces, haddr_t offsets[], size_t element_sizes[],
+                    void *bufs[] /* out */)
 {
     hbool_t  offsets_cooked = FALSE;
     hid_t    mem_space_ids_static[8];
@@ -1252,8 +1263,8 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__read_selection_translate(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                           element_sizes, bufs) < 0)
+        if (H5FD__read_selection_translate(file, type, dxpl_id, count, (const H5S_t * const *)mem_spaces,
+                                           (const H5S_t * const *)file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
     }
 
@@ -1299,8 +1310,8 @@ done:
  */
 static herr_t
 H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                H5S_t *mem_spaces[], H5S_t *file_spaces[], haddr_t offsets[],
-                                size_t element_sizes[], const void *bufs[])
+                                const H5S_t * const *mem_spaces, const H5S_t * const *file_spaces,
+                                haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     hbool_t        extend_sizes = FALSE;
     hbool_t        extend_bufs  = FALSE;
@@ -1323,7 +1334,9 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     size_t         file_nseq;
     size_t         mem_nseq;
     size_t         io_len;
-    size_t         dummy_nelem;
+    size_t         nelmts;
+    hssize_t       hss_nelmts;
+    size_t         seq_nelem;
     H5S_sel_iter_t file_iter;
     H5S_sel_iter_t mem_iter;
     H5FD_mem_t     types[2]       = {type, H5FD_MEM_NOLIST};
@@ -1391,20 +1404,52 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         if (H5S_select_iter_init(&mem_iter, mem_spaces[i], element_size, 0) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize sequence list for memory space")
 
-        /* Fill sequence lists */
-        if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq, &dummy_nelem,
-                                         file_off, file_len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-        if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq, &dummy_nelem,
-                                         mem_off, mem_len) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-        if (file_nseq && !mem_nseq)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
-                        "memory selection is empty but file selection is not")
-        file_seq_i = 0;
-        mem_seq_i  = 0;
+        /* Get the number of elements in selection */
+        if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(file_spaces[i])) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+        H5_CHECKED_ASSIGN(nelmts, size_t, hss_nelmts, hssize_t);
 
-        while (file_seq_i < file_nseq) {
+#ifndef NDEBUG
+        /* Verify mem space has the same number of elements */
+        {
+            if ((hss_nelmts = (hssize_t)H5S_GET_SELECT_NPOINTS(mem_spaces[i])) < 0)
+                HGOTO_ERROR(H5E_VFL, H5E_CANTCOUNT, FAIL, "can't get number of elements selected")
+            HDassert((hssize_t)nelmts == hss_nelmts);
+        }
+#endif /* NDEBUG */
+
+        /* Initialize values so sequence lists are retrieved on the first
+         * iteration */
+        file_seq_i = H5FD_SEQ_LIST_LEN;
+        mem_seq_i = H5FD_SEQ_LIST_LEN;
+        file_nseq = 0;
+        mem_nseq = 0;
+
+        /* Loop until all elements are processed */
+        while (file_seq_i < file_nseq || nelmts > 0) {
+            /* Fill/refill file sequence list if necessary */
+            if (file_seq_i == H5FD_SEQ_LIST_LEN) {
+                if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
+                                                 &seq_nelem, file_off, file_len) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                HDassert(file_nseq > 0);
+
+                nelmts -= seq_nelem;
+                file_seq_i = 0;
+            }
+            HDassert(file_seq_i < file_nseq);
+
+            /* Fill/refill memory sequence list if necessary */
+            if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
+                if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
+                                                 &seq_nelem, mem_off, mem_len) < 0)
+                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
+                HDassert(mem_nseq > 0);
+
+                mem_seq_i = 0;
+            }
+            HDassert(mem_seq_i < mem_nseq);
+
             /* Calculate length of this IO */
             io_len = MIN(file_len[file_seq_i], mem_len[mem_seq_i]);
 
@@ -1482,30 +1527,6 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                 mem_off[mem_seq_i] += io_len;
                 mem_len[mem_seq_i] -= io_len;
             }
-
-            /* Refill file sequence list if necessary */
-            if (file_seq_i == H5FD_SEQ_LIST_LEN) {
-                if (H5S_SELECT_ITER_GET_SEQ_LIST(&file_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &file_nseq,
-                                                 &dummy_nelem, file_off, file_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-
-                file_seq_i = 0;
-            }
-            HDassert(file_seq_i <= file_nseq);
-
-            /* Refill memory sequence list if necessary */
-            if (mem_seq_i == H5FD_SEQ_LIST_LEN) {
-                if (H5S_SELECT_ITER_GET_SEQ_LIST(&mem_iter, H5FD_SEQ_LIST_LEN, SIZE_MAX, &mem_nseq,
-                                                 &dummy_nelem, mem_off, mem_len) < 0)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_UNSUPPORTED, FAIL, "sequence length generation failed")
-
-                if (!mem_nseq && file_seq_i < file_nseq)
-                    HGOTO_ERROR(H5E_INTERNAL, H5E_BADVALUE, FAIL,
-                                "memory selection terminated before file selection")
-
-                mem_seq_i = 0;
-            }
-            HDassert(mem_seq_i <= mem_nseq);
         }
 
         if (mem_seq_i < mem_nseq)
@@ -1585,8 +1606,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t *mem_spaces[], H5S_t *file_spaces[],
-                     haddr_t offsets[], size_t element_sizes[], const void *bufs[])
+H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t * const *mem_spaces,
+                     const H5S_t * const *file_spaces, haddr_t offsets[], size_t element_sizes[],
+                     const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
     hid_t    mem_space_ids_static[8];
@@ -1843,8 +1865,8 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__write_selection_translate(file, type, dxpl_id, count, mem_spaces, file_spaces, offsets,
-                                            element_sizes, bufs) < 0)
+        if (H5FD__write_selection_translate(file, type, dxpl_id, count, (const H5S_t * const *)mem_spaces,
+                                            (const H5S_t * const *)file_spaces, offsets, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
     }
 
