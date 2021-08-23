@@ -174,6 +174,7 @@ static const H5FD_class_t H5FD_direct_g = {
     H5FD__direct_truncate,      /* truncate             */
     H5FD__direct_lock,          /* lock                 */
     H5FD__direct_unlock,        /* unlock               */
+    NULL,                       /* ctl                  */
     H5FD_FLMAP_DICHOTOMY        /* fl_map               */
 };
 

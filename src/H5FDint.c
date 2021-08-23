@@ -2088,7 +2088,7 @@ H5FD__vsrt_tmp_cmp(const void *element_1, const void *element_2)
 
 herr_t
 H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
-                        size_t sizes[], void *bufs[], H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr,
+                        size_t sizes[], const void *bufs[], H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr,
                         size_t **s_sizes_ptr, void ***s_bufs_ptr)
 {
     herr_t                  ret_value = SUCCEED; /* Return value */

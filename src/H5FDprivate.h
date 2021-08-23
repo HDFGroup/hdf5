@@ -45,13 +45,6 @@
 /* Definitions for file MPI type property */
 #define H5FD_MPI_XFER_FILE_MPI_TYPE_NAME "H5FD_mpi_file_mpi_type"
 
-/* Sub-class the H5FD_class_t to add more specific functions for MPI-based VFDs */
-typedef struct H5FD_class_mpi_t {
-    H5FD_class_t super;                       /* Superclass information & methods */
-    int (*get_rank)(const H5FD_t *file);      /* Get the MPI rank of a process */
-    int (*get_size)(const H5FD_t *file);      /* Get the MPI size of a communicator */
-    MPI_Comm (*get_comm)(const H5FD_t *file); /* Get the communicator for a file */
-} H5FD_class_mpi_t;
 #endif
 
 /****************************/
@@ -152,6 +145,7 @@ H5_DLL herr_t  H5FD_flush(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_truncate(H5FD_t *file, hbool_t closing);
 H5_DLL herr_t  H5FD_lock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t  H5FD_unlock(H5FD_t *file);
+H5_DLL herr_t  H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output);
 H5_DLL herr_t  H5FD_get_fileno(const H5FD_t *file, unsigned long *filenum);
 H5_DLL herr_t  H5FD_get_vfd_handle(H5FD_t *file, hid_t fapl, void **file_handle);
 H5_DLL herr_t  H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
@@ -159,8 +153,9 @@ H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t  H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 
 H5_DLL herr_t H5FD_sort_vector_io_req(hbool_t *vector_was_sorted, uint32_t count, H5FD_mem_t types[],
-                                      haddr_t addrs[], size_t sizes[], void *bufs[], H5FD_mem_t **s_types_ptr,
-                                      haddr_t **s_addrs_ptr, size_t **s_sizes_ptr, void ***s_bufs_ptr);
+                                      haddr_t addrs[], size_t sizes[], const void *bufs[],
+                                      H5FD_mem_t **s_types_ptr, haddr_t **s_addrs_ptr, size_t **s_sizes_ptr,
+                                      void ***s_bufs_ptr);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL
@@ -175,9 +170,9 @@ H5_DLL herr_t H5FD_set_mpio_atomicity(H5FD_t *file, hbool_t flag);
 H5_DLL herr_t H5FD_get_mpio_atomicity(H5FD_t *file, hbool_t *flag);
 
 /* Driver specific methods */
-H5_DLL int      H5FD_mpi_get_rank(const H5FD_t *file);
-H5_DLL int      H5FD_mpi_get_size(const H5FD_t *file);
-H5_DLL MPI_Comm H5FD_mpi_get_comm(const H5FD_t *_file);
+H5_DLL int      H5FD_mpi_get_rank(H5FD_t *file);
+H5_DLL int      H5FD_mpi_get_size(H5FD_t *file);
+H5_DLL MPI_Comm H5FD_mpi_get_comm(H5FD_t *file);
 #endif /* H5_HAVE_PARALLEL */
 
 #endif /* !_H5FDprivate_H */
