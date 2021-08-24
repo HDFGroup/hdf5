@@ -414,10 +414,10 @@ precision(detected_t *d)
                 HDmemcpy(_buf + align_g[_ano] + (INFO.offset / 8), ((char *)&_val) + (INFO.offset / 8),      \
                          (size_t)(INFO.precision / 8));                                                      \
             _val2 = *((TYPE *)(_buf + align_g[_ano]));                                                       \
-            H5_GCC_CLANG_DIAG_OFF("float-equal")                                                                   \
+            H5_GCC_CLANG_DIAG_OFF("float-equal")                                                             \
             if (_val != _val2)                                                                               \
                 H5LONGJMP(jbuf_g, 1);                                                                        \
-            H5_GCC_CLANG_DIAG_ON("float-equal")                                                                    \
+            H5_GCC_CLANG_DIAG_ON("float-equal")                                                              \
             /* End Cray Check */                                                                             \
             (INFO.align) = align_g[_ano];                                                                    \
         }                                                                                                    \
