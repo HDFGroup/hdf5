@@ -14,7 +14,6 @@
 ## ----------------------------------------------------------------------
 ## Initialize configure.
 ##
-AC_REVISION($Id: configure.ac 22697 2012-08-19 14:35:47Z hdftest $)
 AC_PREREQ([2.69])
 
 ## AC_INIT takes the name of the package, the version number, and an
@@ -74,8 +73,8 @@ m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) # use silent rules where a
 ## who don't have autoconf, automake, etc. will then have difficulty building
 ## release branches checked out from git.
 ##
-## By default, it is enabled. Users can configure with
-## --disable-maintainer-mode to prevent running the autotools.
+## By default, maintainer mode is enabled in development branches and disabled
+## in release branches.
 AM_MAINTAINER_MODE([enable])
 
 ## ----------------------------------------------------------------------
@@ -96,12 +95,12 @@ AC_CONFIG_COMMANDS([pubconf], [
   sed 's/#define /#define H5_/' <src/H5config.h |\
     sed 's/#undef /#undef H5_/' >pubconf
   if test ! -f src/H5pubconf.h; then
-    /bin/mv -f pubconf src/H5pubconf.h
+    mv -f pubconf src/H5pubconf.h
   elif (diff pubconf src/H5pubconf.h >/dev/null); then
     rm -f pubconf
     echo "src/H5pubconf.h is unchanged"
   else
-    /bin/mv -f pubconf src/H5pubconf.h
+    mv -f pubconf src/H5pubconf.h
   fi
   echo "Post process src/libhdf5.settings"
   sed '/^#/d' < src/libhdf5.settings > libhdf5.settings.TMP
@@ -1248,13 +1247,10 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 
 ## Unix
-AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
-AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
-AC_CHECK_HEADERS([stddef.h setjmp.h features.h])
-AC_CHECK_HEADERS([dirent.h pwd.h])
+AC_CHECK_HEADERS([dirent.h features.h pwd.h setjmp.h stdbool.h stddef.h unistd.h])
+AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/resource.h])
+AC_CHECK_HEADERS([sys/stat.h sys/time.h sys/types.h])
 AC_CHECK_HEADERS([stdint.h], [C9x=yes])
-AC_CHECK_HEADERS([stdbool.h])
-AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
 
 ## Darwin
 AC_SUBST([H5_IS_DARWIN])
@@ -1280,6 +1276,9 @@ case "`uname`" in
     AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
     ;;
 esac
+
+# Mirror VFD networking
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h])
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
@@ -2111,13 +2110,13 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## NOTE: clock_gettime may require linking to the rt or posix4 library
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
+AC_CHECK_FUNCS([alarm asprintf clock_gettime difftime fcntl flock fork frexpf])
 AC_CHECK_FUNCS([frexpl gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([strtoll strtoull])
-AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
+AC_CHECK_FUNCS([tmpfile vasprintf vsnprintf waitpid])
 AC_CHECK_FUNCS([roundf lroundf llroundf round lround llround])
 
 ## ----------------------------------------------------------------------
@@ -4162,6 +4161,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/test/misc/vds/Makefile
                  tools/test/h5stat/Makefile
                  tools/test/h5stat/testh5stat.sh
+                 tools/src/h5perf/Makefile
                  tools/test/perform/Makefile
                  examples/Makefile
                  examples/run-c-ex.sh

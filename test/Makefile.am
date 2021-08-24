@@ -170,7 +170,6 @@ timings _timings: testmeta
 	   fi;                                                                \
 	done;
 
-
 # The flush1 test must run before the flush2 test
 flush2.chkexe_: flush1.chkexe_
 

@@ -397,7 +397,7 @@
 #
 # The following are tests to verify the expected exit code from h5clear:
 # "h5clear -m h5clear_mdc_image.h5"     (valid option, existing file, succeed exit code)
-# "h5clear --vers"                      (valid option, version #, succeed exit code)
+# "h5clear --version"                   (valid option, version #, succeed exit code)
 # "h5clear -k"                          (invalid 1 option, no file, fail exit code)
 # "h5clear -k junk.h5"                  (invalid 1 option, nonexisting file, fail exit code)
 # "h5clear -l h5clear_sec2_v2.h5"       (invalid 1 option, existing file, fail exit code)
@@ -408,7 +408,7 @@
 # "h5clear -m -l h5clear_sec2_v0.h5"    (valid/invalid 2 options, existing file, fail exit code)
 # "h5clear -l -m h5clear_sec2_v0.h5"    (invalid/valid 2 options, existing file, fail exit code)
   ADD_H5_RETTEST (h5clr_mdc_image "false" "-m" h5clear_mdc_image.h5)
-  ADD_H5_RETTEST (h5clr_vers "false" "--vers")
+  ADD_H5_RETTEST (h5clr_vers "false" "--version")
   ADD_H5_RETTEST (h5clr_k "true" "-k")
   ADD_H5_RETTEST (h5clr_k_junk "true" "-k" junk.h5)
   ADD_H5_RETTEST (h5clr_l_sec2 "true" "-l" h5clear_sec2_v2.h5)
