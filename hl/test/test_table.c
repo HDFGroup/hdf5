@@ -245,7 +245,7 @@ test_table(hid_t fid, int do_write)
                                  {"six", 60, 6.0, 60.0, 60},
                                  {"seven", 70, 7.0, 70.0, 70}};
     /* buffers for the field "Pressure" and "New_field" */
-    float pressure_in[NRECORDS] = {0.0f, 1.0f, 2.0f, 3.0f, 4.0f, 5.0f, 6.0f, 7.0f};
+    float pressure_in[NRECORDS] = {0.0F, 1.0F, 2.0F, 3.0F, 4.0F, 5.0F, 6.0F, 7.0F};
     float pressure_out[NRECORDS];
     int   buf_new[NRECORDS] = {0, 1, 2, 3, 4, 5, 6, 7};
     /* buffers for the fields "Latitude,Longitude"  */
@@ -254,8 +254,8 @@ test_table(hid_t fid, int do_write)
     /* buffers for the fields "Name,Pressure"  */
     namepressure_t namepre_out[NRECORDS];
     namepressure_t namepre_in[NRECORDS] = {
-        {"zero", 0.0f}, {"one", 1.0f},  {"two", 2.0f}, {"three", 3.0f},
-        {"four", 4.0f}, {"five", 5.0f}, {"six", 6.0f}, {"seven", 7.0f},
+        {"zero", 0.0F}, {"one", 1.0F},  {"two", 2.0F}, {"three", 3.0F},
+        {"four", 4.0F}, {"five", 5.0F}, {"six", 6.0F}, {"seven", 7.0F},
     };
 
     /*-------------------------------------------------------------------------

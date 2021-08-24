@@ -39,7 +39,7 @@ const char *FILENAME[] = {"set_extent1", "set_extent2", "set_extent3", "set_exte
 #define CONFIG_EARLY_ALLOC 0x04u
 #define CONFIG_UNFILT_EDGE 0x08u
 #define CONFIG_ALL         (CONFIG_COMPRESS + CONFIG_FILL + CONFIG_EARLY_ALLOC + CONFIG_UNFILT_EDGE)
-#define FILL_VALUE         -1
+#define FILL_VALUE         (-1)
 #define DO_RANKS_PRINT_CONFIG(TEST)                                                                          \
     {                                                                                                        \
         HDprintf("  Config:\n");                                                                             \

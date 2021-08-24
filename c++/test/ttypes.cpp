@@ -699,7 +699,7 @@ test_named()
         }
 
         // Check that it is committed.
-        if (itype.committed() == false)
+        if (!itype.committed())
             cerr << "IntType::committed() returned false" << endl;
 
         // We should not be able to modify a type after it has been committed.
