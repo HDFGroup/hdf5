@@ -192,10 +192,10 @@ newmat(unsigned rows, unsigned cols)
 {
     mat_t *mat;
 
-    mat = malloc(sizeof(*mat) + (rows * cols - 1) * sizeof(mat->elt[0]));
+    mat = HDmalloc(sizeof(*mat) + (rows * cols - 1) * sizeof(mat->elt[0]));
 
     if (mat == NULL)
-        err(EXIT_FAILURE, "%s: malloc", __func__);
+        err(EXIT_FAILURE, "%s: HDmalloc", __func__);
 
     mat->rows = rows;
     mat->cols = cols;
@@ -463,11 +463,11 @@ state_init(state_t *s, int argc, char **argv)
     if ((s->one_by_one_sid = H5Screate_simple(1, &dims, &dims)) < 0)
         errx(EXIT_FAILURE, "H5Screate_simple failed");
 
-    s->dataset = malloc(sizeof(*s->dataset) * s->ndatasets);
+    s->dataset = HDmalloc(sizeof(*s->dataset) * s->ndatasets);
     if (s->dataset == NULL)
         err(EXIT_FAILURE, "could not allocate dataset handles");
 
-    s->sources = malloc(sizeof(*s->sources) * s->ndatasets);
+    s->sources = HDmalloc(sizeof(*s->sources) * s->ndatasets);
     if (s->sources == NULL)
         err(EXIT_FAILURE, "could not allocate quadrant dataset handles");
 
@@ -1173,6 +1173,11 @@ main(int argc, char **argv)
     state_destroy(&s);
 
     free(mat);
+
+    if (s.dataset)
+        HDfree(s.dataset);
+    if (s.sources)
+        HDfree(s.sources);
 
     return EXIT_SUCCESS;
 }

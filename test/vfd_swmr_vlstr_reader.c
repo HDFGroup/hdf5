@@ -140,7 +140,7 @@ main(int argc, char **argv)
     if (fid == badhid)
         errx(EXIT_FAILURE, "H5Fcreate");
 
-    /* content 1 seq 1 short
+    /* content 0 seq 1 short
      * content 1 seq 1 long long long long long long long long
      * content 1 seq 1 medium medium medium
      */
@@ -178,6 +178,11 @@ main(int argc, char **argv)
         dbgf(2, ": read which %d seq %d tail %s\n", scanned_content.which, scanned_content.seq,
              scanned_content.tail);
         H5Dclose(dset[which]);
+
+        if (content[which] != NULL) {
+            HDfree(content[which]);
+            content[which] = NULL;
+        }
     }
 
     if (caught_out_of_bounds)

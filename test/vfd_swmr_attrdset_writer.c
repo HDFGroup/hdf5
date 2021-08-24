@@ -924,7 +924,6 @@ perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *c
     unsigned step;
     bool     result;
     unsigned dd;
-    bool     ret = true;
 
     for (step = 0; step < s->asteps; step++) {
         dbgf(2, "Adding attribute %d\n", step);
@@ -1507,11 +1506,11 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
     unsigned int read_which;
     unsigned int tmp_val;
     char         tmp_vl_val[sizeof("attr-9999999999")];
-    char *       read_vl_which = NULL;
-    bool         is_vl         = false;
-    hid_t        aid           = H5I_INVALID_HID;
-    hid_t        atid          = H5I_INVALID_HID;
-    bool         ret           = FALSE;
+    char *       read_vl_which;
+    bool         is_vl = false;
+    hid_t        aid   = H5I_INVALID_HID;
+    hid_t        atid  = H5I_INVALID_HID;
+    bool         ret   = FALSE;
 
     HDassert(did != badhid);
     HDassert(action == ADD_ATTR || action == MODIFY_ATTR);
@@ -1531,11 +1530,6 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
             HDsprintf(tmp_vl_val, "%u", which);
         else
             HDsprintf(tmp_vl_val, "%u %c", which, 'M');
-
-        if ((read_vl_which = HDmalloc(sizeof("9999999999"))) == NULL) {
-            HDprintf("HDmalloc failed\n");
-            TEST_ERROR;
-        }
     }
     else {
         if (action == MODIFY_ATTR)
@@ -1544,7 +1538,7 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
             tmp_val = which;
     }
 
-    if (H5Aread(aid, atid, is_vl ? (void *)&read_vl_which : (void *)&read_which) < 0) {
+    if (H5Aread(aid, atid, is_vl ? &read_vl_which : (void *)&read_which) < 0) {
         HDprintf("H5Aread failed\n");
         TEST_ERROR;
     }
@@ -1569,8 +1563,8 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
         ret = (read_which == tmp_val);
     }
 
-    if (read_vl_which)
-        HDfree(read_vl_which);
+    if (is_vl)
+        H5free_memory(read_vl_which);
 
     return ret;
 
@@ -1582,8 +1576,8 @@ error:
     }
     H5E_END_TRY;
 
-    if (read_vl_which)
-        HDfree(read_vl_which);
+    if (is_vl)
+        H5free_memory(read_vl_which);
 
     return false;
 
@@ -1960,17 +1954,14 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID;
-    hid_t                 fcpl = H5I_INVALID_HID;
-    unsigned              step;
+    hid_t                 fapl   = H5I_INVALID_HID;
+    hid_t                 fcpl   = H5I_INVALID_HID;
     bool                  writer = FALSE;
     state_t               s;
     const char *          personality;
     H5F_vfd_swmr_config_t config;
     np_state_t            np;
     dsets_state_t         ds;
-    unsigned              dd;
-    bool                  result;
 
     if (!state_init(&s, argc, argv)) {
         HDprintf("state_init() failed\n");
