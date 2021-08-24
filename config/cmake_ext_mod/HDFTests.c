@@ -64,6 +64,39 @@ main ()
 
 #endif
 
+#ifdef VSNPRINTF_WORKS
+#include <stdio.h>
+#include <stdlib.h>
+#include <stdarg.h>
+
+int test_vsnprintf(const char *fmt,...)
+{
+    va_list     ap;
+    char *s = malloc(16);
+    int ret;
+
+    va_start(ap, fmt);
+    ret=vsnprintf(s,16,"%s",ap);
+    va_end(ap);
+
+    return(ret!=42 ? 1 : 0);
+}
+
+int main(void)
+{
+    return(test_vsnprintf("%s","A string that is longer than 16 characters"));
+}
+#endif
+
+#ifdef STDC_HEADERS
+#include <stdlib.h>
+#include <stdarg.h>
+#include <string.h>
+#include <float.h>
+int main() { return 0; }
+#endif /* STDC_HEADERS */
+
+
 #ifdef HAVE_ATTRIBUTE
 
 #if 0

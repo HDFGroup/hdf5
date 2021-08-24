@@ -14,7 +14,6 @@
 ## ----------------------------------------------------------------------
 ## Initialize configure.
 ##
-AC_REVISION($Id: configure.ac 22697 2012-08-19 14:35:47Z hdftest $)
 AC_PREREQ([2.69])
 
 ## AC_INIT takes the name of the package, the version number, and an
@@ -37,17 +36,45 @@ AC_CONFIG_MACRO_DIR([m4])
 AM_INIT_AUTOMAKE([foreign subdir-objects])
 m4_ifdef([AM_SILENT_RULES], [AM_SILENT_RULES([yes])]) # use silent rules where available - automake 1.11
 
-## AM_MAINTAINER_MODE turns off "rebuild rules" that contain dependencies
-## for Makefiles, configure, src/H5config.h, etc. If AM_MAINTAINER_MODE
-## is enabled, these files will be rebuilt if out of date. This is a
-## problem because if users try to build on a machine with
-## the wrong versions of autoconf and automake, these files will be
-## rebuilt with the wrong versions and bad things can happen.
-## Also, CVS doesn't preserve dependencies between timestamps, so
-## Makefiles will often think rebuilding needs to occur when it doesn't.
+## AM_MAINTAINER_MODE determines the behavior of "rebuild rules" that contain
+## dependencies for Makefile.in files, configure, src/H5config.h, etc. If
+## AM_MAINTAINER_MODE is enabled, these files will be rebuilt if out of date.
+## When disabled, the autotools build files can get out of sync and the build
+## system will not complain or try to regenerate downstream files.
 ##
-## By default, it is enabled. Users can configure with
-## --disable-maintainer-mode to prevent running the autotools.
+## The AM_MAINTAINER_MODE macro also determines whether the
+## --(enable|disable)-maintainer-mode configure option is available. When the
+## macro is present, with or without a parameter, the option will be added
+## to the generated configure script.
+##
+## In summary:
+##
+##  AM_MAINTAINER_MODE([enable])
+##      - Build dependencies ON by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE([disable])
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  AM_MAINTAINER_MODE
+##      - Build dependencies OFF by default
+##      - Configure option exists
+##
+##  No AM_MAINTAINER_MODE macro
+##      - Build dependencies ON by default
+##      - No configure option to control build dependencies
+##
+## The biggest concern for us is that version control systems like git
+## usually don't preserve dependencies between timestamps, so the build
+## system will often think that upstream build files like Makefile.am are
+## dirty and that rebuilding needs to occur when it doesn't. This is a problem
+## in release branches where we provide the autotools-generated files. Users
+## who don't have autoconf, automake, etc. will then have difficulty building
+## release branches checked out from git.
+##
+## By default, maintainer mode is enabled in development branches and disabled
+## in release branches.
 AM_MAINTAINER_MODE([enable])
 
 ## ----------------------------------------------------------------------
@@ -68,12 +95,12 @@ AC_CONFIG_COMMANDS([pubconf], [
   sed 's/#define /#define H5_/' <src/H5config.h |\
     sed 's/#undef /#undef H5_/' >pubconf
   if test ! -f src/H5pubconf.h; then
-    /bin/mv -f pubconf src/H5pubconf.h
+    mv -f pubconf src/H5pubconf.h
   elif (diff pubconf src/H5pubconf.h >/dev/null); then
     rm -f pubconf
     echo "src/H5pubconf.h is unchanged"
   else
-    /bin/mv -f pubconf src/H5pubconf.h
+    mv -f pubconf src/H5pubconf.h
   fi
   echo "Post process src/libhdf5.settings"
   sed '/^#/d' < src/libhdf5.settings > libhdf5.settings.TMP
@@ -1220,11 +1247,10 @@ AC_HEADER_STDC
 AC_HEADER_TIME
 
 ## Unix
-AC_CHECK_HEADERS([sys/resource.h sys/time.h unistd.h sys/ioctl.h sys/stat.h])
-AC_CHECK_HEADERS([sys/socket.h sys/types.h sys/file.h])
-AC_CHECK_HEADERS([features.h])
-AC_CHECK_HEADERS([dirent.h pwd.h])
-AC_CHECK_HEADERS([netdb.h netinet/in.h arpa/inet.h])
+AC_CHECK_HEADERS([dirent.h features.h pwd.h setjmp.h stdbool.h stddef.h unistd.h])
+AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/resource.h])
+AC_CHECK_HEADERS([sys/stat.h sys/time.h sys/types.h])
+AC_CHECK_HEADERS([stdint.h], [C9x=yes])
 
 ## Darwin
 AC_SUBST([H5_IS_DARWIN])
@@ -1239,17 +1265,20 @@ esac
 ## Windows
 case "`uname`" in
   CYGWIN*)
-    AC_CHECK_HEADERS([sys/timeb.h])
+    AC_CHECK_HEADERS([io.h sys/timeb.h])
     UNAME_CYGWIN="yes"
     ;;
   MINGW*)
-    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
+    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
     AC_HAVE_LIBRARY([ws2_32])
     ;;
   *)
-    AC_CHECK_HEADERS([winsock2.h sys/timeb.h])
+    AC_CHECK_HEADERS([io.h winsock2.h sys/timeb.h])
     ;;
 esac
+
+# Mirror VFD networking
+AC_CHECK_HEADERS([arpa/inet.h netdb.h netinet/in.h sys/socket.h])
 
 ## ----------------------------------------------------------------------
 ## Some platforms require that all symbols are resolved when a library
@@ -1338,6 +1367,17 @@ CFLAGS="$H5_CFLAGS $AM_CFLAGS $CFLAGS"
 ## Checkpoint the cache
 AC_CACHE_SAVE
 
+## Posix.1g types (C9x)
+cat >>confdefs.h <<\EOF
+#include <sys/types.h>
+EOF
+
+if test "X$C9x" = "Xyes"; then
+  cat >>confdefs.h <<\EOF
+#include <stdint.h>
+EOF
+fi
+
 AC_CHECK_SIZEOF(        [int8_t])
 AC_CHECK_SIZEOF(       [uint8_t])
 AC_CHECK_SIZEOF(  [int_least8_t])
@@ -1366,13 +1406,34 @@ AC_CHECK_SIZEOF([uint_least64_t])
 AC_CHECK_SIZEOF(  [int_fast64_t])
 AC_CHECK_SIZEOF( [uint_fast64_t])
 
-
-AC_CHECK_SIZEOF([bool], [], [#include <stdbool.h>])
-AC_CHECK_SIZEOF([off_t])
-AC_CHECK_SIZEOF([ptrdiff_t])
 AC_CHECK_SIZEOF([size_t])
 AC_CHECK_SIZEOF([ssize_t])
-AC_CHECK_SIZEOF([time_t], [], [#include <time.h>])
+AC_CHECK_SIZEOF([ptrdiff_t])
+
+cat >>confdefs.h <<\EOF
+#include <sys/types.h> /*for off_t definition*/
+EOF
+AC_CHECK_SIZEOF([off_t])
+
+if test "X$C9x" = "Xyes"; then
+  cat >>confdefs.h <<\EOF
+#ifdef HAVE_STDBOOL_H
+#include <stdbool.h> /* for bool definition */
+#else
+#define bool _Bool
+#endif
+EOF
+AC_CHECK_SIZEOF([bool])
+fi
+
+AC_CHECK_SIZEOF(time_t, [], [
+#ifdef HAVE_SYS_TYPES_H
+#include <sys/types.h>
+#endif
+#ifdef HAVE_TIME_H
+#include <time.h>
+#endif
+])
 
 ## Checkpoint the cache
 AC_CACHE_SAVE
@@ -1723,8 +1784,13 @@ AM_CONDITIONAL([BUILD_SHARED_SZIP_CONDITIONAL], [test "X$USE_FILTER_SZIP" = "Xye
 AC_CACHE_SAVE
 
 ## ----------------------------------------------------------------------
-## Enable thread-safe version of library.  It requires Pthreads support
-## on POSIX systems.
+## Enable thread-safe version of library (requires Pthreads on POSIX
+## systems). We usually pick up the system Pthreads library, so --with-pthread
+## is only necessary if you are using a custom Pthreads library or if
+## your OS hides its implementation in an unusual location.
+##
+## On Windows, we use Win32 threads and no special configuration should be
+## required to use them.
 ##
 AC_SUBST([THREADSAFE])
 
@@ -1877,8 +1943,10 @@ if test "X$THREADSAFE" = "Xyes"; then
     AC_CACHE_VAL([hdf5_cv_system_scope_threads],
       [AC_RUN_IFELSE(
         [AC_LANG_PROGRAM([
+            #if STDC_HEADERS
             #include <stdlib.h>
             #include <pthread.h>
+            #endif
         ],[
               pthread_attr_t attribute;
               int ret;
@@ -2003,13 +2071,13 @@ AC_COMPILE_IFELSE([AC_LANG_PROGRAM([[
 ## NOTE: clock_gettime may require linking to the rt or posix4 library
 ##       so we'll search for it before calling AC_CHECK_FUNCS.
 AC_SEARCH_LIBS([clock_gettime], [rt posix4])
-AC_CHECK_FUNCS([alarm clock_gettime difftime fcntl flock fork frexpf])
+AC_CHECK_FUNCS([alarm asprintf clock_gettime difftime fcntl flock fork frexpf])
 AC_CHECK_FUNCS([frexpl gethostname getrusage gettimeofday])
 AC_CHECK_FUNCS([lstat rand_r random setsysinfo])
 AC_CHECK_FUNCS([signal longjmp setjmp siglongjmp sigsetjmp sigprocmask])
 AC_CHECK_FUNCS([snprintf srandom strdup symlink system])
 AC_CHECK_FUNCS([strtoll strtoull])
-AC_CHECK_FUNCS([tmpfile asprintf vasprintf vsnprintf waitpid])
+AC_CHECK_FUNCS([tmpfile vasprintf vsnprintf waitpid])
 AC_CHECK_FUNCS([roundf lroundf llroundf round lround llround])
 
 ## ----------------------------------------------------------------------
