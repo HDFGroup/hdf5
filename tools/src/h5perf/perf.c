@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <time.h>
+#endif
 
 #ifdef H5_HAVE_SYS_STAT_H
 #include <sys/stat.h>
