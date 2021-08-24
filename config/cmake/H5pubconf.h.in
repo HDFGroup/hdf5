@@ -202,8 +202,14 @@
    optimization operation */
 #cmakedefine H5_HAVE_INSTRUMENTED_LIBRARY @H5_HAVE_INSTRUMENTED_LIBRARY@
 
+/* Define to 1 if you have the <inttypes.h> header file. */
+#cmakedefine H5_HAVE_INTTYPES_H @H5_HAVE_INTTYPES_H@
+
 /* Define to 1 if you have the `ioctl' function. */
 #cmakedefine H5_HAVE_IOCTL @H5_HAVE_IOCTL@
+
+/* Define to 1 if you have the <io.h> header file. */
+#cmakedefine H5_HAVE_IO_H @H5_HAVE_IO_H@
 
 /* Define to 1 if you have the `crypto' library (-lcrypto). */
 #cmakedefine H5_HAVE_LIBCRYPTO @H5_HAVE_LIBCRYPTO@
@@ -240,6 +246,21 @@
 
 /* Define to 1 if you have the `z' library (-lz). */
 #cmakedefine H5_HAVE_LIBZ @H5_HAVE_LIBZ@
+
+/* Define to 1 if you have the `llround' function. */
+#cmakedefine H5_HAVE_LLROUND @H5_HAVE_LLROUND@
+
+/* Define to 1 if you have the `llroundf' function. */
+#cmakedefine H5_HAVE_LLROUNDF @H5_HAVE_LLROUNDF@
+
+/* Define to 1 if you have the `longjmp' function. */
+#cmakedefine H5_HAVE_LONGJMP @H5_HAVE_LONGJMP@
+
+/* Define to 1 if you have the `lround' function. */
+#cmakedefine H5_HAVE_LROUND @H5_HAVE_LROUND@
+
+/* Define to 1 if you have the `lroundf' function. */
+#cmakedefine H5_HAVE_LROUNDF @H5_HAVE_LROUNDF@
 
 /* Define to 1 if you have the `lseek64' function. */
 #cmakedefine H5_HAVE_LSEEK64 @H5_HAVE_LSEEK64@
@@ -305,11 +326,26 @@
    compiled */
 #cmakedefine H5_HAVE_ROS3_VFD @H5_HAVE_ROS3_VFD@
 
+/* Define to 1 if you have the `round' function. */
+#cmakedefine H5_HAVE_ROUND @H5_HAVE_ROUND@
+
+/* Define to 1 if you have the `roundf' function. */
+#cmakedefine H5_HAVE_ROUNDF @H5_HAVE_ROUNDF@
+
+/* Define to 1 if you have the `setjmp' function. */
+#cmakedefine H5_HAVE_SETJMP @H5_HAVE_SETJMP@
+
+/* Define to 1 if you have the <setjmp.h> header file. */
+#cmakedefine H5_HAVE_SETJMP_H @H5_HAVE_SETJMP_H@
+
 /* Define to 1 if you have the `setsysinfo' function. */
 #cmakedefine H5_HAVE_SETSYSINFO @H5_HAVE_SETSYSINFO@
 
 /* Define to 1 if you have the `siglongjmp' function. */
 #cmakedefine H5_HAVE_SIGLONGJMP @H5_HAVE_SIGLONGJMP@
+
+/* Define to 1 if you have the `signal' function. */
+#cmakedefine H5_HAVE_SIGNAL @H5_HAVE_SIGNAL@
 
 /* Define to 1 if you have the `sigprocmask' function. */
 #cmakedefine H5_HAVE_SIGPROCMASK @H5_HAVE_SIGPROCMASK@
@@ -328,6 +364,18 @@
 
 /* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
+
+/* Define to 1 if you have the <stdbool.h> header file. */
+#cmakedefine H5_HAVE_STDBOOL_H @H5_HAVE_STDBOOL_H@
+
+/* Define to 1 if you have the <stddef.h> header file. */
+#cmakedefine H5_HAVE_STDDEF_H @H5_HAVE_STDDEF_H@
+
+/* Define to 1 if you have the <stdint.h> header file. */
+#cmakedefine H5_HAVE_STDINT_H @H5_HAVE_STDINT_H@
+
+/* Define to 1 if you have the <stdint.h> header file for Cplusplus. */
+#cmakedefine H5_HAVE_STDINT_H_CXX @H5_HAVE_STDINT_H_CXX@
 
 /* Define to 1 if you have the <stdlib.h> header file. */
 #cmakedefine H5_HAVE_STDLIB_H @H5_HAVE_STDLIB_H@
@@ -355,6 +403,9 @@
 
 /* Define to 1 if you have the `symlink' function. */
 #cmakedefine H5_HAVE_SYMLINK @H5_HAVE_SYMLINK@
+
+/* Define to 1 if you have the `system' function. */
+#cmakedefine H5_HAVE_SYSTEM @H5_HAVE_SYSTEM@
 
 /* Define to 1 if you have the <sys/file.h> header file. */
 #cmakedefine H5_HAVE_SYS_FILE_H @H5_HAVE_SYS_FILE_H@
@@ -420,6 +471,9 @@
 
 /* Define if your system has window style path name. */
 #cmakedefine H5_HAVE_WINDOW_PATH @H5_HAVE_WINDOW_PATH@
+
+/* Define to 1 if you have the <winsock2.h> header file. */
+#cmakedefine H5_HAVE_WINSOCK2_H @H5_HAVE_WINSOCK2_H@
 
 /* Define to 1 if you have the <zlib.h> header file. */
 #cmakedefine H5_HAVE_ZLIB_H @H5_HAVE_ZLIB_H@
@@ -662,6 +716,9 @@
 
 /* The size of `__int64', as computed by sizeof. */
 #define H5_SIZEOF___INT64 @H5_SIZEOF___INT64@
+
+/* Define to 1 if you have the ANSI C header files. */
+#cmakedefine H5_STDC_HEADERS @H5_STDC_HEADERS@
 
 /* Define if strict file format checks are enabled */
 #cmakedefine H5_STRICT_FORMAT_CHECKS @H5_STRICT_FORMAT_CHECKS@
