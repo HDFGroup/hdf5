@@ -503,7 +503,7 @@ test_ooo_indices(hid_t fapl)
                 GHEAP_REPEATED_ERR("    Unable to insert object into global heap")
 
             /* Check that the index is as expected */
-            if (obj[j].idx != ((1000 * i) + j - (1000 * ((~i & 1)))) % ((1u << 16) - 1) + 1)
+            if (obj[j].idx != ((1000 * i) + j - (1000 * ((~i & 1)))) % ((1U << 16) - 1) + 1)
                 GHEAP_REPEATED_ERR("    Unexpected global heap index");
         }
 

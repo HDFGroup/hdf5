@@ -218,9 +218,14 @@ test_iter_group(hid_t fapl, hbool_t new_format)
                                          dataset_name, (size_t)NAMELEN, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Lget_name_by_idx");
 
+        //! [H5Oget_info_by_idx3_snip]
+
         ret = H5Oget_info_by_idx3(root_group, ".", H5_INDEX_NAME, H5_ITER_INC, (hsize_t)i, &oinfo,
                                   H5O_INFO_BASIC, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Oget_info_by_idx");
+
+        //! [H5Oget_info_by_idx3_snip]
+
     } /* end for */
 
     H5E_BEGIN_TRY

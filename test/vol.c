@@ -958,9 +958,13 @@ test_basic_object_operation(void)
     if (H5Oget_info3(fid, &object_info, H5O_INFO_ALL) < 0)
         TEST_ERROR;
 
+    //! [H5Oget_info_by_name3_snip]
+
     /* H5Oget_info_by_name */
     if (H5Oget_info_by_name3(fid, NATIVE_VOL_TEST_GROUP_NAME, &object_info, H5O_INFO_ALL, H5P_DEFAULT) < 0)
         TEST_ERROR;
+
+    //! [H5Oget_info_by_name3_snip]
 
     /* H5Oexists_by_name */
     if (H5Oexists_by_name(fid, NATIVE_VOL_TEST_GROUP_NAME, H5P_DEFAULT) != TRUE)
