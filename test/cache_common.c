@@ -4994,7 +4994,7 @@ check_and_validate_cache_hit_rate(hid_t file_id, double *hit_rate_ptr, hbool_t d
         }
         else {
 
-            expected_hit_rate = 0.0F;
+            expected_hit_rate = 0.0;
         }
 
         result = H5Fget_mdc_hit_rate(file_id, &hit_rate);
