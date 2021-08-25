@@ -263,7 +263,7 @@ Bug Fixes since HDF5-1.12.1 release
 
     Testing
     -------
-    - 
+    -
 
 
 Supported Platforms
