@@ -295,7 +295,7 @@ New Features
 
       The Doxygen documentation has been updated and passing values larger
       than UINT32_MAX for size_hint will now produce a normal HDF5 error.
-      
+
         (DER - 2021/04/29, HDFFV-11241)
 
 
@@ -408,6 +408,17 @@ New Features
 
     Tools:
     ------
+    - Refactored the perform tools and removed depends on test library.
+
+        Moved the perf and h5perf tools from tools/test/perform to
+        tools/src/h5perf so that they can be installed. This required
+        that the test library dependency be removed by copying the
+        needed functions from h5test.c.
+        The standalone scripts and other perform tools remain in the
+        tools/test/perform folder.
+
+        (ADB - 2021/08/10)
+
     - h5repack added help text for user-defined filters.
 
         Added help text line that states the valid values of the filter flag
