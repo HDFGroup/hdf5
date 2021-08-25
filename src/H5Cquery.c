@@ -201,7 +201,7 @@ H5C_get_cache_hit_rate(const H5C_t *cache_ptr, double *hit_rate_ptr)
     if (cache_ptr->cache_accesses > 0)
         *hit_rate_ptr = ((double)(cache_ptr->cache_hits)) / ((double)(cache_ptr->cache_accesses));
     else
-        *hit_rate_ptr = 0.0f;
+        *hit_rate_ptr = 0.0;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

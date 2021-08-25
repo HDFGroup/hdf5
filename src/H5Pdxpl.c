@@ -68,7 +68,7 @@
 #define H5D_XFER_BTREE_SPLIT_RATIO_SIZE sizeof(double[3])
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEF                                                                       \
     {                                                                                                        \
-        0.1f, 0.5f, 0.9f                                                                                     \
+        0.1, 0.5, 0.9                                                                                        \
     }
 #define H5D_XFER_BTREE_SPLIT_RATIO_ENC H5P__dxfr_btree_split_ratio_enc
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEC H5P__dxfr_btree_split_ratio_dec
