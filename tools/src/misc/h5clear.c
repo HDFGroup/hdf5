@@ -32,7 +32,7 @@
 #define H5F_ACS_SKIP_EOF_CHECK_NAME     "skip_eof_check"
 
 /* Default increment is 1 megabytes for the --increment option */
-#define DEFAULT_INCREMENT 1024 * 1024
+#define DEFAULT_INCREMENT (1024 * 1024)
 
 static char *  fname_g            = NULL;
 static hbool_t clear_status_flags = FALSE;
