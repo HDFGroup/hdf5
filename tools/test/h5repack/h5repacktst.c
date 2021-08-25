@@ -111,8 +111,8 @@ const char *H5REPACK_FILENAMES[] = {"h5repack_big_out", NULL};
 
 #define DIM1  40
 #define DIM2  20
-#define CDIM1 DIM1 / 2
-#define CDIM2 DIM2 / 2
+#define CDIM1 (DIM1 / 2)
+#define CDIM2 (DIM2 / 2)
 #define RANK  2
 
 /* Size of userblock (for userblock test) */
