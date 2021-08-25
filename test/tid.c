@@ -855,7 +855,7 @@ test_remove_clear_type(void)
     return 0;
 
 error:
-    /* Cleanup.  For simplicity, just destroy the types and ignore errors. */
+    /* Cleanup. For simplicity, just destroy the types and ignore errors. */
     H5E_BEGIN_TRY
     {
         H5Idestroy_type(obj_type);

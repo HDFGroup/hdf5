@@ -41,8 +41,10 @@ const char *FILENAME[] = {"vms_data", "le_data", "be_data", NULL};
 
 #define DATASETNAME14 "Fletcher_float_data_le"
 #define DATASETNAME15 "Fletcher_float_data_be"
+#ifdef H5_HAVE_FILTER_DEFLATE
 #define DATASETNAME16 "Deflate_float_data_le"
 #define DATASETNAME17 "Deflate_float_data_be"
+#endif
 #ifdef H5_HAVE_FILTER_SZIP
 #define DATASETNAME18 "Szip_float_data_le"
 #define DATASETNAME19 "Szip_float_data_be"

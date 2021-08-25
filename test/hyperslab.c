@@ -585,10 +585,10 @@ test_multifill(size_t nx)
 
     for (i = 0; i < nx; i++) {
         src[i].left  = 1111111;
-        src[i].mid   = 12345.6789F;
+        src[i].mid   = 12345.6789;
         src[i].right = 2222222;
         dst[i].left  = 3333333;
-        dst[i].mid   = 98765.4321F;
+        dst[i].mid   = 98765.4321;
         dst[i].right = 4444444;
     } /* end for */
 
@@ -597,7 +597,7 @@ test_multifill(size_t nx)
      * over and over again.
      */
     fill.left  = 55555555;
-    fill.mid   = 3.1415927F;
+    fill.mid   = 3.1415927;
     fill.right = 66666666;
     src_stride = 0;
 
