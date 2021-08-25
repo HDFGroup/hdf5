@@ -53,7 +53,7 @@ const char *FILENAME[] = {"dt_arith1", "dt_arith2", NULL};
  * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
  * be I, otherwise the result will be Z-(I+1).
  */
-#define ENDIAN(Z, I, E) (H5T_ORDER_BE == E ? (I) : (Z) - ((I) + 1))
+#define ENDIAN(Z, I, E) (H5T_ORDER_BE == (E) ? (I) : (Z) - ((I) + 1))
 
 typedef enum dtype_t {
     INT_SCHAR,
@@ -3058,10 +3058,10 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     /* Check the software results against the hardware */
     for (j = 0; j < nelmts; j++) {
         underflow = 0;
-        hw_f      = 911.0f;
-        hw_d      = 911.0f;
+        hw_f      = 911.0F;
+        hw_d      = 911.0F;
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-        hw_ld = 911.0f;
+        hw_ld = 911.0L;
 #endif
 
         /* The hardware conversion */

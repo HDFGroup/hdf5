@@ -78,12 +78,12 @@ char vds_test_str_g[128]   = "";
 #endif /* VDS_TEST_VERBOSE */
 
 /* I/O test config flags */
-#define TEST_IO_CLOSE_SRC      0x01u
-#define TEST_IO_DIFFERENT_FILE 0x02u
-#define TEST_IO_REOPEN_VIRT    0x04u
-#define TEST_IO_FCLOSE_SEMI    0x08u
-#define TEST_IO_FCLOSE_STRONG  0x10u
-#define TEST_IO_NTESTS         0x20u
+#define TEST_IO_CLOSE_SRC      0x01U
+#define TEST_IO_DIFFERENT_FILE 0x02U
+#define TEST_IO_REOPEN_VIRT    0x04U
+#define TEST_IO_FCLOSE_SEMI    0x08U
+#define TEST_IO_FCLOSE_STRONG  0x10U
+#define TEST_IO_NTESTS         0x20U
 
 #define LIST_DOUBLE_SIZE (H5D_VIRTUAL_DEF_LIST_SIZE + 1)
 

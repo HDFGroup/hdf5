@@ -148,7 +148,7 @@ create_chunked_dataset(const char *filename, int chunk_factor, write_type write_
 
         /* verify file size */
         filesize     = get_filesize(filename);
-        est_filesize = nchunks * CHUNK_SIZE * sizeof(unsigned char);
+        est_filesize = (MPI_Offset)nchunks * (MPI_Offset)CHUNK_SIZE * (MPI_Offset)sizeof(unsigned char);
         VRFY((filesize >= est_filesize), "file size check");
     }
 
@@ -284,7 +284,7 @@ parallel_access_dataset(const char *filename, int chunk_factor, access_type acti
 
     /* verify file size */
     filesize     = get_filesize(filename);
-    est_filesize = nchunks * CHUNK_SIZE * sizeof(unsigned char);
+    est_filesize = (MPI_Offset)nchunks * (MPI_Offset)CHUNK_SIZE * (MPI_Offset)sizeof(unsigned char);
     VRFY((filesize >= est_filesize), "file size check");
 
     /* Can close some plists */

@@ -1762,8 +1762,8 @@ test_write_3d_filtered_dataset_overlap(void)
                               WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
                (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-            /* Add the amount that gets added when a rank moves down to its next section vertically in the
-               dataset */
+            /* Add the amount that gets added when a rank moves down to its next
+               section vertically in the dataset */
             + ((hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
                (i / (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
                               WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
@@ -4497,8 +4497,8 @@ test_read_3d_filtered_dataset_overlap(void)
                               READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
                (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-            /* Add the amount that gets added when a rank moves down to its next section vertically in the
-               dataset */
+            /* Add the amount that gets added when a rank moves down to its next
+               section vertically in the dataset */
             + ((hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
                (i / (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
                               READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))));

@@ -93,25 +93,29 @@ const char *FILENAME[] = {"dataset",             /* 0 */
 #define FILE_DEFLATE_NAME "deflate.h5"
 
 /* Dataset names for testing filters */
-#define DSET_DEFAULT_NAME         "default"
-#define DSET_CHUNKED_NAME         "chunked"
-#define DSET_COMPACT_NAME         "compact"
-#define DSET_SIMPLE_IO_NAME       "simple_io"
-#define DSET_USERBLOCK_IO_NAME    "userblock_io"
-#define DSET_COMPACT_IO_NAME      "compact_io"
-#define DSET_COMPACT_MAX_NAME     "max_compact"
-#define DSET_COMPACT_MAX2_NAME    "max_compact_2"
-#define DSET_CONV_BUF_NAME        "conv_buf"
-#define DSET_TCONV_NAME           "tconv"
-#define DSET_DEFLATE_NAME         "deflate"
-#define DSET_SHUFFLE_NAME         "shuffle"
-#define DSET_FLETCHER32_NAME      "fletcher32"
-#define DSET_FLETCHER32_NAME_2    "fletcher32_2"
-#define DSET_FLETCHER32_NAME_3    "fletcher32_3"
+#define DSET_DEFAULT_NAME      "default"
+#define DSET_CHUNKED_NAME      "chunked"
+#define DSET_COMPACT_NAME      "compact"
+#define DSET_SIMPLE_IO_NAME    "simple_io"
+#define DSET_USERBLOCK_IO_NAME "userblock_io"
+#define DSET_COMPACT_IO_NAME   "compact_io"
+#define DSET_COMPACT_MAX_NAME  "max_compact"
+#define DSET_COMPACT_MAX2_NAME "max_compact_2"
+#define DSET_CONV_BUF_NAME     "conv_buf"
+#define DSET_TCONV_NAME        "tconv"
+#ifdef H5_HAVE_FILTER_DEFLATE
+#define DSET_DEFLATE_NAME "deflate"
+#endif
+#define DSET_SHUFFLE_NAME      "shuffle"
+#define DSET_FLETCHER32_NAME   "fletcher32"
+#define DSET_FLETCHER32_NAME_2 "fletcher32_2"
+#define DSET_FLETCHER32_NAME_3 "fletcher32_3"
+#ifdef H5_HAVE_FILTER_DEFLATE
 #define DSET_SHUF_DEF_FLET_NAME   "shuffle+deflate+fletcher32"
 #define DSET_SHUF_DEF_FLET_NAME_2 "shuffle+deflate+fletcher32_2"
-#define DSET_OPTIONAL_SCALAR      "dataset_with_scalar_space"
-#define DSET_OPTIONAL_VLEN        "dataset_with_vlen_type"
+#endif
+#define DSET_OPTIONAL_SCALAR "dataset_with_scalar_space"
+#define DSET_OPTIONAL_VLEN   "dataset_with_vlen_type"
 #ifdef H5_HAVE_FILTER_SZIP
 #define DSET_SZIP_NAME             "szip"
 #define DSET_SHUF_SZIP_FLET_NAME   "shuffle+szip+fletcher32"
@@ -1390,10 +1394,10 @@ test_conv_buffer(hid_t fid)
                 cf->a[j][k][l] = 10 * (j + 1) + l + k;
 
     for (j = 0; j < DIM2; j++)
-        cf->b[j] = 100.0f * (float)(j + 1) + 0.01f * (float)j;
+        cf->b[j] = 100.0F * (float)(j + 1) + 0.01F * (float)j;
 
     for (j = 0; j < DIM3; j++)
-        cf->c[j] = 100.0f * (float)(j + 1) + 0.02f * (float)j;
+        cf->c[j] = 100.0F * (float)(j + 1) + 0.02F * (float)j;
 
     /* Create data space */
     if ((space = H5Screate(H5S_SCALAR)) < 0)
@@ -1502,6 +1506,9 @@ test_conv_buffer(hid_t fid)
     return SUCCEED;
 
 error:
+    HDfree(cfrR);
+    HDfree(cf);
+
     H5E_BEGIN_TRY
     {
         H5Pclose(xfer_list);
@@ -3315,8 +3322,8 @@ test_nbit_float(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    float  orig_data[2][5] = {{188384.0f, 19.103516f, -1.0831790e9f, -84.242188f, 5.2045898f},
-                             {-49140.0f, 2350.25f, -3.2110596e-1f, 6.4998865e-5f, -0.0f}};
+    float  orig_data[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
+                             {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
     float  new_data[2][5];
     size_t precision, offset;
     size_t i, j;
@@ -7160,6 +7167,7 @@ error:
     H5E_END_TRY;
     return FAIL;
 #else
+    (void)file; /* Silence compiler */
     SKIPPED();
     return SUCCEED;
 #endif
@@ -11632,7 +11640,7 @@ test_unfiltered_edge_chunks(hid_t fapl)
         TEST_ERROR
 
     /* Add "count" filter */
-    if (H5Pset_filter(dcpl, H5Z_FILTER_COUNT, 0u, (size_t)0, NULL) < 0)
+    if (H5Pset_filter(dcpl, H5Z_FILTER_COUNT, 0U, (size_t)0, NULL) < 0)
         TEST_ERROR
 
     /* Disable filters on partial chunks */
@@ -15407,6 +15415,7 @@ main(void)
     /* Tests version bounds using its own file */
     nerrors += (test_versionbounds() < 0 ? 1 : 0);
 
+    /* Tests that use their own file */
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
 
     /* Run misc tests */

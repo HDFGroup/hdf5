@@ -340,7 +340,7 @@ test_core(void)
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    /* Retrieve the access property list... */
+    /* Retrieve the access property list */
     if ((fapl_id_out = H5Fget_access_plist(fid)) < 0)
         TEST_ERROR;
 

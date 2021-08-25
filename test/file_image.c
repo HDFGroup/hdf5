@@ -102,8 +102,9 @@ test_properties(void)
      * property list functions. In the file driver tests further down, this will
      * not be the case.
      */
-    size   = (size_t)count * sizeof(char);
-    buffer = (char *)HDmalloc(size);
+    size = (size_t)count * sizeof(char);
+    if (NULL == (buffer = (char *)HDmalloc(size)))
+        TEST_ERROR
     for (i = 0; i < count - 1; i++)
         buffer[i] = (char)(65 + i);
     buffer[count - 1] = '\0';
@@ -338,8 +339,8 @@ test_callbacks(void)
     H5FD_file_image_callbacks_t callbacks;
     hid_t                       fapl_1;
     hid_t                       fapl_2;
-    udata_t *                   udata;
-    char *                      file_image;
+    udata_t *                   udata      = NULL;
+    char *                      file_image = NULL;
     char *                      temp_file_image;
     int                         count = 10;
     int                         i;
@@ -350,6 +351,7 @@ test_callbacks(void)
 
     /* Allocate and initialize udata */
     udata = (udata_t *)HDmalloc(sizeof(udata_t));
+    VERIFY(udata != NULL, "udata malloc failed");
     reset_udata(udata);
 
     /* copy the address of the user data into read_callbacks */
@@ -358,6 +360,7 @@ test_callbacks(void)
     /* Allocate and initialize file image buffer */
     size       = (size_t)count * sizeof(char);
     file_image = (char *)HDmalloc(size);
+    VERIFY(file_image != NULL, "file_image malloc failed");
     for (i = 0; i < count - 1; i++)
         file_image[i] = (char)(65 + i);
     file_image[count - 1] = '\0';
@@ -529,6 +532,9 @@ test_callbacks(void)
     return 0;
 
 error:
+    HDfree(file_image);
+    HDfree(udata);
+
     return 1;
 } /* test_callbacks() */
 
@@ -601,7 +607,8 @@ test_core(void)
     reset_udata(udata);
     file = H5Fopen(copied_filename, H5F_ACC_RDONLY, fapl);
     VERIFY(file >= 0, "H5Fopen failed");
-    VERIFY(udata->used_callbacks == MALLOC, "opening a core file used the wrong callbacks");
+    VERIFY((udata->used_callbacks == MALLOC) || (udata->used_callbacks == (MALLOC | UDATA_COPY | UDATA_FREE)),
+           "opening a core file used the wrong callbacks");
     VERIFY(udata->malloc_src == H5FD_FILE_IMAGE_OP_FILE_OPEN,
            "Malloc callback came from wrong sourc in core open");
 

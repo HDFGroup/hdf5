@@ -1528,6 +1528,9 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
     void *      buf      = NULL;                                 /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
 
+    if (!filename)
+        goto error;
+
     /* Allocate copy buffer */
     if (NULL == (buf = HDcalloc((size_t)1, (size_t)READ_BUF_SIZE)))
         goto error;
