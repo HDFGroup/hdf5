@@ -1265,6 +1265,7 @@
 ./test/test_filter_plugin.sh.in
 ./test/test_filters_be.h5
 ./test/test_filters_le.h5
+./test/test_usecases.sh.in
 ./test/testabort_fail.sh.in
 ./test/testcheck_version.sh.in
 ./test/testerror.sh.in
