@@ -47,7 +47,7 @@ extern "C" {
 /* returns int [] */
 JNIEXPORT jintArray JNICALL
 Java_hdf_hdf5lib_HDFNativeData_byteToInt___3B(JNIEnv *env, jclass clss,
-                                              jbyteArray bdata) /* IN: array of bytes */
+                                              jbyteArray bdata)
 {
     jintArray rarray = NULL;
     jboolean  bb;

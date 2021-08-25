@@ -413,10 +413,15 @@ UD_hard_create(const char *link_name, hid_t loc_group, const void *udata, size_t
 
     addr = *((const haddr_t *)udata);
 
+    //! [H5Oopen_by_addr_snip]
+
     /* Open the object this link points to so that we can increment
      * its reference count. This also ensures that the address passed
      * in points to a real object (although this check is not perfect!) */
     target_obj = H5Oopen_by_addr(loc_group, addr);
+
+    //! [H5Oopen_by_addr_snip]
+
     if (target_obj < 0) {
         ret_value = -1;
         goto done;
@@ -611,7 +616,7 @@ UD_plist_traverse(const char *link_name, hid_t cur_group, const void *udata, siz
                   hid_t dxpl_id)
 {
     char *path;
-    hid_t ret_value = -1;
+    hid_t ret_value = H5I_INVALID_HID;
 
     /* If the link property isn't set or can't be found, traversal fails. */
     if (H5Pexist(lapl_id, PLIST_LINK_PROP) < 0)
@@ -628,7 +633,7 @@ UD_plist_traverse(const char *link_name, hid_t cur_group, const void *udata, siz
     return ret_value;
 
 error:
-    return -1;
+    return H5I_INVALID_HID;
 }
 
 /* Main function
