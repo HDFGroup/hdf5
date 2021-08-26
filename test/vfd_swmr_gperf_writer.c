@@ -416,7 +416,7 @@ error:
  * Purpose:     Add attributes to a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t oid
@@ -522,7 +522,7 @@ error:
  * Purpose:     Add a variable length string  attribute to a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -620,7 +620,7 @@ error:
  * Purpose:     Add variable length string attributes to a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -660,7 +660,7 @@ add_vlstr_attrs(state_t *s, hid_t g, unsigned int which, unsigned int num_attrs)
  * Purpose:     Add an attribute to a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -704,7 +704,7 @@ add_default_group_attr(state_t *s, hid_t g, unsigned int which)
  * Purpose:     delete one attribute in a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t obj_id
@@ -785,7 +785,7 @@ error:
  *              then delete this attribute in this a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -825,7 +825,7 @@ add_del_vlstr_attr(state_t *s, hid_t g, unsigned int which)
  * Purpose:     Modify the value of an attribute in a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -990,10 +990,10 @@ error:
  * Function:    add_modify_vlstr_attr
  *
  * Purpose:     Add a variable length string attribute
- *              then modify this attribute in this a group.
+ *              then modify this attribute in the group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1033,7 +1033,7 @@ add_modify_vlstr_attr(state_t *s, hid_t g, unsigned int which)
  *              attributes that the compact storage can hold
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1095,7 +1095,7 @@ error:
  *              Then,  add another atribute, the storage becomes dense.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1231,7 +1231,7 @@ error:
  *              Then,  delete one atribute, the storage is still compact.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1277,7 +1277,7 @@ add_del_attrs_compact(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
  *              Then,  delete one atribute, the storage is still dense.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1333,7 +1333,7 @@ error:
  *              dense to compact again.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1373,7 +1373,7 @@ add_del_attrs_compact_dense_compact(state_t *s, hid_t g, hid_t gcpl, unsigned in
  * Purpose:     Add an attribute then modify the value to a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1413,7 +1413,7 @@ add_modify_default_group_attr(state_t *s, hid_t g, unsigned int which)
  *              the object header continuation block
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1451,7 +1451,7 @@ del_ohr_block_attr(state_t *s, hid_t g, unsigned int which)
  *              correponding test function..
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t g
@@ -1527,7 +1527,7 @@ add_group_attribute(state_t *s, hid_t g, hid_t gcpl, unsigned int which)
  *              according to the attribute test pattern.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -1695,7 +1695,7 @@ error:
  * Purpose:     Create a group and return the group ID.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -1818,7 +1818,7 @@ error:
  * Purpose:     Create a group
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -1896,7 +1896,7 @@ error:
  *              according to the group test pattern.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t obj_id
@@ -1978,7 +1978,7 @@ error:
  *              according to the group operation test pattern.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -2013,7 +2013,7 @@ delete_group(state_t *s, unsigned int which)
  * Purpose:     A helper function used by the move_group operation.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t obj_id
@@ -2062,7 +2062,7 @@ error:
  * Purpose:     Move a group to another group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -2098,7 +2098,7 @@ move_group(state_t *s, unsigned int which)
  * Purpose:     A helper function used to attach a link to a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              hid_t obj_id
@@ -2212,7 +2212,7 @@ error:
  * Purpose:     create links with a group.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -2253,7 +2253,7 @@ insert_links(state_t *s, unsigned int which)
  * Purpose:     create links with a group and then delete them successfully.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -2295,7 +2295,7 @@ delete_links(state_t *s, unsigned int which)
  *              compact to dense.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -2361,7 +2361,7 @@ error:
  *              compact to dense then to compact.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -2447,7 +2447,7 @@ error:
  *              according to the group operation and attribute test patterns.
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int which
@@ -2596,7 +2596,7 @@ obtain_tree_level_elems(unsigned int total_ele, unsigned int level)
  * Purpose:     Generate the nested groups
  *
  * Parameters:  state_t *s
- *              The struct that stores information of HDF5 file, named pipe
+ *              The struct that stores information of HDF5 file
  *              and some VFD SWMR configuration parameters
  *
  *              unsigned int level
@@ -2922,7 +2922,7 @@ main(int argc, char **argv)
             fprintf(stdout, "\n");
 
             fprintf(stdout, "The length of a tick              = %u\n", s.tick_len);
-            fprintf(stdout, "The maximum expected log(in ticks)= %u\n", s.max_lag);
+            fprintf(stdout, "The maximum expected lag(in ticks)= %u\n", s.max_lag);
             fprintf(stdout, "The page size(in bytes)           = %u\n", s.ps);
             fprintf(stdout, "The page buffer size(in bytes)    = %u\n", s.pbs);
             fprintf(stdout, "\n");
