@@ -457,6 +457,9 @@ H5FD__sec2_close(H5FD_t *_file)
     /* Sanity check */
     HDassert(file);
 
+    /* ensure we don't keep a lock, even if the fd has been duplicated */
+    HDflock(file->fd, LOCK_UN | LOCK_NB);
+
     /* Close the underlying file */
     if(HDclose(file->fd) < 0)
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
