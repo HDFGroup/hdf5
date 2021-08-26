@@ -5276,7 +5276,7 @@ test_misc28(void)
      * bytes). */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
     CHECK(fapl, FAIL, "H5Pcreate");
-    ret = H5Pset_cache(fapl, MISC28_NSLOTS, MISC28_NSLOTS, MISC28_SIZE, 0.75F);
+    ret = H5Pset_cache(fapl, MISC28_NSLOTS, MISC28_NSLOTS, MISC28_SIZE, 0.75);
     CHECK(ret, FAIL, "H5Pset_cache");
 
     /* Create the dcpl and set the chunk size */

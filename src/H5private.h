@@ -44,7 +44,9 @@
 #include <sys/time.h>
 #endif
 #ifdef H5_HAVE_UNISTD_H
+#ifdef H5_HAVE_PWD_H
 #include <pwd.h>
+#endif
 #include <unistd.h>
 #include <sys/wait.h>
 #endif
@@ -2082,6 +2084,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     /* Push the API context */                                                                               \
     if (H5CX_push() < 0)                                                                                     \
         HGOTO_ERROR(H5E_FUNC, H5E_CANTSET, err, "can't set API context")                                     \
+    else                                                                                                     \
+        api_ctx_pushed = TRUE;                                                                               \
                                                                                                              \
     BEGIN_MPE_LOG
 
@@ -2089,6 +2093,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_API(err)                                                                                  \
     {                                                                                                        \
         {                                                                                                    \
+            hbool_t api_ctx_pushed = FALSE;                                                                  \
+                                                                                                             \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
@@ -2103,6 +2109,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_API_NOCLEAR(err)                                                                          \
     {                                                                                                        \
         {                                                                                                    \
+            hbool_t api_ctx_pushed = FALSE;                                                                  \
+                                                                                                             \
             FUNC_ENTER_API_COMMON                                                                            \
             FUNC_ENTER_API_INIT(err);                                                                        \
             FUNC_ENTER_API_PUSH(err);                                                                        \
@@ -2163,7 +2171,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  * Use this macro for API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, or push themselves on the function
  *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
- *	API name itself.  Examples are: H5TSmutex_acquire,
+ *    API name itself.  Examples are: H5TSmutex_acquire,
  *
  */
 #define FUNC_ENTER_API_NAMECHECK_ONLY                                                                        \
@@ -2259,7 +2267,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  * Use this macro for non-API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, or push themselves on the function
  *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
- *	API name itself.  Examples are private routines in the H5TS package.
+ *    API name itself.  Examples are private routines in the H5TS package.
  *
  */
 #define FUNC_ENTER_NOAPI_NAMECHECK_ONLY                                                                      \
@@ -2337,7 +2345,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
  * Use this macro for non-API functions that shouldn't perform _any_ initialization
  *      of the library or an interface, or push themselves on the function
  *      stack, or perform tracing, etc.  This macro _only_ sanity checks the
- *	API name itself.  Examples are static routines in the H5TS package.
+ *    API name itself.  Examples are static routines in the H5TS package.
  *
  */
 #define FUNC_ENTER_STATIC_NAMECHECK_ONLY                                                                     \
@@ -2369,14 +2377,17 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_API_SET_CANCEL
 
 #define FUNC_LEAVE_API_COMMON(ret_value)                                                                     \
-    ;                                                                                                        \
-    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FINISH_MPE_LOG                                                                                           \
     H5TRACE_RETURN(ret_value);
 
 #define FUNC_LEAVE_API(ret_value)                                                                            \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
-    (void)H5CX_pop(TRUE);                                                                                    \
+    if (api_ctx_pushed) {                                                                                    \
+        (void)H5CX_pop(TRUE);                                                                                \
+        api_ctx_pushed = FALSE;                                                                              \
+    }                                                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
         (void)H5E_dump_api_stack(TRUE);                                                                      \
@@ -2387,6 +2398,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT macro */
 #define FUNC_LEAVE_API_NOINIT(ret_value)                                                                     \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     H5_POP_FUNC                                                                                              \
     if (err_occurred)                                                                                        \
@@ -2399,6 +2412,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Use this macro to match the FUNC_ENTER_API_NOINIT_NOERR_NOFS macro */
 #define FUNC_LEAVE_API_NOFS(ret_value)                                                                       \
+    ;                                                                                                        \
+    } /*end scope from end of FUNC_ENTER*/                                                                   \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     FUNC_LEAVE_API_THREADSAFE                                                                                \
     return (ret_value);                                                                                      \
