@@ -43,8 +43,9 @@
 #define ATTR7_NAME    "attr ushort"
 #define ATTR8_NAME    "attr uint"
 #define ATTR9_NAME    "attr ulong"
-#define ATTR10_NAME   "attr float"
-#define ATTR11_NAME   "attr double"
+#define ATTR10_NAME   "attr ullong"
+#define ATTR11_NAME   "attr float"
+#define ATTR12_NAME   "attr double"
 
 static herr_t make_attributes(hid_t loc_id, const char *obj_name);
 
@@ -897,7 +898,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTset_attribute_float");
 
     /* Set the attribute */
-    if (H5LTset_attribute_float(loc_id, obj_name, ATTR10_NAME, attr_float_in, (size_t)5) < 0)
+    if (H5LTset_attribute_float(loc_id, obj_name, ATTR11_NAME, attr_float_in, (size_t)5) < 0)
         return -1;
 
     PASSED();
@@ -910,7 +911,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTget_attribute_float");
 
     /* Get the attribute */
-    if (H5LTget_attribute_float(loc_id, obj_name, ATTR10_NAME, attr_float_out) < 0)
+    if (H5LTget_attribute_float(loc_id, obj_name, ATTR11_NAME, attr_float_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -920,7 +921,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     }
 
     /* Get the attribute */
-    if (H5LTget_attribute(loc_id, obj_name, ATTR10_NAME, H5T_NATIVE_FLOAT, attr_float_out) < 0)
+    if (H5LTget_attribute(loc_id, obj_name, ATTR11_NAME, H5T_NATIVE_FLOAT, attr_float_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -939,7 +940,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTset_attribute_double");
 
     /* Set the attribute */
-    if (H5LTset_attribute_double(loc_id, obj_name, ATTR11_NAME, attr_double_in, (size_t)5) < 0)
+    if (H5LTset_attribute_double(loc_id, obj_name, ATTR12_NAME, attr_double_in, (size_t)5) < 0)
         return -1;
 
     PASSED();
@@ -952,7 +953,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTget_attribute_double");
 
     /* Get the attribute */
-    if (H5LTget_attribute_double(loc_id, obj_name, ATTR11_NAME, attr_double_out) < 0)
+    if (H5LTget_attribute_double(loc_id, obj_name, ATTR12_NAME, attr_double_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -962,7 +963,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     }
 
     /* Get the attribute */
-    if (H5LTget_attribute(loc_id, obj_name, ATTR11_NAME, H5T_NATIVE_DOUBLE, attr_double_out) < 0)
+    if (H5LTget_attribute(loc_id, obj_name, ATTR12_NAME, H5T_NATIVE_DOUBLE, attr_double_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
