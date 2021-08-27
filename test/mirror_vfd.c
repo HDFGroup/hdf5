@@ -2171,9 +2171,9 @@ test_on_disk_zoo(void)
      */
 
     if (pass) {
-        pass = create_zoo(file_id, grp_name, &lastmsgtime, (zoo_config_t){
-                .proc_num = 0, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}
-                });
+        pass = create_zoo(
+            file_id, grp_name, &lastmsgtime,
+            (zoo_config_t){.proc_num = 0, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}});
     }
     if (pass) {
         if (H5Fclose(file_id) == FAIL) {
@@ -2185,7 +2185,9 @@ test_on_disk_zoo(void)
         }
     }
     if (pass) {
-        validate_zoo(file_id, grp_name, &lastmsgtime, (zoo_config_t){.proc_num = 0, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}});
+        validate_zoo(
+            file_id, grp_name, &lastmsgtime,
+            (zoo_config_t){.proc_num = 0, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}});
     }
     if (!pass) {
         HDprintf(failure_mssg);
