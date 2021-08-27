@@ -153,8 +153,10 @@ state_init(state_t *s, int argc, char **argv)
 
     esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
 
-    if (tfile)
+    if (tfile) {
         HDfree(tfile);
+        tfile = NULL;
+    }
 
     while ((ch = getopt(argc, argv, "SGa:bc:n:Nqu:A:O:")) != -1) {
         switch (ch) {

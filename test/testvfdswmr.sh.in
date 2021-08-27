@@ -1021,21 +1021,21 @@ done
 #
 #
 GROUP_seg_n=1000000                      # Number of groups when segmentation fault occurs
-if [ ${do_os_groups_seg:-no} = no ]; then
-	continue
-fi
-echo launch vfd_swmr_group operations with old-style group: $GROUP_seg_n groups ......may take some time......
-catch_out_err_and_rc vfd_swmr_group_writer \
-    ../vfd_swmr_group_writer -q -N -G -n $GROUP_seg_n -a $GROUP_seg_n
+#
+if [ ${do_os_groups_seg:-no} != no ]; then
+    echo launch vfd_swmr_group operations with old-style group: $GROUP_seg_n groups ......may take some time......
+    catch_out_err_and_rc vfd_swmr_group_writer \
+        ../vfd_swmr_group_writer -q -N -G -n $GROUP_seg_n -a $GROUP_seg_n
 
-# Collect exit code of the writer
-if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
-    echo writer had error
-    nerrors=$((nerrors + 1))
-fi
+    # Collect exit code of the writer
+    if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+        echo writer had error
+        nerrors=$((nerrors + 1))
+    fi
 
-# Clean up output files
-rm -f vfd_swmr_group_writer.{out,rc}
+    # Clean up output files
+    rm -f vfd_swmr_group_writer.{out,rc}
+fi
 
 ###############################################################################
 #
