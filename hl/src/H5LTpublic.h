@@ -140,7 +140,7 @@ H5_HLDLL herr_t H5LTset_attribute_ulong(hid_t loc_id, const char *obj_name, cons
                                         const unsigned long *buffer, size_t size);
 
 H5_HLDLL herr_t H5LTset_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_name,
-                                        const unsigned long long *buffer, size_t size);
+                                         const unsigned long long *buffer, size_t size);
 
 H5_HLDLL herr_t H5LTset_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_name,
                                         const float *buffer, size_t size);
@@ -186,7 +186,7 @@ H5_HLDLL herr_t H5LTget_attribute_ulong(hid_t loc_id, const char *obj_name, cons
                                         unsigned long *data);
 
 H5_HLDLL herr_t H5LTget_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_name,
-                                        unsigned long long *data);
+                                         unsigned long long *data);
 
 H5_HLDLL herr_t H5LTget_attribute_float(hid_t loc_id, const char *obj_name, const char *attr_name,
                                         float *data);
