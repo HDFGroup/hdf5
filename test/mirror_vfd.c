@@ -59,6 +59,8 @@
 #define DEFAULT_VERBOSITY 1
 static unsigned int g_verbosity = DEFAULT_VERBOSITY;
 
+static struct timespec lastmsgtime = {.tv_sec = 0, .tv_nsec = 0};
+
 /* Macro for selective debug printing / logging */
 #define LOGPRINT(lvl, ...)                                                                                   \
     do {                                                                                                     \
@@ -2169,7 +2171,9 @@ test_on_disk_zoo(void)
      */
 
     if (pass) {
-        create_zoo(file_id, grp_name, 0);
+        pass = create_zoo(file_id, grp_name, &lastmsgtime, (zoo_config_t){
+                .proc_num = 0, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}
+                });
     }
     if (pass) {
         if (H5Fclose(file_id) == FAIL) {
@@ -2181,7 +2185,7 @@ test_on_disk_zoo(void)
         }
     }
     if (pass) {
-        validate_zoo(file_id, grp_name, 0); /* sanity-check */
+        validate_zoo(file_id, grp_name, &lastmsgtime, (zoo_config_t){.proc_num = 0, .skip_varlen = false, .skip_compact = false, .msgival = {0, 0}});
     }
     if (!pass) {
         HDprintf(failure_mssg);
