@@ -145,9 +145,9 @@ all_tests="generator expand shrink expand_shrink sparse vlstr_null vlstr_oob zoo
 all_tests="${all_tests} groups groups_attrs groups_ops few_big many_small attrdset"
 tests=${all_tests}
 
-# For exhaustive run, add: os_groups_attrs, os_groups_ops, dsetops, dsetchks
+# For exhaustive run, add: os_groups_attrs, os_groups_ops, os_groups_seg, dsetops, dsetchks
 if [[ "$HDF5TestExpress" -eq 0 ]] ; then         # exhaustive run
-    all_tests="${all_tests} os_groups_attrs os_groups_ops dsetops dsetchks"
+    all_tests="${all_tests} os_groups_attrs os_groups_ops os_groups_seg dsetops dsetchks"
 fi
 
 if [ $# -gt 0 ]; then
@@ -1008,6 +1008,36 @@ done
 
 ###############################################################################
 #
+# Setting for "os_groups_seg" test
+#
+# Only for exhaustive run
+#
+# Verify the segmentation fault is fixed when running with:
+# --1,000,000 groups
+# --as writer only
+# 
+###############################################################################
+#
+#
+GROUP_seg_n=1000000                      # Number of groups when segmentation fault occurs
+#
+if [ ${do_os_groups_seg:-no} != no ]; then
+    echo launch vfd_swmr_group operations with old-style group: $GROUP_seg_n groups ......may take some time......
+    catch_out_err_and_rc vfd_swmr_group_writer \
+        ../vfd_swmr_group_writer -q -N -G -n $GROUP_seg_n -a $GROUP_seg_n
+
+    # Collect exit code of the writer
+    if [ $(cat vfd_swmr_group_writer.rc) -ne 0 ]; then
+        echo writer had error
+        nerrors=$((nerrors + 1))
+    fi
+
+    # Clean up output files
+    rm -f vfd_swmr_group_writer.{out,rc}
+fi
+
+###############################################################################
+#
 # Setting for bigset (few_big and many_small) tests
 #
 ###############################################################################
@@ -1209,51 +1239,55 @@ done
 ###############################################################################
 #
 #
-for options in "-p -e 20 -t -q" "-g -m 5 -n 2 -s 10 -w 7 -q" "-k -m 10 -n 5 -r 5 -l 10 -q"; do
-	#
-	#
-	if [ ${do_dsetops:-no} = no ]; then
-		continue
-	fi
-    # Clean up any existing fifo files from previous runs
-    if [ -e ./$DSETOPS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
-        rm -f ./$DSETOPS_FIFO_WRITER_TO_READER
-    fi
-    if [ -e ./$DSETOPS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
-        rm -f ./$DSETOPS_FIFO_READER_TO_WRITER
-    fi
-    #
-	echo launch vfd_swmr_dsetops_writer dsetops, options $options ......may take some time......
-	catch_out_err_and_rc vfd_swmr_dsetops_writer \
-	    ../vfd_swmr_dsetops_writer $options &
-	pid_writer=$!
+# Loop with flushing of raw data and then without
+for flush in "" "-U"; do
+    # Loop with different operations
+    for options in "-p -e 20 -t -q" "-g -m 5 -n 2 -s 10 -w 7 -q" "-k -m 10 -n 5 -r 5 -l 10 -q"; do
+	    #
+	    #
+	    if [ ${do_dsetops:-no} = no ]; then
+		    continue
+	    fi
+        # Clean up any existing fifo files from previous runs
+        if [ -e ./$DSETOPS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+            rm -f ./$DSETOPS_FIFO_WRITER_TO_READER
+        fi
+        if [ -e ./$DSETOPS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+            rm -f ./$DSETOPS_FIFO_READER_TO_WRITER
+        fi
+        #
+	    echo launch vfd_swmr_dsetops_writer dsetops, options $options $flush......may take some time......
+	    catch_out_err_and_rc vfd_swmr_dsetops_writer \
+	        ../vfd_swmr_dsetops_writer $options $flush &
+	    pid_writer=$!
 
-	catch_out_err_and_rc vfd_swmr_dsetops_reader \
-	    ../vfd_swmr_dsetops_reader $options &
-	pid_reader=$!
+	    catch_out_err_and_rc vfd_swmr_dsetops_reader \
+	        ../vfd_swmr_dsetops_reader $options $flush &
+	    pid_reader=$!
 
-	# Wait for the reader to finish before signaling the
-	# writer to quit: the writer holds the file open so that the
-	# reader will find the shadow file when it opens
-	# the .h5 file.
-	wait $pid_reader
-	wait $pid_writer
+	    # Wait for the reader to finish before signaling the
+	    # writer to quit: the writer holds the file open so that the
+	    # reader will find the shadow file when it opens
+	    # the .h5 file.
+	    wait $pid_reader
+	    wait $pid_writer
 
-	# Collect exit code of the reader
-	if [ $(cat vfd_swmr_dsetops_reader.rc) -ne 0 ]; then
-		echo reader had error
-		nerrors=$((nerrors + 1))
-	fi
+	    # Collect exit code of the reader
+	    if [ $(cat vfd_swmr_dsetops_reader.rc) -ne 0 ]; then
+		    echo reader had error
+		    nerrors=$((nerrors + 1))
+	    fi
 
-	# Collect exit code of the writer
-	if [ $(cat vfd_swmr_dsetops_writer.rc) -ne 0 ]; then
-	    echo writer had error
-	    nerrors=$((nerrors + 1))
-	fi
+	    # Collect exit code of the writer
+	    if [ $(cat vfd_swmr_dsetops_writer.rc) -ne 0 ]; then
+	        echo writer had error
+	        nerrors=$((nerrors + 1))
+	    fi
 
-	# Clean up output files
-	rm -f vfd_swmr_dsetops_writer.{out,rc}
-	rm -f vfd_swmr_dsetops_reader.*.{out,rc}
+	    # Clean up output files
+	    rm -f vfd_swmr_dsetops_writer.{out,rc}
+	    rm -f vfd_swmr_dsetops_reader.*.{out,rc}
+    done
 done
 
 ###############################################################################
@@ -1273,51 +1307,56 @@ dsetchks_list=(
                 "-r -m 11 -n 5 -l 7 -q"
                 "-f -x 5 -y 2 -q"
                )
-for options in "${dsetchks_list[@]}"; do
-	#
-	#
-	if [ ${do_dsetchks:-no} = no ]; then
-		continue
-	fi
-    # Clean up any existing fifo files from previous runs
-    if [ -e ./$DSETCHKS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
-        rm -f ./$DSETCHKS_FIFO_WRITER_TO_READER
-    fi
-    if [ -e ./$DSETCHKS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
-        rm -f ./$DSETCHKS_FIFO_READER_TO_WRITER
-    fi
-    #
-	echo launch vfd_swmr_dsetchks_writer dsetchks, options $options ......may take some time......
-	catch_out_err_and_rc vfd_swmr_dsetchks_writer \
-	    ../vfd_swmr_dsetchks_writer $options &
-	pid_writer=$!
+#
+#
+# Loop with flushing of raw data and then without
+for flush in "" "-U"; do
+    for options in "${dsetchks_list[@]}"; do
+	    #
+	    #
+	    if [ ${do_dsetchks:-no} = no ]; then
+		    continue
+	    fi
+        # Clean up any existing fifo files from previous runs
+        if [ -e ./$DSETCHKS_FIFO_WRITER_TO_READER ]; then     # If writer fifo file is found
+            rm -f ./$DSETCHKS_FIFO_WRITER_TO_READER
+        fi
+        if [ -e ./$DSETCHKS_FIFO_READER_TO_WRITER ]; then      # If reader fifo file is found
+            rm -f ./$DSETCHKS_FIFO_READER_TO_WRITER
+        fi
+        #
+	    echo launch vfd_swmr_dsetchks_writer dsetchks, options $options $flush ......may take some time......
+	    catch_out_err_and_rc vfd_swmr_dsetchks_writer \
+	        ../vfd_swmr_dsetchks_writer $options $flush &
+	    pid_writer=$!
 
-	catch_out_err_and_rc vfd_swmr_dsetchks_reader \
-	    ../vfd_swmr_dsetchks_reader $options &
-	pid_reader=$!
+	    catch_out_err_and_rc vfd_swmr_dsetchks_reader \
+	        ../vfd_swmr_dsetchks_reader $options $flush &
+	    pid_reader=$!
 
-	# Wait for the reader to finish before signaling the
-	# writer to quit: the writer holds the file open so that the
-	# reader will find the shadow file when it opens
-	# the .h5 file.
-	wait $pid_reader
-	wait $pid_writer
+	    # Wait for the reader to finish before signaling the
+	    # writer to quit: the writer holds the file open so that the
+	    # reader will find the shadow file when it opens
+	    # the .h5 file.
+	    wait $pid_reader
+	    wait $pid_writer
 
-	# Collect exit code of the reader
-	if [ $(cat vfd_swmr_dsetchks_reader.rc) -ne 0 ]; then
-		echo reader had error
-		nerrors=$((nerrors + 1))
-	fi
+	    # Collect exit code of the reader
+	    if [ $(cat vfd_swmr_dsetchks_reader.rc) -ne 0 ]; then
+		    echo reader had error
+		    nerrors=$((nerrors + 1))
+	    fi
 
-	# Collect exit code of the writer
-	if [ $(cat vfd_swmr_dsetchks_writer.rc) -ne 0 ]; then
-	    echo writer had error
-	    nerrors=$((nerrors + 1))
-	fi
+	    # Collect exit code of the writer
+	    if [ $(cat vfd_swmr_dsetchks_writer.rc) -ne 0 ]; then
+	        echo writer had error
+	        nerrors=$((nerrors + 1))
+	    fi
 
-	# Clean up output files
-	rm -f vfd_swmr_dsetchks_writer.{out,rc}
-	rm -f vfd_swmr_dsetchks_reader.*.{out,rc}
+	    # Clean up output files
+	    rm -f vfd_swmr_dsetchks_writer.{out,rc}
+	    rm -f vfd_swmr_dsetchks_reader.*.{out,rc}
+    done
 done
 
 ###############################################################################

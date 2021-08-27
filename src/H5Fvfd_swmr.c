@@ -768,26 +768,26 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
 
     /* 1) If requested, flush all raw data to the HDF5 file.
      *
-     *    (Not for first cut.)
      */
-    HDassert(!shared->vfd_swmr_config.flush_raw_data);
+    if (shared->vfd_swmr_config.flush_raw_data) {
 
-#if 1
-    /* Test to see if b-tree corruption seen in VFD SWMR tests
-     * is caused by client hiding data from the metadata cache.  Do
-     * this by calling H5D_flush_all(), which flushes any cached
-     * dataset storage.  Eventually, we will do this regardless
-     * when the above flush_raw_data flag is set.
-     */
+        /* Test to see if b-tree corruption seen in VFD SWMR tests
+         * is caused by client hiding data from the metadata cache.  Do
+         * this by calling H5D_flush_all(), which flushes any cached
+         * dataset storage.  Eventually, we will do this regardless
+         * when the above flush_raw_data flag is set.
+         */
 
-    if (H5D_flush_all(f) < 0)
+        if (H5D_flush_all(f) < 0)
 
-        HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
+            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush dataset cache")
 
-    if (H5MF_free_aggrs(f) < 0)
+        if (H5MF_free_aggrs(f) < 0)
 
-        HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
+            HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release file space")
+    }
 
+    /* 2) If it exists, flush the metadata cache to the page buffer. */
     if (shared->cache) {
 
         if (H5AC_prep_for_file_flush(f) < 0)
@@ -806,23 +806,6 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     if (H5FD_truncate(shared->lf, FALSE) < 0)
 
         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "low level truncate failed")
-#endif
-
-    /* 2) If it exists, flush the metadata cache to the page buffer. */
-    if (shared->cache) {
-
-        if (H5AC_prep_for_file_flush(f) < 0)
-
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "prep for MDC flush failed")
-
-        if (H5AC_flush(f) < 0)
-
-            HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't flush metadata cache to the page buffer")
-
-        if (H5AC_secure_from_file_flush(f) < 0)
-
-            HDONE_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "secure from MDC flush failed")
-    }
 
     /* 3) If this is the first tick (i.e. tick == 1), create the
      *    in memory version of the metadata file index.
@@ -1756,7 +1739,7 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "shadow-file allocation failed for index")
     }
 
-    new_mdf_idx = HDmalloc(new_mdf_idx_len * sizeof(new_mdf_idx[0]));
+    new_mdf_idx = H5MM_calloc(new_mdf_idx_len * sizeof(new_mdf_idx[0]));
 
     if (new_mdf_idx == NULL) {
         (void)H5MV_free(f, idx_addr, idx_size);
@@ -1773,6 +1756,11 @@ vfd_swmr_enlarge_shadow_index(H5F_t *f)
     shared->writer_index_offset = idx_addr;
     ret_value = shared->mdf_idx = new_mdf_idx;
     shared->mdf_idx_len         = new_mdf_idx_len;
+
+    H5MM_xfree(f->shared->old_mdf_idx);
+
+    shared->old_mdf_idx        = old_mdf_idx;
+    f->shared->old_mdf_idx_len = old_mdf_idx_len;
 
     /* Postpone reclamation of the old index until max_lag ticks from now.
      * It's only necessary to wait until after the new index is in place,

@@ -153,8 +153,10 @@ state_init(state_t *s, int argc, char **argv)
 
     esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
 
-    if (tfile)
+    if (tfile) {
         HDfree(tfile);
+        tfile = NULL;
+    }
 
     while ((ch = getopt(argc, argv, "SGa:bc:n:Nqu:A:O:")) != -1) {
         switch (ch) {
@@ -3031,8 +3033,8 @@ verify_group(state_t *s, unsigned int which)
 
     esnprintf(name, sizeof(name), "/group-%u", which);
 
-    if ((g = H5Gopen(s->file, name, H5P_DEFAULT)) < 0) {
-        HDprintf("H5Gopen failed\n");
+    if ((g = H5Gopen2(s->file, name, H5P_DEFAULT)) < 0) {
+        HDprintf("H5Gopen2 failed\n");
         TEST_ERROR;
     }
 
@@ -4078,8 +4080,8 @@ vrfy_create_group(state_t *s, unsigned int which)
 
     esnprintf(name, sizeof(name), "/group-%u", which);
 
-    if ((g = H5Gopen(s->file, name, H5P_DEFAULT)) < 0) {
-        HDprintf("H5Gopen failed\n");
+    if ((g = H5Gopen2(s->file, name, H5P_DEFAULT)) < 0) {
+        HDprintf("H5Gopen2 failed\n");
         TEST_ERROR;
     }
 
@@ -4195,8 +4197,8 @@ vrfy_create_group_id(state_t *s, unsigned int which, bool dense_to_compact)
 
     esnprintf(name, sizeof(name), "/group-%u", which);
 
-    if ((g = H5Gopen(s->file, name, H5P_DEFAULT)) < 0) {
-        HDprintf("H5Gopen failed\n");
+    if ((g = H5Gopen2(s->file, name, H5P_DEFAULT)) < 0) {
+        HDprintf("H5Gopen2 failed\n");
         TEST_ERROR;
     }
 
@@ -4569,8 +4571,8 @@ vrfy_move_one_group(state_t *s, hid_t obj_id, const char *name, const char *newn
         TEST_ERROR;
     }
 
-    if ((g = H5Gopen(obj_id, newname, H5P_DEFAULT)) < 0) {
-        HDprintf("H5Gopen failed\n");
+    if ((g = H5Gopen2(obj_id, newname, H5P_DEFAULT)) < 0) {
+        HDprintf("H5Gopen2 failed\n");
         TEST_ERROR;
     }
 
@@ -4985,7 +4987,7 @@ main(int argc, char **argv)
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./group-shadow");
+    init_vfd_swmr_config(&config, 4, 7, writer, TRUE, 128, "./group-shadow");
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
      * as the second parameter of H5Pset_libver_bound() that is called by

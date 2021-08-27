@@ -116,7 +116,7 @@ main(int argc, char **argv)
         errx(EXIT_FAILURE, "unexpected command-line arguments");
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, false, FALSE, 128, "./vlstr-shadow");
+    init_vfd_swmr_config(&config, 4, 7, false, TRUE, 128, "./vlstr-shadow");
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     fapl = vfd_swmr_create_fapl(true, use_vfd_swmr, sel == TEST_OOB, 4096, &config);
@@ -140,7 +140,7 @@ main(int argc, char **argv)
     if (fid == badhid)
         errx(EXIT_FAILURE, "H5Fcreate");
 
-    /* content 1 seq 1 short
+    /* content 0 seq 1 short
      * content 1 seq 1 long long long long long long long long
      * content 1 seq 1 medium medium medium
      */
@@ -178,6 +178,11 @@ main(int argc, char **argv)
         dbgf(2, ": read which %d seq %d tail %s\n", scanned_content.which, scanned_content.seq,
              scanned_content.tail);
         H5Dclose(dset[which]);
+
+        if (content[which] != NULL) {
+            HDfree(content[which]);
+            content[which] = NULL;
+        }
     }
 
     if (caught_out_of_bounds)

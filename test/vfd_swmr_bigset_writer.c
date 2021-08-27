@@ -2259,6 +2259,11 @@ main(int argc, char **argv)
 
     HDfree(mat);
 
+    if (s.dataset)
+        HDfree(s.dataset);
+    if (s.sources)
+        HDfree(s.sources);
+
     return EXIT_SUCCESS;
 
 error:

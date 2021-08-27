@@ -150,12 +150,16 @@ static bool open_dset_real(hid_t fid, hid_t *did, const char *name, unsigned *ma
                            unsigned *min_dense);
 static bool close_dsets(const dsets_state_t *ds);
 
+static bool perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+                                     np_state_t *np);
 static bool attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which);
 static bool attr_action(unsigned action, const state_t *s, hid_t did, unsigned which);
 static bool add_attr(const state_t *s, hid_t did, unsigned int which);
 static bool modify_attr(const state_t *s, hid_t did, unsigned int which);
 static bool delete_attr(hid_t did, unsigned int which);
 
+static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config,
+                                    np_state_t *np);
 static bool verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds,
                                      unsigned which);
 static bool verify_attr_action(unsigned action, hid_t did, unsigned which);
@@ -222,13 +226,23 @@ state_init(state_t *s, int argc, char **argv)
 {
     unsigned long tmp;
     int           ch;
-    const hsize_t dims = 1;
-    char          tfile[PATH_MAX];
+    const hsize_t dims  = 1;
+    char *        tfile = NULL;
     char *        end;
 
     *s = ALL_HID_INITIALIZER;
-    esnprintf(tfile, sizeof(tfile), "%s", argv[0]);
-    esnprintf(s->progname, sizeof(s->progname), "%s", basename(tfile));
+
+    if (H5_basename(argv[0], &tfile) < 0) {
+        HDprintf("H5_basename failed\n");
+        TEST_ERROR;
+    }
+
+    esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
+
+    if (tfile) {
+        HDfree(tfile);
+        tfile = NULL;
+    }
 
     while ((ch = getopt(argc, argv, "pgkvmbqSNa:d:u:c:")) != -1) {
         switch (ch) {
@@ -340,6 +354,9 @@ state_init(state_t *s, int argc, char **argv)
     return true;
 
 error:
+    if (tfile)
+        HDfree(tfile);
+
     return false;
 
 } /* state_init() */
@@ -892,14 +909,87 @@ error:
 } /* close_dsets() */
 
 /*
- *  Attribute handling by the writer
+ *  Writer
  */
 
 /*
- * Perform the "action" for each of the datasets specified on the command line.
+ * Perform the attribute operations specified on the command line.
  *      ADD_ATTR    : -a <nattrs> option
  *      MODIFY_ATTR : -m option
  *      DELETE_ATTR : -d <dattrs> option
+ */
+static bool
+perform_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+{
+    unsigned step;
+    bool     result;
+    unsigned dd;
+
+    for (step = 0; step < s->asteps; step++) {
+        dbgf(2, "Adding attribute %d\n", step);
+
+        result = attr_dsets_action(ADD_ATTR, s, ds, step);
+
+        if (s->use_np && !np_writer(result, step, s, np, config)) {
+            HDprintf("np_writer() for addition failed\n");
+            TEST_ERROR;
+        }
+    }
+
+    if (s->mod_attr) {
+
+        /* Need to sync up writer/reader before moving onto the next phase */
+        if (s->use_np && !np_writer(true, 0, s, np, config)) {
+            HDprintf("np_writer() for modification failed\n");
+            TEST_ERROR;
+        }
+
+        /* Start modification */
+        for (step = 0; step < s->asteps; step++) {
+            dbgf(2, "Modifying attribute %d\n", step);
+
+            result = attr_dsets_action(MODIFY_ATTR, s, ds, step);
+
+            if (s->use_np && !np_writer(result, step, s, np, config)) {
+                HDprintf("np_writer() for modification failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    if (s->dattrs) {
+
+        /* Need to sync up writer/reader before moving onto the next phase */
+        if (s->use_np && !np_writer(true, 0, s, np, config)) {
+            HDprintf("np_writer() for deletion failed\n");
+            TEST_ERROR;
+        }
+
+        /* Start deletion */
+        for (dd = 0, step = s->asteps - 1; dd < s->dattrs; dd++, --step) {
+            dbgf(2, "Deleting attribute %d\n", step);
+
+            result = attr_dsets_action(DELETE_ATTR, s, ds, step);
+
+            if (s->use_np && !np_writer(result, step, s, np, config)) {
+                HDprintf("np_writer() for deletion failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    return true;
+
+error:
+    return false;
+
+} /* perform_dsets_operations() */
+
+/*
+ * Perform the "action" for each of the datasets specified on the command line.
+ *      -p: compact dataset
+ *      -g: contiguous dataset
+ *      -k: 5 chunked datasets with 5 indexing types
  */
 static bool
 attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
@@ -1181,14 +1271,111 @@ error:
  */
 
 /*
- * Verify the action on each of the datasets specified:
+ * Verify the attribute operations specified on the command line:
  *      ADD_ATTR    : -a <nattrs> option
  *      MODIFY_ATTR : -m option
  *      DELETE_ATTR : -d <dattrs> option
  *
  * Also verify continuation block and compact<->dense storage if:
  *      --[-c <csteps>] is 1
- *      --not -m option
+ *      --not appliable for -m option
+ */
+static bool
+verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_config_t *config, np_state_t *np)
+{
+    unsigned step;
+    bool     result;
+    unsigned dd;
+
+    /* Start verifying addition */
+    for (step = 0; step < s->asteps; step++) {
+        dbgf(2, "Verifying...attribute %d\n", step);
+
+        if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+            HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+            TEST_ERROR;
+        }
+
+        /* Wait for a few ticks for the update to happen */
+        decisleep(config->tick_len * s->update_interval);
+
+        result = verify_attr_dsets_action(ADD_ATTR, s, ds, step);
+
+        if (s->use_np && !np_reader(result, step, s, np)) {
+            HDprintf("np_reader() for verifying addition failed\n");
+            TEST_ERROR;
+        }
+    }
+
+    if (s->mod_attr) {
+        /* Need to sync up writer/reader before moving onto the next phase */
+        if (!np_reader_no_verification(s, np, config)) {
+            HDprintf("np_reader_no_verification() for verifying modification failed\n");
+            TEST_ERROR;
+        }
+
+        /* Start verifying modification */
+        for (step = 0; step < s->asteps; step++) {
+            dbgf(2, "Verifying...modify attribute %d\n", step);
+
+            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                TEST_ERROR;
+            }
+
+            /* Wait for a few ticks for the update to happen */
+            decisleep(config->tick_len * s->update_interval);
+
+            result = verify_attr_dsets_action(MODIFY_ATTR, s, ds, step);
+
+            if (s->use_np && !np_reader(result, step, s, np)) {
+                HDprintf("np_reader() for verifying modification failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    if (s->dattrs) {
+
+        /* Need to sync up writer/reader before moving onto the next phase */
+        if (!np_reader_no_verification(s, np, config)) {
+            HDprintf("np_reader_no_verification() for verifying modification failed\n");
+            TEST_ERROR;
+        }
+
+        /* Start verifying deletion */
+        for (dd = 0, step = s->asteps - 1; dd < s->dattrs; dd++, --step) {
+            dbgf(2, "Verifying...delete attribute %d\n", step);
+
+            if (s->use_np && !np_confirm_verify_notify(np->fd_writer_to_reader, step, s, np)) {
+                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
+                TEST_ERROR;
+            }
+
+            /* Wait for a few ticks for the update to happen */
+            decisleep(config->tick_len * s->update_interval);
+
+            result = verify_attr_dsets_action(DELETE_ATTR, s, ds, step);
+
+            if (s->use_np && !np_reader(result, step, s, np)) {
+                HDprintf("np_reader() for verifying deletion failed\n");
+                TEST_ERROR;
+            }
+        }
+    }
+
+    return true;
+
+error:
+
+    return false;
+} /* verify_dsets_operations() */
+
+/*
+ * Verify the "action" for each of the datasets specified on the command line.
+ *      -p: compact dataset
+ *      -g: contiguous dataset
+ *      -k: 5 chunked datasets with 5 indexing types
  */
 static bool
 verify_attr_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which)
@@ -1317,12 +1504,13 @@ static bool
 verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned int which)
 {
     unsigned int read_which;
-    char         vl_which[sizeof("attr-9999999999")];
-    char *       read_vl_which = NULL;
-    bool         is_vl         = false;
-    hid_t        aid           = H5I_INVALID_HID;
-    hid_t        atid          = H5I_INVALID_HID;
-    bool         ret           = FALSE;
+    unsigned int tmp_val;
+    char         tmp_vl_val[sizeof("attr-9999999999")];
+    char *       read_vl_which;
+    bool         is_vl = false;
+    hid_t        aid   = H5I_INVALID_HID;
+    hid_t        atid  = H5I_INVALID_HID;
+    bool         ret   = FALSE;
 
     HDassert(did != badhid);
     HDassert(action == ADD_ATTR || action == MODIFY_ATTR);
@@ -1339,17 +1527,18 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
 
     if ((is_vl = H5Tis_variable_str(atid))) {
         if (action == ADD_ATTR)
-            HDsprintf(vl_which, "%u", which);
+            HDsprintf(tmp_vl_val, "%u", which);
         else
-            HDsprintf(vl_which, "%u %c", which, 'M');
-
-        if ((read_vl_which = HDmalloc(sizeof("9999999999"))) == NULL) {
-            HDprintf("HDmalloc failed\n");
-            TEST_ERROR;
-        }
+            HDsprintf(tmp_vl_val, "%u %c", which, 'M');
+    }
+    else {
+        if (action == MODIFY_ATTR)
+            tmp_val = which + 1;
+        else
+            tmp_val = which;
     }
 
-    if (H5Aread(aid, atid, is_vl ? (void *)&read_vl_which : (void *)&read_which) < 0) {
+    if (H5Aread(aid, atid, is_vl ? &read_vl_which : (void *)&read_which) < 0) {
         HDprintf("H5Aread failed\n");
         TEST_ERROR;
     }
@@ -1365,14 +1554,17 @@ verify_add_or_modify_attr(unsigned action, hid_t did, char *attr_name, unsigned 
     }
 
     if (is_vl) {
-        if (!HDstrcmp(vl_which, read_vl_which))
+        dbgf(2, "read_vl_which = %s, tmp_vl_val= %s\n", read_vl_which, tmp_vl_val);
+        if (!HDstrcmp(read_vl_which, tmp_vl_val))
             ret = true;
     }
-    else
-        ret = (read_which == which);
+    else {
+        dbgf(2, "read_which = %u, tmp_val = %u\n", read_which, tmp_val);
+        ret = (read_which == tmp_val);
+    }
 
-    if (read_vl_which)
-        HDfree(read_vl_which);
+    if (is_vl)
+        H5free_memory(read_vl_which);
 
     return ret;
 
@@ -1384,8 +1576,8 @@ error:
     }
     H5E_END_TRY;
 
-    if (read_vl_which)
-        HDfree(read_vl_which);
+    if (is_vl)
+        H5free_memory(read_vl_which);
 
     return false;
 
@@ -1452,9 +1644,8 @@ verify_storage_cont(unsigned action, hid_t did, unsigned int which, unsigned max
         /* Verify dense storage & no cont */
         else if (which == max_compact)
             ret = verify_storage_cont_real(did, which, max_compact);
-
-        /* For deletion */
     }
+    /* For deletion */
     else if (action == DELETE_ATTR) {
 
         /* Verify compact storage & cont */
@@ -1763,17 +1954,14 @@ error:
 int
 main(int argc, char **argv)
 {
-    hid_t                 fapl = H5I_INVALID_HID;
-    hid_t                 fcpl = H5I_INVALID_HID;
-    unsigned              step;
+    hid_t                 fapl   = H5I_INVALID_HID;
+    hid_t                 fcpl   = H5I_INVALID_HID;
     bool                  writer = FALSE;
     state_t               s;
     const char *          personality;
     H5F_vfd_swmr_config_t config;
     np_state_t            np;
     dsets_state_t         ds;
-    unsigned              dd;
-    bool                  result;
 
     if (!state_init(&s, argc, argv)) {
         HDprintf("state_init() failed\n");
@@ -1792,7 +1980,7 @@ main(int argc, char **argv)
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, FALSE, 128, "./attrdset-shadow");
+    init_vfd_swmr_config(&config, 4, 7, writer, true, 128, "./attrdset-shadow");
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
     if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config)) < 0) {
@@ -1835,136 +2023,15 @@ main(int argc, char **argv)
     }
 
     if (writer) {
-        for (step = 0; step < s.asteps; step++) {
-            dbgf(2, "Adding attribute %d\n", step);
-
-            result = attr_dsets_action(ADD_ATTR, &s, &ds, step);
-
-            if (s.use_np && !np_writer(result, step, &s, &np, &config)) {
-                HDprintf("np_writer() for addition failed\n");
-                TEST_ERROR;
-            }
-        }
-
-        if (s.mod_attr) {
-
-            /* Need to sync up writer/reader before moving onto the next phase */
-            if (s.use_np && !np_writer(true, 0, &s, &np, &config)) {
-                HDprintf("np_writer() for modification failed\n");
-                TEST_ERROR;
-            }
-
-            /* Start modification */
-            for (step = 0; step < s.asteps; step++) {
-                dbgf(2, "Modifying attribute %d\n", step);
-
-                result = attr_dsets_action(MODIFY_ATTR, &s, &ds, step);
-
-                if (s.use_np && !np_writer(result, step, &s, &np, &config)) {
-                    HDprintf("np_writer() for modification failed\n");
-                    TEST_ERROR;
-                }
-            }
-        }
-
-        if (s.dattrs) {
-
-            /* Need to sync up writer/reader before moving onto the next phase */
-            if (s.use_np && !np_writer(true, 0, &s, &np, &config)) {
-                HDprintf("np_writer() for deletion failed\n");
-                TEST_ERROR;
-            }
-
-            /* Start deletion */
-            for (dd = 0, step = s.asteps - 1; dd < s.dattrs; dd++, --step) {
-                dbgf(2, "Deleting attribute %d\n", step);
-
-                result = attr_dsets_action(DELETE_ATTR, &s, &ds, step);
-
-                if (s.use_np && !np_writer(result, step, &s, &np, &config)) {
-                    HDprintf("np_writer() for deletion failed\n");
-                    TEST_ERROR;
-                }
-            }
+        if (!perform_dsets_operations(&s, &ds, &config, &np)) {
+            HDprintf("perform_dsets_operations() failed\n");
+            TEST_ERROR;
         }
     }
     else {
-
-        /* Start verifying addition */
-        for (step = 0; step < s.asteps; step++) {
-            dbgf(2, "Verifying...attribute %d\n", step);
-
-            if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, step, &s, &np)) {
-                HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                TEST_ERROR;
-            }
-
-            /* Wait for a few ticks for the update to happen */
-            decisleep(config.tick_len * s.update_interval);
-
-            result = verify_attr_dsets_action(ADD_ATTR, &s, &ds, step);
-
-            if (s.use_np && !np_reader(result, step, &s, &np)) {
-                HDprintf("np_reader() for verifying addition failed\n");
-                TEST_ERROR;
-            }
-        }
-
-        if (s.mod_attr) {
-            /* Need to sync up writer/reader before moving onto the next phase */
-            if (!np_reader_no_verification(&s, &np, &config)) {
-                HDprintf("np_reader_no_verification() for verifying modification failed\n");
-                TEST_ERROR;
-            }
-
-            /* Start verifying modification */
-            for (step = 0; step < s.asteps; step++) {
-                dbgf(2, "Verifying...modify attribute %d\n", step);
-
-                if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, step, &s, &np)) {
-                    HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                    TEST_ERROR;
-                }
-
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config.tick_len * s.update_interval);
-
-                result = verify_attr_dsets_action(MODIFY_ATTR, &s, &ds, step);
-
-                if (s.use_np && !np_reader(result, step, &s, &np)) {
-                    HDprintf("np_reader() for verifying modification failed\n");
-                    TEST_ERROR;
-                }
-            }
-        }
-
-        if (s.dattrs) {
-
-            /* Need to sync up writer/reader before moving onto the next phase */
-            if (!np_reader_no_verification(&s, &np, &config)) {
-                HDprintf("np_reader_no_verification() for verifying modification failed\n");
-                TEST_ERROR;
-            }
-
-            /* Start verifying deletion */
-            for (dd = 0, step = s.asteps - 1; dd < s.dattrs; dd++, --step) {
-                dbgf(2, "Verifying...delete attribute %d\n", step);
-
-                if (s.use_np && !np_confirm_verify_notify(np.fd_writer_to_reader, step, &s, &np)) {
-                    HDprintf("np_confirm_verify_notify() verify/notify not in sync failed\n");
-                    TEST_ERROR;
-                }
-
-                /* Wait for a few ticks for the update to happen */
-                decisleep(config.tick_len * s.update_interval);
-
-                result = verify_attr_dsets_action(DELETE_ATTR, &s, &ds, step);
-
-                if (s.use_np && !np_reader(result, step, &s, &np)) {
-                    HDprintf("np_reader() for verifying deletion failed\n");
-                    TEST_ERROR;
-                }
-            }
+        if (!verify_dsets_operations(&s, &ds, &config, &np)) {
+            HDprintf("verify_dsets_operations() failed\n");
+            TEST_ERROR;
         }
     }
 
