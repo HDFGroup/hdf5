@@ -11,10 +11,10 @@
 #
 ENABLE_LANGUAGE (CXX)
 
-set(CMAKE_CXX_STANDARD 11)
-set(CMAKE_CXX_STANDARD_REQUIRED TRUE)
+set (CMAKE_CXX_STANDARD 11)
+set (CMAKE_CXX_STANDARD_REQUIRED TRUE)
 
-set(CMAKE_CXX_EXTENSIONS OFF)
+set (CMAKE_CXX_EXTENSIONS OFF)
 
 set (CMAKE_CXX_FLAGS "${CMAKE_CXX_SANITIZER_FLAGS} ${CMAKE_CXX_FLAGS}")
 if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
@@ -23,30 +23,34 @@ endif ()
 #-----------------------------------------------------------------------------
 # Compiler specific flags : Shouldn't there be compiler tests for these
 #-----------------------------------------------------------------------------
-if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-  set(_INTEL_WINDOWS 1)
-endif()
+if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  set (_INTEL_WINDOWS 1)
+endif ()
 
-if(WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
+if (WIN32 AND CMAKE_CXX_COMPILER_ID STREQUAL "Clang"
    AND "x${CMAKE_CXX_SIMULATE_ID}" STREQUAL "xMSVC")
-  set(_CLANG_MSVC_WINDOWS 1)
+  set (_CLANG_MSVC_WINDOWS 1)
 endif()
 
 # MSVC 14.28 enables C5105, but the Windows SDK 10.0.18362.0 triggers it.
-if(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.28)
-  set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd5105")
-endif()
+if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC" AND CMAKE_CXX_COMPILER_LOADED)
+  set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHsc")
+  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 19.28)
+    set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -wd5105")
+  endif ()
+endif ()
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND
-    NOT DEFINED CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION)
-  if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
-    if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD EQUAL 98)
-      set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
-    endif()
-  else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -library=stlport4")
-  endif()
-endif()
+if (CMAKE_CXX_COMPILER_ID STREQUAL SunPro AND CMAKE_CXX_COMPILER_LOADED)
+  if (NOT DEFINED CMAKE_CXX${CMAKE_CXX_STANDARD}_STANDARD_COMPILE_OPTION)
+    if (NOT CMAKE_CXX_COMPILER_VERSION VERSION_LESS 5.13)
+      if (NOT CMAKE_CXX_STANDARD OR CMAKE_CXX_STANDARD EQUAL 98)
+        set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++03")
+      endif ()
+    else ()
+      set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -library=stlport4")
+    endif ()
+  endif ()
+endif ()
 
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_LOADED)
   set (CMAKE_CXX_FLAGS "${CMAKE_ANSI_CFLAGS} ${CMAKE_CXX_FLAGS}")
@@ -301,7 +305,7 @@ endif ()
 # This option will force/override the default setting for all configurations
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_SYMBOLS MATCHES "YES")
-  if(CMAKE_CXX_COMPILER_LOADED)
+  if (CMAKE_CXX_COMPILER_LOADED)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND NOT _INTEL_WINDOWS)
       set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -g")
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -309,7 +313,7 @@ if (HDF5_ENABLE_SYMBOLS MATCHES "YES")
     endif ()
   endif ()
 elseif (HDF5_ENABLE_SYMBOLS MATCHES "NO")
-  if(CMAKE_CXX_COMPILER_LOADED)
+  if (CMAKE_CXX_COMPILER_LOADED)
     if (CMAKE_CXX_COMPILER_ID STREQUAL "Intel" AND NOT _INTEL_WINDOWS)
       set (CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-s")
     elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -323,7 +327,7 @@ endif ()
 # This option will force/override the default setting for all configurations
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_PROFILING)
-  if(CMAKE_CXX_COMPILER_LOADED)
+  if (CMAKE_CXX_COMPILER_LOADED)
     list (APPEND HDF5_CMAKE_CXX_FLAGS "${PROFILE_CXXFLAGS}")
   endif ()
 endif ()
@@ -333,7 +337,7 @@ endif ()
 # This option will force/override the default setting for all configurations
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_OPTIMIZATION)
-  if(CMAKE_CXX_COMPILER_LOADED)
+  if (CMAKE_CXX_COMPILER_LOADED)
     list (APPEND HDF5_CMAKE_CXX_FLAGS "${OPTIMIZE_CXXFLAGS}")
   endif ()
 endif ()
