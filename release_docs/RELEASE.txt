@@ -463,6 +463,25 @@ New Features
 
     Library:
     --------
+    - Change how the release part of version, in major.minor.release is checked
+      for compatibility
+
+      The HDF5 library uses a function, H5check_version, to check that
+      the version defined in the header files, which is used to compile an
+      application is compatible with the version codified in the library, which
+      the application loads at runtime. This previously required an exact match
+      or the library would print a warning, dump the build settings and then
+      abort or continue. An environment variable controlled the logic.
+
+      Now the function first checks that the library release version, in
+      major.minor.release, is not older than the version in the headers.
+      Secondly, if the release version is different, it checks if either
+      the library version or the header version is in the exception list, in
+      which case the release part of version, in major.minor.release, must
+      be exact. An environment variable still controls the logic.
+
+        (ADB - 2021/07/27)
+
     - gcc warning suppression macros were moved out of H5public.h
 
       The HDF5 library uses a set of macros to suppress warnings on gcc.
@@ -1060,6 +1079,30 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Fixed CMake C++ compiler flags
+
+      A recent refactoring of the C++ configure files accidently removed the
+      file that executed the enable_language command for C++ needed by the
+      HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
+      including adding support for windows platforms.
+
+      (ADB - 2021/08/10)
+
+    - Better support for libaec (open-source Szip library) in CMake
+
+      Implemented better support for libaec 1.0.5 (or later) library. This version
+      of libaec contains improvements for better integration with HDF5. Furthermore,
+      the variable USE_LIBAEC_STATIC has been introduced to allow to make use of
+      static version of libaec library. Use libaec_DIR or libaec_ROOT to set
+      the location in which libaec can be found.
+
+      Be aware, the Szip library of libaec 1.0.4 depends on another library within
+      libaec library. This dependency is not specified in the current CMake
+      configuration which means that one can not use the static Szip library of
+      libaec 1.0.4 when building HDF5. This has been resolved in libaec 1.0.5.
+
+      (JWSB - 2021/06/22)
+
     - Refactor CMake configure for Fortran
 
       The Fortran configure tests for KINDs reused a single output file that was
