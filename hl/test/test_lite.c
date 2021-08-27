@@ -472,28 +472,30 @@ make_attributes(hid_t loc_id, const char *obj_name)
     size_t      type_size;
     int         i;
 
-    char           attr_str_in[] = {"My attribute"};
-    char           attr_str_out[20];
-    char           attr_char_in[5] = {1, 2, 3, 4, 5};
-    char           attr_char_out[5];
-    short          attr_short_in[5] = {1, 2, 3, 4, 5};
-    short          attr_short_out[5];
-    int            attr_int_in[5] = {1, 2, 3, 4, 5};
-    int            attr_int_out[5];
-    long           attr_long_in[5] = {1, 2, 3, 4, 5};
-    long           attr_long_out[5];
-    float          attr_float_in[5] = {1, 2, 3, 4, 5};
-    float          attr_float_out[5];
-    double         attr_double_in[5] = {1, 2, 3, 4, 5};
-    double         attr_double_out[5];
-    unsigned char  attr_uchar_in[5] = {1, 2, 3, 4, 5};
-    unsigned char  attr_uchar_out[5];
-    unsigned short attr_ushort_in[5] = {1, 2, 3, 4, 5};
-    unsigned short attr_ushort_out[5];
-    unsigned int   attr_uint_in[5] = {1, 2, 3, 4, 5};
-    unsigned int   attr_uint_out[5];
-    unsigned long  attr_ulong_in[5] = {1, 2, 3, 4, 5};
-    unsigned long  attr_ulong_out[5];
+    char               attr_str_in[] = {"My attribute"};
+    char               attr_str_out[20];
+    char               attr_char_in[5] = {1, 2, 3, 4, 5};
+    char               attr_char_out[5];
+    short              attr_short_in[5] = {1, 2, 3, 4, 5};
+    short              attr_short_out[5];
+    int                attr_int_in[5] = {1, 2, 3, 4, 5};
+    int                attr_int_out[5];
+    long               attr_long_in[5] = {1, 2, 3, 4, 5};
+    long               attr_long_out[5];
+    float              attr_float_in[5] = {1, 2, 3, 4, 5};
+    float              attr_float_out[5];
+    double             attr_double_in[5] = {1, 2, 3, 4, 5};
+    double             attr_double_out[5];
+    unsigned char      attr_uchar_in[5] = {1, 2, 3, 4, 5};
+    unsigned char      attr_uchar_out[5];
+    unsigned short     attr_ushort_in[5] = {1, 2, 3, 4, 5};
+    unsigned short     attr_ushort_out[5];
+    unsigned int       attr_uint_in[5] = {1, 2, 3, 4, 5};
+    unsigned int       attr_uint_out[5];
+    unsigned long      attr_ulong_in[5] = {1, 2, 3, 4, 5};
+    unsigned long      attr_ulong_out[5];
+    unsigned long long attr_ullong_in[5] = {1, 2, 3, 4, 5};
+    unsigned long long attr_ullong_out[5];
 
     /*-------------------------------------------------------------------------
      * H5LTset_attribute_string test
