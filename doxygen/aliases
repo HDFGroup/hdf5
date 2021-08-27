@@ -251,6 +251,7 @@ ALIASES += ref_vol_doc="VOL documentation"
 # RFCs
 ################################################################################
 
+ALIASES += ref_rfc20210528="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_multi_thread.pdf\">Multi-Thread HDF5</a>"
 ALIASES += ref_rfc20190923="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/2019-09-23-RFC_VOL_feature_flags.pdf\">Virtual Object Layer (VOL) API Compatibility</a>"
 ALIASES += ref_rfc20190410="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_VFD_Plugin.docx.pdf\">A Plugin Interface for HDF5 Virtual File Drivers</a>"
 ALIASES += ref_rfc20181231="<a href=\"https://docs.hdfgroup.org/hdf5/rfc/RFC_Min_Obj_Headers_181231.pdf\">Dataset Object Header Size</a>"
