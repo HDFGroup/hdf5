@@ -862,7 +862,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     PASSED();
 
     /*-------------------------------------------------------------------------
-     * H5LTget_attribute_long test
+     * H5LTget_attribute_ulong test
      *-------------------------------------------------------------------------
      */
 
@@ -884,6 +884,48 @@ make_attributes(hid_t loc_id, const char *obj_name)
 
     for (i = 0; i < 5; i++) {
         if (attr_ulong_in[i] != attr_ulong_out[i]) {
+            return -1;
+        }
+    }
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
+     * H5LTset_attribute_ullong test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTset_attribute_ullong");
+
+    /* Set the attribute */
+    if (H5LTset_attribute_ullong(loc_id, obj_name, ATTR10_NAME, attr_ullong_in, (size_t)5) < 0)
+        return -1;
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
+     * H5LTget_attribute_ullong test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTget_attribute_ullong");
+
+    /* Get the attribute */
+    if (H5LTget_attribute_ullong(loc_id, obj_name, ATTR10_NAME, attr_ullong_out) < 0)
+        return -1;
+
+    for (i = 0; i < 5; i++) {
+        if (attr_ullong_in[i] != attr_ullong_out[i]) {
+            return -1;
+        }
+    }
+
+    /* Get the attribute */
+    if (H5LTget_attribute(loc_id, obj_name, ATTR10_NAME, H5T_NATIVE_ULONG, attr_ullong_out) < 0)
+        return -1;
+
+    for (i = 0; i < 5; i++) {
+        if (attr_ullong_in[i] != attr_ullong_out[i]) {
             return -1;
         }
     }
