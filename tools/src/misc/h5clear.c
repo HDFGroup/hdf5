@@ -32,7 +32,7 @@
 #define H5F_ACS_SKIP_EOF_CHECK_NAME     "skip_eof_check"
 
 /* Default increment is 1 megabytes for the --increment option */
-#define DEFAULT_INCREMENT 1024 * 1024
+#define DEFAULT_INCREMENT (1024 * 1024)
 
 static char *  fname_g            = NULL;
 static hbool_t clear_status_flags = FALSE;
@@ -45,39 +45,10 @@ static hsize_t increment          = DEFAULT_INCREMENT;
  * Command-line options: only publicize long options
  */
 static const char *           s_opts   = "hVsmzi*";
-static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
-                                          {"hel", no_arg, 'h'},
-                                          {"he", no_arg, 'h'},
-                                          {"version", no_arg, 'V'},
-                                          {"version", no_arg, 'V'},
-                                          {"versio", no_arg, 'V'},
-                                          {"versi", no_arg, 'V'},
-                                          {"vers", no_arg, 'V'},
-                                          {"status", no_arg, 's'},
-                                          {"statu", no_arg, 's'},
-                                          {"stat", no_arg, 's'},
-                                          {"sta", no_arg, 's'},
-                                          {"st", no_arg, 's'},
-                                          {"image", no_arg, 'm'},
-                                          {"imag", no_arg, 'm'},
-                                          {"ima", no_arg, 'm'},
-                                          {"im", no_arg, 'm'},
-                                          {"filesize", no_arg, 'z'},
-                                          {"filesiz", no_arg, 'z'},
-                                          {"filesi", no_arg, 'z'},
-                                          {"files", no_arg, 'z'},
-                                          {"file", no_arg, 'z'},
-                                          {"fil", no_arg, 'z'},
-                                          {"fi", no_arg, 'z'},
-                                          {"increment", optional_arg, 'i'},
-                                          {"incremen", optional_arg, 'i'},
-                                          {"increme", optional_arg, 'i'},
-                                          {"increm", optional_arg, 'i'},
-                                          {"incre", optional_arg, 'i'},
-                                          {"incr", optional_arg, 'i'},
-                                          {"inc", optional_arg, 'i'},
-                                          {"in", optional_arg, 'i'},
-                                          {NULL, 0, '\0'}};
+static struct h5_long_options l_opts[] = {
+    {"help", no_arg, 'h'},  {"version", no_arg, 'V'},  {"status", no_arg, 's'},
+    {"image", no_arg, 'm'}, {"filesize", no_arg, 'z'}, {"increment", optional_arg, 'i'},
+    {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage
