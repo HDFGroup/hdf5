@@ -509,7 +509,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     PASSED();
 
     /*-------------------------------------------------------------------------
-     * H5LTset_attribute_string test
+     * H5LTget_attribute_string test
      *-------------------------------------------------------------------------
      */
 
