@@ -921,7 +921,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     }
 
     /* Get the attribute */
-    if (H5LTget_attribute(loc_id, obj_name, ATTR10_NAME, H5T_NATIVE_ULONG, attr_ullong_out) < 0)
+    if (H5LTget_attribute(loc_id, obj_name, ATTR10_NAME, H5T_NATIVE_ULLONG, attr_ullong_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
