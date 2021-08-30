@@ -463,6 +463,19 @@ New Features
 
     Library:
     --------
+    - Adds new "ctl" callback to VFD H5FD_class_t structure
+
+      The newly-added "ctl" callback allows Virtual File
+      Drivers to intercept and handle arbitary operations
+      identified by an operation code. The callback accepts
+      a pointer to the file to be operated on (H5FD_t *),
+      an operation code to identify the operation to perform,
+      a set of flags to govern the behavior of the operation
+      and input/output pointers that the VFD may use to
+      receive and return operation parameters/data.
+
+        (JRM - 2021/08/30)
+
     - Change how the release part of version, in major.minor.release is checked
       for compatibility
 

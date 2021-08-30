@@ -139,9 +139,10 @@
 #define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE 0x00008000
 
 /* ctl function definitions: */
-#define H5FD_CTL_OPC_RESERVED  512 /* Opcodes below this value are reserved for library use */
-#define H5FD_CTL_OPC_EXPER_MIN H5FD_CTL_OPC_RESERVED /* Minimum opcode value available for experimental use  \
-                                                      */
+#define H5FD_CTL_OPC_RESERVED 512 /* Opcodes below this value are reserved for library use */
+#define H5FD_CTL_OPC_EXPER_MIN                                                                               \
+    H5FD_CTL_OPC_RESERVED /* Minimum opcode value available for experimental use                             \
+                           */
 #define H5FD_CTL_OPC_EXPER_MAX                                                                               \
     (H5FD_CTL_OPC_RESERVED + 511) /* Maximum opcode value available for experimental use */
 
