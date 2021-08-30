@@ -2,6 +2,7 @@ name: clang-format Check
 on: 
   workflow_dispatch:
   push:
+    branches: [ ]
 jobs:
   formatting-check:
     name: Formatting Check
