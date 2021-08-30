@@ -1117,6 +1117,14 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Corrected pkg-config compile script
+
+      It was discovered that the position of the "$@" location in the compile script
+      may fail on some platforms and configurations. This was moved before the
+      pkg-config sub command.
+
+      (ADB - 2021/08/30)
+
     - Fixed CMake C++ compiler flags
 
       A recent refactoring of the C++ configure files accidently removed the
