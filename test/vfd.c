@@ -48,20 +48,22 @@
 #define DSET2_DIM  4
 #endif /* H5_HAVE_DIRECT */
 
-const char *FILENAME[] = {"sec2_file",          /*0*/
-                          "core_file",          /*1*/
-                          "family_file",        /*2*/
-                          "new_family_v16_",    /*3*/
-                          "multi_file",         /*4*/
-                          "direct_file",        /*5*/
-                          "log_file",           /*6*/
-                          "stdio_file",         /*7*/
-                          "windows_file",       /*8*/
-                          "new_multi_file_v16", /*9*/
-                          "ro_s3_file",         /*10*/
-                          "splitter_rw_file",   /*11*/
-                          "splitter_wo_file",   /*12*/
-                          "splitter.log",       /*13*/
+const char *FILENAME[] = {"sec2_file",            /*0*/
+                          "core_file",            /*1*/
+                          "family_file",          /*2*/
+                          "new_family_v16_",      /*3*/
+                          "multi_file",           /*4*/
+                          "direct_file",          /*5*/
+                          "log_file",             /*6*/
+                          "stdio_file",           /*7*/
+                          "windows_file",         /*8*/
+                          "new_multi_file_v16",   /*9*/
+                          "ro_s3_file",           /*10*/
+                          "splitter_rw_file",     /*11*/
+                          "splitter_wo_file",     /*12*/
+                          "splitter.log",         /*13*/
+                          "ctl_file",             /*14*/
+                          "ctl_splitter_wo_file", /*15*/
                           NULL};
 
 #define LOG_FILENAME "log_vfd_out.log"
@@ -94,15 +96,23 @@ struct splitter_dataset_def {
     int            n_dims;      /* rank */
 };
 
-static int splitter_prepare_file_paths(H5FD_splitter_vfd_config_t *vfd_config, char *filename_rw_out);
-static int splitter_create_single_file_at(const char *filename, hid_t fapl_id,
-                                          const struct splitter_dataset_def *data);
-static int splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def *data);
-static int run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                             hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2]);
-static int splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id);
-static int splitter_tentative_open_test(hid_t child_fapl_id);
-static int file_exists(const char *filename, hid_t fapl_id);
+/* Op code type enum for ctl callback test */
+typedef enum {
+    CTL_OPC_KNOWN_PASSTHROUGH, /* op code known to passthrough VFD */
+    CTL_OPC_KNOWN_TERMINAL,    /* op code known to terminal VFD    */
+    CTL_OPC_UNKNOWN            /* unknown op code                  */
+} ctl_test_opc_type;
+
+static int    splitter_prepare_file_paths(H5FD_splitter_vfd_config_t *vfd_config, char *filename_rw_out);
+static int    splitter_create_single_file_at(const char *filename, hid_t fapl_id,
+                                             const struct splitter_dataset_def *data);
+static int    splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def *data);
+static int    run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
+                                hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2]);
+static int    splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id);
+static int    splitter_tentative_open_test(hid_t child_fapl_id);
+static int    file_exists(const char *filename, hid_t fapl_id);
+static herr_t run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t fapl_id);
 
 /*-------------------------------------------------------------------------
  * Function:    test_sec2
@@ -3399,6 +3409,378 @@ error:
 #undef SPLITTER_TEST_FAULT
 
 /*-------------------------------------------------------------------------
+ * Function:    run_ctl_test
+ *
+ * Purpose:     Helper method for VFD "ctl" callback test
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t fapl_id)
+{
+    hbool_t fail_if_unknown    = FALSE;
+    hbool_t routing_flag_set   = FALSE;
+    hbool_t is_passthrough_vfd = FALSE;
+    hbool_t expect_fail        = FALSE;
+    H5FD_t *file_drv_ptr       = NULL;
+    herr_t  ctl_result         = SUCCEED;
+    hid_t   fid                = H5I_INVALID_HID;
+    hid_t   driver_id          = H5I_INVALID_HID;
+    char    filename[1024];
+
+    /* Check for a few ctl function flags */
+    fail_if_unknown  = (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG);
+    routing_flag_set = (flags & H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG);
+
+    /* Determine if the top-level VFD is a passthrough VFD */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        PUTS_ERROR("couldn't get VFD ID from FAPL");
+
+    is_passthrough_vfd = ((driver_id == H5FD_SPLITTER) || (driver_id == H5FD_MULTI));
+
+    /* Create testing file */
+    h5_fixname(FILENAME[14], fapl_id, filename, sizeof(filename));
+
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        PUTS_ERROR("couldn't create testing file");
+
+    /* Re-open file to get pointer to H5FD_t structure */
+    if (NULL == (file_drv_ptr = H5FDopen(filename, H5F_ACC_TRUNC, fapl_id, HADDR_UNDEF)))
+        PUTS_ERROR("couldn't get pointer to H5FD_t structure");
+
+    /* Determine whether the H5FDctl call is expected to fail */
+    expect_fail = fail_if_unknown && (CTL_OPC_UNKNOWN == opc_type);
+    if (is_passthrough_vfd) {
+        /* Should fail if op code is unknown to passthrough VFD
+         * (but known to terminal VFD), no routing flag is specified
+         * and the "fail if unknown" flag is specified.
+         */
+        expect_fail =
+            expect_fail || ((CTL_OPC_KNOWN_TERMINAL == opc_type) && !routing_flag_set && fail_if_unknown);
+    }
+
+    /* Issue opcode to VFD */
+    if (expect_fail) {
+        H5E_BEGIN_TRY
+        {
+            ctl_result = H5FDctl(file_drv_ptr, op_code, flags, NULL, NULL);
+        }
+        H5E_END_TRY;
+    }
+    else
+        ctl_result = H5FDctl(file_drv_ptr, op_code, flags, NULL, NULL);
+
+    /* Verify result of H5FDctl call */
+    if (expect_fail) {
+        if (ctl_result == SUCCEED)
+            PUTS_ERROR("H5FDctl call succeeded when it should have failed");
+    }
+    else {
+        if (ctl_result != SUCCEED)
+            PUTS_ERROR("H5FDctl call failed when it should have succeeded");
+    }
+
+    /* Close H5FD_t structure pointer */
+    if (H5FDclose(file_drv_ptr) < 0)
+        PUTS_ERROR("couldn't close H5FD_t structure pointer");
+    file_drv_ptr = NULL;
+
+    /* Close and delete the file */
+    if (H5Fclose(fid) < 0)
+        PUTS_ERROR("couldn't close file");
+    h5_delete_test_file(FILENAME[14], fapl_id);
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5FDclose(file_drv_ptr);
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_ctl
+ *
+ * Purpose:     Tests the VFD "ctl" callback
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_ctl(void)
+{
+    H5FD_splitter_vfd_config_t *splitter_config = NULL;
+    uint64_t                    op_code;
+    uint64_t                    flags;
+    hid_t                       fapl_id = H5I_INVALID_HID;
+
+    TESTING("VFD ctl callback");
+    HDputs("");
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        PUTS_ERROR("couldn't create FAPL");
+    if (H5Pset_fapl_sec2(fapl_id) < 0)
+        PUTS_ERROR("couldn't set SEC2 driver on FAPL");
+
+    TESTING_2("known op code to terminal VFD (without fail on unknown flag)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = 0;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code to terminal VFD (with fail on unknown flag)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code to terminal VFD (without fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code to terminal VFD (with fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = 0;
+
+    /* H5FDctl call should silently ignore unknown op code and succeed */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /* H5FDctl call should fail due to 'fail if unknown' flag being specified */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should silently ignore unknown op code and succeed */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should fail due to 'fail if unknown' flag being specified */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    /* Set up splitter VFD config */
+    if (NULL == (splitter_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
+        TEST_ERROR;
+
+    splitter_config->magic          = H5FD_SPLITTER_MAGIC;
+    splitter_config->version        = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
+    splitter_config->ignore_wo_errs = TRUE;
+    splitter_config->rw_fapl_id     = H5P_DEFAULT;
+    splitter_config->wo_fapl_id     = H5P_DEFAULT;
+    h5_fixname(FILENAME[15], splitter_config->wo_fapl_id, splitter_config->wo_path, H5FD_SPLITTER_PATH_MAX);
+
+    if (H5Pset_fapl_splitter(fapl_id, splitter_config) < 0)
+        PUTS_ERROR("couldn't set splitter VFD on FAPL");
+
+    TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = 0;
+
+    /*
+     * H5FDctl call should silently ignore unknown op code in
+     * passthrough VFD since no routing flag is specified and
+     * 'fail if unknown' flag is not specified.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code through passthrough VFD to terminal VFD (with fail on unknown flag)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /*
+     * H5FDctl call should fail since op code is unknown to
+     * passthrough VFD (though known to terminal VFD), no
+     * routing flag is specified and the 'fail if unknown'
+     * flag is specified.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/route to "
+              "terminal VFD)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /*
+     * H5Dctl call should succeed since the passthrough VFD
+     * doesn't recognize the op code, but has been instructed
+     * to route it down to the terminal VFD.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code through passthrough VFD to terminal VFD (with fail on unknown flag/route to "
+              "terminal VFD)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /*
+     * H5Dctl call should succeed since the passthrough VFD
+     * doesn't recognize the op code, but has been instructed
+     * to route it down to the terminal VFD.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = 0;
+
+    /*
+     * H5FDctl call should silently ignore unknown op code in
+     * passthrough VFD since no routing flag is specified and
+     * 'fail if unknown' flag is not specified.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /*
+     * H5FDctl call should fail since op code is unknown to
+     * passthrough VFD, no routing flag is specified and the
+     * 'fail if unknown' flag is specified.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /*
+     * H5Dctl call should succeed since the passthrough VFD
+     * doesn't recognize the op code, but has been instructed
+     * to route it down to the terminal VFD and the 'fail if
+     * unknown' flag has not been specified. Therefore, the
+     * terminal VFD should silently ignore the unknown op
+     * code.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /*
+     * H5Dctl call should fail since the passthrough VFD
+     * doesn't recognize the op code, but has been instructed
+     * to route it down to the terminal VFD and the 'fail if
+     * unknown' flag has been specified. Therefore, the
+     * terminal VFD will throw an error for the unknown op
+     * code.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    HDfree(splitter_config);
+
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (splitter_config)
+            HDfree(splitter_config);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
  * Function:    main
  *
  * Purpose:     Tests the basic features of Virtual File Drivers
@@ -3429,6 +3811,7 @@ main(void)
     nerrors += test_windows() < 0 ? 1 : 0;
     nerrors += test_ros3() < 0 ? 1 : 0;
     nerrors += test_splitter() < 0 ? 1 : 0;
+    nerrors += test_ctl() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

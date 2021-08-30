@@ -139,16 +139,19 @@
 #define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE 0x00008000
 
 /* ctl function definitions: */
-#define H5FD_CTL_OPC_RESERVED  512                           /* Opcodes below this value are reserved for library use */
-#define H5FD_CTL_OPC_EXPER_MIN H5FD_CTL_OPC_RESERVED         /* Minimum opcode value available for experimental use */
-#define H5FD_CTL_OPC_EXPER_MAX (H5FD_CTL_OPC_RESERVED + 511) /* Maximum opcode value available for experimental use */
+#define H5FD_CTL_OPC_RESERVED  512 /* Opcodes below this value are reserved for library use */
+#define H5FD_CTL_OPC_EXPER_MIN H5FD_CTL_OPC_RESERVED /* Minimum opcode value available for experimental use  \
+                                                      */
+#define H5FD_CTL_OPC_EXPER_MAX                                                                               \
+    (H5FD_CTL_OPC_RESERVED + 511) /* Maximum opcode value available for experimental use */
 
 /* ctl function op codes: */
 #define H5FD_CTL__INVALID_OPCODE              0
-#define H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE 1
-#define H5FD_CTL__GET_MPI_RANK_OPCODE         2
-#define H5FD_CTL__GET_MPI_SIZE_OPCODE         3
-#define H5FD_CTL__NUM_OPCODES                 4 /* must be last */
+#define H5FD_CTL__TEST_OPCODE                 1
+#define H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE 2
+#define H5FD_CTL__GET_MPI_RANK_OPCODE         3
+#define H5FD_CTL__GET_MPI_SIZE_OPCODE         4
+#define H5FD_CTL__NUM_OPCODES                 5 /* must be last */
 
 /* ctl function flags: */
 

@@ -72,23 +72,23 @@ typedef struct H5FD_mpio_t {
 /* Private Prototypes */
 
 /* Callbacks */
-static herr_t   H5FD__mpio_term(void);
-static H5FD_t * H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
-static herr_t   H5FD__mpio_close(H5FD_t *_file);
-static herr_t   H5FD__mpio_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t  H5FD__mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t   H5FD__mpio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static haddr_t  H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t   H5FD__mpio_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
-static herr_t   H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-                                void *buf);
-static herr_t   H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-                                 const void *buf);
-static herr_t   H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t   H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t   H5FD__mpio_delete(const char *filename, hid_t fapl_id);
-static herr_t   H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
-                               const void *input, void **output);
+static herr_t  H5FD__mpio_term(void);
+static H5FD_t *H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static herr_t  H5FD__mpio_close(H5FD_t *_file);
+static herr_t  H5FD__mpio_query(const H5FD_t *_f1, unsigned long *flags);
+static haddr_t H5FD__mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t  H5FD__mpio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static haddr_t H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t  H5FD__mpio_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
+static herr_t  H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                               void *buf);
+static herr_t  H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                                const void *buf);
+static herr_t  H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__mpio_delete(const char *filename, hid_t fapl_id);
+static herr_t  H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                              void **output);
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
