@@ -817,7 +817,7 @@ copy_args(int argc, char **argv, int *mfu_argc, int *copy_len)
 {
     int    i, bytes_copied = 0;
     int    check_mfu_args = 1;
-    char **argv_copy      = (char **)MFU_MALLOC((size_t)(argc+2) * sizeof(char **));
+    char **argv_copy      = (char **)MFU_MALLOC((size_t)(argc + 2) * sizeof(char **));
     assert(argv_copy);
     assert(mfu_argc);
     assert(copy_len);
@@ -832,8 +832,8 @@ copy_args(int argc, char **argv, int *mfu_argc, int *copy_len)
             *mfu_argc      = i + 1;
         }
     }
-	argv_copy[i] = 0;
-    *copy_len = bytes_copied;
+    argv_copy[i] = 0;
+    *copy_len    = bytes_copied;
     return argv_copy;
 }
 
@@ -860,10 +860,10 @@ check_path_count(char *h5tool)
 }
 
 typedef struct hash_entry {
-    int hash;
-    char *name;
-    struct hash_entry *next;   	/* table Collision */
-    int nextCount;
+    int                hash;
+    char *             name;
+    struct hash_entry *next; /* table Collision */
+    int                nextCount;
 } hash_entry_t;
 
 #ifndef NAME_ENTRIES
@@ -875,67 +875,67 @@ static hash_entry_t filename_cache[NAME_ENTRIES];
 static int
 get_copy_count(char *fname, char *appname)
 {
-    static char * lastdir;
+    static char *lastdir;
 
-	int k, filehash = 0, apphash = 0;
-    int applen = strlen(appname);
-	int filelen = strlen(fname);
+    int k, filehash = 0, apphash = 0;
+    int applen  = strlen(appname);
+    int filelen = strlen(fname);
     int hash_index;
 
-    for (k=0; k < filelen; k++) {
+    for (k = 0; k < filelen; k++) {
         filehash += fname[k];
     }
-    for (k=0; k < applen; k++) {
+    for (k = 0; k < applen; k++) {
         apphash += appname[k];
     }
     hash_index = filehash % NAME_ENTRIES;
     if (filename_cache[hash_index].name == NULL) {
-        filename_cache[hash_index].hash = apphash;
-        filename_cache[hash_index].name = strdup(fname);
-        filename_cache[hash_index].next = NULL;
+        filename_cache[hash_index].hash      = apphash;
+        filename_cache[hash_index].name      = strdup(fname);
+        filename_cache[hash_index].next      = NULL;
         filename_cache[hash_index].nextCount = 1;
-		return 0;
+        return 0;
     }
-	else if ((apphash == filename_cache[hash_index].hash) &&
+    else if ((apphash == filename_cache[hash_index].hash) &&
              (strcmp(filename_cache[hash_index].name, fname) == 0)) {
         int retval = filename_cache[hash_index].nextCount++;
-		return retval;
-	}
-	else {	/* Collision */
+        return retval;
+    }
+    else { /* Collision */
         hash_entry_t *nextEntry = &filename_cache[hash_index];
         hash_entry_t *lastEntry = nextEntry;
         while (nextEntry) {
-            if ((apphash == nextEntry->hash) &&
-				(strcmp(nextEntry->name, fname) == 0)) {
-				/* Match (increment nextCount and return) */
+            if ((apphash == nextEntry->hash) && (strcmp(nextEntry->name, fname) == 0)) {
+                /* Match (increment nextCount and return) */
                 int retval = nextEntry->nextCount++;
                 return retval;
-			}
-			else {
-				/* No Match (continue search) */
+            }
+            else {
+                /* No Match (continue search) */
                 lastEntry = nextEntry;
                 nextEntry = lastEntry->next;
-			}
-		}
-		nextEntry = (hash_entry_t *)malloc(sizeof(hash_entry_t));
-		if (nextEntry) {
-			lastEntry->next = nextEntry;
-			nextEntry->name = strdup(fname);
-			nextEntry->hash = apphash;
-			nextEntry->next = NULL;
-			nextEntry->nextCount = 1;
-		}
-	}
-	return 0;
+            }
+        }
+        nextEntry = (hash_entry_t *)malloc(sizeof(hash_entry_t));
+        if (nextEntry) {
+            lastEntry->next      = nextEntry;
+            nextEntry->name      = strdup(fname);
+            nextEntry->hash      = apphash;
+            nextEntry->next      = NULL;
+            nextEntry->nextCount = 1;
+        }
+    }
+    return 0;
 }
 
-int run_command(int argc, char **argv, char *cmdline, char *fname)
+int
+run_command(int argc, char **argv, char *cmdline, char *fname)
 {
     char  filepath[1024];
     char *toolname = argv[0];
-    char *buf = NULL;
+    char *buf      = NULL;
 
-	/* create a copy of the 1st file passed to the application */
+    /* create a copy of the 1st file passed to the application */
     strcpy(filepath, fname);
 
     if (log_output_in_single_file) {
@@ -1075,7 +1075,8 @@ int run_command(int argc, char **argv, char *cmdline, char *fname)
 
         if (txtlog == NULL) {
             if (log_instance > 0) {
-                sprintf(logpath, "%s/%s_%s.log_%d", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp, log_instance);
+                sprintf(logpath, "%s/%s_%s.log_%d", getcwd(current_dir, sizeof(current_dir)), logbase,
+                        thisapp, log_instance);
             }
             else {
                 sprintf(logpath, "%s/%s_%s.log", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
@@ -1084,19 +1085,18 @@ int run_command(int argc, char **argv, char *cmdline, char *fname)
         else {
             log_len = strlen(txtlog);
             if (log_instance > 0) {
-               if (txtlog[log_len - 1] == '/')
-                  sprintf(logpath, "%s%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
-               else
-                  sprintf(logpath, "%s/%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+                if (txtlog[log_len - 1] == '/')
+                    sprintf(logpath, "%s%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+                else
+                    sprintf(logpath, "%s/%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
             }
             else {
-               if (txtlog[log_len - 1] == '/')
-                  sprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
-               else
-                  sprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
+                if (txtlog[log_len - 1] == '/')
+                    sprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
+                else
+                    sprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
             }
         }
-
 
         if (log_errors_in_file) {
             /* We co-locate the error logs in the same directories as the regular log files.
@@ -1135,7 +1135,6 @@ int run_command(int argc, char **argv, char *cmdline, char *fname)
     }
 }
 
-
 int MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg);
 int MFU_PRED_PRINT(mfu_flist flist, uint64_t idx, void *arg);
 
@@ -1170,11 +1169,11 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
      */
 
     char   cmdline[2048];
-    char **argv = (char **)MFU_CALLOC((size_t)(count + 2), sizeof(char *));
+    char **argv    = (char **)MFU_CALLOC((size_t)(count + 2), sizeof(char *));
     char * logbase = strdup(basename(fname));
     char * thisapp = strdup(basename(toolname));
 
-    argv[k++]   = strdup(toolname);
+    argv[k++] = strdup(toolname);
 
     memset(cmdline, 0, sizeof(cmdline));
     buf += strlen(toolname) + 1;
@@ -1359,7 +1358,6 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
                 sprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
         }
 
-
         if (log_errors_in_file) {
             /* We co-locate the error logs in the same directories as the regular log files.
              * The easiest way to do this is to simply replace the .log with .err in a
@@ -1395,7 +1393,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         if (thisapp)
             free(thisapp);
     }
-#endif	/* #ifdef USE_OLD_CODE */
+#endif /* #ifdef USE_OLD_CODE */
     mfu_free(argv);
 
     return 0;
@@ -1427,19 +1425,21 @@ pred_commit(mfu_pred *p)
 void
 add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count)
 {
-    char   cmdline[2048];
+    char cmdline[2048];
     sprintf(cmdline, "\n---------\nCommand: %s\n", cmdstring);
     argv[argc] = NULL;
-	run_command(argc, argv, cmdline, argv[f_index[0]]);
+    run_command(argc, argv, cmdline, argv[f_index[0]]);
     return;
 }
 
 int
 process_input_file(char *inputname, int myrank, int size)
 {
-    int  index = 0;
-    char linebuf[PATH_MAX] = {'\0', };
-    FILE *config = fopen(inputname, "r");
+    int  index             = 0;
+    char linebuf[PATH_MAX] = {
+        '\0',
+    };
+    FILE *    config = fopen(inputname, "r");
     mfu_flist flist1 = NULL;
 
     if (config == NULL)
@@ -1448,39 +1448,39 @@ process_input_file(char *inputname, int myrank, int size)
     flist1 = mfu_flist_new();
 
     while (fgets(linebuf, sizeof(linebuf), config) != NULL) {
-        char *cmdline = NULL;
-        char *cmd = NULL;
-        char *arg = NULL;
-        char *delim = " \n";
-        char *argv[256];
-        int fileindex[256];
-        int filecount = 0;
-        int token = 0;
+        char *      cmdline = NULL;
+        char *      cmd     = NULL;
+        char *      arg     = NULL;
+        char *      delim   = " \n";
+        char *      argv[256];
+        int         fileindex[256];
+        int         filecount = 0;
+        int         token     = 0;
         struct stat statbuf;
 
-        char * eol = strchr(linebuf, '\n');
+        char *eol = strchr(linebuf, '\n');
         if (eol) {
             *eol = '\0';
         }
         cmdline = strdup(linebuf);
-        cmd = strtok(linebuf, delim);
+        cmd     = strtok(linebuf, delim);
         if (cmd) {
             arg = cmd;
-            while(arg != NULL) {
+            while (arg != NULL) {
                 char c = arg[0];
-                if (token > 0 ) {
-                   if ((c == '.') || (c == '/')) {
-                      /* 'arg' looks to be a filepath */
-                      if (stat(arg, &statbuf) == 0) {
-                         mfu_flist_insert_stat(flist1, arg, O_RDONLY, &statbuf);
-                      }
-                      fileindex[filecount++] = token;
-                   }
+                if (token > 0) {
+                    if ((c == '.') || (c == '/')) {
+                        /* 'arg' looks to be a filepath */
+                        if (stat(arg, &statbuf) == 0) {
+                            mfu_flist_insert_stat(flist1, arg, O_RDONLY, &statbuf);
+                        }
+                        fileindex[filecount++] = token;
+                    }
                 }
                 argv[token++] = arg;
-                arg = strtok(NULL, delim);
+                arg           = strtok(NULL, delim);
             }
-			
+
             // printf("cmd = %s, argv[%d] = %s\n", cmd, fileindex[0], argv[fileindex[0]]);
             if (myrank == (index % size))
                 add_executable(token, argv, cmdline, fileindex, filecount);
@@ -1543,7 +1543,7 @@ main(int argc, char **argv)
     struct distribute_option option;
 
     // mfu_debug_level = MFU_LOG_WARN; // MFU_LOG_VERBOSE;
-    mfu_debug_level = MFU_LOG_WARN;
+    mfu_debug_level   = MFU_LOG_WARN;
     h5tool_argv[argc] = 0;
 
     /* The struct option declaration can found in bits/getopt_ext.h
@@ -1647,12 +1647,13 @@ show_help:
 
     if (inputname != NULL) {
         if (tool_selected && (rank == 0)) {
-			puts("WARNING: When utilizing --input, the only other supported runtime argument is --output or -l");
-		}
+            puts("WARNING: When utilizing --input, the only other supported runtime argument is --output or "
+                 "-l");
+        }
         rc = process_input_file(inputname, rank, ranks);
         mfu_finalize();
         MPI_Finalize();
-		return rc;
+        return rc;
     }
 
     /**************************************************************/
