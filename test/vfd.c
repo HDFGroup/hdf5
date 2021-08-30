@@ -3447,7 +3447,7 @@ run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t
         PUTS_ERROR("couldn't create testing file");
 
     /* Re-open file to get pointer to H5FD_t structure */
-    if (NULL == (file_drv_ptr = H5FDopen(filename, H5F_ACC_TRUNC, fapl_id, HADDR_UNDEF)))
+    if (NULL == (file_drv_ptr = H5FDopen(filename, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF)))
         PUTS_ERROR("couldn't get pointer to H5FD_t structure");
 
     /* Determine whether the H5FDctl call is expected to fail */
