@@ -817,7 +817,7 @@ copy_args(int argc, char **argv, int *mfu_argc, int *copy_len)
 {
     int    i, bytes_copied = 0;
     int    check_mfu_args = 1;
-    char **argv_copy      = (char **)MFU_MALLOC((size_t)argc * sizeof(char **));
+    char **argv_copy      = (char **)MFU_MALLOC((size_t)(argc+2) * sizeof(char **));
     assert(argv_copy);
     assert(mfu_argc);
     assert(copy_len);
@@ -832,6 +832,7 @@ copy_args(int argc, char **argv, int *mfu_argc, int *copy_len)
             *mfu_argc      = i + 1;
         }
     }
+	argv_copy[i] = 0;
     *copy_len = bytes_copied;
     return argv_copy;
 }
@@ -858,79 +859,84 @@ check_path_count(char *h5tool)
     return -1;
 }
 
-int MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg);
-int MFU_PRED_PRINT(mfu_flist flist, uint64_t idx, void *arg);
+typedef struct hash_entry {
+    int hash;
+    char *name;
+    struct hash_entry *next;   	/* table Collision */
+    int nextCount;
+} hash_entry_t;
 
-int
-MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
+#ifndef NAME_ENTRIES
+#define NAME_ENTRIES 4096
+#endif
+
+static hash_entry_t filename_cache[NAME_ENTRIES];
+
+static int
+get_copy_count(char *fname, char *appname)
 {
-    /* get file name for this item */
-    int         file_substituted = 0;
-    const char *fname            = mfu_flist_file_get_name(flist, idx);
+    static char * lastdir;
 
-    char *toolname = NULL;
+	int k, filehash = 0, apphash = 0;
+    int applen = strlen(appname);
+	int filelen = strlen(fname);
+    int hash_index;
+
+    for (k=0; k < filelen; k++) {
+        filehash += fname[k];
+    }
+    for (k=0; k < applen; k++) {
+        apphash += appname[k];
+    }
+    hash_index = filehash % NAME_ENTRIES;
+    if (filename_cache[hash_index].name == NULL) {
+        filename_cache[hash_index].hash = apphash;
+        filename_cache[hash_index].name = strdup(fname);
+        filename_cache[hash_index].next = NULL;
+        filename_cache[hash_index].nextCount = 1;
+		return 0;
+    }
+	else if ((apphash == filename_cache[hash_index].hash) &&
+             (strcmp(filename_cache[hash_index].name, fname) == 0)) {
+        int retval = filename_cache[hash_index].nextCount++;
+		return retval;
+	}
+	else {	/* Collision */
+        hash_entry_t *nextEntry = &filename_cache[hash_index];
+        hash_entry_t *lastEntry = nextEntry;
+        while (nextEntry) {
+            if ((apphash == nextEntry->hash) &&
+				(strcmp(nextEntry->name, fname) == 0)) {
+				/* Match (increment nextCount and return) */
+                int retval = nextEntry->nextCount++;
+                return retval;
+			}
+			else {
+				/* No Match (continue search) */
+                lastEntry = nextEntry;
+                nextEntry = lastEntry->next;
+			}
+		}
+		nextEntry = (hash_entry_t *)malloc(sizeof(hash_entry_t));
+		if (nextEntry) {
+			lastEntry->next = nextEntry;
+			nextEntry->name = strdup(fname);
+			nextEntry->hash = apphash;
+			nextEntry->next = NULL;
+			nextEntry->nextCount = 1;
+		}
+	}
+	return 0;
+}
+
+int run_command(int argc, char **argv, char *cmdline, char *fname)
+{
     char  filepath[1024];
+    char *toolname = argv[0];
+    char *buf = NULL;
 
-    size_t b_offset;
-
-    /* get pointer to encoded argc count and argv array */
-    int * count_ptr = arg;
-    char *buf       = (char *)arg + sizeof(int);
-
-    /* get number of argv parameters */
-    int k = 0, count = *count_ptr;
-    toolname = buf;
-
-    /* Get a copy of fname */
+	/* create a copy of the 1st file passed to the application */
     strcpy(filepath, fname);
-
-    /* allocate a char* for each item in the argv array,
-     * plus one more for a trailing NULL
-     * 'count' in this case is the number of args, so
-     * so we add (+1) for the toolname and another (+1)
-     * for the trailing NULL to terminate the list
-     */
-
-    char   cmdline[2048];
-    char **argv = (char **)MFU_CALLOC((size_t)(count + 2), sizeof(char *));
-    argv[k++]   = strdup(toolname);
-
-    memset(cmdline, 0, sizeof(cmdline));
-    buf += strlen(toolname) + 1;
-    /* Reconstruct the command line that the user provided for the h5tool */
-    for (k = 1; k < count; k++) {
-        if (buf[0] == '&') {
-            char *     fname_arg    = NULL;
-            void *     check_ptr[2] = {NULL, NULL};
-            mfu_flist *check_flist  = memcpy(&check_ptr[0], &buf[1], sizeof(mfu_flist *));
-            mfu_flist  flist_arg    = (mfu_flist)check_ptr[0];
-
-            /* +2 (see below) accounts for the '&' and the trailing zero pad */
-            buf += sizeof(mfu_flist *) + 2;
-            fname_arg = mfu_flist_file_get_name(flist_arg, idx);
-            if (fname_arg == NULL) {
-                printf("[%d] Warning: Unable to resolve file_substitution %d (idx=%ld)\n", sg_mpi_rank,
-                       file_substituted, idx);
-                argv[k] = strdup(fname);
-            }
-            else {
-                argv[k] = strdup(fname_arg);
-                file_substituted++;
-            }
-        }
-        else {
-            argv[k] = strdup(buf);
-            buf += strlen(argv[k]) + 1;
-        }
-    }
-
-    sprintf(cmdline, "\n---------\nCommand:");
-    b_offset = strlen(cmdline);
-    for (k = 0; k < count; k++) {
-        sprintf(&cmdline[b_offset], " %s", argv[k]);
-        b_offset = strlen(cmdline);
-    }
-    sprintf(&cmdline[b_offset], "\n");
 
     if (log_output_in_single_file) {
         pid_t   pid;
@@ -1056,6 +1062,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         }
     }
     else if (log_stdout_in_file) {
+        int    log_instance = -1;
         pid_t  pid;
         size_t log_len;
         char   logpath[2048];
@@ -1064,15 +1071,33 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         char * logbase = strdup(basename(filepath));
         char * thisapp = strdup(basename(toolname));
 
-        if (txtlog == NULL)
-            sprintf(logpath, "%s/%s_%s.log", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
+        log_instance = get_copy_count(logbase, thisapp);
+
+        if (txtlog == NULL) {
+            if (log_instance > 0) {
+                sprintf(logpath, "%s/%s_%s.log_%d", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp, log_instance);
+            }
+            else {
+                sprintf(logpath, "%s/%s_%s.log", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
+            }
+        }
         else {
             log_len = strlen(txtlog);
-            if (txtlog[log_len - 1] == '/')
-                sprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
-            else
-                sprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
+            if (log_instance > 0) {
+               if (txtlog[log_len - 1] == '/')
+                  sprintf(logpath, "%s%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+               else
+                  sprintf(logpath, "%s/%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+            }
+            else {
+               if (txtlog[log_len - 1] == '/')
+                  sprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
+               else
+                  sprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
+            }
         }
+
+
         if (log_errors_in_file) {
             /* We co-locate the error logs in the same directories as the regular log files.
              * The easiest way to do this is to simply replace the .log with .err in a
@@ -1108,7 +1133,269 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
         if (thisapp)
             free(thisapp);
     }
+}
 
+
+int MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg);
+int MFU_PRED_PRINT(mfu_flist flist, uint64_t idx, void *arg);
+
+int
+MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
+{
+    /* get file name for this item */
+    int         file_substituted = 0;
+    const char *fname            = mfu_flist_file_get_name(flist, idx);
+
+    char *toolname = NULL;
+    char  filepath[1024];
+
+    size_t b_offset;
+
+    /* get pointer to encoded argc count and argv array */
+    int * count_ptr = arg;
+    char *buf       = (char *)arg + sizeof(int);
+
+    /* get number of argv parameters */
+    int k = 0, count = *count_ptr;
+    toolname = buf;
+
+    /* Get a copy of fname */
+    strcpy(filepath, fname);
+
+    /* allocate a char* for each item in the argv array,
+     * plus one more for a trailing NULL
+     * 'count' in this case is the number of args, so
+     * so we add (+1) for the toolname and another (+1)
+     * for the trailing NULL to terminate the list
+     */
+
+    char   cmdline[2048];
+    char **argv = (char **)MFU_CALLOC((size_t)(count + 2), sizeof(char *));
+    char * logbase = strdup(basename(fname));
+    char * thisapp = strdup(basename(toolname));
+
+    argv[k++]   = strdup(toolname);
+
+    memset(cmdline, 0, sizeof(cmdline));
+    buf += strlen(toolname) + 1;
+    /* Reconstruct the command line that the user provided for the h5tool */
+    for (k = 1; k < count; k++) {
+        if (buf[0] == '&') {
+            char *     fname_arg    = NULL;
+            void *     check_ptr[2] = {NULL, NULL};
+            mfu_flist *check_flist  = memcpy(&check_ptr[0], &buf[1], sizeof(mfu_flist *));
+            mfu_flist  flist_arg    = (mfu_flist)check_ptr[0];
+
+            /* +2 (see below) accounts for the '&' and the trailing zero pad */
+            buf += sizeof(mfu_flist *) + 2;
+            fname_arg = mfu_flist_file_get_name(flist_arg, idx);
+            if (fname_arg == NULL) {
+                printf("[%d] Warning: Unable to resolve file_substitution %d (idx=%ld)\n", sg_mpi_rank,
+                       file_substituted, idx);
+                argv[k] = strdup(fname);
+            }
+            else {
+                argv[k] = strdup(fname_arg);
+                file_substituted++;
+            }
+        }
+        else {
+            argv[k] = strdup(buf);
+            buf += strlen(argv[k]) + 1;
+        }
+    }
+
+    sprintf(cmdline, "\n---------\nCommand:");
+    b_offset = strlen(cmdline);
+    for (k = 0; k < count; k++) {
+        sprintf(&cmdline[b_offset], " %s", argv[k]);
+        b_offset = strlen(cmdline);
+    }
+    sprintf(&cmdline[b_offset], "\n");
+    run_command(count, argv, cmdline, fname);
+
+#ifdef USE_OLD_CODE
+    if (log_output_in_single_file) {
+        pid_t   pid;
+        int     pipefd[2];
+        buf_t * thisbuft = NULL;
+        buf_t **bufs     = buf_cache;
+
+        if (bufs == NULL) {
+            bufs = (buf_t **)MFU_CALLOC(buft_max, sizeof(buf_t *));
+            assert((bufs != NULL));
+            buf_cache = bufs;
+#if 0
+			if (buft_count == 0) {
+                printf("[%d] Initial buf_cache allocation: buft_count=%d\n", sg_mpi_rank, buft_count);
+			}
+#endif
+            bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
+            assert((thisbuft != NULL));
+        }
+        else {
+            thisbuft = bufs[buft_count - 1];
+            assert((thisbuft != NULL));
+            /* Check for remaining space in the current buffer */
+            /* If none, then create a new buffer */
+            if (thisbuft->count == 0) {
+                bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
+            }
+        }
+        if ((thisbuft->buf == NULL)) {
+            thisbuft->buf = MFU_MALLOC(BUFT_SIZE);
+            assert((thisbuft->buf != NULL));
+            thisbuft->bufsize = BUFT_SIZE;
+            thisbuft->count   = BUFT_SIZE;
+            thisbuft->dt      = MPI_CHAR;
+        }
+        if (pipe(pipefd) == -1) {
+            perror("pipe");
+            exit(EXIT_FAILURE);
+        }
+        pid = fork();
+        if (pid == -1) {
+            perror("fork");
+            exit(EXIT_FAILURE);
+        }
+        if (pid == 0) {
+            close(pipefd[0]);
+            dup2(pipefd[1], fileno(stdout));
+            dup2(pipefd[1], fileno(stderr));
+            execvp(argv[0], argv);
+        }
+        else {
+            int      w_status;
+            size_t   nbytes;
+            size_t   read_bytes = 0;
+            uint64_t remaining, offset;
+            close(pipefd[1]);
+            buf       = thisbuft->buf;
+            remaining = thisbuft->count;
+            nbytes    = strlen(cmdline);
+            offset    = thisbuft->chars;
+            /* Record the command line for the log! */
+            if (nbytes < remaining) {
+                strcpy(&buf[offset], cmdline);
+                thisbuft->chars += nbytes;
+                thisbuft->count -= nbytes;
+                remaining -= nbytes;
+            }
+            else { /* We're running out of space in the current buffer  */
+                char *nextpart;
+                strncpy(&buf[offset], cmdline, remaining);
+                nextpart        = &cmdline[remaining + 1];
+                thisbuft->count = 0;
+                thisbuft->chars += remaining;
+
+                /* Create a new read buffer */
+#if 0
+                printf("[%d] Allocate-1 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
+#endif
+                bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
+                assert(thisbuft != NULL);
+                thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
+                thisbuft->bufsize = BUFT_SIZE;
+                thisbuft->dt      = MPI_CHAR;
+                /* Copy the remaining cmdline text into the new buffer */
+                strcpy(buf, nextpart);
+                /* And update our buffer info */
+                // thisbuft->chars = strlen(nextpart) +1;
+                thisbuft->chars = strlen(nextpart);
+                thisbuft->count = BUFT_SIZE - thisbuft->chars;
+            }
+            offset = thisbuft->chars;
+
+            do {
+                pid_t wpid;
+                wpid = waitpid(pid, &w_status, WNOHANG);
+                if ((nbytes = (size_t)read(pipefd[0], &buf[offset], remaining)) > 0) {
+                    offset += nbytes;
+                    read_bytes += nbytes;
+                    remaining -= nbytes;
+                    if (remaining == 0) {
+                        /* Update the current buffer prior to allocating the new one */
+                        thisbuft->count = 0;
+                        thisbuft->chars += read_bytes;
+#if 0
+                        printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
+#endif
+                        bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
+                        assert(thisbuft != NULL);
+                        thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
+                        thisbuft->bufsize = BUFT_SIZE;
+                        thisbuft->dt      = MPI_CHAR;
+                        thisbuft->chars   = BUFT_SIZE;
+                        offset            = 0;
+                        remaining         = BUFT_SIZE;
+                    }
+                }
+            } while (!WIFEXITED(w_status));
+            close(pipefd[0]);
+            wait(NULL);
+
+            thisbuft->count = remaining;
+            thisbuft->chars = thisbuft->bufsize - remaining;
+        }
+    }
+    else if (log_stdout_in_file) {
+        int    log_instance = -1;
+        pid_t  pid;
+        size_t log_len;
+        char   logpath[2048];
+        char   logErrors[2048];
+        char   current_dir[2048];
+        char * logbase = strdup(basename(filepath));
+        char * thisapp = strdup(basename(toolname));
+
+        if (txtlog == NULL) {
+            sprintf(logpath, "%s/%s_%s.log", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
+        }
+        else {
+            log_len = strlen(txtlog);
+            if (txtlog[log_len - 1] == '/')
+                sprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
+            else
+                sprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
+        }
+
+
+        if (log_errors_in_file) {
+            /* We co-locate the error logs in the same directories as the regular log files.
+             * The easiest way to do this is to simply replace the .log with .err in a
+             * copy of the logpath variable.
+             */
+            log_len = strlen(logpath);
+            strcpy(logErrors, logpath);
+            strcpy(&logErrors[log_len - 3], "err");
+        }
+        if (mfu_debug_level == MFU_LOG_VERBOSE) {
+            printf("\tCreating logfile: %s\n", logpath);
+            fflush(stdout);
+        }
+        pid = fork();
+        if (pid == 0) {
+            int efd;
+            int fd = open(logpath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+            dup2(fd, fileno(stdout));
+            if (log_errors_in_file) {
+                efd = open(logErrors, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
+                dup2(efd, fileno(stderr));
+                close(efd);
+            }
+            else
+                dup2(fd, fileno(stderr));
+            close(fd);
+            execvp(argv[0], argv);
+        }
+        int status;
+        pid = wait(&status);
+        if (logbase)
+            free(logbase);
+        if (thisapp)
+            free(thisapp);
+    }
+#endif	/* #ifdef USE_OLD_CODE */
     mfu_free(argv);
 
     return 0;
@@ -1135,6 +1422,80 @@ pred_commit(mfu_pred *p)
         }
         cur = cur->next;
     }
+}
+
+void
+add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count)
+{
+    char   cmdline[2048];
+    sprintf(cmdline, "\n---------\nCommand: %s\n", cmdstring);
+    argv[argc] = NULL;
+	run_command(argc, argv, cmdline, argv[f_index[0]]);
+    return;
+}
+
+int
+process_input_file(char *inputname, int myrank, int size)
+{
+    int  index = 0;
+    char linebuf[PATH_MAX] = {'\0', };
+    FILE *config = fopen(inputname, "r");
+    mfu_flist flist1 = NULL;
+
+    if (config == NULL)
+        return -1;
+
+    flist1 = mfu_flist_new();
+
+    while (fgets(linebuf, sizeof(linebuf), config) != NULL) {
+        char *cmdline = NULL;
+        char *cmd = NULL;
+        char *arg = NULL;
+        char *delim = " \n";
+        char *argv[256];
+        int fileindex[256];
+        int filecount = 0;
+        int token = 0;
+        struct stat statbuf;
+
+        char * eol = strchr(linebuf, '\n');
+        if (eol) {
+            *eol = '\0';
+        }
+        cmdline = strdup(linebuf);
+        cmd = strtok(linebuf, delim);
+        if (cmd) {
+            arg = cmd;
+            while(arg != NULL) {
+                char c = arg[0];
+                if (token > 0 ) {
+                   if ((c == '.') || (c == '/')) {
+                      /* 'arg' looks to be a filepath */
+                      if (stat(arg, &statbuf) == 0) {
+                         mfu_flist_insert_stat(flist1, arg, O_RDONLY, &statbuf);
+                      }
+                      fileindex[filecount++] = token;
+                   }
+                }
+                argv[token++] = arg;
+                arg = strtok(NULL, delim);
+            }
+			
+            // printf("cmd = %s, argv[%d] = %s\n", cmd, fileindex[0], argv[fileindex[0]]);
+            if (myrank == (index % size))
+                add_executable(token, argv, cmdline, fileindex, filecount);
+            index++;
+        }
+        linebuf[0] = 0;
+    }
+
+    if (output_log_file) {
+        dh5tool_flist_write_text(output_log_file, flist1);
+    }
+    fclose(config);
+
+    mfu_flist_free(&flist1);
+    return 0;
 }
 
 int
@@ -1183,6 +1544,7 @@ main(int argc, char **argv)
 
     // mfu_debug_level = MFU_LOG_WARN; // MFU_LOG_VERBOSE;
     mfu_debug_level = MFU_LOG_WARN;
+    h5tool_argv[argc] = 0;
 
     /* The struct option declaration can found in bits/getopt_ext.h
      * I've reproduced it here:
@@ -1205,7 +1567,7 @@ main(int argc, char **argv)
     mfu_pred *pred_head       = NULL;
 
     while (!tool_selected) {
-        int c = getopt_long(mfu_argc + 1, h5tool_argv, "h:i:o:E::T:l::", long_options, &option_index);
+        int c = getopt_long(argc, argv, "h:i:o:E::T:l::", long_options, &option_index);
         if (c == -1) {
             break;
         }
@@ -1282,6 +1644,17 @@ show_help:
         MPI_Finalize();
         return 1;
     }
+
+    if (inputname != NULL) {
+        if (tool_selected && (rank == 0)) {
+			puts("WARNING: When utilizing --input, the only other supported runtime argument is --output or -l");
+		}
+        rc = process_input_file(inputname, rank, ranks);
+        mfu_finalize();
+        MPI_Finalize();
+		return rc;
+    }
+
     /**************************************************************/
     /* We might consider doing a tool specific argument checking  */
     /* to prevent runtime errors.  We would also like to allow    */

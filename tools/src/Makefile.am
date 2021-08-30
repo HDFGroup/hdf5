@@ -23,8 +23,6 @@ CONFIG=ordered
 
 if PARALLEL_TOOLS_CONDITIONAL
   DH5WALK=dh5walk
-else
-  DH5WALK=
 endif
 
 # All subdirectories
