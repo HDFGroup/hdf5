@@ -754,7 +754,7 @@ CONTAINS
   SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id   ! Object identifier
-    CHARACTER(LEN=*), INTENT(INOUT) :: buf
+    CHARACTER(LEN=*), INTENT(OUT) :: buf
                                            ! Buffer to hold file name
     INTEGER(SIZE_T), INTENT(OUT) :: size   ! Size of the file name
     INTEGER, INTENT(OUT) :: hdferr         ! Error code: 0 on success,
@@ -774,7 +774,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
        END FUNCTION h5fget_name_c
     END INTERFACE
-    buflen = LEN_TRIM(buf)
+    buflen = LEN(buf)
     hdferr = h5fget_name_c(obj_id, size, buf, buflen)
   END SUBROUTINE h5fget_name_f
 !****s* H5F/h5fget_filesize_f
