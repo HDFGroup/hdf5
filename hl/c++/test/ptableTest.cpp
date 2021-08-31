@@ -620,7 +620,7 @@ TestHDFFV_9758()
 
     for (hsize_t i = 0; i < NUM_PACKETS; i++) {
         s1[i].a = static_cast<int>(i);
-        s1[i].b = 1.0f * static_cast<float>(i * i);
+        s1[i].b = 1.0F * static_cast<float>(i * i);
         s1[i].c = 1.0 / static_cast<double>(i + 1);
         HDsprintf(s1[i].d, "string%" PRIuHSIZE "", i);
         s1[i].e = static_cast<int>(100 + i);

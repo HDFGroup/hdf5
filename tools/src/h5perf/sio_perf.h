@@ -15,7 +15,7 @@
 
 #ifndef STANDALONE
 #include "io_timer.h"
-#include "h5test.h"
+#include "H5private.h"
 #include "h5tools.h"
 #include "h5tools_utils.h"
 #else

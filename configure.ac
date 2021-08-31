@@ -1225,7 +1225,7 @@ AC_CHECK_LIB([dl], [dlopen])
 ##
 
 ## Unix
-AC_CHECK_HEADERS([dirent.h features.h unistd.h])
+AC_CHECK_HEADERS([dirent.h features.h pwd.h unistd.h])
 AC_CHECK_HEADERS([sys/file.h sys/ioctl.h sys/resource.h])
 AC_CHECK_HEADERS([sys/stat.h sys/time.h sys/types.h])
 
@@ -4019,6 +4019,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/test/misc/vds/Makefile
                  tools/test/h5stat/Makefile
                  tools/test/h5stat/testh5stat.sh
+                 tools/src/h5perf/Makefile
                  tools/test/perform/Makefile
                  examples/Makefile
                  examples/run-c-ex.sh

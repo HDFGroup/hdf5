@@ -623,7 +623,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
             HDprintf("Can't read data\n");                                                                   \
             goto error;                                                                                      \
         }                                                                                                    \
-        if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str)) {            \
+        if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str) != 0) {       \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
             HDprintf("incorrect read data\n");                                                               \
