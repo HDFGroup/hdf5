@@ -1394,10 +1394,10 @@ test_conv_buffer(hid_t fid)
                 cf->a[j][k][l] = 10 * (j + 1) + l + k;
 
     for (j = 0; j < DIM2; j++)
-        cf->b[j] = 100.0f * (float)(j + 1) + 0.01f * (float)j;
+        cf->b[j] = 100.0F * (float)(j + 1) + 0.01F * (float)j;
 
     for (j = 0; j < DIM3; j++)
-        cf->c[j] = 100.0f * (float)(j + 1) + 0.02f * (float)j;
+        cf->c[j] = 100.0F * (float)(j + 1) + 0.02F * (float)j;
 
     /* Create data space */
     if ((space = H5Screate(H5S_SCALAR)) < 0)
@@ -3322,8 +3322,8 @@ test_nbit_float(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    float  orig_data[2][5] = {{188384.0f, 19.103516f, -1.0831790e9f, -84.242188f, 5.2045898f},
-                             {-49140.0f, 2350.25f, -3.2110596e-1f, 6.4998865e-5f, -0.0f}};
+    float  orig_data[2][5] = {{188384.0F, 19.103516F, -1.0831790e9F, -84.242188F, 5.2045898F},
+                             {-49140.0F, 2350.25F, -3.2110596e-1F, 6.4998865e-5F, -0.0F}};
     float  new_data[2][5];
     size_t precision, offset;
     size_t i, j;
@@ -11640,7 +11640,7 @@ test_unfiltered_edge_chunks(hid_t fapl)
         TEST_ERROR
 
     /* Add "count" filter */
-    if (H5Pset_filter(dcpl, H5Z_FILTER_COUNT, 0u, (size_t)0, NULL) < 0)
+    if (H5Pset_filter(dcpl, H5Z_FILTER_COUNT, 0U, (size_t)0, NULL) < 0)
         TEST_ERROR
 
     /* Disable filters on partial chunks */

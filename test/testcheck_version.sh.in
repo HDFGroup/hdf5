@@ -15,7 +15,7 @@
 # Tests for the H5check_version function.
 #
 # Programmer: Albert Cheng
-#	      Sep 28, 2009
+#          Sep 28, 2009
 
 srcdir=@srcdir@
 
@@ -24,7 +24,7 @@ srcdir=@srcdir@
 Shared_Lib=@enable_shared@
 Static_Lib=@enable_static@
 Static_exec=@STATIC_EXEC@
-h5haveexitcode=yes	# default is yes
+h5haveexitcode=yes    # default is yes
 
 CMP='cmp -s'
 DIFF='diff -c'
