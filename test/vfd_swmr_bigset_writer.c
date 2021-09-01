@@ -38,9 +38,12 @@
  * (or the width and height) of a chunk, and writes a test pattern to
  * the dataset on chunk boundaries.
  *
+ * For 3D dataset, the extension is always along the first dimension.
+ * It does not support VDS yet.
+ *
  * The reader should be started with the same user-selectable parameters
  * as the writer: iterations, number of datasets, chunk width and
- * height, dimensions.
+ * height and depth, dimensions.
  *
  * The reader opens the same HDF5 file, reads and re-reads it until all
  * `n` datasets appear, and then reads and re-reads the datasets until
@@ -72,7 +75,6 @@
 
 #include "H5Cpkg.h"
 #include "H5Fpkg.h"
-// #include "H5Iprivate.h"
 #include "H5HGprivate.h"
 #include "H5VLprivate.h"
 
@@ -84,12 +86,15 @@
 #define MAX_READ_LEN_IN_SECONDS 2
 #define TICK_LEN                4
 #define MAX_LAG                 7
+#define FSP_SIZE                4096
+#define PAGE_BUF_SIZE           4096
 #define ROWS                    256
 #define COLS                    512
-#define DEPTHS                  1
+#define DEPTH                   1
 #define RANK2                   2
 #define RANK3                   3
 #define NUM_ATTEMPTS            100
+#define SKIP_CHUNK              0
 
 /* Calculate the time passed in seconds.
  * X is the beginning time; Y is the ending time.
@@ -103,7 +108,7 @@ typedef struct _base {
 } base_t;
 
 typedef struct _mat {
-    unsigned rows, cols;
+    unsigned depth, rows, cols;
     uint32_t elt[1];
 } mat_t;
 
@@ -132,20 +137,31 @@ typedef struct {
     struct {
         quadrant_t ul, ur, bl, br, src;
     } quadrants;
-    unsigned int cols, rows;
+    unsigned int depth, cols, rows;
     unsigned int asteps;
     unsigned int nsteps;
+    unsigned int part_chunk;
+    unsigned int skip_chunk;
+    unsigned int over_extend;
     bool         expand_2d;
     bool         test_3d;
     enum { vds_off, vds_single, vds_multi } vds;
     bool            use_vfd_swmr;
     bool            use_named_pipe;
     bool            do_perf;
-    bool            cross_chunks;
+    bool            cross_chunk_read;
     bool            writer;
     bool            fixed_array;
+    bool            flush_raw_data;
     hsize_t         chunk_dims[RANK2];
     hsize_t         one_dee_max_dims[RANK2];
+    hsize_t         fsp_size;
+    size_t          page_buf_size;
+    uint32_t        tick_len;
+    uint32_t        max_lag;
+    unsigned        mdc_init_size;
+    size_t          chunk_cache_size;
+    unsigned int    deflate_level;
     struct timespec ival;
 } state_t;
 
@@ -182,11 +198,15 @@ state_initializer(void)
                      .filetype         = H5T_NATIVE_UINT32,
                      .one_by_one_sid   = H5I_INVALID_HID,
                      .quadrant_dcpl    = H5I_INVALID_HID,
+                     .depth            = DEPTH,
                      .rows             = ROWS,
                      .cols             = COLS,
                      .ndatasets        = 5,
                      .asteps           = 10,
                      .nsteps           = 100,
+                     .part_chunk       = 0,
+                     .skip_chunk       = SKIP_CHUNK,
+                     .over_extend      = 1,
                      .filename         = {"", "", "", ""},
                      .expand_2d        = false,
                      .test_3d          = false,
@@ -194,11 +214,19 @@ state_initializer(void)
                      .use_vfd_swmr     = true,
                      .use_named_pipe   = true,
                      .do_perf          = false,
-                     .cross_chunks     = false,
+                     .cross_chunk_read = false,
                      .writer           = true,
                      .fixed_array      = false,
                      .one_dee_max_dims = {ROWS, H5S_UNLIMITED},
                      .chunk_dims       = {ROWS, COLS},
+                     .fsp_size         = FSP_SIZE,
+                     .page_buf_size    = PAGE_BUF_SIZE,
+                     .tick_len         = TICK_LEN,
+                     .max_lag          = MAX_LAG,
+                     .flush_raw_data   = false,
+                     .mdc_init_size    = 0,
+                     .chunk_cache_size = 0,
+                     .deflate_level    = 0,
                      .ival             = (struct timespec){.tv_sec = MAX_READ_LEN_IN_SECONDS, .tv_nsec = 0}};
 }
 
@@ -208,79 +236,48 @@ static const hid_t badhid = H5I_INVALID_HID;
 
 static hsize_t two_dee_max_dims[RANK2], three_dee_max_dims[RANK3];
 
-static uint32_t
-matget(const mat_t *mat, unsigned i, unsigned j)
-{
-    return mat->elt[i * mat->cols + j];
-}
-
-static bool
-matset(mat_t *mat, unsigned i, unsigned j, uint32_t v)
-{
-    if (i >= mat->rows || j >= mat->cols) {
-        fprintf(stderr, "index out of boundary\n");
-        TEST_ERROR;
-    }
-
-    mat->elt[i * mat->cols + j] = v;
-
-    return true;
-
-error:
-    return false;
-}
-
-static mat_t *
-newmat(unsigned rows, unsigned cols)
-{
-    mat_t *mat;
-
-    mat = HDmalloc(sizeof(*mat) + (rows * cols - 1) * sizeof(mat->elt[0]));
-
-    if (mat == NULL) {
-        fprintf(stderr, "HDmalloc failed\n");
-        TEST_ERROR;
-    }
-
-    mat->rows = rows;
-    mat->cols = cols;
-
-    return mat;
-
-error:
-    return NULL;
-}
-
 static void
 usage(const char *progname)
 {
     fprintf(stderr,
-            "usage: %s [-C] [-F] [-M] [-P] [-S] [-V] [-W] [-a steps] [-b] [-c cols]\n"
-            "    [-d dims]\n"
-            "    [-l tick_num] [-n iterations] [-r rows] [-s datasets]\n"
-            "    [-t] [-u milliseconds]\n"
+            "usage: %s [-C] [-F] [-M] [-P] [-R] [-S] [-V] [-W] [-a steps] [-b] [-c cols]\n"
+            "    [-d dims] [-e depth] [-f tick_len] [-g max_lag] [-j skip_chunk] [-k part_chunk]\n"
+            "    [-l tick_num] [-n iterations] [-o page_buf_size] [-p fsp_size] [-r rows]\n"
+            "    [-s datasets] [-t] [-u over_extend] [-v chunk_cache_size] [-w deflate_level]\n"
             "\n"
-            "-C:                   cross-over chunks during chunk verification\n"
+            "-C:                   cross-over chunk read during chunk verification\n"
             "-F:                   fixed maximal dimension for the chunked datasets\n"
             "-M:	           use virtual datasets and many source\n"
             "                      files\n"
-            "-P:                   do the performance measurement"
+            "-N:                   do not use named pipes\n"
+            "-P:                   do the performance measurement\n"
+            "-R:                   flush raw data\n"
             "-S:	           do not use VFD SWMR\n"
             "-V:	           use virtual datasets and a single\n"
             "                      source file\n"
             "-a steps:	           `steps` between adding attributes\n"
             "-b:	           write data in big-endian byte order\n"
-            "-c cols:	           `cols` columns per chunk\n"
+            "-c cols:	           `cols` columns of the chunk\n"
             "-d 1|one|2|two|both:  select dataset expansion in one or\n"
             "                      both dimensions\n"
+            "-e depth:	           the first dimension of the 3D chunk\n"
+            "-f tick_len:          tick length\n"
+            "-g max_lag:           maximal lag\n"
+            "-j skip_chunk:        skip the Nth (skip_chunk) chunks during chunk writing\n"
+            "-k part_chunk:        the size for partial chunk write\n"
             "-l tick_num:          expected maximal number of ticks from\n"
             "                      the writer's finishing creation to the reader's finishing validation\n"
-            "-N:                   do not use named pipes\n"
+            "-m mdc_init_size:     the initial size of metadata cache in megabytes (must be between 1 and 32MB)\n"
             "-n iterations:        how many times to expand each dataset\n"
-            "-r rows:	           `rows` rows per chunk\n"
+            "-o page_buf_size:     page buffer size\n"
+            "-p fsp_size:          file space page size\n"
+            "-r rows:	           `rows` rows of the chunk\n"
             "-s datasets:          number of datasets to create\n"
             "-t:                   enable test for 3D datasets (dataset expansion is along one dimension)\n"
             "                      currently, 3D datasets isn't tested with VDS\n"
+            "-u over_extend:       extend the size of the dataset in multiple chunks or partial chunks\n"
+            "-v chunk_cache_size:  the size of raw data chunk cache in bytes\n"
+            "-w deflate_level:     the level (0 - 9) of gzip compression\n"
             "\n",
             progname);
     exit(EXIT_FAILURE);
@@ -321,6 +318,8 @@ state_init(state_t *s, int argc, char **argv)
     const hsize_t     dims  = 1;
     char *            tfile = NULL;
     char *            end;
+    size_t            rdcc_nslots, rdcc_nbytes;
+    double            rdcc_w0;
     quadrant_t *const ul = &s->quadrants.ul, *const ur = &s->quadrants.ur, *const bl = &s->quadrants.bl,
                       *const br = &s->quadrants.br, *const src = &s->quadrants.src;
     const char *personality;
@@ -336,11 +335,11 @@ state_init(state_t *s, int argc, char **argv)
 
     HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "CFMNPSVa:bc:d:l:n:qr:s:t")) != -1) {
+    while ((ch = getopt(argc, argv, "CFMNPRSVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:")) != -1) {
         switch (ch) {
             case 'C':
                 /* This flag indicates cross-over chunk read during data validation */
-                s->cross_chunks = true;
+                s->cross_chunk_read = true;
                 break;
             case 'F':
                 /* The flag to indicate whether the maximal dimension of the chunked datasets is fixed or
@@ -352,6 +351,9 @@ state_init(state_t *s, int argc, char **argv)
                 break;
             case 'P':
                 s->do_perf = true;
+                break;
+            case 'R':
+                s->flush_raw_data = true;
                 break;
             case 'S':
                 s->use_vfd_swmr = false;
@@ -376,10 +378,21 @@ state_init(state_t *s, int argc, char **argv)
                 break;
             case 'a':
             case 'c':
+            case 'e':
+            case 'f':
+            case 'g':
+            case 'j':
+            case 'k':
             case 'l':
+            case 'm':
             case 'n':
+            case 'o':
+            case 'p':
             case 'r':
             case 's':
+            case 'u':
+            case 'v':
+            case 'w':
                 errno = 0;
                 tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0') {
@@ -404,6 +417,16 @@ state_init(state_t *s, int argc, char **argv)
                     s->asteps = (unsigned)tmp;
                 else if (ch == 'c')
                     s->cols = (unsigned)tmp;
+                else if (ch == 'e')
+                    s->depth = (unsigned)tmp;
+                else if (ch == 'f')
+                    s->tick_len = (unsigned)tmp;
+                else if (ch == 'g')
+                    s->max_lag = (unsigned)tmp;
+                else if (ch == 'j')
+                    s->skip_chunk = (unsigned)tmp;
+                else if (ch == 'k')
+                    s->part_chunk = (unsigned)tmp;
                 else if (ch == 'l') {
                     /* Translate the tick number to time represented by the timespec struct */
                     float    time = (float)(((unsigned)tmp * TICK_LEN) / 10.0);
@@ -413,10 +436,22 @@ state_init(state_t *s, int argc, char **argv)
                     s->ival.tv_sec  = sec;
                     s->ival.tv_nsec = nsec;
                 }
+                else if (ch == 'm')
+                    s->mdc_init_size = (unsigned)tmp;
                 else if (ch == 'n')
                     s->nsteps = (unsigned)tmp;
+                else if (ch == 'o')
+                    s->page_buf_size = (unsigned)tmp;
+                else if (ch == 'p')
+                    s->fsp_size = (unsigned)tmp;
                 else if (ch == 'r')
                     s->rows = (unsigned)tmp;
+                else if (ch == 'u')
+                    s->over_extend = (unsigned)tmp;
+                else if (ch == 'v')
+                    s->chunk_cache_size = (unsigned)tmp;
+                else if (ch == 'w')
+                    s->deflate_level = (unsigned)tmp;
                 else
                     s->ndatasets = (unsigned)tmp;
                 break;
@@ -449,13 +484,13 @@ state_init(state_t *s, int argc, char **argv)
     }
 
     if (s->test_3d) {
-        if (s->expand_2d) {
-            fprintf(stderr, "3D dataset test doesn't support 2D expansion\n");
+        if (s->depth < 1) {
+            fprintf(stderr, "The depth of 3D dataset can't be less than 1\n");
             TEST_ERROR;
         }
 
-        if (s->cross_chunks) {
-            fprintf(stderr, "3D dataset test doesn't support cross-over chunks during verification\n");
+        if (s->expand_2d) {
+            fprintf(stderr, "3D dataset test doesn't support 2D expansion\n");
             TEST_ERROR;
         }
 
@@ -475,7 +510,7 @@ state_init(state_t *s, int argc, char **argv)
         two_dee_max_dims[1]    = s->cols * s->nsteps;
 
         if (s->test_3d) {
-            three_dee_max_dims[0] = s->nsteps;
+            three_dee_max_dims[0] = s->depth * s->nsteps;
             three_dee_max_dims[1] = s->rows;
             three_dee_max_dims[2] = s->cols;
         }
@@ -597,7 +632,7 @@ state_init(state_t *s, int argc, char **argv)
         TEST_ERROR;
     }
 
-    if ((s->dataset = HDmalloc(sizeof(*s->dataset) * s->ndatasets)) == NULL) {
+    if ((s->dataset = HDmalloc(sizeof(hid_t) * s->ndatasets)) == NULL) {
         fprintf(stderr, "HDmalloc failed\n");
         TEST_ERROR;
     }
@@ -613,18 +648,44 @@ state_init(state_t *s, int argc, char **argv)
     }
 
     if (s->test_3d) {
-        hsize_t dims3[RANK3] = {1, s->chunk_dims[0], s->chunk_dims[1]};
+        hsize_t dims3[RANK3] = {s->depth, s->chunk_dims[0], s->chunk_dims[1]};
+
+        if (s->part_chunk)
+            dims3[0] = s->part_chunk;
 
         if ((s->memspace = H5Screate_simple(RANK3, dims3, NULL)) < 0) {
             fprintf(stderr, "H5Screate_simple failed\n");
             TEST_ERROR;
         }
-    }
-    else {
-        if ((s->memspace = H5Screate_simple(RANK2, s->chunk_dims, NULL)) < 0) {
+    } else {
+        hsize_t dims2[RANK2];
+
+        if (s->expand_2d) {
+            dims2[0] = s->chunk_dims[0];
+            dims2[1] = s->chunk_dims[1];
+        } else {
+            dims2[0] = s->chunk_dims[0];
+
+            if (s->part_chunk)
+                dims2[1] = s->part_chunk;
+            else
+                dims2[1] = s->chunk_dims[1];
+        }
+
+        if ((s->memspace = H5Screate_simple(RANK2, dims2, NULL)) < 0) {
             fprintf(stderr, "H5Screate_simple failed\n");
             TEST_ERROR;
         }
+    }
+
+    if (s->skip_chunk == 1) {
+        fprintf(stderr, "can't skip every chunk\n");
+        TEST_ERROR;
+    }
+
+    if (s->over_extend == 0) {
+        fprintf(stderr, "Extension of the dataset can't be zero\n");
+        TEST_ERROR;
     }
 
     s->filename[0] = "vfd_swmr_bigset.h5";
@@ -655,8 +716,20 @@ state_init(state_t *s, int argc, char **argv)
         TEST_ERROR;
     }
 
-    if (H5Pset_chunk_cache(s->dapl, 0, 0, H5D_CHUNK_CACHE_W0_DEFAULT) < 0) {
-        fprintf(stderr, "H5Pset_chunk_cache failed\n");
+    if (s->chunk_cache_size) {
+        if (H5Pget_chunk_cache(s->dapl, &rdcc_nslots, &rdcc_nbytes, &rdcc_w0) < 0) {
+            fprintf(stderr, "H5Pget_chunk_cache failed\n");
+            TEST_ERROR;
+        }
+
+        if (H5Pset_chunk_cache(s->dapl, rdcc_nslots, s->chunk_cache_size, rdcc_w0) < 0) {
+            fprintf(stderr, "H5Pset_chunk_cache failed\n");
+            TEST_ERROR;
+        }
+    }
+
+    if (s->deflate_level > 9) {
+        fprintf(stderr, "deflation level must be between 0 and 9\n");
         TEST_ERROR;
     }
 
@@ -1010,21 +1083,23 @@ error:
 static int
 notify_reader(np_state_t *np, unsigned step)
 {
-    exchange_info_t last;
+    exchange_info_t *last = HDcalloc(1, sizeof(exchange_info_t));
 
     /* Get the time */
-    if (HDclock_gettime(CLOCK_MONOTONIC, &(last.time)) < 0) {
+    if (HDclock_gettime(CLOCK_MONOTONIC, &(last->time)) < 0) {
         fprintf(stderr, "HDclock_gettime failed\n");
         TEST_ERROR;
     }
 
-    last.step = step;
+    last->step = step;
 
     /* Notify the reader by sending the timestamp and the number of chunks written */
-    if (HDwrite(np->fd_writer_to_reader, &last, sizeof(last)) < 0) {
+    if (HDwrite(np->fd_writer_to_reader, last, sizeof(exchange_info_t)) < 0) {
         fprintf(stderr, "HDwrite failed");
         TEST_ERROR;
     }
+
+    HDfree(last);
 
     return 0;
 
@@ -1041,7 +1116,7 @@ create_extensible_dset(state_t *s, unsigned int which)
     char ul_dname[sizeof("/ul-dataset-9999999999")], ur_dname[sizeof("/ur-dataset-9999999999")],
         bl_dname[sizeof("/bl-dataset-9999999999")], br_dname[sizeof("/br-dataset-9999999999")];
     hid_t   dcpl = H5I_INVALID_HID, dset_id = H5I_INVALID_HID, filespace = H5I_INVALID_HID;
-    hsize_t dims3[3] = {1, s->chunk_dims[0], s->chunk_dims[1]};
+    hsize_t dims3[3] = {s->depth, s->chunk_dims[0], s->chunk_dims[1]};
 
     esnprintf(dname, sizeof(dname), "/dataset-%d", which);
 
@@ -1051,7 +1126,7 @@ create_extensible_dset(state_t *s, unsigned int which)
     }
 
     if (s->test_3d) {
-        /* The chunk is 1 x M x N and grows along the first dimension */
+        /* The chunk is L x M x N and grows along the first dimension */
         if (H5Pset_chunk(dcpl, RANK3, dims3) < 0) {
             fprintf(stderr, "H5Pset_chunk for 3D dataset failed\n");
             TEST_ERROR;
@@ -1062,6 +1137,18 @@ create_extensible_dset(state_t *s, unsigned int which)
             fprintf(stderr, "H5Pset_chunk for 2D dataset failed\n");
             TEST_ERROR;
         }
+    }
+
+    /* Never write fill value when new chunks are allocated */
+    if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) {
+        fprintf(stderr, "H5Pset_fill_time failed\n");
+        TEST_ERROR;
+    }
+
+    /* GZIP compression */
+    if (s->deflate_level && H5Pset_deflate(dcpl, s->deflate_level) < 0) {
+        fprintf(stderr, "H5Pset_deflate failed\n");
+        TEST_ERROR;
     }
 
     if (s->vds != vds_off) {
@@ -1122,8 +1209,7 @@ create_extensible_dset(state_t *s, unsigned int which)
             fprintf(stderr, "H5Screate_simple 3D dataspace failed\n");
             TEST_ERROR;
         }
-    }
-    else {
+    } else {
         if ((filespace = H5Screate_simple(RANK2, s->chunk_dims,
                                           s->expand_2d ? two_dee_max_dims : s->one_dee_max_dims)) < 0) {
             fprintf(stderr, "H5Screate_simple 2D dataspace failed\n");
@@ -1371,13 +1457,80 @@ error:
     return false;
 }
 
+static uint32_t
+matget(const mat_t *mat, unsigned k, unsigned i, unsigned j)
+{
+    return mat->elt[k * mat->rows * mat->cols + i * mat->cols + j];
+}
+
+static bool
+matset(mat_t *mat, unsigned k, unsigned i, unsigned j, uint32_t v)
+{
+    if (k >= mat->depth || i >= mat->rows || j >= mat->cols) {
+        fprintf(stderr, "index out of boundary\n");
+        TEST_ERROR;
+    }
+
+    mat->elt[k * mat->rows * mat->cols + i * mat->cols + j] = v;
+
+    return true;
+
+error:
+    return false;
+}
+
+static mat_t *
+newmat(state_t s)
+{
+    mat_t *mat;
+
+    /*
+     * If partial chunk is enabled, the chunk size along the growing dimension
+     * is replaced with the partial size
+     */
+    if (s.test_3d) {
+        if (s.part_chunk) {
+            mat = HDmalloc(sizeof(*mat) + (s.part_chunk * s.rows * s.cols - 1) * sizeof(mat->elt[0]));
+            mat->depth = s.part_chunk;
+        } else {
+            mat = HDmalloc(sizeof(*mat) + (s.depth * s.rows * s.cols - 1) * sizeof(mat->elt[0]));
+            mat->depth = s.depth;
+        }
+
+        mat->rows = s.rows;
+        mat->cols = s.cols;
+    } else {
+        if (s.part_chunk && !s.expand_2d) {
+            mat = HDmalloc(sizeof(*mat) + (s.rows * s.part_chunk - 1) * sizeof(mat->elt[0]));
+            mat->depth = 1;
+            mat->rows = s.rows;
+            mat->cols = s.part_chunk;
+        } else {
+            mat = HDmalloc(sizeof(*mat) + (s.rows * s.cols - 1) * sizeof(mat->elt[0]));
+            mat->depth = 1;
+            mat->rows = s.rows;
+            mat->cols = s.cols;
+        }
+    }
+
+    if (mat == NULL) {
+        fprintf(stderr, "HDmalloc failed\n");
+        TEST_ERROR;
+    }
+
+    return mat;
+
+error:
+    return NULL;
+}
+
 /* Write or verify the dataset test pattern in the matrix `mat`.
  * `mat` is a "subview" of the `which`th dataset with origin
  * `(base.row, base.col)`.
  *
  * If `do_set` is true, write the pattern; otherwise, verify.
  *
- * The basic test pattern consists of increasing
+ * For 2D datasets, the basic test pattern consists of increasing
  * integers written in nested corners of the dataset
  * starting at element (0, 0):
  *
@@ -1396,37 +1549,42 @@ error:
  * 15 14 13 12
  *
  * In an actual pattern, the dataset number, `which`, is added to each integer.
+ *
+ * For 3D datasets, the increment of chunks is along the first dimension.
  */
 static bool
 set_or_verify_matrix(mat_t *mat, unsigned int which, base_t base, bool do_set)
 {
-    unsigned row, col;
+    unsigned depth, row, col;
     bool     ret = true;
 
-    for (row = 0; row < mat->rows; row++) {
-        for (col = 0; col < mat->cols; col++) {
-            uint32_t v;
-            hsize_t  i = base.row + row, j = base.col + col, u;
+    /* For 2D datasets, `depth` is one */
+    for (depth = 0; depth < mat->depth; depth++) {
+        for (row = 0; row < mat->rows; row++) {
+            for (col = 0; col < mat->cols; col++) {
+                uint32_t v;
+                hsize_t  k = base.depth + depth, i = base.row + row, j = base.col + col, u;
 
-            if (j <= i)
-                u = (i + 1) * (i + 1) - 1 - j;
-            else
-                u = j * j + i;
+                if (j <= i)
+                    u = k * 10 + (i + 1) * (i + 1) - 1 - j;
+                else
+                    u = k * 10 + j * j + i;
 
-            v = (uint32_t)(u + which);
-            if (do_set) {
-                if (!matset(mat, row, col, v)) {
-                    fprintf(stderr, "data initialization failed\n");
+                v = (uint32_t)(u + which);
+
+                if (do_set) {
+                    if (!matset(mat, depth, row, col, v)) {
+                        fprintf(stderr, "data initialization failed\n");
+                        ret = false;
+                        break;
+                    }
+                } else if (matget(mat, depth, row, col) != v) {
+                    /* If the data doesn't match, simply return false and
+                     * let the caller repeat this step
+                     */
                     ret = false;
                     break;
                 }
-            }
-            else if (matget(mat, row, col) != v) {
-                /* If the data doesn't match, simply return false and
-                 * let the caller repeat this step
-                 */
-                ret = false;
-                break;
             }
         }
     }
@@ -1446,12 +1604,35 @@ verify_matrix(mat_t *mat, unsigned int which, base_t base)
     return set_or_verify_matrix(mat, which, base, false);
 }
 
+static unsigned int
+calc_total_steps(state_t s) {
+    unsigned int total_steps = 0;
+
+    /* Calculate the number of steps depending on if partial chunk is enabled.
+     * e.g. the original number of steps is 10 and the size of the chunk along
+     * the growing dimension is 6.  When the size of the partial chunk along the
+     * growing dimension is 5, the number of steps become 12.
+     */
+    if (s.test_3d) {
+        if (s.part_chunk)
+            total_steps = s.nsteps * s.depth / s.part_chunk;
+        else
+            total_steps = s.nsteps;
+    } else if (s.expand_2d) {
+        total_steps = s.nsteps;
+    } else {
+        if (s.part_chunk)
+            total_steps = s.nsteps * s.cols / s.part_chunk;
+        else
+            total_steps = s.nsteps;
+    }
+
+    return total_steps;
+}
+
 static bool
 verify_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, base_t base)
 {
-    hsize_t offset2[RANK2] = {base.row, base.col};
-    hsize_t offset3[RANK3] = {base.depth, base.row, base.col};
-    hsize_t count3[RANK3]  = {1, s->chunk_dims[0], s->chunk_dims[1]};
     herr_t  status;
     hid_t   dset_id;
 
@@ -1460,22 +1641,36 @@ verify_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, base_t bas
         TEST_ERROR;
     }
 
-    if (s->test_3d)
-        dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "\n", base.row, base.col,
-             base.depth);
-    else
-        dbgf(1, "verifying chunk %" PRIuHSIZE ", %" PRIuHSIZE "\n", base.row, base.col);
-
     dset_id = s->dataset[which];
 
     if (s->test_3d) {
+        hsize_t offset3[RANK3] = {base.depth, base.row, base.col};
+        hsize_t count3[RANK3]  = {s->depth, s->chunk_dims[0], s->chunk_dims[1]};
+
+        if (s->part_chunk)
+            count3[0] = s->part_chunk;
+
         if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset3, NULL, count3, NULL) < 0) {
             fprintf(stderr, "H5Sselect_hyperslab failed\n");
             TEST_ERROR;
         }
-    }
-    else {
-        if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset2, NULL, s->chunk_dims, NULL) < 0) {
+    } else {
+        hsize_t offset2[RANK2] = {base.row, base.col};
+        hsize_t count2[RANK2];
+
+        if (s->expand_2d) {
+            count2[0] = s->chunk_dims[0];
+            count2[1] = s->chunk_dims[1];
+        } else {
+            count2[0] = s->chunk_dims[0];
+
+            if (s->part_chunk)
+                count2[1] = s->part_chunk;
+            else
+                count2[1] = s->chunk_dims[1];
+        }
+
+        if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset2, NULL, count2, NULL) < 0) {
             fprintf(stderr, "H5Sselect_hyperslab failed\n");
             TEST_ERROR;
         }
@@ -1484,8 +1679,7 @@ verify_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, base_t bas
     /* A failure to read the data may indicate the data isn't ready yet.  Instead of displaying the error
      * stack, simply return false and let the caller repeat this step.
      */
-    H5E_BEGIN_TRY
-    {
+    H5E_BEGIN_TRY {
         status = H5Dread(dset_id, H5T_NATIVE_UINT32, s->memspace, filespace, H5P_DEFAULT, mat->elt);
     }
     H5E_END_TRY;
@@ -1535,9 +1729,6 @@ error:
 static bool
 init_and_write_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, base_t base)
 {
-    hsize_t offset2[RANK2] = {base.row, base.col};
-    hsize_t offset3[RANK3] = {base.depth, base.row, base.col};
-    hsize_t count3[RANK3]  = {1, s->chunk_dims[0], s->chunk_dims[1]};
     hid_t   dset_id;
 
     dset_id = s->dataset[which];
@@ -1548,14 +1739,37 @@ init_and_write_chunk(state_t *s, hid_t filespace, mat_t *mat, unsigned which, ba
     }
 
     if (s->test_3d) {
-        /* The chunk dimensions are 1 x M x N.  It grows along the first dimension */
+        hsize_t offset3[RANK3] = {base.depth, base.row, base.col};
+        hsize_t count3[RANK3]  = {s->depth, s->chunk_dims[0], s->chunk_dims[1]};
+
+        /* Handling partial chunk */
+        if (s->part_chunk)
+            count3[0] = s->part_chunk;
+
+        /* The chunk dimensions are L x M x N.  It grows along the first dimension */
         if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset3, NULL, count3, NULL) < 0) {
             fprintf(stderr, "H5Sselect_hyperslab for 2D dataset failed\n");
             TEST_ERROR;
         }
     }
     else {
-        if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset2, NULL, s->chunk_dims, NULL) < 0) {
+        hsize_t offset2[RANK2] = {base.row, base.col};
+        hsize_t count2[RANK2];
+
+        if (s->expand_2d) {
+            count2[0] = s->chunk_dims[0];
+            count2[1] = s->chunk_dims[1];
+        } else {
+            count2[0] = s->chunk_dims[0];
+
+            /* Handling partial chunk */
+            if (s->part_chunk)
+                count2[1] = s->part_chunk;
+            else
+                count2[1] = s->chunk_dims[1];
+        }
+
+        if (H5Sselect_hyperslab(filespace, H5S_SELECT_SET, offset2, NULL, count2, NULL) < 0) {
             fprintf(stderr, "H5Sselect_hyperslab for 2D dataset failed\n");
             TEST_ERROR;
         }
@@ -1631,7 +1845,8 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
 
     dset_id = s->dataset[which];
 
-    /* Attempt to check the availablity of the chunks for a number time before reporting it as a failure */
+    /* Attempt to check the availablity of the chunks for a number times
+     * (NUM_ATTEMPTS) before reporting it as a failure */
     for (i = 0; i < NUM_ATTEMPTS; i++) {
         if (H5Drefresh(dset_id) < 0) {
             fprintf(stderr, "H5Drefresh failed\n");
@@ -1649,15 +1864,22 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
                 TEST_ERROR;
             }
 
-            nchunks = (unsigned)size3[0];
-        }
-        else {
+            /* Handling partial chunks */
+            if (s->part_chunk)
+                nchunks = (unsigned)size3[0] / s->part_chunk;
+            else
+                nchunks = (unsigned)size3[0] / s->depth;
+        } else {
             if (H5Sget_simple_extent_dims(filespace, size2, NULL) < 0) {
                 fprintf(stderr, "H5Sget_simple_extent_dims failed\n");
                 TEST_ERROR;
             }
 
-            nchunks = (unsigned)(size2[1] / s->chunk_dims[1]);
+            /* Handling partial chunks */
+            if (s->part_chunk)
+                nchunks = (unsigned)(size2[1] / s->part_chunk);
+            else
+                nchunks = (unsigned)(size2[1] / s->chunk_dims[1]);
         }
 
         /* Make sure the chunks show up on the reader side.  Otherwise sleep a while and try again */
@@ -1675,10 +1897,13 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
     for (step = finished_step; step < last_step; step++) {
         dbgf(1, "%s: which %u step %u\n", __func__, which, step);
 
+        if (s->skip_chunk && step % s->skip_chunk == 0)
+            continue;
+
         /* Read data that randomly crosses over chunks. But it should not happen to
          * the last chunk being written
          */
-        if (s->cross_chunks) {
+        if (s->cross_chunk_read) {
             if (step == last_step - 1)
                 ofs = 0;
             else
@@ -1688,48 +1913,46 @@ verify_extensible_dset(state_t *s, unsigned int which, mat_t *mat, unsigned fini
             ofs = 0;
 
         if (s->test_3d) {
-            size3[0]   = 1 + step;
-            size3[1]   = s->chunk_dims[0];
-            size3[2]   = s->chunk_dims[1];
-            last.depth = step;
+            if (s->part_chunk) {
+                last.depth = s->part_chunk * step + ofs;
+            } else {
+                last.depth = s->depth * step + ofs;
+            }
+
             last.row   = 0;
             last.col   = 0;
-        }
-        else {
+        } else {
+            last.depth = 0;
+
             if (s->expand_2d) {
-                size2[0] = s->chunk_dims[0] * (1 + step);
-                size2[1] = s->chunk_dims[1] * (1 + step);
                 last.row = s->chunk_dims[0] * step + ofs;
                 last.col = s->chunk_dims[1] * step + ofs;
-            }
-            else {
-                size2[0] = s->chunk_dims[0];
-                size2[1] = s->chunk_dims[1] * (1 + step);
+            } else {
                 last.row = 0;
-                last.col = s->chunk_dims[1] * step + ofs;
+
+                if (s->part_chunk) {
+                    last.col = s->part_chunk * step + ofs;
+                } else {
+                    last.col = s->chunk_dims[1] * step + ofs;
+                }
             }
         }
 
-        if (s->test_3d) {
-            dbgf(1, "new size3 %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE "\n", size3[0], size3[1],
-                 size3[2]);
+        if (s->test_3d)
             dbgf(1, "last row %" PRIuHSIZE " col %" PRIuHSIZE " depth %" PRIuHSIZE "\n", last.row, last.col,
                  last.depth);
-        }
-        else {
-            dbgf(1, "new size2 %" PRIuHSIZE ", %" PRIuHSIZE "\n", size2[0], size2[1]);
+        else
             dbgf(1, "last row %" PRIuHSIZE " col %" PRIuHSIZE "\n", last.row, last.col);
-        }
 
         if (s->test_3d || !s->expand_2d) {
             if (!repeat_verify_chunk(s, filespace, mat, which, last)) {
                 fprintf(stderr, "chunk verification failed\n");
                 TEST_ERROR;
             }
-        }
-        else {
+        } else {
             /* Down the right side, intersecting the bottom row. */
             base.col = last.col;
+            base.depth = 0;
             for (base.row = 0; base.row <= last.row; base.row += s->chunk_dims[0]) {
                 if (!repeat_verify_chunk(s, filespace, mat, which, base)) {
                     fprintf(stderr, "chunk verification failed\n");
@@ -1775,9 +1998,12 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
     unsigned        finished_step = 0;
     unsigned        which;
     unsigned        counter     = 0;
+    unsigned        total_steps = 0;
     double          passed_time = 0.0, total_time = 0.0, min_time = 1000000.0, max_time = 0.0;
     exchange_info_t last;
     struct timespec end_time;
+
+    total_steps = calc_total_steps(s);
 
     do {
         /* Receive the notice of the writer finishing creation,
@@ -1829,7 +2055,7 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
             if (passed_time < min_time)
                 min_time = passed_time;
         }
-    } while (finished_step < s.nsteps);
+    } while (finished_step < total_steps);
 
     /* Print out the performance information */
     if (s.use_named_pipe && s.do_perf && counter)
@@ -1898,33 +2124,50 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
 
     dset_id = s->dataset[which];
 
-    if (s->asteps != 0 && step % s->asteps == 0) {
+    if (s->asteps != 0 && step  % s->asteps == 0) {
         if (!add_dset_attribute(s, dset_id, s->one_by_one_sid, which, step)) {
             fprintf(stderr, "add_dset_attribute failed\n");
             TEST_ERROR;
         }
     }
 
+    /* Handling both over extension of the datasets and partial chunks.  Datasets
+     * can be extended multiple chunks instead of one chunk at a time.
+     * e.g. if the over extension is set to 10 chunks, the datasets are extended
+     * 10 chunks along the growing dimension after every 10 chunks are written.
+     */
     if (s->test_3d) {
-        size3[0]   = 1 + step;
+        if (s->part_chunk) {
+            size3[0]   = s->over_extend * s->part_chunk * (1 + step / s->over_extend);
+            last.depth = s->part_chunk * step;
+        } else {
+            size3[0]   = s->over_extend * s->depth * (1 + step / s->over_extend);
+            last.depth = s->depth * step;
+        }
+
         size3[1]   = s->chunk_dims[0];
         size3[2]   = s->chunk_dims[1];
-        last.depth = step;
+
         last.row   = 0;
         last.col   = 0;
-    }
-    else {
+    } else {
         if (s->expand_2d) {
-            size2[0] = s->chunk_dims[0] * (1 + step);
-            size2[1] = s->chunk_dims[1] * (1 + step);
+            size2[0] = s->over_extend * s->chunk_dims[0] * (1 + step / s->over_extend);
+            size2[1] = s->over_extend * s->chunk_dims[1] * (1 + step / s->over_extend);
+
             last.row = s->chunk_dims[0] * step;
             last.col = s->chunk_dims[1] * step;
-        }
-        else {
+        } else {
             size2[0] = s->chunk_dims[0];
-            size2[1] = s->chunk_dims[1] * (1 + step);
             last.row = 0;
-            last.col = s->chunk_dims[1] * step;
+
+            if (s->part_chunk) {
+                size2[1] = s->over_extend * s->part_chunk * (1 + step / s->over_extend);
+                last.col = s->part_chunk * step;
+            } else {
+                size2[1] = s->over_extend * s->chunk_dims[1] * (1 + step / s->over_extend);
+                last.col = s->chunk_dims[1] * step;
+            }
         }
         last.depth = 0;
     }
@@ -1957,18 +2200,22 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
             fprintf(stderr, "H5Dset_extent failed\n");
             TEST_ERROR;
         }
-    }
-    else {
-        if (s->test_3d) {
-            if (H5Dset_extent(dset_id, size3) < 0) {
-                fprintf(stderr, "H5Dset_extent for 3D dataset failed\n");
-                TEST_ERROR;
-            }
-        }
-        else {
-            if (H5Dset_extent(dset_id, size2) < 0) {
-                fprintf(stderr, "H5Dset_extent for 2D dataset failed\n");
-                TEST_ERROR;
+    } else {
+        /* Handling over extension.  Making sure the dataset size doesn't exceed the fixed maximal size */
+        if (step % s->over_extend == 0) {
+            if (s->test_3d) {
+                if (size3[0] <= three_dee_max_dims[0] && H5Dset_extent(dset_id, size3) < 0) {
+                    fprintf(stderr, "H5Dset_extent for 3D dataset failed\n");
+                    TEST_ERROR;
+                }
+            } else {
+                if ((s->expand_2d && size2[0] <= two_dee_max_dims[0] && size2[0] <= two_dee_max_dims[0])
+                    || (!s->expand_2d && size2[1] <= two_dee_max_dims[1])) {
+                    if (H5Dset_extent(dset_id, size2) < 0) {
+                        fprintf(stderr, "H5Dset_extent for 2D dataset failed\n");
+                        TEST_ERROR;
+                    }
+                }
             }
         }
     }
@@ -1983,8 +2230,7 @@ write_extensible_dset(state_t *s, unsigned int which, unsigned int step, mat_t *
             fprintf(stderr, "init_and_write_chunk failed\n");
             TEST_ERROR;
         }
-    }
-    else if (s->expand_2d) {
+    } else if (s->expand_2d) {
         base.col   = last.col;
         base.depth = 0;
         for (base.row = 0; base.row <= last.row; base.row += s->chunk_dims[0]) {
@@ -2025,7 +2271,7 @@ error:
 static bool
 write_dsets(state_t s, np_state_t *np, mat_t *mat)
 {
-    unsigned           last_step, step, which;
+    unsigned           last_step, step, total_steps, which;
     unsigned long long old_tick_num;
     H5F_t *            f = NULL;
     struct timespec    start_time, end_time;
@@ -2046,16 +2292,22 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
     old_tick_num = f->shared->tick_num;
 
     /* Write as many as chunks within the same tick number before notifying
-     * the reader to verify them.
+     * the reader to verify them.  Take account of partial chunk write
+     * here by multiplying the dividing factor for partial chunk. Treat each
+     * partial chunk as if it's a chunk.
      */
-    for (step = 0; step < s.nsteps; step++) {
+    total_steps = calc_total_steps(s);
+
+    for (step = 0; step < total_steps; step++) {
         /* Write as many as chunks before the tick number changes */
         if (f->shared->tick_num == old_tick_num) {
-            for (which = 0; which < s.ndatasets; which++) {
-                dbgf(2, "step %d which %d\n", step, which);
-                if (!write_extensible_dset(&s, which, step, mat)) {
-                    fprintf(stderr, "write_extensible_dset failed\n");
-                    TEST_ERROR;
+            if (!s.skip_chunk || (s.skip_chunk && step % s.skip_chunk != 0)) {
+                for (which = 0; which < s.ndatasets; which++) {
+                    dbgf(2, "step %d which %d\n", step, which);
+                    if (!write_extensible_dset(&s, which, step, mat)) {
+                        fprintf(stderr, "write_extensible_dset failed\n");
+                        TEST_ERROR;
+                    }
                 }
             }
         }
@@ -2063,7 +2315,7 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
         /* Notify the reader to start verification by
          * sending the timestamp and the number of chunks written
          */
-        if (f->shared->tick_num > old_tick_num || step == (s.nsteps - 1)) {
+        if (f->shared->tick_num > old_tick_num || step == (total_steps - 1)) {
             last_step = step + 1;
             if (s.use_named_pipe && notify_reader(np, last_step) < 0) {
                 fprintf(stderr, "notify_reader failed\n");
@@ -2106,18 +2358,21 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    if ((mat = newmat(s.rows, s.cols)) == NULL) {
+    if ((mat = newmat(s)) == NULL) {
         fprintf(stderr, "could not allocate matrix\n");
         TEST_ERROR;
     }
 
     /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
-    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0)
-        errx(EXIT_FAILURE, "H5Pcreate");
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s.fsp_size)) < 0) {
+        fprintf(stderr, "vfd_swmr_create_fcpl failed\n");
+        TEST_ERROR;
+    }
 
     for (i = 0; i < NELMTS(s.file); i++) {
         hid_t                 fapl;
         H5F_vfd_swmr_config_t config;
+        H5AC_cache_config_t   mdc_config;
 
         if (s.vds != vds_multi && i > 0) {
             s.file[i] = s.file[0];
@@ -2125,13 +2380,34 @@ main(int argc, char **argv)
         }
 
         /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-        init_vfd_swmr_config(&config, TICK_LEN, MAX_LAG, s.writer, FALSE, 128, "./bigset-shadow-%zu", i);
+        init_vfd_swmr_config(&config, s.tick_len, s.max_lag, s.writer, s.flush_raw_data, 128, "./bigset-shadow-%zu", i);
 
         /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */
-        fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, 4096, &config);
+        if ((fapl = vfd_swmr_create_fapl(true, s.use_vfd_swmr, true, s.page_buf_size, &config)) < 0) {
+            fprintf(stderr, "vfd_swmr_create_fapl failed");
+            TEST_ERROR;
+        }
 
-        if (fapl < 0)
-            errx(EXIT_FAILURE, "vfd_swmr_create_fapl");
+        /* Set the initial size for the metadata cache between 1 and 32 in megabytes.
+         * Zero means using the default value, which is no-op.
+         */
+        if (s.mdc_init_size) {
+            mdc_config.version = H5AC__CURR_CACHE_CONFIG_VERSION;
+
+            if (H5Pget_mdc_config(fapl, &mdc_config) < 0) {
+                fprintf(stderr, "H5Pget_mdc_config failed");
+                TEST_ERROR;
+            }
+
+            /* Convert the value to megabytes */
+            mdc_config.set_initial_size = TRUE;
+            mdc_config.initial_size     = s.mdc_init_size * 1024 * 1024;
+
+            if (H5Pset_mdc_config(fapl, &mdc_config) < 0) {
+                fprintf(stderr, "H5Pset_mdc_config failed");
+                TEST_ERROR;
+            }
+        }
 
         s.file[i] = s.writer ? H5Fcreate(s.filename[i], H5F_ACC_TRUNC, fcpl, fapl)
                              : H5Fopen(s.filename[i], H5F_ACC_RDONLY, fapl);
@@ -2200,8 +2476,7 @@ main(int argc, char **argv)
             fprintf(stderr, "write_dsets failed");
             TEST_ERROR;
         }
-    }
-    else {
+    } else {
         /* Wait for the writer's notice before starting the validation of dataset creation */
         np.verify = 1;
         if (s.use_named_pipe && reader_verify(np, np.verify) < 0) {
@@ -2258,11 +2533,6 @@ main(int argc, char **argv)
     }
 
     HDfree(mat);
-
-    if (s.dataset)
-        HDfree(s.dataset);
-    if (s.sources)
-        HDfree(s.sources);
 
     return EXIT_SUCCESS;
 
