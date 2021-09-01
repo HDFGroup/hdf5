@@ -103,7 +103,6 @@ be required when building with the Autotools.
 
 Some notes:
 
-- The mirror VFD tests require some rework, so enabling that feature will cause the build step to fail. This will be fixed in a future beta release.
 - The VFD SWMR tests can take some time to run.
 - The VFD SWMR acceptance tests will typically emit some output about "expected errors" that you can ignore. Real errors are clearly flagged.
 - If the tests do not pass on your system, please let the developers know via the email address given at the end of this document.
