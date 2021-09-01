@@ -1084,11 +1084,11 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -t" "-d 1 -t -F" "-d 1 -V
 
 	echo launch vfd_swmr_bigset_writer many small, options $options
 	catch_out_err_and_rc vfd_swmr_bigset_writer \
-	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -e 8 -r 16 -c 16 -q -l 6 &
+	    ../vfd_swmr_bigset_writer -n $BIGSET_n $options -s $BIGSET_many_s -e 8 -r 16 -c 16 -q -l 3 &
 	pid_writer=$!
 
 	catch_out_err_and_rc vfd_swmr_bigset_reader \
-	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_many_s -e 8 -r 16 -c 16 -q -l 6 &
+	    ../vfd_swmr_bigset_reader -n $BIGSET_n $options -s $BIGSET_many_s -e 8 -r 16 -c 16 -q -l 3 &
 	pid_reader=$!
 
 	# Wait for the reader to finish before signalling the
