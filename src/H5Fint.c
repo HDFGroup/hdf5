@@ -82,6 +82,7 @@ static herr_t H5F__build_name(const char *prefix, const char *file_name, char **
 static char * H5F__getenv_prefix_name(char **env_prefix /*in,out*/);
 static H5F_t *H5F__new(H5F_shared_t *shared, unsigned flags, hid_t fcpl_id, hid_t fapl_id, H5FD_t *lf);
 static herr_t H5F__check_if_using_file_locks(H5P_genplist_t *fapl, hbool_t *use_file_locking);
+static herr_t H5F__dest(H5F_t *f, hbool_t flush);
 static herr_t H5F__build_actual_name(const H5F_t *f, const H5P_genplist_t *fapl, const char *name,
                                      char ** /*out*/ actual_name);
 static herr_t H5F__flush_phase1(H5F_t *f);
@@ -1403,12 +1404,12 @@ done:
  * Return:      SUCCEED/FAIL
  *-------------------------------------------------------------------------
  */
-herr_t
+static herr_t
 H5F__dest(H5F_t *f, hbool_t flush)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(f);
@@ -2487,11 +2488,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_delete(const char *filename, hid_t fapl_id)
+H5F__delete(const char *filename, hid_t fapl_id)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_PACKAGE
 
     HDassert(filename);
 
@@ -2501,7 +2502,7 @@ H5F_delete(const char *filename, hid_t fapl_id)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_delete() */
+} /* end H5F__delete() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_try_close
