@@ -529,12 +529,17 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
         case H5VL_NATIVE_FILE_GET_FREE_SECTIONS: {
             H5F_sect_info_t *sect_info = HDva_arg(arguments, H5F_sect_info_t *);
             ssize_t *        ret       = HDva_arg(arguments, ssize_t *);
+            size_t           sect_count = 0;
             H5F_mem_t        type      = (H5F_mem_t)HDva_arg(arguments, int); /* enum work-around */
             size_t           nsects    = HDva_arg(arguments, size_t);
 
             /* Go get the free-space section information in the file */
-            if ((*ret = H5MF_get_free_sections(f, type, nsects, sect_info)) < 0)
+            if (H5MF_get_free_sections(f, type, nsects, sect_info, &sect_count) < 0) {
+                *ret = -1;
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to check free space for file")
+            }
+            else
+                *ret = sect_count;
             break;
         }
 
