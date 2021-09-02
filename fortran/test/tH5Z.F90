@@ -192,7 +192,8 @@ CONTAINS
           INTEGER(HSIZE_T), DIMENSION(2) :: chunk_dims = (/NN, MM/)
           INTEGER     ::   rank = 2                        ! Dataset rank
 
-          INTEGER, DIMENSION(N,M) :: dset_data, data_out ! Data buffers
+          INTEGER, DIMENSION(N,M) :: dset_data ! Data buffers
+          INTEGER, DIMENSION(:,:), ALLOCATABLE :: data_out ! Data buffers
           INTEGER     ::   error ! Error flag
           INTEGER     ::   num_errors = 0 ! Number of data errors
 
@@ -363,8 +364,9 @@ CONTAINS
           !
           ! Read the dataset.
           !
+          ALLOCATE(data_out(1:N,1:M))
           CALL h5dread_f (dset_id, H5T_NATIVE_INTEGER, data_out, data_dims, error)
-              CALL check("h5dread_f", error, total_error)
+          CALL check("h5dread_f", error, total_error)
 
           !
           !Compare the data.
@@ -385,6 +387,7 @@ CONTAINS
 100       IF (num_errors .GT. 0) THEN
             total_error=total_error + 1
           END IF
+          DEALLOCATE(data_out)
 
           !
           ! End access to the dataset and release resources used by it.

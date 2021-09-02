@@ -1380,6 +1380,7 @@ H5_DLL herr_t H5Lunpack_elink_val(const void *ext_linkval /*in*/, size_t link_si
 H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hid_t link_loc_id,
                                  const char *link_name, hid_t lcpl_id, hid_t lapl_id);
 
+/// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
@@ -1401,6 +1402,7 @@ H5_DLL herr_t H5Lcreate_external(const char *file_name, const char *obj_name, hi
 #define H5Lexists_async_wrap        H5_NO_EXPAND(H5Lexists_async)
 #define H5Literate_async_wrap       H5_NO_EXPAND(H5Literate_async)
 #endif /* H5L_MODULE */
+/// \endcond
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

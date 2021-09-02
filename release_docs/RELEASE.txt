@@ -755,6 +755,12 @@ New Features
 
     Fortran Library:
     ----------------
+
+    - H5Fget_name_f fixed to handle correctly trailing whitespaces and
+      newly allocated buffers.
+
+      (MSB - 2021/08/30, github-826,972)
+
     - Add wrappers for H5Pset/get_file_locking() API calls
 
         h5pget_file_locking_f()

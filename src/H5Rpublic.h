@@ -30,9 +30,11 @@
 #define H5R_OBJ_REF_BUF_SIZE      sizeof(haddr_t)
 #define H5R_DSET_REG_REF_BUF_SIZE (sizeof(haddr_t) + 4)
 
-/* Default reference buffer size.
- * Note! Be careful with the sizes of the references because they should really
- * depend on the run-time values in the file.
+/**
+ * Default reference buffer size.
+ *
+ * \internal Note! Be careful with the sizes of the references because they
+ *           should really depend on the run-time values in the file.
  */
 #define H5R_REF_BUF_SIZE (64)
 
@@ -560,6 +562,7 @@ H5_DLL ssize_t H5Rget_obj_name(H5R_ref_t *ref_ptr, hid_t rapl_id, char *name, si
  */
 H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t size);
 
+/// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
@@ -574,6 +577,7 @@ H5_DLL ssize_t H5Rget_attr_name(const H5R_ref_t *ref_ptr, char *name, size_t siz
 #define H5Ropen_region_async_wrap H5_NO_EXPAND(H5Ropen_region_async)
 #define H5Ropen_attr_async_wrap   H5_NO_EXPAND(H5Ropen_attr_async)
 #endif /* H5R_MODULE */
+/// \endcond
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
