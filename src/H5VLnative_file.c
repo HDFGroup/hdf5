@@ -498,10 +498,10 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
 
         /* H5Fget_file_image */
         case H5VL_NATIVE_FILE_GET_FILE_IMAGE: {
-            void *   buf_ptr = HDva_arg(arguments, void *);
-            ssize_t *ret     = HDva_arg(arguments, ssize_t *);
+            void *   buf_ptr   = HDva_arg(arguments, void *);
+            ssize_t *ret       = HDva_arg(arguments, ssize_t *);
             size_t   image_len = 0;
-            size_t   buf_len = HDva_arg(arguments, size_t);
+            size_t   buf_len   = HDva_arg(arguments, size_t);
 
             /* Do the actual work */
             if (H5F__get_file_image(f, buf_ptr, buf_len, &image_len) < 0) {
