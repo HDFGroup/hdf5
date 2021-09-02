@@ -52,7 +52,7 @@
 /* Public Typedefs */
 /*******************/
 
-/* types for attribute GET callback */
+/* Values for attribute 'get' operations */
 typedef enum H5VL_attr_get_t {
     H5VL_ATTR_GET_ACPL,         /* creation property list              */
     H5VL_ATTR_GET_INFO,         /* info                                */
@@ -62,7 +62,7 @@ typedef enum H5VL_attr_get_t {
     H5VL_ATTR_GET_TYPE          /* datatype                            */
 } H5VL_attr_get_t;
 
-/* types for attribute SPECFIC callback */
+/* Values for attribute 'specific' operation */
 typedef enum H5VL_attr_specific_t {
     H5VL_ATTR_DELETE, /* H5Adelete(_by_name/idx)             */
     H5VL_ATTR_EXISTS, /* H5Aexists(_by_name)                 */
@@ -73,7 +73,7 @@ typedef enum H5VL_attr_specific_t {
 /* Typedef for VOL connector attribute optional VOL operations */
 typedef int H5VL_attr_optional_t;
 
-/* types for dataset GET callback */
+/* Values for dataset 'get' operation */
 typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_DAPL,         /* access property list                */
     H5VL_DATASET_GET_DCPL,         /* creation property list              */
@@ -83,7 +83,7 @@ typedef enum H5VL_dataset_get_t {
     H5VL_DATASET_GET_TYPE          /* datatype                            */
 } H5VL_dataset_get_t;
 
-/* types for dataset SPECFIC callback */
+/* Values for dataset 'specific' operation */
 typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
     H5VL_DATASET_FLUSH,      /* H5Dflush                            */
@@ -95,20 +95,20 @@ typedef enum H5VL_dataset_specific_t {
 /* Typedef for VOL connector dataset optional VOL operations */
 typedef int H5VL_dataset_optional_t;
 
-/* types for datatype GET callback */
+/* Values for datatype 'get' operation */
 typedef enum H5VL_datatype_get_t {
     H5VL_DATATYPE_GET_BINARY, /* get serialized form of transient type    */
     H5VL_DATATYPE_GET_TCPL    /* datatype creation property list          */
 } H5VL_datatype_get_t;
 
-/* types for datatype SPECFIC callback */
+/* Values for datatype 'specific' operation */
 typedef enum H5VL_datatype_specific_t { H5VL_DATATYPE_FLUSH, H5VL_DATATYPE_REFRESH } H5VL_datatype_specific_t;
 
 /* Typedef and values for native VOL connector named datatype optional VOL operations */
 typedef int H5VL_datatype_optional_t;
 /* (No optional named datatype VOL operations currently) */
 
-/* types for file GET callback */
+/* Values for file 'get' operation */
 typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_CONT_INFO, /* file get container info              */
     H5VL_FILE_GET_FAPL,      /* file access property list            */
@@ -120,7 +120,7 @@ typedef enum H5VL_file_get_t {
     H5VL_FILE_GET_OBJ_IDS    /* object ids in file                   */
 } H5VL_file_get_t;
 
-/* types for file SPECIFIC callback */
+/* Values for file 'specific' operation */
 typedef enum H5VL_file_specific_t {
     H5VL_FILE_FLUSH,         /* Flush file                       */
     H5VL_FILE_REOPEN,        /* Reopen the file                  */
@@ -135,33 +135,36 @@ typedef enum H5VL_file_specific_t {
 /* Typedef for VOL connector file optional VOL operations */
 typedef int H5VL_file_optional_t;
 
-/* types for group GET callback */
+/* Values for group 'get' operation */
 typedef enum H5VL_group_get_t {
     H5VL_GROUP_GET_GCPL, /* group creation property list     */
     H5VL_GROUP_GET_INFO  /* group info                       */
 } H5VL_group_get_t;
 
-/* types for group SPECFIC callback */
-typedef enum H5VL_group_specific_t { H5VL_GROUP_FLUSH, H5VL_GROUP_REFRESH } H5VL_group_specific_t;
+/* Values for group 'specific' operation */
+typedef enum H5VL_group_specific_t {
+    H5VL_GROUP_FLUSH,   /* H5Gflush                         */
+    H5VL_GROUP_REFRESH  /* H5Grefresh                       */
+} H5VL_group_specific_t;
 
 /* Typedef for VOL connector group optional VOL operations */
 typedef int H5VL_group_optional_t;
 
-/* link create types for VOL */
+/* Link create types for VOL */
 typedef enum H5VL_link_create_type_t {
     H5VL_LINK_CREATE_HARD,
     H5VL_LINK_CREATE_SOFT,
     H5VL_LINK_CREATE_UD
 } H5VL_link_create_type_t;
 
-/* types for link GET callback */
+/* Values for link 'get' operation */
 typedef enum H5VL_link_get_t {
     H5VL_LINK_GET_INFO, /* link info                         */
     H5VL_LINK_GET_NAME, /* link name                         */
     H5VL_LINK_GET_VAL   /* link value                        */
 } H5VL_link_get_t;
 
-/* types for link SPECIFIC callback */
+/* Values for link 'specific' operation */
 typedef enum H5VL_link_specific_t {
     H5VL_LINK_DELETE, /* H5Ldelete(_by_idx)                */
     H5VL_LINK_EXISTS, /* link existence                    */
@@ -172,7 +175,7 @@ typedef enum H5VL_link_specific_t {
 typedef int H5VL_link_optional_t;
 /* (No optional link VOL operations currently) */
 
-/* types for object GET callback */
+/* Values for object 'get' operation */
 typedef enum H5VL_object_get_t {
     H5VL_OBJECT_GET_FILE, /* object file                       */
     H5VL_OBJECT_GET_NAME, /* object name                       */
@@ -180,7 +183,7 @@ typedef enum H5VL_object_get_t {
     H5VL_OBJECT_GET_INFO  /* H5Oget_info(_by_idx|name)         */
 } H5VL_object_get_t;
 
-/* types for object SPECIFIC callback */
+/* Values for object 'specific' operation */
 typedef enum H5VL_object_specific_t {
     H5VL_OBJECT_CHANGE_REF_COUNT, /* H5Oincr/decr_refcount             */
     H5VL_OBJECT_EXISTS,           /* H5Oexists_by_name                 */
@@ -206,7 +209,7 @@ typedef enum H5VL_request_status_t {
     H5VL_REQUEST_STATUS_CANCELED     /* Operation has not completed and was canceled          */
 } H5VL_request_status_t;
 
-/* types for async request SPECIFIC callback */
+/* Values for async request 'specific' operation */
 typedef enum H5VL_request_specific_t {
     H5VL_REQUEST_WAITANY,      /* Wait until any request completes */
     H5VL_REQUEST_WAITSOME,     /* Wait until at least one requesst completes */
@@ -218,7 +221,7 @@ typedef enum H5VL_request_specific_t {
 typedef int H5VL_request_optional_t;
 /* (No optional request VOL operations currently) */
 
-/* types for 'blob' SPECIFIC callback */
+/* Values for 'blob' 'specific' operation */
 typedef enum H5VL_blob_specific_t {
     H5VL_BLOB_DELETE,  /* Delete a blob (by ID) */
     H5VL_BLOB_GETSIZE, /* Get size of blob */
