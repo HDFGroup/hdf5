@@ -197,19 +197,25 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
             }
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_file parameters")
+
             break;
         }
 
         /* Object name */
         case H5VL_OBJECT_GET_NAME: {
             ssize_t *ret  = HDva_arg(arguments, ssize_t *);
+            size_t name_len = 0;
             char *   name = HDva_arg(arguments, char *);
             size_t   size = HDva_arg(arguments, size_t);
 
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
                 /* Retrieve object's name */
-                if ((*ret = H5G_get_name(&loc, name, size, NULL)) < 0)
+                if (H5G_get_name(&loc, name, size, &name_len, NULL) < 0) {
+                    *ret = -1;
                     HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve object name")
+                }
+                else
+                    *ret = name_len;
             } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_TOKEN) {
                 H5O_loc_t   obj_oloc; /* Object location */
@@ -225,11 +231,16 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                                 "can't deserialize object token into address")
 
                 /* Retrieve object's name */
-                if ((*ret = H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, name, size)) < 0)
+                if (H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, name, size, &name_len) < 0) {
+                    *ret = -1;
                     HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't determine object name")
+                }
+                else
+                    *ret = name_len;
             } /* end else-if */
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_name parameters")
+
             break;
         }
 
@@ -258,6 +269,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
             }
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_type parameters")
+
             break;
         }
 
@@ -307,6 +319,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
             } /* end else-if */
             else
                 HGOTO_ERROR(H5E_OHDR, H5E_UNSUPPORTED, FAIL, "unknown get info parameters")
+
             break;
         }
 
@@ -355,15 +368,21 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
         /* H5Oexists_by_name */
         case H5VL_OBJECT_EXISTS: {
             htri_t *ret = HDva_arg(arguments, htri_t *);
+            hbool_t exists = FALSE;
 
             if (loc_params->type == H5VL_OBJECT_BY_NAME) {
                 /* Check if the object exists */
-                if ((*ret = H5G_loc_exists(&loc, loc_params->loc_data.loc_by_name.name)) < 0)
+                if (H5G_loc_exists(&loc, loc_params->loc_data.loc_by_name.name, &exists) < 0) {
+                    *ret = FAIL;
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists",
                                 loc_params->loc_data.loc_by_name.name)
+                }
+                else
+                    *ret = exists;
             } /* end if */
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown object exists parameters")
+
             break;
         }
 
@@ -401,6 +420,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
             break;
         }
 
+        /* H5Ovisit/H5Ovisit_by_name */
         case H5VL_OBJECT_VISIT: {
             H5_index_t      idx_type = (H5_index_t)HDva_arg(arguments, int);      /* enum work-around */
             H5_iter_order_t order    = (H5_iter_order_t)HDva_arg(arguments, int); /* enum work-around */
@@ -422,6 +442,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
             } /* end else-if */
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown object visit params");
+
             break;
         }
 
@@ -482,19 +503,28 @@ H5VL__native_object_optional(void *obj, H5VL_object_optional_t optional_type, hi
             char *   comment = HDva_arg(arguments, char *);
             size_t   bufsize = HDva_arg(arguments, size_t);
             ssize_t *ret     = HDva_arg(arguments, ssize_t *);
+            size_t comment_len = 0;
 
             /* Retrieve the object's comment */
             if (loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Oget_comment */
-                if ((*ret = H5G_loc_get_comment(&loc, ".", comment /*out*/, bufsize)) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
+                if (H5G_loc_get_comment(&loc, ".", comment /*out*/, bufsize, &comment_len) < 0) {
+                    *ret = -1;
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
+                }
+                else
+                    *ret = comment_len;
             }                                                   /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Oget_comment_by_name */
-                if ((*ret = H5G_loc_get_comment(&loc, loc_params->loc_data.loc_by_name.name, comment /*out*/,
-                                                bufsize)) < 0)
-                    HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
+                if (H5G_loc_get_comment(&loc, loc_params->loc_data.loc_by_name.name, comment, bufsize, &comment_len) < 0) {
+                    *ret = -1;
+                    HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
+                }
+                else
+                    *ret = comment_len;
             } /* end else-if */
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown set_coment parameters")
+
             break;
         }
 
@@ -514,6 +544,7 @@ H5VL__native_object_optional(void *obj, H5VL_object_optional_t optional_type, hi
             } /* end else-if */
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown set_coment parameters")
+
             break;
         }
 
