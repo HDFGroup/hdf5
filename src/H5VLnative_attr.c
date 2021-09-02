@@ -290,7 +290,7 @@ H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t H5_ATTR_UNUSED 
             size_t                   buf_size   = HDva_arg(arguments, size_t);
             char *                   buf        = HDva_arg(arguments, char *);
             ssize_t *                ret_val    = HDva_arg(arguments, ssize_t *);
-            size_t                   name_len = 0;
+            size_t                   name_len   = 0;
             H5A_t *                  attr       = NULL;
 
             if (H5VL_OBJECT_BY_SELF == loc_params->type) {
