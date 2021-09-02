@@ -180,6 +180,7 @@ set (H5ES_SOURCES
     ${HDF5_SRC_DIR}/H5ESlist.c
 )
 set (H5ES_HDRS
+    ${HDF5_SRC_DIR}/H5ESdevelop.h
     ${HDF5_SRC_DIR}/H5ESpublic.h
 )
 IDE_GENERATED_PROPERTIES ("H5ES" "${H5ES_HDRS}" "${H5ES_SOURCES}" )
