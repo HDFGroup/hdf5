@@ -285,10 +285,10 @@ H5VL__native_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_
 
         /* H5Lget_name_by_idx */
         case H5VL_LINK_GET_NAME: {
-            char *   name = HDva_arg(arguments, char *);
-            size_t   size = HDva_arg(arguments, size_t);
-            ssize_t *ret  = HDva_arg(arguments, ssize_t *);
-            size_t name_len = 0;
+            char *   name     = HDva_arg(arguments, char *);
+            size_t   size     = HDva_arg(arguments, size_t);
+            ssize_t *ret      = HDva_arg(arguments, ssize_t *);
+            size_t   name_len = 0;
 
             /* Get the link name */
             if (H5L__get_name_by_idx(&loc, loc_params->loc_data.loc_by_idx.name,
