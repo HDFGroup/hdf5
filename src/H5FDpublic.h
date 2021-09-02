@@ -263,6 +263,69 @@ typedef enum H5F_mem_t H5FD_mem_t;
  */
 #define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE 0x00008000
 
+/* ctl function op codes: */
+#define H5FD_CTL__INVALID_OPCODE              0
+#define H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE 1
+#define H5FD_CTL__GET_MPI_RANK_OPCODE         2
+#define H5FD_CTL__GET_MPI_SIZE_OPCODE         3
+#define H5FD_CTL__NUM_OPCODES                 4 /* must be last */
+
+/* ctl function flags: */
+
+/* Definitions:
+ *
+ * WARNING: While the following definitions of Terminal
+ * and Passthrough VFDs should be workable for now, they
+ * have to be adjusted as our use cases for VFDs expand.
+ *
+ *                                   JRM -- 8/4/21
+ *
+ *
+ * Terminal VFD: Lowest VFD in the VFD stack through
+ * which all VFD calls pass.  Note that this definition
+ * is situational.  For example, the sec2 VFD is typically
+ * terminal.  However, in the context of the family file
+ * driver, it is not -- the family file driver is the
+ * bottom VFD through which all VFD calls pass, and thus
+ * it is terminal.
+ *
+ * Similarly, on the splitter VFD, a sec2 VFD on the
+ * R/W channel is terminal, but a sec2 VFD on the W/O
+ * channel is not.
+ *
+ *
+ * Pass through VFD:  Any VFD that relays all VFD calls
+ * (with the possible exception of some non-I/O related
+ * calls) to underlying VFD(s).
+ */
+
+/* Unknown op codes should be ignored silently unless the
+ * H5FD_CTL__FAIL_IF_UNKNOWN_FLAG is set.
+ *
+ * On terminal VFDs, unknown op codes should generate an
+ * error unconditionally if this flag is set.
+ *
+ * On pass through VFDs, unknown op codes should be routed
+ * to the underlying VFD(s) as indicated by any routing
+ * flags.  In the absence of such flags, the VFD should
+ * generate an error.
+ */
+#define H5FD_CTL__FAIL_IF_UNKNOWN_FLAG 0x0001
+
+/* The H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG is used only
+ * by non-ternminal VFDs, and only applies to unknown
+ * opcodes. (known op codes should be handled as
+ * appropriate.)
+ *
+ * If this flag is set for an uknown op code, that
+ * op code should be passed to the next VFD down
+ * the VFD stack en-route to the terminal VFD.
+ * If that VFD does not support the ctl call, the
+ * pass through VFD should fail or succeed as directed
+ * by the  H5FD_CTL__FAIL_IF_UNKNOWN_FLAG.
+ */
+#define H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG 0x0002
+
 /* Forward declaration */
 typedef struct H5FD_t H5FD_t;
 
@@ -309,6 +372,7 @@ typedef struct H5FD_class_t {
     herr_t (*truncate)(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
     herr_t (*lock)(H5FD_t *file, hbool_t rw);
     herr_t (*unlock)(H5FD_t *file);
+    herr_t (*ctl)(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output);
     H5FD_mem_t fl_map[H5FD_MEM_NTYPES];
 } H5FD_class_t;
 
@@ -397,6 +461,7 @@ H5_DLL herr_t  H5FDflush(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDtruncate(H5FD_t *file, hid_t dxpl_id, hbool_t closing);
 H5_DLL herr_t  H5FDlock(H5FD_t *file, hbool_t rw);
 H5_DLL herr_t  H5FDunlock(H5FD_t *file);
+H5_DLL herr_t  H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output);
 
 /* Allows querying a VFD ID for features before the file is opened */
 H5_DLL herr_t H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/);

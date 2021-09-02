@@ -185,6 +185,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_truncate,      /* truncate             */
     H5FD__core_lock,          /* lock                 */
     H5FD__core_unlock,        /* unlock               */
+    NULL,                     /* ctl                  */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 

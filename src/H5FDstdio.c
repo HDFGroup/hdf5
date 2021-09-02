@@ -217,6 +217,7 @@ static const H5FD_class_t H5FD_stdio_g = {
     H5FD_stdio_truncate,   /* truncate     */
     H5FD_stdio_lock,       /* lock         */
     H5FD_stdio_unlock,     /* unlock       */
+    NULL,                  /* ctl          */
     H5FD_FLMAP_DICHOTOMY   /* fl_map       */
 };
 

@@ -172,6 +172,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_truncate,       /*truncate        */
     H5FD_multi_lock,           /*lock                  */
     H5FD_multi_unlock,         /*unlock                */
+    NULL,                      /*ctl                   */
     H5FD_FLMAP_DEFAULT         /*fl_map        */
 };
 
