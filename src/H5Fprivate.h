@@ -791,6 +791,7 @@ uint64_decode(uint8_t **pp)
 /* Forward declarations (for prototypes & type definitions) */
 struct H5B_class_t;
 struct H5UC_t;
+struct H5G_loc_t;
 struct H5O_loc_t;
 struct H5HG_heap_t;
 struct H5VL_class_t;
@@ -948,6 +949,8 @@ H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_han
 H5_DLL hbool_t H5F_use_vfd_swmr(const H5F_t *f);
 
 /* File mounting routines */
+H5_DLL herr_t  H5F_mount(const struct H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
+H5_DLL herr_t  H5F_unmount(const struct H5G_loc_t *loc, const char *name);
 H5_DLL hbool_t H5F_is_mount(const H5F_t *file);
 H5_DLL hbool_t H5F_has_mount(const H5F_t *file);
 H5_DLL herr_t  H5F_traverse_mount(struct H5O_loc_t *oloc /*in,out*/);

@@ -519,25 +519,23 @@ H5_DLLVAR htri_t use_locks_env_g;
 
 /* General routines */
 H5_DLL herr_t H5F__post_open(H5F_t *f);
-H5_DLL H5F_t * H5F__reopen(H5F_t *f);
-H5_DLL herr_t  H5F__dest(H5F_t *f, hbool_t flush);
-H5_DLL herr_t  H5F__flush(H5F_t *f);
-H5_DLL htri_t  H5F__is_hdf5(const char *name, hid_t fapl_id);
-H5_DLL ssize_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len);
-H5_DLL herr_t  H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
-H5_DLL herr_t  H5F__format_convert(H5F_t *f);
-H5_DLL herr_t  H5F__start_swmr_write(H5F_t *f);
-H5_DLL herr_t  H5F__close(H5F_t *f);
-H5_DLL herr_t  H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
-H5_DLL herr_t  H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
-H5_DLL herr_t  H5F__parse_file_lock_env_var(htri_t *use_locks);
-H5_DLL herr_t  H5F__vfd_swmr_end_tick(H5F_t *f);
-H5_DLL herr_t  H5F__vfd_swmr_disable_end_of_tick(H5F_t *f);
-H5_DLL herr_t  H5F__vfd_swmr_enable_end_of_tick(H5F_t *f);
+H5_DLL H5F_t *H5F__reopen(H5F_t *f);
+H5_DLL herr_t H5F__dest(H5F_t *f, hbool_t flush);
+H5_DLL herr_t H5F__flush(H5F_t *f);
+H5_DLL htri_t H5F__is_hdf5(const char *name, hid_t fapl_id);
+H5_DLL herr_t H5F__get_file_image(H5F_t *f, void *buf_ptr, size_t buf_len, size_t *image_len);
+H5_DLL herr_t H5F__get_info(H5F_t *f, H5F_info2_t *finfo);
+H5_DLL herr_t H5F__format_convert(H5F_t *f);
+H5_DLL herr_t H5F__start_swmr_write(H5F_t *f);
+H5_DLL herr_t H5F__close(H5F_t *f);
+H5_DLL herr_t H5F__set_libver_bounds(H5F_t *f, H5F_libver_t low, H5F_libver_t high);
+H5_DLL herr_t H5F__get_cont_info(const H5F_t *f, H5VL_file_cont_info_t *info);
+H5_DLL herr_t H5F__parse_file_lock_env_var(htri_t *use_locks);
+H5_DLL herr_t H5F__vfd_swmr_end_tick(H5F_t *f);
+H5_DLL herr_t H5F__vfd_swmr_disable_end_of_tick(H5F_t *f);
+H5_DLL herr_t H5F__vfd_swmr_enable_end_of_tick(H5F_t *f);
 
 /* File mount related routines */
-H5_DLL herr_t H5F__mount(H5G_loc_t *loc, const char *name, H5F_t *child, hid_t plist_id);
-H5_DLL herr_t H5F__unmount(H5G_loc_t *loc, const char *name);
 H5_DLL herr_t H5F__close_mounts(H5F_t *f);
 H5_DLL herr_t H5F__mount_count_ids(H5F_t *f, unsigned *nopen_files, unsigned *nopen_objs);
 

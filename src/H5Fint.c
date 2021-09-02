@@ -3241,27 +3241,28 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5F__get_file_image
  *
- * Purpose:     Private version of H5Fget_file_image
+ * Purpose:     Private version of H5Fget_file_image, returns bytes copied/
+ *              number of bytes needed in *image_len.
  *
- * Return:      Success:        Bytes copied / number of bytes needed.
- *              Failure:        -1
+ * Return:      SUCCEED/FAIL
+ *
  *-------------------------------------------------------------------------
  */
-ssize_t
-H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
+herr_t
+H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len, size_t *image_len)
 {
-    H5FD_t *fd_ptr;         /* file driver */
-    haddr_t eoa;            /* End of file address */
-    ssize_t ret_value = -1; /* Return value */
+    H5FD_t *fd_ptr;              /* file driver */
+    haddr_t eoa;                 /* End of file address */
+    herr_t  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check args */
     if (!file || !file->shared || !file->shared->lf)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, (-1), "file_id yields invalid file pointer")
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "file_id yields invalid file pointer")
     fd_ptr = file->shared->lf;
     if (!fd_ptr->cls)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, (-1), "fd_ptr yields invalid class pointer")
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "fd_ptr yields invalid class pointer")
 
     /* the address space used by the split and multi file drivers is not
      * a good fit for this call.  Since the plan is to depreciate these
@@ -3282,7 +3283,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
      *                                          JRM -- 11/11/22
      */
     if (HDstrcmp(fd_ptr->cls->name, "multi") == 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "Not supported for multi file driver.")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not supported for multi file driver.")
 
     /* While the family file driver is conceptually fully compatible
      * with the get file image operation, it sets a file driver message
@@ -3290,7 +3291,7 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
      * driver other than the family file driver.  Needless to say, this
      * rather defeats the purpose of the get file image operation.
      *
-     * While this problem is quire solvable, the required time and
+     * While this problem is quite solvable, the required time and
      * resources are lacking at present.  Hence, for now, we don't
      * allow the get file image operation to be perfomed on files
      * opened with the family file driver.
@@ -3304,30 +3305,24 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
      *                                   JRM -- 12/21/11
      */
     if (HDstrcmp(fd_ptr->cls->name, "family") == 0)
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, (-1), "Not supported for family file driver.")
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "Not supported for family file driver.")
 
     /* Go get the actual file size */
     if (HADDR_UNDEF == (eoa = H5FD_get_eoa(file->shared->lf, H5FD_MEM_DEFAULT)))
-        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, (-1), "unable to get file size")
+        HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get file size")
 
-    /* set ret_value = to eoa -- will overwrite this if appropriate */
-    ret_value = (ssize_t)eoa;
-
-    /* test to see if a buffer was provided -- if not, we are done */
+    /* Test to see if a buffer was provided */
     if (buf_ptr != NULL) {
-        size_t   space_needed; /* size of file image */
         unsigned tmp, tmp_size;
 
         /* Check for buffer too small */
         if ((haddr_t)buf_len < eoa)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, (-1), "supplied buffer too small")
+            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "supplied buffer too small")
 
-        space_needed = (size_t)eoa;
-
-        /* read in the file image */
+        /* Read in the file image */
         /* (Note compensation for base address addition in internal routine) */
-        if (H5FD_read(fd_ptr, H5FD_MEM_DEFAULT, 0, space_needed, buf_ptr) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_READERROR, (-1), "file image read request failed")
+        if (H5FD_read(fd_ptr, H5FD_MEM_DEFAULT, 0, (size_t)eoa, buf_ptr) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "file image read request failed")
 
         /* Offset to "status_flags" in the superblock */
         tmp = H5F_SUPER_STATUS_FLAGS_OFF(file->shared->sblock->super_vers);
@@ -3338,6 +3333,9 @@ H5F__get_file_image(H5F_t *file, void *buf_ptr, size_t buf_len)
         /* Clear "status_flags" */
         HDmemset((uint8_t *)buf_ptr + tmp, 0, tmp_size);
     } /* end if */
+
+    /* Set *image_len = to EOA */
+    *image_len = (size_t)eoa;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

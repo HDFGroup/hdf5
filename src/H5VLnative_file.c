@@ -383,7 +383,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
             /* Do the mount */
-            if (H5F__mount(&loc, name, child, fmpl_id) < 0)
+            if (H5F_mount(&loc, name, child, fmpl_id) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
 
             break;
@@ -399,7 +399,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
             /* Unmount */
-            if (H5F__unmount(&loc, name) < 0)
+            if (H5F_unmount(&loc, name) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
 
             break;
@@ -500,11 +500,16 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
         case H5VL_NATIVE_FILE_GET_FILE_IMAGE: {
             void *   buf_ptr = HDva_arg(arguments, void *);
             ssize_t *ret     = HDva_arg(arguments, ssize_t *);
+            size_t   image_len = 0;
             size_t   buf_len = HDva_arg(arguments, size_t);
 
             /* Do the actual work */
-            if ((*ret = H5F__get_file_image(f, buf_ptr, buf_len)) < 0)
+            if (H5F__get_file_image(f, buf_ptr, buf_len, &image_len) < 0) {
+                *ret = -1;
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "get file image failed")
+            }
+            else
+                *ret = image_len;
             break;
         }
 
