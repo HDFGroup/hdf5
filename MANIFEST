@@ -751,6 +751,7 @@
 ./src/H5EAstat.c
 ./src/H5EAtest.c
 ./src/H5ES.c
+./src/H5ESdevelop.h
 ./src/H5ESevent.c
 ./src/H5ESint.c
 ./src/H5ESlist.c

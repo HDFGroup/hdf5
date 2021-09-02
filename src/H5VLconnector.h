@@ -20,6 +20,7 @@
 /* Public headers needed by this file */
 #include "H5public.h"   /* Generic Functions                    */
 #include "H5Apublic.h"  /* Attributes                           */
+#include "H5Dpublic.h"  /* Datasets                             */
 #include "H5ESpublic.h" /* Event Stack                          */
 #include "H5Fpublic.h"  /* Files                                */
 #include "H5Ipublic.h"  /* IDs                                  */
@@ -33,14 +34,19 @@
 /*****************/
 
 /* Capability flags for connector */
-#define H5VL_CAP_FLAG_NONE       0    /* No special connector capabilities */
-#define H5VL_CAP_FLAG_THREADSAFE 0x01 /* Connector is threadsafe */
+#define H5VL_CAP_FLAG_NONE         0    /* No special connector capabilities */
+#define H5VL_CAP_FLAG_THREADSAFE   0x01 /* Connector is threadsafe */
+#define H5VL_CAP_FLAG_ASYNC        0x02 /* Connector performs operations asynchronously*/
+#define H5VL_CAP_FLAG_NATIVE_FILES 0x04 /* Connector produces native file format */
 
 /* Container info version */
 #define H5VL_CONTAINER_INFO_VERSION 0x01 /* Container info struct version */
 
 /* The maximum size allowed for blobs */
 #define H5VL_MAX_BLOB_ID_SIZE (16) /* Allow for 128-bits blob IDs */
+
+/* # of optional operations reserved for the native VOL connector */
+#define H5VL_RESERVED_NATIVE_OPTIONAL 1024
 
 /*******************/
 /* Public Typedefs */
