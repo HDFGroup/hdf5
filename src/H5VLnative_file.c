@@ -353,6 +353,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
                                     "unable to flush file's cached information")
                 } /* end else */
             }     /* end if */
+
             break;
         }
 
@@ -799,6 +800,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
             if (H5F_set_min_dset_ohdr(f, (hbool_t)minimize) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL,
                             "cannot set file's dataset object header minimization flag")
+
             break;
         }
 
@@ -806,16 +808,18 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
         /* H5Fget_mpi_atomicity */
         case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY: {
             hbool_t *flag = (hbool_t *)HDva_arg(arguments, hbool_t *);
-            if (H5F_get_mpi_atomicity(f, flag) < 0)
+            if (H5F__get_mpi_atomicity(f, flag) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "cannot get MPI atomicity");
+
             break;
         }
 
         /* H5Fset_mpi_atomicity */
         case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY: {
             hbool_t flag = (hbool_t)HDva_arg(arguments, int);
-            if (H5F_set_mpi_atomicity(f, flag) < 0)
+            if (H5F__set_mpi_atomicity(f, flag) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "cannot set MPI atomicity");
+
             break;
         }
 #endif /* H5_HAVE_PARALLEL */
@@ -898,7 +902,7 @@ H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_U
             HGOTO_ERROR(H5E_ID, H5E_CANTGET, FAIL, "can't get ID ref count")
         if (nref == 1)
             if (H5F__flush(f) < 0)
-                HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush cache")
     } /* end if */
 
     /* Close the file */

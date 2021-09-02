@@ -193,7 +193,7 @@ done:
 } /* end H5F_mpi_get_size() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_set_mpi_atomicity
+ * Function:    H5F__set_mpi_atomicity
  *
  * Purpose:     Private call to set the atomicity mode
  *
@@ -202,11 +202,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag)
+H5F__set_mpi_atomicity(H5F_t *file, hbool_t flag)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(file);
@@ -222,7 +222,7 @@ H5F_set_mpi_atomicity(H5F_t *file, hbool_t flag)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5F_set_mpi_atomicity() */
+} /* end H5F__set_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Fset_mpi_atomicity
@@ -261,7 +261,7 @@ done:
 } /* end H5Fset_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_get_mpi_atomicity
+ * Function:    H5F__get_mpi_atomicity
  *
  * Purpose:     Private call to get the atomicity mode
  *
@@ -270,11 +270,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag)
+H5F__get_mpi_atomicity(const H5F_t *file, hbool_t *flag)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_PACKAGE
 
     /* Check args */
     HDassert(file);
@@ -291,7 +291,7 @@ H5F_get_mpi_atomicity(H5F_t *file, hbool_t *flag)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5F_get_mpi_atomicity() */
+} /* end H5F__get_mpi_atomicity() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Fget_mpi_atomicity
