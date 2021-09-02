@@ -203,10 +203,10 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
 
         /* Object name */
         case H5VL_OBJECT_GET_NAME: {
-            ssize_t *ret  = HDva_arg(arguments, ssize_t *);
-            size_t name_len = 0;
-            char *   name = HDva_arg(arguments, char *);
-            size_t   size = HDva_arg(arguments, size_t);
+            ssize_t *ret      = HDva_arg(arguments, ssize_t *);
+            size_t   name_len = 0;
+            char *   name     = HDva_arg(arguments, char *);
+            size_t   size     = HDva_arg(arguments, size_t);
 
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
                 /* Retrieve object's name */
@@ -367,7 +367,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
 
         /* H5Oexists_by_name */
         case H5VL_OBJECT_EXISTS: {
-            htri_t *ret = HDva_arg(arguments, htri_t *);
+            htri_t *ret    = HDva_arg(arguments, htri_t *);
             hbool_t exists = FALSE;
 
             if (loc_params->type == H5VL_OBJECT_BY_NAME) {
@@ -500,10 +500,10 @@ H5VL__native_object_optional(void *obj, H5VL_object_optional_t optional_type, hi
     switch (optional_type) {
         /* H5Oget_comment / H5Oget_comment_by_name */
         case H5VL_NATIVE_OBJECT_GET_COMMENT: {
-            char *   comment = HDva_arg(arguments, char *);
-            size_t   bufsize = HDva_arg(arguments, size_t);
-            ssize_t *ret     = HDva_arg(arguments, ssize_t *);
-            size_t comment_len = 0;
+            char *   comment     = HDva_arg(arguments, char *);
+            size_t   bufsize     = HDva_arg(arguments, size_t);
+            ssize_t *ret         = HDva_arg(arguments, ssize_t *);
+            size_t   comment_len = 0;
 
             /* Retrieve the object's comment */
             if (loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Oget_comment */
@@ -515,7 +515,8 @@ H5VL__native_object_optional(void *obj, H5VL_object_optional_t optional_type, hi
                     *ret = comment_len;
             }                                                   /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Oget_comment_by_name */
-                if (H5G_loc_get_comment(&loc, loc_params->loc_data.loc_by_name.name, comment, bufsize, &comment_len) < 0) {
+                if (H5G_loc_get_comment(&loc, loc_params->loc_data.loc_by_name.name, comment, bufsize,
+                                        &comment_len) < 0) {
                     *ret = -1;
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get comment for object")
                 }
