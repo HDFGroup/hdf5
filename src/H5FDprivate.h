@@ -129,11 +129,11 @@ H5_DLL herr_t  H5FD_read_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[]
                                 size_t sizes[], void *bufs[] /* out */);
 H5_DLL herr_t  H5FD_write_vector(H5FD_t *file, uint32_t count, H5FD_mem_t types[], haddr_t addrs[],
                                  size_t sizes[], const void *bufs[] /* out */);
-H5_DLL herr_t  H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t *mem_spaces[],
-                                   H5S_t *file_spaces[], haddr_t offsets[], size_t element_sizes[],
+H5_DLL herr_t  H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t * const *mem_spaces,
+                                   const H5S_t * const *file_spaces, haddr_t offsets[], size_t element_sizes[],
                                    void *bufs[] /* out */);
-H5_DLL herr_t  H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, H5S_t *mem_spaces[],
-                                    H5S_t *file_spaces[], haddr_t offsets[], size_t element_sizes[],
+H5_DLL herr_t  H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t * const *mem_spaces,
+                                    const H5S_t * const *file_spaces, haddr_t offsets[], size_t element_sizes[],
                                     const void *bufs[]);
 H5_DLL herr_t  H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_space_ids[],
                                       hid_t file_space_ids[], haddr_t offsets[], size_t element_sizes[],

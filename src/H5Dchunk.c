@@ -2471,6 +2471,8 @@ H5D__chunk_may_use_select_io(const H5D_io_info_t *io_info)
     else {
         htri_t page_buf_enabled;
 
+        HDassert(io_info->io_ops.single_write == H5D__select_write);
+
         /* Check if the page buffer is enabled */
         if ((page_buf_enabled = H5PB_enabled(io_info->f_sh, H5FD_MEM_DRAW)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if page buffer is enabled")
@@ -2649,7 +2651,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
          * because this is raw data) */
         if (num_chunks > 0 &&
             H5F_shared_select_read(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, (uint32_t)num_chunks,
-                                   chunk_mem_spaces, chunk_file_spaces, chunk_addrs, element_sizes, bufs) < 0)
+                                   (const H5S_t * const *)chunk_mem_spaces, (const H5S_t * const *)chunk_file_spaces,
+                                   chunk_addrs, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunk selection read failed")
 
         /* Clean up memory */
@@ -2988,7 +2991,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
          * because this is raw data) */
         if (num_chunks > 0 && H5F_shared_select_write(
                                   H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, (uint32_t)num_chunks,
-                                  chunk_mem_spaces, chunk_file_spaces, chunk_addrs, element_sizes, bufs) < 0)
+                                  (const H5S_t * const *)chunk_mem_spaces, (const H5S_t * const *)chunk_file_spaces,
+                                  chunk_addrs, element_sizes, bufs) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "chunk selection read failed")
 
         /* Clean up memory */
