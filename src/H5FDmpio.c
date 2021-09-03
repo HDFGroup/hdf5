@@ -2288,6 +2288,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         hbool_t fixed_size = FALSE;
         size_t  size;
 
+        haddr_t max_addr = HADDR_MAX;
+
         /* The read is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
          * and thus we can't use the above code to construct the MPI datatypes.
