@@ -248,20 +248,20 @@ usage(const char *progname)
         "\n"
         "-C:                   cross-over chunk read during chunk verification\n"
         "-F:                   fixed maximal dimension for the chunked datasets\n"
-        "-M:	           use virtual datasets and many source\n"
+        "-M:	               use virtual datasets and many source\n"
         "                      files\n"
         "-N:                   do not use named pipes\n"
         "-P:                   do the performance measurement\n"
         "-R:                   flush raw data\n"
-        "-S:	           do not use VFD SWMR\n"
-        "-V:	           use virtual datasets and a single\n"
+        "-S:	               do not use VFD SWMR\n"
+        "-V:	               use virtual datasets and a single\n"
         "                      source file\n"
-        "-a steps:	           `steps` between adding attributes\n"
-        "-b:	           write data in big-endian byte order\n"
-        "-c cols:	           `cols` columns of the chunk\n"
+        "-a steps:	       `steps` between adding attributes\n"
+        "-b:	               write data in big-endian byte order\n"
+        "-c cols:	       `cols` columns of the chunk\n"
         "-d 1|one|2|two|both:  select dataset expansion in one or\n"
         "                      both dimensions\n"
-        "-e depth:	           the first dimension of the 3D chunk\n"
+        "-e depth:	       the first dimension of the 3D chunk\n"
         "-f tick_len:          tick length\n"
         "-g max_lag:           maximal lag\n"
         "-j skip_chunk:        skip the Nth (skip_chunk) chunks during chunk writing\n"
@@ -272,7 +272,7 @@ usage(const char *progname)
         "-n iterations:        how many times to expand each dataset\n"
         "-o page_buf_size:     page buffer size\n"
         "-p fsp_size:          file space page size\n"
-        "-r rows:	           `rows` rows of the chunk\n"
+        "-r rows:	       `rows` rows of the chunk\n"
         "-s datasets:          number of datasets to create\n"
         "-t:                   enable test for 3D datasets (dataset expansion is along one dimension)\n"
         "                      currently, 3D datasets isn't tested with VDS\n"
@@ -1145,6 +1145,12 @@ create_extensible_dset(state_t *s, unsigned int which)
     /* Never write fill value when new chunks are allocated */
     if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_NEVER) < 0) {
         fprintf(stderr, "H5Pset_fill_time failed\n");
+        TEST_ERROR;
+    }
+
+    /* Early space allocation */
+    if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0) {
+        fprintf(stderr, "H5Pset_alloc_time failed\n");
         TEST_ERROR;
     }
 
