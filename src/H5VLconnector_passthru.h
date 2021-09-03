@@ -96,8 +96,8 @@ H5_DLL herr_t H5VLattr_get(void *obj, hid_t connector_id, H5VL_attr_get_args_t *
                            void **req);
 H5_DLL herr_t H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                                 H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id,
-                                void **req, va_list arguments);
+H5_DLL herr_t H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+                                void **req);
 H5_DLL herr_t H5VLattr_close(void *attr, hid_t connector_id, hid_t dxpl_id, void **req);
 
 /* Public wrappers for dataset callbacks */

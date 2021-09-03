@@ -56,6 +56,10 @@ typedef struct H5VL_file_open_find_connector_t {
     hid_t                  fapl_id;
 } H5VL_file_open_find_connector_t;
 
+/* Typedef for common callback form of registered optional operations */
+typedef herr_t (*H5VL_reg_opt_oper_t)(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args,
+                                      hid_t dxpl_id, void **req);
+
 /********************/
 /* Package Typedefs */
 /********************/
@@ -76,8 +80,8 @@ static herr_t H5VL__attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_a
                              void **req);
 static herr_t H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                   H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req);
-static herr_t H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_attr_optional_t opt_type,
-                                  hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args,
+                                  hid_t dxpl_id, void **req);
 static herr_t H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
 static void * H5VL__dataset_create(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                    const char *name, hid_t lcpl_id, hid_t type_id, hid_t space_id,
@@ -328,6 +332,50 @@ H5VLget_value(hid_t connector_id, H5VL_class_value_t *value /*out*/)
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* H5VLget_value */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__common_optional_op
+ *
+ * Purpose:     Performs an optional connector-specific operation on an object
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5VL__common_optional_op(hid_t id, H5I_type_t id_type, H5VL_reg_opt_oper_t reg_opt_op,
+                         H5VL_optional_args_t *args, hid_t dxpl_id, void **req, H5VL_object_t **_vol_obj_ptr)
+{
+    H5VL_object_t * tmp_vol_obj = NULL;                                         /* Object for id */
+    H5VL_object_t **vol_obj_ptr = (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for id */
+    hbool_t         vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
+    herr_t          ret_value       = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    /* Check ID type & get VOL object */
+    if (NULL == (*vol_obj_ptr = (H5VL_object_t *)H5I_object_verify(id, id_type)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid identifier")
+
+    /* Set wrapper info in API context */
+    if (H5VL_set_vol_wrapper(*vol_obj_ptr) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
+    vol_wrapper_set = TRUE;
+
+    /* Call the corresponding internal VOL routine */
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value =
+             (*reg_opt_op)((*vol_obj_ptr)->data, (*vol_obj_ptr)->connector->cls, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute optional callback");
+
+done:
+    /* Reset object wrapping info in API context */
+    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
+        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL__common_optional_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_copy_connector_info
@@ -1545,8 +1593,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_attr_optional_t opt_type, hid_t dxpl_id,
-                    void **req, va_list arguments)
+H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1557,8 +1604,9 @@ H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_attr_optional_t opt
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'attr optional' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->attr_cls.optional)(obj, opt_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = (cls->attr_cls.optional)(obj, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute optional callback");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1575,11 +1623,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_attr_optional(const H5VL_object_t *vol_obj, H5VL_attr_optional_t opt_type, hid_t dxpl_id, void **req,
-                   ...)
+H5VL_attr_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -1591,17 +1636,11 @@ H5VL_attr_optional(const H5VL_object_t *vol_obj, H5VL_attr_optional_t opt_type, 
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if ((ret_value = H5VL__attr_optional(vol_obj->data, vol_obj->connector->cls, opt_type, dxpl_id, req,
-                                         arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = H5VL__attr_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute optional callback");
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -1620,14 +1659,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLattr_optional(void *obj, hid_t connector_id, H5VL_attr_optional_t opt_type, hid_t dxpl_id,
-                  void **req /*out*/, va_list arguments)
+H5VLattr_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+                  void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVsixx", obj, connector_id, opt_type, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1636,12 +1675,56 @@ H5VLattr_optional(void *obj, hid_t connector_id, H5VL_attr_optional_t opt_type, 
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__attr_optional(obj, cls, opt_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = H5VL__attr_optional(obj, cls, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute optional callback");
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLattr_optional() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLattr_optional_op
+ *
+ * Purpose:     Performs an optional connector-specific operation on an attribute
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id,
+                     H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Attribute VOL object */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*!ii", app_file, app_func, app_line, attr_id, args, dxpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Call the common VOL connector optional routine */
+    if ((ret_value = H5VL__common_optional_op(attr_id, H5I_ATTR, H5VL__attr_optional, args, dxpl_id,
+                                              token_ptr, &vol_obj)) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute optional callback")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(__func__, "*s*sIui*!ii", app_file, app_func, app_line, attr_id, args, dxpl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLattr_optional_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__attr_close
