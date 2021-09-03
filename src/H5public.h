@@ -34,30 +34,37 @@
 #ifdef H5_HAVE_FEATURES_H
 #include <features.h> /* For setting POSIX, BSD, etc. compatibility */
 #endif
-
-/* C library header files for things that appear in HDF5 public headers */
-#ifdef __cplusplus
-#define __STDC_FORMAT_MACROS
-#endif
-#include <inttypes.h>
-#include <limits.h>
-#include <stdarg.h>
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdint.h>
-
-/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is avaible
- * on Windows, though it doesn't necessarily contain all the POSIX types
- * we need for HDF5 (e.g. ssize_t).
- */
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
+#endif
+#ifdef H5_STDC_HEADERS
+#include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
+#include <stdarg.h> /* For variadic functions in H5VLpublic.h   */
+#endif
+#ifndef __cplusplus
+#ifdef H5_HAVE_STDINT_H
+#include <stdint.h> /* For C9x types */
+#endif
+#else
+#ifdef H5_HAVE_STDINT_H_CXX
+#include <stdint.h> /* For C9x types (when included from C++) */
+#endif
+#endif
+#ifdef H5_HAVE_INTTYPES_H
+#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
+#endif
+#ifdef H5_HAVE_STDDEF_H
+#include <stddef.h>
 #endif
 
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
+#ifndef MPICH_SKIP_MPICXX
 #define MPICH_SKIP_MPICXX 1
-#define OMPI_SKIP_MPICXX  1
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX 1
+#endif
 #include <mpi.h>
 #ifndef MPI_FILE_NULL /* MPIO may be defined in mpi.h already */
 #include <mpio.h>
@@ -190,8 +197,9 @@ extern "C" {
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
  * zero for failure) while successful return is non-negative (often zero).
- * The negative failure value is most commonly -1, but don't bet on it.  The
- * proper way to detect failure is something like:
+ * The negative failure value is most commonly -1, but don't bet on it.
+ *
+ * The proper way to detect failure is something like:
  * \code
  * if((dset = H5Dopen2(file, name)) < 0)
  *    fprintf(stderr, "unable to open the requested dataset\n");
@@ -215,10 +223,30 @@ typedef int herr_t;
  * }
  * \endcode
  */
+#ifdef H5_HAVE_STDBOOL_H
+#include <stdbool.h>
+#else /* H5_HAVE_STDBOOL_H */
+#ifndef __cplusplus
+#if defined(H5_SIZEOF_BOOL) && (H5_SIZEOF_BOOL != 0)
+#define bool _Bool
+#else
+#define bool unsigned int
+#endif
+#define true 1
+#define false 0
+#endif /* __cplusplus */
+#endif /* H5_HAVE_STDBOOL_H */
 typedef bool hbool_t;
 typedef int  htri_t;
 
-/* Define the ssize_t type if it not is defined */
+/* The signed version of size_t
+ *
+ * ssize_t is POSIX and not defined in any C standard. It's used in some
+ * public HDF5 API calls so this work-around will define it if it's not
+ * present.
+ *
+ * Use of ssize_t should be discouraged in new code.
+ */
 #if H5_SIZEOF_SSIZE_T == 0
 /* Undefine this size, we will re-define it in one of the sections below */
 #undef H5_SIZEOF_SSIZE_T
@@ -236,8 +264,10 @@ typedef long long ssize_t;
 #endif
 #endif
 
-/* int64_t type is used for creation order field for links.  It may be
- * defined in Posix.1g, otherwise it is defined here.
+/**
+ * The size of file objects.
+ *
+ * \internal Defined as a (minimum) 64-bit integer type.
  */
 #if H5_SIZEOF_INT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
@@ -282,9 +312,11 @@ typedef unsigned long long uint64_t;
 #error "nothing appropriate for uint64_t"
 #endif
 
-/*
- * The sizes of file objects have their own types defined here, use a minimum
- * 64-bit type.
+/**
+ * The size of file objects. Used when negative values are needed to indicate errors.
+ *
+ * \internal Defined as a (minimum) 64-bit integer type. Use of hssize_t
+ * should be discouraged in new code.
  */
 #if H5_SIZEOF_LONG_LONG >= 8
 H5_GCC_DIAG_OFF("long-long")
@@ -304,8 +336,10 @@ H5_GCC_DIAG_ON("long-long")
 #error "nothing appropriate for hsize_t"
 #endif
 
-/*
- * File addresses have their own types.
+/**
+ * The address of an object in the file.
+ *
+ * \internal Defined as a (minimum) 64-bit unsigned integer type.
  */
 #if H5_SIZEOF_INT >= 8
 typedef unsigned haddr_t;
@@ -386,9 +420,9 @@ typedef enum {
 /* (Actually, any positive value will cause the iterator to stop and pass back
  *      that positive value to the function that called the iterator)
  */
-#define H5_ITER_ERROR (-1)
-#define H5_ITER_CONT  (0)
-#define H5_ITER_STOP  (1)
+#define H5_ITER_ERROR (-1) /**< Error, stop iteration */
+#define H5_ITER_CONT  (0)  /**< Continue iteration */
+#define H5_ITER_STOP  (1)  /**< Stop iteration, short-circuit success */
 
 //! <!-- [H5_index_t_snip] -->
 /**
