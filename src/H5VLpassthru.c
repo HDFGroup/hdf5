@@ -211,8 +211,7 @@ static herr_t H5VL_pass_through_object_copy(void *src_obj, const H5VL_loc_params
                                             const H5VL_loc_params_t *dst_loc_params, const char *dst_name,
                                             hid_t ocpypl_id, hid_t lcpl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_object_get(void *obj, const H5VL_loc_params_t *loc_params,
-                                           H5VL_object_get_t get_type, hid_t dxpl_id, void **req,
-                                           va_list arguments);
+                                           H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
                                                 H5VL_object_specific_t specific_type, hid_t dxpl_id,
                                                 void **req, va_list arguments);
@@ -252,8 +251,7 @@ static herr_t H5VL_pass_through_token_from_str(void *obj, H5I_type_t obj_type, c
                                                H5O_token_t *token);
 
 /* Generic optional callback */
-static herr_t H5VL_pass_through_optional(void *obj, int op_type, hid_t dxpl_id, void **req,
-                                         va_list arguments);
+static herr_t H5VL_pass_through_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
 /*******************/
 /* Local variables */
@@ -2504,8 +2502,8 @@ H5VL_pass_through_object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_pa
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_t get_type,
-                             hid_t dxpl_id, void **req, va_list arguments)
+H5VL_pass_through_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_args_t *args,
+                             hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -2514,8 +2512,7 @@ H5VL_pass_through_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5V
     printf("------- PASS THROUGH VOL OBJECT Get\n");
 #endif
 
-    ret_value =
-        H5VLobject_get(o->under_object, loc_params, o->under_vol_id, get_type, dxpl_id, req, arguments);
+    ret_value = H5VLobject_get(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
@@ -3163,7 +3160,7 @@ H5VL_pass_through_token_from_str(void *obj, H5I_type_t obj_type, const char *tok
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_pass_through_optional(void *obj, int op_type, hid_t dxpl_id, void **req, va_list arguments)
+H5VL_pass_through_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -3172,7 +3169,7 @@ H5VL_pass_through_optional(void *obj, int op_type, hid_t dxpl_id, void **req, va
     printf("------- PASS THROUGH VOL generic Optional\n");
 #endif
 
-    ret_value = H5VLoptional(o->under_object, o->under_vol_id, op_type, dxpl_id, req, arguments);
+    ret_value = H5VLoptional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
     return ret_value;
 } /* end H5VL_pass_through_optional() */

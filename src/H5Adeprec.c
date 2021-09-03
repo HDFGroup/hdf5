@@ -309,10 +309,11 @@ done:
 int
 H5Aget_num_attrs(hid_t loc_id)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    H5O_info2_t       oinfo;
-    int               ret_value = -1;
+    H5VL_object_t *        vol_obj = NULL; /* Object of loc_id */
+    H5VL_object_get_args_t vol_cb_args;    /* Arguments to VOL callback */
+    H5VL_loc_params_t      loc_params;
+    H5O_info2_t            oinfo;
+    int                    ret_value = -1;
 
     FUNC_ENTER_API((-1))
     H5TRACE1("Is", "i", loc_id);
@@ -324,9 +325,13 @@ H5Aget_num_attrs(hid_t loc_id)
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type              = H5VL_OBJECT_GET_INFO;
+    vol_cb_args.args.get_info.oinfo  = &oinfo;
+    vol_cb_args.args.get_info.fields = H5O_INFO_NUM_ATTRS;
+
     /* Get the number of attributes for the object */
-    if (H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                        &oinfo, H5O_INFO_NUM_ATTRS) < 0)
+    if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute count for object")
 
     H5_CHECKED_ASSIGN(ret_value, int, oinfo.num_attrs, hsize_t);

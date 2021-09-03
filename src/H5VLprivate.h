@@ -252,7 +252,7 @@ H5_DLL herr_t H5VL_object_copy(const H5VL_object_t *src_obj, const H5VL_loc_para
                                const H5VL_loc_params_t *dst_loc_params, const char *dst_name, hid_t ocpypl_id,
                                hid_t lcpl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_object_get(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-                              H5VL_object_get_t get_type, hid_t dxpl_id, void **req, ...);
+                              H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
                                    H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...);
 H5_DLL herr_t H5VL_object_optional(const H5VL_object_t *vol_obj, H5VL_object_optional_t opt_type,
@@ -292,6 +292,7 @@ H5_DLL herr_t H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_t
                                   H5O_token_t *token);
 
 /* Generic functions */
-H5_DLL herr_t H5VL_optional(const H5VL_object_t *vol_obj, int op_type, hid_t dxpl_id, void **req, ...);
+H5_DLL herr_t H5VL_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id,
+                            void **req);
 
 #endif /* H5VLprivate_H */

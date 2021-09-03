@@ -1189,10 +1189,11 @@ done:
 H5G_obj_t
 H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    H5O_info2_t       oinfo;     /* Object info (contains object type) */
-    H5G_obj_t         ret_value; /* Return value */
+    H5VL_object_t *        vol_obj;     /* Object of loc_id */
+    H5VL_object_get_args_t vol_cb_args; /* Arguments to VOL callback */
+    H5VL_loc_params_t      loc_params;
+    H5O_info2_t            oinfo;     /* Object info (contains object type) */
+    H5G_obj_t              ret_value; /* Return value */
 
     FUNC_ENTER_API(H5G_UNKNOWN)
     H5TRACE2("Go", "ih", loc_id, idx);
@@ -1210,9 +1211,13 @@ H5Gget_objtype_by_idx(hid_t loc_id, hsize_t idx)
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5G_UNKNOWN, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type              = H5VL_OBJECT_GET_INFO;
+    vol_cb_args.args.get_info.oinfo  = &oinfo;
+    vol_cb_args.args.get_info.fields = H5O_INFO_BASIC;
+
     /* Retrieve the object's basic information (which includes its type) */
-    if (H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                        &oinfo, H5O_INFO_BASIC) < 0)
+    if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_BADTYPE, H5G_UNKNOWN, "can't get object info")
 
     /* Map to group object type */

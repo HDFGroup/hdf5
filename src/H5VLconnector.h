@@ -968,8 +968,8 @@ typedef struct H5VL_object_class_t {
     herr_t (*copy)(void *src_obj, const H5VL_loc_params_t *loc_params1, const char *src_name, void *dst_obj,
                    const H5VL_loc_params_t *loc_params2, const char *dst_name, hid_t ocpypl_id, hid_t lcpl_id,
                    hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_t get_type, hid_t dxpl_id,
-                  void **req, va_list arguments);
+    herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_args_t *args, hid_t dxpl_id,
+                  void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, H5VL_object_optional_t opt_type, hid_t dxpl_id, void **req,
@@ -1056,8 +1056,8 @@ typedef struct H5VL_class_t {
     H5VL_token_class_t      token_cls;      /**< VOL connector object token class callbacks */
 
     /* Catch-all */
-    herr_t (*optional)(void *obj, int op_type, hid_t dxpl_id, void **req,
-                       va_list arguments); /**< Optional callback */
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id,
+                       void **req); /**< Optional callback */
 } H5VL_class_t;
 //! <!-- [H5VL_class_t_snip] -->
 
@@ -1122,6 +1122,23 @@ H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
  * \ingroup H5VLDEV
  */
 H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
+
+/* User-defined optional operations */
+H5_DLL herr_t H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+                                   hid_t attr_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
+
+/* API Wrappers for "optional_op" routines */
+/* (Must be defined _after_ the function prototype) */
+/* (And must only defined when included in application code, not the library) */
+#ifndef H5VL_MODULE
+/* Inject application compile-time macros into function calls */
+#define H5VLattr_optional_op(...)     H5VLattr_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+
+/* Define "wrapper" versions of function calls, to allow compile-time values to
+ *      be passed in by language wrapper or library layer on top of HDF5.
+ */
+#define H5VLattr_optional_op_wrap     H5_NO_EXPAND(H5VLattr_optional_op)
+#endif /* H5VL_MODULE */
 
 #ifdef __cplusplus
 }

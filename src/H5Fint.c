@@ -4042,11 +4042,12 @@ done:
 hid_t
 H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
 {
-    void *            vol_obj_file = NULL;               /* File object pointer */
-    H5VL_loc_params_t loc_params;                        /* Location parameters */
-    hid_t             file_id         = H5I_INVALID_HID; /* File ID for object */
-    hbool_t           vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
-    hid_t             ret_value       = H5I_INVALID_HID; /* Return value */
+    void *                 vol_obj_file = NULL;               /* File object pointer */
+    H5VL_object_get_args_t vol_cb_args;                       /* Arguments to VOL callback */
+    H5VL_loc_params_t      loc_params;                        /* Location parameters */
+    hid_t                  file_id         = H5I_INVALID_HID; /* File ID for object */
+    hbool_t                vol_wrapper_set = FALSE; /* Whether the VOL object wrapping context was set up */
+    hid_t                  ret_value       = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
@@ -4054,9 +4055,12 @@ H5F_get_file_id(H5VL_object_t *vol_obj, H5I_type_t obj_type, hbool_t app_ref)
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = obj_type;
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type            = H5VL_OBJECT_GET_FILE;
+    vol_cb_args.args.get_file.file = &vol_obj_file;
+
     /* Retrieve VOL file from object */
-    if (H5VL_object_get(vol_obj, &loc_params, H5VL_OBJECT_GET_FILE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                        &vol_obj_file) < 0)
+    if (H5VL_object_get(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, H5I_INVALID_HID, "can't retrieve file from object")
 
     /* Check if the file's ID already exists */

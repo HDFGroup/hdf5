@@ -169,8 +169,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_t get_type,
-                        hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_args_t *args,
+                        hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     herr_t    ret_value = SUCCEED; /* Return value */
     H5G_loc_t loc;                 /* Location of group */
@@ -180,14 +180,12 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
     if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-    switch (get_type) {
+    switch (args->op_type) {
 
         /* Object file */
         case H5VL_OBJECT_GET_FILE: {
-            void **ret = HDva_arg(arguments, void **);
-
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
-                *ret = (void *)loc.oloc->file;
+                *args->args.get_file.file = (void *)loc.oloc->file;
 
                 /* TODO we currently need to set id_exists to TRUE because
                  * the upper layer will create an ID from the returned
@@ -203,19 +201,11 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
 
         /* Object name */
         case H5VL_OBJECT_GET_NAME: {
-            ssize_t *ret      = HDva_arg(arguments, ssize_t *);
-            size_t   name_len = 0;
-            char *   name     = HDva_arg(arguments, char *);
-            size_t   size     = HDva_arg(arguments, size_t);
-
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
                 /* Retrieve object's name */
-                if (H5G_get_name(&loc, name, size, &name_len, NULL) < 0) {
-                    *ret = -1;
+                if (H5G_get_name(&loc, args->args.get_name.buf, args->args.get_name.buf_size,
+                                 args->args.get_name.name_len, NULL) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't retrieve object name")
-                }
-                else
-                    *ret = name_len;
             } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_TOKEN) {
                 H5O_loc_t   obj_oloc; /* Object location */
@@ -231,12 +221,9 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                                 "can't deserialize object token into address")
 
                 /* Retrieve object's name */
-                if (H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, name, size, &name_len) < 0) {
-                    *ret = -1;
+                if (H5G_get_name_by_addr(loc.oloc->file, &obj_oloc, args->args.get_name.buf,
+                                         args->args.get_name.buf_size, args->args.get_name.name_len) < 0)
                     HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't determine object name")
-                }
-                else
-                    *ret = name_len;
             } /* end else-if */
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown get_name parameters")
@@ -246,8 +233,6 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
 
         /* Object type */
         case H5VL_OBJECT_GET_TYPE: {
-            H5O_type_t *obj_type = HDva_arg(arguments, H5O_type_t *);
-
             if (loc_params->type == H5VL_OBJECT_BY_TOKEN) {
                 H5O_loc_t   obj_oloc; /* Object location */
                 unsigned    rc;       /* Reference count of object */
@@ -264,7 +249,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
 
                 /* Get the # of links for object, and its type */
                 /* (To check to make certain that this object hasn't been deleted) */
-                if (H5O_get_rc_and_type(&obj_oloc, &rc, obj_type) < 0 || 0 == rc)
+                if (H5O_get_rc_and_type(&obj_oloc, &rc, args->args.get_type.obj_type) < 0 || 0 == rc)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_LINKCOUNT, FAIL, "dereferencing deleted object")
             }
             else
@@ -275,25 +260,19 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
 
         /* H5Oget_info(_name|_by_idx)3 */
         case H5VL_OBJECT_GET_INFO: {
-            H5O_info2_t *oinfo  = HDva_arg(arguments, H5O_info2_t *);
-            unsigned     fields = HDva_arg(arguments, unsigned);
-
-            /* Use the original H5Oget_info code to get the data */
-
-            if (loc_params->type == H5VL_OBJECT_BY_SELF) { /* H5Oget_info */
-                /* Retrieve the object's information */
-                if (H5G_loc_info(&loc, ".", oinfo, fields) < 0)
+            if (loc_params->type == H5VL_OBJECT_BY_SELF) {
+                if (H5G_loc_info(&loc, ".", args->args.get_info.oinfo, args->args.get_info.fields) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
-            }                                                   /* end if */
-            else if (loc_params->type == H5VL_OBJECT_BY_NAME) { /* H5Oget_info_by_name */
-                /* Retrieve the object's information */
-                if (H5G_loc_info(&loc, loc_params->loc_data.loc_by_name.name, oinfo, fields) < 0)
+            } /* end if */
+            else if (loc_params->type == H5VL_OBJECT_BY_NAME) {
+                if (H5G_loc_info(&loc, loc_params->loc_data.loc_by_name.name, args->args.get_info.oinfo,
+                                 args->args.get_info.fields) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
-            }                                                  /* end else-if */
-            else if (loc_params->type == H5VL_OBJECT_BY_IDX) { /* H5Oget_info_by_idx */
-                H5G_loc_t  obj_loc;                            /* Location used to open group */
-                H5G_name_t obj_path;                           /* Opened object group hier. path */
-                H5O_loc_t  obj_oloc;                           /* Opened object object location */
+            } /* end else-if */
+            else if (loc_params->type == H5VL_OBJECT_BY_IDX) {
+                H5G_loc_t  obj_loc;  /* Location used to open group */
+                H5G_name_t obj_path; /* Opened object group hier. path */
+                H5O_loc_t  obj_oloc; /* Opened object object location */
 
                 /* Set up opened group location to fill in */
                 obj_loc.oloc = &obj_oloc;
@@ -308,7 +287,7 @@ H5VL__native_object_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_obj
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "group not found")
 
                 /* Retrieve the object's information */
-                if (H5O_get_info(obj_loc.oloc, oinfo, fields) < 0) {
+                if (H5O_get_info(obj_loc.oloc, args->args.get_info.oinfo, args->args.get_info.fields) < 0) {
                     H5G_loc_free(&obj_loc);
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't retrieve object info")
                 } /* end if */
