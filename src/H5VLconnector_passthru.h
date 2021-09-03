@@ -110,8 +110,8 @@ H5_DLL herr_t H5VLdataset_read(void *dset, hid_t connector_id, hid_t mem_type_id
                                hid_t file_space_id, hid_t plist_id, void *buf, void **req);
 H5_DLL herr_t H5VLdataset_write(void *dset, hid_t connector_id, hid_t mem_type_id, hid_t mem_space_id,
                                 hid_t file_space_id, hid_t plist_id, const void *buf, void **req);
-H5_DLL herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_t get_type, hid_t dxpl_id,
-                              void **req, va_list arguments);
+H5_DLL herr_t H5VLdataset_get(void *dset, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
+                              void **req);
 H5_DLL herr_t H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_t specific_type,
                                    hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_dataset_optional_t opt_type,

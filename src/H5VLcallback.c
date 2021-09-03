@@ -92,8 +92,8 @@ static herr_t H5VL__dataset_read(void *dset, const H5VL_class_t *cls, hid_t mem_
                                  hid_t file_space_id, hid_t dxpl_id, void *buf, void **req);
 static herr_t H5VL__dataset_write(void *obj, const H5VL_class_t *cls, hid_t mem_type_id, hid_t mem_space_id,
                                   hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req);
-static herr_t H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_t get_type,
-                                hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_args_t *args,
+                                hid_t dxpl_id, void **req);
 static herr_t H5VL__dataset_specific(void *obj, const H5VL_class_t *cls,
                                      H5VL_dataset_specific_t specific_type, hid_t dxpl_id, void **req,
                                      va_list arguments);
@@ -2240,8 +2240,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req,
-                  va_list arguments)
+H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
+                  void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2252,7 +2252,7 @@ H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_t get_typ
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'dataset get' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->dataset_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+    if ((cls->dataset_cls.get)(obj, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "dataset get failed")
 
 done:
@@ -2270,10 +2270,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_get(const H5VL_object_t *vol_obj, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req, ...)
+H5VL_dataset_get(const H5VL_object_t *vol_obj, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -2285,16 +2283,10 @@ H5VL_dataset_get(const H5VL_object_t *vol_obj, H5VL_dataset_get_t get_type, hid_
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if (H5VL__dataset_get(vol_obj->data, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__dataset_get(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "dataset get failed")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -2313,14 +2305,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_get(void *obj, hid_t connector_id, H5VL_dataset_get_t get_type, hid_t dxpl_id, void **req /*out*/,
-                va_list arguments)
+H5VLdataset_get(void *obj, hid_t connector_id, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
+                void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVcixx", obj, connector_id, get_type, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2329,7 +2321,7 @@ H5VLdataset_get(void *obj, hid_t connector_id, H5VL_dataset_get_t get_type, hid_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__dataset_get(obj, cls, get_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__dataset_get(obj, cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute dataset get callback")
 
 done:
