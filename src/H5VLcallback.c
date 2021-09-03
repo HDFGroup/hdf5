@@ -75,8 +75,7 @@ static herr_t H5VL__attr_write(void *obj, const H5VL_class_t *cls, hid_t mem_typ
 static herr_t H5VL__attr_get(void *obj, const H5VL_class_t *cls, H5VL_attr_get_args_t *args, hid_t dxpl_id,
                              void **req);
 static herr_t H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                                  H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req,
-                                  va_list arguments);
+                                  H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL__attr_optional(void *obj, const H5VL_class_t *cls, H5VL_attr_optional_t opt_type,
                                   hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__attr_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
@@ -1443,7 +1442,7 @@ done:
  */
 static herr_t
 H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                    H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
+                    H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1454,8 +1453,9 @@ H5VL__attr_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_c
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'attr specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->attr_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute specific callback")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = (cls->attr_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute 'specific' callback");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1473,10 +1473,8 @@ done:
  */
 herr_t
 H5VL_attr_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-                   H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req, ...)
+                   H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -1488,17 +1486,12 @@ H5VL_attr_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_pa
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if ((ret_value = H5VL__attr_specific(vol_obj->data, loc_params, vol_obj->connector->cls, specific_type,
-                                         dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute specific callback")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value =
+             H5VL__attr_specific(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute 'specific' callback");
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -1518,13 +1511,13 @@ done:
  */
 herr_t
 H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                  H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req /*out*/, va_list arguments)
+                  H5VL_attr_specific_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE7("e", "*x*#iVbixx", obj, loc_params, connector_id, specific_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -1533,8 +1526,9 @@ H5VLattr_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connecto
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__attr_specific(obj, loc_params, cls, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute attribute specific callback")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = H5VL__attr_specific(obj, loc_params, cls, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute attribute 'specific' callback");
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
