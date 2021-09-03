@@ -82,7 +82,7 @@ static herr_t H5VL_pass_through_file_specific_reissue(void *obj, hid_t connector
                                                       void **req, ...);
 static herr_t H5VL_pass_through_request_specific_reissue(void *obj, hid_t connector_id,
                                                          H5VL_request_specific_t specific_type, ...);
-static herr_t H5VL_pass_through_link_create_reissue(H5VL_link_create_type_t create_type, void *obj,
+static herr_t H5VL_pass_through_link_create_reissue(H5VL_link_create_t create_type, void *obj,
                                                     const H5VL_loc_params_t *loc_params, hid_t connector_id,
                                                     hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req,
                                                     ...);
@@ -187,7 +187,7 @@ static herr_t H5VL_pass_through_group_optional(void *obj, H5VL_group_optional_t 
 static herr_t H5VL_pass_through_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
-static herr_t H5VL_pass_through_link_create(H5VL_link_create_type_t create_type, void *obj,
+static herr_t H5VL_pass_through_link_create(H5VL_link_create_t create_type, void *obj,
                                             const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
                                             hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL_pass_through_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
@@ -2165,7 +2165,7 @@ H5VL_pass_through_group_close(void *grp, hid_t dxpl_id, void **req)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_link_create_reissue(H5VL_link_create_type_t create_type, void *obj,
+H5VL_pass_through_link_create_reissue(H5VL_link_create_t create_type, void *obj,
                                       const H5VL_loc_params_t *loc_params, hid_t connector_id, hid_t lcpl_id,
                                       hid_t lapl_id, hid_t dxpl_id, void **req, ...)
 {
@@ -2191,7 +2191,7 @@ H5VL_pass_through_link_create_reissue(H5VL_link_create_type_t create_type, void 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_link_create(H5VL_link_create_type_t create_type, void *obj,
+H5VL_pass_through_link_create(H5VL_link_create_t create_type, void *obj,
                               const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
                               hid_t dxpl_id, void **req, va_list arguments)
 {

@@ -116,7 +116,7 @@ H5_DLL herr_t H5VL__native_group_optional(void *obj, H5VL_group_optional_t opt_t
 H5_DLL herr_t H5VL__native_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
-H5_DLL herr_t H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj,
+H5_DLL herr_t H5VL__native_link_create(H5VL_link_create_t create_type, void *obj,
                                        const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
                                        hid_t dxpl_id, void **req, va_list arguments);
 H5_DLL herr_t H5VL__native_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,

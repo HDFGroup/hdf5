@@ -3164,9 +3164,9 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         }     /* end block */
                         break;
 
-                        case 'k': /* H5VL_link_create_type_t */
+                        case 'k': /* H5VL_link_create_t */
                         {
-                            H5VL_link_create_type_t create = (H5VL_link_create_type_t)HDva_arg(ap, int);
+                            H5VL_link_create_t create = (H5VL_link_create_t)HDva_arg(ap, int);
 
                             switch (create) {
                                 case H5VL_LINK_CREATE_HARD:

@@ -68,7 +68,7 @@
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_link_create(H5VL_link_create_type_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
+H5VL__native_link_create(H5VL_link_create_t create_type, void *obj, const H5VL_loc_params_t *loc_params,
                          hid_t lcpl_id, hid_t H5_ATTR_UNUSED lapl_id, hid_t H5_ATTR_UNUSED dxpl_id,
                          void H5_ATTR_UNUSED **req, va_list arguments)
 {
