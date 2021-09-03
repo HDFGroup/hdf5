@@ -1106,8 +1106,9 @@ done:
 hid_t
 H5Aget_space(hid_t attr_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* Attribute object for ID */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;              /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
+    hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", attr_id);
@@ -1116,10 +1117,16 @@ H5Aget_space(hid_t attr_id)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                 = H5VL_ATTR_GET_SPACE;
+    vol_cb_args.args.get_space.space_id = H5I_INVALID_HID;
+
     /* Get the dataspace */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_SPACE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) <
-        0)
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5I_INVALID_HID, "unable to get dataspace of attribute")
+
+    /* Set the return value */
+    ret_value = vol_cb_args.args.get_space.space_id;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1144,8 +1151,9 @@ done:
 hid_t
 H5Aget_type(hid_t attr_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* Attribute object for ID */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;              /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
+    hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", attr_id);
@@ -1154,9 +1162,16 @@ H5Aget_type(hid_t attr_id)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type               = H5VL_ATTR_GET_TYPE;
+    vol_cb_args.args.get_type.type_id = H5I_INVALID_HID;
+
     /* Get the datatype */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5I_INVALID_HID, "unable to get datatype of attribute")
+
+    /* Set the return value */
+    ret_value = vol_cb_args.args.get_type.type_id;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1184,8 +1199,9 @@ done:
 hid_t
 H5Aget_create_plist(hid_t attr_id)
 {
-    H5VL_object_t *vol_obj   = NULL;            /* Attribute object for ID */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;              /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;                 /* Arguments to VOL callback */
+    hid_t                ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", attr_id);
@@ -1196,10 +1212,17 @@ H5Aget_create_plist(hid_t attr_id)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not an attribute")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type               = H5VL_ATTR_GET_ACPL;
+    vol_cb_args.args.get_acpl.acpl_id = H5I_INVALID_HID;
+
     /* Get the acpl */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_ACPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) < 0)
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, H5I_INVALID_HID,
                     "unable to get creation property list for attribute")
+
+    /* Set the return value */
+    ret_value = vol_cb_args.args.get_acpl.acpl_id;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1229,9 +1252,10 @@ done:
 ssize_t
 H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Attribute object for ID */
-    H5VL_loc_params_t loc_params;
-    ssize_t           ret_value = -1;
+    H5VL_object_t *      vol_obj = NULL;     /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;        /* Arguments to VOL callback */
+    size_t               attr_name_len = 0;  /* Length of attribute name */
+    ssize_t              ret_value     = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "izx", attr_id, buf_size, buf);
@@ -1242,14 +1266,20 @@ H5Aget_name(hid_t attr_id, size_t buf_size, char *buf /*out*/)
     if (!buf && buf_size)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, (-1), "buf cannot be NULL if buf_size is non-zero")
 
-    /* Set location struct parameters */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(attr_id);
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                           = H5VL_ATTR_GET_NAME;
+    vol_cb_args.args.get_name.loc_params.type     = H5VL_OBJECT_BY_SELF;
+    vol_cb_args.args.get_name.loc_params.obj_type = H5I_get_type(attr_id);
+    vol_cb_args.args.get_name.buf_size            = buf_size;
+    vol_cb_args.args.get_name.buf                 = buf;
+    vol_cb_args.args.get_name.attr_name_len       = &attr_name_len;
 
     /* Get the attribute name */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params,
-                      buf_size, buf, &ret_value) < 0)
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, (-1), "unable to get attribute name")
+
+    /* Set the return value */
+    ret_value = (ssize_t)attr_name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1276,9 +1306,10 @@ ssize_t
 H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                    char *name /*out*/, size_t size, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
-    H5VL_loc_params_t loc_params;
-    ssize_t           ret_value; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;    /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;       /* Arguments to VOL callback */
+    size_t               attr_name_len = 0; /* Length of attribute name */
+    ssize_t              ret_value;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("Zs", "i*sIiIohxzi", loc_id, obj_name, idx_type, order, n, name, size, lapl_id);
@@ -1303,18 +1334,25 @@ H5Aget_name_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
-    loc_params.type                         = H5VL_OBJECT_BY_IDX;
-    loc_params.loc_data.loc_by_idx.name     = obj_name;
-    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
-    loc_params.loc_data.loc_by_idx.order    = order;
-    loc_params.loc_data.loc_by_idx.n        = n;
-    loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                                               = H5VL_ATTR_GET_NAME;
+    vol_cb_args.args.get_name.loc_params.type                         = H5VL_OBJECT_BY_IDX;
+    vol_cb_args.args.get_name.loc_params.loc_data.loc_by_idx.name     = obj_name;
+    vol_cb_args.args.get_name.loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    vol_cb_args.args.get_name.loc_params.loc_data.loc_by_idx.order    = order;
+    vol_cb_args.args.get_name.loc_params.loc_data.loc_by_idx.n        = n;
+    vol_cb_args.args.get_name.loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
+    vol_cb_args.args.get_name.loc_params.obj_type                     = H5I_get_type(loc_id);
+    vol_cb_args.args.get_name.buf_size                                = size;
+    vol_cb_args.args.get_name.buf                                     = name;
+    vol_cb_args.args.get_name.attr_name_len                           = &attr_name_len;
 
     /* Get the name */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params,
-                      size, name, &ret_value) < 0)
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get name")
+
+    /* Set the return value */
+    ret_value = (ssize_t)attr_name_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1340,8 +1378,10 @@ done:
 hsize_t
 H5Aget_storage_size(hid_t attr_id)
 {
-    H5VL_object_t *vol_obj;
-    hsize_t        ret_value; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;   /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;      /* Arguments to VOL callback */
+    hsize_t              storage_size = 0; /* Storage size of attribute */
+    hsize_t              ret_value;        /* Return value */
 
     FUNC_ENTER_API(0)
     H5TRACE1("h", "i", attr_id);
@@ -1350,10 +1390,16 @@ H5Aget_storage_size(hid_t attr_id)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(attr_id, H5I_ATTR)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, 0, "not an attribute")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                         = H5VL_ATTR_GET_STORAGE_SIZE;
+    vol_cb_args.args.get_storage_size.data_size = &storage_size;
+
     /* Get the storage size */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_STORAGE_SIZE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                      &ret_value) < 0)
-        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, 0, "unable to get acpl")
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
+        HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, 0, "unable to get storage size")
+
+    /* Set the return value */
+    ret_value = storage_size;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1375,9 +1421,9 @@ done:
 herr_t
 H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
 {
-    H5VL_object_t *   vol_obj;
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;      /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", attr_id, ainfo);
@@ -1388,12 +1434,15 @@ H5Aget_info(hid_t attr_id, H5A_info_t *ainfo /*out*/)
     if (!ainfo)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "attribute_info parameter cannot be NULL")
 
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = H5I_get_type(attr_id);
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                           = H5VL_ATTR_GET_INFO;
+    vol_cb_args.args.get_info.loc_params.type     = H5VL_OBJECT_BY_SELF;
+    vol_cb_args.args.get_info.loc_params.obj_type = H5I_get_type(attr_id);
+    vol_cb_args.args.get_info.attr_name           = NULL;
+    vol_cb_args.args.get_info.ainfo               = ainfo;
 
     /* Get the attribute information */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params,
-                      ainfo) < 0)
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1417,9 +1466,9 @@ herr_t
 H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H5A_info_t *ainfo /*out*/,
                     hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;      /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*s*sxi", loc_id, obj_name, attr_name, ainfo, lapl_id);
@@ -1438,18 +1487,21 @@ H5Aget_info_by_name(hid_t loc_id, const char *obj_name, const char *attr_name, H
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    loc_params.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params.loc_data.loc_by_name.name    = obj_name;
-    loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
-
     /* Get the object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                                               = H5VL_ATTR_GET_INFO;
+    vol_cb_args.args.get_info.loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    vol_cb_args.args.get_info.loc_params.loc_data.loc_by_name.name    = obj_name;
+    vol_cb_args.args.get_info.loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
+    vol_cb_args.args.get_info.loc_params.obj_type                     = H5I_get_type(loc_id);
+    vol_cb_args.args.get_info.attr_name                               = attr_name;
+    vol_cb_args.args.get_info.ainfo                                   = ainfo;
+
     /* Get the attribute information */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params,
-                      ainfo, attr_name) < 0)
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:
@@ -1474,9 +1526,9 @@ herr_t
 H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order, hsize_t n,
                    H5A_info_t *ainfo /*out*/, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj;
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *      vol_obj = NULL;      /* Attribute object for ID */
+    H5VL_attr_get_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE7("e", "i*sIiIohxi", loc_id, obj_name, idx_type, order, n, ainfo, lapl_id);
@@ -1497,21 +1549,24 @@ H5Aget_info_by_idx(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_i
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    loc_params.type                         = H5VL_OBJECT_BY_IDX;
-    loc_params.loc_data.loc_by_idx.name     = obj_name;
-    loc_params.loc_data.loc_by_idx.idx_type = idx_type;
-    loc_params.loc_data.loc_by_idx.order    = order;
-    loc_params.loc_data.loc_by_idx.n        = n;
-    loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
-
     /* Get the object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                                               = H5VL_ATTR_GET_INFO;
+    vol_cb_args.args.get_info.loc_params.type                         = H5VL_OBJECT_BY_IDX;
+    vol_cb_args.args.get_info.loc_params.loc_data.loc_by_idx.name     = obj_name;
+    vol_cb_args.args.get_info.loc_params.loc_data.loc_by_idx.idx_type = idx_type;
+    vol_cb_args.args.get_info.loc_params.loc_data.loc_by_idx.order    = order;
+    vol_cb_args.args.get_info.loc_params.loc_data.loc_by_idx.n        = n;
+    vol_cb_args.args.get_info.loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
+    vol_cb_args.args.get_info.loc_params.obj_type                     = H5I_get_type(loc_id);
+    vol_cb_args.args.get_info.attr_name                               = NULL;
+    vol_cb_args.args.get_info.ainfo                                   = ainfo;
+
     /* Get the attribute information */
-    if (H5VL_attr_get(vol_obj, H5VL_ATTR_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params,
-                      ainfo) < 0)
+    if (H5VL_attr_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTGET, FAIL, "unable to get attribute info")
 
 done:

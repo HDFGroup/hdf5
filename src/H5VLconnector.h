@@ -876,7 +876,7 @@ typedef struct H5VL_attr_class_t {
                   hid_t dxpl_id, void **req);
     herr_t (*read)(void *attr, hid_t mem_type_id, void *buf, hid_t dxpl_id, void **req);
     herr_t (*write)(void *attr, hid_t mem_type_id, const void *buf, hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*get)(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_attr_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
     herr_t (*optional)(void *obj, H5VL_attr_optional_t opt_type, hid_t dxpl_id, void **req,

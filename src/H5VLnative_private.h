@@ -49,8 +49,7 @@ void *        H5VL__native_attr_open(void *obj, const H5VL_loc_params_t *loc_par
                                      hid_t aapl_id, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_attr_read(void *attr, hid_t dtype_id, void *buf, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_attr_write(void *attr, hid_t dtype_id, const void *buf, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL__native_attr_get(void *obj, H5VL_attr_get_t get_type, hid_t dxpl_id, void **req,
-                                    va_list arguments);
+H5_DLL herr_t H5VL__native_attr_get(void *obj, H5VL_attr_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_attr_specific(void *obj, const H5VL_loc_params_t *loc_params,
                                          H5VL_attr_specific_t specific_type, hid_t dxpl_id, void **req,
                                          va_list arguments);
