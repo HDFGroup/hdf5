@@ -320,7 +320,7 @@ H5A__create_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, obj_name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
     /* Verify access property list and set up collective metadata if appropriate */
@@ -630,7 +630,7 @@ H5A__open_by_name_api_common(hid_t loc_id, const char *obj_name, const char *att
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, obj_name, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
     /* Verify access property list and set up collective metadata if appropriate */
@@ -764,8 +764,8 @@ H5A__open_by_idx_api_common(hid_t loc_id, const char *obj_name, H5_index_t idx_t
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, H5I_INVALID_HID, "invalid iteration order specified")
 
     /* Set up object access arguments */
-    if (H5VL_setup_idx_args(loc_id, obj_name, idx_type, order, n, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr,
-                            &loc_params) < 0)
+    if (H5VL_setup_idx_args(loc_id, obj_name, idx_type, order, n, FALSE, lapl_id, vol_obj_ptr, &loc_params) <
+        0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
     /* Verify access property list and set up collective metadata if appropriate */
@@ -1057,7 +1057,7 @@ done:
  *--------------------------------------------------------------------------*/
 herr_t
 H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid_t attr_id, hid_t dtype_id,
-              void *buf, hid_t es_id)
+              void *buf /*out*/, hid_t es_id)
 {
     H5VL_object_t *vol_obj   = NULL;            /* Object for attr_id */
     void *         token     = NULL;            /* Request token for async operation        */
@@ -1065,7 +1065,7 @@ H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     herr_t         ret_value = SUCCEED;         /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE7("e", "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id);
+    H5TRACE7("e", "*s*sIuiixi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id);
 
     /* Set up request token pointer for asynchronous operation */
     if (H5ES_NONE != es_id)
@@ -1079,7 +1079,7 @@ H5Aread_async(const char *app_file, const char *app_func, unsigned app_line, hid
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(__func__, "*s*sIuii*xi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id)) < 0)
+                        H5ARG_TRACE7(__func__, "*s*sIuiixi", app_file, app_func, app_line, attr_id, dtype_id, buf, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_ATTR, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -1700,7 +1700,7 @@ H5A__rename_by_name_api_common(hid_t loc_id, const char *obj_name, const char *o
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, obj_name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Rename the attribute */
@@ -1837,7 +1837,7 @@ H5Aiterate2(hid_t loc_id, H5_index_t idx_type, H5_iter_order_t order, hsize_t *i
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iIiIo*hAO*x", loc_id, idx_type, order, idx, op, op_data);
 
-    /* check arguments */
+    /* Check arguments */
     if (H5I_ATTR == H5I_get_type(loc_id))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "location is not valid for an attribute")
     if (idx_type <= H5_INDEX_UNKNOWN || idx_type >= H5_INDEX_N)
@@ -2400,7 +2400,7 @@ H5A__exists_by_name_api_common(hid_t loc_id, const char *obj_name, const char *a
 
     /* obj_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, obj_name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, obj_name, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_ATTR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Check if the attribute exists */

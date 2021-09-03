@@ -298,10 +298,8 @@ H5L__create_soft_api_common(const char *link_target, hid_t link_loc_id, const ch
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, link_loc_id, TRUE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
-    /* link_name is verified in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(link_loc_id, link_name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) <
-        0)
+    if (H5VL_setup_name_args(link_loc_id, link_name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Create the link */
@@ -726,7 +724,7 @@ H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t link_type, con
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(link_loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
-    /* Create external link */
+    /* Create user-defined link */
     if (H5VL_link_create(H5VL_LINK_CREATE_UD, vol_obj, &loc_params, lcpl_id, lapl_id,
                          H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, (int)link_type, udata, udata_size) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTINIT, FAIL, "unable to create link")
@@ -760,10 +758,10 @@ H5L__delete_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **tok
     /* name is verified in H5VL_setup_name_args() */
 
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, name, TRUE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
-    /* Unlink */
+    /* Delete link */
     if (H5VL_link_specific(*vol_obj_ptr, &loc_params, H5VL_LINK_DELETE, H5P_DATASET_XFER_DEFAULT, token_ptr) <
         0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTDELETE, FAIL, "unable to delete link")
@@ -878,8 +876,8 @@ H5L__delete_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t i
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid iteration order specified")
 
     /* Set up object access arguments */
-    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, H5P_CLS_LACC, TRUE, lapl_id, vol_obj_ptr,
-                            &loc_params) < 0)
+    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, TRUE, lapl_id, vol_obj_ptr, &loc_params) <
+        0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Delete the link */
@@ -1008,12 +1006,13 @@ H5Lget_val(hid_t loc_id, const char *name, void *buf /*out*/, size_t size, hid_t
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_NAME;
     loc_params.obj_type                     = H5I_get_type(loc_id);
     loc_params.loc_data.loc_by_name.name    = name;
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
 
-    /* Get the location object */
+    /* Get the VOL object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
@@ -1067,6 +1066,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set up location struct */
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name     = group_name;
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
@@ -1075,7 +1075,7 @@ H5Lget_val_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_
     loc_params.loc_data.loc_by_idx.lapl_id  = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
-    /* get the location object */
+    /* Get the VOL object */
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
@@ -1115,7 +1115,7 @@ H5L__exists_api_common(hid_t loc_id, const char *name, hbool_t *exists, hid_t la
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid pointer for link existence")
 
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Check for the existence of the link */

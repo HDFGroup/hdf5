@@ -112,7 +112,7 @@ H5O__open_api_common(hid_t loc_id, const char *name, hid_t lapl_id, void **token
 
     /* name is checked in this H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
     /* Open the object */
@@ -239,7 +239,7 @@ H5O__open_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t idx
     /* Check args */
     /* group_name, idx_type, order are checked in H5VL_setup_idx-args() */
     /* Set up object access arguments */
-    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr,
+    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, FALSE, lapl_id, vol_obj_ptr,
                             &loc_params) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_CANTSET, H5I_INVALID_HID, "can't set object access arguments")
 
@@ -1126,7 +1126,7 @@ H5O__get_info_by_name_api_common(hid_t loc_id, const char *name, H5O_info2_t *oi
 
     /* "name" is checked in H5VL_setup_name_args() */
     /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
     /* Retrieve the object's information */
