@@ -745,7 +745,6 @@ New Features
 
     Fortran Library:
     ----------------
-
     - H5Fget_name_f fixed to handle correctly trailing whitespaces and
       newly allocated buffers.
 
