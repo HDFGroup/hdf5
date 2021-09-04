@@ -192,6 +192,7 @@ H5_DLL herr_t H5VLobject_optional(void *obj, hid_t connector_id, H5VL_object_opt
 /* Public wrappers for connector/container introspection callbacks */
 H5_DLL herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl,
                                           const H5VL_class_t **conn_cls);
+H5_DLL herr_t H5VLintrospect_get_cap_flags(const void *info, hid_t connector_id, unsigned *cap_flags);
 H5_DLL herr_t H5VLintrospect_opt_query(void *obj, hid_t connector_id, H5VL_subclass_t subcls, int opt_type,
                                        uint64_t *flags);
 
