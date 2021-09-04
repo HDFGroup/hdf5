@@ -150,12 +150,12 @@ H5_DLL void * H5VLgroup_create(void *obj, const H5VL_loc_params_t *loc_params, h
                                void **req);
 H5_DLL void * H5VLgroup_open(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                              const char *name, hid_t gapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_t get_type, hid_t dxpl_id,
-                            void **req, va_list arguments);
-H5_DLL herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_t specific_type,
-                                 hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_group_optional_t opt_type, hid_t dxpl_id,
-                                 void **req, va_list arguments);
+H5_DLL herr_t H5VLgroup_get(void *obj, hid_t connector_id, H5VL_group_get_args_t *args, hid_t dxpl_id,
+                            void **req);
+H5_DLL herr_t H5VLgroup_specific(void *obj, hid_t connector_id, H5VL_group_specific_args_t *args,
+                                 hid_t dxpl_id, void **req);
+H5_DLL herr_t H5VLgroup_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+                                 void **req);
 H5_DLL herr_t H5VLgroup_close(void *grp, hid_t connector_id, hid_t dxpl_id, void **req);
 
 /* Public wrappers for link callbacks */

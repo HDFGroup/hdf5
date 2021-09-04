@@ -794,12 +794,11 @@ done:
 herr_t
 H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *op_data)
 {
-    H5VL_object_t *    vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t  loc_params;
-    H5G_link_iterate_t lnk_op;    /* Link operator                    */
-    hsize_t            last_obj;  /* Index of last object looked at   */
-    hsize_t            idx;       /* Internal location to hold index  */
-    herr_t             ret_value; /* Return value                     */
+    H5VL_object_t *                   vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t              vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_group_optional_args_t grp_opt_args; /* Arguments for optional operation */
+    hsize_t                           last_obj = 0; /* Pointer to index value */
+    herr_t                            ret_value;    /* Return value                     */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*s*IsGi*x", loc_id, name, idx_p, op, op_data);
@@ -812,30 +811,28 @@ H5Giterate(hid_t loc_id, const char *name, int *idx_p, H5G_iterate_t op, void *o
     if (!op)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no operator specified")
 
-    /* Set number of objects looked at to zero */
-    last_obj = 0;
-    idx      = (hsize_t)(idx_p == NULL ? 0 : *idx_p);
-
-    /* Build link operator info */
-    lnk_op.op_type        = H5G_LINK_OP_OLD;
-    lnk_op.op_func.op_old = op;
-
-    /* Fill out location struct */
-    loc_params.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params.loc_data.loc_by_name.name    = name;
-    loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
-
     /* Get the object pointer */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ID, H5E_BADTYPE, (-1), "invalid identifier")
 
+    /* Set up VOL callback arguments */
+    grp_opt_args.iterate_old.loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    grp_opt_args.iterate_old.loc_params.loc_data.loc_by_name.name    = name;
+    grp_opt_args.iterate_old.loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    grp_opt_args.iterate_old.loc_params.obj_type                     = H5I_get_type(loc_id);
+    grp_opt_args.iterate_old.idx                                     = (hsize_t)(idx_p == NULL ? 0 : *idx_p);
+    grp_opt_args.iterate_old.last_obj                                = &last_obj;
+    grp_opt_args.iterate_old.op                                      = op;
+    grp_opt_args.iterate_old.op_data                                 = op_data;
+    vol_cb_args.op_type                                              = H5VL_NATIVE_GROUP_ITERATE_OLD;
+    vol_cb_args.args                                                 = &grp_opt_args;
+
     /* Call private iteration function, through VOL callback */
-    if ((ret_value = H5VL_group_optional(vol_obj, H5VL_NATIVE_GROUP_ITERATE_OLD, H5P_DATASET_XFER_DEFAULT,
-                                         H5_REQUEST_NULL, &loc_params, idx, &last_obj, &lnk_op, op_data)) < 0)
+    if ((ret_value = H5VL_group_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL)) <
+        0)
         HERROR(H5E_SYM, H5E_BADITER, "error iterating over group's links");
 
-    /* Set the index we stopped at */
+    /* Set value to return */
     if (idx_p)
         *idx_p = (int)last_obj;
 
@@ -862,11 +859,11 @@ done:
 herr_t
 H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs /*out*/)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5I_type_t        id_type; /* Type of ID */
-    H5VL_loc_params_t loc_params;
-    H5G_info_t        grp_info;            /* Group information */
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *       vol_obj = NULL;      /* Object of loc_id */
+    H5VL_group_get_args_t vol_cb_args;         /* Arguments to VOL callback */
+    H5I_type_t            id_type;             /* Type of ID */
+    H5G_info_t            grp_info;            /* Group information */
+    herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "ix", loc_id, num_objs);
@@ -878,17 +875,14 @@ H5Gget_num_objs(hid_t loc_id, hsize_t *num_objs /*out*/)
     if (!num_objs)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad pointer to # of objects")
 
-    /* Fill in location struct fields */
-    loc_params.type     = H5VL_OBJECT_BY_SELF;
-    loc_params.obj_type = id_type;
-
-    /* Get group location */
-    if (NULL == (vol_obj = (H5VL_object_t *)H5I_object(loc_id)))
-        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
+    /* Set up VOL callback & object access arguments */
+    vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
+    if (H5VL_setup_self_args(loc_id, &vol_obj, &vol_cb_args.args.get_info.loc_params) < 0)
+        HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments")
+    vol_cb_args.args.get_info.ginfo = &grp_info;
 
     /* Retrieve the group's information */
-    if (H5VL_group_get(vol_obj, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &loc_params,
-                       &grp_info) < 0)
+    if (H5VL_group_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
 
     /* Set the number of objects [i.e. links] in the group */
@@ -918,9 +912,10 @@ done:
 herr_t
 H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *statbuf /*out*/)
 {
-    H5VL_object_t *   vol_obj = NULL; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                   vol_obj = NULL;      /* Object of loc_id */
+    H5VL_optional_args_t              vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_native_group_optional_args_t grp_opt_args;        /* Arguments for optional operation */
+    herr_t                            ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL);
     H5TRACE4("e", "i*sbx", loc_id, name, follow_link, statbuf);
@@ -933,20 +928,22 @@ H5Gget_objinfo(hid_t loc_id, const char *name, hbool_t follow_link, H5G_stat_t *
     if (H5CX_set_loc(loc_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info");
 
-    /* Retrieve object info */
-    /* Fill out location struct */
-    loc_params.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params.loc_data.loc_by_name.name    = name;
-    loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    loc_params.obj_type                     = H5I_get_type(loc_id);
-
     /* Get the location object */
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier");
 
+    /* Set up VOL callback arguments */
+    grp_opt_args.get_objinfo.loc_params.type                         = H5VL_OBJECT_BY_NAME;
+    grp_opt_args.get_objinfo.loc_params.loc_data.loc_by_name.name    = name;
+    grp_opt_args.get_objinfo.loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
+    grp_opt_args.get_objinfo.loc_params.obj_type                     = H5I_get_type(loc_id);
+    grp_opt_args.get_objinfo.follow_link                             = follow_link;
+    grp_opt_args.get_objinfo.statbuf                                 = statbuf;
+    vol_cb_args.op_type                                              = H5VL_NATIVE_GROUP_GET_OBJINFO;
+    vol_cb_args.args                                                 = &grp_opt_args;
+
     /* Retrieve the object's information */
-    if (H5VL_group_optional(vol_obj, H5VL_NATIVE_GROUP_GET_OBJINFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                            &loc_params, (unsigned)follow_link, statbuf) < 0)
+    if (H5VL_group_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "can't get info for object: '%s'", name);
 
 done:

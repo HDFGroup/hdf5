@@ -526,6 +526,8 @@ typedef struct H5VL_group_get_args_t {
 
 /* Values for group 'specific' operation */
 typedef enum H5VL_group_specific_t {
+    H5VL_GROUP_MOUNT,   /* Mount a file on a group          */
+    H5VL_GROUP_UNMOUNT, /* Unmount a file on a group        */
     H5VL_GROUP_FLUSH,   /* H5Gflush                         */
     H5VL_GROUP_REFRESH  /* H5Grefresh                       */
 } H5VL_group_specific_t;
@@ -935,11 +937,9 @@ typedef struct H5VL_group_class_t {
                     hid_t gcpl_id, hid_t gapl_id, hid_t dxpl_id, void **req);
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t gapl_id,
                   hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*specific)(void *obj, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
-    herr_t (*optional)(void *obj, H5VL_group_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*get)(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req);
+    herr_t (*specific)(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req);
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *grp, hid_t dxpl_id, void **req);
 } H5VL_group_class_t;
 
@@ -1126,6 +1126,8 @@ H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 /* User-defined optional operations */
 H5_DLL herr_t H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                    hid_t attr_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
+H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+                                    hid_t group_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 
 /* API Wrappers for "optional_op" routines */
 /* (Must be defined _after_ the function prototype) */
@@ -1133,11 +1135,13 @@ H5_DLL herr_t H5VLattr_optional_op(const char *app_file, const char *app_func, u
 #ifndef H5VL_MODULE
 /* Inject application compile-time macros into function calls */
 #define H5VLattr_optional_op(...)     H5VLattr_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLgroup_optional_op(...)    H5VLgroup_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
 #define H5VLattr_optional_op_wrap     H5_NO_EXPAND(H5VLattr_optional_op)
+#define H5VLgroup_optional_op_wrap    H5_NO_EXPAND(H5VLgroup_optional_op)
 #endif /* H5VL_MODULE */
 
 #ifdef __cplusplus

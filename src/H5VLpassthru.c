@@ -176,12 +176,11 @@ static void * H5VL_pass_through_group_create(void *obj, const H5VL_loc_params_t 
                                              void **req);
 static void * H5VL_pass_through_group_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                                            hid_t gapl_id, hid_t dxpl_id, void **req);
-static herr_t H5VL_pass_through_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req,
-                                          va_list arguments);
-static herr_t H5VL_pass_through_group_specific(void *obj, H5VL_group_specific_t specific_type, hid_t dxpl_id,
-                                               void **req, va_list arguments);
-static herr_t H5VL_pass_through_group_optional(void *obj, H5VL_group_optional_t opt_type, hid_t dxpl_id,
-                                               void **req, va_list arguments);
+static herr_t H5VL_pass_through_group_get(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL_pass_through_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id,
+                                               void **req);
+static herr_t H5VL_pass_through_group_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id,
+                                               void **req);
 static herr_t H5VL_pass_through_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
@@ -2028,8 +2027,7 @@ H5VL_pass_through_group_open(void *obj, const H5VL_loc_params_t *loc_params, con
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id, void **req,
-                            va_list arguments)
+H5VL_pass_through_group_get(void *obj, H5VL_group_get_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -2038,7 +2036,7 @@ H5VL_pass_through_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id,
     printf("------- PASS THROUGH VOL GROUP Get\n");
 #endif
 
-    ret_value = H5VLgroup_get(o->under_object, o->under_vol_id, get_type, dxpl_id, req, arguments);
+    ret_value = H5VLgroup_get(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
@@ -2058,8 +2056,7 @@ H5VL_pass_through_group_get(void *obj, H5VL_group_get_t get_type, hid_t dxpl_id,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_group_specific(void *obj, H5VL_group_specific_t specific_type, hid_t dxpl_id, void **req,
-                                 va_list arguments)
+H5VL_pass_through_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     hid_t                under_vol_id;
@@ -2069,11 +2066,27 @@ H5VL_pass_through_group_specific(void *obj, H5VL_group_specific_t specific_type,
     printf("------- PASS THROUGH VOL GROUP Specific\n");
 #endif
 
-    // Save copy of underlying VOL connector ID and prov helper, in case of
-    // refresh destroying the current object
+    /* Save copy of underlying VOL connector ID, in case of
+     * 'refresh' operation destroying the current object
+     */
     under_vol_id = o->under_vol_id;
 
-    ret_value = H5VLgroup_specific(o->under_object, o->under_vol_id, specific_type, dxpl_id, req, arguments);
+    /* Unpack arguments to get at the child file pointer when mounting a file */
+    if (args->op_type == H5VL_GROUP_MOUNT) {
+        H5VL_group_specific_args_t vol_cb_args; /* New group specific arg struct */
+
+        /* Set up new VOL callback arguments */
+        vol_cb_args.op_type         = H5VL_GROUP_MOUNT;
+        vol_cb_args.args.mount.name = args->args.mount.name;
+        vol_cb_args.args.mount.child_file =
+            ((H5VL_pass_through_t *)args->args.mount.child_file)->under_object;
+        vol_cb_args.args.mount.fmpl_id = args->args.mount.fmpl_id;
+
+        /* Re-issue 'group specific' call, using the unwrapped pieces */
+        ret_value = H5VLgroup_specific(o->under_object, under_vol_id, &vol_cb_args, dxpl_id, req);
+    } /* end if */
+    else
+        ret_value = H5VLgroup_specific(o->under_object, under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
@@ -2093,8 +2106,7 @@ H5VL_pass_through_group_specific(void *obj, H5VL_group_specific_t specific_type,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_group_optional(void *obj, H5VL_group_optional_t opt_type, hid_t dxpl_id, void **req,
-                                 va_list arguments)
+H5VL_pass_through_group_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -2103,7 +2115,7 @@ H5VL_pass_through_group_optional(void *obj, H5VL_group_optional_t opt_type, hid_
     printf("------- PASS THROUGH VOL GROUP Optional\n");
 #endif
 
-    ret_value = H5VLgroup_optional(o->under_object, o->under_vol_id, opt_type, dxpl_id, req, arguments);
+    ret_value = H5VLgroup_optional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
