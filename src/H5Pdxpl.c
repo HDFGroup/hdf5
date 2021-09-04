@@ -68,7 +68,7 @@
 #define H5D_XFER_BTREE_SPLIT_RATIO_SIZE sizeof(double[3])
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEF                                                                       \
     {                                                                                                        \
-        0.1f, 0.5f, 0.9f                                                                                     \
+        0.1, 0.5, 0.9                                                                                        \
     }
 #define H5D_XFER_BTREE_SPLIT_RATIO_ENC H5P__dxfr_btree_split_ratio_enc
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEC H5P__dxfr_btree_split_ratio_dec
@@ -2281,7 +2281,7 @@ herr_t
 H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper_t op, const hsize_t start[],
                                       const hsize_t stride[], const hsize_t count[], const hsize_t block[])
 {
-    H5P_genplist_t *plist;                         /* Property list pointer */
+    H5P_genplist_t *plist = NULL;                  /* Property list pointer */
     H5S_t *         space;                         /* Dataspace to hold selection */
     hbool_t         space_created       = FALSE;   /* Whether a new dataspace has been created */
     hbool_t         reset_prop_on_error = FALSE;   /* Whether to reset the property on failure */
@@ -2371,7 +2371,7 @@ H5Pset_dataset_io_hyperslab_selection(hid_t plist_id, unsigned rank, H5S_seloper
 done:
     /* Cleanup on failure */
     if (ret_value < 0) {
-        if (reset_prop_on_error && H5P_poke(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
+        if (reset_prop_on_error && plist && H5P_poke(plist, H5D_XFER_DSET_IO_SEL_NAME, &space) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "error setting dataset I/O selection")
         if (space_created && H5S_close(space) < 0)
             HDONE_ERROR(H5E_PLIST, H5E_CLOSEERROR, FAIL, "unable to release dataspace")

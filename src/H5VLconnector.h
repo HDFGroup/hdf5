@@ -1123,6 +1123,9 @@ H5_DLL hid_t H5VLpeek_connector_id_by_name(const char *name);
 H5_DLL hid_t H5VLpeek_connector_id_by_value(H5VL_class_value_t value);
 
 /* User-defined optional operations */
+H5_DLL herr_t H5VLregister_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);
+H5_DLL herr_t H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name, int *op_val);
+H5_DLL herr_t H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name);
 H5_DLL herr_t H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                    hid_t attr_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_line,

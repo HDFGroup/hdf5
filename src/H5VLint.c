@@ -2855,3 +2855,45 @@ H5VL_setup_token_args(hid_t loc_id, H5O_token_t *obj_token, H5VL_object_t **vol_
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_setup_token_args() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL_get_cap_flags
+ *
+ * Purpose:     Query capability flags for connector property.
+ *
+ * Note:        VOL connector set with HDF5_VOL_CONNECTOR overrides the
+ *              property passed in.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_get_cap_flags(const H5VL_connector_prop_t *connector_prop, unsigned *cap_flags)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity check */
+    HDassert(connector_prop);
+
+    /* Copy the connector ID & info, if there is one */
+    if (connector_prop->connector_id > 0) {
+        H5VL_class_t *connector; /* Pointer to connector */
+
+        /* Retrieve the connector for the ID */
+        if (NULL == (connector = (H5VL_class_t *)H5I_object(connector_prop->connector_id)))
+            HGOTO_ERROR(H5E_PLIST, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+        /* Query the connector's capability flags */
+        if (H5VL_introspect_get_cap_flags(connector_prop->connector_info, connector, cap_flags) < 0)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't query connector's capability flags")
+    } /* end if */
+    else
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "connector ID not set?")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_get_cap_flags() */

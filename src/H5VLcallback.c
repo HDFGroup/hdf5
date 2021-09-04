@@ -7358,8 +7358,7 @@ herr_t
 H5VL_token_cmp(const H5VL_object_t *vol_obj, const H5O_token_t *token1, const H5O_token_t *token2,
                int *cmp_value)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7367,20 +7366,11 @@ H5VL_token_cmp(const H5VL_object_t *vol_obj, const H5O_token_t *token1, const H5
     HDassert(vol_obj);
     HDassert(cmp_value);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__token_cmp(vol_obj->data, vol_obj->connector->cls, token1, token2, cmp_value)) < 0)
+    if (H5VL__token_cmp(vol_obj->data, vol_obj->connector->cls, token1, token2, cmp_value) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTCOMPARE, FAIL, "token compare failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_token_cmp() */
 
@@ -7477,8 +7467,7 @@ herr_t
 H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const H5O_token_t *token,
                   char **token_str)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7487,21 +7476,11 @@ H5VL_token_to_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const H5O_t
     HDassert(token);
     HDassert(token_str);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__token_to_str(vol_obj->data, obj_type, vol_obj->connector->cls, token, token_str)) <
-        0)
+    if (H5VL__token_to_str(vol_obj->data, obj_type, vol_obj->connector->cls, token, token_str) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSERIALIZE, FAIL, "token serialization failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_token_to_str() */
 
@@ -7595,8 +7574,7 @@ herr_t
 H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const char *token_str,
                     H5O_token_t *token)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7605,21 +7583,11 @@ H5VL_token_from_str(const H5VL_object_t *vol_obj, H5I_type_t obj_type, const cha
     HDassert(token);
     HDassert(token_str);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
-    if ((ret_value =
-             H5VL__token_from_str(vol_obj->data, obj_type, vol_obj->connector->cls, token_str, token)) < 0)
+    if (H5VL__token_from_str(vol_obj->data, obj_type, vol_obj->connector->cls, token_str, token) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTUNSERIALIZE, FAIL, "token deserialization failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_token_from_str() */
 

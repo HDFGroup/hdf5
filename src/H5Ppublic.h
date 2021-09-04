@@ -22,16 +22,17 @@
 
 /* Public headers needed by this file */
 #include "H5public.h"
-#include "H5ACpublic.h"
-#include "H5Dpublic.h"
-#include "H5Fpublic.h"
-#include "H5FDpublic.h"
-#include "H5Ipublic.h"
-#include "H5Lpublic.h"
-#include "H5Opublic.h"
-#include "H5MMpublic.h"
-#include "H5Tpublic.h"
-#include "H5Zpublic.h"
+#include "H5ACpublic.h" /* Metadata cache                           */
+#include "H5Dpublic.h"  /* Datasets                                 */
+#include "H5Fpublic.h"  /* Files                                    */
+#include "H5FDpublic.h" /* File drivers                             */
+#include "H5Ipublic.h"  /* ID management                            */
+#include "H5Lpublic.h"  /* Links                                    */
+#include "H5MMpublic.h" /* Memory management                        */
+#include "H5Opublic.h"  /* Object headers                           */
+#include "H5Spublic.h"  /* Dataspaces                               */
+#include "H5Tpublic.h"  /* Datatypes                                */
+#include "H5Zpublic.h"  /* Data filters                             */
 
 /*****************/
 /* Public Macros */
@@ -5211,6 +5212,34 @@ H5_DLL herr_t H5Pset_small_data_block_size(hid_t fapl_id, hsize_t size);
  *
  */
 H5_DLL herr_t H5Pset_vol(hid_t plist_id, hid_t new_vol_id, const void *new_vol_info);
+
+/**
+ * \ingroup FAPL
+ *
+ * \brief Query the capability flags for the VOL connector that will be used
+ *              with this file access property list (FAPL).
+ *
+ * \fapl_id{plist_id}
+ * \param[out]  cap_flags  Flags that indicate the VOL connector capabilities
+ *
+ * \return \herr_t
+ *
+ * \details H5Pget_vol_cap_flags() queries the current VOL connector information
+ *              for a FAPL to retrieve the capability flags for the VOL
+ *              connector stack, as will be used by a file open or create
+ *              operation that uses this FAPL.
+ *
+ * \note This routine supports the use of the HDF5_VOL_CONNECTOR environment
+ *       variable to override the VOL connector set programmatically for the
+ *       FAPL (with H5Pset_vol).
+ *
+ * \note The H5VL_CAP_FLAG_ASYNC flag can be checked to see if asynchronous
+ *              operations are supported by the VOL connector stack.
+ *
+ * \since 1.13.0
+ *
+ */
+H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
 
 #ifdef H5_HAVE_PARALLEL
 /**
