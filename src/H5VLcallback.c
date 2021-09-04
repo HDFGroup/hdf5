@@ -94,11 +94,10 @@ static herr_t H5VL__dataset_write(void *obj, const H5VL_class_t *cls, hid_t mem_
                                   hid_t file_space_id, hid_t dxpl_id, const void *buf, void **req);
 static herr_t H5VL__dataset_get(void *obj, const H5VL_class_t *cls, H5VL_dataset_get_args_t *args,
                                 hid_t dxpl_id, void **req);
-static herr_t H5VL__dataset_specific(void *obj, const H5VL_class_t *cls,
-                                     H5VL_dataset_specific_t specific_type, hid_t dxpl_id, void **req,
-                                     va_list arguments);
-static herr_t H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, H5VL_dataset_optional_t opt_type,
-                                     hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific_args_t *args,
+                                     hid_t dxpl_id, void **req);
+static herr_t H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args,
+                                     hid_t dxpl_id, void **req);
 static herr_t H5VL__dataset_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
 static void * H5VL__datatype_commit(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                     const char *name, hid_t type_id, hid_t lcpl_id, hid_t tcpl_id,
@@ -2336,8 +2335,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific_t specific_type,
-                       hid_t dxpl_id, void **req, va_list arguments)
+H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
+                       void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2348,7 +2347,7 @@ H5VL__dataset_specific(void *obj, const H5VL_class_t *cls, H5VL_dataset_specific
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'dataset specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->dataset_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+    if ((cls->dataset_cls.specific)(obj, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
 
 done:
@@ -2366,11 +2365,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_t specific_type, hid_t dxpl_id,
-                      void **req, ...)
+H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
+                      void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -2382,17 +2379,10 @@ H5VL_dataset_specific(const H5VL_object_t *vol_obj, H5VL_dataset_specific_t spec
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if (H5VL__dataset_specific(vol_obj->data, vol_obj->connector->cls, specific_type, dxpl_id, req,
-                               arguments) < 0)
+    if (H5VL__dataset_specific(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -2411,14 +2401,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_t specific_type, hid_t dxpl_id,
-                     void **req /*out*/, va_list arguments)
+H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
+                     void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVdixx", obj, connector_id, specific_type, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2427,7 +2417,7 @@ H5VLdataset_specific(void *obj, hid_t connector_id, H5VL_dataset_specific_t spec
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__dataset_specific(obj, cls, specific_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__dataset_specific(obj, cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset specific callback")
 
 done:
@@ -2445,8 +2435,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
-                       void **req, va_list arguments)
+H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args, hid_t dxpl_id,
+                       void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2457,7 +2447,7 @@ H5VL__dataset_optional(void *obj, const H5VL_class_t *cls, H5VL_dataset_optional
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'dataset optional' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->dataset_cls.optional)(obj, opt_type, dxpl_id, req, arguments) < 0)
+    if ((cls->dataset_cls.optional)(obj, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
 
 done:
@@ -2475,11 +2465,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_dataset_optional(const H5VL_object_t *vol_obj, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
-                      void **req, ...)
+H5VL_dataset_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -2491,16 +2478,10 @@ H5VL_dataset_optional(const H5VL_object_t *vol_obj, H5VL_dataset_optional_t opt_
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if (H5VL__dataset_optional(vol_obj->data, vol_obj->connector->cls, opt_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__dataset_optional(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -2519,14 +2500,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
-                     void **req /*out*/, va_list arguments)
+H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+                     void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVtixx", obj, connector_id, opt_type, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -2535,12 +2516,55 @@ H5VLdataset_optional(void *obj, hid_t connector_id, H5VL_dataset_optional_t opt_
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__dataset_optional(obj, cls, opt_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__dataset_optional(obj, cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLdataset_optional() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLdataset_optional_op
+ *
+ * Purpose:     Performs an optional connector-specific operation on a dataset
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app_line, hid_t dset_id,
+                        H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id)
+{
+    H5VL_object_t *vol_obj   = NULL;            /* Dataset VOL object */
+    void *         token     = NULL;            /* Request token for async operation        */
+    void **        token_ptr = H5_REQUEST_NULL; /* Pointer to request token for async operation        */
+    herr_t         ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE7("e", "*s*sIui*!ii", app_file, app_func, app_line, dset_id, args, dxpl_id, es_id);
+
+    /* Set up request token pointer for asynchronous operation */
+    if (H5ES_NONE != es_id)
+        token_ptr = &token; /* Point at token for VOL connector to set up */
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__common_optional_op(dset_id, H5I_DATASET, H5VL__dataset_optional, args, dxpl_id, token_ptr,
+                                 &vol_obj) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute dataset optional callback")
+
+    /* If a token was created, add the token to the event set */
+    if (NULL != token)
+        /* clang-format off */
+        if (H5ES_insert(es_id, vol_obj->connector, token,
+                        H5ARG_TRACE7(__func__, "*s*sIui*!ii", app_file, app_func, app_line, dset_id, args, dxpl_id, es_id)) < 0)
+            /* clang-format on */
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINSERT, FAIL, "can't insert token into event set")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLdataset_optional_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__dataset_close

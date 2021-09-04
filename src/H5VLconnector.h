@@ -272,9 +272,7 @@ typedef struct H5VL_dataset_get_args_t {
 typedef enum H5VL_dataset_specific_t {
     H5VL_DATASET_SET_EXTENT, /* H5Dset_extent                       */
     H5VL_DATASET_FLUSH,      /* H5Dflush                            */
-    H5VL_DATASET_REFRESH,    /* H5Drefresh                          */
-    H5VL_DATASET_WAIT,       /* H5Dwait                             */
-    H5VL_DATASET_CHUNK_ITER  /* H5Dchunk_iter                       */
+    H5VL_DATASET_REFRESH     /* H5Drefresh                          */
 } H5VL_dataset_specific_t;
 
 /* Parameters for dataset 'specific' operations */
@@ -895,10 +893,8 @@ typedef struct H5VL_dataset_class_t {
     herr_t (*write)(void *dset, hid_t mem_type_id, hid_t mem_space_id, hid_t file_space_id, hid_t dxpl_id,
                     const void *buf, void **req);
     herr_t (*get)(void *obj, H5VL_dataset_get_args_t *args, hid_t dxpl_id, void **req);
-    herr_t (*specific)(void *obj, H5VL_dataset_specific_t specific_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
-    herr_t (*optional)(void *obj, H5VL_dataset_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req);
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *dset, hid_t dxpl_id, void **req);
 } H5VL_dataset_class_t;
 
@@ -1128,6 +1124,8 @@ H5_DLL herr_t H5VLfind_opt_operation(H5VL_subclass_t subcls, const char *op_name
 H5_DLL herr_t H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name);
 H5_DLL herr_t H5VLattr_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                    hid_t attr_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
+H5_DLL herr_t H5VLdataset_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+                                      hid_t dset_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                     hid_t group_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_line,
@@ -1141,6 +1139,7 @@ H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_option
 #ifndef H5VL_MODULE
 /* Inject application compile-time macros into function calls */
 #define H5VLattr_optional_op(...)     H5VLattr_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLdataset_optional_op(...)  H5VLdataset_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLgroup_optional_op(...)    H5VLgroup_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLlink_optional_op(...)     H5VLlink_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
@@ -1148,6 +1147,7 @@ H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_option
  *      be passed in by language wrapper or library layer on top of HDF5.
  */
 #define H5VLattr_optional_op_wrap     H5_NO_EXPAND(H5VLattr_optional_op)
+#define H5VLdataset_optional_op_wrap  H5_NO_EXPAND(H5VLdataset_optional_op)
 #define H5VLgroup_optional_op_wrap    H5_NO_EXPAND(H5VLgroup_optional_op)
 #define H5VLlink_optional_op_wrap     H5_NO_EXPAND(H5VLlink_optional_op)
 #endif /* H5VL_MODULE */

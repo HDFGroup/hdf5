@@ -3948,7 +3948,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__refresh(hid_t dset_id, H5D_t *dset)
+H5D__refresh(H5D_t *dset, hid_t dset_id)
 {
     H5D_virtual_held_file_t *head            = NULL;    /* Pointer to list of files held open */
     hbool_t                  virt_dsets_held = FALSE;   /* Whether virtual datasets' files are held open */

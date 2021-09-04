@@ -131,10 +131,10 @@ static herr_t H5VL_pass_through_dataset_write(void *dset, hid_t mem_type_id, hid
                                               void **req);
 static herr_t H5VL_pass_through_dataset_get(void *dset, H5VL_dataset_get_args_t *args, hid_t dxpl_id,
                                             void **req);
-static herr_t H5VL_pass_through_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type,
-                                                 hid_t dxpl_id, void **req, va_list arguments);
-static herr_t H5VL_pass_through_dataset_optional(void *obj, H5VL_dataset_optional_t opt_type, hid_t dxpl_id,
-                                                 void **req, va_list arguments);
+static herr_t H5VL_pass_through_dataset_specific(void *obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id,
+                                                 void **req);
+static herr_t H5VL_pass_through_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id,
+                                                 void **req);
 static herr_t H5VL_pass_through_dataset_close(void *dset, hid_t dxpl_id, void **req);
 
 /* Datatype callbacks */
@@ -1298,8 +1298,7 @@ H5VL_pass_through_dataset_get(void *dset, H5VL_dataset_get_args_t *args, hid_t d
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_dataset_specific(void *obj, H5VL_dataset_specific_t specific_type, hid_t dxpl_id,
-                                   void **req, va_list arguments)
+H5VL_pass_through_dataset_specific(void *obj, H5VL_dataset_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     hid_t                under_vol_id;
@@ -1314,8 +1313,7 @@ H5VL_pass_through_dataset_specific(void *obj, H5VL_dataset_specific_t specific_t
      */
     under_vol_id = o->under_vol_id;
 
-    ret_value =
-        H5VLdataset_specific(o->under_object, o->under_vol_id, specific_type, dxpl_id, req, arguments);
+    ret_value = H5VLdataset_specific(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
@@ -1335,8 +1333,7 @@ H5VL_pass_through_dataset_specific(void *obj, H5VL_dataset_specific_t specific_t
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_dataset_optional(void *obj, H5VL_dataset_optional_t opt_type, hid_t dxpl_id, void **req,
-                                   va_list arguments)
+H5VL_pass_through_dataset_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -1345,7 +1342,7 @@ H5VL_pass_through_dataset_optional(void *obj, H5VL_dataset_optional_t opt_type, 
     printf("------- PASS THROUGH VOL DATASET Optional\n");
 #endif
 
-    ret_value = H5VLdataset_optional(o->under_object, o->under_vol_id, opt_type, dxpl_id, req, arguments);
+    ret_value = H5VLdataset_optional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)

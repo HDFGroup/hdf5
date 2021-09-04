@@ -287,9 +287,12 @@ H5Dextend(hid_t dset_id, const hsize_t size[])
     if (H5CX_set_loc(dset_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
+    /* Set up VOL callback arguments */
+    vol_spec_cb_args.op_type              = H5VL_DATASET_SET_EXTENT;
+    vol_spec_cb_args.args.set_extent.size = dset_dims;
+
     /* Increase size */
-    if ((ret_value = H5VL_dataset_specific(vol_obj, H5VL_DATASET_SET_EXTENT, H5P_DATASET_XFER_DEFAULT,
-                                           H5_REQUEST_NULL, dset_dims)) < 0)
+    if (H5VL_dataset_specific(vol_obj, &vol_spec_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to extend dataset")
 
 done:
