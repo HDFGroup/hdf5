@@ -82,10 +82,6 @@ static herr_t H5VL_pass_through_file_specific_reissue(void *obj, hid_t connector
                                                       void **req, ...);
 static herr_t H5VL_pass_through_request_specific_reissue(void *obj, hid_t connector_id,
                                                          H5VL_request_specific_t specific_type, ...);
-static herr_t H5VL_pass_through_link_create_reissue(H5VL_link_create_t create_type, void *obj,
-                                                    const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                                                    hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req,
-                                                    ...);
 static H5VL_pass_through_t *H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id);
 static herr_t               H5VL_pass_through_free_obj(H5VL_pass_through_t *obj);
 
@@ -184,9 +180,9 @@ static herr_t H5VL_pass_through_group_optional(void *obj, H5VL_optional_args_t *
 static herr_t H5VL_pass_through_group_close(void *grp, hid_t dxpl_id, void **req);
 
 /* Link callbacks */
-static herr_t H5VL_pass_through_link_create(H5VL_link_create_t create_type, void *obj,
+static herr_t H5VL_pass_through_link_create(H5VL_link_create_args_t *args, void *obj,
                                             const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
-                                            hid_t dxpl_id, void **req, va_list arguments);
+                                            hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_link_copy(void *src_obj, const H5VL_loc_params_t *loc_params1, void *dst_obj,
                                           const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id,
                                           hid_t dxpl_id, void **req);
@@ -194,13 +190,11 @@ static herr_t H5VL_pass_through_link_move(void *src_obj, const H5VL_loc_params_t
                                           const H5VL_loc_params_t *loc_params2, hid_t lcpl_id, hid_t lapl_id,
                                           hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_link_get(void *obj, const H5VL_loc_params_t *loc_params,
-                                         H5VL_link_get_t get_type, hid_t dxpl_id, void **req,
-                                         va_list arguments);
+                                         H5VL_link_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                              H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
-                                              va_list arguments);
-static herr_t H5VL_pass_through_link_optional(void *obj, H5VL_link_optional_t opt_type, hid_t dxpl_id,
-                                              void **req, va_list arguments);
+                                              H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req);
+static herr_t H5VL_pass_through_link_optional(void *obj, const H5VL_loc_params_t *loc_params,
+                                              H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
 /* Object callbacks */
 static void * H5VL_pass_through_object_open(void *obj, const H5VL_loc_params_t *loc_params,
@@ -2158,33 +2152,6 @@ H5VL_pass_through_group_close(void *grp, hid_t dxpl_id, void **req)
 } /* end H5VL_pass_through_group_close() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_pass_through_link_create_reissue
- *
- * Purpose:     Re-wrap vararg arguments into a va_list and reissue the
- *              link create callback to the underlying VOL connector.
- *
- * Return:      Success:    0
- *              Failure:    -1
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_pass_through_link_create_reissue(H5VL_link_create_t create_type, void *obj,
-                                      const H5VL_loc_params_t *loc_params, hid_t connector_id, hid_t lcpl_id,
-                                      hid_t lapl_id, hid_t dxpl_id, void **req, ...)
-{
-    va_list arguments;
-    herr_t  ret_value;
-
-    va_start(arguments, req);
-    ret_value = H5VLlink_create(create_type, obj, loc_params, connector_id, lcpl_id, lapl_id, dxpl_id, req,
-                                arguments);
-    va_end(arguments);
-
-    return ret_value;
-} /* end H5VL_pass_through_link_create_reissue() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5VL_pass_through_link_create
  *
  * Purpose:     Creates a hard / soft / UD / external link.
@@ -2195,9 +2162,8 @@ H5VL_pass_through_link_create_reissue(H5VL_link_create_t create_type, void *obj,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_link_create(H5VL_link_create_t create_type, void *obj,
-                              const H5VL_loc_params_t *loc_params, hid_t lcpl_id, hid_t lapl_id,
-                              hid_t dxpl_id, void **req, va_list arguments)
+H5VL_pass_through_link_create(H5VL_link_create_args_t *args, void *obj, const H5VL_loc_params_t *loc_params,
+                              hid_t lcpl_id, hid_t lapl_id, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o            = (H5VL_pass_through_t *)obj;
     hid_t                under_vol_id = -1;
@@ -2212,32 +2178,22 @@ H5VL_pass_through_link_create(H5VL_link_create_t create_type, void *obj,
         under_vol_id = o->under_vol_id;
 
     /* Fix up the link target object for hard link creation */
-    if (H5VL_LINK_CREATE_HARD == create_type) {
-        void *             cur_obj;
-        H5VL_loc_params_t *cur_params;
+    if (H5VL_LINK_CREATE_HARD == args->op_type) {
+        void *cur_obj = args->args.hard.curr_obj;
 
-        /* Retrieve the object & loc params for the link target */
-        cur_obj    = va_arg(arguments, void *);
-        cur_params = va_arg(arguments, H5VL_loc_params_t *);
-
-        /* If it's a non-NULL pointer, find the 'under object' and re-set the property */
+        /* If cur_obj is a non-NULL pointer, find its 'under object' and update the pointer */
         if (cur_obj) {
-            /* Check if we still need the "under" VOL ID */
+            /* Check if we still haven't set the "under" VOL ID */
             if (under_vol_id < 0)
                 under_vol_id = ((H5VL_pass_through_t *)cur_obj)->under_vol_id;
 
-            /* Set the object for the link target */
-            cur_obj = ((H5VL_pass_through_t *)cur_obj)->under_object;
+            /* Update the object for the link target */
+            args->args.hard.curr_obj = ((H5VL_pass_through_t *)cur_obj)->under_object;
         } /* end if */
+    }     /* end if */
 
-        /* Re-issue 'link create' call, using the unwrapped pieces */
-        ret_value = H5VL_pass_through_link_create_reissue(create_type, (o ? o->under_object : NULL),
-                                                          loc_params, under_vol_id, lcpl_id, lapl_id, dxpl_id,
-                                                          req, cur_obj, cur_params);
-    } /* end if */
-    else
-        ret_value = H5VLlink_create(create_type, (o ? o->under_object : NULL), loc_params, under_vol_id,
-                                    lcpl_id, lapl_id, dxpl_id, req, arguments);
+    ret_value = H5VLlink_create(args, (o ? o->under_object : NULL), loc_params, under_vol_id, lcpl_id,
+                                lapl_id, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
@@ -2351,8 +2307,8 @@ H5VL_pass_through_link_move(void *src_obj, const H5VL_loc_params_t *loc_params1,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_t get_type,
-                           hid_t dxpl_id, void **req, va_list arguments)
+H5VL_pass_through_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_link_get_args_t *args,
+                           hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -2361,7 +2317,7 @@ H5VL_pass_through_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
     printf("------- PASS THROUGH VOL LINK Get\n");
 #endif
 
-    ret_value = H5VLlink_get(o->under_object, loc_params, o->under_vol_id, get_type, dxpl_id, req, arguments);
+    ret_value = H5VLlink_get(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
@@ -2382,8 +2338,7 @@ H5VL_pass_through_link_get(void *obj, const H5VL_loc_params_t *loc_params, H5VL_
  */
 static herr_t
 H5VL_pass_through_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                                H5VL_link_specific_t specific_type, hid_t dxpl_id, void **req,
-                                va_list arguments)
+                                H5VL_link_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -2392,8 +2347,7 @@ H5VL_pass_through_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
     printf("------- PASS THROUGH VOL LINK Specific\n");
 #endif
 
-    ret_value = H5VLlink_specific(o->under_object, loc_params, o->under_vol_id, specific_type, dxpl_id, req,
-                                  arguments);
+    ret_value = H5VLlink_specific(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
@@ -2413,8 +2367,8 @@ H5VL_pass_through_link_specific(void *obj, const H5VL_loc_params_t *loc_params,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_link_optional(void *obj, H5VL_link_optional_t opt_type, hid_t dxpl_id, void **req,
-                                va_list arguments)
+H5VL_pass_through_link_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
+                                hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -2423,7 +2377,7 @@ H5VL_pass_through_link_optional(void *obj, H5VL_link_optional_t opt_type, hid_t 
     printf("------- PASS THROUGH VOL LINK Optional\n");
 #endif
 
-    ret_value = H5VLlink_optional(o->under_object, o->under_vol_id, opt_type, dxpl_id, req, arguments);
+    ret_value = H5VLlink_optional(o->under_object, loc_params, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)
