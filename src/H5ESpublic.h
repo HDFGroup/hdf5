@@ -83,6 +83,8 @@ typedef struct H5ES_err_info_t {
     /* Operation info */
     uint64_t op_ins_count; /**< Counter of operation's insertion into event set */
     uint64_t op_ins_ts;    /**< Timestamp for when the operation was inserted into the event set */
+    uint64_t op_exec_ts;   /**< Timestamp for when the operation began execution */
+    uint64_t op_exec_time; /**< Execution time for operation (in ns) */
 
     /* Error info */
     hid_t err_stack_id; /**< ID for error stack from failed operation */
@@ -176,6 +178,7 @@ H5_DLL hid_t H5EScreate(void);
  *
  */
 H5_DLL herr_t H5ESwait(hid_t es_id, uint64_t timeout, size_t *num_in_progress, hbool_t *err_occurred);
+H5_DLL herr_t H5EScancel(hid_t es_id, size_t *num_not_canceled, hbool_t *err_occurred);
 
 /**
  * \ingroup H5ES
@@ -266,6 +269,9 @@ H5_DLL herr_t H5ESget_err_count(hid_t es_id, size_t *num_errs);
  */
 H5_DLL herr_t H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[],
                                size_t *err_cleared);
+H5_DLL herr_t H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[]);
+H5_DLL herr_t H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx);
+H5_DLL herr_t H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx);
 
 /**
  * \ingroup H5ES

@@ -174,10 +174,8 @@ static herr_t H5VL__request_wait(void *req, const H5VL_class_t *cls, uint64_t ti
                                  H5VL_request_status_t *status);
 static herr_t H5VL__request_notify(void *req, const H5VL_class_t *cls, H5VL_request_notify_t cb, void *ctx);
 static herr_t H5VL__request_cancel(void *req, const H5VL_class_t *cls, H5VL_request_status_t *status);
-static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls,
-                                     H5VL_request_specific_t specific_type, va_list arguments);
-static herr_t H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_request_optional_t opt_type,
-                                     va_list arguments);
+static herr_t H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific_args_t *args);
+static herr_t H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_optional_args_t *args);
 static herr_t H5VL__request_free(void *req, const H5VL_class_t *cls);
 static herr_t H5VL__blob_put(void *obj, const H5VL_class_t *cls, const void *buf, size_t size, void *blob_id,
                              void *ctx);
@@ -6224,28 +6222,18 @@ done:
 herr_t
 H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout, H5VL_request_status_t *status)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_wait(vol_obj->data, vol_obj->connector->cls, timeout, status) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request wait failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_wait() */
 
@@ -6328,28 +6316,18 @@ done:
 herr_t
 H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_notify(vol_obj->data, vol_obj->connector->cls, cb, ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "request notify failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_notify() */
 
@@ -6431,28 +6409,18 @@ done:
 herr_t
 H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
     if (H5VL__request_cancel(vol_obj->data, vol_obj->connector->cls, status) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request cancel failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_cancel() */
 
@@ -6467,13 +6435,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status)
+H5VLrequest_cancel(void *req, hid_t connector_id, H5VL_request_status_t *status /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE3("e", "*xi*#", req, connector_id, status);
+    H5TRACE3("e", "*xix", req, connector_id, status);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
@@ -6498,8 +6466,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific_t specific_type,
-                       va_list arguments)
+H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific_args_t *args)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -6514,7 +6481,7 @@ H5VL__request_specific(void *req, const H5VL_class_t *cls, H5VL_request_specific
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'async specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->request_cls.specific)(req, specific_type, arguments)) < 0)
+    if ((cls->request_cls.specific)(req, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
                     "unable to execute asynchronous request specific callback")
 
@@ -6533,40 +6500,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...)
+H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t *args)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, specific_type);
-    arg_started = TRUE;
-    if ((ret_value =
-             H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, specific_type, arguments)) < 0)
+    if (H5VL__request_specific(vol_obj->data, vol_obj->connector->cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
                     "unable to execute asynchronous request specific callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_specific() */
 
@@ -6581,20 +6529,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_t specific_type, va_list arguments)
+H5VLrequest_specific(void *req, hid_t connector_id, H5VL_request_specific_args_t *args)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiVrx", req, connector_id, specific_type, arguments);
+    H5TRACE3("e", "*xi*!", req, connector_id, args);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__request_specific(req, cls, specific_type, arguments)) < 0)
+    if (H5VL__request_specific(req, cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
                     "unable to execute asynchronous request specific callback")
 
@@ -6613,8 +6561,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_request_optional_t opt_type,
-                       va_list arguments)
+H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_optional_args_t *args)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -6629,7 +6576,7 @@ H5VL__request_optional(void *req, const H5VL_class_t *cls, H5VL_request_optional
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'async optional' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->request_cls.optional)(req, opt_type, arguments)) < 0)
+    if ((cls->request_cls.optional)(req, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
                     "unable to execute asynchronous request optional callback")
 
@@ -6648,39 +6595,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_request_optional_t opt_type, ...)
+H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, opt_type);
-    arg_started = TRUE;
-    if ((ret_value = H5VL__request_optional(vol_obj->data, vol_obj->connector->cls, opt_type, arguments)) < 0)
+    if (H5VL__request_optional(vol_obj->data, vol_obj->connector->cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
                     "unable to execute asynchronous request optional callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_optional() */
 
@@ -6695,26 +6624,63 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLrequest_optional(void *req, hid_t connector_id, H5VL_request_optional_t opt_type, va_list arguments)
+H5VLrequest_optional(void *req, hid_t connector_id, H5VL_optional_args_t *args)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE4("e", "*xiVzx", req, connector_id, opt_type, arguments);
+    H5TRACE3("e", "*xi*!", req, connector_id, args);
 
     /* Get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if ((ret_value = H5VL__request_optional(req, cls, opt_type, arguments)) < 0)
+    if (H5VL__request_optional(req, cls, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL,
                     "unable to execute asynchronous request optional callback")
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)
 } /* end H5VLrequest_optional() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLrequest_optional_op
+ *
+ * Purpose:     Performs an optional connector-specific operation on a request
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_optional_args_t *args)
+{
+    H5VL_class_t *cls;                 /* VOL connector's class struct */
+    herr_t        ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "*xi*!", req, connector_id, args);
+
+    /* Check arguments */
+    if (NULL == req)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid request")
+    if (NULL == args)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid arguments")
+
+    /* Get class pointer */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
+
+    /* Call the corresponding internal VOL routine */
+    if (H5VL__request_optional(req, cls, args) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute request optional callback")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLrequest_optional_op() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL__request_free
@@ -6762,28 +6728,18 @@ done:
 herr_t
 H5VL_request_free(const H5VL_object_t *vol_obj)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDassert(vol_obj);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding VOL callback */
     if (H5VL__request_free(vol_obj->data, vol_obj->connector->cls) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTRELEASE, FAIL, "request free failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_request_free() */
 

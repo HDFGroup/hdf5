@@ -41,6 +41,8 @@
 extern "C" {
 #endif
 
+H5_DLL herr_t H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request);
+
 #ifdef __cplusplus
 }
 #endif

@@ -66,8 +66,9 @@ typedef enum H5VL_get_connector_kind_t {
 /******************************/
 
 /* Utility functions */
-H5_DLL herr_t  H5VL_init_phase1(void);
-H5_DLL herr_t  H5VL_init_phase2(void);
+H5_DLL herr_t H5VL_init_phase1(void);
+H5_DLL herr_t H5VL_init_phase2(void);
+H5_DLL H5VL_t *H5VL_new_connector(hid_t connector_id);
 H5_DLL herr_t  H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_class_t *cls2);
 H5_DLL herr_t  H5VL_conn_copy(H5VL_connector_prop_t *value);
 H5_DLL int64_t H5VL_conn_inc_rc(H5VL_t *connector);
@@ -269,8 +270,8 @@ H5_DLL herr_t H5VL_request_wait(const H5VL_object_t *vol_obj, uint64_t timeout,
                                 H5VL_request_status_t *status);
 H5_DLL herr_t H5VL_request_notify(const H5VL_object_t *vol_obj, H5VL_request_notify_t cb, void *ctx);
 H5_DLL herr_t H5VL_request_cancel(const H5VL_object_t *vol_obj, H5VL_request_status_t *status);
-H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_t specific_type, ...);
-H5_DLL herr_t H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_request_optional_t opt_type, ...);
+H5_DLL herr_t H5VL_request_specific(const H5VL_object_t *vol_obj, H5VL_request_specific_args_t *args);
+H5_DLL herr_t H5VL_request_optional(const H5VL_object_t *vol_obj, H5VL_optional_args_t *args);
 H5_DLL herr_t H5VL_request_free(const H5VL_object_t *vol_obj);
 
 /* Blob functions */

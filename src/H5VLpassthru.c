@@ -80,8 +80,6 @@ typedef struct H5VL_pass_through_wrap_ctx_t {
 static herr_t H5VL_pass_through_file_specific_reissue(void *obj, hid_t connector_id,
                                                       H5VL_file_specific_t specific_type, hid_t dxpl_id,
                                                       void **req, ...);
-static herr_t H5VL_pass_through_request_specific_reissue(void *obj, hid_t connector_id,
-                                                         H5VL_request_specific_t specific_type, ...);
 static H5VL_pass_through_t *H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id);
 static herr_t               H5VL_pass_through_free_obj(H5VL_pass_through_t *obj);
 
@@ -221,10 +219,8 @@ static herr_t H5VL_pass_through_introspect_opt_query(void *obj, H5VL_subclass_t 
 static herr_t H5VL_pass_through_request_wait(void *req, uint64_t timeout, H5VL_request_status_t *status);
 static herr_t H5VL_pass_through_request_notify(void *obj, H5VL_request_notify_t cb, void *ctx);
 static herr_t H5VL_pass_through_request_cancel(void *req, H5VL_request_status_t *status);
-static herr_t H5VL_pass_through_request_specific(void *req, H5VL_request_specific_t specific_type,
-                                                 va_list arguments);
-static herr_t H5VL_pass_through_request_optional(void *req, H5VL_request_optional_t opt_type,
-                                                 va_list arguments);
+static herr_t H5VL_pass_through_request_specific(void *req, H5VL_request_specific_args_t *args);
+static herr_t H5VL_pass_through_request_optional(void *req, H5VL_optional_args_t *args);
 static herr_t H5VL_pass_through_request_free(void *req);
 
 /* Blob callbacks */
@@ -2700,31 +2696,6 @@ H5VL_pass_through_request_cancel(void *obj, H5VL_request_status_t *status)
 } /* end H5VL_pass_through_request_cancel() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_pass_through_request_specific_reissue
- *
- * Purpose:     Re-wrap vararg arguments into a va_list and reissue the
- *              request specific callback to the underlying VOL connector.
- *
- * Return:      Success:    0
- *              Failure:    -1
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5VL_pass_through_request_specific_reissue(void *obj, hid_t connector_id,
-                                           H5VL_request_specific_t specific_type, ...)
-{
-    va_list arguments;
-    herr_t  ret_value;
-
-    va_start(arguments, specific_type);
-    ret_value = H5VLrequest_specific(obj, connector_id, specific_type, arguments);
-    va_end(arguments);
-
-    return ret_value;
-} /* end H5VL_pass_through_request_specific_reissue() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5VL_pass_through_request_specific
  *
  * Purpose:     Specific operation on a request
@@ -2735,139 +2706,16 @@ H5VL_pass_through_request_specific_reissue(void *obj, hid_t connector_id,
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_type, va_list arguments)
+H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_args_t *args)
 {
-    herr_t ret_value = -1;
+    H5VL_pass_through_t *o         = (H5VL_pass_through_t *)obj;
+    herr_t               ret_value = -1;
 
 #ifdef ENABLE_PASSTHRU_LOGGING
     printf("------- PASS THROUGH VOL REQUEST Specific\n");
 #endif
 
-    if (H5VL_REQUEST_WAITANY == specific_type || H5VL_REQUEST_WAITSOME == specific_type ||
-        H5VL_REQUEST_WAITALL == specific_type) {
-        va_list tmp_arguments;
-        size_t  req_count;
-
-        /* Sanity check */
-        assert(obj == NULL);
-
-        /* Get enough info to call the underlying connector */
-        va_copy(tmp_arguments, arguments);
-        req_count = va_arg(tmp_arguments, size_t);
-
-        /* Can only use a request to invoke the underlying VOL connector when there's >0 requests */
-        if (req_count > 0) {
-            void **              req_array;
-            void **              under_req_array;
-            uint64_t             timeout;
-            H5VL_pass_through_t *o;
-            size_t               u; /* Local index variable */
-
-            /* Get the request array */
-            req_array = va_arg(tmp_arguments, void **);
-
-            /* Get a request to use for determining the underlying VOL connector */
-            o = (H5VL_pass_through_t *)req_array[0];
-
-            /* Create array of underlying VOL requests */
-            under_req_array = (void **)malloc(req_count * sizeof(void **));
-            for (u = 0; u < req_count; u++)
-                under_req_array[u] = ((H5VL_pass_through_t *)req_array[u])->under_object;
-
-            /* Remove the timeout value from the vararg list (it's used in all the calls below) */
-            timeout = va_arg(tmp_arguments, uint64_t);
-
-            /* Release requests that have completed */
-            if (H5VL_REQUEST_WAITANY == specific_type) {
-                size_t *               idx;    /* Pointer to the index of completed request */
-                H5VL_request_status_t *status; /* Pointer to the request's status */
-
-                /* Retrieve the remaining arguments */
-                idx = va_arg(tmp_arguments, size_t *);
-                assert(*idx <= req_count);
-                status = va_arg(tmp_arguments, H5VL_request_status_t *);
-
-                /* Reissue the WAITANY 'request specific' call */
-                ret_value = H5VL_pass_through_request_specific_reissue(o->under_object, o->under_vol_id,
-                                                                       specific_type, req_count,
-                                                                       under_req_array, timeout, idx, status);
-
-                /* Release the completed request, if it completed */
-                if (ret_value >= 0 && *status != H5ES_STATUS_IN_PROGRESS) {
-                    H5VL_pass_through_t *tmp_o;
-
-                    tmp_o = (H5VL_pass_through_t *)req_array[*idx];
-                    H5VL_pass_through_free_obj(tmp_o);
-                } /* end if */
-            }     /* end if */
-            else if (H5VL_REQUEST_WAITSOME == specific_type) {
-                size_t *               outcount;          /* # of completed requests */
-                unsigned *             array_of_indices;  /* Array of indices for completed requests */
-                H5VL_request_status_t *array_of_statuses; /* Array of statuses for completed requests */
-
-                /* Retrieve the remaining arguments */
-                outcount = va_arg(tmp_arguments, size_t *);
-                assert(*outcount <= req_count);
-                array_of_indices  = va_arg(tmp_arguments, unsigned *);
-                array_of_statuses = va_arg(tmp_arguments, H5VL_request_status_t *);
-
-                /* Reissue the WAITSOME 'request specific' call */
-                ret_value = H5VL_pass_through_request_specific_reissue(
-                    o->under_object, o->under_vol_id, specific_type, req_count, under_req_array, timeout,
-                    outcount, array_of_indices, array_of_statuses);
-
-                /* If any requests completed, release them */
-                if (ret_value >= 0 && *outcount > 0) {
-                    unsigned *idx_array; /* Array of indices of completed requests */
-
-                    /* Retrieve the array of completed request indices */
-                    idx_array = va_arg(tmp_arguments, unsigned *);
-
-                    /* Release the completed requests */
-                    for (u = 0; u < *outcount; u++) {
-                        H5VL_pass_through_t *tmp_o;
-
-                        tmp_o = (H5VL_pass_through_t *)req_array[idx_array[u]];
-                        H5VL_pass_through_free_obj(tmp_o);
-                    }                                     /* end for */
-                }                                         /* end if */
-            }                                             /* end else-if */
-            else {                                        /* H5VL_REQUEST_WAITALL == specific_type */
-                H5VL_request_status_t *array_of_statuses; /* Array of statuses for completed requests */
-
-                /* Retrieve the remaining arguments */
-                array_of_statuses = va_arg(tmp_arguments, H5VL_request_status_t *);
-
-                /* Reissue the WAITALL 'request specific' call */
-                ret_value = H5VL_pass_through_request_specific_reissue(
-                    o->under_object, o->under_vol_id, specific_type, req_count, under_req_array, timeout,
-                    array_of_statuses);
-
-                /* Release the completed requests */
-                if (ret_value >= 0) {
-                    for (u = 0; u < req_count; u++) {
-                        if (array_of_statuses[u] != H5ES_STATUS_IN_PROGRESS) {
-                            H5VL_pass_through_t *tmp_o;
-
-                            tmp_o = (H5VL_pass_through_t *)req_array[u];
-                            H5VL_pass_through_free_obj(tmp_o);
-                        } /* end if */
-                    }     /* end for */
-                }         /* end if */
-            }             /* end else */
-
-            /* Release array of requests for underlying connector */
-            free(under_req_array);
-        } /* end if */
-
-        /* Finish use of copied vararg list */
-        va_end(tmp_arguments);
-    } /* end if */
-    else {
-        H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
-
-        ret_value = H5VLrequest_specific(o->under_object, o->under_vol_id, specific_type, arguments);
-    } /* end else */
+    ret_value = H5VLrequest_specific(o->under_object, o->under_vol_id, args);
 
     return ret_value;
 } /* end H5VL_pass_through_request_specific() */
@@ -2883,7 +2731,7 @@ H5VL_pass_through_request_specific(void *obj, H5VL_request_specific_t specific_t
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_request_optional(void *obj, H5VL_request_optional_t opt_type, va_list arguments)
+H5VL_pass_through_request_optional(void *obj, H5VL_optional_args_t *args)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)obj;
     herr_t               ret_value;
@@ -2892,7 +2740,7 @@ H5VL_pass_through_request_optional(void *obj, H5VL_request_optional_t opt_type, 
     printf("------- PASS THROUGH VOL REQUEST Optional\n");
 #endif
 
-    ret_value = H5VLrequest_optional(o->under_object, o->under_vol_id, opt_type, arguments);
+    ret_value = H5VLrequest_optional(o->under_object, o->under_vol_id, args);
 
     return ret_value;
 } /* end H5VL_pass_through_request_optional() */

@@ -786,10 +786,8 @@ typedef enum H5VL_request_status_t {
 
 /* Values for async request 'specific' operation */
 typedef enum H5VL_request_specific_t {
-    H5VL_REQUEST_WAITANY,      /* Wait until any request completes */
-    H5VL_REQUEST_WAITSOME,     /* Wait until at least one requesst completes */
-    H5VL_REQUEST_WAITALL,      /* Wait until all requests complete */
-    H5VL_REQUEST_GET_ERR_STACK /* Retrieve error stack for failed operation */
+    H5VL_REQUEST_GET_ERR_STACK, /* Retrieve error stack for failed operation */
+    H5VL_REQUEST_GET_EXEC_TIME  /* Retrieve execution time for operation */
 } H5VL_request_specific_t;
 
 /* Parameters for request 'specific' operations */
@@ -1001,8 +999,8 @@ typedef struct H5VL_request_class_t {
     herr_t (*wait)(void *req, uint64_t timeout, H5VL_request_status_t *status);
     herr_t (*notify)(void *req, H5VL_request_notify_t cb, void *ctx);
     herr_t (*cancel)(void *req, H5VL_request_status_t *status);
-    herr_t (*specific)(void *req, H5VL_request_specific_t specific_type, va_list arguments);
-    herr_t (*optional)(void *req, H5VL_request_optional_t opt_type, va_list arguments);
+    herr_t (*specific)(void *req, H5VL_request_specific_args_t *args);
+    herr_t (*optional)(void *req, H5VL_optional_args_t *args);
     herr_t (*free)(void *req);
 } H5VL_request_class_t;
 
@@ -1131,6 +1129,7 @@ H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, 
 H5_DLL herr_t H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                    hid_t loc_id, const char *name, hid_t lapl_id, H5VL_optional_args_t *args,
                                    hid_t dxpl_id, hid_t es_id);
+H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_optional_args_t *args);
 
 /* API Wrappers for "optional_op" routines */
 /* (Must be defined _after_ the function prototype) */

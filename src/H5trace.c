@@ -1083,6 +1083,15 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         } /* end block */
                         break;
 
+                        case 'C': /* H5ES_event_complete_func_t */
+                        {
+                            H5ES_event_complete_func_t cfunc =
+                                (H5ES_event_complete_func_t)HDva_arg(ap, H5ES_event_complete_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)cfunc);
+                        } /* end block */
+                        break;
+
                         case 'd': /* H5E_direction_t */
                         {
                             H5E_direction_t direction = (H5E_direction_t)HDva_arg(ap, int);
@@ -1111,6 +1120,15 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         } /* end block */
                         break;
 
+                        case 'I': /* H5ES_event_insert_func_t */
+                        {
+                            H5ES_event_insert_func_t ifunc =
+                                (H5ES_event_insert_func_t)HDva_arg(ap, H5ES_event_insert_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifunc);
+                        } /* end block */
+                        break;
+
                         case 's': /* H5ES_status_t */
                         {
                             H5ES_status_t status = (H5ES_status_t)HDva_arg(ap, int);
@@ -1122,6 +1140,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5ES_STATUS_SUCCEED:
                                     H5RS_acat(rs, "H5ES_STATUS_SUCCEED");
+                                    break;
+
+                                case H5ES_STATUS_CANCELED:
+                                    H5RS_acat(rs, "H5ES_STATUS_CANCELED");
                                     break;
 
                                 case H5ES_STATUS_FAIL:
@@ -2873,6 +2895,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_ATTR_DELETE");
                                     break;
 
+                                case H5VL_ATTR_DELETE_BY_IDX:
+                                    H5RS_acat(rs, "H5VL_ATTR_DELETE_BY_IDX");
+                                    break;
+
                                 case H5VL_ATTR_EXISTS:
                                     H5RS_acat(rs, "H5VL_ATTR_EXISTS");
                                     break;
@@ -3149,6 +3175,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5VL_group_specific_t specific = (H5VL_group_specific_t)HDva_arg(ap, int);
 
                             switch (specific) {
+                                case H5VL_GROUP_MOUNT:
+                                    H5RS_acat(rs, "H5VL_GROUP_MOUNT");
+                                    break;
+
+                                case H5VL_GROUP_UNMOUNT:
+                                    H5RS_acat(rs, "H5VL_GROUP_UNMOUNT");
+                                    break;
+
                                 case H5VL_GROUP_FLUSH:
                                     H5RS_acat(rs, "H5VL_GROUP_FLUSH");
                                     break;
@@ -3334,20 +3368,12 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5VL_request_specific_t specific = (H5VL_request_specific_t)HDva_arg(ap, int);
 
                             switch (specific) {
-                                case H5VL_REQUEST_WAITANY:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITANY");
-                                    break;
-
-                                case H5VL_REQUEST_WAITSOME:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITSOME");
-                                    break;
-
-                                case H5VL_REQUEST_WAITALL:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITALL");
-                                    break;
-
                                 case H5VL_REQUEST_GET_ERR_STACK:
                                     H5RS_acat(rs, "H5VL_REQUEST_GET_ERR_STACK");
+                                    break;
+
+                                case H5VL_REQUEST_GET_EXEC_TIME:
+                                    H5RS_acat(rs, "H5VL_REQUEST_GET_EXEC_TIME");
                                     break;
 
                                 default:

@@ -760,6 +760,57 @@ done:
 } /* end H5VL_register_using_existing_id() */
 
 /*-------------------------------------------------------------------------
+ * Function:	H5VL_new_connector
+ *
+ * Purpose:     Utility function to create a connector for a connector ID.
+ *
+ * Return:      Success:    Pointer to a new connector object
+ *              Failure:    NULL
+ *
+ *-------------------------------------------------------------------------
+ */
+H5VL_t *
+H5VL_new_connector(hid_t connector_id)
+{
+    H5VL_class_t *cls          = NULL;  /* VOL connector class */
+    H5VL_t *      connector    = NULL;  /* New VOL connector struct */
+    hbool_t       conn_id_incr = FALSE; /* Whether the VOL connector ID has been incremented */
+    H5VL_t *      ret_value    = NULL;  /* Return value */
+
+    FUNC_ENTER_NOAPI(NULL)
+
+    /* Get the VOL class object from the connector's ID */
+    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
+        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, NULL, "not a VOL connector ID")
+
+    /* Setup VOL info struct */
+    if (NULL == (connector = H5FL_CALLOC(H5VL_t)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, NULL, "can't allocate VOL connector struct")
+    connector->cls = cls;
+    connector->id  = connector_id;
+    if (H5I_inc_ref(connector->id, FALSE) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, NULL, "unable to increment ref count on VOL connector")
+    conn_id_incr = TRUE;
+
+    /* Set return value */
+    ret_value = connector;
+
+done:
+    /* Clean up on error */
+    if (NULL == ret_value) {
+        /* Decrement VOL connector ID ref count on error */
+        if (conn_id_incr && H5I_dec_ref(connector_id) < 0)
+            HDONE_ERROR(H5E_VOL, H5E_CANTDEC, NULL, "unable to decrement ref count on VOL connector")
+
+        /* Free VOL connector struct */
+        if (NULL != connector)
+            connector = H5FL_FREE(H5VL_t, connector);
+    } /* end if */
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_new_connector() */
+
+/*-------------------------------------------------------------------------
  * Function:	H5VL_register_using_vol_id
  *
  * Purpose:     Utility function to create a user ID for an object created

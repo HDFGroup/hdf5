@@ -104,6 +104,55 @@ done:
 } /* end H5EScreate() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ESinsert_request
+ *
+ * Purpose:     Insert a request from a VOL connector into an event set.
+ *
+ * Note:        This function is primarily targeted at VOL connector
+ *              authors and is _not_ designed for general-purpose application use.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 11, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESinsert_request(hid_t es_id, hid_t connector_id, void *request)
+{
+    H5ES_t *es;                  /* Event set */
+    H5VL_t *connector = NULL;    /* VOL connector */
+    herr_t  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ii*x", es_id, connector_id, request);
+
+    /* Check arguments */
+    if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+    if (NULL == request)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL request pointer")
+
+    /* Create new VOL connector object, using the connector ID */
+    if (NULL == (connector = H5VL_new_connector(connector_id)))
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCREATE, FAIL, "can't create VOL connector object")
+
+    /* Insert request into event set */
+    if (H5ES__insert_request(es, connector, request) < 0)
+        HGOTO_ERROR(H5E_EVENTSET, H5E_CANTINSERT, FAIL, "can't insert request into event set")
+
+done:
+    /* Clean up on error */
+    if (ret_value < 0)
+        /* Release newly created connector */
+        if (connector && H5VL_conn_dec_rc(connector) < 0)
+            HDONE_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "unable to decrement ref count on VOL connector")
+
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESinsert_request() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5ESget_count
  *
  * Purpose:     Retrieve the # of events in an event set
@@ -244,6 +293,49 @@ done:
 } /* end H5ESwait() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5EScancel
+ *
+ * Purpose:     Attempt to cancel operations in an event set
+ *
+ * Note:        H5ES_NONE is a valid value for 'es_id', but functions as a no-op
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Thursday, December 10, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5EScancel(hid_t es_id, size_t *num_not_canceled /*out*/, hbool_t *op_failed /*out*/)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "ixx", es_id, num_not_canceled, op_failed);
+
+    /* Passing H5ES_NONE is valid, but a no-op */
+    if (H5ES_NONE != es_id) {
+        H5ES_t *es; /* Event set */
+
+        /* Check arguments */
+        if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+        if (NULL == num_not_canceled)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL num_not_canceled pointer")
+        if (NULL == op_failed)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL op_failed pointer")
+
+        /* Cancel operations */
+        if (H5ES__cancel(es, num_not_canceled, op_failed) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTCANCEL, FAIL, "can't cancel operations")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5EScancel() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5ESget_err_status
  *
  * Purpose:     Check if event set has failed operations
@@ -376,6 +468,137 @@ H5ESget_err_info(hid_t es_id, size_t num_err_info, H5ES_err_info_t err_info[] /*
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5ESget_err_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ESfree_err_info
+ *
+ * Purpose:     Convenience routine to free 1+ H5ES_err_info_t structs.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:  Quincey Koziol
+ *              Friday, March 5, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESfree_err_info(size_t num_err_info, H5ES_err_info_t err_info[])
+{
+    size_t u;                   /* Local index variable */
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "z*#", num_err_info, err_info);
+
+    /* Check arguments */
+    if (0 == num_err_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "err_info array size is 0")
+    if (NULL == err_info)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL err_info array pointer")
+
+    /* Iterate over array, releasing error information */
+    for (u = 0; u < num_err_info; u++) {
+        H5MM_xfree(err_info[u].api_name);
+        H5MM_xfree(err_info[u].api_args);
+        H5MM_xfree(err_info[u].app_file_name);
+        H5MM_xfree(err_info[u].app_func_name);
+        if (H5I_dec_app_ref(err_info[u].err_stack_id) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTDEC, FAIL, "can't close error stack for err_info #%zu", u)
+    } /* end for */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESfree_err_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ESregister_insert_func
+ *
+ * Purpose:     Registers a callback to invoke when a new operation is inserted
+ *              into an event set.
+ *
+ * Note:        Only one insert callback can be registered for each event set.
+ *              Registering a new callback will replace the existing one.
+ *
+ * Note:        H5ES_NONE is a valid value for 'es_id', but functions as a no-op
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 11, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESregister_insert_func(hid_t es_id, H5ES_event_insert_func_t func, void *ctx)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iEI*x", es_id, func, ctx);
+
+    /* Passing H5ES_NONE is valid, but a no-op */
+    if (H5ES_NONE != es_id) {
+        H5ES_t *es; /* Event set */
+
+        /* Check arguments */
+        if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+        if (NULL == func)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL function callback pointer")
+
+        /* Set the event set's insert callback */
+        es->ins_func = func;
+        es->ins_ctx  = ctx;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESregister_insert_func() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5ESregister_complete_func
+ *
+ * Purpose:     Registers a callback to invoke when an operation completes
+ *              within an event set.
+ *
+ * Note:        Only one complete callback can be registered for each event set.
+ *              Registering a new callback will replace the existing one.
+ *
+ * Note:        H5ES_NONE is a valid value for 'es_id', but functions as a no-op
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, December 11, 2020
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESregister_complete_func(hid_t es_id, H5ES_event_complete_func_t func, void *ctx)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE3("e", "iEC*x", es_id, func, ctx);
+
+    /* Passing H5ES_NONE is valid, but a no-op */
+    if (H5ES_NONE != es_id) {
+        H5ES_t *es; /* Event set */
+
+        /* Check arguments */
+        if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+        if (NULL == func)
+            HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL function callback pointer")
+
+        /* Set the event set's completion callback */
+        es->comp_func = func;
+        es->comp_ctx  = ctx;
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESregister_complete_func() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5ESclose
