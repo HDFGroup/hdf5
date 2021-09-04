@@ -1307,8 +1307,9 @@ H5VL_pass_through_dataset_specific(void *obj, H5VL_dataset_specific_t specific_t
     printf("------- PASS THROUGH VOL H5Dspecific\n");
 #endif
 
-    // Save copy of underlying VOL connector ID and prov helper, in case of
-    // refresh destroying the current object
+    /* Save copy of underlying VOL connector ID, in case of
+     * 'refresh' operation destroying the current object
+     */
     under_vol_id = o->under_vol_id;
 
     ret_value =

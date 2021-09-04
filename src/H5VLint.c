@@ -88,7 +88,6 @@ typedef struct {
 /********************/
 static herr_t         H5VL__free_cls(H5VL_class_t *cls, void **request);
 static int            H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data);
-static herr_t         H5VL__set_def_conn(void);
 static void *         H5VL__wrap_obj(void *obj, H5I_type_t obj_type);
 static H5VL_object_t *H5VL__new_vol_obj(H5I_type_t type, void *object, H5VL_t *vol_connector,
                                         hbool_t wrap_obj);
@@ -194,6 +193,10 @@ H5VL_init_phase2(void)
     if (H5M_init() < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize map interface")
 
+    /* Sanity check default VOL connector */
+    HDassert(H5VL_def_conn_s.connector_id == (-1));
+    HDassert(H5VL_def_conn_s.connector_info == NULL);
+
     /* Set up the default VOL connector in the default FAPL */
     if (H5VL__set_def_conn() < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "unable to set default VOL connector")
@@ -261,15 +264,22 @@ H5VL_term_package(void)
                 n++;
             } /* end if */
             else {
-                /* Destroy the VOL connector ID group */
-                n += (H5I_dec_type_ref(H5I_VOL) > 0);
+                if (H5VL__num_opt_operation() > 0) {
+                    /* Unregister all dynamically registered optional operations */
+                    (void)H5VL__term_opt_operation();
+                    n++;
+                } /* end if */
+                else {
+                    /* Destroy the VOL connector ID group */
+                    n += (H5I_dec_type_ref(H5I_VOL) > 0);
 
-                /* Mark interface as closed */
-                if (0 == n)
-                    H5_PKG_INIT_VAR = FALSE;
-            } /* end else */
-        }     /* end else */
-    }         /* end if */
+                    /* Mark interface as closed */
+                    if (0 == n)
+                        H5_PKG_INIT_VAR = FALSE;
+                } /* end else */
+            }     /* end else */
+        }         /* end else */
+    }             /* end if */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5VL_term_package() */
@@ -365,7 +375,7 @@ H5VL__get_connector_cb(void *obj, hid_t id, void *_op_data)
  *
  *-------------------------------------------------------------------------
  */
-static herr_t
+herr_t
 H5VL__set_def_conn(void)
 {
     H5P_genplist_t *def_fapl;               /* Default file access property list */
@@ -376,11 +386,16 @@ H5VL__set_def_conn(void)
     void *          vol_info     = NULL;    /* VOL connector info */
     herr_t          ret_value    = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_PACKAGE
 
-    /* Sanity check */
-    HDassert(H5VL_def_conn_s.connector_id == (-1));
-    HDassert(H5VL_def_conn_s.connector_info == NULL);
+    /* Reset default VOL connector, if it's set already */
+    /* (Can happen during testing -QAK) */
+    if (H5VL_def_conn_s.connector_id > 0) {
+        /* Release the default VOL connector */
+        (void)H5VL_conn_free(&H5VL_def_conn_s);
+        H5VL_def_conn_s.connector_id   = -1;
+        H5VL_def_conn_s.connector_info = NULL;
+    } /* end if */
 
     /* Check for environment variable set */
     env_var = HDgetenv("HDF5_VOL_CONNECTOR");
@@ -825,25 +840,14 @@ done:
 hid_t
 H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool_t app_ref)
 {
-    H5VL_class_t *cls          = NULL;            /* VOL connector class */
-    H5VL_t *      connector    = NULL;            /* VOL connector struct */
-    hbool_t       conn_id_incr = FALSE;           /* Whether the VOL connector ID has been incremented */
-    hid_t         ret_value    = H5I_INVALID_HID; /* Return value */
+    H5VL_t *connector = NULL;            /* VOL connector struct */
+    hid_t   ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Get the VOL class object from the connector's ID */
-    if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
-        HGOTO_ERROR(H5E_VOL, H5E_BADTYPE, H5I_INVALID_HID, "not a VOL connector ID")
-
-    /* Setup VOL info struct */
-    if (NULL == (connector = H5FL_CALLOC(H5VL_t)))
-        HGOTO_ERROR(H5E_VOL, H5E_CANTALLOC, H5I_INVALID_HID, "can't allocate VOL info struct")
-    connector->cls = cls;
-    connector->id  = connector_id;
-    if (H5I_inc_ref(connector->id, FALSE) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTINC, H5I_INVALID_HID, "unable to increment ref count on VOL connector")
-    conn_id_incr = TRUE;
+    /* Create new VOL connector object, using the connector ID */
+    if (NULL == (connector = H5VL_new_connector(connector_id)))
+        HGOTO_ERROR(H5E_VOL, H5E_CANTCREATE, H5I_INVALID_HID, "can't create VOL connector object")
 
     /* Get an ID for the VOL object */
     if ((ret_value = H5VL_register(type, obj, connector, app_ref)) < 0)
@@ -851,16 +855,11 @@ H5VL_register_using_vol_id(H5I_type_t type, void *obj, hid_t connector_id, hbool
 
 done:
     /* Clean up on error */
-    if (ret_value < 0) {
-        /* Decrement VOL connector ID ref count on error */
-        if (conn_id_incr && H5I_dec_ref(connector_id) < 0)
+    if (H5I_INVALID_HID == ret_value)
+        /* Release newly created connector */
+        if (connector && H5VL_conn_dec_rc(connector) < 0)
             HDONE_ERROR(H5E_VOL, H5E_CANTDEC, H5I_INVALID_HID,
                         "unable to decrement ref count on VOL connector")
-
-        /* Free VOL connector struct */
-        if (NULL != connector)
-            connector = H5FL_FREE(H5VL_t, connector);
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_register_using_vol_id() */
@@ -2098,6 +2097,36 @@ done:
 } /* end H5VL_retrieve_lib_state() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5VL_start_lib_state
+ *
+ * Purpose:     Opens a new internal state for the HDF5 library.
+ *
+ * Note:        Currently just pushes a new API context state, but could be
+ *		expanded in the future.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:	Quincey Koziol
+ *              Friday, February 5, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VL_start_lib_state(void)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Push a new API context on the stack */
+    if (H5CX_push() < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't push API context")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5VL_start_lib_state() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5VL_restore_lib_state
  *
  * Purpose:     Restore the state of the library.
@@ -2122,10 +2151,6 @@ H5VL_restore_lib_state(const void *state)
     /* Sanity checks */
     HDassert(state);
 
-    /* Push a new API context on the stack */
-    if (H5CX_push() < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't push API context")
-
     /* Restore the API context state */
     if (H5CX_restore_state((const H5CX_state_t *)state) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set API context state")
@@ -2135,16 +2160,16 @@ done:
 } /* end H5VL_restore_lib_state() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5VL_reset_lib_state
+ * Function:    H5VL_finish_lib_state
  *
- * Purpose:     Reset the state of the library, undoing affects of
- *		H5VL_restore_lib_state.
+ * Purpose:     Closes the state of the library, undoing affects of
+ *		H5VL_start_lib_state.
  *
  * Note:        Currently just resets the API context state, but could be
  *		expanded in the future.
  *
  * Note:	This routine must be called as a "pair" with
- * 		H5VL_restore_lib_state.  It can be called before / after /
+ * 		H5VL_start_lib_state.  It can be called before / after /
  * 		independently of H5VL_free_lib_state.
  *
  * Return:      SUCCEED / FAIL
@@ -2155,7 +2180,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_reset_lib_state(void)
+H5VL_finish_lib_state(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -2167,7 +2192,7 @@ H5VL_reset_lib_state(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5VL_reset_lib_state() */
+} /* end H5VL_finish_lib_state() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_free_lib_state
@@ -2533,6 +2558,33 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_check_plugin_load() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VL__is_default_conn
+ *
+ * Purpose:     Check if the default connector will be used for a container.
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5VL__is_default_conn(hid_t fapl_id, hid_t connector_id, hbool_t *is_default)
+{
+    FUNC_ENTER_PACKAGE_NOERR
+
+    /* Sanity checks */
+    HDassert(is_default);
+
+    /* Determine if the default VOL connector will be used, based on non-default
+     * values in the FAPL, connector ID, or the HDF5_VOL_CONNECTOR environment
+     * variable being set.
+     */
+    *is_default = (H5VL_def_conn_s.connector_id == H5_DEFAULT_VOL) &&
+                  ((H5P_FILE_ACCESS_DEFAULT == fapl_id) || connector_id == H5_DEFAULT_VOL);
+
+    FUNC_LEAVE_NOAPI_VOID
+} /* end H5VL__is_default_conn() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5VL_setup_args
