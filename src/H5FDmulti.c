@@ -2085,8 +2085,7 @@ H5_MULTI_GCC_DIAG_ON("format-nonliteral")
  *              The input and output parameters allow op_code specific
  *              input and output
  *
- *              At present, this VFD supports no op codes of its own and
- *              simply passes ctl calls on to each member VFD.
+ *              At present, this VFD supports no op codes of its own.
  *
  * Return:      Non-negative on success/Negative on failure
  *
@@ -2105,23 +2104,9 @@ H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *inpu
     switch (op_code) {
         /* Unknown op code */
         default:
-            if (flags & H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG) {
-                /* Pass ctl call on to each member file */
-                UNIQUE_MEMBERS (file->fa.memb_map, mt) {
-                    if (file->memb[mt] && H5FDctl(file->memb[mt], op_code, flags, input, output) < 0)
-                        H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL, "VFD ctl request failed", -1);
-                }
-                END_MEMBERS;
-            }
-            else {
-                /* If no valid VFD routing flag is specified, fail for unknown op code
-                 * if H5FD_CTL__FAIL_IF_UNKNOWN_FLAG flag is set.
-                 */
-                if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
-                    H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL,
-                                "VFD ctl request failed (unknown op code and fail if unknown flag is set)",
-                                -1);
-            }
+            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL,
+                            "VFD ctl request failed (unknown op code and fail if unknown flag is set)", -1);
 
             break;
     }
