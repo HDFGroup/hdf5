@@ -152,7 +152,7 @@ typedef herr_t (*H5D_append_cb_t)(hid_t dataset_id, hsize_t *cur_dims, void *op_
  *
  * \param[in,out] elem Pointer to the memory buffer containing the current dataset
  *                     element
- * \param[in] type_id Datatype identifier of the elements stored in \pelem
+ * \param[in] type_id Datatype identifier of the elements stored in \p elem
  * \param[in] ndim Number of dimensions for the \p point array
  * \param[in] point Array containing the location of the element within
  *                  the original dataspace
