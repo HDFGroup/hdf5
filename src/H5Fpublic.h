@@ -188,7 +188,7 @@ typedef enum H5F_libver_t {
     H5F_LIBVER_EARLIEST = 0, /**< Use the earliest possible format for storing objects */
     H5F_LIBVER_V18      = 1, /**< Use the latest v18 format for storing objects */
     H5F_LIBVER_V110     = 2, /**< Use the latest v110 format for storing objects */
-    H5F_LIBVER_NBOUNDS
+    H5F_LIBVER_NBOUNDS       /**< Sentinel */
 } H5F_libver_t;
 
 #define H5F_LIBVER_LATEST H5F_LIBVER_V110
