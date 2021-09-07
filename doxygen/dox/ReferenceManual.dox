@@ -3,38 +3,87 @@
 The functions provided by the HDF5 C-API are grouped into the following
 \Emph{modules}:
 
-\li \ref H5A "Attributes" — Management of HDF5 attributes (\ref H5A)
-\li \ref H5D "Datasets" — Management of HDF5 datasets (\ref H5D)
-\li \ref H5S "Dataspaces" — Management of HDF5 dataspaces which describe the shape of datasets and attributes (\ref H5S)
-\li \ref H5T "Datatypes" — Management of datatypes which describe elements of datasets and attributes (\ref H5T)
-\li \ref H5E "Error Handling" — Functions for handling HDF5 errors (\ref H5E)
-\li \ref H5F "Files" — Management of HDF5 files (\ref H5F)
-\li \ref H5Z "Filters" — Configuration of filters that process data during I/O operation (\ref H5Z)
-\li \ref H5G "Groups" — Management of groups in HDF5 files (\ref H5G)
-\li \ref H5I "Identifiers" — Management of object identifiers and object names (\ref H5I)
-\li \ref H5 "Library" — General purpose library functions (\ref H5)
-\li \ref H5L "Links" — Management of links in HDF5 groups (\ref H5L)
-\li \ref H5O "Objects" — Management of objects in HDF5 files (\ref H5O)
-\li \ref H5PL "Plugins" — Programmatic control over dynamically loaded plugins (\ref H5PL)
-\li \ref H5P "Property Lists" — Management of property lists to control HDF5 library behavior (\ref H5P)
-\li \ref H5R "References" — Management of references to specific objects and data regions in an HDF5 file (\ref H5R)
+<table>
+<tr><th>Modules</th></tr>
+<tr valign="top">
+<td>
 
-\par Asynchronous Functions
-     A subset of functions has \ref ASYNC "asynchronous variants".
+<table>
+<tr><td style="border: none;">
+\li \ref H5A "Attributes (H5A)"
+\li \ref H5D "Datasets (H5D)"
+\li \ref H5S "Dataspaces (H5S)"
+\li \ref H5T "Datatypes (H5T)"
+\li \ref H5E "Error Handling (H5E)"
+\li \ref H5ES "Event Sets (H5ES)"
+\li \ref H5F "Files (H5F)"
+\li \ref H5Z "Filters (H5Z)"
+\li \ref H5G "Groups (H5G)"
+</td><td style="border: none;">
+\li \ref H5I "Identifiers (H5I)"
+\li \ref H5 "Library General (H5)"
+\li \ref H5L "Links (H5L)"
+\li \ref H5M "Maps (H5M)"
+\li \ref H5O "Objects (H5O)"
+\li \ref H5P "Property Lists (H5P)"
+\li \ref H5PL "Dynamically-loaded Plugins (H5PL)"
+\li \ref H5R "References (H5R)"
+\li \ref H5VL "Virtual Object Layer (H5VL)"
+</td><td style="border: none;vertical-align: top;">
+\li Functions with \ref ASYNC "asynchronous variants"
+\li \ref api-compat-macros
+\li <a href="./deprecated.html">Deprecated functions</a>
+\li High-level Extensions
+    <ul>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Lite">\Bold{HDF5 Lite} (H5LT)</a></li>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Images">\Bold{HDF5 Image} (H5IM)</a></li>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Tables">\Bold{HDF5 Table} (H5TB)</a></li>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Packet+Tables">\Bold{HDF5 Packet Table} (H5TB)</a></li>
+    <li><a href="https://portal.hdfgroup.org/display/HDF5/Dimension+Scales">\Bold{HDF5 Dimension Scale} (H5DS)</a></li>
+    </ul>
+</td></tr>
+<tr><td colspan="3" style="border: none;">
+\ref H5 \ref H5A \ref H5D \ref H5E \ref H5ES \ref H5F \ref H5G \ref H5I \ref H5L
+\ref H5M \ref H5O \ref H5P \ref H5PL \ref H5R \ref H5S \ref H5T \ref H5VL \ref H5Z
+</td></tr>
+</table>
 
-\par API Versioning
-     See \ref api-compat-macros
+</td></tr>
+<tr><th>Mind the gap</th></tr>
+<tr><td>
+Follow these simple rules and stay out of trouble:
 
-\par Deprecated Functions and Types
-     A list of deprecated functions and types can be found
-     <a href="./deprecated.html">here</a>.
+\li \Bold{Handle discipline:} The HDF5 C-API is rife with handles or
+    identifiers, which you typically obtain by creating new HDF5 items, copying
+    items, or retrieving facets of items. \Emph{You acquire a handle, you own it!}
+    (Colin Powell) In other words, you are responsible for releasing the underlying
+    resources via the matching \Code{H5*close()} call, or deal with the consequences
+    of resource leakage.
+\li \Bold{Closed means closed:} Do not pass identifiers that were previously
+    \Code{H5*close()}-d to other API functions! It will generate an error.
+\li \Bold{Dynamic memory allocation:} The API contains a few functions in which the
+    HDF5 library dynamically allocates memory on the caller's behalf. The caller owns
+    this memory and eventually must free it by calling H5free_memory(). (\Bold{Not}
+    the `free` function \Emph{du jour}!)
+\li \Bold{Be careful with that saw:} Do not modify the underlying collection when an
+    iteration is in progress!
+\li \Bold{Use of locations:} Certain API functions, typically called \Code{H5***_by_name}
+    use a combination of identifiers and path names to refer to HDF5 objects.
+    If the identifier fully specifies the object in question, pass \Code{'.'} (a dot)
+    for the name!
 
-\par Etiquette
-     Here are a few simple rules to follow:
-     \li \Bold{Handle discipline:} If you acquire a handle (by creation or copy), \Emph{you own it!} (..., i.e., you have to close it.)
-     \li \Bold{Dynamic memory allocation:} ...
-     \li \Bold{Use of locations:} Identifier + name combo
+Break a leg!
+</td>
+</tr>
+</table>
 
 \cpp_c_api_note
+
+\par Don't like what you see? - You can help to improve this Reference Manual
+     Complete the survey linked near the top of this page!\n
+     We treat documentation like code: Fork the
+     <a href="https://github.com/HDFGroup/hdf5">HDF5 repo</a>, make changes, and create a
+     <a href="https://github.com/HDFGroup/hdf5/pulls">pull request</a> !\n
+     See the \ref RMT for general guidance.
 
 */
