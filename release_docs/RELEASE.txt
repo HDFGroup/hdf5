@@ -755,7 +755,6 @@ New Features
 
     Fortran Library:
     ----------------
-
     - H5Fget_name_f fixed to handle correctly trailing whitespaces and
       newly allocated buffers.
 
@@ -1133,6 +1132,14 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Corrected pkg-config compile script
+
+      It was discovered that the position of the "$@" argument for the command
+      in the compile script may fail on some platforms and configurations. The
+      position of the "$@"command argument was moved before the pkg-config sub command.
+
+      (ADB - 2021/08/30)
+
     - Fixed CMake C++ compiler flags
 
       A recent refactoring of the C++ configure files accidently removed the
