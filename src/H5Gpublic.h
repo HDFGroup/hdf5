@@ -467,6 +467,7 @@ H5_DLL herr_t H5Gclose(hid_t group_id);
 H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hid_t group_id,
                              hid_t es_id);
 
+/// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
@@ -488,6 +489,7 @@ H5_DLL herr_t H5Gclose_async(const char *app_file, const char *app_func, unsigne
 #define H5Gget_info_by_idx_async_wrap  H5_NO_EXPAND(H5Gget_info_by_idx_async)
 #define H5Gclose_async_wrap            H5_NO_EXPAND(H5Gclose_async)
 #endif /* H5G_MODULE */
+/// \endcond
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
