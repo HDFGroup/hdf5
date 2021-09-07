@@ -24,7 +24,7 @@
 #include "H5Ipublic.h"
 
 /* Value for the default error stack */
-#define H5E_DEFAULT (hid_t)0
+#define H5E_DEFAULT 0 /* (hid_t) */
 
 /**
  * Different kinds of error information
@@ -38,9 +38,9 @@ typedef struct H5E_error2_t {
     hid_t cls_id;
     /**< Class ID                           */
     hid_t maj_num;
-    /**< Major error ID		                */
+    /**< Major error ID                        */
     hid_t min_num;
-    /**< Minor error number		            */
+    /**< Minor error number                    */
     unsigned line;
     /**< Line in file where error occurs    */
     const char *func_name;

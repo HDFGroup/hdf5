@@ -139,7 +139,7 @@ H5_DLL hid_t H5Mcreate_anon(hid_t loc_id, hid_t key_type_id, hid_t val_type_id, 
  *          H5Mclose() when the application is not longer interested in
  *          accessing it.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mopen(hid_t loc_id, const char *name, hid_t mapl_id);
@@ -208,7 +208,7 @@ H5_DLL hid_t H5Mget_val_type(hid_t map_id);
  * \details H5Mget_create_plist() returns an identifier for a copy of the
  *          creation property list for a map object specified by \p map_id.
  *
- * \since 1.13.0
+ * \since 1.12.0
  *
  */
 H5_DLL hid_t H5Mget_create_plist(hid_t map_id);

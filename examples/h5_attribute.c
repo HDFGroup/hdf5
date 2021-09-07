@@ -184,6 +184,8 @@ main(void)
     printf("The value of the attribute \"Integer attribute\" is %d \n", point_out);
     ret = H5Aclose(attr);
 
+    //! [H5Oget_info3_snip]
+
     /*
      * Find string attribute by iterating through all attributes
      */
@@ -203,6 +205,7 @@ main(void)
         ret = H5Tclose(atype);
     }
 
+    //! [H5Oget_info3_snip]
     /*
      * Get attribute info using iteration function.
      */

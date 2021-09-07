@@ -44,7 +44,7 @@
 /**
  * \brief Macro to indicate operation occurs on same location
  */
-#define H5L_SAME_LOC (hid_t)0
+#define H5L_SAME_LOC 0 /* (hid_t) */
 
 /**
  * \brief Current version of the H5L_class_t struct

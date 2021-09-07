@@ -41,10 +41,10 @@ main(void)
     Particle dst_buf[NRECORDS + NRECORDS_INS];
 
     /* Define an array of Particles */
-    Particle p_data[NRECORDS] = {{"zero", 0, 0, 0.0f, 0.0},    {"one", 10, 10, 1.0f, 10.0},
-                                 {"two", 20, 20, 2.0f, 20.0},  {"three", 30, 30, 3.0f, 30.0},
-                                 {"four", 40, 40, 4.0f, 40.0}, {"five", 50, 50, 5.0f, 50.0},
-                                 {"six", 60, 60, 6.0f, 60.0},  {"seven", 70, 70, 7.0f, 70.0}};
+    Particle p_data[NRECORDS] = {{"zero", 0, 0, 0.0F, 0.0},    {"one", 10, 10, 1.0F, 10.0},
+                                 {"two", 20, 20, 2.0F, 20.0},  {"three", 30, 30, 3.0F, 30.0},
+                                 {"four", 40, 40, 4.0F, 40.0}, {"five", 50, 50, 5.0F, 50.0},
+                                 {"six", 60, 60, 6.0F, 60.0},  {"seven", 70, 70, 7.0F, 70.0}};
 
     /* Calculate the size and the offsets of our struct members in memory */
     size_t dst_size            = sizeof(Particle);
@@ -54,7 +54,7 @@ main(void)
                                  sizeof(p_data[0].pressure), sizeof(p_data[0].temperature)};
 
     /* Define an array of Particles to insert */
-    Particle p_data_insert[NRECORDS_INS] = {{"new", 30, 30, 3.0f, 30.0}, {"new", 40, 40, 4.0f, 40.0}};
+    Particle p_data_insert[NRECORDS_INS] = {{"new", 30, 30, 3.0F, 30.0}, {"new", 40, 40, 4.0F, 40.0}};
 
     /* Define field information */
     const char *field_names[NFIELDS] = {"Name", "Latitude", "Longitude", "Pressure", "Temperature"};

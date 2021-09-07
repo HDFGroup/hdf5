@@ -56,10 +56,15 @@
 #ifdef H5_HAVE_STDDEF_H
 #include <stddef.h>
 #endif
+
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
+#ifndef MPICH_SKIP_MPICXX
 #define MPICH_SKIP_MPICXX 1
-#define OMPI_SKIP_MPICXX  1
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX 1
+#endif
 #include <mpi.h>
 #ifndef MPI_FILE_NULL /* MPIO may be defined in mpi.h already */
 #include <mpio.h>
@@ -233,7 +238,14 @@ typedef int herr_t;
 typedef bool hbool_t;
 typedef int  htri_t;
 
-/* Define the ssize_t type if it not is defined */
+/* The signed version of size_t
+ *
+ * ssize_t is POSIX and not defined in any C standard. It's used in some
+ * public HDF5 API calls so this work-around will define it if it's not
+ * present.
+ *
+ * Use of ssize_t should be discouraged in new code.
+ */
 #if H5_SIZEOF_SSIZE_T == 0
 /* Undefine this size, we will re-define it in one of the sections below */
 #undef H5_SIZEOF_SSIZE_T
@@ -251,8 +263,10 @@ typedef long long ssize_t;
 #endif
 #endif
 
-/* int64_t type is used for creation order field for links.  It may be
- * defined in Posix.1g, otherwise it is defined here.
+/**
+ * The size of file objects.
+ *
+ * \internal Defined as a (minimum) 64-bit integer type.
  */
 #if H5_SIZEOF_INT64_T >= 8
 #elif H5_SIZEOF_INT >= 8
@@ -297,9 +311,11 @@ typedef unsigned long long uint64_t;
 #error "nothing appropriate for uint64_t"
 #endif
 
-/*
- * The sizes of file objects have their own types defined here, use a minimum
- * 64-bit type.
+/**
+ * The size of file objects. Used when negative values are needed to indicate errors.
+ *
+ * \internal Defined as a (minimum) 64-bit integer type. Use of hssize_t
+ * should be discouraged in new code.
  */
 #if H5_SIZEOF_LONG_LONG >= 8
 H5_GCC_DIAG_OFF("long-long")
@@ -319,8 +335,10 @@ H5_GCC_DIAG_ON("long-long")
 #error "nothing appropriate for hsize_t"
 #endif
 
-/*
- * File addresses have their own types.
+/**
+ * The address of an object in the file.
+ *
+ * \internal Defined as a (minimum) 64-bit unsigned integer type.
  */
 #if H5_SIZEOF_INT >= 8
 typedef unsigned haddr_t;

@@ -406,10 +406,10 @@ create_int_dataset(hid_t fid, const char *dsidx, int fulldims)
 herr_t
 create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int fulldims)
 {
-    int     rank    = 4;
-    int     rankds  = 1;
-    hsize_t dims[4] = {DIM1_SIZE, DIM2_SIZE, DIM3_SIZE, DIM4_SIZE};
-    long *  buf;
+    int     rank                = 4;
+    int     rankds              = 1;
+    hsize_t dims[4]             = {DIM1_SIZE, DIM2_SIZE, DIM3_SIZE, DIM4_SIZE};
+    long *  buf                 = NULL;
     hsize_t s1_dim[1]           = {DIM1_SIZE};
     hsize_t s2_dim[1]           = {DIM2_SIZE};
     hsize_t s3_dim[1]           = {DIM3_SIZE};
@@ -431,49 +431,54 @@ create_long_dataset(hid_t fid, const char *dsname, const char *dsidx, int fulldi
 
     /* Allocate buffer */
     if (NULL == (buf = (long *)HDmalloc(sizeof(long) * DIM1_SIZE * DIM2_SIZE * DIM3_SIZE * DIM4_SIZE)))
-        return FAIL;
+        goto error;
 
     /* make a dataset */
     if (H5LTmake_dataset_long(fid, dsname, rank, dims, buf) >= 0) {
         if (fulldims == 0) {
             /* make a DS dataset for the first dimension */
             if (create_DS1_long_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, NULL) < 0)
-                return FAIL;
+                goto error;
 
             /* make a DS dataset for the second dimension */
             if (create_DS2_long_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, NULL, NULL) < 0)
-                return FAIL;
+                goto error;
 
             /* make a DS dataset for the third dimension */
             if (create_DS3_long_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, NULL, NULL, NULL) < 0)
-                return FAIL;
+                goto error;
 
             /* make a DS dataset for the fourth dimension */
             if (create_DS4_long_datasets(fid, dsidx, rankds, s4_dim, s4_wbuf, NULL, NULL, NULL, NULL) < 0)
-                return FAIL;
+                goto error;
         }
         else {
             if (create_DS1_long_datasets(fid, dsidx, rankds, s1_dim, s1_wbuf, s11_wbuf) < 0)
-                return FAIL;
+                goto error;
 
             if (create_DS2_long_datasets(fid, dsidx, rankds, s2_dim, s2_wbuf, s21_wbuf, s22_wbuf) < 0)
-                return FAIL;
+                goto error;
 
             if (create_DS3_long_datasets(fid, dsidx, rankds, s3_dim, s3_wbuf, s31_wbuf, s32_wbuf, s33_wbuf) <
                 0)
-                return FAIL;
+                goto error;
 
             if (create_DS4_long_datasets(fid, dsidx, rankds, s4_dim, s4_wbuf, s41_wbuf, s42_wbuf, s43_wbuf,
                                          s44_wbuf) < 0)
-                return FAIL;
+                goto error;
         }
     }
     else
-        return FAIL;
+        goto error;
 
     HDfree(buf);
 
     return SUCCEED;
+
+error:
+    HDfree(buf);
+
+    return FAIL;
 }
 
 herr_t
@@ -4959,12 +4964,12 @@ read_data(const char *fname, int ndims, hsize_t *dims, float **buf)
     }
 
     for (i = 0, nelms = 1; i < ndims; i++) {
-        if (fscanf(f, "%s %u", str, &j) && HDferror(f)) {
+        if (HDfscanf(f, "%s %u", str, &j) && HDferror(f)) {
             HDprintf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
         } /* end if */
-        if (fscanf(f, "%d", &n) < 0 && HDferror(f)) {
+        if (HDfscanf(f, "%d", &n) < 0 && HDferror(f)) {
             HDprintf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
@@ -4982,7 +4987,7 @@ read_data(const char *fname, int ndims, hsize_t *dims, float **buf)
     }
 
     for (j = 0; j < nelms; j++) {
-        if (fscanf(f, "%f", &val) < 0 && HDferror(f)) {
+        if (HDfscanf(f, "%f", &val) < 0 && HDferror(f)) {
             HDprintf("fscanf error in file %s\n", data_file);
             HDfclose(f);
             return -1;
@@ -5204,6 +5209,8 @@ test_attach_detach(void)
     hsize_t dims[RANK1] = {DIM1};
 
     HL_TESTING2("permutations of attaching and detaching");
+
+    gid = var1_id = var2_id = var3_id = H5I_INVALID_HID;
 
     if ((fid = H5Fcreate(FILE8, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto out;
