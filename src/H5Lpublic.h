@@ -963,7 +963,7 @@ H5_DLL herr_t H5Literate2(hid_t grp_id, H5_index_t idx_type, H5_iter_order_t ord
  *          following:
  *          \orders
  *
- *          \p idx_p allows an interrupted iteration to be resumed; it is
+ *          \p idx allows an interrupted iteration to be resumed; it is
  *          passed in by the application with a starting point and returned by
  *          the library with the point at which the iteration stopped.
  *

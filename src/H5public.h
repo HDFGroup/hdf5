@@ -197,8 +197,9 @@ extern "C" {
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
  * zero for failure) while successful return is non-negative (often zero).
- * The negative failure value is most commonly -1, but don't bet on it.  The
- * proper way to detect failure is something like:
+ * The negative failure value is most commonly -1, but don't bet on it.
+ *
+ * The proper way to detect failure is something like:
  * \code
  * if((dset = H5Dopen2(file, name)) < 0)
  *    fprintf(stderr, "unable to open the requested dataset\n");
@@ -419,9 +420,9 @@ typedef enum {
 /* (Actually, any positive value will cause the iterator to stop and pass back
  *      that positive value to the function that called the iterator)
  */
-#define H5_ITER_ERROR (-1)
-#define H5_ITER_CONT  (0)
-#define H5_ITER_STOP  (1)
+#define H5_ITER_ERROR (-1) /**< Error, stop iteration */
+#define H5_ITER_CONT  (0)  /**< Continue iteration */
+#define H5_ITER_STOP  (1)  /**< Stop iteration, short-circuit success */
 
 //! <!-- [H5_index_t_snip] -->
 /**
