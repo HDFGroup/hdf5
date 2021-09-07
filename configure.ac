@@ -4087,6 +4087,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  tools/test/misc/vds/Makefile
                  tools/test/h5stat/Makefile
                  tools/test/h5stat/testh5stat.sh
+                 tools/src/h5perf/Makefile
                  tools/test/perform/Makefile
                  examples/Makefile
                  examples/run-c-ex.sh

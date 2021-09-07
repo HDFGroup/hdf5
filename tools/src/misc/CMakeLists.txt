@@ -42,7 +42,7 @@ if (NOT ONLY_SHARED_LIBS)
       h5debug
       h5repart
       h5mkgrp
-     h5clear
+      h5clear
   )
 endif ()
 if (BUILD_SHARED_LIBS)

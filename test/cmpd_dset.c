@@ -110,8 +110,8 @@ typedef struct {
     long long r, s, t;
 } stype4;
 
-#define NX          100u
-#define NY          2000u
+#define NX          100U
+#define NY          2000U
 #define PACK_NMEMBS 100
 
 /*-------------------------------------------------------------------------
@@ -1466,6 +1466,10 @@ test_hdf5_src_subset(char *filename, hid_t fapl)
     return 0;
 
 error:
+    HDfree(orig);
+    HDfree(rbuf);
+    HDfree(rew_buf);
+
     HDputs("*** DATASET TESTS FAILED ***");
     return 1;
 }

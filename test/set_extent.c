@@ -39,7 +39,7 @@ const char *FILENAME[] = {"set_extent1", "set_extent2", "set_extent3", "set_exte
 #define CONFIG_EARLY_ALLOC 0x04u
 #define CONFIG_UNFILT_EDGE 0x08u
 #define CONFIG_ALL         (CONFIG_COMPRESS + CONFIG_FILL + CONFIG_EARLY_ALLOC + CONFIG_UNFILT_EDGE)
-#define FILL_VALUE         -1
+#define FILL_VALUE         (-1)
 #define DO_RANKS_PRINT_CONFIG(TEST)                                                                          \
     {                                                                                                        \
         HDprintf("  Config:\n");                                                                             \
@@ -134,11 +134,11 @@ main(void)
         TEST_ERROR
 
     /* Set chunk cache so only part of the chunks can be cached on fapl */
-    if (H5Pset_cache(fapl, 0, (size_t)8, 256 * sizeof(int), 0.75F) < 0)
+    if (H5Pset_cache(fapl, 0, (size_t)8, 256 * sizeof(int), 0.75) < 0)
         TEST_ERROR
 
     /* Disable chunk caching on fapl2 */
-    if (H5Pset_cache(fapl2, 0, (size_t)0, (size_t)0, 0.0F) < 0)
+    if (H5Pset_cache(fapl2, 0, (size_t)0, (size_t)0, 0.0) < 0)
         TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */

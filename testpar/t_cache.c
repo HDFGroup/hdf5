@@ -211,7 +211,9 @@ struct datum data[NUM_DATA_ENTRIES];
 #define STD_VIRT_NUM_DATA_ENTRIES     NUM_DATA_ENTRIES
 #define EXPRESS_VIRT_NUM_DATA_ENTRIES (NUM_DATA_ENTRIES / 10)
 /* Use a smaller test size to avoid creating huge MPE logfiles. */
+#ifdef H5_HAVE_MPE
 #define MPE_VIRT_NUM_DATA_ENTIES (NUM_DATA_ENTRIES / 100)
+#endif
 
 int virt_num_data_entries = NUM_DATA_ENTRIES;
 

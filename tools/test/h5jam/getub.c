@@ -109,7 +109,7 @@ main(int argc, const char *argv[])
     filename = HDstrdup(argv[H5_optind]);
 
     size = 0;
-    if (EOF == (res = sscanf(nbytes, "%u", &size))) {
+    if (EOF == (res = HDsscanf(nbytes, "%u", &size))) {
         /* fail */
         error_msg("missing file name\n");
         usage(h5tools_getprogname());

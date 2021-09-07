@@ -3117,8 +3117,9 @@ verify_cache_image_RO(int file_name_id, int md_write_strat, int mpi_rank)
 
             H5_FAILED();
 
-            if (show_progress)
-                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", failure_mssg);
+            if (show_progress) {
+                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            }
         }
     }
 
@@ -3401,8 +3402,9 @@ verify_cache_image_RW(int file_name_id, int md_write_strat, int mpi_rank)
 
             H5_FAILED();
 
-            if (show_progress)
-                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", failure_mssg);
+            if (show_progress) {
+                HDfprintf(stdout, "%s: failure_mssg = \"%s\"\n", fcn_name, failure_mssg);
+            }
         }
     }
 

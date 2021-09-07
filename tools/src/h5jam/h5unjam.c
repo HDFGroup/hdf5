@@ -36,13 +36,9 @@ char *ub_file     = NULL;
  * adding more, make sure that they don't clash with each other.
  */
 static const char *           s_opts   = "hu:i:o:d:V";
-static struct h5_long_options l_opts[] = {
-    {"help", no_arg, 'h'},   {"hel", no_arg, 'h'},  {"i", require_arg, 'i'}, /* input file */
-    {"u", require_arg, 'u'},                                                 /* user block file */
-    {"o", require_arg, 'o'},                                                 /* output file */
-    {"delete", no_arg, 'd'},                                                 /* delete ub */
-    {"delet", no_arg, 'd'},  {"dele", no_arg, 'd'}, {"del", no_arg, 'd'},
-    {"de", no_arg, 'd'},     {NULL, 0, '\0'}};
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},   {"i", require_arg, 'i'},
+                                          {"u", require_arg, 'u'}, {"o", require_arg, 'o'},
+                                          {"delete", no_arg, 'd'}, {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------
  * Function:    usage

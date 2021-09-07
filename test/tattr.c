@@ -94,8 +94,7 @@ int attr_data2[ATTR2_DIM1][ATTR2_DIM2] = {{7614, -416}, {197814, -3}}; /* Test d
 #define ATTR3_DIM2 2
 #define ATTR3_DIM3 2
 double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
-    {{2.3F, -26.1F}, {0.123F, -10.0F}},
-    {{973.23F, -0.91827F}, {2.0F, 23.0F}}}; /* Test data for 3rd attribute */
+    {{2.3, -26.1}, {0.123, -10.0}}, {{973.23, -0.91827}, {2.0, 23.0}}}; /* Test data for 3rd attribute */
 
 #define ATTR4_NAME       "Attr4"
 #define ATTR4_RANK       2
@@ -112,8 +111,8 @@ struct attr4_struct {
     double d;
     char   c;
 } attr_data4[ATTR4_DIM1][ATTR4_DIM2] = {
-    {{3, -26.1F, 'd'}, {-100000, 0.123F, '3'}},
-    {{-23, 981724.2F, 'Q'}, {0, 2.0F, '\n'}}}; /* Test data for 4th attribute */
+    {{3, -26.1, 'd'}, {-100000, 0.123, '3'}},
+    {{-23, 981724.2, 'Q'}, {0, 2.0, '\n'}}}; /* Test data for 4th attribute */
 
 #define ATTR5_NAME "Attr5"
 #define ATTR5_RANK 0

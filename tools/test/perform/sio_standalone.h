@@ -21,6 +21,10 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
+/*
+ * Include ANSI-C header files.
+ */
+#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -33,6 +37,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#endif
 
 /* maximum of two, three, or four values */
 #undef MAX
@@ -471,17 +476,6 @@ extern char *         strdup(const char *s);
 #endif
 #ifndef TRUE
 #define TRUE true
-#endif
-
-/** From h5test.h **/
-
-#ifdef H5_HAVE_PARALLEL
-extern MPI_Info h5_io_info_g; /* MPI INFO object for IO */
-#endif
-
-#ifdef H5_HAVE_PARALLEL
-int  h5_set_info_object(void);
-void h5_dump_info_object(MPI_Info info);
 #endif
 
 /** From h5tools_utils.h **/

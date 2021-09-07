@@ -124,7 +124,7 @@
 #define TEST_THRESHOLD10 10                         /* Free space section threshold */
 #define FSP_SIZE_DEF     4096                       /* File space page size default */
 #define FSP_SIZE512      512                        /* File space page size */
-#define FSP_SIZE1G       1024 * 1024 * 1024         /* File space page size */
+#define FSP_SIZE1G       (1024 * 1024 * 1024)       /* File space page size */
 
 /* Declaration for test_libver_macros2() */
 #define FILE6 "tfile6.h5" /* Test file */

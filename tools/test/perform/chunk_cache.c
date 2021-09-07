@@ -26,9 +26,9 @@
 #define RANK 2
 
 #define DSET1_NAME  "partial_chunks"
-#define DSET1_DIM1  9 * 1000
+#define DSET1_DIM1  (9 * 1000)
 #define DSET1_DIM2  9
-#define CHUNK1_DIM1 2 * 1000
+#define CHUNK1_DIM1 (2 * 1000)
 #define CHUNK1_DIM2 2
 
 #define DSET2_NAME  "hash_value"
@@ -38,7 +38,7 @@
 #define CHUNK2_DIM2 100
 
 #define RDCC_NSLOTS 5
-#define RDCC_NBYTES 1024 * 1024 * 10
+#define RDCC_NBYTES (1024 * 1024 * 10)
 #define RDCC_W0     0.75F
 
 #define FILTER_COUNTER 306
