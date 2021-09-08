@@ -162,7 +162,7 @@ static herr_t  H5FD__onion_term(void);
 static herr_t  H5FD__onion_write(H5FD_t *, H5FD_mem_t, hid_t, haddr_t, size_t, const void *);
 
 static int      H5FD__onion_archival_index_list_sort_compar(const void *, const void *);
-static herr_t   H5FD__onion_injest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD_t *raw_file,
+static herr_t   H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD_t *raw_file,
                                                  haddr_t addr, haddr_t size);
 static herr_t   H5FD__onion_open_rw(H5FD_onion_t *, unsigned int, haddr_t);
 static herr_t   H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *);
@@ -1596,7 +1596,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_injest_history_header(struct H5FD__onion_history_header *hdr_out, H5FD_t *raw_file, haddr_t addr)
+H5FD__onion_ingest_history_header(struct H5FD__onion_history_header *hdr_out, H5FD_t *raw_file, haddr_t addr)
 {
     unsigned char *buf       = NULL;
     herr_t         ret_value = SUCCEED;
@@ -1635,7 +1635,7 @@ done:
     HDfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__onion_injest_history_header() */
+} /* end H5FD__onion_ingest_history_header() */
 
 /*-----------------------------------------------------------------------------
  *
@@ -1653,7 +1653,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_injest_revision_record(struct H5FD__onion_revision_record *r_out, H5FD_t *raw_file,
+H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5FD_t *raw_file,
                                    const struct H5FD__onion_whole_history *whs, uint64_t revision_id)
 {
     unsigned char *buf       = NULL;
@@ -1800,7 +1800,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__onion_injest_revision_record() */
+} /* end H5FD__onion_ingest_revision_record() */
 
 /*-----------------------------------------------------------------------------
  *
@@ -1816,7 +1816,7 @@ done:
  *-----------------------------------------------------------------------------
  */
 static herr_t
-H5FD__onion_injest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD_t *raw_file, haddr_t addr,
+H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD_t *raw_file, haddr_t addr,
                                  haddr_t size)
 {
     unsigned char *buf       = NULL;
@@ -1869,7 +1869,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
-} /* end H5FD__onion_injest_whole_history() */
+} /* end H5FD__onion_ingest_whole_history() */
 
 /*-----------------------------------------------------------------------------
  *
@@ -2112,7 +2112,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
             }
         }
 
-        if (H5FD__onion_injest_history_header(&file->header, file->backing_onion, 0) < 0) {
+        if (H5FD__onion_ingest_history_header(&file->header, file->backing_onion, 0) < 0) {
             HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get history header from backing store");
         }
         file->page_align_history =
@@ -2122,7 +2122,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
             HGOTO_ERROR(H5E_VFL, H5E_UNSUPPORTED, NULL, "Can't open file already opened in write-mode");
         } /* end if file is already opened in write-mode */
         else {
-            if (H5FD__onion_injest_whole_history(&file->summary, file->backing_onion,
+            if (H5FD__onion_ingest_whole_history(&file->summary, file->backing_onion,
                                                  file->header.whole_history_addr,
                                                  file->header.whole_history_size) < 0) {
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get whole-history from backing store");
@@ -2133,9 +2133,9 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range");
             }
 
-            // if (H5FD__onion_injest_revision_record(&file->rev_record,
+            // if (H5FD__onion_ingest_revision_record(&file->rev_record,
             if (file->summary.n_revisions > 0 &&
-                H5FD__onion_injest_revision_record(&file->rev_record, file->backing_onion, &file->summary,
+                H5FD__onion_ingest_revision_record(&file->rev_record, file->backing_onion, &file->summary,
                                                    MIN(fa.revision_id, (file->summary.n_revisions - 1))) <
                     0) {
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get revision record from backing store");
