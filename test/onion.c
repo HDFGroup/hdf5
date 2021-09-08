@@ -583,8 +583,8 @@ test_revision_index_to_archival_index(void)
         0, /* n_entries to be set */
         NULL,
     };
-    const uint64_t                  n_insert = 10;
-    uint64_t                        i        = 0;
+    const uint64_t n_insert = 10;
+    uint64_t       i        = 0;
 
     TESTING("revision index to archival index");
 
@@ -609,7 +609,7 @@ test_revision_index_to_archival_index(void)
     if (n_insert != rix_p->n_entries)
         TEST_ERROR;
 
-    aix.list = NULL;
+    aix.list      = NULL;
     aix.n_entries = 0;
 
     /*
@@ -3221,7 +3221,7 @@ test_integration_create(void)
      * Create the dataset creation property list, and set the chunk
      * size.
      */
-    dcpl   = H5Pcreate(H5P_DATASET_CREATE);
+    dcpl = H5Pcreate(H5P_DATASET_CREATE);
     if (H5Pset_chunk(dcpl, 2, chunk) < 0)
         TEST_ERROR
 
