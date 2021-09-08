@@ -583,7 +583,6 @@ test_revision_index_to_archival_index(void)
         0, /* n_entries to be set */
         NULL,
     };
-    struct H5FD__onion_index_entry *_list    = NULL;
     const uint64_t                  n_insert = 10;
     uint64_t                        i        = 0;
 
@@ -610,10 +609,7 @@ test_revision_index_to_archival_index(void)
     if (n_insert != rix_p->n_entries)
         TEST_ERROR;
 
-    aix.list = (struct H5FD__onion_index_entry *)HDmalloc(0);
-    if (NULL == aix.list)
-        TEST_ERROR;
-
+    aix.list = NULL;
     aix.n_entries = 0;
 
     /*
@@ -648,13 +644,6 @@ test_revision_index_to_archival_index(void)
     if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
         TEST_ERROR; /* archival index version must be valid */
     aix.version--;
-
-    _list    = aix.list;
-    aix.list = NULL;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* list pointer must exist */
-    aix.list = _list;
-    _list    = NULL;
 
     aix.page_size_log2 += 1;
     if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
@@ -1046,7 +1035,7 @@ test_header_encode_decode(void)
 
     for (i = 0; i < H5FD__ONION_ENCODED_SIZE_HEADER; i++) {
         if (exp[i] != buf[i]) {
-            HDprintf("first mismatched byte at %llu: %02x %02x\n", i, exp[i], buf[i]);
+            HDprintf("first mismatched byte at %zu: %02x %02x\n", i, exp[i], buf[i]);
             TEST_ERROR;
         }
     }
@@ -1173,7 +1162,7 @@ test_whole_history_encode_decode_empty(void)
         TEST_ERROR;
     for (i = 0; i < 20; i++) {
         if (exp[i] != buf[i]) {
-            HDprintf("first mismatched byte at %llu: %02x %02x\n", i, exp[i], buf[i]);
+            HDprintf("first mismatched byte at %zu: %02x %02x\n", i, exp[i], buf[i]);
             TEST_ERROR;
         }
     }
@@ -1739,7 +1728,7 @@ compare_file_bytes_exactly(const char *filepath, hid_t fapl_id, size_t nbytes, c
     /* compare raw bytes data */
     for (i = 0; i < nbytes; i++) {
         if (exp[i] != act_buf[i]) {
-            HDprintf("first mismatched byte %llu: expected 0x%02X was 0x%02X\n", i, exp[i], act_buf[i]);
+            HDprintf("first mismatched byte %zu: expected 0x%02X was 0x%02X\n", i, exp[i], act_buf[i]);
             TEST_ERROR;
         }
     }
@@ -2861,7 +2850,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
                 size_t               z    = 0;
                 HDputs("i  exp  act");
                 for (z = 0; z < wi->size; z++)
-                    HDprintf("%02x %c %c\n", z, _buf[z], buf_vfy[z]);
+                    HDprintf("%02zx %c %c\n", z, _buf[z], buf_vfy[z]);
                 fflush(stdout);
                 TEST_ERROR;
             }
@@ -2998,20 +2987,20 @@ test_page_aligned_history_create(void)
         TEST_ERROR;
     if (HDmemcmp(a_list_s, buf + a_off, a_list_size_s) != 0) {
         size_t k;
-        HDprintf("aoff: %llu\n", a_off);
+        HDprintf("aoff: %" PRIu64 "\n", a_off);
         HDputs("i exp act");
         for (k = 0; k < b_list_size_s; k++) {
-            HDprintf("%3llu:: %c : %c\n", k, (k < a_off) ? ' ' : a_list_s[k - a_off], buf[k]);
+            HDprintf("%3zu:: %c : %c\n", k, (k < a_off) ? ' ' : a_list_s[k - a_off], buf[k]);
         }
         fflush(stdout);
         TEST_ERROR;
     }
     if (HDmemcmp(b_list_s, buf, a_off) != 0) {
         size_t k;
-        HDprintf("aoff: %llu\n", a_off);
+        HDprintf("aoff: %" PRIu64 "\n", a_off);
         HDputs("i exp act");
         for (k = 0; k < b_list_size_s; k++) {
-            HDprintf("%3llu:: %c : %c\n", k, (k < a_off) ? b_list_s[k] : ' ', buf[k]);
+            HDprintf("%3zu:: %c : %c\n", k, (k < a_off) ? b_list_s[k] : ' ', buf[k]);
         }
         fflush(stdout);
         TEST_ERROR;
@@ -3205,7 +3194,6 @@ test_integration_create(void)
     // CREATE FILE WITHOUT ONION
 
     hid_t   file, space, dset, dcpl; /* Handles */
-    herr_t  status;
     hsize_t dims[2] = {4, 7}, maxdims[2] = {H5S_UNLIMITED, H5S_UNLIMITED}, chunk[2] = {4, 4};
     int     wdata[4][7], /* Write buffer */
         fillval, i, j;
@@ -3226,27 +3214,31 @@ test_integration_create(void)
     /*
      * Create dataspace with unlimited dimensions.
      */
-    space = H5Screate_simple(2, dims, maxdims);
+    if (H5Screate_simple(2, dims, maxdims) < 0)
+        TEST_ERROR
 
     /*
      * Create the dataset creation property list, and set the chunk
      * size.
      */
     dcpl   = H5Pcreate(H5P_DATASET_CREATE);
-    status = H5Pset_chunk(dcpl, 2, chunk);
+    if (H5Pset_chunk(dcpl, 2, chunk) < 0)
+        TEST_ERROR
 
     /*
      * Set the fill value for the dataset.
      */
     fillval = 99;
-    status  = H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval);
+    if (H5Pset_fill_value(dcpl, H5T_NATIVE_INT, &fillval) < 0)
+        TEST_ERROR
 
     /*
      * Set the allocation time to "early".  This way we can be sure
      * that reading from the dataset immediately after creation will
      * return the fill value.
      */
-    status = H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY);
+    if (H5Pset_alloc_time(dcpl, H5D_ALLOC_TIME_EARLY) < 0)
+        TEST_ERROR
 
     /*
      * Create the dataset using the dataset creation property list.
@@ -3256,15 +3248,20 @@ test_integration_create(void)
     /*
      * Write the data to the dataset.
      */
-    status = H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]);
+    if (H5Dwrite(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata[0]) < 0)
+        TEST_ERROR
 
     /*
      * Close and release resources.
      */
-    status = H5Pclose(dcpl);
-    status = H5Dclose(dset);
-    status = H5Sclose(space);
-    status = H5Fclose(file);
+    if (H5Pclose(dcpl) < 0)
+        TEST_ERROR
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    if (H5Sclose(space) < 0)
+        TEST_ERROR
+    if (H5Fclose(file) < 0)
+        TEST_ERROR
 
     ////////////////////////////
 
@@ -3283,7 +3280,7 @@ test_integration_create(void)
         TEST_ERROR;
     }
     HDputs(".");
-    fflush(stdout);
+    HDfflush(stdout);
 
     ///
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3292,23 +3289,23 @@ test_integration_create(void)
         TEST_ERROR
     }
     HDputs(".");
-    fflush(stdout);
+    HDfflush(stdout);
     int dset_data[2][2];
     for (i = 0; i < 2; i++)
         for (j = 0; j < 2; j++)
             dset_data[i][j] = i * 6 + j + 1;
     HDputs(".");
-    fflush(stdout);
-    status = H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data);
+    HDfflush(stdout);
+    if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
+        TEST_ERROR;
     HDputs(".");
-    fflush(stdout);
-    ///
+    HDfflush(stdout);
 
     if (H5Fclose(file_id) < 0)
         TEST_ERROR;
     file_id = H5I_INVALID_HID;
     HDputs(".");
-    fflush(stdout);
+    HDfflush(stdout);
 
     /* TODO */
 

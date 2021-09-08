@@ -1568,8 +1568,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
     if (TRUE == file->page_align_history)
         file->history_eof = (file->history_eof + (hdr_p->page_size - 1)) & (~(hdr_p->page_size - 1));
 
-    /* list must be allocated */
-    rec_p->archival_index.list = (struct H5FD__onion_index_entry *)HDmalloc(0);
+    rec_p->archival_index.list = NULL;
 
     file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size);
     if (NULL == file->rev_index) {
@@ -2075,8 +2074,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     file->history_eof =
                         (file->history_eof + (hdr_p->page_size - 1)) & (~(hdr_p->page_size - 1));
 
-                /* list must be allocated */
-                rec_p->archival_index.list = (struct H5FD__onion_index_entry *)HDmalloc(0);
+                rec_p->archival_index.list = NULL;
 
                 file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size);
                 if (NULL == file->rev_index) {
@@ -3137,9 +3135,6 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
     }
     if (H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR != aix->version)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null archival version");
-
-    if (NULL == aix->list)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null archival index list");
 
     if (aix->page_size_log2 != rix->page_size_log2)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page size mismatch");
