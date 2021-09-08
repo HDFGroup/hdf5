@@ -333,6 +333,7 @@ set (H5_TESTS
     timer
     cmpd_dtransform
     event_set
+    onion
 )
 
 macro (ADD_H5_EXE file)

@@ -598,6 +598,7 @@ typedef enum {
     MPIO_VFD_IDX,
     ROS3_VFD_IDX,
     HDFS_VFD_IDX,
+    ONION_VFD_IDX,
 } driver_idx;
 
 /* The following include, h5tools_str.h, must be after the

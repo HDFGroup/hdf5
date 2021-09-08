@@ -197,6 +197,7 @@ $Source = "";
                "H5FD_t"                     => "#",
                "H5FD_hdfs_fapl_t"           => "#",
                "H5FD_mirror_fapl_t"         => "#",
+               "H5FD_onion_fapl_t"         => "#",
                "H5FD_ros3_fapl_t"           => "#",
                "H5FD_splitter_vfd_config_t" => "#",
                "H5L_class_t"                => "#",

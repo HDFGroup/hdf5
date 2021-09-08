@@ -810,6 +810,9 @@
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDonion.c
+./src/H5FDonion.h
+./src/H5FDonion_priv.h
 ./src/H5FDros3.c
 ./src/H5FDros3.h
 ./src/H5FDpkg.h
@@ -1289,6 +1292,7 @@
 ./test/objcopy.c
 ./test/objcopy_ref.c
 ./test/ohdr.c
+./test/onion.c
 ./test/page_buffer.c
 ./test/paged_nopersist.h5
 ./test/paged_persist.h5
