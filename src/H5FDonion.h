@@ -18,22 +18,22 @@
 #ifndef H5FDonion_H
 #define H5FDonion_H
 
-#define H5FD_ONION       (H5FD_onion_init())
+#define H5FD_ONION (H5FD_onion_init())
 
 #define H5FD_ONION_ENABLE_INDEX_STATS 0
 
-#define H5FD_ONION_FAPL_INFO_MAGIC 0x10101010 /* TODO */
-#define H5FD_ONION_FAPL_INFO_VERSION_CURR 1
-#define H5FD_ONION_FAPL_INFO_FLAG_FORCE_OPEN 1
+#define H5FD_ONION_FAPL_INFO_MAGIC                                0x10101010 /* TODO */
+#define H5FD_ONION_FAPL_INFO_VERSION_CURR                         1
+#define H5FD_ONION_FAPL_INFO_FLAG_FORCE_OPEN                      1
 #define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY 1
-#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT 2
-#define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN 255
-#define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST (uint64_t)(-1)
+#define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT    2
+#define H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN                      255
+#define H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST                   (uint64_t)(-1)
 
 enum H5FD_onion_target_file_constant {
-    H5FD_ONION_STORE_TARGET_H5, /* onion history as part of H5 file */
+    H5FD_ONION_STORE_TARGET_H5,    /* onion history as part of H5 file */
     H5FD_ONION_STORE_TARGET_ONION, /* separate, single "onion" file */
-   /* TODO: other storage location/scheme? */
+                                   /* TODO: other storage location/scheme? */
 };
 
 /*-----------------------------------------------------------------------------
@@ -117,15 +117,15 @@ enum H5FD_onion_target_file_constant {
  *-----------------------------------------------------------------------------
  */
 typedef struct H5FD_onion_fapl_info_t {
-    uint32_t magic;
-    uint8_t  version;
-    hid_t    backing_fapl_id;
-    uint32_t page_size;
+    uint32_t                             magic;
+    uint8_t                              version;
+    hid_t                                backing_fapl_id;
+    uint32_t                             page_size;
     enum H5FD_onion_target_file_constant store_target;
-    uint64_t revision_id;
-    uint8_t  force_write_open;
-    uint8_t  creation_flags;
-    char     comment[H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN + 1];
+    uint64_t                             revision_id;
+    uint8_t                              force_write_open;
+    uint8_t                              creation_flags;
+    char                                 comment[H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN + 1];
 } H5FD_onion_fapl_info_t;
 
 #ifdef __cplusplus
@@ -136,14 +136,12 @@ extern "C" {
  * PUBLIC PROTOTYPES
  */
 
-H5_DLL hid_t H5FD_onion_init(void);
+H5_DLL hid_t  H5FD_onion_init(void);
 H5_DLL herr_t H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out);
-H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id,
-        const H5FD_onion_fapl_info_t *fa);
+H5_DLL herr_t H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa);
 
 #ifdef __cplusplus
 }
 #endif
 
 #endif /* H5FDonion_H */
-

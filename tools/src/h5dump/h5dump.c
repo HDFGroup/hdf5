@@ -51,15 +51,15 @@ static H5FD_hdfs_fapl_t hdfs_fa_g = {
 #endif /* H5_HAVE_LIBHDFS */
 
 static H5FD_onion_fapl_info_t onion_fa_g = {
-        H5FD_ONION_FAPL_INFO_MAGIC,
-        H5FD_ONION_FAPL_INFO_VERSION_CURR,
-        H5P_DEFAULT,                       /* backing_fapl_id                */
-        32,                                /* page_size                      */
-        H5FD_ONION_STORE_TARGET_ONION,     /* store_target                   */
-        H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-        0,                                 /* force_write_open               */
-        0,                                 /* creation_flags                 */
-        "indoor speaking voices",          /* comment                        */
+    H5FD_ONION_FAPL_INFO_MAGIC,
+    H5FD_ONION_FAPL_INFO_VERSION_CURR,
+    H5P_DEFAULT,                   /* backing_fapl_id                */
+    32,                            /* page_size                      */
+    H5FD_ONION_STORE_TARGET_ONION, /* store_target                   */
+    H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
+    0,                        /* force_write_open               */
+    0,                        /* creation_flags                 */
+    "indoor speaking voices", /* comment                        */
 };
 static int64_t onion_revision_g = -1;
 
@@ -1419,7 +1419,7 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrcmp(driver_name_g, drivernames[ONION_VFD_IDX])) {
             onion_fa_g.revision_id = onion_revision_g;
-            vfd_info.info = (void *)&onion_fa_g;
+            vfd_info.info          = (void *)&onion_fa_g;
         }
 
         if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {

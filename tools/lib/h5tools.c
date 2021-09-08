@@ -81,7 +81,8 @@ const char *volnames[] = {
  *
  */
 const char *drivernames[] = {
-    "sec2", "direct", "log", "windows", "stdio", "core", "family", "split", "multi", "mpio", "ros3", "hdfs", "onion",
+    "sec2",  "direct", "log",  "windows", "stdio", "core",  "family",
+    "split", "multi",  "mpio", "ros3",    "hdfs",  "onion",
 };
 
 #define NUM_VOLS    (sizeof(volnames) / sizeof(volnames[0]))
