@@ -187,14 +187,14 @@ static int
 test_archival_index(void)
 {
     /* We can ignore each entry's physical address and checksum values */
-    struct H5FD__onion_index_entry e0 = {1, 474};
-    struct H5FD__onion_index_entry e1 = {4, 558};
-    struct H5FD__onion_index_entry e2 = {5, 306};
-    struct H5FD__onion_index_entry e3 = {9, 515};
-    struct H5FD__onion_index_entry e4 = {14, 386};
-    struct H5FD__onion_index_entry e5 = {18, 90};
-    struct H5FD__onion_index_entry e6 = {19, 94};
-    struct H5FD__onion_index_entry e7 = {20, 509};
+    struct H5FD__onion_index_entry e0                   = {1, 474};
+    struct H5FD__onion_index_entry e1                   = {4, 558};
+    struct H5FD__onion_index_entry e2                   = {5, 306};
+    struct H5FD__onion_index_entry e3                   = {9, 515};
+    struct H5FD__onion_index_entry e4                   = {14, 386};
+    struct H5FD__onion_index_entry e5                   = {18, 90};
+    struct H5FD__onion_index_entry e6                   = {19, 94};
+    struct H5FD__onion_index_entry e7                   = {20, 509};
     struct H5FD__onion_index_entry sorted[8]            = {e0, e1, e2, e3, e4, e5, e6, e7};
     struct H5FD__onion_index_entry sorted_duplicates[8] = {e0, e1, e2, e2, e4, e5, e6, e7};
     struct H5FD__onion_index_entry sorted_incomplete[8] = {e1, e3, e4, e5};
