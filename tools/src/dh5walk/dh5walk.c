@@ -43,6 +43,9 @@ static int   mpierrlen;
 static int   sg_mpi_rank;
 
 static void dh5tool_flist_write_text(const char *name, mfu_flist bflist);
+static void run_command(int argc, char **argv, char *cmdline, const char *fname);
+static void add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count);
+static int  process_input_file(char *inputname, int myrank, int size);
 
 // getpwent getgrent to read user and group entries
 
@@ -133,9 +136,9 @@ create_default_separators(struct distribute_option *option, mfu_flist *flist, ui
 }
 
 static int
-dh5walk_map_fn(mfu_flist flist, uint64_t idx, int ranks, void *args)
+dh5walk_map_fn(mfu_flist flist __attribute__((unused)), uint64_t idx, int ranks, void *args __attribute__((unused)))
 {
-    int rank = (int)(idx % ranks);
+    int rank = (int)((int)idx % ranks);
     return rank;
 }
 
@@ -392,6 +395,7 @@ list_get_elem(flist_t *flist, uint64_t idx)
     return NULL;
 }
 
+#ifdef VERBOSE
 /* print information about a file given the index and rank (used in print_files) */
 static void
 print_file(mfu_flist flist, uint64_t idx)
@@ -531,6 +535,7 @@ print_file_text(mfu_flist flist, uint64_t idx, char *buffer, size_t bufsize)
 
     return numbytes;
 }
+#endif
 
 static size_t
 get_local_bufsize(uint64_t *bufsize)
@@ -567,8 +572,6 @@ dh5tool_flist_write_text(const char *name, mfu_flist bflist)
         MFU_LOG(MFU_LOG_INFO, "Writing to output file: %s", name);
     }
 
-    /* compute size of buffer needed to hold all data */
-    size_t   bufsize = 0;
     uint64_t idx     = 0;
     char *   ptr     = NULL;
 
@@ -579,7 +582,7 @@ dh5tool_flist_write_text(const char *name, mfu_flist bflist)
     size_t   local_total = get_local_bufsize(&maxwrite);
     uint64_t iters       = 0;
     if (local_total > 0)
-        (uint64_t) local_total / maxwrite;
+        iters = (uint64_t) local_total / maxwrite;
 
     if (iters * maxwrite < (uint64_t)local_total) {
         iters++;
@@ -837,6 +840,7 @@ copy_args(int argc, char **argv, int *mfu_argc, int *copy_len)
     return argv_copy;
 }
 
+#ifdef VALIDATE_ARG_COUNT
 static int
 check_path_count(char *h5tool)
 {
@@ -858,6 +862,7 @@ check_path_count(char *h5tool)
     }
     return -1;
 }
+#endif
 
 typedef struct hash_entry {
     int hash;
@@ -875,11 +880,9 @@ static hash_entry_t filename_cache[NAME_ENTRIES];
 static int
 get_copy_count(char *fname, char *appname)
 {
-    static char * lastdir;
-
-	int k, filehash = 0, apphash = 0;
-    int applen = strlen(appname);
-	int filelen = strlen(fname);
+	int filehash = 0, apphash = 0;
+    size_t k, applen = strlen(appname);
+	size_t filelen = strlen(fname);
     int hash_index;
 
     for (k=0; k < filelen; k++) {
@@ -929,7 +932,8 @@ get_copy_count(char *fname, char *appname)
 	return 0;
 }
 
-int run_command(int argc, char **argv, char *cmdline, char *fname)
+static
+void run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const char *fname)
 {
     char  filepath[1024];
     char *toolname = argv[0];
@@ -948,7 +952,7 @@ int run_command(int argc, char **argv, char *cmdline, char *fname)
             bufs = (buf_t **)MFU_CALLOC(buft_max, sizeof(buf_t *));
             assert((bufs != NULL));
             buf_cache = bufs;
-#if 0
+#ifdef VERBOSE
 			if (buft_count == 0) {
                 printf("[%d] Initial buf_cache allocation: buft_count=%d\n", sg_mpi_rank, buft_count);
 			}
@@ -1030,8 +1034,7 @@ int run_command(int argc, char **argv, char *cmdline, char *fname)
             offset = thisbuft->chars;
 
             do {
-                pid_t wpid;
-                wpid = waitpid(pid, &w_status, WNOHANG);
+                waitpid(pid, &w_status, WNOHANG);
                 if ((nbytes = (size_t)read(pipefd[0], &buf[offset], remaining)) > 0) {
                     offset += nbytes;
                     read_bytes += nbytes;
@@ -1171,8 +1174,6 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
 
     char   cmdline[2048];
     char **argv = (char **)MFU_CALLOC((size_t)(count + 2), sizeof(char *));
-    char * logbase = strdup(basename(fname));
-    char * thisapp = strdup(basename(toolname));
 
     argv[k++]   = strdup(toolname);
 
@@ -1181,9 +1182,8 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     /* Reconstruct the command line that the user provided for the h5tool */
     for (k = 1; k < count; k++) {
         if (buf[0] == '&') {
-            char *     fname_arg    = NULL;
+            const char *fname_arg   = NULL;
             void *     check_ptr[2] = {NULL, NULL};
-            mfu_flist *check_flist  = memcpy(&check_ptr[0], &buf[1], sizeof(mfu_flist *));
             mfu_flist  flist_arg    = (mfu_flist)check_ptr[0];
 
             /* +2 (see below) accounts for the '&' and the trailing zero pad */
@@ -1402,7 +1402,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
 }
 
 int
-MFU_PRED_PRINT(mfu_flist flist, uint64_t idx, void *arg)
+MFU_PRED_PRINT(mfu_flist flist, uint64_t idx, void *arg __attribute__((unused)))
 {
     const char *name = mfu_flist_file_get_name(flist, idx);
     printf("%s\n", name);
@@ -1412,20 +1412,17 @@ MFU_PRED_PRINT(mfu_flist flist, uint64_t idx, void *arg)
 static void
 pred_commit(mfu_pred *p)
 {
-    int need_print = 1;
-
     mfu_pred *cur = p;
     while (cur) {
         if (cur->f == MFU_PRED_PRINT || cur->f == MFU_PRED_EXEC) {
-            need_print = 0;
             break;
         }
         cur = cur->next;
     }
 }
 
-void
-add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count)
+static void
+add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count __attribute__((unused)))
 {
     char   cmdline[2048];
     sprintf(cmdline, "\n---------\nCommand: %s\n", cmdstring);
@@ -1434,7 +1431,7 @@ add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count
     return;
 }
 
-int
+static int
 process_input_file(char *inputname, int myrank, int size)
 {
     int  index = 0;
@@ -1448,10 +1445,10 @@ process_input_file(char *inputname, int myrank, int size)
     flist1 = mfu_flist_new();
 
     while (fgets(linebuf, sizeof(linebuf), config) != NULL) {
+        const char *delim = " \n";
         char *cmdline = NULL;
         char *cmd = NULL;
         char *arg = NULL;
-        char *delim = " \n";
         char *argv[256];
         int fileindex[256];
         int filecount = 0;
@@ -1532,17 +1529,11 @@ main(int argc, char **argv)
     char *outputname   = NULL;
     char *sortfields   = NULL;
     char *distribution = NULL;
-    char *h5toolname   = NULL;
 
-    int file_histogram = 0;
-    int walk           = 0;
     int print          = 0;
     int text           = 0;
     int h5tool_argc    = 0;
 
-    struct distribute_option option;
-
-    // mfu_debug_level = MFU_LOG_WARN; // MFU_LOG_VERBOSE;
     mfu_debug_level = MFU_LOG_WARN;
     h5tool_argv[argc] = 0;
 
@@ -1561,7 +1552,6 @@ main(int argc, char **argv)
 
     int       usage           = 0;
     int       tool_selected   = 0;
-    int       tool_paths      = 0;
     int       tool_args_start = -1;
     int       last_mfu_arg    = 0;
     mfu_pred *pred_head       = NULL;
@@ -1597,14 +1587,12 @@ main(int argc, char **argv)
                     txtlog = MFU_STRDUP(optarg);
                 break;
             case 'T':
-                h5toolname = MFU_STRDUP(optarg);
                 /* We need to stop parsing user options at this point.
                  * all remaining arguments should be utilized as the
                  * arguments to the selected HDF5 tools.
                  * We also want to avoid any misinterpretations if
                  * HDF5 tool options conflict with the MFU options.
                  */
-                // tool_paths      = check_path_count(h5toolname);
                 tool_selected   = 1;
                 tool_args_start = mfu_argc;
                 h5tool_argc     = argc - mfu_argc;
@@ -1716,8 +1704,6 @@ show_help:
         }
     }
     else if (numpaths > 0) {
-        /* got a path to walk */
-        walk = 1;
 
         /* allocate space for each path */
         paths = (mfu_param_path *)MFU_MALLOC((size_t)numpaths * sizeof(mfu_param_path));
@@ -1797,7 +1783,6 @@ show_help:
     if (args_buf != NULL) {
         int   k          = 0;
         char *ptr        = args_buf + sizeof(int);
-        char *cmdline    = ptr;
         *(int *)args_buf = h5tool_argc;
         for (i = tool_args_start; i < argc; i++) {
             int copy_flist = -1;
@@ -1814,10 +1799,10 @@ show_help:
                 *ptr++ = '&';
                 /* Select which argument list should be used */
                 if (k == 0) {
-                    memcpy(ptr, &flist1, sizeof(mfu_flist *));
+                    memcpy(ptr, &flist1, sizeof(void *));
                 }
                 if (k == 1) {
-                    memcpy(ptr, &flist2, sizeof(mfu_flist *));
+                    memcpy(ptr, &flist2, sizeof(void *));
                 }
                 ptr += sizeof(mfu_flist *);
                 k++;
