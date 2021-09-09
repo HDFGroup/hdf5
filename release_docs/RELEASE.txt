@@ -917,7 +917,13 @@ New Features
 
     High-Level APIs:
     ----------------
-    -
+    - added set/get for unsigned long long attributes
+
+        the attribute writing high-level API has been expanded to include 
+        public set/get functions for ULL attributes, analogously to the 
+        existing set/get for other types.
+
+        (AF - 2021/09/08)
 
     C Packet Table API:
     -------------------
