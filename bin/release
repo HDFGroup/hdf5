@@ -236,7 +236,7 @@ tar2cmakezip()
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.12.9-Source.zip $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_12_1.zip $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_12_2.zip $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpsubdir
@@ -332,7 +332,7 @@ tar2cmaketgz()
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.12.9-Source.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_12_1.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_12_2.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
@@ -416,7 +416,7 @@ tar2hpccmaketgz()
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.12.9-Source.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_12_1.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_12_2.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
 
