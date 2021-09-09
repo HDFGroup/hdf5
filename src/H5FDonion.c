@@ -691,7 +691,6 @@ H5FD__onion_close(H5FD_t *_file)
 
             if (H5FD__onion_update_and_write_header(file) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "Can't write updated header to backing store")
-
         }
     }
     else if (H5FD_ONION_STORE_TARGET_H5 == file->fa.store_target)
@@ -1867,13 +1866,14 @@ done:
 static H5FD_t *
 H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
-    H5P_genplist_t *       plist = NULL;
-    H5FD_onion_t *         file = NULL;
-    const H5FD_onion_fapl_info_t *fa = NULL;;
-    hid_t                  backing_fapl_id = H5I_INVALID_HID;
-    char *                 name_onion      = NULL;
-    char *                 name_recovery   = NULL;
-    H5FD_t *               ret_value       = NULL;
+    H5P_genplist_t *              plist = NULL;
+    H5FD_onion_t *                file  = NULL;
+    const H5FD_onion_fapl_info_t *fa    = NULL;
+    ;
+    hid_t   backing_fapl_id = H5I_INVALID_HID;
+    char *  name_onion      = NULL;
+    char *  name_recovery   = NULL;
+    H5FD_t *ret_value       = NULL;
 
     FUNC_ENTER_STATIC
 
@@ -1942,7 +1942,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
      *       instead of division, which is some severly premature optimization
      *       with a major hit on maintainability.
      */
-    double log2_page_size = HDlog2((double)(fa->page_size));
+    double log2_page_size                          = HDlog2((double)(fa->page_size));
     file->rev_record.archival_index.page_size_log2 = (uint32_t)log2_page_size;
 
     /* Proceed with open. */
@@ -2139,8 +2139,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
             // if (H5FD__onion_ingest_revision_record(&file->rev_record,
             if (file->summary.n_revisions > 0 &&
                 H5FD__onion_ingest_revision_record(&file->rev_record, file->backing_onion, &file->summary,
-                                                   MIN(fa->revision_id, (file->summary.n_revisions - 1))) <
-                    0)
+                                                   MIN(fa->revision_id, (file->summary.n_revisions - 1))) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get revision record from backing store")
 
             if (H5F_ACC_RDWR & flags)
