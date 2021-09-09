@@ -228,7 +228,7 @@ tar2cmakezip()
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.8.14-Source.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1.8.22.zip $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_8_23.zip $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpsubdir
@@ -324,7 +324,7 @@ tar2cmaketgz()
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.8.14-Source.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1.8.22.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_8_23.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
@@ -343,7 +343,7 @@ tar2cmaketgz()
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.8.14-Source.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1.8.22.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_8_23.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
