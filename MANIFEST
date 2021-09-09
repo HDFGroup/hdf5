@@ -213,6 +213,7 @@
 ./doc/code-conventions.md
 ./doc/contributing.md
 ./doxygen/aliases
+./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
 ./doxygen/dox/APIVersions.dox
 ./doxygen/dox/About.dox
