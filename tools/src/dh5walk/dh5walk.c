@@ -136,7 +136,8 @@ create_default_separators(struct distribute_option *option, mfu_flist *flist, ui
 }
 
 static int
-dh5walk_map_fn(mfu_flist flist __attribute__((unused)), uint64_t idx, int ranks, void *args __attribute__((unused)))
+dh5walk_map_fn(mfu_flist flist __attribute__((unused)), uint64_t idx, int ranks,
+               void *args __attribute__((unused)))
 {
     int rank = (int)((int)idx % ranks);
     return rank;
@@ -572,8 +573,8 @@ dh5tool_flist_write_text(const char *name, mfu_flist bflist)
         MFU_LOG(MFU_LOG_INFO, "Writing to output file: %s", name);
     }
 
-    uint64_t idx     = 0;
-    char *   ptr     = NULL;
+    uint64_t idx = 0;
+    char *   ptr = NULL;
 
     /* if we block things up into 128MB chunks, how many iterations
      * to write everything? */
@@ -582,7 +583,7 @@ dh5tool_flist_write_text(const char *name, mfu_flist bflist)
     size_t   local_total = get_local_bufsize(&maxwrite);
     uint64_t iters       = 0;
     if (local_total > 0)
-        iters = (uint64_t) local_total / maxwrite;
+        iters = (uint64_t)local_total / maxwrite;
 
     if (iters * maxwrite < (uint64_t)local_total) {
         iters++;
@@ -880,10 +881,10 @@ static hash_entry_t filename_cache[NAME_ENTRIES];
 static int
 get_copy_count(char *fname, char *appname)
 {
-	int filehash = 0, apphash = 0;
-    size_t k, applen = strlen(appname);
-	size_t filelen = strlen(fname);
-    int hash_index;
+    int    filehash = 0, apphash = 0;
+    size_t k, applen             = strlen(appname);
+    size_t filelen = strlen(fname);
+    int    hash_index;
 
     for (k = 0; k < filelen; k++) {
         filehash += fname[k];
@@ -931,8 +932,8 @@ get_copy_count(char *fname, char *appname)
     return 0;
 }
 
-static
-void run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const char *fname)
+static void
+run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const char *fname)
 {
     char  filepath[1024];
     char *toolname = argv[0];
@@ -952,9 +953,9 @@ void run_command(int argc __attribute__((unused)), char **argv, char *cmdline, c
             assert((bufs != NULL));
             buf_cache = bufs;
 #ifdef VERBOSE
-			if (buft_count == 0) {
+            if (buft_count == 0) {
                 printf("[%d] Initial buf_cache allocation: buft_count=%d\n", sg_mpi_rank, buft_count);
-			}
+            }
 #endif
             bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
             assert((thisbuft != NULL));
@@ -1043,7 +1044,8 @@ void run_command(int argc __attribute__((unused)), char **argv, char *cmdline, c
                         thisbuft->count = 0;
                         thisbuft->chars += read_bytes;
 #if VERBOSE
-                        printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
+                        printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank,
+                               buft_count);
 #endif
                         bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
                         assert(thisbuft != NULL);
@@ -1180,9 +1182,9 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     /* Reconstruct the command line that the user provided for the h5tool */
     for (k = 1; k < count; k++) {
         if (buf[0] == '&') {
-            const char *fname_arg   = NULL;
-            void *     check_ptr[2] = {NULL, NULL};
-            mfu_flist  flist_arg    = (mfu_flist)check_ptr[0];
+            const char *fname_arg    = NULL;
+            void *      check_ptr[2] = {NULL, NULL};
+            mfu_flist   flist_arg    = (mfu_flist)check_ptr[0];
 
             /* +2 (see below) accounts for the '&' and the trailing zero pad */
             buf += sizeof(mfu_flist *) + 2;
@@ -1224,9 +1226,9 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             assert((bufs != NULL));
             buf_cache = bufs;
 #if VERBOSE
-			if (buft_count == 0) {
+            if (buft_count == 0) {
                 printf("[%d] Initial buf_cache allocation: buft_count=%d\n", sg_mpi_rank, buft_count);
-			}
+            }
 #endif
             bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
             assert((thisbuft != NULL));
@@ -1316,7 +1318,8 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
                         thisbuft->count = 0;
                         thisbuft->chars += read_bytes;
 #if VERBOSE
-                        printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
+                        printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank,
+                               buft_count);
 #endif
                         bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
                         assert(thisbuft != NULL);
@@ -1444,14 +1447,14 @@ process_input_file(char *inputname, int myrank, int size)
     flist1 = mfu_flist_new();
 
     while (fgets(linebuf, sizeof(linebuf), config) != NULL) {
-        const char *delim = " \n";
-        char *cmdline = NULL;
-        char *cmd = NULL;
-        char *arg = NULL;
-        char *argv[256];
-        int fileindex[256];
-        int filecount = 0;
-        int token = 0;
+        const char *delim   = " \n";
+        char *      cmdline = NULL;
+        char *      cmd     = NULL;
+        char *      arg     = NULL;
+        char *      argv[256];
+        int         fileindex[256];
+        int         filecount = 0;
+        int         token     = 0;
         struct stat statbuf;
 
         char *eol = strchr(linebuf, '\n');
@@ -1529,11 +1532,11 @@ main(int argc, char **argv)
     char *sortfields   = NULL;
     char *distribution = NULL;
 
-    int print          = 0;
-    int text           = 0;
-    int h5tool_argc    = 0;
+    int print       = 0;
+    int text        = 0;
+    int h5tool_argc = 0;
 
-    mfu_debug_level = MFU_LOG_WARN;
+    mfu_debug_level   = MFU_LOG_WARN;
     h5tool_argv[argc] = 0;
 
     /* The struct option declaration can found in bits/getopt_ext.h
