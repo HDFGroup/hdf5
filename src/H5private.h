@@ -996,6 +996,9 @@ H5_DLL H5_ATTR_CONST int Nflock(int fd, int operation);
 #ifndef HDlog
 #define HDlog(X) log(X)
 #endif
+#ifndef HDlog2
+#define HDlog2(X) log2(X)
+#endif
 #ifndef HDlog10
 #define HDlog10(X) log10(X)
 #endif
