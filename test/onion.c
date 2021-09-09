@@ -195,7 +195,6 @@ test_archival_index(void)
     struct H5FD__onion_index_entry e5 = {18, 90};
     struct H5FD__onion_index_entry e6 = {19, 94};
     struct H5FD__onion_index_entry e7 = {20, 509};
-    struct H5FD__onion_index_entry empty[8];
     struct H5FD__onion_index_entry sorted[8]            = {e0, e1, e2, e3, e4, e5, e6, e7};
     struct H5FD__onion_index_entry sorted_duplicates[8] = {e0, e1, e2, e2, e4, e5, e6, e7};
     struct H5FD__onion_index_entry sorted_incomplete[8] = {e1, e3, e4, e5};
@@ -233,10 +232,6 @@ test_archival_index(void)
     aix.list = NULL;
     if (H5FD_onion_archival_index_is_valid(&aix))
         TEST_ERROR; /* list cannot be NULL */
-
-    aix.list = empty;
-    if (H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* list cannot be empty */
 
     aix.list = sorted_incomplete;
     if (H5FD_onion_archival_index_is_valid(&aix))
