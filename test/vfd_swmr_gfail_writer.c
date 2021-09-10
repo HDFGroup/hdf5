@@ -12,40 +12,36 @@
 
 /*
  *  Purpose: To demostrate the four issues uncovered during the test plan
- *           1.4 part 1.  
+ *           1.4 part 1.
  *
  *           Setup:
- *           Writer: 
+ *           Writer:
  *            1) Create an HDF5 file
- *            2) Create many groups 
- *            3) Use the named pipe to send the reader a message to start verifying  
+ *            2) Create many groups
+ *            3) Use the named pipe to send the reader a message to start verifying
  *            4) Call H5Fvfd_swmr_end_tick  immeidately after sending out the message to the reader
- *            5) Sleep for two ticks before receiving a message from the reader that the reader starts verifying 
- *            6) 
- *              If the option to delete the group is off(by default), 
- *                 just sleep for a relatively long time, then close the HDF5 file.
- *              else 
- *                 delete the last 1000 groups that are just created if the total number of created groups is greater than 1000
- *                 call H5Fvfd_swmr_end_tick
- *                 sleep for a relatively long time, then close the HDF5 file.
- *               
+ *            5) Sleep for two ticks before receiving a message from the reader that the reader starts
+ * verifying 6) If the option to delete the group is off(by default), just sleep for a relatively long time,
+ * then close the HDF5 file. else delete the last 1000 groups that are just created if the total number of
+ * created groups is greater than 1000 call H5Fvfd_swmr_end_tick sleep for a relatively long time, then close
+ * the HDF5 file.
+ *
  *          Reader:
- *            1) Open the HDF5 file 
- *            2) Wait for the writer's message that the writer finishes creating groups. 
- *            3) After receiving the message from the writer, send a message back to the writer, 
- *               then call H5Literate to iterate through all the groups. The callback function just checks if the group name's prefix
- *               is valid. An #if 0 #endif block can help the user easily tune to check the iterated group names.
- *            4) HDclock_gettime is used to check the total time of H5Literate call.
- *            5) Close the HDF5 file if everything runs successfully.
- *          
- *          The number of groups, the tick length, the max lag, the page buffer size, the page size and the sleep duration on the writer
- *          side before closing the file are configurable. Users can also choose an option to delete 1000 groups.
- *          We only test to creat the groups with the latest file format. The option to create a group via the earlies file format is
- *          still there but it is not tested for our purpose.
+ *            1) Open the HDF5 file
+ *            2) Wait for the writer's message that the writer finishes creating groups.
+ *            3) After receiving the message from the writer, send a message back to the writer,
+ *               then call H5Literate to iterate through all the groups. The callback function just checks if
+ * the group name's prefix is valid. An #if 0 #endif block can help the user easily tune to check the iterated
+ * group names. 4) HDclock_gettime is used to check the total time of H5Literate call. 5) Close the HDF5 file
+ * if everything runs successfully.
+ *
+ *          The number of groups, the tick length, the max lag, the page buffer size, the page size and the
+ * sleep duration on the writer side before closing the file are configurable. Users can also choose an option
+ * to delete 1000 groups. We only test to creat the groups with the latest file format. The option to create a
+ * group via the earlies file format is still there but it is not tested for our purpose.
  *
  *          Add information on how to duplicate the four issues and the expected design fail.
  */
-
 
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
 
@@ -88,8 +84,8 @@ typedef struct {
     {                                                                                                        \
         .file = H5I_INVALID_HID, .one_by_one_sid = H5I_INVALID_HID, .filename = "",                          \
         .filetype = H5T_NATIVE_UINT32, .nsteps = 10000, .use_vfd_swmr = true, .old_style_grp = false,        \
-        .use_named_pipes = true, .w_sleep_len = 112, .tick_len = 4, .max_lag = 7, .ps = 4096, .pbs = 4096,                       \
-        .del_grp = false, .np_fd_w_to_r = -1, .np_fd_r_to_w = -1, .np_notify = 0, .np_verify = 0          \
+        .use_named_pipes = true, .w_sleep_len = 112, .tick_len = 4, .max_lag = 7, .ps = 4096, .pbs = 4096,   \
+        .del_grp = false, .np_fd_w_to_r = -1, .np_fd_r_to_w = -1, .np_notify = 0, .np_verify = 0             \
     }
 
 /*
@@ -584,7 +580,7 @@ main(int argc, char **argv)
                 }
             }
             /* end tick,may be not necessary. */
-            if (H5Fvfd_swmr_end_tick(s.file)<0)
+            if (H5Fvfd_swmr_end_tick(s.file) < 0)
                 TEST_ERROR;
         }
 
@@ -726,7 +722,6 @@ op_func(hid_t loc_id, const char *name, const H5L_info_t *info, void *operator_d
         return 0;
     }
 }
-
 
 #else /* H5_HAVE_WIN32_API */
 
