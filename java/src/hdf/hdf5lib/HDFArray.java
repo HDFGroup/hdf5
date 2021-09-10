@@ -46,10 +46,10 @@ public class HDFArray {
      *
      * @param anArray
      *                The array object.
-     * @exception hdf.hdf5lib.exceptions.HDF5Exception
-     *                                                 object is not an array.
+     * @exception hdf.hdf5lib.exceptions.HDF5JavaException
+     *                object is not an array.
      */
-    public HDFArray(Object anArray) throws HDF5Exception
+    public HDFArray(Object anArray) throws HDF5JavaException
     {
         if (anArray == null) {
             HDF5JavaException ex = new HDF5JavaException("HDFArray: array is null?: ");
@@ -76,16 +76,14 @@ public class HDFArray {
      * @return A one-D array of bytes, filled with zeroes. The bytes are sufficient to hold the data of the Array passed
      *         to the constructor.
      * @exception hdf.hdf5lib.exceptions.HDF5JavaException
-     *                                                     Allocation failed.
+     *                Allocation failed.
      */
 
-    public byte[] emptyBytes()
-            throws HDF5JavaException
+    public byte[] emptyBytes() throws HDF5JavaException
     {
         byte[] b = null;
 
-        if ((ArrayDescriptor.dims == 1)
-                && (ArrayDescriptor.NT == 'B')) {
+        if ((ArrayDescriptor.dims == 1) && (ArrayDescriptor.NT == 'B')) {
             b = (byte[]) _theArray;
         }
         else {
@@ -103,10 +101,9 @@ public class HDFArray {
      *
      * @return A one-D array of bytes, constructed from the Array passed to the constructor.
      * @exception hdf.hdf5lib.exceptions.HDF5JavaException
-     *                                                     the object not an array or other internal error.
+     *                the object not an array or other internal error.
      */
-    public byte[] byteify()
-            throws HDF5JavaException
+    public byte[] byteify() throws HDF5JavaException
     {
         if (_barray != null) {
             return _barray;
@@ -222,8 +219,6 @@ public class HDFArray {
             byte arow[];
             try {
                 if (ArrayDescriptor.NT == 'J') {
-                    arow = HDFNativeData.longToByte(0, ArrayDescriptor.dimlen[ArrayDescriptor.dims],
-                            (long[]) ArrayDescriptor.objs[ArrayDescriptor.dims - 1]);
                     arow = HDFNativeData.longToByte(0, ArrayDescriptor.dimlen[ArrayDescriptor.dims],
                             (long[]) ArrayDescriptor.objs[ArrayDescriptor.dims - 1]);
                 }
@@ -552,8 +547,7 @@ public class HDFArray {
                                 + "?"));
             }
         }
-        if (ArrayDescriptor.currentindex[ArrayDescriptor.dims - 1] != ArrayDescriptor.dimlen[ArrayDescriptor.dims
-                - 1]) {
+        if (ArrayDescriptor.currentindex[ArrayDescriptor.dims - 1] != ArrayDescriptor.dimlen[ArrayDescriptor.dims - 1]) {
             throw new java.lang.InternalError(
                     new String("HDFArray::arrayify Panic didn't complete all data: currentindex[" + i + "] = "
                             + ArrayDescriptor.currentindex[i] + " (should be " + (ArrayDescriptor.dimlen[i]) + "?"));
@@ -580,7 +574,7 @@ public class HDFArray {
         Integer[] out = new Integer[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Integer(in[i]);
+            out[i] = Integer.valueOf(in[i]);
         }
         return out;
     }
@@ -592,7 +586,7 @@ public class HDFArray {
         Integer[] out = new Integer[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Integer(in[i]);
+            out[i] = Integer.valueOf(in[i]);
         }
         return out;
     }
@@ -615,7 +609,7 @@ public class HDFArray {
         Short[] out = new Short[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Short(in[i]);
+            out[i] = Short.valueOf(in[i]);
         }
         return out;
     }
@@ -627,7 +621,7 @@ public class HDFArray {
         Short[] out = new Short[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Short(in[i]);
+            out[i] = Short.valueOf(in[i]);
         }
         return out;
     }
@@ -649,7 +643,7 @@ public class HDFArray {
         Byte[] out = new Byte[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Byte(bin[i]);
+            out[i] = Byte.valueOf(bin[i]);
         }
         return out;
     }
@@ -659,7 +653,7 @@ public class HDFArray {
         Byte[] out = new Byte[len];
 
         for (int i = 0; i < len; i++) {
-            out[i] = new Byte(bin[i]);
+            out[i] = Byte.valueOf(bin[i]);
         }
         return out;
     }
@@ -682,7 +676,7 @@ public class HDFArray {
         Float[] out = new Float[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Float(in[i]);
+            out[i] = Float.valueOf(in[i]);
         }
         return out;
     }
@@ -694,7 +688,7 @@ public class HDFArray {
         Float[] out = new Float[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Float(in[i]);
+            out[i] = Float.valueOf(in[i]);
         }
         return out;
     }
@@ -717,7 +711,7 @@ public class HDFArray {
         Double[] out = new Double[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Double(in[i]);
+            out[i] = Double.valueOf(in[i]);
         }
         return out;
     }
@@ -729,7 +723,7 @@ public class HDFArray {
         Double[] out = new Double[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Double(in[i]);
+            out[i] = Double.valueOf(in[i]);
         }
         return out;
     }
@@ -752,7 +746,7 @@ public class HDFArray {
         Long[] out = new Long[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Long(in[i]);
+            out[i] = Long.valueOf(in[i]);
         }
         return out;
     }
@@ -764,7 +758,7 @@ public class HDFArray {
         Long[] out = new Long[nelems];
 
         for (int i = 0; i < nelems; i++) {
-            out[i] = new Long(in[i]);
+            out[i] = Long.valueOf(in[i]);
         }
         return out;
     }
@@ -790,12 +784,12 @@ class ArrayDescriptor {
     static int dims = 0;
     static String className;
 
-    public ArrayDescriptor(Object anArray) throws HDF5Exception
+    public ArrayDescriptor(Object anArray) throws HDF5JavaException
     {
         Class tc = anArray.getClass();
         if (tc.isArray() == false) {
             /* exception: not an array */
-            HDF5Exception ex = new HDF5JavaException("ArrayDescriptor: not an array?: ");
+            HDF5JavaException ex = new HDF5JavaException("ArrayDescriptor: not an array?: ");
             throw (ex);
         }
 
