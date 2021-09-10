@@ -117,7 +117,7 @@ static herr_t __attribute__((constructor(101))) H5__init_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    /* Run the library initialization routine, if it hasn't already ran */
+    /* Run the library initialization routine, if it hasn't already run */
     if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {
         if (H5_init_library() < 0)
             HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "unable to initialize library")
