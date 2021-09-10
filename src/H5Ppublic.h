@@ -7343,10 +7343,6 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  *          If an error occurs, the buffer pointed to by \p expression is
  *          unchanged, and the function returns a negative value.
  *
- * \par Example
- *      An example snippet from examples/h5_dtransform.c:
- *      \snippet h5_dtransform.c H5Pget_data_transform_snip
- *
  * \since 1.8.0
  *
  */
