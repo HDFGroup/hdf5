@@ -1778,28 +1778,7 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_t specific_type, 
     printf("------- PASS THROUGH VOL FILE Specific\n");
 #endif
 
-    /* Unpack arguments to get at the child file pointer when mounting a file */
-    if (specific_type == H5VL_FILE_MOUNT) {
-        H5I_type_t           loc_type;
-        const char *         name;
-        H5VL_pass_through_t *child_file;
-        hid_t                plist_id;
-
-        /* Retrieve parameters for 'mount' operation, so we can unwrap the child file */
-        loc_type   = (H5I_type_t)va_arg(arguments, int); /* enum work-around */
-        name       = va_arg(arguments, const char *);
-        child_file = (H5VL_pass_through_t *)va_arg(arguments, void *);
-        plist_id   = va_arg(arguments, hid_t);
-
-        /* Keep the correct underlying VOL ID for possible async request token */
-        under_vol_id = o->under_vol_id;
-
-        /* Re-issue 'file specific' call, using the unwrapped pieces */
-        ret_value = H5VL_pass_through_file_specific_reissue(o->under_object, o->under_vol_id, specific_type,
-                                                            dxpl_id, req, (int)loc_type, name,
-                                                            child_file->under_object, plist_id);
-    } /* end if */
-    else if (specific_type == H5VL_FILE_IS_ACCESSIBLE || specific_type == H5VL_FILE_DELETE) {
+    if (specific_type == H5VL_FILE_IS_ACCESSIBLE || specific_type == H5VL_FILE_DELETE) {
         H5VL_pass_through_info_t *info;
         hid_t                     fapl_id, under_fapl_id;
         const char *              name;

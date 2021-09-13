@@ -3115,14 +3115,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_FILE_REOPEN");
                                     break;
 
-                                case H5VL_FILE_MOUNT:
-                                    H5RS_acat(rs, "H5VL_FILE_MOUNT");
-                                    break;
-
-                                case H5VL_FILE_UNMOUNT:
-                                    H5RS_acat(rs, "H5VL_FILE_UNMOUNT");
-                                    break;
-
                                 case H5VL_FILE_IS_ACCESSIBLE:
                                     H5RS_acat(rs, "H5VL_FILE_IS_ACCESSIBLE");
                                     break;
@@ -3133,10 +3125,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5VL_FILE_IS_EQUAL:
                                     H5RS_acat(rs, "H5VL_FILE_IS_EQUAL");
-                                    break;
-
-                                case H5VL_FILE_WAIT:
-                                    H5RS_acat(rs, "H5VL_FILE_WAIT");
                                     break;
 
                                 default:

@@ -371,40 +371,6 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
             break;
         }
 
-        /* H5Fmount */
-        case H5VL_FILE_MOUNT: {
-            H5I_type_t  type    = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-            const char *name    = HDva_arg(arguments, const char *);
-            H5F_t *     child   = HDva_arg(arguments, H5F_t *);
-            hid_t       fmpl_id = HDva_arg(arguments, hid_t);
-            H5G_loc_t   loc;
-
-            if (H5G_loc_real(obj, type, &loc) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-            /* Do the mount */
-            if (H5F_mount(&loc, name, child, fmpl_id) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to mount file")
-
-            break;
-        }
-
-        /* H5Funmount */
-        case H5VL_FILE_UNMOUNT: {
-            H5I_type_t  type = (H5I_type_t)HDva_arg(arguments, int); /* enum work-around */
-            const char *name = HDva_arg(arguments, const char *);
-            H5G_loc_t   loc;
-
-            if (H5G_loc_real(obj, type, &loc) < 0)
-                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
-
-            /* Unmount */
-            if (H5F_unmount(&loc, name) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_MOUNT, FAIL, "unable to unmount file")
-
-            break;
-        }
-
         /* H5Fis_accessible */
         case H5VL_FILE_IS_ACCESSIBLE: {
             hid_t       fapl_id = HDva_arg(arguments, hid_t);
@@ -438,14 +404,6 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
                 *is_equal = FALSE;
             else
                 *is_equal = (((H5F_t *)obj)->shared == file2->shared);
-            break;
-        }
-
-        /* H5Fwait */
-        case H5VL_FILE_WAIT: {
-            /* The native VOL connector doesn't support asynchronous
-             *      operations, so this is a no-op.
-             */
             break;
         }
 
@@ -607,6 +565,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
             /* Retrieve the VFD handle for the file */
             if (H5F_get_vfd_handle(f, fapl_id, file_handle) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't retrieve VFD handle")
+
             break;
         }
 
@@ -616,6 +575,7 @@ H5VL__native_file_optional(void *obj, H5VL_file_optional_t optional_type, hid_t 
             if (f->shared->efc)
                 if (H5F__efc_release(f->shared->efc) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTRELEASE, FAIL, "can't release external file cache")
+
             break;
         }
 
