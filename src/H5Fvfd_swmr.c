@@ -1014,7 +1014,19 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
     /* This is ok if we're entering the API, but it should
      * not happen if we're exiting the API.
      */
+    /* JRM  review this */
+    /* The following line is added for more meaningful error message when
+     * the long running API on the reader side exceeds the max_lag of ticks.
+     *        KY 2021-09-02
+     *               */
+    if (!entering_api && tmp_tick_num >= shared->tick_num + shared->vfd_swmr_config.max_lag) {
+        HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL,
+                    "Reader's API time exceeds max_lag of ticks, may increase the value of max_lag.");
+    }
+#if 0 /* Kent */
+    /* The original code */
     HDassert(entering_api || tmp_tick_num < shared->tick_num + shared->vfd_swmr_config.max_lag);
+#endif
 
     if (!entering_api) {
         H5FD_vfd_swmr_record_elapsed_ticks(shared->lf, tmp_tick_num - shared->tick_num);
@@ -1102,7 +1114,15 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
                      * case where the new entry is *longer*, because the
                      * extension could overlap with a second entry.
                      */
+
+                    /* JRM  review this */
+                    /*  Kent: need to comment out the line to make reader iterate
+                     *        a large number of groups
+                     * */
+#if 0 /*Kent*/
                     HDassert(oent->length == nent->length);
+#endif
+ 
 
                     /* the page has been altered -- evict it and
                      * any contained metadata cache entries.

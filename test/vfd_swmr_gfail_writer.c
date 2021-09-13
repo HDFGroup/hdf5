@@ -19,28 +19,87 @@
  *            1) Create an HDF5 file
  *            2) Create many groups
  *            3) Use the named pipe to send the reader a message to start verifying
- *            4) Call H5Fvfd_swmr_end_tick  immeidately after sending out the message to the reader
- *            5) Sleep for two ticks before receiving a message from the reader that the reader starts
- * verifying 6) If the option to delete the group is off(by default), just sleep for a relatively long time,
- * then close the HDF5 file. else delete the last 1000 groups that are just created if the total number of
- * created groups is greater than 1000 call H5Fvfd_swmr_end_tick sleep for a relatively long time, then close
- * the HDF5 file.
- *
+ *            4) Call H5Fvfd_swmr_end_tick immeidately after sending out the message to the reader
+ *            5) Sleep for two ticks before receiving a message from the reader that informs the reader 
+ *               started verifying
+ *            6) If the option to delete the group is off(by default), just sleep for a relatively long time,
+ *                  then close the HDF5 file. 
+ *               Else delete the last 1000 groups that are just created if the total number of
+ *                  created groups is greater than 1000.
+ *                  Call H5Fvfd_swmr_end_tick sleep for a relatively long time, 
+ *                  then close HDF5 file.
  *          Reader:
  *            1) Open the HDF5 file
- *            2) Wait for the writer's message that the writer finishes creating groups.
+ *            2) Wait for the writer's message that informs the writer finished creating groups.
  *            3) After receiving the message from the writer, send a message back to the writer,
  *               then call H5Literate to iterate through all the groups. The callback function just checks if
- * the group name's prefix is valid. An #if 0 #endif block can help the user easily tune to check the iterated
- * group names. 4) HDclock_gettime is used to check the total time of H5Literate call. 5) Close the HDF5 file
- * if everything runs successfully.
+ *               the group name's prefix is valid. 
+ *               An #if 0 #endif block can help the user easily tune to check the iterated group names.
+ *            4) HDclock_gettime is used to check the total time of H5Literate call. 
+ *            5) Close the HDF5 file.
  *
  *          The number of groups, the tick length, the max lag, the page buffer size, the page size and the
- * sleep duration on the writer side before closing the file are configurable. Users can also choose an option
- * to delete 1000 groups. We only test to creat the groups with the latest file format. The option to create a
- * group via the earlies file format is still there but it is not tested for our purpose.
+ *          sleep duration on the writer side before closing the file are configurable. 
+ *          Users can also choose an option to delete 1000 groups after creating a larger number of groups..
+ *          We only test to creat the groups with the latest file format. The option to create a
+ *          group via the earlies file format is still there.
  *
- *          Add information on how to duplicate the four issues and the expected design fail.
+ *          Issues and expected design fail
+ *
+ *          The parameter numbers that can reproduce the issues are tested at jelly. 
+ * To duplicate the issues at other machines, the number of groups to be created should be different.
+ *
+ * Issue 1: HDassert(oent->length == nent->length) error.
+ * Need to UNCOMMENT out the HDassert(oent->length == nent->length) at ../src/H5Fvfd_swmr.c.
+ * May also modify the group number a bit to see the assertion error.
+ *
+ * GROUP_n=340000 
+ *  ./vfd_swmr_gfail_writer -q -n $GROUP_n &
+ *  ./vfd_swmr_gfail_reader -n $GROUP_n  &
+ *
+ * Issue 2: H5C__load_entry(): incorrect metadata checksum after all read attempts addr 
+ * Sometimes the expected 
+ * "Reader's API time exceeds max_lag of ticks, may increase the value of max_lag." may appear
+ * You may need to modify the group number a bit to see the unexpected error message.
+ *
+ * GROUP_n=420000 
+ *  ./vfd_swmr_gfail_writer -q -n $GROUP_n &
+ *  ./vfd_swmr_gfail_reader -n $GROUP_n  &
+ *
+ * Issue 3: Assertion `length == cache_ptr->page_size || page ......' failed
+ * This failure occurs when page size and page buffer size change from 4K to 8K.
+ * This issue seems to be always repeatable with the following number of groups.
+ *
+ * GROUP_n=320000                         
+ *  ./vfd_swmr_gfail_writer -q -B 8192 -s 8192 -n $GROUP_n &
+ *  ./vfd_swmr_gfail_reader -B 8192 -s 8192 -n $GROUP_n  &
+
+ * Issue 4: not enough space to copy index
+ * To duplicate this failure, the number of groups should be much larger, 2 millions.
+ * The max_lag and tick_len should also be set to  big numbers. 
+ * This issue seems to be always repeatable with the following number of groups.
+ *
+ * GROUP_n=2000000                         
+ *  ./vfd_swmr_gfail_writer -q -m 40 -t 10 -n $GROUP_n &
+ *  ./vfd_swmr_gfail_reader -m 40 -t 10 -n $GROUP_n  &
+
+ * Expected design fail
+ *
+ * Writer creates a large number of groups, then deletes the last 1000 groups,
+ * With the following settings, the expected 
+ * "Reader's API time exceeds max_lag of ticks, may increase the value of max_lag."
+ * should appear. If not, increases the GROUP_n. 
+ *
+ * GROUP_n=320000                         
+ *  ./vfd_swmr_gfail_writer -q -d -n $GROUP_n &
+ *  ./vfd_swmr_gfail_reader -n $GROUP_n  &
+ *
+ * When increasing the max_lag, we may see the program run normally since 
+ * the reader can finish iterating all the groups within the max_lag of ticks.
+ * The following program should end normally. If not, increase the max_lag.
+ *  ./vfd_swmr_gfail_writer -m 9 -q -d -n $GROUP_n &
+ *  ./vfd_swmr_gfail_reader -m 9 -n $GROUP_n  &
+	
  */
 
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
@@ -107,7 +166,7 @@ usage(const char *progname)
               "                mainly for running the writer and reader seperately\n"
               "-t tick_len:    length of a tick in tenths of a second.\n"
               "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
-              "-B pbs:         page Buffer Size in bytes:\n"
+              "-B pbs:         page buffer size in bytes:\n"
               "                The default value is 4K(4096).\n"
               "-s ps:          page size used by page aggregation, page buffer and \n"
               "                the metadata file. The default value is 4K(4096).\n"
@@ -557,12 +616,13 @@ main(int argc, char **argv)
 
             wg_ret = create_group(&s, step);
             if (wg_ret == false) {
-                np_send_error(&s, true);
+                if (s.use_named_pipes)
+                    np_send_error(&s, true);
                 HDprintf("create groups failed\n");
                 TEST_ERROR;
             }
         }
-        if (np_wr_send_receive(&s) == false) {
+        if (s.use_named_pipes && np_wr_send_receive(&s) == false) {
             HDprintf("writer: write group - verification failed.\n");
             TEST_ERROR;
         }
@@ -592,15 +652,18 @@ main(int argc, char **argv)
         decisleep(s.w_sleep_len);
     }
     else { /*Reader */
-        if (false == np_rd_receive(&s)) {
-            TEST_ERROR;
+        if(s.use_named_pipes) {
+            if (false == np_rd_receive(&s)) {
+                TEST_ERROR;
+            }
+    
+            dbgf(2, "reader receives the message.\n");
+            if (np_rd_send(&s) == false) {
+                TEST_ERROR;
+            }
+            dbgf(2, "reader sends the message.\n ");
         }
 
-        dbgf(2, "reader receives the message.\n");
-        if (np_rd_send(&s) == false) {
-            TEST_ERROR;
-        }
-        dbgf(2, "reader sends the message.\n ");
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) == -1) {
             fprintf(stderr, "HDclock_gettime failed");
             TEST_ERROR;
