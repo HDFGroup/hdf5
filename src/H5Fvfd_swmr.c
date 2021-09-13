@@ -1122,7 +1122,6 @@ H5F_vfd_swmr_reader_end_of_tick(H5F_t *f, hbool_t entering_api)
 #if 0 /*Kent*/
                     HDassert(oent->length == nent->length);
 #endif
- 
 
                     /* the page has been altered -- evict it and
                      * any contained metadata cache entries.
