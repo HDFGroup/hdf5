@@ -58,8 +58,8 @@ typedef struct {
         .filetype = H5T_NATIVE_UINT32, .asteps = 10, .csteps = 10, .nsteps = 100,                            \
         .update_interval = READER_WAIT_TICKS, .use_vfd_swmr = true, .old_style_grp = false,                  \
         .use_named_pipes = true, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',             \
-        .attr_test = false, .tick_len = 4, .max_lag = 7, .ps = 4096, .pbs = 4096,                            \
-        .np_fd_w_to_r = -1, .np_fd_r_to_w = -1, .np_notify = 0, .np_verify = 0                               \
+        .attr_test = false, .tick_len = 4, .max_lag = 7, .ps = 4096, .pbs = 4096, .np_fd_w_to_r = -1,        \
+        .np_fd_r_to_w = -1, .np_notify = 0, .np_verify = 0                                                   \
     }
 
 static void
@@ -305,7 +305,7 @@ state_init(state_t *s, int argc, char **argv)
         TEST_ERROR;
     }
 
-    if(s->pbs < s->ps) {
+    if (s->pbs < s->ps) {
         HDprintf("Page buffer size cannot be smaller than the page size.s\n");
         TEST_ERROR;
     }
