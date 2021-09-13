@@ -829,12 +829,12 @@ state_destroy(state_t *s)
                 fprintf(stderr, "H5Fclose failed\n");
                 TEST_ERROR;
             }
-        else
-            for (j = 0; j < NELMTS(s->file); j++)
-                if (H5Fvfd_swmr_end_tick(s->file[j]) < 0) {
-                    fprintf(stderr, "H5Fclose failed\n");
-                    TEST_ERROR;
-                }
+            else
+                for (j = 0; j < NELMTS(s->file); j++)
+                    if (H5Fvfd_swmr_end_tick(s->file[j]) < 0) {
+                        fprintf(stderr, "H5Fclose failed\n");
+                        TEST_ERROR;
+                    }
     }
 
     /* For checking the time spent in file close.  It's for running the writer alone */
@@ -1644,7 +1644,7 @@ calc_total_steps(state_t s)
     /* Calculate the number of steps depending on if partial chunk is enabled.
      * e.g. the original number of steps is 10 and the size of the chunk along
      * the growing dimension is 6.  The number of elements for this dimension is
-     * 60.  When the size of the partial chunk along the growing dimension is 5 
+     * 60.  When the size of the partial chunk along the growing dimension is 5
      * (treated as the new chunk size), the number of steps becomes 12.
      */
     if (s.test_3d) {
