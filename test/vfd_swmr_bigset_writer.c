@@ -39,7 +39,9 @@
  * the dataset on chunk boundaries.
  *
  * For 3D dataset, the extension is always along the first dimension.
- * It does not support VDS yet.
+ * e.g. the chunk size is `l` x `m` x `n`, after `i` iterations, the
+ * dataset size becomes `i x l` x `m` x `n`.
+ * It does not test VDS for 3D dataset.
  *
  * The reader should be started with the same user-selectable parameters
  * as the writer: iterations, number of datasets, chunk width and
@@ -265,7 +267,7 @@ usage(const char *progname)
         "-f tick_len:          tick length\n"
         "-g max_lag:           maximal lag\n"
         "-j skip_chunk:        skip the Nth (skip_chunk) chunks during chunk writing\n"
-        "-k part_chunk:        the size for partial chunk write\n"
+        "-k part_chunk:        the size for partial chunk write (only along the first dimension)\n"
         "-l tick_num:          expected maximal number of ticks from\n"
         "                      the writer's finishing creation to the reader's finishing validation\n"
         "-m mdc_init_size:     the initial size of metadata cache in megabytes (must be between 1 and 32MB)\n"
@@ -334,7 +336,8 @@ state_init(state_t *s, int argc, char **argv)
 
     esnprintf(s->progname, sizeof(s->progname), "%s", tfile);
 
-    HDfree(tfile);
+    if (tfile)
+        HDfree(tfile);
 
     while ((ch = getopt(argc, argv, "CFMNPRSVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:")) != -1) {
         switch (ch) {
@@ -681,6 +684,7 @@ state_init(state_t *s, int argc, char **argv)
         }
     }
 
+    /* The default is zero, meaning no skip */
     if (s->skip_chunk == 1) {
         fprintf(stderr, "can't skip every chunk\n");
         TEST_ERROR;
@@ -761,11 +765,14 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(tfile);
+    if (tfile)
+        HDfree(tfile);
 
-    HDfree(s->dataset);
+    if (s->dataset)
+        HDfree(s->dataset);
 
-    HDfree(s->sources);
+    if (s->sources)
+        HDfree(s->sources);
 
     return false;
 }
@@ -818,10 +825,16 @@ state_destroy(state_t *s)
         unsigned long j;
 
         if (s->vds != vds_multi)
-            H5Fvfd_swmr_end_tick(s->file[0]);
+            if (H5Fvfd_swmr_end_tick(s->file[0]) < 0) {
+                fprintf(stderr, "H5Fclose failed\n");
+                TEST_ERROR;
+            }
         else
             for (j = 0; j < NELMTS(s->file); j++)
-                H5Fvfd_swmr_end_tick(s->file[j]);
+                if (H5Fvfd_swmr_end_tick(s->file[j]) < 0) {
+                    fprintf(stderr, "H5Fclose failed\n");
+                    TEST_ERROR;
+                }
     }
 
     /* For checking the time spent in file close.  It's for running the writer alone */
@@ -857,9 +870,11 @@ state_destroy(state_t *s)
                 TIME_PASSED(start_time, end_time));
     }
 
-    HDfree(s->dataset);
+    if (s->dataset)
+        HDfree(s->dataset);
 
-    HDfree(s->sources);
+    if (s->sources)
+        HDfree(s->sources);
 
     return true;
 
@@ -872,9 +887,11 @@ error:
     }
     H5E_END_TRY;
 
-    HDfree(s->dataset);
+    if (s->dataset)
+        HDfree(s->dataset);
 
-    HDfree(s->sources);
+    if (s->sources)
+        HDfree(s->sources);
 
     return false;
 }
@@ -1102,7 +1119,8 @@ notify_reader(np_state_t *np, unsigned step)
         TEST_ERROR;
     }
 
-    HDfree(last);
+    if (last)
+        HDfree(last);
 
     return 0;
 
@@ -1625,8 +1643,9 @@ calc_total_steps(state_t s)
 
     /* Calculate the number of steps depending on if partial chunk is enabled.
      * e.g. the original number of steps is 10 and the size of the chunk along
-     * the growing dimension is 6.  When the size of the partial chunk along the
-     * growing dimension is 5, the number of steps become 12.
+     * the growing dimension is 6.  The number of elements for this dimension is
+     * 60.  When the size of the partial chunk along the growing dimension is 5 
+     * (treated as the new chunk size), the number of steps becomes 12.
      */
     if (s.test_3d) {
         if (s.part_chunk)
@@ -2568,7 +2587,8 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    HDfree(mat);
+    if (mat)
+        HDfree(mat);
 
     return EXIT_SUCCESS;
 
@@ -2592,6 +2612,9 @@ error:
         HDremove(np.fifo_writer_to_reader);
         HDremove(np.fifo_reader_to_writer);
     }
+
+    if (mat)
+        HDfree(mat);
 
     return EXIT_FAILURE;
 }

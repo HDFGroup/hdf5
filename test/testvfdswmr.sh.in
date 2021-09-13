@@ -1063,7 +1063,7 @@ elif [[ "$HDF5TestExpress" -gt 1 ]]; then        # quick run
 fi
 #
 #
-for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -t" "-d 1 -t -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
+for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -t" "-d 1 -t -F" "-d 1 -t -R" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	if [ ${do_many_small:-no} = no ]; then
 		continue
 	fi
@@ -1116,7 +1116,7 @@ for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -t" "-d 1 -t -F" "-d 1 -V
 done
 
 # bigset test for bigger chunks
-for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -t" "-d 1 -t -F" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
+for options in "-d 1" "-d 1 -F" "-d 2" "-d 2 -F" "-d 1 -t" "-d 1 -t -F" "-d 1 -t -R" "-d 1 -V" "-d 1 -M" "-d 1 -V -F" "-d 1 -M -F"; do
 	#
 	# Test a few big datasets of one and two dimensions.
 	#
