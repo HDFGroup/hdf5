@@ -43,6 +43,8 @@ typedef struct {
     bool         attr_test;
     uint32_t     max_lag;
     uint32_t     tick_len;
+    uint32_t     ps;
+    uint32_t     pbs;
     int          np_fd_w_to_r;
     int          np_fd_r_to_w;
     int          np_notify;
@@ -56,8 +58,8 @@ typedef struct {
         .filetype = H5T_NATIVE_UINT32, .asteps = 10, .csteps = 10, .nsteps = 100,                            \
         .update_interval = READER_WAIT_TICKS, .use_vfd_swmr = true, .old_style_grp = false,                  \
         .use_named_pipes = true, .grp_op_pattern = ' ', .grp_op_test = false, .at_pattern = ' ',             \
-        .attr_test = false, .tick_len = 4, .max_lag = 7, .np_fd_w_to_r = -1, .np_fd_r_to_w = -1,             \
-        .np_notify = 0, .np_verify = 0                                                                       \
+        .attr_test = false, .tick_len = 4, .max_lag = 7, .ps = 4096, .pbs = 4096,                            \
+        .np_fd_w_to_r = -1, .np_fd_r_to_w = -1, .np_notify = 0, .np_verify = 0                               \
     }
 
 static void
@@ -66,6 +68,7 @@ usage(const char *progname)
     HDfprintf(stderr,
               "usage: %s [-S] [-G] [-a steps] [-b] [-c] [-n iterations]\n"
               "    [-N] [-q] [-u numb_ticks] [-A at_pattern] [-O grp_op_pattern]\n"
+              "    [-t tick_len] [-m max_lag][-B pbs] [-s ps] \n"
               "\n"
               "-S:             do not use VFD SWMR\n"
               "-G:             old-style type of group\n"
@@ -76,6 +79,12 @@ usage(const char *progname)
               "-N:             do not use named pipes, \n"
               "                mainly for running the writer and reader seperately\n"
               "-u numb_ticks:  `numb_ticks` for the reader to wait before verification\n"
+              "-t tick_len:    length of a tick in tenths of a second.\n"
+              "-m max_lag:     maximum expected lag(in ticks) between writer and readers\n"
+              "-B pbs:         page buffer size in bytes:\n"
+              "                The default value is 4K(4096).\n"
+              "-s ps:          page size used by page aggregation, page buffer and \n"
+              "                the metadata file. The default value is 4K(4096).\n"
               "-A at_pattern:  `at_pattern' for different attribute tests\n"
               "              The value of `at_pattern` is one of the following:\n"
               "              `compact`              - Attributes added in compact storage\n"
@@ -158,7 +167,7 @@ state_init(state_t *s, int argc, char **argv)
         tfile = NULL;
     }
 
-    while ((ch = getopt(argc, argv, "SGa:bc:n:Nqu:A:O:")) != -1) {
+    while ((ch = getopt(argc, argv, "SGa:bc:n:Nqu:t:m:B:s:A:O:")) != -1) {
         switch (ch) {
             case 'S':
                 s->use_vfd_swmr = false;
@@ -170,6 +179,10 @@ state_init(state_t *s, int argc, char **argv)
             case 'c':
             case 'n':
             case 'u':
+            case 't':
+            case 'm':
+            case 'B':
+            case 's':
                 errno = 0;
                 tmp   = HDstrtoul(optarg, &end, 0);
                 if (end == optarg || *end != '\0') {
@@ -193,6 +206,14 @@ state_init(state_t *s, int argc, char **argv)
                     s->nsteps = (unsigned)tmp;
                 else if (ch == 'u')
                     s->update_interval = (unsigned)tmp;
+                else if (ch == 't')
+                    s->tick_len = (unsigned)tmp;
+                else if (ch == 'm')
+                    s->max_lag = (unsigned)tmp;
+                else if (ch == 'B')
+                    s->pbs = (unsigned)tmp;
+                else if (ch == 's')
+                    s->ps = (unsigned)tmp;
                 break;
             case 'b':
                 s->filetype = H5T_STD_U32BE;
@@ -284,6 +305,10 @@ state_init(state_t *s, int argc, char **argv)
         TEST_ERROR;
     }
 
+    if(s->pbs < s->ps) {
+        HDprintf("Page buffer size cannot be smaller than the page size.s\n");
+        TEST_ERROR;
+    }
     if (argc > 0) {
         HDprintf("unexpected command-line arguments\n");
         TEST_ERROR;
@@ -4987,20 +5012,20 @@ main(int argc, char **argv)
     }
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, 4, 7, writer, TRUE, 128, "./group-shadow");
+    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, TRUE, 128, "./group-shadow");
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
      * as the second parameter of H5Pset_libver_bound() that is called by
      * vfd_swmr_create_fapl. Otherwise, the latest file format(H5F_LIBVER_LATEST)
      * should be used as the second parameter of H5Pset_libver_bound().
      * Also pass the use_vfd_swmr, only_meta_page, page_buf_size, config to vfd_swmr_create_fapl().*/
-    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, 4096, &config)) < 0) {
+    if ((fapl = vfd_swmr_create_fapl(!s.old_style_grp, s.use_vfd_swmr, true, s.pbs, &config)) < 0) {
         HDprintf("vfd_swmr_create_fapl failed\n");
         TEST_ERROR;
     }
 
     /* Set fs_strategy (file space strategy) and fs_page_size (file space page size) */
-    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, 4096)) < 0) {
+    if ((fcpl = vfd_swmr_create_fcpl(H5F_FSPACE_STRATEGY_PAGE, s.ps)) < 0) {
         HDprintf("vfd_swmr_create_fcpl() failed");
         TEST_ERROR;
     }
@@ -5049,8 +5074,6 @@ main(int argc, char **argv)
         s.np_fd_r_to_w = fd_reader_to_writer;
         s.np_notify    = notify;
         s.np_verify    = verify;
-        s.tick_len     = config.tick_len;
-        s.max_lag      = config.max_lag;
     }
 
     /* For attribute test, force the named pipe to communicate in every step.
