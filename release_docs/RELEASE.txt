@@ -924,6 +924,17 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Detection of simple data transform function "x"
+
+        In the case of the simple data transform function "x" the (parallel)
+        library recognizes this is the same as not applying this data transform
+        function. This improves the I/O performance. In the case of the parallel
+        library, it also avoids breaking to independent I/O, which makes it
+        possible to apply a filter when writing or reading data to or from
+        teh HDF5 file.
+
+        (JWSB - 2021/09/13)
+
     - Fixed an invalid read and memory leak when parsing corrupt file space
       info messages
 
