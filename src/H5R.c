@@ -86,6 +86,7 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
     H5VL_loc_params_t     loc_params;                     /* Location parameters */
     H5O_token_t           obj_token = {0};                /* Object token */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
+    H5VL_file_get_args_t        file_get_vol_cb_args; /* Arguments to VOL callback */
     herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -121,9 +122,12 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
     if (NULL == (vol_obj_file = H5VL_vol_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    file_get_vol_cb_args.op_type                 = H5VL_FILE_GET_CONT_INFO;
+    file_get_vol_cb_args.args.get_cont_info.info = &cont_info;
+
     /* Get container info */
-    if (H5VL_file_get(vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                      &cont_info) < 0)
+    if (H5VL_file_get(vol_obj_file, &file_get_vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get container info")
 
     /* Set location parameters */
@@ -174,8 +178,9 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
     H5VL_loc_params_t     loc_params;                     /* Location parameters */
     H5O_token_t           obj_token = {0};                /* Object token */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
-    struct H5S_t *        space     = NULL;    /* Pointer to dataspace containing region */
-    herr_t                ret_value = SUCCEED; /* Return value */
+    H5VL_file_get_args_t        file_get_vol_cb_args; /* Arguments to VOL callback */
+    struct H5S_t *              space     = NULL;     /* Pointer to dataspace containing region */
+    herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*sii*Rr", loc_id, name, space_id, oapl_id, ref_ptr);
@@ -214,9 +219,12 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
     if (NULL == (vol_obj_file = H5VL_vol_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    file_get_vol_cb_args.op_type                 = H5VL_FILE_GET_CONT_INFO;
+    file_get_vol_cb_args.args.get_cont_info.info = &cont_info;
+
     /* Get container info */
-    if (H5VL_file_get(vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                      &cont_info) < 0)
+    if (H5VL_file_get(vol_obj_file, &file_get_vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get container info")
 
     /* Set location parameters */
@@ -266,6 +274,7 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
     H5VL_loc_params_t     loc_params;                     /* Location parameters */
     H5O_token_t           obj_token = {0};                /* Object token */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
+    H5VL_file_get_args_t        file_get_vol_cb_args; /* Arguments to VOL callback */
     herr_t                ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -303,9 +312,12 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
     if (NULL == (vol_obj_file = H5VL_vol_object(file_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    file_get_vol_cb_args.op_type                 = H5VL_FILE_GET_CONT_INFO;
+    file_get_vol_cb_args.args.get_cont_info.info = &cont_info;
+
     /* Get container info */
-    if (H5VL_file_get(vol_obj_file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                      &cont_info) < 0)
+    if (H5VL_file_get(vol_obj_file, &file_get_vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "unable to get container info")
 
     /* Set location parameters */
@@ -1029,15 +1041,27 @@ H5Rget_file_name(const H5R_ref_t *ref_ptr, char *buf /*out*/, size_t size)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "unable to retrieve file name")
     }
     else {
-        H5VL_object_t *vol_obj = NULL; /* Object of loc_id */
+        H5VL_object_t *      vol_obj;           /* Object of loc_id */
+        H5VL_file_get_args_t vol_cb_args;       /* Arguments to VOL callback */
+        size_t               file_name_len = 0; /* Length of file name */
 
         /* Retrieve VOL file object */
         if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
             HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
-        if (H5VL_file_get(vol_obj, H5VL_FILE_GET_NAME, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, H5I_FILE,
-                          size, buf, &ret_value) < 0)
+        /* Set up VOL callback arguments */
+        vol_cb_args.op_type                     = H5VL_FILE_GET_NAME;
+        vol_cb_args.args.get_name.type          = H5I_FILE;
+        vol_cb_args.args.get_name.buf_size      = size;
+        vol_cb_args.args.get_name.buf           = buf;
+        vol_cb_args.args.get_name.file_name_len = &file_name_len;
+
+        /* Get file name */
+        if (H5VL_file_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, (-1), "unable to get file name")
+
+        /* Set return value */
+        ret_value = (ssize_t)file_name_len;
     }
 
 done:

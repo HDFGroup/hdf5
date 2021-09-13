@@ -247,8 +247,7 @@ done:
 htri_t
 H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
 {
-    H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
-    htri_t                ret_value = FALSE; /* Indicate success, but no location change */
+    htri_t ret_value = FALSE; /* Indicate success, but no location change */
 
     FUNC_ENTER_PACKAGE
 
@@ -293,15 +292,22 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 dt->shared->u.vlen.file = NULL;
                 break;
 
-            case H5T_LOC_DISK: /* Disk based VL datatype */
+            /* Disk based VL datatype */
+            case H5T_LOC_DISK: {
+                H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
+                H5VL_file_get_args_t  vol_cb_args; /* Arguments to VOL callback */
+
                 HDassert(file);
 
                 /* Mark this type as being stored on disk */
                 dt->shared->u.vlen.loc = H5T_LOC_DISK;
 
+                /* Set up VOL callback arguments */
+                vol_cb_args.op_type                 = H5VL_FILE_GET_CONT_INFO;
+                vol_cb_args.args.get_cont_info.info = &cont_info;
+
                 /* Get container info */
-                if (H5VL_file_get(file, H5VL_FILE_GET_CONT_INFO, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                                  &cont_info) < 0)
+                if (H5VL_file_get(file, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, FAIL, "unable to get container info")
 
                 /* The datatype size is equal to 4 bytes for the sequence length
@@ -319,6 +325,7 @@ H5T__vlen_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                 if (H5T_own_vol_obj(dt, file) < 0)
                     HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "can't give ownership of VOL object")
                 break;
+            }
 
             case H5T_LOC_BADLOC:
                 /* Allow undefined location. In H5Odtype.c, H5O_dtype_decode sets undefined

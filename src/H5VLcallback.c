@@ -118,8 +118,8 @@ static void * H5VL__file_open(const H5VL_class_t *cls, const char *name, unsigne
                               hid_t dxpl_id, void **req);
 static herr_t H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_info,
                                                 void *op_data);
-static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_t get_type, hid_t dxpl_id,
-                             void **req, va_list arguments);
+static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_args_t *args, hid_t dxpl_id,
+                             void **req);
 static herr_t H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type,
                                   hid_t dxpl_id, void **req, va_list arguments);
 static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, H5VL_file_optional_t opt_type,
@@ -3665,8 +3665,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_t get_type, hid_t dxpl_id, void **req,
-               va_list arguments)
+H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -3677,7 +3676,7 @@ H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_t get_type, hid
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'file get' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->file_cls.get)(obj, get_type, dxpl_id, req, arguments) < 0)
+    if ((cls->file_cls.get)(obj, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "file get failed")
 
 done:
@@ -3695,10 +3694,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type, hid_t dxpl_id, void **req, ...)
+H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -3710,16 +3707,10 @@ H5VL_file_get(const H5VL_object_t *vol_obj, H5VL_file_get_t get_type, hid_t dxpl
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if (H5VL__file_get(vol_obj->data, vol_obj->connector->cls, get_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__file_get(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "file get failed")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -3738,14 +3729,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_get(void *obj, hid_t connector_id, H5VL_file_get_t get_type, hid_t dxpl_id, void **req /*out*/,
-             va_list arguments)
+H5VLfile_get(void *obj, hid_t connector_id, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVgixx", obj, connector_id, get_type, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3754,7 +3744,7 @@ H5VLfile_get(void *obj, hid_t connector_id, H5VL_file_get_t get_type, hid_t dxpl
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__file_get(obj, cls, get_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__file_get(obj, cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "unable to execute file get callback")
 
 done:

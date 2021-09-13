@@ -89,8 +89,7 @@ H5_DLL void * H5VL__native_file_create(const char *name, unsigned flags, hid_t f
                                        hid_t dxpl_id, void **req);
 H5_DLL void * H5VL__native_file_open(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id,
                                      void **req);
-H5_DLL herr_t H5VL__native_file_get(void *file, H5VL_file_get_t get_type, hid_t dxpl_id, void **req,
-                                    va_list arguments);
+H5_DLL herr_t H5VL__native_file_get(void *file, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_file_specific(void *file, H5VL_file_specific_t specific_type, hid_t dxpl_id,
                                          void **req, va_list arguments);
 H5_DLL herr_t H5VL__native_file_optional(void *file, H5VL_file_optional_t opt_type, hid_t dxpl_id, void **req,
