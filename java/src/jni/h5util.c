@@ -832,11 +832,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             }
             else {
                 if (typeSize > 0) {
-                    if (NULL == (this_str = (char *)HDmalloc(typeSize + 1)))
+                    if (NULL == (this_str = HDstrdup(tmp_str)))
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-
-                    HDstrncpy(this_str, tmp_str, typeSize);
-                    this_str[typeSize] = '\0';
                 }
             }
 
@@ -3390,18 +3387,13 @@ obj_info_all(hid_t loc_id, const char *name, const H5L_info_t *info, void *op_da
     info_all_t *datainfo = (info_all_t *)op_data;
     H5O_info_t  object_info;
     htri_t      object_exists;
-    size_t      str_len;
 
     datainfo->otype[datainfo->count] = -1;
     datainfo->ltype[datainfo->count] = -1;
     datainfo->objno[datainfo->count] = (unsigned long)-1;
 
-    str_len = HDstrlen(name);
-    if (NULL == (datainfo->objname[datainfo->count] = (char *)HDmalloc(str_len + 1)))
+    if (NULL == (datainfo->objname[datainfo->count] = HDstrdup(name)))
         goto done;
-
-    HDstrncpy(datainfo->objname[datainfo->count], name, str_len);
-    (datainfo->objname[datainfo->count])[str_len] = '\0';
 
     if ((object_exists = H5Oexists_by_name(loc_id, name, H5P_DEFAULT)) < 0)
         goto done;
@@ -3434,7 +3426,6 @@ obj_info_max(hid_t loc_id, const char *name, const H5L_info_t *info, void *op_da
 {
     info_all_t *datainfo = (info_all_t *)op_data;
     H5O_info_t  object_info;
-    size_t      str_len;
 
     datainfo->otype[datainfo->count]   = -1;
     datainfo->ltype[datainfo->count]   = -1;
@@ -3442,12 +3433,8 @@ obj_info_max(hid_t loc_id, const char *name, const H5L_info_t *info, void *op_da
     datainfo->objno[datainfo->count]   = (unsigned long)-1;
 
     /* This will be freed by h5str_array_free(oName, n) */
-    str_len = HDstrlen(name);
-    if (NULL == (datainfo->objname[datainfo->count] = (char *)HDmalloc(str_len + 1)))
+    if (NULL == (datainfo->objname[datainfo->count] = HDstrdup(name)))
         goto done;
-
-    HDstrncpy(datainfo->objname[datainfo->count], name, str_len);
-    (datainfo->objname[datainfo->count])[str_len] = '\0';
 
     if (H5Oget_info2(loc_id, &object_info, H5O_INFO_ALL) < 0)
         goto done;

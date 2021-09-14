@@ -258,7 +258,8 @@ h5tools_str_fmt(h5tools_str_t *str /*in,out*/, size_t start, const char *fmt)
             HDassert(temp);
         }
 
-        HDstrncpy(temp, str->s + start, n);
+        HDstrncpy(temp, str->s + start, n - 1);
+        temp[n - 1] = '\0';
     }
 
     /* Reset the output string and append a formatted version */

@@ -1320,13 +1320,21 @@ attr_search(hid_t oid, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *a
                 ret = FAIL;
             }
             else {
+                size_t buffer_space = w - 1;
+
                 HDmemset(obj_name, '\0', w);
                 if (op_name[0] != '/') {
-                    HDstrncat(obj_name, buf, u + 1);
-                    if (buf[u - 1] != '/')
-                        HDstrncat(obj_name, "/", (size_t)2);
+                    HDstrncat(obj_name, buf, buffer_space);
+                    buffer_space -= MIN(buffer_space, u);
+
+                    if (buf[u - 1] != '/') {
+                        HDstrncat(obj_name, "/", buffer_space);
+                        buffer_space -= MIN(buffer_space, 2);
+                    }
                 }
-                HDstrncat(obj_name, op_name, v + 1);
+
+                HDstrncat(obj_name, op_name, buffer_space);
+                buffer_space -= MIN(buffer_space, v);
 
                 handle_attributes(oid, obj_name, NULL, 0, NULL);
                 HDfree(obj_name);
@@ -1396,10 +1404,10 @@ lnk_search(const char *path, const H5L_info_t *li, void *_op_data)
     else {
         if (k == 2) {
             HDstrcpy(search_name, "/");
-            HDstrncat(search_name, op_name, search_len + 1);
+            HDstrcat(search_name, op_name);
         }
         else
-            HDstrncpy(search_name, op_name, search_len + 1);
+            HDstrcpy(search_name, op_name);
         search_name[search_len + k - 1] = '\0';
 
         if (HDstrcmp(path, search_name) == 0) {
