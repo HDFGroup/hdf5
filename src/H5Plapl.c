@@ -1044,7 +1044,7 @@ H5Pget_elink_prefix(hid_t plist_id, char *prefix, size_t size)
         /* Copy to user's buffer, if given */
         len = HDstrlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, MIN(len + 1, size));
+            HDstrncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */

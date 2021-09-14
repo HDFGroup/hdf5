@@ -1030,7 +1030,7 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
     /* Copy into application buffer */
     len = HDstrlen(pexp);
     if (expression) {
-        HDstrncpy(expression, pexp, MIN(len + 1, size));
+        HDstrncpy(expression, pexp, size);
         if (len >= size)
             expression[size - 1] = '\0';
     } /* end if */

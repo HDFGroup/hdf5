@@ -1143,28 +1143,40 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
                 for (cause = 1, idx = 0;
                      (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (idx < cause_strings_len);
                      cause <<= 1, idx++) {
-                    size_t cause_strlen = HDstrlen(cause_strings[idx]);
-
                     if (cause & local_no_collective_cause) {
+                        size_t local_buffer_space = sizeof(local_no_collective_cause_string) -
+                                                    HDstrlen(local_no_collective_cause_string) - 1;
+
                         /* Check if there were any previous error messages included. If so, prepend a
                          * semicolon to separate the messages.
                          */
-                        if (local_error_message_previously_written)
-                            HDstrncat(local_no_collective_cause_string, "; ", 2);
+                        if (local_buffer_space && local_error_message_previously_written) {
+                            HDstrncat(local_no_collective_cause_string, "; ", local_buffer_space);
+                            local_buffer_space -= MIN(local_buffer_space, 2);
+                        }
 
-                        HDstrncat(local_no_collective_cause_string, cause_strings[idx], cause_strlen);
+                        if (local_buffer_space)
+                            HDstrncat(local_no_collective_cause_string, cause_strings[idx],
+                                      local_buffer_space);
 
                         local_error_message_previously_written = TRUE;
                     } /* end if */
 
                     if (cause & global_no_collective_cause) {
+                        size_t global_buffer_space = sizeof(global_no_collective_cause_string) -
+                                                     HDstrlen(global_no_collective_cause_string) - 1;
+
                         /* Check if there were any previous error messages included. If so, prepend a
                          * semicolon to separate the messages.
                          */
-                        if (global_error_message_previously_written)
-                            HDstrncat(global_no_collective_cause_string, "; ", 2);
+                        if (global_buffer_space && global_error_message_previously_written) {
+                            HDstrncat(global_no_collective_cause_string, "; ", global_buffer_space);
+                            global_buffer_space -= MIN(global_buffer_space, 2);
+                        }
 
-                        HDstrncat(global_no_collective_cause_string, cause_strings[idx], cause_strlen);
+                        if (global_buffer_space)
+                            HDstrncat(global_no_collective_cause_string, cause_strings[idx],
+                                      global_buffer_space);
 
                         global_error_message_previously_written = TRUE;
                     } /* end if */
