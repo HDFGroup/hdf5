@@ -1423,3 +1423,34 @@ H5T_already_vol_managed(const H5T_t *dt)
 
     FUNC_LEAVE_NOAPI(dt->vol_obj != NULL)
 } /* end H5T_already_vol_managed() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5T_invoke_vol_optional
+ *
+ * Purpose:     Invokes an optional VOL connector-specific operation on a named datatype
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5T_invoke_vol_optional(H5T_t *dt, H5VL_optional_args_t *args, hid_t dxpl_id, void **req,
+                        H5VL_object_t **vol_obj_ptr)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Check that datatype is committed */
+    if (!H5T_is_named(dt))
+        HGOTO_ERROR(H5E_DATATYPE, H5E_BADTYPE, FAIL, "not a committed datatype")
+
+    /* Only invoke callback if VOL object is set for the datatype */
+    if (dt->vol_obj)
+        if (H5VL_datatype_optional_op(dt->vol_obj, args, dxpl_id, req, vol_obj_ptr) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTOPERATE, FAIL, "unable to execute datatype optional callback")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5T_invoke_vol_optional() */

@@ -129,8 +129,8 @@ H5_DLL herr_t H5VLdatatype_get(void *dt, hid_t connector_id, H5VL_datatype_get_a
                                void **req);
 H5_DLL herr_t H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_t specific_type,
                                     hid_t dxpl_id, void **req, va_list arguments);
-H5_DLL herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_datatype_optional_t opt_type,
-                                    hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLdatatype_optional(void *obj, hid_t connector_id, H5VL_optional_args_t *args, hid_t dxpl_id,
+                                    void **req);
 H5_DLL herr_t H5VLdatatype_close(void *dt, hid_t connector_id, hid_t dxpl_id, void **req);
 
 /* Public wrappers for file callbacks */
