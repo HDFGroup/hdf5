@@ -96,12 +96,12 @@ static const H5VL_class_t fake_vol_g = {
     },
     {
         /* datatype_cls */
-        NULL,                 /* commit       */
-        NULL,                 /* open         */
-        NULL,                 /* get          */
-        NULL,                 /* specific     */
-        NULL,                 /* optional     */
-        NULL                  /* close        */
+        NULL, /* commit       */
+        NULL, /* open         */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* close        */
     },
     {
         /* file_cls */

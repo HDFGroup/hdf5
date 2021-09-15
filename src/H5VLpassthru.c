@@ -77,9 +77,9 @@ typedef struct H5VL_pass_through_wrap_ctx_t {
 /********************* */
 
 /* Helper routines */
-static herr_t H5VL_pass_through_file_specific_reissue(void *obj, hid_t connector_id,
-                                                      H5VL_file_specific_t specific_type, hid_t dxpl_id,
-                                                      void **req, ...);
+static herr_t               H5VL_pass_through_file_specific_reissue(void *obj, hid_t connector_id,
+                                                                    H5VL_file_specific_t specific_type, hid_t dxpl_id,
+                                                                    void **req, ...);
 static H5VL_pass_through_t *H5VL_pass_through_new_obj(void *under_obj, hid_t under_vol_id);
 static herr_t               H5VL_pass_through_free_obj(H5VL_pass_through_t *obj);
 

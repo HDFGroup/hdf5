@@ -86,8 +86,8 @@ H5Rcreate_object(hid_t loc_id, const char *name, hid_t oapl_id, H5R_ref_t *ref_p
     H5VL_loc_params_t     loc_params;                     /* Location parameters */
     H5O_token_t           obj_token = {0};                /* Object token */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
-    H5VL_file_get_args_t        file_get_vol_cb_args; /* Arguments to VOL callback */
-    herr_t                ret_value = SUCCEED; /* Return value */
+    H5VL_file_get_args_t  file_get_vol_cb_args; /* Arguments to VOL callback */
+    herr_t                ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*si*Rr", loc_id, name, oapl_id, ref_ptr);
@@ -178,9 +178,9 @@ H5Rcreate_region(hid_t loc_id, const char *name, hid_t space_id, hid_t oapl_id, 
     H5VL_loc_params_t     loc_params;                     /* Location parameters */
     H5O_token_t           obj_token = {0};                /* Object token */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
-    H5VL_file_get_args_t        file_get_vol_cb_args; /* Arguments to VOL callback */
-    struct H5S_t *              space     = NULL;     /* Pointer to dataspace containing region */
-    herr_t                      ret_value = SUCCEED;  /* Return value */
+    H5VL_file_get_args_t  file_get_vol_cb_args; /* Arguments to VOL callback */
+    struct H5S_t *        space     = NULL;     /* Pointer to dataspace containing region */
+    herr_t                ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*sii*Rr", loc_id, name, space_id, oapl_id, ref_ptr);
@@ -274,8 +274,8 @@ H5Rcreate_attr(hid_t loc_id, const char *name, const char *attr_name, hid_t oapl
     H5VL_loc_params_t     loc_params;                     /* Location parameters */
     H5O_token_t           obj_token = {0};                /* Object token */
     H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
-    H5VL_file_get_args_t        file_get_vol_cb_args; /* Arguments to VOL callback */
-    herr_t                ret_value = SUCCEED; /* Return value */
+    H5VL_file_get_args_t  file_get_vol_cb_args; /* Arguments to VOL callback */
+    herr_t                ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*s*si*Rr", loc_id, name, attr_name, oapl_id, ref_ptr);

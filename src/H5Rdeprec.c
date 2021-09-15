@@ -376,9 +376,9 @@ H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t ref_type, hid_t 
     H5VL_object_t *       vol_obj      = NULL;      /* Object of loc_id */
     H5I_type_t            vol_obj_type = H5I_BADID; /* Object type of loc_id */
     H5VL_loc_params_t     loc_params;               /* Location parameters */
-    H5O_token_t           obj_token    = {0};       /* Object token */
-    H5VL_file_cont_info_t cont_info    = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
-    H5VL_file_get_args_t        file_get_vol_cb_args;           /* Arguments to VOL callback */
+    H5O_token_t           obj_token = {0};          /* Object token */
+    H5VL_file_cont_info_t cont_info = {H5VL_CONTAINER_INFO_VERSION, 0, 0, 0};
+    H5VL_file_get_args_t  file_get_vol_cb_args;           /* Arguments to VOL callback */
     hid_t                 file_id      = H5I_INVALID_HID; /* File ID for region reference */
     void *                vol_obj_file = NULL;
     unsigned char *       buf          = (unsigned char *)ref; /* Return reference pointer */
