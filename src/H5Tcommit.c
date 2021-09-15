@@ -790,12 +790,19 @@ H5Tget_create_plist(hid_t dtype_id)
     } /* end if */
     /* If the datatype is committed, retrieve further information */
     else {
-        H5VL_object_t *vol_obj = type->vol_obj;
+        H5VL_object_t *          vol_obj = type->vol_obj;
+        H5VL_datatype_get_args_t vol_cb_args; /* Arguments to VOL callback */
+
+        /* Set up VOL callback arguments */
+        vol_cb_args.op_type               = H5VL_DATATYPE_GET_TCPL;
+        vol_cb_args.args.get_tcpl.tcpl_id = H5I_INVALID_HID;
 
         /* Get the property list through the VOL */
-        if (H5VL_datatype_get(vol_obj, H5VL_DATATYPE_GET_TCPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                              &ret_value) < 0)
+        if (H5VL_datatype_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID, "can't get object creation info")
+
+        /* Set return value */
+        ret_value = vol_cb_args.args.get_tcpl.tcpl_id;
     } /* end else */
 
 done:
@@ -1222,32 +1229,41 @@ H5T_update_shared(H5T_t *dt)
 H5T_t *
 H5T_construct_datatype(H5VL_object_t *vol_obj)
 {
-    ssize_t nalloc;
-    void *  buf       = NULL;
-    H5T_t * dt        = NULL; /* datatype object from VOL connector */
-    H5T_t * ret_value = NULL;
+    H5T_t *                  dt = NULL;        /* Datatype object from VOL connector */
+    H5VL_datatype_get_args_t vol_cb_args;      /* Arguments to VOL callback */
+    size_t                   nalloc    = 0;    /* Size required to store serialized form of datatype */
+    void *                   buf       = NULL; /* Buffer to store serialized datatype */
+    H5T_t *                  ret_value = NULL;
 
     FUNC_ENTER_NOAPI(NULL)
 
-    /* get required buf size for encoding the datatype */
-    if (H5VL_datatype_get(vol_obj, H5VL_DATATYPE_GET_BINARY, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                          &nalloc, NULL, 0) < 0)
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                   = H5VL_DATATYPE_GET_BINARY_SIZE;
+    vol_cb_args.args.get_binary_size.size = &nalloc;
+
+    /* Get required buf size for encoding the datatype */
+    if (H5VL_datatype_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get datatype serialized size")
 
-    /* allocate buffer to store binary description of the datatype */
-    if (NULL == (buf = (void *)H5MM_calloc((size_t)nalloc)))
+    /* Allocate buffer to store binary description of the datatype */
+    if (NULL == (buf = (void *)H5MM_calloc(nalloc)))
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "can't allocate space for datatype")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                  = H5VL_DATATYPE_GET_BINARY;
+    vol_cb_args.args.get_binary.buf      = buf;
+    vol_cb_args.args.get_binary.buf_size = nalloc;
+
     /* get binary description of the datatype */
-    if (H5VL_datatype_get(vol_obj, H5VL_DATATYPE_GET_BINARY, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                          &nalloc, buf, (size_t)nalloc) < 0)
+    if (H5VL_datatype_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "unable to get serialized datatype")
 
-    if (NULL == (dt = H5T_decode((size_t)nalloc, (const unsigned char *)buf)))
+    /* Construct datatype, from serialized form in buffer */
+    if (NULL == (dt = H5T_decode(nalloc, buf)))
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, NULL, "can't decode datatype")
-
     dt->vol_obj = vol_obj;
 
+    /* Set return value */
     ret_value = dt;
 
 done:

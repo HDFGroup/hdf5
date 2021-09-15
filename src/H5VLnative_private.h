@@ -78,8 +78,7 @@ H5_DLL void * H5VL__native_datatype_commit(void *obj, const H5VL_loc_params_t *l
                                            hid_t dxpl_id, void **req);
 H5_DLL void * H5VL__native_datatype_open(void *obj, const H5VL_loc_params_t *loc_params, const char *name,
                                          hid_t tapl_id, hid_t dxpl_id, void **req);
-H5_DLL herr_t H5VL__native_datatype_get(void *dt, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req,
-                                        va_list arguments);
+H5_DLL herr_t H5VL__native_datatype_get(void *dt, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
 H5_DLL herr_t H5VL__native_datatype_specific(void *dt, H5VL_datatype_specific_t specific_type, hid_t dxpl_id,
                                              void **req, va_list arguments);
 H5_DLL herr_t H5VL__native_datatype_close(void *dt, hid_t dxpl_id, void **req);

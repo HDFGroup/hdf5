@@ -303,8 +303,9 @@ typedef int H5VL_dataset_optional_t;
 
 /* Values for datatype 'get' operation */
 typedef enum H5VL_datatype_get_t {
-    H5VL_DATATYPE_GET_BINARY, /* get serialized form of transient type    */
-    H5VL_DATATYPE_GET_TCPL    /* datatype creation property list          */
+    H5VL_DATATYPE_GET_BINARY_SIZE, /* Get size of serialized form of transient type */
+    H5VL_DATATYPE_GET_BINARY,      /* Get serialized form of transient type         */
+    H5VL_DATATYPE_GET_TCPL         /* Datatype creation property list               */
 } H5VL_datatype_get_t;
 
 /* Parameters for datatype 'get' operations */
@@ -900,7 +901,7 @@ typedef struct H5VL_datatype_class_t {
                     hid_t lcpl_id, hid_t tcpl_id, hid_t tapl_id, hid_t dxpl_id, void **req);
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id,
                   hid_t dxpl_id, void **req);
-    herr_t (*get)(void *obj, H5VL_datatype_get_t get_type, hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*get)(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req,
                        va_list arguments);
     herr_t (*optional)(void *obj, H5VL_datatype_optional_t opt_type, hid_t dxpl_id, void **req,
