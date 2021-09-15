@@ -13,62 +13,30 @@
  * The following is a list of those functions in the HDF5 library. This list is
  * integral to the discussion in the H5Pset_all_coll_metadata_ops() entry:
  *
- * <pre>
+ * H5Awrite(), H5Aread(), H5Arename(), H5Aiterate2(), H5Adelete(), H5Aexists()
  *
- * H5Awrite()
- * H5Aread()
- * H5Arename()
- * H5Aiterate2()
- * H5Adelete()
- * H5Aexists()
+ * H5Dget_space_status(), H5Dget_storage_size(), H5Dset_extent(), H5Ddebug(),
+ * H5Dclose(), H5Dget_create_plist(), H5Dget_space() (for virtual datasets)
  *
- * H5Dget_space_status()
- * H5Dget_storage_size()
- * H5Dset_extent()
- * H5Ddebug()
- * H5Dclose()
- * H5Dget_create_plist()
- * H5Dget_space()   (when dataset is a virtual dataset)
+ * H5Gget_create_plist(), H5Gget_info(), H5Gclose()
  *
- * H5Gget_create_plist()
- * H5Gget_info()
- * H5Gclose()
+ * H5Literate(), H5Lvisit()
  *
- * H5Literate()
- * H5Lvisit()
+ * H5Rcreate(), H5Rdereference2() (for object references),
+ * H5Rget_region(), H5Rget_obj_type2(), H5Rget_name()
  *
- * H5Rcreate()
- * H5Rdereference2()   (when reference is an object reference)
- * H5Rget_region()
- * H5Rget_obj_type2()
- * H5Rget_name()
+ * H5Ocopy(), H5Oopen_by_addr(), H5Oincr_refcount(), H5Odecr_refcount(),
+ * H5Oget_info(), H5Oset_comment(), H5Ovisit()
  *
- * H5Ocopy()
- * H5Oopen_by_addr()
- * H5Oincr_refcount()
- * H5Odecr_refcount()
- * H5Oget_info()
- * H5Oset_comment()
- * H5Ovisit()
- *
- * H5Fis_hdf5()
- * H5Fflush()
- * H5Fclose()
- * H5Fget_file_image()
- * H5Freopen()
- * H5Fget_freespace()
- * H5Fget_info2()
- * H5Fget_free_sections()
- * H5Fmount()
+ * H5Fis_hdf5(), H5Fflush(), H5Fclose(), H5Fget_file_image(), H5Freopen(),
+ * H5Fget_freespace(), H5Fget_info2(), H5Fget_free_sections(), H5Fmount(),
  * H5Funmount()
  *
  * H5Iget_name()
  *
- * H5Tget_create_plist()
- * H5Tclose()
+ * H5Tget_create_plist(), H5Tclose()
  *
  * H5Zunregister()
- * </pre>
  *
  * In addition, \b most deprecated functions fall into this category.
  *
