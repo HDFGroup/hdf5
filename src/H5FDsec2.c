@@ -196,8 +196,8 @@ H5FL_DEFINE_STATIC(H5FD_sec2_t);
 hid_t
 H5FD_sec2_init(void)
 {
-    char * lock_env_var = NULL; /* Environment variable pointer */
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    char *lock_env_var = NULL;            /* Environment variable pointer */
+    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 

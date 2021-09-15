@@ -172,7 +172,7 @@ next:
             } /* end for */
         }     /* end for */
     }         /* end if */
-#endif            /* H5Z_DEBUG */
+#endif        /* H5Z_DEBUG */
 
     /* Free the table of filters */
     if (H5Z_table_g) {

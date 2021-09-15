@@ -143,7 +143,7 @@ H5_DLL herr_t  H5FD_set_base_addr(H5FD_t *file, haddr_t base_addr);
 H5_DLL haddr_t H5FD_get_base_addr(const H5FD_t *file);
 H5_DLL herr_t  H5FD_set_paged_aggr(H5FD_t *file, hbool_t paged);
 
-H5_DLL herr_t  H5FD_init(void);
+H5_DLL herr_t H5FD_init(void);
 
 /* Function prototypes for MPI based VFDs*/
 #ifdef H5_HAVE_PARALLEL

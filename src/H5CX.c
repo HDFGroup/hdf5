@@ -469,7 +469,7 @@ H5CX_init(void)
     H5P_genplist_t *dc_plist;            /* Dataset creation property list */
     H5P_genplist_t *da_plist;            /* Dataset access property list */
     H5P_genplist_t *fa_plist;            /* File access property list */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

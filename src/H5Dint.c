@@ -161,7 +161,7 @@ herr_t
 H5D_init(void)
 {
     H5P_genplist_t *def_dcpl;            /* Default Dataset Creation Property list */
-    herr_t ret_value = SUCCEED; /* Return value */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 

@@ -181,8 +181,9 @@ H5FL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Garbage collect any nodes on the free lists */
-    (void)H5FL_garbage_coll();
+        /* Garbage collect any nodes on the free lists */
+        (void)
+    H5FL_garbage_coll();
 
     /* Shut down the various kinds of free lists */
     n += H5FL__reg_term();

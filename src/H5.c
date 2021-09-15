@@ -32,7 +32,7 @@
 #include "H5SLprivate.h" /* Skip lists                               */
 #include "H5Tprivate.h"  /* Datatypes                                */
 
-#include "H5FDsec2.h"   /* for H5FD_sec2_init() */
+#include "H5FDsec2.h" /* for H5FD_sec2_init() */
 
 /****************/
 /* Local Macros */
@@ -103,7 +103,7 @@ H5FL_DEFINE_STATIC(H5_atclose_node_t);
 static herr_t
 H5_default_vfd_init(void)
 {
-    hid_t id;
+    hid_t  id;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
@@ -113,8 +113,7 @@ H5_default_vfd_init(void)
     id = H5FD_sec2_init();
 
     if (id == H5I_INVALID_HID) {
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-            "unable to load default VFD ID")
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to load default VFD ID")
     }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -257,24 +256,23 @@ H5_init_library(void)
     struct {
         herr_t (*func)(void);
         const char *descr;
-    } initializer[] = {
-          {H5E_init, "error"}
-        , {H5VL_init_phase1, "VOL"}
-        , {H5SL_init, "VOL"}
-        , {H5FD_init, "VFD"}
-        , {H5_default_vfd_init, "default VFD"}
-        , {H5P_init, "property list"}
-        , {H5AC_init, "metadata caching"}
-        , {H5L_init, "link"}
-        , {H5FS_init, "FS"}
-        , {H5S_init, "dataspace"}
-        /* Finish initializing interfaces that depend on the interfaces above */
-        , {H5VL_init_phase2, "VOL"}
-    };
+    } initializer[] = {{H5E_init, "error"},
+                       {H5VL_init_phase1, "VOL"},
+                       {H5SL_init, "VOL"},
+                       {H5FD_init, "VFD"},
+                       {H5_default_vfd_init, "default VFD"},
+                       {H5P_init, "property list"},
+                       {H5AC_init, "metadata caching"},
+                       {H5L_init, "link"},
+                       {H5FS_init, "FS"},
+                       {H5S_init, "dataspace"}
+                       /* Finish initializing interfaces that depend on the interfaces above */
+                       ,
+                       {H5VL_init_phase2, "VOL"}};
     for (i = 0; i < NELMTS(initializer); i++) {
         if (initializer[i].func() < 0) {
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
-                "unable to initialize %s interface", initializer[i].descr)
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize %s interface",
+                        initializer[i].descr)
         }
     }
 
@@ -302,11 +300,11 @@ done:
 void
 H5_term_library(void)
 {
-    int         pending, ntries = 0;
+    int         pending, ntries   = 0;
     char        loop[1024], *next = loop;
-    size_t i;
-    size_t nleft = sizeof(loop);
-    int nprinted;
+    size_t      i;
+    size_t      nleft = sizeof(loop);
+    int         nprinted;
     H5E_auto2_t func;
 
 #ifdef H5_HAVE_THREADSAFE
@@ -356,52 +354,33 @@ H5_term_library(void)
      * way that would necessitate some cleanup work in the other interface.
      */
 
-#define TERMINATOR(module, wait) \
-    {.func = H5##module##_term_package, .name = #module, .completed = false, \
-     .await_prior = wait}
+#define TERMINATOR(module, wait)                                                                             \
+    {                                                                                                        \
+        .func = H5##module##_term_package, .name = #module, .completed = false, .await_prior = wait          \
+    }
 
     struct {
-        int (*func)(void);  /* function to terminate the module; returns 0
-                             * on success, >0 if termination was not completed
-                             * and we should try to terminate some dependent
-                             * modules, first.
-                             */
-        const char *name;   /* name of the module */
-        bool completed;     /* true iff this terminator was already completed */
-        const bool await_prior;   /* true iff all prior terminators in the list
-                                   * must complete before this terminator is
-                                   * attempted
-                                   */
-    } terminator[] = {
-        TERMINATOR(ES, false)
-    ,   TERMINATOR(L, true)
-    ,   TERMINATOR(A_top, false)
-    ,   TERMINATOR(D_top, false)
-    ,   TERMINATOR(G_top, false)
-    ,   TERMINATOR(M_top, false)
-    ,   TERMINATOR(R_top, false)
-    ,   TERMINATOR(S_top, false)
-    ,   TERMINATOR(T_top, false)
-    ,   TERMINATOR(F, true)
-    ,   TERMINATOR(P, true)
-    ,   TERMINATOR(A, false)
-    ,   TERMINATOR(D, false)
-    ,   TERMINATOR(G, false)
-    ,   TERMINATOR(M, false)
-    ,   TERMINATOR(R, false)
-    ,   TERMINATOR(S, false)
-    ,   TERMINATOR(T, false)
-    ,   TERMINATOR(AC, true)
-    ,   TERMINATOR(Z, false)
-    ,   TERMINATOR(FD, false)
-    ,   TERMINATOR(VL, false)
-    ,   TERMINATOR(PL, true)
-    ,   TERMINATOR(E, true)
-    ,   TERMINATOR(I, true)
-    ,   TERMINATOR(SL, true)
-    ,   TERMINATOR(FL, true)
-    ,   TERMINATOR(CX, true)
-    };
+        int (*func)(void);       /* function to terminate the module; returns 0
+                                  * on success, >0 if termination was not completed
+                                  * and we should try to terminate some dependent
+                                  * modules, first.
+                                  */
+        const char *name;        /* name of the module */
+        bool        completed;   /* true iff this terminator was already completed */
+        const bool  await_prior; /* true iff all prior terminators in the list
+                                  * must complete before this terminator is
+                                  * attempted
+                                  */
+    } terminator[] = {TERMINATOR(ES, false),    TERMINATOR(L, true),      TERMINATOR(A_top, false),
+                      TERMINATOR(D_top, false), TERMINATOR(G_top, false), TERMINATOR(M_top, false),
+                      TERMINATOR(R_top, false), TERMINATOR(S_top, false), TERMINATOR(T_top, false),
+                      TERMINATOR(F, true),      TERMINATOR(P, true),      TERMINATOR(A, false),
+                      TERMINATOR(D, false),     TERMINATOR(G, false),     TERMINATOR(M, false),
+                      TERMINATOR(R, false),     TERMINATOR(S, false),     TERMINATOR(T, false),
+                      TERMINATOR(AC, true),     TERMINATOR(Z, false),     TERMINATOR(FD, false),
+                      TERMINATOR(VL, false),    TERMINATOR(PL, true),     TERMINATOR(E, true),
+                      TERMINATOR(I, true),      TERMINATOR(SL, true),     TERMINATOR(FL, true),
+                      TERMINATOR(CX, true)};
 
     do {
         pending = 0;
@@ -412,8 +391,7 @@ H5_term_library(void)
                 break;
             if (terminator[i].func() != 0) {
                 pending++;
-                nprinted = snprintf(next, nleft, "%s%s",
-                    (next == loop) ? "," : "", terminator[i].name);
+                nprinted = snprintf(next, nleft, "%s%s", (next == loop) ? "," : "", terminator[i].name);
                 if (nprinted < 0)
                     continue;
                 if ((size_t)nprinted >= nleft)
