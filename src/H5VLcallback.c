@@ -181,9 +181,9 @@ static herr_t H5VL__blob_put(void *obj, const H5VL_class_t *cls, const void *buf
 static herr_t H5VL__blob_get(void *obj, const H5VL_class_t *cls, const void *blob_id, void *buf, size_t size,
                              void *ctx);
 static herr_t H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id,
-                                  H5VL_blob_specific_t specific_type, va_list arguments);
+                                  H5VL_blob_specific_args_t *args);
 static herr_t H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id,
-                                  H5VL_blob_optional_t opt_type, va_list arguments);
+                                  H5VL_optional_args_t *args);
 static herr_t H5VL__token_cmp(void *obj, const H5VL_class_t *cls, const H5O_token_t *token1,
                               const H5O_token_t *token2, int *cmp_value);
 static herr_t H5VL__token_to_str(void *obj, H5I_type_t obj_type, const H5VL_class_t *cls,
@@ -6907,8 +6907,7 @@ done:
 herr_t
 H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size, void *blob_id, void *ctx)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -6917,19 +6916,11 @@ H5VL_blob_put(const H5VL_object_t *vol_obj, const void *buf, size_t size, void *
     HDassert(size == 0 || buf);
     HDassert(blob_id);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding VOL callback */
     if (H5VL__blob_put(vol_obj->data, vol_obj->connector->cls, buf, size, blob_id, ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "blob put failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_put() */
 
@@ -7011,8 +7002,7 @@ done:
 herr_t
 H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size_t size, void *ctx)
 {
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7021,19 +7011,11 @@ H5VL_blob_get(const H5VL_object_t *vol_obj, const void *blob_id, void *buf, size
     HDassert(blob_id);
     HDassert(buf);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding VOL callback */
     if (H5VL__blob_get(vol_obj->data, vol_obj->connector->cls, blob_id, buf, size, ctx) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "blob get failed")
 
 done:
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_get() */
 
@@ -7082,8 +7064,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob_specific_t specific_type,
-                    va_list arguments)
+H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob_specific_args_t *args)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -7099,7 +7080,7 @@ H5VL__blob_specific(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->blob_cls.specific)(obj, blob_id, specific_type, arguments) < 0)
+    if ((cls->blob_cls.specific)(obj, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
 
 done:
@@ -7117,12 +7098,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specific_t specific_type, ...)
+H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specific_args_t *args)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7130,27 +7108,11 @@ H5VL_blob_specific(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_specif
     HDassert(vol_obj);
     HDassert(blob_id);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, specific_type);
-    arg_started = TRUE;
-    if ((ret_value = H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, specific_type,
-                                         arguments)) < 0)
+    if (H5VL__blob_specific(vol_obj->data, vol_obj->connector->cls, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob specific callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_specific() */
 
@@ -7164,14 +7126,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_t specific_type,
-                  va_list arguments)
+H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specific_args_t *args)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*xVBx", obj, connector_id, blob_id, specific_type, arguments);
+    H5TRACE4("e", "*xi*x*!", obj, connector_id, blob_id, args);
 
     /* Get class pointer */
     if (NULL == obj)
@@ -7180,7 +7141,7 @@ H5VLblob_specific(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_specif
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding VOL callback */
-    if (H5VL__blob_specific(obj, cls, blob_id, specific_type, arguments) < 0)
+    if (H5VL__blob_specific(obj, cls, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "blob specific operation failed")
 
 done:
@@ -7200,8 +7161,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob_optional_t opt_type,
-                    va_list arguments)
+H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_optional_args_t *args)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -7217,7 +7177,7 @@ H5VL__blob_optional(void *obj, const H5VL_class_t *cls, void *blob_id, H5VL_blob
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'blob optional' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->blob_cls.optional)(obj, blob_id, opt_type, arguments) < 0)
+    if ((cls->blob_cls.optional)(obj, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob optional callback")
 
 done:
@@ -7235,12 +7195,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_optional_t opt_type, ...)
+H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_optional_args_t *args)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
-    hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
-    herr_t  ret_value       = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -7248,27 +7205,11 @@ H5VL_blob_optional(const H5VL_object_t *vol_obj, void *blob_id, H5VL_blob_option
     HDassert(vol_obj);
     HDassert(blob_id);
 
-    /* Set wrapper info in API context */
-    if (H5VL_set_vol_wrapper(vol_obj) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTSET, FAIL, "can't set VOL wrapper info")
-    vol_wrapper_set = TRUE;
-
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, opt_type);
-    arg_started = TRUE;
-    if ((ret_value =
-             H5VL__blob_optional(vol_obj->data, vol_obj->connector->cls, blob_id, opt_type, arguments)) < 0)
+    if (H5VL__blob_optional(vol_obj->data, vol_obj->connector->cls, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute blob optional callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
-    /* Reset object wrapping info in API context */
-    if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
-        HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
-
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_blob_optional() */
 
@@ -7282,14 +7223,13 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_optional_t opt_type,
-                  va_list arguments)
+H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id, H5VL_optional_args_t *args)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE5("e", "*xi*xVAx", obj, connector_id, blob_id, opt_type, arguments);
+    H5TRACE4("e", "*xi*x*!", obj, connector_id, blob_id, args);
 
     /* Get class pointer */
     if (NULL == obj)
@@ -7298,7 +7238,7 @@ H5VLblob_optional(void *obj, hid_t connector_id, void *blob_id, H5VL_blob_option
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding VOL callback */
-    if (H5VL__blob_optional(obj, cls, blob_id, opt_type, arguments) < 0)
+    if (H5VL__blob_optional(obj, cls, blob_id, args) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "blob optional operation failed")
 
 done:

@@ -810,10 +810,9 @@ typedef int H5VL_request_optional_t;
 
 /* Values for 'blob' 'specific' operation */
 typedef enum H5VL_blob_specific_t {
-    H5VL_BLOB_DELETE,  /* Delete a blob (by ID) */
-    H5VL_BLOB_GETSIZE, /* Get size of blob */
-    H5VL_BLOB_ISNULL,  /* Check if a blob ID is "null" */
-    H5VL_BLOB_SETNULL  /* Set a blob ID to the connector's "null" blob ID value */
+    H5VL_BLOB_DELETE, /* Delete a blob (by ID) */
+    H5VL_BLOB_ISNULL, /* Check if a blob ID is "null" */
+    H5VL_BLOB_SETNULL /* Set a blob ID to the connector's "null" blob ID value */
 } H5VL_blob_specific_t;
 
 /* Parameters for blob 'specific' operations */
@@ -1002,8 +1001,8 @@ typedef struct H5VL_request_class_t {
 typedef struct H5VL_blob_class_t {
     herr_t (*put)(void *obj, const void *buf, size_t size, void *blob_id, void *ctx);
     herr_t (*get)(void *obj, const void *blob_id, void *buf, size_t size, void *ctx);
-    herr_t (*specific)(void *obj, void *blob_id, H5VL_blob_specific_t specific_type, va_list arguments);
-    herr_t (*optional)(void *obj, void *blob_id, H5VL_blob_optional_t opt_type, va_list arguments);
+    herr_t (*specific)(void *obj, void *blob_id, H5VL_blob_specific_args_t *args);
+    herr_t (*optional)(void *obj, void *blob_id, H5VL_optional_args_t *args);
 } H5VL_blob_class_t;
 
 /* Object token routines */

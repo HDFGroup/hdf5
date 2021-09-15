@@ -2927,10 +2927,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_BLOB_DELETE");
                                     break;
 
-                                case H5VL_BLOB_GETSIZE:
-                                    H5RS_acat(rs, "H5VL_BLOB_GETSIZE");
-                                    break;
-
                                 case H5VL_BLOB_ISNULL:
                                     H5RS_acat(rs, "H5VL_BLOB_ISNULL");
                                     break;
