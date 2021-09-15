@@ -319,28 +319,6 @@ static const H5FD_class_t H5FD_hdfs_g = {
 H5FL_DEFINE_STATIC(H5FD_hdfs_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t __attribute__((constructor(200))) H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (H5FD_hdfs_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize hdfs VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_hdfs_init
  *
  * Purpose:     Initialize this driver by registering the driver with the

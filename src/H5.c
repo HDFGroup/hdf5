@@ -32,6 +32,8 @@
 #include "H5SLprivate.h" /* Skip lists                               */
 #include "H5Tprivate.h"  /* Datatypes                                */
 
+#include "H5FDsec2.h"   /* for H5FD_sec2_init() */
+
 /****************/
 /* Local Macros */
 /****************/
@@ -62,9 +64,6 @@ static int H5__mpi_delete_cb(MPI_Comm comm, int keyval, void *attr_val, int *fla
 /*********************/
 /* Package Variables */
 /*********************/
-
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
 
 /*****************************/
 /* Library Private Variables */
@@ -101,31 +100,25 @@ static H5_atclose_node_t *H5_atclose_head = NULL;
 /* Declare a free list to manage the H5_atclose_node_t struct */
 H5FL_DEFINE_STATIC(H5_atclose_node_t);
 
-/*--------------------------------------------------------------------------
-NAME
-    H5__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(101))) H5__init_package(void)
+static herr_t
+H5_default_vfd_init(void)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
+    hid_t id;
+    herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
+    /* Load the hid_t for the default VFD for the side effect
+     * it has of initializing the default VFD.
+     */
+    id = H5FD_sec2_init();
 
-    /* Run the library initialization routine, if it hasn't already run */
-    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {
-        if (H5_init_library() < 0)
-            HGOTO_ERROR(H5E_LIB, H5E_CANTINIT, FAIL, "unable to initialize library")
-    } /* end if */
-
+    if (id == H5I_INVALID_HID) {
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+            "unable to load default VFD ID")
+    }
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5__init_package() */
+}
 
 /*--------------------------------------------------------------------------
  * NAME
@@ -144,7 +137,12 @@ done:
 herr_t
 H5_init_library(void)
 {
+    size_t i;
     herr_t ret_value = SUCCEED;
+
+    /* Run the library initialization routine, if it hasn't already run */
+    if (H5_INIT_GLOBAL || H5_TERM_GLOBAL)
+        HGOTO_DONE(SUCCEED)
 
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
@@ -240,7 +238,6 @@ H5_init_library(void)
         H5_dont_atexit_g = TRUE;
     } /* end if */
 
-#if 0
     /*
      * Initialize interfaces that might not be able to initialize themselves
      * soon enough.  The file & dataset interfaces must be initialized because
@@ -257,31 +254,37 @@ H5_init_library(void)
      * The dataspace interface needs to be initialized so that future IDs for
      *   dataspaces work.
      */
-    if (H5E_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize error interface")
-    if (H5VL_init_phase1() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
-    if (H5P_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize property list interface")
-    if (H5AC_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize metadata caching interface")
-    if (H5L_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize link interface")
-    if (H5FS_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize FS interface")
-    if (H5S_init() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize dataspace interface")
-
-    /* Finish initializing interfaces that depend on the interfaces above */
-    if (H5VL_init_phase2() < 0)
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize vol interface")
-#endif
+    struct {
+        herr_t (*func)(void);
+        const char *descr;
+    } initializer[] = {
+          {H5E_init, "error"}
+        , {H5VL_init_phase1, "VOL"}
+        , {H5SL_init, "VOL"}
+        , {H5FD_init, "VFD"}
+        , {H5_default_vfd_init, "default VFD"}
+        , {H5P_init, "property list"}
+        , {H5AC_init, "metadata caching"}
+        , {H5L_init, "link"}
+        , {H5FS_init, "FS"}
+        , {H5S_init, "dataspace"}
+        /* Finish initializing interfaces that depend on the interfaces above */
+        , {H5VL_init_phase2, "VOL"}
+    };
+    for (i = 0; i < NELMTS(initializer); i++) {
+        if (initializer[i].func() < 0) {
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                "unable to initialize %s interface", initializer[i].descr)
+        }
+    }
 
     /* Debugging? */
     H5__debug_mask("-all");
     H5__debug_mask(HDgetenv("HDF5_DEBUG"));
 
 done:
+    if (ret_value != SUCCEED)
+        abort();
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_init_library() */
 
@@ -299,9 +302,11 @@ done:
 void
 H5_term_library(void)
 {
-    int         pending, ntries = 0, n;
-    size_t      at = 0;
-    char        loop[1024];
+    int         pending, ntries = 0;
+    char        loop[1024], *next = loop;
+    size_t i;
+    size_t nleft = sizeof(loop);
+    int nprinted;
     H5E_auto2_t func;
 
 #ifdef H5_HAVE_THREADSAFE
@@ -350,101 +355,77 @@ H5_term_library(void)
      * value if they do something that might affect some other interface in a
      * way that would necessitate some cleanup work in the other interface.
      */
-#define DOWN(F)                                                                                              \
-    (((n = H5##F##_term_package()) && (at + 8) < sizeof loop)                                                \
-         ? (HDsprintf(loop + at, "%s%s", (at ? "," : ""), #F), at += HDstrlen(loop + at), n)                 \
-         : ((n > 0 && (at + 5) < sizeof loop) ? (HDsprintf(loop + at, "..."), at += HDstrlen(loop + at), n)  \
-                                              : n))
+
+#define TERMINATOR(module, wait) \
+    {.func = H5##module##_term_package, .name = #module, .completed = false, \
+     .await_prior = wait}
+
+    struct {
+        int (*func)(void);  /* function to terminate the module; returns 0
+                             * on success, >0 if termination was not completed
+                             * and we should try to terminate some dependent
+                             * modules, first.
+                             */
+        const char *name;   /* name of the module */
+        bool completed;     /* true iff this terminator was already completed */
+        const bool await_prior;   /* true iff all prior terminators in the list
+                                   * must complete before this terminator is
+                                   * attempted
+                                   */
+    } terminator[] = {
+        TERMINATOR(ES, false)
+    ,   TERMINATOR(L, true)
+    ,   TERMINATOR(A_top, false)
+    ,   TERMINATOR(D_top, false)
+    ,   TERMINATOR(G_top, false)
+    ,   TERMINATOR(M_top, false)
+    ,   TERMINATOR(R_top, false)
+    ,   TERMINATOR(S_top, false)
+    ,   TERMINATOR(T_top, false)
+    ,   TERMINATOR(F, true)
+    ,   TERMINATOR(P, true)
+    ,   TERMINATOR(A, false)
+    ,   TERMINATOR(D, false)
+    ,   TERMINATOR(G, false)
+    ,   TERMINATOR(M, false)
+    ,   TERMINATOR(R, false)
+    ,   TERMINATOR(S, false)
+    ,   TERMINATOR(T, false)
+    ,   TERMINATOR(AC, true)
+    ,   TERMINATOR(Z, false)
+    ,   TERMINATOR(FD, false)
+    ,   TERMINATOR(VL, false)
+    ,   TERMINATOR(PL, true)
+    ,   TERMINATOR(E, true)
+    ,   TERMINATOR(I, true)
+    ,   TERMINATOR(SL, true)
+    ,   TERMINATOR(FL, true)
+    ,   TERMINATOR(CX, true)
+    };
 
     do {
         pending = 0;
-
-        /* Try to organize these so the "higher" level components get shut
-         * down before "lower" level components that they might rely on. -QAK
-         */
-
-        /* Close the event sets first, so that all asynchronous operations
-         *  complete before anything else attempts to shut down.
-         */
-        pending += DOWN(ES);
-
-        /* Close down the user-facing interfaces, after the event sets */
-        if (pending == 0) {
-            /* Close the interfaces dependent on others */
-            pending += DOWN(L);
-
-            /* Close the "top" of various interfaces (IDs, etc) but don't shut
-             *  down the whole interface yet, so that the object header messages
-             *  get serialized correctly for entries in the metadata cache and the
-             *  symbol table entry in the superblock gets serialized correctly, etc.
-             *  all of which is performed in the 'F' shutdown.
-             */
-            pending += DOWN(A_top);
-            pending += DOWN(D_top);
-            pending += DOWN(G_top);
-            pending += DOWN(M_top);
-            pending += DOWN(R_top);
-            pending += DOWN(S_top);
-            pending += DOWN(T_top);
-        } /* end if */
-
-        /* Don't shut down the file code until objects in files are shut down */
-        if (pending == 0)
-            pending += DOWN(F);
-
-        /* Don't shut down the property list code until all objects that might
-         * use property lists are shut down */
-        if (pending == 0)
-            pending += DOWN(P);
-
-        /* Wait to shut down the "bottom" of various interfaces until the
-         *      files are closed, so pieces of the file can be serialized
-         *      correctly.
-         */
-        if (pending == 0) {
-            /* Shut down the "bottom" of the attribute, dataset, group,
-             *  reference, dataspace, and datatype interfaces, fully closing
-             *  out the interfaces now.
-             */
-            pending += DOWN(A);
-            pending += DOWN(D);
-            pending += DOWN(G);
-            pending += DOWN(M);
-            pending += DOWN(R);
-            pending += DOWN(S);
-            pending += DOWN(T);
-        } /* end if */
-
-        /* Don't shut down "low-level" components until "high-level" components
-         * have successfully shut down.  This prevents property lists and IDs
-         * from being closed "out from underneath" of the high-level objects
-         * that depend on them. -QAK
-         */
-        if (pending == 0) {
-            pending += DOWN(AC);
-            /* Shut down the "pluggable" interfaces, before the plugin framework */
-            pending += DOWN(Z);
-            pending += DOWN(FD);
-            pending += DOWN(VL);
-            /* Don't shut down the plugin code until all "pluggable" interfaces (Z, FD, PL) are shut down */
-            if (pending == 0)
-                pending += DOWN(PL);
-            /* Don't shut down the error code until other APIs which use it are shut down */
-            if (pending == 0)
-                pending += DOWN(E);
-            /* Don't shut down the ID code until other APIs which use them are shut down */
-            if (pending == 0)
-                pending += DOWN(I);
-            /* Don't shut down the skip list code until everything that uses it is down */
-            if (pending == 0)
-                pending += DOWN(SL);
-            /* Don't shut down the free list code until everything that uses it is down */
-            if (pending == 0)
-                pending += DOWN(FL);
-            /* Don't shut down the API context code until _everything_ else is down */
-            if (pending == 0)
-                pending += DOWN(CX);
-        } /* end if */
+        for (i = 0; i < NELMTS(terminator); i++) {
+            if (terminator[i].completed)
+                continue;
+            if (pending != 0 && terminator[i].await_prior)
+                break;
+            if (terminator[i].func() != 0) {
+                pending++;
+                nprinted = snprintf(next, nleft, "%s%s",
+                    (next == loop) ? "," : "", terminator[i].name);
+                if (nprinted < 0)
+                    continue;
+                if ((size_t)nprinted >= nleft)
+                    nprinted = snprintf(next, nleft, "...");
+                if (nprinted < 0 || (size_t)nprinted >= nleft)
+                    continue;
+                nleft -= (size_t)nprinted;
+                next += nprinted;
+                continue;
+            }
+            terminator[i].completed = true;
+        }
     } while (pending && ntries++ < 100);
 
     if (pending) {

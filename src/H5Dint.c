@@ -160,36 +160,10 @@ static const char *H5D_prefix_vds_env = NULL;
 herr_t
 H5D_init(void)
 {
+    H5P_genplist_t *def_dcpl;            /* Default Dataset Creation Property list */
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D_init() */
-
-/*--------------------------------------------------------------------------
-NAME
-    H5D__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5D__init_package()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-NOTES
-    Care must be taken when using the H5P functions, since they can cause
-    a deadlock in the library when the library is attempting to terminate -QAK
-
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(107))) H5D__init_package(void)
-{
-    H5P_genplist_t *def_dcpl;            /* Default Dataset Creation Property list */
-    herr_t          ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the dataset IDs */
     if (H5I_register_type(H5I_DATASET_CLS) < 0)
@@ -228,7 +202,7 @@ static herr_t __attribute__((constructor(107))) H5D__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__init_package() */
+} /* end H5D_init() */
 
 /*-------------------------------------------------------------------------
  * Function: H5D_top_term_package
@@ -303,18 +277,12 @@ H5D_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_DATASET));
-        HDassert(FALSE == H5D_top_package_initialize_s);
+    /* Sanity checks */
+    HDassert(0 == H5I_nmembers(H5I_DATASET));
+    HDassert(FALSE == H5D_top_package_initialize_s);
 
-        /* Destroy the dataset object id group */
-        n += (H5I_dec_type_ref(H5I_DATASET) > 0);
-
-        /* Mark closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
+    /* Destroy the dataset object id group */
+    n += (H5I_dec_type_ref(H5I_DATASET) > 0);
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5D_term_package() */

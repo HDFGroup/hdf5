@@ -157,34 +157,6 @@ static int H5FD_mpio_debug_rank_s = -1;
     (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == (file)->mpi_rank)
 #endif
 
-/*--------------------------------------------------------------------------
-NAME
-   H5FD__init_package -- Initialize interface-specific information
-
-USAGE
-    herr_t H5FD__init_package()
-
-RETURNS
-    SUCCEED/FAIL
-
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5FD_mpio_init currently).
-
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(200))) H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (H5FD_mpio_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize mpio VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
 #ifdef H5FDmpio_DEBUG
 
 /*---------------------------------------------------------------------------

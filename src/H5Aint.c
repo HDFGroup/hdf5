@@ -99,9 +99,6 @@ static herr_t H5A__iterate_common(hid_t loc_id, H5_index_t idx_type, H5_iter_ord
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /* Format version bounds for attribute */
 const unsigned H5O_attr_ver_bounds[] = {
     H5O_ATTR_VERSION_1,     /* H5F_LIBVER_EARLIEST */
@@ -158,29 +155,6 @@ H5A_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A_init() */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5A__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5A__init_package()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(107))) H5A__init_package(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
 
     /*
      * Create attribute ID type.
@@ -190,11 +164,10 @@ static herr_t __attribute__((constructor(107))) H5A__init_package(void)
 
     /* Mark "top" of interface as initialized, too */
     H5A_top_package_initialize_s = TRUE;
-    H5_PKG_INIT_VAR              = true;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5A__init_package() */
+} /* end H5A_init() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -260,18 +233,12 @@ H5A_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_ATTR));
-        HDassert(FALSE == H5A_top_package_initialize_s);
+    /* Sanity checks */
+    HDassert(0 == H5I_nmembers(H5I_ATTR));
+    HDassert(FALSE == H5A_top_package_initialize_s);
 
-        /* Destroy the attribute object id group */
-        n += (H5I_dec_type_ref(H5I_ATTR) > 0);
-
-        /* Mark closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
+    /* Destroy the attribute object id group */
+    n += (H5I_dec_type_ref(H5I_ATTR) > 0);
 
     FUNC_LEAVE_NOAPI(n)
 } /* H5A_term_package() */

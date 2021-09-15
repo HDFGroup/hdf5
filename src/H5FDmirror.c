@@ -204,29 +204,6 @@ H5FL_DEFINE_STATIC(H5FD_mirror_t);
 /* Declare a free list to manage the H5FD_mirror_xmit_open_t struct */
 H5FL_DEFINE_STATIC(H5FD_mirror_xmit_open_t);
 
-/*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *-------------------------------------------------------------------------
- */
-static herr_t __attribute__((constructor(200))) H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    LOG_OP_CALL(__func__);
-
-    if (H5FD_mirror_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize mirror VFD");
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
 /* -------------------------------------------------------------------------
  * Function:    H5FD_mirror_init
  *

@@ -141,9 +141,6 @@ static herr_t H5R__decode_string(const unsigned char *buf, size_t *nbytes, char 
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -155,19 +152,8 @@ hbool_t H5_PKG_INIT_VAR = true;
 /* Flag indicating "top" of interface has been initialized */
 static hbool_t H5R_top_package_initialize_s = FALSE;
 
-/*--------------------------------------------------------------------------
-NAME
-   H5R__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5R__init_package()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(200))) H5R__init_package(void)
+herr_t
+H5R_init(void)
 {
     herr_t ret_value = SUCCEED;
 
@@ -181,7 +167,7 @@ static herr_t __attribute__((constructor(200))) H5R__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5R__init_package() */
+}
 
 /*--------------------------------------------------------------------------
  NAME
@@ -243,14 +229,8 @@ H5R_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(FALSE == H5R_top_package_initialize_s);
-
-        /* Mark closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    }
+    /* Sanity checks */
+    HDassert(FALSE == H5R_top_package_initialize_s);
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5R_term_package() */

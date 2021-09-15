@@ -55,9 +55,6 @@ static htri_t H5S__is_simple(const H5S_t *sdim);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /* Format version bounds for dataspace */
 const unsigned H5O_sdspace_ver_bounds[] = {
     H5O_SDSPACE_VERSION_1,     /* H5F_LIBVER_EARLIEST */
@@ -114,27 +111,6 @@ H5S_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S_init() */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5S__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5S__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(107))) H5S__init_package(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the dataspace IDs */
     if (H5I_register_type(H5I_DATASPACE_CLS) < 0)
@@ -150,7 +126,7 @@ static herr_t __attribute__((constructor(107))) H5S__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5S__init_package() */
+} /* end H5S_init() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -223,22 +199,16 @@ H5S_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_DATASPACE));
-        HDassert(0 == H5I_nmembers(H5I_SPACE_SEL_ITER));
-        HDassert(FALSE == H5S_top_package_initialize_s);
+    /* Sanity checks */
+    HDassert(0 == H5I_nmembers(H5I_DATASPACE));
+    HDassert(0 == H5I_nmembers(H5I_SPACE_SEL_ITER));
+    HDassert(FALSE == H5S_top_package_initialize_s);
 
-        /* Destroy the dataspace object id group */
-        n += (H5I_dec_type_ref(H5I_DATASPACE) > 0);
+    /* Destroy the dataspace object id group */
+    n += (H5I_dec_type_ref(H5I_DATASPACE) > 0);
 
-        /* Destroy the dataspace selection iterator object id group */
-        n += (H5I_dec_type_ref(H5I_SPACE_SEL_ITER) > 0);
-
-        /* Mark interface as closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
+    /* Destroy the dataspace selection iterator object id group */
+    n += (H5I_dec_type_ref(H5I_SPACE_SEL_ITER) > 0);
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5S_term_package() */

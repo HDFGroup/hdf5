@@ -428,9 +428,6 @@ static H5CX_node_t *H5CX__pop_common(hbool_t update_dxpl_props);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /*******************/
 /* Local Variables */
 /*******************/
@@ -463,17 +460,8 @@ H5FL_DEFINE_STATIC(H5CX_node_t);
 /* Declare a static free list to manage H5CX_state_t structs */
 H5FL_DEFINE_STATIC(H5CX_state_t);
 
-/*--------------------------------------------------------------------------
-NAME
-    H5CX__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5CX__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(200))) H5CX__init_package(void)
+herr_t
+H5CX_init(void)
 {
     H5P_genplist_t *dx_plist;            /* Data transfer property list */
     H5P_genplist_t *lc_plist;            /* Link creation property list */
@@ -481,9 +469,9 @@ static herr_t __attribute__((constructor(200))) H5CX__init_package(void)
     H5P_genplist_t *dc_plist;            /* Dataset creation property list */
     H5P_genplist_t *da_plist;            /* Dataset access property list */
     H5P_genplist_t *fa_plist;            /* File access property list */
-    herr_t          ret_value = SUCCEED; /* Return value */
+    herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Reset the "default DXPL cache" information */
     HDmemset(&H5CX_def_dxpl_cache, 0, sizeof(H5CX_dxpl_cache_t));
@@ -648,10 +636,9 @@ static herr_t __attribute__((constructor(200))) H5CX__init_package(void)
 
     if (H5P_get(fa_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &H5CX_def_fapl_cache.high_bound) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX__init_package() */
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5CX_term_package
@@ -672,23 +659,19 @@ H5CX_term_package(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        H5CX_node_t *cnode; /* Context node */
+    H5CX_node_t *cnode; /* Context node */
 
-        /* Pop the top context node from the stack */
-        /* (Can't check for errors, as rest of library is shut down) */
-        cnode = H5CX__pop_common(FALSE);
+    /* Pop the top context node from the stack */
+    /* (Can't check for errors, as rest of library is shut down) */
+    cnode = H5CX__pop_common(FALSE);
 
-        /* Free the context node */
-        /* (Allocated with HDmalloc() in H5CX_push_special() ) */
-        HDfree(cnode);
+    /* Free the context node */
+    /* (Allocated with HDmalloc() in H5CX_push_special() ) */
+    HDfree(cnode);
 
 #ifndef H5_HAVE_THREADSAFE
-        H5CX_head_g = NULL;
+    H5CX_head_g = NULL;
 #endif /* H5_HAVE_THREADSAFE */
-
-        H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5CX_term_package() */

@@ -568,9 +568,6 @@ static H5SL_node_t *H5SL__insert_common(H5SL_t *slist, void *item, const void *k
 static herr_t       H5SL__release_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 static herr_t       H5SL__close_common(H5SL_t *slist, H5SL_operator_t op, void *op_data);
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /* Declare a free list to manage the H5SL_t struct */
 H5FL_DEFINE_STATIC(H5SL_t);
 
@@ -582,23 +579,8 @@ static H5FL_fac_head_t **H5SL_fac_g;
 static size_t            H5SL_fac_nused_g;
 static size_t            H5SL_fac_nalloc_g;
 
-/*--------------------------------------------------------------------------
- NAME
-    H5SL__init_package
- PURPOSE
-    Initialize interface-specific information
- USAGE
-    herr_t H5SL__init_package()
- RETURNS
-    Non-negative on success/Negative on failure
- DESCRIPTION
-    Initializes any interface-specific data or routines.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(103))) H5SL__init_package(void)
+herr_t
+H5SL_init(void)
 {
     herr_t ret_value = SUCCEED;
 
@@ -616,7 +598,7 @@ static herr_t __attribute__((constructor(103))) H5SL__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5SL__init_package() */
+}
 
 /*--------------------------------------------------------------------------
  NAME
@@ -644,32 +626,26 @@ H5SL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Terminate all the factories */
-        if (H5SL_fac_nused_g > 0) {
-            size_t                       i;
-            herr_t H5_ATTR_NDEBUG_UNUSED ret;
+    /* Terminate all the factories */
+    if (H5SL_fac_nused_g > 0) {
+        size_t                       i;
+        herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
-            for (i = 0; i < H5SL_fac_nused_g; i++) {
-                ret = H5FL_fac_term(H5SL_fac_g[i]);
-                HDassert(ret >= 0);
-            } /* end if */
-            H5SL_fac_nused_g = 0;
-
-            n++;
+        for (i = 0; i < H5SL_fac_nused_g; i++) {
+            ret = H5FL_fac_term(H5SL_fac_g[i]);
+            HDassert(ret >= 0);
         } /* end if */
+        H5SL_fac_nused_g = 0;
 
-        /* Free the list of factories */
-        if (H5SL_fac_g) {
-            H5SL_fac_g        = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
-            H5SL_fac_nalloc_g = 0;
+        n++;
+    } /* end if */
 
-            n++;
-        } /* end if */
+    /* Free the list of factories */
+    if (H5SL_fac_g) {
+        H5SL_fac_g        = (H5FL_fac_head_t **)H5MM_xfree((void *)H5SL_fac_g);
+        H5SL_fac_nalloc_g = 0;
 
-        /* Mark the interface as uninitialized */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
+        n++;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)

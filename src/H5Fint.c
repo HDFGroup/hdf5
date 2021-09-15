@@ -91,9 +91,6 @@ static herr_t H5F__flush_phase2(H5F_t *f, hbool_t closing);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /* Based on the value of the HDF5_USE_FILE_LOCKING environment variable.
  * TRUE/FALSE have obvious meanings. FAIL means the environment variable was
  * not set, so the code should ignore it and use the fapl value instead.
@@ -138,28 +135,6 @@ H5F_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5F_init() */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5F__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5F__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(107))) H5F__init_package(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_FILE_CLS) < 0)
@@ -171,7 +146,7 @@ static herr_t __attribute__((constructor(107))) H5F__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5F__init_package() */
+} /* end H5F_init() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_term_package
@@ -195,23 +170,17 @@ H5F_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        if (H5I_nmembers(H5I_FILE) > 0) {
-            (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-        else {
-            /* Make certain we've cleaned up all the shared file objects */
-            H5F_sfile_assert_num(0);
+    if (H5I_nmembers(H5I_FILE) > 0) {
+        (void)H5I_clear_type(H5I_FILE, FALSE, FALSE);
+        n++; /*H5I*/
+    }        /* end if */
+    else {
+        /* Make certain we've cleaned up all the shared file objects */
+        H5F_sfile_assert_num(0);
 
-            /* Destroy the file object id group */
-            n += (H5I_dec_type_ref(H5I_FILE) > 0);
-
-            /* Mark closed */
-            if (0 == n)
-                H5_PKG_INIT_VAR = FALSE;
-        } /* end else */
-    }     /* end if */
+        /* Destroy the file object id group */
+        n += (H5I_dec_type_ref(H5I_FILE) > 0);
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5F_term_package() */

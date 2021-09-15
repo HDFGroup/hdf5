@@ -92,9 +92,6 @@ static herr_t     H5E__append_stack(H5E_t *dst_estack, const H5E_t *src_stack);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -136,50 +133,15 @@ static const H5I_class_t H5I_ERRSTK_CLS[1] = {{
     (H5I_free_t)H5E__close_stack /* Callback routine for closing objects of this class */
 }};
 
-/*-------------------------------------------------------------------------
- * Function:    H5E_init
- *
- * Purpose:     Initialize the interface from some other layer.
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:	Quincey Koziol
- *              Tuesday, June 29, 2004
- *
- *-------------------------------------------------------------------------
- */
 herr_t
 H5E_init(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E_init() */
-
-/*--------------------------------------------------------------------------
- * Function:    H5E__init_package
- *
- * Purpose:     Initialize interface-specific information
- *
- * Return:      SUCCEED/FAIL
- *
- * Programmer:  Raymond Lu
- *              Friday, July 11, 2003
- *
- *--------------------------------------------------------------------------
- */
-static herr_t __attribute__((constructor(102))) H5E__init_package(void)
 {
     H5E_cls_t *cls;                 /* Pointer to error class */
     H5E_msg_t *msg;                 /* Pointer to new error message */
     char       lib_vers[128];       /* Buffer to constructu library version within */
     herr_t     ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Initialize the ID group for the error class IDs */
     if (H5I_register_type(H5I_ERRCLS_CLS) < 0)
@@ -212,7 +174,7 @@ static herr_t __attribute__((constructor(102))) H5E__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5E__init_package() */
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5E_term_package
@@ -236,66 +198,61 @@ H5E_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        int64_t ncls, nmsg, nstk;
+    int64_t ncls, nmsg, nstk;
 
-        /* Check if there are any open error stacks, classes or messages */
-        ncls = H5I_nmembers(H5I_ERROR_CLASS);
-        nmsg = H5I_nmembers(H5I_ERROR_MSG);
-        nstk = H5I_nmembers(H5I_ERROR_STACK);
+    /* Check if there are any open error stacks, classes or messages */
+    ncls = H5I_nmembers(H5I_ERROR_CLASS);
+    nmsg = H5I_nmembers(H5I_ERROR_MSG);
+    nstk = H5I_nmembers(H5I_ERROR_STACK);
 
-        if ((ncls + nmsg + nstk) > 0) {
-            /* Clear the default error stack. Note that
-             * the following H5I_clear_type calls do not
-             * force the clears and will not be able to
-             * clear any error message IDs that are still
-             * in use by the default error stack unless we
-             * clear that stack manually.
-             *
-             * Error message IDs will typically still be
-             * in use by the default error stack when the
-             * application does H5E_BEGIN/END_TRY cleanup
-             * at the very end.
-             */
-            H5E_clear_stack(NULL);
+    if ((ncls + nmsg + nstk) > 0) {
+        /* Clear the default error stack. Note that
+         * the following H5I_clear_type calls do not
+         * force the clears and will not be able to
+         * clear any error message IDs that are still
+         * in use by the default error stack unless we
+         * clear that stack manually.
+         *
+         * Error message IDs will typically still be
+         * in use by the default error stack when the
+         * application does H5E_BEGIN/END_TRY cleanup
+         * at the very end.
+         */
+        H5E_clear_stack(NULL);
 
-            /* Clear any outstanding error stacks */
-            if (nstk > 0)
-                (void)H5I_clear_type(H5I_ERROR_STACK, FALSE, FALSE);
+        /* Clear any outstanding error stacks */
+        if (nstk > 0)
+            (void)H5I_clear_type(H5I_ERROR_STACK, FALSE, FALSE);
 
-            /* Clear all the error classes */
-            if (ncls > 0) {
-                (void)H5I_clear_type(H5I_ERROR_CLASS, FALSE, FALSE);
+        /* Clear all the error classes */
+        if (ncls > 0) {
+            (void)H5I_clear_type(H5I_ERROR_CLASS, FALSE, FALSE);
 
-                /* Reset the HDF5 error class, if its been closed */
-                if (H5I_nmembers(H5I_ERROR_CLASS) == 0)
-                    H5E_ERR_CLS_g = -1;
-            } /* end if */
+            /* Reset the HDF5 error class, if its been closed */
+            if (H5I_nmembers(H5I_ERROR_CLASS) == 0)
+                H5E_ERR_CLS_g = -1;
+        } /* end if */
 
-            /* Clear all the error messages */
-            if (nmsg > 0) {
-                (void)H5I_clear_type(H5I_ERROR_MSG, FALSE, FALSE);
+        /* Clear all the error messages */
+        if (nmsg > 0) {
+            (void)H5I_clear_type(H5I_ERROR_MSG, FALSE, FALSE);
 
-                /* Reset the HDF5 error messages, if they've been closed */
-                if (H5I_nmembers(H5I_ERROR_MSG) == 0) {
+            /* Reset the HDF5 error messages, if they've been closed */
+            if (H5I_nmembers(H5I_ERROR_MSG) == 0) {
 /* Include the automatically generated error code termination */
 #include "H5Eterm.h"
-                } /* end if */
-            }     /* end if */
+            } /* end if */
+        }     /* end if */
 
-            n++; /*H5I*/
-        }        /* end if */
-        else {
-            /* Destroy the error class, message, and stack id groups */
-            n += (H5I_dec_type_ref(H5I_ERROR_STACK) > 0);
-            n += (H5I_dec_type_ref(H5I_ERROR_CLASS) > 0);
-            n += (H5I_dec_type_ref(H5I_ERROR_MSG) > 0);
+        n++; /*H5I*/
+    }        /* end if */
+    else {
+        /* Destroy the error class, message, and stack id groups */
+        n += (H5I_dec_type_ref(H5I_ERROR_STACK) > 0);
+        n += (H5I_dec_type_ref(H5I_ERROR_CLASS) > 0);
+        n += (H5I_dec_type_ref(H5I_ERROR_MSG) > 0);
 
-            /* Mark closed */
-            if (0 == n)
-                H5_PKG_INIT_VAR = FALSE;
-        } /* end else */
-    }     /* end if */
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5E_term_package() */

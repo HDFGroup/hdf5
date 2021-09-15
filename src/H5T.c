@@ -368,12 +368,9 @@ H5T_order_t H5T_native_order_g = H5T_ORDER_ERROR;
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /*
  * Predefined data types. These are initialized at runtime in H5Tinit.c and
- * by H5T__init_package() in this source file.
+ * by H5T_init() in this source file.
  *
  * If more of these are added, the new ones must be added to the list of
  * types to reset in H5T_term_package().
@@ -610,31 +607,6 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
 static hbool_t H5T_top_package_initialize_s = FALSE;
 
 /*-------------------------------------------------------------------------
- * Function:    H5T_init
- *
- * Purpose:    Initialize the interface from some other package.
- *
- * Return:    Success:    non-negative
- *            Failure:    negative
- *
- * Programmer:    Robb Matzke
- *              Wednesday, December 16, 1998
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5T_init(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T_init() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5T__init_inf
  *
  * Purpose:    Initialize the +/- Infinity floating-poing values for type
@@ -746,18 +718,8 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__init_inf() */
 
-/*--------------------------------------------------------------------------
-NAME
-   H5T__init_package -- Initialize interface-specific information
-USAGE
-    herr__t H5T_init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
-static herr_t __attribute__((constructor(107))) H5T__init_package(void)
+herr_t
+H5T_init(void)
 {
     H5T_t *native_schar  = NULL; /* Datatype structure for native signed char */
     H5T_t *native_uchar  = NULL; /* Datatype structure for native unsigned char */
@@ -800,7 +762,7 @@ static herr_t __attribute__((constructor(107))) H5T__init_package(void)
         TRUE; /* Flag to indicate whether datatype was copied or allocated (for error cleanup) */
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI(FAIL)
 
     if (H5_TERM_GLOBAL)
         HGOTO_DONE(SUCCEED)
@@ -1447,7 +1409,7 @@ static herr_t __attribute__((constructor(107))) H5T__init_package(void)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to register conversion function(s)")
 
     /* Register datatype creation property class properties here.  See similar
-     * code in H5D__init_package(), etc. for example.
+     * code in H5D_init(), etc. for example.
      */
 
     /* Only register the default property list if it hasn't been created yet */
@@ -1490,7 +1452,7 @@ done:
     }         /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5T__init_package() */
+} /* end H5T_init() */
 
 /*-------------------------------------------------------------------------
  * Function:   H5T__unlock_cb
@@ -1755,18 +1717,12 @@ H5T_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity check */
-        HDassert(0 == H5I_nmembers(H5I_DATATYPE));
-        HDassert(FALSE == H5T_top_package_initialize_s);
+    /* Sanity check */
+    HDassert(0 == H5I_nmembers(H5I_DATATYPE));
+    HDassert(FALSE == H5T_top_package_initialize_s);
 
-        /* Destroy the datatype object id group */
-        n += (H5I_dec_type_ref(H5I_DATATYPE) > 0);
-
-        /* Mark interface as closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
+    /* Destroy the datatype object id group */
+    n += (H5I_dec_type_ref(H5I_DATATYPE) > 0);
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5T_term_package() */

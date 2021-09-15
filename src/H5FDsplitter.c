@@ -173,29 +173,6 @@ H5FL_DEFINE_STATIC(H5FD_splitter_t);
 H5FL_DEFINE_STATIC(H5FD_splitter_fapl_t);
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      SUCCEED/FAIL
- *-------------------------------------------------------------------------
- */
-static herr_t __attribute__((constructor(200))) H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    H5FD_SPLITTER_LOG_CALL(__func__);
-
-    if (H5FD_splitter_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize splitter VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_splitter_init
  *
  * Purpose:     Initialize the splitter driver by registering it with the

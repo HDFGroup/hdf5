@@ -82,9 +82,6 @@ static herr_t                 H5O__reset_info2(H5O_info2_t *oinfo);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /* Header message ID to class mapping
  *
  * Remember to increment H5O_MSG_TYPES in H5Opkg.h when adding a new
@@ -177,22 +174,12 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
     H5O_OBJ_GROUP,    /* Group object (H5O_TYPE_GROUP - 0) */
 };
 
-/*-------------------------------------------------------------------------
- * Function:    H5O__init_package
- *
- * Purpose:    Initialize information specific to H5O interface.
- *
- * Return:    Non-negative on success/Negative on failure
- *
- * Programmer:    Quincey Koziol
- *              Thursday, January 18, 2007
- *
- *-------------------------------------------------------------------------
- */
-static herr_t __attribute__((constructor(200))) H5O__init_package(void)
+herr_t
+H5O_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
-    FUNC_ENTER_PACKAGE_NOERR
+
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* H5O interface sanity checks */
     HDcompile_assert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
@@ -202,7 +189,7 @@ static herr_t __attribute__((constructor(200))) H5O__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5O__init_package() */
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5O__set_version

@@ -46,9 +46,6 @@
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = true;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -122,22 +119,13 @@ H5PL__set_plugin_control_mask(unsigned int mask)
 
 } /* end H5PL__set_plugin_control_mask() */
 
-/*-------------------------------------------------------------------------
- * Function:    H5PL__init_package
- *
- * Purpose:     Initialize any package-specific data and call any init
- *              routines for the package.
- *
- * Return:      SUCCEED/FAIL
- *
- *-------------------------------------------------------------------------
- */
-static herr_t __attribute__((constructor(200))) H5PL__init_package(void)
+herr_t
+H5PL_init(void)
 {
     char * env_var   = NULL;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Check the environment variable to determine if the user wants
      * to ignore plugins. The special symbol H5PL_NO_PLUGIN (defined in
@@ -159,7 +147,7 @@ static herr_t __attribute__((constructor(200))) H5PL__init_package(void)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5PL__init_package() */
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL_term_package
@@ -182,24 +170,17 @@ H5PL_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    if (H5_PKG_INIT_VAR) {
+    /* Close the plugin cache.
+     * We need to bump the return value if we did any real work here.
+     */
+    if (H5PL__close_plugin_cache(&already_closed) < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing plugin cache")
+    if (!already_closed)
+        ret_value++;
 
-        /* Close the plugin cache.
-         * We need to bump the return value if we did any real work here.
-         */
-        if (H5PL__close_plugin_cache(&already_closed) < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing plugin cache")
-        if (!already_closed)
-            ret_value++;
-
-        /* Close the search path table and free the paths */
-        if (H5PL__close_path_table() < 0)
-            HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing search path table")
-
-        /* Mark the interface as uninitialized */
-        if (0 == ret_value)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
+    /* Close the search path table and free the paths */
+    if (H5PL__close_path_table() < 0)
+        HGOTO_ERROR(H5E_PLUGIN, H5E_CANTFREE, (-1), "problem closing search path table")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

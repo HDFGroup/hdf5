@@ -1988,20 +1988,6 @@ extern hbool_t H5_libterm_g; /* Is the library being shutdown? */
 extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
 #endif
 
-/* Macros for referencing package initialization symbols */
-#define H5_PACKAGE_INIT_VAR(x)  H5_GLUE(x, _init_g)
-#define H5_PACKAGE_INIT_FUNC(x) H5_GLUE(x, __init_package)
-
-/* Macros for defining package initialization routines */
-#ifdef H5_MY_PKG
-#define H5_PKG_INIT_VAR  H5_PACKAGE_INIT_VAR(H5_MY_PKG)
-#define H5_PKG_INIT_FUNC H5_PACKAGE_INIT_FUNC(H5_MY_PKG)
-#else /* H5_MY_PKG */
-#define H5_PKG_INIT_VAR (TRUE)
-#endif /* H5_MY_PKG */
-
-#define H5_PACKAGE_INIT(pkg_init, err)
-
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
@@ -2053,8 +2039,11 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     FUNC_ENTER_API_THREADSAFE;
 
 #define FUNC_ENTER_API_INIT(err)                                                                             \
-    /* Initialize the package, if appropriate */                                                             \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
+    /* Initialize the library */                                                                             \
+    if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
+        if (H5_init_library() < 0)                                                                           \
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed")                        \
+    }
 
 #define FUNC_ENTER_API_PUSH(err)                                                                             \
     /* Push the name of this function on the function stack */                                               \
@@ -2165,9 +2154,6 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Note: this macro only works when there's _no_ interface initialization routine for the module */
 #define FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-    /* Initialize the package, if appropriate */                                                             \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                                                     \
-                                                                                                             \
     /* Push the name of this function on the function stack */                                               \
     H5_PUSH_FUNC
 
@@ -2224,8 +2210,6 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
                                                                                                              \
-        /* Initialize the package, if appropriate */                                                         \
-        H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                                                 \
         if (true) {
 
 /*
@@ -2468,27 +2452,6 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_POP_FUNC                                                                                              \
     return (ret_value);                                                                                      \
     } /*end scope from beginning of FUNC_ENTER*/
-
-/* Macros to declare package initialization function, if a package initialization routine is defined */
-#ifdef H5_PKG_SINGLE_SOURCE
-#define H5_PKG_DECLARE_YES_FUNC(pkg) /* static herr_t H5_PACKAGE_INIT_FUNC(pkg)(void); */
-#else
-#define H5_PKG_DECLARE_YES_FUNC(pkg) /* extern herr_t H5_PACKAGE_INIT_FUNC(pkg)(void); */
-#endif
-#define H5_PKG_DECLARE_NO_FUNC(pkg)
-
-/* Declare package initialization symbols (if in a package) */
-#ifdef H5_PKG_SINGLE_SOURCE
-#define H5_PKG_DECLARE_VAR(pkg) static hbool_t H5_PACKAGE_INIT_VAR(pkg);
-#else
-#define H5_PKG_DECLARE_VAR(pkg) extern hbool_t H5_PACKAGE_INIT_VAR(pkg);
-#endif
-#define H5_PKG_DECLARE_FUNC(pkg_init, pkg) H5_GLUE3(H5_PKG_DECLARE_, pkg_init, _FUNC)(pkg)
-
-#ifdef H5_MY_PKG
-H5_PKG_DECLARE_VAR(H5_MY_PKG)
-H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
-#endif
 
 /* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
  * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
