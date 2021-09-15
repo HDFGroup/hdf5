@@ -80,7 +80,7 @@ H5FL_DEFINE_STATIC(H5O_fsinfo_t);
  */
 static void *
 H5O_fsinfo_decode(H5F_t *f, H5O_t H5_ATTR_UNUSED *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
-                   unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
+                  unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
     H5O_fsinfo_t * fsinfo = NULL; /* File space info message */
     H5F_mem_page_t ptype;         /* Memory type for iteration */
