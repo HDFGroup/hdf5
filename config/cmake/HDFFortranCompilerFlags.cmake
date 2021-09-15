@@ -91,9 +91,10 @@ if (NOT MSVC AND NOT MINGW)
     #endif ()
 
     # Append more extra warning flags that only gcc 5.x+ knows about
-    if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 5.0)
-      ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-5")
-    endif ()
+    # do not include -Wuse-without-only
+    #if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 5.0)
+    #  ADD_H5_FLAGS (HDF5_CMAKE_Fortran_FLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/gfort-5")
+    #endif ()
 
     # Append more extra warning flags that only gcc 6.x+ knows about
     if (NOT CMAKE_Fortran_COMPILER_VERSION VERSION_LESS 6.0)
