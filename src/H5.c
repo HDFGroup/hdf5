@@ -285,8 +285,6 @@ H5_init_library(void)
     H5__debug_mask(HDgetenv("HDF5_DEBUG"));
 
 done:
-    if (ret_value != SUCCEED)
-        abort();
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5_init_library() */
 
