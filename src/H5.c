@@ -253,28 +253,32 @@ H5_init_library(void)
      * The dataspace interface needs to be initialized so that future IDs for
      *   dataspaces work.
      */
+    /* clang-format off */
     struct {
         herr_t (*func)(void);
         const char *descr;
-    } initializer[] = {{H5E_init, "error"},
-                       {H5VL_init_phase1, "VOL"},
-                       {H5SL_init, "VOL"},
-                       {H5FD_init, "VFD"},
-                       {H5_default_vfd_init, "default VFD"},
-                       {H5P_init, "property list"},
-                       {H5AC_init, "metadata caching"},
-                       {H5L_init, "link"},
-                       {H5FS_init, "FS"},
-                       {H5S_init, "dataspace"}
-                       /* Finish initializing interfaces that depend on the interfaces above */
-                       ,
-                       {H5VL_init_phase2, "VOL"}};
+    } initializer[] = {
+        {H5E_init, "error"}
+    ,   {H5VL_init_phase1, "VOL"}
+    ,   {H5SL_init, "VOL"}
+    ,   {H5FD_init, "VFD"}
+    ,   {H5_default_vfd_init, "default VFD"}
+    ,   {H5P_init, "property list"}
+    ,   {H5AC_init, "metadata caching"}
+    ,   {H5L_init, "link"}
+    ,   {H5FS_init, "FS"}
+    ,   {H5S_init, "dataspace"}
+    /* Finish initializing interfaces that depend on the interfaces above */
+    ,   {H5VL_init_phase2, "VOL"}
+    };
+
     for (i = 0; i < NELMTS(initializer); i++) {
         if (initializer[i].func() < 0) {
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to initialize %s interface",
-                        initializer[i].descr)
+            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL,
+                "unable to initialize %s interface", initializer[i].descr)
         }
     }
+    /* clang-format on */
 
     /* Debugging? */
     H5__debug_mask("-all");
@@ -354,19 +358,21 @@ H5_term_library(void)
      * way that would necessitate some cleanup work in the other interface.
      */
 
-#define TERMINATOR(module, wait)                                                                             \
-    {                                                                                                        \
-        .func = H5##module##_term_package, .name = #module, .completed = false, .await_prior = wait          \
-    }
+#define TERMINATOR(module, wait)                                \
+    {.func = H5##module##_term_package, .name = #module,        \
+     .completed = false, .await_prior = wait}
 
+    /* clang-format off */
     struct {
         int (*func)(void);       /* function to terminate the module; returns 0
-                                  * on success, >0 if termination was not completed
-                                  * and we should try to terminate some dependent
-                                  * modules, first.
+                                  * on success, >0 if termination was not
+                                  * completed and we should try to terminate
+                                  * some dependent modules, first.
                                   */
         const char *name;        /* name of the module */
-        bool        completed;   /* true iff this terminator was already completed */
+        bool        completed;   /* true iff this terminator was already
+                                  * completed
+                                  */
         const bool  await_prior; /* true iff all prior terminators in the list
                                   * must complete before this terminator is
                                   * attempted
