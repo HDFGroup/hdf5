@@ -740,20 +740,34 @@ done:
  * Return:      Success:    SUCCEED
  *              Failure:    FAIL (file will not be closed)
  *
+ * Modifications:
+ *
+ *              BMR -- 9/15/21
+ *              Temporary solution for CVE-2020-10812:
+ *                  Added a check for the returned value of H5F_NREFS to detect
+ *                  a file shared pointer being null possibly due to file
+ *                  corruption.  When that situation occurs, H5F_NREFS will return
+ *                  UINT_MAX.  This is to avoid core dump in production mode.
  *-------------------------------------------------------------------------
  */
 herr_t
 H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
-    int    nref;
-    H5F_t *f         = (H5F_t *)file;
-    hid_t  file_id   = H5I_INVALID_HID;
-    herr_t ret_value = SUCCEED; /* Return value */
+    int      nref;
+    H5F_t   *f         = (H5F_t *)file;
+    hid_t    file_id   = H5I_INVALID_HID;
+    unsigned f_nrefs   = UINT_MAX;
+    herr_t   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* This routine should only be called when a file ID's ref count drops to zero */
     HDassert(H5F_ID_EXISTS(f));
+
+    /* If f_nrefs is UINT_MAX, return failure to avoid core dump */
+    f_nrefs = H5F_NREFS(f);
+    if (f_nrefs >= UINT_MAX)
+        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "null pointer encountered, possible data corruption.")
 
     /* Flush file if this is the last reference to this id and we have write
      * intent, unless it will be flushed by the "shared" file being closed.

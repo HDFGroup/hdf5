@@ -555,18 +555,30 @@ H5F_Kvalue(const H5F_t *f, const H5B_class_t *type)
  * Purpose:  Retrieve the file's 'nrefs' value
  *
  * Return:   'nrefs' on success/abort on failure (shouldn't fail)
+ *
+ * Modifications:
+ *
+ *              BMR -- 9/15/21
+ *              Temporary solution for CVE-2020-10812:
+ *                  Returning UINT_MAX when null pointer is encountered to
+ *                  avoid core dump in production mode.
  *-------------------------------------------------------------------------
  */
 unsigned
 H5F_get_nrefs(const H5F_t *f)
 {
+    unsigned ret_value = UINT_MAX;
+
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(f);
     HDassert(f->shared);
 
-    FUNC_LEAVE_NOAPI(f->shared->nrefs)
+    if(f->shared != NULL)
+        ret_value = f->shared->nrefs;
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5F_get_nrefs() */
 
 /*-------------------------------------------------------------------------
