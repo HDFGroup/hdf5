@@ -1043,76 +1043,40 @@ target_compile_options(H5detect
 )
 set (lib_prog_deps ${lib_prog_deps} H5detect)
 
-# check if a pregenerated H5Tinit.c file is present
-if (NOT EXISTS "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c")
-  # execute the H5detect program
-  if (HDF5_BATCH_H5DETECT)
-    configure_file (
-        ${HDF5_SOURCE_DIR}/bin/batch/${HDF5_BATCH_H5DETECT_SCRIPT}.in.cmake
-        ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT} ESCAPE_QUOTES @ONLY
-    )
-    add_custom_command (
-        OUTPUT     gen_SRCS.stamp1
-        BYPRODUCTS H5Tinit.c
-        COMMAND    ${HDF5_BATCH_CMD}
-        ARGS       ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT}
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E echo "Executed batch command to create H5Tinit.c"
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E touch gen_SRCS.stamp1
-        DEPENDS H5detect
-        WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
-    )
-    add_custom_target (gen_H5Tinit
-        COMMAND ${CMAKE_COMMAND} -P ${HDF5_SOURCE_DIR}/config/cmake/wait_H5Tinit.cmake
-    )
-  else ()
-    add_custom_command (
-        OUTPUT     gen_SRCS.stamp1
-        BYPRODUCTS H5Tinit.c
-        COMMAND    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5detect>
-        ARGS       H5Tinit.c
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E touch gen_SRCS.stamp1
-        DEPENDS H5detect
-        WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
-        COMMENT    "Create H5Tinit.c"
-    )
-    if (BUILD_SHARED_LIBS)
-      add_custom_command (
-          OUTPUT     shared/shared_gen_SRCS.stamp1
-          BYPRODUCTS shared/H5Tinit.c
-          COMMAND    ${CMAKE_COMMAND}
-          ARGS       -E copy_if_different H5Tinit.c shared/H5Tinit.c
-          COMMAND    ${CMAKE_COMMAND}
-          ARGS       -E touch shared/shared_gen_SRCS.stamp1
-          DEPENDS H5detect gen_SRCS.stamp1
-          WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
-          COMMENT    "Copy H5Tinit.c to shared folder"
-      )
-    endif ()
-  endif ()
+# execute the H5detect program
+if (HDF5_BATCH_H5DETECT)
+  configure_file (
+      ${HDF5_SOURCE_DIR}/bin/batch/${HDF5_BATCH_H5DETECT_SCRIPT}.in.cmake
+      ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT} ESCAPE_QUOTES @ONLY
+  )
+  add_custom_command (
+      OUTPUT     "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c"
+      COMMAND    ${HDF5_BATCH_CMD}
+      ARGS       ${HDF5_BINARY_DIR}/${HDF5_BATCH_H5DETECT_SCRIPT}
+      COMMENT    "Executed batch command to create H5Tinit.c"
+      DEPENDS H5detect
+      WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
+  )
+  add_custom_target (gen_H5Tinit
+      COMMAND ${CMAKE_COMMAND} -P ${HDF5_SOURCE_DIR}/config/cmake/wait_H5Tinit.cmake
+  )
 else ()
   add_custom_command (
-      OUTPUT     gen_SRCS.stamp1
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E touch gen_SRCS.stamp1
-      DEPENDS H5Tinit.c
+      OUTPUT     "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c"
+      COMMAND    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5detect>
+      ARGS       H5Tinit.c
+      DEPENDS H5detect
       WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
-      COMMENT    "Touch existing H5Tinit.c"
+      COMMENT    "Create H5Tinit.c"
   )
-  set_source_files_properties (${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c PROPERTIES GENERATED TRUE)
   if (BUILD_SHARED_LIBS)
     add_custom_command (
-        OUTPUT     shared/shared_gen_SRCS.stamp1
-        BYPRODUCTS shared/H5Tinit.c
+        OUTPUT     "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
         COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different H5Tinit.c shared/H5Tinit.c
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E touch shared/shared_gen_SRCS.stamp1
-        DEPENDS H5Tinit.c gen_SRCS.stamp1
+        ARGS       -E copy_if_different "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c" "${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c"
+        DEPENDS H5detect "${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c"
         WORKING_DIRECTORY ${HDF5_GENERATED_SOURCE_DIR}
-        COMMENT    "Copy existing H5Tinit.c to shared folder"
+        COMMENT    "Copy H5Tinit.c to shared folder"
     )
   endif ()
 endif ()
@@ -1146,26 +1110,19 @@ endif ()
 
 # execute the H5make_libsettings program
 add_custom_command (
-    OUTPUT     gen_SRCS.stamp2
-    BYPRODUCTS H5lib_settings.c
+    OUTPUT     "${HDF5_SRC_BINARY_DIR}/H5lib_settings.c"
     COMMAND    ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5make_libsettings>
     ARGS       H5lib_settings.c
-    COMMAND    ${CMAKE_COMMAND}
-    ARGS       -E touch gen_SRCS.stamp2
     DEPENDS H5make_libsettings
     WORKING_DIRECTORY ${HDF5_SRC_BINARY_DIR}
     COMMENT    "Create H5lib_settings.c"
 )
-set_source_files_properties (${HDF5_SRC_BINARY_DIR}/H5lib_settings.c PROPERTIES GENERATED TRUE)
 if (BUILD_SHARED_LIBS)
   add_custom_command (
-      OUTPUT     shared/shared_gen_SRCS.stamp2
-      BYPRODUCTS shared/H5lib_settings.c
+      OUTPUT     "${HDF5_SRC_BINARY_DIR}/shared/H5lib_settings.c"
       COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E copy_if_different H5lib_settings.c shared/H5lib_settings.c
-      COMMAND    ${CMAKE_COMMAND}
-      ARGS       -E touch shared/shared_gen_SRCS.stamp2
-      DEPENDS H5make_libsettings gen_SRCS.stamp2
+      ARGS       -E copy_if_different "${HDF5_SRC_BINARY_DIR}/H5lib_settings.c" "${HDF5_SRC_BINARY_DIR}/shared/H5lib_settings.c"
+      DEPENDS H5make_libsettings "${HDF5_SRC_BINARY_DIR}/H5lib_settings.c"
       WORKING_DIRECTORY ${HDF5_SRC_BINARY_DIR}
       COMMENT    "Copy H5lib_settings.c to shared folder"
   )
@@ -1181,7 +1138,7 @@ option (HDF5_ENABLE_DEBUG_APIS "Turn on extra debug output in all packages" OFF)
 if (NOT ONLY_SHARED_LIBS)
   set (gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/H5Tinit.c ${HDF5_SRC_BINARY_DIR}/H5lib_settings.c)
   add_custom_target (gen_${HDF5_LIB_TARGET} ALL
-    DEPENDS ${lib_prog_deps} ${HDF5_GENERATED_SOURCE_DIR}/gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/gen_SRCS.stamp2
+    DEPENDS ${lib_prog_deps} ${gen_SRCS}
     COMMENT "Generation target files"
   )
 
@@ -1220,7 +1177,7 @@ endif ()
 if (BUILD_SHARED_LIBS)
   set (shared_gen_SRCS ${HDF5_GENERATED_SOURCE_DIR}/shared/H5Tinit.c ${HDF5_SRC_BINARY_DIR}/shared/H5lib_settings.c)
   add_custom_target (gen_${HDF5_LIBSH_TARGET} ALL
-    DEPENDS ${lib_prog_deps} ${HDF5_GENERATED_SOURCE_DIR}/shared/shared_gen_SRCS.stamp1 ${HDF5_SRC_BINARY_DIR}/shared/shared_gen_SRCS.stamp2
+    DEPENDS ${lib_prog_deps} ${shared_gen_SRCS}
     COMMENT "Shared generation target files"
   )
 
