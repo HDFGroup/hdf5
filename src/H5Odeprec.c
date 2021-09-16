@@ -122,8 +122,6 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
     H5O_info1_t           oinfo;                    /* Deprecated object info struct */
     unsigned              dm_fields;                /* Fields for data model query */
     unsigned              nat_fields;               /* Fields for native query */
-    H5VL_object_t *       vol_obj;                  /* Object of obj_id */
-    H5VL_loc_params_t     loc_params;               /* Location parameters for VOL callback */
     herr_t                ret_value = H5_ITER_CONT; /* Return value */
 
     FUNC_ENTER_STATIC
@@ -160,24 +158,34 @@ H5O__iterate1_adapter(hid_t obj_id, const char *name, const H5O_info2_t *oinfo2,
             oinfo.num_attrs = oinfo2->num_attrs;
     }
 
-    /* Fill out location struct */
-    loc_params.type                         = H5VL_OBJECT_BY_NAME;
-    loc_params.loc_data.loc_by_name.name    = name;
-    loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
-    loc_params.obj_type                     = H5I_get_type(obj_id);
-
-    /* Get the location object */
-    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
-        HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier")
-
     /* Check for retrieving native information */
     nat_fields = shim_data->fields & (H5O_INFO_HDR | H5O_INFO_META_SIZE);
     if (nat_fields) {
-        H5O_native_info_t nat_info; /* Native object info */
+        H5VL_object_t *                    vol_obj;      /* Object of obj_id */
+        H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+        H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+        H5VL_loc_params_t                  loc_params;   /* Location parameters for VOL callback */
+        H5O_native_info_t                  nat_info;     /* Native object info */
+
+        /* Fill out location struct */
+        loc_params.type                         = H5VL_OBJECT_BY_NAME;
+        loc_params.loc_data.loc_by_name.name    = name;
+        loc_params.loc_data.loc_by_name.lapl_id = H5P_LINK_ACCESS_DEFAULT;
+        loc_params.obj_type                     = H5I_get_type(obj_id);
+
+        /* Get the location object */
+        if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
+            HGOTO_ERROR(H5E_OHDR, H5E_BADTYPE, H5_ITER_ERROR, "invalid location identifier")
+
+        /* Set up VOL callback arguments */
+        obj_opt_args.get_native_info.fields = nat_fields;
+        obj_opt_args.get_native_info.ninfo  = &nat_info;
+        vol_cb_args.op_type                 = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
+        vol_cb_args.args                    = &obj_opt_args;
 
         /* Retrieve the object's native information */
-        if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_NATIVE_INFO, H5P_DATASET_XFER_DEFAULT,
-                                 H5_REQUEST_NULL, &loc_params, &nat_info, nat_fields) < 0)
+        if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                 H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native info for object")
 
         /* Set the native fields */
@@ -270,11 +278,19 @@ H5O__get_info_old(H5VL_object_t *vol_obj, H5VL_loc_params_t *loc_params, H5O_inf
     /* Check for retrieving native information */
     nat_fields = fields & (H5O_INFO_HDR | H5O_INFO_META_SIZE);
     if (nat_fields) {
-        H5O_native_info_t nat_info; /* Native object info */
+        H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+        H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+        H5O_native_info_t                  nat_info;     /* Native object info */
+
+        /* Set up VOL callback arguments */
+        obj_opt_args.get_native_info.fields = nat_fields;
+        obj_opt_args.get_native_info.ninfo  = &nat_info;
+        vol_cb_args.op_type                 = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
+        vol_cb_args.args                    = &obj_opt_args;
 
         /* Retrieve the object's native information */
-        if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_NATIVE_INFO, H5P_DATASET_XFER_DEFAULT,
-                                 H5_REQUEST_NULL, loc_params, &nat_info, nat_fields) < 0)
+        if (H5VL_object_optional(vol_obj, loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                 H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native info for object")
 
         /* Set the native fields */

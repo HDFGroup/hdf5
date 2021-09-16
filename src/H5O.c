@@ -70,7 +70,7 @@ static herr_t H5O__copy_api_common(hid_t src_loc_id, const char *src_name, hid_t
                                    H5VL_object_t **_vol_obj_ptr);
 static herr_t H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
 static herr_t H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t **_vol_obj_ptr);
-static htri_t H5O__close_check_common(hid_t object_id);
+static htri_t H5O__close_check_type(hid_t object_id);
 
 /*********************/
 /* Package Variables */
@@ -1312,9 +1312,11 @@ done:
 herr_t
 H5Oget_native_info(hid_t loc_id, H5O_native_info_t *oinfo /*out*/, unsigned fields)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "ixIu", loc_id, oinfo, fields);
@@ -1333,9 +1335,15 @@ H5Oget_native_info(hid_t loc_id, H5O_native_info_t *oinfo /*out*/, unsigned fiel
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.get_native_info.fields = fields;
+    obj_opt_args.get_native_info.ninfo  = oinfo;
+    vol_cb_args.op_type                 = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
+    vol_cb_args.args                    = &obj_opt_args;
+
     /* Retrieve the object's information */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_NATIVE_INFO, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, oinfo, fields) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native file format info for object")
 
 done:
@@ -1358,9 +1366,11 @@ herr_t
 H5Oget_native_info_by_name(hid_t loc_id, const char *name, H5O_native_info_t *oinfo /*out*/, unsigned fields,
                            hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE5("e", "i*sxIui", loc_id, name, oinfo, fields, lapl_id);
@@ -1389,9 +1399,15 @@ H5Oget_native_info_by_name(hid_t loc_id, const char *name, H5O_native_info_t *oi
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.get_native_info.fields = fields;
+    obj_opt_args.get_native_info.ninfo  = oinfo;
+    vol_cb_args.op_type                 = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
+    vol_cb_args.args                    = &obj_opt_args;
+
     /* Retrieve the object's information */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_NATIVE_INFO, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, oinfo, fields) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native file format info for object: '%s'", name)
 
 done:
@@ -1416,9 +1432,11 @@ herr_t
 H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
                           hsize_t n, H5O_native_info_t *oinfo /*out*/, unsigned fields, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "i*sIiIohxIui", loc_id, group_name, idx_type, order, n, oinfo, fields, lapl_id);
@@ -1439,6 +1457,7 @@ H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_t
     if (H5CX_set_apl(&lapl_id, H5P_CLS_LACC, loc_id, FALSE) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set location struct fields */
     loc_params.type                         = H5VL_OBJECT_BY_IDX;
     loc_params.loc_data.loc_by_idx.name     = group_name;
     loc_params.loc_data.loc_by_idx.idx_type = idx_type;
@@ -1451,9 +1470,15 @@ H5Oget_native_info_by_idx(hid_t loc_id, const char *group_name, H5_index_t idx_t
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.get_native_info.fields = fields;
+    obj_opt_args.get_native_info.ninfo  = oinfo;
+    vol_cb_args.op_type                 = H5VL_NATIVE_OBJECT_GET_NATIVE_INFO;
+    vol_cb_args.args                    = &obj_opt_args;
+
     /* Retrieve the object's information */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_NATIVE_INFO, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, oinfo, fields) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "can't get native file format info for object")
 
 done:
@@ -1480,9 +1505,11 @@ done:
 herr_t
 H5Oset_comment(hid_t obj_id, const char *comment)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*s", obj_id, comment);
@@ -1499,9 +1526,14 @@ H5Oset_comment(hid_t obj_id, const char *comment)
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(obj_id);
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.set_comment.comment = comment;
+    vol_cb_args.op_type              = H5VL_NATIVE_OBJECT_SET_COMMENT;
+    vol_cb_args.args                 = &obj_opt_args;
+
     /* (Re)set the object's comment */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_SET_COMMENT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, comment) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object")
 
 done:
@@ -1528,9 +1560,11 @@ done:
 herr_t
 H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*s*si", loc_id, name, comment, lapl_id);
@@ -1553,9 +1587,14 @@ H5Oset_comment_by_name(hid_t loc_id, const char *name, const char *comment, hid_
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.set_comment.comment = comment;
+    vol_cb_args.op_type              = H5VL_NATIVE_OBJECT_SET_COMMENT;
+    vol_cb_args.args                 = &obj_opt_args;
+
     /* (Re)set the object's comment */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_SET_COMMENT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, comment) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set comment for object: '%s'", name)
 
 done:
@@ -1581,9 +1620,12 @@ done:
 ssize_t
 H5Oget_comment(hid_t obj_id, char *comment /*out*/, size_t bufsize)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    ssize_t           ret_value = -1; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    size_t                             comment_len = 0;  /* Length of comment string */
+    ssize_t                            ret_value   = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE3("Zs", "ixz", obj_id, comment, bufsize);
@@ -1596,10 +1638,20 @@ H5Oget_comment(hid_t obj_id, char *comment /*out*/, size_t bufsize)
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(obj_id);
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.get_comment.buf         = comment;
+    obj_opt_args.get_comment.buf_size    = bufsize;
+    obj_opt_args.get_comment.comment_len = &comment_len;
+    vol_cb_args.op_type                  = H5VL_NATIVE_OBJECT_GET_COMMENT;
+    vol_cb_args.args                     = &obj_opt_args;
+
     /* Retrieve the object's comment */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_COMMENT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, comment, bufsize, &ret_value) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, (-1), "can't get comment for object")
+
+    /* Set return value */
+    ret_value = (ssize_t)comment_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1624,9 +1676,12 @@ done:
 ssize_t
 H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment /*out*/, size_t bufsize, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    ssize_t           ret_value = -1; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    size_t                             comment_len = 0;  /* Length of comment string */
+    ssize_t                            ret_value   = -1; /* Return value */
 
     FUNC_ENTER_API((-1))
     H5TRACE5("Zs", "i*sxzi", loc_id, name, comment, bufsize, lapl_id);
@@ -1649,10 +1704,20 @@ H5Oget_comment_by_name(hid_t loc_id, const char *name, char *comment /*out*/, si
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, (-1), "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.get_comment.buf         = comment;
+    obj_opt_args.get_comment.buf_size    = bufsize;
+    obj_opt_args.get_comment.comment_len = &comment_len;
+    vol_cb_args.op_type                  = H5VL_NATIVE_OBJECT_GET_COMMENT;
+    vol_cb_args.args                     = &obj_opt_args;
+
     /* Retrieve the object's comment */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_COMMENT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, comment, bufsize, &ret_value) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, (-1), "can't get comment for object: '%s'", name)
+
+    /* Set return value */
+    ret_value = (ssize_t)comment_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1817,23 +1882,23 @@ done:
 } /* end H5Ovisit_by_name3() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O__close_check_common
+ * Function:    H5O__close_check_type
  *
  * Purpose:     This is the common function to validate an object
- *              when closing it.
+ *              before closing it.
  *
  * Return:      TRUE/FALSE/FAIL
  *
  *-------------------------------------------------------------------------
  */
 static htri_t
-H5O__close_check_common(hid_t object_id)
+H5O__close_check_type(hid_t object_id)
 {
     htri_t ret_value = TRUE; /* Return value */
 
     FUNC_ENTER_STATIC
 
-    /* Get the type of the object and close it in the correct way */
+    /* Check for closeable object */
     switch (H5I_get_type(object_id)) {
         case H5I_GROUP:
         case H5I_DATATYPE:
@@ -1859,14 +1924,13 @@ H5O__close_check_common(hid_t object_id)
         case H5I_EVENTSET:
         case H5I_NTYPES:
         default:
-            HGOTO_ERROR(H5E_ARGS, H5E_CANTRELEASE, FALSE,
-                        "not a valid file object ID (dataset, group, or datatype)")
+            HGOTO_DONE(FALSE);
             break;
     } /* end switch */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O__close_check_common() */
+} /* H5O__close_check_type() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Oclose
@@ -1894,7 +1958,7 @@ H5Oclose(hid_t object_id)
     H5TRACE1("e", "i", object_id);
 
     /* Validate the object type before closing */
-    if (H5O__close_check_common(object_id) <= 0)
+    if (H5O__close_check_type(object_id) <= 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "not a valid object")
 
     if (H5I_dec_app_ref(object_id) < 0)
@@ -1926,7 +1990,7 @@ H5Oclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     H5TRACE5("e", "*s*sIuii", app_file, app_func, app_line, object_id, es_id);
 
     /* Validate the object type before closing */
-    if (H5O__close_check_common(object_id) <= 0)
+    if (H5O__close_check_type(object_id) <= 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTRELEASE, FAIL, "not a valid object")
 
     /* Prepare for possible asynchronous operation */
@@ -1966,7 +2030,7 @@ done:
 } /* end H5Oclose_async() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_disable_mdc_flushes
+ * Function:    H5O__disable_mdc_flushes
  *
  * Purpose:     Private version of the metadata cache cork function.
  *
@@ -1975,18 +2039,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_disable_mdc_flushes(H5O_loc_t *oloc)
+H5O__disable_mdc_flushes(H5O_loc_t *oloc)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_PACKAGE
 
     if (H5AC_cork(oloc->file, oloc->addr, H5AC__SET_CORK, NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5O_disable_mdc_flushes() */
+} /* H5O__disable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Odisable_mdc_flushes
@@ -2005,9 +2069,10 @@ done:
 herr_t
 H5Odisable_mdc_flushes(hid_t object_id)
 {
-    H5VL_object_t *   vol_obj;             /* Object of loc_id */
-    H5VL_loc_params_t loc_params;          /* Location parameters */
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *      vol_obj;             /* Object of loc_id */
+    H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_loc_params_t    loc_params;          /* Location parameters */
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL);
     H5TRACE1("e", "i", object_id);
@@ -2024,9 +2089,13 @@ H5Odisable_mdc_flushes(hid_t object_id)
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(object_id);
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type = H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES;
+    vol_cb_args.args    = NULL;
+
     /* Cork the object */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_DISABLE_MDC_FLUSHES, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTCORK, FAIL, "unable to cork object");
 
 done:
@@ -2034,7 +2103,7 @@ done:
 } /* H5Odisable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_enable_mdc_flushes
+ * Function:    H5O__enable_mdc_flushes
  *
  * Purpose:     Private version of the metadata cache uncork function.
  *
@@ -2043,18 +2112,18 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_enable_mdc_flushes(H5O_loc_t *oloc)
+H5O__enable_mdc_flushes(H5O_loc_t *oloc)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_PACKAGE
 
     if (H5AC_cork(oloc->file, oloc->addr, H5AC__UNCORK, NULL) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork object");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
-} /* H5O_enable_mdc_flushes() */
+} /* H5O__enable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Oenable_mdc_flushes
@@ -2073,9 +2142,10 @@ done:
 herr_t
 H5Oenable_mdc_flushes(hid_t object_id)
 {
-    H5VL_object_t *   vol_obj;             /* Object of loc_id */
-    H5VL_loc_params_t loc_params;          /* Location parameters */
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *      vol_obj;             /* Object of loc_id */
+    H5VL_optional_args_t vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_loc_params_t    loc_params;          /* Location parameters */
+    herr_t               ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL);
     H5TRACE1("e", "i", object_id);
@@ -2092,9 +2162,13 @@ H5Oenable_mdc_flushes(hid_t object_id)
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(object_id);
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type = H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES;
+    vol_cb_args.args    = NULL;
+
     /* Uncork the object */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_ENABLE_MDC_FLUSHES, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTUNCORK, FAIL, "unable to uncork object");
 
 done:
@@ -2102,7 +2176,7 @@ done:
 } /* H5Oenable_mdc_flushes() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5O_are_mdc_flushes_disabled
+ * Function:    H5O__are_mdc_flushes_disabled
  *
  * Purpose:     Private version of cork status getter.
  *
@@ -2111,11 +2185,11 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5O_are_mdc_flushes_disabled(H5O_loc_t *oloc, hbool_t *are_disabled)
+H5O__are_mdc_flushes_disabled(const H5O_loc_t *oloc, hbool_t *are_disabled)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL);
+    FUNC_ENTER_PACKAGE
 
     HDassert(are_disabled);
 
@@ -2124,7 +2198,7 @@ H5O_are_mdc_flushes_disabled(H5O_loc_t *oloc, hbool_t *are_disabled)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* H5O_are_mdc_flushes_disabled() */
+} /* H5O__are_mdc_flushes_disabled() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5Oare_mdc_flushes_disabled
@@ -2146,9 +2220,11 @@ done:
 herr_t
 H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
 {
-    H5VL_object_t *   vol_obj;             /* Object of loc_id */
-    H5VL_loc_params_t loc_params;          /* Location parameters */
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                    vol_obj;             /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args;        /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;          /* Location parameters */
+    herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "i*b", object_id, are_disabled);
@@ -2169,9 +2245,14 @@ H5Oare_mdc_flushes_disabled(hid_t object_id, hbool_t *are_disabled)
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(object_id);
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.are_mdc_flushes_disabled.flag = are_disabled;
+    vol_cb_args.op_type                        = H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED;
+    vol_cb_args.args                           = &obj_opt_args;
+
     /* Get the cork status */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_ARE_MDC_FLUSHES_DISABLED, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, are_disabled) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to retrieve object's cork status");
 
 done:

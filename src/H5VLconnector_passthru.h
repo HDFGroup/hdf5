@@ -186,8 +186,8 @@ H5_DLL herr_t H5VLobject_get(void *obj, const H5VL_loc_params_t *loc_params, hid
 H5_DLL herr_t H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
                                   H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
                                   va_list arguments);
-H5_DLL herr_t H5VLobject_optional(void *obj, hid_t connector_id, H5VL_object_optional_t opt_type,
-                                  hid_t dxpl_id, void **req, va_list arguments);
+H5_DLL herr_t H5VLobject_optional(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
+                                  H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 
 /* Public wrappers for connector/container introspection callbacks */
 H5_DLL herr_t H5VLintrospect_get_conn_cls(void *obj, hid_t connector_id, H5VL_get_conn_lvl_t lvl,

@@ -962,8 +962,8 @@ typedef struct H5VL_object_class_t {
                   void **req);
     herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type,
                        hid_t dxpl_id, void **req, va_list arguments);
-    herr_t (*optional)(void *obj, H5VL_object_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
+                       hid_t dxpl_id, void **req);
 } H5VL_object_class_t;
 
 /* Asynchronous request 'notify' callback */
@@ -1129,6 +1129,9 @@ H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, 
 H5_DLL herr_t H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                    hid_t loc_id, const char *name, hid_t lapl_id, H5VL_optional_args_t *args,
                                    hid_t dxpl_id, hid_t es_id);
+H5_DLL herr_t H5VLobject_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+                                     hid_t loc_id, const char *name, hid_t lapl_id,
+                                     H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_optional_args_t *args);
 
 /* API Wrappers for "optional_op" routines */
@@ -1141,6 +1144,7 @@ H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_option
 #define H5VLdatatype_optional_op(...) H5VLdatatype_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLgroup_optional_op(...)    H5VLgroup_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLlink_optional_op(...)     H5VLlink_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLobject_optional_op(...)   H5VLobject_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 
 /* Define "wrapper" versions of function calls, to allow compile-time values to
  *      be passed in by language wrapper or library layer on top of HDF5.
@@ -1150,6 +1154,7 @@ H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_option
 #define H5VLdatatype_optional_op_wrap H5_NO_EXPAND(H5VLdatatype_optional_op)
 #define H5VLgroup_optional_op_wrap    H5_NO_EXPAND(H5VLgroup_optional_op)
 #define H5VLlink_optional_op_wrap     H5_NO_EXPAND(H5VLlink_optional_op)
+#define H5VLobject_optional_op_wrap   H5_NO_EXPAND(H5VLobject_optional_op)
 #endif /* H5VL_MODULE */
 
 #ifdef __cplusplus

@@ -692,9 +692,11 @@ done:
 herr_t
 H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    herr_t                             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "i*s*s", loc_id, name, comment);
@@ -716,9 +718,14 @@ H5Gset_comment(hid_t loc_id, const char *name, const char *comment)
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.set_comment.comment = comment;
+    vol_cb_args.op_type              = H5VL_NATIVE_OBJECT_SET_COMMENT;
+    vol_cb_args.args                 = &obj_opt_args;
+
     /* Set the comment */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_SET_COMMENT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, comment) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "unable to set comment value")
 
 done:
@@ -751,10 +758,12 @@ done:
 int
 H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf /*out*/)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    ssize_t           op_ret;    /* Return value from operation */
-    int               ret_value; /* Return value */
+    H5VL_object_t *                    vol_obj;      /* Object of loc_id */
+    H5VL_optional_args_t               vol_cb_args;  /* Arguments to VOL callback */
+    H5VL_native_object_optional_args_t obj_opt_args; /* Arguments for optional operation */
+    H5VL_loc_params_t                  loc_params;
+    size_t                             comment_len = 0; /* Length of comment */
+    int                                ret_value;       /* Return value */
 
     FUNC_ENTER_API(-1)
     H5TRACE4("Is", "i*szx", loc_id, name, bufsize, buf);
@@ -778,13 +787,20 @@ H5Gget_comment(hid_t loc_id, const char *name, size_t bufsize, char *buf /*out*/
     if (NULL == (vol_obj = H5VL_vol_object(loc_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, -1, "invalid location identifier")
 
+    /* Set up VOL callback arguments */
+    obj_opt_args.get_comment.buf         = buf;
+    obj_opt_args.get_comment.buf_size    = bufsize;
+    obj_opt_args.get_comment.comment_len = &comment_len;
+    vol_cb_args.op_type                  = H5VL_NATIVE_OBJECT_GET_COMMENT;
+    vol_cb_args.args                     = &obj_opt_args;
+
     /* Get the comment */
-    if (H5VL_object_optional(vol_obj, H5VL_NATIVE_OBJECT_GET_COMMENT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &loc_params, buf, bufsize, &op_ret) < 0)
+    if (H5VL_object_optional(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, -1, "unable to get comment value")
 
     /* Set return value */
-    ret_value = (int)op_ret;
+    ret_value = (int)comment_len;
 
 done:
     FUNC_LEAVE_API(ret_value)
