@@ -395,7 +395,8 @@ H5_term_library(void)
                 break;
             if (terminator[i].func() != 0) {
                 pending++;
-                nprinted = snprintf(next, nleft, "%s%s", (next == loop) ? "," : "", terminator[i].name);
+                nprinted = snprintf(next, nleft, "%s%s",
+                    (next != loop) ? "," : "", terminator[i].name);
                 if (nprinted < 0)
                     continue;
                 if ((size_t)nprinted >= nleft)
