@@ -754,7 +754,7 @@ herr_t
 H5VL__native_file_close(void *file, hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
 {
     int      nref;
-    H5F_t   *f         = (H5F_t *)file;
+    H5F_t *  f         = (H5F_t *)file;
     hid_t    file_id   = H5I_INVALID_HID;
     unsigned f_nrefs   = UINT_MAX;
     herr_t   ret_value = SUCCEED; /* Return value */

@@ -575,7 +575,7 @@ H5F_get_nrefs(const H5F_t *f)
     HDassert(f);
     HDassert(f->shared);
 
-    if(f->shared != NULL)
+    if (f->shared != NULL)
         ret_value = f->shared->nrefs;
 
     FUNC_LEAVE_NOAPI(ret_value)
