@@ -149,9 +149,6 @@ static herr_t H5R__decode_string(const unsigned char *buf, size_t *nbytes, char 
 /* Local Variables */
 /*******************/
 
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5R_top_package_initialize_s = FALSE;
-
 herr_t
 H5R_init(void)
 {
@@ -159,81 +156,12 @@ H5R_init(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    /* Mark "top" of interface as initialized */
-    H5R_top_package_initialize_s = TRUE;
-
     /* Sanity check, if assert fails, H5R_REF_BUF_SIZE must be increased */
     HDcompile_assert(sizeof(H5R_ref_priv_t) <= H5R_REF_BUF_SIZE);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R_top_term_package
- PURPOSE
-    Terminate various H5R objects
- USAGE
-    void H5R_top_term_package()
- RETURNS
-    void
- DESCRIPTION
-    Release IDs for the ID group, deferring full interface shutdown
-    until later (in H5R_term_package).
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5R_top_term_package(void)
-{
-    int n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Mark closed if initialized */
-    if (H5R_top_package_initialize_s)
-        if (0 == n)
-            H5R_top_package_initialize_s = FALSE;
-
-    FUNC_LEAVE_NOAPI(n)
-} /* end H5R_top_term_package() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R_term_package
- PURPOSE
-    Terminate various H5R objects
- USAGE
-    void H5R_term_package()
- RETURNS
-    void
- DESCRIPTION
-    Release the ID group and any other resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
-
-     Finishes shutting down the interface, after H5R_top_term_package()
-     is called
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5R_term_package(void)
-{
-    int n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Sanity checks */
-    HDassert(FALSE == H5R_top_package_initialize_s);
-
-    FUNC_LEAVE_NOAPI(n)
-} /* end H5R_term_package() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5R__create_object

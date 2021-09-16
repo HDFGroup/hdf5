@@ -114,9 +114,6 @@ static const H5I_class_t H5I_GROUP_CLS[1] = {{
     (H5I_free_t)H5G__close_cb /* Callback routine for closing objects of this class */
 }};
 
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5G_top_package_initialize_s = FALSE;
-
 /*-------------------------------------------------------------------------
  * Function: H5G_init
  *
@@ -136,9 +133,6 @@ H5G_init(void)
     /* Initialize the ID group for the group IDs */
     if (H5I_register_type(H5I_GROUP_CLS) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-    /* Mark "top" of interface as initialized, too */
-    H5G_top_package_initialize_s = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -165,16 +159,10 @@ H5G_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5G_top_package_initialize_s) {
-        if (H5I_nmembers(H5I_GROUP) > 0) {
-            (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-
-        /* Mark closed */
-        if (0 == n)
-            H5G_top_package_initialize_s = FALSE;
-    } /* end if */
+    if (H5I_nmembers(H5I_GROUP) > 0) {
+        (void)H5I_clear_type(H5I_GROUP, FALSE, FALSE);
+        n++;
+    }
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5G_top_term_package() */
@@ -205,7 +193,6 @@ H5G_term_package(void)
 
     /* Sanity checks */
     HDassert(0 == H5I_nmembers(H5I_GROUP));
-    HDassert(FALSE == H5G_top_package_initialize_s);
 
     /* Destroy the group object id group */
     n += (H5I_dec_type_ref(H5I_GROUP) > 0);

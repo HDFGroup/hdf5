@@ -603,9 +603,6 @@ static const H5I_class_t H5I_DATATYPE_CLS[1] = {{
     (H5I_free_t)H5T__close_cb /* Callback routine for closing objects of this class */
 }};
 
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5T_top_package_initialize_s = FALSE;
-
 /*-------------------------------------------------------------------------
  * Function:    H5T__init_inf
  *
@@ -1422,9 +1419,6 @@ H5T_init(void)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTREGISTER, FAIL, "can't insert property into class")
     } /* end if */
 
-    /* Mark "top" of interface as initialized, too */
-    H5T_top_package_initialize_s = TRUE;
-
 done:
     /* General cleanup */
     if (compound != NULL)
@@ -1508,185 +1502,179 @@ H5T_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5T_top_package_initialize_s) {
-        /* Unregister all conversion functions */
-        if (H5T_g.path) {
-            int i, nprint = 0;
+    /* Unregister all conversion functions */
+    if (H5T_g.path) {
+        int i, nprint = 0;
 
-            for (i = 0; i < H5T_g.npaths; i++) {
-                H5T_path_t *path;
+        for (i = 0; i < H5T_g.npaths; i++) {
+            H5T_path_t *path;
 
-                path = H5T_g.path[i];
-                HDassert(path);
-                if (path->conv.u.app_func) {
-                    H5T__print_stats(path, &nprint /*in,out*/);
-                    path->cdata.command = H5T_CONV_FREE;
-                    if (path->conv.is_app) {
-                        if ((path->conv.u.app_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0,
-                                                    (size_t)0, (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
+            path = H5T_g.path[i];
+            HDassert(path);
+            if (path->conv.u.app_func) {
+                H5T__print_stats(path, &nprint /*in,out*/);
+                path->cdata.command = H5T_CONV_FREE;
+                if (path->conv.is_app) {
+                    if ((path->conv.u.app_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0,
+                                                (size_t)0, (size_t)0, NULL, NULL, H5CX_get_dxpl()) < 0) {
 #ifdef H5T_DEBUG
-                            if (H5DEBUG(T)) {
-                                HDfprintf(H5DEBUG(T),
-                                          "H5T: conversion function "
-                                          "0x%08lx failed to free private data for "
-                                          "%s (ignored)\n",
-                                          (unsigned long)(path->conv.u.app_func), path->name);
-                            } /* end if */
+                        if (H5DEBUG(T)) {
+                            HDfprintf(H5DEBUG(T),
+                                      "H5T: conversion function "
+                                      "0x%08lx failed to free private data for "
+                                      "%s (ignored)\n",
+                                      (unsigned long)(path->conv.u.app_func), path->name);
+                        } /* end if */
 #endif
-                            H5E_clear_stack(NULL); /*ignore the error*/
-                        }                          /* end if */
-                    }                              /* end if */
-                    else {
-                        if ((path->conv.u.lib_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0,
-                                                    (size_t)0, (size_t)0, NULL, NULL) < 0) {
+                        H5E_clear_stack(NULL); /*ignore the error*/
+                    }                          /* end if */
+                }                              /* end if */
+                else {
+                    if ((path->conv.u.lib_func)((hid_t)FAIL, (hid_t)FAIL, &(path->cdata), (size_t)0,
+                                                (size_t)0, (size_t)0, NULL, NULL) < 0) {
 #ifdef H5T_DEBUG
-                            if (H5DEBUG(T)) {
-                                HDfprintf(H5DEBUG(T),
-                                          "H5T: conversion function "
-                                          "0x%08lx failed to free private data for "
-                                          "%s (ignored)\n",
-                                          (unsigned long)(path->conv.u.lib_func), path->name);
-                            } /* end if */
+                        if (H5DEBUG(T)) {
+                            HDfprintf(H5DEBUG(T),
+                                      "H5T: conversion function "
+                                      "0x%08lx failed to free private data for "
+                                      "%s (ignored)\n",
+                                      (unsigned long)(path->conv.u.lib_func), path->name);
+                        } /* end if */
 #endif
-                            H5E_clear_stack(NULL); /*ignore the error*/
-                        }                          /* end if */
-                    }                              /* end else */
-                }                                  /* end if */
+                        H5E_clear_stack(NULL); /*ignore the error*/
+                    }                          /* end if */
+                }                              /* end else */
+            }                                  /* end if */
 
-                if (path->src)
-                    (void)H5T_close_real(path->src);
-                if (path->dst)
-                    (void)H5T_close_real(path->dst);
-                path          = H5FL_FREE(H5T_path_t, path);
-                H5T_g.path[i] = NULL;
-            } /* end for */
+            if (path->src)
+                (void)H5T_close_real(path->src);
+            if (path->dst)
+                (void)H5T_close_real(path->dst);
+            path          = H5FL_FREE(H5T_path_t, path);
+            H5T_g.path[i] = NULL;
+        } /* end for */
 
-            /* Clear conversion tables */
-            H5T_g.path   = (H5T_path_t **)H5MM_xfree(H5T_g.path);
-            H5T_g.npaths = 0;
-            H5T_g.apaths = 0;
-            H5T_g.soft   = (H5T_soft_t *)H5MM_xfree(H5T_g.soft);
-            H5T_g.nsoft  = 0;
-            H5T_g.asoft  = 0;
+        /* Clear conversion tables */
+        H5T_g.path   = (H5T_path_t **)H5MM_xfree(H5T_g.path);
+        H5T_g.npaths = 0;
+        H5T_g.apaths = 0;
+        H5T_g.soft   = (H5T_soft_t *)H5MM_xfree(H5T_g.soft);
+        H5T_g.nsoft  = 0;
+        H5T_g.asoft  = 0;
 
-            n++;
-        } /* end if */
+        n++;
+    } /* end if */
 
-        /* Unlock all datatypes, then free them */
-        /* note that we are ignoring the return value from H5I_iterate() */
-        /* Also note that we are incrementing 'n' in the callback */
-        H5I_iterate(H5I_DATATYPE, H5T__unlock_cb, &n, FALSE);
+    /* Unlock all datatypes, then free them */
+    /* note that we are ignoring the return value from H5I_iterate() */
+    /* Also note that we are incrementing 'n' in the callback */
+    H5I_iterate(H5I_DATATYPE, H5T__unlock_cb, &n, FALSE);
 
-        /* Release all datatype IDs */
-        if (H5I_nmembers(H5I_DATATYPE) > 0) {
-            (void)H5I_clear_type(H5I_DATATYPE, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
+    /* Release all datatype IDs */
+    if (H5I_nmembers(H5I_DATATYPE) > 0) {
+        (void)H5I_clear_type(H5I_DATATYPE, FALSE, FALSE);
+        n++; /*H5I*/
+    }        /* end if */
 
-        /* Reset all the datatype IDs */
-        if (H5T_IEEE_F32BE_g > 0) {
-            H5T_IEEE_F32BE_g = FAIL;
-            H5T_IEEE_F32LE_g = FAIL;
-            H5T_IEEE_F64BE_g = FAIL;
-            H5T_IEEE_F64LE_g = FAIL;
+    /* Reset all the datatype IDs */
+    if (H5T_IEEE_F32BE_g > 0) {
+        H5T_IEEE_F32BE_g = FAIL;
+        H5T_IEEE_F32LE_g = FAIL;
+        H5T_IEEE_F64BE_g = FAIL;
+        H5T_IEEE_F64LE_g = FAIL;
 
-            H5T_STD_I8BE_g        = FAIL;
-            H5T_STD_I8LE_g        = FAIL;
-            H5T_STD_I16BE_g       = FAIL;
-            H5T_STD_I16LE_g       = FAIL;
-            H5T_STD_I32BE_g       = FAIL;
-            H5T_STD_I32LE_g       = FAIL;
-            H5T_STD_I64BE_g       = FAIL;
-            H5T_STD_I64LE_g       = FAIL;
-            H5T_STD_U8BE_g        = FAIL;
-            H5T_STD_U8LE_g        = FAIL;
-            H5T_STD_U16BE_g       = FAIL;
-            H5T_STD_U16LE_g       = FAIL;
-            H5T_STD_U32BE_g       = FAIL;
-            H5T_STD_U32LE_g       = FAIL;
-            H5T_STD_U64BE_g       = FAIL;
-            H5T_STD_U64LE_g       = FAIL;
-            H5T_STD_B8BE_g        = FAIL;
-            H5T_STD_B8LE_g        = FAIL;
-            H5T_STD_B16BE_g       = FAIL;
-            H5T_STD_B16LE_g       = FAIL;
-            H5T_STD_B32BE_g       = FAIL;
-            H5T_STD_B32LE_g       = FAIL;
-            H5T_STD_B64BE_g       = FAIL;
-            H5T_STD_B64LE_g       = FAIL;
-            H5T_STD_REF_OBJ_g     = FAIL;
-            H5T_STD_REF_DSETREG_g = FAIL;
-            H5T_STD_REF_g         = FAIL;
+        H5T_STD_I8BE_g        = FAIL;
+        H5T_STD_I8LE_g        = FAIL;
+        H5T_STD_I16BE_g       = FAIL;
+        H5T_STD_I16LE_g       = FAIL;
+        H5T_STD_I32BE_g       = FAIL;
+        H5T_STD_I32LE_g       = FAIL;
+        H5T_STD_I64BE_g       = FAIL;
+        H5T_STD_I64LE_g       = FAIL;
+        H5T_STD_U8BE_g        = FAIL;
+        H5T_STD_U8LE_g        = FAIL;
+        H5T_STD_U16BE_g       = FAIL;
+        H5T_STD_U16LE_g       = FAIL;
+        H5T_STD_U32BE_g       = FAIL;
+        H5T_STD_U32LE_g       = FAIL;
+        H5T_STD_U64BE_g       = FAIL;
+        H5T_STD_U64LE_g       = FAIL;
+        H5T_STD_B8BE_g        = FAIL;
+        H5T_STD_B8LE_g        = FAIL;
+        H5T_STD_B16BE_g       = FAIL;
+        H5T_STD_B16LE_g       = FAIL;
+        H5T_STD_B32BE_g       = FAIL;
+        H5T_STD_B32LE_g       = FAIL;
+        H5T_STD_B64BE_g       = FAIL;
+        H5T_STD_B64LE_g       = FAIL;
+        H5T_STD_REF_OBJ_g     = FAIL;
+        H5T_STD_REF_DSETREG_g = FAIL;
+        H5T_STD_REF_g         = FAIL;
 
-            H5T_UNIX_D32BE_g = FAIL;
-            H5T_UNIX_D32LE_g = FAIL;
-            H5T_UNIX_D64BE_g = FAIL;
-            H5T_UNIX_D64LE_g = FAIL;
+        H5T_UNIX_D32BE_g = FAIL;
+        H5T_UNIX_D32LE_g = FAIL;
+        H5T_UNIX_D64BE_g = FAIL;
+        H5T_UNIX_D64LE_g = FAIL;
 
-            H5T_C_S1_g = FAIL;
+        H5T_C_S1_g = FAIL;
 
-            H5T_FORTRAN_S1_g = FAIL;
+        H5T_FORTRAN_S1_g = FAIL;
 
-            H5T_NATIVE_SCHAR_g  = FAIL;
-            H5T_NATIVE_UCHAR_g  = FAIL;
-            H5T_NATIVE_SHORT_g  = FAIL;
-            H5T_NATIVE_USHORT_g = FAIL;
-            H5T_NATIVE_INT_g    = FAIL;
-            H5T_NATIVE_UINT_g   = FAIL;
-            H5T_NATIVE_LONG_g   = FAIL;
-            H5T_NATIVE_ULONG_g  = FAIL;
-            H5T_NATIVE_LLONG_g  = FAIL;
-            H5T_NATIVE_ULLONG_g = FAIL;
-            H5T_NATIVE_FLOAT_g  = FAIL;
-            H5T_NATIVE_DOUBLE_g = FAIL;
+        H5T_NATIVE_SCHAR_g  = FAIL;
+        H5T_NATIVE_UCHAR_g  = FAIL;
+        H5T_NATIVE_SHORT_g  = FAIL;
+        H5T_NATIVE_USHORT_g = FAIL;
+        H5T_NATIVE_INT_g    = FAIL;
+        H5T_NATIVE_UINT_g   = FAIL;
+        H5T_NATIVE_LONG_g   = FAIL;
+        H5T_NATIVE_ULONG_g  = FAIL;
+        H5T_NATIVE_LLONG_g  = FAIL;
+        H5T_NATIVE_ULLONG_g = FAIL;
+        H5T_NATIVE_FLOAT_g  = FAIL;
+        H5T_NATIVE_DOUBLE_g = FAIL;
 #if H5_SIZEOF_LONG_DOUBLE != 0
-            H5T_NATIVE_LDOUBLE_g = FAIL;
+        H5T_NATIVE_LDOUBLE_g = FAIL;
 #endif
-            H5T_NATIVE_B8_g     = FAIL;
-            H5T_NATIVE_B16_g    = FAIL;
-            H5T_NATIVE_B32_g    = FAIL;
-            H5T_NATIVE_B64_g    = FAIL;
-            H5T_NATIVE_OPAQUE_g = FAIL;
-            H5T_NATIVE_HADDR_g  = FAIL;
-            H5T_NATIVE_HSIZE_g  = FAIL;
-            H5T_NATIVE_HSSIZE_g = FAIL;
-            H5T_NATIVE_HERR_g   = FAIL;
-            H5T_NATIVE_HBOOL_g  = FAIL;
+        H5T_NATIVE_B8_g     = FAIL;
+        H5T_NATIVE_B16_g    = FAIL;
+        H5T_NATIVE_B32_g    = FAIL;
+        H5T_NATIVE_B64_g    = FAIL;
+        H5T_NATIVE_OPAQUE_g = FAIL;
+        H5T_NATIVE_HADDR_g  = FAIL;
+        H5T_NATIVE_HSIZE_g  = FAIL;
+        H5T_NATIVE_HSSIZE_g = FAIL;
+        H5T_NATIVE_HERR_g   = FAIL;
+        H5T_NATIVE_HBOOL_g  = FAIL;
 
-            H5T_NATIVE_INT8_g        = FAIL;
-            H5T_NATIVE_UINT8_g       = FAIL;
-            H5T_NATIVE_INT_LEAST8_g  = FAIL;
-            H5T_NATIVE_UINT_LEAST8_g = FAIL;
-            H5T_NATIVE_INT_FAST8_g   = FAIL;
-            H5T_NATIVE_UINT_FAST8_g  = FAIL;
+        H5T_NATIVE_INT8_g        = FAIL;
+        H5T_NATIVE_UINT8_g       = FAIL;
+        H5T_NATIVE_INT_LEAST8_g  = FAIL;
+        H5T_NATIVE_UINT_LEAST8_g = FAIL;
+        H5T_NATIVE_INT_FAST8_g   = FAIL;
+        H5T_NATIVE_UINT_FAST8_g  = FAIL;
 
-            H5T_NATIVE_INT16_g        = FAIL;
-            H5T_NATIVE_UINT16_g       = FAIL;
-            H5T_NATIVE_INT_LEAST16_g  = FAIL;
-            H5T_NATIVE_UINT_LEAST16_g = FAIL;
-            H5T_NATIVE_INT_FAST16_g   = FAIL;
-            H5T_NATIVE_UINT_FAST16_g  = FAIL;
+        H5T_NATIVE_INT16_g        = FAIL;
+        H5T_NATIVE_UINT16_g       = FAIL;
+        H5T_NATIVE_INT_LEAST16_g  = FAIL;
+        H5T_NATIVE_UINT_LEAST16_g = FAIL;
+        H5T_NATIVE_INT_FAST16_g   = FAIL;
+        H5T_NATIVE_UINT_FAST16_g  = FAIL;
 
-            H5T_NATIVE_INT32_g        = FAIL;
-            H5T_NATIVE_UINT32_g       = FAIL;
-            H5T_NATIVE_INT_LEAST32_g  = FAIL;
-            H5T_NATIVE_UINT_LEAST32_g = FAIL;
-            H5T_NATIVE_INT_FAST32_g   = FAIL;
-            H5T_NATIVE_UINT_FAST32_g  = FAIL;
+        H5T_NATIVE_INT32_g        = FAIL;
+        H5T_NATIVE_UINT32_g       = FAIL;
+        H5T_NATIVE_INT_LEAST32_g  = FAIL;
+        H5T_NATIVE_UINT_LEAST32_g = FAIL;
+        H5T_NATIVE_INT_FAST32_g   = FAIL;
+        H5T_NATIVE_UINT_FAST32_g  = FAIL;
 
-            H5T_NATIVE_INT64_g        = FAIL;
-            H5T_NATIVE_UINT64_g       = FAIL;
-            H5T_NATIVE_INT_LEAST64_g  = FAIL;
-            H5T_NATIVE_UINT_LEAST64_g = FAIL;
-            H5T_NATIVE_INT_FAST64_g   = FAIL;
-            H5T_NATIVE_UINT_FAST64_g  = FAIL;
+        H5T_NATIVE_INT64_g        = FAIL;
+        H5T_NATIVE_UINT64_g       = FAIL;
+        H5T_NATIVE_INT_LEAST64_g  = FAIL;
+        H5T_NATIVE_UINT_LEAST64_g = FAIL;
+        H5T_NATIVE_INT_FAST64_g   = FAIL;
+        H5T_NATIVE_UINT_FAST64_g  = FAIL;
 
-            n++;
-        } /* end if */
-
-        /* Mark "top" of interface as closed */
-        if (0 == n)
-            H5T_top_package_initialize_s = FALSE;
+        n++;
     } /* end if */
 
     FUNC_LEAVE_NOAPI(n)
@@ -1719,7 +1707,6 @@ H5T_term_package(void)
 
     /* Sanity check */
     HDassert(0 == H5I_nmembers(H5I_DATATYPE));
-    HDassert(FALSE == H5T_top_package_initialize_s);
 
     /* Destroy the datatype object id group */
     n += (H5I_dec_type_ref(H5I_DATATYPE) > 0);

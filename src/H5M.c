@@ -74,9 +74,6 @@ static const H5I_class_t H5I_MAP_CLS[1] = {{
     (H5I_free_t)H5M__close_cb /* Callback routine for closing objects of this class */
 }};
 
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5M_top_package_initialize_s = FALSE;
-
 /*-------------------------------------------------------------------------
  * Function: H5M_init
  *
@@ -97,9 +94,6 @@ H5M_init(void)
     /* Initialize the ID group for the map IDs */
     if (H5I_register_type(H5I_MAP_CLS) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTINIT, FAIL, "unable to initialize interface")
-
-    /* Mark "top" of interface as initialized, too */
-    H5M_top_package_initialize_s = TRUE;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -122,16 +116,10 @@ H5M_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5M_top_package_initialize_s) {
-        if (H5I_nmembers(H5I_MAP) > 0) {
-            (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-
-        /* Mark closed */
-        if (0 == n)
-            H5M_top_package_initialize_s = FALSE;
-    } /* end if */
+    if (H5I_nmembers(H5I_MAP) > 0) {
+        (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
+        n++;
+    }
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5M_top_term_package() */
@@ -158,7 +146,6 @@ H5M_term_package(void)
 
     /* Sanity checks */
     HDassert(0 == H5I_nmembers(H5I_MAP));
-    HDassert(FALSE == H5M_top_package_initialize_s);
 
     /* Destroy the dataset object id group */
     n += (H5I_dec_type_ref(H5I_MAP) > 0);

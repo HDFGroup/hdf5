@@ -375,16 +375,35 @@ H5_term_library(void)
                                   * must complete before this terminator is
                                   * attempted
                                   */
-    } terminator[] = {TERMINATOR(ES, false),    TERMINATOR(L, true),      TERMINATOR(A_top, false),
-                      TERMINATOR(D_top, false), TERMINATOR(G_top, false), TERMINATOR(M_top, false),
-                      TERMINATOR(R_top, false), TERMINATOR(S_top, false), TERMINATOR(T_top, false),
-                      TERMINATOR(F, true),      TERMINATOR(P, true),      TERMINATOR(A, false),
-                      TERMINATOR(D, false),     TERMINATOR(G, false),     TERMINATOR(M, false),
-                      TERMINATOR(R, false),     TERMINATOR(S, false),     TERMINATOR(T, false),
-                      TERMINATOR(AC, true),     TERMINATOR(Z, false),     TERMINATOR(FD, false),
-                      TERMINATOR(VL, false),    TERMINATOR(PL, true),     TERMINATOR(E, true),
-                      TERMINATOR(I, true),      TERMINATOR(SL, true),     TERMINATOR(FL, true),
-                      TERMINATOR(CX, true)};
+    } terminator[] = {
+        TERMINATOR(ES, false)
+    ,   TERMINATOR(L, true)
+    ,   TERMINATOR(A_top, false)
+    ,   TERMINATOR(D_top, false)
+    ,   TERMINATOR(G_top, false)
+    ,   TERMINATOR(M_top, false)
+    ,   TERMINATOR(S_top, false)
+    ,   TERMINATOR(T_top, false)
+    ,   TERMINATOR(F, true)
+    ,   TERMINATOR(P, true)
+    ,   TERMINATOR(A, false)
+    ,   TERMINATOR(D, false)
+    ,   TERMINATOR(G, false)
+    ,   TERMINATOR(M, false)
+    ,   TERMINATOR(S, false)
+    ,   TERMINATOR(T, false)
+    ,   TERMINATOR(AC, true)
+    ,   TERMINATOR(Z, false)
+    ,   TERMINATOR(FD, false)
+    ,   TERMINATOR(VL, false)
+    ,   TERMINATOR(PL, true)
+    ,   TERMINATOR(E, true)
+    ,   TERMINATOR(I, true)
+    ,   TERMINATOR(SL, true)
+    ,   TERMINATOR(FL, true)
+    ,   TERMINATOR(CX, true)
+    };
+    /* clang-format on */
 
     do {
         pending = 0;
