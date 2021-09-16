@@ -49,6 +49,14 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to control the build of High-Level tools
+      that default ON/enabled.
+
+      Add configure options (autotools - CMake):
+            enable-hltools       HDF5_BUILD_HL_TOOLS
+
+      (ADB - 2021/09/16, HDFFV-11266)
+
     - Adds C++ Autotools configuration file for Intel
 
       * Checks for icpc as the compiler
@@ -909,8 +917,8 @@ New Features
     ----------------
     - added set/get for unsigned long long attributes
 
-        the attribute writing high-level API has been expanded to include 
-        public set/get functions for ULL attributes, analogously to the 
+        the attribute writing high-level API has been expanded to include
+        public set/get functions for ULL attributes, analogously to the
         existing set/get for other types.
 
         (AF - 2021/09/08)
