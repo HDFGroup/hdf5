@@ -37,7 +37,7 @@ else
   TEST_DIR =
 endif
 if BUILD_TOOLS_CONDITIONAL
-if BUILD_HL_TOOLS_CONDITIONAL
+if BUILD_TOOLS_HL_CONDITIONAL
   TOOLS_DIR = tools
 else
   TOOLS_DIR =
@@ -50,7 +50,6 @@ endif
 ## use the HL library
 if BUILD_HDF5_HL_CONDITIONAL
    SUBDIRS=src $(TEST_DIR) $(TOOLS_DIR) $(CXX_DIR) $(FORTRAN_DIR)
-
 endif
 DIST_SUBDIRS=src test tools c++ fortran examples
 
