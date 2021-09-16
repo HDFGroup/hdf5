@@ -617,6 +617,8 @@ AC_LANG_POP(C++)
 AC_SUBST(HL) HL=""
 ## name of fortran folder inside "hl", if FORTRAN compile is requested
 AC_SUBST(HL_FOR) HL_FOR=""
+## name of tools folder inside "hl", if HL_TOOLS compile is requested
+AC_SUBST(HL_TOOLS) HL_TOOLS=""
 AC_MSG_CHECKING([if high level library is enabled])
 AC_ARG_ENABLE([hl],
      [AS_HELP_STRING([--enable-hl],
@@ -637,6 +639,21 @@ if test "X$HDF5_HL" = "Xyes"; then
   fi
 else
  echo "no"
+fi
+
+AC_MSG_CHECKING([if the high-level tools are enabled])
+AC_ARG_ENABLE([hltools],
+     [AS_HELP_STRING([--enable-hltools],
+                     [Enable the high-level tools.
+                     [default=yes)]
+                     ])],
+     [HDF5_HL_TOOLS=$enableval])
+
+if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
+ AC_MSG_RESULT([yes])
+ HL_TOOLS="tools"
+else
+  AC_MSG_RESULT([no])
 fi
 
 
@@ -3480,6 +3497,7 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TOOLS_HL_CONDITIONAL], [test "X$HDF5_HL_TOOLS" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
