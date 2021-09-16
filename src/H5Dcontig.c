@@ -91,7 +91,7 @@ typedef struct H5D_contig_writevv_ud_t {
 /* Layout operation callbacks */
 static herr_t  H5D__contig_construct(H5F_t *f, H5D_t *dset);
 static herr_t  H5D__contig_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
-static herr_t  H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+static herr_t  H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                    hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
                                    H5D_chunk_map_t *cm);
 static ssize_t H5D__contig_readvv(const H5D_io_info_t *io_info, size_t dset_max_nseq, size_t *dset_curr_seq,
@@ -551,16 +551,25 @@ H5D__contig_is_data_cached(const H5D_shared_t *shared_dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__contig_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
+H5D__contig_io_init(H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
                     hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space,
                     const H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *cm)
 {
-    FUNC_ENTER_STATIC_NOERR
+    htri_t use_selection_io = FALSE; /* Whether to use selection I/O */
+    htri_t ret_value = SUCCEED;      /* Return value */
+
+    FUNC_ENTER_STATIC
 
     io_info->store->contig.dset_addr = io_info->dset->shared->layout.storage.u.contig.addr;
     io_info->store->contig.dset_size = io_info->dset->shared->layout.storage.u.contig.size;
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
+    /* Check if we're performing selection I/O */
+    if ((use_selection_io = H5D__contig_may_use_select_io(io_info, H5D_IO_OP_READ)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
+    io_info->use_select_io = (hbool_t)use_selection_io;
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_io_init() */
 
 /*-------------------------------------------------------------------------
@@ -632,7 +641,6 @@ herr_t
 H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
                  const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
-    htri_t use_selection_io = FALSE; /* Whether to use selection I/O */
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -644,11 +652,7 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     HDassert(mem_space);
     HDassert(file_space);
 
-    /* Check if we're performing selection I/O */
-    if ((use_selection_io = H5D__contig_may_use_select_io(io_info, H5D_IO_OP_READ)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
-
-    if (use_selection_io) {
+    if (io_info->use_select_io) {
         size_t dst_type_size = type_info->dst_type_size;
 
         /* Issue selection I/O call (we can skip the page buffer because we've
@@ -684,7 +688,6 @@ herr_t
 H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
                   const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
-    htri_t use_selection_io = FALSE; /* Whether to use selection I/O */
     herr_t ret_value = SUCCEED;      /* Return value */
 
     FUNC_ENTER_PACKAGE
@@ -696,11 +699,7 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
     HDassert(mem_space);
     HDassert(file_space);
 
-    /* Check if we're performing selection I/O */
-    if ((use_selection_io = H5D__contig_may_use_select_io(io_info, H5D_IO_OP_WRITE)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
-
-    if (use_selection_io) {
+    if (io_info->use_select_io) {
         size_t dst_type_size = type_info->dst_type_size;
 
         /* Issue selection I/O call (we can skip the page buffer because we've
