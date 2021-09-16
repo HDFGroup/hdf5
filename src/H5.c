@@ -356,9 +356,10 @@ H5_term_library(void)
      * way that would necessitate some cleanup work in the other interface.
      */
 
-#define TERMINATOR(module, wait)                                \
-    {.func = H5##module##_term_package, .name = #module,        \
-     .completed = false, .await_prior = wait}
+#define TERMINATOR(module, wait)                                                                             \
+    {                                                                                                        \
+        .func = H5##module##_term_package, .name = #module, .completed = false, .await_prior = wait          \
+    }
 
     /* clang-format off */
     struct {
@@ -414,8 +415,7 @@ H5_term_library(void)
                 break;
             if (terminator[i].func() != 0) {
                 pending++;
-                nprinted = snprintf(next, nleft, "%s%s",
-                    (next != loop) ? "," : "", terminator[i].name);
+                nprinted = snprintf(next, nleft, "%s%s", (next != loop) ? "," : "", terminator[i].name);
                 if (nprinted < 0)
                     continue;
                 if ((size_t)nprinted >= nleft)
