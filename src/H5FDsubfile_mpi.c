@@ -1110,7 +1110,7 @@ write__independent_async(int n_io_concentrators, hid_t context_id, int64_t offse
  */
 herr_t
 H5FD__write_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], hsize_t sizes[],
-                            void *bufs[] /* data_in */)
+                            void *bufs[] /* in */)
 {
     herr_t               ret_value = SUCCEED;
     hssize_t             status = 0, k = 0;
@@ -1193,7 +1193,7 @@ errors:
  */
 herr_t
 H5FD__read_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], hsize_t sizes[],
-                           void *bufs[] /* data_out */)
+                           void *bufs[] /* out */)
 {
     herr_t               ret_value = SUCCEED;
     hssize_t             status = 0, k = 0;
