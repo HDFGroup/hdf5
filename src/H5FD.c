@@ -380,7 +380,7 @@ H5FD_sb_size(H5FD_t *file)
 {
     hsize_t ret_value = 0;
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -390,7 +390,6 @@ H5FD_sb_size(H5FD_t *file)
     if (file->cls->sb_size)
         ret_value = (file->cls->sb_size)(file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -518,7 +517,7 @@ H5FD_fapl_get(H5FD_t *file)
 {
     void *ret_value = NULL;
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -528,7 +527,6 @@ H5FD_fapl_get(H5FD_t *file)
     if (file->cls->fapl_get)
         ret_value = (file->cls->fapl_get)(file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_fapl_get() */
 
@@ -865,7 +863,7 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 {
     int ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI(-1) /* return value is arbitrary */
+    FUNC_ENTER_NOAPI_NOERR /* return value is arbitrary */
 
     if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
         HGOTO_DONE(0)
@@ -1226,7 +1224,7 @@ H5FD_get_maxaddr(const H5FD_t *file)
 {
     haddr_t ret_value = HADDR_UNDEF; /* Return value */
 
-    FUNC_ENTER_NOAPI(HADDR_UNDEF)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(file);
@@ -1234,7 +1232,6 @@ H5FD_get_maxaddr(const H5FD_t *file)
     /* Set return value */
     ret_value = file->maxaddr;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_get_maxaddr() */
 
