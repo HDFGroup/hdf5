@@ -806,6 +806,7 @@ AC_LANG_POP(C++)
 ## This needs to be exposed for the library info file even if the HL
 ## library is disabled.
 AC_SUBST([HDF5_HL])
+AC_SUBST([HDF5_HL_TOOLS])
 
 ## The high-level library is enabled unless the build mode is clean.
 if test "X-$BUILD_MODE" = "X-clean" ; then
@@ -822,6 +823,9 @@ HL=""
 ## Fortran high-level library
 AC_SUBST(HL_FOR)
 HL_FOR=""
+## Tools high-level library
+AC_SUBST(HL_TOOLS)
+HL_TOOLS=""
 
 AC_MSG_CHECKING([if the high-level library is enabled])
 AC_ARG_ENABLE([hl],
@@ -836,6 +840,21 @@ if test "X-$HDF5_HL" = "X-yes"; then
  HL="hl"
  AC_DEFINE([INCLUDE_HL], [1],
            [Define if the high-level library headers should be included in hdf5.h])
+else
+  AC_MSG_RESULT([no])
+fi
+
+AC_MSG_CHECKING([if the high-level tools are enabled])
+AC_ARG_ENABLE([hltools],
+     [AS_HELP_STRING([--enable-hltools],
+                     [Enable the high-level tools.
+                     [default=yes)]
+                     ])],
+     [HDF5_HL_TOOLS=$enableval])
+
+if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
+ AC_MSG_RESULT([yes])
+ HL_TOOLS="tools"
 else
   AC_MSG_RESULT([no])
 fi
@@ -3919,6 +3938,7 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TOOLS_HL_CONDITIONAL], [test "X$HDF5_HL_TOOLS" = "Xyes"])
 AM_CONDITIONAL([BUILD_DOXYGEN_CONDITIONAL], [test "X$HDF5_DOXYGEN" = "Xyes"])
 
 ## ----------------------------------------------------------------------
