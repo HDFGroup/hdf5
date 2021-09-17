@@ -584,7 +584,7 @@ H5SL_init(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_PACKAGE_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Allocate space for array of factories */
     H5SL_fac_g = (H5FL_fac_head_t **)H5MM_malloc(sizeof(H5FL_fac_head_t *));
