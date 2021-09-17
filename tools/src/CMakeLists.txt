@@ -13,7 +13,7 @@ add_subdirectory (misc)
 #-- Add the h5import and test executables
 add_subdirectory (h5import)
 
-#-- h5Repack executables
+#-- h5repack executables
 add_subdirectory (h5repack)
 
 #-- Add the h5dump and test executables
@@ -30,3 +30,6 @@ add_subdirectory (h5dump)
 
 #-- Add the h5format_convert and test executables
 add_subdirectory (h5format_convert)
+
+#-- h5perf executables
+add_subdirectory (h5perf)

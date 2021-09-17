@@ -22,9 +22,9 @@
 #include "testhdf5.h"
 #include "H5Fprivate.h"
 
-#define TEST_INT16_VALUE  -7641
+#define TEST_INT16_VALUE  (-7641)
 #define TEST_UINT16_VALUE 45002
-#define TEST_INT32_VALUE  -981236
+#define TEST_INT32_VALUE  (-981236)
 #define TEST_UINT32_VALUE 3476589
 
 uint8_t compar_buffer[] = {

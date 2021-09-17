@@ -432,10 +432,7 @@ IdComponent::p_valid_id(const hid_t obj_id)
         return false;
 
     H5I_type_t id_type = H5Iget_type(obj_id);
-    if (id_type <= H5I_BADID || id_type >= H5I_NTYPES)
-        return false;
-    else
-        return true;
+    return (id_type > H5I_BADID && id_type < H5I_NTYPES);
 }
 
 // Notes about IdComponent::id

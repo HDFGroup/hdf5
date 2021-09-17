@@ -588,6 +588,7 @@ H5_DLL herr_t H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *id
  */
 H5_DLL herr_t H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hid_t dxpl_id);
 
+/// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
@@ -606,6 +607,7 @@ H5_DLL herr_t H5Mdelete(hid_t map_id, hid_t key_mem_type_id, const void *key, hi
 #define H5Mput_async_wrap    H5_NO_EXPAND(H5Mput_async)
 #define H5Mget_async_wrap    H5_NO_EXPAND(H5Mget_async)
 #endif /* H5M_MODULE */
+/// \endcond
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *

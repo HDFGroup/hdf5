@@ -456,17 +456,6 @@ extern char *         strdup(const char *s);
 #define TRUE true
 #endif
 
-/** From h5test.h **/
-
-#ifdef H5_HAVE_PARALLEL
-extern MPI_Info h5_io_info_g; /* MPI INFO object for IO */
-#endif
-
-#ifdef H5_HAVE_PARALLEL
-int  h5_set_info_object(void);
-void h5_dump_info_object(MPI_Info info);
-#endif
-
 /** From h5tools_utils.h **/
 
 H5_DLLVAR int         H5_opterr; /* getoption prints errors if this is on    */

@@ -138,6 +138,16 @@ typedef struct {
 #define INTERLEAVED_WRITE_FILTERED_DATASET_NCOLS                                                             \
     (INTERLEAVED_WRITE_FILTERED_DATASET_CH_NCOLS * DIM1_SCALE_FACTOR)
 
+/* Defines for the unshared transformed and filtered chunks write test */
+#define WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME "unshared_transformed_filtered_chunks_write"
+#define WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS 2
+#define WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS        (mpi_size * DIM0_SCALE_FACTOR)
+#define WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS        (mpi_size * DIM1_SCALE_FACTOR)
+#define WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS                                                  \
+    (WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS / mpi_size)
+#define WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS                                                  \
+    (WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS / mpi_size)
+
 /* Defines for the 3D unshared filtered dataset separate page write test */
 #define WRITE_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME                                              \
     "3D_unshared_filtered_chunks_separate_pages_write"
@@ -279,6 +289,16 @@ typedef struct {
     (INTERLEAVED_READ_FILTERED_DATASET_CH_NROWS * DIM0_SCALE_FACTOR)
 #define INTERLEAVED_READ_FILTERED_DATASET_NCOLS                                                              \
     (INTERLEAVED_READ_FILTERED_DATASET_CH_NCOLS * DIM1_SCALE_FACTOR)
+
+/* Defines for the unshared transformed and filtered chunks read test */
+#define READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME "unshared_transformed_filtered_chunks_read"
+#define READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS 2
+#define READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS        (mpi_size * DIM0_SCALE_FACTOR)
+#define READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS        (mpi_size * DIM1_SCALE_FACTOR)
+#define READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS                                                   \
+    (READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS / mpi_size)
+#define READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS                                                   \
+    (READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS / mpi_size)
 
 /* Defines for the 3D unshared filtered dataset separate page read test */
 #define READ_UNSHARED_FILTERED_CHUNKS_3D_SEP_PAGE_DATASET_NAME                                               \
