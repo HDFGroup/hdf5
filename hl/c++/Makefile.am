@@ -14,7 +14,7 @@
 ## Run automake to generate a Makefile.in from this file.
 #
 # High-Level API C++ Makefile(.in)
-# 
+#
 
 include $(top_srcdir)/config/commence.am
 

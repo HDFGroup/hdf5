@@ -26,7 +26,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -493,6 +493,7 @@ HDF_FORTRAN2003 = @HDF_FORTRAN2003@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
+HL_TOOLS = @HL_TOOLS@
 HSIZE_T = @HSIZE_T@
 HSSIZE_T = @HSSIZE_T@
 INSTALL = @INSTALL@
@@ -685,7 +686,8 @@ CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 @BUILD_TESTS_CONDITIONAL_FALSE@TEST_DIR = 
 @BUILD_TESTS_CONDITIONAL_TRUE@TEST_DIR = test
 @BUILD_TOOLS_CONDITIONAL_FALSE@TOOLS_DIR = 
-@BUILD_TOOLS_CONDITIONAL_TRUE@TOOLS_DIR = tools
+@BUILD_TOOLS_CONDITIONAL_TRUE@@BUILD_TOOLS_HL_CONDITIONAL_FALSE@TOOLS_DIR = 
+@BUILD_TOOLS_CONDITIONAL_TRUE@@BUILD_TOOLS_HL_CONDITIONAL_TRUE@TOOLS_DIR = tools
 @BUILD_HDF5_HL_CONDITIONAL_TRUE@SUBDIRS = src $(TEST_DIR) $(TOOLS_DIR) $(CXX_DIR) $(FORTRAN_DIR)
 DIST_SUBDIRS = src test tools c++ fortran examples
 

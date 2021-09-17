@@ -10,7 +10,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# 
+#
 # This makefile mostly just reinvokes make in the various subdirectories
 # but does so in the correct order.  You can alternatively invoke make from
 # each subdirectory manually.
@@ -31,14 +31,17 @@ endif
 if BUILD_CXX_CONDITIONAL
   CXX_DIR = c++
 endif
-
 if BUILD_TESTS_CONDITIONAL
   TEST_DIR = test
 else
   TEST_DIR =
 endif
 if BUILD_TOOLS_CONDITIONAL
+if BUILD_TOOLS_HL_CONDITIONAL
   TOOLS_DIR = tools
+else
+  TOOLS_DIR =
+endif
 else
   TOOLS_DIR =
 endif
