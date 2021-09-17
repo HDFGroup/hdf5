@@ -350,18 +350,20 @@ H5_term_library(void)
         H5_atclose_head = NULL;
     } /* end if */
 
+    /* clang-format off */
     /*
      * Terminate each interface. The termination functions return a positive
      * value if they do something that might affect some other interface in a
      * way that would necessitate some cleanup work in the other interface.
      */
 
-#define TERMINATOR(module, wait)                                                                             \
-    {                                                                                                        \
-        .func = H5##module##_term_package, .name = #module, .completed = false, .await_prior = wait          \
+#define TERMINATOR(module, wait) {      \
+      .func = H5##module##_term_package \
+    , .name = #module                   \
+    , .completed = false                \
+    , .await_prior = wait               \
     }
 
-    /* clang-format off */
     struct {
         int (*func)(void);       /* function to terminate the module; returns 0
                                   * on success, >0 if termination was not
@@ -404,7 +406,6 @@ H5_term_library(void)
     ,   TERMINATOR(FL, true)
     ,   TERMINATOR(CX, true)
     };
-    /* clang-format on */
 
     do {
         pending = 0;
@@ -415,7 +416,8 @@ H5_term_library(void)
                 break;
             if (terminator[i].func() != 0) {
                 pending++;
-                nprinted = snprintf(next, nleft, "%s%s", (next != loop) ? "," : "", terminator[i].name);
+                nprinted = snprintf(next, nleft, "%s%s",
+                    (next != loop) ? "," : "", terminator[i].name);
                 if (nprinted < 0)
                     continue;
                 if ((size_t)nprinted >= nleft)
@@ -429,6 +431,8 @@ H5_term_library(void)
             terminator[i].completed = true;
         }
     } while (pending && ntries++ < 100);
+
+    /* clang-format on */
 
     if (pending) {
         /* Only display the error message if the user is interested in them. */
