@@ -209,7 +209,7 @@
         /* Check if we need to increase allocation of forward pointers */                                    \
         if (LVL + 1 >= 1u << X->log_nalloc) {                                                                \
             H5SL_node_t **_tmp;                                                                              \
-            HDassert(LVL + 1 == 1u << X->log_nalloc);                                                        \
+            HDassert(LVL + 1 == 1U << X->log_nalloc);                                                        \
             /* Double the amount of allocated space */                                                       \
             X->log_nalloc++;                                                                                 \
                                                                                                              \
@@ -251,7 +251,7 @@
         /* Check if we can reduce the allocation of forward pointers */                                      \
         if (LVL <= 1u << (X->log_nalloc - 1)) {                                                              \
             H5SL_node_t **_tmp;                                                                              \
-            HDassert(LVL == 1u << (X->log_nalloc - 1));                                                      \
+            HDassert(LVL == 1U << (X->log_nalloc - 1));                                                      \
             X->log_nalloc--;                                                                                 \
                                                                                                              \
             /* Allocate space for new forward pointers */                                                    \

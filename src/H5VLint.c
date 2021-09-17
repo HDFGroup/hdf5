@@ -1726,7 +1726,7 @@ H5VL__get_connector_name(hid_t id, char *name /*out*/, size_t size)
 
     len = HDstrlen(cls->name);
     if (name) {
-        HDstrncpy(name, cls->name, MIN(len + 1, size));
+        HDstrncpy(name, cls->name, size);
         if (len >= size)
             name[size - 1] = '\0';
     } /* end if */

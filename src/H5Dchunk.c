@@ -107,9 +107,9 @@
 /*#define H5D_CHUNK_DEBUG */
 
 /* Flags for the "edge_chunk_state" field below */
-#define H5D_RDCC_DISABLE_FILTERS 0x01u /* Disable filters on this chunk */
+#define H5D_RDCC_DISABLE_FILTERS 0x01U /* Disable filters on this chunk */
 #define H5D_RDCC_NEWLY_DISABLED_FILTERS                                                                      \
-    0x02u /* Filters have been disabled since                                                                \
+    0x02U /* Filters have been disabled since                                                                \
            * the last flush */
 
 /******************/

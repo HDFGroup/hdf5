@@ -338,10 +338,7 @@ DataType::encode()
 bool
 DataType::hasBinaryDesc() const
 {
-    if (encoded_buf != NULL)
-        return true;
-    else
-        return false;
+    return encoded_buf != NULL;
 }
 
 //--------------------------------------------------------------------------

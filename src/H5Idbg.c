@@ -110,9 +110,9 @@ H5I__id_dump_cb(void *_item, void H5_ATTR_UNUSED *_key, void *_udata)
         case H5I_DATATYPE: {
             const H5T_t *dt = (const H5T_t *)info->object;
 
-            H5_GCC_DIAG_OFF("cast-qual")
+            H5_GCC_CLANG_DIAG_OFF("cast-qual")
             object = (void *)H5T_get_actual_type((H5T_t *)dt); /* Casting away const OK - QAK */
-            H5_GCC_DIAG_ON("cast-qual")
+            H5_GCC_CLANG_DIAG_ON("cast-qual")
 
             path = H5T_nameof((const H5T_t *)object);
             break;

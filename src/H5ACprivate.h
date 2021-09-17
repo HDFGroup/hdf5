@@ -275,24 +275,24 @@ typedef struct H5AC_proxy_entry_t {
   /* size_t      min_size               = */ ( 1 * 1024 * 1024),              \
   /* long int    epoch_length           = */ 50000,                           \
   /* enum H5C_cache_incr_mode incr_mode = */ H5C_incr__threshold,             \
-  /* double      lower_hr_threshold     = */ 0.9f,                            \
-  /* double      increment              = */ 2.0f,                            \
+  /* double      lower_hr_threshold     = */ 0.9,                             \
+  /* double      increment              = */ 2.0,                             \
   /* hbool_t     apply_max_increment    = */ TRUE,                            \
   /* size_t      max_increment          = */ (4 * 1024 * 1024),               \
   /* enum H5C_cache_flash_incr_mode       */                                  \
   /*                    flash_incr_mode = */ H5C_flash_incr__add_space,       \
-  /* double      flash_multiple         = */ 1.4f,                            \
-  /* double      flash_threshold        = */ 0.25f,                           \
+  /* double      flash_multiple         = */ 1.4,                             \
+  /* double      flash_threshold        = */ 0.25,                            \
   /* enum H5C_cache_decr_mode decr_mode = */ H5C_decr__age_out_with_threshold,\
-  /* double      upper_hr_threshold     = */ 0.999f,                          \
-  /* double      decrement              = */ 0.9f,                            \
+  /* double      upper_hr_threshold     = */ 0.999,                           \
+  /* double      decrement              = */ 0.9,                             \
   /* hbool_t     apply_max_decrement    = */ TRUE,                            \
   /* size_t      max_decrement          = */ (1 * 1024 * 1024),               \
   /* int         epochs_before_eviction = */ 3,                               \
   /* hbool_t     apply_empty_reserve    = */ TRUE,                            \
-  /* double      empty_reserve          = */ 0.1f,                            \
+  /* double      empty_reserve          = */ 0.1,                             \
   /* size_t      dirty_bytes_threshold  = */ (256 * 1024),                    \
-  /* int         metadata_write_strategy = */                                  \
+  /* int         metadata_write_strategy = */                                 \
                     H5AC__DEFAULT_METADATA_WRITE_STRATEGY  \
 }
 #endif /* H5_HAVE_PARALLEL */

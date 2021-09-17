@@ -68,7 +68,7 @@
 #define H5D_XFER_BTREE_SPLIT_RATIO_SIZE sizeof(double[3])
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEF                                                                       \
     {                                                                                                        \
-        0.1f, 0.5f, 0.9f                                                                                     \
+        0.1, 0.5, 0.9                                                                                        \
     }
 #define H5D_XFER_BTREE_SPLIT_RATIO_ENC H5P__dxfr_btree_split_ratio_enc
 #define H5D_XFER_BTREE_SPLIT_RATIO_DEC H5P__dxfr_btree_split_ratio_dec
@@ -1052,7 +1052,7 @@ H5Pget_data_transform(hid_t plist_id, char *expression /*out*/, size_t size)
     /* Copy into application buffer */
     len = HDstrlen(pexp);
     if (expression) {
-        HDstrncpy(expression, pexp, MIN(len + 1, size));
+        HDstrncpy(expression, pexp, size);
         if (len >= size)
             expression[size - 1] = '\0';
     } /* end if */

@@ -36,10 +36,10 @@
 #include "H5Pprivate.h"  /* Property lists                       */
 
 /* Special values for the "tag" field below */
-#define H5F_EFC_TAG_DEFAULT   -1
-#define H5F_EFC_TAG_LOCK      -2
-#define H5F_EFC_TAG_CLOSE     -3
-#define H5F_EFC_TAG_DONTCLOSE -4
+#define H5F_EFC_TAG_DEFAULT   (-1)
+#define H5F_EFC_TAG_LOCK      (-2)
+#define H5F_EFC_TAG_CLOSE     (-3)
+#define H5F_EFC_TAG_DONTCLOSE (-4)
 
 /* Structure for each entry in a file's external file cache */
 typedef struct H5F_efc_ent_t {
