@@ -671,14 +671,20 @@ Bug Fixes since HDF5-1.10.7 release
 Platforms Tested
 ===================
 
-    Linux 5.10.10-200.fc33.x86_64    GNU gcc (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
-    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 10.2.1 20201125 (Red Hat 10.2.1-9)
-    Fedora33                         clang version 11.0.0 (Fedora 11.0.0-2.fc33)
+    Linux 5.13.14-200.fc34           GNU gcc (GCC) 11.2.1 2021078 (Red Hat 11.2.1-1)
+    #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 2021078 (Red Hat 11.2.1-1)
+    Fedora34                         clang version 12.0.1 (Fedora 12.0.1-1.fc34)
                                      (cmake and autotools)
 
-    Linux 5.8.0-41-generic-x86_64    GNU gcc (GCC) 10.2.0-13ubuntu1
-    #46-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 10.2.0-13ubuntu1
-    Ubuntu20.10                      (cmake and autotools)
+    Linux 5.11.0-34-generic          GNU gcc (GCC) 9.3.0-17ubuntu1
+    #36-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 9.3.0-17ubuntu1
+    Ubuntu 20.04                     Ubuntu clang version 10.0.0-4
+                                     (cmake and autotools)
+
+    Linux 5.8.0-63-generic           GNU gcc (GCC) 10.3.0-1ubuntu1
+    #71-Ubuntu SMP x86_64 GNU/Linux  GNU Fortran (GCC) 10.3.0-1ubuntu1
+    Ubuntu20.10                      Ubuntu clang version 11.0.0-2
+                                     (cmake and autotools)
 
     Linux 5.3.18-22-default          GNU gcc (SUSE Linux) 7.5.0
     #1 SMP x86_64  GNU/Linux         GNU Fortran (SUSE Linux) 7.5.0
@@ -731,8 +737,8 @@ Platforms Tested
                                          Intel 16.0.4, 18.0.2, 19.0.4
 
     macOS Apple M1 11.6              Apple clang version 12.0.5 (clang-1205.0.22.11)
-    Darwin 20.6.0 arm64              
-    (macmini-m1)
+    Darwin 20.6.0 arm64              gfortran GNU Fortran (Homebrew GCC 11.2.0) 11.1.0
+    (macmini-m1)                     Intel icc/icpc/ifort version 2021.3.0 202106092021.3.0 20210609
 
     macOS Big Sur 11.3.1             Apple clang version 12.0.5 (clang-1205.0.22.9)
     Darwin 20.4.0 x86_64             gfortran GNU Fortran (Homebrew GCC 10.2.0_3) 10.2.0
@@ -760,12 +766,12 @@ Platforms Tested
                                      x86_64;
                                          Version 19.10-0
 
-    Windows 10 x64                  Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-                                    Visual Studio 2017 w/ Intel Fortran 19 (cmake)
+    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
+                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
+                                    Visual Studio 2019 w/ clang 12.0.0 
+                                        with MSVC-like command-line (C/C++ only - cmake)
                                     Visual Studio 2019 w/ Intel Fortran 19 (cmake)
-                                    Visual Studio 2019 w/ MSMPI 10.1 (cmake)
-                                    (cmake)
-
+                                    Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
 
 
 Tested Configuration Features Summary
@@ -783,28 +789,24 @@ Tested Configuration Features Summary
 
 Platform                              C         F90/   F90      C++  zlib  SZIP
                                       parallel  F2003  parallel
-Windows 10 x64                          y        y/y    n        y    y     y
-Mac OS X El Capitan 10.11.6 64-bit      n        y/y    n        y    y     y
-Mac OS Sierra 10.12.6 64-bit            n        y/y    n        y    y     y
-Mac OS X High Sierra 10.13.6 64-bit     n        y/y    n        y    y     y
-Mac OS X Mojave 10.14.6 64-bit          n        y/y    n        y    y     y
-CentOS 7.2 Linux 2.6.32 x86_64 PGI      n        y/y    n        y    y     y
-CentOS 7.2 Linux 2.6.32 x86_64 GNU      y        y/y    y        y    y     y
-CentOS 7.2 Linux 2.6.32 x86_64 Intel    n        y/y    n        y    y     y
-Linux 2.6.32-573.18.1.el6.ppc64         n        y/y    n        y    y     y
+Windows 10 x64                           y       y/y    n        y    y     y
+Mac OS X El Capitan 10.11.6 64-bit       n       y/y    n        y    y     y
+macOS 10.12.6, 10.13.6, 11.3.1 64-bit    n       y/y    n        y    y     y
+macOS M1 11.6 64-bit                     n       y/y    n        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 GNU       y       y/y    y        y    y     y
+CentOS 7.2 Linux 3.10.0 x86_64 Intel,PGI n       y/y    n        y    y     y
+Linux 3.10.0-1160.36.2.el7. ppc64be      n       y/y    n        y    y     y
 
 
 Platform                                 Shared  Shared    Shared    Thread-
                                          C libs  F90 libs  C++ libs  safe
 Windows 10 x64                             y       y         y         y
 Mac OS X El Capitan 10.11.6 64-bit         y       n         y         y
-Mac OS Sierra 10.12.6 64-bit               y       n         y         y
-Mac OS X High Sierra 10.13.6 64-bit        y       n         y         y
-Mac OS X Mojave 10.14.6 64-bit             y       n         y         y
-CentOS 7.2 Linux 2.6.32 x86_64 PGI         y       y         y         n
+macOS 10.12.6, 10.13.6, 11.3.1 64-bit      y       n         y         y
+macOS M1 11.6 64-bit                       y       n         y         y
 CentOS 7.2 Linux 2.6.32 x86_64 GNU         y       y         y         y
-CentOS 7.2 Linux 2.6.32 x86_64 Intel       y       y         y         n
-Linux 2.6.32-573.18.1.el6.ppc64            y       y         y         n
+CentOS 7.2 Linux 2.6.32 x86_64 Intel,PGI   y       y         y         n
+Linux 3.10.0-1160.36.2.el7.ppc64be         y       y         y         n
 
 Compiler versions for each platform are listed in the preceding
 "Platforms Tested" table.
