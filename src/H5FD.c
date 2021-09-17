@@ -865,8 +865,7 @@ H5FD_cmp(const H5FD_t *f1, const H5FD_t *f2)
 
     FUNC_ENTER_NOAPI_NOERR /* return value is arbitrary */
 
-    if ((!f1 || !f1->cls) && (!f2 || !f2->cls))
-        HGOTO_DONE(0)
+        if ((!f1 || !f1->cls) && (!f2 || !f2->cls)) HGOTO_DONE(0)
     if (!f1 || !f1->cls)
         HGOTO_DONE(-1)
     if (!f2 || !f2->cls)
