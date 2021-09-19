@@ -848,7 +848,7 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
     /* Make any parallel I/O adjustments.  Do not use collective code path if
      * we're using selection I/O - in this case the file driver will handle it.
      */
-     /* Check for selection/vector support in file driver? -NAF */
+    /* Check for selection/vector support in file driver? -NAF */
     if (io_info->using_mpi_vfd /*&& !H5_use_selection_io_g*/) {
         H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
         htri_t           opt;       /* Flag whether a selection is optimizable */

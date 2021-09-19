@@ -1281,7 +1281,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 #endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
-    /* Get the type's size */
+            /* Get the type's size */
 #if MPI_VERSION >= 3
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
 #else
@@ -1593,17 +1593,17 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     H5FD_mpio_collective_opt_t coll_opt_mode; /* whether we are doing collective or independent I/O */
     int                        size_i;
 #if MPI_VERSION >= 3
-    MPI_Count                  bytes_read = 0; /* Number of bytes read in */
-    MPI_Count                  type_size;      /* MPI datatype used for I/O's size */
-    MPI_Count                  io_size;        /* Actual number of bytes requested */
-    MPI_Count                  n;
+    MPI_Count bytes_read = 0; /* Number of bytes read in */
+    MPI_Count type_size;      /* MPI datatype used for I/O's size */
+    MPI_Count io_size;        /* Actual number of bytes requested */
+    MPI_Count n;
 #else
-    int                        bytes_read = 0; /* Number of bytes read in */
-    int                        type_size;      /* MPI datatype used for I/O's size */
-    int                        io_size;        /* Actual number of bytes requested */
-    int                        n;
+    int bytes_read = 0; /* Number of bytes read in */
+    int type_size;      /* MPI datatype used for I/O's size */
+    int io_size;        /* Actual number of bytes requested */
+    int n;
 #endif
-    herr_t                     ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1650,8 +1650,8 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
              * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
              * In this case, this function must free the memory allocated for the sorted vectors.
              */
-            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, bufs, &s_types, &s_addrs,
-                                        &s_sizes, &s_bufs) < 0)
+            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, bufs, &s_types,
+                                        &s_addrs, &s_sizes, &s_bufs) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
@@ -1822,7 +1822,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
 
-        /* How many bytes were actually read? */
+            /* How many bytes were actually read? */
 #if MPI_VERSION >= 3
         if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
 #else
@@ -1830,7 +1830,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 #endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
 
-        /* Get the type's size */
+            /* Get the type's size */
 #if MPI_VERSION >= 3
         if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
 #else
@@ -1856,10 +1856,10 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 HDassert(i >= 0);
 
 #if MPI_VERSION >= 3
-                io_size = MIN(n, (MPI_Count)s_sizes[i]);
+                io_size    = MIN(n, (MPI_Count)s_sizes[i]);
                 bytes_read = (MPI_Count)s_sizes[i] - io_size;
 #else
-                io_size = MIN(n, (int)s_sizes[i]);
+                io_size    = MIN(n, (int)s_sizes[i]);
                 bytes_read = (int)s_sizes[i] - io_size;
 #endif
                 HDassert(bytes_read >= 0);
@@ -1921,7 +1921,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
                     HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
 
-                /* How many bytes were actually read? */
+                    /* How many bytes were actually read? */
 #if MPI_VERSION >= 3
                 if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, MPI_BYTE, &bytes_read)))
 #else

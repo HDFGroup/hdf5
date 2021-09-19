@@ -147,8 +147,8 @@ done:
 herr_t
 H5_init_library(void)
 {
-    char *env_use_select_io = NULL;
-    herr_t ret_value = SUCCEED;
+    char * env_use_select_io = NULL;
+    herr_t ret_value         = SUCCEED;
 
     /* Set the 'library initialized' flag as early as possible, to avoid
      * possible re-entrancy.
@@ -281,11 +281,10 @@ H5_init_library(void)
 
     /* Check for HDF5_USE_SELECTION_IO env variable */
     env_use_select_io = HDgetenv("HDF5_USE_SELECTION_IO");
-    if (NULL != env_use_select_io && HDstrcmp(env_use_select_io, "")
-        && HDstrcmp(env_use_select_io, "0") && HDstrcmp(env_use_select_io, "no")
-        && HDstrcmp(env_use_select_io, "No") && HDstrcmp(env_use_select_io, "NO")
-        && HDstrcmp(env_use_select_io, "false") && HDstrcmp(env_use_select_io, "False")
-        && HDstrcmp(env_use_select_io, "FALSE"))
+    if (NULL != env_use_select_io && HDstrcmp(env_use_select_io, "") && HDstrcmp(env_use_select_io, "0") &&
+        HDstrcmp(env_use_select_io, "no") && HDstrcmp(env_use_select_io, "No") &&
+        HDstrcmp(env_use_select_io, "NO") && HDstrcmp(env_use_select_io, "false") &&
+        HDstrcmp(env_use_select_io, "False") && HDstrcmp(env_use_select_io, "FALSE"))
         H5_use_selection_io_g = TRUE;
 
     /* Debugging? */

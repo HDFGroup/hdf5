@@ -254,9 +254,8 @@ typedef struct H5D_chunk_coll_info_t {
 /* Chunked layout operation callbacks */
 static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                 hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-                                 H5D_chunk_map_t *fm);
+static herr_t H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
+                                 const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                             H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
@@ -1064,10 +1063,10 @@ H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsi
     hssize_t     old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
     htri_t       file_space_normalized = FALSE; /* File dataspace was normalized */
     unsigned     f_ndims;                       /* The number of dimensions of the file's dataspace */
-    int          sm_ndims;            /* The number of dimensions of the memory buffer's dataspace (signed) */
-    htri_t       use_selection_io = FALSE;      /* Whether to use selection I/O */
-    unsigned     u;                   /* Local index variable */
-    herr_t       ret_value = SUCCEED; /* Return value        */
+    int          sm_ndims; /* The number of dimensions of the memory buffer's dataspace (signed) */
+    htri_t       use_selection_io = FALSE; /* Whether to use selection I/O */
+    unsigned     u;                        /* Local index variable */
+    herr_t       ret_value = SUCCEED;      /* Return value        */
 
     FUNC_ENTER_STATIC
 
@@ -2541,7 +2540,7 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
     H5S_t *       chunk_file_spaces_static[8]; /* Static buffer for chunk_file_spaces */
     haddr_t *     chunk_addrs = NULL;          /* Array of chunk addresses */
     haddr_t       chunk_addrs_static[8];       /* Static buffer for chunk_addrs */
-    herr_t        ret_value        = SUCCEED;  /*return value        */
+    herr_t        ret_value = SUCCEED;         /*return value        */
 
     FUNC_ENTER_STATIC
 
@@ -2817,7 +2816,7 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     H5S_t *       chunk_file_spaces_static[8]; /* Static buffer for chunk_file_spaces */
     haddr_t *     chunk_addrs = NULL;          /* Array of chunk addresses */
     haddr_t       chunk_addrs_static[8];       /* Static buffer for chunk_addrs */
-    herr_t        ret_value        = SUCCEED;  /* Return value        */
+    herr_t        ret_value = SUCCEED;         /* Return value        */
 
     FUNC_ENTER_STATIC
 

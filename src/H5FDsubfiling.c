@@ -1953,7 +1953,7 @@ H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void 
 
         case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
             HDassert(output);
-#if 0 /* JRM */ /* remove eventually */
+#if 0 /* JRM */  /* remove eventually */
             if (*output == NULL) {
                 HDfprintf(stdout,
                           "H5FD__subfiling_ctl:H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE: *output is NULL\n");
