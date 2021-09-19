@@ -254,7 +254,7 @@ typedef struct H5D_chunk_coll_info_t {
 /* Chunked layout operation callbacks */
 static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
-static herr_t H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+static herr_t H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                  hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
                                  H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
@@ -1057,7 +1057,7 @@ H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
+H5D__chunk_io_init(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
                    const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm)
 {
     const H5D_t *dataset = io_info->dset;       /* Local pointer to dataset info */
@@ -1065,6 +1065,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
     htri_t       file_space_normalized = FALSE; /* File dataspace was normalized */
     unsigned     f_ndims;                       /* The number of dimensions of the file's dataspace */
     int          sm_ndims;            /* The number of dimensions of the memory buffer's dataspace (signed) */
+    htri_t       use_selection_io = FALSE;      /* Whether to use selection I/O */
     unsigned     u;                   /* Local index variable */
     herr_t       ret_value = SUCCEED; /* Return value        */
 
@@ -1119,6 +1120,11 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
 
     if (H5D__chunk_io_init_selections(io_info, type_info, fm) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "unable to create file and memory chunk selections")
+
+    /* Check if we're performing selection I/O and save the result */
+    if ((use_selection_io = H5D__chunk_may_use_select_io(io_info)) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
+    io_info->use_select_io = (hbool_t)use_selection_io;
 
 done:
     /* Reset the global dataspace info */
@@ -2535,7 +2541,6 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
     H5S_t *       chunk_file_spaces_static[8]; /* Static buffer for chunk_file_spaces */
     haddr_t *     chunk_addrs = NULL;          /* Array of chunk addresses */
     haddr_t       chunk_addrs_static[8];       /* Static buffer for chunk_addrs */
-    htri_t        use_selection_io = FALSE;    /* Whether to use selection I/O */
     herr_t        ret_value        = SUCCEED;  /*return value        */
 
     FUNC_ENTER_STATIC
@@ -2567,12 +2572,8 @@ H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_
             skip_missing_chunks = TRUE;
     }
 
-    /* Check if we're performing selection I/O */
-    if ((use_selection_io = H5D__chunk_may_use_select_io(io_info)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
-
     /* Different blocks depending on whether we're using selection I/O */
-    if (use_selection_io) {
+    if (io_info->use_select_io) {
         size_t num_chunks;
         size_t element_sizes[2] = {type_info->dst_type_size, 0};
         void * bufs[2]          = {io_info->u.rbuf, NULL};
@@ -2816,7 +2817,6 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     H5S_t *       chunk_file_spaces_static[8]; /* Static buffer for chunk_file_spaces */
     haddr_t *     chunk_addrs = NULL;          /* Array of chunk addresses */
     haddr_t       chunk_addrs_static[8];       /* Static buffer for chunk_addrs */
-    htri_t        use_selection_io = FALSE;    /* Whether to use selection I/O */
     herr_t        ret_value        = SUCCEED;  /* Return value        */
 
     FUNC_ENTER_STATIC
@@ -2844,12 +2844,8 @@ H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
     /* Initialize temporary compact storage info */
     cpt_store.compact.dirty = &cpt_dirty;
 
-    /* Check if we're performing selection I/O */
-    if ((use_selection_io = H5D__chunk_may_use_select_io(io_info)) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't check if selection I/O is possible")
-
     /* Different blocks depending on whether we're using selection I/O */
-    if (use_selection_io) {
+    if (io_info->use_select_io) {
         size_t      num_chunks;
         size_t      element_sizes[2] = {type_info->dst_type_size, 0};
         const void *bufs[2]          = {io_info->u.wbuf, NULL};

@@ -884,15 +884,15 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                         void *tmp_ptr;
 
                         /* Reallocate arrays */
-                        if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * sizeof(*addrs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for address list")
                         addrs = tmp_ptr;
-                        if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * sizeof(*sizes) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for size list")
                         sizes = tmp_ptr;
-                        if (NULL == (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * sizeof(*vec_bufs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for buffer list")
                         vec_bufs = tmp_ptr;
@@ -1504,15 +1504,15 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                         void *tmp_ptr;
 
                         /* Reallocate arrays */
-                        if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * sizeof(*addrs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for address list")
                         addrs = tmp_ptr;
-                        if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * sizeof(*sizes) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for size list")
                         sizes = tmp_ptr;
-                        if (NULL == (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * sizeof(*vec_bufs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for buffer list")
                         vec_bufs = tmp_ptr;

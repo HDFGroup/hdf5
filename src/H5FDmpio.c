@@ -1281,7 +1281,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
 #endif
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
-            /* Get the type's size */
+    /* Get the type's size */
 #if MPI_VERSION >= 3
     if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
 #else
@@ -1592,6 +1592,17 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     H5FD_mpio_xfer_t           xfer_mode;     /* I/O transfer mode */
     H5FD_mpio_collective_opt_t coll_opt_mode; /* whether we are doing collective or independent I/O */
     int                        size_i;
+#if MPI_VERSION >= 3
+    MPI_Count                  bytes_read = 0; /* Number of bytes read in */
+    MPI_Count                  type_size;      /* MPI datatype used for I/O's size */
+    MPI_Count                  io_size;        /* Actual number of bytes requested */
+    MPI_Count                  n;
+#else
+    int                        bytes_read = 0; /* Number of bytes read in */
+    int                        type_size;      /* MPI datatype used for I/O's size */
+    int                        io_size;        /* Actual number of bytes requested */
+    int                        n;
+#endif
     herr_t                     ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1615,19 +1626,6 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     HDassert((count == 0) || (sizes[0] != 0));
     HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
 
-    /* sort the vector I/O request into increasing address order if required
-     *
-     * If the vector is already sorted, the base addresses of types, addrs, sizes,
-     * and bufs will be returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
-     *
-     * If the vector was not already sorted, new, sorted versions of types, addrs, sizes, and bufs
-     * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
-     * In this case, this function must free the memory allocated for the sorted vectors.
-     */
-    if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, bufs, &s_types, &s_addrs,
-                                &s_sizes, &s_bufs) < 0)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
-
     /* Get the transfer mode from the API context
      *
      * This flag is set to H5FD_MPIO_COLLECTIVE if the API call is
@@ -1642,6 +1640,19 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
         if (count > 0) { /* create MPI derived types describing the vector write */
+
+            /* sort the vector I/O request into increasing address order if required
+             *
+             * If the vector is already sorted, the base addresses of types, addrs, sizes,
+             * and bufs will be returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
+             *
+             * If the vector was not already sorted, new, sorted versions of types, addrs, sizes, and bufs
+             * are allocated, populated, and returned in s_types, s_addrs, s_sizes, and s_bufs respectively.
+             * In this case, this function must free the memory allocated for the sorted vectors.
+             */
+            if (H5FD_sort_vector_io_req(&vector_was_sorted, count, types, addrs, sizes, bufs, &s_types, &s_addrs,
+                                        &s_sizes, &s_bufs) < 0)
+                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't sort vector I/O request")
 
             if ((NULL == (mpi_block_lengths = (int *)HDmalloc((size_t)count * sizeof(int)))) ||
                 (NULL == (mpi_displacments = (MPI_Aint *)HDmalloc((size_t)count * sizeof(MPI_Aint)))) ||
@@ -1810,8 +1821,59 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, (MPI_Offset)0, MPI_BYTE, MPI_BYTE,
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+
+        /* How many bytes were actually read? */
+#if MPI_VERSION >= 3
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
+#else
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
+#endif
+            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+
+        /* Get the type's size */
+#if MPI_VERSION >= 3
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(buf_type, &type_size)))
+#else
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_size(buf_type, &type_size)))
+#endif
+            HMPI_GOTO_ERROR(FAIL, "MPI_Type_size failed", mpi_code)
+
+        /* Compute the actual number of bytes requested */
+        io_size = type_size * size_i;
+
+        /* Check for read failure */
+        if (bytes_read < 0 || bytes_read > io_size)
+            HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+
+        /* Check for incomplete read */
+        n = io_size - bytes_read;
+        if (n > 0) {
+            i = (int)count - 1;
+
+            /* Iterate over sorted array in reverse, filling in zeroes to
+             * sections of the buffers that were not read to */
+            do {
+                HDassert(i >= 0);
+
+#if MPI_VERSION >= 3
+                io_size = MIN(n, (MPI_Count)s_sizes[i]);
+                bytes_read = (MPI_Count)s_sizes[i] - io_size;
+#else
+                io_size = MIN(n, (int)s_sizes[i]);
+                bytes_read = (int)s_sizes[i] - io_size;
+#endif
+                HDassert(bytes_read >= 0);
+
+                HDmemset((char *)bufs[i] + bytes_read, 0, (size_t)io_size);
+
+                n -= io_size;
+                i--;
+            } while (n > 0);
+        }
     }
     else if (count > 0) {
+
+        haddr_t max_addr = HADDR_MAX;
 
         /* The read is part of an independent operation. As a result,
          * we can't use MPI_File_set_view() (since it it a collective operation),
@@ -1832,7 +1894,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
         for (i = 0; i < (int)count; i++) {
 
-            if (H5FD_mpi_haddr_to_MPIOff(s_addrs[i], &mpi_off) < 0)
+            if (H5FD_mpi_haddr_to_MPIOff(addrs[i], &mpi_off) < 0)
 
                 HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't convert from haddr to MPI off")
 
@@ -1845,16 +1907,46 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                 }
                 else {
 
-                    size = s_sizes[i];
+                    size = sizes[i];
                 }
             }
 
             size_i = (int)size; /* todo: fix potential for overflow */
 
-            if (MPI_SUCCESS !=
-                (mpi_code = MPI_File_read_at(file->f, mpi_off, s_bufs[i], size_i, MPI_BYTE, &mpi_stat)))
+            /* Check if we acutally need to do I/O */
+            if (addrs[i] < max_addr) {
+                /* Issue read */
+                if (MPI_SUCCESS !=
+                    (mpi_code = MPI_File_read_at(file->f, mpi_off, bufs[i], size_i, MPI_BYTE, &mpi_stat)))
 
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                    HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+
+                /* How many bytes were actually read? */
+#if MPI_VERSION >= 3
+                if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, MPI_BYTE, &bytes_read)))
+#else
+                if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
+#endif
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+
+                /* Check for read failure */
+                if (bytes_read < 0 || bytes_read > size_i)
+                    HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "file read failed")
+
+                /*
+                 * If we didn't read the entire I/O, fill in zeroes beyond end of
+                 * the physical MPI file and don't issue any more reads at higher
+                 * addresses.
+                 */
+                if ((n = (size_i - bytes_read)) > 0) {
+                    HDmemset((char *)bufs[i] + bytes_read, 0, (size_t)n);
+                    max_addr = addrs[i] + (haddr_t)bytes_read;
+                }
+            }
+            else {
+                /* Read is past the max address, fill in zeroes */
+                HDmemset((char *)bufs[i], 0, size);
+            }
         }
     }
 
