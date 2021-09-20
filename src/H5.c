@@ -458,21 +458,23 @@ H5_term_library(void)
                 continue;
             if (pending != 0 && terminator[i].await_prior)
                 break;
-            if (terminator[i].func() != 0) {
-                pending++;
-                nprinted = snprintf(next, nleft, "%s%s",
-                    (next != loop) ? "," : "", terminator[i].name);
-                if (nprinted < 0)
-                    continue;
-                if ((size_t)nprinted >= nleft)
-                    nprinted = snprintf(next, nleft, "...");
-                if (nprinted < 0 || (size_t)nprinted >= nleft)
-                    continue;
-                nleft -= (size_t)nprinted;
-                next += nprinted;
+            if (terminator[i].func() == 0) {
+                terminator[i].completed = true;
                 continue;
             }
-            terminator[i].completed = true;
+
+            /* log a package when its terminator needs to be retried */
+            pending++;
+            nprinted = snprintf(next, nleft, "%s%s",
+                (next != loop) ? "," : "", terminator[i].name);
+            if (nprinted < 0)
+                continue;
+            if ((size_t)nprinted >= nleft)
+                nprinted = snprintf(next, nleft, "...");
+            if (nprinted < 0 || (size_t)nprinted >= nleft)
+                continue;
+            nleft -= (size_t)nprinted;
+            next += nprinted;
         }
     } while (pending && ntries++ < 100);
 
