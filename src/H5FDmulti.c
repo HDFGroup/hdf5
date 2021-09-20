@@ -2098,6 +2098,11 @@ H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *inpu
     static const char *func      = "H5FD_multi_ctl"; /* Function Name for error reporting */
     herr_t             ret_value = 0;
 
+    /* Silence compiler */
+    (void)file;
+    (void)input;
+    (void)output;
+
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 

@@ -1106,10 +1106,6 @@ H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_AT
     HDassert(H5FD_SEC2 == file->pub.driver_id);
 
     switch (op_code) {
-        /* Op code for testing purposes */
-        case H5FD_CTL__TEST_OPCODE:
-            break;
-
         /* Unknown op code */
         default:
             if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)

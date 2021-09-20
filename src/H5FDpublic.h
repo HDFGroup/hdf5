@@ -152,7 +152,6 @@
 #define H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE 2
 #define H5FD_CTL__GET_MPI_RANK_OPCODE         3
 #define H5FD_CTL__GET_MPI_SIZE_OPCODE         4
-#define H5FD_CTL__NUM_OPCODES                 5 /* must be last */
 
 /* ctl function flags: */
 
