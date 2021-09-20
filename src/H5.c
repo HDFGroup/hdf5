@@ -266,7 +266,6 @@ H5_init_library(void)
     ,   {H5P_init, "property list"}
     ,   {H5AC_init, "metadata caching"}
     ,   {H5L_init, "link"}
-    ,   {H5FS_init, "FS"}
     ,   {H5S_init, "dataspace"}
     /* Finish initializing interfaces that depend on the interfaces above */
     ,   {H5VL_init_phase2, "VOL"}
