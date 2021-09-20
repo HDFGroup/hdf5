@@ -18,9 +18,7 @@
 # in column one with a '#'.
 #------------------------------------------------------------------------------
 
-./.gitattributes       _DO_NOT_DISTRIBUTE_
-./.gitignore           _DO_NOT_DISTRIBUTE_
-./.autom4te.cfg        _DO_NOT_DISTRIBUTE_
+./.autom4te.cfg                 _DO_NOT_DISTRIBUTE_
 ./.h5chkright.ini      _DO_NOT_DISTRIBUTE_
 ./ACKNOWLEDGMENTS
 ./COPYING
