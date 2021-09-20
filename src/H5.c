@@ -350,6 +350,7 @@ H5_term_library(void)
     } /* end if */
 
     /* clang-format off */
+
     /*
      * Terminate each interface. The termination functions return a positive
      * value if they do something that might affect some other interface in a
@@ -363,6 +364,11 @@ H5_term_library(void)
     , .await_prior = wait               \
     }
 
+    /*
+     * Termination is ordered by the `terminator` table so the "higher" level
+     * packages are shut down before "lower" level packages that they
+     * rely on:
+     */
     struct {
         int (*func)(void);       /* function to terminate the module; returns 0
                                   * on success, >0 if termination was not
@@ -378,27 +384,66 @@ H5_term_library(void)
                                   * attempted
                                   */
     } terminator[] = {
+        /* Close the event sets first, so that all asynchronous operations
+         * complete before anything else attempts to shut down.
+         */
         TERMINATOR(ES, false)
+        /* Do not attempt to close down package L until after event sets
+         * have finished closing down.
+         */
     ,   TERMINATOR(L, true)
+        /* Close the "top" of various interfaces (IDs, etc) but don't shut
+         * down the whole interface yet, so that the object header messages
+         * get serialized correctly for entries in the metadata cache and the
+         * symbol table entry in the superblock gets serialized correctly, etc.
+         * all of which is performed in the 'F' shutdown.
+         *
+         * The tops of packages A, D, G, M, S, T do not need to wait for L
+         * or previous packages to finish closing down.
+         */
     ,   TERMINATOR(A_top, false)
     ,   TERMINATOR(D_top, false)
     ,   TERMINATOR(G_top, false)
     ,   TERMINATOR(M_top, false)
     ,   TERMINATOR(S_top, false)
     ,   TERMINATOR(T_top, false)
+        /* Don't shut down the file code until objects in files are shut down */
     ,   TERMINATOR(F, true)
+        /* Don't shut down the property list code until all objects that might
+         * use property lists are shut down
+         */
     ,   TERMINATOR(P, true)
-    ,   TERMINATOR(A, false)
+        /* Wait to shut down the "bottom" of various interfaces until the
+         * files are closed, so pieces of the file can be serialized
+         * correctly.
+         *
+         * Shut down the "bottom" of the attribute, dataset, group,
+         * reference, dataspace, and datatype interfaces, fully closing
+         * out the interfaces now.
+         */
+    ,   TERMINATOR(A, true)
     ,   TERMINATOR(D, false)
     ,   TERMINATOR(G, false)
     ,   TERMINATOR(M, false)
     ,   TERMINATOR(S, false)
     ,   TERMINATOR(T, false)
+        /* Wait to shut down low-level packages like AC until after
+         * the preceding high-level packages have shut down.  This prevents
+         * low-level objects from closing "out from underneath" their
+         * reliant high-level objects.
+         */
     ,   TERMINATOR(AC, true)
+        /* Shut down the "pluggable" interfaces, before the plugin framework */
     ,   TERMINATOR(Z, false)
     ,   TERMINATOR(FD, false)
     ,   TERMINATOR(VL, false)
+        /* Don't shut down the plugin code until all "pluggable" interfaces
+         * (Z, FD, PL) are shut down
+         */
     ,   TERMINATOR(PL, true)
+        /* Shut down the following packages in strictly the order given
+         * by the table.
+         */
     ,   TERMINATOR(E, true)
     ,   TERMINATOR(I, true)
     ,   TERMINATOR(SL, true)
