@@ -99,8 +99,14 @@
 #include <dirent.h>
 #endif
 
-/* Define the default VFD for this platform.
- * Since the removal of the Windows VFD, this is sec2 for all platforms.
+/* Define the default VFD for this platform.  Since the removal of the
+ * Windows VFD, this is sec2 for all platforms.
+ *
+ * Note well: if you change the default, then be sure to change
+ * H5_default_vfd_init() to call that default's initializer.  Also,
+ * make sure that the initializer for each *non*-default VFD calls
+ * H5_init_library(); also, make sure that the initializer for default
+ * VFD does *not* call H5_init_library().
  */
 #define H5_DEFAULT_VFD H5FD_SEC2
 
