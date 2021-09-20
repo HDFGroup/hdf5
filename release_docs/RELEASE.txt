@@ -48,11 +48,12 @@ New Features
 
     Configuration:
     -------------
-    - Added new option to control the build of High-Level tools
-      that default ON/enabled.
+    - Added new option to control the build of High-Level tool, which is
+      ON/enabled by default.  Disabling High-Level tools addresses these
+      vulnerabilities:  CVE-2018-17433, CVE-2018-17436,  and CVE-2020-10809.
 
       Add configure options (autotools - CMake):
-            enable-hltools       HDF5_BUILD_HL_TOOLS
+          --enable-hltools       HDF5_BUILD_HL_TOOLS
 
       (ADB - 2021/09/16, HDFFV-11266)
 
