@@ -622,6 +622,10 @@ H5D__ioinfo_init(H5D_t *dset, const H5D_type_info_t *type_info, H5D_storage_t *s
         io_info->io_ops.single_write = H5D__scatgath_write;
     } /* end else */
 
+    /* Start with selection I/O off, layout callback will turn it on if
+     * appropriate */
+    io_info->use_select_io = FALSE;
+
 #ifdef H5_HAVE_PARALLEL
     /* Determine if the file was opened with an MPI VFD */
     io_info->using_mpi_vfd = H5F_HAS_FEATURE(dset->oloc.file, H5FD_FEAT_HAS_MPI);
@@ -841,8 +845,11 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
         H5CX_set_mpio_actual_io_mode(H5D_MPIO_NO_COLLECTIVE);
     } /* end if */
 
-    /* Make any parallel I/O adjustments */
-    if (io_info->using_mpi_vfd) {
+    /* Make any parallel I/O adjustments.  Do not use collective code path if
+     * we're using selection I/O - in this case the file driver will handle it.
+     */
+    /* Check for selection/vector support in file driver? -NAF */
+    if (io_info->using_mpi_vfd /*&& !H5_use_selection_io_g*/) {
         H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
         htri_t           opt;       /* Flag whether a selection is optimizable */
 

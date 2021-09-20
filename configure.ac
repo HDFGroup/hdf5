@@ -1526,6 +1526,81 @@ case "X-$withval" in
 esac
 
 ## ----------------------------------------------------------------------
+## Is mercury(an external RPC Framework library) requested? It has a 
+## header file `mercury.h' and a library `-lmercury_util' and their 
+## install locations might be specified with the `--with-mercury'
+## command-line switch. The value is an include path and/or a library path.
+## If the library path is specified then it must be preceded by a comma.
+##
+AC_SUBST([HAVE_MERCURY])
+
+## Default is not present
+HAVE_MERCURY=no
+
+AC_ARG_WITH([mercury],
+            [AS_HELP_STRING([--with-mercury=DIR],
+                            [Use the mercury library [default=no]])],,
+            [withval=no])
+
+case "X-$withval" in
+  X-yes)
+    HAVE_MERCURY="yes"
+    AC_CHECK_HEADERS([mercury.h],[HAVE_MERCURY_H="yes"], [unset HAVE_MERCURY])
+    if test "x$HAVE_MERCURY" = "xyes"; then
+      AC_CHECK_LIB([mercury_util], [hg_thread_mutex_init],, [unset HAVE_MERCURY])
+    fi
+    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find mercury library])
+    fi
+    ;;
+  X-|X-no|X-none)
+    HAVE_MERCURY="no"
+    AC_MSG_CHECKING([for mercury library])
+    AC_MSG_RESULT([suppressed])
+    ;;
+  *)
+    HAVE_MERCURY="yes"
+    case "$withval" in
+      *,*)
+        mercury_inc="`echo $withval |cut -f1 -d,`"
+        mercury_lib="`echo $withval |cut -f2 -d, -s`"
+        ;;
+      *)
+        if test -n "$withval"; then
+          mercury_inc="$withval/include"
+          mercury_lib="$withval/lib"
+        fi
+        ;;
+    esac
+
+    saved_CPPFLAGS="$CPPFLAGS"
+    saved_AM_CPPFLAGS="$AM_CPPFLAGS"
+    saved_LDFLAGS="$LDFLAGS"
+    saved_AM_LDFLAGS="$AM_LDFLAGS"
+
+    if test -n "$mercury_inc"; then
+      CPPFLAGS="$CPPFLAGS -I$mercury_inc"
+      AM_CPPFLAGS="$AM_CPPFLAGS -I$mercury_inc"
+    fi
+
+    AC_CHECK_HEADERS([mercury.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_MERCURY])
+
+    if test "x$HAVE_MERCURY" = "xyes"; then
+      if test -n "$mercury_lib"; then
+        LDFLAGS="$LDFLAGS -L$mercury_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$mercury_lib"
+      fi
+
+      AC_CHECK_LIB([mercury_util], [hg_thread_mutex_init],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_MERCURY])
+    fi
+
+    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
+      AC_MSG_ERROR([couldn't find mercury library])
+    fi
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
 ## At this point it's unset (no external filters by default) but it
 ## will be filled in during the deflate (zlib) and szip processing

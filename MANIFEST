@@ -741,6 +741,9 @@
 ./src/H5FDhdfs.c
 ./src/H5FDhdfs.h
 ./src/H5FDint.c
+./src/H5FDioc.c
+./src/H5FDioc.h
+./src/H5FDioc_threads.c
 ./src/H5FDlog.c
 ./src/H5FDlog.h
 ./src/H5FDmirror.c
@@ -766,6 +769,11 @@
 ./src/H5FDsplitter.c
 ./src/H5FDsplitter.h
 ./src/H5FDstdio.c
+./src/H5FDsubfile_int.c
+./src/H5FDsubfile_mpi.c
+./src/H5FDsubfiling.c
+./src/H5FDsubfiling.h
+./src/H5FDsubfiling_priv.h
 ./src/H5FDstdio.h
 ./src/H5FDtest.c
 ./src/H5FDwindows.c
@@ -1462,6 +1470,7 @@
 ./testpar/t_pshutdown.c
 ./testpar/t_prestart.c
 ./testpar/t_span_tree.c
+./testpar/t_subfiling_vfd.c
 ./testpar/t_vfd.c
 ./testpar/t_init_term.c
 ./testpar/t_2Gio.c

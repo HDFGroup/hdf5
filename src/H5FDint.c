@@ -712,7 +712,7 @@ done:
  */
 static herr_t
 H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                               const H5S_t * const *mem_spaces, const H5S_t * const *file_spaces,
+                               const H5S_t *const *mem_spaces, const H5S_t *const *file_spaces,
                                haddr_t offsets[], size_t element_sizes[], void *bufs[] /* out */)
 {
     hbool_t        extend_sizes = FALSE;
@@ -823,9 +823,9 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
         /* Initialize values so sequence lists are retrieved on the first
          * iteration */
         file_seq_i = H5FD_SEQ_LIST_LEN;
-        mem_seq_i = H5FD_SEQ_LIST_LEN;
-        file_nseq = 0;
-        mem_nseq = 0;
+        mem_seq_i  = H5FD_SEQ_LIST_LEN;
+        file_nseq  = 0;
+        mem_nseq   = 0;
 
         /* Loop until all elements are processed */
         while (file_seq_i < file_nseq || nelmts > 0) {
@@ -884,15 +884,16 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
                         void *tmp_ptr;
 
                         /* Reallocate arrays */
-                        if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * sizeof(*addrs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for address list")
                         addrs = tmp_ptr;
-                        if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * sizeof(*sizes) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for size list")
                         sizes = tmp_ptr;
-                        if (NULL == (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * 2)))
+                        if (NULL ==
+                            (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * sizeof(*vec_bufs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for buffer list")
                         vec_bufs = tmp_ptr;
@@ -1010,8 +1011,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t * const *mem_spaces,
-                    const H5S_t * const *file_spaces, haddr_t offsets[], size_t element_sizes[],
+H5FD_read_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t *const *mem_spaces,
+                    const H5S_t *const *file_spaces, haddr_t offsets[], size_t element_sizes[],
                     void *bufs[] /* out */)
 {
     hbool_t  offsets_cooked = FALSE;
@@ -1284,8 +1285,9 @@ H5FD_read_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem_
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__read_selection_translate(file, type, dxpl_id, count, (const H5S_t * const *)mem_spaces,
-                                           (const H5S_t * const *)file_spaces, offsets, element_sizes, bufs) < 0)
+        if (H5FD__read_selection_translate(file, type, dxpl_id, count, (const H5S_t *const *)mem_spaces,
+                                           (const H5S_t *const *)file_spaces, offsets, element_sizes,
+                                           bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "translation to vector or scalar read failed")
     }
 
@@ -1331,7 +1333,7 @@ done:
  */
 static herr_t
 H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uint32_t count,
-                                const H5S_t * const *mem_spaces, const H5S_t * const *file_spaces,
+                                const H5S_t *const *mem_spaces, const H5S_t *const *file_spaces,
                                 haddr_t offsets[], size_t element_sizes[], const void *bufs[])
 {
     hbool_t        extend_sizes = FALSE;
@@ -1442,9 +1444,9 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
         /* Initialize values so sequence lists are retrieved on the first
          * iteration */
         file_seq_i = H5FD_SEQ_LIST_LEN;
-        mem_seq_i = H5FD_SEQ_LIST_LEN;
-        file_nseq = 0;
-        mem_nseq = 0;
+        mem_seq_i  = H5FD_SEQ_LIST_LEN;
+        file_nseq  = 0;
+        mem_nseq   = 0;
 
         /* Loop until all elements are processed */
         while (file_seq_i < file_nseq || nelmts > 0) {
@@ -1503,15 +1505,16 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
                         void *tmp_ptr;
 
                         /* Reallocate arrays */
-                        if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(addrs, vec_arr_nalloc * sizeof(*addrs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for address list")
                         addrs = tmp_ptr;
-                        if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * 2)))
+                        if (NULL == (tmp_ptr = H5MM_realloc(sizes, vec_arr_nalloc * sizeof(*sizes) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for size list")
                         sizes = tmp_ptr;
-                        if (NULL == (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * 2)))
+                        if (NULL ==
+                            (tmp_ptr = H5MM_realloc(vec_bufs, vec_arr_nalloc * sizeof(*vec_bufs) * 2)))
                             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
                                         "memory reallocation failed for buffer list")
                         vec_bufs = tmp_ptr;
@@ -1627,8 +1630,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t * const *mem_spaces,
-                     const H5S_t * const *file_spaces, haddr_t offsets[], size_t element_sizes[],
+H5FD_write_selection(H5FD_t *file, H5FD_mem_t type, uint32_t count, const H5S_t *const *mem_spaces,
+                     const H5S_t *const *file_spaces, haddr_t offsets[], size_t element_sizes[],
                      const void *bufs[])
 {
     hbool_t  offsets_cooked = FALSE;
@@ -1886,8 +1889,9 @@ H5FD_write_selection_id(H5FD_t *file, H5FD_mem_t type, uint32_t count, hid_t mem
         }
 
         /* Translate to vector or scalar I/O */
-        if (H5FD__write_selection_translate(file, type, dxpl_id, count, (const H5S_t * const *)mem_spaces,
-                                            (const H5S_t * const *)file_spaces, offsets, element_sizes, bufs) < 0)
+        if (H5FD__write_selection_translate(file, type, dxpl_id, count, (const H5S_t *const *)mem_spaces,
+                                            (const H5S_t *const *)file_spaces, offsets, element_sizes,
+                                            bufs) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "translation to vector or scalar write failed")
     }
 
