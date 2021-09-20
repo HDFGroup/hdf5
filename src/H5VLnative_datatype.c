@@ -249,7 +249,7 @@ H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_t specific_type
             hid_t type_id = HDva_arg(arguments, hid_t);
 
             /* Call private function to refresh datatype object */
-            if ((H5O_refresh_metadata(type_id, dt->oloc)) < 0)
+            if ((H5O_refresh_metadata(&dt->oloc, type_id)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
 
             break;

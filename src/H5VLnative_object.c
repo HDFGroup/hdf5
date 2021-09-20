@@ -440,7 +440,7 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
             H5O_loc_t *oloc = loc.oloc;
 
             /* Refresh the metadata */
-            if (H5O_refresh_metadata(oid, *oloc) < 0)
+            if (H5O_refresh_metadata(oloc, oid) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
             break;

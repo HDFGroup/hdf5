@@ -288,7 +288,7 @@ H5VL__native_group_specific(void *obj, H5VL_group_specific_args_t *args, hid_t H
 
         /* H5Grefresh */
         case H5VL_GROUP_REFRESH: {
-            if ((H5O_refresh_metadata(args->args.refresh.grp_id, grp->oloc)) < 0)
+            if ((H5O_refresh_metadata(&grp->oloc, args->args.refresh.grp_id)) < 0)
                 HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
 
             break;
