@@ -159,8 +159,8 @@ static void * H5VL_pass_through_file_open(const char *name, unsigned flags, hid_
 static herr_t H5VL_pass_through_file_get(void *file, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL_pass_through_file_specific(void *file, H5VL_file_specific_t specific_type, hid_t dxpl_id,
                                               void **req, va_list arguments);
-static herr_t H5VL_pass_through_file_optional(void *file, H5VL_file_optional_t opt_type, hid_t dxpl_id,
-                                              void **req, va_list arguments);
+static herr_t H5VL_pass_through_file_optional(void *file, H5VL_optional_args_t *args, hid_t dxpl_id,
+                                              void **req);
 static herr_t H5VL_pass_through_file_close(void *file, hid_t dxpl_id, void **req);
 
 /* Group callbacks */
@@ -1855,8 +1855,7 @@ H5VL_pass_through_file_specific(void *file, H5VL_file_specific_t specific_type, 
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL_pass_through_file_optional(void *file, H5VL_file_optional_t opt_type, hid_t dxpl_id, void **req,
-                                va_list arguments)
+H5VL_pass_through_file_optional(void *file, H5VL_optional_args_t *args, hid_t dxpl_id, void **req)
 {
     H5VL_pass_through_t *o = (H5VL_pass_through_t *)file;
     herr_t               ret_value;
@@ -1865,7 +1864,7 @@ H5VL_pass_through_file_optional(void *file, H5VL_file_optional_t opt_type, hid_t
     printf("------- PASS THROUGH VOL File Optional\n");
 #endif
 
-    ret_value = H5VLfile_optional(o->under_object, o->under_vol_id, opt_type, dxpl_id, req, arguments);
+    ret_value = H5VLfile_optional(o->under_object, o->under_vol_id, args, dxpl_id, req);
 
     /* Check for async request */
     if (req && *req)

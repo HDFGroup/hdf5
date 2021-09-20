@@ -916,8 +916,7 @@ typedef struct H5VL_file_class_t {
     herr_t (*get)(void *obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*specific)(void *obj, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req,
                        va_list arguments);
-    herr_t (*optional)(void *obj, H5VL_file_optional_t opt_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *file, hid_t dxpl_id, void **req);
 } H5VL_file_class_t;
 

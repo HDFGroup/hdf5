@@ -396,6 +396,13 @@ typedef union H5VL_native_file_optional_args_t {
 
     /* H5VL_NATIVE_FILE_POST_OPEN */
     /* No args */
+
+    /* H5VL_NATIVE_FILE_VFD_SWMR_DISABLE_EOT */
+
+    /* H5VL_NATIVE_FILE_VFD_SWMR_ENABLE_EOT */
+
+    /* H5VL_NATIVE_FILE_VFD_SWMR_END_TICK */
+
 } H5VL_native_file_optional_args_t;
 
 /* Values for native VOL connector group optional VOL operations */

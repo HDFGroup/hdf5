@@ -240,9 +240,10 @@ done:
 herr_t
 H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
 {
-    H5VL_object_t *vol_obj   = NULL;
-    int            va_flag   = (int)flag; /* C is grumpy about passing hbool_t via va_arg */
-    herr_t         ret_value = SUCCEED;
+    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
+    herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "ib", file_id, flag);
@@ -251,9 +252,13 @@ H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
+    /* Set up VOL callback arguments */
+    file_opt_args.set_mpi_atomicity.flag = flag;
+    vol_cb_args.op_type                  = H5VL_NATIVE_FILE_SET_MPI_ATOMICITY;
+    vol_cb_args.args                     = &file_opt_args;
+
     /* Set atomicity value */
-    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_SET_MPI_ATOMICITY, H5P_DATASET_XFER_DEFAULT,
-                           H5_REQUEST_NULL, va_flag) < 0)
+    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to set MPI atomicity");
 
 done:
@@ -309,8 +314,10 @@ done:
 herr_t
 H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
 {
-    H5VL_object_t *vol_obj   = NULL;
-    herr_t         ret_value = SUCCEED;
+    H5VL_object_t *                  vol_obj;             /* File info */
+    H5VL_optional_args_t             vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_native_file_optional_args_t file_opt_args;       /* Arguments for optional operation */
+    herr_t                           ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL);
     H5TRACE2("e", "ix", file_id, flag);
@@ -319,9 +326,13 @@ H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag /*out*/)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid file identifier");
 
+    /* Set up VOL callback arguments */
+    file_opt_args.get_mpi_atomicity.flag = flag;
+    vol_cb_args.op_type                  = H5VL_NATIVE_FILE_GET_MPI_ATOMICITY;
+    vol_cb_args.args                     = &file_opt_args;
+
     /* Get atomicity value */
-    if (H5VL_file_optional(vol_obj, H5VL_NATIVE_FILE_GET_MPI_ATOMICITY, H5P_DATASET_XFER_DEFAULT,
-                           H5_REQUEST_NULL, flag) < 0)
+    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "unable to get MPI atomicity");
 
 done:
