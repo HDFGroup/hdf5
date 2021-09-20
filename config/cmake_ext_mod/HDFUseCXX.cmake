@@ -43,6 +43,9 @@ if (${HDF_PREFIX}_HAVE_STDINT_H AND CMAKE_CXX_COMPILER_LOADED)
   endif ()
 endif ()
 
+#Always define
+set (${HDF_PREFIX}_CXX_HAVE_OFFSETOF 1)
+
 # For other CXX specific tests, use this MACRO.
 macro (HDF_CXX_FUNCTION_TEST OTHER_TEST)
   if (NOT DEFINED ${OTHER_TEST})
@@ -108,7 +111,6 @@ if (CMAKE_CXX_COMPILER_LOADED)
       HDF_NO_STD
       BOOL_NOTDEFINED
       NO_STATIC_CAST
-      CXX_HAVE_OFFSETOF
   )
     HDF_CXX_FUNCTION_TEST (${cxx_test})
   endforeach ()

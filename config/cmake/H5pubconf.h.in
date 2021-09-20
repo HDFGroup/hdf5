@@ -72,7 +72,7 @@
 #cmakedefine H5_HAVE_CODESTACK @H5_HAVE_CODESTACK@
 
 /* Define to 1 if you have the <curl/curl.h> header file. */
-#cmakedefine H5_HAVE_CURL_H @H5_HAVE_CURL_H@
+#cmakedefine H5_HAVE_CURL_CURL_H @H5_HAVE_CURL_H@
 
 /* Define if Darwin or Mac OS X */
 #cmakedefine H5_HAVE_DARWIN @H5_HAVE_DARWIN@
@@ -307,7 +307,7 @@
 /* Define to 1 if you have the `stat64' function. */
 #cmakedefine H5_HAVE_STAT64 @H5_HAVE_STAT64@
 
-/* Define if `struct stat' has the `st_blocks' field */
+/* Define if struct stat has the st_blocks field */
 #cmakedefine H5_HAVE_STAT_ST_BLOCKS @H5_HAVE_STAT_ST_BLOCKS@
 
 /* Define to 1 if you have the <stddef.h> header file. */
