@@ -180,19 +180,33 @@ H5VL_init_phase2(void)
 
     FUNC_ENTER_NOAPI(FAIL)
 
+    /* clang-format off */
     struct {
         herr_t (*func)(void);
         const char *descr;
-    } initializer[] = {{H5T_init, "datatype"},  {H5O_init, "object header"}, {H5D_init, "dataset"},
-                       {H5F_init, "file"},      {H5G_init, "group"},         {H5A_init, "attribute"},
-                       {H5M_init, "map"},       {H5CX_init, "context"},      {H5ES_init, "event set"},
-                       {H5Z_init, "transform"}, {H5PL_init, "plugin"},       {H5R_init, "reference"}};
+    } initializer[] = {
+        {H5T_init, "datatype"}
+    ,   {H5O_init, "object header"}
+    ,   {H5D_init, "dataset"}
+    ,   {H5F_init, "file"}
+    ,   {H5G_init, "group"}
+    ,   {H5A_init, "attribute"}
+    ,   {H5M_init, "map"}
+    ,   {H5CX_init, "context"}
+    ,   {H5ES_init, "event set"}
+    ,   {H5Z_init, "transform"}
+    ,   {H5PL_init, "plugin"}
+    ,   {H5R_init, "reference"}
+    };
+
     /* Initialize all packages for VOL-managed objects */
     for (i = 0; i < NELMTS(initializer); i++) {
         if (initializer[i].func() < 0)
-            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL, "unable to initialize %s interface",
-                        initializer[i].descr)
+            HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL,
+                "unable to initialize %s interface", initializer[i].descr)
     }
+
+    /* clang-format on */
 
     /* Sanity check default VOL connector */
     HDassert(H5VL_def_conn_s.connector_id == (-1));
