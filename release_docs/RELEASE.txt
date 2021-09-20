@@ -48,6 +48,14 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to control the build of High-Level tools
+      that default ON/enabled.
+
+      Add configure options (autotools - CMake):
+            enable-hltools       HDF5_BUILD_HL_TOOLS
+
+      (ADB - 2021/09/16, HDFFV-11266)
+
     - Adds C++ Autotools configuration file for Intel
 
       * Checks for icpc as the compiler
@@ -464,6 +472,23 @@ Bug Fixes since HDF5-1.10.7 release
         teh HDF5 file.
 
         (JWSB - 2021/09/13)
+
+    - Fixed an invalid read and memory leak when parsing corrupt file space
+      info messages
+
+        When the corrupt file from CVE-2020-10810 was parsed by the library,
+        the code that imports the version 0 file space info object header
+        message to the version 1 struct could read past the buffer read from
+        the disk, causing an invalid memory read. Not catching this error would
+        cause downstream errors that eventually resulted in a previously
+        allocated buffer to be unfreed when the library shut down. In builds
+        where the free lists are in use, this could result in an infinite loop
+        and SIGABRT when the library shuts down.
+
+        We now track the buffer size and raise an error on attempts to read
+        past the end of it.
+
+        (DER - 2021/08/12, HDFFV-11053)
 
     - Fixed CVE-2018-14460
 

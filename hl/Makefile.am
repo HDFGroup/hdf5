@@ -37,7 +37,11 @@ else
   TEST_DIR =
 endif
 if BUILD_TOOLS_CONDITIONAL
+if BUILD_TOOLS_HL_CONDITIONAL
   TOOLS_DIR = tools
+else
+  TOOLS_DIR =
+endif
 else
   TOOLS_DIR =
 endif
