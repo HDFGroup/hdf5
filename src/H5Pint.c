@@ -3472,7 +3472,7 @@ H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops, hbool_t recu
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(pclass);
     HDassert(nprops);
@@ -3487,7 +3487,6 @@ H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops, hbool_t recu
             *nprops += pclass->nprops;
         } /* end while */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P_get_nprops_pclass() */
 
@@ -3918,7 +3917,7 @@ H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(pclass1);
     HDassert(pclass2);
@@ -5220,14 +5219,13 @@ H5P_get_class_name(H5P_genclass_t *pclass)
 {
     char *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(pclass);
 
     /* Get class name */
     ret_value = H5MM_xstrdup(pclass->name);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P_get_class_name() */
 

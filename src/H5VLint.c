@@ -959,7 +959,7 @@ H5VL_conn_inc_rc(H5VL_t *connector)
 {
     int64_t ret_value = -1;
 
-    FUNC_ENTER_NOAPI(-1)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check arguments */
     HDassert(connector);
@@ -969,7 +969,6 @@ H5VL_conn_inc_rc(H5VL_t *connector)
 
     ret_value = connector->nrefs;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_conn_inc_rc() */
 
@@ -1989,7 +1988,7 @@ H5VL_cmp_connector_cls(int *cmp_value, const H5VL_class_t *cls1, const H5VL_clas
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(cls1);
@@ -2517,7 +2516,7 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(cls);
@@ -2543,7 +2542,6 @@ H5VL_check_plugin_load(const H5VL_class_t *cls, const H5PL_key_t *key, hbool_t *
     if (*success && cls->version != H5VL_VERSION)
         *success = FALSE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5VL_check_plugin_load() */
 

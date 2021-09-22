@@ -584,7 +584,7 @@ H5SL_init(void)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Allocate space for array of factories */
     H5SL_fac_g = (H5FL_fac_head_t **)H5MM_malloc(sizeof(H5FL_fac_head_t *));
@@ -596,7 +596,6 @@ H5SL_init(void)
     HDassert(H5SL_fac_g[0]);
     H5SL_fac_nused_g = 1;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 

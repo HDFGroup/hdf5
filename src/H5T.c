@@ -2129,7 +2129,7 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
 {
     H5T_class_t ret_value = H5T_NO_CLASS; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5T_NO_CLASS)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(dt);
 
@@ -2144,7 +2144,6 @@ H5T_get_class(const H5T_t *dt, htri_t internal)
             ret_value = dt->shared->type;
     }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_class() */
 
@@ -2202,7 +2201,7 @@ H5T_detect_class(const H5T_t *dt, H5T_class_t cls, hbool_t from_api)
     unsigned i;
     htri_t   ret_value = FALSE; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(dt);
     HDassert(cls > H5T_NO_CLASS && cls < H5T_NCLASSES);
@@ -5585,14 +5584,13 @@ H5T_is_immutable(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(dt);
 
     if (dt->shared->state == H5T_STATE_IMMUTABLE)
         ret_value = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -5610,7 +5608,7 @@ H5T_is_named(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(dt);
 
@@ -5619,7 +5617,6 @@ H5T_is_named(const H5T_t *dt)
     else
         ret_value = (H5T_STATE_OPEN == dt->shared->state || H5T_STATE_NAMED == dt->shared->state);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -5697,14 +5694,13 @@ H5T_get_ref_type(const H5T_t *dt)
 {
     H5R_type_t ret_value = H5R_BADTYPE;
 
-    FUNC_ENTER_NOAPI(H5R_BADTYPE)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(dt);
 
     if (dt->shared->type == H5T_REFERENCE)
         ret_value = dt->shared->u.atomic.u.r.rtype;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_get_ref_type() */
 
@@ -5727,7 +5723,7 @@ H5T_is_sensible(const H5T_t *dt)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(dt);
 
@@ -5765,7 +5761,6 @@ H5T_is_sensible(const H5T_t *dt)
             break;
     } /* end switch */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -5958,7 +5953,7 @@ H5T_is_relocatable(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(dt);
@@ -5967,7 +5962,6 @@ H5T_is_relocatable(const H5T_t *dt)
     if (H5T_detect_class(dt, H5T_VLEN, FALSE) || H5T_detect_class(dt, H5T_REFERENCE, FALSE))
         ret_value = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_relocatable() */
 
@@ -6058,7 +6052,7 @@ H5T_is_vl_storage(const H5T_t *dt)
 {
     htri_t ret_value = FALSE;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(dt);
@@ -6071,7 +6065,6 @@ H5T_is_vl_storage(const H5T_t *dt)
     else
         ret_value = FALSE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_is_vl_storage() */
 
@@ -6225,7 +6218,7 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
 {
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(dt);
@@ -6236,7 +6229,6 @@ H5T_patch_file(H5T_t *dt, H5F_t *f)
         dt->sh_loc.file = f;
     } /* end if */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_patch_file() */
 

@@ -159,7 +159,7 @@ H5FD_family_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
 
     if (H5I_VFL != H5I_get_type(H5FD_FAMILY_g))
         H5FD_FAMILY_g = H5FD_register(&H5FD_family_g, sizeof(H5FD_class_t), FALSE);

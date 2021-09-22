@@ -179,7 +179,7 @@ H5O_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* H5O interface sanity checks */
     HDcompile_assert(H5O_MSG_TYPES == NELMTS(H5O_msg_class_g));
@@ -187,7 +187,6 @@ H5O_init(void)
 
     HDcompile_assert(H5O_UNKNOWN_ID < H5O_MSG_TYPES);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -555,7 +554,7 @@ H5O_open(H5O_loc_t *loc)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(loc);
@@ -572,7 +571,6 @@ H5O_open(H5O_loc_t *loc)
     else
         H5F_INCR_NOPEN_OBJS(loc->file);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5O_open() */
 

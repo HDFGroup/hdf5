@@ -238,7 +238,7 @@ H5FD_log_init(void)
     char *lock_env_var = NULL;            /* Environment variable pointer */
     hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
@@ -255,7 +255,6 @@ H5FD_log_init(void)
     /* Set return value */
     ret_value = H5FD_LOG_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_log_init() */
 

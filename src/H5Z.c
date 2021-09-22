@@ -1506,7 +1506,7 @@ H5Z_filter_in_pline(const H5O_pline_t *pline, H5Z_filter_t filter)
     size_t idx;              /* Index of filter in pipeline */
     htri_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(pline);
     HDassert(filter >= 0 && filter <= H5Z_FILTER_MAX);
@@ -1520,7 +1520,6 @@ H5Z_filter_in_pline(const H5O_pline_t *pline, H5Z_filter_t filter)
     if (idx >= pline->nused)
         ret_value = FALSE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5Z_filter_in_pline() */
 
@@ -1540,7 +1539,7 @@ H5Z_all_filters_avail(const H5O_pline_t *pline)
     size_t i, j;             /* Local index variable */
     htri_t ret_value = TRUE; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(pline);

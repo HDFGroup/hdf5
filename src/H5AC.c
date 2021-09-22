@@ -140,7 +140,7 @@ H5AC_init(void)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
 #ifdef H5_HAVE_PARALLEL
     /* check whether to enable strict collective function calling
@@ -157,7 +157,6 @@ H5AC_init(void)
     }
 #endif /* H5_HAVE_PARALLEL */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5AC_init() */
 

@@ -199,7 +199,7 @@ H5FD_sec2_init(void)
     char *lock_env_var = NULL;            /* Environment variable pointer */
     hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");

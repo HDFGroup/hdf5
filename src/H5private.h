@@ -2186,23 +2186,18 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                             FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                    \
                             {
 
-/* Note: this macro only works when there's _no_ interface initialization routine for the module */
-#define FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-    /* Push the name of this function on the function stack */                                               \
-    H5_PUSH_FUNC
-
 /* Use this macro for all "normal" non-API functions */
 #define FUNC_ENTER_NOAPI(err)                                                                                \
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
-        FUNC_ENTER_NOAPI_INIT(err)                                                                           \
+        H5_PUSH_FUNC                                                                                         \
         {
 
 /* Use this macro for all non-API functions, which propagate errors, but don't issue them */
 #define FUNC_ENTER_NOAPI_NOERR                                                                               \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
-        FUNC_ENTER_NOAPI_INIT(-)                                                                             \
+        H5_PUSH_FUNC                                                                                         \
         {
 
 /*
@@ -2280,7 +2275,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
-        FUNC_ENTER_NOAPI_INIT(err)                                                                           \
+        H5_PUSH_FUNC                                                                                         \
         {
 
 #define FUNC_ENTER_NOAPI_NOINIT_TAG(tag)                                                                     \

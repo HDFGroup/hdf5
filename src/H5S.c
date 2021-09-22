@@ -714,7 +714,7 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
 {
     hssize_t ret_value = -1; /* Return value */
 
-    FUNC_ENTER_NOAPI(-1)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* check args */
     HDassert(ds);
@@ -722,7 +722,6 @@ H5S_get_simple_extent_npoints(const H5S_t *ds)
     /* Get the number of elements in extent */
     ret_value = (hssize_t)ds->extent.nelem;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_get_simple_extent_npoints() */
 
@@ -1695,13 +1694,12 @@ H5S_get_simple_extent_type(const H5S_t *space)
 {
     H5S_class_t ret_value = H5S_NO_CLASS; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5S_NO_CLASS)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(space);
 
     ret_value = H5S_GET_EXTENT_TYPE(space);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_get_simple_extent_type() */
 

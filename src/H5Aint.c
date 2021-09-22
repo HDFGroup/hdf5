@@ -1102,7 +1102,7 @@ H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check args */
     HDassert(attr);
@@ -1120,7 +1120,6 @@ H5A__get_info(const H5A_t *attr, H5A_info_t *ainfo)
         ainfo->corder       = attr->shared->crt_idx;
     } /* end else */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A__get_info() */
 
@@ -1337,14 +1336,13 @@ H5A_oloc(H5A_t *attr)
 {
     H5O_loc_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = &(attr->oloc);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_oloc() */
 
@@ -1368,14 +1366,13 @@ H5A_nameof(H5A_t *attr)
 {
     H5G_name_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = &(attr->path);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_nameof() */
 
@@ -1397,14 +1394,13 @@ H5A_type(const H5A_t *attr)
 {
     H5T_t *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(attr);
 
     /* Set return value */
     ret_value = attr->shared->dt;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5A_type() */
 

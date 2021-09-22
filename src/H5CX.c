@@ -1209,7 +1209,7 @@ H5CX_set_libver_bounds(H5F_t *f)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -1223,7 +1223,6 @@ H5CX_set_libver_bounds(H5F_t *f)
     (*head)->ctx.low_bound_valid  = TRUE;
     (*head)->ctx.high_bound_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_libver_bounds() */
 
@@ -1491,7 +1490,7 @@ H5CX_set_vol_wrap_ctx(void *vol_wrap_ctx)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -1503,7 +1502,6 @@ H5CX_set_vol_wrap_ctx(void *vol_wrap_ctx)
     /* Mark the value as valid */
     (*head)->ctx.vol_wrap_ctx_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_vol_wrap_ctx() */
 
@@ -1525,7 +1523,7 @@ H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -1537,7 +1535,6 @@ H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
     /* Mark the value as valid */
     (*head)->ctx.vol_connector_prop_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_vol_connector_prop() */
 
@@ -1619,7 +1616,7 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(vol_wrap_ctx);
@@ -1633,7 +1630,6 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
     else
         *vol_wrap_ctx = NULL;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_wrap_ctx() */
 
@@ -1655,7 +1651,7 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(vol_connector_prop);
@@ -1669,7 +1665,6 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
     else
         HDmemset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_connector_prop() */
 
@@ -3117,7 +3112,7 @@ H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -3132,7 +3127,6 @@ H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free
     /* Mark the value as valid */
     (*head)->ctx.vl_alloc_info_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_vlen_alloc_info() */
 
@@ -3154,7 +3148,7 @@ H5CX_set_nlinks(size_t nlinks)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -3166,7 +3160,6 @@ H5CX_set_nlinks(size_t nlinks)
     /* Mark the value as valid */
     (*head)->ctx.nlinks_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_nlinks() */
 

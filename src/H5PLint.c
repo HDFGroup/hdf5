@@ -433,10 +433,9 @@ H5PL_iterate(H5PL_iterate_type_t iter_type, H5PL_iterate_t iter_op, void *op_dat
 {
     herr_t ret_value = H5_ITER_CONT;
 
-    FUNC_ENTER_NOAPI(H5_ITER_ERROR)
+    FUNC_ENTER_NOAPI_NOERR
 
     ret_value = H5PL__path_table_iterate(iter_type, iter_op, op_data);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL_iterate() */
