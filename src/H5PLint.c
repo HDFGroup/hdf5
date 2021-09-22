@@ -292,7 +292,7 @@ done:
  *       get_plugin_info function pointer, but early (4.4.7, at least) gcc
  *       only allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("pedantic")
+H5_GCC_CLANG_DIAG_OFF("pedantic")
 herr_t
 H5PL__open(const char *path, H5PL_type_t type, const H5PL_key_t *key, hbool_t *success,
            H5PL_type_t *plugin_type, const void **plugin_info)
@@ -414,7 +414,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__open() */
-H5_GCC_DIAG_ON("pedantic")
+H5_GCC_CLANG_DIAG_ON("pedantic")
 
 /*-------------------------------------------------------------------------
  * Function:    H5PL__close
