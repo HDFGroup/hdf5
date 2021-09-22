@@ -35,6 +35,7 @@
 #include "H5Pprivate.h"    /* Property lists           */
 #include "H5Spkg.h"        /* For selections and creation of subfiling vectors */
 #include "H5private.h"     /* Generic Functions        */
+#include "H5FDioc.h"       /* IOC                      */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SUBFILING_g = 0;
@@ -411,6 +412,54 @@ H5FD__copy_plist(hid_t fapl_id, hid_t *id_out_ptr)
 done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__copy_plist() */
+
+
+herr_t
+H5Pset_fapl_subfiling2(hid_t fapl_id)
+{
+    hid_t                    ioc_fapl   = H5I_INVALID_HID;
+    H5FD_ioc_config_t        ioc_config = {0,};
+    H5FD_subfiling_config_t  subfiling_conf = {0,};
+    herr_t                   ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+
+    /* Check arguments */
+    if (fapl_id == H5P_DEFAULT)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+
+    ioc_fapl = H5Pcreate(H5P_FILE_ACCESS);
+    if (H5I_INVALID_HID == ioc_fapl) 
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't create ioc fapl")
+
+    /* Get subfiling VFD defaults */
+    if (H5Pget_fapl_subfiling(fapl_id,&subfiling_conf) < 0)
+        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get subfiling fapl")
+
+    if (subfiling_conf.require_ioc) {
+        /* Get IOC VFD defaults */
+        if (H5Pget_fapl_ioc(ioc_fapl, &ioc_config) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get ioc fapl")
+
+        /* Now we can set the IOC fapl. */
+        if (H5Pset_fapl_ioc(ioc_fapl, &ioc_config) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set ioc fapl")
+        else
+          if (H5Pset_fapl_sec2(ioc_fapl) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sec2 fapl")
+     }
+
+     /* Assign the IOC fapl as the underlying VPD */
+     subfiling_conf.common.ioc_fapl_id = ioc_fapl;
+
+     /* Set the SUBFILING fapl before returning. */
+    if (H5Pset_fapl_subfiling(fapl_id, &subfiling_conf) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set subfiling fapl")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5Pset_fapl_subfiling2() */
 
 /*-------------------------------------------------------------------------
  *

@@ -156,6 +156,7 @@ extern FILE *client_log;
 H5_DLL hid_t  H5FD_subfiling_init(void);
 H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *config_out);
 H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *vfd_config);
+H5_DLL herr_t H5Pset_fapl_subfiling2(hid_t fapl_id);
 H5_DLL herr_t H5FD__get_file_ino(const char *name, uint64_t *st_ino);
 H5_DLL char * H5FD__get_file_directory(void *h5file);
 H5_DLL herr_t H5FD__dataset_write_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
