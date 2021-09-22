@@ -175,7 +175,7 @@ done:
 herr_t
 H5VL_init_phase2(void)
 {
-    int    i;
+    size_t i;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
