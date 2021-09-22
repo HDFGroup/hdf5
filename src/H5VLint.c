@@ -201,9 +201,10 @@ H5VL_init_phase2(void)
 
     /* Initialize all packages for VOL-managed objects */
     for (i = 0; i < NELMTS(initializer); i++) {
-        if (initializer[i].func() < 0)
+        if (initializer[i].func() < 0) {
             HGOTO_ERROR(H5E_VOL, H5E_CANTINIT, FAIL,
                 "unable to initialize %s interface", initializer[i].descr)
+        }
     }
 
     /* clang-format on */
