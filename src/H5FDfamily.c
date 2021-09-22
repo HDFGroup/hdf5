@@ -582,7 +582,7 @@ done:
  *      memb_name & temp in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static H5FD_t *
 H5FD__family_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
@@ -735,7 +735,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__family_open() */
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__family_close
@@ -905,7 +905,7 @@ H5FD__family_get_eoa(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
  *      memb_name in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 H5FD__family_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t abs_eoa)
 {
@@ -974,7 +974,7 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 }
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__family_get_eof

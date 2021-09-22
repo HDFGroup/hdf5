@@ -49,6 +49,14 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to control the build of High-Level tools
+      that default ON/enabled.
+
+      Add configure options (autotools - CMake):
+            enable-hltools       HDF5_BUILD_HL_TOOLS
+
+      (ADB - 2021/09/16, HDFFV-11266)
+
     - Adds C++ Autotools configuration file for Intel
 
       * Checks for icpc as the compiler
@@ -745,6 +753,11 @@ New Features
 
     Fortran Library:
     ----------------
+    - H5Fget_name_f fixed to handle correctly trailing whitespaces and
+      newly allocated buffers.
+
+      (MSB - 2021/08/30, github-826,972)
+
     - Add wrappers for H5Pset/get_file_locking() API calls
 
         h5pget_file_locking_f()
@@ -820,6 +833,26 @@ New Features
 
     Tools:
     ------
+    - Refactored the perform tools and removed depends on test library.
+
+        Moved the perf and h5perf tools from tools/test/perform to
+        tools/src/h5perf so that they can be installed. This required
+        that the test library dependency be removed by copying the
+        needed functions from h5test.c.
+        The standalone scripts and other perform tools remain in the
+        tools/test/perform folder.
+
+        (ADB - 2021/08/10)
+
+    - Removed partial long exceptions
+
+        Some of the tools accepted shortened versions of the long options
+        (ex: --datas instead of --dataset). These were implemented inconsistently,
+        are difficult to maintian, and occasionally block useful long option
+        names. These partial long options have been removed from all the tools.
+
+        (DER - 2021/08/03)
+
     - h5repack added help text for user-defined filters.
 
         Added help text line that states the valid values of the filter flag
@@ -882,7 +915,13 @@ New Features
 
     High-Level APIs:
     ----------------
-    -
+    - added set/get for unsigned long long attributes
+
+        the attribute writing high-level API has been expanded to include
+        public set/get functions for ULL attributes, analogously to the
+        existing set/get for other types.
+
+        (AF - 2021/09/08)
 
     C Packet Table API:
     -------------------
@@ -904,6 +943,35 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Detection of simple data transform function "x"
+
+        In the case of the simple data transform function "x" the (parallel)
+        library recognizes this is the same as not applying this data transform
+        function. This improves the I/O performance. In the case of the parallel
+        library, it also avoids breaking to independent I/O, which makes it
+        possible to apply a filter when writing or reading data to or from
+        teh HDF5 file.
+
+        (JWSB - 2021/09/13)
+
+    - Fixed an invalid read and memory leak when parsing corrupt file space
+      info messages
+
+        When the corrupt file from CVE-2020-10810 was parsed by the library,
+        the code that imports the version 0 file space info object header
+        message to the version 1 struct could read past the buffer read from
+        the disk, causing an invalid memory read. Not catching this error would
+        cause downstream errors that eventually resulted in a previously
+        allocated buffer to be unfreed when the library shut down. In builds
+        where the free lists are in use, this could result in an infinite loop
+        and SIGABRT when the library shuts down.
+
+        We now track the buffer size and raise an error on attempts to read
+        past the end of it.
+
+        (DER - 2021/08/12, HDFFV-11053)
+
+
     - Fixed CVE-2018-14460
 
         The tool h5repack produced a segfault when the rank in dataspace
@@ -1079,6 +1147,14 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Corrected pkg-config compile script
+
+      It was discovered that the position of the "$@" argument for the command
+      in the compile script may fail on some platforms and configurations. The
+      position of the "$@"command argument was moved before the pkg-config sub command.
+
+      (ADB - 2021/08/30)
+
     - Fixed CMake C++ compiler flags
 
       A recent refactoring of the C++ configure files accidently removed the
@@ -1464,6 +1540,10 @@ The following platforms are not supported but have been tested for this release.
 
 Known Problems
 ==============
+    Setting a variable-length dataset fill value will leak the memory allocated
+    for the p field of the hvl_t struct. A fix is in progress for this.
+    HDFFV-10840
+
     CMake files do not behave correctly with paths containing spaces.
     Do not use spaces in paths because the required escaping for handling spaces
     results in very complex and fragile build files.

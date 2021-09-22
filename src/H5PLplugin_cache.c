@@ -242,7 +242,7 @@ done:
 /* See the other use of H5PL_GET_LIB_FUNC() for an explanation
  * for why we disable -Wpedantic here.
  */
-H5_GCC_DIAG_OFF("pedantic")
+H5_GCC_CLANG_DIAG_OFF("pedantic")
 herr_t
 H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *found,
                            const void **plugin_info)
@@ -320,4 +320,4 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5PL__find_plugin_in_cache() */
-H5_GCC_DIAG_ON("pedantic")
+H5_GCC_CLANG_DIAG_ON("pedantic")
