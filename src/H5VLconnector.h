@@ -1123,6 +1123,8 @@ H5_DLL herr_t H5VLdataset_optional_op(const char *app_file, const char *app_func
                                       hid_t dset_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLdatatype_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                        hid_t type_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
+H5_DLL herr_t H5VLfile_optional_op(const char *app_file, const char *app_func, unsigned app_line,
+                                   hid_t file_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLgroup_optional_op(const char *app_file, const char *app_func, unsigned app_line,
                                     hid_t group_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
 H5_DLL herr_t H5VLlink_optional_op(const char *app_file, const char *app_func, unsigned app_line,
@@ -1141,6 +1143,7 @@ H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_option
 #define H5VLattr_optional_op(...)     H5VLattr_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLdataset_optional_op(...)  H5VLdataset_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLdatatype_optional_op(...) H5VLdatatype_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
+#define H5VLfile_optional_op(...)     H5VLfile_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLgroup_optional_op(...)    H5VLgroup_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLlink_optional_op(...)     H5VLlink_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
 #define H5VLobject_optional_op(...)   H5VLobject_optional_op(__FILE__, __func__, __LINE__, __VA_ARGS__)
@@ -1151,6 +1154,7 @@ H5_DLL herr_t H5VLrequest_optional_op(void *req, hid_t connector_id, H5VL_option
 #define H5VLattr_optional_op_wrap     H5_NO_EXPAND(H5VLattr_optional_op)
 #define H5VLdataset_optional_op_wrap  H5_NO_EXPAND(H5VLdataset_optional_op)
 #define H5VLdatatype_optional_op_wrap H5_NO_EXPAND(H5VLdatatype_optional_op)
+#define H5VLfile_optional_op_wrap     H5_NO_EXPAND(H5VLfile_optional_op)
 #define H5VLgroup_optional_op_wrap    H5_NO_EXPAND(H5VLgroup_optional_op)
 #define H5VLlink_optional_op_wrap     H5_NO_EXPAND(H5VLlink_optional_op)
 #define H5VLobject_optional_op_wrap   H5_NO_EXPAND(H5VLobject_optional_op)

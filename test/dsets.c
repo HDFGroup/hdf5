@@ -83,6 +83,8 @@ const char *FILENAME[] = {"dataset",             /* 0 */
                           "power2up",            /* 24 */
                           "version_bounds",      /* 25 */
                           "alloc_0sized",        /* 26 */
+                          "h5s_block",           /* 27 */
+                          "h5s_plist",           /* 28 */
                           NULL};
 
 #define OHMIN_FILENAME_A "ohdr_min_a"
@@ -14971,6 +14973,370 @@ error:
 } /* end test_object_header_minimization_dcpl() */
 
 /*-----------------------------------------------------------------------------
+ * Function:   test_h5s_block
+ *
+ * Purpose:    Test the H5S_BLOCK feature.
+ *
+ * Return:     Success/pass:   0
+ *             Failure/error: -1
+ *
+ * Programmer: Quincey Koziol
+ *             3 November 2020
+ *
+ *-----------------------------------------------------------------------------
+ */
+static herr_t
+test_h5s_block(void)
+{
+    hid_t    file_id                     = H5I_INVALID_HID; /* File ID */
+    char     filename[FILENAME_BUF_SIZE] = "";
+    hid_t    dset_id                     = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t  dims[1]                     = {20};            /* Dataset's dataspace size */
+    hsize_t  start                       = 2;               /* Starting offset of hyperslab selection */
+    hsize_t  count                       = 10;              /* Count of hyperslab selection */
+    hid_t    file_space_id               = H5I_INVALID_HID; /* File dataspace ID */
+    int      buf[20];                                       /* Memory buffer for I/O */
+    unsigned u;                                             /* Local index variable */
+    herr_t   ret;
+
+    TESTING("contiguous memory buffers with H5S_BLOCK");
+
+    /*********/
+    /* SETUP */
+    /*********/
+    if (NULL == h5_fixname(FILENAME[27], H5P_DEFAULT, filename, sizeof(filename)))
+        TEST_ERROR
+    if (H5I_INVALID_HID == (file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)))
+        FAIL_STACK_ERROR
+    if ((file_space_id = H5Screate_simple(1, dims, NULL)) < 0)
+        FAIL_STACK_ERROR
+    if ((dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_INT, file_space_id, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+
+    for (u = 0; u < 20; u++)
+        buf[u] = (int)u;
+
+    /*********/
+    /* TESTS */
+    /*********/
+
+    /* Check error cases */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_BLOCK, H5P_DEFAULT, buf);
+    }
+    H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+
+    /* Write the entire dataset */
+    if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Reset the memory buffer */
+    HDmemset(buf, 0, sizeof(buf));
+
+    /* Read the entire dataset */
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the data read in */
+    for (u = 0; u < 20; u++)
+        if (buf[u] != (int)u)
+            TEST_ERROR
+
+    /* Read a hyperslab from the file to the first 10 elements of the buffer */
+    if (H5Sselect_hyperslab(file_space_id, H5S_SELECT_SET, &start, NULL, &count, NULL) < 0)
+        FAIL_STACK_ERROR
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, file_space_id, H5P_DEFAULT, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the data read in */
+    for (u = 0; u < count; u++)
+        if (buf[u] != (int)(u + start))
+            TEST_ERROR
+
+    /* Verify that reading 0 elements is handled correctly and doesn't modify buffer */
+    if (H5Sselect_none(file_space_id) < 0)
+        FAIL_STACK_ERROR
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, file_space_id, H5P_DEFAULT, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the data read in */
+    for (u = 0; u < count; u++)
+        if (buf[u] != (int)(u + start))
+            TEST_ERROR
+
+    /************/
+    /* TEARDOWN */
+    /************/
+    if (FAIL == H5Sclose(file_space_id))
+        FAIL_STACK_ERROR
+    if (FAIL == H5Dclose(dset_id))
+        FAIL_STACK_ERROR
+    if (FAIL == H5Fclose(file_id))
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(file_space_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_h5s_block() */
+
+/*-----------------------------------------------------------------------------
+ * Function:   test_h5s_plist
+ *
+ * Purpose:    Test the H5S_PLIST feature.
+ *
+ * Return:     Success/pass:   0
+ *             Failure/error: -1
+ *
+ * Programmer: Quincey Koziol
+ *             28 January 2021
+ *
+ *-----------------------------------------------------------------------------
+ */
+static herr_t
+test_h5s_plist(void)
+{
+    hid_t    file_id                     = H5I_INVALID_HID; /* File ID */
+    char     filename[FILENAME_BUF_SIZE] = "";
+    hid_t    dset_id                     = H5I_INVALID_HID; /* Dataset ID */
+    hsize_t  dims[1]                     = {20};            /* Dataset's dataspace size */
+    hid_t    dxpl_id                     = H5I_INVALID_HID; /* Dataset xfer property list ID */
+    hid_t    dxpl_id_copy                = H5I_INVALID_HID; /* Copy of dataset xfer property list ID */
+    hsize_t  start                       = 2;               /* Starting offset of hyperslab selection */
+    hsize_t  stride                      = 1;               /* Stride of hyperslab selection */
+    hsize_t  count                       = 10;              /* Count of hyperslab selection */
+    hsize_t  start2                      = 14;              /* Starting offset of hyperslab selection */
+    hsize_t  count2                      = 4;               /* Count of hyperslab selection */
+    hsize_t  block                       = 1;               /* Block size of hyperslab selection */
+    hid_t    file_space_id               = H5I_INVALID_HID; /* File dataspace ID */
+    int      buf[20];                                       /* Memory buffer for I/O */
+    unsigned u;                                             /* Local index variable */
+    herr_t   ret;
+
+    TESTING("dataset's dataspace selection for I/O in DXPL with H5S_PLIST");
+
+    /*********/
+    /* SETUP */
+    /*********/
+    if (NULL == h5_fixname(FILENAME[28], H5P_DEFAULT, filename, sizeof(filename)))
+        TEST_ERROR
+    if (H5I_INVALID_HID == (file_id = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)))
+        FAIL_STACK_ERROR
+    if ((file_space_id = H5Screate_simple(1, dims, NULL)) < 0)
+        FAIL_STACK_ERROR
+    if ((dset_id = H5Dcreate2(file_id, "dset", H5T_NATIVE_INT, file_space_id, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+        FAIL_STACK_ERROR
+    if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+        FAIL_STACK_ERROR
+
+    for (u = 0; u < 20; u++)
+        buf[u] = (int)u;
+
+    /*********/
+    /* TESTS */
+    /*********/
+
+    /* Check error cases */
+    H5E_BEGIN_TRY
+    {
+        /* Bad rank */
+        ret = H5Pset_dataset_io_hyperslab_selection(dxpl_id, 0, H5S_SELECT_SET, &start, &stride, &count,
+                                                    &block);
+    }
+    H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+    H5E_BEGIN_TRY
+    {
+        /* Bad selection operator */
+        ret = H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_NOOP, &start, &stride, &count,
+                                                    &block);
+    }
+    H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+    H5E_BEGIN_TRY
+    {
+        /* Bad start pointer */
+        ret =
+            H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_SET, NULL, &stride, &count, &block);
+    }
+    H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+    H5E_BEGIN_TRY
+    {
+        /* Bad stride value (stride of NULL is OK) */
+        stride = 0;
+        ret    = H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_SET, &start, &stride, &count,
+                                                    &block);
+        stride = 1;
+    }
+    H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+    H5E_BEGIN_TRY
+    {
+        /* Bad count pointer */
+        ret =
+            H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_SET, &start, &stride, NULL, &block);
+    }
+    H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+
+    /* Block pointer is allowed to be NULL */
+
+    H5E_BEGIN_TRY
+    {
+        /* H5S_PLIST for memory dataspace */
+        ret = H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_PLIST, H5S_ALL, H5P_DEFAULT, buf);
+    }
+    H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+
+    /* Write the entire dataset */
+    if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Reset the memory buffer */
+    HDmemset(buf, 0, sizeof(buf));
+
+    /* Read the entire dataset */
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_ALL, H5P_DEFAULT, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the data read in */
+    for (u = 0; u < 20; u++)
+        if (buf[u] != (int)u)
+            TEST_ERROR
+
+    /* Reset the memory buffer */
+    HDmemset(buf, 0, sizeof(buf));
+
+    /* Set valid selection in DXPL */
+    if (H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_SET, &start, &stride, &count, &block) <
+        0)
+        FAIL_STACK_ERROR
+
+    /* Read a hyperslab from the file to the first 10 elements of the buffer */
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_PLIST, dxpl_id, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the data read in */
+    for (u = 0; u < count; u++)
+        if (buf[u] != (int)(u + start))
+            TEST_ERROR
+
+    /* Reset the memory buffer */
+    HDmemset(buf, 0, sizeof(buf));
+
+    /* Check for copying property list w/selection */
+    if ((dxpl_id_copy = H5Pcopy(dxpl_id)) < 0)
+        FAIL_STACK_ERROR
+
+    /* Read a hyperslab from the file to the first 10 elements of the buffer */
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_PLIST, dxpl_id_copy, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the data read in */
+    for (u = 0; u < count; u++)
+        if (buf[u] != (int)(u + start))
+            TEST_ERROR
+
+    /* Attempt to 'OR' block with invalid dimensions into the selection */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_dataset_io_hyperslab_selection(dxpl_id_copy, 2, H5S_SELECT_OR, &start, &stride, &count,
+                                                    &block);
+    }
+    H5E_END_TRY;
+    if (ret == SUCCEED)
+        TEST_ERROR
+
+    /* Set new valid selection in DXPL */
+    if (H5Pset_dataset_io_hyperslab_selection(dxpl_id_copy, 1, H5S_SELECT_SET, &start, &stride, &count,
+                                              &block) < 0)
+        FAIL_STACK_ERROR
+
+    /* Read a hyperslab from the file to the first 10 elements of the buffer */
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_PLIST, dxpl_id_copy, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the data read in */
+    for (u = 0; u < count; u++)
+        if (buf[u] != (int)(u + start))
+            TEST_ERROR
+
+    /* Close the copy */
+    if (FAIL == H5Pclose(dxpl_id_copy))
+        FAIL_STACK_ERROR
+    dxpl_id_copy = H5I_INVALID_HID;
+
+    /* 'OR' valid block into the existing selection in original DXPL */
+    if (H5Pset_dataset_io_hyperslab_selection(dxpl_id, 1, H5S_SELECT_OR, &start2, &stride, &count2, &block) <
+        0)
+        FAIL_STACK_ERROR
+
+    /* Read a disjoint hyperslab from the file to the first 10 elements of the buffer */
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_BLOCK, H5S_PLIST, dxpl_id, buf) < 0)
+        FAIL_STACK_ERROR
+
+    /* Verify the data read in */
+    for (u = 0; u < count; u++)
+        if (buf[u] != (int)(u + start))
+            TEST_ERROR
+    for (u = 0; u < count2; u++)
+        if (buf[u + count] != (int)(u + start2))
+            TEST_ERROR
+
+    /************/
+    /* TEARDOWN */
+    /************/
+    if (FAIL == H5Pclose(dxpl_id))
+        FAIL_STACK_ERROR
+    if (FAIL == H5Sclose(file_space_id))
+        FAIL_STACK_ERROR
+    if (FAIL == H5Dclose(dset_id))
+        FAIL_STACK_ERROR
+    if (FAIL == H5Fclose(file_id))
+        FAIL_STACK_ERROR
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id_copy);
+        H5Pclose(dxpl_id);
+        H5Sclose(file_space_id);
+        H5Dclose(dset_id);
+        H5Fclose(file_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_h5s_plist() */
+
+/*-----------------------------------------------------------------------------
  * Function:   test_0sized_dset_metadata_alloc
  *
  * Purpose:    Tests the metadata allocation for 0-sized datasets.
@@ -15417,6 +15783,8 @@ main(void)
 
     /* Tests that use their own file */
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
+    nerrors += (test_h5s_block() < 0 ? 1 : 0);
+    nerrors += (test_h5s_plist() < 0 ? 1 : 0);
 
     /* Run misc tests */
     nerrors += (dls_01_main() < 0 ? 1 : 0);
