@@ -417,17 +417,20 @@ done:
 herr_t
 H5Pset_fapl_subfiling2(hid_t fapl_id)
 {
+    H5P_genplist_t           *plist;
     hid_t                    ioc_fapl   = H5I_INVALID_HID;
     H5FD_ioc_config_t        ioc_config = {0,};
     H5FD_subfiling_config_t  subfiling_conf = {0,};
     herr_t                   ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
+    H5TRACE1("e", "i", fapl_id);
 
     /* Check arguments */
-    if (fapl_id == H5P_DEFAULT)
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "can't set values in default property list")
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
+        HGOTO_ERROR(H5E_ID, H5E_BADID, FAIL, "can't find object for ID")
 
+    /* Create IOC fapl */
     ioc_fapl = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == ioc_fapl) 
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't create ioc fapl")
