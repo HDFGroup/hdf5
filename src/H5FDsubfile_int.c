@@ -39,6 +39,7 @@ Private functions
 =========================================
 */
 
+
 /*
 --------------------------------------------------------------------------
 sf_context_limit   -- How many contexts can be recorded (default = 4)
@@ -46,12 +47,12 @@ sf_context_entries -- The number of contexts that are currently recorded.
 sf_context_cache   -- Storage for contexts
 --------------------------------------------------------------------------
 */
-static size_t               twoGIG_LIMIT      = (1 << 30);
-static size_t               sf_context_limit  = 16;
-static subfiling_context_t *sf_context_cache  = NULL;
-static size_t               sf_topology_limit = 4;
-static sf_topology_t *      sf_topology_cache = NULL;
-static app_layout_t *       sf_app_layout     = NULL;
+// static size_t                 twoGIG_LIMIT = (1 << 30);
+static size_t                 sf_context_limit  = 16;
+static subfiling_context_t   *sf_context_cache  = NULL;
+static size_t                 sf_topology_limit = 4;
+static sf_topology_t         *sf_topology_cache = NULL;
+static app_layout_t          *sf_app_layout = NULL;
 
 static file_map_to_context_t *sf_open_file_map = NULL;
 static int                    sf_file_map_size = 0;
@@ -63,25 +64,31 @@ static int                    sf_file_map_size = 0;
 ---------------------------------------
  */
 static stat_record_t subfiling_stats[TOTAL_STAT_COUNT];
-#define SF_WRITE_OPS       (subfiling_stats[WRITE_STAT].op_count)
-#define SF_WRITE_TIME      (subfiling_stats[WRITE_STAT].total / (double)subfiling_stats[WRITE_STAT].op_count)
-#define SF_WRITE_WAIT_TIME (subfiling_stats[WRITE_WAIT].total / (double)subfiling_stats[WRITE_WAIT].op_count)
-#define SF_READ_OPS        (subfiling_stats[READ_STAT].op_count)
-#define SF_READ_TIME       (subfiling_stats[READ_STAT].total / (double)subfiling_stats[READ_STAT].op_count)
-#define SF_READ_WAIT_TIME  (subfiling_stats[READ_WAIT].total / (double)subfiling_stats[READ_WAIT].op_count)
-#define SF_QUEUE_DELAYS    (subfiling_stats[QUEUE_STAT].total)
+#define SF_WRITE_OPS (subfiling_stats[WRITE_STAT].op_count)
+#define SF_WRITE_TIME (subfiling_stats[WRITE_STAT].total/(double)subfiling_stats[WRITE_STAT].op_count)
+#define SF_WRITE_WAIT_TIME (subfiling_stats[WRITE_WAIT].total/(double)subfiling_stats[WRITE_WAIT].op_count)
+#define SF_READ_OPS  (subfiling_stats[READ_STAT].op_count)
+#define SF_READ_TIME (subfiling_stats[READ_STAT].total/(double)subfiling_stats[READ_STAT].op_count)
+#define SF_READ_WAIT_TIME (subfiling_stats[READ_WAIT].total/(double)subfiling_stats[READ_WAIT].op_count)
+#define SF_QUEUE_DELAYS (subfiling_stats[QUEUE_STAT].total)
+
 
 static void
 maybe_initialize_statistics(void)
 {
-    memset(subfiling_stats, 0, sizeof(subfiling_stats));
+	memset(subfiling_stats, 0, sizeof(subfiling_stats));
 }
+
+static void clear_fid_map_entry(uint64_t sf_fid);
 
 /*
 =========================================
 Public functions
 =========================================
 */
+
+
+
 
 /*
 -------------------------------------------------------------------------
@@ -111,7 +118,7 @@ Public functions
 void *
 get__subfiling_object(int64_t object_id)
 {
-    int obj_type = (int)((object_id >> 32) & 0x0FFFF);
+    int obj_type = (int) ((object_id >> 32) & 0x0FFFF);
     /* We don't require a large indexing space
      * 16 bits should be enough..
      */
@@ -123,17 +130,16 @@ get__subfiling_object(int64_t object_id)
          * nodes along with the number of MPI ranks on a node.
          */
         if (sf_topology_cache == NULL) {
-            sf_topology_cache = (sf_topology_t *)calloc(sf_topology_limit, sizeof(sf_topology_t));
+            sf_topology_cache = (sf_topology_t *) calloc(
+                sf_topology_limit, sizeof(sf_topology_t));
             assert(sf_topology_cache != NULL);
         }
         if (index < sf_topology_limit) {
-            return (void *)&sf_topology_cache[index];
-        }
-        else {
+            return (void *) &sf_topology_cache[index];
+        } else {
             HDputs("Illegal toplogy object index");
         }
-    }
-    else if (obj_type == SF_CONTEXT) {
+    } else if (obj_type == SF_CONTEXT) {
         /* Contexts provide information principally about
          * the application and how the data layout is managed
          * over some number of sub-files.  The important
@@ -144,24 +150,26 @@ get__subfiling_object(int64_t object_id)
          * to facilitate the communication of IO requests.
          */
         if (sf_context_cache == NULL) {
-            sf_context_cache = (subfiling_context_t *)calloc(sf_context_limit, sizeof(subfiling_context_t));
+            sf_context_cache = (subfiling_context_t *) calloc(
+                sf_context_limit, sizeof(subfiling_context_t));
             assert(sf_context_cache != NULL);
         }
         if (index == sf_context_limit) {
             sf_context_limit *= 2;
-            sf_context_cache = (subfiling_context_t *)realloc(sf_context_cache,
-                                                              sf_context_limit * sizeof(subfiling_context_t));
+            sf_context_cache = (subfiling_context_t *) realloc(sf_context_cache,
+                sf_context_limit * sizeof(subfiling_context_t));
             assert(sf_context_cache != NULL);
+        } else {
+            return (void *) &sf_context_cache[index];
         }
-        else {
-            return (void *)&sf_context_cache[index];
-        }
-    }
-    else {
-        printf("get__subfiling_object: UNKNOWN Subfiling object type id = 0x%lx\n", object_id);
+    } else {
+        printf(
+            "get__subfiling_object: UNKNOWN Subfiling object type id = 0x%lx\n",
+            object_id);
     }
     return NULL;
 } /* end get__subfiling_object() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    UTILITY FUNCTIONS:
@@ -203,7 +211,7 @@ Public vars (for subfiling) and functions
 We probably need a function to set and clear this
 ======================================================
 */
-int sf_verbose_flag    = 0;
+int sf_verbose_flag = 0;
 int sf_open_file_count = 0;
 
 /*-------------------------------------------------------------------------
@@ -226,16 +234,14 @@ void
 set_verbose_flag(int subfile_rank, int new_value)
 {
 #ifndef NDEBUG
-    sf_verbose_flag = (int)(new_value & 0x0FF);
+    sf_verbose_flag = (int) (new_value & 0x0FF);
     if (sf_verbose_flag) {
         char logname[64];
         sprintf(logname, "ioc_%d.log", subfile_rank);
         if (sf_open_file_count > 1)
             sf_logfile = fopen(logname, "a+");
-        else
-            sf_logfile = fopen(logname, "w+");
-    }
-    else if (sf_logfile) {
+        else sf_logfile = fopen(logname, "w+");
+    } else if (sf_logfile) {
         fclose(sf_logfile);
         sf_logfile = NULL;
     }
@@ -275,27 +281,29 @@ set_verbose_flag(int subfile_rank, int new_value)
  *-------------------------------------------------------------------------
  */
 static herr_t
-record_fid_to_subfile(hid_t fid, hid_t subfile_context_id, int *next_index)
+record_fid_to_subfile(uint64_t fid, hid_t subfile_context_id, int *next_index)
 {
     herr_t status = SUCCEED;
     int    index;
     if (sf_file_map_size == 0) {
         int i;
-        sf_open_file_map =
-            (file_map_to_context_t *)malloc((size_t)DEFAULT_MAP_ENTRIES * sizeof(file_map_to_context_t));
+        sf_open_file_map = (file_map_to_context_t *) malloc(
+            (size_t) DEFAULT_MAP_ENTRIES * sizeof(file_map_to_context_t));
         if (sf_open_file_map == NULL) {
-            perror("calloc");
+            perror("malloc");
             return FAIL;
         }
         sf_file_map_size = DEFAULT_MAP_ENTRIES;
         for (i = 0; i < sf_file_map_size; i++) {
-            sf_open_file_map[i].h5_file_id = H5I_INVALID_HID;
+            sf_open_file_map[i].h5_file_id = (uint64_t)H5I_INVALID_HID;
+            sf_open_file_map[i].sf_context_id = 0;
         }
     }
     for (index = 0; index < sf_file_map_size; index++) {
-        if (sf_open_file_map[index].h5_file_id == H5I_INVALID_HID) {
-            sf_open_file_map[index].h5_file_id    = fid;
+        if (sf_open_file_map[index].h5_file_id == (uint64_t)H5I_INVALID_HID) {
+            sf_open_file_map[index].h5_file_id = fid;
             sf_open_file_map[index].sf_context_id = subfile_context_id;
+
             if (next_index) {
                 *next_index = index;
             }
@@ -304,22 +312,22 @@ record_fid_to_subfile(hid_t fid, hid_t subfile_context_id, int *next_index)
     }
     if (index == sf_file_map_size) {
         int i;
-        sf_open_file_map =
-            realloc(sf_open_file_map, ((size_t)(sf_file_map_size * 2) * sizeof(file_map_to_context_t)));
+        sf_open_file_map = realloc(sf_open_file_map,
+           ((size_t)(sf_file_map_size * 2) * sizeof(file_map_to_context_t)));
         if (sf_open_file_map == NULL) {
             perror("realloc");
             return FAIL;
         }
         sf_file_map_size *= 2;
         for (i = index; i < sf_file_map_size; i++) {
-            sf_open_file_map[i].h5_file_id = H5I_INVALID_HID;
+            sf_open_file_map[i].h5_file_id = (uint64_t)H5I_INVALID_HID;
         }
 
         if (next_index) {
             *next_index = index;
         }
 
-        sf_open_file_map[index].h5_file_id      = fid;
+        sf_open_file_map[index].h5_file_id = fid;
         sf_open_file_map[index++].sf_context_id = subfile_context_id;
     }
     return status;
@@ -360,13 +368,19 @@ record_fid_to_subfile(hid_t fid, hid_t subfile_context_id, int *next_index)
  *-------------------------------------------------------------------------
  */
 int
-open_subfile_with_context(subfiling_context_t *sf_context, hid_t fid, int fd, int flags)
+open_subfile_with_context(subfiling_context_t *sf_context, uint64_t fid, int flags)
 {
-    int    ret;
-    int    g_errors = 0;
-    int    l_errors = 0;
-    double start_t  = MPI_Wtime();
+    int ret;
+    int g_errors = 0;
+    int l_errors = 0;
+    double start_t = MPI_Wtime();
     assert(sf_context != NULL);
+
+#ifdef VERBOSE
+    printf("[%s %d]: context_id=%ld\n", __func__,
+		   sf_context->topology->app_layout->world_rank,
+		   sf_context->sf_context_id);
+#endif
 
     /*
      * Save the HDF5 file id (fid) to subfile context mapping.
@@ -377,21 +391,18 @@ open_subfile_with_context(subfiling_context_t *sf_context, hid_t fid, int fd, in
     ret = record_fid_to_subfile(fid, sf_context->sf_context_id, NULL);
     if (ret != SUCCEED) {
         printf("[%d - %s] Error mapping hdf5 file to a subfiling context\n",
-               sf_context->topology->app_layout->world_rank, __func__);
+            sf_context->topology->app_layout->world_rank, __func__);
         return -1;
     }
 
     if (sf_context->topology->rank_is_ioc) {
-        sf_work_request_t msg = {{flags, fid, sf_context->sf_context_id},
-                                 OPEN_OP,
-                                 sf_context->topology->app_layout->world_rank,
+        sf_work_request_t msg = {{flags,(int64_t)fid, sf_context->sf_context_id},
+                                 OPEN_OP, sf_context->topology->app_layout->world_rank,
                                  sf_context->topology->subfile_rank,
-                                 sf_context->sf_context_id,
-                                 start_t};
+                                 sf_context->sf_context_id, start_t, NULL, 0};
 
         if (flags & O_CREAT) {
-
-            sf_context->sf_fid = -1;
+             sf_context->sf_fid = -2;
         }
 
         l_errors = subfiling_open_file(&msg, sf_context->topology->subfile_rank, flags);
@@ -401,8 +412,8 @@ open_subfile_with_context(subfiling_context_t *sf_context, hid_t fid, int fd, in
 
     MPI_Allreduce(&l_errors, &g_errors, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
     if (g_errors) {
-        printf("[%s %d]: error count = %d\n", __func__, sf_context->topology->app_layout->world_rank,
-               g_errors);
+        printf("[%s %d]: error count = %d l_errors=%d\n", __func__,
+               sf_context->topology->app_layout->world_rank, g_errors, l_errors);
         fflush(stdout);
     }
     return g_errors;
@@ -434,12 +445,13 @@ open_subfile_with_context(subfiling_context_t *sf_context, hid_t fid, int fd, in
  *-------------------------------------------------------------------------
  */
 static int
-close__subfiles(subfiling_context_t *sf_context, hid_t fid)
+close__subfiles( subfiling_context_t *sf_context, uint64_t fid)
 {
-    int    global_errors = 0, errors = 0;
-    int    file_open_count;
-    int    subfile_fid = 0;
-    double t0, t1, t2, t_main_exit, t_finalize_threads;
+    int         global_errors = 0, errors = 0;
+    int         file_open_count;
+    int         subfile_fid = 0;
+    double      t0 = 0.0, t1 = 0.0, t2 = 0.0;
+    double      t_main_exit = 0.0, t_finalize_threads = 0.0;
 
     HDassert((sf_context != NULL));
 
@@ -460,16 +472,15 @@ close__subfiles(subfiling_context_t *sf_context, hid_t fid)
      * HDF5 application ranks.
      */
 #if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
-    MPI_Request b_req      = MPI_REQUEST_NULL;
-    int         mpi_status = MPI_Ibarrier(MPI_COMM_WORLD, &b_req);
+    MPI_Request b_req = MPI_REQUEST_NULL;
+    int mpi_status = MPI_Ibarrier(MPI_COMM_WORLD, &b_req);
     if (mpi_status == MPI_SUCCESS) {
         int completed = 0;
         while (!completed) {
             useconds_t t_delay = 5;
             usleep(t_delay);
             mpi_status = MPI_Test(&b_req, &completed, MPI_STATUS_IGNORE);
-            if (mpi_status != MPI_SUCCESS)
-                completed = 1;
+            if (mpi_status != MPI_SUCCESS) completed = 1;
         }
     }
 #else
@@ -488,55 +499,60 @@ close__subfiles(subfiling_context_t *sf_context, hid_t fid)
          * as part of the file close.
          */
         if (file_open_count == 1) {
-            /* Shutdown the main IOC thread */
-            H5FD_ioc_set_shutdown_flag(1);
-            /* Allow ioc_main to exit.*/
-            usleep(20);
+           /* Shutdown the main IOC thread */
+           H5FD_ioc_set_shutdown_flag(1);
+           /* Allow ioc_main to exit.*/
+           usleep(20);
 
-            t1 = MPI_Wtime();
-            H5FD_ioc_wait_thread_main();
-            t2          = MPI_Wtime();
-            t1          = t2;
-            t_main_exit = t2 - t1;
-            H5FD_ioc_finalize_threads();
-            t2                 = MPI_Wtime();
-            t_finalize_threads = t2 - t1;
+           t1 = MPI_Wtime();
+           H5FD_ioc_wait_thread_main();
+           t2 = MPI_Wtime();
+           t1 = t2;
+           t_main_exit = t2-t1;
+           H5FD_ioc_finalize_threads();
+           t2 = MPI_Wtime();
         }
+
+        t_finalize_threads = t2-t1;
 
         if ((subfile_fid = sf_context->sf_fid) > 0) {
             if (HDclose(subfile_fid) < 0)
                 errors++;
-            sf_context->sf_fid = -1;
+			sf_context->sf_fid = -1;
         }
 
 #ifndef NDEBUG
-        /* FIXME: If we've had multiple files open, our statistics
-         * will be messed up!
+        /* FIXME: If we've had multiple files open, our statistics 
+         * will be messed up! 
          */
         if (sf_verbose_flag) {
             t1 = t2;
             if (sf_logfile != NULL) {
-                fprintf(sf_logfile, "[%d] main_exit=%lf, finalize_threads=%lf\n", sf_context->sf_group_rank,
-                        t_main_exit, t_finalize_threads);
-                if (SF_WRITE_OPS > 0)
-                    fprintf(sf_logfile,
-                            "[%d] pwrite perf: wrt_ops=%ld wait=%lf pwrite=%lf IOC_shutdown = %lf seconds\n",
-                            sf_context->sf_group_rank, SF_WRITE_OPS, SF_WRITE_WAIT_TIME, SF_WRITE_TIME,
-                            (t1 - t0));
-                if (SF_READ_OPS > 0)
-                    fprintf(sf_logfile,
-                            "[%d] pread perf: read_ops=%ld wait=%lf pread=%lf IOC_shutdown = %lf seconds\n",
-                            sf_context->sf_group_rank, SF_READ_OPS, SF_READ_WAIT_TIME, SF_READ_TIME,
-                            (t1 - t0));
+              fprintf(sf_logfile, "[%d] main_exit=%lf, finalize_threads=%lf\n",
+                      sf_context->sf_group_rank, t_main_exit, t_finalize_threads);
+              if (SF_WRITE_OPS > 0)
+                fprintf(sf_logfile, "[%d] pwrite perf: wrt_ops=%ld wait=%lf pwrite=%lf IOC_shutdown = %lf seconds\n",
+                        sf_context->sf_group_rank, SF_WRITE_OPS, SF_WRITE_WAIT_TIME, SF_WRITE_TIME, (t1 - t0));
+              if (SF_READ_OPS > 0)
+                fprintf(sf_logfile, "[%d] pread perf: read_ops=%ld wait=%lf pread=%lf IOC_shutdown = %lf seconds\n",
+                   sf_context->sf_group_rank, SF_READ_OPS, SF_READ_WAIT_TIME, SF_READ_TIME, (t1 - t0));
 
-                fprintf(sf_logfile, "[%d] Avg queue time=%lf seconds\n", sf_context->sf_group_rank,
-                        SF_QUEUE_DELAYS / (double)(SF_WRITE_OPS + SF_READ_OPS));
+              fprintf(sf_logfile,"[%d] Avg queue time=%lf seconds\n", sf_context->sf_group_rank,
+                      SF_QUEUE_DELAYS/(double)(SF_WRITE_OPS + SF_READ_OPS));
 
-                fflush(sf_logfile);
+              fflush(sf_logfile);
 
-                fclose(sf_logfile);
-                sf_logfile = NULL;
+              fclose(sf_logfile);
+              sf_logfile = NULL;
             }
+        }
+        if (sf_context->filename) {
+           free(sf_context->filename);
+           sf_context->filename = NULL;
+        }
+        if (sf_context->subfile_prefix) {
+           free(sf_context->subfile_prefix);
+           sf_context->subfile_prefix = NULL;
         }
 #endif
     }
@@ -548,7 +564,7 @@ close__subfiles(subfiling_context_t *sf_context, hid_t fid)
             client_log = NULL;
         }
     }
-#endif
+#endif    
     return global_errors;
 } /* end close__subfiles() */
 
@@ -563,39 +579,43 @@ being thread safe.
 */
 
 int
-sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank)
+sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
+    int subfile_rank)
 {
-    int     ret     = 0;
-    int     retries = MIN_RETRIES;
+    int     ret = 0;
+	int     retries = MIN_RETRIES;
+    useconds_t delay = 100;
     ssize_t bytes_read;
-    ssize_t bytes_remaining = (ssize_t)data_size;
-    char *  this_buffer     = data_buffer;
+    ssize_t bytes_remaining = (ssize_t) data_size;
+    char *  this_buffer = data_buffer;
 
     while (bytes_remaining) {
-        if ((bytes_read = (ssize_t)pread(fd, this_buffer, (size_t)bytes_remaining, file_offset)) < 0) {
+        if ((bytes_read = (ssize_t) pread(
+                 fd, this_buffer, (size_t) bytes_remaining, file_offset)) < 0) {
 
             perror("pread failed!");
-            printf("[ioc(%d) %s] pread(fd, buf, bytes_remaining=%ld, "
+            HDprintf("[ioc(%d) %s] pread(fd, buf, bytes_remaining=%ld, "
                    "file_offset =%ld)\n",
-                   subfile_rank, __func__, bytes_remaining, file_offset);
-            fflush(stdout);
+                subfile_rank, __func__, bytes_remaining, file_offset);
+            HDfflush(stdout);
             return -1;
-        }
-        else if (bytes_read > 0) {
-            retries = MIN_RETRIES;
+        } else if (bytes_read > 0) {
+            /* reset retry params */
+			retries = MIN_RETRIES;
+            delay = 100;
             bytes_remaining -= bytes_read;
-#if 0
+#ifdef VERBOSE
             printf("[ioc(%d) %s]: read %ld bytes, remaining=%ld, file_offset=%ld\n",subfile_rank,
                    __func__, bytes_read, bytes_remaining, file_offset);
             fflush(stdout);
 #endif
             this_buffer += bytes_read;
             file_offset += bytes_read;
-        }
-        else {
-            if (retries == 0) {
-#if 0
-                printf("[ioc(%d) %s] file_offset=%ld, data_size=%ld\n",
+
+        } else {
+			if (retries == 0) {
+#ifdef VERBOSE
+                printf("[ioc(%d) %s] TIMEOUT: file_offset=%ld, data_size=%ld\n",
 					   subfile_rank, __func__, file_offset, data_size);
                 printf("[ioc(%d) %s] ERROR! read of 0 bytes == eof!\n",
                        subfile_rank, __func__);
@@ -604,32 +624,36 @@ sf_read_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, 
 #endif
                 return -2;
             }
-            retries--;
-            usleep(100);
+			retries--;
+			usleep(delay);
+			delay *= 2;
         }
     }
     return ret;
 } /* end sf_read_data() */
 
 int
-sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size, int subfile_rank)
+sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
+    int subfile_rank)
 {
-    int     ret             = 0;
-    char *  this_data       = (char *)data_buffer;
-    ssize_t bytes_remaining = (ssize_t)data_size;
-    ssize_t written         = 0;
+    int     ret = 0;
+    char *  this_data = (char *) data_buffer;
+    ssize_t bytes_remaining = (ssize_t) data_size;
+    ssize_t written = 0;
     while (bytes_remaining) {
-        if ((written = pwrite(fd, this_data, (size_t)bytes_remaining, file_offset)) < 0) {
+        if ((written = pwrite(
+                 fd, this_data, (size_t) bytes_remaining, file_offset)) < 0) {
+            struct stat statbuf;
             perror("pwrite failed!");
-            printf("[ioc(%d) %s] pwrite(fd, data, bytes_remaining=%ld, "
-                   "file_offset =%ld)\n",
-                   subfile_rank, __func__, bytes_remaining, file_offset);
-            fflush(stdout);
+            fstat(fd, &statbuf);
+            HDprintf("[ioc(%d) %s] pwrite(fd, data, bytes_remaining=%ld, "
+                   "file_offset=%ld), fd=%d, st_size=%ld\n",
+                   subfile_rank, __func__, bytes_remaining, file_offset, fd, statbuf.st_size);
+            HDfflush(stdout);
             return -1;
-        }
-        else {
+        } else {
             bytes_remaining -= written;
-#if 0
+#ifdef VERBOSE
             printf("[ioc(%d) %s]: wrote %ld bytes, remaining=%ld, file_offset=%ld\n",subfile_rank,
                    __func__, written, bytes_remaining, file_offset);
             fflush(stdout);
@@ -646,6 +670,7 @@ sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
 #endif
     return ret;
 } /* end sf_write_data() */
+
 
 /*
  * ---------------------------------------------------
@@ -686,8 +711,8 @@ sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
 static int
 compare_hostid(const void *h1, const void *h2)
 {
-    const layout_t *host1 = (const layout_t *)h1;
-    const layout_t *host2 = (const layout_t *)h2;
+    const layout_t *host1 = (const layout_t *) h1;
+    const layout_t *host2 = (const layout_t *) h2;
     return (host1->hostid > host2->hostid);
 }
 
@@ -711,8 +736,8 @@ compare_hostid(const void *h1, const void *h2)
 static void
 gather_topology_info(sf_topology_t *info)
 {
-    int           sf_world_size;
-    int           sf_world_rank;
+    int sf_world_size;
+    int sf_world_rank;
     app_layout_t *app_layout = NULL;
 
     HDassert(info != NULL);
@@ -725,22 +750,24 @@ gather_topology_info(sf_topology_t *info)
         return;
 
     if (1) {
-        long     hostid = gethostid();
-        layout_t my_hostinfo;
-        app_layout->layout = (layout_t *)calloc((size_t)sf_world_size + 1, sizeof(layout_t));
+        long      hostid = gethostid();
+        layout_t  my_hostinfo;
+        app_layout->layout =
+            (layout_t *) calloc((size_t) sf_world_size + 1, sizeof(layout_t));
         if (app_layout->layout == NULL) {
             perror("calloc failure!");
             MPI_Abort(MPI_COMM_WORLD, 1);
         }
         app_layout->hostid = hostid;
 
-        my_hostinfo.rank                  = sf_world_rank;
-        my_hostinfo.hostid                = hostid;
+        my_hostinfo.rank = sf_world_rank;
+        my_hostinfo.hostid = hostid;
         app_layout->layout[sf_world_rank] = my_hostinfo;
         if (sf_world_size > 1) {
-            if (MPI_Allgather(&my_hostinfo, 2, MPI_LONG, app_layout->layout, 2, MPI_LONG, MPI_COMM_WORLD) ==
-                MPI_SUCCESS) {
-                qsort(app_layout->layout, (size_t)sf_world_size, sizeof(layout_t), compare_hostid);
+            if (MPI_Allgather(&my_hostinfo, 2, MPI_LONG, app_layout->layout, 2,
+                    MPI_LONG, MPI_COMM_WORLD) == MPI_SUCCESS) {
+                qsort(app_layout->layout, (size_t) sf_world_size, sizeof(layout_t),
+                    compare_hostid);
             }
         }
     }
@@ -769,9 +796,9 @@ gather_topology_info(sf_topology_t *info)
 static int
 count_nodes(sf_topology_t *info, int my_rank)
 {
-    int           k, node_count, hostid_index = -1;
+    int  k, node_count, hostid_index = -1;
     app_layout_t *app_layout = NULL;
-    long          nextid;
+    long nextid;
 
     HDassert(info != NULL);
     HDassert((app_layout = info->app_layout) != NULL);
@@ -781,7 +808,8 @@ count_nodes(sf_topology_t *info, int my_rank)
     }
 
     if (app_layout->node_ranks == NULL) {
-        app_layout->node_ranks = (int *)calloc((size_t)(app_layout->world_size + 1), sizeof(int));
+        app_layout->node_ranks = (int *)
+         calloc((size_t)(app_layout->world_size + 1), sizeof(int));
     }
 
     HDassert(app_layout->node_ranks != NULL);
@@ -792,8 +820,8 @@ count_nodes(sf_topology_t *info, int my_rank)
         hostid_index = 0;
     }
 
-    app_layout->node_ranks[0] = 0; /* Add index */
-    node_count                = 1;
+    app_layout->node_ranks[0] = 0;    /* Add index */
+    node_count = 1;
 
     /* Recall that the topology array has been sorted! */
     for (k = 1; k < app_layout->world_size; k++) {
@@ -810,9 +838,10 @@ count_nodes(sf_topology_t *info, int my_rank)
     /* Mark the end of the node_ranks */
     app_layout->node_ranks[node_count] = app_layout->world_size;
     /* Save the index where we first located my hostid */
-    app_layout->node_index        = hostid_index;
+    app_layout->node_index = hostid_index;
     return app_layout->node_count = node_count;
 } /* end count_nodes() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    identify_ioc_ranks
@@ -830,34 +859,34 @@ count_nodes(sf_topology_t *info, int my_rank)
  *              As a side effect, we fill the 'ioc_concentrator' vector
  *              and set the 'rank_is_ioc' flag to TRUE if our rank is
  *              identified as owning an IO Concentrator (IOC).
- *
+ * 
  *-------------------------------------------------------------------------
  */
 
-static int
+static int 
 identify_ioc_ranks(int node_count, int iocs_per_node, sf_topology_t *info)
 {
-    int           n;
-    int           total_ioc_count = 0;
-    app_layout_t *app_layout      = NULL;
+    int n;
+    int total_ioc_count = 0;
+	app_layout_t *app_layout = NULL;
     HDassert(info != NULL);
-    HDassert((app_layout = info->app_layout) != NULL);
+	HDassert((app_layout = info->app_layout) != NULL);
 
-    for (n = 0; n < node_count; n++) {
+    for (n=0; n < node_count; n++) {
         int k;
-        int node_index                           = app_layout->node_ranks[n];
-        int local_peer_count                     = app_layout->node_ranks[n + 1] - app_layout->node_ranks[n];
+        int node_index = app_layout->node_ranks[n];
+        int local_peer_count = app_layout->node_ranks[n+1] - app_layout->node_ranks[n];
         info->io_concentrator[total_ioc_count++] = (int)(app_layout->layout[node_index++].rank);
 
-        if (app_layout->layout[node_index - 1].rank == app_layout->world_rank) {
-            info->subfile_rank = total_ioc_count - 1;
-            info->rank_is_ioc  = TRUE;
+        if (app_layout->layout[node_index-1].rank == app_layout->world_rank) {
+            info->subfile_rank = total_ioc_count-1;
+            info->rank_is_ioc = TRUE;
         }
 
-        for (k = 1; k < iocs_per_node; k++) {
+        for(k=1; k < iocs_per_node; k++) {
             if (k < local_peer_count) {
                 if (app_layout->layout[node_index].rank == app_layout->world_rank) {
-                    info->rank_is_ioc  = TRUE;
+                    info->rank_is_ioc = TRUE;
                     info->subfile_rank = total_ioc_count;
                 }
                 info->io_concentrator[total_ioc_count++] = (int)(app_layout->layout[node_index++].rank);
@@ -870,18 +899,18 @@ identify_ioc_ranks(int node_count, int iocs_per_node, sf_topology_t *info)
 } /* end identify_ioc_ranks() */
 
 static inline void
-assign_ioc_ranks(int *io_concentrator, int ioc_count, int rank_multiple, sf_topology_t *app_topology)
+assign_ioc_ranks(int *io_concentrator, int ioc_count, int rank_multiple, sf_topology_t *app_topology )
 {
     app_layout_t *app_layout = NULL;
     /* Validate that the input pointers are not NULL */
     HDassert(io_concentrator);
     HDassert(app_topology);
     HDassert((app_layout = app_topology->app_layout) != NULL);
-    /* fill the io_concentrator values based on the application layout */
+	/* fill the io_concentrator values based on the application layout */
     if (io_concentrator) {
         int k, ioc_next, ioc_index;
-        for (k = 0, ioc_next = 0; ioc_next < ioc_count; ioc_next++) {
-            ioc_index                 = rank_multiple * k++;
+        for ( k=0, ioc_next = 0; ioc_next < ioc_count; ioc_next++) {
+            ioc_index = rank_multiple * k++;
             io_concentrator[ioc_next] = (int)(app_layout->layout[ioc_index].rank);
             if (io_concentrator[ioc_next] == app_layout->world_rank)
                 app_topology->rank_is_ioc = TRUE;
@@ -889,6 +918,8 @@ assign_ioc_ranks(int *io_concentrator, int ioc_count, int rank_multiple, sf_topo
         app_topology->n_io_concentrators = ioc_count;
     }
 } /* end assign_ioc_ranks() */
+
+
 
 /*-------------------------------------------------------------------------
  * Function:    fid_map_to_context
@@ -907,12 +938,12 @@ assign_ioc_ranks(int *io_concentrator, int ioc_count, int rank_multiple, sf_topo
  *-------------------------------------------------------------------------
  */
 hid_t
-fid_map_to_context(hid_t sf_fid)
+fid_map_to_context(uint64_t sf_fid)
 {
     if (sf_open_file_map) {
         int i;
         for (i = 0; i < sf_file_map_size; i++) {
-            hid_t sf_context_id = sf_open_file_map[i].sf_context_id;
+            hid_t sf_context_id = sf_open_file_map[i].sf_context_id;		
             if (sf_open_file_map[i].h5_file_id == sf_fid) {
                 return sf_context_id;
             }
@@ -920,6 +951,7 @@ fid_map_to_context(hid_t sf_fid)
     }
     return H5I_INVALID_HID;
 } /* end fid_map_to_context() */
+
 
 /*-------------------------------------------------------------------------
  * Function:    clear_fid_map_entry
@@ -937,15 +969,15 @@ fid_map_to_context(hid_t sf_fid)
  *
  *-------------------------------------------------------------------------
  */
-void
-clear_fid_map_entry(hid_t sf_fid)
+static void
+clear_fid_map_entry(uint64_t sf_fid)
 {
     if (sf_open_file_map) {
         int i;
         for (i = 0; i < sf_file_map_size; i++) {
             if (sf_open_file_map[i].h5_file_id == sf_fid) {
-                sf_open_file_map[i].h5_file_id    = H5I_INVALID_HID;
-                sf_open_file_map[i].sf_context_id = H5I_INVALID_HID;
+                sf_open_file_map[i].h5_file_id = (uint64_t)H5I_INVALID_HID;
+                sf_open_file_map[i].sf_context_id = 0;
                 return;
             }
         }
@@ -973,7 +1005,7 @@ active_map_entries(void)
 {
     int i, map_entries = 0;
     for (i = 0; i < sf_file_map_size; i++) {
-        if (sf_open_file_map[i].h5_file_id != H5I_INVALID_HID) {
+        if (sf_open_file_map[i].h5_file_id != (uint64_t)H5I_INVALID_HID) {
             map_entries++;
         }
     }
@@ -1016,38 +1048,39 @@ active_map_entries(void)
  *-------------------------------------------------------------------------
  */
 int
-H5FD__determine_ioc_count(int world_size, int world_rank, ioc_selection_t ioc_select_method,
-                          char *ioc_select_option, sf_topology_t **thisapp)
+H5FD__determine_ioc_count(int world_size, int world_rank,
+    ioc_selection_t ioc_select_method, char *ioc_select_option,
+    sf_topology_t **thisapp)
 {
-    int             ioc_count     = 0;
+    int ioc_count = 0;
     ioc_selection_t ioc_selection = ioc_selection_options;
-    sf_topology_t * app_topology  = NULL;
+    sf_topology_t * app_topology = NULL;
 
     HDassert(thisapp != NULL);
 
     if (!ioc_count || (ioc_selection != ioc_select_method)) {
-        int   rank_multiple   = 0;
-        int   iocs_per_node   = 1;
-        char *envValue        = NULL;
-        int * io_concentrator = NULL;
+        int     rank_multiple = 0;
+        int     iocs_per_node = 1;
+        char *  envValue = NULL;
+        int *   io_concentrator = NULL;
 
         if ((app_topology = *thisapp) == NULL) {
-            app_topology = (sf_topology_t *)calloc(1, sizeof(sf_topology_t));
+            app_topology = (sf_topology_t *) calloc(1, sizeof(sf_topology_t));
             HDassert(app_topology != NULL);
-        }
+		}
         if (sf_app_layout == NULL) {
-            sf_app_layout = (app_layout_t *)calloc(1, sizeof(app_layout_t));
-            HDassert(sf_app_layout != NULL);
-        }
-        /* Once the application layout has been filled once, any additional
+			sf_app_layout = (app_layout_t *) calloc(1, sizeof(app_layout_t));
+            HDassert (sf_app_layout != NULL);
+		}
+        /* Once the application layout has been filled once, any additional 
          * file open operations won't be required to gather that information.
          */
-        app_topology->app_layout  = sf_app_layout;
+		app_topology->app_layout = sf_app_layout;
         sf_app_layout->world_size = world_size;
         sf_app_layout->world_rank = world_rank;
         if (app_topology->io_concentrator == NULL) {
             app_topology->io_concentrator = io_concentrator =
-                (int *)HDmalloc(((size_t)world_size * sizeof(int)));
+                (int *) HDmalloc(((size_t) world_size * sizeof(int)));
         }
         assert(io_concentrator != NULL);
         app_topology->selection_type = ioc_selection = ioc_select_method;
@@ -1060,13 +1093,13 @@ H5FD__determine_ioc_count(int world_size, int world_rank, ioc_selection_t ioc_se
         if (ioc_select_method == SELECT_IOC_TOTAL) {
             if (ioc_select_option) {
                 int checkValue = atoi(ioc_select_option);
-                if ((checkValue <= 0) || (checkValue >= world_size)) {
+                if ((checkValue <= 0) ||  (checkValue >= world_size)) {
                     ioc_select_method = SELECT_IOC_ONE_PER_NODE;
                     goto next;
                 }
 
-                ioc_count     = checkValue;
-                rank_multiple = (world_size / checkValue);
+                ioc_count = checkValue;
+                rank_multiple = (world_size/checkValue);
                 assign_ioc_ranks(io_concentrator, ioc_count, rank_multiple, app_topology);
                 *thisapp = app_topology;
             }
@@ -1090,8 +1123,8 @@ H5FD__determine_ioc_count(int world_size, int world_rank, ioc_selection_t ioc_se
                     goto next;
                 }
                 rank_multiple = checkValue;
-                ioc_count     = (world_size / rank_multiple);
-
+                ioc_count = (world_size / rank_multiple);
+    
                 if ((world_size % rank_multiple) != 0) {
                     ioc_count++;
                 }
@@ -1109,7 +1142,7 @@ next:
 
         if (ioc_select_method == SELECT_IOC_ONE_PER_NODE) {
             app_topology->selection_type = ioc_select_method;
-            ioc_count                    = count_nodes(app_topology, world_rank);
+            ioc_count = count_nodes(app_topology, world_rank);
 
             if ((envValue = HDgetenv("IOC_COUNT_PER_NODE")) != NULL) {
                 int value_check = atoi(envValue);
@@ -1117,26 +1150,26 @@ next:
                     iocs_per_node = value_check;
                 }
             }
-            ioc_count = identify_ioc_ranks(ioc_count, iocs_per_node, app_topology);
+            ioc_count = identify_ioc_ranks( ioc_count, iocs_per_node, app_topology);
         }
         if (ioc_count > 0) {
             app_topology->n_io_concentrators = ioc_count;
             /* Create a vector of "potential" file descriptors
-             * which can be indexed by the IOC id.
+             * which can be indexed by the IOC id. 
              */
-            app_topology->subfile_fd = (int *)HDcalloc((size_t)ioc_count, sizeof(int));
+            app_topology->subfile_fd = (int *) HDcalloc((size_t)ioc_count, sizeof(int));
             if (app_topology->subfile_fd == NULL) {
                 HDputs("Failed to allocate vector of subfile fds");
             }
             *thisapp = app_topology;
         }
-    }
-    else {
+    } else {
         HDputs("Unable to create app_toplogy");
     }
 
     return ioc_count;
 } /* end H5FD__determine_ioc_count() */
+
 
 /*
 -------------------------------------------------------------------------
@@ -1171,9 +1204,8 @@ get_ioc_selection_criteria(ioc_selection_t *selection)
         if ((checkValue < 0) || (checkValue >= ioc_selection_options)) {
             *selection = SELECT_IOC_ONE_PER_NODE;
             return NULL;
-        }
-        else {
-            *selection = (ioc_selection_t)checkValue;
+        } else {
+            *selection = (ioc_selection_t) checkValue;
             return optValue;
         }
     }
@@ -1198,10 +1230,9 @@ get_ioc_selection_criteria(ioc_selection_t *selection)
  *-------------------------------------------------------------------------
  */
 int
-H5FD__init_subfile_context(sf_topology_t *thisApp, int n_iocs, int world_rank,
-                           subfiling_context_t *newContext)
+H5FD__init_subfile_context(sf_topology_t *thisApp, int n_iocs, int world_rank, subfiling_context_t *newContext)
 {
-    MPI_Comm sf_msg_comm  = MPI_COMM_NULL;
+    MPI_Comm sf_msg_comm = MPI_COMM_NULL;
     MPI_Comm sf_data_comm = MPI_COMM_NULL;
 
     assert(newContext != NULL);
@@ -1209,20 +1240,20 @@ H5FD__init_subfile_context(sf_topology_t *thisApp, int n_iocs, int world_rank,
         int   status;
         char *envValue = NULL;
 
-        newContext->topology       = thisApp;
-        newContext->sf_msg_comm    = MPI_COMM_NULL;
-        newContext->sf_data_comm   = MPI_COMM_NULL;
-        newContext->sf_group_comm  = MPI_COMM_NULL;
-        newContext->sf_intercomm   = MPI_COMM_NULL;
+        newContext->topology = thisApp;
+        newContext->sf_msg_comm = MPI_COMM_NULL;
+        newContext->sf_data_comm = MPI_COMM_NULL;
+        newContext->sf_group_comm = MPI_COMM_NULL;
+        newContext->sf_intercomm = MPI_COMM_NULL;
         newContext->sf_stripe_size = H5FD_DEFAULT_STRIPE_DEPTH;
         newContext->sf_write_count = 0;
-        newContext->sf_read_count  = 0;
-        newContext->sf_eof         = 0;
+        newContext->sf_read_count = 0;
+        newContext->sf_eof = 0;
 
         if ((envValue = HDgetenv("IOC_STRIPE_SIZE")) != NULL) {
             long value_check = atol(envValue);
             if (value_check > 0) {
-                newContext->sf_stripe_size = (int64_t)value_check;
+                newContext->sf_stripe_size = (int64_t) value_check;
             }
         }
         if ((envValue = HDgetenv("IOC_SUBFILE_PREFIX")) != NULL) {
@@ -1232,12 +1263,14 @@ H5FD__init_subfile_context(sf_topology_t *thisApp, int n_iocs, int world_rank,
             /* sf_subfile_prefix = strdup(temp); */
         }
 
-        newContext->sf_blocksize_per_stripe = newContext->sf_stripe_size * n_iocs;
+        newContext->sf_blocksize_per_stripe =
+            newContext->sf_stripe_size * n_iocs;
         if (sf_msg_comm == MPI_COMM_NULL) {
             status = MPI_Comm_dup(MPI_COMM_WORLD, &newContext->sf_msg_comm);
             if (status != MPI_SUCCESS)
                 goto err_exit;
-            status = MPI_Comm_set_errhandler(newContext->sf_msg_comm, MPI_ERRORS_RETURN);
+            status = MPI_Comm_set_errhandler(
+                newContext->sf_msg_comm, MPI_ERRORS_RETURN);
             if (status != MPI_SUCCESS)
                 goto err_exit;
             sf_msg_comm = newContext->sf_msg_comm;
@@ -1246,29 +1279,31 @@ H5FD__init_subfile_context(sf_topology_t *thisApp, int n_iocs, int world_rank,
             status = MPI_Comm_dup(MPI_COMM_WORLD, &newContext->sf_data_comm);
             if (status != MPI_SUCCESS)
                 goto err_exit;
-            status = MPI_Comm_set_errhandler(newContext->sf_data_comm, MPI_ERRORS_RETURN);
+            status = MPI_Comm_set_errhandler(
+                newContext->sf_data_comm, MPI_ERRORS_RETURN);
             if (status != MPI_SUCCESS)
                 goto err_exit;
             sf_data_comm = newContext->sf_data_comm;
         }
         if (n_iocs > 1) {
-            status =
-                MPI_Comm_split(MPI_COMM_WORLD, thisApp->rank_is_ioc, world_rank, &newContext->sf_group_comm);
+            status = MPI_Comm_split(MPI_COMM_WORLD, thisApp->rank_is_ioc,
+                world_rank, &newContext->sf_group_comm);
 
             if (status != MPI_SUCCESS)
                 goto err_exit;
-            status = MPI_Comm_size(newContext->sf_group_comm, &newContext->sf_group_size);
+            status = MPI_Comm_size(
+                newContext->sf_group_comm, &newContext->sf_group_size);
             if (status != MPI_SUCCESS)
                 goto err_exit;
-            status = MPI_Comm_rank(newContext->sf_group_comm, &newContext->sf_group_rank);
+            status = MPI_Comm_rank(
+                newContext->sf_group_comm, &newContext->sf_group_rank);
             if (status != MPI_SUCCESS)
                 goto err_exit;
             /*
              * There may be additional functionality we need for the IOCs...
              * If so, then can probably initialize those things here!
              */
-        }
-        else {
+        } else {
             newContext->sf_group_size = 1;
             newContext->sf_group_rank = 0;
         }
@@ -1278,6 +1313,7 @@ H5FD__init_subfile_context(sf_topology_t *thisApp, int n_iocs, int world_rank,
 err_exit:
     return -1;
 } /* end H5FD__init_subfile_context() */
+
 
 /*
 -------------------------------------------------------------------------
@@ -1304,12 +1340,12 @@ H5FDsubfiling_init(ioc_selection_t ioc_select_method, char *ioc_select_option, i
     herr_t               ret_value = SUCCEED;
     int                  ioc_count;
     int                  world_rank, world_size;
-    sf_topology_t *      thisApp    = NULL;
+    sf_topology_t *      thisApp = NULL;
     int                  file_index = active_map_entries();
-    int64_t              tag        = SF_CONTEXT;
+    int64_t              tag = SF_CONTEXT;
     int64_t              context_id = ((tag << 32) | file_index);
-    subfiling_context_t *newContext = (subfiling_context_t *)get__subfiling_object(context_id);
-    char *               envValue   = NULL;
+    subfiling_context_t *newContext = (subfiling_context_t *) get__subfiling_object(context_id);
+    char                *envValue = NULL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("e", "IO*s*!", ioc_select_method, ioc_select_option, sf_context);
@@ -1326,8 +1362,8 @@ H5FDsubfiling_init(ioc_selection_t ioc_select_method, char *ioc_select_option, i
     }
 
     /* Compute the number an distribution map of the set of IO Concentrators */
-    if ((ioc_count = H5FD__determine_ioc_count(world_size, world_rank, ioc_select_method, ioc_select_option,
-                                               &thisApp)) <= 0) {
+    if ((ioc_count = H5FD__determine_ioc_count(world_size, world_rank,
+             ioc_select_method, ioc_select_option, &thisApp)) <= 0) {
         HDputs("Unable to register subfiling topology!");
         ret_value = FAIL;
         goto done;
@@ -1339,13 +1375,12 @@ H5FDsubfiling_init(ioc_selection_t ioc_select_method, char *ioc_select_option, i
     envValue = HDgetenv("SF_VERBOSE_FLAG");
     if (envValue != NULL) {
         int check_value = atoi(envValue);
-        if (check_value > 0)
-            sf_verbose_flag = 1;
+        if (check_value > 0) sf_verbose_flag = 1;
     }
 
     /* Maybe open client-side log files */
-    if (sf_verbose_flag) {
-        manage_client_logfile(world_rank, sf_verbose_flag);
+    if (sf_verbose_flag ) {
+        manage_client_logfile(world_rank,sf_verbose_flag);
     }
 
     if (H5FD__init_subfile_context(thisApp, ioc_count, world_rank, newContext) != SUCCEED) {
@@ -1394,16 +1429,16 @@ done:
  *-------------------------------------------------------------------------
  */
 int
-H5FD__open_subfiles(void *_config_info, int64_t h5_file_id, int fd, int flags)
+H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags)
 {
     int                  status;
     int64_t              context_id = -1;
     subfiling_context_t *sf_context = NULL;
     ioc_selection_t      ioc_selection;
-    char                 filepath[PATH_MAX];
-    char *               slash;
-    config_common_t *    config_info = _config_info;
-    char *               option_arg  = get_ioc_selection_criteria(&ioc_selection);
+    // char filepath[PATH_MAX];
+    // char *slash;
+    config_common_t *config_info = _config_info;
+    char *option_arg = get_ioc_selection_criteria(&ioc_selection);
 
     HDassert(config_info);
     /* Check to see who is calling ths function::
@@ -1413,7 +1448,7 @@ H5FD__open_subfiles(void *_config_info, int64_t h5_file_id, int fd, int flags)
         (config_info->magic != H5FD_SUBFILING_FAPL_T_MAGIC)) {
         HDputs("Unrecgonized driver!");
         return -1;
-    }
+	}
 
     /* Initialize/identify IO Concentrators based on the
      * config information that we have...
@@ -1427,28 +1462,18 @@ H5FD__open_subfiles(void *_config_info, int64_t h5_file_id, int fd, int flags)
     /* For statistics gathering */
     maybe_initialize_statistics();
 
-    /* Create a new context which is associated with
+    /* Create a new context which is associated with 
      * this file (context_id)
      */
     sf_context = get__subfiling_object(context_id);
     assert(sf_context != NULL);
 
     /* Save some basic things in the new context */
-    config_info->context_id   = context_id;
+    config_info->context_id = context_id;
+    sf_context->sf_fid = 0;
     sf_context->sf_context_id = context_id;
-    sf_context->h5_file_id    = h5_file_id;
-    slash                     = strchr(config_info->file_path, '/');
-    if (slash)
-        sf_context->filename = strdup(config_info->file_path);
-    else {
-        char filename[PATH_MAX];
-        char path[PATH_MAX];
-        char sep = '/';
-        HDgetcwd(path, sizeof(path));
-        HDsnprintf(filename, sizeof(path), "%s%c%s", path, sep, config_info->file_path);
-        HDsnprintf(filepath, sizeof(filepath), "%s%c%s", config_info->file_dir, sep, filename);
-        sf_context->filename = strdup(filepath);
-    }
+    sf_context->h5_file_id = h5_file_id;
+    sf_context->filename = strdup(config_info->file_path);
 
     /* Ensure that the IOC service won't exit
      * as we prepare to start up..
@@ -1459,7 +1484,7 @@ H5FD__open_subfiles(void *_config_info, int64_t h5_file_id, int fd, int flags)
      * start the service threads on the identified
      * ranks as part of the subfile opening.
      */
-    return open_subfile_with_context(sf_context, h5_file_id, fd, flags);
+    return open_subfile_with_context(sf_context, h5_file_id, flags);
 }
 
 /*-------------------------------------------------------------------------
@@ -1485,3 +1510,4 @@ H5FD__close_subfiles(int64_t context_id)
     assert(sf_context != NULL);
     return close__subfiles(sf_context, sf_context->h5_file_id);
 }
+
