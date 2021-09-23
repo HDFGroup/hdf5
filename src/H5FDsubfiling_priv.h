@@ -42,27 +42,13 @@
 #include "H5MMprivate.h" /* Memory management                        */
 #include "H5Pprivate.h"  /* Property lists                           */
 #include "H5private.h"   /* Generic Functions                        */
-// #include "H5FDioc.h"
+#include "H5FDioc.h"
 
 #include "mpi.h"
 
 #ifdef __cplusplus
 extern "C" {
 #endif
-
-/*
- *    Define the various constants to allow different allocations
- *    of subfile ranks.  The choices are self explanatory, starting
- *    with the default of one IO Concentrator (IOC) per node and
- *    lastly, defining a fixed number.
- */
-typedef enum {
-    SELECT_IOC_ONE_PER_NODE = 0, /* Default */
-    SELECT_IOC_EVERY_NTH_RANK,   /* Starting at rank 0, select-next += N */
-    SELECT_IOC_WITH_CONFIG,      /* NOT IMPLEMENTED: Read-from-file       */
-    SELECT_IOC_TOTAL,            /* Starting at rank 0, mpi_size / total   */
-    ioc_selection_options        /* (Uses same selection as every Nth rank) */
-} ioc_selection_t;
 
 /****************************************************************************
  *
@@ -151,40 +137,27 @@ typedef enum {
 
 #ifndef H5FD_SUBFILING_FAPL_T_MAGIC
 #define H5FD_CURR_SUBFILING_FAPL_T_VERSION 1
-#define H5FD_SUBFILING_FAPL_T_MAGIC        0xFED01331
+#define H5FD_SUBFILING_FAPL_T_MAGIC 0xFED01331
 #endif
 
 #ifndef H5FD_IOC_FAPL_T_MAGIC
 #define H5FD_CURR_IOC_FAPL_T_VERSION 1
-#define H5FD_IOC_FAPL_T_MAGIC        0xFED21331
+#define H5FD_IOC_FAPL_T_MAGIC 0xFED21331
 #endif
 
-#define H5FD_SUBFILING_PATH_MAX 4096
+#define DRIVER_INFO_MESSAGE_MAX_INFO 65536
+#define DRIVER_INFO_MESSAGE_MAX_LENGTH                                         \
+  65552 /* MAX_INFO + sizeof(info_header_t) */
 
-typedef struct config_common_t {
-    uint32_t        magic;                                  /* set to H5FD_SUBFILING_FAPL_T_MAGIC */
-    uint32_t        version;                                /* set to H5FD_CURR_SUBFILING_FAPL_T_VERSION */
-    int32_t         stripe_count;                           /* How many io concentrators */
-    int64_t         stripe_depth;                           /* Max # of bytes in contigious IO to an IOC */
-    ioc_selection_t ioc_selection;                          /* Method to select IO Concentrators */
-    hid_t           ioc_fapl_id;                            /* The hid_t value of the stacked VFD  */
-    int64_t         context_id;                             /* The value used to lookup an IOC context */
-    char            file_dir[H5FD_SUBFILING_PATH_MAX + 1];  /* Directory where we find files */
-    char            file_path[H5FD_SUBFILING_PATH_MAX + 1]; /* The user define filename */
-} config_common_t;
-
-#define DRIVER_INFO_MESSAGE_MAX_INFO   65536
-#define DRIVER_INFO_MESSAGE_MAX_LENGTH 65552 /* MAX_INFO + sizeof(info_header_t) */
-
-#define K(n)                      ((n)*1024)
-#define M(n)                      ((n) * (1024 * 1024))
+#define K(n) ((n)*1024)
+#define M(n) ((n) * (1024 * 1024))
 #define H5FD_DEFAULT_STRIPE_DEPTH M(32)
 
 typedef struct stat_record {
-    int64_t op_count; /* How many ops in total */
-    double  min;      /* minium (time)         */
-    double  max;      /* maximum (time)        */
-    double  total;    /* average (time)        */
+  int64_t op_count; /* How many ops in total */
+  double min;       /* minium (time)         */
+  double max;       /* maximum (time)        */
+  double total;     /* average (time)        */
 } stat_record_t;
 
 typedef enum stat_category { /* Stat (OP) Categories  */
@@ -199,12 +172,12 @@ typedef enum stat_category { /* Stat (OP) Categories  */
 } stat_category_t;
 
 typedef struct _info_header { /* Header for a driver info message */
-    uint8_t version;
-    uint8_t unused_1;
-    uint8_t unused_2;
-    uint8_t unused_3;    /* Actual info message length, but  */
-    int32_t info_length; /* CANNOT exceed 64k (65552) bytes  */
-    char    vfd_key[8];  /* 's' 'u' 'b' 'f' 'i' 'l' 'i' 'n'  */
+  uint8_t version;
+  uint8_t unused_1;
+  uint8_t unused_2;
+  uint8_t unused_3;    /* Actual info message length, but  */
+  int32_t info_length; /* CANNOT exceed 64k (65552) bytes  */
+  char vfd_key[8];     /* 's' 'u' 'b' 'f' 'i' 'l' 'i' 'n'  */
 } info_header_t;
 
 /* THE following definitions are used between H5FDsubfile_mpi.c
@@ -241,21 +214,21 @@ typedef struct _info_header { /* Header for a driver info message */
 /* Bit 3 SET indicates collectives */
 #define COLL_FUNC (0x1 << 3)
 
-#define ACK_PART  (0x0acc << 8)
+#define ACK_PART (0x0acc << 8)
 #define DATA_PART (0xd8da << 8)
-#define READY     (0xfeed << 8)
+#define READY (0xfeed << 8)
 #define COMPLETED (0xfed1 << 8)
 
-#define READ_INDEP  (READ_OP)
-#define READ_COLL   (COLL_FUNC | READ_OP)
+#define READ_INDEP (READ_OP)
+#define READ_COLL (COLL_FUNC | READ_OP)
 #define WRITE_INDEP (WRITE_OP)
-#define WRITE_COLL  (COLL_FUNC | WRITE_OP)
+#define WRITE_COLL (COLL_FUNC | WRITE_OP)
 
-#define WRITE_INDEP_ACK  (ACK_PART | WRITE_OP)
+#define WRITE_INDEP_ACK (ACK_PART | WRITE_OP)
 #define WRITE_INDEP_DATA (DATA_PART | WRITE_OP)
 
 #define READ_INDEP_DATA (DATA_PART | READ_OP)
-#define SET_LOGGING     (LOGGING_OP)
+#define SET_LOGGING (LOGGING_OP)
 
 #define INT32_MASK 0x07FFFFFFFFFFFFFFF
 
@@ -267,22 +240,22 @@ typedef struct _info_header { /* Header for a driver info message */
  * We currently ONLY use READ_OP and WRITE_OP
  */
 typedef enum io_ops {
-    READ_OP    = 1,
-    WRITE_OP   = 2,
-    OPEN_OP    = 3,
-    CLOSE_OP   = 4,
-    FINI_OP    = 8,
-    LOGGING_OP = 16
+  READ_OP = 1,
+  WRITE_OP = 2,
+  OPEN_OP = 3,
+  CLOSE_OP = 4,
+  FINI_OP = 8,
+  LOGGING_OP = 16
 } io_op_t;
 
 /* Here are the basic key values to be used when accessing
  * the cache of stored topologies or contexts.
  */
 typedef enum {
-    SF_BADID    = (-1),
-    SF_TOPOLOGY = 1,
-    SF_CONTEXT  = 2,
-    SF_NTYPES /* number of subfiling object types, MUST BE LAST */
+  SF_BADID = (-1),
+  SF_TOPOLOGY = 1,
+  SF_CONTEXT = 2,
+  SF_NTYPES /* number of subfiling object types, MUST BE LAST */
 } sf_obj_type_t;
 
 /* Every application rank will record their MPI rank
@@ -295,54 +268,54 @@ typedef enum {
  * associated with a "new" hostid.
  */
 typedef struct {
-    long rank;
-    long hostid;
+  long rank;
+  long hostid;
 } layout_t;
 
 /* This typedef defines a fixed process layout which
  * can be reused for any number of file open operations
  */
 typedef struct app_layout_t {
-    long      hostid;      /* value returned by gethostid()  */
-    layout_t *layout;      /* Vector of {rank,hostid} values */
-    int *     node_ranks;  /* ranks extracted from sorted layout */
-    int       node_count;  /* Total nodes (differnt hostids) */
-    int       node_index;  /* My node: index into node_ranks */
-    int       local_peers; /* How may local peers on my node */
-    int       world_rank;  /* My MPI rank                    */
-    int       world_size;  /* Total number of MPI ranks      */
+  long hostid;      /* value returned by gethostid()  */
+  layout_t *layout; /* Vector of {rank,hostid} values */
+  int *node_ranks;  /* ranks extracted from sorted layout */
+  int node_count;   /* Total nodes (differnt hostids) */
+  int node_index;   /* My node: index into node_ranks */
+  int local_peers;  /* How may local peers on my node */
+  int world_rank;   /* My MPI rank                    */
+  int world_size;   /* Total number of MPI ranks      */
 } app_layout_t;
 
 /*  This typedef defines things related to IOC selections */
 typedef struct topology {
-    app_layout_t *  app_layout;         /* Pointer to our layout struct   */
-    bool            rank_is_ioc;        /* Indicates that we host an IOC  */
-    int             subfile_rank;       /* Valid only if rank_is_ioc      */
-    int             n_io_concentrators; /* Number of IO concentrators  */
-    int *           io_concentrator;    /* Vector of ranks which are IOCs */
-    int *           subfile_fd;         /* file descriptor (if IOC)       */
-    ioc_selection_t selection_type;     /* Cache our IOC selection criteria */
+  app_layout_t *app_layout;       /* Pointer to our layout struct   */
+  bool rank_is_ioc;               /* Indicates that we host an IOC  */
+  int subfile_rank;               /* Valid only if rank_is_ioc      */
+  int n_io_concentrators;         /* Number of IO concentrators  */
+  int *io_concentrator;           /* Vector of ranks which are IOCs */
+  int *subfile_fd;                /* file descriptor (if IOC)       */
+  ioc_selection_t selection_type; /* Cache our IOC selection criteria */
 } sf_topology_t;
 
 typedef struct {
-    hid_t          sf_context_id;           /* Generated context ID which embeds the cache index */
-    hid_t          h5_file_id;              /* GUID (basically the inode value) */
-    int            sf_fid;                  /* value returned by open(file,..)  */
-    size_t         sf_write_count;          /* Statistics: write_count  */
-    size_t         sf_read_count;           /* Statistics: read_count  */
-    size_t         sf_eof;                  /* File eof */
-    int64_t        sf_stripe_size;          /* Stripe-depth */
-    int64_t        sf_blocksize_per_stripe; /* Stripe-depth X n_IOCs  */
-    MPI_Comm       sf_msg_comm;             /* MPI comm used to send RPC msg  */
-    MPI_Comm       sf_data_comm;            /* MPI comm used to move data     */
-    MPI_Comm       sf_group_comm;           /* Not used: for IOC collectives  */
-    MPI_Comm       sf_intercomm;            /* Not used: for msgs to all IOC  */
-    int            sf_group_size;           /* IOC count (in sf_group_comm)   */
-    int            sf_group_rank;           /* IOC rank  (in sf_group_comm)   */
-    int            sf_intercomm_root;       /* Not used: for IOC comms      */
-    char *         subfile_prefix;          /* If subfiles are node-local     */
-    char *         filename;                /* The user supplied file name    */
-    sf_topology_t *topology;                /* pointer to our topology        */
+  hid_t sf_context_id;   /* Generated context ID which embeds the cache index */
+  uint64_t h5_file_id;   /* GUID (basically the inode value) */
+  int sf_fid;            /* value returned by open(file,..)  */
+  size_t sf_write_count; /* Statistics: write_count  */
+  size_t sf_read_count;  /* Statistics: read_count  */
+  size_t sf_eof;         /* File eof */
+  int64_t sf_stripe_size;          /* Stripe-depth */
+  int64_t sf_blocksize_per_stripe; /* Stripe-depth X n_IOCs  */
+  MPI_Comm sf_msg_comm;            /* MPI comm used to send RPC msg  */
+  MPI_Comm sf_data_comm;           /* MPI comm used to move data     */
+  MPI_Comm sf_group_comm;          /* Not used: for IOC collectives  */
+  MPI_Comm sf_intercomm;           /* Not used: for msgs to all IOC  */
+  int sf_group_size;               /* IOC count (in sf_group_comm)   */
+  int sf_group_rank;               /* IOC rank  (in sf_group_comm)   */
+  int sf_intercomm_root;           /* Not used: for IOC comms      */
+  char *subfile_prefix;            /* If subfiles are node-local     */
+  char *filename;                  /* The user supplied file name    */
+  sf_topology_t *topology;         /* pointer to our topology        */
 } subfiling_context_t;
 
 /* The following is a somewhat augmented input (by the IOC) which captures
@@ -350,21 +323,21 @@ typedef struct {
  * an easy gathering of statistics by the IO Concentrator.
  */
 typedef struct {
-    /* {Datasize, Offset, FileID} */
-    int64_t header[3];    /* The basic RPC input plus       */
-    int     tag;          /* the supplied OPCODE tag        */
-    int     source;       /* Rank of who sent the message   */
-    int     subfile_rank; /* The IOC rank                   */
-    hid_t   context_id;   /* context to be used to complete */
-    double  start_time;   /* the request, + time of receipt */
-                          /* from which we calc Time(queued) */
-    void *buffer;         /* for writes, we keep the buffer */
-    int   completed;      /* around for awhile...           */
+  /* {Datasize, Offset, FileID} */
+  int64_t header[3]; /* The basic RPC input plus       */
+  int tag;           /* the supplied OPCODE tag        */
+  int source;        /* Rank of who sent the message   */
+  int subfile_rank;  /* The IOC rank                   */
+  hid_t context_id;  /* context to be used to complete */
+  double start_time; /* the request, + time of receipt */
+                     /* from which we calc Time(queued) */
+  void *buffer;      /* for writes, we keep the buffer */
+  int completed;     /* around for awhile...           */
 } sf_work_request_t;
 
-typedef struct {         /* Format of a context map entry  */
-    hid_t h5_file_id;    /* key value (linear search of the cache) */
-    hid_t sf_context_id; /* The return value if matching h5_file_id */
+typedef struct {       /* Format of a context map entry  */
+  uint64_t h5_file_id; /* key value (linear search of the cache) */
+  hid_t sf_context_id; /* The return value if matching h5_file_id */
 } file_map_to_context_t;
 
 /*
@@ -376,11 +349,11 @@ typedef struct {         /* Format of a context map entry  */
  * allow me to get the inode info.
  */
 typedef struct H5FD_sec2_t {
-    H5FD_t pub; /* public stuff, must be first      */
-    int    fd;  /* the filesystem file descriptor   */
+  H5FD_t pub; /* public stuff, must be first      */
+  int fd;     /* the filesystem file descriptor   */
 } H5FD_sec2_t;
 
-extern int        sf_verbose_flag;
+extern int sf_verbose_flag;
 extern atomic_int sf_work_pending;
 extern atomic_int sf_file_open_count;
 extern atomic_int sf_file_close_count;

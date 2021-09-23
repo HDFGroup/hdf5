@@ -234,6 +234,8 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDfamily.c
     ${HDF5_SRC_DIR}/H5FDhdfs.c
     ${HDF5_SRC_DIR}/H5FDint.c
+    ${HDF5_SRC_DIR}/H5FDioc.c
+    ${HDF5_SRC_DIR}/H5FDioc_threads.c
     ${HDF5_SRC_DIR}/H5FDlog.c
     ${HDF5_SRC_DIR}/H5FDmirror.c
     ${HDF5_SRC_DIR}/H5FDmpi.c
@@ -245,6 +247,9 @@ set (H5FD_SOURCES
     ${HDF5_SRC_DIR}/H5FDspace.c
     ${HDF5_SRC_DIR}/H5FDsplitter.c
     ${HDF5_SRC_DIR}/H5FDstdio.c
+    ${HDF5_SRC_DIR}/H5FDsubfiling.c
+    ${HDF5_SRC_DIR}/H5FDsubfile_int.c
+    ${HDF5_SRC_DIR}/H5FDsubfile_mpi.c
     ${HDF5_SRC_DIR}/H5FDtest.c
     ${HDF5_SRC_DIR}/H5FDwindows.c
 )
