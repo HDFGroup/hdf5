@@ -456,18 +456,18 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
       if (H5Pget_fapl_subfiling(fapl_id,&subfiling_conf) < 0)
          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get subfiling fapl")
               
-       if (subfiling_conf.require_ioc) {
+      if (subfiling_conf.require_ioc) {
          /* Get IOC VFD defaults */
-         if (H5Pget_fapl_ioc(ioc_fapl, &ioc_config) < 0)
-           HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get ioc fapl")
+        if (H5Pget_fapl_ioc(ioc_fapl, &ioc_config) < 0)
+          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get ioc fapl")
                     
-          /* Now we can set the IOC fapl. */
-          if (H5Pset_fapl_ioc(ioc_fapl, &ioc_config) < 0)
-            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set ioc fapl")
-          else
-            if (H5Pset_fapl_sec2(ioc_fapl) < 0)
-              HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sec2 fapl")
-        }
+        /* Now we can set the IOC fapl. */
+        if (H5Pset_fapl_ioc(ioc_fapl, &ioc_config) < 0)
+          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set ioc fapl")
+       } else {
+        if (H5Pset_fapl_sec2(ioc_fapl) < 0)
+          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sec2 fapl")
+       }
 
        /* Assign the IOC fapl as the underlying VPD */
        subfiling_conf.common.ioc_fapl_id = ioc_fapl;
