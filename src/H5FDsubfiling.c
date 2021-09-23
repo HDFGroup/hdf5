@@ -434,11 +434,15 @@ done:
 herr_t
 H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
 {
-    H5P_genplist_t *plist     = NULL; /* Property list pointer */
-    hid_t                    ioc_fapl   = H5I_INVALID_HID;
-    H5FD_ioc_config_t        ioc_config = {0,};
-    H5FD_subfiling_config_t  subfiling_conf = {0,};
-    herr_t          ret_value = FAIL;
+    H5P_genplist_t *  plist      = NULL; /* Property list pointer */
+    hid_t             ioc_fapl   = H5I_INVALID_HID;
+    H5FD_ioc_config_t ioc_config = {
+        0,
+    };
+    H5FD_subfiling_config_t subfiling_conf = {
+        0,
+    };
+    herr_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*!", fapl_id, fa);
@@ -446,38 +450,38 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    if( fa == NULL) {
-      /* Create IOC fapl */
-      ioc_fapl = H5Pcreate(H5P_FILE_ACCESS);
-      if (H5I_INVALID_HID == ioc_fapl) 
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't create ioc fapl")
+    if (fa == NULL) {
+        /* Create IOC fapl */
+        ioc_fapl = H5Pcreate(H5P_FILE_ACCESS);
+        if (H5I_INVALID_HID == ioc_fapl)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't create ioc fapl")
 
-      /* Get subfiling VFD defaults */
-      if (H5Pget_fapl_subfiling(fapl_id,&subfiling_conf) < 0)
-         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get subfiling fapl")
-              
-      if (subfiling_conf.require_ioc) {
-         /* Get IOC VFD defaults */
-        if (H5Pget_fapl_ioc(ioc_fapl, &ioc_config) < 0)
-          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get ioc fapl")
-                    
-        /* Now we can set the IOC fapl. */
-        if (H5Pset_fapl_ioc(ioc_fapl, &ioc_config) < 0)
-          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set ioc fapl")
-       } else {
-        if (H5Pset_fapl_sec2(ioc_fapl) < 0)
-          HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sec2 fapl")
-       }
+        /* Get subfiling VFD defaults */
+        if (H5Pget_fapl_subfiling(fapl_id, &subfiling_conf) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get subfiling fapl")
 
-       /* Assign the IOC fapl as the underlying VPD */
-       subfiling_conf.common.ioc_fapl_id = ioc_fapl;
+        if (subfiling_conf.require_ioc) {
+            /* Get IOC VFD defaults */
+            if (H5Pget_fapl_ioc(ioc_fapl, &ioc_config) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get ioc fapl")
 
-       fa = &subfiling_conf;
+            /* Now we can set the IOC fapl. */
+            if (H5Pset_fapl_ioc(ioc_fapl, &ioc_config) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set ioc fapl")
+        }
+        else {
+            if (H5Pset_fapl_sec2(ioc_fapl) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sec2 fapl")
+        }
 
+        /* Assign the IOC fapl as the underlying VPD */
+        subfiling_conf.common.ioc_fapl_id = ioc_fapl;
+
+        fa = &subfiling_conf;
     }
-    
+
     if (FAIL == H5FD__subfiling_validate_config(fa)) {
-      HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling config")
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling config")
     }
 
     ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)fa);
