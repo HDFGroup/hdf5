@@ -427,6 +427,35 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__copy_plist() */
 
+static herr_t
+fapl__get_subfiling_defaults(H5FD_subfiling_config_t *fa)
+{
+    herr_t ret_value = SUCCEED;
+    char * envValue  = NULL;
+
+    HDassert(fa);
+
+    fa->common.magic         = H5FD_SUBFILING_FAPL_T_MAGIC;
+    fa->common.version       = H5FD_CURR_SUBFILING_FAPL_T_VERSION;
+    fa->common.ioc_fapl_id   = H5P_DEFAULT;
+    fa->common.stripe_count  = 0;
+    fa->common.stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
+    fa->common.ioc_selection = SELECT_IOC_ONE_PER_NODE;
+    /* VFD specific */
+    fa->require_ioc = TRUE;
+
+    if ((envValue = getenv("H5_REQUIRE_IOC")) != NULL) {
+        int value_check = atoi(envValue);
+        if (value_check == 0) {
+            fa->require_ioc = FALSE;
+        }
+        else if (value_check > 0) {
+            fa->require_ioc = TRUE;
+        }
+    }
+    return (ret_value);
+}
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5Pset_fapl_subfiling
@@ -471,7 +500,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't create ioc fapl")
 
         /* Get subfiling VFD defaults */
-        if (H5Pget_fapl_subfiling(fapl_id, &subfiling_conf) < 0)
+        if (fapl__get_subfiling_defaults(&subfiling_conf) < 0)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get subfiling fapl")
 
         if (subfiling_conf.require_ioc) {
@@ -544,35 +573,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_subfiling_validate_config() */
-
-static herr_t
-fapl__get_subfiling_defaults(H5FD_subfiling_config_t *fa)
-{
-    herr_t ret_value = SUCCEED;
-    char * envValue  = NULL;
-
-    HDassert(fa);
-
-    fa->common.magic         = H5FD_SUBFILING_FAPL_T_MAGIC;
-    fa->common.version       = H5FD_CURR_SUBFILING_FAPL_T_VERSION;
-    fa->common.ioc_fapl_id   = H5P_DEFAULT;
-    fa->common.stripe_count  = 0;
-    fa->common.stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
-    fa->common.ioc_selection = SELECT_IOC_ONE_PER_NODE;
-    /* VFD specific */
-    fa->require_ioc = TRUE;
-
-    if ((envValue = getenv("H5_REQUIRE_IOC")) != NULL) {
-        int value_check = atoi(envValue);
-        if (value_check == 0) {
-            fa->require_ioc = FALSE;
-        }
-        else if (value_check > 0) {
-            fa->require_ioc = TRUE;
-        }
-    }
-    return (ret_value);
-}
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_subfiling
