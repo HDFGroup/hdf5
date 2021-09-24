@@ -129,6 +129,7 @@
 ./config/cygwin
 ./config/ibm-aix
 ./config/ibm-flags
+./config/intel-cxxflags
 ./config/intel-fflags
 ./config/intel-flags
 ./config/libhdf5.pc.in
@@ -140,6 +141,7 @@
 ./config/lt_vers.am
 ./config/Makefile.am.blank
 ./config/netbsd
+./config/pgi-cxxflags
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
@@ -165,6 +167,7 @@
 ./config/gnu-warnings/cxx-4.8
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
+./config/gnu-warnings/cxx-9
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
 ./config/gnu-warnings/cxx-noerror-5
@@ -189,8 +192,13 @@
 ./config/gnu-warnings/noerror-5
 ./config/gnu-warnings/noerror-8
 ./config/gnu-warnings/noerror-general
-./config/intel-warnings/ifort-general
+./config/intel-warnings/15
+./config/intel-warnings/18
+./config/intel-warnings/developer-general
 ./config/intel-warnings/general
+./config/intel-warnings/win-developer-general
+./config/intel-warnings/win-general
+./config/intel-warnings/ifort-general
 
 ./config/site-specific/BlankForm
 
