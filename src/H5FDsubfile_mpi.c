@@ -1751,7 +1751,6 @@ void get__subfile_name(subfiling_context_t *sf_context, int64_t h5_file_id, int 
 
   size_t prefix_len = strlen(prefix);
   if (strcmp(prefix, workdir)) {
-     mkdir(prefix, S_IRWXU);
      if (prefix[prefix_len-1] == slash) {
        if (sf_context->subfile_prefix)
           sprintf(filepath, "%s" SF_NODE_LOCAL_TEMPLATE, prefix, h5_file_id,
@@ -1841,8 +1840,12 @@ int subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags) {
       const char *dotconfig = ".subfile_config";
       int n_io_concentrators = sf_context->topology->n_io_concentrators;
       int *io_concentrator = sf_context->topology->io_concentrator;
-
-      if ((sf_context->sf_fid = HDopen(filepath, flags, mode)) < 0) {
+      hid_t fapl = H5Pcreate(H5P_FILE_ACCESS);
+      void *fptr = H5FD_open(filepath, H5F_ACC_CREAT|H5F_ACC_RDWR, fapl, HADDR_UNDEF);
+      if (fptr) {
+          H5FD_close(fptr);
+      }
+      if ((sf_context->sf_fid = HDopen(filepath, flags|O_CREAT , mode)) < 0) {
         end_thread_exclusive();
         HDprintf("[%d %s] file create(%s) failed!\n", subfile_rank, __func__,
                 filepath);
@@ -1871,7 +1874,6 @@ int subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags) {
 
       if ((subfile_rank == 0) && (flags & O_CREAT)) {
         FILE *f = NULL;
-
         /* If a config file already exists, AND
          * the user wants to truncate subfiles (if they exist),
          * then we should also truncate an existing config file.

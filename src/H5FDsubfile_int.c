@@ -454,7 +454,6 @@ close__subfiles( subfiling_context_t *sf_context, uint64_t fid)
     double      t_main_exit = 0.0, t_finalize_threads = 0.0;
 
     HDassert((sf_context != NULL));
-
     t0 = MPI_Wtime();
 
     /* We make the subfile close operation collective.
@@ -471,26 +470,10 @@ close__subfiles( subfiling_context_t *sf_context, uint64_t fid)
      * extremely busy servicing IO requests from all
      * HDF5 application ranks.
      */
-#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
-    MPI_Request b_req = MPI_REQUEST_NULL;
-    int mpi_status = MPI_Ibarrier(MPI_COMM_WORLD, &b_req);
-    if (mpi_status == MPI_SUCCESS) {
-        int completed = 0;
-        while (!completed) {
-            useconds_t t_delay = 5;
-            usleep(t_delay);
-            mpi_status = MPI_Test(&b_req, &completed, MPI_STATUS_IGNORE);
-            if (mpi_status != MPI_SUCCESS) completed = 1;
-        }
-    }
-#else
-    MPI_Barrier(MPI_COMM_WORLD);
-#endif
     /* The map from fid to context can now be cleared */
     clear_fid_map_entry(fid);
 
     if (sf_context->topology->rank_is_ioc) {
-
         file_open_count = atomic_load(&sf_file_open_count);
         atomic_fetch_sub(&sf_file_open_count, 1);
 
@@ -518,7 +501,9 @@ close__subfiles( subfiling_context_t *sf_context, uint64_t fid)
         if ((subfile_fid = sf_context->sf_fid) > 0) {
             if (HDclose(subfile_fid) < 0)
                 errors++;
-			sf_context->sf_fid = -1;
+			else {
+				sf_context->sf_fid = -1;
+			}
         }
 
 #ifndef NDEBUG
@@ -557,6 +542,8 @@ close__subfiles( subfiling_context_t *sf_context, uint64_t fid)
 #endif
     }
 
+	MPI_Allreduce(&errors, &global_errors, 1, MPI_INT, MPI_SUM, MPI_COMM_WORLD);
+
 #ifndef NDEBUG
     if (sf_verbose_flag) {
         if (client_log != NULL) {
@@ -565,6 +552,8 @@ close__subfiles( subfiling_context_t *sf_context, uint64_t fid)
         }
     }
 #endif    
+
+
     return global_errors;
 } /* end close__subfiles() */
 
