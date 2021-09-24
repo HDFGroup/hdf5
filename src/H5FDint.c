@@ -788,7 +788,6 @@ H5FD__read_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, uin
     /* Sanity checks */
     HDassert(file);
     HDassert(file->cls);
-    HDassert(count > 0);
     HDassert(vec_arr_nalloc == sizeof(sizes_static) / sizeof(sizes_static[0]));
     HDassert(vec_arr_nalloc == sizeof(vec_bufs_static) / sizeof(vec_bufs_static[0]));
     HDassert(mem_spaces);
@@ -1407,7 +1406,6 @@ H5FD__write_selection_translate(H5FD_t *file, H5FD_mem_t type, hid_t dxpl_id, ui
     /* Sanity checks */
     HDassert(file);
     HDassert(file->cls);
-    HDassert(count > 0);
     HDassert(vec_arr_nalloc == sizeof(sizes_static) / sizeof(sizes_static[0]));
     HDassert(vec_arr_nalloc == sizeof(vec_bufs_static) / sizeof(vec_bufs_static[0]));
     HDassert(mem_spaces);
