@@ -141,10 +141,15 @@ typedef struct config_common_t {
  *
  */
 
+//! <!-- [H5FD_subfiling_config_t_snip] -->
+/**
+ * Configure struct for  H5Pget_fapl_subfiling() / H5Pset_fapl_subfiling()
+ */
 typedef struct H5FD_subfiling_config_t {
     config_common_t common;
     hbool_t         require_ioc;
 } H5FD_subfiling_config_t;
+//! <!-- [H5FD_subfiling_config_t_snip] -->
 
 #ifdef __cplusplus
 extern "C" {
@@ -154,8 +159,42 @@ extern FILE *sf_logfile;
 extern FILE *client_log;
 
 H5_DLL hid_t H5FD_subfiling_init(void);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Queries subfiling file driver properties
+ *
+ * \fapl_id
+ * \param[out] config_out The subfiling fapl data.
+ *
+ * \returns \herr_t
+ *
+ * \details H5Pget_fapl_subfiling() queries the #H5FD_SUBFILING driver properties as set
+ *          by H5Pset_fapl_subfiling().
+ *
+ * \since 1.14.0
+ *
+ */
 H5_DLL herr_t H5Pget_fapl_subfiling(hid_t fapl_id,
                                     H5FD_subfiling_config_t *config_out);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Modifies the file access property list to use the #H5FD_SUBFILING driver
+ *
+ * \fapl_id
+ * \param[in] vfd_config #H5FD_SUBFILING driver specfic properties. If NULL, then
+ *            the IO concentrator VFD will be used.
+ * \returns \herr_t
+ *
+ * \details H5Pset_fapl_core() modifies the file access property list to use the
+ *          #H5FD_SUBFILING driver.
+ *
+ *          \todo Expand details!
+ *
+ * \since 1.14.0
+ *
+ */
 H5_DLL herr_t H5Pset_fapl_subfiling(hid_t fapl_id,
                                     H5FD_subfiling_config_t *vfd_config);
 H5_DLL herr_t H5FD__get_file_ino(const char *name, uint64_t *st_ino);
