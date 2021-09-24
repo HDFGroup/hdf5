@@ -658,7 +658,7 @@ H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize
         /* Issue selection I/O call (we can skip the page buffer because we've
          * already verified it won't be used, and the metadata accumulator
          * because this is raw data) Only call funciton if nelmts > 0. */
-        if (nelmts > 0 && H5F_shared_select_read(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, 1,
+        if (H5F_shared_select_read(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
                                    &mem_space, &file_space, &(io_info->store->contig.dset_addr),
                                    &dst_type_size, &(io_info->u.rbuf)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "contiguous selection read failed")
@@ -705,9 +705,9 @@ H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsiz
         /* Issue selection I/O call (we can skip the page buffer because we've
          * already verified it won't be used, and the metadata accumulator
          * because this is raw data). Only call funciton if nelmts > 0. */
-        if (nelmts > 0 && H5F_shared_select_write(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, 1,
-                                   &mem_space, &file_space, &(io_info->store->contig.dset_addr),
-                                   &dst_type_size, &(io_info->u.wbuf)) < 0)
+        if (H5F_shared_select_write(H5F_SHARED(io_info->dset->oloc.file), H5FD_MEM_DRAW, nelmts > 0 ? 1 : 0,
+                                    &mem_space, &file_space, &(io_info->store->contig.dset_addr),
+                                    &dst_type_size, &(io_info->u.wbuf)) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "contiguous selection write failed")
     } /* end if */
     else

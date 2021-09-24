@@ -1573,6 +1573,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     H5FD_mem_t *               s_types           = NULL;
     haddr_t *                  s_addrs           = NULL;
     size_t *                   s_sizes           = NULL;
+    size_t                     s_size;
     void **                    s_bufs            = NULL;
     int *                      mpi_block_lengths = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
@@ -1603,6 +1604,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     int                        io_size;        /* Actual number of bytes requested */
     int                        n;
 #endif
+    hbool_t rank0_bcast        = FALSE; /* If read-with-rank0-and-bcast flag was used */
     herr_t                     ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
@@ -1639,7 +1641,23 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
     if (xfer_mode == H5FD_MPIO_COLLECTIVE) {
 
-        if (count > 0) { /* create MPI derived types describing the vector write */
+        if (count == 1) {
+            /* Single block.  Just use a series of MPI_BYTEs for the file view.
+             */
+            size_i = (int)sizes[0];
+            buf_type  = MPI_BYTE;
+            file_type = MPI_BYTE;
+            mpi_bufs_base = bufs[0];
+
+            /* Setup s_sizes (needed for incomplete read filling code) */
+            vector_was_sorted = TRUE;
+            s_sizes = sizes;
+
+            /* some numeric conversions */
+            if (H5FD_mpi_haddr_to_MPIOff(addrs[0], &mpi_off) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI offset")
+        }
+        else if (count > 0) { /* create MPI derived types describing the vector write */
 
             /* sort the vector I/O request into increasing address order if required
              *
@@ -1750,6 +1768,10 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
             if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type)))
 
                 HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit for file_type failed", mpi_code)
+
+            /* some numeric conversions */
+            if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
         }
         else {
 
@@ -1763,14 +1785,14 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
             /* MPI count to read */
             size_i = 0;
+
+            /* some numeric conversions */
+            if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
+                HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
         }
 
         /* Portably initialize MPI status variable */
-        HDmemset(&mpi_stat, 0, sizeof(MPI_Status));
-
-        /* some numeric conversions */
-        if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
-            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
+        HDmemset(&mpi_stat, 0, sizeof(mpi_stat));
 
 #ifdef H5FDmpio_DEBUG
         if (H5FD_mpio_Debug[(int)'r'])
@@ -1781,6 +1803,10 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         if (MPI_SUCCESS != (mpi_code = MPI_File_set_view(file->f, mpi_off, MPI_BYTE, file_type,
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
+
+        /* Reset mpi_off to 0 since the view now starts at the data offset */
+        if (H5FD_mpi_haddr_to_MPIOff((haddr_t)0, &mpi_off) < 0)
+            HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "can't set MPI off to 0")
 
         /* Get the collective_opt property to check whether the application wants to do IO individually.
          */
@@ -1793,15 +1819,30 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
         if (H5FD_mpio_Debug[(int)'r'])
             HDfprintf(stdout, "%s: using MPIO collective mode\n", FUNC);
 #endif
-
         if (coll_opt_mode == H5FD_MPIO_COLLECTIVE_IO) {
 #ifdef H5FDmpio_DEBUG
             if (H5FD_mpio_Debug[(int)'r'])
                 HDfprintf(stdout, "%s: doing MPI collective IO\n", FUNC);
 #endif
+            /* Check whether we should read from rank 0 and broadcast to other ranks */
+            if (H5CX_get_mpio_rank0_bcast()) {
+#ifdef H5FDmpio_DEBUG
+                if (H5FD_mpio_Debug[(int)'r'])
+                    HDfprintf(stdout, "%s: doing read-rank0-and-MPI_Bcast\n", FUNC);
+#endif
+                /* Indicate path we've taken */
+                rank0_bcast = TRUE;
 
-            if (MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(file->f, mpi_off, mpi_bufs_base, size_i,
-                                                                buf_type, &mpi_stat)))
+                /* Read on rank 0 Bcast to other ranks */
+                if (file->mpi_rank == 0)
+                    if (MPI_SUCCESS != (mpi_code = MPI_File_read_at(file->f, mpi_off, mpi_bufs_base, size_i,
+                                                                    buf_type, &mpi_stat)))
+                        HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
+                if (MPI_SUCCESS != (mpi_code = MPI_Bcast(mpi_bufs_base, size_i, buf_type, 0, file->comm)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+            } /* end if */
+            else if (MPI_SUCCESS != (mpi_code = MPI_File_read_at_all(file->f, mpi_off, mpi_bufs_base, size_i,
+                                                                     buf_type, &mpi_stat)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at_all failed", mpi_code)
         } /* end if */
         else if (size_i > 0) {
@@ -1822,13 +1863,32 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
                                                          H5FD_mpi_native_g, file->info)))
             HMPI_GOTO_ERROR(FAIL, "MPI_File_set_view failed", mpi_code)
 
-        /* How many bytes were actually read? */
+        /* Only retrieve bytes read if this rank _actually_ participated in I/O */
+        if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
+            /* How many bytes were actually read? */
 #if MPI_VERSION >= 3
-        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
+            if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
 #else
-        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
+            if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
 #endif
-            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+                HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+        } /* end if */
+
+        /* If the rank0-bcast feature was used, broadcast the # of bytes read to
+         * other ranks, which didn't perform any I/O.
+         */
+        /* NOTE: This could be optimized further to be combined with the broadcast
+         *          of the data.  (QAK - 2019/1/2)
+         *       Or have rank 0 clear the unread parts of the buffer prior to
+         *          the bcast.  (NAF - 2021/9/15)
+         */
+        if (rank0_bcast)
+#if MPI_VERSION >= 3
+            if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_COUNT, 0, file->comm))
+#else
+            if (MPI_SUCCESS != MPI_Bcast(&bytes_read, 1, MPI_INT, 0, file->comm))
+#endif
+                HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", 0)
 
         /* Get the type's size */
 #if MPI_VERSION >= 3
@@ -1915,6 +1975,9 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
 
             /* Check if we acutally need to do I/O */
             if (addrs[i] < max_addr) {
+                /* Portably initialize MPI status variable */
+                HDmemset(&mpi_stat, 0, sizeof(mpi_stat));
+
                 /* Issue read */
                 if (MPI_SUCCESS !=
                     (mpi_code = MPI_File_read_at(file->f, mpi_off, bufs[i], size_i, MPI_BYTE, &mpi_stat)))
