@@ -479,12 +479,8 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
 {
     H5P_genplist_t *  plist      = NULL; /* Property list pointer */
     hid_t             ioc_fapl   = H5I_INVALID_HID;
-    H5FD_ioc_config_t ioc_config = {
-        0,
-    };
-    H5FD_subfiling_config_t subfiling_conf = {
-        0,
-    };
+    H5FD_ioc_config_t ioc_config;
+    H5FD_subfiling_config_t subfiling_conf;
     herr_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
