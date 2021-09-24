@@ -472,8 +472,8 @@ H5FD__splitter_populate_config(H5FD_splitter_vfd_config_t *vfd_config, H5FD_spli
     fapl_out->wo_path[H5FD_SPLITTER_PATH_MAX] = '\0';
     HDstrncpy(fapl_out->log_file_path, vfd_config->log_file_path, H5FD_SPLITTER_PATH_MAX + 1);
     fapl_out->log_file_path[H5FD_SPLITTER_PATH_MAX] = '\0';
-    fapl_out->rw_fapl_id = H5P_FILE_ACCESS_DEFAULT; /* pre-set value */
-    fapl_out->wo_fapl_id = H5P_FILE_ACCESS_DEFAULT; /* pre-set value */
+    fapl_out->rw_fapl_id                            = H5P_FILE_ACCESS_DEFAULT; /* pre-set value */
+    fapl_out->wo_fapl_id                            = H5P_FILE_ACCESS_DEFAULT; /* pre-set value */
 
     if (NULL == (def_plist = (H5P_genplist_t *)H5I_object(H5P_FILE_ACCESS_DEFAULT)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")

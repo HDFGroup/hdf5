@@ -68,6 +68,7 @@ static const H5FD_class_t H5FD_null_g = {
     NULL,                /* lock         */
     NULL,                /* unlock       */
     NULL,                /* del          */
+    NULL,                /* ctl          */
     H5FD_FLMAP_DICHOTOMY /* fl_map       */
 };
 
