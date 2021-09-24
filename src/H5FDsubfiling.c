@@ -35,6 +35,7 @@
 #include "H5Pprivate.h"    /* Property lists           */
 #include "H5Spkg.h"        /* For selections and creation of subfiling vectors */
 #include "H5private.h"     /* Generic Functions        */
+#include "H5FDioc.h"       /* IOC                      */
 
 /* The driver identification number, initialized at runtime */
 static hid_t H5FD_SUBFILING_g = 0;
@@ -426,6 +427,35 @@ done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__copy_plist() */
 
+static herr_t
+fapl__get_subfiling_defaults(H5FD_subfiling_config_t *fa)
+{
+    herr_t ret_value = SUCCEED;
+    char * envValue  = NULL;
+
+    HDassert(fa);
+
+    fa->common.magic         = H5FD_SUBFILING_FAPL_T_MAGIC;
+    fa->common.version       = H5FD_CURR_SUBFILING_FAPL_T_VERSION;
+    fa->common.ioc_fapl_id   = H5P_DEFAULT;
+    fa->common.stripe_count  = 0;
+    fa->common.stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
+    fa->common.ioc_selection = SELECT_IOC_ONE_PER_NODE;
+    /* VFD specific */
+    fa->require_ioc = TRUE;
+
+    if ((envValue = getenv("H5_REQUIRE_IOC")) != NULL) {
+        int value_check = atoi(envValue);
+        if (value_check == 0) {
+            fa->require_ioc = FALSE;
+        }
+        else if (value_check > 0) {
+            fa->require_ioc = TRUE;
+        }
+    }
+    return (ret_value);
+}
+
 /*-------------------------------------------------------------------------
  *
  * Function:    H5Pset_fapl_subfiling
@@ -447,18 +477,46 @@ done:
 herr_t
 H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
 {
-    H5P_genplist_t *plist     = NULL; /* Property list pointer */
-    herr_t          ret_value = FAIL;
+    H5P_genplist_t *  plist      = NULL; /* Property list pointer */
+    hid_t             ioc_fapl   = H5I_INVALID_HID;
+    H5FD_ioc_config_t ioc_config;
+    H5FD_subfiling_config_t subfiling_conf;
+    herr_t ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*!", fapl_id, fa);
 
-    HDassert(fa != NULL);
-
-    plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS);
-
-    if (plist == NULL) {
+    if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+    if (fa == NULL) {
+        /* Create IOC fapl */
+        ioc_fapl = H5Pcreate(H5P_FILE_ACCESS);
+        if (H5I_INVALID_HID == ioc_fapl)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't create ioc fapl")
+
+        /* Get subfiling VFD defaults */
+        if (fapl__get_subfiling_defaults(&subfiling_conf) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get subfiling fapl")
+
+        if (subfiling_conf.require_ioc) {
+            /* Get IOC VFD defaults */
+            if (H5Pget_fapl_ioc(ioc_fapl, &ioc_config) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't get ioc fapl")
+
+            /* Now we can set the IOC fapl. */
+            if (H5Pset_fapl_ioc(ioc_fapl, &ioc_config) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set ioc fapl")
+        }
+        else {
+            if (H5Pset_fapl_sec2(ioc_fapl) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set sec2 fapl")
+        }
+
+        /* Assign the IOC fapl as the underlying VPD */
+        subfiling_conf.common.ioc_fapl_id = ioc_fapl;
+
+        fa = &subfiling_conf;
     }
 
     if (FAIL == H5FD__subfiling_validate_config(fa)) {
@@ -511,35 +569,6 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 
 } /* end H5FD_subfiling_validate_config() */
-
-static herr_t
-fapl__get_subfiling_defaults(H5FD_subfiling_config_t *fa)
-{
-    herr_t ret_value = SUCCEED;
-    char * envValue  = NULL;
-
-    HDassert(fa);
-
-    fa->common.magic         = H5FD_SUBFILING_FAPL_T_MAGIC;
-    fa->common.version       = H5FD_CURR_SUBFILING_FAPL_T_VERSION;
-    fa->common.ioc_fapl_id   = H5P_DEFAULT;
-    fa->common.stripe_count  = 0;
-    fa->common.stripe_depth  = H5FD_DEFAULT_STRIPE_DEPTH;
-    fa->common.ioc_selection = SELECT_IOC_ONE_PER_NODE;
-    /* VFD specific */
-    fa->require_ioc = TRUE;
-
-    if ((envValue = getenv("H5_REQUIRE_IOC")) != NULL) {
-        int value_check = atoi(envValue);
-        if (value_check == 0) {
-            fa->require_ioc = FALSE;
-        }
-        else if (value_check > 0) {
-            fa->require_ioc = TRUE;
-        }
-    }
-    return (ret_value);
-}
 
 /*-------------------------------------------------------------------------
  * Function:    H5Pget_fapl_subfiling
