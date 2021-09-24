@@ -314,9 +314,9 @@ test_get_config_str(void)
         TEST_ERROR;
 
     /* Set default driver and driver configuration using environment variables */
-    if (HDsetenv("HDF5_DRIVER", "sec2", 1) < 0)
+    if (HDsetenv(HDF5_DRIVER, "sec2", 1) < 0)
         TEST_ERROR;
-    if (HDsetenv("HDF5_DRIVER_CONFIG", config_str, 1) < 0)
+    if (HDsetenv(HDF5_DRIVER_CONFIG, config_str, 1) < 0)
         TEST_ERROR;
 
     /* Close and re-open HDF5 to have it parse the environment variables */
@@ -335,9 +335,9 @@ test_get_config_str(void)
         TEST_ERROR;
 
     /* Unset environment variables */
-    if (HDsetenv("HDF5_DRIVER", "", 1) < 0)
+    if (HDsetenv(HDF5_DRIVER, "", 1) < 0)
         TEST_ERROR;
-    if (HDsetenv("HDF5_DRIVER_CONFIG", "", 1) < 0)
+    if (HDsetenv(HDF5_DRIVER_CONFIG, "", 1) < 0)
         TEST_ERROR;
 
     PASSED();

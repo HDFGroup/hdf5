@@ -394,7 +394,7 @@ H5VL__set_def_conn(void)
     } /* end if */
 
     /* Check for environment variable set */
-    env_var = HDgetenv("HDF5_VOL_CONNECTOR");
+    env_var = HDgetenv(HDF5_VOL_CONNECTOR);
 
     /* Only parse the string if it's set */
     if (env_var && *env_var) {

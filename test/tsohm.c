@@ -3821,7 +3821,7 @@ test_sohm(void)
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

@@ -419,7 +419,7 @@ static herr_t H5P__facc_mpi_info_close(const char *name, size_t size, void *valu
 #endif /* H5_HAVE_PARALLEL */
 
 /* Internal routines */
-static inline herr_t H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver_id);
+static herr_t H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver_id);
 
 /*********************/
 /* Package Variables */
@@ -852,7 +852,7 @@ H5P__facc_set_def_driver(void)
     FUNC_ENTER_STATIC
 
     /* Check if VFL driver environment variable is set */
-    driver_env_var = HDgetenv("HDF5_DRIVER");
+    driver_env_var = HDgetenv(HDF5_DRIVER);
 
     /* Only parse VFL driver string if it's set */
     if (driver_env_var && *driver_env_var) {
@@ -890,7 +890,7 @@ H5P__facc_set_def_driver(void)
         }     /* end else */
 
         /* Retrieve driver configuration string from environment variable, if set. */
-        driver_config_env_var = HDgetenv("HDF5_DRIVER_CONFIG");
+        driver_config_env_var = HDgetenv(HDF5_DRIVER_CONFIG);
 
         driver_prop.driver_id         = driver_id;
         driver_prop.driver_info       = NULL;
@@ -939,7 +939,7 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-static inline herr_t
+static herr_t
 H5P__facc_set_def_driver_check_predefined(const char *driver_name, hid_t *driver_id)
 {
     herr_t ret_value = SUCCEED;

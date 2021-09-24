@@ -153,7 +153,7 @@ main(int argc, const char *argv[])
          * anything. */
 
         /* Determine driver being used */
-        envval = HDgetenv("HDF5_DRIVER");
+        envval = HDgetenv(HDF5_DRIVER);
 
         if (envval == NULL || H5FD__supports_swmr_test(envval)) {
             if (test_flush() != SUCCEED)

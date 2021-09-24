@@ -133,7 +133,7 @@ main(int argc, char *argv[])
         TESTING("H5Fflush (part1)");
 
     /* Don't run using the split VFD */
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 

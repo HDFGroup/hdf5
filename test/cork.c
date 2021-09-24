@@ -2253,7 +2253,7 @@ main(void)
             /* Skip these tests if SWMR I/O is not supported for the VFD specified
              * by the environment variable.
              */
-            driver = HDgetenv("HDF5_DRIVER");
+            driver = HDgetenv(HDF5_DRIVER);
             if (!H5FD__supports_swmr_test(driver)) {
                 HDputs("-- SKIPPED SWMR tests for SWMR-incompatible VFD --");
                 continue;

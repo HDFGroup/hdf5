@@ -144,7 +144,7 @@ H5PL__init_package(void)
      * to ignore plugins. The special symbol H5PL_NO_PLUGIN (defined in
      * H5PLpublic.h) means we don't want to load plugins.
      */
-    if (NULL != (env_var = HDgetenv("HDF5_PLUGIN_PRELOAD")))
+    if (NULL != (env_var = HDgetenv(HDF5_PLUGIN_PRELOAD)))
         if (!HDstrcmp(env_var, H5PL_NO_PLUGIN)) {
             H5PL_plugin_control_mask_g = 0;
             H5PL_allow_plugins_g       = FALSE;

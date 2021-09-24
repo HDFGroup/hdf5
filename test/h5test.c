@@ -538,7 +538,7 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
     /* Determine if driver is set by environment variable. If it is,
      * only generate a suffix if fixing the filename for the superblock
      * file. */
-    driver_env_var = HDgetenv("HDF5_DRIVER");
+    driver_env_var = HDgetenv(HDF5_DRIVER);
     if (driver_env_var && (H5P_DEFAULT == fapl) && subst_for_superblock)
         fapl = H5P_FILE_ACCESS_DEFAULT;
 
@@ -592,12 +592,12 @@ h5_fixname_real(const char *base_name, hid_t fapl, const char *_suffix, char *fu
      */
     if (isppdriver) {
 #ifdef H5_HAVE_PARALLEL
-        if (getenv_all(MPI_COMM_WORLD, 0, "HDF5_NOCLEANUP"))
+        if (getenv_all(MPI_COMM_WORLD, 0, HDF5_NOCLEANUP))
             SetTestNoCleanup();
 #endif /* H5_HAVE_PARALLEL */
     }
     else {
-        if (HDgetenv("HDF5_NOCLEANUP"))
+        if (HDgetenv(HDF5_NOCLEANUP))
             SetTestNoCleanup();
     }
 
@@ -1192,7 +1192,7 @@ h5_get_file_size(const char *filename, hid_t fapl)
             h5_stat_size_t tot_size       = 0;
             char *         driver_env_var = NULL;
 
-            driver_env_var = HDgetenv("HDF5_DRIVER");
+            driver_env_var = HDgetenv(HDF5_DRIVER);
             if (driver_env_var && !HDstrcmp(driver_env_var, "split")) {
                 for (mt = H5FD_MEM_DEFAULT; mt < H5FD_MEM_NTYPES; mt++) {
                     if (mt != H5FD_MEM_DRAW && mt != H5FD_MEM_SUPER)
@@ -2189,7 +2189,7 @@ h5_using_default_driver(const char *drv_name)
     HDassert(H5_DEFAULT_VFD == H5FD_SEC2);
 
     if (!drv_name)
-        drv_name = HDgetenv("HDF5_DRIVER");
+        drv_name = HDgetenv(HDF5_DRIVER);
 
     if (drv_name)
         return (!HDstrcmp(drv_name, "sec2") || !HDstrcmp(drv_name, "nomatch"));
@@ -2218,7 +2218,7 @@ h5_using_parallel_driver(const char *drv_name)
     hbool_t ret_val = FALSE;
 
     if (!drv_name)
-        drv_name = HDgetenv("HDF5_DRIVER");
+        drv_name = HDgetenv(HDF5_DRIVER);
 
     if (drv_name)
         return (!HDstrcmp(drv_name, "mpio"));
@@ -2248,7 +2248,7 @@ hbool_t
 h5_driver_uses_modified_filename(void)
 {
     hbool_t ret_val = FALSE;
-    char *  driver  = HDgetenv("HDF5_DRIVER");
+    char *  driver  = HDgetenv(HDF5_DRIVER);
 
     if (driver) {
         ret_val = !HDstrcmp(driver, "multi") || !HDstrcmp(driver, "split") || !HDstrcmp(driver, "family") ||
@@ -2287,7 +2287,7 @@ h5_driver_uses_multiple_files(const char *drv_name, unsigned flags)
     hbool_t ret_val = FALSE;
 
     if (!drv_name)
-        drv_name = HDgetenv("HDF5_DRIVER");
+        drv_name = HDgetenv(HDF5_DRIVER);
 
     if (drv_name) {
         if ((flags & H5_EXCLUDE_MULTIPART_DRIVERS) == 0) {

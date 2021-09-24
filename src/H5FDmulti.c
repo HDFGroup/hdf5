@@ -1140,7 +1140,7 @@ H5FD_multi_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
     }
     H5E_END_TRY;
     if (!fa || (H5P_FILE_ACCESS_DEFAULT == fapl_id) || (H5FD_MULTI != H5Pget_driver(fapl_id))) {
-        char *env = getenv("HDF5_DRIVER");
+        char *env = getenv(HDF5_DRIVER);
 
         close_fapl = fapl_id = H5Pcreate(H5P_FILE_ACCESS);
         if (env && !strcmp(env, "split")) {
@@ -2191,7 +2191,7 @@ H5FD_multi_delete(const char *filename, hid_t fapl_id)
     }
     H5E_END_TRY;
     if (!fa) {
-        char *env = getenv("HDF5_DRIVER");
+        char *env = getenv(HDF5_DRIVER);
 
         if (env && !strcmp(env, "split")) {
             if (H5FD_split_populate_config(NULL, H5P_DEFAULT, NULL, H5P_DEFAULT, TRUE, &default_fa) < 0)

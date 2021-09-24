@@ -10126,7 +10126,7 @@ main(void)
     const char *     envval         = NULL;
     hbool_t          api_ctx_pushed = FALSE; /* Whether API context pushed */
 
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 

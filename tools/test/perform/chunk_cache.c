@@ -81,7 +81,7 @@ counter(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static void
 cleanup(void)
 {
-    if (!getenv("HDF5_NOCLEANUP")) {
+    if (!getenv(HDF5_NOCLEANUP)) {
         remove(FILENAME);
     }
 }

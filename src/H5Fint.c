@@ -277,7 +277,7 @@ H5F__parse_file_lock_env_var(htri_t *use_locks)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check the file locking environment variable */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && (!HDstrcmp(lock_env_var, "FALSE") || !HDstrcmp(lock_env_var, "0")))
         *use_locks = FALSE; /* Override: Never use locks */
     else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "BEST_EFFORT") ||

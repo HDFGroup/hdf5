@@ -248,7 +248,7 @@ H5PL__create_path_table(void)
     /* Retrieve paths from HDF5_PLUGIN_PATH if the user sets it
      * or from the default paths if it isn't set.
      */
-    env_var = HDgetenv("HDF5_PLUGIN_PATH");
+    env_var = HDgetenv(HDF5_PLUGIN_PATH);
     if (NULL == env_var)
         paths = H5MM_strdup(H5PL_DEFAULT_PATH);
     else

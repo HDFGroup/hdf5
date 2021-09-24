@@ -17314,7 +17314,7 @@ main(void)
     const char *env_h5_drvr; /* File Driver value from environment */
     hbool_t     same_file;   /* Whether to run tests that only use one file */
 
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

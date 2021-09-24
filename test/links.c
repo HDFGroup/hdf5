@@ -22552,7 +22552,7 @@ main(void)
     const char *env_h5_drvr; /* File Driver value from environment */
     hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
 
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 

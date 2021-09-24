@@ -119,7 +119,7 @@ usage(const char *prog)
 static void
 cleanup(void)
 {
-    if (!getenv("HDF5_NOCLEANUP")) {
+    if (!getenv(HDF5_NOCLEANUP)) {
         remove(FILE_NAME_1);
     }
 }
