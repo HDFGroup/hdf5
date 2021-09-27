@@ -52,7 +52,7 @@ static const char *FileHeader = "\n\
 /* Disable warning about cast increasing the alignment of the target type,
  * that's _exactly_ what this code is probing.  -QAK
  */
-H5_GCC_DIAG_OFF("cast-align")
+H5_GCC_CLANG_DIAG_OFF("cast-align")
 
 #if defined(__has_attribute)
 #if __has_attribute(no_sanitize_address)
@@ -300,10 +300,10 @@ precision(detected_t *d)
             for (_byte_mask = (unsigned char)1; _byte_mask; _byte_mask = (unsigned char)(_byte_mask << 1)) { \
                 _buf1[_i] ^= _byte_mask;                                                                     \
                 HDmemcpy((void *)&_v2, (const void *)_buf1, sizeof(TYPE));                                   \
-                H5_GCC_DIAG_OFF("float-equal")                                                               \
+                H5_GCC_CLANG_DIAG_OFF("float-equal")                                                         \
                 if (_v1 != _v2)                                                                              \
                     _pad_mask[_i] |= _byte_mask;                                                             \
-                H5_GCC_DIAG_ON("float-equal")                                                                \
+                H5_GCC_CLANG_DIAG_ON("float-equal")                                                          \
                 _buf1[_i] ^= _byte_mask;                                                                     \
             } /* end for */                                                                                  \
                                                                                                              \
@@ -414,10 +414,10 @@ precision(detected_t *d)
                 HDmemcpy(_buf + align_g[_ano] + (INFO.offset / 8), ((char *)&_val) + (INFO.offset / 8),      \
                          (size_t)(INFO.precision / 8));                                                      \
             _val2 = *((TYPE *)(_buf + align_g[_ano]));                                                       \
-            H5_GCC_DIAG_OFF("float-equal")                                                                   \
+            H5_GCC_CLANG_DIAG_OFF("float-equal")                                                             \
             if (_val != _val2)                                                                               \
                 H5LONGJMP(jbuf_g, 1);                                                                        \
-            H5_GCC_DIAG_ON("float-equal")                                                                    \
+            H5_GCC_CLANG_DIAG_ON("float-equal")                                                              \
             /* End Cray Check */                                                                             \
             (INFO.align) = align_g[_ano];                                                                    \
         }                                                                                                    \
@@ -1567,4 +1567,4 @@ main(int argc, char *argv[])
     return EXIT_SUCCESS;
 }
 
-H5_GCC_DIAG_ON("cast-align")
+H5_GCC_CLANG_DIAG_ON("cast-align")

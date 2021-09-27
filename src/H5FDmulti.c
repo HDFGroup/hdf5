@@ -44,7 +44,7 @@
 #define my_strdup strdup
 #endif
 
-/* Macros for enabling/disabling particular GCC warnings
+/* Macros for enabling/disabling particular GCC / clang warnings
  *
  * These are (renamed) duplicates of macros in H5private.h. If you make changes
  * here, be sure to update those as well.
@@ -166,6 +166,8 @@ static herr_t  H5FD_multi_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing
 static herr_t  H5FD_multi_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD_multi_unlock(H5FD_t *_file);
 static herr_t  H5FD_multi_delete(const char *filename, hid_t fapl_id);
+static herr_t  H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                              void **output);
 
 /* The class struct */
 static const H5FD_class_t H5FD_multi_g = {
@@ -201,6 +203,7 @@ static const H5FD_class_t H5FD_multi_g = {
     H5FD_multi_lock,           /* lock              */
     H5FD_multi_unlock,         /* unlock            */
     H5FD_multi_delete,         /* del               */
+    H5FD_multi_ctl,            /* ctl               */
     H5FD_FLMAP_DEFAULT         /* fl_map            */
 };
 
@@ -646,7 +649,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out
     H5Eclear2(H5E_DEFAULT);
 
     /* Name and version number */
-    strncpy(name, "NCSAmulti", (size_t)8);
+    strncpy(name, "NCSAmult", (size_t)9);
     name[8] = '\0';
 
     assert(7 == H5FD_MEM_NTYPES);
@@ -682,7 +685,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out
     p = buf + 8 + nseen * 2 * 8;
     UNIQUE_MEMBERS (file->fa.memb_map, mt) {
         size_t n = strlen(file->fa.memb_name[mt]) + 1;
-        strncpy((char *)p, file->fa.memb_name[mt], n);
+        strcpy((char *)p, file->fa.memb_name[mt]);
         p += n;
         for (i = n; i % 8; i++)
             *p++ = '\0';
@@ -2019,6 +2022,7 @@ open_members(H5FD_multi_t *file)
 
     return 0;
 }
+H5_MULTI_GCC_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_multi_delete
@@ -2029,6 +2033,7 @@ open_members(H5FD_multi_t *file)
  *
  *-------------------------------------------------------------------------
  */
+H5_MULTI_GCC_DIAG_OFF("format-nonliteral")
 static herr_t
 H5FD_multi_delete(const char *filename, hid_t fapl_id)
 {
@@ -2067,6 +2072,54 @@ H5FD_multi_delete(const char *filename, hid_t fapl_id)
     return 0;
 } /* end H5FD_multi_delete() */
 H5_MULTI_GCC_DIAG_ON("format-nonliteral")
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_multi_ctl
+ *
+ * Purpose:     Multi VFD version of the ctl callback.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ *              At present, this VFD supports no op codes of its own.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD_multi_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    H5FD_multi_t *     file      = (H5FD_multi_t *)_file;
+    static const char *func      = "H5FD_multi_ctl"; /* Function Name for error reporting */
+    herr_t             ret_value = 0;
+
+    /* Silence compiler */
+    (void)file;
+    (void)input;
+    (void)output;
+
+    /* Clear the error stack */
+    H5Eclear2(H5E_DEFAULT);
+
+    switch (op_code) {
+        /* Unknown op code */
+        default:
+            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+                H5Epush_ret(func, H5E_ERR_CLS, H5E_VFL, H5E_FCNTL,
+                            "VFD ctl request failed (unknown op code and fail if unknown flag is set)", -1);
+
+            break;
+    }
+
+    return ret_value;
+} /* end H5FD_multi_ctl() */
 
 #ifdef H5private_H
 /*

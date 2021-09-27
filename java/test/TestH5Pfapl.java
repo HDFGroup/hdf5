@@ -104,7 +104,7 @@ public class TestH5Pfapl {
         for(int indx = 0; ;indx++) {
             java.text.DecimalFormat myFormat = new java.text.DecimalFormat("00000");
             try {
-                file = new File("test"+myFormat.format(new Integer(indx))+".h5");
+                file = new File("test"+myFormat.format(Integer.valueOf(indx))+".h5");
             }
             catch (Throwable err) {}
 

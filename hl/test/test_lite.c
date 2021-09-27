@@ -43,8 +43,9 @@
 #define ATTR7_NAME    "attr ushort"
 #define ATTR8_NAME    "attr uint"
 #define ATTR9_NAME    "attr ulong"
-#define ATTR10_NAME   "attr float"
-#define ATTR11_NAME   "attr double"
+#define ATTR10_NAME   "attr ullong"
+#define ATTR11_NAME   "attr float"
+#define ATTR12_NAME   "attr double"
 
 static herr_t make_attributes(hid_t loc_id, const char *obj_name);
 
@@ -472,28 +473,30 @@ make_attributes(hid_t loc_id, const char *obj_name)
     size_t      type_size;
     int         i;
 
-    char           attr_str_in[] = {"My attribute"};
-    char           attr_str_out[20];
-    char           attr_char_in[5] = {1, 2, 3, 4, 5};
-    char           attr_char_out[5];
-    short          attr_short_in[5] = {1, 2, 3, 4, 5};
-    short          attr_short_out[5];
-    int            attr_int_in[5] = {1, 2, 3, 4, 5};
-    int            attr_int_out[5];
-    long           attr_long_in[5] = {1, 2, 3, 4, 5};
-    long           attr_long_out[5];
-    float          attr_float_in[5] = {1, 2, 3, 4, 5};
-    float          attr_float_out[5];
-    double         attr_double_in[5] = {1, 2, 3, 4, 5};
-    double         attr_double_out[5];
-    unsigned char  attr_uchar_in[5] = {1, 2, 3, 4, 5};
-    unsigned char  attr_uchar_out[5];
-    unsigned short attr_ushort_in[5] = {1, 2, 3, 4, 5};
-    unsigned short attr_ushort_out[5];
-    unsigned int   attr_uint_in[5] = {1, 2, 3, 4, 5};
-    unsigned int   attr_uint_out[5];
-    unsigned long  attr_ulong_in[5] = {1, 2, 3, 4, 5};
-    unsigned long  attr_ulong_out[5];
+    char               attr_str_in[] = {"My attribute"};
+    char               attr_str_out[20];
+    char               attr_char_in[5] = {1, 2, 3, 4, 5};
+    char               attr_char_out[5];
+    short              attr_short_in[5] = {1, 2, 3, 4, 5};
+    short              attr_short_out[5];
+    int                attr_int_in[5] = {1, 2, 3, 4, 5};
+    int                attr_int_out[5];
+    long               attr_long_in[5] = {1, 2, 3, 4, 5};
+    long               attr_long_out[5];
+    float              attr_float_in[5] = {1, 2, 3, 4, 5};
+    float              attr_float_out[5];
+    double             attr_double_in[5] = {1, 2, 3, 4, 5};
+    double             attr_double_out[5];
+    unsigned char      attr_uchar_in[5] = {1, 2, 3, 4, 5};
+    unsigned char      attr_uchar_out[5];
+    unsigned short     attr_ushort_in[5] = {1, 2, 3, 4, 5};
+    unsigned short     attr_ushort_out[5];
+    unsigned int       attr_uint_in[5] = {1, 2, 3, 4, 5};
+    unsigned int       attr_uint_out[5];
+    unsigned long      attr_ulong_in[5] = {1, 2, 3, 4, 5};
+    unsigned long      attr_ulong_out[5];
+    unsigned long long attr_ullong_in[5] = {1, 2, 3, 4, 5};
+    unsigned long long attr_ullong_out[5];
 
     /*-------------------------------------------------------------------------
      * H5LTset_attribute_string test
@@ -509,7 +512,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     PASSED();
 
     /*-------------------------------------------------------------------------
-     * H5LTset_attribute_string test
+     * H5LTget_attribute_string test
      *-------------------------------------------------------------------------
      */
 
@@ -859,7 +862,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     PASSED();
 
     /*-------------------------------------------------------------------------
-     * H5LTget_attribute_long test
+     * H5LTget_attribute_ulong test
      *-------------------------------------------------------------------------
      */
 
@@ -888,6 +891,48 @@ make_attributes(hid_t loc_id, const char *obj_name)
     PASSED();
 
     /*-------------------------------------------------------------------------
+     * H5LTset_attribute_ullong test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTset_attribute_ullong");
+
+    /* Set the attribute */
+    if (H5LTset_attribute_ullong(loc_id, obj_name, ATTR10_NAME, attr_ullong_in, (size_t)5) < 0)
+        return -1;
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
+     * H5LTget_attribute_ullong test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTget_attribute_ullong");
+
+    /* Get the attribute */
+    if (H5LTget_attribute_ullong(loc_id, obj_name, ATTR10_NAME, attr_ullong_out) < 0)
+        return -1;
+
+    for (i = 0; i < 5; i++) {
+        if (attr_ullong_in[i] != attr_ullong_out[i]) {
+            return -1;
+        }
+    }
+
+    /* Get the attribute */
+    if (H5LTget_attribute(loc_id, obj_name, ATTR10_NAME, H5T_NATIVE_ULLONG, attr_ullong_out) < 0)
+        return -1;
+
+    for (i = 0; i < 5; i++) {
+        if (attr_ullong_in[i] != attr_ullong_out[i]) {
+            return -1;
+        }
+    }
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
      * H5LTset_attribute_float test
      *-------------------------------------------------------------------------
      */
@@ -895,7 +940,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTset_attribute_float");
 
     /* Set the attribute */
-    if (H5LTset_attribute_float(loc_id, obj_name, ATTR10_NAME, attr_float_in, (size_t)5) < 0)
+    if (H5LTset_attribute_float(loc_id, obj_name, ATTR11_NAME, attr_float_in, (size_t)5) < 0)
         return -1;
 
     PASSED();
@@ -908,7 +953,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTget_attribute_float");
 
     /* Get the attribute */
-    if (H5LTget_attribute_float(loc_id, obj_name, ATTR10_NAME, attr_float_out) < 0)
+    if (H5LTget_attribute_float(loc_id, obj_name, ATTR11_NAME, attr_float_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -918,7 +963,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     }
 
     /* Get the attribute */
-    if (H5LTget_attribute(loc_id, obj_name, ATTR10_NAME, H5T_NATIVE_FLOAT, attr_float_out) < 0)
+    if (H5LTget_attribute(loc_id, obj_name, ATTR11_NAME, H5T_NATIVE_FLOAT, attr_float_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -937,7 +982,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTset_attribute_double");
 
     /* Set the attribute */
-    if (H5LTset_attribute_double(loc_id, obj_name, ATTR11_NAME, attr_double_in, (size_t)5) < 0)
+    if (H5LTset_attribute_double(loc_id, obj_name, ATTR12_NAME, attr_double_in, (size_t)5) < 0)
         return -1;
 
     PASSED();
@@ -950,7 +995,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTget_attribute_double");
 
     /* Get the attribute */
-    if (H5LTget_attribute_double(loc_id, obj_name, ATTR11_NAME, attr_double_out) < 0)
+    if (H5LTget_attribute_double(loc_id, obj_name, ATTR12_NAME, attr_double_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -960,7 +1005,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     }
 
     /* Get the attribute */
-    if (H5LTget_attribute(loc_id, obj_name, ATTR11_NAME, H5T_NATIVE_DOUBLE, attr_double_out) < 0)
+    if (H5LTget_attribute(loc_id, obj_name, ATTR12_NAME, H5T_NATIVE_DOUBLE, attr_double_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
