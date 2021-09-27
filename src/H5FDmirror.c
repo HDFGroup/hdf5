@@ -192,6 +192,7 @@ static const H5FD_class_t H5FD_mirror_g = {
     H5FD__mirror_lock,      /* lock                 */
     H5FD__mirror_unlock,    /* unlock               */
     NULL,                   /* del                  */
+    NULL,                   /* ctl                  */
     H5FD_FLMAP_DICHOTOMY    /* fl_map               */
 };
 
