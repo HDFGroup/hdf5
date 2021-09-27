@@ -121,9 +121,8 @@ typedef herr_t (*H5D_layout_construct_func_t)(H5F_t *f, H5D_t *dset);
 typedef herr_t (*H5D_layout_init_func_t)(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 typedef hbool_t (*H5D_layout_is_space_alloc_func_t)(const H5O_storage_t *storage);
 typedef hbool_t (*H5D_layout_is_data_cached_func_t)(const H5D_shared_t *shared_dset);
-typedef herr_t (*H5D_layout_io_init_func_t)(struct H5D_io_info_t *io_info,
-                                            const H5D_type_info_t *type_info, hsize_t nelmts,
-                                            const H5S_t *file_space, const H5S_t *mem_space,
+typedef herr_t (*H5D_layout_io_init_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+                                            hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
                                             struct H5D_chunk_map_t *cm);
 typedef herr_t (*H5D_layout_read_func_t)(struct H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                          hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,

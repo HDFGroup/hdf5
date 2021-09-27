@@ -845,11 +845,8 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
         H5CX_set_mpio_actual_io_mode(H5D_MPIO_NO_COLLECTIVE);
     } /* end if */
 
-    /* Make any parallel I/O adjustments.  Do not use collective code path if
-     * we're using selection I/O - in this case the file driver will handle it.
-     */
-     /* Check for selection/vector support in file driver? -NAF */
-    if (io_info->using_mpi_vfd /*&& !H5_use_selection_io_g*/) {
+    /* Make any parallel I/O adjustments */
+    if (io_info->using_mpi_vfd) {
         H5FD_mpio_xfer_t xfer_mode; /* Parallel transfer for this request */
         htri_t           opt;       /* Flag whether a selection is optimizable */
 
@@ -867,12 +864,17 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
 
         /* Check if we can use the optimized parallel I/O routines */
         if (opt == TRUE) {
-            /* Override the I/O op pointers to the MPI-specific routines */
-            io_info->io_ops.multi_read   = dset->shared->layout.ops->par_read;
-            io_info->io_ops.multi_write  = dset->shared->layout.ops->par_write;
-            io_info->io_ops.single_read  = H5D__mpio_select_read;
-            io_info->io_ops.single_write = H5D__mpio_select_write;
-        } /* end if */
+            /* Override the I/O op pointers to the MPI-specific routines, unless
+             * selection I/O is to be used - in this case the file driver will
+             * handle collective I/O */
+            /* Check for selection/vector support in file driver? -NAF */
+            if (!io_info->use_select_io) {
+                io_info->io_ops.multi_read   = dset->shared->layout.ops->par_read;
+                io_info->io_ops.multi_write  = dset->shared->layout.ops->par_write;
+                io_info->io_ops.single_read  = H5D__mpio_select_read;
+                io_info->io_ops.single_write = H5D__mpio_select_write;
+            } /* end if */
+        }     /* end if */
         else {
             /* Check if there are any filters in the pipeline. If there are,
              * we cannot break to independent I/O if this is a write operation;
