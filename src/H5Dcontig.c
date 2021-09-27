@@ -1666,4 +1666,3 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__contig_copy() */
-
