@@ -29,6 +29,11 @@ if test -z "$bindir"; then
    bindir=.
 fi
 
+# If the testdir directory is not set just use current (.).
+if test -z "$testdir"; then
+   testdir=.
+fi
+
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
 ../utils/swmr_compat_vfd
@@ -91,7 +96,7 @@ TOOLTEST() {
     # Run test.
     TESTING $program $@
     (
-      $RUNSERIAL $bindir/$program "$@"
+      $RUNSERIAL $testdir/$program "$@"
     ) >$actual 2>$actual_err
     exit_code=$?
 

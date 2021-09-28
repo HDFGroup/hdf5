@@ -2499,6 +2499,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 
 /* Use this macro to match the FUNC_ENTER_API_WRAPPER macro */
 #define FUNC_LEAVE_API_WRAPPER(ret_value)                                                                    \
+    ;                                                                                                        \
+    }                                                                                                        \
     FUNC_LEAVE_API_COMMON(ret_value);                                                                        \
     if (pushed)                                                                                              \
         (void)H5CX_pop(TRUE);                                                                                \

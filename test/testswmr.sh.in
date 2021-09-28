@@ -103,6 +103,11 @@ if test -z "$bindir"; then
    bindir=.
 fi
 
+# If the testdir directory is not set just use current (.).
+if test -z "$testdir"; then
+   testdir=.
+fi
+
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
 ../utils/swmr_compat_vfd
@@ -178,7 +183,7 @@ do
         echo "###############################################################################"
         # Launch the Generator without SWMR_WRITE
         echo launch the swmr_generator
-        $bindir/swmr_generator $compress $index_type
+        $testdir/swmr_generator $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -186,7 +191,7 @@ do
 
         # Launch the Generator with SWMR_WRITE
         echo launch the swmr_generator with SWMR_WRITE
-        $bindir/swmr_generator -s $compress $index_type
+        $testdir/swmr_generator -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -210,7 +215,7 @@ do
         # Launch the Writer
         echo launch the swmr_start_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_start_write $compress $index_type $Nrecords $seed 2>&1 |tee swmr_writer.out &
+        $testdir/swmr_start_write $compress $index_type $Nrecords $seed 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -226,7 +231,7 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            $bindir/swmr_reader $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_reader $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -271,7 +276,7 @@ do
 
         # Launch the Generator
         echo launch the swmr_generator
-        $bindir/swmr_generator -s $compress $index_type
+        $testdir/swmr_generator -s $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -283,7 +288,7 @@ do
         # Launch the Writer
         echo launch the swmr_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_writer -o $Nrecords $seed 2>&1 |tee swmr_writer.out &
+        $testdir/swmr_writer -o $Nrecords $seed 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -298,7 +303,7 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            $bindir/swmr_reader $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_reader $Nsecs_add $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -346,7 +351,7 @@ do
         # Launch the Remove Writer
         echo launch the swmr_remove_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_remove_writer -o $Nrecs_rem $seed 2>&1 |tee swmr_writer.out &
+        $testdir/swmr_remove_writer -o $Nrecs_rem $seed 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -361,7 +366,7 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            $bindir/swmr_remove_reader $Nsecs_rem $seed 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_remove_reader $Nsecs_rem $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -406,7 +411,7 @@ do
 
         # Launch the Generator
         echo launch the swmr_generator
-        $bindir/swmr_generator $compress $index_type
+        $testdir/swmr_generator $compress $index_type
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -415,7 +420,7 @@ do
         # Launch the Writer (not in parallel - just to rebuild the datasets)
         echo launch the swmr_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_writer $Nrecords $seed
+        $testdir/swmr_writer $Nrecords $seed
         if test $? -ne 0; then
             echo writer had error
             nerrors=`expr $nerrors + 1`
@@ -427,7 +432,7 @@ do
         # Launch the Add/Remove Writer
         echo launch the swmr_addrem_writer
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_addrem_writer $Nrecords $seed 2>&1 |tee swmr_writer.out &
+        $testdir/swmr_addrem_writer $Nrecords $seed 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -442,7 +447,7 @@ do
         while [ $n -lt $Nreaders ]; do
             #seed="-r ${seeds[$n]}"
             seed=""
-            $bindir/swmr_remove_reader $Nsecs_addrem $seed 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_remove_reader $Nsecs_addrem $seed 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
@@ -490,7 +495,7 @@ do
         #       created by the generator.
         echo launch the swmr_generator
         seed="" # Put -r <random seed> command here
-        $bindir/swmr_generator $compress $index_type $seed
+        $testdir/swmr_generator $compress $index_type $seed
         if test $? -ne 0; then
             echo generator had error
             nerrors=`expr $nerrors + 1`
@@ -500,7 +505,7 @@ do
         rm -f $WRITER_MESSAGE
         # Launch the Sparse writer
         echo launch the swmr_sparse_writer
-        nice -n 20 $bindir/swmr_sparse_writer $Nrecs_spa 2>&1 |tee swmr_writer.out &
+        nice -n 20 $testdir/swmr_sparse_writer $Nrecs_spa 2>&1 |tee swmr_writer.out &
         pid_writer=$!
         $DPRINT pid_writer=$pid_writer
 
@@ -513,7 +518,7 @@ do
         echo launch $Nrdrs_spa swmr_sparse_readers
         while [ $n -lt $Nrdrs_spa ]; do
             # The sparse reader spits out a LOT of data so it's set to 'quiet'
-            $bindir/swmr_sparse_reader -q $Nrecs_spa 2>&1 |tee swmr_reader.out.$n &
+            $testdir/swmr_sparse_reader -q $Nrecs_spa 2>&1 |tee swmr_reader.out.$n &
             pid_readers="$pid_readers $!"
             n=`expr $n + 1`
         done
