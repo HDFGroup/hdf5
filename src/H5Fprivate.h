@@ -24,11 +24,9 @@ typedef struct H5F_t H5F_t;
 /* Include package's public header */
 #include "H5Fpublic.h"
 
-/* Public headers needed by this file */
-#include "H5FDpublic.h" /* File drivers                 */
-
 /* Private headers needed by this file */
 #include "H5MMprivate.h" /* Memory management            */
+#include "H5FDprivate.h" /* File drivers                 */
 #ifdef H5_HAVE_PARALLEL
 #include "H5Pprivate.h"  /* Property lists               */
 #endif                   /* H5_HAVE_PARALLEL */
@@ -906,6 +904,7 @@ H5_DLL hbool_t H5F_shared_has_feature(const H5F_shared_t *f, unsigned feature);
 H5_DLL hbool_t H5F_has_feature(const H5F_t *f, unsigned feature);
 H5_DLL haddr_t H5F_shared_get_eoa(const H5F_shared_t *f_sh, H5FD_mem_t type);
 H5_DLL haddr_t H5F_get_eoa(const H5F_t *f, H5FD_mem_t type);
+H5_DLL herr_t  H5F_shared_get_file_handle(const H5F_shared_t *f_sh, H5FD_t **file_handle);
 H5_DLL herr_t  H5F_get_vfd_handle(const H5F_t *file, hid_t fapl, void **file_handle);
 
 /* File mounting routines */
