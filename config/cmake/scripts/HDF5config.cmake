@@ -38,7 +38,7 @@ cmake_minimum_required (VERSION 3.12)
 ##############################################################################
 
 set (CTEST_SOURCE_VERSION "1.13.0")
-set (CTEST_SOURCE_VERSEXT "")
+set (CTEST_SOURCE_VERSEXT "-6")
 
 ##############################################################################
 # handle input parameters to script.
