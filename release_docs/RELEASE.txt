@@ -1172,6 +1172,15 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Corrected path searched by CMake find_package command
+
+      The install path for cmake find_package files had been changed to use
+        "share/cmake"
+      for all platforms. However the trailing "hdf5" directory was not removed.
+      This "hdf5" additional directory has been removed.
+
+      (ADB - 2021/09/27)
+
     - Corrected pkg-config compile script
 
       It was discovered that the position of the "$@" argument for the command
