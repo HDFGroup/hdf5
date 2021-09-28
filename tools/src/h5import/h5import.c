@@ -3771,6 +3771,7 @@ getCompressionParameter(struct Input *in, FILE *strm)
 static int
 getExternalFilename(struct Input *in, FILE *strm)
 {
+    size_t      temp_len;
     char        temp[255];
     const char *err1 = "Unable to get 'string' value.\n";
 
@@ -3779,8 +3780,10 @@ getExternalFilename(struct Input *in, FILE *strm)
         return (-1);
     }
 
-    in->externFilename = (char *)HDmalloc((size_t)(HDstrlen(temp) + 1) * sizeof(char));
-    (void)HDstrncpy(in->externFilename, temp, HDstrlen(temp) + 1);
+    temp_len           = HDstrlen(temp);
+    in->externFilename = (char *)HDmalloc((temp_len + 1) * sizeof(char));
+    (void)HDstrcpy(in->externFilename, temp);
+    in->externFilename[temp_len] = '\0';
     return (0);
 }
 

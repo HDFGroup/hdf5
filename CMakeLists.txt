@@ -572,20 +572,6 @@ endif ()
 # endif ()
 
 #-----------------------------------------------------------------------------
-# Option to build documentation
-#-----------------------------------------------------------------------------
-option (HDF5_BUILD_DOC "Build documentation" OFF)
-if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
-# check if Doxygen is installed
-  find_package(Doxygen)
-  if (DOXYGEN_FOUND)
-    message(STATUS "Doxygen version: ${DOXYGEN_VERSION}")
-  else ()
-    message(STATUS "Doxygen needs to be installed to generate the doxygen documentation")
-  endif ()
-endif ()
-
-#-----------------------------------------------------------------------------
 # Option to indicate using a memory checker
 #-----------------------------------------------------------------------------
 option (HDF5_ENABLE_USING_MEMCHECKER "Indicate that a memory checker is used" OFF)
@@ -922,6 +908,21 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
     if (BUILD_SHARED_LIBS)
       add_dependencies (${HDF5_LIBSH_TARGET} SZIP)
     endif ()
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
+# Option to build documentation
+#-----------------------------------------------------------------------------
+option (HDF5_BUILD_DOC "Build documentation" OFF)
+if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
+# check if Doxygen is installed
+  find_package(Doxygen)
+  if (DOXYGEN_FOUND)
+    message(STATUS "Doxygen version: ${DOXYGEN_VERSION}")
+    add_subdirectory (doxygen)
+  else ()
+    message(STATUS "Doxygen needs to be installed to generate the doxygen documentation")
   endif ()
 endif ()
 

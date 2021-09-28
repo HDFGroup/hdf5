@@ -49,6 +49,14 @@ New Features
 
     Configuration:
     -------------
+    - Added new option to control the build of High-Level tools
+      that default ON/enabled.
+
+      Add configure options (autotools - CMake):
+            enable-hltools       HDF5_BUILD_HL_TOOLS
+
+      (ADB - 2021/09/16, HDFFV-11266)
+
     - Adds C++ Autotools configuration file for Intel
 
       * Checks for icpc as the compiler
@@ -463,6 +471,31 @@ New Features
 
     Library:
     --------
+    - Adds new "ctl" callback to VFD H5FD_class_t structure
+      with the following prototype:
+
+        herr_t (*ctl)(H5FD_t *file, uint64_t op_code,
+                      uint64_t flags, const void *input,
+                      void **output);
+
+      This newly-added "ctl" callback allows Virtual File
+      Drivers to intercept and handle arbitary operations
+      identified by an operation code. Its parameters are
+      as follows:
+
+        `file` [in] - A pointer to the file to be operated on
+        `op_code` [in] - The operation code identifying the
+                         operation to be performed
+        `flags` [in] - Flags governing the behavior of the
+                       operation performed (see H5FDpublic.h
+                       for a list of valid flags)
+        `input` [in] - A pointer to arguments passed to the
+                       VFD performing the operation
+        `output` [out] - A pointer for the receiving VFD to
+                         use for output from the operation
+
+        (JRM - 2021/08/16)
+
     - Change how the release part of version, in major.minor.release is checked
       for compatibility
 
@@ -745,7 +778,6 @@ New Features
 
     Fortran Library:
     ----------------
-
     - H5Fget_name_f fixed to handle correctly trailing whitespaces and
       newly allocated buffers.
 
@@ -908,7 +940,13 @@ New Features
 
     High-Level APIs:
     ----------------
-    -
+    - added set/get for unsigned long long attributes
+
+        the attribute writing high-level API has been expanded to include
+        public set/get functions for ULL attributes, analogously to the
+        existing set/get for other types.
+
+        (AF - 2021/09/08)
 
     C Packet Table API:
     -------------------
@@ -930,6 +968,17 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Detection of simple data transform function "x"
+
+        In the case of the simple data transform function "x" the (parallel)
+        library recognizes this is the same as not applying this data transform
+        function. This improves the I/O performance. In the case of the parallel
+        library, it also avoids breaking to independent I/O, which makes it
+        possible to apply a filter when writing or reading data to or from
+        teh HDF5 file.
+
+        (JWSB - 2021/09/13)
+
     - Fixed an invalid read and memory leak when parsing corrupt file space
       info messages
 
@@ -1123,6 +1172,23 @@ Bug Fixes since HDF5-1.12.0 release
 
     Configuration
     -------------
+    - Corrected path searched by CMake find_package command
+
+      The install path for cmake find_package files had been changed to use
+        "share/cmake"
+      for all platforms. However the trailing "hdf5" directory was not removed.
+      This "hdf5" additional directory has been removed.
+
+      (ADB - 2021/09/27)
+
+    - Corrected pkg-config compile script
+
+      It was discovered that the position of the "$@" argument for the command
+      in the compile script may fail on some platforms and configurations. The
+      position of the "$@"command argument was moved before the pkg-config sub command.
+
+      (ADB - 2021/08/30)
+
     - Fixed CMake C++ compiler flags
 
       A recent refactoring of the C++ configure files accidently removed the
