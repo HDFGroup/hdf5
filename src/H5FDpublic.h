@@ -171,13 +171,13 @@
  */
 #define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE 0x00008000
 /*
- * Defining H5FD_FEAT_SPECIAL_MEMMANAGE for a VFL driver means
- * that the driver uses special memory management routines.
- * Therefore, HDF5 should request that the driver handle any
- * memory management operations that would otherwise be performed
- * with standard library routines.
+ * Defining H5FD_FEAT_MEMMANAGE for a VFL driver means that
+ * the driver uses special memory management routines or wishes
+ * to do memory management in a specific manner. Therefore, HDF5
+ * should request that the driver handle any memory management
+ * operations when appropriate.
  */
-#define H5FD_FEAT_SPECIAL_MEMMANAGE 0x00010000
+#define H5FD_FEAT_MEMMANAGE 0x00010000
 
 /* ctl function definitions: */
 #define H5FD_CTL_OPC_RESERVED 512 /* Opcodes below this value are reserved for library use */

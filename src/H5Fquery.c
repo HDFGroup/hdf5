@@ -950,16 +950,16 @@ done:
 } /* end H5F_get_eoa() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5F_shared_get_file_handle
+ * Function:    H5F_shared_get_file_driver
  *
- * Purpose:     Returns a pointer to the lower-level I/O file handle of the
+ * Purpose:     Returns a pointer to the file driver structure of the
  *              file's 'shared' structure.
  *
  * Return:      file handle on success/abort on failure (shouldn't fail)
  *-------------------------------------------------------------------------
  */
 herr_t
-H5F_shared_get_file_handle(const H5F_shared_t *f_sh, H5FD_t **file_handle)
+H5F_shared_get_file_driver(const H5F_shared_t *f_sh, H5FD_t **file_handle)
 {
     /* Use FUNC_ENTER_NOAPI_NOINIT_NOERR here to avoid performance issues */
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -970,7 +970,7 @@ H5F_shared_get_file_handle(const H5F_shared_t *f_sh, H5FD_t **file_handle)
     *file_handle = f_sh->lf;
 
     FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5F_shared_get_file_handle() */
+} /* end H5F_shared_get_file_driver() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5F_get_vfd_handle
