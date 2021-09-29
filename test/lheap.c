@@ -174,27 +174,29 @@ main(void)
         goto error;
     PASSED();
 
-    /* Check opening existing file non-default sizes of lengths and addresses */
-    TESTING("opening pre-created file with non-default sizes");
-    {
-        const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
-        hid_t       dset     = -1;
-        file                 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
-        if (file >= 0) {
-            if ((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)
-                TEST_ERROR
-            if (H5Dclose(dset) < 0)
-                TEST_ERROR
-            if (H5Fclose(file) < 0)
-                TEST_ERROR
+    if (!h5_driver_uses_modified_filename()) {
+        /* Check opening existing file non-default sizes of lengths and addresses */
+        TESTING("opening pre-created file with non-default sizes");
+        {
+            const char *testfile = H5_get_srcdir_filename(TESTFILE); /* Corrected test file name */
+            hid_t       dset     = -1;
+            file                 = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
+            if (file >= 0) {
+                if ((dset = H5Dopen2(file, "/Dataset1", H5P_DEFAULT)) < 0)
+                    TEST_ERROR
+                if (H5Dclose(dset) < 0)
+                    TEST_ERROR
+                if (H5Fclose(file) < 0)
+                    TEST_ERROR
+            }
+            else {
+                H5_FAILED();
+                HDprintf("***cannot open the pre-created non-default sizes test file (%s)\n", testfile);
+                goto error;
+            } /* end else */
         }
-        else {
-            H5_FAILED();
-            HDprintf("***cannot open the pre-created non-default sizes test file (%s)\n", testfile);
-            goto error;
-        } /* end else */
+        PASSED();
     }
-    PASSED();
 
     /* Verify symbol table messages are cached */
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)

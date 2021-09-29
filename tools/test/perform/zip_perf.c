@@ -103,7 +103,7 @@ error(const char *fmt, ...)
 static void
 cleanup(void)
 {
-    if (!HDgetenv("HDF5_NOCLEANUP"))
+    if (!HDgetenv(HDF5_NOCLEANUP))
         HDunlink(filename);
     HDfree(filename);
 }

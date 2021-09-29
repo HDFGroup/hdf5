@@ -1702,25 +1702,9 @@ main(int argc, const char *argv[])
     if (drivername) {
         h5tools_vfd_info_t vfd_info;
 
-        vfd_info.info = NULL;
-        vfd_info.name = drivername;
-
-        if (!HDstrcmp(drivername, drivernames[ROS3_VFD_IDX])) {
-#ifdef H5_HAVE_ROS3_VFD
-            vfd_info.info = (void *)&ros3_fa;
-#else
-            error_msg("Read-Only S3 VFD not enabled.\n");
-            goto done;
-#endif
-        }
-        else if (!HDstrcmp(drivername, drivernames[HDFS_VFD_IDX])) {
-#ifdef H5_HAVE_LIBHDFS
-            vfd_info.info = (void *)&hdfs_fa;
-#else
-            error_msg("HDFS VFD not enabled.\n");
-            goto done;
-#endif
-        }
+        vfd_info.type   = VFD_BY_NAME;
+        vfd_info.info   = NULL;
+        vfd_info.u.name = drivername;
 
         if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
             error_msg("Unable to create FAPL for file access\n");
@@ -1737,7 +1721,7 @@ main(int argc, const char *argv[])
 
         HDprintf("Filename: %s\n", fname);
 
-        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE, NULL, 0);
+        fid = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), NULL, 0);
 
         if (fid < 0) {
             error_msg("unable to open file \"%s\"\n", fname);

@@ -1272,7 +1272,7 @@ do_cleanupfile(iotype iot, char *filename)
     hid_t driver;
 
     if (clean_file_g == -1)
-        clean_file_g = (HDgetenv("HDF5_NOCLEANUP") == NULL) ? 1 : 0;
+        clean_file_g = (HDgetenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
 
     if (clean_file_g) {
 

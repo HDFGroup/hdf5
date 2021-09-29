@@ -117,7 +117,7 @@ main(void)
     const char *env_h5_drvr;     /* File Driver value from environment */
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
 
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
     /* Current VFD that does not support contigous address space */
@@ -343,14 +343,18 @@ do_ranks(hid_t fapl, hbool_t new_format)
                 goto error;
             } /* end if */
 
-            /* VL test */
-            if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) < 0) {
-                DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length")
-                HDprintf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
-                                               ? "btree"
-                                               : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
-                goto error;
-            } /* end if */
+            if (!h5_using_parallel_driver(NULL)) {
+                /* VL test */
+                if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) <
+                    0) {
+                    DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length")
+                    HDprintf("   Index: %s\n",
+                             index_type == RANK4_INDEX_BTREE
+                                 ? "btree"
+                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                    goto error;
+                } /* end if */
+            }
 
             /* Sparse allocation test (regular and VL) */
             if (!(config & CONFIG_EARLY_ALLOC)) {
@@ -362,16 +366,19 @@ do_ranks(hid_t fapl, hbool_t new_format)
                                  : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
                     goto error;
                 } /* end if */
-                if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE, index_type) <
-                    0) {
-                    DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length with sparse allocation")
-                    HDprintf("   Index: %s\n",
-                             index_type == RANK4_INDEX_BTREE
-                                 ? "btree"
-                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
-                    goto error;
-                } /* end if */
-            }     /* end if */
+
+                if (!h5_using_parallel_driver(NULL)) {
+                    if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE,
+                                             index_type) < 0) {
+                        DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length with sparse allocation")
+                        HDprintf("   Index: %s\n",
+                                 index_type == RANK4_INDEX_BTREE
+                                     ? "btree"
+                                     : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                        goto error;
+                    } /* end if */
+                }
+            } /* end if */
 
             /* Break out if using the old format */
             if (!new_format)
