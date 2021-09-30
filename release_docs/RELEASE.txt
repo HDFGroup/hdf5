@@ -463,6 +463,20 @@ Bug Fixes since HDF5-1.10.7 release
 ===================================
     Library
     -------
+    - Fix for CVE-2020-10812
+
+        If a malformed file includes a cache image superblock extension
+        message with an offset past the file's end of address (EOA), the
+        file close will fail, leaving behind a largely deallocated stub.
+        When the library shuts down, it will attempt to close this stub,
+        causing segmentation faults or asserts to trip when it pushes
+        the stub through the normal close routines.
+
+        The fix detects malformed file stubs left over from failed
+        close operations and allows the library to shut down cleanly.
+
+        (DER - 2021/09/29)
+
     - Detection of simple data transform function "x"
 
         In the case of the simple data transform function "x" the (parallel)

@@ -2166,8 +2166,14 @@ H5F__close_cb(H5F_t *f)
 
     /* Sanity check */
     HDassert(f);
-    HDassert(f->file_id >
-             0); /* This routine should only be called when a file ID's ref count drops to zero */
+
+    /* If we got here with a bad file ID or no shared file pointer, we
+     * probably had a previous close callback failure. Proceeding with the
+     * close is almost certain to fail, so the best thing to do here is to
+     * fake "success" so the library can terminate.
+     */
+    if (H5I_INVALID_HID == f->file_id || NULL == f->shared)
+        HGOTO_DONE(SUCCEED);
 
     /* Perform checks for "semi" file close degree here, since closing the
      * file is not allowed if there are objects still open.

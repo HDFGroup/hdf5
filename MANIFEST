@@ -1078,6 +1078,7 @@
 ./src/uthash.h
 
 ./test/AtomicWriterReader.txt
+./test/CVE-2020-10812.h5
 ./test/H5srcdir.h
 ./test/H5srcdir_str.h.in
 ./test/Makefile.am
