@@ -817,8 +817,8 @@ test_basic_file_operation(const char *env_h5_drvr)
     /* Can't compare VFD properties for several VFDs */
     if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
                   HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0) &&
-        HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0) {
+                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -881,8 +881,8 @@ test_basic_file_operation(const char *env_h5_drvr)
     /* Can't compare VFD properties for several VFDs */
     if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
                   HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0) &&
-        HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0) {
+                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid)) < 0)
             TEST_ERROR;
@@ -898,8 +898,8 @@ test_basic_file_operation(const char *env_h5_drvr)
     /* Can't compare VFD properties for several VFDs */
     if ((hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
                   HDstrcmp(env_h5_drvr, "family") != 0 && HDstrcmp(env_h5_drvr, "direct") != 0 &&
-                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0) &&
-        HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0) {
+                  HDstrcmp(env_h5_drvr, "core") != 0 && HDstrcmp(env_h5_drvr, "core_paged") != 0 &&
+                  HDstrcmp(env_h5_drvr, "mpio") != 0 && HDstrcmp(env_h5_drvr, "splitter") != 0)) {
         /* H5Fget_access_plist */
         if ((fapl_id2 = H5Fget_access_plist(fid_reopen)) < 0)
             TEST_ERROR;
