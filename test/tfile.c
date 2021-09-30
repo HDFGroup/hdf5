@@ -7399,7 +7399,7 @@ test_min_dset_ohdr(void)
  *
  *  test_CVE_2020_10812:
  *    Test the fix for CVE-2020-10812
- *  
+ *
  *  In this test, the cache image was set past EOA in a malformed
  *  file, causing the close to fail, eventually tripping an
  *  assert() in debug builds or causing a segfault in production
@@ -7409,18 +7409,20 @@ test_min_dset_ohdr(void)
 static void
 test_CVE_2020_10812(void)
 {
-    hid_t fid = H5I_INVALID_HID;
+    hid_t  fid = H5I_INVALID_HID;
     herr_t ret = FAIL;
     /* Corrected test file name (not generated) */
-    const char * testfile = H5_get_srcdir_filename("CVE-2020-10812.h5");
+    const char *testfile = H5_get_srcdir_filename("CVE-2020-10812.h5");
 
     fid = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT);
     CHECK(fid, H5I_INVALID_HID, "H5Fopen");
 
     /* This will fail, but should not segfault or trip an assert */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Fclose(fid);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
     VERIFY(ret, FAIL, "H5Fclose");
 }
 
