@@ -489,7 +489,7 @@ main(void)
     hid_t       fapl;
     const char *envval = NULL;
 
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
     /* QAK: should be able to use the core driver? */

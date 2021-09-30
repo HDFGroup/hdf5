@@ -28,6 +28,39 @@
 
 #define H5FD_VFD_DEFAULT 0 /* Default VFL driver value */
 
+/* VFD identifier values
+ * These are H5FD_class_value_t values, NOT hid_t values!
+ */
+#define H5_VFD_INVALID  ((H5FD_class_value_t)(-1))
+#define H5_VFD_SEC2     ((H5FD_class_value_t)(0))
+#define H5_VFD_CORE     ((H5FD_class_value_t)(1))
+#define H5_VFD_LOG      ((H5FD_class_value_t)(2))
+#define H5_VFD_FAMILY   ((H5FD_class_value_t)(3))
+#define H5_VFD_MULTI    ((H5FD_class_value_t)(4))
+#define H5_VFD_STDIO    ((H5FD_class_value_t)(5))
+#define H5_VFD_SPLITTER ((H5FD_class_value_t)(6))
+#ifdef H5_HAVE_PARALLEL
+#define H5_VFD_MPIO ((H5FD_class_value_t)(7))
+#endif
+#ifdef H5_HAVE_DIRECT
+#define H5_VFD_DIRECT ((H5FD_class_value_t)(8))
+#endif
+#ifdef H5_HAVE_MIRROR_VFD
+#define H5_VFD_MIRROR ((H5FD_class_value_t)(9))
+#endif
+#ifdef H5_HAVE_LIBHDFS
+#define H5_VFD_HDFS ((H5FD_class_value_t)(10))
+#endif
+#ifdef H5_HAVE_ROS3_VFD
+#define H5_VFD_ROS3 ((H5FD_class_value_t)(11))
+#endif
+
+/* VFD IDs below this value are reserved for library use. */
+#define H5_VFD_RESERVED 256
+
+/* Maximum VFD ID */
+#define H5_VFD_MAX 65535
+
 /* Define VFL driver features that can be enabled on a per-driver basis */
 /* These are returned with the 'query' function pointer in H5FD_class_t */
 /*
@@ -137,6 +170,14 @@
  * enabled may be used as the Write-Only (W/O) channel driver.
  */
 #define H5FD_FEAT_DEFAULT_VFD_COMPATIBLE 0x00008000
+/*
+ * Defining H5FD_FEAT_MEMMANAGE for a VFL driver means that
+ * the driver uses special memory management routines or wishes
+ * to do memory management in a specific manner. Therefore, HDF5
+ * should request that the driver handle any memory management
+ * operations when appropriate.
+ */
+#define H5FD_FEAT_MEMMANAGE 0x00010000
 
 /* ctl function definitions: */
 #define H5FD_CTL_OPC_RESERVED 512 /* Opcodes below this value are reserved for library use */
@@ -152,6 +193,9 @@
 #define H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE 2
 #define H5FD_CTL__GET_MPI_RANK_OPCODE         3
 #define H5FD_CTL__GET_MPI_SIZE_OPCODE         4
+#define H5FD_CTL__MEM_ALLOC                   5
+#define H5FD_CTL__MEM_FREE                    6
+#define H5FD_CTL__MEM_COPY                    7
 
 /* ctl function flags: */
 
@@ -212,6 +256,16 @@
 /*******************/
 /* Public Typedefs */
 /*******************/
+
+/*
+ * File driver identifiers.
+ *
+ * Values 0 through 255 are for drivers defined by the HDF5 library.
+ * Values 256 through 511 are available for testing new drivers.
+ * Subsequent values should be obtained from the HDF5 development
+ * team at mailto:help@hdfgroup.org.
+ */
+typedef int H5FD_class_value_t;
 
 /* Types of allocation requests: see H5Fpublic.h  */
 typedef enum H5F_mem_t H5FD_mem_t;
@@ -323,6 +377,19 @@ typedef struct {
     void *udata;
 } H5FD_file_image_callbacks_t;
 //! <!-- [H5FD_file_image_callbacks_t_snip] -->
+
+/**
+ * Define structure to hold "ctl memory copy" parameters
+ */
+//! <!-- [H5FD_ctl_memcpy_args_t_snip] -->
+typedef struct H5FD_ctl_memcpy_args_t {
+    void *      dstbuf;  /**< Destination buffer */
+    hsize_t     dst_off; /**< Offset within destination buffer */
+    const void *srcbuf;  /**< Source buffer */
+    hsize_t     src_off; /**< Offset within source buffer */
+    size_t      len;     /**< Length of data to copy from source buffer */
+} H5FD_ctl_memcpy_args_t;
+//! <!-- [H5FD_ctl_memcpy_args_t_snip] -->
 
 /********************/
 /* Public Variables */

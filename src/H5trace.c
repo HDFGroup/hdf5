@@ -1046,6 +1046,65 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         }     /* end block */
                         break;
 
+                        case 'V': /* H5FD_class_value_t */
+                        {
+                            H5FD_class_value_t class_val =
+                                (H5FD_class_value_t)HDva_arg(ap, H5FD_class_value_t);
+
+                            switch (class_val) {
+                                case H5_VFD_INVALID:
+                                    H5RS_acat(rs, "H5_VFD_INVALID");
+                                    break;
+                                case H5_VFD_SEC2:
+                                    H5RS_acat(rs, "H5_VFD_SEC2");
+                                    break;
+                                case H5_VFD_CORE:
+                                    H5RS_acat(rs, "H5_VFD_CORE");
+                                    break;
+                                case H5_VFD_LOG:
+                                    H5RS_acat(rs, "H5_VFD_LOG");
+                                    break;
+                                case H5_VFD_FAMILY:
+                                    H5RS_acat(rs, "H5_VFD_FAMILY");
+                                    break;
+                                case H5_VFD_MULTI:
+                                    H5RS_acat(rs, "H5_VFD_MULTI");
+                                    break;
+                                case H5_VFD_STDIO:
+                                    H5RS_acat(rs, "H5_VFD_STDIO");
+                                    break;
+#ifdef H5_HAVE_PARALLEL
+                                case H5_VFD_MPIO:
+                                    H5RS_acat(rs, "H5_VFD_MPIO");
+                                    break;
+#endif
+#ifdef H5_HAVE_DIRECT
+                                case H5_VFD_DIRECT:
+                                    H5RS_acat(rs, "H5_VFD_DIRECT");
+                                    break;
+#endif
+#ifdef H5_HAVE_MIRROR_VFD
+                                case H5_HAVE_MIRROR_VFD:
+                                    H5RS_acat(rs, "H5_HAVE_MIRROR_VFD");
+                                    break;
+#endif
+#ifdef H5_HAVE_LIBHDFS
+                                case H5_HAVE_LIBHDFS:
+                                    H5RS_acat(rs, "H5_HAVE_LIBHDFS");
+                                    break;
+#endif
+#ifdef H5_HAVE_ROS3_VFD
+                                case H5_HAVE_ROS3_VFD:
+                                    H5RS_acat(rs, "H5_HAVE_ROS3_VFD");
+                                    break;
+#endif
+                                default:
+                                    H5RS_asprintf_cat(rs, "%ld", (long)class_val);
+                                    break;
+                            }
+                        } /* end block */
+                        break;
+
                         default:
                             H5RS_asprintf_cat(rs, "BADTYPE(D%c)", type[1]);
                             goto error;

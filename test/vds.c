@@ -12288,8 +12288,23 @@ main(void)
     hid_t        src_fapl = -1; /* File access property list */
     int          test_api_config;
     unsigned     bit_config;
-    H5F_libver_t low, high; /* Low and high bounds */
+    H5F_libver_t low, high;   /* Low and high bounds */
+    const char * env_h5_drvr; /* File Driver value from environment */
     int          nerrors = 0;
+
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /*
+     * Skip VDS tests for parallel-enabled and splitter VFDs. VDS currently
+     * doesn't support parallel reads and the splitter VFD has external
+     * link-related bugs.
+     */
+    if (h5_using_parallel_driver(env_h5_drvr) || !HDstrcmp(env_h5_drvr, "splitter")) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        HDexit(EXIT_SUCCESS);
+    }
 
     /* Testing setup */
     h5_reset();
