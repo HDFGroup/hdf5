@@ -5212,26 +5212,26 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     char       buf1[2][STR_SIZE] = {"ab", "de"};     /* string */
     char *     buf1a[2];                             /* VL string */
     char       buf2[2] = {1, 2};                     /* bitfield, opaque */
-    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};     /* compound */
+    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};       /* compound */
     hobj_ref_t buf4[2];                              /* reference */
     e_t        buf45[2] = {RED, RED};                /* enum */
     hvl_t      buf5[2];                              /* vlen */
     hsize_t    dimarray[1] = {3};                    /* array dimension */
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
-    float      buf8[2]     = {1.0, 2.0};           /* float */
+    float      buf8[2]     = {1.0, 2.0};             /* float */
 
     /* create 2D attributes with dimension [3][2], 6 elements */
-    hsize_t dims2[2]              = {3, 2};
-    char    buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
-    char *  buf12a[3][2];                                                       /* VL string */
-    char    buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
-    s_t     buf32[6] = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
+    hsize_t    dims2[2]              = {3, 2};
+    char       buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
+    char *     buf12a[3][2];                                                       /* VL string */
+    char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
+    s_t        buf32[6]    = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
     hobj_ref_t buf42[3][2];                                                                   /* reference */
     e_t        buf452[3][2];                                                                  /* enum */
     hvl_t      buf52[3][2];                                                                   /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
-    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                     /* integer */
+    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};               /* integer */
     float buf82[3][2] = {{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}}; /* float */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
@@ -6201,26 +6201,26 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     char       buf1[2][STR_SIZE] = {"ab", "de"};     /* string */
     char *     buf1a[2];                             /* VL string */
     char       buf2[2] = {1, 2};                     /* bitfield, opaque */
-    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};     /* compound */
+    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};       /* compound */
     hobj_ref_t buf4[2];                              /* reference */
     e_t        buf45[2] = {RED, RED};                /* enum */
     hvl_t      buf5[2];                              /* vlen */
     hsize_t    dimarray[1] = {3};                    /* array dimension */
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
-    float      buf8[2]     = {1.0, 2.0};           /* float */
+    float      buf8[2]     = {1.0, 2.0};             /* float */
 
     /* create 2D attributes with dimension [3][2], 6 elements */
-    hsize_t dims2[2]              = {3, 2};
-    char    buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
-    char *  buf12a[3][2];                                                       /* VL string */
-    char    buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
-    s_t     buf32[6] = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
+    hsize_t    dims2[2]              = {3, 2};
+    char       buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
+    char *     buf12a[3][2];                                                       /* VL string */
+    char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
+    s_t        buf32[6]    = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
     hobj_ref_t buf42[3][2];                                                                   /* reference */
     e_t        buf452[3][2];                                                                  /* enum */
     hvl_t      buf52[3][2];                                                                   /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
-    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                     /* integer */
+    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};               /* integer */
     float buf82[3][2] = {{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}}; /* float */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
@@ -7193,25 +7193,25 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     char       buf1[2][STR_SIZE] = {"ab", "de"};     /* string */
     char *     buf1a[2];                             /* VL string */
     char       buf2[2] = {1, 2};                     /* bitfield, opaque */
-    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};     /* compound */
+    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};       /* compound */
     hobj_ref_t buf4[2];                              /* reference */
     e_t        buf45[2] = {RED, GREEN};              /* enum */
     hvl_t      buf5[2];                              /* vlen */
     hsize_t    dimarray[1] = {3};                    /* array dimension */
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
-    float      buf8[2]     = {1.0, 2.0};           /* float */
+    float      buf8[2]     = {1.0, 2.0};             /* float */
 
     /* create 2D attributes with dimension [3][2], 6 elements */
-    hsize_t dims2[2]              = {3, 2};
-    char    buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
-    char *  buf12a[3][2];                                                       /* VL string */
-    char    buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
-    s_t     buf32[6] = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
+    hsize_t    dims2[2]              = {3, 2};
+    char       buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
+    char *     buf12a[3][2];                                                       /* VL string */
+    char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
+    s_t        buf32[6]    = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
     hobj_ref_t buf42[3][2];                                                                   /* reference */
     hvl_t      buf52[3][2];                                                                   /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
-    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                     /* integer */
+    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};               /* integer */
     float buf82[3][2] = {{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}}; /* float */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
