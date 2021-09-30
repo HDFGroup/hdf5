@@ -1471,6 +1471,10 @@ main(int argc, const char *argv[])
         if (table_list_add(fid, oi.fileno) < 0) {
             error_msg("internal error (file %s:line %d)\n", __FILE__, __LINE__);
             h5tools_setstatus(EXIT_FAILURE);
+            /* table_list.nused will be zero and the added containers needs to be cleaned up */
+            HDfree(table_list.tables[0].group_table);
+            HDfree(table_list.tables[0].dset_table);
+            HDfree(table_list.tables[0].type_table);
             goto done;
         }
         group_table = table_list.tables[0].group_table;
