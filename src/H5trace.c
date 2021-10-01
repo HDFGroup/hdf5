@@ -1084,18 +1084,18 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     break;
 #endif
 #ifdef H5_HAVE_MIRROR_VFD
-                                case H5_HAVE_MIRROR_VFD:
-                                    H5RS_acat(rs, "H5_HAVE_MIRROR_VFD");
+                                case H5_VFD_MIRROR:
+                                    H5RS_acat(rs, "H5_VFD_MIRROR");
                                     break;
 #endif
 #ifdef H5_HAVE_LIBHDFS
-                                case H5_HAVE_LIBHDFS:
-                                    H5RS_acat(rs, "H5_HAVE_LIBHDFS");
+                                case H5_VFD_HDFS:
+                                    H5RS_acat(rs, "H5_VFD_HDFS");
                                     break;
 #endif
 #ifdef H5_HAVE_ROS3_VFD
-                                case H5_HAVE_ROS3_VFD:
-                                    H5RS_acat(rs, "H5_HAVE_ROS3_VFD");
+                                case H5_VFD_ROS3:
+                                    H5RS_acat(rs, "H5_VFD_ROS3");
                                     break;
 #endif
                                 default:
