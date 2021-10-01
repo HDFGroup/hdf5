@@ -40,9 +40,9 @@
  *
  *          The number of groups, the tick length, the max lag, the page buffer size, the page size and the
  *          sleep duration on the writer side before closing the file are configurable.
- *          Users can also choose an option to delete 1000 groups after creating a larger number of groups..
+ *          Users can also choose an option to delete 1000 groups after creating a larger number of groups.
  *          We only test to creat the groups with the latest file format. The option to create a
- *          group via the earlies file format is still there.
+ *          group via the earliest file format is still there.
  *
  *          Issues and expected design fail
  *
