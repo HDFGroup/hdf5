@@ -188,6 +188,9 @@ H5_DLL herr_t H5P__decode_double(const void **_pp, void *value);
 H5_DLL herr_t H5P__encode_coll_md_read_flag_t(const void *value, void **_pp, size_t *size);
 H5_DLL herr_t H5P__decode_coll_md_read_flag_t(const void **_pp, void *value);
 
+/* Private FAPL routines */
+H5_DLL herr_t H5P__facc_set_def_driver(void);
+
 /* Private OCPL routines */
 H5_DLL herr_t H5P__get_filter(const struct H5Z_filter_info_t *filter, unsigned int *flags, size_t *cd_nelmts,
                               unsigned cd_values[], size_t namelen, char name[], unsigned *filter_config);

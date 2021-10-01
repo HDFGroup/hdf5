@@ -87,11 +87,11 @@
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE ""
+#define H5_VERS_SUBRELEASE "7"
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.13.0"
+#define H5_VERS_INFO "HDF5 library version: 1.13.0-7"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
@@ -167,6 +167,58 @@
 #define H5_VERSION_LE(Maj, Min, Rel)                                                                         \
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
+
+/* Macros for various environment variables that HDF5 interprets */
+/**
+ * Used to specify the name of an HDF5 Virtual File Driver to use as
+ * the default file driver for file access. Setting this environment
+ * variable overrides the default file driver for File Access Property
+ * Lists.
+ */
+#define HDF5_DRIVER "HDF5_DRIVER"
+/**
+ * Used to specify a configuration string for the HDF5 Virtual File
+ * Driver being used for file access.
+ */
+#define HDF5_DRIVER_CONFIG "HDF5_DRIVER_CONFIG"
+/**
+ * Used to specify the name of an HDF5 Virtual Object Layer Connector
+ * to use as the default VOL connector for file access. Setting this
+ * environment variable overrides the default VOL connector for File
+ * Access Property Lists.
+ */
+#define HDF5_VOL_CONNECTOR "HDF5_VOL_CONNECTOR"
+/**
+ * Used to specify a delimiter-separated (currently, ';' for Windows
+ * and ':' for other systems) list of paths that HDF5 should search
+ * when loading plugins.
+ */
+#define HDF5_PLUGIN_PATH "HDF5_PLUGIN_PATH"
+/**
+ * Used to control the loading of HDF5 plugins at runtime. If this
+ * environment variable is set to the special string "::" (defined
+ * in H5PLpublic.h as H5PL_NO_PLUGIN), then dynamic loading of any
+ * HDF5 plugins will be disabled. No other values are valid for this
+ * environment variable.
+ */
+#define HDF5_PLUGIN_PRELOAD "HDF5_PLUGIN_PRELOAD"
+/**
+ * Used to control whether HDF5 uses file locking when creating or
+ * opening a file. Valid values for this environment variable are
+ * as follows:
+ *
+ *  "TRUE" or "1"  - Request that file locks should be used
+ *  "FALSE" or "0" - Request that file locks should NOT be used
+ *  "BEST_EFFORT"  - Request that file locks should be used and
+ *                     that any locking errors caused by file
+ *                     locking being disabled on the system
+ *                     should be ignored
+ */
+#define HDF5_USE_FILE_LOCKING "HDF5_USE_FILE_LOCKING"
+/**
+ * Used to instruct HDF5 not to cleanup files created during testing.
+ */
+#define HDF5_NOCLEANUP "HDF5_NOCLEANUP"
 
 /**
  * Status return values.  Failed integer functions in HDF5 result almost
