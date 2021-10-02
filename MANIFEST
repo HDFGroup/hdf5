@@ -3824,6 +3824,7 @@
 ./tools/src/h5import/Makefile.in
 ./tools/src/h5jam/Makefile.in
 ./tools/src/h5ls/Makefile.in
+./tools/src/h5perf/Makefile.in
 ./tools/src/h5repack/Makefile.in
 ./tools/src/h5stat/Makefile.in
 ./tools/src/misc/Makefile.in
