@@ -1545,13 +1545,10 @@ AC_ARG_WITH([mercury],
 case "X-$withval" in
   X-yes)
     HAVE_MERCURY="yes"
-    AC_CHECK_HEADERS([mercury.h],[HAVE_MERCURY_H="yes"], [unset HAVE_MERCURY])
-    if test "x$HAVE_MERCURY" = "xyes"; then
-      AC_CHECK_LIB([mercury_util], [hg_thread_mutex_init],, [unset HAVE_MERCURY])
-    fi
     if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find mercury library])
     fi
+    echo "HAVE_MERCURY flag = $HAVE_MERCURY"
     ;;
   X-|X-no|X-none)
     HAVE_MERCURY="no"
@@ -1573,6 +1570,7 @@ case "X-$withval" in
         ;;
     esac
 
+    echo "checking include path: $mercury_inc"
     saved_CPPFLAGS="$CPPFLAGS"
     saved_AM_CPPFLAGS="$AM_CPPFLAGS"
     saved_LDFLAGS="$LDFLAGS"
@@ -1584,21 +1582,10 @@ case "X-$withval" in
     fi
 
     AC_CHECK_HEADERS([mercury.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_MERCURY])
-
-    if test "x$HAVE_MERCURY" = "xyes"; then
-      if test -n "$mercury_lib"; then
-        LDFLAGS="$LDFLAGS -L$mercury_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$mercury_lib"
-      fi
-
-      AC_CHECK_LIB([mercury_util], [hg_thread_mutex_init],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_MERCURY])
-    fi
-
-    if test -z "$HAVE_MERCURY" -a -n "$HDF5_CONFIG_ABORT"; then
-      AC_MSG_ERROR([couldn't find mercury library])
-    fi
     ;;
 esac
+
+AM_CONDITIONAL([HAVE_MERCURY_CONDITIONAL], [test "X$HAVE_MERCURY" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Make the external filters list available to *.in files
@@ -3152,6 +3139,34 @@ if test "X$MAP_API" = "Xyes"; then
 else
     AC_MSG_RESULT([no])
 fi
+
+## ----------------------------------------------------------------------
+## Check if Subfiling I/O driver is enabled by --enable-subfiling-vfd
+##
+AC_SUBST([SUBFILING_VFD])
+
+## Default is no direct VFD
+SUBFILING_VFD=no
+
+AC_MSG_CHECKING([if the subfiling I/O virtual file driver (VFD) is enabled])
+
+AC_ARG_ENABLE([subfiling-vfd],
+              [AS_HELP_STRING([--enable-subfiling-vfd],
+                              [Build the subfiling I/O virtual file driver (VFD).
+                               [default=no]])],
+              [SUBFILING_VFD=$enableval], [SUBFILING_VFD=no])
+
+if test "X$SUBFILING_VFD" = "Xyes"; then
+        AC_MSG_RESULT([yes])
+        AC_DEFINE([HAVE_SUBFILING], [1],
+                [Define if the subfiling I/O virtual file driver (VFD) should be compiled])
+else
+    AC_MSG_RESULT([no])
+fi
+
+## Subfiling VFD files are not built if not required.
+AM_CONDITIONAL([SUBFILING_VFD_CONDITIONAL], [test "X$SUBFILING_VFD" = "Xyes"])
+
 
 ## ----------------------------------------------------------------------
 ## Check if Direct I/O driver is enabled by --enable-direct-vfd

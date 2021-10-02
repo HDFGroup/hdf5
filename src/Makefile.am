@@ -121,8 +121,12 @@ libhdf5_la_SOURCES= H5.c H5checksum.c H5dbg.c H5lib_settings.c H5system.c \
 
 # Only compile parallel sources if necessary
 if BUILD_PARALLEL_CONDITIONAL
-    libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c \
-        H5FDsubfiling.c H5FDsubfile_int.c H5FDsubfile_mpi.c H5FDioc.c H5FDioc_threads.c
+    libhdf5_la_SOURCES += H5mpi.c H5ACmpio.c H5Cmpio.c H5Dmpio.c H5Fmpi.c H5FDmpi.c H5FDmpio.c H5Smpio.c
+endif
+
+# Only compile the subfiling VFD if necessary
+if SUBFILING_VFD_CONDITIONAL
+    libhdf5_la_SOURCES += H5FDsubfiling.c H5FDsubfile_int.c H5FDsubfile_mpi.c H5FDioc.c H5FDioc_threads.c
 endif
 
 # Only compile the direct VFD if necessary
@@ -161,6 +165,21 @@ include_HEADERS = hdf5.h H5api_adpt.h H5overflow.h H5pubconf.h H5public.h H5vers
         H5VLconnector.h H5VLconnector_passthru.h \
         H5VLnative.h H5VLpassthru.h H5VLpublic.h \
         H5Zpublic.h
+
+if HAVE_MERCURY_CONDITIONAL
+    include_HEADERS += mercury/src/util/mercury_thread.h \
+    mercury/src/util/mercury_thread_mutex.h mercury/src/util/mercury_thread_pool.h
+
+    libhdf5_la_SOURCES += mercury/src/util/mercury_atomic_queue.c \
+    mercury/src/util/mercury_dlog.c mercury/src/util/mercury_event.c \
+    mercury/src/util/mercury_hash_table.c mercury/src/util/mercury_log.c \
+    mercury/src/util/mercury_mem.c mercury/src/util/mercury_mem_pool.c \
+    mercury/src/util/mercury_poll.c mercury/src/util/mercury_request.c \
+    mercury/src/util/mercury_thread.c mercury/src/util/mercury_thread_condition.c \
+    mercury/src/util/mercury_thread_pool.c mercury/src/util/mercury_thread_mutex.c \
+    mercury/src/util/mercury_thread_rwlock.c mercury/src/util/mercury_thread_spin.c \
+    mercury/src/util/mercury_util.c
+endif
 
 # install libhdf5.settings in lib directory
 settingsdir=$(libdir)

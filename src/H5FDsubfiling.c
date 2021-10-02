@@ -46,9 +46,9 @@ FILE *client_log = NULL;
 #endif
 
 /* These are used for the creation of read or write vectors */
-static haddr_t *sf_offsets = NULL;
-static hssize_t *sf_sizes  = NULL;
-static void **  sf_bufs    = NULL;
+static haddr_t * sf_offsets = NULL;
+static hssize_t *sf_sizes   = NULL;
+static void **   sf_bufs    = NULL;
 
 /* The description of a file belonging to this driver. The 'eoa' and 'eof'
  * determine the amount of hdf5 address space in use and the high-water mark
@@ -182,17 +182,16 @@ typedef struct H5FD_subfiling_t {
 #define MAXADDR          (((haddr_t)1 << (8 * sizeof(HDoff_t) - 1)) - 1)
 #define ADDR_OVERFLOW(A) (HADDR_UNDEF == (A) || ((A) & ~(haddr_t)MAXADDR))
 #define SIZE_OVERFLOW(Z) ((Z) & ~(hsize_t)MAXADDR)
-#define REGION_OVERFLOW(A, Z)                                                    \
-    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) ||         \
-     (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
+#define REGION_OVERFLOW(A, Z)                                                                                \
+    (ADDR_OVERFLOW(A) || SIZE_OVERFLOW(Z) || HADDR_UNDEF == (A) + (Z) || (HDoff_t)((A) + (Z)) < (HDoff_t)(A))
 
 #define H5FD_IOC_DEBUG_OP_CALLS 0 /* debugging print toggle; 0 disables */
 
 #if H5FD_SUBFILING_DEBUG_OP_CALLS
-#define H5FD_SUBFILING_LOG_CALL(name)                                            \
-    do {                                                                         \
-        HDprintf("called %s()\n", (name));                                       \
-        HDfflush(stdout);                                                        \
+#define H5FD_SUBFILING_LOG_CALL(name)                                                                        \
+    do {                                                                                                     \
+        HDprintf("called %s()\n", (name));                                                                   \
+        HDfflush(stdout);                                                                                    \
     } while (0)
 #else
 #define H5FD_SUBFILING_LOG_CALL(name) /* no-op */
@@ -204,45 +203,32 @@ static herr_t  H5FD__subfiling_term(void);
 static void *  H5FD__subfiling_fapl_get(H5FD_t *_file);
 static void *  H5FD__subfiling_fapl_copy(const void *_old_fa);
 static herr_t  H5FD__subfiling_fapl_free(void *_fa);
-static H5FD_t *H5FD__subfiling_open(const char *name, unsigned flags,
-                                    hid_t fapl_id, haddr_t maxaddr);
+static H5FD_t *H5FD__subfiling_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
 static herr_t  H5FD__subfiling_close(H5FD_t *_file);
 static int     H5FD__subfiling_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
 static herr_t  H5FD__subfiling_query(const H5FD_t *_f1, unsigned long *flags);
 static haddr_t H5FD__subfiling_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t  H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t type,
-                                       haddr_t addr);
+static herr_t  H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
 static haddr_t H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t  H5FD__subfiling_get_handle(H5FD_t *_file, hid_t fapl,
-                                          void **file_handle);
-static herr_t  H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type,
-                                    hid_t fapl_id, haddr_t addr, size_t size,
+static herr_t  H5FD__subfiling_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
+static herr_t  H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, haddr_t addr, size_t size,
                                     void *buf);
-static herr_t  H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type,
-                                     hid_t dxpl_id, haddr_t addr, size_t size,
+static herr_t  H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
                                      const void *buf);
 
-static herr_t H5FD__subfiling_read_vector(H5FD_t *file, hid_t dxpl_id,
-                                          uint32_t count, H5FD_mem_t types[],
-                                          haddr_t addrs[], size_t sizes[],
-                                          void *bufs[] /* out */);
-static herr_t H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id,
-                                           uint32_t count, H5FD_mem_t types[],
-                                           haddr_t addrs[], size_t sizes[],
-                                           const void *bufs[] /* in */);
+static herr_t H5FD__subfiling_read_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
+                                          haddr_t addrs[], size_t sizes[], void *bufs[] /* out */);
+static herr_t H5FD__subfiling_write_vector(H5FD_t *file, hid_t dxpl_id, uint32_t count, H5FD_mem_t types[],
+                                           haddr_t addrs[], size_t sizes[], const void *bufs[] /* in */);
 
-static herr_t H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id,
-                                       hbool_t closing);
+static herr_t H5FD__subfiling_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 
 static herr_t H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw);
 static herr_t H5FD__subfiling_unlock(H5FD_t *_file);
-static herr_t H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code,
-                                  uint64_t flags,
-                                  const void H5_ATTR_UNUSED *input,
-                                  void **output);
+static herr_t H5FD__subfiling_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags,
+                                  const void H5_ATTR_UNUSED *input, void **output);
 
 static herr_t H5FD__subfiling_validate_config(const H5FD_subfiling_config_t *fa);
-
 
 #if 0 /* JRM */ /* delete if all goes well */
 static int H5FD__subfiling_mpi_rank(const H5FD_t *_file);
@@ -287,8 +273,8 @@ static const H5FD_class_t H5FD_subfiling_g = {
     NULL,                            /* write_selection      */
     NULL,                            /* flush                */
     H5FD__subfiling_truncate,        /* truncate             */
-    NULL,                            /* lock                 */
-    NULL,                            /* unlock               */
+    H5FD__subfiling_lock,            /* lock                 */
+    H5FD__subfiling_unlock,          /* unlock               */
     H5FD__subfiling_ctl,             /* ctl                  */
     H5FD_FLMAP_DICHOTOMY             /* fl_map               */
 };
@@ -477,11 +463,11 @@ fapl__get_subfiling_defaults(H5FD_subfiling_config_t *fa)
 herr_t
 H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
 {
-    H5P_genplist_t *  plist      = NULL; /* Property list pointer */
-    hid_t             ioc_fapl   = H5I_INVALID_HID;
-    H5FD_ioc_config_t ioc_config;
+    H5P_genplist_t *        plist    = NULL; /* Property list pointer */
+    hid_t                   ioc_fapl = H5I_INVALID_HID;
+    H5FD_ioc_config_t       ioc_config;
     H5FD_subfiling_config_t subfiling_conf;
-    herr_t ret_value = FAIL;
+    herr_t                  ret_value = FAIL;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*!", fapl_id, fa);
@@ -912,18 +898,43 @@ done:
 static herr_t
 H5FD__subfiling_close(H5FD_t *_file)
 {
-    H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5FD_subfiling_t *   file_ptr   = (H5FD_subfiling_t *)_file;
+    herr_t               ret_value  = SUCCEED; /* Return value */
+    subfiling_context_t *sf_context = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
 
     /* Sanity check */
     HDassert(file_ptr);
 
+    sf_context = (subfiling_context_t *)get__subfiling_object(file_ptr->fa.common.context_id);
+
+#ifdef VERBOSE
+
+    if (sf_context->topology->rank_is_ioc)
+        printf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
+    else
+        printf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
+    fflush(stdout);
+#endif
     if (H5FD_close(file_ptr->sf_file) != SUCCEED) {
         HSYS_GOTO_ERROR(H5E_IO, H5E_CANTCLOSEFILE, FAIL, "unable to close file")
     }
 
+    if (sf_context != NULL) {
+        if (sf_context->subfile_prefix) {
+            HDfree(sf_context->subfile_prefix);
+            sf_context->subfile_prefix = NULL;
+        }
+        if (sf_context->sf_filename) {
+            HDfree(sf_context->sf_filename);
+            sf_context->sf_filename = NULL;
+        }
+        if (sf_context->h5_filename) {
+            HDfree(sf_context->h5_filename);
+            sf_context->h5_filename = NULL;
+        }
+    }
     /* if set, close the copy of the plist for the underlying VFD. */
     if ((H5I_INVALID_HID != file_ptr->fa.common.ioc_fapl_id) &&
         (H5I_dec_ref(file_ptr->fa.common.ioc_fapl_id) < 0))
@@ -1105,12 +1116,64 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
 /*-------------------------------------------------------------------------
  * Function:    H5FD_subfiling_get_eof
  *
- * Purpose:     Returns the end-of-file marker, which is the greater of
- *              either the filesystem end-of-file or the HDF5 end-of-address
- *              markers.
+ * Purpose:     Returns the end-of-file marker from the filesystem
+ *              perspective.
  *
  * Return:      End of file address, the first address past the end of the
  *              "file", either the filesystem file or the HDF5 file.
+ *
+ *              SUBFILING NOTE:
+ *              The EOF calculation for subfiling is somewhat different
+ *              than for the more traditional HDF5 file implementations.
+ *              This statement derives from the fact that unlike "normal"
+ *              HDF5 files, subfiling introduces a multi-file representation
+ *              of a single HDF5 file.  The plurality of sub-files represents
+ *              a software RAID-0 based HDF5 file.  As such, each sub-file
+ *              contains a designated portion of the address space of the
+ *              virtual HDF5 storage.  We have no notion of HDF5 datatypes,
+ *              datasets, metadata, or other HDF5 structures; only BYTES.
+ *
+ *              The organization of the bytes within sub-files is consistent
+ *              with the RAID-0 striping, i.e. there are IO Concentrators
+ *              (IOCs) which correspond to a stripe-count (in Lustre) as
+ *              well as a stripe_size.  The combiniation of these two
+ *              variables determines the "address" (a combination of IOC
+ *              and a file offset) of any storage operation.
+ *
+ *              Having a defined storage layout, the virtual file EOF
+ *              calculation shoud be the MAXIMUM value returned by the
+ *              collection of IOCs.  Every MPI rank which hosts an IOC
+ *              maintains it's own EOF by updating that value for each
+ *              WRITE operation that completes, i.e. if a new local EOF
+ *              is greater than the existing local EOF, the new EOF
+ *              will replace the old.  The local EOF calculation is as
+ *              follows.
+ *              1. At file creation, each IOC is assigned a rank value
+ *                 (0 to N-1, where N is the total number of IOCs) and
+ *                 a 'sf_base_addr' = 'subfile_rank' * 'sf_stripe_size')
+ *                 we also determine the 'sf_blocksize_per_stripe' which
+ *                 is simply the 'sf_stripe_size' * 'n_ioc_concentrators'
+ *
+ *              2. For every write operation, the IOC recieves a message
+ *                 containing a file_offset and the data_size.
+ *              3. The file_offset + data_size are in turn used to
+ *                 create a stripe_id:
+ *                   IOC-(ioc_rank)       IOC-(ioc_rank+1)
+ *                   |<- sf_base_address  |<- sf_base_address  |
+ *                ID +--------------------+--------------------+
+ *                 0:|<- sf_stripe_size ->|<- sf_stripe_size ->|
+ *                 1:|<- sf_stripe_size ->|<- sf_stripe_size ->|
+ *                   ~                    ~                    ~
+ *                 N:|<- sf_stripe_size ->|<- sf_stripe_size ->|
+ *                   +--------------------+--------------------+
+ *
+ *                The new 'stripe_id' is then used to calculate a
+ *                potential new EOF:
+ *                sf_eof = (stripe_id * sf_blocksize_per_stripe) + sf_base_addr
+ *                         + ((file_offset + data_size) % sf_stripe_size)
+ *
+ *              4. If (sf_eof > current_sf_eof), then current_sf_eof = sf_eof.
+ *
  *
  * Programmer:  Richard Warren
  *
@@ -1119,11 +1182,19 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_subfiling_t *file = (const H5FD_subfiling_t *)_file;
+    const H5FD_subfiling_t *file      = (const H5FD_subfiling_t *)_file;
+    haddr_t                 ret_value = HADDR_UNDEF;
+    haddr_t                 local_eof, global_eof = 0;
+    FUNC_ENTER_STATIC
 
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    local_eof = H5FD_get_eof(file->sf_file, type);
+    if (MPI_SUCCESS != MPI_Allreduce(&local_eof, &global_eof, 1, MPI_LONG_LONG, MPI_MAX, MPI_COMM_WORLD))
+        HGOTO_ERROR(H5E_INTERNAL, H5E_CANTGET, HADDR_UNDEF, "mpi_allreduce failed")
+    /* Return the global max of all the subfile EOF values */
 
-    FUNC_LEAVE_NOAPI(file->eof)
+    ret_value = global_eof;
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_subfiling_get_eof() */
 
 /*-------------------------------------------------------------------------
@@ -1200,12 +1271,18 @@ H5FD__subfiling_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATT
      * used to invoke the underlying IO operations.
      */
     ioc_total = sf_context->topology->n_io_concentrators;
+#ifdef VERBOSE
+    printf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
+    fflush(stdout);
+#endif
+
     if (ioc_total > 1) {
+        size_t max_depth;
         blocksize = sf_context->sf_blocksize_per_stripe;
 #if 0  /* JRM */
     size_t max_depth = (size_t)(size / blocksize) + 2;
 #else  /* JRM */
-        size_t max_depth = (size / (size_t)blocksize) + 2;
+        max_depth = (size / (size_t)blocksize) + 2;
 #endif /* JRM */
         int next, ioc_count = 0, ioc_start = -1;
 
@@ -1418,7 +1495,6 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_AT
     HDassert(buf);
 
     sf_context = (subfiling_context_t *)get__subfiling_object(file_ptr->fa.common.context_id);
-
     HDassert(sf_context);
     HDassert(sf_context->topology);
 
@@ -1431,12 +1507,22 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_AT
      * used to invoke the underlying IO operations.
      */
     ioc_total = sf_context->topology->n_io_concentrators;
+
+#ifdef VERBOSE
+    if (sf_context->topology->rank_is_ioc)
+        printf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
+    else
+        printf("[%s %d] fd=*\n", __func__, file_ptr->mpi_rank);
+    fflush(stdout);
+#endif
+
     if (ioc_total > 1) {
+        size_t max_depth;
         blocksize = sf_context->sf_blocksize_per_stripe;
 #if 0  /* JRM */
-    size_t max_depth = (size_t)(size / blocksize) + 2;
+        size_t max_depth = (size_t)(size / blocksize) + 2;
 #else  /* JRM */
-        size_t max_depth = (size_t)(size / (size_t)blocksize) + 2;
+        max_depth = (size_t)(size / (size_t)blocksize) + 2;
 #endif /* JRM */
         int next, ioc_count = 0, ioc_start = -1;
 
@@ -1457,6 +1543,11 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_AT
                         (unsigned long long)addr, (unsigned long long)size)
 
         addr += _file->base_addr;
+
+#ifdef VERBOSE
+        printf("[%s %d] addr=%ld, size=%ld\n", __func__, file_ptr->mpi_rank, addr, size);
+        fflush(stdout);
+#endif
 
         /* Follow the example of read_vector (see H5FDint.c) */
         addrs_cooked = TRUE;
@@ -1487,13 +1578,13 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_AT
         size,         /* (in)  IO size */
         1);           /* (in)  data extent of the 'type' assumes byte */
 #else  /* JRM */
-        count            = init__indep_io(sf_context, /* We use the context to look up config info */
+        count     = init__indep_io(sf_context, /* We use the context to look up config info */
                                max_depth, ioc_total, (int64_t *)source_data_offset, /* (out) Memory offset */
                                (int64_t *)sf_data_size, /* (out) Length of this contiguous block */
                                (int64_t *)sf_offset,    /* (out) File offset */
-                               &ioc_start, /* (out) IOC index corresponding to starting offset */
-                               &ioc_count, /* (out) number of actual IOCs used */
-                               offset,     /* (in)  Starting file offset */
+                               &ioc_start,    /* (out) IOC index corresponding to starting offset */
+                               &ioc_count,    /* (out) number of actual IOCs used */
+                               offset,        /* (in)  Starting file offset */
                                (int64_t)size, /* (in)  IO size */
                                1);            /* (in)  data extent of the 'type' assumes byte */
 #endif /* JRM */
@@ -1817,10 +1908,10 @@ done:
 static herr_t
 H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_UNUSED closing)
 {
-    H5FD_subfiling_t *file        = (H5FD_subfiling_t *)_file;
-    herr_t            ret_value   = SUCCEED; /* Return value */
+    H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file;
+    herr_t            ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOINIT
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     HDassert(file);
 
@@ -1855,22 +1946,18 @@ H5FD__subfiling_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5
 static herr_t
 H5FD__subfiling_lock(H5FD_t *_file, hbool_t rw)
 {
-    H5FD_subfiling_t *file_ptr = (H5FD_subfiling_t *)_file; /* VFD file struct  */
-    herr_t            ret_value = SUCCEED;                  /* Return value       */
+    H5FD_subfiling_t *file      = (H5FD_subfiling_t *)_file; /* VFD file struct  */
+    herr_t            ret_value = SUCCEED;                   /* Return value       */
 
     FUNC_ENTER_NOAPI_NOINIT
 
-    HDassert(file_ptr);
-
-    /* Set exclusive or shared lock based on rw status */
-    if (file_ptr->fa.require_ioc) {
+    HDassert(file);
+    if (file->fa.require_ioc)
         puts("Subfiling driver doesn't suport file locking");
-    }
     else {
-        if (H5FD_lock(file_ptr->sf_file, rw) < 0)
+        if (H5FD_lock(file->sf_file, rw) < 0)
             HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")
     } /* end if */
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_subfiling_lock() */
@@ -1896,14 +1983,8 @@ H5FD__subfiling_unlock(H5FD_t *_file)
 
     HDassert(file);
 
-    if (HDflock(file->fd, LOCK_UN) < 0) {
-        if (ENOSYS == errno)
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL,
-                            "file locking disabled on this file system (use "
-                            "HDF5_USE_FILE_LOCKING environment variable to override)")
-        else
-            HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to unlock file")
-    } /* end if */
+    if (H5FD_unlock(file->sf_file) < 0)
+        HSYS_GOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to lock file")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2023,14 +2104,14 @@ done:
 } /* end H5FD__subfiling_ctl() */
 
 static herr_t
-create__simple_vector(hid_t H5_ATTR_UNUSED file_space_id, void *memDataBuf, haddr_t addrBase, hssize_t elements,
-                      size_t type_extent, hssize_t *vlen, haddr_t **_offsets, hssize_t **_blocklens,
-                      void ***_bufs)
+create__simple_vector(hid_t H5_ATTR_UNUSED file_space_id, void *memDataBuf, haddr_t addrBase,
+                      hssize_t elements, size_t type_extent, hssize_t *vlen, haddr_t **_offsets,
+                      hssize_t **_blocklens, void ***_bufs)
 {
-    haddr_t *offsets    = *_offsets;
+    haddr_t * offsets   = *_offsets;
     hssize_t *blocklens = *_blocklens;
-    void **  bufs       = *_bufs;
-    void *   nextBuf    = memDataBuf;
+    void **   bufs      = *_bufs;
+    void *    nextBuf   = memDataBuf;
 
     assert(vlen);
     assert(_offsets);
@@ -2049,7 +2130,7 @@ create__simple_vector(hid_t H5_ATTR_UNUSED file_space_id, void *memDataBuf, hadd
 
         bufs[0]      = nextBuf;
         offsets[0]   = addrBase;
-        blocklens[0] = (hssize_t)((hssize_t)elements * type_extent);
+        blocklens[0] = (hssize_t)((hssize_t)elements * (hssize_t)type_extent);
 
         if (*vlen < 0) {
             *_offsets   = offsets;
@@ -2226,13 +2307,14 @@ get__base_offset(int mpi_rank, int mpi_size, size_t dtype_extent, hid_t mem_spac
 }
 
 herr_t
-H5FD__dataset_write_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent, int mpi_rank,
-                               int mpi_size, void *_dset, hid_t mem_type_id, hid_t mem_space_id,
-                               hid_t file_space_id, hid_t plist_id, const void *buf)
+H5FD__dataset_write_contiguous(hid_t H5_ATTR_UNUSED h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
+                               int mpi_rank, int mpi_size, void H5_ATTR_UNUSED *_dset,
+                               hid_t H5_ATTR_UNUSED mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+                               hid_t H5_ATTR_UNUSED plist_id, const void *buf)
 {
     herr_t       ret_value     = SUCCEED; /* Return value */
     hssize_t     num_elem_file = (hssize_t)-1, num_elem_mem = (hssize_t)-1;
-	hssize_t     s_dtype_extent = (hssize_t)dtype_extent;
+    hssize_t     s_dtype_extent = (hssize_t)dtype_extent;
     H5S_sel_type sel_type;
     hssize_t     sf_vlen = -1;
 
@@ -2242,20 +2324,21 @@ H5FD__dataset_write_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_
     FUNC_ENTER_PACKAGE
 
     if ((num_elem_file = H5Sget_select_npoints(file_space_id)) < 0)
-        puts("can't get number of points in file selection");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't get number of points in file selection")
+
     if ((num_elem_mem = H5Sget_select_npoints(mem_space_id)) < 0)
-        puts("can't get number of points in memory selection");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't get number of points in memory selection")
 
     if (num_elem_file != num_elem_mem)
-        puts("number of elements selected in file and memory dataspaces is "
-             "different");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                    "number of elements selected"
+                    " in file and memory dataspaces is different")
 
-    if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0) {
-        puts("could not get a validated dataspace from mem_space_id");
-    }
-    if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0) {
-        puts("could not get a validated dataspace from file_space_id");
-    }
+    if (H5S_get_validated_dataspace(mem_space_id, &mem_space) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not get a validated dataspace from mem_space_id")
+
+    if (H5S_get_validated_dataspace(file_space_id, &file_space) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "could not get a validated dataspace from file_space_id")
 
     if (num_elem_file > 0) {
         sel_type = H5Sget_select_type(file_space_id);
@@ -2337,25 +2420,27 @@ done:
 }
 
 herr_t
-H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent, int mpi_rank,
-                              int mpi_size, void *_dset, hid_t mem_type_id, hid_t mem_space_id,
-                              hid_t file_space_id, hid_t plist_id, void *buf)
+H5FD__dataset_read_contiguous(hid_t H5_ATTR_UNUSED h5_file_id, haddr_t dataset_baseAddr, size_t dtype_extent,
+                              int mpi_rank, int mpi_size, void H5_ATTR_UNUSED *_dset,
+                              hid_t H5_ATTR_UNUSED mem_type_id, hid_t mem_space_id, hid_t file_space_id,
+                              hid_t H5_ATTR_UNUSED plist_id, void *buf)
 {
-    H5FD_t *     dset          = (H5FD_t *)_dset;
     herr_t       ret_value     = SUCCEED; /* Return value */
     hssize_t     num_elem_file = -1, num_elem_mem = -1;
     H5S_sel_type sel_type;
     hssize_t     sf_vlen = -1;
+    int          status  = 0;
 
     FUNC_ENTER_PACKAGE
     if ((num_elem_file = H5Sget_select_npoints(file_space_id)) < 0)
-        puts("can't get number of points in file selection");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't get number of points in file selection")
     if ((num_elem_mem = H5Sget_select_npoints(mem_space_id)) < 0)
-        puts("can't get number of points in memory selection");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't get number of points in memory selection")
 
     if (num_elem_file != num_elem_mem)
-        puts("number of elements selected in file and memory dataspaces is "
-             "different");
+        HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL,
+                    "number of elements selected"
+                    " in file and memory dataspaces is different")
 
     if (num_elem_file > 0) {
         sel_type = H5Sget_select_type(file_space_id);
@@ -2364,7 +2449,6 @@ H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t
                 // printf("[%d] H5S_SEL_NONE\n", mpi_rank);
                 break;
             case H5S_SEL_POINTS: {
-                int     status;
                 haddr_t rank_baseAddr;
                 rank_baseAddr =
                     get__base_offset(mpi_rank, mpi_size, dtype_extent, mem_space_id, file_space_id);
@@ -2377,7 +2461,6 @@ H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t
                 break;
             }
             case H5S_SEL_HYPERSLABS: {
-                int          status;
                 haddr_t      rank_baseAddr;
                 const H5S_t *mem_space;
                 const H5S_t *file_space;
@@ -2397,11 +2480,10 @@ H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t
                     goto done;
                 }
                 if (status > 0) {
-                    hssize_t previous_vlen = sf_vlen;
                     if (sf_offsets == NULL)
                         sf_offsets = (haddr_t *)malloc(sizeof(haddr_t));
                     if (sf_sizes == NULL)
-                        sf_sizes = (hsize_t *)malloc(sizeof(hsize_t));
+                        sf_sizes = (hssize_t *)malloc(sizeof(hsize_t));
                     if (sf_bufs == NULL)
                         sf_bufs = (void **)malloc(sizeof(void *));
                     sf_vlen = 1;
@@ -2410,13 +2492,12 @@ H5FD__dataset_read_contiguous(hid_t h5_file_id, haddr_t dataset_baseAddr, size_t
                     assert(sf_bufs);
 
                     sf_offsets[0] = rank_baseAddr;
-                    sf_sizes[0]   = num_elem_mem * dtype_extent;
+                    sf_sizes[0]   = (hssize_t)((hssize_t)num_elem_mem * (hssize_t)dtype_extent);
                     sf_bufs[0]    = buf;
                 }
                 break;
             }
             case H5S_SEL_ALL: {
-                int     status;
                 haddr_t rank_baseAddr;
                 rank_baseAddr =
                     get__base_offset(mpi_rank, mpi_size, dtype_extent, mem_space_id, file_space_id);
@@ -2538,7 +2619,7 @@ done:
 #endif /* JRM */
 
 void
-manage_client_logfile(int client_rank, int flag_value)
+manage_client_logfile(int H5_ATTR_UNUSED client_rank, int H5_ATTR_UNUSED flag_value)
 {
 #ifndef NDEBUG
     if (flag_value) {
