@@ -280,7 +280,7 @@ typedef struct app_layout_t {
     int *     node_ranks;  /* ranks extracted from sorted layout */
     int       node_count;  /* Total nodes (differnt hostids) */
     int       node_index;  /* My node: index into node_ranks */
-    int       local_peers; /* How may local peers on my node (NOT USED) */
+    int       local_peers; /* How may local peers on my node */
     int       world_rank;  /* My MPI rank                    */
     int       world_size;  /* Total number of MPI ranks      */
 } app_layout_t;

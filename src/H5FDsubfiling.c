@@ -898,8 +898,8 @@ done:
 static herr_t
 H5FD__subfiling_close(H5FD_t *_file)
 {
-    H5FD_subfiling_t *   file_ptr   = (H5FD_subfiling_t *)_file;
-    herr_t               ret_value  = SUCCEED; /* Return value */
+    H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
+    herr_t            ret_value = SUCCEED; /* Return value */
     subfiling_context_t *sf_context = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -910,7 +910,6 @@ H5FD__subfiling_close(H5FD_t *_file)
     sf_context = (subfiling_context_t *)get__subfiling_object(file_ptr->fa.common.context_id);
 
 #ifdef VERBOSE
-
     if (sf_context->topology->rank_is_ioc)
         printf("[%s %d] fd=%d\n", __func__, file_ptr->mpi_rank, sf_context->sf_fid);
     else
@@ -1182,9 +1181,9 @@ H5FD__subfiling_set_eoa(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, haddr_t a
 static haddr_t
 H5FD__subfiling_get_eof(const H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type)
 {
-    const H5FD_subfiling_t *file      = (const H5FD_subfiling_t *)_file;
-    haddr_t                 ret_value = HADDR_UNDEF;
-    haddr_t                 local_eof, global_eof = 0;
+    H5FD_subfiling_t *file      = (const H5FD_subfiling_t *)_file;
+    haddr_t           ret_value = HADDR_UNDEF;
+    haddr_t           local_eof, global_eof = 0;
     FUNC_ENTER_STATIC
 
     local_eof = H5FD_get_eof(file->sf_file, type);

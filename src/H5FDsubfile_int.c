@@ -70,6 +70,7 @@ static stat_record_t subfiling_stats[TOTAL_STAT_COUNT];
 #define SF_READ_TIME       (subfiling_stats[READ_STAT].total / (double)subfiling_stats[READ_STAT].op_count)
 #define SF_READ_WAIT_TIME  (subfiling_stats[READ_WAIT].total / (double)subfiling_stats[READ_WAIT].op_count)
 #define SF_QUEUE_DELAYS    (subfiling_stats[QUEUE_STAT].total)
+
 #define SF_ALIGNMENT       8
 
 static void
@@ -557,6 +558,7 @@ close__subfiles(subfiling_context_t *sf_context, uint64_t fid)
                 sf_logfile = NULL;
             }
         }
+
 #endif
     }
     if (sf_context->h5_filename) {

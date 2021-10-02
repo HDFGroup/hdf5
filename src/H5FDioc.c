@@ -854,11 +854,7 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
 
         else if (file_ptr->inode > 0) { /* No errors opening the subfiles */
             subfiling_context_t *sf_context = get__subfiling_object(file_ptr->fa.common.context_id);
-#if 0 /* JRM */ /* original */
-      if (sf_context) {
-#else /* JRM */ /* Richard's fix */
-            if (sf_context && sf_context->topology->rank_is_ioc) {
-#endif
+        if (sf_context && sf_context->topology->rank_is_ioc) {
             if (initialize_ioc_threads(sf_context) < 0) {
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Unable to initialize IOC threads")
             }
@@ -873,10 +869,7 @@ else
 
 ret_value = (H5FD_t *)file_ptr;
 
-done :
-
-    if (NULL == ret_value)
-{
+done : if (NULL == ret_value) {
     if (file_ptr) {
         if (file_ptr->ioc_file)
             H5FD_close(file_ptr->ioc_file);

@@ -234,6 +234,7 @@ H5_DLL herr_t H5FD__write_vector(hid_t h5_fid, hssize_t count, haddr_t *addrs, h
 H5_DLL int    H5FD__truncate(hid_t h5_fid, haddr_t addr);
 H5_DLL int    H5FD__shutdown_local_ioc(hid_t fid);
 H5_DLL void   manage_client_logfile(int client_rank, int flag_value);
+H5_DLL int    initialize_ioc_threads(void *sf_context);
 H5_DLL herr_t H5FD__write_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
                                           const void *bufs[] /* data_in */);
 

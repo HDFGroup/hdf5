@@ -43,7 +43,6 @@ atomic_int sf_file_refcount     = 0;
 atomic_int sf_ioc_fini_refcount = 0;
 atomic_int sf_ioc_ready         = 0;
 atomic_int sf_shutdown_flag     = 0;
-// volatile int sf_shutdown_flag = 0;
 
 /*
  * Structure definitions to enable async io completions
@@ -1002,7 +1001,6 @@ write__independent_async(int n_io_concentrators, hid_t context_id, int64_t offse
     fflush(stdout);
 #endif
     status = MPI_Send(msg, 3, MPI_INT64_T, io_concentrator[ioc_start], WRITE_INDEP, sf_context->sf_msg_comm);
-
     if (status != MPI_SUCCESS) {
         int  len;
         char estring[MPI_MAX_ERROR_STRING];
@@ -1827,14 +1825,9 @@ int
 subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags)
 {
     int errors = 0;
-#if 0
-  char filepath[PATH_MAX];
-  char config[PATH_MAX];
-  char linebuf[PATH_MAX];
-#else
     char filepath[PATH_MAX];
     char linebuf[PATH_MAX];
-#endif
+
     char * temp        = NULL;
     char * prefix      = NULL;
     char * subfile_dir = NULL;
@@ -1968,7 +1961,6 @@ subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags)
 
 done:
     t_end = MPI_Wtime();
-
     if (base)
         HDfree(base);
     if (subfile_dir)

@@ -432,6 +432,7 @@ tpool_add_work(void *_work)
     work->in_progress = 0;
     hg_thread_mutex_lock(&ioc_mutex);
     if (check__overlap(_work, work_index, &conflict_id) > 0) {
+#ifdef VERBOSE
         const char *       type = (work->tag == WRITE_INDEP ? "WRITE" : "READ");
         sf_work_request_t *next = (sf_work_request_t *)(pool_request[conflict_id].args);
         printf("%s - (%d) Found conflict: index=%d: work(offset=%ld,length=%ld) conflict(offset=%ld, "
@@ -439,10 +440,6 @@ tpool_add_work(void *_work)
                type, work_index, conflict_id, work->header[1], work->header[0], next->header[1],
                next->header[0]);
         fflush(stdout);
-#if 0
-      add_delayed(work, conflict_id);
-      hg_thread_mutex_unlock(&ioc_mutex);
-      return 0;
 #endif
     }
 
