@@ -37,8 +37,8 @@ cmake_minimum_required (VERSION 3.12)
 #     CTEST_SOURCE_NAME  -  source folder
 ##############################################################################
 
-set (CTEST_SOURCE_VERSION "1.10.8")
-set (CTEST_SOURCE_VERSEXT "-2")
+set (CTEST_SOURCE_VERSION "1.10.9")
+set (CTEST_SOURCE_VERSEXT "-1")
 
 ##############################################################################
 # handle input parameters to script.
