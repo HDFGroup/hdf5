@@ -143,6 +143,7 @@ static herr_t  H5FD__sec2_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
                               void **output);
 
 static const H5FD_class_t H5FD_sec2_g = {
+    H5FD_SEC2_VALUE,       /* value                */
     "sec2",                /* name                 */
     MAXADDR,               /* maxaddr              */
     H5F_CLOSE_WEAK,        /* fc_degree            */
@@ -200,7 +201,7 @@ H5FD__init_package(void)
     FUNC_ENTER_STATIC
 
     /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
         ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
@@ -295,7 +296,7 @@ H5Pset_fapl_sec2(hid_t fapl_id)
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
 
-    ret_value = H5P_set_driver(plist, H5FD_SEC2, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_SEC2, NULL, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

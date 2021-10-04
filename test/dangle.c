@@ -660,7 +660,21 @@ error:
 int
 main(void)
 {
-    int nerrors = 0;
+    const char *env_h5_drvr; /* File Driver value from environment */
+    int         nerrors = 0;
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /* Don't run this test with the multi/split VFD. A bug in library shutdown
+     * ordering causes problems with the multi VFD when IDs are left dangling.
+     */
+    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split")) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        return 0;
+    }
 
     /* Run tests w/weak file close */
     HDputs("Testing dangling objects with weak file close:");

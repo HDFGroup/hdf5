@@ -306,10 +306,10 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
         }
     }
 
@@ -442,16 +442,6 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         }
     }
 
-    /* close the fapl used to create the file */
-    if (pass) {
-
-        if (H5Pclose(fapl_id) < 0) {
-
-            pass         = FALSE;
-            failure_mssg = "H5Pclose() failed.\n";
-        }
-    }
-
     /* close the file and delete it */
     if (pass) {
 
@@ -460,10 +450,20 @@ check_fapl_mdc_api_calls(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, fapl_id) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
+        }
+    }
+
+    /* close the fapl used to create the file */
+    if (pass) {
+
+        if (H5Pclose(fapl_id) < 0) {
+
+            pass         = FALSE;
+            failure_mssg = "H5Pclose() failed.\n";
         }
     }
 
@@ -803,10 +803,10 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
         }
     }
 
@@ -1445,10 +1445,10 @@ mdc_api_call_smoke_check(int express_test, unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
         }
     }
 
@@ -2170,10 +2170,10 @@ check_file_mdc_api_errs(unsigned paged, hid_t fcpl_id)
             pass         = FALSE;
             failure_mssg = "H5Fclose() failed.\n";
         }
-        else if (HDremove(filename) < 0) {
+        else if (H5Fdelete(filename, H5P_DEFAULT) < 0) {
 
             pass         = FALSE;
-            failure_mssg = "HDremove() failed.\n";
+            failure_mssg = "H5Fdelete() failed.\n";
         }
     }
 
@@ -2258,8 +2258,13 @@ main(void)
     for (paged = FALSE; paged <= TRUE; paged++) {
         hid_t my_fcpl = fcpl_id;
 
-        if (paged)
-            my_fcpl = fcpl2_id;
+        if (paged) {
+            /* Only run paged aggregation tests with sec2/default driver */
+            if (!h5_using_default_driver(NULL))
+                continue;
+            else
+                my_fcpl = fcpl2_id;
+        }
 
         if (!check_fapl_mdc_api_calls(paged, my_fcpl))
             nerrs += 1;
