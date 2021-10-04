@@ -740,6 +740,7 @@ HDF5_BUILD_FORTRAN  "Build FORTRAN support"          OFF
 HDF5_BUILD_JAVA     "Build JAVA support"             OFF
 HDF5_BUILD_HL_LIB   "Build HIGH Level HDF5 Library"  ON
 HDF5_BUILD_TOOLS    "Build HDF5 Tools"               ON
+HDF5_BUILD_HL_TOOLS "Build HIGH Level HDF5 Tools"    ON
 
 ---------------- HDF5 Advanced Options ---------------------
 ONLY_SHARED_LIBS               "Only Build Shared Libraries"                                  OFF

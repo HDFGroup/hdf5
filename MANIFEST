@@ -212,6 +212,7 @@
 ./doc/code-conventions.md
 ./doc/contributing.md
 ./doxygen/aliases
+./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
 ./doxygen/dox/APIVersions.dox
 ./doxygen/dox/About.dox
@@ -3579,6 +3580,7 @@
 ./config/cmake/HDF5PluginMacros.cmake
 ./config/cmake/HDF5PluginCache.cmake
 ./config/cmake/HDF5UseFortran.cmake
+./config/cmake/javaTargets.cmake.in
 ./config/cmake/jrunTest.cmake
 ./config/cmake/jvolTest.cmake
 ./config/cmake/libh5cc.in

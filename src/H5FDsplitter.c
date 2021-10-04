@@ -129,6 +129,8 @@ static herr_t  H5FD__splitter_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closin
 static herr_t  H5FD__splitter_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__splitter_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__splitter_unlock(H5FD_t *_file);
+static herr_t  H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                                  void **output);
 
 static const H5FD_class_t H5FD_splitter_g = {
     "splitter",                   /* name                 */
@@ -163,6 +165,7 @@ static const H5FD_class_t H5FD_splitter_g = {
     H5FD__splitter_lock,          /* lock                 */
     H5FD__splitter_unlock,        /* unlock               */
     NULL,                         /* del                  */
+    H5FD__splitter_ctl,           /* ctl                  */
     H5FD_FLMAP_DICHOTOMY          /* fl_map               */
 };
 
@@ -340,10 +343,12 @@ H5Pset_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *vfd_config)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, FAIL, "unable to allocate file access property list struct")
 
     info->ignore_wo_errs = vfd_config->ignore_wo_errs;
-    HDstrncpy(info->wo_path, vfd_config->wo_path, H5FD_SPLITTER_PATH_MAX);
-    HDstrncpy(info->log_file_path, vfd_config->log_file_path, H5FD_SPLITTER_PATH_MAX);
-    info->rw_fapl_id = H5P_FILE_ACCESS_DEFAULT; /* pre-set value */
-    info->wo_fapl_id = H5P_FILE_ACCESS_DEFAULT; /* pre-set value */
+    HDstrncpy(info->wo_path, vfd_config->wo_path, H5FD_SPLITTER_PATH_MAX + 1);
+    info->wo_path[H5FD_SPLITTER_PATH_MAX] = '\0';
+    HDstrncpy(info->log_file_path, vfd_config->log_file_path, H5FD_SPLITTER_PATH_MAX + 1);
+    info->log_file_path[H5FD_SPLITTER_PATH_MAX] = '\0';
+    info->rw_fapl_id                            = H5P_FILE_ACCESS_DEFAULT; /* pre-set value */
+    info->wo_fapl_id                            = H5P_FILE_ACCESS_DEFAULT; /* pre-set value */
 
     /* Set non-default channel FAPL IDs in splitter configuration info */
     if (H5P_DEFAULT != vfd_config->rw_fapl_id) {
@@ -412,8 +417,8 @@ H5Pget_fapl_splitter(hid_t fapl_id, H5FD_splitter_vfd_config_t *config /*out*/)
     if (NULL == (fapl_ptr = (const H5FD_splitter_fapl_t *)H5P_peek_driver_info(plist_ptr)))
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "unable to get specific-driver info")
 
-    HDstrncpy(config->wo_path, fapl_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
-    HDstrncpy(config->log_file_path, fapl_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
+    HDstrncpy(config->wo_path, fapl_ptr->wo_path, H5FD_SPLITTER_PATH_MAX + 1);
+    HDstrncpy(config->log_file_path, fapl_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX + 1);
     config->ignore_wo_errs = fapl_ptr->ignore_wo_errs;
 
     /* Copy R/W and W/O FAPLs */
@@ -587,8 +592,8 @@ H5FD__splitter_fapl_copy(const void *_old_fa)
         HGOTO_ERROR(H5E_VFL, H5E_CANTALLOC, NULL, "unable to allocate log file FAPL")
 
     H5MM_memcpy(new_fa_ptr, old_fa_ptr, sizeof(H5FD_splitter_fapl_t));
-    HDstrncpy(new_fa_ptr->wo_path, old_fa_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
-    HDstrncpy(new_fa_ptr->log_file_path, old_fa_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
+    HDstrncpy(new_fa_ptr->wo_path, old_fa_ptr->wo_path, H5FD_SPLITTER_PATH_MAX + 1);
+    HDstrncpy(new_fa_ptr->log_file_path, old_fa_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX + 1);
 
     /* Copy R/W and W/O FAPLs */
     if (H5FD__copy_plist(old_fa_ptr->rw_fapl_id, &(new_fa_ptr->rw_fapl_id)) < 0)
@@ -688,8 +693,8 @@ H5FD__splitter_open(const char *name, unsigned flags, hid_t splitter_fapl_id, ha
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "unable to get VFL driver info")
 
     /* Copy simpler info */
-    HDstrncpy(file_ptr->fa.wo_path, fapl_ptr->wo_path, H5FD_SPLITTER_PATH_MAX);
-    HDstrncpy(file_ptr->fa.log_file_path, fapl_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX);
+    HDstrncpy(file_ptr->fa.wo_path, fapl_ptr->wo_path, H5FD_SPLITTER_PATH_MAX + 1);
+    HDstrncpy(file_ptr->fa.log_file_path, fapl_ptr->log_file_path, H5FD_SPLITTER_PATH_MAX + 1);
     file_ptr->fa.ignore_wo_errs = fapl_ptr->ignore_wo_errs;
 
     /* Copy R/W and W/O channel FAPLs. */
@@ -1141,6 +1146,63 @@ H5FD__splitter_unlock(H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__splitter_unlock */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__splitter_ctl
+ *
+ * Purpose:     Splitter VFD version of the ctl callback.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ *              At present, this VFD supports no op codes of its own and
+ *              simply passes ctl calls on to the R/W channel VFD.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__splitter_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    H5FD_splitter_t *file      = (H5FD_splitter_t *)_file;
+    herr_t           ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(H5FD_SPLITTER == file->pub.driver_id);
+
+    switch (op_code) {
+        /* Unknown op code */
+        default:
+            if (flags & H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG) {
+                /* Pass ctl call down to R/W channel VFD */
+                if (H5FDctl(file->rw_file, op_code, flags, input, output) < 0)
+                    HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+            }
+            else {
+                /* If no valid VFD routing flag is specified, fail for unknown op code
+                 * if H5FD_CTL__FAIL_IF_UNKNOWN_FLAG flag is set.
+                 */
+                if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+                    HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
+                                "VFD ctl request failed (unknown op code and fail if unknown flag is set)")
+            }
+
+            break;
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__splitter_ctl() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD__splitter_query
