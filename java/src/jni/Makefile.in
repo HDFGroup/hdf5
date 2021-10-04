@@ -814,9 +814,9 @@ LT_HL_CXX_VERS_AGE = 1
 LT_HL_F_VERS_INTERFACE = 100
 LT_HL_F_VERS_REVISION = 7
 LT_HL_F_VERS_AGE = 0
-LT_JAVA_VERS_INTERFACE = 105
-LT_JAVA_VERS_REVISION = 1
-LT_JAVA_VERS_AGE = 5
+LT_JAVA_VERS_INTERFACE = 106
+LT_JAVA_VERS_REVISION = 0
+LT_JAVA_VERS_AGE = 6
 LT_TOOLS_VERS_INTERFACE = 102
 LT_TOOLS_VERS_REVISION = 1
 LT_TOOLS_VERS_AGE = 0
@@ -828,7 +828,7 @@ JAVA_API = yes
 lib_LTLIBRARIES = libhdf5_java.la
 
 # Add libtool numbers to the HDF5 Java (JNI) library (from config/lt_vers.am)
-libhdf5_java_la_LDFLAGS = -avoid-version -shared -export-dynamic -version-info $(LT_JAVA_VERS_INTERFACE):$(LT_JAVA_VERS_REVISION):$(LT_JAVA_VERS_AGE) $(AM_LDFLAGS)
+libhdf5_java_la_LDFLAGS = -shared -export-dynamic -version-info $(LT_JAVA_VERS_INTERFACE):$(LT_JAVA_VERS_REVISION):$(LT_JAVA_VERS_AGE) $(AM_LDFLAGS)
 
 # Source files for the library
 libhdf5_java_la_SOURCES = exceptionImp.c h5Constants.c nativeData.c h5util.c h5Imp.c \
