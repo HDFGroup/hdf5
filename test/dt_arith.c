@@ -2707,7 +2707,7 @@ my_isnan(dtype_t type, void *val)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE != 0
     }
     else if (FLT_LDOUBLE == type) {
-        long double x = 0.0;
+        long double x = 0.0L;
         HDmemcpy(&x, val, sizeof(long double));
         retval = (x != x);
 #endif
@@ -2735,7 +2735,7 @@ my_isnan(dtype_t type, void *val)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE && H5_SIZEOF_LONG_DOUBLE != 0
         }
         else if (FLT_LDOUBLE == type) {
-            long double x = 0.0;
+            long double x = 0.0L;
 
             HDmemcpy(&x, val, sizeof(long double));
             HDsnprintf(s, sizeof(s), "%Lg", x);
@@ -3059,7 +3059,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     for (j = 0; j < nelmts; j++) {
         underflow = 0;
         hw_f      = 911.0F;
-        hw_d      = 911.0F;
+        hw_d      = 911.0;
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         hw_ld = 911.0L;
 #endif
@@ -3073,12 +3073,12 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 hw   = (unsigned char *)&hw_f;
             }
             else if (FLT_DOUBLE == dst_type) {
-                hw_d = *((float *)aligned);
+                hw_d = *((double *)aligned);
                 hw   = (unsigned char *)&hw_d;
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
             }
             else {
-                hw_ld = *((float *)aligned);
+                hw_ld = *((long double *)aligned);
                 hw    = (unsigned char *)&hw_ld;
 #endif
             }
@@ -3097,7 +3097,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
             }
             else {
-                hw_ld = *((double *)aligned);
+                hw_ld = *((long double *)aligned);
                 hw    = (unsigned char *)&hw_ld;
 #endif
             }
@@ -3108,14 +3108,14 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             if (FLT_FLOAT == dst_type) {
                 hw_f      = (float)*((long double *)aligned);
                 hw        = (unsigned char *)&hw_f;
-                underflow = HDfabsl(*((long double *)aligned)) < FLT_MIN;
-                overflow  = HDfabsl(*((long double *)aligned)) > FLT_MAX;
+                underflow = HDfabsl(*((long double *)aligned)) < (long double) FLT_MIN;
+                overflow  = HDfabsl(*((long double *)aligned)) > (long double) FLT_MAX;
             }
             else if (FLT_DOUBLE == dst_type) {
                 hw_d      = (double)*((long double *)aligned);
                 hw        = (unsigned char *)&hw_d;
-                underflow = HDfabsl(*((long double *)aligned)) < DBL_MIN;
-                overflow  = HDfabsl(*((long double *)aligned)) > DBL_MAX;
+                underflow = HDfabsl(*((long double *)aligned)) < (long double) DBL_MIN;
+                overflow  = HDfabsl(*((long double *)aligned)) > (long double) DBL_MAX;
             }
             else {
                 hw_ld = *((long double *)aligned);
@@ -3204,8 +3204,8 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 if (overflow && my_isinf(dendian, buf + j * sizeof(float), dst_size, dst_mpos, dst_msize,
                                          dst_epos, dst_esize))
                     continue; /* all overflowed, no error */
-                check_mant[0] = HDfrexpf(x, check_expo + 0);
-                check_mant[1] = HDfrexpf(hw_f, check_expo + 1);
+                check_mant[0] = (double) HDfrexpf(x, check_expo + 0);
+                check_mant[1] = (double) HDfrexpf(hw_f, check_expo + 1);
             }
             else if (FLT_DOUBLE == dst_type) {
                 double x = 0.0;
@@ -3220,7 +3220,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #if H5_SIZEOF_LONG_DOUBLE != 0 && (H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE)
             }
             else {
-                long double x = 0.0;
+                long double x = 0.0L;
                 HDmemcpy(&x, &buf[j * dst_size], sizeof(long double));
                 /* dst is largest float, no need to check underflow. */
                 check_mant[0] = (double)HDfrexpl(x, check_expo + 0);
@@ -3278,7 +3278,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         }
         else {
-            long double x = 0.0;
+            long double x = 0.0L;
             HDmemcpy(&x, &saved[j * src_size], sizeof(long double));
             HDfprintf(stdout, " %29.20Le\n", x);
 #endif
@@ -3300,7 +3300,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
         }
         else {
-            long double x = 0.0;
+            long double x = 0.0L;
             HDmemcpy(&x, &buf[j * dst_size], sizeof(long double));
             HDfprintf(stdout, " %29.20Le\n", x);
 #endif
