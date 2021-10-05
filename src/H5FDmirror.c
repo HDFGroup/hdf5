@@ -223,6 +223,17 @@ H5FD_mirror_init(void)
 
     LOG_OP_CALL(__func__);
 
+    /* It is possible that an application will call this routine through
+     * a `H5FD_*` symbol (`H5FD_FAMILY`, `H5FD_MULTI`, `H5FD_SEC2`, et
+     * cetera) before the library has had an opportunity to initialize.
+     * Call H5_init_library() to make sure that the library has been
+     * initialized before this VFD tries to initialize.
+     */
+    if (H5_init_library() < 0) {
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID,
+            "library initialization failed")
+    }
+
     if (H5I_VFL != H5I_get_type(H5FD_MIRROR_g))
         H5FD_MIRROR_g = H5FD_register(&H5FD_mirror_g, sizeof(H5FD_class_t), FALSE);
 

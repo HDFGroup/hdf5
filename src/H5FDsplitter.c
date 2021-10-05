@@ -187,15 +187,27 @@ H5FD_splitter_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     H5FD_SPLITTER_LOG_CALL(__func__);
+
+    /* It is possible that an application will call this routine through
+     * a `H5FD_*` symbol (`H5FD_FAMILY`, `H5FD_MULTI`, `H5FD_SEC2`, et
+     * cetera) before the library has had an opportunity to initialize.
+     * Call H5_init_library() to make sure that the library has been
+     * initialized before this VFD tries to initialize.
+     */
+    if (H5_init_library() < 0) {
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID,
+            "library initialization failed")
+    }
 
     if (H5I_VFL != H5I_get_type(H5FD_SPLITTER_g))
         H5FD_SPLITTER_g = H5FDregister(&H5FD_splitter_g);
 
     ret_value = H5FD_SPLITTER_g;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_init() */
 

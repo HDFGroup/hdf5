@@ -427,7 +427,18 @@ H5FD_core_init(void)
     char *lock_env_var = NULL;            /* Environment variable pointer */
     hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI_NOERR
+    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+
+    /* It is possible that an application will call this routine through
+     * a `H5FD_*` symbol (`H5FD_FAMILY`, `H5FD_MULTI`, `H5FD_SEC2`, et
+     * cetera) before the library has had an opportunity to initialize.
+     * Call H5_init_library() to make sure that the library has been
+     * initialized before this VFD tries to initialize.
+     */
+    if (H5_init_library() < 0) {
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID,
+            "library initialization failed")
+    }
 
     /* Check the use disabled file locks environment variable */
     lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
@@ -444,6 +455,7 @@ H5FD_core_init(void)
     /* Set return value */
     ret_value = H5FD_CORE_g;
 
+done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_init() */
 
