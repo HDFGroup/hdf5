@@ -5128,8 +5128,8 @@ test_scaleoffset_float(hid_t file)
     hid_t         dataset, datatype, space, dc;
     const hsize_t size[2]       = {2, 5};
     const hsize_t chunk_size[2] = {2, 5};
-    double         orig_data[2][5];
-    double         new_data[2][5];
+    double        orig_data[2][5];
+    double        new_data[2][5];
     size_t        i, j;
 
     TESTING("    scaleoffset float without fill value, D-scaling (setup)");
@@ -5251,8 +5251,8 @@ test_scaleoffset_float_2(hid_t file)
     hid_t         dataset, datatype, space, mspace, dc;
     const hsize_t size[2]       = {2, 5};
     const hsize_t chunk_size[2] = {2, 5};
-    double         orig_data[2][5];
-    double         new_data[2][5];
+    double        orig_data[2][5];
+    double        new_data[2][5];
     float         fillval;
     hsize_t       start[2];  /* Start of hyperslab */
     hsize_t       stride[2]; /* Stride of hyperslab */
