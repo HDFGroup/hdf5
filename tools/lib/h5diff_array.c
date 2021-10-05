@@ -2163,8 +2163,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                 }
                 nfound++;
             }
-            else if (per > opts->percent &&
-                     (double) ABS(temp1_double - temp2_double) > opts->delta) {
+            else if (per > opts->percent && (double)ABS(temp1_double - temp2_double) > opts->delta) {
                 opts->print_percentage = 1;
                 print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
