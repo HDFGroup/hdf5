@@ -3108,14 +3108,14 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
             if (FLT_FLOAT == dst_type) {
                 hw_f      = (float)*((long double *)aligned);
                 hw        = (unsigned char *)&hw_f;
-                underflow = HDfabsl(*((long double *)aligned)) < (long double) FLT_MIN;
-                overflow  = HDfabsl(*((long double *)aligned)) > (long double) FLT_MAX;
+                underflow = HDfabsl(*((long double *)aligned)) < (long double)FLT_MIN;
+                overflow  = HDfabsl(*((long double *)aligned)) > (long double)FLT_MAX;
             }
             else if (FLT_DOUBLE == dst_type) {
                 hw_d      = (double)*((long double *)aligned);
                 hw        = (unsigned char *)&hw_d;
-                underflow = HDfabsl(*((long double *)aligned)) < (long double) DBL_MIN;
-                overflow  = HDfabsl(*((long double *)aligned)) > (long double) DBL_MAX;
+                underflow = HDfabsl(*((long double *)aligned)) < (long double)DBL_MIN;
+                overflow  = HDfabsl(*((long double *)aligned)) > (long double)DBL_MAX;
             }
             else {
                 hw_ld = *((long double *)aligned);
@@ -3204,8 +3204,8 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 if (overflow && my_isinf(dendian, buf + j * sizeof(float), dst_size, dst_mpos, dst_msize,
                                          dst_epos, dst_esize))
                     continue; /* all overflowed, no error */
-                check_mant[0] = (double) HDfrexpf(x, check_expo + 0);
-                check_mant[1] = (double) HDfrexpf(hw_f, check_expo + 1);
+                check_mant[0] = (double)HDfrexpf(x, check_expo + 0);
+                check_mant[1] = (double)HDfrexpf(hw_f, check_expo + 1);
             }
             else if (FLT_DOUBLE == dst_type) {
                 double x = 0.0;
