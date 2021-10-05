@@ -350,8 +350,7 @@ H5FD_hdfs_init(void)
      * initialized before this VFD tries to initialize.
      */
     if (H5_init_library() < 0) {
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID,
-            "library initialization failed")
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID, "library initialization failed")
     }
 
     if (H5I_VFL != H5I_get_type(H5FD_HDFS_g))

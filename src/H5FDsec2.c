@@ -208,8 +208,7 @@ H5FD_sec2_init(void)
      * initialized before this VFD tries to initialize.
      */
     if (H5_init_library() < 0) {
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID,
-            "library initialization failed")
+        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID, "library initialization failed")
     }
 
     /* Check the use disabled file locks environment variable */
