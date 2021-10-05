@@ -1399,7 +1399,7 @@ test_conv_buffer(hid_t fid)
         cf->b[j] = 100.0F * (float)(j + 1) + 0.01F * (float)j;
 
     for (j = 0; j < DIM3; j++)
-        cf->c[j] = 100.0F * (float)(j + 1) + 0.02F * (float)j;
+        cf->c[j] = 100.0 * (double)(j + 1) + 0.02 * (double)j;
 
     /* Create data space */
     if ((space = H5Screate(H5S_SCALAR)) < 0)
@@ -3442,11 +3442,11 @@ test_nbit_double(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    double orig_data[2][5] = {{(double)1.6081706885101836e+60L, -255.32099170994480f,
-                               (double)1.2677579992621376e-61L, 64568.289448797700f,
+    double orig_data[2][5] = {{(double)1.6081706885101836e+60L, -255.32099170994480,
+                               (double)1.2677579992621376e-61L, 64568.289448797700,
                                (double)-1.0619721778839084e-75L},
-                              {(double)2.1499497833454840e+56L, 6.6562295504670740e-3f, -1.5747263393432150f,
-                               1.0711093225222612f, -9.8971679387636870e-1f}};
+                              {(double)2.1499497833454840e+56L, 6.6562295504670740e-3, -1.5747263393432150,
+                               1.0711093225222612, -9.8971679387636870e-1}};
     double new_data[2][5];
     size_t precision, offset;
     size_t i, j;
@@ -5128,8 +5128,8 @@ test_scaleoffset_float(hid_t file)
     hid_t         dataset, datatype, space, dc;
     const hsize_t size[2]       = {2, 5};
     const hsize_t chunk_size[2] = {2, 5};
-    float         orig_data[2][5];
-    float         new_data[2][5];
+    double         orig_data[2][5];
+    double         new_data[2][5];
     size_t        i, j;
 
     TESTING("    scaleoffset float without fill value, D-scaling (setup)");
@@ -5168,7 +5168,7 @@ test_scaleoffset_float(hid_t file)
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            orig_data[i][j] = (float)(HDrandom() % 100000) / 1000.0F;
+            orig_data[i][j] = (HDrandom() % 100000) / 1000.0;
 
             /* even-numbered values are negtive */
             if ((i * size[1] + j + 1) % 2 == 0)
@@ -5251,8 +5251,8 @@ test_scaleoffset_float_2(hid_t file)
     hid_t         dataset, datatype, space, mspace, dc;
     const hsize_t size[2]       = {2, 5};
     const hsize_t chunk_size[2] = {2, 5};
-    float         orig_data[2][5];
-    float         new_data[2][5];
+    double         orig_data[2][5];
+    double         new_data[2][5];
     float         fillval;
     hsize_t       start[2];  /* Start of hyperslab */
     hsize_t       stride[2]; /* Stride of hyperslab */
@@ -5314,7 +5314,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (float)(HDrandom() % 100000) / 1000.0F;
+        orig_data[0][j] = (HDrandom() % 100000) / 1000.0;
 
         /* even-numbered values are negtive */
         if ((j + 1) % 2 == 0)
@@ -5435,7 +5435,7 @@ test_scaleoffset_double(hid_t file)
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            orig_data[i][j] = (float)(HDrandom() % 10000000) / 10000000.0F;
+            orig_data[i][j] = (HDrandom() % 10000000) / 10000000.0;
 
             /* even-numbered values are negtive */
             if ((i * size[1] + j + 1) % 2 == 0)
@@ -5544,7 +5544,7 @@ test_scaleoffset_double_2(hid_t file)
         goto error;
 
     /* Set fill value */
-    fillval = 10000.0F;
+    fillval = 10000.0;
     if (H5Pset_fill_value(dc, H5T_NATIVE_DOUBLE, &fillval) < 0)
         goto error;
 
@@ -5581,7 +5581,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (float)(HDrandom() % 10000000) / 10000000.0F;
+        orig_data[0][j] = (HDrandom() % 10000000) / 10000000.0;
 
         /* even-numbered values are negtive */
         if ((j + 1) % 2 == 0)
@@ -6525,7 +6525,7 @@ test_set_local(hid_t fapl)
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
 
     /* Initialize the integer & floating-point dataset */
-    n = 1.0F;
+    n = 1.0;
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++) {
             points[i][j]     = (int)n++;
@@ -9085,7 +9085,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* Define cache size to be smaller than chunk size */
     rdcc_nelmts = BYPASS_CHUNK_DIM / 5;
     rdcc_nbytes = sizeof(int) * BYPASS_CHUNK_DIM / 5;
-    if (H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, 0.0F) < 0)
+    if (H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, 0.0) < 0)
         FAIL_STACK_ERROR
 
     /* Create file */
@@ -15558,11 +15558,10 @@ main(void)
     int         nerrors = 0;
     const char *envval;
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
-    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
     int         i;
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv(HDF5_DRIVER);
+    envval = HDgetenv("HDF5_DRIVER");
     if (envval == NULL)
         envval = "nomatch";
 
@@ -15719,11 +15718,7 @@ main(void)
                 nerrors += (test_multiopen(file) < 0 ? 1 : 0);
                 nerrors += (test_types(file) < 0 ? 1 : 0);
                 nerrors += (test_userblock_offset(envval, my_fapl, new_format) < 0 ? 1 : 0);
-
-                if (!driver_uses_modified_filename) {
-                    nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
-                }
-
+                nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
                 nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
@@ -15732,11 +15727,7 @@ main(void)
                 nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
                 nerrors += (test_copy_dcpl(file, my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
-
-                if (!driver_uses_modified_filename) {
-                    nerrors += (test_filters_endianess() < 0 ? 1 : 0);
-                }
-
+                nerrors += (test_filters_endianess() < 0 ? 1 : 0);
                 nerrors += (test_zero_dims(file) < 0 ? 1 : 0);
                 nerrors += (test_missing_chunk(file) < 0 ? 1 : 0);
                 nerrors += (test_random_chunks(my_fapl) < 0 ? 1 : 0);
@@ -15754,11 +15745,7 @@ main(void)
                 nerrors += (test_chunk_expand(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_layout_extend(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_fixed_array(my_fapl) < 0 ? 1 : 0);
-
-                if (!driver_uses_modified_filename) {
-                    nerrors += (test_idx_compatible() < 0 ? 1 : 0);
-                }
-
+                nerrors += (test_idx_compatible() < 0 ? 1 : 0);
                 nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_single_chunk(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_large_chunk_shrink(my_fapl) < 0 ? 1 : 0);
@@ -15792,9 +15779,7 @@ main(void)
     nerrors += (test_gather_error() < 0 ? 1 : 0);
 
     /* Tests version bounds using its own file */
-    if (!driver_uses_modified_filename) {
-        nerrors += (test_versionbounds() < 0 ? 1 : 0);
-    }
+    nerrors += (test_versionbounds() < 0 ? 1 : 0);
 
     /* Tests that use their own file */
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);
