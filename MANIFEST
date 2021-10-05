@@ -211,6 +211,7 @@
 ./doc/branches-explained.md
 ./doc/code-conventions.md
 ./doc/contributing.md
+./doc/library-init-shutdown.md
 ./doxygen/aliases
 ./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
