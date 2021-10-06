@@ -1008,6 +1008,15 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed cross platform incompatibility of references within variable length
+      types
+
+        Reference types within variable length types previously could not be
+        read on a platform with different endianness from where they were
+        written. Fixed so cross platform portability is restored.
+
+        (NAF - 2021/09/30)
+
     - Detection of simple data transform function "x"
 
         In the case of the simple data transform function "x" the (parallel)
