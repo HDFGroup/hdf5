@@ -41,6 +41,136 @@ const char *FILENAME[] = {"native_vol_test", NULL};
 
 #define N_ELEMENTS 10
 
+/* A VOL class struct to verify registering optional operations */
+static int    reg_opt_curr_op_val;
+static herr_t reg_opt_op_optional(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+static herr_t reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params,
+                                    H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
+static herr_t reg_opt_datatype_get(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
+#define REG_OPT_VOL_NAME  "reg_opt"
+#define REG_OPT_VOL_VALUE ((H5VL_class_value_t)502)
+static const H5VL_class_t reg_opt_vol_g = {
+    H5VL_VERSION,      /* VOL class struct version */
+    REG_OPT_VOL_VALUE, /* value        */
+    REG_OPT_VOL_NAME,  /* name         */
+    0,                 /* version      */
+    0,                 /* capability flags */
+    NULL,              /* initialize   */
+    NULL,              /* terminate    */
+    {
+        /* info_cls */
+        (size_t)0, /* size    */
+        NULL,      /* copy    */
+        NULL,      /* compare */
+        NULL,      /* free    */
+        NULL,      /* to_str  */
+        NULL,      /* from_str */
+    },
+    {
+        /* wrap_cls */
+        NULL, /* get_object   */
+        NULL, /* get_wrap_ctx */
+        NULL, /* wrap_object  */
+        NULL, /* unwrap_object */
+        NULL, /* free_wrap_ctx */
+    },
+    {
+        /* attribute_cls */
+        NULL,                /* create       */
+        NULL,                /* open         */
+        NULL,                /* read         */
+        NULL,                /* write        */
+        NULL,                /* get          */
+        NULL,                /* specific     */
+        reg_opt_op_optional, /* optional     */
+        NULL                 /* close        */
+    },
+    {
+        /* dataset_cls */
+        NULL,                /* create       */
+        NULL,                /* open         */
+        NULL,                /* read         */
+        NULL,                /* write        */
+        NULL,                /* get          */
+        NULL,                /* specific     */
+        reg_opt_op_optional, /* optional     */
+        NULL                 /* close        */
+    },
+    {
+        /* datatype_cls */
+        NULL,                 /* commit       */
+        NULL,                 /* open         */
+        reg_opt_datatype_get, /* get          */
+        NULL,                 /* specific     */
+        reg_opt_op_optional,  /* optional     */
+        NULL                  /* close        */
+    },
+    {
+        /* file_cls */
+        NULL,                /* create       */
+        NULL,                /* open         */
+        NULL,                /* get          */
+        NULL,                /* specific     */
+        reg_opt_op_optional, /* optional     */
+        NULL                 /* close        */
+    },
+    {
+        /* group_cls */
+        NULL,                /* create       */
+        NULL,                /* open         */
+        NULL,                /* get          */
+        NULL,                /* specific     */
+        reg_opt_op_optional, /* optional     */
+        NULL                 /* close        */
+    },
+    {
+        /* link_cls */
+        NULL,                 /* create       */
+        NULL,                 /* copy         */
+        NULL,                 /* move         */
+        NULL,                 /* get          */
+        NULL,                 /* specific     */
+        reg_opt_link_optional /* optional     */
+    },
+    {
+        /* object_cls */
+        NULL,                 /* open         */
+        NULL,                 /* copy         */
+        NULL,                 /* get          */
+        NULL,                 /* specific     */
+        reg_opt_link_optional /* optional     */
+    },
+    {
+        /* introspect_cls */
+        NULL, /* get_conn_cls */
+        NULL, /* get_cap_flags */
+        NULL, /* opt_query    */
+    },
+    {
+        /* request_cls */
+        NULL, /* wait         */
+        NULL, /* notify       */
+        NULL, /* cancel       */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* free         */
+    },
+    {
+        /* blob_cls */
+        NULL, /* put          */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL  /* optional     */
+    },
+    {
+        /* token_cls */
+        NULL, /* cmp              */
+        NULL, /* to_str           */
+        NULL  /* from_str         */
+    },
+    NULL /* optional     */
+};
+
 #define FAKE_VOL_NAME  "fake"
 #define FAKE_VOL_VALUE ((H5VL_class_value_t)501)
 
@@ -96,12 +226,12 @@ static const H5VL_class_t fake_vol_g = {
     },
     {
         /* datatype_cls */
-        NULL, /* commit       */
-        NULL, /* open         */
-        NULL, /* get          */
-        NULL, /* specific     */
-        NULL, /* optional     */
-        NULL  /* close        */
+        NULL,                 /* commit       */
+        NULL,                 /* open         */
+        reg_opt_datatype_get, /* get          */
+        NULL,                 /* specific     */
+        NULL,                 /* optional     */
+        NULL                  /* close        */
     },
     {
         /* file_cls */
@@ -298,6 +428,129 @@ static const H5VL_class_t fake_async_vol_g = {
     },
     NULL /* optional     */
 };
+
+/*-------------------------------------------------------------------------
+ * Function:    reg_opt_op_optional_verify
+ *
+ * Purpose:     Common verification routine for dynamic optional operations
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+reg_opt_op_optional_verify(void *obj, H5VL_optional_args_t *args)
+{
+    int *o = (int *)obj;
+    int *op_args;
+
+    /* Check for receiving correct operation value */
+    if (args->op_type != reg_opt_curr_op_val)
+        return -1;
+
+    /* Check that the object is correct */
+    if ((-1) != *o)
+        return -1;
+
+    /* Update the object, with the operation value */
+    *o = args->op_type;
+
+    /* Check that the argument is correct */
+    op_args = args->args;
+    if (NULL == op_args)
+        return -1;
+    if ((-1) != *op_args)
+        return -1;
+
+    /* Update the argument return parameter */
+    *op_args = args->op_type;
+
+    return 0;
+} /* end reg_opt_op_optional_verify() */
+
+/*-------------------------------------------------------------------------
+ * Function:    reg_opt_op_optional
+ *
+ * Purpose:     Common callback to perform a connector-specific operation
+ *              on an object
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+reg_opt_op_optional(void *obj, H5VL_optional_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                    void H5_ATTR_UNUSED **req)
+{
+    /* Invoke the common value verification routine */
+    return reg_opt_op_optional_verify(obj, args);
+} /* end reg_opt_op_optional() */
+
+/*-------------------------------------------------------------------------
+ * Function:    reg_opt_link_optional
+ *
+ * Purpose:     Callback to perform a connector-specific operation
+ *              on a link
+ *
+ * Return:      Success:    0
+ *              Failure:    -1
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+reg_opt_link_optional(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
+                      hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req)
+{
+    /* Check for receiving correct loc_params info */
+    if (loc_params->type != H5VL_OBJECT_BY_NAME)
+        return -1;
+    if (loc_params->obj_type != H5I_GROUP)
+        return -1;
+    if (HDstrcmp(loc_params->loc_data.loc_by_name.name, ".") != 0)
+        return -1;
+    if (loc_params->loc_data.loc_by_name.lapl_id != H5P_LINK_ACCESS_DEFAULT)
+        return -1;
+
+    /* Invoke the common value verification routine */
+    return reg_opt_op_optional_verify(obj, args);
+} /* end reg_opt_link_optional() */
+
+/*-------------------------------------------------------------------------
+ * Function:    reg_opt_datatype_get
+ *
+ * Purpose:     Handles the datatype get callback
+ *
+ * Note:        This is _strictly_ a testing fixture to support the
+ *              exercise_reg_opt_oper() testing routine.  It fakes just
+ *              enough of the named datatype VOL callback for the
+ *              H5VL_register_using_vol_id() call in that test routine to
+ *              succeed.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+reg_opt_datatype_get(void H5_ATTR_UNUSED *obj, H5VL_datatype_get_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                     void H5_ATTR_UNUSED **req)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    if (H5VL_DATATYPE_GET_BINARY_SIZE == args->op_type) {
+        if (H5Tencode(H5T_NATIVE_INT, NULL, args->args.get_binary_size.size) < 0)
+            ret_value = FAIL;
+    } /* end if */
+    else if (H5VL_DATATYPE_GET_BINARY == args->op_type) {
+        if (H5Tencode(H5T_NATIVE_INT, args->args.get_binary.buf, &args->args.get_binary.buf_size) < 0)
+            ret_value = FAIL;
+    } /* end if */
+    else
+        ret_value = FAIL;
+
+    return ret_value;
+} /* end reg_opt_datatype_get() */
 
 /*-------------------------------------------------------------------------
  * Function:    fake_async_get_cap_flags
@@ -1330,6 +1583,365 @@ error:
 
 } /* end test_basic_datatype_operation() */
 
+typedef herr_t (*reg_opt_obj_oper_t)(const char *app_file, const char *app_func, unsigned app_line,
+                                     hid_t obj_id, H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
+typedef herr_t (*reg_opt_link_oper_t)(const char *app_file, const char *app_func, unsigned app_line,
+                                      hid_t obj_id, const char *name, hid_t lapl_id,
+                                      H5VL_optional_args_t *args, hid_t dxpl_id, hid_t es_id);
+typedef union {
+    reg_opt_obj_oper_t  obj_op;
+    reg_opt_link_oper_t link_op;
+} reg_opt_oper_t;
+
+/*-------------------------------------------------------------------------
+ * Function:    exercise_reg_opt_oper()
+ *
+ * Purpose:     Exercise a particular optional operation for a type.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+exercise_reg_opt_oper(hid_t fake_vol_id, hid_t reg_opt_vol_id, H5VL_subclass_t subcls,
+                      const char *subcls_name, H5I_type_t id_type, reg_opt_oper_t reg_opt_op)
+{
+    char                 op_name[256]; /* Operation name to register */
+    hid_t                obj_id = H5I_INVALID_HID;
+    H5VL_object_t *      vol_obj;
+    H5VL_optional_args_t vol_cb_args;
+    int                  fake_obj, fake_arg;
+    int                  op_val = -1, op_val2 = -1;
+    int                  find_op_val;
+    herr_t               ret = SUCCEED;
+
+    /* Test registering optional operation */
+    HDsnprintf(op_name, sizeof(op_name), "%s-op1", subcls_name);
+    if (H5VLregister_opt_operation(subcls, op_name, &op_val) < 0)
+        TEST_ERROR;
+
+    /* Verify that the reserved amount of optional operations is obeyed */
+    /* (The first optional operation registered should be at the lower limit) */
+    if (op_val != H5VL_RESERVED_NATIVE_OPTIONAL)
+        TEST_ERROR;
+
+    /* Look up 1st registered optional operation */
+    find_op_val = 0;
+    if (H5VLfind_opt_operation(subcls, op_name, &find_op_val) < 0)
+        TEST_ERROR;
+
+    /* Verify that the operation was looked up successfully */
+    if (op_val != find_op_val)
+        TEST_ERROR;
+
+    /* Test registering second optional operation */
+    HDsnprintf(op_name, sizeof(op_name), "%s-op2", subcls_name);
+    if (H5VLregister_opt_operation(subcls, op_name, &op_val2) < 0)
+        TEST_ERROR;
+
+    /* Verify that the reserved amount of optional operations is obeyed */
+    /* (The 2nd optional operation registered should be at the lower limit + 1) */
+    if (op_val2 != (H5VL_RESERVED_NATIVE_OPTIONAL + 1))
+        TEST_ERROR;
+
+    /* Look up 2nd registered optional operation */
+    find_op_val = 0;
+    if (H5VLfind_opt_operation(subcls, op_name, &find_op_val) < 0)
+        TEST_ERROR;
+
+    /* Verify that the operation was looked up successfully */
+    if (op_val2 != find_op_val)
+        TEST_ERROR;
+
+    /* Push a new API context on the stack */
+    /* (Necessary for the named datatype construction routines) */
+    if (H5VL_SUBCLS_DATATYPE == subcls)
+        H5CX_push();
+
+    /* Create fake object on fake VOL connector */
+    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, fake_vol_id, TRUE)))
+        TEST_ERROR;
+
+    /* Pop the API context off the stack */
+    if (H5VL_SUBCLS_DATATYPE == subcls)
+        H5CX_pop(FALSE);
+
+    /* Attempt to issue operation on fake VOL connector */
+    fake_obj            = -1;
+    fake_arg            = -1;
+    vol_cb_args.op_type = op_val;
+    vol_cb_args.args    = &fake_arg;
+    H5E_BEGIN_TRY
+    {
+        if (H5VL_SUBCLS_LINK == subcls || H5VL_SUBCLS_OBJECT == subcls)
+            ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, &vol_cb_args,
+                                        H5P_DEFAULT, H5ES_NONE);
+        else
+            ret = (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, &vol_cb_args, H5P_DEFAULT,
+                                       H5ES_NONE);
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to perform an optional operation with a NULL callback");
+    if ((-1) != fake_obj)
+        FAIL_PUTS_ERROR("'fake_obj' changed during failed operation?");
+    if ((-1) != fake_arg)
+        FAIL_PUTS_ERROR("'fake_arg' changed during failed operation?");
+
+    /* Named datatypes must be destroyed differently */
+    if (H5VL_SUBCLS_DATATYPE == subcls) {
+        H5T_t *dt;
+
+        /* Destroy fake datatype object */
+        if (NULL == (dt = H5I_remove(obj_id)))
+            TEST_ERROR;
+        if (H5VL_free_object(dt->vol_obj) < 0)
+            TEST_ERROR;
+        dt->vol_obj = NULL;
+        if (H5T_close(dt) < 0)
+            TEST_ERROR;
+    } /* end if */
+    else {
+        /* Destroy fake object */
+        if (NULL == (vol_obj = H5I_remove(obj_id)))
+            TEST_ERROR;
+        if (H5VL_free_object(vol_obj) < 0)
+            TEST_ERROR;
+    } /* end else */
+
+    /* Push a new API context on the stack */
+    /* (Necessary for the named datatype construction routines) */
+    if (H5VL_SUBCLS_DATATYPE == subcls)
+        H5CX_push();
+
+    /* Create fake object on reg_opt VOL connector */
+    if (H5I_INVALID_HID == (obj_id = H5VL_register_using_vol_id(id_type, &fake_obj, reg_opt_vol_id, TRUE)))
+        TEST_ERROR;
+
+    /* Pop the API context off the stack */
+    if (H5VL_SUBCLS_DATATYPE == subcls)
+        H5CX_pop(FALSE);
+
+    /* Issue first operation */
+    fake_obj            = -1;
+    fake_arg            = -1;
+    reg_opt_curr_op_val = op_val;
+    vol_cb_args.op_type = op_val;
+    vol_cb_args.args    = &fake_arg;
+    if (H5VL_SUBCLS_LINK == subcls || H5VL_SUBCLS_OBJECT == subcls)
+        ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, &vol_cb_args,
+                                    H5P_DEFAULT, H5ES_NONE);
+    else
+        ret =
+            (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, &vol_cb_args, H5P_DEFAULT, H5ES_NONE);
+    if (ret < 0)
+        TEST_ERROR;
+
+    /* Verify that fake object & argument were modified correctly */
+    if (op_val != fake_obj)
+        FAIL_PUTS_ERROR("'fake_obj' not updated");
+    if (op_val != fake_arg)
+        FAIL_PUTS_ERROR("'fake_arg' not updated");
+
+    /* Issue second operation */
+    fake_obj            = -1;
+    fake_arg            = -1;
+    reg_opt_curr_op_val = op_val2;
+    vol_cb_args.op_type = op_val2;
+    vol_cb_args.args    = &fake_arg;
+    if (H5VL_SUBCLS_LINK == subcls || H5VL_SUBCLS_OBJECT == subcls)
+        ret = (*reg_opt_op.link_op)(__FILE__, __func__, __LINE__, obj_id, ".", H5P_DEFAULT, &vol_cb_args,
+                                    H5P_DEFAULT, H5ES_NONE);
+    else
+        ret =
+            (*reg_opt_op.obj_op)(__FILE__, __func__, __LINE__, obj_id, &vol_cb_args, H5P_DEFAULT, H5ES_NONE);
+    if (ret < 0)
+        TEST_ERROR;
+
+    /* Verify that fake object & argument were modified correctly */
+    if (op_val2 != fake_obj)
+        FAIL_PUTS_ERROR("'fake_obj' not updated");
+    if (op_val2 != fake_arg)
+        FAIL_PUTS_ERROR("'fake_arg' not updated");
+
+    /* Named datatypes must be destroyed differently */
+    if (H5VL_SUBCLS_DATATYPE == subcls) {
+        H5T_t *dt;
+
+        /* Destroy fake datatype object */
+        if (NULL == (dt = H5I_remove(obj_id)))
+            TEST_ERROR;
+        if (H5VL_free_object(dt->vol_obj) < 0)
+            TEST_ERROR;
+        dt->vol_obj = NULL;
+        if (H5T_close(dt) < 0)
+            TEST_ERROR;
+    } /* end if */
+    else {
+        /* Destroy fake object */
+        if (NULL == (vol_obj = H5I_remove(obj_id)))
+            TEST_ERROR;
+        if (H5VL_free_object(vol_obj) < 0)
+            TEST_ERROR;
+    } /* end else */
+
+    /* Unregister 2nd registered optional operation */
+    if (H5VLunregister_opt_operation(subcls, op_name) < 0)
+        TEST_ERROR;
+
+    return SUCCEED;
+
+error:
+    return FAIL;
+} /* end exercise_reg_opt_oper() */
+
+/*-------------------------------------------------------------------------
+ * Function:    test_register_opt_operation()
+ *
+ * Purpose:     Tests if we can load, register, and close a simple
+ *              VOL connector.
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_register_opt_operation(void)
+{
+    hid_t fake_vol_id    = H5I_INVALID_HID;
+    hid_t reg_opt_vol_id = H5I_INVALID_HID;
+    struct {
+        H5VL_subclass_t subcls;
+        const char *    subcls_name;
+        H5I_type_t      id_type;
+        reg_opt_oper_t  reg_opt_op;
+    } test_params[] = {{H5VL_SUBCLS_ATTR, "attr", H5I_ATTR, {.obj_op = H5VLattr_optional_op}},
+                       {H5VL_SUBCLS_DATASET, "dataset", H5I_DATASET, {.obj_op = H5VLdataset_optional_op}},
+                       {H5VL_SUBCLS_DATATYPE, "datatype", H5I_DATATYPE, {.obj_op = H5VLdatatype_optional_op}},
+                       {H5VL_SUBCLS_FILE, "file", H5I_FILE, {.obj_op = H5VLfile_optional_op}},
+                       {H5VL_SUBCLS_GROUP, "group", H5I_GROUP, {.obj_op = H5VLgroup_optional_op}},
+                       {H5VL_SUBCLS_LINK, "link", H5I_GROUP, {.link_op = H5VLlink_optional_op}},
+                       {H5VL_SUBCLS_OBJECT, "object", H5I_GROUP, {.link_op = H5VLobject_optional_op}}};
+    int      op_val = -1;
+    unsigned u;
+    herr_t   ret = SUCCEED;
+
+    TESTING("dynamically registering optional operations");
+
+    /* Register the VOL connectors for testing */
+    if ((fake_vol_id = H5VLregister_connector(&fake_vol_g, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+    if ((reg_opt_vol_id = H5VLregister_connector(&reg_opt_vol_g, H5P_DEFAULT)) < 0)
+        TEST_ERROR;
+
+    /* Test registering invalid optional VOL subclass operations */
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_NONE, "fail", &op_val);
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'NONE' VOL subclass");
+    if ((-1) != op_val)
+        FAIL_PUTS_ERROR("'op_val' changed during failed operation?");
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_INFO, "fail2", &op_val);
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'INFO' VOL subclass");
+    if ((-1) != op_val)
+        FAIL_PUTS_ERROR("'op_val' changed during failed operation?");
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_WRAP, "fail3", &op_val);
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'WRAP' VOL subclass");
+    if ((-1) != op_val)
+        FAIL_PUTS_ERROR("'op_val' changed during failed operation?");
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_BLOB, "fail4", &op_val);
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'BLOB' VOL subclass");
+    if ((-1) != op_val)
+        FAIL_PUTS_ERROR("'op_val' changed during failed operation?");
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_TOKEN, "fail5", &op_val);
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to register an optional operation for the 'TOKEN' VOL subclass");
+    if ((-1) != op_val)
+        FAIL_PUTS_ERROR("'op_val' changed during failed operation?");
+
+    /* Test registering valid optional VOL subclass operation with NULL op_val ptr*/
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLregister_opt_operation(H5VL_SUBCLS_FILE, "fail6", NULL);
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to register an optional operation with a NULL 'op_val'");
+
+    /* Try finding a non-existent optional VOL subclass operation */
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLfind_opt_operation(H5VL_SUBCLS_DATASET, "fail", &op_val);
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to find a non-existent optional operation");
+
+    /* Try unregistering a non-existent optional VOL subclass operation */
+    H5E_BEGIN_TRY
+    {
+        ret = H5VLunregister_opt_operation(H5VL_SUBCLS_DATASET, "fail");
+    }
+    H5E_END_TRY;
+    if (FAIL != ret)
+        FAIL_PUTS_ERROR("should not be able to unregister a non-existent optional operation");
+
+    /* Optional operations on requests are supported (but difficult to test further) */
+    if (H5VLregister_opt_operation(H5VL_SUBCLS_REQUEST, "req_op", &op_val) < 0)
+        TEST_ERROR;
+
+    /* Register & test calling optional operations for each valid VOL subclass */
+    /* (Table-driven, with test_params array) */
+    for (u = 0; u < NELMTS(test_params); u++)
+        /* Exercise appropriate callback, for each VOL subclass */
+        if (exercise_reg_opt_oper(fake_vol_id, reg_opt_vol_id, test_params[u].subcls,
+                                  test_params[u].subcls_name, test_params[u].id_type,
+                                  test_params[u].reg_opt_op) < 0)
+            TEST_ERROR;
+
+    /* Unregister the VOL connectors */
+    if (H5VLunregister_connector(fake_vol_id) < 0)
+        TEST_ERROR;
+    if (H5VLunregister_connector(reg_opt_vol_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5VLunregister_connector(fake_vol_id);
+        H5VLunregister_connector(reg_opt_vol_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+} /* end test_register_opt_operation() */
+
 /*-------------------------------------------------------------------------
  * Function:    test_async_vol_props()
  *
@@ -1509,6 +2121,7 @@ main(void)
     HDputs("Testing basic Virtual Object Layer (VOL) functionality.");
 
     nerrors += test_vol_registration() < 0 ? 1 : 0;
+    nerrors += test_register_opt_operation() < 0 ? 1 : 0;
     nerrors += test_native_vol_init() < 0 ? 1 : 0;
     nerrors += test_basic_file_operation(env_h5_drvr) < 0 ? 1 : 0;
     nerrors += test_basic_group_operation() < 0 ? 1 : 0;
