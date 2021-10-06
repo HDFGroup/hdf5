@@ -469,6 +469,48 @@ New Features
 
     Library:
     --------
+    - Adds new file driver-level memory copy operation for
+      "ctl" callback and updates compact dataset I/O routines
+      to utilize it
+
+      When accessing an HDF5 file with a file driver that uses
+      memory allocated in special ways (e.g., without standard
+      library's `malloc`), a crash could be observed when HDF5
+      tries to perform `memcpy` operations on such a memory
+      region.
+
+      These changes add a new H5FD_FEAT_MEMMANAGE VFD feature
+      flag, which, if specified as supported by a VFD, will
+      inform HDF5 that the VFD either uses special memory
+      management routines or wishes to perform memory management
+      in a specific way. Therefore, this flag instructs HDF5 to
+      ask the file driver to perform memory management for
+      certain operations.
+
+      These changes also introduce a new "ctl" callback
+      operation identified by the H5FD_CTL__MEM_COPY op code.
+      This operation simply asks a VFD to perform a memory copy.
+      The arguments to this operation are passed to the "ctl"
+      callback's "input" parameter as a pointer to a struct
+      defined as:
+
+        struct H5FD_ctl_memcpy_args_t {
+            void *      dstbuf;  /**< Destination buffer */
+            hsize_t     dst_off; /**< Offset within destination buffer */
+            const void *srcbuf;  /**< Source buffer */
+            hsize_t     src_off; /**< Offset within source buffer */
+            size_t      len;     /**< Length of data to copy from source buffer */
+        } H5FD_ctl_memcpy_args_t;
+
+      Further, HDF5's compact dataset I/O routines were
+      identified as a problematic area that could cause a crash
+      for VFDs that make use of special memory management. Those
+      I/O routines were therefore updated to make use of this new
+      "ctl" callback operation in order to ask the underlying
+      file driver to correctly handle memory copies.
+
+        (JTH - 2021/09/28)
+
     - Adds new "ctl" callback to VFD H5FD_class_t structure
       with the following prototype:
 
@@ -966,6 +1008,15 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed cross platform incompatibility of references within variable length
+      types
+
+        Reference types within variable length types previously could not be
+        read on a platform with different endianness from where they were
+        written. Fixed so cross platform portability is restored.
+
+        (NAF - 2021/09/30)
+
     - Detection of simple data transform function "x"
 
         In the case of the simple data transform function "x" the (parallel)
