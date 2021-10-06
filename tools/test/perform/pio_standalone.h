@@ -441,22 +441,11 @@ extern char *         strdup(const char *s);
 #define TRUE true
 #endif
 
-/** From h5test.h **/
-
-#ifdef H5_HAVE_PARALLEL
-extern MPI_Info h5_io_info_g; /* MPI INFO object for IO */
-#endif
-
-#ifdef H5_HAVE_PARALLEL
-int  h5_set_info_object(void);
-void h5_dump_info_object(MPI_Info info);
-#endif
-
 /** From h5tools_utils.h **/
 
-extern int         H5_opterr; /* getoption prints errors if this is on    */
-extern int         H5_optind; /* token pointer                            */
-extern const char *H5_optarg; /* flag argument (or value)                 */
+H5_DLLVAR int         H5_opterr; /* getoption prints errors if this is on    */
+H5_DLLVAR int         H5_optind; /* token pointer                            */
+H5_DLLVAR const char *H5_optarg; /* flag argument (or value)                 */
 
 enum h5_arg_level {
     no_arg = 0,  /* doesn't take an argument     */

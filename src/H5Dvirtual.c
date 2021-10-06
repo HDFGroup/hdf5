@@ -3129,7 +3129,7 @@ H5D__virtual_refresh_source_dset(H5D_t **dset)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTREGISTER, FAIL, "can't register (temporary) source dataset ID")
 
     /* Refresh source dataset */
-    if (H5D__refresh(temp_id, *dset) < 0)
+    if (H5D__refresh(*dset, temp_id) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTFLUSH, FAIL, "unable to refresh source dataset")
 
     /* Discard the identifier & replace the dataset */

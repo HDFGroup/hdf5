@@ -104,9 +104,9 @@ static hbool_t not_comparable;
         per            = -1;                                                                                 \
         not_comparable = FALSE;                                                                              \
         both_zero      = FALSE;                                                                              \
-        if (H5_DBL_ABS_EQUAL(0, (double)A) && H5_DBL_ABS_EQUAL(0, (double)B))                                \
+        if (H5_DBL_ABS_EQUAL(0, (double)(A)) && H5_DBL_ABS_EQUAL(0, (double)(B)))                            \
             both_zero = TRUE;                                                                                \
-        if (!H5_DBL_ABS_EQUAL(0, (double)A))                                                                 \
+        if (!H5_DBL_ABS_EQUAL(0, (double)(A)))                                                               \
             per = (double)ABS((double)((B) - (A)) / (double)(A));                                            \
         else                                                                                                 \
             not_comparable = TRUE;                                                                           \
@@ -117,9 +117,9 @@ static hbool_t not_comparable;
         per            = -1;                                                                                 \
         not_comparable = FALSE;                                                                              \
         both_zero      = FALSE;                                                                              \
-        if (H5_DBL_ABS_EQUAL(0, (double)A) && H5_DBL_ABS_EQUAL(0, (double)B))                                \
+        if (H5_DBL_ABS_EQUAL(0, (double)(A)) && H5_DBL_ABS_EQUAL(0, (double)(B)))                            \
             both_zero = TRUE;                                                                                \
-        if (!H5_DBL_ABS_EQUAL(0, (double)A))                                                                 \
+        if (!H5_DBL_ABS_EQUAL(0, (double)(A)))                                                               \
             per = ABS((double)((TYPE)((B) - (A))) / (double)(A));                                            \
         else                                                                                                 \
             not_comparable = TRUE;                                                                           \

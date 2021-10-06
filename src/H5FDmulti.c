@@ -44,7 +44,7 @@
 #define my_strdup strdup
 #endif
 
-/* Macros for enabling/disabling particular GCC warnings
+/* Macros for enabling/disabling particular GCC / clang warnings
  *
  * These are (renamed) duplicates of macros in H5private.h. If you make changes
  * here, be sure to update those as well.
@@ -646,7 +646,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out
     H5Eclear2(H5E_DEFAULT);
 
     /* Name and version number */
-    strncpy(name, "NCSAmulti", (size_t)8);
+    strncpy(name, "NCSAmult", (size_t)9);
     name[8] = '\0';
 
     assert(7 == H5FD_MEM_NTYPES);
@@ -682,7 +682,7 @@ H5FD_multi_sb_encode(H5FD_t *_file, char *name /*out*/, unsigned char *buf /*out
     p = buf + 8 + nseen * 2 * 8;
     UNIQUE_MEMBERS (file->fa.memb_map, mt) {
         size_t n = strlen(file->fa.memb_name[mt]) + 1;
-        strncpy((char *)p, file->fa.memb_name[mt], n);
+        strcpy((char *)p, file->fa.memb_name[mt]);
         p += n;
         for (i = n; i % 8; i++)
             *p++ = '\0';
@@ -2019,6 +2019,7 @@ open_members(H5FD_multi_t *file)
 
     return 0;
 }
+H5_MULTI_GCC_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_multi_delete
@@ -2029,6 +2030,7 @@ open_members(H5FD_multi_t *file)
  *
  *-------------------------------------------------------------------------
  */
+H5_MULTI_GCC_DIAG_OFF("format-nonliteral")
 static herr_t
 H5FD_multi_delete(const char *filename, hid_t fapl_id)
 {

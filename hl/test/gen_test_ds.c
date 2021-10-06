@@ -75,7 +75,7 @@ main(int argc, char **argv)
     int  nerrors = 0;
     char filename[65];
 
-    if (argc < 2) {
+    if (argc < 2 || !argv[0] || !argv[1]) {
         HDprintf("Usage: gen_test [le | be]\n");
         return 1;
     }

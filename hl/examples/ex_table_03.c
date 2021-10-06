@@ -46,14 +46,14 @@ main(void)
     size_t dst_offset[NFIELDS] = {HOFFSET(Particle, name), HOFFSET(Particle, lati), HOFFSET(Particle, longi),
                                   HOFFSET(Particle, pressure), HOFFSET(Particle, temperature)};
 
-    Particle p                  = {"zero", 0, 0, 0.0f, 0.0};
+    Particle p                  = {"zero", 0, 0, 0.0F, 0.0};
     size_t   dst_sizes[NFIELDS] = {sizeof(p.name), sizeof(p.lati), sizeof(p.longi), sizeof(p.pressure),
                                  sizeof(p.temperature)};
 
     /* Define field information */
     const char *field_names[NFIELDS] = {"Name", "Latitude", "Longitude", "Pressure", "Temperature"};
     /* Fill value particle */
-    Particle fill_data[1] = {{"no data", -1, -1, -99.0f, -99.0}};
+    Particle fill_data[1] = {{"no data", -1, -1, -99.0F, -99.0}};
     hid_t    field_type[NFIELDS];
     hid_t    string_type;
     hid_t    file_id;
@@ -63,7 +63,7 @@ main(void)
     int      i;
 
     /* Define 2 new particles to write */
-    Particle particle_in[NRECORDS_WRITE] = {{"zero", 0, 0, 0.0f, 0.0}, {"one", 10, 10, 1.0f, 10.0}};
+    Particle particle_in[NRECORDS_WRITE] = {{"zero", 0, 0, 0.0F, 0.0}, {"one", 10, 10, 1.0F, 10.0}};
 
     /* Initialize the field field_type */
     string_type = H5Tcopy(H5T_C_S1);
