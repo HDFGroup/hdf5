@@ -245,7 +245,7 @@ H5F__parse_file_lock_env_var(htri_t *use_locks)
     FUNC_ENTER_PACKAGE_NOERR
 
     /* Check the file locking environment variable */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && (!HDstrcmp(lock_env_var, "FALSE") || !HDstrcmp(lock_env_var, "0")))
         *use_locks = FALSE; /* Override: Never use locks */
     else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "BEST_EFFORT") ||
@@ -422,9 +422,10 @@ H5F_get_access_plist(H5F_t *f, hbool_t app_ref)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, H5I_INVALID_HID, "can't set initial metadata cache resize config.")
 
     /* Prepare the driver property */
-    driver_prop.driver_id   = f->shared->lf->driver_id;
-    driver_prop.driver_info = H5FD_fapl_get(f->shared->lf);
-    driver_prop_copied      = TRUE;
+    driver_prop.driver_id         = f->shared->lf->driver_id;
+    driver_prop.driver_info       = H5FD_fapl_get(f->shared->lf);
+    driver_prop.driver_config_str = H5P_peek_driver_config_str(old_plist);
+    driver_prop_copied            = TRUE;
 
     /* Set the driver property */
     if (H5P_set(new_plist, H5F_ACS_FILE_DRV_NAME, &driver_prop) < 0)
@@ -1796,7 +1797,13 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     else
         tent_flags = flags;
 
-    if (NULL == (lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF))) {
+    H5E_BEGIN_TRY
+    {
+        lf = H5FD_open(name, tent_flags, fapl_id, HADDR_UNDEF);
+    }
+    H5E_END_TRY;
+
+    if (NULL == lf) {
         if (tent_flags == flags)
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file: name = '%s', tent_flags = %x",
                         name, tent_flags)

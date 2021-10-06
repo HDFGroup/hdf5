@@ -263,11 +263,12 @@ H5_init_library(void)
     ,   {H5SL_init, "VOL"}
     ,   {H5FD_init, "VFD"}
     ,   {H5_default_vfd_init, "default VFD"}
-    ,   {H5P_init, "property list"}
+    ,   {H5P_init_phase1, "property list"}
     ,   {H5AC_init, "metadata caching"}
     ,   {H5L_init, "link"}
     ,   {H5S_init, "dataspace"}
     /* Finish initializing interfaces that depend on the interfaces above */
+    ,   {H5P_init_phase2, "property list"}
     ,   {H5VL_init_phase2, "VOL"}
     };
 

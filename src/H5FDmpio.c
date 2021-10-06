@@ -45,6 +45,9 @@ static hid_t H5FD_MPIO_g = 0;
 /* (Can be changed by setting "HDF5_MPI_OPT_TYPES" environment variable to '0' or '1') */
 hbool_t H5FD_mpi_opt_types_g = TRUE;
 
+/* Whether the driver initialized MPI on its own */
+hbool_t H5FD_mpi_self_initialized = FALSE;
+
 /*
  * The view is set to this value
  */
@@ -72,66 +75,61 @@ typedef struct H5FD_mpio_t {
 /* Private Prototypes */
 
 /* Callbacks */
-static herr_t   H5FD__mpio_term(void);
-static H5FD_t * H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
-static herr_t   H5FD__mpio_close(H5FD_t *_file);
-static herr_t   H5FD__mpio_query(const H5FD_t *_f1, unsigned long *flags);
-static haddr_t  H5FD__mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t   H5FD__mpio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
-static haddr_t  H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t type);
-static herr_t   H5FD__mpio_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
-static herr_t   H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-                                void *buf);
-static herr_t   H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
-                                 const void *buf);
-static herr_t   H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t   H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
-static herr_t   H5FD__mpio_delete(const char *filename, hid_t fapl_id);
-static int      H5FD__mpio_mpi_rank(const H5FD_t *_file);
-static int      H5FD__mpio_mpi_size(const H5FD_t *_file);
-static MPI_Comm H5FD__mpio_communicator(const H5FD_t *_file);
+static herr_t  H5FD__mpio_term(void);
+static H5FD_t *H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static herr_t  H5FD__mpio_close(H5FD_t *_file);
+static herr_t  H5FD__mpio_query(const H5FD_t *_f1, unsigned long *flags);
+static haddr_t H5FD__mpio_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t  H5FD__mpio_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static haddr_t H5FD__mpio_get_eof(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t  H5FD__mpio_get_handle(H5FD_t *_file, hid_t fapl, void **file_handle);
+static herr_t  H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                               void *buf);
+static herr_t  H5FD__mpio_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr, size_t size,
+                                const void *buf);
+static herr_t  H5FD__mpio_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__mpio_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
+static herr_t  H5FD__mpio_delete(const char *filename, hid_t fapl_id);
+static herr_t  H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                              void **output);
 
 /* The MPIO file driver information */
-static const H5FD_class_mpi_t H5FD_mpio_g = {
-    {
-        /* Start of superclass information */
-        "mpio",                /* name                  */
-        HADDR_MAX,             /* maxaddr               */
-        H5F_CLOSE_SEMI,        /* fc_degree             */
-        H5FD__mpio_term,       /* terminate             */
-        NULL,                  /* sb_size               */
-        NULL,                  /* sb_encode             */
-        NULL,                  /* sb_decode             */
-        0,                     /* fapl_size             */
-        NULL,                  /* fapl_get              */
-        NULL,                  /* fapl_copy             */
-        NULL,                  /* fapl_free             */
-        0,                     /* dxpl_size             */
-        NULL,                  /* dxpl_copy             */
-        NULL,                  /* dxpl_free             */
-        H5FD__mpio_open,       /* open                  */
-        H5FD__mpio_close,      /* close                 */
-        NULL,                  /* cmp                   */
-        H5FD__mpio_query,      /* query                 */
-        NULL,                  /* get_type_map          */
-        NULL,                  /* alloc                 */
-        NULL,                  /* free                  */
-        H5FD__mpio_get_eoa,    /* get_eoa               */
-        H5FD__mpio_set_eoa,    /* set_eoa               */
-        H5FD__mpio_get_eof,    /* get_eof               */
-        H5FD__mpio_get_handle, /* get_handle            */
-        H5FD__mpio_read,       /* read                  */
-        H5FD__mpio_write,      /* write                 */
-        H5FD__mpio_flush,      /* flush                 */
-        H5FD__mpio_truncate,   /* truncate              */
-        NULL,                  /* lock                  */
-        NULL,                  /* unlock                */
-        H5FD__mpio_delete,     /* del                   */
-        H5FD_FLMAP_DICHOTOMY   /* fl_map                */
-    },                         /* End of superclass information */
-    H5FD__mpio_mpi_rank,       /* get_rank              */
-    H5FD__mpio_mpi_size,       /* get_size              */
-    H5FD__mpio_communicator    /* get_comm              */
+static const H5FD_class_t H5FD_mpio_g = {
+    H5_VFD_MPIO,           /* value                 */
+    "mpio",                /* name                  */
+    HADDR_MAX,             /* maxaddr               */
+    H5F_CLOSE_SEMI,        /* fc_degree             */
+    H5FD__mpio_term,       /* terminate             */
+    NULL,                  /* sb_size               */
+    NULL,                  /* sb_encode             */
+    NULL,                  /* sb_decode             */
+    0,                     /* fapl_size             */
+    NULL,                  /* fapl_get              */
+    NULL,                  /* fapl_copy             */
+    NULL,                  /* fapl_free             */
+    0,                     /* dxpl_size             */
+    NULL,                  /* dxpl_copy             */
+    NULL,                  /* dxpl_free             */
+    H5FD__mpio_open,       /* open                  */
+    H5FD__mpio_close,      /* close                 */
+    NULL,                  /* cmp                   */
+    H5FD__mpio_query,      /* query                 */
+    NULL,                  /* get_type_map          */
+    NULL,                  /* alloc                 */
+    NULL,                  /* free                  */
+    H5FD__mpio_get_eoa,    /* get_eoa               */
+    H5FD__mpio_set_eoa,    /* set_eoa               */
+    H5FD__mpio_get_eof,    /* get_eof               */
+    H5FD__mpio_get_handle, /* get_handle            */
+    H5FD__mpio_read,       /* read                  */
+    H5FD__mpio_write,      /* write                 */
+    H5FD__mpio_flush,      /* flush                 */
+    H5FD__mpio_truncate,   /* truncate              */
+    NULL,                  /* lock                  */
+    NULL,                  /* unlock                */
+    H5FD__mpio_delete,     /* del                   */
+    H5FD__mpio_ctl,        /* ctl                   */
+    H5FD_FLMAP_DICHOTOMY   /* fl_map                */
 };
 
 #ifdef H5FDmpio_DEBUG
@@ -210,6 +208,7 @@ hid_t
 H5FD_mpio_init(void)
 {
     static int H5FD_mpio_Debug_inited = 0;
+    char *     env                    = NULL;
     hid_t      ret_value              = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
@@ -226,7 +225,22 @@ H5FD_mpio_init(void)
 
     /* Register the MPI-IO VFD, if it isn't already */
     if (H5I_VFL != H5I_get_type(H5FD_MPIO_g))
-        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_mpi_t), FALSE);
+        H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_t), FALSE);
+
+    /* Check if MPI driver has been loaded dynamically */
+    env = HDgetenv(HDF5_DRIVER);
+    if (env && !HDstrcmp(env, "mpio")) {
+        int mpi_initialized = 0;
+
+        /* Initialize MPI if not already initialized */
+        if (MPI_SUCCESS != MPI_Initialized(&mpi_initialized))
+            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, H5I_INVALID_HID, "can't check if MPI is initialized")
+        if (!mpi_initialized) {
+            if (MPI_SUCCESS != MPI_Init(NULL, NULL))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't initialize MPI")
+            H5FD_mpi_self_initialized = TRUE;
+        }
+    }
 
     if (!H5FD_mpio_Debug_inited) {
         const char *s; /* String for environment variables */
@@ -272,6 +286,17 @@ static herr_t
 H5FD__mpio_term(void)
 {
     FUNC_ENTER_STATIC_NOERR
+
+    /* Terminate MPI if the driver initialized it */
+    if (H5FD_mpi_self_initialized) {
+        int mpi_finalized = 0;
+
+        MPI_Finalized(&mpi_finalized);
+        if (!mpi_finalized)
+            MPI_Finalize();
+
+        H5FD_mpi_self_initialized = FALSE;
+    }
 
     /* Reset VFL ID */
     H5FD_MPIO_g = 0;
@@ -334,7 +359,7 @@ H5Pset_fapl_mpio(hid_t fapl_id, MPI_Comm comm, MPI_Info info)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set MPI info object")
 
     /* duplication is done during driver setting. */
-    ret_value = H5P_set_driver(plist, H5FD_MPIO, NULL);
+    ret_value = H5P_set_driver(plist, H5FD_MPIO, NULL, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -789,11 +814,16 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
 
-    /* Get the MPI communicator and info object from the property list */
-    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI communicator")
-    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI info object")
+    if (H5FD_mpi_self_initialized) {
+        comm = MPI_COMM_WORLD;
+    }
+    else {
+        /* Get the MPI communicator and info object from the property list */
+        if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI communicator")
+        if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get MPI info object")
+    }
 
     /* Get the MPI rank of this process and the total number of processes */
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
@@ -1755,11 +1785,16 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
     HDassert(H5FD_MPIO == H5P_peek_driver(plist));
 
-    /* Get the MPI communicator and info from the fapl */
-    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI info object")
-    if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI communicator")
+    if (H5FD_mpi_self_initialized) {
+        comm = MPI_COMM_WORLD;
+    }
+    else {
+        /* Get the MPI communicator and info from the fapl */
+        if (H5P_get(plist, H5F_ACS_MPI_PARAMS_INFO_NAME, &info) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI info object")
+        if (H5P_get(plist, H5F_ACS_MPI_PARAMS_COMM_NAME, &comm) < 0)
+            HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't get MPI communicator")
+    }
 
     /* Get the MPI rank of this process */
     if (MPI_SUCCESS != (mpi_code = MPI_Comm_rank(comm, &mpi_rank)))
@@ -1783,83 +1818,78 @@ done:
 } /* end H5FD__mpio_delete() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__mpio_mpi_rank
+ * Function:    H5FD__mpio_ctl
  *
- * Purpose:     Returns the MPI rank for a process
+ * Purpose:     MPIO version of the ctl callback.
  *
- * Return:      Success: non-negative
- *              Failure: negative
+ *              The desired operation is specified by the op_code
+ *              parameter.
  *
- * Programmer:  Quincey Koziol
- *              Thursday, May 16, 2002
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ *              At present, the supported op codes are:
+ *
+ *                  H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE
+ *                  H5FD_CTL__GET_MPI_RANK_OPCODE
+ *                  H5FD_CTL__GET_MPI_SIZE_OPCODE
+ *
+ *              Note that these opcodes must be supported by all VFDs that
+ *              support MPI.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  JRM -- 8/3/21
  *
  *-------------------------------------------------------------------------
  */
-static int
-H5FD__mpio_mpi_rank(const H5FD_t *_file)
+static herr_t
+H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void H5_ATTR_UNUSED *input,
+               void **output)
 {
-    const H5FD_mpio_t *file = (const H5FD_mpio_t *)_file;
+    H5FD_mpio_t *file      = (H5FD_mpio_t *)_file;
+    herr_t       ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC_NOERR
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity checks */
     HDassert(file);
     HDassert(H5FD_MPIO == file->pub.driver_id);
 
-    FUNC_LEAVE_NOAPI(file->mpi_rank)
-} /* end H5FD__mpio_mpi_rank() */
+    switch (op_code) {
 
-/*-------------------------------------------------------------------------
- * Function:    H5FD__mpio_mpi_size
- *
- * Purpose:     Returns the number of MPI processes
- *
- * Return:      Success: non-negative
- *              Failure: negative
- *
- * Programmer:  Quincey Koziol
- *              Thursday, May 16, 2002
- *
- *-------------------------------------------------------------------------
- */
-static int
-H5FD__mpio_mpi_size(const H5FD_t *_file)
-{
-    const H5FD_mpio_t *file = (const H5FD_mpio_t *)_file;
+        case H5FD_CTL__GET_MPI_COMMUNICATOR_OPCODE:
+            HDassert(output);
+            HDassert(*output);
+            **((MPI_Comm **)output) = file->comm;
+            break;
 
-    FUNC_ENTER_STATIC_NOERR
+        case H5FD_CTL__GET_MPI_RANK_OPCODE:
+            HDassert(output);
+            HDassert(*output);
+            **((int **)output) = file->mpi_rank;
+            break;
 
-    /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+        case H5FD_CTL__GET_MPI_SIZE_OPCODE:
+            HDassert(output);
+            HDassert(*output);
+            **((int **)output) = file->mpi_size;
+            break;
 
-    FUNC_LEAVE_NOAPI(file->mpi_size)
-} /* end H5FD__mpio_mpi_size() */
+        default: /* unknown op code */
+            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
 
-/*-------------------------------------------------------------------------
- * Function:    H5FD__mpio_communicator
- *
- * Purpose:     Returns the MPI communicator for the file.
- *
- * Return:      Success:    The communicator
- *              Failure:    Can't fail
- *
- * Programmer:  Robb Matzke
- *              Monday, August  9, 1999
- *
- *-------------------------------------------------------------------------
- */
-static MPI_Comm
-H5FD__mpio_communicator(const H5FD_t *_file)
-{
-    const H5FD_mpio_t *file = (const H5FD_mpio_t *)_file;
+                HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "unknown op_code and fail if unknown")
+            }
+            break;
+    }
 
-    FUNC_ENTER_STATIC_NOERR
+done:
 
-    /* Sanity checks */
-    HDassert(file);
-    HDassert(H5FD_MPIO == file->pub.driver_id);
+    FUNC_LEAVE_NOAPI(ret_value)
 
-    FUNC_LEAVE_NOAPI(file->comm)
-} /* end H5FD__mpio_communicator() */
+} /* end H5FD__mpio_ctl() */
 #endif /* H5_HAVE_PARALLEL */

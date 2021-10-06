@@ -3725,53 +3725,55 @@ test_compound_18(void)
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR
 
-    /* Open Generated File */
-    /* (generated with gen_bad_compound.c) */
-    if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
-        FAIL_STACK_ERROR
+    if (!h5_driver_uses_modified_filename()) {
+        /* Open Generated File */
+        /* (generated with gen_bad_compound.c) */
+        if ((file = H5Fopen(testfile, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+            FAIL_STACK_ERROR
 
-    /* Try to open the datatype */
-    H5E_BEGIN_TRY
-    {
-        tid = H5Topen2(file, "cmpnd", H5P_DEFAULT);
+        /* Try to open the datatype */
+        H5E_BEGIN_TRY
+        {
+            tid = H5Topen2(file, "cmpnd", H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        if (tid > 0) {
+            H5Tclose(tid);
+            FAIL_PUTS_ERROR("opened named datatype with bad compound datatype")
+        } /* end if */
+
+        /* Try to open the dataset */
+        H5E_BEGIN_TRY
+        {
+            did = H5Dopen2(file, "dataset", H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        if (did > 0) {
+            H5Dclose(did);
+            FAIL_PUTS_ERROR("opened dataset with bad compound datatype")
+        } /* end if */
+
+        /* Open the group with the attribute */
+        if ((gid = H5Gopen2(file, "group", H5P_DEFAULT)) < 0)
+            TEST_ERROR
+
+        /* Try to open the dataset */
+        H5E_BEGIN_TRY
+        {
+            aid = H5Aopen(gid, "attr", H5P_DEFAULT);
+        }
+        H5E_END_TRY;
+        if (aid > 0) {
+            H5Aclose(aid);
+            FAIL_PUTS_ERROR("opened attribute with bad compound datatype")
+        } /* end if */
+
+        /* Close IDs */
+        if (H5Gclose(gid) < 0)
+            FAIL_STACK_ERROR
+        if (H5Fclose(file) < 0)
+            FAIL_STACK_ERROR
     }
-    H5E_END_TRY;
-    if (tid > 0) {
-        H5Tclose(tid);
-        FAIL_PUTS_ERROR("opened named datatype with bad compound datatype")
-    } /* end if */
-
-    /* Try to open the dataset */
-    H5E_BEGIN_TRY
-    {
-        did = H5Dopen2(file, "dataset", H5P_DEFAULT);
-    }
-    H5E_END_TRY;
-    if (did > 0) {
-        H5Dclose(did);
-        FAIL_PUTS_ERROR("opened dataset with bad compound datatype")
-    } /* end if */
-
-    /* Open the group with the attribute */
-    if ((gid = H5Gopen2(file, "group", H5P_DEFAULT)) < 0)
-        TEST_ERROR
-
-    /* Try to open the dataset */
-    H5E_BEGIN_TRY
-    {
-        aid = H5Aopen(gid, "attr", H5P_DEFAULT);
-    }
-    H5E_END_TRY;
-    if (aid > 0) {
-        H5Aclose(aid);
-        FAIL_PUTS_ERROR("opened attribute with bad compound datatype")
-    } /* end if */
-
-    /* Close IDs */
-    if (H5Gclose(gid) < 0)
-        FAIL_STACK_ERROR
-    if (H5Fclose(file) < 0)
-        FAIL_STACK_ERROR
 
     PASSED();
     return 0;
