@@ -1,4 +1,4 @@
-HDF5 version 1.10.8-3 currently under development
+HDF5 version 1.10.8-3 released on 2021-10-06
 ================================================================================
 
 
@@ -393,6 +393,7 @@ New Features
 
         (NAF - 2021/01/19)
 
+
     Fortran Library:
     ----------------
     - H5Fget_name_f fixed to handle correctly trailing whitespaces and
@@ -400,9 +401,6 @@ New Features
 
       (MSB - 2021/08/30, github-826,972)
 
-    C++ Library:
-    ------------
-    -
 
     Java Library:
     -------------
@@ -438,25 +436,25 @@ New Features
         (ADB - 2021/01/14, HDFFV-11099)
 
 
-    High-Level APIs:
-    ----------------
-    -
-
-    C Packet Table API:
-    -------------------
-    -
-
-    Internal header file:
-    ---------------------
-    -
-
     Documentation:
     --------------
-    -
+    - Doxygen documentation is available when configured and generated.
+      Currently CMake will install doxygen files in share/html.
 
-Support for new platforms, languages and compilers
+
+New platforms, languages and compilers tested
 ==================================================
-    -
+    - Linux 5.13.14-200.fc34 #1 SMP x86_64  GNU/Linux Fedora34
+    - Linux 5.11.0-34-generic #36-Ubuntu SMP x86_64 GNU/Linux Ubuntu 20.04
+    - Linux 5.3.18-22-default #1 SMP x86_64  GNU/Linux SUSE15sp2
+    - Linux-4.14.0-115.21.2 #1 SMP ppc64le GNU/Linux
+    - Linux-4.12.14-150.75-default #1 SMP x86_64 GNU/Linux
+    - macOS Apple M1 11.6 Darwin 20.6.0 arm64
+    - macOS Big Sur 11.3.1 Darwin 20.4.0 x86_64
+    - clang versions 11.0.1, 12.0.5
+    - Visual Studio 2019 w/ clang 12.0.0 with MSVC-like command-line
+    
+
 
 Bug Fixes since HDF5-1.10.7 release
 ===================================
@@ -673,26 +671,11 @@ Bug Fixes since HDF5-1.10.7 release
         (ADB - 2021/01/19, HDFFV-11106)
 
 
-    Fortran API
-    -----------
-    -
-
-
-    High-Level Library
-    ------------------
-    -
-
-
     Documentation
     -------------
     - Updated doxygen comments with changes for release
 
       (ADB - 2021/05/17)
-
-
-    F90 APIs
-    --------
-    -
 
 
     C++ APIs
@@ -703,11 +686,6 @@ Bug Fixes since HDF5-1.10.7 release
         but the assignment operator is implicitly set to default.
 
         (2021/05/19)
-
-
-    Testing
-    -------
-    -
 
 
 Platforms Tested
