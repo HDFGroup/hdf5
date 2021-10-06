@@ -1,4 +1,4 @@
-HDF5 version 1.10.8-3 currently under development
+HDF5 version 1.10.8-3 released on 2021-10-06
 
 ------------------------------------------------------------------------------
 Please refer to the release_docs/INSTALL file for installation instructions.
