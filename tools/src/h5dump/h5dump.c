@@ -453,11 +453,8 @@ table_list_free(void)
 
         /* Free each table */
         free_table(table_list.tables[u].group_table);
-        HDfree(table_list.tables[u].group_table);
         free_table(table_list.tables[u].dset_table);
-        HDfree(table_list.tables[u].dset_table);
         free_table(table_list.tables[u].type_table);
-        HDfree(table_list.tables[u].type_table);
     }
 
     /* Free the table list */
