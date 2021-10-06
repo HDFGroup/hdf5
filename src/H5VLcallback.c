@@ -106,9 +106,8 @@ static void * H5VL__datatype_open(void *obj, const H5VL_loc_params_t *loc_params
                                   const char *name, hid_t tapl_id, hid_t dxpl_id, void **req);
 static herr_t H5VL__datatype_get(void *obj, const H5VL_class_t *cls, H5VL_datatype_get_args_t *args,
                                  hid_t dxpl_id, void **req);
-static herr_t H5VL__datatype_specific(void *obj, const H5VL_class_t *cls,
-                                      H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req,
-                                      va_list arguments);
+static herr_t H5VL__datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specific_args_t *args,
+                                      hid_t dxpl_id, void **req);
 static herr_t H5VL__datatype_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args,
                                       hid_t dxpl_id, void **req);
 static herr_t H5VL__datatype_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
@@ -120,8 +119,8 @@ static herr_t H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const v
                                                 void *op_data);
 static herr_t H5VL__file_get(void *obj, const H5VL_class_t *cls, H5VL_file_get_args_t *args, hid_t dxpl_id,
                              void **req);
-static herr_t H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type,
-                                  hid_t dxpl_id, void **req, va_list arguments);
+static herr_t H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_args_t *args,
+                                  hid_t dxpl_id, void **req);
 static herr_t H5VL__file_optional(void *obj, const H5VL_class_t *cls, H5VL_optional_args_t *args,
                                   hid_t dxpl_id, void **req);
 static herr_t H5VL__file_close(void *obj, const H5VL_class_t *cls, hid_t dxpl_id, void **req);
@@ -161,8 +160,7 @@ static herr_t H5VL__object_copy(void *src_obj, const H5VL_loc_params_t *src_loc_
 static herr_t H5VL__object_get(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                H5VL_object_get_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                                    H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req,
-                                    va_list arguments);
+                                    H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL__object_optional(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
                                     H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
 static herr_t H5VL__introspect_get_conn_cls(void *obj, const H5VL_class_t *cls, H5VL_get_conn_lvl_t lvl,
@@ -2990,8 +2988,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specific_t specific_type,
-                        hid_t dxpl_id, void **req, va_list arguments)
+H5VL__datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specific_args_t *args,
+                        hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -3002,7 +3000,7 @@ H5VL__datatype_specific(void *obj, const H5VL_class_t *cls, H5VL_datatype_specif
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'datatype specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->datatype_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+    if ((cls->datatype_cls.specific)(obj, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback")
 
 done:
@@ -3020,11 +3018,9 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype_specific_t specific_type, hid_t dxpl_id,
-                       void **req, ...)
+H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id,
+                       void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -3036,17 +3032,10 @@ H5VL_datatype_specific(const H5VL_object_t *vol_obj, H5VL_datatype_specific_t sp
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if (H5VL__datatype_specific(vol_obj->data, vol_obj->connector->cls, specific_type, dxpl_id, req,
-                                arguments) < 0)
+    if (H5VL__datatype_specific(vol_obj->data, vol_obj->connector->cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -3065,14 +3054,14 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_t specific_type, hid_t dxpl_id,
-                      void **req /*out*/, va_list arguments)
+H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_args_t *args, hid_t dxpl_id,
+                      void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVfixx", obj, connector_id, specific_type, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -3081,7 +3070,7 @@ H5VLdatatype_specific(void *obj, hid_t connector_id, H5VL_datatype_specific_t sp
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__datatype_specific(obj, cls, specific_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__datatype_specific(obj, cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute datatype specific callback")
 
 done:
@@ -3533,14 +3522,16 @@ static herr_t
 H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_info, void *op_data)
 {
     H5VL_file_open_find_connector_t *udata = (H5VL_file_open_find_connector_t *)op_data;
-    const H5VL_class_t *             cls   = (const H5VL_class_t *)plugin_info;
+    H5VL_file_specific_args_t        vol_cb_args; /* Arguments to VOL callback */
+    const H5VL_class_t *             cls = (const H5VL_class_t *)plugin_info;
     H5P_genplist_t *                 fapl_plist;
     H5P_genplist_t *                 fapl_plist_copy;
+    hbool_t                          is_accessible = FALSE; /* Whether file is accessible */
+    ssize_t                          num_errors    = 0;
     herr_t                           status;
-    htri_t                           is_accessible = FALSE;
-    hid_t                            connector_id  = H5I_INVALID_HID;
-    hid_t                            fapl_id       = H5I_INVALID_HID;
-    herr_t                           ret_value     = H5_ITER_CONT;
+    hid_t                            connector_id = H5I_INVALID_HID;
+    hid_t                            fapl_id      = H5I_INVALID_HID;
+    herr_t                           ret_value    = H5_ITER_CONT;
 
     FUNC_ENTER_STATIC
 
@@ -3569,19 +3560,40 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
     if (H5P_set_vol(fapl_plist_copy, connector_id, NULL) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, H5_ITER_ERROR, "can't set VOL connector on fapl")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                       = H5VL_FILE_IS_ACCESSIBLE;
+    vol_cb_args.args.is_accessible.filename   = udata->filename;
+    vol_cb_args.args.is_accessible.fapl_id    = fapl_id;
+    vol_cb_args.args.is_accessible.accessible = &is_accessible;
+
+    /* Store current error stack size */
+    if ((num_errors = H5Eget_num(H5E_DEFAULT)) < 0)
+        HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, H5_ITER_ERROR, "can't get current error stack size")
+
     /* Check if file is accessible with given VOL connector */
     H5E_BEGIN_TRY
     {
-        status = H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                                    fapl_id, udata->filename, &is_accessible);
+        status = H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL);
     }
     H5E_END_TRY;
 
-    /* If the file was accessible with the current VOL connector, return
-     * the FAPL with that VOL connector set on it. Errors are ignored here
-     * as some VOL connectors may not support H5Fis_accessible.
-     */
-    if (status == SUCCEED && is_accessible > 0) {
+    if (status < 0) {
+        ssize_t new_num_errors = 0;
+
+        /* Pop any errors generated by the above call */
+        if ((new_num_errors = H5Eget_num(H5E_DEFAULT)) < 0)
+            HGOTO_ERROR(H5E_ERROR, H5E_CANTGET, H5_ITER_ERROR, "can't get current error stack size")
+        if (new_num_errors > num_errors) {
+            new_num_errors -= num_errors;
+            if (H5Epop(H5E_DEFAULT, (size_t)new_num_errors) < 0)
+                HGOTO_ERROR(H5E_ERROR, H5E_CANTRELEASE, H5_ITER_ERROR, "can't sanitize error stack")
+        }
+    }
+    else if (status == SUCCEED && is_accessible) {
+        /* If the file was accessible with the current VOL connector, return
+         * the FAPL with that VOL connector set on it.
+         */
+
         /* Modify 'connector_prop' to point to the VOL connector that
          * was actually used to open the file, rather than the original
          * VOL connector that was requested.
@@ -3591,7 +3603,7 @@ H5VL__file_open_find_connector_cb(H5PL_type_t plugin_type, const void *plugin_in
 
         udata->fapl_id = fapl_id;
         ret_value      = H5_ITER_STOP;
-    } /* end if */
+    }
 
 done:
     if (ret_value != H5_ITER_STOP) {
@@ -3632,21 +3644,18 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
 
     /* Call the corresponding internal VOL routine */
     if (NULL == (ret_value = H5VL__file_open(cls, name, flags, fapl_id, dxpl_id, req))) {
-        H5VL_file_open_find_connector_t find_connector_ud;
-        hbool_t                         find_connector;
-        hbool_t                         connector_available = FALSE;
+        hbool_t is_default_conn = TRUE;
 
         /* Opening the file failed - Determine whether we should search
          * the plugin path to see if any other VOL connectors are available
-         * to attempt to open the file with. This only occurs if no particular
-         * VOL connector was specified (either via a FAPL or the
-         * HDF5_VOL_CONNECTOR environment variable).
+         * to attempt to open the file with. This only occurs if the default
+         * VOL connector was used for the initial file open attempt.
          */
-        find_connector = !getenv("HDF5_VOL_CONNECTOR") && ((H5P_FILE_ACCESS_DEFAULT == fapl_id) ||
-                                                           connector_prop->connector_id == H5_DEFAULT_VOL);
+        H5VL__is_default_conn(fapl_id, connector_prop->connector_id, &is_default_conn);
 
-        if (find_connector) {
-            herr_t iter_ret;
+        if (is_default_conn) {
+            H5VL_file_open_find_connector_t find_connector_ud;
+            herr_t                          iter_ret;
 
             find_connector_ud.connector_prop = connector_prop;
             find_connector_ud.filename       = name;
@@ -3658,24 +3667,24 @@ H5VL_file_open(H5VL_connector_prop_t *connector_prop, const char *name, unsigned
             if (iter_ret < 0)
                 HGOTO_ERROR(H5E_VOL, H5E_BADITER, NULL,
                             "failed to iterate over available VOL connector plugins")
-            else if (iter_ret)
-                connector_available = TRUE;
+            else if (iter_ret) {
+                /* If one of the available VOL connector plugins is
+                 * able to open the file, clear the error stack from any
+                 * previous file open failures and then open the file.
+                 * Otherwise, if no VOL connectors are available, throw
+                 * error from original file open failure.
+                 */
+                H5E_clear_stack(NULL);
+
+                if (NULL == (ret_value = H5VL__file_open(find_connector_ud.cls, name, flags,
+                                                         find_connector_ud.fapl_id, dxpl_id, req)))
+                    HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL,
+                                "can't open file '%s' with VOL connector '%s'", name,
+                                find_connector_ud.cls->name)
+            }
+            else
+                HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
         } /* end if */
-
-        /* If one of the available VOL connector plugins is
-         * able to open the file, clear the error stack from any
-         * previous file open failures and then open the file.
-         * Otherwise, if no VOL connectors are available, throw
-         * error from original file open failure.
-         */
-        if (connector_available) {
-            H5E_clear_stack(NULL);
-
-            if (NULL == (ret_value = H5VL__file_open(find_connector_ud.cls, name, flags,
-                                                     find_connector_ud.fapl_id, dxpl_id, req)))
-                HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "can't open file '%s' with VOL connector '%s'",
-                            name, find_connector_ud.cls->name)
-        }
         else
             HGOTO_ERROR(H5E_VOL, H5E_CANTOPENOBJ, NULL, "open failed")
     } /* end if */
@@ -3831,8 +3840,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t specific_type, hid_t dxpl_id,
-                    void **req, va_list arguments)
+H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_args_t *args, hid_t dxpl_id,
+                    void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -3843,7 +3852,7 @@ H5VL__file_specific(void *obj, const H5VL_class_t *cls, H5VL_file_specific_t spe
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'file specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((cls->file_cls.specific)(obj, specific_type, dxpl_id, req, arguments) < 0)
+    if ((cls->file_cls.specific)(obj, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
 
 done:
@@ -3861,33 +3870,28 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_type, hid_t dxpl_id,
-                   void **req, ...)
+H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     const H5VL_class_t *cls;                       /* VOL connector's class struct */
-    va_list             arguments;                 /* Argument list passed from the API call */
-    hbool_t             arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t             vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t              ret_value       = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    /* Start access to the varargs, so they are available in all situations below */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-
     /* Special treatment of file access check & delete operations */
     /* (Retrieve the VOL connector from the FAPL, since the file isn't open) */
-    if (specific_type == H5VL_FILE_IS_ACCESSIBLE || specific_type == H5VL_FILE_DELETE) {
+    if (args->op_type == H5VL_FILE_IS_ACCESSIBLE || args->op_type == H5VL_FILE_DELETE) {
         H5P_genplist_t *      plist;          /* Property list pointer */
         H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
-        va_list               tmp_args;       /* argument list passed from the API call */
         hid_t                 fapl_id;        /* File access property list for accessing the file */
 
         /* Get the file access property list to access the file */
-        HDva_copy(tmp_args, arguments);
-        fapl_id = HDva_arg(tmp_args, hid_t);
-        HDva_end(tmp_args);
+        if (args->op_type == H5VL_FILE_IS_ACCESSIBLE)
+            fapl_id = args->args.is_accessible.fapl_id;
+        else {
+            HDassert(args->op_type == H5VL_FILE_DELETE);
+            fapl_id = args->args.del.fapl_id;
+        }
 
         /* Get the VOL info from the FAPL */
         if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
@@ -3913,14 +3917,10 @@ H5VL_file_specific(const H5VL_object_t *vol_obj, H5VL_file_specific_t specific_t
     } /* end else */
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__file_specific(vol_obj ? vol_obj->data : NULL, cls, specific_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__file_specific(vol_obj ? vol_obj->data : NULL, cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "file specific failed")
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -3941,21 +3941,21 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_t specific_type, hid_t dxpl_id,
-                  void **req /*out*/, va_list arguments)
+H5VLfile_specific(void *obj, hid_t connector_id, H5VL_file_specific_args_t *args, hid_t dxpl_id,
+                  void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE6("e", "*xiVhixx", obj, connector_id, specific_type, dxpl_id, req, arguments);
+    H5TRACE5("e", "*xi*!ix", obj, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
     /* Call the corresponding internal VOL routine */
-    if (H5VL__file_specific(obj, cls, specific_type, dxpl_id, req, arguments) < 0)
+    if (H5VL__file_specific(obj, cls, args, dxpl_id, req) < 0)
         HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute file specific callback")
 
 done:
@@ -5868,7 +5868,7 @@ done:
  */
 static herr_t
 H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL_class_t *cls,
-                      H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, va_list arguments)
+                      H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -5879,8 +5879,9 @@ H5VL__object_specific(void *obj, const H5VL_loc_params_t *loc_params, const H5VL
         HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no 'object specific' method")
 
     /* Call the corresponding VOL callback */
-    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "object specific failed");
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -5898,10 +5899,8 @@ done:
  */
 herr_t
 H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_params,
-                     H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req, ...)
+                     H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req)
 {
-    va_list arguments;                 /* Argument list passed from the API call */
-    hbool_t arg_started     = FALSE;   /* Whether the va_list has been started */
     hbool_t vol_wrapper_set = FALSE;   /* Whether the VOL object wrapping context was set up */
     herr_t  ret_value       = SUCCEED; /* Return value */
 
@@ -5913,17 +5912,12 @@ H5VL_object_specific(const H5VL_object_t *vol_obj, const H5VL_loc_params_t *loc_
     vol_wrapper_set = TRUE;
 
     /* Call the corresponding internal VOL routine */
-    HDva_start(arguments, req);
-    arg_started = TRUE;
-    if ((ret_value = H5VL__object_specific(vol_obj->data, loc_params, vol_obj->connector->cls, specific_type,
-                                           dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "object specific failed")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = H5VL__object_specific(vol_obj->data, loc_params, vol_obj->connector->cls, args, dxpl_id,
+                                           req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "object specific failed");
 
 done:
-    /* End access to the va_list, if we started it */
-    if (arg_started)
-        HDva_end(arguments);
-
     /* Reset object wrapping info in API context */
     if (vol_wrapper_set && H5VL_reset_vol_wrapper() < 0)
         HDONE_ERROR(H5E_VOL, H5E_CANTRESET, FAIL, "can't reset VOL wrapper info")
@@ -5943,14 +5937,13 @@ done:
  */
 herr_t
 H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connector_id,
-                    H5VL_object_specific_t specific_type, hid_t dxpl_id, void **req /*out*/,
-                    va_list arguments)
+                    H5VL_object_specific_args_t *args, hid_t dxpl_id, void **req /*out*/)
 {
     H5VL_class_t *cls;                 /* VOL connector's class struct */
     herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API_NOINIT
-    H5TRACE7("e", "*x*#iVoixx", obj, loc_params, connector_id, specific_type, dxpl_id, req, arguments);
+    H5TRACE6("e", "*x*#i*!ix", obj, loc_params, connector_id, args, dxpl_id, req);
 
     /* Check args and get class pointer */
     if (NULL == obj)
@@ -5958,13 +5951,10 @@ H5VLobject_specific(void *obj, const H5VL_loc_params_t *loc_params, hid_t connec
     if (NULL == (cls = (H5VL_class_t *)H5I_object_verify(connector_id, H5I_VOL)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a VOL connector ID")
 
-    /* Check if the corresponding VOL callback exists */
-    if (NULL == cls->object_cls.specific)
-        HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "VOL connector has no `object specific' method")
-
     /* Bypass the H5VLint layer, calling the VOL callback directly */
-    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, specific_type, dxpl_id, req, arguments)) < 0)
-        HGOTO_ERROR(H5E_VOL, H5E_CANTOPERATE, FAIL, "unable to execute object specific callback")
+    /* (Must return value from callback, for iterators) */
+    if ((ret_value = (cls->object_cls.specific)(obj, loc_params, args, dxpl_id, req)) < 0)
+        HERROR(H5E_VOL, H5E_CANTOPERATE, "unable to execute object specific callback");
 
 done:
     FUNC_LEAVE_API_NOINIT(ret_value)

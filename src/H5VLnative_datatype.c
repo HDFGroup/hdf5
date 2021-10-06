@@ -226,30 +226,26 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_t specific_type,
-                               hid_t H5_ATTR_UNUSED dxpl_id, void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_datatype_specific(void *obj, H5VL_datatype_specific_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                               void H5_ATTR_UNUSED **req)
 {
     H5T_t *dt        = (H5T_t *)obj;
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (specific_type) {
+    switch (args->op_type) {
+        /* H5VL_DATATYPE_FLUSH */
         case H5VL_DATATYPE_FLUSH: {
-            hid_t type_id = HDva_arg(arguments, hid_t);
-
-            /* To flush metadata and invoke flush callback if there is */
-            if (H5O_flush_common(&dt->oloc, type_id) < 0)
+            if (H5O_flush_common(&dt->oloc, args->args.flush.type_id) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype")
 
             break;
         }
 
+        /* H5VL_DATATYPE_REFRESH */
         case H5VL_DATATYPE_REFRESH: {
-            hid_t type_id = HDva_arg(arguments, hid_t);
-
-            /* Call private function to refresh datatype object */
-            if ((H5O_refresh_metadata(&dt->oloc, type_id)) < 0)
+            if ((H5O_refresh_metadata(&dt->oloc, args->args.refresh.type_id)) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
 
             break;

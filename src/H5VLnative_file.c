@@ -282,22 +282,20 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                           void H5_ATTR_UNUSED **req, va_list arguments)
+H5VL__native_file_specific(void *obj, H5VL_file_specific_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                           void H5_ATTR_UNUSED **req)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
-    switch (specific_type) {
+    switch (args->op_type) {
         /* H5Fflush */
         case H5VL_FILE_FLUSH: {
-            H5I_type_t  type  = (H5I_type_t)HDva_arg(arguments, int);  /* enum work-around */
-            H5F_scope_t scope = (H5F_scope_t)HDva_arg(arguments, int); /* enum work-around */
-            H5F_t *     f     = NULL;                                  /* File to flush */
+            H5F_t *f = NULL; /* File to flush */
 
             /* Get the file for the object */
-            if (H5VL_native_get_file_struct(obj, type, &f) < 0)
+            if (H5VL_native_get_file_struct(obj, args->args.flush.obj_type, &f) < 0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
             /* Nothing to do if the file is read only. This determination is
@@ -308,7 +306,7 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
              */
             if (H5F_ACC_RDWR & H5F_INTENT(f)) {
                 /* Flush other files, depending on scope */
-                if (H5F_SCOPE_GLOBAL == scope) {
+                if (H5F_SCOPE_GLOBAL == args->args.flush.scope) {
                     /* Call the flush routine for mounted file hierarchies */
                     if (H5F_flush_mounts(f) < 0)
                         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush mounted file hierarchy")
@@ -326,51 +324,49 @@ H5VL__native_file_specific(void *obj, H5VL_file_specific_t specific_type, hid_t 
 
         /* H5Freopen */
         case H5VL_FILE_REOPEN: {
-            void **ret      = HDva_arg(arguments, void **);
-            H5F_t *new_file = NULL;
+            H5F_t *new_file;
 
             /* Reopen the file through the VOL connector */
             if (NULL == (new_file = H5F__reopen((H5F_t *)obj)))
                 HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "unable to reopen file")
             new_file->id_exists = TRUE;
 
-            *ret = (void *)new_file;
+            /* Set 'out' value */
+            *args->args.reopen.file = new_file;
+
             break;
         }
 
         /* H5Fis_accessible */
         case H5VL_FILE_IS_ACCESSIBLE: {
-            hid_t       fapl_id = HDva_arg(arguments, hid_t);
-            const char *name    = HDva_arg(arguments, const char *);
-            htri_t *    result  = HDva_arg(arguments, htri_t *);
+            htri_t result;
 
-            /* Call private routine */
-            if ((*result = H5F__is_hdf5(name, fapl_id)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, FAIL, "error in HDF5 file check")
+            if ((result = H5F__is_hdf5(args->args.is_accessible.filename, args->args.is_accessible.fapl_id)) <
+                0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "error in HDF5 file check")
+
+            /* Set 'out' value */
+            *args->args.is_accessible.accessible = (hbool_t)result;
+
             break;
         }
 
         /* H5Fdelete */
         case H5VL_FILE_DELETE: {
-            hid_t       fapl_id = HDva_arg(arguments, hid_t);
-            const char *name    = HDva_arg(arguments, const char *);
-            herr_t *    ret     = HDva_arg(arguments, herr_t *);
+            if (H5F__delete(args->args.del.filename, args->args.del.fapl_id) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "error in HDF5 file deletion")
 
-            /* Call private routine */
-            if ((*ret = H5F__delete(name, fapl_id)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "error in HDF5 file check")
             break;
         }
 
         /* Check if two files are the same */
         case H5VL_FILE_IS_EQUAL: {
-            H5F_t *  file2    = (H5F_t *)HDva_arg(arguments, void *);
-            hbool_t *is_equal = HDva_arg(arguments, hbool_t *);
-
-            if (!obj || !file2)
-                *is_equal = FALSE;
+            if (!obj || !args->args.is_equal.obj2)
+                *args->args.is_equal.same_file = FALSE;
             else
-                *is_equal = (((H5F_t *)obj)->shared == file2->shared);
+                *args->args.is_equal.same_file =
+                    (((H5F_t *)obj)->shared == ((H5F_t *)args->args.is_equal.obj2)->shared);
+
             break;
         }
 

@@ -617,8 +617,9 @@ H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t **_vol_obj_p
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    herr_t            ret_value = SUCCEED;            /* Return value */
+    H5VL_object_specific_args_t vol_cb_args;          /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;           /* Location parameters for object access */
+    herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -626,9 +627,13 @@ H5O__flush_api_common(hid_t obj_id, void **token_ptr, H5VL_object_t **_vol_obj_p
     if (H5VL_setup_loc_args(obj_id, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_OBJECT_FLUSH;
+    vol_cb_args.args.flush.obj_id = obj_id;
+
     /* Flush the object */
-    if (H5VL_object_specific(*vol_obj_ptr, &loc_params, H5VL_OBJECT_FLUSH, H5P_DATASET_XFER_DEFAULT,
-                             token_ptr, obj_id) < 0)
+    if (H5VL_object_specific(*vol_obj_ptr, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
 done:
@@ -718,8 +723,9 @@ H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t **_vol_obj_pt
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    herr_t            ret_value = SUCCEED;            /* Return value */
+    H5VL_object_specific_args_t vol_cb_args;          /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;           /* Location parameters for object access */
+    herr_t                      ret_value = SUCCEED;  /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -727,9 +733,13 @@ H5O__refresh_api_common(hid_t oid, void **token_ptr, H5VL_object_t **_vol_obj_pt
     if (H5VL_setup_loc_args(oid, vol_obj_ptr, &loc_params) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set object access arguments")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type             = H5VL_OBJECT_REFRESH;
+    vol_cb_args.args.refresh.obj_id = oid;
+
     /* Refresh the object */
-    if (H5VL_object_specific(*vol_obj_ptr, &loc_params, H5VL_OBJECT_REFRESH, H5P_DATASET_XFER_DEFAULT,
-                             token_ptr, oid) < 0)
+    if (H5VL_object_specific(*vol_obj_ptr, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
 done:
@@ -931,9 +941,10 @@ done:
 herr_t
 H5Oincr_refcount(hid_t object_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED;
+    H5VL_object_t *             vol_obj;     /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;  /* Location parameters for object access */
+    herr_t                      ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
@@ -949,9 +960,13 @@ H5Oincr_refcount(hid_t object_id)
     if (H5CX_set_loc(object_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type              = H5VL_OBJECT_CHANGE_REF_COUNT;
+    vol_cb_args.args.change_rc.delta = 1;
+
     /* Change the object's reference count */
-    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_CHANGE_REF_COUNT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, 1) < 0)
+    if (H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -981,9 +996,10 @@ done:
 herr_t
 H5Odecr_refcount(hid_t object_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5VL_object_t *             vol_obj;             /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;          /* Location parameters for object access */
+    herr_t                      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", object_id);
@@ -999,9 +1015,13 @@ H5Odecr_refcount(hid_t object_id)
     if (H5CX_set_loc(object_id) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTSET, FAIL, "can't set access property list info")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type              = H5VL_OBJECT_CHANGE_REF_COUNT;
+    vol_cb_args.args.change_rc.delta = -1;
+
     /* Change the object's reference count */
-    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_CHANGE_REF_COUNT, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, -1) < 0)
+    if (H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
 done:
@@ -1024,9 +1044,11 @@ done:
 htri_t
 H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    htri_t            ret_value = FAIL; /* Return value */
+    H5VL_object_t *             vol_obj;            /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args;        /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;         /* Location parameters for object access */
+    hbool_t                     obj_exists = FALSE; /* Whether object exists */
+    htri_t                      ret_value  = FAIL;  /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE3("t", "i*si", loc_id, name, lapl_id);
@@ -1051,10 +1073,17 @@ H5Oexists_by_name(hid_t loc_id, const char *name, hid_t lapl_id)
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type            = H5VL_OBJECT_EXISTS;
+    vol_cb_args.args.exists.exists = &obj_exists;
+
     /* Check if the object exists */
-    if (H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_EXISTS, H5P_DATASET_XFER_DEFAULT,
-                             H5_REQUEST_NULL, &ret_value) < 0)
+    if (H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) <
+        0)
         HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists", name)
+
+    /* Set return value */
+    ret_value = (htri_t)obj_exists;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1762,9 +1791,10 @@ herr_t
 H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate2_t op, void *op_data,
           unsigned fields)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value; /* Return value */
+    H5VL_object_t *             vol_obj;     /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;  /* Location parameters for object access */
+    herr_t                      ret_value;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE6("e", "iIiIoOI*xIu", obj_id, idx_type, order, op, op_data, fields);
@@ -1787,10 +1817,17 @@ H5Ovisit3(hid_t obj_id, H5_index_t idx_type, H5_iter_order_t order, H5O_iterate2
     loc_params.type     = H5VL_OBJECT_BY_SELF;
     loc_params.obj_type = H5I_get_type(obj_id);
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type             = H5VL_OBJECT_VISIT;
+    vol_cb_args.args.visit.idx_type = idx_type;
+    vol_cb_args.args.visit.order    = order;
+    vol_cb_args.args.visit.op       = op;
+    vol_cb_args.args.visit.op_data  = op_data;
+    vol_cb_args.args.visit.fields   = fields;
+
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT,
-                                          H5_REQUEST_NULL, (int)idx_type, (int)order, op, op_data, fields)) <
-        0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                          H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object iteration failed")
 
 done:
@@ -1836,9 +1873,10 @@ herr_t
 H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_iter_order_t order,
                   H5O_iterate2_t op, void *op_data, unsigned fields, hid_t lapl_id)
 {
-    H5VL_object_t *   vol_obj; /* Object of loc_id */
-    H5VL_loc_params_t loc_params;
-    herr_t            ret_value; /* Return value */
+    H5VL_object_t *             vol_obj;     /* Object of loc_id */
+    H5VL_object_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+    H5VL_loc_params_t           loc_params;  /* Location parameters for object access */
+    herr_t                      ret_value;   /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE8("e", "i*sIiIoOI*xIui", loc_id, obj_name, idx_type, order, op, op_data, fields, lapl_id);
@@ -1871,10 +1909,17 @@ H5Ovisit_by_name3(hid_t loc_id, const char *obj_name, H5_index_t idx_type, H5_it
     loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     loc_params.obj_type                     = H5I_get_type(loc_id);
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type             = H5VL_OBJECT_VISIT;
+    vol_cb_args.args.visit.idx_type = idx_type;
+    vol_cb_args.args.visit.order    = order;
+    vol_cb_args.args.visit.op       = op;
+    vol_cb_args.args.visit.op_data  = op_data;
+    vol_cb_args.args.visit.fields   = fields;
+
     /* Visit the objects */
-    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, H5VL_OBJECT_VISIT, H5P_DATASET_XFER_DEFAULT,
-                                          H5_REQUEST_NULL, (int)idx_type, (int)order, op, op_data, fields)) <
-        0)
+    if ((ret_value = H5VL_object_specific(vol_obj, &loc_params, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
+                                          H5_REQUEST_NULL)) < 0)
         HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object iteration failed")
 
 done:

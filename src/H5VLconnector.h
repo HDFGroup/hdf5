@@ -902,8 +902,7 @@ typedef struct H5VL_datatype_class_t {
     void *(*open)(void *obj, const H5VL_loc_params_t *loc_params, const char *name, hid_t tapl_id,
                   hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_datatype_get_args_t *args, hid_t dxpl_id, void **req);
-    herr_t (*specific)(void *obj, H5VL_datatype_specific_t specific_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_datatype_specific_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *dt, hid_t dxpl_id, void **req);
 } H5VL_datatype_class_t;
@@ -914,8 +913,7 @@ typedef struct H5VL_file_class_t {
                     void **req);
     void *(*open)(const char *name, unsigned flags, hid_t fapl_id, hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, H5VL_file_get_args_t *args, hid_t dxpl_id, void **req);
-    herr_t (*specific)(void *obj, H5VL_file_specific_t specific_type, hid_t dxpl_id, void **req,
-                       va_list arguments);
+    herr_t (*specific)(void *obj, H5VL_file_specific_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, H5VL_optional_args_t *args, hid_t dxpl_id, void **req);
     herr_t (*close)(void *file, hid_t dxpl_id, void **req);
 } H5VL_file_class_t;
@@ -959,8 +957,8 @@ typedef struct H5VL_object_class_t {
                    hid_t dxpl_id, void **req);
     herr_t (*get)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_get_args_t *args, hid_t dxpl_id,
                   void **req);
-    herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_t specific_type,
-                       hid_t dxpl_id, void **req, va_list arguments);
+    herr_t (*specific)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_object_specific_args_t *args,
+                       hid_t dxpl_id, void **req);
     herr_t (*optional)(void *obj, const H5VL_loc_params_t *loc_params, H5VL_optional_args_t *args,
                        hid_t dxpl_id, void **req);
 } H5VL_object_class_t;

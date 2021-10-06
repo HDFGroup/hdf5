@@ -321,8 +321,8 @@ done:
  */
 herr_t
 H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
-                             H5VL_object_specific_t specific_type, hid_t H5_ATTR_UNUSED dxpl_id,
-                             void H5_ATTR_UNUSED **req, va_list arguments)
+                             H5VL_object_specific_args_t *args, hid_t H5_ATTR_UNUSED dxpl_id,
+                             void H5_ATTR_UNUSED **req)
 {
     H5G_loc_t loc;
     herr_t    ret_value = SUCCEED; /* Return value */
@@ -332,13 +332,10 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
     if (H5G_loc_real(obj, loc_params->obj_type, &loc) < 0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file or file object")
 
-    switch (specific_type) {
+    switch (args->op_type) {
         /* H5Oincr_refcount / H5Odecr_refcount */
         case H5VL_OBJECT_CHANGE_REF_COUNT: {
-            int        update_ref = HDva_arg(arguments, int);
-            H5O_loc_t *oloc       = loc.oloc;
-
-            if (H5O_link(oloc, update_ref) < 0)
+            if (H5O_link(loc.oloc, args->args.change_rc.delta) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_LINKCOUNT, FAIL, "modifying object link count failed")
 
             break;
@@ -346,18 +343,11 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
 
         /* H5Oexists_by_name */
         case H5VL_OBJECT_EXISTS: {
-            htri_t *ret    = HDva_arg(arguments, htri_t *);
-            hbool_t exists = FALSE;
-
             if (loc_params->type == H5VL_OBJECT_BY_NAME) {
                 /* Check if the object exists */
-                if (H5G_loc_exists(&loc, loc_params->loc_data.loc_by_name.name, &exists) < 0) {
-                    *ret = FAIL;
+                if (H5G_loc_exists(&loc, loc_params->loc_data.loc_by_name.name, args->args.exists.exists) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTGET, FAIL, "unable to determine if '%s' exists",
                                 loc_params->loc_data.loc_by_name.name)
-                }
-                else
-                    *ret = exists;
             } /* end if */
             else
                 HGOTO_ERROR(H5E_VOL, H5E_UNSUPPORTED, FAIL, "unknown object exists parameters")
@@ -367,10 +357,6 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
 
         /* Lookup object */
         case H5VL_OBJECT_LOOKUP: {
-            H5O_token_t *token = HDva_arg(arguments, H5O_token_t *);
-
-            HDassert(token);
-
             if (loc_params->type == H5VL_OBJECT_BY_NAME) {
                 H5G_loc_t  obj_loc;  /* Group hier. location of object */
                 H5G_name_t obj_path; /* Object group hier. path */
@@ -386,7 +372,8 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
                     HGOTO_ERROR(H5E_OHDR, H5E_NOTFOUND, FAIL, "object not found")
 
                 /* Encode token */
-                if (H5VL_native_addr_to_token(loc.oloc->file, H5I_FILE, obj_loc.oloc->addr, token) < 0)
+                if (H5VL_native_addr_to_token(loc.oloc->file, H5I_FILE, obj_loc.oloc->addr,
+                                              args->args.lookup.token_ptr) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_CANTSERIALIZE, FAIL,
                                 "can't serialize address into object token")
 
@@ -401,22 +388,18 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
 
         /* H5Ovisit/H5Ovisit_by_name */
         case H5VL_OBJECT_VISIT: {
-            H5_index_t      idx_type = (H5_index_t)HDva_arg(arguments, int);      /* enum work-around */
-            H5_iter_order_t order    = (H5_iter_order_t)HDva_arg(arguments, int); /* enum work-around */
-            H5O_iterate2_t  op       = HDva_arg(arguments, H5O_iterate2_t);
-            void *          op_data  = HDva_arg(arguments, void *);
-            unsigned        fields   = HDva_arg(arguments, unsigned);
+            H5VL_object_visit_args_t *visit_args = &args->args.visit;
 
             /* Call internal object visitation routine */
             if (loc_params->type == H5VL_OBJECT_BY_SELF) {
-                /* H5Ovisit */
-                if ((ret_value = H5O__visit(&loc, ".", idx_type, order, op, op_data, fields)) < 0)
+                if ((ret_value = H5O__visit(&loc, ".", visit_args->idx_type, visit_args->order,
+                                            visit_args->op, visit_args->op_data, visit_args->fields)) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
             } /* end if */
             else if (loc_params->type == H5VL_OBJECT_BY_NAME) {
-                /* H5Ovisit_by_name */
-                if ((ret_value = H5O__visit(&loc, loc_params->loc_data.loc_by_name.name, idx_type, order, op,
-                                            op_data, fields)) < 0)
+                if ((ret_value = H5O__visit(&loc, loc_params->loc_data.loc_by_name.name, visit_args->idx_type,
+                                            visit_args->order, visit_args->op, visit_args->op_data,
+                                            visit_args->fields)) < 0)
                     HGOTO_ERROR(H5E_OHDR, H5E_BADITER, FAIL, "object visitation failed")
             } /* end else-if */
             else
@@ -426,21 +409,16 @@ H5VL__native_object_specific(void *obj, const H5VL_loc_params_t *loc_params,
         }
 
         case H5VL_OBJECT_FLUSH: {
-            hid_t oid = HDva_arg(arguments, hid_t);
-
             /* Flush the object's metadata */
-            if (H5O_flush(loc.oloc, oid) < 0)
+            if (H5O_flush(loc.oloc, args->args.flush.obj_id) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTFLUSH, FAIL, "unable to flush object")
 
             break;
         }
 
         case H5VL_OBJECT_REFRESH: {
-            hid_t      oid  = HDva_arg(arguments, hid_t);
-            H5O_loc_t *oloc = loc.oloc;
-
             /* Refresh the metadata */
-            if (H5O_refresh_metadata(oloc, oid) < 0)
+            if (H5O_refresh_metadata(loc.oloc, args->args.refresh.obj_id) < 0)
                 HGOTO_ERROR(H5E_OHDR, H5E_CANTLOAD, FAIL, "unable to refresh object")
 
             break;

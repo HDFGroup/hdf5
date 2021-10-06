@@ -475,7 +475,9 @@ done:
 htri_t
 H5Fis_accessible(const char *filename, hid_t fapl_id)
 {
-    htri_t ret_value; /* Return value */
+    H5VL_file_specific_args_t vol_cb_args;           /* Arguments to VOL callback */
+    hbool_t                   is_accessible = FALSE; /* Whether file is accessible */
+    htri_t                    ret_value;             /* Return value */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("t", "*si", filename, fapl_id);
@@ -490,10 +492,18 @@ H5Fis_accessible(const char *filename, hid_t fapl_id)
     else if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not file access property list")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                       = H5VL_FILE_IS_ACCESSIBLE;
+    vol_cb_args.args.is_accessible.filename   = filename;
+    vol_cb_args.args.is_accessible.fapl_id    = fapl_id;
+    vol_cb_args.args.is_accessible.accessible = &is_accessible;
+
     /* Check if file is accessible */
-    if (H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id,
-                           filename, &ret_value) < 0)
+    if (H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to determine if file is accessible as HDF5")
+
+    /* Set return value */
+    ret_value = (htri_t)is_accessible;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -920,8 +930,9 @@ H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr, H5VL
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5I_type_t obj_type;                              /* Type of object to use */
-    herr_t     ret_value = SUCCEED;                   /* Return value     */
+    H5I_type_t                obj_type;               /* Type of object to use */
+    H5VL_file_specific_args_t vol_cb_args;            /* Arguments to VOL callback */
+    herr_t                    ret_value = SUCCEED;    /* Return value     */
 
     FUNC_ENTER_STATIC
 
@@ -935,9 +946,13 @@ H5F__flush_api_common(hid_t object_id, H5F_scope_t scope, void **token_ptr, H5VL
     if (NULL == (*vol_obj_ptr = H5VL_vol_object(object_id)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type             = H5VL_FILE_FLUSH;
+    vol_cb_args.args.flush.obj_type = obj_type;
+    vol_cb_args.args.flush.scope    = scope;
+
     /* Flush the object */
-    if (H5VL_file_specific(*vol_obj_ptr, H5VL_FILE_FLUSH, H5P_DATASET_XFER_DEFAULT, token_ptr, (int)obj_type,
-                           (int)scope) < 0)
+    if (H5VL_file_specific(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTFLUSH, FAIL, "unable to flush file")
 
 done:
@@ -1122,10 +1137,11 @@ done:
 herr_t
 H5Fdelete(const char *filename, hid_t fapl_id)
 {
-    H5P_genplist_t *      plist;          /* Property list pointer */
-    H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
-    htri_t                is_hdf5   = FAIL;
-    herr_t                ret_value = SUCCEED;
+    H5P_genplist_t *          plist;                 /* Property list pointer */
+    H5VL_connector_prop_t     connector_prop;        /* Property for VOL connector ID & info */
+    H5VL_file_specific_args_t vol_cb_args;           /* Arguments to VOL callback */
+    hbool_t                   is_accessible = FALSE; /* Whether file is accessible */
+    herr_t                    ret_value     = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "*si", filename, fapl_id);
@@ -1150,16 +1166,25 @@ H5Fdelete(const char *filename, hid_t fapl_id)
     if (H5CX_set_vol_connector_prop(&connector_prop) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't set VOL connector info in API context")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type                       = H5VL_FILE_IS_ACCESSIBLE;
+    vol_cb_args.args.is_accessible.filename   = filename;
+    vol_cb_args.args.is_accessible.fapl_id    = fapl_id;
+    vol_cb_args.args.is_accessible.accessible = &is_accessible;
+
     /* Make sure this is HDF5 storage for this VOL connector */
-    if (H5VL_file_specific(NULL, H5VL_FILE_IS_ACCESSIBLE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id,
-                           filename, &is_hdf5) < 0)
+    if (H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "unable to determine if file is accessible as HDF5")
-    if (!is_hdf5)
+    if (!is_accessible)
         HGOTO_ERROR(H5E_FILE, H5E_NOTHDF5, FAIL, "not an HDF5 file")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_FILE_DELETE;
+    vol_cb_args.args.del.filename = filename;
+    vol_cb_args.args.del.fapl_id  = fapl_id;
+
     /* Delete the file */
-    if (H5VL_file_specific(NULL, H5VL_FILE_DELETE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, fapl_id,
-                           filename, &ret_value) < 0)
+    if (H5VL_file_specific(NULL, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTDELETEFILE, FAIL, "unable to delete the file")
 
 done:
@@ -1388,9 +1413,10 @@ done:
 static hid_t
 H5F__reopen_api_common(hid_t file_id, void **token_ptr)
 {
-    void *         file      = NULL;            /* File struct for new file */
-    H5VL_object_t *vol_obj   = NULL;            /* Object for loc_id */
-    hid_t          ret_value = H5I_INVALID_HID; /* Return value */
+    H5VL_object_t *           vol_obj = NULL;                /* Object for loc_id */
+    H5VL_file_specific_args_t vol_cb_args;                   /* Arguments to VOL callback */
+    void *                    reopen_file = NULL;            /* Pointer to the re-opened file object */
+    hid_t                     ret_value   = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1398,16 +1424,20 @@ H5F__reopen_api_common(hid_t file_id, void **token_ptr)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(file_id, H5I_FILE)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "invalid file identifier")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type          = H5VL_FILE_REOPEN;
+    vol_cb_args.args.reopen.file = &reopen_file;
+
     /* Reopen the file */
-    if (H5VL_file_specific(vol_obj, H5VL_FILE_REOPEN, H5P_DATASET_XFER_DEFAULT, token_ptr, &file) < 0)
+    if (H5VL_file_specific(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file via the VOL connector")
 
     /* Make sure that worked */
-    if (NULL == file)
+    if (NULL == reopen_file)
         HGOTO_ERROR(H5E_FILE, H5E_CANTINIT, H5I_INVALID_HID, "unable to reopen file")
 
     /* Get an ID for the file */
-    if ((ret_value = H5VL_register(H5I_FILE, file, vol_obj->connector, TRUE)) < 0)
+    if ((ret_value = H5VL_register(H5I_FILE, reopen_file, vol_obj->connector, TRUE)) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTREGISTER, H5I_INVALID_HID, "unable to register file handle")
 
 done:

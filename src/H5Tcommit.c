@@ -836,15 +836,21 @@ H5Tflush(hid_t type_id)
     if (!H5T_is_named(dt))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
-    /* Set up collective metadata if appropriate */
-    if (H5CX_set_loc(type_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
-
     /* Flush metadata for named datatype */
-    if (dt->vol_obj)
-        if (H5VL_datatype_specific(dt->vol_obj, H5VL_DATATYPE_FLUSH, H5P_DATASET_XFER_DEFAULT,
-                                   H5_REQUEST_NULL, type_id) < 0)
+    if (dt->vol_obj) {
+        H5VL_datatype_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+
+        /* Set up collective metadata if appropriate */
+        if (H5CX_set_loc(type_id) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+
+        /* Set up VOL callback arguments */
+        vol_cb_args.op_type            = H5VL_DATATYPE_FLUSH;
+        vol_cb_args.args.flush.type_id = type_id;
+
+        if (H5VL_datatype_specific(dt->vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTFLUSH, FAIL, "unable to flush datatype")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -877,15 +883,21 @@ H5Trefresh(hid_t type_id)
     if (!H5T_is_named(dt))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a committed datatype")
 
-    /* Set up collective metadata if appropriate */
-    if (H5CX_set_loc(type_id) < 0)
-        HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
-
     /* Refresh the datatype's metadata */
-    if (dt->vol_obj)
-        if (H5VL_datatype_specific(dt->vol_obj, H5VL_DATATYPE_REFRESH, H5P_DATASET_XFER_DEFAULT,
-                                   H5_REQUEST_NULL, type_id) < 0)
+    if (dt->vol_obj) {
+        H5VL_datatype_specific_args_t vol_cb_args; /* Arguments to VOL callback */
+
+        /* Set up collective metadata if appropriate */
+        if (H5CX_set_loc(type_id) < 0)
+            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTSET, FAIL, "can't set access property list info")
+
+        /* Set up VOL callback arguments */
+        vol_cb_args.op_type              = H5VL_DATATYPE_REFRESH;
+        vol_cb_args.args.refresh.type_id = type_id;
+
+        if (H5VL_datatype_specific(dt->vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTLOAD, FAIL, "unable to refresh datatype")
+    }
 
 done:
     FUNC_LEAVE_API(ret_value)
