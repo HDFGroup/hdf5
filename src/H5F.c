@@ -2818,8 +2818,7 @@ H5Fvfd_swmr_end_tick(hid_t file_id)
     vol_cb_args.op_type = H5VL_NATIVE_FILE_VFD_SWMR_END_TICK;
     vol_cb_args.args    = NULL;
 
-    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                           H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "unable to trigger end of tick processing for VFD SWMR")
 
 done:
@@ -2858,8 +2857,7 @@ H5Fvfd_swmr_disable_end_of_tick(hid_t file_id)
     vol_cb_args.op_type = H5VL_NATIVE_FILE_VFD_SWMR_DISABLE_EOT;
     vol_cb_args.args    = NULL;
 
-    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                           H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "unable to disable EOT for VFD SWMR")
 
 done:
@@ -2897,8 +2895,7 @@ H5Fvfd_swmr_enable_end_of_tick(hid_t file_id)
     vol_cb_args.op_type = H5VL_NATIVE_FILE_VFD_SWMR_ENABLE_EOT;
     vol_cb_args.args    = NULL;
 
-    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT,
-                           H5_REQUEST_NULL) < 0)
+    if (H5VL_file_optional(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_SYSTEM, FAIL, "unable to enable EOT for VFD SWMR")
 
 done:
