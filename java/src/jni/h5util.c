@@ -658,8 +658,6 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
 
     int ret_value = FAIL;
 
-    if (!h5str_append(out_str, " \""))
-        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
     if (buf_size) {
         ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
@@ -697,8 +695,6 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
             ref_name = NULL;
         }
     }
-    if (!h5str_append(out_str, "\""))
-        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
     ret_value = SUCCEED;
 done:
@@ -724,6 +720,9 @@ h5str_region_dataset(JNIEnv *env, h5str_t *out_str, H5R_ref_t *ref_vp, int expan
 
     if ((new_obj_sid = H5Ropen_region(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    if (h5str_sprint_reference(ENVONLY, out_str, ref_vp) < 0)
+        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if ((region_type = H5Sget_select_type(new_obj_sid)) > H5S_SEL_ERROR) {
         if (H5S_SEL_POINTS == region_type) {
