@@ -4,7 +4,6 @@ name: hdf5 dev CI
 on:
   workflow_dispatch:
   push:
-    branches: [ develop, hdf5_1_12, hdf5_1_10, hdf5_1_8 ]
     paths-ignore:
     - '.github/**'
     - 'doc/**'
