@@ -429,7 +429,7 @@ static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
 herr_t
 H5P_init_phase1(void)
 {
-    size_t tot_init;  /* Total # of classes initialized */
+    size_t tot_init = 0;  /* Total # of classes initialized */
     size_t pass_init; /* # of classes initialized in each pass */
     size_t u;
     herr_t ret_value = SUCCEED; /* Return value */
