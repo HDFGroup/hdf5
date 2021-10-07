@@ -280,7 +280,7 @@ ref_path_table_gen_fake(const char *path)
 /*-------------------------------------------------------------------------
  * Function:    lookup_ref_path
  *
- * Purpose:     Lookup the path to the object with refernce 'ref'.
+ * Purpose:     Lookup the path to the object with reference 'ref'.
  *
  * Return:      Return a path to the object, or NULL if not found.
  *
