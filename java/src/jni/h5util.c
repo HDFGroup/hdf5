@@ -683,8 +683,9 @@ h5str_region_dataset(JNIEnv *env, h5str_t *out_str, hid_t container, void *ref_b
     if ((region_sid = H5Rget_region(container, H5R_DATASET_REGION, ref_buf)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (h5str_sprint_reference(ENVONLY, out_str, region_obj, ref_buf) < 0)
-        CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
+    if (expand_data == 0)
+        if (h5str_sprint_reference(ENVONLY, out_str, region_obj, ref_buf) < 0)
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if ((region_type = H5Sget_select_type(region_sid)) > H5S_SEL_ERROR) {
         if (H5S_SEL_POINTS == region_type) {
