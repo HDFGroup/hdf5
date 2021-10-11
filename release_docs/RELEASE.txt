@@ -35,7 +35,7 @@ CONTENTS
 ========
 
 - New Features
-- Support for new platforms and languages
+- New platforms, languages and compilers tested
 - Bug Fixes since HDF5-1.10.7
 - Platforms Tested
 - Configuration Options Tested
@@ -446,7 +446,7 @@ New Features
 
 
 New platforms, languages and compilers tested
-==================================================
+=============================================
     - Linux 5.13.14-200.fc34 #1 SMP x86_64  GNU/Linux Fedora34
     - Linux 5.11.0-34-generic #36-Ubuntu SMP x86_64 GNU/Linux Ubuntu 20.04
     - Linux 5.3.18-22-default #1 SMP x86_64  GNU/Linux SUSE15sp2
@@ -457,7 +457,6 @@ New platforms, languages and compilers tested
     - clang versions 11.0.1, 12.0.5
     - Visual Studio 2019 w/ clang 12.0.0 with MSVC-like command-line
     
-
 
 Bug Fixes since HDF5-1.10.7 release
 ===================================
@@ -692,7 +691,7 @@ Bug Fixes since HDF5-1.10.7 release
 
 
 Platforms Tested
-===================
+================
 
     Linux 5.13.14-200.fc34           GNU gcc (GCC) 11.2.1 2021078 (Red Hat 11.2.1-1)
     #1 SMP x86_64  GNU/Linux         GNU Fortran (GCC) 11.2.1 2021078 (Red Hat 11.2.1-1)
@@ -784,9 +783,6 @@ Platforms Tested
     Centos6                              Version 4.4.7 20120313
     (platypus)                           Version 4.9.3, 5.3.0, 6.2.0
                                      MPICH 3.1.4 compiled with GCC 4.9.3
-                                     PGI C, Fortran, C++ for 64-bit target on
-                                     x86_64;
-                                         Version 19.10-0
 
     Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
                                     Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
@@ -825,8 +821,7 @@ VFDs:
     HDFS                       HDF5_ENABLE_HDFS               --with-libhdfs=DIR
     Mirror                     HDF5_ENABLE_MIRROR_VFD         --enable-mirror-vfd
     ROS3                       HDF5_ENABLE_ROS3_VFD           --enable-ros3-vfd
-
-=======================================================================
+================================================================================
 (1) enabled by default
 
 
