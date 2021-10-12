@@ -784,13 +784,21 @@ Platforms Tested
     (platypus)                           Version 4.9.3, 5.3.0, 6.2.0
                                      MPICH 3.1.4 compiled with GCC 4.9.3
 
-    Windows 10 x64                  Visual Studio 2015 w/ Intel C/C++/Fortran 18 (cmake)
-                                    Visual Studio 2017 w/ Intel C/C++/Fortran 19 (cmake)
-                                    Visual Studio 2019 w/ clang 12.0.0
-                                        with MSVC-like command-line (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel 19 (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ Intel 2021 (C/C++ only - cmake)
-                                    Visual Studio 2019 w/ MSMPI 10.1 (C only - cmake)
+    Windows 10 x64                   MSVC C/C++ 19.0.24215.1
+    w/ Visual Studio 2015            Intel C/C++/Fortran 18.0.5.20180823
+    (cmake)
+
+    Windows 10 x64                   MSVC C/C++ 19.16.27045.0
+    w/ Visual Studio 2017            Intel C/C++/Fortran 19.0.5.20190815
+    (cmake)
+
+    Windows 10 x64                   MSVC C/C++ 9.29.30133.0
+    w/ Visual Studio 2019            clang C/C++ 12.0.0
+    (cmake)                          IntelLLVM C/C++ 2021.3.0 with MSVC-like command-line
+
+    Windows 10 x64                   MSVC C/C++ is 19.29.30133.0
+    w/ Visual Studio 2019            MSMPI 10.1 (C only)
+    (cmake)
 
 
 Configuration Options Tested
