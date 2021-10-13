@@ -153,7 +153,6 @@
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
-./config/clang-warnings/noerror-general
 ./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
@@ -170,8 +169,6 @@
 ./config/gnu-warnings/cxx-9
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
-./config/gnu-warnings/cxx-noerror-5
-./config/gnu-warnings/cxx-noerror-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
@@ -189,9 +186,6 @@
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
-./config/gnu-warnings/noerror-5
-./config/gnu-warnings/noerror-8
-./config/gnu-warnings/noerror-general
 ./config/intel-warnings/15
 ./config/intel-warnings/18
 ./config/intel-warnings/developer-general
