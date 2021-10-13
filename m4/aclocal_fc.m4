@@ -68,7 +68,7 @@ AC_DEFUN([PAC_PROG_FC_ISO_FORTRAN_ENV],[
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic module ISO_FORTRAN_ENV])
   TEST_SRC="`sed -n '/PROGRAM PROG_FC_ISO_FORTRAN_ENV/,/END PROGRAM PROG_FC_ISO_FORTRAN_ENV/p' $srcdir/m4/aclocal_fc.f90`"
   AC_LINK_IFELSE([$TEST_SRC],[AC_MSG_RESULT([yes])
-     	HAVE_ISO_FORTRAN_ENV="yes"],
+        HAVE_ISO_FORTRAN_ENV="yes"],
       [AC_MSG_RESULT([no])])
 ])
 
@@ -79,7 +79,7 @@ AC_DEFUN([PAC_PROG_FC_SIZEOF],[
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic SIZEOF])
   TEST_SRC="`sed -n '/PROGRAM PROG_FC_SIZEOF/,/END PROGRAM PROG_FC_SIZEOF/p' $srcdir/m4/aclocal_fc.f90`"
   AC_LINK_IFELSE([$TEST_SRC],[AC_MSG_RESULT([yes])
-     	HAVE_SIZEOF_FORTRAN="yes"],
+        HAVE_SIZEOF_FORTRAN="yes"],
       [AC_MSG_RESULT([no])])
 ])
 
@@ -90,7 +90,7 @@ AC_DEFUN([PAC_PROG_FC_C_SIZEOF],[
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic C_SIZEOF])
   TEST_SRC="`sed -n '/PROGRAM PROG_FC_C_SIZEOF/,/END PROGRAM PROG_FC_C_SIZEOF/p' $srcdir/m4/aclocal_fc.f90`"
   AC_LINK_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
-     	HAVE_C_SIZEOF_FORTRAN="yes"],
+        HAVE_C_SIZEOF_FORTRAN="yes"],
      [AC_MSG_RESULT([no])])
 ])
 
@@ -101,7 +101,7 @@ AC_DEFUN([PAC_PROG_FC_STORAGE_SIZE],[
   AC_MSG_CHECKING([if Fortran compiler supports intrinsic STORAGE_SIZE])
   TEST_SRC="`sed -ne '/PROGRAM PROG_FC_STORAGE_SIZE/,/END PROGRAM PROG_FC_STORAGE_SIZE/p' $srcdir/m4/aclocal_fc.f90`"
   AC_LINK_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
-     	HAVE_STORAGE_SIZE_FORTRAN="yes"],
+        HAVE_STORAGE_SIZE_FORTRAN="yes"],
      [AC_MSG_RESULT([no])])
 
 ])
@@ -114,7 +114,7 @@ AC_DEFUN([PAC_PROG_FC_HAVE_C_LONG_DOUBLE],[
   TEST_SRC=""
   TEST_SRC="`sed -n '/PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE/,/END PROGRAM PROG_FC_HAVE_C_LONG_DOUBLE/p' $srcdir/m4/aclocal_fc.f90`"
   AC_LINK_IFELSE([$TEST_SRC], [AC_MSG_RESULT([yes])
-     	HAVE_C_LONG_DOUBLE_FORTRAN="yes"],
+        HAVE_C_LONG_DOUBLE_FORTRAN="yes"],
      [AC_MSG_RESULT([no])])
 ])
 
@@ -146,8 +146,8 @@ AC_DEFUN([PAC_PROG_FC_HAVE_F2003_REQUIREMENTS],[
 dnl -------------------------------------------------------------------------
 dnl AC_F9X_MODS()
 dnl
-dnl	Check how F9X handles modules. This macro also checks which
-dnl	command-line option to use to include the module once it's built.
+dnl    Check how F9X handles modules. This macro also checks which
+dnl    command-line option to use to include the module once it's built.
 dnl
 AC_DEFUN([AC_F9X_MODS],
 [AC_MSG_CHECKING(what $FC does with modules)
@@ -241,9 +241,9 @@ dnl   Change to the Fortran 90 language
 dnl   Try link a simple MPI program.
       AC_MSG_CHECKING([whether a simple MPI-IO Fortran program can be linked])
       AC_LINK_IFELSE([$TEST_SRC],
-	  [AC_MSG_RESULT([yes])],
-	  [AC_MSG_RESULT([no])
-	   AC_MSG_ERROR([unable to link a simple MPI-IO Fortran program])])
+    [AC_MSG_RESULT([yes])],
+    [AC_MSG_RESULT([no])
+    AC_MSG_ERROR([unable to link a simple MPI-IO Fortran program])])
 
 dnl   Change to the C language
       AC_LANG_POP(Fortran)
@@ -271,7 +271,7 @@ AC_RUN_IFELSE([$TEST_SRC],
      dnl    -- LINE 5 --  number of valid real kinds
 
         pac_validIntKinds="`sed -n '1p' pac_fconftest.out`"
-	pac_validRealKinds="`sed -n '2p' pac_fconftest.out`"
+    pac_validRealKinds="`sed -n '2p' pac_fconftest.out`"
         PAC_FC_MAX_REAL_PRECISION="`sed -n '3p' pac_fconftest.out`"
         AC_DEFINE_UNQUOTED([PAC_FC_MAX_REAL_PRECISION], $PAC_FC_MAX_REAL_PRECISION, [Define Fortran Maximum Real Decimal Precision])
 
@@ -279,24 +279,24 @@ AC_RUN_IFELSE([$TEST_SRC],
         PAC_FC_ALL_REAL_KINDS="{`echo $pac_validRealKinds`}"
 
         PAC_FORTRAN_NUM_INTEGER_KINDS="`sed -n '4p' pac_fconftest.out`"
-	H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $PAC_FORTRAN_NUM_INTEGER_KINDS`"
-	H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
-	H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `sed -n '5p' pac_fconftest.out`"
-	H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
+    H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $PAC_FORTRAN_NUM_INTEGER_KINDS`"
+    H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
+    H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = `sed -n '5p' pac_fconftest.out`"
+    H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
 
-	AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
-	AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_IKIND], $H5CONFIG_F_NUM_IKIND, [Define number of valid Fortran INTEGER KINDs])
-	AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
-	AC_DEFINE_UNQUOTED([H5CONFIG_F_IKIND], $H5CONFIG_F_IKIND, [Define valid Fortran INTEGER KINDs])
+    AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
+    AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_IKIND], $H5CONFIG_F_NUM_IKIND, [Define number of valid Fortran INTEGER KINDs])
+    AC_DEFINE_UNQUOTED([H5CONFIG_F_RKIND], $H5CONFIG_F_RKIND, [Define valid Fortran REAL KINDs])
+    AC_DEFINE_UNQUOTED([H5CONFIG_F_IKIND], $H5CONFIG_F_IKIND, [Define valid Fortran INTEGER KINDs])
 
         AC_MSG_CHECKING([for Number of Fortran INTEGER KINDs])
         AC_MSG_RESULT([$PAC_FORTRAN_NUM_INTEGER_KINDS])
         AC_MSG_CHECKING([for Fortran INTEGER KINDs])
         AC_MSG_RESULT([$PAC_FC_ALL_INTEGER_KINDS])
-	AC_MSG_CHECKING([for Fortran REAL KINDs])
-	AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])
-	AC_MSG_CHECKING([for Fortran REALs maximum decimal precision])
-	AC_MSG_RESULT([$PAC_FC_MAX_REAL_PRECISION])
+    AC_MSG_CHECKING([for Fortran REAL KINDs])
+    AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])
+    AC_MSG_CHECKING([for Fortran REALs maximum decimal precision])
+    AC_MSG_RESULT([$PAC_FC_MAX_REAL_PRECISION])
     else
         AC_MSG_RESULT([Error])
         AC_MSG_ERROR([No output from Fortran test program!])
@@ -402,9 +402,9 @@ rm -f pac_fconftest.out
                 DOUBLE PRECISION c
                 OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
                 WRITE(8,*) $FC_SIZEOF_A
-	        WRITE(8,*) KIND(a)
-	        WRITE(8,*) $FC_SIZEOF_B
-	        WRITE(8,*) KIND(b)
+            WRITE(8,*) KIND(a)
+            WRITE(8,*) $FC_SIZEOF_B
+            WRITE(8,*) KIND(b)
                 WRITE(8,*) $FC_SIZEOF_C
                 WRITE(8,*) KIND(c)
                 CLOSE(8)
@@ -458,19 +458,12 @@ rm -f pac_Cconftest.out
                 #define C_LDBL_DIG LDBL_DIG
                 #endif
                 ],[[
-                  FILE * pFile;
-                  pFile = fopen("pac_Cconftest.out","w");
-                  fprintf(pFile, "%d\n%d\n", C_LDBL_DIG, C_FLT128_DIG);
+                  fprintf(stderr, "%d\n%d\n", C_LDBL_DIG, C_FLT128_DIG);
                 ]])
         ])
         AC_RUN_IFELSE([],[
-            if test -s pac_Cconftest.out ; then
-	        LDBL_DIG="`sed -n '1p' pac_Cconftest.out`"
-	        FLT128_DIG="`sed -n '2p' pac_Cconftest.out`"
-            else
-                AC_MSG_ERROR([No output from C decimal precision program!])
-            fi
-            rm -f pac_Cconftest.out
+            LDBL_DIG=$(./conftest$EXEEXT 2>&1 | sed -n '1p')
+            FLT128_DIG=$(./conftest$EXEEXT 2>&1 | sed -n '2p')
         ],[
             AC_MSG_ERROR([C program fails to build or run!])
         ],[])
