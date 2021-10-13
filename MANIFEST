@@ -186,7 +186,7 @@
 ./config/gnu-warnings/general
 ./config/gnu-warnings/gfort-general
 ./config/gnu-warnings/gfort-4.8
-./config/gnu-warnings/gfort-5
+./config/gnu-warnings/developer-gfort-5
 ./config/gnu-warnings/gfort-6
 ./config/gnu-warnings/gfort-8
 ./config/gnu-warnings/no-developer-4.8
