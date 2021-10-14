@@ -5128,8 +5128,8 @@ test_scaleoffset_float(hid_t file)
     hid_t         dataset, datatype, space, dc;
     const hsize_t size[2]       = {2, 5};
     const hsize_t chunk_size[2] = {2, 5};
-    double        orig_data[2][5];
-    double        new_data[2][5];
+    float         orig_data[2][5];
+    float         new_data[2][5];
     size_t        i, j;
 
     TESTING("    scaleoffset float without fill value, D-scaling (setup)");
@@ -5168,7 +5168,7 @@ test_scaleoffset_float(hid_t file)
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            orig_data[i][j] = (HDrandom() % 100000) / 1000.0;
+            orig_data[i][j] = (float)(HDrandom() % 100000) / 1000.0F;
 
             /* even-numbered values are negtive */
             if ((i * size[1] + j + 1) % 2 == 0)
@@ -5201,7 +5201,7 @@ test_scaleoffset_float(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0, -3.0)) {
+            if (HDfabs((double)(new_data[i][j] - orig_data[i][j])) > HDpow(10.0, -3.0)) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5251,8 +5251,8 @@ test_scaleoffset_float_2(hid_t file)
     hid_t         dataset, datatype, space, mspace, dc;
     const hsize_t size[2]       = {2, 5};
     const hsize_t chunk_size[2] = {2, 5};
-    double        orig_data[2][5];
-    double        new_data[2][5];
+    float         orig_data[2][5];
+    float         new_data[2][5];
     float         fillval;
     hsize_t       start[2];  /* Start of hyperslab */
     hsize_t       stride[2]; /* Stride of hyperslab */
@@ -5314,7 +5314,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (HDrandom() % 100000) / 1000.0;
+        orig_data[0][j] = (float)(HDrandom() % 100000) / 1000.0F;
 
         /* even-numbered values are negtive */
         if ((j + 1) % 2 == 0)
@@ -5347,7 +5347,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0, -3.0)) {
+        if (HDfabs((double)(new_data[0][j] - orig_data[0][j])) > HDpow(10.0, -3.0)) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -5614,7 +5614,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0, -7.0)) {
+        if (HDfabs((double)(new_data[0][j] - orig_data[0][j])) > HDpow(10.0, -7.0)) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
