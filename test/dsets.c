@@ -15558,10 +15558,11 @@ main(void)
     int         nerrors = 0;
     const char *envval;
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
+    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
     int         i;
 
     /* Don't run this test using certain file drivers */
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
@@ -15718,7 +15719,11 @@ main(void)
                 nerrors += (test_multiopen(file) < 0 ? 1 : 0);
                 nerrors += (test_types(file) < 0 ? 1 : 0);
                 nerrors += (test_userblock_offset(envval, my_fapl, new_format) < 0 ? 1 : 0);
-                nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
+
+                if (!driver_uses_modified_filename) {
+                    nerrors += (test_missing_filter(file) < 0 ? 1 : 0);
+                }
+
                 nerrors += (test_can_apply(file) < 0 ? 1 : 0);
                 nerrors += (test_can_apply2(file) < 0 ? 1 : 0);
                 nerrors += (test_optional_filters(file) < 0 ? 1 : 0);
@@ -15727,7 +15732,11 @@ main(void)
                 nerrors += (test_compare_dcpl(file) < 0 ? 1 : 0);
                 nerrors += (test_copy_dcpl(file, my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_filter_delete(file) < 0 ? 1 : 0);
-                nerrors += (test_filters_endianess() < 0 ? 1 : 0);
+
+                if (!driver_uses_modified_filename) {
+                    nerrors += (test_filters_endianess() < 0 ? 1 : 0);
+                }
+
                 nerrors += (test_zero_dims(file) < 0 ? 1 : 0);
                 nerrors += (test_missing_chunk(file) < 0 ? 1 : 0);
                 nerrors += (test_random_chunks(my_fapl) < 0 ? 1 : 0);
@@ -15745,7 +15754,11 @@ main(void)
                 nerrors += (test_chunk_expand(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_layout_extend(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_fixed_array(my_fapl) < 0 ? 1 : 0);
-                nerrors += (test_idx_compatible() < 0 ? 1 : 0);
+
+                if (!driver_uses_modified_filename) {
+                    nerrors += (test_idx_compatible() < 0 ? 1 : 0);
+                }
+
                 nerrors += (test_unfiltered_edge_chunks(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_single_chunk(my_fapl) < 0 ? 1 : 0);
                 nerrors += (test_large_chunk_shrink(my_fapl) < 0 ? 1 : 0);
@@ -15779,7 +15792,9 @@ main(void)
     nerrors += (test_gather_error() < 0 ? 1 : 0);
 
     /* Tests version bounds using its own file */
-    nerrors += (test_versionbounds() < 0 ? 1 : 0);
+    if (!driver_uses_modified_filename) {
+        nerrors += (test_versionbounds() < 0 ? 1 : 0);
+    }
 
     /* Tests that use their own file */
     nerrors += (test_object_header_minimization_dcpl() < 0 ? 1 : 0);

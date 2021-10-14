@@ -22,6 +22,7 @@
 
 /* Private headers needed by this file */
 #include "H5private.h"   /* Generic Functions                    */
+#include "H5FDprivate.h" /* File Drivers                         */
 #include "H5VLprivate.h" /* Virtual Object Layer                 */
 
 /**************************/
@@ -32,16 +33,29 @@
 /* Library Private Typedefs */
 /****************************/
 
+/* Key used to find VOL connector plugins */
+typedef struct H5PL_vol_key_t {
+    H5VL_get_connector_kind_t kind; /* Kind of VOL lookup to do */
+    union {
+        H5VL_class_value_t value; /* VOL connector value */
+        const char *       name;  /* VOL connector name */
+    } u;
+} H5PL_vol_key_t;
+
+/* Key used to find VFD plugins */
+typedef struct H5PL_vfd_key_t {
+    H5FD_get_driver_kind_t kind; /* Kind of VFD lookup to do */
+    union {
+        H5FD_class_value_t value; /* VFD value */
+        const char *       name;  /* VFD name */
+    } u;
+} H5PL_vfd_key_t;
+
 /* The key that will be used to find the plugin */
 typedef union H5PL_key_t {
-    int id; /* I/O filters */
-    struct {
-        H5VL_get_connector_kind_t kind; /* Kind of VOL lookup to do */
-        union {
-            H5VL_class_value_t value; /* VOL connector value */
-            const char *       name;  /* VOL connector name */
-        } u;
-    } vol;
+    int            id; /* I/O filters */
+    H5PL_vol_key_t vol;
+    H5PL_vfd_key_t vfd;
 } H5PL_key_t;
 
 /* Enum dictating the type of plugins to process
@@ -50,6 +64,7 @@ typedef union H5PL_key_t {
 typedef enum {
     H5PL_ITER_TYPE_FILTER,
     H5PL_ITER_TYPE_VOL,
+    H5PL_ITER_TYPE_VFD,
     H5PL_ITER_TYPE_ALL,
 } H5PL_iterate_type_t;
 

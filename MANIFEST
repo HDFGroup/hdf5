@@ -159,7 +159,6 @@
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
-./config/clang-warnings/noerror-general
 ./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
@@ -176,8 +175,6 @@
 ./config/gnu-warnings/cxx-9
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
-./config/gnu-warnings/cxx-noerror-5
-./config/gnu-warnings/cxx-noerror-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
@@ -195,9 +192,6 @@
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
-./config/gnu-warnings/noerror-5
-./config/gnu-warnings/noerror-8
-./config/gnu-warnings/noerror-general
 ./config/intel-warnings/15
 ./config/intel-warnings/18
 ./config/intel-warnings/developer-general
@@ -1200,10 +1194,10 @@
 ./test/external_common.h
 ./test/external_env.c
 ./test/external_fname.h
-./test/family_v16_00000.h5
-./test/family_v16_00001.h5
-./test/family_v16_00002.h5
-./test/family_v16_00003.h5
+./test/family_v16-000000.h5
+./test/family_v16-000001.h5
+./test/family_v16-000002.h5
+./test/family_v16-000003.h5
 ./test/farray.c
 ./test/fheap.c
 ./test/file_image.c
@@ -1288,6 +1282,8 @@
 ./test/ntypes.c
 ./test/null_vol_connector.c
 ./test/null_vol_connector.h
+./test/null_vfd_plugin.c
+./test/null_vfd_plugin.h
 ./test/objcopy.c
 ./test/objcopy_ref.c
 ./test/ohdr.c
@@ -1395,6 +1391,7 @@
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
 ./test/vfd.c
+./test/vfd_plugin.c
 ./test/vol.c
 ./test/vol_plugin.c
 
@@ -3196,6 +3193,8 @@
 ./java/src/jni/nativeData.c
 ./java/src/jni/nativeData.h
 ./java/src/jni/h5jni.h
+./java/src/jni/h5jni_test.c
+./java/src/jni/h5jni_test.h
 ./java/src/jni/h5util.c
 ./java/src/jni/h5util.h
 ./java/src/jni/h5Imp.c
@@ -3504,6 +3503,7 @@
 ./java/test/testfiles/JUnit-TestH5VL.txt
 ./java/test/testfiles/JUnit-TestH5Z.txt
 ./java/test/h5ex_g_iterate.orig
+./java/test/TestAll.java
 ./java/test/TestH5.java
 ./java/test/TestH5A.java
 ./java/test/TestH5Arw.java
@@ -3546,7 +3546,7 @@
 ./java/test/TestH5T.java
 ./java/test/TestH5VL.java
 ./java/test/TestH5Z.java
-./java/test/TestAll.java
+./java/test/H5TestUtils.java
 
 ./java/lib/hamcrest-core.jar
 ./java/lib/junit.jar
@@ -3826,6 +3826,7 @@
 ./tools/src/h5import/Makefile.in
 ./tools/src/h5jam/Makefile.in
 ./tools/src/h5ls/Makefile.in
+./tools/src/h5perf/Makefile.in
 ./tools/src/h5repack/Makefile.in
 ./tools/src/h5stat/Makefile.in
 ./tools/src/misc/Makefile.in

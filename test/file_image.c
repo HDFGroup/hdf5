@@ -1361,7 +1361,10 @@ main(void)
 
     errors += test_properties();
     errors += test_callbacks();
-    errors += test_core();
+
+    if (!h5_driver_uses_modified_filename()) {
+        errors += test_core();
+    }
 
     /* Perform tests with/without user block */
     for (user = FALSE; user <= TRUE; user++) {

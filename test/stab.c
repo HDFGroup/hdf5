@@ -1417,10 +1417,11 @@ main(void)
     unsigned    new_format;      /* Whether to use the new format or not */
     const char *env_h5_drvr;     /* File Driver value from environment */
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
-    int         nerrors = 0;
+    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
+    int         nerrors                       = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -1473,14 +1474,21 @@ main(void)
     if (contig_addr_vfd) {
         nerrors += lifecycle(fcpl2, fapl2);
         nerrors += long_compact(fcpl2, fapl2);
-        nerrors += read_old();
+
+        if (!driver_uses_modified_filename) {
+            nerrors += read_old();
+        }
+
         nerrors += no_compact(fcpl2, fapl2);
         nerrors += gcpl_on_root(fapl2);
     }
 
     /* Old group API specific tests */
     nerrors += old_api(fapl);
-    nerrors += corrupt_stab_msg();
+
+    if (!driver_uses_modified_filename) {
+        nerrors += corrupt_stab_msg();
+    }
 
     /* Close 2nd FAPL */
     H5Pclose(fapl2);

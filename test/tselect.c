@@ -15991,17 +15991,23 @@ test_h5s_set_extent_none(void)
 void
 test_select(void)
 {
-    hid_t    plist_id;                     /* Property list for reading random hyperslabs */
-    hid_t    fapl;                         /* Property list accessing the file */
-    int      mdc_nelmts;                   /* Metadata number of elements */
-    size_t   rdcc_nelmts;                  /* Raw data number of elements */
-    size_t   rdcc_nbytes;                  /* Raw data number of bytes */
-    double   rdcc_w0;                      /* Raw data write percentage */
-    hssize_t offset[SPACE7_RANK] = {1, 1}; /* Offset for testing selection offsets */
-    herr_t   ret;                          /* Generic return value        */
+    hid_t       plist_id;                     /* Property list for reading random hyperslabs */
+    hid_t       fapl;                         /* Property list accessing the file */
+    int         mdc_nelmts;                   /* Metadata number of elements */
+    size_t      rdcc_nelmts;                  /* Raw data number of elements */
+    size_t      rdcc_nbytes;                  /* Raw data number of bytes */
+    double      rdcc_w0;                      /* Raw data write percentage */
+    hssize_t    offset[SPACE7_RANK] = {1, 1}; /* Offset for testing selection offsets */
+    const char *env_h5_drvr;                  /* File Driver value from environment */
+    herr_t      ret;                          /* Generic return value        */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Selections\n"));
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     /* Create a dataset transfer property list */
     plist_id = H5Pcreate(H5P_DATASET_XFER);
@@ -16065,10 +16071,13 @@ test_select(void)
     test_select_hyper_union_3d();          /* Test hyperslab union code for 3-D dataset */
     test_select_hyper_valid_combination(); /* Test different input combinations */
 
-    test_select_hyper_and_2d();  /* Test hyperslab intersection (AND) code for 2-D dataset */
-    test_select_hyper_xor_2d();  /* Test hyperslab XOR code for 2-D dataset */
-    test_select_hyper_notb_2d(); /* Test hyperslab NOTB code for 2-D dataset */
-    test_select_hyper_nota_2d(); /* Test hyperslab NOTA code for 2-D dataset */
+    /* The following tests are currently broken with the Direct VFD */
+    if (HDstrcmp(env_h5_drvr, "direct") != 0) {
+        test_select_hyper_and_2d();  /* Test hyperslab intersection (AND) code for 2-D dataset */
+        test_select_hyper_xor_2d();  /* Test hyperslab XOR code for 2-D dataset */
+        test_select_hyper_notb_2d(); /* Test hyperslab NOTB code for 2-D dataset */
+        test_select_hyper_nota_2d(); /* Test hyperslab NOTA code for 2-D dataset */
+    }
 
     /* test the random hyperslab I/O with the default property list for reading */
     test_select_hyper_union_random_5d(H5P_DEFAULT); /* Test hyperslab union code for random 5-D hyperslabs */
