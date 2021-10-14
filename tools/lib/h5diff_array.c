@@ -104,9 +104,9 @@ static hbool_t not_comparable;
         per            = -1;                                                                                 \
         not_comparable = FALSE;                                                                              \
         both_zero      = FALSE;                                                                              \
-        if (H5_DBL_ABS_EQUAL(0, (double)A) && H5_DBL_ABS_EQUAL(0, (double)B))                                \
+        if (H5_DBL_ABS_EQUAL(0, (double)(A)) && H5_DBL_ABS_EQUAL(0, (double)(B)))                            \
             both_zero = TRUE;                                                                                \
-        if (!H5_DBL_ABS_EQUAL(0, (double)A))                                                                 \
+        if (!H5_DBL_ABS_EQUAL(0, (double)(A)))                                                               \
             per = (double)ABS((double)((B) - (A)) / (double)(A));                                            \
         else                                                                                                 \
             not_comparable = TRUE;                                                                           \
@@ -117,9 +117,9 @@ static hbool_t not_comparable;
         per            = -1;                                                                                 \
         not_comparable = FALSE;                                                                              \
         both_zero      = FALSE;                                                                              \
-        if (H5_DBL_ABS_EQUAL(0, (double)A) && H5_DBL_ABS_EQUAL(0, (double)B))                                \
+        if (H5_DBL_ABS_EQUAL(0, (double)(A)) && H5_DBL_ABS_EQUAL(0, (double)(B)))                            \
             both_zero = TRUE;                                                                                \
-        if (!H5_DBL_ABS_EQUAL(0, (double)A))                                                                 \
+        if (!H5_DBL_ABS_EQUAL(0, (double)(A)))                                                               \
             per = ABS((double)((TYPE)((B) - (A))) / (double)(A));                                            \
         else                                                                                                 \
             not_comparable = TRUE;                                                                           \
@@ -1838,7 +1838,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
 
         /* both not NaN, do the comparison */
         if (!isnan1 && !isnan2) {
-            if (ABS(temp1_double - temp2_double) > opts->delta) {
+            if ((double)ABS(temp1_double - temp2_double) > opts->delta) {
                 opts->print_percentage = 0;
                 print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
@@ -1931,7 +1931,7 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                 }
                 nfound++;
             }
-            else if (per > opts->percent && ABS(temp1_double - temp2_double) > opts->delta) {
+            else if (per > opts->percent && (double)ABS(temp1_double - temp2_double) > opts->delta) {
                 opts->print_percentage = 1;
                 print_pos(opts, elem_idx, 0);
                 if (print_data(opts)) {
@@ -2887,7 +2887,7 @@ ull2float(unsigned long long ull_value, float *f_value)
     size_t         dst_size;
     int            ret_value = 0;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
         H5TOOLS_GOTO_ERROR(FAIL, "H5Pcreate failed");
 
