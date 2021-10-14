@@ -91,7 +91,7 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
+    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
     mirror_vfd
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
