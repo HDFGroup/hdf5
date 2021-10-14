@@ -49,7 +49,12 @@ New Features
 
     Configuration:
     -------------
-    -
+    - Changed autotools and CMake configurations to derive both
+      compilation warnings-as-errors and warnings-only-warn configurations
+      from the same files, `config/*/*error*`.  Removed redundant files
+      `config/*/*noerror*`.
+
+      (DCY - 2021/09/29)
 
 
     Library:
