@@ -1439,7 +1439,11 @@ Bug Fixes since HDF5-1.12.0 release
 
     High-Level Library
     ------------------
-    -
+    - Fixed HL_test_packet, test for packet table vlen of vlen.
+
+      Incorrect length assignment.
+
+        (ADB - 2021/10/14)
 
 
     Fortran High-Level APIs
