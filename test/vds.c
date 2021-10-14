@@ -12288,8 +12288,8 @@ main(void)
     hid_t        src_fapl = -1; /* File access property list */
     int          test_api_config;
     unsigned     bit_config;
-    H5F_libver_t low, high; /* Low and high bounds */
-    hbool_t      is_native; /* Whether native VOL connector is being used */
+    H5F_libver_t low, high;   /* Low and high bounds */
+    hbool_t      is_native;   /* Whether native VOL connector is being used */
     const char * env_h5_drvr; /* File Driver value from environment */
     int          nerrors = 0;
 

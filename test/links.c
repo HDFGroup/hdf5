@@ -22659,7 +22659,8 @@ main(void)
                 HDputs("    External link tests skipped - not using native VOL connector");
             }
             else if (HDstrcmp(env_h5_drvr, "splitter") == 0) {
-                HDputs("    External link tests skipped - splitter VFD does not currently support external links");
+                HDputs("    External link tests skipped - splitter VFD does not currently support external "
+                       "links");
             }
             else {
                 /* tests for external link */
