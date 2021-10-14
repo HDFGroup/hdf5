@@ -462,6 +462,14 @@ Bug Fixes since HDF5-1.10.7 release
 ===================================
     Library
     -------
+    - Fixed a segmentation fault
+
+      A segmentation fault occurred with a Mathworks corrupted file.
+
+      A detection of accessing a null pointer was added to prevent the problem.
+
+      (BMR - 2021/10/14, HDFFV-11150)
+
     - Detection of simple data transform function "x"
 
         In the case of the simple data transform function "x" the (parallel)
