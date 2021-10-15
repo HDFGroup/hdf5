@@ -2014,9 +2014,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Short cuts */
     shared = file->shared;
 #if 1 /* Kent*/
-    H5F_post_vfd_swrm_log_entry(file,0,NULL);
+    H5F_post_vfd_swrm_log_entry(file, 0, NULL);
 #endif
-    lf     = shared->lf;
+    lf = shared->lf;
 
     /* Set the file locking flag. If the file is already open, the file
      * requested file locking flag must match that of the open file.

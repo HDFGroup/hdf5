@@ -1887,7 +1887,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-void* H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char * body) {
-
-
+void *
+H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body)
+{
 }
