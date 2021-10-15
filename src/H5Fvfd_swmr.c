@@ -1886,3 +1886,8 @@ H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
+
+void* H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char * body) {
+
+
+}
