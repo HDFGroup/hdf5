@@ -149,7 +149,7 @@ add_custom_target(H5WATCH_files ALL COMMENT "Copying files needed by H5WATCH tes
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-set (SWMR_INCOMPAT ${hl_swmr_check_compat_vfd})
+set (SWMR_INCOMPAT ${swmr_check_compat_vfd})
 
 if (NOT SWMR_INCOMPAT)
 # Remove any output file left over from previous test run

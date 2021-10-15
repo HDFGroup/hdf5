@@ -24,6 +24,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/hl/sr
 # These are our main targets, the tools
 
 bin_PROGRAMS=h5watch
+noinst_PROGRAMS=swmr_check_compat_vfd
 
 # Add h5watch specific linker flags here
 h5watch_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
