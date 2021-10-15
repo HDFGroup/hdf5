@@ -1092,6 +1092,14 @@ Bug Fixes since HDF5-1.12.0 release
 
         (ADB - 2021/03/03, #361)
 
+    - Fixed a segmentation fault
+
+      A segmentation fault occurred with a Mathworks corrupted file.
+
+      A detection of accessing a null pointer was added to prevent the problem.
+
+      (BMR - 2021/02/19, HDFFV-11150)
+
     - Fixed issue with MPI communicator and info object not being
       copied into new FAPL retrieved from H5F_get_access_plist
 
