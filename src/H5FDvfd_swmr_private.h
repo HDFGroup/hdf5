@@ -57,6 +57,15 @@ typedef struct eot_queue_entry {
     TAILQ_ENTRY(eot_queue_entry) link;
 } eot_queue_entry_t;
 
+#define TOTAL_TIME_PASSED(X, Y)                                                                                 \
+    ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000.0
+
+#define TIME_PASSED_MIN(X) (unsigned int)(X/60000)
+#define TIME_PASSED_SEC(X,Y) (unsigned int)((X-Y*60000)/1000)
+#define TIME_PASSED_MSEC(X,Y,Z) (unsigned int)(X-Y*60000-Z*1000)
+//H5_DLLVAR extern hbool_t vfd_swmr_log_on;
+//H5_DLLVAR extern FILE *vfd_swmr_log_file_ptr;
+
 H5_DLLVAR unsigned int vfd_swmr_api_entries_g;
 
 /* The head of the EOT queue */
