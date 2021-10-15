@@ -370,7 +370,7 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
 } /* init_vfd_swmr_config() */
 
 void
-init_vfd_swmr_config_log(H5F_vfd_swmr_config_t *config, const char *log_file_fmtstr,...)
+init_vfd_swmr_log(H5F_vfd_swmr_config_t *config, const char *log_file_fmtstr,...)
 
 {
     va_list ap;
@@ -379,7 +379,7 @@ init_vfd_swmr_config_log(H5F_vfd_swmr_config_t *config, const char *log_file_fmt
     evsnprintf(config->log_file_path, sizeof(config->log_file_path), log_file_fmtstr, ap);
     HDva_end(ap);
 
-} /* init_vfd_swmr_config() */
+} /* init_vfd_swmr_log() */
 
 
 /* Perform common VFD SWMR configuration on the file-access property list:

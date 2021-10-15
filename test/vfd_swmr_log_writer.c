@@ -2763,7 +2763,7 @@ main(int argc, char **argv)
 
     /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
     init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, FALSE, 128, "./group-shadow");
-    init_vfd_swmr_config_log(&config, "./log-test");
+    init_vfd_swmr_log(&config, "./log-test");
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
      * as the second parameter of H5Pset_libver_bound() that is called by

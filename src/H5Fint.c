@@ -108,8 +108,6 @@ htri_t use_locks_env_g = FAIL;
 /*******************/
 /* Local Variables */
 /*******************/
-hbool_t vfd_swmr_log_on;
-FILE *vfd_swmr_log_file_ptr;
 
 /* Declare a free list to manage the H5F_t struct */
 H5FL_DEFINE(H5F_t);
@@ -1855,14 +1853,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t                ci_write            = FALSE;    /* Whether MDC CI write requested */
     hbool_t                file_create         = FALSE;    /* Creating a new file or not */
     H5F_vfd_swmr_config_t *vfd_swmr_config_ptr = NULL;     /* Points to VFD SMWR config info */
-    //FILE  *                vfd_swmr_log_file_ptr = NULL; 
-    //hbool_t                vfd_swmr_log_on     = FALSE;
-    struct timespec start_time, end_time;
-    double temp_time;
-    unsigned int elap_min,elap_sec,elap_msec;
-
     H5F_t *                ret_value           = NULL;     /* Actual return value */
-
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -1878,17 +1869,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     if (H5P_get(a_plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, vfd_swmr_config_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get VFD SWMR config info")
 
-    vfd_swmr_log_on = FALSE;
     /* When configured with VFD SWMR */
     if (vfd_swmr_config_ptr->version) {
-        
-        if(HDstrlen(vfd_swmr_config_ptr->log_file_path) >0)  
-            vfd_swmr_log_on = TRUE;
-        if( TRUE == vfd_swmr_log_on) {
-            clock_gettime(CLOCK_MONOTONIC,&start_time);
-            if((vfd_swmr_log_file_ptr=HDfopen(vfd_swmr_config_ptr->log_file_path,"w"))==NULL) 
-                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create the metadata file")
-        }
         /* Verify that file access flags are consistent with VFD SWMR configuartion */
         if ((flags & H5F_ACC_RDWR) && !vfd_swmr_config_ptr->writer)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is writer but VFD SWMR config is reader")
@@ -2238,16 +2220,6 @@ done:
 
         if (H5F__dest(file, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
-    }
-
-    if (TRUE == vfd_swmr_log_on) {
-        clock_gettime(CLOCK_MONOTONIC,&end_time);
-        temp_time = TOTAL_TIME_PASSED(start_time,end_time);
-        elap_min = TIME_PASSED_MIN(temp_time);
-        elap_sec = TIME_PASSED_SEC(temp_time,elap_min);
-        elap_msec = TIME_PASSED_MSEC(temp_time,elap_min,elap_sec);
-        HDfprintf(vfd_swmr_log_file_ptr,"FILE OPEN: %u m %u s %u ms, time - %lf seconds\n",elap_min,elap_sec,elap_msec,temp_time/1000);
-        HDfclose(vfd_swmr_log_file_ptr);
     }
     if (vfd_swmr_config_ptr)
         H5MM_free(vfd_swmr_config_ptr);
