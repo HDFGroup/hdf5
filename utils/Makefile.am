@@ -21,6 +21,6 @@ include $(top_srcdir)/config/commence.am
 CONFIG=ordered
 
 # All subdirectories
-SUBDIRS=mirror_vfd
+SUBDIRS=mirror_vfd test
 
 include $(top_srcdir)/config/conclude.am
