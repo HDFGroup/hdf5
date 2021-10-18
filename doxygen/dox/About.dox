@@ -15,7 +15,6 @@ of <em>documentation done right</em>.
 \li \todo Describe how to add a reference or a new RFC
 \li \todo Describe how to add an example
 \li \todo Describe how to add an API macro
-\li \todo Describe the S3 bucket layout and update routine
 
 \subsection plain_html Including Plain HTML Pages
 
@@ -44,5 +43,17 @@ subdirectory of the <a href="https://github.com/HDFGroup/hdf5">main HDF5 repo</a
 
 The custom commands are grouped in sections. Find a suitable section for your command or
 ask for help if unsure!
+
+\subsection hosting How do updates and changes get published?
+
+Currently, the files underlying this documentation website are stored in an
+bucket on AWS S3. The top-level bucket is <pre>s3://docs.hdfgroup.org/hdf5/</pre>
+There are folders for the <tt>development</tt> branch and all supported release
+version.
+
+Talk to your friendly IT-team if you need write access, or you need someone to
+push an updated version for you!
+
+\todo Make the publication a GitHub action!
 
 */
