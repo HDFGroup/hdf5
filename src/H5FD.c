@@ -2147,7 +2147,8 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
     }
     else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
 
-        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed (no ctl and fail if unknown flag is set)")
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
+                    "VFD ctl request failed (no ctl and fail if unknown flag is set)")
     }
 
 done:
