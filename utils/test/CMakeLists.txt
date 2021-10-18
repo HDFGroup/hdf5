@@ -20,7 +20,7 @@ macro (ADD_H5_EXE file)
 endmacro ()
 
 ##############################################################################
-###                S W I M M E R   T E S T S                              ###
+###                S W I M M E R   T E S T  U T I L S                      ###
 ##############################################################################
 set (H5_UTIL_TESTS)
 
@@ -28,6 +28,8 @@ if (HDF5_TEST_SWMR)
   set (H5_UTIL_TESTS ${H5_UTIL_TESTS} swmr_check_compat_vfd)
 endif ()
 
-foreach (h5_test ${H5_UTIL_TESTS})
-  ADD_H5_EXE(${h5_test})
-endforeach ()
+if (H5_UTIL_TESTS)
+  foreach (h5_test ${H5_UTIL_TESTS})
+    ADD_H5_EXE(${h5_test})
+  endforeach ()
+endif ()
