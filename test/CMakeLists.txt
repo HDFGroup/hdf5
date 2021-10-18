@@ -357,7 +357,7 @@ set (H5_TESTS
     ros3
     s3comms
     hdfs
-    mirror_vfd
+    #mirror_vfd # multiple source
     ntypes
     dangle
     dtransform
@@ -378,6 +378,9 @@ set (H5_TESTS
     cmpd_dtransform
     event_set
 )
+if (HDF5_BUILD_UTILS)
+  set (H5_TESTS ${H5_TESTS} mirror_vfd)
+endif ()
 
 macro (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
