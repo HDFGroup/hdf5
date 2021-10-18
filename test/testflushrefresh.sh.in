@@ -126,7 +126,7 @@ fi
 # ========================
 # Launch the Test Program.
 # ========================
-./flushrefresh &
+$bindir/flushrefresh &
 pid_main=$!
 
 # =======================================
@@ -163,7 +163,7 @@ until [ $verification_done -eq 1 ]; do
     verification_done=1
     echo "all flush verification complete" > $endsignal
   else
-    ./flushrefresh $param1 $param2
+    $bindir/flushrefresh $param1 $param2
 
     # Check for core dump
     if [ $? -gt 0 ]; then
@@ -208,7 +208,7 @@ if [ $timedout -eq 0 ]; then
       verification_done=2
       echo "all refresh verification complete" > $endsignal
     else
-      ./flushrefresh $param1
+      $bindir/flushrefresh $param1
 
       # Check for core dump
       if [ $? -gt 0 ]; then
