@@ -19,7 +19,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/utils/test
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/test -I$(top_srcdir)/tools/lib -I$(top_srcdir)/utils/test
 
 # These are our main targets, the tools
 
