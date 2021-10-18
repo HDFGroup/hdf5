@@ -27,12 +27,8 @@ noinst_PROGRAMS=swmr_check_compat_vfd
 
 # Programs all depend on the hdf5 library, the tools library, and the HL
 # library.
-LDADD=$(LIBH5TOOLS) $(LIBHDF5)
+LDADD=$(LIBH5TEST) $(LIBHDF5)
 
-if BUILD_TESTS_CONDITIONAL
-  AM_CPPFLAGS+=-I$(top_srcdir)/utils/test
-endif
-#
 CHECK_CLEANFILES+=*.h5
 
 include $(top_srcdir)/config/conclude.am
