@@ -2014,7 +2014,18 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Short cuts */
     shared = file->shared;
 #if 1 /* Kent*/
-    H5F_post_vfd_swrm_log_entry(file, 0, NULL);
+    if (vfd_swmr_config_ptr->version) {
+
+        if (HDstrlen(vfd_swmr_config_ptr->log_file_path) > 0)
+           shared->vfd_swmr_log_on = TRUE;
+        if (TRUE == shared->vfd_swmr_log_on) {
+            /* Create the log file */
+            if ((shared->vfd_swmr_log_file_ptr = HDfopen(vfd_swmr_config_ptr->log_file_path,"w"))==NULL)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create the log file")
+            if(HDclock_gettime(CLOCK_MONOTONIC, &(shared->vfd_swmr_log_start_time))<0) 
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get time via clock_gettime");
+        }
+    }
 #endif
     lf = shared->lf;
 
@@ -2224,6 +2235,9 @@ done:
         if (H5F__dest(file, FALSE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTCLOSEFILE, NULL, "problems closing file")
     }
+#if 1 /*KENT*/
+    H5F_post_vfd_swrm_log_entry(file, 0, "File open ends");
+#endif 
     if (vfd_swmr_config_ptr)
         H5MM_free(vfd_swmr_config_ptr);
 
