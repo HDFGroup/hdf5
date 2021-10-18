@@ -469,9 +469,9 @@ struct H5F_shared_t {
                                  * manager
                                  */
 
-    FILE*     vfd_swmr_log_file_ptr;
-    hbool_t vfd_swmr_log_on;
-    struct timespec  vfd_swmr_log_start_time;
+    FILE *          vfd_swmr_log_file_ptr;
+    hbool_t         vfd_swmr_log_on;
+    struct timespec vfd_swmr_log_start_time;
 
     /* Delayed free space release doubly linked list */
     shadow_defree_queue_t shadow_defrees;
@@ -612,5 +612,5 @@ H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
-H5_DLL herr_t H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code,  char *body);
+H5_DLL herr_t H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body);
 #endif /* H5Fpkg_H */

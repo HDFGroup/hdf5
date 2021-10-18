@@ -84,7 +84,6 @@ H5_DLL herr_t H5F_vfd_swmr_insert_entry_eot(struct H5F_t *f);
 H5_DLL void   H5F_vfd_swmr_update_entry_eot(eot_queue_entry_t *);
 H5_DLL herr_t H5F_dump_eot_queue(void);
 
-
 /***************************************/
 /* Log Macros and Functions            */
 /***************************************/
@@ -96,7 +95,7 @@ H5_DLL herr_t H5F_dump_eot_queue(void);
 #define TIME_PASSED_MSEC(X, Y, Z) (unsigned int)(X - Y * 60000 - Z * 1000)
 
 /* Add more tags */
-static const char *H5Fvfd_swmr_log_tags[] = { "FILE_OPEN", "FILE_CLOSE", "EOT_TRIGGER_TIME",
-                                              "EOT_PROCESSING_TIME", "EOT_META_FILE_INDEX"};
+static const char *H5Fvfd_swmr_log_tags[] = {"FILE_OPEN", "FILE_CLOSE", "EOT_TRIGGER_TIME",
+                                             "EOT_PROCESSING_TIME", "EOT_META_FILE_INDEX"};
 
 #endif /* H5FDvfd_swmr_private_H */

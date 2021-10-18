@@ -276,7 +276,6 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-
     HDassert(shared->vfd_swmr_writer);
     HDassert(shared->vfd_swmr_md_fd >= 0);
 
@@ -320,11 +319,11 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
             HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick");
     }
 done:
-     
+
     H5F_post_vfd_swrm_log_entry(f, 1, "File close ends");
 
     if (shared->vfd_swmr_log_on) {
-       HDfclose(shared->vfd_swmr_log_file_ptr); 
+        HDfclose(shared->vfd_swmr_log_file_ptr);
     }
     FUNC_LEAVE_NOAPI(ret_value)
 }
@@ -634,7 +633,6 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-
     HDassert(shared->vfd_swmr);
     HDassert(shared->vfd_swmr_writer);
     HDassert(shared->page_buf);
@@ -764,9 +762,9 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     herr_t        ret_value                 = SUCCEED; /* Return value */
     hbool_t       incr_tick                 = FALSE;
 
-    struct timespec start_time,end_time;
-    unsigned int temp_time;
-    char*  log_msg;
+    struct timespec start_time, end_time;
+    unsigned int    temp_time;
+    char *          log_msg;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -774,9 +772,9 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     HDassert(shared->page_buf);
     HDassert(shared->vfd_swmr_writer);
 
-    if(f->shared->vfd_swmr_log_on == true) {
-        H5F_post_vfd_swrm_log_entry(f, 3, "EOT gets started"); 
-        if(HDclock_gettime(CLOCK_MONOTONIC, &start_time)<0) 
+    if (f->shared->vfd_swmr_log_on == true) {
+        H5F_post_vfd_swrm_log_entry(f, 3, "EOT gets started");
+        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
     }
     if (!vfd_swmr_writer_may_increase_tick_to(shared->tick_num + 1, wait_for_reader))
@@ -901,13 +899,13 @@ update_eot:
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
 done:
-    if(f->shared->vfd_swmr_log_on == true) {
-        if(HDclock_gettime(CLOCK_MONOTONIC, &end_time)<0) 
+    if (f->shared->vfd_swmr_log_on == true) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
-        log_msg = HDmalloc(48);
-        temp_time = (unsigned int) (TOTAL_TIME_PASSED(start_time, end_time));
-        HDsprintf(log_msg,"Writer time is %u milliseconds",temp_time);
-        H5F_post_vfd_swrm_log_entry(f, 3, log_msg); 
+        log_msg   = HDmalloc(48);
+        temp_time = (unsigned int)(TOTAL_TIME_PASSED(start_time, end_time));
+        HDsprintf(log_msg, "Writer time is %u milliseconds", temp_time);
+        H5F_post_vfd_swrm_log_entry(f, 3, log_msg);
         HDfree(log_msg);
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1914,18 +1912,18 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
-herr_t 
+herr_t
 H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body)
 {
-    herr_t ret_value = SUCCEED;
-    double temp_time;
-    struct timespec  current_time;
+    herr_t          ret_value = SUCCEED;
+    double          temp_time;
+    struct timespec current_time;
     unsigned int    elap_min, elap_sec, elap_msec;
 
     FUNC_ENTER_NOAPI(FAIL)
-    if(f->shared->vfd_swmr_log_on == false)
+    if (f->shared->vfd_swmr_log_on == false)
         HGOTO_DONE(TRUE)
-    if(HDclock_gettime(CLOCK_MONOTONIC, &current_time)<0) 
+    if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
     temp_time = TOTAL_TIME_PASSED(f->shared->vfd_swmr_log_start_time, current_time);
     elap_min  = TIME_PASSED_MIN(temp_time);
@@ -1933,8 +1931,8 @@ H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body)
     elap_msec = TIME_PASSED_MSEC(temp_time, elap_min, elap_sec);
 
     /* TODO: add a check for the range of entry_type_code to separate debug mode from the production mode.*/
-    HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%s: %u m %u s %u ms, Content -  %s\n", 
-              H5Fvfd_swmr_log_tags[entry_type_code],elap_min,elap_sec, elap_msec, body);
+    HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%s: %u m %u s %u ms, Content -  %s\n",
+              H5Fvfd_swmr_log_tags[entry_type_code], elap_min, elap_sec, elap_msec, body);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
