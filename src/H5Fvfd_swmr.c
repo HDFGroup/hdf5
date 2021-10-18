@@ -1921,7 +1921,7 @@ H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body)
     unsigned int    elap_min, elap_sec, elap_msec;
 
     FUNC_ENTER_NOAPI(FAIL)
-    if (f==NULL) 
+    if (f == NULL)
         HGOTO_DONE(TRUE)
     if (f->shared->vfd_swmr_log_on == false)
         HGOTO_DONE(TRUE)
