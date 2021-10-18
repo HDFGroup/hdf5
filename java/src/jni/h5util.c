@@ -658,8 +658,6 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
 
     int ret_value = FAIL;
 
-    if (!h5str_append(out_str, " \""))
-        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
     buf_size = H5Rget_file_name(ref_vp, NULL, 0);
     if (buf_size) {
         ref_name = (char *)HDmalloc(sizeof(char) * (size_t)buf_size + 1);
@@ -697,8 +695,6 @@ h5str_sprint_reference(JNIEnv *env, h5str_t *out_str, void *ref_p)
             ref_name = NULL;
         }
     }
-    if (!h5str_append(out_str, "\""))
-        H5_ASSERTION_ERROR(ENVONLY, "Unable to append string.");
 
     ret_value = SUCCEED;
 done:
@@ -724,6 +720,10 @@ h5str_region_dataset(JNIEnv *env, h5str_t *out_str, H5R_ref_t *ref_vp, int expan
 
     if ((new_obj_sid = H5Ropen_region(ref_vp, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
+
+    if (expand_data == 0)
+        if (h5str_sprint_reference(ENVONLY, out_str, ref_vp) < 0)
+            CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
     if ((region_type = H5Sget_select_type(new_obj_sid)) > H5S_SEL_ERROR) {
         if (H5S_SEL_POINTS == region_type) {
@@ -870,11 +870,8 @@ h5str_sprintf(JNIEnv *env, h5str_t *out_str, hid_t container, hid_t tid, void *i
             }
             else {
                 if (typeSize > 0) {
-                    if (NULL == (this_str = (char *)HDmalloc(typeSize + 1)))
+                    if (NULL == (this_str = HDstrdup(tmp_str)))
                         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "h5str_sprintf: failed to allocate string buffer");
-
-                    HDstrncpy(this_str, tmp_str, typeSize);
-                    this_str[typeSize] = '\0';
                 }
             }
 
@@ -3664,18 +3661,13 @@ obj_info_all(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_d
     info_all_t *datainfo = (info_all_t *)op_data;
     H5O_info2_t object_info;
     htri_t      object_exists;
-    size_t      str_len;
 
     datainfo->otype[datainfo->count]     = -1;
     datainfo->ltype[datainfo->count]     = -1;
     datainfo->obj_token[datainfo->count] = H5O_TOKEN_UNDEF;
 
-    str_len = HDstrlen(name);
-    if (NULL == (datainfo->objname[datainfo->count] = (char *)HDmalloc(str_len + 1)))
+    if (NULL == (datainfo->objname[datainfo->count] = HDstrdup(name)))
         goto done;
-
-    HDstrncpy(datainfo->objname[datainfo->count], name, str_len);
-    (datainfo->objname[datainfo->count])[str_len] = '\0';
 
     if ((object_exists = H5Oexists_by_name(loc_id, name, H5P_DEFAULT)) < 0)
         goto done;
@@ -3702,7 +3694,6 @@ obj_info_max(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_d
 {
     info_all_t *datainfo = (info_all_t *)op_data;
     H5O_info2_t object_info;
-    size_t      str_len;
 
     datainfo->otype[datainfo->count]     = -1;
     datainfo->ltype[datainfo->count]     = -1;
@@ -3710,12 +3701,8 @@ obj_info_max(hid_t loc_id, const char *name, const H5L_info2_t *info, void *op_d
     datainfo->obj_token[datainfo->count] = H5O_TOKEN_UNDEF;
 
     /* This will be freed by h5str_array_free(oName, n) */
-    str_len = HDstrlen(name);
-    if (NULL == (datainfo->objname[datainfo->count] = (char *)HDmalloc(str_len + 1)))
+    if (NULL == (datainfo->objname[datainfo->count] = HDstrdup(name)))
         goto done;
-
-    HDstrncpy(datainfo->objname[datainfo->count], name, str_len);
-    (datainfo->objname[datainfo->count])[str_len] = '\0';
 
     if (H5Oget_info3(loc_id, &object_info, H5O_INFO_ALL) < 0)
         goto done;

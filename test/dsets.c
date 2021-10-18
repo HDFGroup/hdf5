@@ -1399,7 +1399,7 @@ test_conv_buffer(hid_t fid)
         cf->b[j] = 100.0F * (float)(j + 1) + 0.01F * (float)j;
 
     for (j = 0; j < DIM3; j++)
-        cf->c[j] = 100.0F * (float)(j + 1) + 0.02F * (float)j;
+        cf->c[j] = 100.0 * (double)(j + 1) + 0.02 * (double)j;
 
     /* Create data space */
     if ((space = H5Screate(H5S_SCALAR)) < 0)
@@ -3442,11 +3442,11 @@ test_nbit_double(hid_t file)
     /* orig_data[] are initialized to be within the range that can be represented by
      * dataset datatype (no precision loss during datatype conversion)
      */
-    double orig_data[2][5] = {{(double)1.6081706885101836e+60L, -255.32099170994480f,
-                               (double)1.2677579992621376e-61L, 64568.289448797700f,
+    double orig_data[2][5] = {{(double)1.6081706885101836e+60L, -255.32099170994480,
+                               (double)1.2677579992621376e-61L, 64568.289448797700,
                                (double)-1.0619721778839084e-75L},
-                              {(double)2.1499497833454840e+56L, 6.6562295504670740e-3f, -1.5747263393432150f,
-                               1.0711093225222612f, -9.8971679387636870e-1f}};
+                              {(double)2.1499497833454840e+56L, 6.6562295504670740e-3, -1.5747263393432150,
+                               1.0711093225222612, -9.8971679387636870e-1}};
     double new_data[2][5];
     size_t precision, offset;
     size_t i, j;
@@ -5201,7 +5201,7 @@ test_scaleoffset_float(hid_t file)
     /* Check that the values read are the same as the values written */
     for (i = 0; i < (size_t)size[0]; i++) {
         for (j = 0; j < (size_t)size[1]; j++) {
-            if (HDfabs(new_data[i][j] - orig_data[i][j]) > HDpow(10.0, -3.0)) {
+            if (HDfabs((double)(new_data[i][j] - orig_data[i][j])) > HDpow(10.0, -3.0)) {
                 H5_FAILED();
                 HDprintf("    Read different values than written.\n");
                 HDprintf("    At index %lu,%lu\n", (unsigned long)i, (unsigned long)j);
@@ -5347,7 +5347,7 @@ test_scaleoffset_float_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0, -3.0)) {
+        if (HDfabs((double)(new_data[0][j] - orig_data[0][j])) > HDpow(10.0, -3.0)) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -5435,7 +5435,7 @@ test_scaleoffset_double(hid_t file)
     /* Initialize data */
     for (i = 0; i < (size_t)size[0]; i++)
         for (j = 0; j < (size_t)size[1]; j++) {
-            orig_data[i][j] = (float)(HDrandom() % 10000000) / 10000000.0F;
+            orig_data[i][j] = (HDrandom() % 10000000) / 10000000.0;
 
             /* even-numbered values are negtive */
             if ((i * size[1] + j + 1) % 2 == 0)
@@ -5544,7 +5544,7 @@ test_scaleoffset_double_2(hid_t file)
         goto error;
 
     /* Set fill value */
-    fillval = 10000.0F;
+    fillval = 10000.0;
     if (H5Pset_fill_value(dc, H5T_NATIVE_DOUBLE, &fillval) < 0)
         goto error;
 
@@ -5581,7 +5581,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Initialize data of hyperslab */
     for (j = 0; j < (size_t)size[1]; j++) {
-        orig_data[0][j] = (float)(HDrandom() % 10000000) / 10000000.0F;
+        orig_data[0][j] = (HDrandom() % 10000000) / 10000000.0;
 
         /* even-numbered values are negtive */
         if ((j + 1) % 2 == 0)
@@ -5614,7 +5614,7 @@ test_scaleoffset_double_2(hid_t file)
 
     /* Check that the values read are the same as the values written */
     for (j = 0; j < (size_t)size[1]; j++) {
-        if (HDfabs(new_data[0][j] - orig_data[0][j]) > HDpow(10.0, -7.0)) {
+        if (HDfabs((double)(new_data[0][j] - orig_data[0][j])) > HDpow(10.0, -7.0)) {
             H5_FAILED();
             HDprintf("    Read different values than written.\n");
             HDprintf("    At index %lu,%lu\n", (unsigned long)0, (unsigned long)j);
@@ -6525,7 +6525,7 @@ test_set_local(hid_t fapl)
     h5_fixname(FILENAME[5], fapl, filename, sizeof filename);
 
     /* Initialize the integer & floating-point dataset */
-    n = 1.0F;
+    n = 1.0;
     for (i = 0; i < DSET_DIM1; i++)
         for (j = 0; j < DSET_DIM2; j++) {
             points[i][j]     = (int)n++;
@@ -9085,7 +9085,7 @@ test_big_chunks_bypass_cache(hid_t fapl)
     /* Define cache size to be smaller than chunk size */
     rdcc_nelmts = BYPASS_CHUNK_DIM / 5;
     rdcc_nbytes = sizeof(int) * BYPASS_CHUNK_DIM / 5;
-    if (H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, 0.0F) < 0)
+    if (H5Pset_cache(fapl_local, 0, rdcc_nelmts, rdcc_nbytes, 0.0) < 0)
         FAIL_STACK_ERROR
 
     /* Create file */

@@ -639,7 +639,7 @@ H5E__get_class_name(const H5E_cls_t *cls, char *name, size_t size)
 
     /* Set the user's buffer, if provided */
     if (name) {
-        HDstrncpy(name, cls->cls_name, MIN((size_t)(len + 1), size));
+        HDstrncpy(name, cls->cls_name, size);
         if ((size_t)len >= size)
             name[size - 1] = '\0';
     } /* end if */
