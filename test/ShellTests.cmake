@@ -37,7 +37,7 @@ if (UNIX)
     #shell script creates dir
     #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
     add_custom_command (
-        TARGET     swmr_check_compat_vfd
+        TARGET     accum_swmr_reader
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "${HDF5_SOURCE_DIR}/bin/output_filter.sh" "${HDF5_TEST_BINARY_DIR}/H5TEST/bin/output_filter.sh"
