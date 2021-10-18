@@ -235,6 +235,7 @@
 ./doxygen/dox/cookbook/Performance.dox
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
+./doxygen/examples/FileFormat.html
 ./doxygen/examples/FileFormatSpecChunkDiagram.jpg
 ./doxygen/examples/H5Pset_metadata_read_attempts.c
 ./doxygen/examples/H5Pset_object_flush_cb.c
@@ -264,6 +265,7 @@
 ./doxygen/examples/H5Z_examples.c
 ./doxygen/examples/H5_examples.c
 ./doxygen/examples/ImageSpec.html
+./doxygen/examples/IOFlow.html
 ./doxygen/examples/PaletteExample1.gif
 ./doxygen/examples/Palettes.fm.anc.gif
 ./doxygen/examples/TableSpec.html
@@ -279,6 +281,9 @@
 ./doxygen/img/FF-IH_FileObject.gif
 ./doxygen/img/FileFormatSpecChunkDiagram.jpg
 ./doxygen/img/HDFG-logo.png
+./doxygen/img/IOFlow.gif
+./doxygen/img/IOFlow2.gif
+./doxygen/img/IOFlow3.gif
 ./doxygen/img/PaletteExample1.gif
 ./doxygen/img/Palettes.fm.anc.gif
 ./doxygen/img/ftv2node.png
