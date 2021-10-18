@@ -148,6 +148,7 @@ static herr_t  H5FD__core_flush(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__core_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__core_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__core_unlock(H5FD_t *_file);
+static herr_t  H5FD__core_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_core_g = {
     "core",                   /* name                 */
@@ -185,6 +186,7 @@ static const H5FD_class_t H5FD_core_g = {
     H5FD__core_truncate,      /* truncate             */
     H5FD__core_lock,          /* lock                 */
     H5FD__core_unlock,        /* unlock               */
+    H5FD__core_delete,        /* del                  */
     NULL,                     /* ctl                  */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
@@ -1713,3 +1715,36 @@ H5FD__core_unlock(H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__core_unlock() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__core_delete
+ *
+ * Purpose:     Delete a file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__core_delete(const char *filename, hid_t fapl_id)
+{
+    const H5FD_core_fapl_t *fa = NULL;
+    H5P_genplist_t *        plist;               /* Property list pointer */
+    herr_t                  ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    HDassert(filename);
+
+    if (NULL == (plist = (H5P_genplist_t *)H5I_object(fapl_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    if (NULL == (fa = (const H5FD_core_fapl_t *)H5P_peek_driver_info(plist)))
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "bad VFL driver info")
+
+    if (fa->backing_store)
+        if (HDremove(filename) < 0)
+            HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__core_delete() */

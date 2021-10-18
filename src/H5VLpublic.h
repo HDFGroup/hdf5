@@ -93,9 +93,9 @@
  *          connectors. Subsequent values should be obtained from the HDF5
  *          development team at mailto:help@hdfgroup.org.
  */
-//! [H5VL_class_value_t_snip]
+//! <!-- [H5VL_class_value_t_snip] -->
 typedef int H5VL_class_value_t;
-//! [H5VL_class_value_t_snip]
+//! <!-- [H5VL_class_value_t_snip] -->
 
 /**
  * \ingroup H5VLDEF
@@ -116,6 +116,9 @@ typedef enum H5VL_subclass_t {
     H5VL_SUBCLS_REQUEST,  /**< 'Request' subclass */
     H5VL_SUBCLS_BLOB,     /**< 'Blob' subclass */
     H5VL_SUBCLS_TOKEN     /**< 'Token' subclass */
+                          /* NOTE: if more operations are added, the
+                           * H5VL_opt_vals_g[] array size should be updated.
+                           */
 } H5VL_subclass_t;
 
 /********************/
@@ -153,11 +156,10 @@ extern "C" {
  *          uncommon, as most VOL-specific properties are added to the file
  *          access property list via the connector's API calls which set the
  *          VOL connector for the file open/create. For more information, see
- *          the VOL documentation.
- *
- * \todo Fix the reference to VOL documentation.
+ *          \ref_vol_doc.
  *
  * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vipl_id);
 /**
@@ -192,11 +194,10 @@ H5_DLL hid_t H5VLregister_connector_by_name(const char *connector_name, hid_t vi
  *          uncommon, as most VOL-specific properties are added to the file
  *          access property list via the connector's API calls which set the
  *          VOL connector for the file open/create. For more information, see
- *          the VOL documentation.
- *
- * \todo Fix the reference to VOL documentation.
+ *          the \ref_vol_doc.
  *
  * \since 1.12.0
+ *
  */
 H5_DLL hid_t H5VLregister_connector_by_value(H5VL_class_value_t connector_value, hid_t vipl_id);
 /**
@@ -359,10 +360,5 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
 #ifdef __cplusplus
 }
 #endif
-
-/* Semi-public headers mainly for VOL connector authors */
-#include "H5VLconnector.h"          /* VOL connector author routines */
-#include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
-#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
 
 #endif /* H5VLpublic_H */

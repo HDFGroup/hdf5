@@ -16,11 +16,7 @@
    tcompound.cpp - HDF5 C++ testing the compound data type functionality
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -105,11 +101,11 @@ test_compound_2()
     SUBTEST("Compound Element Reordering");
     try {
         // Sizes should be the same, but be careful just in case
-        buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char *)HDmalloc(nelmts * sizeof(src_typ_t));
+        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
-            s_ptr       = ((src_typ_t *)orig) + i;
+            s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
             s_ptr->b    = i * 8 + 1;
             s_ptr->c[0] = i * 8 + 2;
@@ -119,7 +115,7 @@ test_compound_2()
             s_ptr->d    = i * 8 + 6;
             s_ptr->e    = i * 8 + 7;
         }
-        memcpy(buf, orig, nelmts * sizeof(src_typ_t));
+        HDmemcpy(buf, orig, nelmts * sizeof(src_typ_t));
 
         // Build hdf5 datatypes
         array_dt = new ArrayType(PredType::NATIVE_INT, 1, &four);
@@ -146,12 +142,12 @@ test_compound_2()
         array_dt->close();
 
         // Perform the conversion
-        st.convert(dt, (size_t)nelmts, buf, bkg);
+        st.convert(dt, static_cast<size_t>(nelmts), buf, bkg);
 
         // Compare results
         for (i = 0; i < nelmts; i++) {
-            s_ptr = ((src_typ_t *)orig) + i;
-            d_ptr = ((dst_typ_t *)buf) + i;
+            s_ptr = (reinterpret_cast<src_typ_t *>(orig)) + i;
+            d_ptr = (reinterpret_cast<dst_typ_t *>(buf)) + i;
             if (s_ptr->a != d_ptr->a || s_ptr->b != d_ptr->b || s_ptr->c[0] != d_ptr->c[0] ||
                 s_ptr->c[1] != d_ptr->c[1] || s_ptr->c[2] != d_ptr->c[2] || s_ptr->c[3] != d_ptr->c[3] ||
                 s_ptr->d != d_ptr->d || s_ptr->e != d_ptr->e) {
@@ -180,8 +176,7 @@ test_compound_2()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_2()
 
 /*-------------------------------------------------------------------------
@@ -219,11 +214,11 @@ test_compound_3()
     SUBTEST("Compound Datatype Subset Conversions");
     try {
         /* Initialize */
-        buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char *)HDmalloc(nelmts * sizeof(src_typ_t));
+        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
-            s_ptr       = ((src_typ_t *)orig) + i;
+            s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
             s_ptr->b    = i * 8 + 1;
             s_ptr->c[0] = i * 8 + 2;
@@ -258,12 +253,12 @@ test_compound_3()
         array_dt->close();
 
         /* Perform the conversion */
-        st.convert(dt, (size_t)nelmts, buf, bkg);
+        st.convert(dt, static_cast<size_t>(nelmts), buf, bkg);
 
         /* Compare results */
         for (i = 0; i < nelmts; i++) {
-            s_ptr = ((src_typ_t *)orig) + i;
-            d_ptr = ((dst_typ_t *)buf) + i;
+            s_ptr = (reinterpret_cast<src_typ_t *>(orig)) + i;
+            d_ptr = (reinterpret_cast<dst_typ_t *>(buf)) + i;
             if (s_ptr->a != d_ptr->a || s_ptr->c[0] != d_ptr->c[0] || s_ptr->c[1] != d_ptr->c[1] ||
                 s_ptr->c[2] != d_ptr->c[2] || s_ptr->c[3] != d_ptr->c[3] || s_ptr->e != d_ptr->e) {
                 H5_FAILED();
@@ -273,8 +268,8 @@ test_compound_3()
                      << ", e=" << s_ptr->e << "}" << endl;
                 cerr << "    dst={a=" << d_ptr->a << ", c=[" << d_ptr->c[0] << "," << d_ptr->c[1] << ","
                      << d_ptr->c[2] << "," << d_ptr->c[3] << "], e=" << d_ptr->e << "}" << endl;
-            } // if
-        }     // for
+            }
+        }
 
         /* Release resources */
         HDfree(buf);
@@ -291,8 +286,7 @@ test_compound_3()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_3()
 
 /*-------------------------------------------------------------------------
@@ -335,11 +329,11 @@ test_compound_4()
     SUBTEST("Compound Element Shrinking & Reordering");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char *)HDmalloc(nelmts * sizeof(src_typ_t));
+        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
-            s_ptr       = ((src_typ_t *)orig) + i;
+            s_ptr       = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->a    = i * 8 + 0;
             s_ptr->b    = (i * 8 + 1) & 0x7fff;
             s_ptr->c[0] = i * 8 + 2;
@@ -376,12 +370,12 @@ test_compound_4()
         array_dt->close();
 
         /* Perform the conversion */
-        st.convert(dt, (size_t)nelmts, buf, bkg);
+        st.convert(dt, static_cast<size_t>(nelmts), buf, bkg);
 
         /* Compare results */
         for (i = 0; i < nelmts; i++) {
-            s_ptr = ((src_typ_t *)orig) + i;
-            d_ptr = ((dst_typ_t *)buf) + i;
+            s_ptr = (reinterpret_cast<src_typ_t *>(orig)) + i;
+            d_ptr = (reinterpret_cast<dst_typ_t *>(buf)) + i;
             if (s_ptr->a != d_ptr->a || s_ptr->b != d_ptr->b || s_ptr->c[0] != d_ptr->c[0] ||
                 s_ptr->c[1] != d_ptr->c[1] || s_ptr->c[2] != d_ptr->c[2] || s_ptr->c[3] != d_ptr->c[3] ||
                 s_ptr->d != d_ptr->d || s_ptr->e != d_ptr->e) {
@@ -411,8 +405,7 @@ test_compound_4()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_4()
 
 /*-------------------------------------------------------------------------
@@ -480,8 +473,8 @@ test_compound_5()
 
         /* Convert data */
         memcpy(buf, src, sizeof(src));
-        src_type.convert(dst_type, (size_t)2, buf, bkg);
-        dst = (dst_typ_t *)buf;
+        src_type.convert(dst_type, 2, buf, bkg);
+        dst = static_cast<dst_typ_t *>(buf);
 
         /* Cleanup */
         src_type.close();
@@ -491,7 +484,7 @@ test_compound_5()
         int_array.close();
 
         /* Check results */
-        if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) || src[1].tdim != dst[1].tdim ||
+        if (memcmp(src[1].name, dst[1].name, sizeof(src[1].name)) != 0 || src[1].tdim != dst[1].tdim ||
             src[1].coll_ids[0] != dst[1].coll_ids[0] || src[1].coll_ids[1] != dst[1].coll_ids[1] ||
             src[1].coll_ids[2] != dst[1].coll_ids[2] || src[1].coll_ids[3] != dst[1].coll_ids[3]) {
             H5_FAILED();
@@ -508,8 +501,7 @@ test_compound_5()
         issue_fail_msg(E.getCFuncName(), __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (array_dt)
-        delete array_dt;
+    delete array_dt;
 } // test_compound_5()
 
 /*-------------------------------------------------------------------------
@@ -548,11 +540,11 @@ test_compound_6()
     SUBTEST("Compound Element Growing");
     try {
         /* Sizes should be the same, but be careful just in case */
-        buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t)));
-        bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(dst_typ_t));
-        orig = (unsigned char *)HDmalloc(nelmts * sizeof(src_typ_t));
+        buf  = static_cast<unsigned char *>(HDmalloc(nelmts * MAX(sizeof(src_typ_t), sizeof(dst_typ_t))));
+        bkg  = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(dst_typ_t)));
+        orig = static_cast<unsigned char *>(HDmalloc(nelmts * sizeof(src_typ_t)));
         for (i = 0; i < nelmts; i++) {
-            s_ptr    = ((src_typ_t *)orig) + i;
+            s_ptr    = (reinterpret_cast<src_typ_t *>(orig)) + i;
             s_ptr->b = (i * 8 + 1) & 0x7fff;
             s_ptr->d = (i * 8 + 6) & 0x7fff;
         }
@@ -568,19 +560,19 @@ test_compound_6()
         dt.insertMember("d", HOFFSET(dst_typ_t, d), PredType::NATIVE_LONG);
 
         /* Perform the conversion */
-        st.convert(dt, (size_t)nelmts, buf, bkg);
+        st.convert(dt, static_cast<size_t>(nelmts), buf, bkg);
 
         /* Compare results */
         for (i = 0; i < nelmts; i++) {
-            s_ptr = ((src_typ_t *)orig) + i;
-            d_ptr = ((dst_typ_t *)buf) + i;
+            s_ptr = (reinterpret_cast<src_typ_t *>(orig)) + i;
+            d_ptr = (reinterpret_cast<dst_typ_t *>(buf)) + i;
             if (s_ptr->b != d_ptr->b || s_ptr->d != d_ptr->d) {
                 H5_FAILED();
                 cerr << "    i=" << i << endl;
                 cerr << "    src={b=" << s_ptr->b << ", d=" << s_ptr->d << "}" << endl;
                 cerr << "    dst={b=" << d_ptr->b << ", d=" << d_ptr->d << "}" << endl;
-            } // if
-        }     // for
+            }
+        }
 
         /* Release resources */
         HDfree(buf);
@@ -723,22 +715,22 @@ test_compound_set_size()
         // verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
 
         // Expand the type, and verify that it became unpacked
-        dtype.setSize((size_t)33);
+        dtype.setSize(33);
         // packed = dtype.packed(); // not until C library provides API
         // verify_val(packed, FALSE, "DataType::packed", __LINE__, __FILE__);
 
         // Verify setSize() actually set size
         size_t new_size = dtype.getSize();
-        verify_val(new_size, (size_t)33, "DataType::getSize", __LINE__, __FILE__);
+        verify_val(static_cast<long>(new_size), 33, "DataType::getSize", __LINE__, __FILE__);
 
         // Shrink the type, and verify that it became packed
-        dtype.setSize((size_t)32);
+        dtype.setSize(32);
         // packed = dtype.packed(); // not until C library provides API
         // verify_val(packed, TRUE, "DataType::packed", __LINE__, __FILE__);
 
         // Verify setSize() actually set size again
         new_size = dtype.getSize();
-        verify_val(new_size, (size_t)32, "DataType::getSize", __LINE__, __FILE__);
+        verify_val(static_cast<long>(new_size), 32, "DataType::getSize", __LINE__, __FILE__);
 
         /* Close types and file */
         dtype_tmp.close();

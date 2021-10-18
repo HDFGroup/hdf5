@@ -1686,7 +1686,7 @@ H5Pset_cache(hid_t plist_id, int H5_ATTR_UNUSED mdc_nelmts, size_t rdcc_nslots, 
     H5TRACE5("e", "iIszzd", plist_id, mdc_nelmts, rdcc_nslots, rdcc_nbytes, rdcc_w0);
 
     /* Check arguments */
-    if (rdcc_w0 < (double)0.0f || rdcc_w0 > (double)1.0f)
+    if (rdcc_w0 < 0.0 || rdcc_w0 > 1.0)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                     "raw data cache w0 value must be between 0.0 and 1.0 inclusive")
 
@@ -4221,7 +4221,7 @@ herr_t
 H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location, hbool_t start_on_access)
 {
     H5P_genplist_t *plist;               /* Property list pointer */
-    char *          tmp_location;        /* Working location pointer */
+    char *          new_location;        /* Working location pointer */
     herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
@@ -4237,19 +4237,14 @@ H5Pset_mdc_log_options(hid_t plist_id, hbool_t is_enabled, const char *location,
     if (NULL == (plist = H5P_object_verify(plist_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "plist_id is not a file access property list")
 
-    /* Get the current location string and free it */
-    if (H5P_get(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
-        HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get current log location")
-    H5MM_xfree(tmp_location);
-
     /* Make a copy of the passed-in location */
-    if (NULL == (tmp_location = H5MM_xstrdup(location)))
+    if (NULL == (new_location = H5MM_xstrdup(location)))
         HGOTO_ERROR(H5E_PLIST, H5E_CANTCOPY, FAIL, "can't copy passed-in log location")
 
     /* Set values */
     if (H5P_set(plist, H5F_ACS_USE_MDC_LOGGING_NAME, &is_enabled) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set is_enabled flag")
-    if (H5P_set(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &tmp_location) < 0)
+    if (H5P_set(plist, H5F_ACS_MDC_LOG_LOCATION_NAME, &new_location) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set log location")
     if (H5P_set(plist, H5F_ACS_START_MDC_LOG_ON_ACCESS_NAME, &start_on_access) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set start_on_access flag")
@@ -5706,6 +5701,64 @@ H5Pget_vol_info(hid_t plist_id, void **vol_info /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5Pget_vol_info() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5Pget_vol_cap_flags
+ *
+ * Purpose:     Queries the current VOL connector information for a FAPL to
+ *              retrieve the capability flags for the VOL connector stack, as will
+ *              be used by a file open or create operation that uses this FAPL.
+ *
+ *              Current capability flags are:
+ *                  H5VL_CAP_FLAG_THREADSAFE   - Connector is threadsafe
+ *                  H5VL_CAP_FLAG_ASYNC        - Connector performs operations asynchronously
+ *                  H5VL_CAP_FLAG_NATIVE_FILES - Connector produces native file format
+ *
+ * Note:        This routine supports the use of the HDF5_VOL_CONNECTOR environment
+ *              environment variable to override the VOL connector set programmatically
+ *              for the FAPL (with H5Pset_vol).
+ *
+ * Note:        The H5VL_CAP_FLAG_ASYNC flag can be checked to see if asynchronous
+ *              operations are supported by the VOL connector stack.
+ *
+ * Return:      Success:        Non-negative
+ *              Failure:        Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*Iu", plist_id, cap_flags);
+
+    /* Get the 'cap_flags' from the connector */
+    if (cap_flags) {
+        if (TRUE == H5P_isa_class(plist_id, H5P_FILE_ACCESS)) {
+            H5P_genplist_t *      plist;          /* Property list pointer */
+            H5VL_connector_prop_t connector_prop; /* Property for VOL connector ID & info */
+
+            /* Get property list for ID */
+            if (NULL == (plist = (H5P_genplist_t *)H5I_object_verify(plist_id, H5I_GENPROP_LST)))
+                HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a property list")
+
+            /* Get the connector property */
+            if (H5P_peek(plist, H5F_ACS_VOL_CONN_NAME, &connector_prop) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector property")
+
+            /* Query the capability flags */
+            if (H5VL_get_cap_flags(&connector_prop, cap_flags) < 0)
+                HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, FAIL, "can't get VOL connector capability flags")
+        } /* end if */
+        else
+            HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+    } /* end if */
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5Pget_vol_cap_flags() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_vol_create

@@ -387,8 +387,6 @@ create_datasets(hid_t file_id, int min_dset, int max_dset)
         }
     }
 
-    return;
-
 } /* create_datasets() */
 
 /*-------------------------------------------------------------------------
@@ -459,8 +457,6 @@ delete_datasets(hid_t file_id, int min_dset, int max_dset)
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    return;
 
 } /* delete_datasets() */
 
@@ -850,8 +846,6 @@ open_hdf5_file(hbool_t create_file, hbool_t mdci_sbem_expected, hbool_t read_onl
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d -- exiting.\n", fcn_name, cp++);
 
-    return;
-
 } /* open_hdf5_file() */
 
 /*-------------------------------------------------------------------------
@@ -946,7 +940,10 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
         }
         else {
 
-            H5E_BEGIN_TRY { file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl_id); }
+            H5E_BEGIN_TRY
+            {
+                file_id = H5Fopen(hdf_file_name, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl_id);
+            }
             H5E_END_TRY;
         }
 
@@ -959,8 +956,6 @@ attempt_swmr_open_hdf5_file(const hbool_t create_file, const hbool_t set_mdci_fa
 
     if (show_progress)
         HDfprintf(stdout, "%s: cp = %d.\n", fcn_name, cp++);
-
-    return;
 
 } /* attempt_swmr_open_hdf5_file() */
 
@@ -1198,8 +1193,6 @@ verify_datasets(hid_t file_id, int min_dset, int max_dset)
             failure_mssg = "H5Sclose(memspace_id) failed.";
         }
     }
-
-    return;
 
 } /* verify_datasets() */
 
@@ -1480,7 +1473,7 @@ check_cache_image_ctl_flow_1(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -1726,7 +1719,7 @@ check_cache_image_ctl_flow_2(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -2100,7 +2093,7 @@ check_cache_image_ctl_flow_3(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -2436,7 +2429,7 @@ check_cache_image_ctl_flow_4(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -2725,7 +2718,7 @@ check_cache_image_ctl_flow_5(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -2976,7 +2969,7 @@ check_cache_image_ctl_flow_6(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -3425,7 +3418,7 @@ cache_image_smoke_check_1(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -3701,7 +3694,7 @@ cache_image_smoke_check_2(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -4089,7 +4082,7 @@ cache_image_smoke_check_3(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -4468,7 +4461,7 @@ cache_image_smoke_check_4(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 } /* cache_image_smoke_check_4() */
@@ -4972,7 +4965,7 @@ cache_image_smoke_check_5(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -5389,7 +5382,7 @@ cache_image_smoke_check_6(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -5745,7 +5738,7 @@ cache_image_api_error_check_1(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -6173,7 +6166,7 @@ cache_image_api_error_check_2(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -6428,7 +6421,7 @@ cache_image_api_error_check_3(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -6985,7 +6978,7 @@ cache_image_api_error_check_4(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -7443,7 +7436,7 @@ get_free_sections_test(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 
@@ -7816,7 +7809,7 @@ evict_on_close_test(hbool_t single_file_vfd)
     }
 
     if (!pass)
-        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", FUNC, failure_mssg);
+        HDfprintf(stdout, "%s: failure_mssg = \"%s\".\n", __func__, failure_mssg);
 
     return !pass;
 #endif /* H5_HAVE_PARALLEL */
@@ -7860,8 +7853,8 @@ main(void)
     HDprintf("=========================================\n");
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0 &&
+                                HDstrcmp(env_h5_drvr, "family") != 0);
 
     nerrs += check_cache_image_ctl_flow_1(single_file_vfd);
     nerrs += check_cache_image_ctl_flow_2(single_file_vfd);

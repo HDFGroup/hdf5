@@ -581,6 +581,11 @@ H5_DLL herr_t             H5O__chunk_resize(H5O_t *oh, H5O_chunk_proxy_t *chk_pr
 H5_DLL herr_t             H5O__chunk_delete(H5F_t *f, H5O_t *oh, unsigned idx);
 H5_DLL herr_t             H5O__chunk_dest(H5O_chunk_proxy_t *chunk_proxy);
 
+/* Cache corking functions */
+H5_DLL herr_t H5O__disable_mdc_flushes(H5O_loc_t *oloc);
+H5_DLL herr_t H5O__enable_mdc_flushes(H5O_loc_t *oloc);
+H5_DLL herr_t H5O__are_mdc_flushes_disabled(const H5O_loc_t *oloc, hbool_t *are_disabled);
+
 /* Collect storage info for btree and heap */
 H5_DLL herr_t H5O__attr_bh_info(H5F_t *f, H5O_t *oh, H5_ih_info_t *bh_info);
 

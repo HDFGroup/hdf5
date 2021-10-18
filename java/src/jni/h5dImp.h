@@ -13,8 +13,8 @@
 #include <jni.h>
 /* Header for class hdf_hdf5lib_H5_H5D */
 
-#ifndef _Included_hdf_hdf5lib_H5_H5D
-#define _Included_hdf_hdf5lib_H5_H5D
+#ifndef Included_hdf_hdf5lib_H5_H5D
+#define Included_hdf_hdf5lib_H5_H5D
 
 #ifdef __cplusplus
 extern "C" {
@@ -322,4 +322,4 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Drefresh(JNIEnv *, jclass, jlong);
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_H5D */
+#endif /* Included_hdf_hdf5lib_H5_H5D */

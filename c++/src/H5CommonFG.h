@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __CommonFG_H
-#define __CommonFG_H
+#ifndef H5CommonFG_H
+#define H5CommonFG_H
 
 namespace H5 {
 
@@ -83,7 +83,7 @@ class H5_DLLCPP CommonFG {
 }; // end of CommonFG
 } // namespace H5
 
-#endif // __CommonFG_H
+#endif // H5CommonFG_H
 
 /***************************************************************************
                                 Design Note

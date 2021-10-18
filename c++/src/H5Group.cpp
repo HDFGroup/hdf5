@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 #include <string>
 
 #include "H5Include.h"
@@ -50,7 +46,9 @@ using std::endl;
 ///\brief       Default constructor: creates a stub Group.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID) {}
+Group::Group() : H5Object(), CommonFG(), id(H5I_INVALID_HID)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    Group copy constructor

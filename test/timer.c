@@ -43,55 +43,55 @@ test_time_formatting(void)
     TESTING("Time string formats");
 
     /*      < 0,            N/A             */
-    s = H5_timer_get_time_string(-1.0F);
+    s = H5_timer_get_time_string(-1.0);
     if (NULL == s || HDstrcmp(s, "N/A") != 0)
         TEST_ERROR;
     HDfree(s);
 
     /*      0               0               */
-    s = H5_timer_get_time_string(0.0F);
+    s = H5_timer_get_time_string(0.0);
     if (NULL == s || HDstrcmp(s, "0.0 s") != 0)
         TEST_ERROR;
     HDfree(s);
 
     /*      < 1 us          nanoseconds     */
-    s = H5_timer_get_time_string(123.0E-9F);
+    s = H5_timer_get_time_string(123.0E-9);
     if (NULL == s || HDstrcmp(s, "123 ns") != 0)
         TEST_ERROR;
     HDfree(s);
 
     /*      < 1 ms          microseconds    */
-    s = H5_timer_get_time_string(23.456E-6F);
+    s = H5_timer_get_time_string(23.456E-6);
     if (NULL == s || HDstrcmp(s, "23.5 us") != 0)
         TEST_ERROR;
     HDfree(s);
 
     /*      < 1 s           milliseconds    */
-    s = H5_timer_get_time_string(4.56789E-3F);
+    s = H5_timer_get_time_string(4.56789E-3);
     if (NULL == s || HDstrcmp(s, "4.6 ms") != 0)
         TEST_ERROR;
     HDfree(s);
 
     /*      < 1 min         seconds         */
-    s = H5_timer_get_time_string(3.14F);
+    s = H5_timer_get_time_string(3.14);
     if (NULL == s || HDstrcmp(s, "3.14 s") != 0)
         TEST_ERROR;
     HDfree(s);
 
     /*      < 1 hr          mins, secs      */
-    s = H5_timer_get_time_string(2521.0F);
+    s = H5_timer_get_time_string(2521.0);
     if (NULL == s || HDstrcmp(s, "42 m 1 s") != 0)
         TEST_ERROR;
     HDfree(s);
 
     /*      < 1 d           hrs, mins, secs */
-    s = H5_timer_get_time_string(9756.0F);
+    s = H5_timer_get_time_string(9756.0);
     if (NULL == s || HDstrcmp(s, "2 h 42 m 36 s") != 0)
         TEST_ERROR;
     HDfree(s);
 
     /*      > 1 d            days, hrs, mins, secs */
-    s = H5_timer_get_time_string(280802.0F);
+    s = H5_timer_get_time_string(280802.0);
     if (NULL == s || HDstrcmp(s, "3 d 6 h 0 m 2 s") != 0)
         TEST_ERROR;
     HDfree(s);
@@ -144,7 +144,7 @@ test_timer_system_user(void)
     /* The system and user times may not be present on some systems.  They
      * will be -1.0 if they are not.
      */
-    if (timer.initial.system < (double)0.0f || timer.initial.user < (double)0.0f) {
+    if (timer.initial.system < 0.0 || timer.initial.user < 0.0) {
         SKIPPED();
         HDprintf("NOTE: No suitable way to get system/user times on this platform.\n");
         return 0;
@@ -165,7 +165,7 @@ test_timer_system_user(void)
         TEST_ERROR;
 
     /* System and user times should be non-negative. */
-    if (times.system < (double)0.0f || times.user < (double)0.0f)
+    if (times.system < 0.0 || times.user < 0.0)
         TEST_ERROR;
 
     PASSED();
@@ -224,7 +224,7 @@ test_timer_elapsed(void)
         TEST_ERROR;
 
     /* Elapsed time should be non-negative. */
-    if (times.elapsed < (double)0.0f)
+    if (times.elapsed < 0.0)
         TEST_ERROR;
 
     PASSED();
@@ -260,11 +260,11 @@ test_timer_functionality(void)
 
     /* Times should be initialized to zero */
     err = H5_timer_get_times(timer, &times);
-    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, (double)0.0f))
+    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, 0.0))
         TEST_ERROR;
 
     err = H5_timer_get_total_times(timer, &times);
-    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, (double)0.0f))
+    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, 0.0))
         TEST_ERROR;
 
     /********************
@@ -289,11 +289,11 @@ test_timer_functionality(void)
 
     /* Times should be positive and non-negative */
     err = H5_timer_get_times(timer, &times);
-    if (err < 0 || times.elapsed < (double)0.0f)
+    if (err < 0 || times.elapsed < 0.0)
         TEST_ERROR;
 
     err = H5_timer_get_total_times(timer, &times);
-    if (err < 0 || times.elapsed < (double)0.0f)
+    if (err < 0 || times.elapsed < 0.0)
         TEST_ERROR;
 
     /**********************
@@ -306,11 +306,11 @@ test_timer_functionality(void)
         TEST_ERROR;
 
     err = H5_timer_get_times(timer, &times);
-    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, (double)0.0f))
+    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, 0.0))
         TEST_ERROR;
 
     err = H5_timer_get_total_times(timer, &times);
-    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, (double)0.0f))
+    if (err < 0 || !H5_DBL_ABS_EQUAL(times.elapsed, 0.0))
         TEST_ERROR;
 
     /* Timer state should flip */
@@ -326,12 +326,12 @@ test_timer_functionality(void)
 
     /* Times should be non-negative */
     err = H5_timer_get_times(timer, &times);
-    if (err < 0 || times.elapsed < (double)0.0f)
+    if (err < 0 || times.elapsed < 0.0)
         TEST_ERROR;
     prev_etime = times.elapsed;
 
     err = H5_timer_get_total_times(timer, &times);
-    if (err < 0 || times.elapsed < (double)0.0f)
+    if (err < 0 || times.elapsed < 0.0)
         TEST_ERROR;
     prev_total_etime = times.elapsed;
 

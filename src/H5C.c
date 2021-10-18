@@ -21,14 +21,8 @@
  *              things which exist on disk, and which may be
  *              unambiguously referenced by their disk addresses.
  *
- *              The code in this module was initially written in
- *        support of a complete re-write of the metadata cache
- *        in H5AC.c  However, other uses for the cache code
- *        suggested themselves, and thus this file was created
- *        in an attempt to support re-use.
- *
- *        For a detailed overview of the cache, please see the
- *        header comment for H5C_t in H5Cpkg.h.
+ *		For a detailed overview of the cache, please see the
+ *		header comment for H5C_t in H5Cpkg.h.
  *
  *-------------------------------------------------------------------------
  */
@@ -39,9 +33,7 @@
  *
  *    Code Changes:
  *
- *     - Remove extra functionality in H5C__flush_single_entry()?
- *
- *     - Change protect/unprotect to lock/unlock.
+ *	 - Change protect/unprotect to lock/unlock.
  *
  *     - Flush entries in increasing address order in
  *       H5C__make_space_in_cache().
@@ -53,18 +45,9 @@
  *       I/O overhead.  Can't do this just yet as some entries are not
  *       contiguous.  Do this in parallel only or in serial as well?
  *
- *     - Create MPI type for dirty objects when flushing in parallel.
- *
- *     - Now that TBBT routines aren't used, fix nodes in memory to
- *         point directly to the skip list node from the LRU list, eliminating
- *         skip list lookups when evicting objects from the cache.
- *
- *    Tests:
- *
- *     - Trim execution time.  (This is no longer a major issue with the
- *       shift from the TBBT to a hash table for indexing.)
- *
- *     - Add random tests.
+ *	 - Fix nodes in memory to point directly to the skip list node from
+ *         the LRU list, eliminating skip list lookups when evicting objects
+ *         from the cache.
  *
  **************************************************************************/
 
@@ -462,17 +445,17 @@ H5C_create(size_t max_cache_size, size_t min_clean_size, int max_type_id,
     (cache_ptr->resize_ctl).max_increment       = H5C__DEF_AR_MAX_INCREMENT;
 
     (cache_ptr->resize_ctl).flash_incr_mode = H5C_flash_incr__off;
-    (cache_ptr->resize_ctl).flash_multiple  = (double)1.0f;
-    (cache_ptr->resize_ctl).flash_threshold = (double)0.25f;
+    (cache_ptr->resize_ctl).flash_multiple  = 1.0;
+    (cache_ptr->resize_ctl).flash_threshold = 0.25;
 
     (cache_ptr->resize_ctl).decr_mode              = H5C_decr__off;
-    (cache_ptr->resize_ctl).upper_hr_threshold     = (double)H5C__DEF_AR_UPPER_THRESHHOLD;
-    (cache_ptr->resize_ctl).decrement              = (double)H5C__DEF_AR_DECREMENT;
+    (cache_ptr->resize_ctl).upper_hr_threshold     = H5C__DEF_AR_UPPER_THRESHHOLD;
+    (cache_ptr->resize_ctl).decrement              = H5C__DEF_AR_DECREMENT;
     (cache_ptr->resize_ctl).apply_max_decrement    = TRUE;
     (cache_ptr->resize_ctl).max_decrement          = H5C__DEF_AR_MAX_DECREMENT;
     (cache_ptr->resize_ctl).epochs_before_eviction = H5C__DEF_AR_EPCHS_B4_EVICT;
     (cache_ptr->resize_ctl).apply_empty_reserve    = TRUE;
-    (cache_ptr->resize_ctl).empty_reserve          = (double)H5C__DEF_AR_EMPTY_RESERVE;
+    (cache_ptr->resize_ctl).empty_reserve          = H5C__DEF_AR_EMPTY_RESERVE;
 
     cache_ptr->epoch_markers_active = 0;
 
@@ -689,9 +672,6 @@ H5C_def_auto_resize_rpt_fcn(H5C_t *cache_ptr,
             HDfprintf(stdout, "%sAuto cache resize -- unknown status code.\n", cache_ptr->prefix);
             break;
     }
-
-    return;
-
 } /* H5C_def_auto_resize_rpt_fcn() */
 
 /*-------------------------------------------------------------------------
@@ -2725,7 +2705,7 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             break;
 
         case H5C_incr__threshold:
-            if ((config_ptr->lower_hr_threshold <= (double)0.0f) || (config_ptr->increment <= (double)1.0f) ||
+            if ((config_ptr->lower_hr_threshold <= 0.0) || (config_ptr->increment <= 1.0) ||
                 ((config_ptr->apply_max_increment) && (config_ptr->max_increment <= 0)))
                 cache_ptr->size_increase_possible = FALSE;
             break;
@@ -2745,21 +2725,21 @@ H5C_set_cache_auto_resize_config(H5C_t *cache_ptr, H5C_auto_size_ctl_t *config_p
             break;
 
         case H5C_decr__threshold:
-            if ((config_ptr->upper_hr_threshold >= (double)1.0f) || (config_ptr->decrement >= (double)1.0f) ||
+            if ((config_ptr->upper_hr_threshold >= 1.0) || (config_ptr->decrement >= 1.0) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
         case H5C_decr__age_out:
-            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= (double)1.0f)) ||
+            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= 1.0)) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
         case H5C_decr__age_out_with_threshold:
-            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= (double)1.0f)) ||
+            if (((config_ptr->apply_empty_reserve) && (config_ptr->empty_reserve >= 1.0)) ||
                 ((config_ptr->apply_max_decrement) && (config_ptr->max_decrement <= 0)) ||
-                (config_ptr->upper_hr_threshold >= (double)1.0f))
+                (config_ptr->upper_hr_threshold >= 1.0))
                 cache_ptr->size_decrease_possible = FALSE;
             break;
 
@@ -3740,8 +3720,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                         "initial_size must be in the interval [min_size, max_size]")
 
-        if ((config_ptr->min_clean_fraction < (double)0.0f) ||
-            (config_ptr->min_clean_fraction > (double)1.0f))
+        if ((config_ptr->min_clean_fraction < 0.0) || (config_ptr->min_clean_fraction > 1.0))
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "min_clean_fraction must be in the interval [0.0, 1.0]")
 
         if (config_ptr->epoch_length < H5C__MIN_AR_EPOCH_LENGTH)
@@ -3756,12 +3735,11 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
             HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Invalid incr_mode")
 
         if (config_ptr->incr_mode == H5C_incr__threshold) {
-            if ((config_ptr->lower_hr_threshold < (double)0.0f) ||
-                (config_ptr->lower_hr_threshold > (double)1.0f))
+            if ((config_ptr->lower_hr_threshold < 0.0) || (config_ptr->lower_hr_threshold > 1.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "lower_hr_threshold must be in the range [0.0, 1.0]")
 
-            if (config_ptr->increment < (double)1.0f)
+            if (config_ptr->increment < 1.0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "increment must be greater than or equal to 1.0")
 
             /* no need to check max_increment, as it is a size_t,
@@ -3775,12 +3753,10 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
                 break;
 
             case H5C_flash_incr__add_space:
-                if ((config_ptr->flash_multiple < (double)0.1f) ||
-                    (config_ptr->flash_multiple > (double)10.0f))
+                if ((config_ptr->flash_multiple < 0.1) || (config_ptr->flash_multiple > 10.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "flash_multiple must be in the range [0.1, 10.0]")
-                if ((config_ptr->flash_threshold < (double)0.1f) ||
-                    (config_ptr->flash_threshold > (double)1.0f))
+                if ((config_ptr->flash_threshold < 0.1) || (config_ptr->flash_threshold > 1.0))
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                                 "flash_threshold must be in the range [0.1, 1.0]")
                 break;
@@ -3801,10 +3777,10 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
         }
 
         if (config_ptr->decr_mode == H5C_decr__threshold) {
-            if (config_ptr->upper_hr_threshold > (double)1.0f)
+            if (config_ptr->upper_hr_threshold > 1.0)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "upper_hr_threshold must be <= 1.0")
 
-            if ((config_ptr->decrement > (double)1.0f) || (config_ptr->decrement < (double)0.0f))
+            if ((config_ptr->decrement > 1.0) || (config_ptr->decrement < 0.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "decrement must be in the interval [0.0, 1.0]")
 
             /* no need to check max_decrement as it is a size_t
@@ -3821,7 +3797,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "epochs_before_eviction too big")
 
             if ((config_ptr->apply_empty_reserve) &&
-                ((config_ptr->empty_reserve > (double)1.0f) || (config_ptr->empty_reserve < (double)0.0f)))
+                ((config_ptr->empty_reserve > 1.0) || (config_ptr->empty_reserve < 0.0)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "empty_reserve must be in the interval [0.0, 1.0]")
 
             /* no need to check max_decrement as it is a size_t
@@ -3830,8 +3806,7 @@ H5C_validate_resize_config(H5C_auto_size_ctl_t *config_ptr, unsigned int tests)
         } /* H5C_decr__age_out || H5C_decr__age_out_with_threshold */
 
         if (config_ptr->decr_mode == H5C_decr__age_out_with_threshold) {
-            if ((config_ptr->upper_hr_threshold > (double)1.0f) ||
-                (config_ptr->upper_hr_threshold < (double)0.0f))
+            if ((config_ptr->upper_hr_threshold > 1.0) || (config_ptr->upper_hr_threshold < 0.0))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL,
                             "upper_hr_threshold must be in the interval [0.0, 1.0]")
         } /* H5C_decr__age_out_with_threshold */
@@ -4299,8 +4274,8 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
     HDassert(cache_ptr);
     HDassert(cache_ptr->magic == H5C__H5C_T_MAGIC);
     HDassert(cache_ptr->cache_accesses >= (cache_ptr->resize_ctl).epoch_length);
-    HDassert((double)0.0f <= (cache_ptr->resize_ctl).min_clean_fraction);
-    HDassert((cache_ptr->resize_ctl).min_clean_fraction <= (double)100.0f);
+    HDassert(0.0 <= (cache_ptr->resize_ctl).min_clean_fraction);
+    HDassert((cache_ptr->resize_ctl).min_clean_fraction <= 100.0);
 
     /* check to see if cache_ptr->resize_in_progress is TRUE.  If it, this
      * is a re-entrant call via a client callback called in the resize
@@ -4323,7 +4298,7 @@ H5C__auto_adjust_cache_size(H5F_t *f, hbool_t write_permitted)
     if (H5C_get_cache_hit_rate(cache_ptr, &hit_rate) != SUCCEED)
         HGOTO_ERROR(H5E_CACHE, H5E_SYSTEM, FAIL, "Can't get hit rate")
 
-    HDassert(((double)0.0f <= hit_rate) && (hit_rate <= (double)1.0f));
+    HDassert((0.0 <= hit_rate) && (hit_rate <= 1.0));
 
     switch ((cache_ptr->resize_ctl).incr_mode) {
         case H5C_incr__off:
@@ -6653,9 +6628,7 @@ H5C__flush_single_entry(H5F_t *f, H5C_cache_entry_t *entry_ptr, unsigned flags)
                 }
 
                 if (H5F_block_write(f, mem_type, entry_ptr->addr, entry_ptr->size, entry_ptr->image_ptr) < 0)
-
                     HGOTO_ERROR(H5E_CACHE, H5E_CANTFLUSH, FAIL, "Can't write image to file")
-
 #ifdef H5_HAVE_PARALLEL
             }
 #endif /* H5_HAVE_PARALLEL */

@@ -64,8 +64,8 @@ main(void)
 
     double b64r3[5][3][4];
     double row8[3], col8[4], pln8[5];
-    double rowo8 = 11.0F, colo8 = 21.0F, plno8 = 51.0F;
-    double rowi8 = 1.0F, coli8 = 2.0F, plni8 = 5.0F;
+    double rowo8 = 11.0, colo8 = 21.0, plno8 = 51.0;
+    double rowi8 = 1.0, coli8 = 2.0, plni8 = 5.0;
 
     /* Initialize machine endian */
     volatile uint32_t ibyte = 0x01234567;

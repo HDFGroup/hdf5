@@ -53,7 +53,7 @@ public class TestH5Rref {
     public void openH5file(String filename, String dsetname) {
        try {
            H5fid = H5.H5Fopen(filename,
-                   HDF5Constants.H5F_ACC_RDWR, HDF5Constants.H5P_DEFAULT);
+                   HDF5Constants.H5F_ACC_RDONLY, HDF5Constants.H5P_DEFAULT);
        }
        catch (Throwable err) {
            err.printStackTrace();
@@ -134,7 +134,7 @@ public class TestH5Rref {
             try {H5.H5Tclose(f_type);} catch (Exception ex) {}
         }
         try {
-            ndims = H5.H5Sget_simple_extent_ndims(H5dsid);
+            ndims = (int)H5.H5Sget_simple_extent_npoints(H5dsid);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -209,7 +209,7 @@ public class TestH5Rref {
             try {H5.H5Tclose(f_type);} catch (Exception ex) {}
         }
         try {
-            ndims = H5.H5Sget_simple_extent_ndims(H5dsid);
+            ndims = (int)H5.H5Sget_simple_extent_npoints(H5dsid);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -286,7 +286,7 @@ public class TestH5Rref {
           try {H5.H5Tclose(f_type);} catch (Exception ex) {}
       }
       try {
-          ndims = H5.H5Sget_simple_extent_ndims(H5dsid);
+          ndims = (int)H5.H5Sget_simple_extent_npoints(H5dsid);
       }
       catch (Throwable err) {
           err.printStackTrace();
@@ -305,79 +305,80 @@ public class TestH5Rref {
       }
       for (int i = 0; i < ndims; i++) {
           try {
-              ret_val = H5.H5Rget_type(refbuf[i]);
+              try {
+                  ret_val = H5.H5Rget_type(refbuf[i]);
+              }
+              catch (Throwable err) {
+                  err.printStackTrace();
+                  fail("testH5Rget_region_dataset: H5Rget_type["+i+"]: " + err);
+              }
               assertTrue("testH5Rget_region_dataset: H5Rget_type["+i+"]="+ret_val, ret_val == ref_type);
               try {
                   loc_id = H5.H5Ropen_object(refbuf[i], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
                   assertTrue(loc_id >= 0);
-                  boolean regionzero = byteArrayCheck(refbuf[i]);
-                  if (i > 1)
-                      assertTrue(regionzero);
-                  else {
+                  try {
+                      loc_sid = H5.H5Ropen_region(refbuf[i], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
+                      assertTrue(loc_sid >= 0);
+                      int region_type = -1;
                       try {
-                          loc_sid = H5.H5Ropen_region(refbuf[i], HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
-                          assertTrue(loc_sid >= 0);
-                          int region_type = -1;
-                          try {
-                              int reg_ndims = H5.H5Sget_simple_extent_ndims(loc_sid);
-                              region_type = H5.H5Sget_select_type(loc_sid);
-                              if (i == 1)
-                                  assertTrue(region_type == HDF5Constants.H5S_SEL_POINTS);
-                              else
-                                  assertTrue(region_type == HDF5Constants.H5S_SEL_HYPERSLABS);
-                              if (region_type == HDF5Constants.H5S_SEL_POINTS) {
-                                  long reg_npoints = H5.H5Sget_select_elem_npoints(loc_sid);
-                                  // Coordinates for get point selection
-                                  long getcoord[] = new long[reg_ndims * (int)reg_npoints];
-                                  // Known coordinates for point selection
-                                  long coord[][] = {{6,9},{2,2},{8,4},{1,6},{2,8},{3,2},
-                                                   {0,4},{9,0},{7,1},{3,3}};
-                                  try {
-                                      H5.H5Sget_select_elem_pointlist(loc_sid, 0, reg_npoints, getcoord);
-                                      assertTrue("H5.H5Sget_select_elem_pointlist", coord[0][0] == getcoord[0]);
-                                      assertTrue("H5.H5Sget_select_elem_pointlist", coord[0][1] == getcoord[1]);
-                                      assertTrue("H5.H5Sget_select_elem_pointlist", coord[1][0] == getcoord[2]);
-                                      assertTrue("H5.H5Sget_select_elem_pointlist", coord[1][1] == getcoord[3]);
-                                      assertTrue("H5.H5Sget_select_elem_pointlist", coord[2][0] == getcoord[4]);
-                                      assertTrue("H5.H5Sget_select_elem_pointlist", coord[2][1] == getcoord[5]);
-                                  }
-                                  catch (Throwable err3) {
-                                      err3.printStackTrace();
-                                      fail("H5.H5Sget_select_elem_pointlist: " + err3);
-                                  }
+                          int reg_ndims = H5.H5Sget_simple_extent_ndims(loc_sid);
+                          region_type = H5.H5Sget_select_type(loc_sid);
+                          if (i == 1)
+                              assertTrue(region_type == HDF5Constants.H5S_SEL_POINTS);
+                          else
+                              assertTrue(region_type == HDF5Constants.H5S_SEL_HYPERSLABS);
+                          if (region_type == HDF5Constants.H5S_SEL_POINTS) {
+                              long reg_npoints = H5.H5Sget_select_elem_npoints(loc_sid);
+                              // Coordinates for get point selection
+                              long getcoord[] = new long[reg_ndims * (int)reg_npoints];
+                              // Known coordinates for point selection
+                              long coord[][] = {{6,9},{2,2},{8,4},{1,6},{2,8},{3,2},
+                                               {0,4},{9,0},{7,1},{3,3}};
+                              try {
+                                  H5.H5Sget_select_elem_pointlist(loc_sid, 0, reg_npoints, getcoord);
+                                  assertTrue("H5.H5Sget_select_elem_pointlist", coord[0][0] == getcoord[0]);
+                                  assertTrue("H5.H5Sget_select_elem_pointlist", coord[0][1] == getcoord[1]);
+                                  assertTrue("H5.H5Sget_select_elem_pointlist", coord[1][0] == getcoord[2]);
+                                  assertTrue("H5.H5Sget_select_elem_pointlist", coord[1][1] == getcoord[3]);
+                                  assertTrue("H5.H5Sget_select_elem_pointlist", coord[2][0] == getcoord[4]);
+                                  assertTrue("H5.H5Sget_select_elem_pointlist", coord[2][1] == getcoord[5]);
                               }
-                              else if (region_type == HDF5Constants.H5S_SEL_HYPERSLABS) {
-                                  long reg_nblocks = H5.H5Sget_select_hyper_nblocks(loc_sid);
-                                  assertTrue("H5Sget_select_hyper_nblocks", reg_nblocks == 1);
-                                  // Coordinates for get block selection
-                                  long getblocks[] = new long[reg_ndims * (int)reg_nblocks * 2];
-                                  long start[] = {2,2};
-                                  long block[] = {8,8};
-                                  try {
-                                      H5.H5Sget_select_hyper_blocklist(loc_sid, 0, reg_nblocks, getblocks);
-                                      assertTrue("H5.H5Sget_select_hyper_blocklist", start[0] == getblocks[0]);
-                                      assertTrue("H5.H5Sget_select_hyper_blocklist", start[1] == getblocks[1]);
-                                      assertTrue("H5.H5Sget_select_hyper_blocklist", (block[0]-1) == getblocks[2]);
-                                      assertTrue("H5.H5Sget_select_hyper_blocklist", (block[1]-1) == getblocks[3]);
-                                  }
-                                  catch (Throwable err3) {
-                                      err3.printStackTrace();
-                                      fail("H5.H5Sget_select_hyper_blocklist: " + err3);
-                                  }
+                              catch (Throwable err3) {
+                                  err3.printStackTrace();
+                                  fail("H5.H5Sget_select_elem_pointlist: " + err3);
                               }
                           }
-                          catch (Throwable err2) {
-                              err2.printStackTrace();
-                              fail("testH5Rget_region_dataset: H5Sget_select_type: " + err2);
+                          else if (region_type == HDF5Constants.H5S_SEL_HYPERSLABS) {
+                              long reg_nblocks = H5.H5Sget_select_hyper_nblocks(loc_sid);
+                              assertTrue("H5Sget_select_hyper_nblocks", reg_nblocks == 1);
+                              // Coordinates for get block selection
+                              long getblocks[] = new long[reg_ndims * (int)reg_nblocks * 2];
+                              long start[] = {2,2};
+                              long block[] = {8,8};
+                              try {
+                                  H5.H5Sget_select_hyper_blocklist(loc_sid, 0, reg_nblocks, getblocks);
+                                  assertTrue("H5.H5Sget_select_hyper_blocklist", start[0] == getblocks[0]);
+                                  assertTrue("H5.H5Sget_select_hyper_blocklist", start[1] == getblocks[1]);
+                                  assertTrue("H5.H5Sget_select_hyper_blocklist", (block[0]-1) == getblocks[2]);
+                                  assertTrue("H5.H5Sget_select_hyper_blocklist", (block[1]-1) == getblocks[3]);
+                              }
+                              catch (Throwable err3) {
+                                  err3.printStackTrace();
+                                  fail("H5.H5Sget_select_hyper_blocklist: " + err3);
+                              }
                           }
                       }
-                      catch (Throwable err1) {
-                          err1.printStackTrace();
-                          fail("testH5Rget_region_dataset: " + err1);
+                      catch (Throwable err2) {
+                          err2.printStackTrace();
+                          assertTrue("testH5Rget_region_dataset: H5Sget_select_type: " + err2, i > 1);
                       }
-                      finally {
-                          try {H5.H5Sclose(loc_sid);} catch (Exception ex) {}
-                      }
+                  }
+                  catch (Throwable err1) {
+                      err1.printStackTrace();
+                      fail("testH5Rget_region_dataset: " + err1);
+                  }
+                  finally {
+                      try {H5.H5Sclose(loc_sid);} catch (Exception ex) {}
                   }
               }
               catch (Throwable err0) {
@@ -432,7 +433,7 @@ public class TestH5Rref {
           try {H5.H5Tclose(f_type);} catch (Exception ex) {}
       }
       try {
-          ndims = H5.H5Sget_simple_extent_ndims(H5dsid);
+          ndims = (int)H5.H5Sget_simple_extent_npoints(H5dsid);
       }
       catch (Throwable err) {
           err.printStackTrace();
@@ -473,7 +474,8 @@ public class TestH5Rref {
               }
               catch (Throwable err0) {
                   err0.printStackTrace();
-                  fail("testH5Rget_region_attribute: " + err0);
+                  // second attribute is null
+                  assertTrue("testH5Rget_region_attribute: " + err0, i == 1);
               }
               finally {
                   try {H5.H5Aclose(loc_id);} catch (Exception ex) {}

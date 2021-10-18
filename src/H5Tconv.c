@@ -1668,7 +1668,7 @@ H5T__conv_b_b(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t         olap;                    /*num overlapping elements    */
     size_t         half_size;               /*1/2 of total size for swapping*/
     uint8_t *      s, *sp, *d, *dp;         /*source and dest traversal ptrs*/
-    uint8_t        dbuf[256];               /*temp destination buffer    */
+    uint8_t        dbuf[256] = {0};         /*temp destination buffer    */
     size_t         msb_pad_offset;          /*offset for dest MSB padding    */
     size_t         i;
     uint8_t *      src_rev   = NULL;         /*order-reversed source buffer  */
@@ -2699,7 +2699,7 @@ H5T__conv_enum_init(H5T_t *src, H5T_t *dst, H5T_cdata_t *cdata)
         HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed")
     for (i = 0, j = 0; i < src->shared->u.enumer.nmembs && j < dst->shared->u.enumer.nmembs; i++, j++) {
         while (j < dst->shared->u.enumer.nmembs &&
-               HDstrcmp(src->shared->u.enumer.name[i], dst->shared->u.enumer.name[j]))
+               HDstrcmp(src->shared->u.enumer.name[i], dst->shared->u.enumer.name[j]) != 0)
             j++;
         if (j >= dst->shared->u.enumer.nmembs)
             HGOTO_ERROR(H5E_DATATYPE, H5E_UNSUPPORTED, FAIL,
@@ -3843,8 +3843,8 @@ H5T__conv_i_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t         half_size;            /*half the type size        */
     size_t         olap;                 /*num overlapping elements    */
     uint8_t *      s, *sp, *d, *dp;      /*source and dest traversal ptrs*/
-    uint8_t *      src_rev = NULL;       /*order-reversed source buffer  */
-    uint8_t        dbuf[64];             /*temp destination buffer    */
+    uint8_t *      src_rev  = NULL;      /*order-reversed source buffer  */
+    uint8_t        dbuf[64] = {0};       /*temp destination buffer    */
     size_t         first;
     ssize_t        sfirst;                   /*a signed version of `first'    */
     size_t         i;                        /*Local index variables         */
@@ -4286,8 +4286,8 @@ H5T__conv_f_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       olap;                 /*num overlapping elements    */
     ssize_t      bitno = 0;            /*bit number            */
     uint8_t *    s, *sp, *d, *dp;      /*source and dest traversal ptrs*/
-    uint8_t *    src_rev = NULL;       /*order-reversed source buffer  */
-    uint8_t      dbuf[64];             /*temp destination buffer    */
+    uint8_t *    src_rev  = NULL;      /*order-reversed source buffer  */
+    uint8_t      dbuf[64] = {0};       /*temp destination buffer    */
     uint8_t      tmp1, tmp2;           /*temp variables for swapping bytes*/
 
     /* Conversion-related variables */
@@ -4947,7 +4947,7 @@ H5T__conv_s_s(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
             dst_delta = (ssize_t)direction * (ssize_t)(buf_stride ? buf_stride : dst->shared->size);
 
             /* Allocate the overlap buffer */
-            if (NULL == (dbuf = (uint8_t *)H5MM_malloc(dst->shared->size)))
+            if (NULL == (dbuf = (uint8_t *)H5MM_calloc(dst->shared->size)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, FAIL, "memory allocation failed for string conversion")
 
             /* The conversion loop. */
@@ -7725,9 +7725,9 @@ herr_t
 H5T__conv_float_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                       size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, SCHAR, float, signed char, SCHAR_MIN, SCHAR_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7747,9 +7747,9 @@ herr_t
 H5T__conv_float_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                       size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, UCHAR, float, unsigned char, 0, UCHAR_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7769,9 +7769,9 @@ herr_t
 H5T__conv_double_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, SCHAR, double, signed char, SCHAR_MIN, SCHAR_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7791,9 +7791,9 @@ herr_t
 H5T__conv_double_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, UCHAR, double, unsigned char, 0, UCHAR_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7813,9 +7813,9 @@ herr_t
 H5T__conv_ldouble_schar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, SCHAR, long double, signed char, SCHAR_MIN, SCHAR_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7835,9 +7835,9 @@ herr_t
 H5T__conv_ldouble_uchar(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, UCHAR, long double, unsigned char, 0, UCHAR_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7857,9 +7857,9 @@ herr_t
 H5T__conv_float_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                       size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, SHORT, float, short, SHRT_MIN, SHRT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7879,9 +7879,9 @@ herr_t
 H5T__conv_float_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, USHORT, float, unsigned short, 0, USHRT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7901,9 +7901,9 @@ herr_t
 H5T__conv_double_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, SHORT, double, short, SHRT_MIN, SHRT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7923,9 +7923,9 @@ herr_t
 H5T__conv_double_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, USHORT, double, unsigned short, 0, USHRT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7945,9 +7945,9 @@ herr_t
 H5T__conv_ldouble_short(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, SHORT, long double, short, SHRT_MIN, SHRT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7967,9 +7967,9 @@ herr_t
 H5T__conv_ldouble_ushort(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, USHORT, long double, unsigned short, 0, USHRT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -7989,9 +7989,9 @@ herr_t
 H5T__conv_float_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                     size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, INT, float, int, INT_MIN, INT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8011,9 +8011,9 @@ herr_t
 H5T__conv_float_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                      size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, UINT, float, unsigned int, 0, UINT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8033,9 +8033,9 @@ herr_t
 H5T__conv_double_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                      size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, INT, double, int, INT_MIN, INT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8055,9 +8055,9 @@ herr_t
 H5T__conv_double_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                       size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, UINT, double, unsigned int, 0, UINT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8077,9 +8077,9 @@ herr_t
 H5T__conv_ldouble_int(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                       size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, INT, long double, int, INT_MIN, INT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8099,9 +8099,9 @@ herr_t
 H5T__conv_ldouble_uint(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, UINT, long double, unsigned int, 0, UINT_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8121,9 +8121,9 @@ herr_t
 H5T__conv_float_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                      size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, LONG, float, long, LONG_MIN, LONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8143,9 +8143,9 @@ herr_t
 H5T__conv_float_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                       size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, ULONG, float, unsigned long, 0, ULONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8165,9 +8165,9 @@ herr_t
 H5T__conv_double_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                       size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, LONG, double, long, LONG_MIN, LONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8187,9 +8187,9 @@ herr_t
 H5T__conv_double_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, ULONG, double, unsigned long, 0, ULONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8209,9 +8209,9 @@ herr_t
 H5T__conv_ldouble_long(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, LONG, long double, long, LONG_MIN, LONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8231,9 +8231,9 @@ herr_t
 H5T__conv_ldouble_ulong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, ULONG, long double, unsigned long, 0, ULONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8253,9 +8253,9 @@ herr_t
 H5T__conv_float_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                       size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, LLONG, float, long long, LLONG_MIN, LLONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8275,9 +8275,9 @@ herr_t
 H5T__conv_float_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(FLOAT, ULLONG, float, unsigned long long, 0, ULLONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8297,9 +8297,9 @@ herr_t
 H5T__conv_double_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                        size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, LLONG, double, long long, LLONG_MIN, LLONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8319,9 +8319,9 @@ herr_t
 H5T__conv_double_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(DOUBLE, ULLONG, double, unsigned long long, 0, ULLONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 
 /*-------------------------------------------------------------------------
@@ -8342,9 +8342,9 @@ herr_t
 H5T__conv_ldouble_llong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, LLONG, long double, long long, LLONG_MIN, LLONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_LLONG*/
 
@@ -8366,9 +8366,9 @@ herr_t
 H5T__conv_ldouble_ullong(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
-    H5_GCC_DIAG_OFF("float-equal")
+    H5_GCC_CLANG_DIAG_OFF("float-equal")
     H5T_CONV_Fx(LDOUBLE, ULLONG, long double, unsigned long long, 0, ULLONG_MAX);
-    H5_GCC_DIAG_ON("float-equal")
+    H5_GCC_CLANG_DIAG_ON("float-equal")
 }
 #endif /*H5T_CONV_INTERNAL_LDOUBLE_ULLONG*/
 
@@ -8401,8 +8401,8 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       tsize;           /*type size for swapping bytes  */
     size_t       olap;            /*num overlapping elements    */
     uint8_t *    s, *sp, *d, *dp; /*source and dest traversal ptrs*/
-    uint8_t *    src_rev = NULL;  /*order-reversed source buffer  */
-    uint8_t      dbuf[64];        /*temp destination buffer    */
+    uint8_t *    src_rev  = NULL; /*order-reversed source buffer  */
+    uint8_t      dbuf[64] = {0};  /*temp destination buffer    */
     uint8_t      tmp1, tmp2;      /*temp variables for swapping bytes*/
 
     /* Conversion-related variables */
@@ -8477,7 +8477,7 @@ H5T__conv_f_i(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
             /* Allocate enough space for the buffer holding temporary
              * converted value
              */
-            buf_size = (size_t)(HDpow((double)2.0f, (double)src.u.f.esize) / 8 + 1);
+            buf_size = (size_t)(HDpow(2.0, (double)src.u.f.esize) / 8 + 1);
             int_buf  = (uint8_t *)H5MM_calloc(buf_size);
 
             /* Get conversion exception callback property */
@@ -9027,8 +9027,8 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
     size_t       tsize;           /*type size for swapping bytes  */
     size_t       olap;            /*num overlapping elements    */
     uint8_t *    s, *sp, *d, *dp; /*source and dest traversal ptrs*/
-    uint8_t *    src_rev = NULL;  /*order-reversed source buffer  */
-    uint8_t      dbuf[64];        /*temp destination buffer    */
+    uint8_t *    src_rev  = NULL; /*order-reversed source buffer  */
+    uint8_t      dbuf[64] = {0};  /*temp destination buffer    */
     uint8_t      tmp1, tmp2;      /*temp variables for swapping bytes*/
 
     /* Conversion-related variables */
@@ -9315,7 +9315,7 @@ H5T__conv_i_f(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, siz
                 }
 
                 /* Check if the exponent is too big */
-                expo_max = (hsize_t)(HDpow((double)2.0f, (double)dst.u.f.esize) - 1);
+                expo_max = (hsize_t)(HDpow(2.0, (double)dst.u.f.esize) - 1);
 
                 if (expo > expo_max) {    /*overflows*/
                     if (cb_struct.func) { /*user's exception handler.  Reverse back source order*/

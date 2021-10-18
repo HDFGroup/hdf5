@@ -140,7 +140,7 @@ H5HF_id_print(H5HF_t *fh, const void *_id, FILE *stream, int indent, int fwidth)
         id_type = 'T';
     } /* end if */
     else {
-        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", FUNC);
+        HDfprintf(stderr, "%s: Heap ID type not supported yet!\n", __func__);
         HGOTO_ERROR(H5E_HEAP, H5E_UNSUPPORTED, FAIL, "heap ID type not supported yet")
     } /* end else */
 
@@ -543,7 +543,7 @@ H5HF_dblock_debug(H5F_t *f, haddr_t addr, FILE *stream, int indent, int fwidth, 
         amount_free = 0;
 
     HDfprintf(stream, "%*s%-*s %.2f%%\n", indent, "", fwidth, "Percent of available space for data used:",
-              ((double)100.0f * (double)((dblock->size - blk_prefix_size) - amount_free) /
+              (100.0 * (double)((dblock->size - blk_prefix_size) - amount_free) /
                (double)(dblock->size - blk_prefix_size)));
 
     /*

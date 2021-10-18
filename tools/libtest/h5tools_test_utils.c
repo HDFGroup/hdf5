@@ -69,7 +69,7 @@
  *
  *****************************************************************************/
 
-H5_GCC_DIAG_OFF("format")
+H5_GCC_CLANG_DIAG_OFF("format")
 
 /*----------------------------------------------------------------------------
  *
@@ -100,7 +100,7 @@ H5_GCC_DIAG_OFF("format")
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);                                \
+        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
     }
 
 /*----------------------------------------------------------------------------
@@ -1254,7 +1254,7 @@ error:
 #undef UTIL_TEST_DEFAULT
 #undef UTIL_TEST_CREATE
 } /* test_set_configured_fapl */
-H5_GCC_DIAG_ON("format")
+H5_GCC_CLANG_DIAG_ON("format")
 
 /*----------------------------------------------------------------------------
  *

@@ -461,7 +461,7 @@ build_match_list(const char *objname1, trav_info_t *info1, const char *objname2,
 done:
     *table_out = table;
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -493,7 +493,7 @@ trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata)
     const char *       ext_path;
     herr_t             ret_value = SUCCEED;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* init linkinfo struct */
     HDmemset(&lnk_info, 0, sizeof(h5tool_link_info_t));
 
@@ -577,7 +577,7 @@ trav_grp_symlinks(const char *path, const H5L_info2_t *linfo, void *udata)
 done:
     if (lnk_info.trg_path)
         HDfree(lnk_info.trg_path);
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
     return ret_value;
 }
 
@@ -627,7 +627,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     trav_table_t *match_list = NULL;
     diff_err_t    ret_value  = H5DIFF_NO_ERR;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
     /* init filenames */
     HDmemset(filenames, 0, MAX_FILENAME * 2);
     /* init link info struct */
@@ -687,7 +687,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
     /* if any object is specified */
     if (objname1) {
         /* make the given object1 fullpath, start with "/"  */
-        if (HDstrncmp(objname1, "/", 1)) {
+        if (HDstrncmp(objname1, "/", 1) != 0) {
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if (HDasprintf(&obj1fullname, "/%s", objname1) < 0)
@@ -706,7 +706,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
         H5TOOLS_DEBUG("obj1fullname = %s", obj1fullname);
 
         /* make the given object2 fullpath, start with "/" */
-        if (HDstrncmp(objname2, "/", 1)) {
+        if (HDstrncmp(objname2, "/", 1) != 0) {
 #ifdef H5_HAVE_ASPRINTF
             /* Use the asprintf() routine, since it does what we're trying to do below */
             if (HDasprintf(&obj2fullname, "/%s", objname2) < 0)
@@ -1013,7 +1013,7 @@ h5diff(const char *fname1, const char *fname2, const char *objname1, const char 
 
             parallel_print("\n");
             /* if given objects is group under root */
-            if (HDstrcmp(obj1fullname, "/") || HDstrcmp(obj2fullname, "/"))
+            if (HDstrcmp(obj1fullname, "/") != 0 || HDstrcmp(obj2fullname, "/") != 0)
                 parallel_print("group1   group2\n");
             else
                 parallel_print("file1     file2\n");
@@ -1115,9 +1115,9 @@ diff_match(hid_t file1_id, const char *grp1, trav_info_t *info1, hid_t file2_id,
      * if not root, prepare object name to be pre-appended to group path to
      * make full path
      */
-    if (HDstrcmp(grp1, "/"))
+    if (HDstrcmp(grp1, "/") != 0)
         grp1_path = grp1;
-    if (HDstrcmp(grp2, "/"))
+    if (HDstrcmp(grp2, "/") != 0)
         grp2_path = grp2;
 
     /*-------------------------------------------------------------------------

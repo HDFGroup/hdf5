@@ -41,13 +41,30 @@ I. Preconditions
 
    2. You have installed the HDF5 library built with CMake, by executing
       the HDF Install Utility (the *.msi file in the binary package for
-      Windows). If you are using a Windows platform, you can obtain a
-      pre-built Windows binary from The HDF Group's website at
+      Windows). You can obtain pre-built binaries from The HDF Group's website at
       www.hdfgroup.org.
 
    3. Set the environment variable HDF5_DIR to the installed location of
-      the config files for HDF5. On Windows:
+      the config files for HDF5.
+         On Windows:
             HDF5_DIR=C:/Program Files/HDF_Group/HDF5/1.13.x/cmake
+         On unix:
+            HDF5_DIR=<install root folder>/HDF_Group/HDF5/1.13.x/cmake
+
+      If you are using shared libraries, you may need to add to the path
+      environment variable. Set the path environment variable to the
+      installed location of the library files for HDF5.
+         On Windows (*.dll):
+            PATH=%PATH%;C:/Program Files/HDF_Group/HDF5/1.13.x/bin
+         On unix (*.so):
+            LD_LIBRARY_PATH=$LD_LIBRARY_PATH:<install root folder>/HDF_Group/HDF5/1.13.x/lib
+
+      If you are using filter plugin libraries, you will need to set the
+      HDF5_PLUGIN_PATH environment variable.
+         On Windows:
+            HDF5_PLUGIN_PATH=C:/Program Files/HDF_Group/HDF5/1.13.x/lib/plugin
+         On unix:
+            HDF5_PLUGIN_PATH=<install root folder>/HDF_Group/HDF5/1.13.x/lib/plugin
 
       (Note there are no quote characters used on Windows and all platforms
       use forward slashes)
@@ -99,12 +116,13 @@ These steps are described in more detail below.
             * MinGW Makefiles
             * NMake Makefiles
             * Unix Makefiles
-            * Visual Studio 12 2013
-            * Visual Studio 12 2013 Win64
             * Visual Studio 14 2015
             * Visual Studio 14 2015 Win64
             * Visual Studio 15 2017
             * Visual Studio 15 2017 Win64
+            * Visual Studio 16 2019
+            * ... in addition VS2019 will need to set the "-A" option,
+            * ... [Win32, x64, ARM, ARM64]
 
         <options> is:
             * BUILD_TESTING:BOOL=ON
@@ -114,7 +132,7 @@ These steps are described in more detail below.
 
       2.1  Visual CMake users, click the Configure button. If this is the first time you are
            running cmake-gui in this directory, you will be prompted for the
-           generator you wish to use (for example on Windows, Visual Studio 12 2013).
+           generator you wish to use (for example on Windows, Visual Studio 14 2015 Win64).
            CMake will read in the CMakeLists.txt files from the source directory and
            display options for the HDF5 project. After the first configure you
            can adjust the cache settings and/or specify locations of other programs.
@@ -132,7 +150,7 @@ These steps are described in more detail below.
 
       2.2  Alternative command line example on Windows in c:\MyHDFstuff\hdf5\build directory:
 
-           cmake -G "Visual Studio 12 2013" -DBUILD_TESTING:BOOL=ON ..
+           cmake -G "Visual Studio 14 2015 Win64" -DBUILD_TESTING:BOOL=ON ..
 
    3. Build HDF5 Applications
 

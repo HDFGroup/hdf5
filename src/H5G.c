@@ -271,7 +271,7 @@ H5Gcreate_async(const char *app_file, const char *app_func, unsigned app_line, h
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE9(FUNC, "*s*sIui*siiii", app_file, app_func, app_line, loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id)) < 0) {
+                        H5ARG_TRACE9(__func__, "*s*sIui*siiii", app_file, app_func, app_line, loc_id, name, lcpl_id, gcpl_id, gapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID")
@@ -475,7 +475,7 @@ H5Gopen_async(const char *app_file, const char *app_func, unsigned app_line, hid
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE7(FUNC, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, gapl_id, es_id)) < 0) {
+                        H5ARG_TRACE7(__func__, "*s*sIui*sii", app_file, app_func, app_line, loc_id, name, gapl_id, es_id)) < 0) {
             /* clang-format on */
             if (H5I_dec_app_ref_always_close(ret_value) < 0)
                 HDONE_ERROR(H5E_SYM, H5E_CANTDEC, H5I_INVALID_HID, "can't decrement count on group ID")
@@ -502,8 +502,9 @@ done:
 hid_t
 H5Gget_create_plist(hid_t group_id)
 {
-    H5VL_object_t *vol_obj   = NULL;
-    hid_t          ret_value = H5I_INVALID_HID;
+    H5VL_object_t *       vol_obj;     /* Object for loc_id */
+    H5VL_group_get_args_t vol_cb_args; /* Arguments to VOL callback */
+    hid_t                 ret_value = H5I_INVALID_HID;
 
     FUNC_ENTER_API(H5I_INVALID_HID)
     H5TRACE1("i", "i", group_id);
@@ -512,10 +513,16 @@ H5Gget_create_plist(hid_t group_id)
     if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(group_id, H5I_GROUP)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "not a group ID")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type               = H5VL_GROUP_GET_GCPL;
+    vol_cb_args.args.get_gcpl.gcpl_id = H5I_INVALID_HID;
+
     /* Get the group creation property list for the group */
-    if (H5VL_group_get(vol_obj, H5VL_GROUP_GET_GCPL, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, &ret_value) <
-        0)
+    if (H5VL_group_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, H5I_INVALID_HID, "can't get group's creation property list")
+
+    /* Set the return value */
+    ret_value = vol_cb_args.args.get_gcpl.gcpl_id;
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -538,9 +545,9 @@ H5G__get_info_api_common(hid_t loc_id, H5G_info_t *group_info /*out*/, void **to
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    H5I_type_t        id_type;                        /* Type of ID */
-    herr_t            ret_value = SUCCEED;            /* Return value */
+    H5VL_group_get_args_t vol_cb_args;                /* Arguments to VOL callback */
+    H5I_type_t            id_type;                    /* Type of ID */
+    herr_t                ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -551,13 +558,14 @@ H5G__get_info_api_common(hid_t loc_id, H5G_info_t *group_info /*out*/, void **to
     if (!group_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
 
-    /* Set up object access arguments */
-    if (H5VL_setup_self_args(loc_id, vol_obj_ptr, &loc_params) < 0)
+    /* Set up VOL callback & object access arguments */
+    vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
+    if (H5VL_setup_self_args(loc_id, vol_obj_ptr, &vol_cb_args.args.get_info.loc_params) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments")
+    vol_cb_args.args.get_info.ginfo = group_info;
 
     /* Retrieve group information */
-    if (H5VL_group_get(*vol_obj_ptr, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, token_ptr, &loc_params,
-                       group_info) < 0)
+    if (H5VL_group_get(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -622,7 +630,7 @@ H5Gget_info_async(const char *app_file, const char *app_func, unsigned app_line,
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                H5ARG_TRACE6(FUNC, "*s*sIuixi", app_file, app_func, app_line, loc_id, group_info, es_id)) < 0)
+                H5ARG_TRACE6(__func__, "*s*sIuixi", app_file, app_func, app_line, loc_id, group_info, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -647,8 +655,8 @@ H5G__get_info_by_name_api_common(hid_t loc_id, const char *name, H5G_info_t *gro
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    herr_t            ret_value = SUCCEED;            /* Return value */
+    H5VL_group_get_args_t vol_cb_args;                /* Arguments to VOL callback */
+    herr_t                ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -656,13 +664,15 @@ H5G__get_info_by_name_api_common(hid_t loc_id, const char *name, H5G_info_t *gro
     if (!group_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
 
-    /* Set up object access arguments */
-    if (H5VL_setup_name_args(loc_id, name, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr, &loc_params) < 0)
+    /* Set up VOL callback & object access arguments */
+    vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
+    if (H5VL_setup_name_args(loc_id, name, FALSE, lapl_id, vol_obj_ptr,
+                             &vol_cb_args.args.get_info.loc_params) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments")
+    vol_cb_args.args.get_info.ginfo = group_info;
 
     /* Retrieve group information */
-    if (H5VL_group_get(*vol_obj_ptr, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, token_ptr, &loc_params,
-                       group_info) < 0)
+    if (H5VL_group_get(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -728,7 +738,7 @@ H5Gget_info_by_name_async(const char *app_file, const char *app_func, unsigned a
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE8(FUNC, "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE8(__func__, "*s*sIui*sxii", app_file, app_func, app_line, loc_id, name, group_info, lapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -754,8 +764,8 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t
     H5VL_object_t * tmp_vol_obj = NULL; /* Object for loc_id */
     H5VL_object_t **vol_obj_ptr =
         (_vol_obj_ptr ? _vol_obj_ptr : &tmp_vol_obj); /* Ptr to object ptr for loc_id */
-    H5VL_loc_params_t loc_params;                     /* Location parameters for object access */
-    herr_t            ret_value = SUCCEED;            /* Return value */
+    H5VL_group_get_args_t vol_cb_args;                /* Arguments to VOL callback */
+    herr_t                ret_value = SUCCEED;        /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -763,14 +773,15 @@ H5G__get_info_by_idx_api_common(hid_t loc_id, const char *group_name, H5_index_t
     if (!group_info)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "group_info parameter cannot be NULL")
 
-    /* Set up object access arguments */
-    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, H5P_CLS_LACC, FALSE, lapl_id, vol_obj_ptr,
-                            &loc_params) < 0)
+    /* Set up VOL callback & object access arguments */
+    vol_cb_args.op_type = H5VL_GROUP_GET_INFO;
+    if (H5VL_setup_idx_args(loc_id, group_name, idx_type, order, n, FALSE, lapl_id, vol_obj_ptr,
+                            &vol_cb_args.args.get_info.loc_params) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set object access arguments")
+    vol_cb_args.args.get_info.ginfo = group_info;
 
     /* Retrieve group information */
-    if (H5VL_group_get(*vol_obj_ptr, H5VL_GROUP_GET_INFO, H5P_DATASET_XFER_DEFAULT, token_ptr, &loc_params,
-                       group_info) < 0)
+    if (H5VL_group_get(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTGET, FAIL, "unable to get group info")
 
 done:
@@ -841,7 +852,7 @@ H5Gget_info_by_idx_async(const char *app_file, const char *app_func, unsigned ap
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE11(FUNC, "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
+                        H5ARG_TRACE11(__func__, "*s*sIui*sIiIohxii", app_file, app_func, app_line, loc_id, group_name, idx_type, order, n, group_info, lapl_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -931,7 +942,7 @@ H5Gclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     if (NULL != token)
         /* clang-format off */
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, group_id, es_id)) < 0)
+                        H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, group_id, es_id)) < 0)
             /* clang-format on */
             HGOTO_ERROR(H5E_SYM, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
@@ -957,8 +968,9 @@ done:
 herr_t
 H5Gflush(hid_t group_id)
 {
-    H5VL_object_t *vol_obj;             /* Group for this operation     */
-    herr_t         ret_value = SUCCEED; /* Return value                 */
+    H5VL_object_t *            vol_obj;             /* Object of loc_id */
+    H5VL_group_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t                     ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", group_id);
@@ -971,9 +983,12 @@ H5Gflush(hid_t group_id)
     if (H5CX_set_loc(group_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type           = H5VL_GROUP_FLUSH;
+    vol_cb_args.args.flush.grp_id = group_id;
+
     /* Flush group's metadata to file */
-    if (H5VL_group_specific(vol_obj, H5VL_GROUP_FLUSH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL, group_id) <
-        0)
+    if (H5VL_group_specific(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTFLUSH, FAIL, "unable to flush group")
 
 done:
@@ -995,8 +1010,9 @@ done:
 herr_t
 H5Grefresh(hid_t group_id)
 {
-    H5VL_object_t *vol_obj;             /* Group for this operation     */
-    herr_t         ret_value = SUCCEED; /* Return value                 */
+    H5VL_object_t *            vol_obj;             /* Object of loc_id */
+    H5VL_group_specific_args_t vol_cb_args;         /* Arguments to VOL callback */
+    herr_t                     ret_value = SUCCEED; /* Return value                 */
 
     FUNC_ENTER_API(FAIL)
     H5TRACE1("e", "i", group_id);
@@ -1009,9 +1025,12 @@ H5Grefresh(hid_t group_id)
     if (H5CX_set_loc(group_id) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTSET, FAIL, "can't set collective metadata read info")
 
+    /* Set up VOL callback arguments */
+    vol_cb_args.op_type             = H5VL_GROUP_REFRESH;
+    vol_cb_args.args.refresh.grp_id = group_id;
+
     /* Refresh group's metadata */
-    if (H5VL_group_specific(vol_obj, H5VL_GROUP_REFRESH, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                            group_id) < 0)
+    if (H5VL_group_specific(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
         HGOTO_ERROR(H5E_SYM, H5E_CANTLOAD, FAIL, "unable to refresh group")
 
 done:

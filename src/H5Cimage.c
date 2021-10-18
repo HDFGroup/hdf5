@@ -933,15 +933,14 @@ H5C_image_stats(H5C_t *cache_ptr, hbool_t H5_ATTR_UNUSED print_header)
     } /* end for */
 
     if ((total_hits > 0) || (total_misses > 0))
-        hit_rate = (double)100.0f * ((double)(total_hits)) / ((double)(total_hits + total_misses));
+        hit_rate = 100.0 * ((double)(total_hits)) / ((double)(total_hits + total_misses));
     else
-        hit_rate = 0.0f;
+        hit_rate = 0.0;
 
     if (cache_ptr->prefetches > 0)
-        prefetch_use_rate =
-            (double)100.0f * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
+        prefetch_use_rate = 100.0 * ((double)(cache_ptr->prefetch_hits)) / ((double)(cache_ptr->prefetches));
     else
-        prefetch_use_rate = 0.0f;
+        prefetch_use_rate = 0.0;
 
     if (print_header) {
         HDfprintf(stdout, "\nhit     prefetches      prefetch              image  pf hit\n");
@@ -1773,7 +1772,7 @@ H5C__decode_cache_image_header(const H5F_t *f, H5C_t *cache_ptr, const uint8_t *
     p = *buf;
 
     /* Check signature */
-    if (HDmemcmp(p, H5C__MDCI_BLOCK_SIGNATURE, (size_t)H5C__MDCI_BLOCK_SIGNATURE_LEN))
+    if (HDmemcmp(p, H5C__MDCI_BLOCK_SIGNATURE, (size_t)H5C__MDCI_BLOCK_SIGNATURE_LEN) != 0)
         HGOTO_ERROR(H5E_CACHE, H5E_BADVALUE, FAIL, "Bad metadata cache image header signature")
     p += H5C__MDCI_BLOCK_SIGNATURE_LEN;
 

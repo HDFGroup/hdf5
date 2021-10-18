@@ -13,23 +13,23 @@ CMakeTests.*      @byrnHDF @derobins
 
 /bin/             @lrknox @derobins @qkoziol
 
-/c++/             @bmribler @byrnHDF
+/c++/             @bmribler @byrnHDF @derobins
 
 /config/          @lrknox @derobins @qkoziol @byrnHDF
 
 /doc/             @gnuoyd @jrmainzer
 
-/examples/        @lrknox @derobins @bljhdf
+/examples/        @lrknox @derobins @bmribler
 
 /fortran/         @brtnfld @epourmal
 
-/hl/              @bmribler @byrnHDF
+/hl/              @bmribler @byrnHDF @derobins
 
 /java/            @jhendersonHDF @byrnHDF
 
 /m4/              @lrknox @derobins
 
-/release_docs/    @lrknox @bljhdf @byrnHDF
+/release_docs/    @lrknox @bmribler @byrnHDF
 
 /src/             @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup @jrmainzer
 
@@ -37,6 +37,6 @@ CMakeTests.*      @byrnHDF @derobins
 
 /testpar/         @jhendersonHDF @rawarren @jrmainzer @qkoziol
 
-/tools/           @byrnHDF @bmribler
+/tools/           @byrnHDF @bmribler @derobins
 
-/utils/           @lrknox @byrnHDF
+/utils/           @lrknox @byrnHDF @derobins

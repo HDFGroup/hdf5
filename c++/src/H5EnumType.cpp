@@ -13,7 +13,6 @@
 
 #include <string>
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -41,7 +40,9 @@ namespace H5 {
 ///\brief       Default constructor: Creates a stub datatype
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType() : DataType() {}
+EnumType::EnumType() : DataType()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -50,14 +51,18 @@ EnumType::EnumType() : DataType() {}
 ///\exception   H5::DataTypeIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(const hid_t existing_id) : DataType(existing_id) {}
+EnumType::EnumType(const hid_t existing_id) : DataType(existing_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType copy constructor
 ///\brief       Copy constructor: same HDF5 object as \a original
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(const EnumType &original) : DataType(original) {}
+EnumType::EnumType(const EnumType &original) : DataType(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -69,7 +74,9 @@ EnumType::EnumType(const EnumType &original) : DataType(original) {}
 //              the enum datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size) {}
+EnumType::EnumType(size_t size) : DataType(H5T_ENUM, size)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    EnumType overloaded constructor
@@ -211,8 +218,7 @@ EnumType::insert(const H5std_string &name, void *value) const
 H5std_string
 EnumType::nameOf(void *value, size_t size) const
 {
-    char *name_C = new char[size + 1]; // temporary C-string for C API
-    HDmemset(name_C, 0, size + 1);     // clear buffer
+    char *name_C = new char[size + 1](); // temporary C-string for C API
 
     // Calls C routine H5Tenum_nameof to get the name of the specified enum type
     herr_t ret_value = H5Tenum_nameof(id, value, name_C, size);
@@ -335,6 +341,8 @@ EnumType::getMemberValue(unsigned memb_no, void *value) const
 ///\brief       Properly terminates access to this enum datatype.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-EnumType::~EnumType() {}
+EnumType::~EnumType()
+{
+}
 
 } // namespace H5

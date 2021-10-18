@@ -62,6 +62,7 @@ static void test_write_filtered_dataset_single_no_selection(void);
 static void test_write_filtered_dataset_all_no_selection(void);
 static void test_write_filtered_dataset_point_selection(void);
 static void test_write_filtered_dataset_interleaved_write(void);
+static void test_write_transformed_filtered_dataset_no_overlap(void);
 static void test_write_3d_filtered_dataset_no_overlap_separate_pages(void);
 static void test_write_3d_filtered_dataset_no_overlap_same_pages(void);
 static void test_write_3d_filtered_dataset_overlap(void);
@@ -79,6 +80,7 @@ static void test_read_filtered_dataset_single_no_selection(void);
 static void test_read_filtered_dataset_all_no_selection(void);
 static void test_read_filtered_dataset_point_selection(void);
 static void test_read_filtered_dataset_interleaved_read(void);
+static void test_read_transformed_filtered_dataset_no_overlap(void);
 static void test_read_3d_filtered_dataset_no_overlap_separate_pages(void);
 static void test_read_3d_filtered_dataset_no_overlap_same_pages(void);
 static void test_read_3d_filtered_dataset_overlap(void);
@@ -120,6 +122,7 @@ static void (*tests[])(void) = {
     test_write_filtered_dataset_all_no_selection,
     test_write_filtered_dataset_point_selection,
     test_write_filtered_dataset_interleaved_write,
+    test_write_transformed_filtered_dataset_no_overlap,
     test_write_3d_filtered_dataset_no_overlap_separate_pages,
     test_write_3d_filtered_dataset_no_overlap_same_pages,
     test_write_3d_filtered_dataset_overlap,
@@ -135,6 +138,7 @@ static void (*tests[])(void) = {
     test_read_filtered_dataset_all_no_selection,
     test_read_filtered_dataset_point_selection,
     test_read_filtered_dataset_interleaved_read,
+    test_read_transformed_filtered_dataset_no_overlap,
     test_read_3d_filtered_dataset_no_overlap_separate_pages,
     test_read_3d_filtered_dataset_no_overlap_same_pages,
     test_read_3d_filtered_dataset_overlap,
@@ -428,7 +432,7 @@ test_write_filtered_dataset_no_overlap(void)
 
     /* Select hyperslab in the file */
     filespace = H5Dget_space(dset_id);
-    VRFY((dset_id >= 0), "File dataspace retrieval succeeded");
+    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
 
     VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
          "Hyperslab selection succeeded");
@@ -1288,6 +1292,177 @@ test_write_filtered_dataset_interleaved_write(void)
 }
 
 /*
+ * Tests parallel write of transformed and filtered data
+ * in the case where only one process is writing to a
+ * particular chunk in the operation. Normally, a data
+ * transform function will cause the parallel library to
+ * break to independent I/O and this isn't allowed when
+ * there are filters in the pipeline. However, in this
+ * case the parallel library recognizes that the used
+ * data transform function "x" is the same as not applying
+ * the transform function. Therefore it does not apply
+ * the transform function resulting in not breaking to
+ * independent I/O.
+ *
+ * Programmer: Jan-Willem Blokland
+ *             08/20/2021
+ */
+static void
+test_write_transformed_filtered_dataset_no_overlap(void)
+{
+    C_DATATYPE *data        = NULL;
+    C_DATATYPE *read_buf    = NULL;
+    C_DATATYPE *correct_buf = NULL;
+    hsize_t     dataset_dims[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     chunk_dims[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     sel_dims[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     start[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     stride[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     count[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     block[WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    size_t      i, data_size, correct_buf_size;
+    hid_t       file_id = -1, dset_id = -1, plist_id = -1;
+    hid_t       filespace = -1, memspace = -1;
+
+    if (MAINPROCESS)
+        HDputs("Testing write to unshared transformed and filtered chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
+
+    /* Set up file access property list with parallel I/O access */
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((plist_id >= 0), "FAPL creation succeeded");
+
+    VRFY((H5Pset_fapl_mpio(plist_id, comm, info) >= 0), "Set FAPL MPIO succeeded");
+
+    VRFY((H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
+         "Set libver bounds succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, plist_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
+
+    /* Create the dataspace for the dataset */
+    dataset_dims[0] = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS;
+    dataset_dims[1] = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS;
+    chunk_dims[0]   = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+    chunk_dims[1]   = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+    sel_dims[0]     = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+    sel_dims[1]     = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS;
+
+    filespace = H5Screate_simple(WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+    VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+    memspace = H5Screate_simple(WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, sel_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    /* Create chunked dataset */
+    plist_id = H5Pcreate(H5P_DATASET_CREATE);
+    VRFY((plist_id >= 0), "DCPL creation succeeded");
+
+    VRFY((H5Pset_chunk(plist_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+         "Chunk size set");
+
+    /* Add test filter to the pipeline */
+    VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
+
+    dset_id = H5Dcreate2(file_id, WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, HDF5_DATATYPE_NAME,
+                         filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+
+    /* Each process defines the dataset selection in memory and writes
+     * it to the hyperslab in the file
+     */
+    count[0] = 1;
+    count[1] = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS /
+               (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+    stride[0] = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+    stride[1] = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+    block[0]  = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+    block[1]  = (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+    start[0]  = ((hsize_t)mpi_rank * (hsize_t)WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS * count[0]);
+    start[1]  = 0;
+
+    if (VERBOSE_MED) {
+        HDprintf("Process %d is writing with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
+                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+                 ", %" PRIuHSIZE " ]\n",
+                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+        HDfflush(stdout);
+    }
+
+    /* Select hyperslab in the file */
+    filespace = H5Dget_space(dset_id);
+    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
+
+    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
+         "Hyperslab selection succeeded");
+
+    /* Fill data buffer */
+    data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
+    correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
+
+    data = (C_DATATYPE *)HDcalloc(1, data_size);
+    VRFY((NULL != data), "HDcalloc succeeded");
+
+    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+
+    for (i = 0; i < data_size / sizeof(*data); i++)
+        data[i] = (C_DATATYPE)GEN_DATA(i);
+
+    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
+        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
+                                      (i / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])));
+
+    /* Create property list for collective dataset write and data transform */
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((plist_id >= 0), "DXPL creation succeeded");
+
+    VRFY((H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) >= 0), "Set DXPL MPIO succeeded");
+
+    /* Set data transform expression */
+    VRFY((H5Pset_data_transform(plist_id, "x") >= 0), "Set data transform expression succeeded");
+
+    VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, data) >= 0),
+         "Dataset write succeeded");
+
+    if (data)
+        HDfree(data);
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+
+    /* Verify the correct data was written */
+    read_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
+    VRFY((NULL != read_buf), "HDcalloc succeeded");
+
+    dset_id = H5Dopen2(file_id, "/" WRITE_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset open succeeded");
+
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, read_buf) >= 0),
+         "Dataset read succeeded");
+
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+
+    if (correct_buf)
+        HDfree(correct_buf);
+    if (read_buf)
+        HDfree(read_buf);
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    return;
+}
+
+/*
  * Tests parallel write of filtered data in the case where
  * the dataset has 3 dimensions and each process writes
  * to its own "page" in the 3rd dimension.
@@ -1762,8 +1937,8 @@ test_write_3d_filtered_dataset_overlap(void)
                               WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
                (hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-            /* Add the amount that gets added when a rank moves down to its next section vertically in the
-               dataset */
+            /* Add the amount that gets added when a rank moves down to its next
+               section vertically in the dataset */
             + ((hsize_t)(WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH * WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
                (i / (hsize_t)(mpi_size * WRITE_SHARED_FILTERED_CHUNKS_3D_DEPTH *
                               WRITE_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
@@ -4224,6 +4399,232 @@ test_read_3d_filtered_dataset_no_overlap_separate_pages(void)
 }
 
 /*
+ * Tests parallel read of transformed and filtered data in the
+ * case where only one process is reading from a particular
+ * chunk in the operation. Normally, a data transform function
+ * will cause the parallel library to break to independent I/O
+ * and this isn't allowed when there are filters in the pipeline.
+ * However, in this case the parallel library recognizes that
+ * the used data transform function "x" is the same as not
+ * applying the transform function. Therefore it does not apply
+ * the transform function resulting in not breaking to
+ * independent I/O.
+ *
+ * The MAINPROCESS rank will first write out all of the
+ * data to the dataset. Then, each rank reads a part of
+ * the dataset and contributes its piece to a global buffer
+ * that is checked for consistency.
+ *
+ * Programmer: Jan-Willem Blokland
+ *             08/20/2021
+ */
+static void
+test_read_transformed_filtered_dataset_no_overlap(void)
+{
+    C_DATATYPE *read_buf    = NULL;
+    C_DATATYPE *correct_buf = NULL;
+    C_DATATYPE *global_buf  = NULL;
+    hsize_t     dataset_dims[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     chunk_dims[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     sel_dims[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     start[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     stride[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     count[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     block[READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS];
+    hsize_t     flat_dims[1];
+    size_t      i, read_buf_size, correct_buf_size;
+    hid_t       file_id = -1, dset_id = -1, plist_id = -1;
+    hid_t       filespace = -1, memspace = -1;
+    int *       recvcounts = NULL;
+    int *       displs     = NULL;
+
+    if (MAINPROCESS)
+        HDputs("Testing read from unshared transformed and filtered chunks");
+
+    CHECK_CUR_FILTER_AVAIL();
+
+    dataset_dims[0] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS;
+    dataset_dims[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS;
+
+    /* Setup the buffer for writing and for comparison */
+    correct_buf_size = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NROWS *
+                       (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS * sizeof(*correct_buf);
+
+    correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
+    VRFY((NULL != correct_buf), "HDcalloc succeeded");
+
+    for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
+        correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
+                                      (i / (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])));
+
+    if (MAINPROCESS) {
+        plist_id = H5Pcreate(H5P_FILE_ACCESS);
+        VRFY((plist_id >= 0), "FAPL creation succeeded");
+
+        VRFY((H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
+             "Set libver bounds succeeded");
+
+        file_id = H5Fopen(filenames[0], H5F_ACC_RDWR, plist_id);
+        VRFY((file_id >= 0), "Test file open succeeded");
+
+        VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
+
+        /* Create the dataspace for the dataset */
+        filespace =
+            H5Screate_simple(READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, dataset_dims, NULL);
+        VRFY((filespace >= 0), "File dataspace creation succeeded");
+
+        /* Create chunked dataset */
+        chunk_dims[0] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+        chunk_dims[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+
+        plist_id = H5Pcreate(H5P_DATASET_CREATE);
+        VRFY((plist_id >= 0), "DCPL creation succeeded");
+
+        VRFY(
+            (H5Pset_chunk(plist_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_DIMS, chunk_dims) >= 0),
+            "Chunk size set");
+
+        /* Add test filter to the pipeline */
+        VRFY((set_dcpl_filter(plist_id) >= 0), "Filter set");
+
+        dset_id = H5Dcreate2(file_id, READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME,
+                             HDF5_DATATYPE_NAME, filespace, H5P_DEFAULT, plist_id, H5P_DEFAULT);
+        VRFY((dset_id >= 0), "Dataset creation succeeded");
+
+        VRFY((H5Pclose(plist_id) >= 0), "DCPL close succeeded");
+        VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+
+        /* Create property list for collective dataset read */
+        plist_id = H5Pcreate(H5P_DATASET_XFER);
+        VRFY((plist_id >= 0), "DXPL creation succeeded");
+
+        /* Set data transform expression */
+        VRFY((H5Pset_data_transform(plist_id, "x") >= 0), "Set data transform expression succeeded");
+
+        VRFY((H5Dwrite(dset_id, HDF5_DATATYPE_NAME, H5S_ALL, H5S_ALL, plist_id, correct_buf) >= 0),
+             "Dataset write succeeded");
+
+        VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
+        VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+        VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+    }
+
+    /* Set up file access property list with parallel I/O access */
+    plist_id = H5Pcreate(H5P_FILE_ACCESS);
+    VRFY((plist_id >= 0), "FAPL creation succeeded");
+
+    VRFY((H5Pset_fapl_mpio(plist_id, comm, info) >= 0), "Set FAPL MPIO succeeded");
+
+    VRFY((H5Pset_libver_bounds(plist_id, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) >= 0),
+         "Set libver bounds succeeded");
+
+    file_id = H5Fopen(filenames[0], H5F_ACC_RDONLY, plist_id);
+    VRFY((file_id >= 0), "Test file open succeeded");
+
+    VRFY((H5Pclose(plist_id) >= 0), "FAPL close succeeded");
+
+    dset_id = H5Dopen2(file_id, "/" READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_DATASET_NAME, H5P_DEFAULT);
+    VRFY((dset_id >= 0), "Dataset open succeeded");
+
+    sel_dims[0] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+    sel_dims[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS;
+
+    /* Setup one-dimensional memory dataspace for reading the dataset data into a contiguous buffer */
+    flat_dims[0] = sel_dims[0] * sel_dims[1];
+
+    memspace = H5Screate_simple(1, flat_dims, NULL);
+    VRFY((memspace >= 0), "Memory dataspace creation succeeded");
+
+    /* Select hyperslab in the file */
+    filespace = H5Dget_space(dset_id);
+    VRFY((filespace >= 0), "File dataspace retrieval succeeded");
+
+    /*
+     * Each process defines the dataset selection in the file and reads
+     * it to the selection in memory
+     */
+    count[0] = 1;
+    count[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_NCOLS /
+               (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+    stride[0] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+    stride[1] = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+    block[0]  = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS;
+    block[1]  = (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NCOLS;
+    start[0]  = ((hsize_t)mpi_rank * (hsize_t)READ_UNSHARED_TRANSFORMED_FILTERED_CHUNKS_CH_NROWS * count[0]);
+    start[1]  = 0;
+
+    if (VERBOSE_MED) {
+        HDprintf("Process %d is reading with count[ %" PRIuHSIZE ", %" PRIuHSIZE " ], stride[ %" PRIuHSIZE
+                 ", %" PRIuHSIZE " ], start[ %" PRIuHSIZE ", %" PRIuHSIZE " ], block size[ %" PRIuHSIZE
+                 ", %" PRIuHSIZE " ]\n",
+                 mpi_rank, count[0], count[1], stride[0], stride[1], start[0], start[1], block[0], block[1]);
+        HDfflush(stdout);
+    }
+
+    VRFY((H5Sselect_hyperslab(filespace, H5S_SELECT_SET, start, stride, count, block) >= 0),
+         "Hyperslab selection succeeded");
+
+    /* Create property list for collective dataset read and data transform */
+    plist_id = H5Pcreate(H5P_DATASET_XFER);
+    VRFY((plist_id >= 0), "DXPL creation succeeded");
+
+    VRFY((H5Pset_dxpl_mpio(plist_id, H5FD_MPIO_COLLECTIVE) >= 0), "Set DXPL MPIO succeeded");
+
+    /* Set data transform expression */
+    VRFY((H5Pset_data_transform(plist_id, "x") >= 0), "Set data transform expression succeeded");
+
+    read_buf_size = flat_dims[0] * sizeof(*read_buf);
+
+    read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
+    VRFY((NULL != read_buf), "HDcalloc succeeded");
+
+    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, plist_id, read_buf) >= 0),
+         "Dataset read succeeded");
+
+    global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
+    VRFY((NULL != global_buf), "HDcalloc succeeded");
+
+    /* Collect each piece of data from all ranks into a global buffer on all ranks */
+    recvcounts = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*recvcounts));
+    VRFY((NULL != recvcounts), "HDcalloc succeeded");
+
+    for (i = 0; i < (size_t)mpi_size; i++)
+        recvcounts[i] = (int)flat_dims[0];
+
+    displs = (int *)HDcalloc(1, (size_t)mpi_size * sizeof(*displs));
+    VRFY((NULL != displs), "HDcalloc succeeded");
+
+    for (i = 0; i < (size_t)mpi_size; i++)
+        displs[i] = (int)(i * flat_dims[0]);
+
+    VRFY((MPI_SUCCESS == MPI_Allgatherv(read_buf, (int)flat_dims[0], C_DATATYPE_MPI, global_buf, recvcounts,
+                                        displs, C_DATATYPE_MPI, comm)),
+         "MPI_Allgatherv succeeded");
+
+    VRFY((0 == HDmemcmp(global_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
+
+    if (displs)
+        HDfree(displs);
+    if (recvcounts)
+        HDfree(recvcounts);
+    if (global_buf)
+        HDfree(global_buf);
+    if (read_buf)
+        HDfree(read_buf);
+    if (correct_buf)
+        HDfree(correct_buf);
+
+    VRFY((H5Dclose(dset_id) >= 0), "Dataset close succeeded");
+    VRFY((H5Sclose(filespace) >= 0), "File dataspace close succeeded");
+    VRFY((H5Sclose(memspace) >= 0), "Memory dataspace close succeeded");
+    VRFY((H5Pclose(plist_id) >= 0), "DXPL close succeeded");
+    VRFY((H5Fclose(file_id) >= 0), "File close succeeded");
+
+    return;
+}
+
+/*
  * Tests parallel read of filtered data in the case where
  * the dataset has 3 dimensions and each process reads from
  * each "page" in the 3rd dimension. However, no chunk on a
@@ -4497,8 +4898,8 @@ test_read_3d_filtered_dataset_overlap(void)
                               READ_SHARED_FILTERED_CHUNKS_3D_NCOLS)) /
                (hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))
 
-            /* Add the amount that gets added when a rank moves down to its next section vertically in the
-               dataset */
+            /* Add the amount that gets added when a rank moves down to its next
+               section vertically in the dataset */
             + ((hsize_t)(READ_SHARED_FILTERED_CHUNKS_3D_DEPTH * READ_SHARED_FILTERED_CHUNKS_3D_NCOLS) *
                (i / (hsize_t)(mpi_size * READ_SHARED_FILTERED_CHUNKS_3D_DEPTH *
                               READ_SHARED_FILTERED_CHUNKS_3D_NCOLS))));
@@ -6093,7 +6494,7 @@ main(int argc, char **argv)
     if (VERBOSE_MED)
         h5_show_hostname();
 
-    ALARM_ON;
+    TestAlarmOn();
 
     /* Create test file */
     fapl = H5Pcreate(H5P_FILE_ACCESS);
@@ -6172,7 +6573,7 @@ exit:
         if (MAINPROCESS)
             HDprintf("*** %d TEST ERROR%s OCCURRED ***\n", nerrors, nerrors > 1 ? "S" : "");
 
-    ALARM_OFF;
+    TestAlarmOff();
 
     h5_clean_files(FILENAME, fapl);
 

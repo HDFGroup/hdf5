@@ -30,19 +30,35 @@
 #define H5_MY_PKG_INIT YES
 
 /**\defgroup H5A H5A
- * \brief Attribute Interface
  *
- * \details The Attribute Interface, H5A, provides a mechanism for attaching
- *          additional information to a dataset, group, or named datatype.
+ * Use the functions in this module to manage HDF5 attributes.
  *
- *          Attributes are accessed by opening the object that they are
- *          attached to and are not independent objects. Typically an
- *          attribute is small in size and contains user metadata about the
- *          object that it is attached to.
+ * Like HDF5 datasets, HDF5 attributes are array variables which have an element
+ * datatype and a shape (dataspace). However, they perform a different function:
+ * Attributes decorate other HDF5 objects, and are typically used to
+ * represent application metadata. Unlike datasets, the HDF5 library does not
+ * support partial I/O operations for attributes and they cannot be compressed
+ * or extended.
  *
- *          Attributes look similar to HDF5 datasets in that they have a
- *          datatype and dataspace. However, they do not support partial
- *          I/O operations and cannot be compressed or extended.
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5A_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5A_examples.c read
+ *   </td>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5A_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5A_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
  *
  */
 

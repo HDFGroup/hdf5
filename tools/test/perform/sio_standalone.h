@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef SIO_STANDALONE_H__
-#define SIO_PERF_H__
+#ifndef SIO_STANDALONE_H
+#define SIO_STANDALONE_H
 
 /* Header file for building h5perf by standalone mode.
  * Created: Christian Chilan, 2005/5/18.
@@ -21,10 +21,6 @@
 
 #include "H5public.h" /* Include Public Definitions    */
 
-/*
- * Include ANSI-C header files.
- */
-#ifdef H5_STDC_HEADERS
 #include <assert.h>
 #include <ctype.h>
 #include <errno.h>
@@ -37,7 +33,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#endif
 
 /* maximum of two, three, or four values */
 #undef MAX
@@ -110,28 +105,20 @@
 #define HDctermid(S)             ctermid(S)
 #define HDctime(T)               ctime(T)
 #define HDcuserid(S)             cuserid(S)
-#ifdef H5_HAVE_DIFFTIME
-#define HDdifftime(X, Y) difftime(X, Y)
-#else
-#define HDdifftime(X, Y) ((double)(X) - (double)(Y))
-#endif
-#define HDdiv(X, Y)  div(X, Y)
-#define HDdup(F)     dup(F)
-#define HDdup2(F, I) dup2(F, I)
-/* execl() variable arguments */
-/* execle() variable arguments */
-/* execlp() variable arguments */
-#define HDexecv(S, AV)     execv(S, AV)
-#define HDexecve(S, AV, E) execve(S, AV, E)
-#define HDexecvp(S, AV)    execvp(S, AV)
-#define HDexit(N)          exit(N)
-#define HD_exit(N)         _exit(N)
-#define HDexp(X)           exp(X)
-#define HDfabs(X)          fabs(X)
-/* use ABS() because fabsf() fabsl() are not common yet. */
-#define HDfabsf(X)  ABS(X)
-#define HDfabsl(X)  ABS(X)
-#define HDfclose(F) fclose(F)
+#define HDdifftime(X, Y)         difftime(X, Y)
+#define HDdiv(X, Y)              div(X, Y)
+#define HDdup(F)                 dup(F)
+#define HDdup2(F, I)             dup2(F, I)
+#define HDexecv(S, AV)           execv(S, AV)
+#define HDexecve(S, AV, E)       execve(S, AV, E)
+#define HDexecvp(S, AV)          execvp(S, AV)
+#define HDexit(N)                exit(N)
+#define HD_exit(N)               _exit(N)
+#define HDexp(X)                 exp(X)
+#define HDfabs(X)                fabs(X)
+#define HDfabsf(X)               fabsf(X)
+#define HDfabsl(X)               fabsl(X)
+#define HDfclose(F)              fclose(F)
 /* fcntl() variable arguments */
 #define HDfdopen(N, S)   fdopen(N, S)
 #define HDfeof(F)        feof(F)
@@ -157,17 +144,8 @@
 #define HDfree(M)           free(M)
 #define HDfreopen(S, M, F)  freopen(S, M, F)
 #define HDfrexp(X, N)       frexp(X, N)
-/* Check for Cray-specific 'frexpf()' and 'frexpl()' routines */
-#ifdef H5_HAVE_FREXPF
-#define HDfrexpf(X, N) frexpf(X, N)
-#else /* H5_HAVE_FREXPF */
-#define HDfrexpf(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPF */
-#ifdef H5_HAVE_FREXPL
-#define HDfrexpl(X, N) frexpl(X, N)
-#else /* H5_HAVE_FREXPL */
-#define HDfrexpl(X, N) frexp(X, N)
-#endif /* H5_HAVE_FREXPL */
+#define HDfrexpf(X, N)      frexpf(X, N)
+#define HDfrexpl(X, N)      frexpl(X, N)
 /* fscanf() variable arguments */
 #ifdef H5_HAVE_FSEEKO
 #define HDfseek(F, O, W) fseeko(F, O, W)
@@ -363,15 +341,9 @@ H5_DLL int HDrand(void);
 #define HDsin(X)               sin(X)
 #define HDsinh(X)              sinh(X)
 #define HDsleep(N)             sleep(N)
-#ifdef H5_HAVE_WIN32_API
-H5_DLL int c99_snprintf(char *str, size_t size, const char *format, ...);
-#define HDsnprintf c99_snprintf /*varargs*/
-#else
-#define HDsnprintf snprintf /*varargs*/
-#endif
-/* sprintf() variable arguments */
-#define HDsprintf sprintf /*varargs*/
-#define HDsqrt(X) sqrt(X)
+#define HDsnprintf             snprintf /*varargs*/
+#define HDsprintf              sprintf  /*varargs*/
+#define HDsqrt(X)              sqrt(X)
 #ifdef H5_HAVE_RAND_R
 H5_DLL void HDsrand(unsigned int seed);
 #define HDsrandom(S) HDsrand(S)
@@ -382,7 +354,6 @@ H5_DLL void HDsrand(unsigned int seed);
 #define HDsrand(S)   srand(S)
 #define HDsrandom(S) srand(S)
 #endif
-/* sscanf() variable arguments */
 
 #ifdef H5_HAVE_WIN32_API
 #define HDstrcasecmp(A, B) _stricmp(A, B)
@@ -444,25 +415,20 @@ H5_DLL int64_t HDstrtoll(const char *s, const char **rest, int base);
 #else
 #define HDunlink(S) unlink(S)
 #endif
-#define HDutime(S, T)            utime(S, T)
-#define HDva_arg(A, T)           va_arg(A, T)
-#define HDva_end(A)              va_end(A)
-#define HDva_start(A, P)         va_start(A, P)
-#define HDvasprintf(RET, FMT, A) vasprintf(RET, FMT, A)
-#define HDvfprintf(F, FMT, A)    vfprintf(F, FMT, A)
-#define HDvprintf(FMT, A)        vprintf(FMT, A)
-#define HDvsprintf(S, FMT, A)    vsprintf(S, FMT, A)
-#ifdef H5_HAVE_WIN32_API
-H5_DLL int c99_vsnprintf(char *str, size_t size, const char *format, va_list ap);
-#define HDvsnprintf c99_vsnprintf
-#else
+#define HDutime(S, T)             utime(S, T)
+#define HDva_arg(A, T)            va_arg(A, T)
+#define HDva_end(A)               va_end(A)
+#define HDva_start(A, P)          va_start(A, P)
+#define HDvasprintf(RET, FMT, A)  vasprintf(RET, FMT, A)
+#define HDvfprintf(F, FMT, A)     vfprintf(F, FMT, A)
+#define HDvprintf(FMT, A)         vprintf(FMT, A)
+#define HDvsprintf(S, FMT, A)     vsprintf(S, FMT, A)
 #define HDvsnprintf(S, N, FMT, A) vsnprintf(S, N, FMT, A)
-#endif
-#define HDwait(W)           wait(W)
-#define HDwaitpid(P, W, O)  waitpid(P, W, O)
-#define HDwcstombs(S, P, Z) wcstombs(S, P, Z)
-#define HDwctomb(S, C)      wctomb(S, C)
-#define HDwrite(F, M, Z)    write(F, M, Z)
+#define HDwait(W)                 wait(W)
+#define HDwaitpid(P, W, O)        waitpid(P, W, O)
+#define HDwcstombs(S, P, Z)       wcstombs(S, P, Z)
+#define HDwctomb(S, C)            wctomb(S, C)
+#define HDwrite(F, M, Z)          write(F, M, Z)
 
 /*
  * And now for a couple non-Posix functions...  Watch out for systems that
@@ -490,37 +456,27 @@ extern char *         strdup(const char *s);
 #define TRUE true
 #endif
 
-/** From h5test.h **/
-
-#ifdef H5_HAVE_PARALLEL
-extern MPI_Info h5_io_info_g; /* MPI INFO object for IO */
-#endif
-
-#ifdef H5_HAVE_PARALLEL
-int  h5_set_info_object(void);
-void h5_dump_info_object(MPI_Info info);
-#endif
-
 /** From h5tools_utils.h **/
 
-extern int         opt_err; /* getoption prints errors if this is on    */
-extern int         opt_ind; /* token pointer                            */
-extern const char *opt_arg; /* flag argument (or value)                 */
+H5_DLLVAR int         H5_opterr; /* getoption prints errors if this is on    */
+H5_DLLVAR int         H5_optind; /* token pointer                            */
+H5_DLLVAR const char *H5_optarg; /* flag argument (or value)                 */
 
-enum {
+enum h5_arg_level {
     no_arg = 0,  /* doesn't take an argument     */
     require_arg, /* requires an argument          */
     optional_arg /* argument is optional         */
 };
 
-typedef struct long_options {
-    const char *name;     /* name of the long option              */
-    int         has_arg;  /* whether we should look for an arg    */
-    char        shortval; /* the shortname equivalent of long arg
-                           * this gets returned from get_option   */
-} long_options;
+struct h5_long_options {
+    const char *      name;     /* Name of the long option */
+    enum h5_arg_level has_arg;  /* Whether we should look for an arg */
+    char              shortval; /* The shortname equivalent of long arg
+                                 * this gets returned from get_option
+                                 */
+};
 
-extern int get_option(int argc, const char **argv, const char *opt, const struct long_options *l_opt);
+extern int H5_get_option(int argc, const char **argv, const char *opt, const struct h5_long_options *l_opt);
 
 extern int nCols; /*max number of columns for outputting  */
 

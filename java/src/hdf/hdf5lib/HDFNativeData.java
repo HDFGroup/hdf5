@@ -153,8 +153,7 @@ public class HDFNativeData {
      *            The input array of bytes
      * @return an array of 'len' float
      */
-    public synchronized static native float[] byteToFloat(int start, int len,
-            byte[] data);
+    public synchronized static native float[] byteToFloat(int start, int len, byte[] data);
 
     /**
      * Convert 4 bytes from an array of bytes into a single float
@@ -437,41 +436,38 @@ public class HDFNativeData {
      *                - Error unsupported type.
      */
     public synchronized static Object byteToNumber(byte[] barray, Object obj)
-            throws HDF5Exception {
+            throws HDF5Exception
+    {
         Class theClass = obj.getClass();
         String type = theClass.getName();
         Object retobj = null;
 
         if (type.equals("java.lang.Integer")) {
             int[] i = hdf.hdf5lib.HDFNativeData.byteToInt(0, 1, barray);
-            retobj = new Integer(i[0]);
+            retobj = Integer.valueOf(i[0]);
         }
         else if (type.equals("java.lang.Byte")) {
-            retobj = new Byte(barray[0]);
+            retobj = Byte.valueOf(barray[0]);
         }
         else if (type.equals("java.lang.Short")) {
-            short[] f = hdf.hdf5lib.HDFNativeData
-                    .byteToShort(0, 1, barray);
-            retobj = new Short(f[0]);
+            short[] f = hdf.hdf5lib.HDFNativeData.byteToShort(0, 1, barray);
+            retobj = Short.valueOf(f[0]);
         }
         else if (type.equals("java.lang.Float")) {
-            float[] f = hdf.hdf5lib.HDFNativeData
-                    .byteToFloat(0, 1, barray);
-            retobj = new Float(f[0]);
+            float[] f = hdf.hdf5lib.HDFNativeData.byteToFloat(0, 1, barray);
+            retobj = Float.valueOf(f[0]);
         }
         else if (type.equals("java.lang.Long")) {
             long[] f = hdf.hdf5lib.HDFNativeData.byteToLong(0, 1, barray);
-            retobj = new Long(f[0]);
+            retobj = Long.valueOf(f[0]);
         }
         else if (type.equals("java.lang.Double")) {
-            double[] f = hdf.hdf5lib.HDFNativeData.byteToDouble(0, 1,
-                    barray);
-            retobj = new Double(f[0]);
+            double[] f = hdf.hdf5lib.HDFNativeData.byteToDouble(0, 1, barray);
+            retobj = Double.valueOf(f[0]);
         }
         else {
             /* exception: unsupported type */
-            HDF5Exception ex = new HDF5JavaException(
-                    "byteToNumber: setfield bad type: " + obj + " " + type);
+            HDF5Exception ex = new HDF5JavaException("byteToNumber: setfield bad type: " + obj + " " + type);
             throw (ex);
         }
         return (retobj);

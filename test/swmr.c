@@ -163,7 +163,10 @@ test_metadata_read_attempts(hid_t in_fapl)
         TEST_ERROR
 
     /* Set the # of read attempts to 0--should fail */
-    H5E_BEGIN_TRY { ret = H5Pset_metadata_read_attempts(fapl, 0); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_metadata_read_attempts(fapl, 0);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -844,14 +847,17 @@ error:
 static int
 test_metadata_read_retry_info(hid_t in_fapl)
 {
-    hid_t            fapl, new_fapl;                             /* File access property list */
-    hid_t            fid, fid1;                                  /* File IDs */
+    hid_t            fapl     = H5I_INVALID_HID;                 /* File access property list */
+    hid_t            new_fapl = H5I_INVALID_HID;                 /* File access property list */
+    hid_t            fid      = H5I_INVALID_HID;                 /* File ID */
+    hid_t            fid1     = H5I_INVALID_HID;                 /* File ID */
     H5F_retry_info_t info, info1;                                /* The collection of metadata retries */
     H5F_t *          f = NULL, *f1 = NULL;                       /* Internal file object pointers */
     unsigned         i, j, n;                                    /* Local index variables */
-    hid_t            did1, did2;                                 /* Dataset IDs */
-    hid_t            sid;                                        /* Dataspace ID */
-    hid_t            dcpl;                                       /* Dataset creation property list */
+    hid_t            did1    = H5I_INVALID_HID;                  /* Dataset ID */
+    hid_t            did2    = H5I_INVALID_HID;                  /* Dataset ID */
+    hid_t            sid     = H5I_INVALID_HID;                  /* Dataspace ID */
+    hid_t            dcpl    = H5I_INVALID_HID;                  /* Dataset creation property list */
     hsize_t          dims[2] = {6, 10};                          /* Dataset dimensions */
     char             filename[NAME_BUF_SIZE];                    /* File name */
     int              buf[6][10], chkbuf1[6][10], chkbuf2[6][10]; /* Buffers for data */
@@ -1620,7 +1626,7 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR
 
     /* Should be 100 */
-    if (attempts != (new_format ? H5F_METADATA_READ_ATTEMPTS : H5F_SWMR_METADATA_READ_ATTEMPTS))
+    if (attempts != (unsigned int)(new_format ? H5F_METADATA_READ_ATTEMPTS : H5F_SWMR_METADATA_READ_ATTEMPTS))
         TEST_ERROR;
 
     /* Close the property list */
@@ -1649,7 +1655,10 @@ test_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 
     /* Should fail to enable SWMR for non-latest-format */
     /* Should succeed in enabling SWMR for latest format */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (new_format) {
         if (ret < 0)
@@ -1974,7 +1983,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
     fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, fapl);
 
     /* Should fail to enable SWMR writing when the file is already in SWMR writing mode */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1997,7 +2009,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Should fail to enable SWMR writing when there is an opened named datatype */
-        H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fstart_swmr_write(fid);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -2021,7 +2036,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
             TEST_ERROR
 
         /* Should fail to enable SWMR writing because the file's superblock version is not at least 3 */
-        H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fstart_swmr_write(fid);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -2047,7 +2065,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is already in SWMR writing mode */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2063,7 +2084,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with read only access */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2079,7 +2103,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when the file is opened with SWMR read access only */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2109,7 +2136,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing when there are opened named datatype and attribute */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2119,7 +2149,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Still fail to enable SWMR writing when the attribute is still opened */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2164,7 +2197,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail for a second call to enable SWMR writing mode */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2188,7 +2224,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         FAIL_STACK_ERROR;
 
     /* Should fail to enable SWMR writing mode for fid2 */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2214,7 +2253,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to enable SWMR writing for fid2 */
-    H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Fstart_swmr_write(fid2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2241,7 +2283,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 
         /* Should fail to open the file with SWMR write + latest format due to superblock version not at least
          * 3 */
-        H5E_BEGIN_TRY { bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, new_fapl); }
+        H5E_BEGIN_TRY
+        {
+            bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, new_fapl);
+        }
         H5E_END_TRY;
         if (bad_fid >= 0)
             TEST_ERROR
@@ -2250,7 +2295,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
 
         /* Should fail to open the file with SWMR write + non-latest-format due to superblock version not at
          * least 3 */
-        H5E_BEGIN_TRY { bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            bad_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
         if (bad_fid >= 0)
             TEST_ERROR
@@ -2262,7 +2310,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Should fail to enable SWMR writing due to superblock version not at least 3 */
-        H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fstart_swmr_write(fid);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -2277,7 +2328,10 @@ test_err_start_swmr_write(hid_t in_fapl, hbool_t new_format)
             FAIL_STACK_ERROR;
 
         /* Should fail to enable SWMR writing because the file's superblock version is not at least 3 */
-        H5E_BEGIN_TRY { ret = H5Fstart_swmr_write(fid); }
+        H5E_BEGIN_TRY
+        {
+            ret = H5Fstart_swmr_write(fid);
+        }
         H5E_END_TRY;
         if (ret >= 0)
             TEST_ERROR
@@ -2341,17 +2395,24 @@ error:
  *  (5) Parent: open a file with write access; enable SWMR writing mode
  *      Child: concurrent open of the file with write and SWMR write access (fail)
  */
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#ifndef H5_HAVE_UNISTD_H
 
 static int
-test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t H5_ATTR_UNUSED new_format)
+test_start_swmr_write_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
 {
+    if (new_format) {
+        TESTING("H5Fstart_swmr_write()--concurrent access for latest format");
+    }
+    else {
+        TESTING("H5Fstart_swmr_write()--concurrent access for non-latest-format");
+    }
+
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
 } /* test_start_swmr_write_concur() */
 
-#else  /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#else  /* H5_HAVE_UNISTD_H */
 
 static int
 test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
@@ -2383,7 +2444,7 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
     }
     else {
         TESTING("H5Fstart_swmr_write()--concurrent access for non-latest-format");
-    } /* end if */
+    }
 
     if ((fapl = H5Pcopy(in_fapl)) < 0)
         FAIL_STACK_ERROR
@@ -2725,7 +2786,10 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
 
         /* Should fail in opening the test file */
-        H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY;
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
@@ -2798,7 +2862,10 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
 
         /* Should fail in opening the test file */
-        H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        }
         H5E_END_TRY;
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
@@ -2875,7 +2942,10 @@ test_start_swmr_write_concur(hid_t in_fapl, hbool_t new_format)
         }
 
         /* Should fail in opening the test file */
-        H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
         if (fid >= 0)
             HDexit(EXIT_FAILURE);
@@ -2944,7 +3014,7 @@ error:
     return -1;
 
 } /* test_start_swmr_write_concur() */
-#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 /*
  * test_start_swmr_write_stress_ohdr():
@@ -3163,7 +3233,10 @@ test_object_flush_cb(hid_t in_fapl)
      *  To verify the failure condition in setting object flush property
      */
     /* Should fail if the callback function is not defined but user data is defined */
-    H5E_BEGIN_TRY { ret = H5Pset_object_flush_cb(fapl, NULL, &flush_ct); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_object_flush_cb(fapl, NULL, &flush_ct);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3464,19 +3537,28 @@ test_append_flush_generic(void)
         FAIL_STACK_ERROR
 
     /* Invalid dataset rank: zero value */
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 0, NULL, NULL, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 0, NULL, NULL, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* Invalid dataset rank: > H5S_MAX_RANK */
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, H5S_MAX_RANK + 1, NULL, NULL, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, H5S_MAX_RANK + 1, NULL, NULL, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* No boundary specified */
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 2, NULL, NULL, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 2, NULL, NULL, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3486,7 +3568,10 @@ test_append_flush_generic(void)
     boundary[1] = 1;
 
     /* Undefined callback function but defined user data */
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 2, boundary, NULL, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 2, boundary, NULL, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3494,7 +3579,10 @@ test_append_flush_generic(void)
     /* Invalid boundary size: negative value */
     boundary[0] = (hsize_t)-1;
     boundary[1] = 1;
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3502,7 +3590,10 @@ test_append_flush_generic(void)
     /* Invalid boundary size: H5S_UNLIMITED */
     boundary[0] = 1;
     boundary[1] = H5S_UNLIMITED;
-    H5E_BEGIN_TRY { ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_append_flush(dapl, 2, boundary, append_cb, &count);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -3545,7 +3636,10 @@ test_append_flush_generic(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(dapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dapl);
+    }
     H5E_END_TRY;
 
     return -1;
@@ -3663,7 +3757,10 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should fail to Create the dataset */
-    H5E_BEGIN_TRY { did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl); }
+    H5E_BEGIN_TRY
+    {
+        did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
+    }
     H5E_END_TRY;
     if (did2 >= 0)
         TEST_ERROR
@@ -3674,7 +3771,10 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
         FAIL_STACK_ERROR
 
     /* Should fail to create the dataset */
-    H5E_BEGIN_TRY { did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl); }
+    H5E_BEGIN_TRY
+    {
+        did2 = H5Dcreate2(fid, "dataset2", H5T_NATIVE_INT, sid, H5P_DEFAULT, dcpl, dapl);
+    }
     H5E_END_TRY;
     if (did2 >= 0)
         TEST_ERROR
@@ -3686,7 +3786,10 @@ test_append_flush_dataset_chunked(hid_t in_fapl)
         FAIL_STACK_ERROR;
 
     /* Should fail to open the dataset */
-    H5E_BEGIN_TRY { did2 = H5Dopen2(fid, "dataset2", dapl); }
+    H5E_BEGIN_TRY
+    {
+        did2 = H5Dopen2(fid, "dataset2", dapl);
+    }
     H5E_END_TRY;
     if (did2 >= 0)
         TEST_ERROR
@@ -4325,7 +4428,10 @@ test_file_lock_same(hid_t in_fapl)
         TEST_ERROR
 
     /* Open file with RDWR should fail */
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4396,8 +4502,9 @@ error:
 static int
 test_file_lock_swmr_same(hid_t in_fapl)
 {
-    hid_t fid, fid2;               /* File IDs */
-    hid_t fapl;                    /* File access property list */
+    hid_t fid  = H5I_INVALID_HID; /* File IDs */
+    hid_t fid2 = H5I_INVALID_HID;
+    hid_t fapl = H5I_INVALID_HID;  /* File access property list */
     char  filename[NAME_BUF_SIZE]; /* file name */
 
     /* Output message about test being performed */
@@ -4429,7 +4536,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /*
      * Case a: RDWR|SWRM_READ : should fail
      */
-    H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_READ, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_READ, fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR
@@ -4437,7 +4547,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /*
      * Case b: RDWR|SWMM_WRTE|SWMR_READ : should fail
      */
-    H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR
@@ -4445,7 +4558,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /*
      * Case c: RDONLY|SWMM_WRITE : should fail
      */
-    H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE, fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR
@@ -4453,7 +4569,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     /*
      * Case d: RDONLY|SWMM_WRITE|SWMR_READ : should fail
      */
-    H5E_BEGIN_TRY { fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_WRITE | H5F_ACC_SWMR_READ, fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR
@@ -4468,7 +4587,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4561,7 +4683,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4576,7 +4701,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4623,7 +4751,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4638,7 +4769,10 @@ test_file_lock_swmr_same(hid_t in_fapl)
     if ((fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         FAIL_STACK_ERROR
 
-    H5E_BEGIN_TRY { fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid2 = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+    }
     H5E_END_TRY;
     if (fid2 >= 0)
         TEST_ERROR
@@ -4675,7 +4809,7 @@ error:
 **    This is for concurrent access.
 **
 *****************************************************************/
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK))
+#ifndef H5_HAVE_UNISTD_H
 
 static int
 test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
@@ -4683,12 +4817,12 @@ test_file_lock_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combinations of flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork, waitpid, or flock not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
 
 } /* end test_file_lock_concur() */
 
-#else
+#else /* H5_HAVE_UNISTD_H */
 
 static int
 test_file_lock_concur(hid_t in_fapl)
@@ -4749,7 +4883,10 @@ test_file_lock_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -4823,7 +4960,10 @@ test_file_lock_concur(hid_t in_fapl)
         }
 
         /* Opens the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -4898,7 +5038,10 @@ test_file_lock_concur(hid_t in_fapl)
         }
 
         /* Opens the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -4973,7 +5116,10 @@ test_file_lock_concur(hid_t in_fapl)
         }
 
         /* Opens the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY, fapl);
+        }
         H5E_END_TRY;
 
         /* Should succeed */
@@ -5046,7 +5192,7 @@ error:
 
 } /* end test_file_lock_concur() */
 
-#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID) && defined(H5_HAVE_FLOCK)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 /****************************************************************
 **
@@ -5056,7 +5202,7 @@ error:
 **    This is for concurrent access.
 **
 *****************************************************************/
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#ifndef H5_HAVE_UNISTD_H
 
 static int
 test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
@@ -5064,12 +5210,12 @@ test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
     /* Output message about test being performed */
     TESTING("File open with different combintations of flags + SWMR flags--concurrent access");
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
 
 } /* end test_file_lock_swmr_concur() */
 
-#else
+#else /* H5_HAVE_UNISTD_H */
 
 static int
 test_file_lock_swmr_concur(hid_t in_fapl)
@@ -5134,7 +5280,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5209,7 +5358,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5284,7 +5436,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, H5P_DEFAULT);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5358,7 +5513,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5432,7 +5590,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+        }
         H5E_END_TRY;
 
         /* Should succeed */
@@ -5509,7 +5670,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY, H5P_DEFAULT);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5584,7 +5748,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5659,7 +5826,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5734,7 +5904,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+        }
         H5E_END_TRY;
 
         /* Should succeed */
@@ -5890,7 +6063,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDWR | H5F_ACC_SWMR_WRITE, fapl);
+        }
         H5E_END_TRY;
 
         /* Should fail */
@@ -5965,7 +6141,10 @@ test_file_lock_swmr_concur(hid_t in_fapl)
         }
 
         /* Open the test file */
-        H5E_BEGIN_TRY { child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl); }
+        H5E_BEGIN_TRY
+        {
+            child_fid = H5Fopen(filename, H5F_ACC_RDONLY | H5F_ACC_SWMR_READ, fapl);
+        }
         H5E_END_TRY;
 
         /* Should succeed */
@@ -6036,7 +6215,7 @@ error:
 
 } /* end test_file_lock_swmr_concur() */
 
-#endif /* !(defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 /****************************************************************
 **
@@ -6048,11 +6227,19 @@ error:
 static int
 test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_override)
 {
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#ifndef H5_HAVE_UNISTD_H
+    if (turn_locking_on && env_var_override)
+        TESTING("File locking: ON w/ env var override")
+    else if (turn_locking_on && !env_var_override)
+        TESTING("File locking: ON")
+    else if (!turn_locking_on && env_var_override)
+        TESTING("File locking: OFF w/ env var override")
+    else
+        TESTING("File locking: OFF")
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
-#else
+#else /* H5_HAVE_UNISTD_H */
     hid_t  fid  = -1;               /* File ID */
     hid_t  fapl = -1;               /* File access property list */
     char   filename[NAME_BUF_SIZE]; /* file name */
@@ -6218,7 +6405,7 @@ error:
 
     return -1;
 
-#endif /* !(defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 } /* end test_file_locking() */
 
@@ -6264,7 +6451,10 @@ test_different_lock_flags(hid_t in_fapl)
         TEST_ERROR
 
     /* Open the test file with different flags (should FAIL) */
-    H5E_BEGIN_TRY { fid3 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        fid3 = H5Fopen(filename, H5F_ACC_RDWR, fapl_id);
+    }
     H5E_END_TRY;
     if (H5I_INVALID_HID != fid3)
         FAIL_PUTS_ERROR("Should not have been able to open a file with different locking flags")
@@ -6332,7 +6522,10 @@ test_swmr_vfd_flag(void)
 
     fid = -1;
     h5_fixname(FILENAME[0], bad_fapl, filename, sizeof(filename));
-    H5E_BEGIN_TRY { fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, bad_fapl); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fcreate(filename, H5F_ACC_TRUNC | H5F_ACC_SWMR_WRITE, H5P_DEFAULT, bad_fapl);
+    }
     H5E_END_TRY;
     if (fid >= 0)
         TEST_ERROR;
@@ -6367,10 +6560,18 @@ error:
 static int
 test_bug_refresh(hid_t in_fapl)
 {
-    hid_t  fid = -1; /* File ID */
-    hid_t  fapl;
+    hid_t  fid  = H5I_INVALID_HID;
+    hid_t  fapl = H5I_INVALID_HID;
     H5F_t *f;
-    hid_t  gid1, gid2, gid3, gid4, gid5, gid6, gid7, gid8, gid9;
+    hid_t  gid1 = H5I_INVALID_HID;
+    hid_t  gid2 = H5I_INVALID_HID;
+    hid_t  gid3 = H5I_INVALID_HID;
+    hid_t  gid4 = H5I_INVALID_HID;
+    hid_t  gid5 = H5I_INVALID_HID;
+    hid_t  gid6 = H5I_INVALID_HID;
+    hid_t  gid7 = H5I_INVALID_HID;
+    hid_t  gid8 = H5I_INVALID_HID;
+    hid_t  gid9 = H5I_INVALID_HID;
     char   filename[NAME_BUF_SIZE]; /* File name */
 
     /* Create a copy of the input parameter in_fapl */
@@ -6498,17 +6699,24 @@ error:
  *              (7) Refresh the dataset
  *              (8) Verify the dataset's dimension and data are correct
  */
-#if !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID))
+#ifndef H5_HAVE_UNISTD_H
 
 static int
-test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t H5_ATTR_UNUSED new_format)
+test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
 {
+    if (new_format) {
+        TESTING("H5Drefresh()--concurrent access for latest format");
+    }
+    else {
+        TESTING("H5Drefresh()--concurrent access for non-latest-format");
+    }
+
     SKIPPED();
-    HDputs("    Test skipped due to fork or waitpid not defined.");
+    HDputs("    Test skipped due to a lack of unistd.h functionality.");
     return 0;
 } /* test_refresh_concur() */
 
-#else  /* defined(H5_HAVE_FORK && defined(H5_HAVE_WAITPID) */
+#else  /* H5_HAVE_UNISTD_H */
 
 static int
 test_refresh_concur(hid_t in_fapl, hbool_t new_format)
@@ -6808,7 +7016,7 @@ error:
     return -1;
 
 } /* test_refresh_concur() */
-#endif /* !(defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)) */
+#endif /* H5_HAVE_UNISTD_H */
 
 /*
  * test_multiple_same():

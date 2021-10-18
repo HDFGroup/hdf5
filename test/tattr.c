@@ -95,8 +95,7 @@ int attr_data2[ATTR2_DIM1][ATTR2_DIM2] = {{7614, -416}, {197814, -3}}; /* Test d
 #define ATTR3_DIM2 2
 #define ATTR3_DIM3 2
 double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
-    {{2.3F, -26.1F}, {0.123F, -10.0F}},
-    {{973.23F, -0.91827F}, {2.0F, 23.0F}}}; /* Test data for 3rd attribute */
+    {{2.3, -26.1}, {0.123, -10.0}}, {{973.23, -0.91827}, {2.0, 23.0}}}; /* Test data for 3rd attribute */
 
 #define ATTR4_NAME       "Attr4"
 #define ATTR4_RANK       2
@@ -113,8 +112,8 @@ struct attr4_struct {
     double d;
     char   c;
 } attr_data4[ATTR4_DIM1][ATTR4_DIM2] = {
-    {{3, -26.1F, 'd'}, {-100000, 0.123F, '3'}},
-    {{-23, 981724.2F, 'Q'}, {0, 2.0F, '\n'}}}; /* Test data for 4th attribute */
+    {{3, -26.1, 'd'}, {-100000, 0.123, '3'}},
+    {{-23, 981724.2, 'Q'}, {0, 2.0, '\n'}}}; /* Test data for 4th attribute */
 
 #define ATTR5_NAME "Attr5"
 #define ATTR5_RANK 0
@@ -519,13 +518,13 @@ test_attr_basic_read(hid_t fapl)
 static void
 test_attr_flush(hid_t fapl)
 {
-    hid_t fil,               /* File ID */
-        att,                 /* Attribute ID */
-        spc,                 /* Dataspace ID */
-        set;                 /* Dataset ID */
-    double wdata = 3.14159F; /* Data to write */
-    double rdata;            /* Data read in */
-    herr_t ret;              /* Generic return value        */
+    hid_t fil,              /* File ID */
+        att,                /* Attribute ID */
+        spc,                /* Dataspace ID */
+        set;                /* Dataset ID */
+    double wdata = 3.14159; /* Data to write */
+    double rdata;           /* Data read in */
+    herr_t ret;             /* Generic return value */
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Attribute Flushing\n"));
@@ -545,8 +544,8 @@ test_attr_flush(hid_t fapl)
     ret = H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if (!H5_DBL_ABS_EQUAL(rdata, (double)0.0f))
-        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, (double)0.0F);
+    if (!H5_DBL_ABS_EQUAL(rdata, 0.0))
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, 0.0);
 
     ret = H5Fflush(fil, H5F_SCOPE_GLOBAL);
     CHECK(ret, FAIL, "H5Fflush");
@@ -554,8 +553,8 @@ test_attr_flush(hid_t fapl)
     ret = H5Aread(att, H5T_NATIVE_DOUBLE, &rdata);
     CHECK(ret, FAIL, "H5Awrite");
 
-    if (!H5_DBL_ABS_EQUAL(rdata, (double)0.0f))
-        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, (double)0.0F);
+    if (!H5_DBL_ABS_EQUAL(rdata, 0.0))
+        TestErrPrintf("attribute value wrong: rdata=%f, should be %f\n", rdata, 0.0);
 
     ret = H5Awrite(att, H5T_NATIVE_DOUBLE, &wdata);
     CHECK(ret, FAIL, "H5Awrite");
@@ -859,8 +858,8 @@ test_attr_compound_read(hid_t fapl)
     VERIFY(fields, 3, "H5Tget_nmembers");
     for (i = 0; i < fields; i++) {
         fieldname = H5Tget_member_name(type, (unsigned)i);
-        if (!(HDstrcmp(fieldname, ATTR4_FIELDNAME1) || HDstrcmp(fieldname, ATTR4_FIELDNAME2) ||
-              HDstrcmp(fieldname, ATTR4_FIELDNAME3)))
+        if (!(HDstrcmp(fieldname, ATTR4_FIELDNAME1) != 0 || HDstrcmp(fieldname, ATTR4_FIELDNAME2) != 0 ||
+              HDstrcmp(fieldname, ATTR4_FIELDNAME3) != 0))
             TestErrPrintf("invalid field name for field #%d: %s\n", i, fieldname);
         H5free_memory(fieldname);
     } /* end for */
@@ -907,7 +906,7 @@ test_attr_compound_read(hid_t fapl)
     /* Verify values read in */
     for (i = 0; i < ATTR4_DIM1; i++)
         for (j = 0; j < ATTR4_DIM2; j++)
-            if (HDmemcmp(&attr_data4[i][j], &read_data4[i][j], sizeof(struct attr4_struct))) {
+            if (HDmemcmp(&attr_data4[i][j], &read_data4[i][j], sizeof(struct attr4_struct)) != 0) {
                 HDprintf("%d: attribute data different: attr_data4[%d][%d].i=%d, read_data4[%d][%d].i=%d\n",
                          __LINE__, i, j, attr_data4[i][j].i, i, j, read_data4[i][j].i);
                 HDprintf("%d: attribute data different: attr_data4[%d][%d].d=%f, read_data4[%d][%d].d=%f\n",
@@ -920,7 +919,7 @@ test_attr_compound_read(hid_t fapl)
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR4_NAME), "H5Aget_name");
-    if (HDstrcmp(attr_name, ATTR4_NAME))
+    if (HDstrcmp(attr_name, ATTR4_NAME) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR4_NAME);
 
     /* Close attribute datatype */
@@ -1279,7 +1278,7 @@ test_attr_mult_read(hid_t fapl)
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
-    if (HDstrcmp(attr_name, ATTR1_NAME))
+    if (HDstrcmp(attr_name, ATTR1_NAME) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR1_NAME);
 
     /* Verify Name with too small of a buffer */
@@ -1287,7 +1286,7 @@ test_attr_mult_read(hid_t fapl)
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
     HDstrcpy(temp_name, ATTR1_NAME);            /* make a copy of the name */
     temp_name[HDstrlen(ATTR1_NAME) - 1] = '\0'; /* truncate it to match the one retrieved */
-    if (HDstrcmp(attr_name, temp_name))
+    if (HDstrcmp(attr_name, temp_name) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, temp_name);
 
     /* Close attribute */
@@ -1337,7 +1336,7 @@ test_attr_mult_read(hid_t fapl)
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
-    if (HDstrcmp(attr_name, ATTR2_NAME))
+    if (HDstrcmp(attr_name, ATTR2_NAME) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR2_NAME);
 
     /* Verify Name with too small of a buffer */
@@ -1345,7 +1344,7 @@ test_attr_mult_read(hid_t fapl)
     VERIFY(name_len, HDstrlen(ATTR2_NAME), "H5Aget_name");
     HDstrcpy(temp_name, ATTR2_NAME);            /* make a copy of the name */
     temp_name[HDstrlen(ATTR2_NAME) - 1] = '\0'; /* truncate it to match the one retrieved */
-    if (HDstrcmp(attr_name, temp_name))
+    if (HDstrcmp(attr_name, temp_name) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, temp_name);
 
     /* Close attribute */
@@ -1399,7 +1398,7 @@ test_attr_mult_read(hid_t fapl)
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
-    if (HDstrcmp(attr_name, ATTR3_NAME))
+    if (HDstrcmp(attr_name, ATTR3_NAME) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR3_NAME);
 
     /* Verify Name with too small of a buffer */
@@ -1407,7 +1406,7 @@ test_attr_mult_read(hid_t fapl)
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
     HDstrcpy(temp_name, ATTR3_NAME);            /* make a copy of the name */
     temp_name[HDstrlen(ATTR3_NAME) - 1] = '\0'; /* truncate it to match the one retrieved */
-    if (HDstrcmp(attr_name, temp_name))
+    if (HDstrcmp(attr_name, temp_name) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, temp_name);
 
     /* Close attribute */
@@ -1436,19 +1435,19 @@ attr_op1(hid_t H5_ATTR_UNUSED loc_id, const char *name, const H5A_info_t H5_ATTR
 
     switch (*count) {
         case 0:
-            if (HDstrcmp(name, ATTR1_NAME))
+            if (HDstrcmp(name, ATTR1_NAME) != 0)
                 TestErrPrintf("attribute name different: name=%s, should be %s\n", name, ATTR1_NAME);
             (*count)++;
             break;
 
         case 1:
-            if (HDstrcmp(name, ATTR2_NAME))
+            if (HDstrcmp(name, ATTR2_NAME) != 0)
                 TestErrPrintf("attribute name different: name=%s, should be %s\n", name, ATTR2_NAME);
             (*count)++;
             break;
 
         case 2:
-            if (HDstrcmp(name, ATTR3_NAME))
+            if (HDstrcmp(name, ATTR3_NAME) != 0)
                 TestErrPrintf("attribute name different: name=%s, should be %s\n", name, ATTR3_NAME);
             (*count)++;
             break;
@@ -1590,7 +1589,7 @@ test_attr_delete(hid_t fapl)
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR1_NAME), "H5Aget_name");
-    if (HDstrcmp(attr_name, ATTR1_NAME))
+    if (HDstrcmp(attr_name, ATTR1_NAME) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR1_NAME);
 
     /* Close attribute */
@@ -1605,7 +1604,7 @@ test_attr_delete(hid_t fapl)
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
-    if (HDstrcmp(attr_name, ATTR3_NAME))
+    if (HDstrcmp(attr_name, ATTR3_NAME) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR3_NAME);
 
     /* Close attribute */
@@ -1629,7 +1628,7 @@ test_attr_delete(hid_t fapl)
     /* Verify Name */
     name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, attr_name);
     VERIFY(name_len, HDstrlen(ATTR3_NAME), "H5Aget_name");
-    if (HDstrcmp(attr_name, ATTR3_NAME))
+    if (HDstrcmp(attr_name, ATTR3_NAME) != 0)
         TestErrPrintf("attribute name different: attr_name=%s, should be %s\n", attr_name, ATTR3_NAME);
 
     /* Close attribute */
@@ -2123,7 +2122,7 @@ test_attr_dense_verify(hid_t loc_id, unsigned max_attr)
         HDsprintf(attrname, "attr %02u", u);
         name_len = H5Aget_name(attr, (size_t)ATTR_NAME_LEN, check_name);
         VERIFY(name_len, HDstrlen(attrname), "H5Aget_name");
-        if (HDstrcmp(check_name, attrname))
+        if (HDstrcmp(check_name, attrname) != 0)
             TestErrPrintf("attribute name different: attrname = '%s', should be '%s'\n", check_name,
                           attrname);
 
@@ -5658,7 +5657,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
     ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_INC, n, tmpname,
                                      (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
-    if (HDstrcmp(attrname, tmpname))
+    if (HDstrcmp(attrname, tmpname) != 0)
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
 
     /* Don't test "native" order if there is no creation order index, since
@@ -5684,7 +5683,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
         ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_NATIVE, n, tmpname,
                                          (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
         CHECK(ret, FAIL, "H5Aget_name_by_idx");
-        if (HDstrcmp(attrname, tmpname))
+        if (HDstrcmp(attrname, tmpname) != 0)
             TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
     } /* end if */
 
@@ -5705,7 +5704,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
     ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_CRT_ORDER, H5_ITER_DEC, (hsize_t)0, tmpname,
                                      (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
-    if (HDstrcmp(attrname, tmpname))
+    if (HDstrcmp(attrname, tmpname) != 0)
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
 
     /* Verify the information for first attribute, in increasing name order */
@@ -5725,7 +5724,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
     ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_INC, n, tmpname,
                                      (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
-    if (HDstrcmp(attrname, tmpname))
+    if (HDstrcmp(attrname, tmpname) != 0)
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
 
     /* Don't test "native" order queries on link name order, since there's not
@@ -5749,7 +5748,7 @@ attr_info_by_idx_check(hid_t obj_id, const char *attrname, hsize_t n, hbool_t us
     ret = (herr_t)H5Aget_name_by_idx(obj_id, ".", H5_INDEX_NAME, H5_ITER_DEC, (hsize_t)0, tmpname,
                                      (size_t)NAME_BUF_SIZE, H5P_DEFAULT);
     CHECK(ret, FAIL, "H5Aget_name_by_idx");
-    if (HDstrcmp(attrname, tmpname))
+    if (HDstrcmp(attrname, tmpname) != 0)
         TestErrPrintf("Line %d: attribute name size wrong!\n", __LINE__);
 
     /* Retrieve current # of errors */
@@ -6010,7 +6009,10 @@ test_attr_info_null_info_pointer(hid_t fcpl, hid_t fapl)
     attr = H5Acreate2(fid, GET_INFO_NULL_POINTER_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
-    H5E_BEGIN_TRY { err_ret = H5Aget_info(attr, NULL); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Aget_info(attr, NULL);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Aget_info");
@@ -6071,22 +6073,34 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
     attr = H5Acreate2(fid, INVALID_RENAME_TEST_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename(fid, NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename(fid, NULL, INVALID_RENAME_TEST_NEW_ATTR_NAME);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename(fid, "", INVALID_RENAME_TEST_NEW_ATTR_NAME); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename(fid, "", INVALID_RENAME_TEST_NEW_ATTR_NAME);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, NULL); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, NULL);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, ""); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename(fid, INVALID_RENAME_TEST_ATTR_NAME, "");
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename");
@@ -6107,12 +6121,18 @@ test_attr_rename_invalid_name(hid_t fcpl, hid_t fapl)
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, NULL, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, NULL, H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
 
-    H5E_BEGIN_TRY { err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, "", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Arename_by_name(fid, ".", INVALID_RENAME_TEST_ATTR_NAME, "", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     CHECK(err_ret, SUCCEED, "H5Arename_by_name");
@@ -6159,7 +6179,10 @@ test_attr_get_name_invalid_buf(hid_t fcpl, hid_t fapl)
         H5Acreate2(fid, GET_NAME_INVALID_BUF_TEST_ATTR_NAME, H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT);
     CHECK(attr, FAIL, "H5Acreate2");
 
-    H5E_BEGIN_TRY { err_ret = H5Aget_name(attr, 1, NULL); }
+    H5E_BEGIN_TRY
+    {
+        err_ret = H5Aget_name(attr, 1, NULL);
+    }
     H5E_END_TRY;
 
     VERIFY(err_ret, FAIL, "H5Aget_name");
@@ -6782,7 +6805,7 @@ attr_iterate2_cb(hid_t loc_id, const char *attr_name, const H5A_info_t *info, vo
 
     /* Verify name of link */
     HDsprintf(attrname, "attr %02u", (unsigned)my_info.corder);
-    if (HDstrcmp(attr_name, attrname))
+    if (HDstrcmp(attr_name, attrname) != 0)
         return (H5_ITER_ERROR);
 
     /* Check if we've visited this link before */

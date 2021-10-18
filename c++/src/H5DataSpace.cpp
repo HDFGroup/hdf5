@@ -11,11 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 #include <string>
 
 #include "H5Include.h"
@@ -73,8 +69,7 @@ DataSpace::getConstant()
 void
 DataSpace::deleteConstants()
 {
-    if (ALL_ != 0)
-        delete ALL_;
+    delete ALL_;
 }
 
 //--------------------------------------------------------------------------
@@ -93,9 +88,8 @@ const DataSpace &DataSpace::ALL = *getConstant();
 ///\exception   H5::DataSpaceIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace(H5S_class_t type) : IdComponent()
+DataSpace::DataSpace(H5S_class_t type) : IdComponent(), id{H5Screate(type)}
 {
-    id = H5Screate(type);
     if (id < 0) {
         throw DataSpaceIException("DataSpace constructor", "H5Screate failed");
     }
@@ -110,9 +104,9 @@ DataSpace::DataSpace(H5S_class_t type) : IdComponent()
 ///\exception   H5::DataSpaceIException
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DataSpace::DataSpace(int rank, const hsize_t *dims, const hsize_t *maxdims) : IdComponent()
+DataSpace::DataSpace(int rank, const hsize_t *dims, const hsize_t *maxdims)
+    : IdComponent(), id{H5Screate_simple(rank, dims, maxdims)}
 {
-    id = H5Screate_simple(rank, dims, maxdims);
     if (id < 0) {
         throw DataSpaceIException("DataSpace constructor", "H5Screate_simple failed");
     }

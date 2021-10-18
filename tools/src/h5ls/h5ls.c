@@ -428,11 +428,6 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
         else if (H5Tequal(type, H5T_NATIVE_DOUBLE) == TRUE) {
             h5tools_str_append(buffer, "native double");
         }
-#if H5_SIZEOF_LONG_DOUBLE != 0
-        else if (H5Tequal(type, H5T_NATIVE_LDOUBLE) == TRUE) {
-            h5tools_str_append(buffer, "native long double");
-        }
-#endif
         else if (H5Tequal(type, H5T_NATIVE_INT8) == TRUE) {
             h5tools_str_append(buffer, "native int8_t");
         }
@@ -530,10 +525,7 @@ print_native_type(h5tools_str_t *buffer, hid_t type, int ind)
             h5tools_str_append(buffer, "native hbool_t");
         }
         else {
-            if (H5T_FLOAT == H5Tget_class(type))
-                return print_float_type(buffer, type, ind);
-            else
-                return print_int_type(buffer, type, ind);
+            return print_int_type(buffer, type, ind);
         }
     }
     else {
@@ -1323,7 +1315,7 @@ dump_dataset_values(hid_t dset)
     h5tool_format_t * info    = &ls_dataformat;
     H5R_ref_t *       ref_buf = NULL;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     f_type = H5Dget_type(dset);
     space  = H5Dget_space(dset);
@@ -1464,7 +1456,7 @@ done:
 
     PRINTVALSTREAM(rawoutstream, "\n");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -1492,7 +1484,7 @@ dump_attribute_values(hid_t attr)
     h5tool_format_t * info    = &ls_dataformat;
     H5R_ref_t *       ref_buf = NULL;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     f_type = H5Aget_type(attr);
     space  = H5Aget_space(attr);
@@ -1640,7 +1632,7 @@ done:
 
     PRINTVALSTREAM(rawoutstream, "\n");
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 }
 
 /*-------------------------------------------------------------------------
@@ -1669,7 +1661,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t * info = &ls_dataformat;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -1748,7 +1740,7 @@ list_attr(hid_t obj, const char *attr_name, const H5A_info_t H5_ATTR_UNUSED *ain
         H5TOOLS_DEBUG("Attribute open failed");
         h5tools_str_close(&buffer);
     }
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return 0;
 }
@@ -1991,7 +1983,7 @@ dataset_list2(hid_t dset, const char H5_ATTR_UNUSED *name)
                                    HSIZE_T_FORMAT " logical byte%s, " HSIZE_T_FORMAT " allocated byte%s",
                                    total, 1 == total ? "" : "s", used, 1 == used ? "" : "s");
                 if (used > 0) {
-                    utilization = ((double)total * (double)100.0f) / (double)used;
+                    utilization = ((double)total * 100.0) / (double)used;
                     h5tools_str_append(&buffer, ", %1.2f%% utilization", utilization);
                 }
         }
@@ -2096,7 +2088,7 @@ list_obj(const char *name, const H5O_info2_t *oinfo, const char *first_seen, voi
     h5tools_context_t ctx;          /* print context  */
     h5tool_format_t * info = &ls_dataformat;
 
-    H5TOOLS_START_DEBUG("");
+    H5TOOLS_START_DEBUG(" ");
 
     HDmemset(&ctx, 0, sizeof(ctx));
     HDmemset(&buffer, 0, sizeof(h5tools_str_t));
@@ -2250,7 +2242,7 @@ done:
     }
     h5tools_str_close(&buffer);
 
-    H5TOOLS_ENDDEBUG("");
+    H5TOOLS_ENDDEBUG(" ");
 
     return 0;
 } /* end list_obj() */
@@ -3091,7 +3083,7 @@ main(int argc, const char *argv[])
         symlink_list.objs                        = NULL;
 
         /* Check for root group as object name */
-        if (HDstrcmp(oname, root_name)) {
+        if (HDstrcmp(oname, root_name) != 0) {
             /* Check the type of link given */
             if (H5Lget_info2(file_id, oname, &li, H5P_DEFAULT) < 0) {
                 hsize_t           curr_pos = 0; /* total data element position   */

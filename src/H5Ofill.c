@@ -196,8 +196,9 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
                      unsigned H5_ATTR_UNUSED mesg_flags, unsigned H5_ATTR_UNUSED *ioflags, size_t p_size,
                      const uint8_t *p)
 {
-    H5O_fill_t *fill      = NULL;
-    void *      ret_value = NULL; /* Return value */
+    H5O_fill_t *   fill      = NULL;
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void *         ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -228,8 +229,11 @@ H5O__fill_new_decode(H5F_t H5_ATTR_UNUSED *f, H5O_t H5_ATTR_UNUSED *open_oh,
             INT32DECODE(p, fill->size);
             if (fill->size > 0) {
                 H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
-                if ((size_t)fill->size > p_size)
-                    HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "destination buffer too small")
+
+                /* Ensure that fill size doesn't exceed buffer size, due to possible data corruption */
+                if (p + fill->size - 1 > p_end)
+                    HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
+
                 if (NULL == (fill->buf = H5MM_malloc((size_t)fill->size)))
                     HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "memory allocation failed for fill value")
                 H5MM_memcpy(fill->buf, p, (size_t)fill->size);
@@ -311,10 +315,11 @@ static void *
 H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flags,
                      unsigned H5_ATTR_UNUSED *ioflags, size_t p_size, const uint8_t *p)
 {
-    H5O_fill_t *fill      = NULL; /* Decoded fill value message */
-    htri_t      exists    = FALSE;
-    H5T_t *     dt        = NULL;
-    void *      ret_value = NULL; /* Return value */
+    H5O_fill_t *   fill      = NULL; /* Decoded fill value message */
+    htri_t         exists    = FALSE;
+    H5T_t *        dt        = NULL;
+    const uint8_t *p_end     = p + p_size - 1; /* End of the p buffer */
+    void *         ret_value = NULL;           /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -335,8 +340,10 @@ H5O__fill_old_decode(H5F_t *f, H5O_t *open_oh, unsigned H5_ATTR_UNUSED mesg_flag
     /* Only decode the fill value itself if there is one */
     if (fill->size > 0) {
         H5_CHECK_OVERFLOW(fill->size, ssize_t, size_t);
-        if ((size_t)fill->size > p_size)
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, NULL, "destination buffer too small")
+
+        /* Ensure that fill size doesn't exceed buffer size, due to possible data corruption */
+        if (p + fill->size - 1 > p_end)
+            HGOTO_ERROR(H5E_OHDR, H5E_OVERFLOW, NULL, "fill size exceeds buffer size")
 
         /* Get the datatype message  */
         if ((exists = H5O_msg_exists_oh(open_oh, H5O_DTYPE_ID)) < 0)

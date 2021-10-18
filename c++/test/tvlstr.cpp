@@ -18,11 +18,7 @@
    EXTERNAL ROUTINES/VARIABLES:
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -187,7 +183,7 @@ test_vlstring_dataset()
         // Test scalar type dataset with 1 value.
         dset1 = root.createDataSet("test_scalar_small", vlst, ds_space);
 
-        dynstring_ds_write = (char *)HDcalloc(2, sizeof(char));
+        dynstring_ds_write = static_cast<char *>(HDcalloc(2, sizeof(char)));
         HDmemset(dynstring_ds_write, 'A', 1);
 
         // Write data to the dataset, then read it back.
@@ -289,7 +285,7 @@ test_vlstring_array_dataset()
 
         // Create and write another dataset.
         DataSet dataset2(file1->createDataSet("Dataset2", vlst, scalar_space));
-        char *  wdata2 = (char *)HDcalloc(65534, sizeof(char));
+        char *  wdata2 = static_cast<char *>(HDcalloc(65534, sizeof(char)));
         HDmemset(wdata2, 'A', 65533);
         dataset2.write(&wdata2, vlst);
 
@@ -317,8 +313,7 @@ test_vlstring_array_dataset()
         issue_fail_msg("test_vlstring_array_dataset()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } // end test_vlstring_array_dataset()
 
 /*-------------------------------------------------------------------------
@@ -365,7 +360,7 @@ test_vlstrings_special()
         hsize_t ii; // counting variable
         for (ii = 0; ii < SPACE1_DIM1; ii++)
             if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)ii, rdata[ii]);
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", static_cast<int>(ii), rdata[ii]);
 
         // Write dataset to disk, then read it back.
         dataset.write(wdata, vlst);
@@ -377,18 +372,19 @@ test_vlstrings_special()
             size_t rlen = HDstrlen(rdata[ii]);
             if (wlen != rlen) {
                 TestErrPrintf("VL data lengths don't match!, strlen(wdata[%d])=%u, strlen(rdata[%d])=%u\n",
-                              (int)ii, (unsigned)wlen, (int)ii, (unsigned)rlen);
+                              static_cast<int>(ii), static_cast<unsigned>(wlen), static_cast<int>(ii),
+                              static_cast<unsigned>(rlen));
                 continue;
-            } // end if
+            }
             if (HDstrcmp(wdata[ii], rdata[ii]) != 0) {
-                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)ii, wdata[ii],
-                              (int)ii, rdata[ii]);
+                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
+                              static_cast<int>(ii), wdata[ii], static_cast<int>(ii), rdata[ii]);
                 continue;
-            } // end if
-        }     // end for
+            }
+        }
 
         // Reclaim the read VL data.
-        DataSet::vlenReclaim((void *)rdata, vlst, sid1);
+        DataSet::vlenReclaim(static_cast<void *>(rdata), vlst, sid1);
 
         // Close Dataset.
         dataset.close();
@@ -413,7 +409,7 @@ test_vlstrings_special()
         // Check data read in.
         for (ii = 0; ii < SPACE1_DIM1; ii++)
             if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)ii, rdata[ii]);
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", static_cast<int>(ii), rdata[ii]);
 
         // Try to write nil strings to disk.
         dataset.write(wdata2, vlst);
@@ -424,7 +420,7 @@ test_vlstrings_special()
         // Check data read in.
         for (ii = 0; ii < SPACE1_DIM1; ii++)
             if (rdata[ii] != NULL)
-                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)ii, rdata[ii]);
+                TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", static_cast<int>(ii), rdata[ii]);
 
         // Close objects and file.
         dataset.close();
@@ -472,22 +468,26 @@ test_vlstring_type()
         // Change padding and verify it.
         vlst.setStrpad(H5T_STR_NULLPAD);
         H5T_str_t pad = vlst.getStrpad();
-        verify_val(pad, H5T_STR_NULLPAD, "StrType::getStrpad", __LINE__, __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
+                   __FILE__);
 
         // Convert to variable-length string.
         vlst.setSize(H5T_VARIABLE);
 
         // Check if datatype is VL string.
         H5T_class_t type_class = vlst.getClass();
-        verify_val(type_class, H5T_STRING, "DataType::getClass", __LINE__, __FILE__);
+        verify_val(static_cast<long>(type_class), static_cast<long>(H5T_STRING), "DataType::getClass",
+                   __LINE__, __FILE__);
         bool is_variable_str = vlst.isVariableStr();
         verify_val(is_variable_str, true, "DataType::isVariableStr", __LINE__, __FILE__);
 
         // Check default character set and padding.
         H5T_cset_t cset = vlst.getCset();
-        verify_val(cset, H5T_CSET_ASCII, "StrType::getCset", __LINE__, __FILE__);
+        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__,
+                   __FILE__);
         pad = vlst.getStrpad();
-        verify_val(pad, H5T_STR_NULLPAD, "StrType::getStrpad", __LINE__, __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
+                   __FILE__);
 
         // Commit variable-length string datatype to storage.
         vlst.commit(*file1, VLSTR_TYPE);
@@ -515,9 +515,11 @@ test_vlstring_type()
 
         // Verify character set and padding
         cset = vlst2.getCset();
-        verify_val(cset, H5T_CSET_ASCII, "StrType::getCset", __LINE__, __FILE__);
+        verify_val(static_cast<long>(cset), static_cast<long>(H5T_CSET_ASCII), "StrType::getCset", __LINE__,
+                   __FILE__);
         pad = vlst2.getStrpad();
-        verify_val(pad, H5T_STR_NULLPAD, "StrType::getStrpad", __LINE__, __FILE__);
+        verify_val(static_cast<long>(pad), static_cast<long>(H5T_STR_NULLPAD), "StrType::getStrpad", __LINE__,
+                   __FILE__);
 
         // Close datatype and file
         vlst2.close();
@@ -531,8 +533,7 @@ test_vlstring_type()
         issue_fail_msg("test_vlstring_type()", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (file1)
-        delete file1;
+    delete file1;
 } // end test_vlstring_type()
 
 /*-------------------------------------------------------------------------
@@ -584,18 +585,19 @@ test_compact_vlstring()
         for (i = 0; i < SPACE1_DIM1; i++) {
             if (HDstrlen(wdata[i]) != strlen(rdata[i])) {
                 TestErrPrintf("VL data length don't match!, strlen(wdata[%d])=%d, strlen(rdata[%d])=%d\n",
-                              (int)i, (int)strlen(wdata[i]), (int)i, (int)strlen(rdata[i]));
+                              static_cast<int>(i), static_cast<int>(HDstrlen(wdata[i])), static_cast<int>(i),
+                              static_cast<int>(HDstrlen(rdata[i])));
                 continue;
             } // end if
             if (HDstrcmp(wdata[i], rdata[i]) != 0) {
-                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n", (int)i, wdata[i],
-                              (int)i, rdata[i]);
+                TestErrPrintf("VL data values don't match!, wdata[%d]=%s, rdata[%d]=%s\n",
+                              static_cast<int>(i), wdata[i], static_cast<int>(i), rdata[i]);
                 continue;
             } // end if
         }     // end for
 
         // Reclaim the read VL data
-        DataSet::vlenReclaim((void *)rdata, vlst, sid1);
+        DataSet::vlenReclaim(static_cast<void *>(rdata), vlst, sid1);
 
         // Close objects and file
         dataset.close();
@@ -676,7 +678,7 @@ test_vlstring_attribute()
         // Test creating a "large" sized string attribute
         gr_attr = root.createAttribute("test_scalar_large", vlst, att_space);
 
-        string_att_write = (char *)HDcalloc(8192, sizeof(char));
+        string_att_write = static_cast<char *>(HDcalloc(8192, sizeof(char)));
         HDmemset(string_att_write, 'A', 8191);
 
         // Write data to the attribute, then read it back.
@@ -865,7 +867,7 @@ read_scalar_dset(H5File &file, DataType &type, DataSpace &space, char *name, cha
         dset.read(&data_read, type, space, space);
         dset.close();
 
-        if (HDstrcmp(data, data_read))
+        if (HDstrcmp(data, data_read) != 0)
             TestErrPrintf("Expected %s for dataset %s but read %s\n", data, name, data_read);
 
         HDfree(data_read);

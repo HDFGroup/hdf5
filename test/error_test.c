@@ -129,13 +129,8 @@ test_error(hid_t file)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-#ifdef H5_USE_16_API
-    if (old_func != (H5E_auto_t)H5Eprint)
+    if (old_func == NULL)
         TEST_ERROR;
-#else  /* H5_USE_16_API */
-    if (old_func != (H5E_auto2_t)H5Eprint2)
-        TEST_ERROR;
-#endif /* H5_USE_16_API */
 
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         TEST_ERROR;
@@ -200,7 +195,7 @@ init_error(void)
 
     if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1)
         TEST_ERROR;
-    if (HDstrcmp(ERR_CLS_NAME, cls_name))
+    if (HDstrcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
 
     if ((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_TEST_MSG)) < 0)
@@ -225,7 +220,7 @@ init_error(void)
         TEST_ERROR;
     if (msg_type != H5E_MINOR)
         TEST_ERROR;
-    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG))
+    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
         TEST_ERROR;
 
     /* Register another class for later testing. */
@@ -324,7 +319,7 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
  *      'full_desc' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_long_desc(void)
 {
@@ -380,7 +375,7 @@ error:
 
     return -1;
 } /* end test_long_desc() */
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    dump_error
@@ -563,7 +558,10 @@ test_copy(void)
     /* Try to close error stack copy.  Should fail because
      * the current H5Eset_current_stack closes the stack to be set.
      */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(estack_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -629,15 +627,24 @@ test_append(void)
         TEST_ERROR
 
     /* Try to append bad error stack IDs */
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -663,7 +670,10 @@ test_append(void)
     /* Try to close error stack #2.  Should fail because H5Eappend_stack
      * should have already closed it.
      */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(estack_id2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id2);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR

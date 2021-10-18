@@ -29,10 +29,43 @@
 #define H5_MY_PKG_ERR  H5E_FILE
 #define H5_MY_PKG_INIT YES
 
-/**
- * \defgroup H5F H5F
- * \brief File Interface
- * \todo Describe concisely what the functions in this module are about.
+/**\defgroup H5F H5F
+ *
+ * Use the functions in this module to manage HDF5 files.
+ *
+ * In the code snippets below, we show the skeletal life cycle of an HDF5 file,
+ * when creating a new file (left) or when opening an existing file (right).
+ * File creation is essentially controlled through \ref FCPL, and file access to
+ * new and existing files is controlled through \ref FAPL. The file \c name and
+ * creation or access \c mode control the interaction with the underlying
+ * storage such as file systems.
+ *
+ * <table>
+ * <tr><th>Create</th><th>Read</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5F_examples.c create
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5F_examples.c read
+ *   </td>
+ * </tr>
+ * <tr><th>Update</th><th>Delete</th></tr>
+ * <tr valign="top">
+ *   <td>
+ *   \snippet{lineno} H5F_examples.c update
+ *   </td>
+ *   <td>
+ *   \snippet{lineno} H5F_examples.c delete
+ *   </td>
+ * </tr>
+ * </table>
+ *
+ * In addition to general file management functions, there are three categories
+ * of functions that deal with advanced file management tasks and use cases:
+ * 1. The control of the HDF5 \ref MDC
+ * 2. The use of (MPI-) \ref PH5F HDF5
+ * 3. The \ref SWMR pattern
  *
  * \defgroup MDC Metadata Cache
  * \ingroup H5F
