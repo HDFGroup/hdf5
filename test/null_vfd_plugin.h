@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -12,23 +11,20 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
- * Purpose:	The public header file for the sec2 driver.
+ * Purpose: The public header file for the null testing VFD plugin.
  */
-#ifndef H5FDsec2_H
-#define H5FDsec2_H
+#ifndef H5FDnull_H
+#define H5FDnull_H
 
-#define H5FD_SEC2       (H5FD_sec2_init())
-#define H5FD_SEC2_VALUE H5_VFD_SEC2
+#define H5FD_NULL      (H5FD_null_init())
+#define NULL_VFD_NAME  "null_vfd_plugin"
+#define NULL_VFD_VALUE ((H5FD_class_value_t)200)
 
 #ifdef __cplusplus
 extern "C" {
 #endif
 
-H5_DLL hid_t  H5FD_sec2_init(void);
-H5_DLL herr_t H5Pset_fapl_sec2(hid_t fapl_id);
+H5_DLL hid_t H5FD_null_init(void);
 
 #ifdef __cplusplus
 }

@@ -101,6 +101,8 @@ typedef struct H5T_subset_info_t {
 } H5T_subset_info_t;
 
 /* Forward declarations for prototype arguments */
+struct H5G_loc_t;
+struct H5G_name_t;
 struct H5O_shared_t;
 
 /* The native endianness of the platform */
@@ -123,7 +125,7 @@ H5_DLL herr_t      H5T_encode(H5T_t *obj, unsigned char *buf, size_t *nalloc);
 H5_DLL H5T_t *           H5T_decode(size_t buf_size, const unsigned char *buf);
 H5_DLL herr_t            H5T_debug(const H5T_t *dt, FILE *stream);
 H5_DLL struct H5O_loc_t *H5T_oloc(H5T_t *dt);
-H5_DLL H5G_name_t *H5T_nameof(const H5T_t *dt);
+H5_DLL struct H5G_name_t *H5T_nameof(const H5T_t *dt);
 H5_DLL htri_t      H5T_is_immutable(const H5T_t *dt);
 H5_DLL htri_t      H5T_is_named(const H5T_t *dt);
 H5_DLL herr_t      H5T_convert_committed_datatype(H5T_t *dt, H5F_t *f);
@@ -159,7 +161,7 @@ H5_DLL herr_t  H5T_invoke_vol_optional(H5T_t *dt, H5VL_optional_args_t *args, hi
 H5_DLL H5R_type_t H5T_get_ref_type(const H5T_t *dt);
 
 /* Operations on named datatypes */
-H5_DLL H5T_t *H5T_open(const H5G_loc_t *loc);
+H5_DLL H5T_t *H5T_open(const struct H5G_loc_t *loc);
 H5_DLL int    H5T_link(const H5T_t *type, int adjust);
 H5_DLL herr_t H5T_update_shared(H5T_t *type);
 

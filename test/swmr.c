@@ -6270,13 +6270,13 @@ test_file_locking(hid_t in_fapl, hbool_t turn_locking_on, hbool_t env_var_overri
 
     /* If requested, set the environment variable */
     if (env_var_override) {
-        if (HDsetenv("HDF5_USE_FILE_LOCKING", turn_locking_on ? "FALSE" : "TRUE", TRUE) < 0)
+        if (HDsetenv(HDF5_USE_FILE_LOCKING, turn_locking_on ? "FALSE" : "TRUE", TRUE) < 0)
             TEST_ERROR
         if (H5F__reparse_file_lock_variable_test() < 0)
             TEST_ERROR
     }
     else {
-        if (HDsetenv("HDF5_USE_FILE_LOCKING", "", TRUE) < 0)
+        if (HDsetenv(HDF5_USE_FILE_LOCKING, "", TRUE) < 0)
             TEST_ERROR
         if (H5F__reparse_file_lock_variable_test() < 0)
             TEST_ERROR
@@ -7367,7 +7367,7 @@ main(void)
     /* Skip this test if SWMR I/O is not supported for the VFD specified
      * by the environment variable.
      */
-    driver = HDgetenv("HDF5_DRIVER");
+    driver = HDgetenv(HDF5_DRIVER);
     if (!H5FD__supports_swmr_test(driver)) {
         HDprintf("This VFD does not support SWMR I/O\n");
         return EXIT_SUCCESS;
@@ -7377,7 +7377,7 @@ main(void)
      * about file locking. File locking should be used unless explicitly
      * disabled.
      */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "FALSE"))
         use_file_locking = FALSE;
     else

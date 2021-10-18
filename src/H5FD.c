@@ -301,6 +301,62 @@ done:
 } /* end H5FD_register() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FDis_driver_registered_by_name
+ *
+ * Purpose:     Tests whether a VFD class has been registered or not
+ *              according to a supplied driver name.
+ *
+ * Return:      >0 if a VFD with that name has been registered
+ *              0 if a VFD with that name has NOT been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FDis_driver_registered_by_name(const char *driver_name)
+{
+    htri_t ret_value = FALSE; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "*s", driver_name);
+
+    /* Check if driver with this name is registered */
+    if ((ret_value = H5FD_is_driver_registered_by_name(driver_name, NULL)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDis_driver_registered_by_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDis_driver_registered_by_value
+ *
+ * Purpose:     Tests whether a VFD class has been registered or not
+ *              according to a supplied driver value (ID).
+ *
+ * Return:      >0 if a VFD with that value has been registered
+ *              0 if a VFD with that value hasn't been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "DV", driver_value);
+
+    /* Check if driver with this value is registered */
+    if ((ret_value = H5FD_is_driver_registered_by_value(driver_value, NULL)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDis_driver_registered_by_value() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FDunregister
  *
  * Purpose:     Removes a driver ID from the library. This in no way affects

@@ -3448,6 +3448,34 @@ H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
 /**
  * \ingroup FAPL
  *
+ * \brief Retrieves a string representation of the configuration for
+ *        the driver set on the given FAPL. The returned string can
+ *        be used to configure the same driver in an identical way.
+ *
+ * \fapl_id
+ * \param[out] config_buf Driver configuration string output buffer
+ * \param[in]  buf_size Size of driver configuration string output buffer
+ *
+ * \return Returns the length of the driver configuration string on
+ *         success (not including the NUL terminator). Returns negative
+ *         on failure.
+ *
+ * \details H5Pget_driver_config_str() retrieves a string representation
+ *          of the configuration for the driver set on the given FAPL. The
+ *          returned string can be used to configure the same driver in
+ *          an identical way.
+ *
+ *          If \p config_buf is NULL, the length of the driver configuration
+ *          string is simply returned. The caller can then allocate a buffer
+ *          of the appropriate size and call this routine again.
+ *
+ * \version 1.12.1 Function publicized in this release.
+ *
+ */
+H5_DLL ssize_t H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size);
+/**
+ * \ingroup FAPL
+ *
  * \brief Retrieves the size of the external link open file cache
  *
  * \fapl_id{plist_id}
@@ -4284,6 +4312,57 @@ H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size
  *
  */
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets a file driver according to a given driver name
+ *
+ * \plist_id
+ * \param[in] driver_name   The new driver name
+ * \param[in] driver_config Optional string containing driver properties
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_driver_by_name() sets the file driver, by the name
+ *          driver_name, for a file access or data transfer property list,
+ *          \p plist_id, and supplies an optional string containing the
+ *          driver-specific properties, \p driver_config. The driver
+ *          properties string will be copied into the property list.
+ *
+ *          If the driver specified by \p driver_name is not currently
+ *          registered, an attempt will be made to load the driver as a
+ *          plugin.
+ *
+ * \version 1.12.1 Function publicized in this release.
+ *
+ */
+H5_DLL herr_t H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, const char *driver_config);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets a file driver according to a given driver value (ID).
+ *
+ * \plist_id
+ * \param[in] driver_value  The new driver value (ID)
+ * \param[in] driver_config Optional string containing driver properties
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_driver_by_value() sets the file driver, by the value
+ *          driver_value, for a file access or data transfer property list,
+ *          \p plist_id, and supplies an optional string containing the
+ *          driver-specific properties, \p driver_config. The driver
+ *          properties string will be copied into the property list.
+ *
+ *          If the driver specified by \p driver_value is not currently
+ *          registered, an attempt will be made to load the driver as a
+ *          plugin.
+ *
+ * \version 1.12.1 Function publicized in this release.
+ *
+ */
+H5_DLL herr_t H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_value,
+                                     const char *driver_config);
 /**
  * \ingroup FAPL
  *

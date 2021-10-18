@@ -180,6 +180,7 @@ static herr_t  H5FD__log_unlock(H5FD_t *_file);
 static herr_t  H5FD__log_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_log_g = {
+    H5FD_LOG_VALUE,          /* value               */
     "log",                   /* name                */
     MAXADDR,                 /* maxaddr             */
     H5F_CLOSE_WEAK,          /*  fc_degree          */
@@ -220,6 +221,9 @@ static const H5FD_class_t H5FD_log_g = {
     H5FD_FLMAP_DICHOTOMY     /* fl_map              */
 };
 
+/* Default configuration, if none provided */
+static const H5FD_log_fapl_t H5FD_log_default_config_g = {NULL, H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC, 4096};
+
 /* Declare a free list to manage the H5FD_log_t struct */
 H5FL_DEFINE_STATIC(H5FD_log_t);
 
@@ -241,7 +245,7 @@ H5FD__init_package(void)
     FUNC_ENTER_STATIC
 
     /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
         ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
@@ -352,7 +356,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
 
     fa.flags    = flags;
     fa.buf_size = buf_size;
-    ret_value   = H5P_set_driver(plist, H5FD_LOG, &fa);
+    ret_value   = H5P_set_driver(plist, H5FD_LOG, &fa, NULL);
 
 done:
     if (fa.logfile)
@@ -487,10 +491,11 @@ static H5FD_t *
 H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_log_t *           file = NULL;
-    H5P_genplist_t *       plist;   /* Property list */
-    const H5FD_log_fapl_t *fa;      /* File access property list information */
-    int                    fd = -1; /* File descriptor */
-    int                    o_flags; /* Flags for open() call */
+    H5P_genplist_t *       plist; /* Property list */
+    const H5FD_log_fapl_t *fa;    /* File access property list information */
+    H5FD_log_fapl_t        default_fa = H5FD_log_default_config_g;
+    int                    fd         = -1; /* File descriptor */
+    int                    o_flags;         /* Flags for open() call */
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
@@ -528,8 +533,10 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Get the driver specific information */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if (NULL == (fa = (const H5FD_log_fapl_t *)H5P_peek_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
+    if (NULL == (fa = (const H5FD_log_fapl_t *)H5P_peek_driver_info(plist))) {
+        /* Use default driver configuration*/
+        fa = &default_fa;
+    }
 
     /* Start timer for open() call */
     if (fa->flags & H5FD_LOG_TIME_OPEN)
