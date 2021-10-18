@@ -19,7 +19,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src and tools/lib directories
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/util/test
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib -I$(top_srcdir)/utils/test
 
 # These are our main targets, the tools
 
@@ -30,7 +30,7 @@ noinst_PROGRAMS=swmr_check_compat_vfd
 LDADD=$(LIBH5_HL) $(LIBH5TOOLS) $(LIBHDF5)
 
 if BUILD_TESTS_CONDITIONAL
-  AM_CPPFLAGS+=-I$(top_srcdir)/util/test
+  AM_CPPFLAGS+=-I$(top_srcdir)/utils/test
 endif
 #
 CHECK_CLEANFILES+=*.h5
