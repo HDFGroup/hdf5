@@ -14,10 +14,35 @@ of <em>documentation done right</em>.
 
 \li \todo Describe how to add a reference or a new RFC
 \li \todo Describe how to add an example
-\li \todo Describe how to include plain HTML
 \li \todo Describe how to add an API macro
-\li \todo Describe the custom commands
 \li \todo Describe the S3 bucket layout and update routine
-\li \todo Link the RM template
+
+\subsection plain_html Including Plain HTML Pages
+
+The most common use case for this is the inclusion of older documentation.
+New documentation should, whenever possible, be created using Doxygen markdown!
+
+Use Doxygen's <a href="https://www.doxygen.nl/manual/commands.html#cmdhtmlinclude"><code>htmlinclude</code></a>
+special command to include existing plain HTML pages.
+
+An example from this documentation set can be seen
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/dox/FileFormatSpec.dox">here</a>.
+
+\subsection new_rm_entry Creating a New Reference Manual Entry
+
+Please refer to the \ref RMT for guidance on how to create a new reference manual entry.
+
+\subsection custom_commands Creating Custom Commands
+
+See Doxygen's <a href="https://www.doxygen.nl/manual/custcmd.html">Custom Commands documentation</a>
+as a general reference.
+
+All cusom commands for this project are located in the
+<a href="https://github.com/HDFGroup/hdf5/blob/develop/doxygen/aliases"><tt>aliases</tt></a>
+file in the <a href="https://github.com/HDFGroup/hdf5/tree/develop/doxygen"><tt>doxygen</tt></a>
+subdirectory of the <a href="https://github.com/HDFGroup/hdf5">main HDF5 repo</a>.
+
+The custom commands are grouped in sections. Find a suitable section for your command or
+ask for help if unsure!
 
 */

@@ -3,7 +3,9 @@
 \li \link api-compat-macros API Compatibility Macros \endlink
 \li \ref TNMDC "Metadata Caching in HDF5"
 \li \ref MT "Thread Safe library"
+\li \ref IOFLOW "HDF5 Raw I/O Flow Notes"
 \li \ref VFL "Virtual File Layer"
+\li \ref FMTDISC "File Format Walkthrough"
 
  */
 
@@ -13,8 +15,20 @@
 
 */
 
+/** \page IOFLOW HDF5 Raw I/O Flow Notes
+
+\htmlinclude IOFlow.html
+
+*/
+
 /** \page VFL HDF5 Virtual File Layer
 
 \htmlinclude VFL.html
+
+*/
+
+/** \page FMTDISC HDF5 File Format Discussion
+
+\htmlinclude FileFormat.html
 
 */
