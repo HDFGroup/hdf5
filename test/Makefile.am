@@ -36,8 +36,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       test_mirror.sh: mirror_vfd ../utils/mirror_vfd/*
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh testexternal_env.sh \
-    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh \
-    test_mirror.sh
+    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
@@ -48,6 +47,10 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
 if HAVE_SHARED_CONDITIONAL
   TEST_SCRIPT += test_filter_plugin.sh test_vol_plugin.sh
   SCRIPT_DEPEND += filter_plugin$(EXEEXT) vol_plugin$(EXEEXT)
+endif
+
+if MIRROR_VFD_CONDITIONAL
+  TEST_SCRIPT += test_mirror.sh
 endif
 
 check_SCRIPTS = $(TEST_SCRIPT)
@@ -91,10 +94,13 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
-    mirror_vfd
+    vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin vol_plugin
+endif
+
+if MIRROR_VFD_CONDITIONAL
+  check_PROGRAMS+= mirror_vfd
 endif
 
 # These programs generate test files for the tests.  They don't need to be

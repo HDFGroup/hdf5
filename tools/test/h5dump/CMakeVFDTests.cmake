@@ -16,19 +16,7 @@
 ##############################################################################
 ##############################################################################
 
-set (VFD_H5DUMP_LIST
-    sec2
-    stdio
-    core
-    core_paged
-    split
-    multi
-    family
-)
-
-if (H5_HAVE_DIRECT)
-  set (VFD_H5DUMP_LIST ${VFD_H5DUMP_LIST} direct)
-endif ()
+H5_SET_VFD_LIST()
 
 # --------------------------------------------------------------------
 # Copy all the HDF5 files from the source directory into the test directory
@@ -37,8 +25,7 @@ set (HDF5_VFD_H5DUMP_FILES
   packedbits
 )
 
-foreach (vfdtest ${VFD_H5DUMP_LIST})
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}")
+foreach (vfdtest ${VFD_LIST})
   foreach (h5_tfile ${HDF5_VFD_H5DUMP_FILES})
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}.h5" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.h5" "HDF5_VFD_H5DUMP_files")
     HDFTEST_COPY_FILE("${HDF5_TOOLS_DIR}/testfiles/${h5_tfile}.ddl" "${PROJECT_BINARY_DIR}/${vfdtest}/${h5_tfile}.ddl" "HDF5_VFD_H5DUMP_files")
@@ -79,7 +66,7 @@ endmacro ()
 ##############################################################################
 
 # Run test with different Virtual File Driver
-foreach (vfd ${VFD_H5DUMP_LIST})
+foreach (vfd ${VFDP_LIST})
   # test for signed/unsigned datasets
   ADD_VFD_H5DUMP_TEST (${vfd} packedbits 0 --enable-error-stack packedbits.h5)
 endforeach ()
