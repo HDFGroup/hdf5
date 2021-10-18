@@ -23,7 +23,7 @@ AC_PREREQ([2.69])
 ## NOTE: Do not forget to change the version number here when we do a
 ## release!!!
 ##
-AC_INIT([HDF5], [1.13.0], [help@hdfgroup.org])
+AC_INIT([HDF5], [1.13.0-7], [help@hdfgroup.org])
 
 AC_CONFIG_SRCDIR([src/H5.c])
 AC_CONFIG_HEADERS([src/H5config.h])
@@ -235,6 +235,41 @@ elif test $hdf5_cv_host != $host; then
   echo "this is $host.  Please remove that file and try again."
   AC_MSG_ERROR([config.cache file is invalid])
 fi
+
+## ----------------------------------------------------------------------
+## Check if we should consider certain compiler warnings as errors
+##
+## We have to set WARNINGS_AS_ERRORS before sourcing a $host_config
+## file, below.
+##
+## These should NOT be on by default as the risk of breakage is high
+## when compiling HDF5 on new (or new versions) of platforms and
+## compilers. It can also cause failures when header files we have no
+## control over (e.g. MPI, HDFS) raise warnings.
+##
+AC_MSG_CHECKING([enable warnings as errors])
+AC_ARG_ENABLE([warnings-as-errors],
+              [AS_HELP_STRING([--enable-warnings-as-errors],
+                              [Determines whether certain warnings will be
+                               considered errors. This is mainly for use
+                               by HDF5 library developers.
+                               [default=no]
+                               ])],
+              [WARNINGS_AS_ERRORS=$enableval])
+
+## Set default
+if test "X-$WARNINGS_AS_ERRORS" = X- ; then
+  WARNINGS_AS_ERRORS=no
+fi
+
+case "X-$WARNINGS_AS_ERRORS" in
+  X-yes|X-no)
+    AC_MSG_RESULT([$WARNINGS_AS_ERRORS])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $WARNINGS_AS_ERRORS])
+    ;;
+esac
 
 ## ----------------------------------------------------------------------
 ## Source any special files that we need.  These files normally aren't
@@ -2233,6 +2268,13 @@ case "X-$ASSERTS" in
     ;;
 esac
 
+## Incorporate the potentially warning-to-error promoting flags after
+## feature tests.  Some of the tests (e.g., `off_t`) generate compilation
+## errors with the flags we chose for the HDF5 library and tools.
+##
+H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
+H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
+
 ## ----------------------------------------------------------------------
 ## Check if developer warnings should be turned on
 ## These are warnings that provide suggestions like gcc's -Wsuggest-attribute.
@@ -2268,45 +2310,6 @@ case "X-$DEV_WARNINGS" in
     ;;
   *)
     AC_MSG_ERROR([Unrecognized value: $DEV_WARNINGS])
-    ;;
-esac
-
-## ----------------------------------------------------------------------
-## Check if we should consider certain compiler warnings as errors
-##
-## These should NOT be on by default as the risk of breakage is high
-## when compiling HDF5 on new (or new versions) of platforms and
-## compilers. It can also cause failures when header files we have no
-## control over (e.g. MPI, HDFS) raise warnings.
-##
-AC_MSG_CHECKING([enable warnings as errors])
-AC_ARG_ENABLE([warnings-as-errors],
-              [AS_HELP_STRING([--enable-warnings-as-errors],
-                              [Determines whether certain warnings will be
-                               considered errors. This is mainly for use
-                               by HDF5 library developers.
-                               [default=no]
-                               ])],
-              [WARNINGS_AS_ERRORS=$enableval])
-
-## Set default
-if test "X-$WARNINGS_AS_ERRORS" = X- ; then
-  WARNINGS_AS_ERRORS=no
-fi
-
-case "X-$WARNINGS_AS_ERRORS" in
-  X-yes)
-    H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
-    H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
-    AC_MSG_RESULT([yes])
-    ;;
-  X-no)
-    H5_CFLAGS="$H5_CFLAGS $H5_NECFLAGS"
-    H5_CXXFLAGS="$H5_CXXFLAGS $H5_NECXXFLAGS"
-    AC_MSG_RESULT([no])
-    ;;
-  *)
-    AC_MSG_ERROR([Unrecognized value: $WARNINGS_AS_ERRORS])
     ;;
 esac
 

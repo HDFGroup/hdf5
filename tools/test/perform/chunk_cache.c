@@ -39,7 +39,7 @@
 
 #define RDCC_NSLOTS 5
 #define RDCC_NBYTES (1024 * 1024 * 10)
-#define RDCC_W0     0.75F
+#define RDCC_W0     0.75
 
 #define FILTER_COUNTER 306
 static size_t nbytes_global;
@@ -81,7 +81,7 @@ counter(unsigned H5_ATTR_UNUSED flags, size_t H5_ATTR_UNUSED cd_nelmts,
 static void
 cleanup(void)
 {
-    if (!getenv("HDF5_NOCLEANUP")) {
+    if (!getenv(HDF5_NOCLEANUP)) {
         remove(FILENAME);
     }
 }

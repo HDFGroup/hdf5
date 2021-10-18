@@ -157,7 +157,7 @@ main(int argc, char *argv[])
         TESTING("H5Fflush (part2 with flush)");
 
     /* Don't run using the split VFD */
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
@@ -167,7 +167,7 @@ main(int argc, char *argv[])
             HDputs("    Test not compatible with current Virtual File Driver");
         }
         MPI_Finalize();
-        HDexit(EXIT_FAILURE);
+        HDexit(EXIT_SUCCESS);
     }
 
     if ((fapl_id1 = H5Pcreate(H5P_FILE_ACCESS)) < 0)

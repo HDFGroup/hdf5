@@ -240,6 +240,12 @@ usage(void)
     PRINTVALSTREAM(rawoutstream,
                    "   --vol-info      VOL-specific info to pass to the VOL connector used for\n");
     PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-value     Value (ID) of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-name      Name of the VFL driver to use for opening the\n");
+    PRINTVALSTREAM(rawoutstream, "                   HDF5 file specified\n");
+    PRINTVALSTREAM(rawoutstream, "   --vfd-info      VFD-specific info to pass to the VFL driver used for\n");
+    PRINTVALSTREAM(rawoutstream, "                   opening the HDF5 file specified\n");
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "  file/OBJECT\n");
     PRINTVALSTREAM(rawoutstream, "    Each object consists of an HDF5 file name optionally followed by a\n");
@@ -2649,11 +2655,12 @@ main(int argc, const char *argv[])
     int                argno;
     static char        root_name[] = "/";
     char               drivername[50];
-    const char *       preferred_driver = NULL;
-    int                err_exit         = 0;
-    hid_t              fapl_id          = H5P_DEFAULT;
-    hbool_t            custom_vol_fapl  = FALSE;
+    int                err_exit        = 0;
+    hid_t              fapl_id         = H5P_DEFAULT;
+    hbool_t            custom_vol_fapl = FALSE;
+    hbool_t            custom_vfd_fapl = FALSE;
     h5tools_vol_info_t vol_info;
+    h5tools_vfd_info_t vfd_info;
 
 #ifdef H5_HAVE_ROS3_VFD
     /* Default "anonymous" S3 configuration */
@@ -2684,8 +2691,9 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    /* Initialize fapl info struct */
+    /* Initialize fapl info structs */
     HDmemset(&vol_info, 0, sizeof(h5tools_vol_info_t));
+    HDmemset(&vfd_info, 0, sizeof(h5tools_vfd_info_t));
 
     /* Build object display table */
     DISPATCH(H5O_TYPE_GROUP, "Group", NULL, NULL);
@@ -2747,9 +2755,6 @@ main(int argc, const char *argv[])
         else if (!HDstrcmp(argv[argno], "--string")) {
             string_g = TRUE;
         }
-        else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
-            preferred_driver = argv[argno] + 6;
-        }
         else if (!HDstrncmp(argv[argno], "--vol-value=", (size_t)12)) {
             vol_info.type    = VOL_BY_VALUE;
             vol_info.u.value = (H5VL_class_value_t)HDatoi(argv[argno] + 12);
@@ -2762,6 +2767,25 @@ main(int argc, const char *argv[])
         }
         else if (!HDstrncmp(argv[argno], "--vol-info=", (size_t)11)) {
             vol_info.info_string = argv[argno] + 11;
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd=", (size_t)6)) {
+            vfd_info.type   = VFD_BY_NAME;
+            vfd_info.u.name = argv[argno] + 6;
+            vfd_info.info   = NULL;
+            custom_vfd_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd-value=", (size_t)12)) {
+            vfd_info.type    = VFD_BY_VALUE;
+            vfd_info.u.value = (H5FD_class_value_t)HDatoi(argv[argno] + 12);
+            custom_vfd_fapl  = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd-name=", (size_t)11)) {
+            vfd_info.type   = VFD_BY_NAME;
+            vfd_info.u.name = argv[argno] + 11;
+            custom_vfd_fapl = TRUE;
+        }
+        else if (!HDstrncmp(argv[argno], "--vfd-info=", (size_t)11)) {
+            vfd_info.info = (const void *)(argv[argno] + 11);
         }
         else if (!HDstrncmp(argv[argno], "--width=", (size_t)8)) {
             width_g = (int)HDstrtol(argv[argno] + 8, &rest, 0);
@@ -2959,38 +2983,10 @@ main(int argc, const char *argv[])
     }
 
     /* Setup a custom fapl for file accesses */
-    if (custom_vol_fapl) {
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, &vol_info, NULL)) < 0) {
+    if (custom_vol_fapl || custom_vfd_fapl) {
+        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, custom_vol_fapl ? &vol_info : NULL,
+                                        custom_vfd_fapl ? &vfd_info : NULL)) < 0) {
             error_msg("failed to setup file access property list (fapl) for file\n");
-            leave(EXIT_FAILURE);
-        }
-    }
-
-    if (preferred_driver) {
-        h5tools_vfd_info_t vfd_info;
-
-        vfd_info.info = NULL;
-        vfd_info.name = preferred_driver;
-
-        if (!HDstrcmp(preferred_driver, drivernames[ROS3_VFD_IDX])) {
-#ifdef H5_HAVE_ROS3_VFD
-            vfd_info.info = (void *)&ros3_fa;
-#else
-            HDfprintf(rawerrorstream, "Error: Read-Only S3 VFD is not enabled\n\n");
-            leave(EXIT_FAILURE);
-#endif
-        }
-        else if (!HDstrcmp(preferred_driver, drivernames[HDFS_VFD_IDX])) {
-#ifdef H5_HAVE_LIBHDFS
-            vfd_info.info = (void *)&hdfs_fa;
-#else
-            HDfprintf(rawerrorstream, "Error: The HDFS VFD is not enabled\n\n");
-            leave(EXIT_FAILURE);
-#endif
-        }
-
-        if ((fapl_id = h5tools_get_fapl(H5P_DEFAULT, NULL, &vfd_info)) < 0) {
-            HDfprintf(rawerrorstream, "Error: Unable to create FAPL for file access\n\n");
             leave(EXIT_FAILURE);
         }
     }
@@ -3019,8 +3015,8 @@ main(int argc, const char *argv[])
         file_id = H5I_INVALID_HID;
 
         while (fname && *fname) {
-            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id == H5P_DEFAULT) ? FALSE : TRUE,
-                                    drivername, sizeof drivername);
+            file_id = h5tools_fopen(fname, H5F_ACC_RDONLY, fapl_id, (fapl_id != H5P_DEFAULT), drivername,
+                                    sizeof drivername);
 
             if (file_id >= 0) {
                 if (verbose_g)
