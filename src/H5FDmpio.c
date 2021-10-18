@@ -100,45 +100,45 @@ static herr_t  H5FD__mpio_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, c
 
 /* The MPIO file driver information */
 static const H5FD_class_t H5FD_mpio_g = {
-    H5_VFD_MPIO,           /* value                 */
-    "mpio",                /* name                  */
-    HADDR_MAX,             /* maxaddr               */
-    H5F_CLOSE_SEMI,        /* fc_degree             */
-    H5FD__mpio_term,       /* terminate             */
-    NULL,                  /* sb_size               */
-    NULL,                  /* sb_encode             */
-    NULL,                  /* sb_decode             */
-    0,                     /* fapl_size             */
-    NULL,                  /* fapl_get              */
-    NULL,                  /* fapl_copy             */
-    NULL,                  /* fapl_free             */
-    0,                     /* dxpl_size             */
-    NULL,                  /* dxpl_copy             */
-    NULL,                  /* dxpl_free             */
-    H5FD__mpio_open,       /* open                  */
-    H5FD__mpio_close,      /* close                 */
-    NULL,                  /* cmp                   */
-    H5FD__mpio_query,      /* query                 */
-    NULL,                  /* get_type_map          */
-    NULL,                  /* alloc                 */
-    NULL,                  /* free                  */
-    H5FD__mpio_get_eoa,    /* get_eoa               */
-    H5FD__mpio_set_eoa,    /* set_eoa               */
-    H5FD__mpio_get_eof,    /* get_eof               */
-    H5FD__mpio_get_handle, /* get_handle            */
-    H5FD__mpio_read,       /* read                  */
-    H5FD__mpio_write,      /* write                 */
+    H5_VFD_MPIO,             /* value                 */
+    "mpio",                  /* name                  */
+    HADDR_MAX,               /* maxaddr               */
+    H5F_CLOSE_SEMI,          /* fc_degree             */
+    H5FD__mpio_term,         /* terminate             */
+    NULL,                    /* sb_size               */
+    NULL,                    /* sb_encode             */
+    NULL,                    /* sb_decode             */
+    0,                       /* fapl_size             */
+    NULL,                    /* fapl_get              */
+    NULL,                    /* fapl_copy             */
+    NULL,                    /* fapl_free             */
+    0,                       /* dxpl_size             */
+    NULL,                    /* dxpl_copy             */
+    NULL,                    /* dxpl_free             */
+    H5FD__mpio_open,         /* open                  */
+    H5FD__mpio_close,        /* close                 */
+    NULL,                    /* cmp                   */
+    H5FD__mpio_query,        /* query                 */
+    NULL,                    /* get_type_map          */
+    NULL,                    /* alloc                 */
+    NULL,                    /* free                  */
+    H5FD__mpio_get_eoa,      /* get_eoa               */
+    H5FD__mpio_set_eoa,      /* set_eoa               */
+    H5FD__mpio_get_eof,      /* get_eof               */
+    H5FD__mpio_get_handle,   /* get_handle            */
+    H5FD__mpio_read,         /* read                  */
+    H5FD__mpio_write,        /* write                 */
     H5FD__mpio_read_vector,  /*read_vector          */
     H5FD__mpio_write_vector, /*write_vector         */
     NULL,                    /*read_selection       */
     NULL,                    /*write_selection      */
-    H5FD__mpio_flush,      /* flush                 */
-    H5FD__mpio_truncate,   /* truncate              */
-    NULL,                  /* lock                  */
-    NULL,                  /* unlock                */
-    H5FD__mpio_delete,     /* del                   */
-    H5FD__mpio_ctl,        /* ctl                   */
-    H5FD_FLMAP_DICHOTOMY   /* fl_map                */
+    H5FD__mpio_flush,        /* flush                 */
+    H5FD__mpio_truncate,     /* truncate              */
+    NULL,                    /* lock                  */
+    NULL,                    /* unlock                */
+    H5FD__mpio_delete,       /* del                   */
+    H5FD__mpio_ctl,          /* ctl                   */
+    H5FD_FLMAP_DICHOTOMY     /* fl_map                */
 };
 
 #ifdef H5FDmpio_DEBUG
@@ -1677,9 +1677,9 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     hbool_t                    vector_was_sorted = TRUE;
     hbool_t                    fixed_size        = FALSE;
     size_t                     size;
-    H5FD_mem_t *               s_types = NULL;
-    haddr_t *                  s_addrs = NULL;
-    size_t *                   s_sizes = NULL;
+    H5FD_mem_t *               s_types           = NULL;
+    haddr_t *                  s_addrs           = NULL;
+    size_t *                   s_sizes           = NULL;
     void **                    s_bufs            = NULL;
     int *                      mpi_block_lengths = NULL;
     char                       unused            = 0; /* Unused, except for non-NULL pointer value */
@@ -1715,7 +1715,7 @@ H5FD__mpio_read_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t cou
     hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     hbool_t H5FD_mpio_debug_r_flag = (H5FD_mpio_debug_flags_s[(int)'r'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    herr_t  ret_value   = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -2262,7 +2262,7 @@ H5FD__mpio_write_vector(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, uint32_t co
     hbool_t H5FD_mpio_debug_t_flag = (H5FD_mpio_debug_flags_s[(int)'t'] && H5FD_MPIO_TRACE_THIS_RANK(file));
     hbool_t H5FD_mpio_debug_w_flag = (H5FD_mpio_debug_flags_s[(int)'w'] && H5FD_MPIO_TRACE_THIS_RANK(file));
 #endif
-    herr_t                     ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
