@@ -47,6 +47,13 @@ New Features
 
     Configuration:
     -------------
+    - Changed autotools and CMake configurations to derive both
+      compilation warnings-as-errors and warnings-only-warn configurations
+      from the same files, `config/*/*error*`.  Removed redundant files
+      `config/*/*noerror*`.
+
+      (DCY - 2021/09/29)
+
     - Added new option to control the build of High-Level tools
       that default ON/enabled.
 
@@ -202,6 +209,14 @@ Bug Fixes since HDF5-1.12.1 release
 ===================================
     Library
     -------
+    - Fixed a segmentation fault
+
+      A segmentation fault occurred with a Mathworks corrupted file.
+
+      A detection of accessing a null pointer was added to prevent the problem.
+
+      (BMR - 2021/10/14, HDFFV-11150)
+
     - Detection of simple data transform function "x"
 
         In the case of the simple data transform function "x" the (parallel)
@@ -286,7 +301,11 @@ Bug Fixes since HDF5-1.12.1 release
 
     High-Level Library
     ------------------
-    -
+    - Fixed HL_test_packet, test for packet table vlen of vlen.
+
+      Incorrect length assignment.
+
+        (ADB - 2021/10/14)
 
 
     Fortran High-Level APIs

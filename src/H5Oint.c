@@ -2925,7 +2925,8 @@ H5O__dec_rc(H5O_t *oh)
     FUNC_ENTER_PACKAGE
 
     /* check args */
-    HDassert(oh);
+    if (!oh)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid object header")
 
     /* Decrement reference count */
     oh->rc--;
