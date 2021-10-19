@@ -409,7 +409,7 @@ H5FD__onion_update_and_write_header(H5FD_onion_t *file)
     if (file->is_open_rw)
         file->header.flags &= (uint32_t)~H5FD__ONION_HEADER_FLAG_WRITE_LOCK;
 
-    buf = (unsigned char *)HDmalloc(H5FD__ONION_ENCODED_SIZE_HEADER);
+    buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER);
     if (NULL == buf) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for updated history header");
     }
@@ -423,7 +423,7 @@ H5FD__onion_update_and_write_header(H5FD_onion_t *file)
 
 done:
     if (buf != NULL)
-        HDfree(buf);
+        H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_update_and_write_header()*/
@@ -450,8 +450,8 @@ H5FD__onion_whole_history_write(struct H5FD__onion_whole_history *whs, H5FD_t *f
 
     FUNC_ENTER_STATIC;
 
-    buf = (unsigned char *)HDmalloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY +
-                                    (H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * whs->n_revisions));
+    buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY +
+                      (H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * whs->n_revisions));
     if (NULL == buf) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, 0, "can't allocate buffer for updated whole-history");
     }
@@ -471,7 +471,7 @@ H5FD__onion_whole_history_write(struct H5FD__onion_whole_history *whs, H5FD_t *f
 
 done:
     if (buf != NULL)
-        HDfree(buf);
+        H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_whole_history_write() */
@@ -550,9 +550,9 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, FAIL, "unable to update index to write");
     }
 
-    buf = (unsigned char *)HDmalloc(H5FD__ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec_p->comment_size +
-                                    (size_t)rec_p->username_size +
-                                    (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * rec_p->archival_index.n_entries));
+    buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec_p->comment_size +
+                      (size_t)rec_p->username_size +
+                      (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * rec_p->archival_index.n_entries));
     if (NULL == buf) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoded revision record");
     }
@@ -580,9 +580,8 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
 
         HDassert(whs_p->record_pointer_list == NULL);
-        whs_p->n_revisions = 1;
-        whs_p->record_pointer_list =
-            (struct H5FD__onion_record_pointer *)HDcalloc(1, sizeof(struct H5FD__onion_record_pointer));
+        whs_p->n_revisions         = 1;
+        whs_p->record_pointer_list = H5MM_calloc(sizeof(struct H5FD__onion_record_pointer));
         if (NULL == whs_p->record_pointer_list) {
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate temporary record pointer list");
         }
@@ -599,14 +598,13 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
         HDassert(whs_p->record_pointer_list != NULL);
 
-        new_list = (struct H5FD__onion_record_pointer *)HDcalloc(whs_p->n_revisions + 1,
-                                                                 sizeof(struct H5FD__onion_record_pointer));
+        new_list = H5MM_calloc((whs_p->n_revisions + 1) * sizeof(struct H5FD__onion_record_pointer));
         if (NULL == new_list) {
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to resize record pointer list");
         }
         HDmemcpy(new_list, whs_p->record_pointer_list,
                  sizeof(struct H5FD__onion_record_pointer) * whs_p->n_revisions);
-        HDfree(whs_p->record_pointer_list);
+        H5MM_xfree(whs_p->record_pointer_list);
         whs_p->record_pointer_list                                 = new_list;
         new_list                                                   = NULL;
         whs_p->record_pointer_list[whs_p->n_revisions].phys_addr   = phys_addr;
@@ -624,9 +622,9 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
 done:
     if (buf != NULL)
-        HDfree(buf);
+        H5MM_xfree(buf);
     if (new_list != NULL)
-        HDfree(new_list);
+        H5MM_xfree(new_list);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_commit_new_revision_record() */
@@ -696,11 +694,11 @@ done:
         if (H5FD_onion_revision_index_destroy(file->rev_index) < 0)
             HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, FAIL, "can't close revision index")
 
-    HDfree(file->name_recov);
-    HDfree(file->summary.record_pointer_list);
-    HDfree(file->rev_record.username);
-    HDfree(file->rev_record.comment);
-    HDfree(file->rev_record.archival_index.list);
+    H5MM_xfree(file->name_recov);
+    H5MM_xfree(file->summary.record_pointer_list);
+    H5MM_xfree(file->rev_record.username);
+    H5MM_xfree(file->rev_record.comment);
+    H5MM_xfree(file->rev_record.archival_index.list);
 
     file = H5FL_FREE(H5FD_onion_t, file);
 
@@ -1389,16 +1387,13 @@ H5FD__onion_set_userinfo_in_record(struct H5FD__onion_revision_record *rec_p)
     HDassert(0 == ((uint64_t)uid & 0xFFFFFFFF00000000)); /* fits uint32_t */
     rec_p->user_id = (uint32_t)uid;
 
-    user_info = HDgetpwuid(uid);
-    if (NULL == user_info)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't get user info");
+    if (NULL == (user_info = HDgetpwuid(uid)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "can't get user info")
 
     rec_p->username_size = (uint32_t)HDstrlen(user_info->pw_name) + 1;
 
-    rec_p->username = HDmalloc(sizeof(char) * rec_p->username_size);
-    if (NULL == rec_p->username) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for username string");
-    }
+    if (NULL == (rec_p->username = H5MM_malloc(sizeof(char) * rec_p->username_size)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for username string")
 
     HDmemcpy(rec_p->username, user_info->pw_name, rec_p->username_size);
 
@@ -1476,8 +1471,7 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
         HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "cannot open the backing file");
     }
 
-    /* Write "empty" .h5 file contents (signature ONIONEOF)
-     */
+    /* Write "empty" .h5 file contents (signature ONIONEOF) */
 
     if (H5FD_set_eoa(file->backing_canon, H5FD_MEM_DRAW, 8) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA");
@@ -1486,59 +1480,55 @@ H5FD__onion_create_truncate_onion(H5FD_onion_t *file, const char *filename, cons
         HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write header to the backing h5 file");
     }
 
-    /* Write nascent whole-history summary (with no revisions) to "recovery".
-     */
+    /* Write nascent whole-history summary (with no revisions) to "recovery" */
 
-    buf = (unsigned char *)HDmalloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY);
-    if (NULL == buf)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer");
+    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer")
     size = H5FD_onion_whole_history_encode(whs_p, buf, &whs_p->checksum);
     if (H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY != size)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode whole-history");
     if (H5FD_set_eoa(file->backing_recov, H5FD_MEM_DRAW, size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA");
-    /* must use public API to correclty set DXPL context :( */
-    if (H5FDwrite(file->backing_recov, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0) {
-        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write summary to the backing recovery file");
-    }
+    /* Must use public API to correclty set DXPL context :(
+     * TODO: Revisit this...
+     */
+    if (H5FDwrite(file->backing_recov, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write summary to the backing recovery file")
     hdr_p->whole_history_size = size; /* record for later use */
-    HDfree(buf);
+    H5MM_xfree(buf);
     buf = NULL;
 
     /* Write history header with "no" whole-history summary to history.
      * Size of the "recovery" history recorded for later use on close.
      */
 
-    buf = (unsigned char *)HDmalloc(H5FD__ONION_ENCODED_SIZE_HEADER);
-    if (NULL == buf)
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer");
+    if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER)))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer")
     size = H5FD_onion_history_header_encode(hdr_p, buf, &hdr_p->checksum);
     if (H5FD__ONION_ENCODED_SIZE_HEADER != size)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "can't encode history header");
     if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, size) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA");
-    /* must use public API to correclty set DXPL context :( */
-    if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0) {
-        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write header to the backing onion file");
-    }
+    /* Must use public API to correctly set DXPL context :(
+     * TODO: Revisit this...
+     */
+    if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, buf) < 0)
+        HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, FAIL, "cannot write header to the backing onion file")
     file->history_eof = (haddr_t)size;
     if (TRUE == file->page_align_history)
         file->history_eof = (file->history_eof + (hdr_p->page_size - 1)) & (~(hdr_p->page_size - 1));
 
     rec_p->archival_index.list = NULL;
 
-    file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size);
-    if (NULL == file->rev_index) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize revision index");
-    }
+    if (NULL == (file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize revision index")
 
 done:
     if (buf != NULL)
-        HDfree(buf);
+        H5MM_xfree(buf);
 
-    if (FAIL == ret_value) {
+    if (FAIL == ret_value)
         HDremove(name_recovery); /* destroy new temp file, if 'twas created */
-    }
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_create_truncate_onion() */
@@ -1566,7 +1556,7 @@ H5FD__onion_ingest_history_header(struct H5FD__onion_history_header *hdr_out, H5
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates whole-history beyond EOF");
     }
 
-    buf = (unsigned char *)HDmalloc(sizeof(char) * size);
+    buf = H5MM_malloc(sizeof(char) * size);
     if (NULL == buf) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
     }
@@ -1589,7 +1579,7 @@ H5FD__onion_ingest_history_header(struct H5FD__onion_history_header *hdr_out, H5
     }
 
 done:
-    HDfree(buf);
+    H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_ingest_history_header() */
@@ -1599,11 +1589,6 @@ done:
  * Read and decode the revision_record information from `raw_file` at
  * `addr` .. `addr + size` (taken from whole-history), and store the decoded
  * information in the structure at `r_out`.
- *
- * If successful, `r_out->index_entry_list` is always allocated, even if
- * there is zero entries, and `r_out->username` is always allocated.
- * `r_out->comment` is allocated and populated iff comment_size for the target
- * revision is not zero.
  *
  * 13 August 2020
  *
@@ -1625,16 +1610,26 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
 
     FUNC_ENTER_STATIC;
 
-    HDassert(r_out != NULL);
-    HDassert(raw_file != NULL);
-    HDassert(whs != NULL);
-    HDassert(whs->record_pointer_list != NULL);
+    HDassert(r_out);
+    HDassert(raw_file);
+    HDassert(whs);
+    HDassert(whs->record_pointer_list);
     HDassert(whs->n_revisions > 0);
 
     high  = whs->n_revisions - 1;
     range = high;
     addr  = (haddr_t)whs->record_pointer_list[high].phys_addr;
     size  = (haddr_t)whs->record_pointer_list[high].record_size;
+
+    /* Initialize r_out
+     *
+     * TODO: This function should completely initialize r_out. Relying on
+     *       other code to some of the work while we just paste over parts
+     *       of the struct here is completely bananas.
+     */
+    r_out->comment             = H5MM_xfree(r_out->comment);
+    r_out->username            = H5MM_xfree(r_out->username);
+    r_out->archival_index.list = H5MM_xfree(r_out->archival_index.list);
 
     if (H5FD_get_eof(raw_file, H5FD_MEM_DRAW) < (addr + size)) {
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "at least one record extends beyond EOF");
@@ -1658,7 +1653,7 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
         addr = (haddr_t)whs->record_pointer_list[n].phys_addr;
         size = (haddr_t)whs->record_pointer_list[n].record_size;
 
-        buf = (unsigned char *)HDmalloc(sizeof(char) * size);
+        buf = H5MM_malloc(sizeof(char) * size);
         if (NULL == buf) {
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
         }
@@ -1679,7 +1674,7 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
         if (revision_id == r_out->revision_id)
             break;
 
-        HDfree(buf);
+        H5MM_xfree(buf);
         buf = NULL;
 
         r_out->archival_index.n_entries = 0;
@@ -1698,7 +1693,7 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
         addr = (haddr_t)whs->record_pointer_list[n].phys_addr;
         size = (haddr_t)whs->record_pointer_list[n].record_size;
 
-        buf = (unsigned char *)HDmalloc(sizeof(char) * size);
+        buf = H5MM_malloc(sizeof(char) * size);
         if (NULL == buf) {
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
         }
@@ -1722,38 +1717,28 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
         }
     } /* end if revision ID at 'leaf' in binary search */
 
-    /* XXX DER: Free may not be necessary */
-    HDfree(r_out->username);
-    if (NULL == (r_out->username = HDmalloc(sizeof(char) * r_out->username_size)))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate username space")
+    if (r_out->username_size > 0)
+        if (NULL == (r_out->username = H5MM_malloc(sizeof(char) * r_out->username_size)))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate username space")
 
-    if (r_out->comment_size > 0) {
-        /* XXX DER: Free may not be necessary */
-        HDfree(r_out->comment);
-        if (NULL == (r_out->comment = HDmalloc(sizeof(char) * r_out->comment_size)))
+    if (r_out->comment_size > 0)
+        if (NULL == (r_out->comment = H5MM_malloc(sizeof(char) * r_out->comment_size)))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate comment space")
-    }
 
-    r_out->archival_index.list = (struct H5FD__onion_index_entry *)HDcalloc(
-        r_out->archival_index.n_entries, sizeof(struct H5FD__onion_index_entry));
-    if (NULL == r_out->archival_index.list) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate index entry list");
-    }
+    if (r_out->archival_index.n_entries > 0)
+        if (NULL == (r_out->archival_index.list = H5MM_calloc(r_out->archival_index.n_entries *
+                                                              sizeof(struct H5FD__onion_index_entry))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate index entry list")
 
-    if (H5FD_onion_revision_record_decode(buf, r_out) != size) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (final)");
-    }
+    if (H5FD_onion_revision_record_decode(buf, r_out) != size)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, FAIL, "can't decode revision record (final)")
 
 done:
-    if (buf != NULL)
-        HDfree(buf);
+    H5MM_xfree(buf);
     if (ret_value == FAIL) {
-        if (r_out->comment != NULL)
-            HDfree(r_out->comment);
-        if (r_out->username != NULL)
-            HDfree(r_out->username);
-        if (r_out->archival_index.list != NULL)
-            HDfree(r_out->archival_index.list);
+        H5MM_xfree(r_out->comment);
+        H5MM_xfree(r_out->username);
+        H5MM_xfree(r_out->archival_index.list);
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1786,7 +1771,7 @@ H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "header indicates whole-history beyond EOF");
     }
 
-    buf = (unsigned char *)HDmalloc(sizeof(char) * size);
+    buf = H5MM_malloc(sizeof(char) * size);
     if (NULL == buf) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer space");
     }
@@ -1808,8 +1793,8 @@ H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored");
     }
 
-    whs_out->record_pointer_list = (struct H5FD__onion_record_pointer *)HDcalloc(
-        whs_out->n_revisions, sizeof(struct H5FD__onion_record_pointer));
+    whs_out->record_pointer_list =
+        H5MM_calloc(whs_out->n_revisions * sizeof(struct H5FD__onion_record_pointer));
     if (NULL == whs_out->record_pointer_list) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate record pointer list");
     }
@@ -1819,10 +1804,10 @@ H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD
     }
 
 done:
-    HDfree(buf);
+    H5MM_xfree(buf);
     if (ret_value == FAIL) {
         if (whs_out->record_pointer_list != NULL)
-            HDfree(whs_out->record_pointer_list);
+            H5MM_xfree(whs_out->record_pointer_list);
     }
 
     FUNC_LEAVE_NOAPI(ret_value);
@@ -1875,15 +1860,15 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate file struct")
 
     /* Allocate space for onion VFD file names */
-    if (NULL == (name_onion = HDmalloc(sizeof(char) * (HDstrlen(filename) + 7))))
+    if (NULL == (name_onion = H5MM_malloc(sizeof(char) * (HDstrlen(filename) + 7))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate onion name string")
     HDsnprintf(name_onion, HDstrlen(filename) + 7, "%s.onion", filename);
 
-    if (NULL == (name_recovery = HDmalloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
+    if (NULL == (name_recovery = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
     HDsnprintf(name_recovery, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
 
-    if (NULL == (file->name_recov = HDmalloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
+    if (NULL == (file->name_recov = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
     HDsnprintf(file->name_recov, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
 
@@ -2010,7 +1995,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 hdr_p->whole_history_size = H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY; /* record for later use */
                 hdr_p->whole_history_addr =
                     H5FD__ONION_ENCODED_SIZE_HEADER + 1; /* TODO: comment these 2 or do some other way */
-                head_buf = (unsigned char *)HDmalloc(H5FD__ONION_ENCODED_SIZE_HEADER);
+                head_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER);
                 if (NULL == head_buf)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 size = H5FD_onion_history_header_encode(hdr_p, head_buf, &hdr_p->checksum);
@@ -2020,7 +2005,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 //    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA");
                 /* must use public API to correclty set DXPL context :( */
 
-                wh_buf = (unsigned char *)HDmalloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY);
+                wh_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY);
                 if (NULL == wh_buf)
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 saved_size         = size;
@@ -2052,10 +2037,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 rec_p->archival_index.list = NULL;
 
-                file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size);
-                if (NULL == file->rev_index) {
+                if (NULL == (file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size)))
                     HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize revision index")
-                }
 
                 /// to here
                 ////
@@ -2112,7 +2095,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 fa->revision_id != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range")
 
-            // if (H5FD__onion_ingest_revision_record(&file->rev_record,
             if (file->summary.n_revisions > 0 &&
                 H5FD__onion_ingest_revision_record(&file->rev_record, file->backing_onion, &file->summary,
                                                    MIN(fa->revision_id, (file->summary.n_revisions - 1))) < 0)
@@ -2128,10 +2110,13 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     /* Copy comment from FAPL info, if one is given */
     if ((H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC) & flags) {
         if (fa->comment) {
+            /* Free the old comment */
+            file->rev_record.comment = H5MM_xfree(file->rev_record.comment);
+
             /* TODO: Lengths of strings should be size_t */
             file->rev_record.comment_size = (uint32_t)HDstrlen(fa->comment) + 1;
 
-            if (NULL == (file->rev_record.comment = HDstrdup(fa->comment)))
+            if (NULL == (file->rev_record.comment = H5MM_xstrdup(fa->comment)))
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate comment string")
         }
     }
@@ -2148,8 +2133,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     ret_value = (H5FD_t *)file;
 
 done:
-    if (name_onion != NULL)
-        HDfree(name_onion);
+    H5MM_xfree(name_onion);
+    H5MM_xfree(name_recovery);
 
     if ((NULL == ret_value) && file) {
 
@@ -2167,9 +2152,11 @@ done:
             if (H5FD_onion_revision_index_destroy(file->rev_index) < 0)
                 HDONE_ERROR(H5E_VFL, H5E_CANTRELEASE, NULL, "can't destroy revision index")
 
-        HDfree(file->name_recov);
-        HDfree(file->rev_record.comment);
-        HDfree(file->rev_record.username);
+        H5MM_xfree(file->summary.record_pointer_list);
+
+        H5MM_xfree(file->name_recov);
+        H5MM_xfree(file->rev_record.comment);
+        H5MM_xfree(file->rev_record.username);
 
         H5FL_FREE(H5FD_onion_t, file);
     }
@@ -2231,7 +2218,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr)
     /* Set write-lock flag in Onion header.
      */
 
-    buf = (unsigned char *)HDmalloc(H5FD__ONION_ENCODED_SIZE_HEADER);
+    buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_HEADER);
     if (NULL == buf) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate space for encoded buffer");
     }
@@ -2247,13 +2234,10 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr)
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated history header");
     }
 
-    /* Prepare revision index and finalize write-mode open.
-     */
+    /* Prepare revision index and finalize write-mode open */
 
-    file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size);
-    if (NULL == file->rev_index) {
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize revision index");
-    }
+    if (NULL == (file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size)))
+        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "can't initialize revision index")
     file->rev_record.parent_revision_id = file->rev_record.revision_id;
     file->rev_record.revision_id += 1;
     file->is_open_rw = TRUE;
@@ -2280,7 +2264,7 @@ done:
     } /* end if failure */
 
     if (buf != NULL)
-        HDfree(buf);
+        H5MM_xfree(buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_open_rw() */
@@ -2456,7 +2440,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     page_0         = offset >> page_size_log2;
     n_pages        = (len + page_size - 1) >> page_size_log2;
 
-    page_buf = (unsigned char *)HDcalloc(page_size, sizeof(unsigned char));
+    page_buf = H5MM_calloc(page_size * sizeof(unsigned char));
     if (NULL == page_buf) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate temporary buffer");
     }
@@ -2567,7 +2551,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
 done:
     if (page_buf != NULL)
-        HDfree(page_buf);
+        H5MM_xfree(page_buf);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD__onion_write() */
@@ -2606,15 +2590,11 @@ H5FD_onion_archival_index_is_valid(const struct H5FD__onion_archival_index *aix)
     if (NULL == aix->list)
         HGOTO_DONE(FALSE)
 
-    if (aix->n_entries > 1) {
-        uint64_t i         = 1;
-        uint64_t prev_page = aix->list[0].logi_page;
-        uint64_t logi_page = aix->list[1].logi_page;
-
-        for (i = 1; i < aix->n_entries; prev_page = logi_page, i++, logi_page = aix->list[i].logi_page)
-            if (logi_page <= prev_page)
+    /* Ensure list is sorted on logi_page field */
+    if (aix->n_entries > 1)
+        for (uint64_t i = 1; i < aix->n_entries - 1; i++)
+            if (aix->list[i + 1].logi_page <= aix->list[i].logi_page)
                 HGOTO_DONE(FALSE)
-    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -2659,10 +2639,9 @@ H5FD_onion_archival_index_find(const struct H5FD__onion_archival_index *aix, uin
     high  = aix->n_entries - 1;
     range = high;
 
-    if (aix->n_entries == 0 || logi_page > aix->list[high].logi_page || logi_page < aix->list[0].logi_page) {
-        ret_value = 0; /* pre-empt address out of range */
-        goto done;
-    }
+    /* Trivial cases */
+    if (aix->n_entries == 0 || logi_page > aix->list[high].logi_page || logi_page < aix->list[0].logi_page)
+        HGOTO_DONE(0)
 
     /*
      * Binary search on sorted list
@@ -2733,12 +2712,12 @@ H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *rix)
             HDassert(H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR == node_p->version);
 
             next_p = node_p->next;
-            HDfree(node_p);
+            H5MM_xfree(node_p);
             node_p = next_p;
         }
     }
-    HDfree(rix->_hash_table);
-    HDfree(rix);
+    H5MM_xfree(rix->_hash_table);
+    H5MM_xfree(rix);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_onion_revision_index_destroy() */
@@ -2768,11 +2747,11 @@ H5FD_onion_revision_index_init(uint32_t page_size)
     HDassert(0 != page_size);
     HDassert(POWER_OF_TWO(page_size));
 
-    if (NULL == (rix = HDcalloc(1, sizeof(H5FD__onion_revision_index_t))))
+    if (NULL == (rix = H5MM_calloc(sizeof(H5FD__onion_revision_index_t))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate index")
 
     if (NULL == (rix->_hash_table =
-                     HDcalloc(table_size, sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
+                     H5MM_calloc(table_size * sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate hash table")
 
     rix->magic     = H5FD__ONION_REVISION_INDEX_MAGIC;
@@ -2790,7 +2769,7 @@ H5FD_onion_revision_index_init(uint32_t page_size)
 
 done:
     if (NULL == ret_value && NULL != rix)
-        HDfree(rix);
+        H5MM_xfree(rix);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_onion_revision_index_init() */
@@ -2827,7 +2806,8 @@ H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *rix)
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
     HDassert(rix->_hash_table);
 
-    if (NULL == (new_table = HDcalloc(new_size, sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
+    if (NULL ==
+        (new_table = H5MM_calloc(new_size * sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new hash table")
 
     for (i = 0; i < rix->_hash_table_size; i++) {
@@ -2852,7 +2832,7 @@ H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *rix)
         }
     }
 
-    HDfree(rix->_hash_table);
+    H5MM_xfree(rix->_hash_table);
     rix->_hash_table_size             = new_size;
     rix->_hash_table_size_log2        = new_size_log2;
     rix->_hash_table_n_keys_populated = new_n_keys_populated;
@@ -2927,7 +2907,7 @@ H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *        rix,
 
     /* Add new entry to bucket chain */
     if (append_dest != NULL) {
-        if (NULL == (node = HDmalloc(sizeof(struct H5FD__onion_revision_index_hash_chain_node))))
+        if (NULL == (node = H5MM_malloc(sizeof(struct H5FD__onion_revision_index_hash_chain_node))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new ash chain node")
         node->magic   = H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_MAGIC;
         node->version = H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR;
@@ -3022,12 +3002,7 @@ H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
  *              The conversion to archival index changes logical pages in
  *              revision index entries to their logical addresses in-file.
  *
- *              No resources are created or destroyed as part of this routine.
- *              The archival index MUST have its list pointer allocated, even
- *              if there are zero entries.
- *
- * Return:      Success: Non-negative value (SUCCEED).
- *              Failure: Negative value (FAIL).
+ * Return:      SUCCEED/FAIL
  *
  *-----------------------------------------------------------------------------
  */
@@ -3043,7 +3018,7 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
         H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
         0,    /* page_size_log2 tbd */
         0,    /* n_entries */
-        NULL, /* list tbd */
+        NULL, /* list pointer (allocated later) */
     };
     herr_t ret_value = SUCCEED;
 
@@ -3057,14 +3032,16 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
     HDassert(H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
     HDassert(aix->page_size_log2 == rix->page_size_log2);
 
-    /* Short-circuit degenerate case */
+    /* If the revision index is empty there is nothing to archive */
     if (rix->n_entries == 0)
         goto done;
 
-    /* Add all 'live' revision index entries to new list (unsorted) */
+    /* Add all revision index entries to new archival list */
     new_aix.page_size_log2 = aix->page_size_log2;
-    if (NULL == (new_aix.list = HDcalloc(rix->n_entries, sizeof(struct H5FD__onion_index_entry))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list")
+
+    if (NULL == (new_aix.list = H5MM_calloc(rix->n_entries * sizeof(struct H5FD__onion_index_entry))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate new archival index list")
+
     for (i = 0; i < rix->_hash_table_size; i++) {
         const struct H5FD__onion_revision_index_hash_chain_node *node_p = NULL;
 
@@ -3074,44 +3051,58 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
             new_aix.n_entries++;
         }
     }
+
+    /* Sort the new archival list */
     HDqsort(new_aix.list, new_aix.n_entries, sizeof(struct H5FD__onion_index_entry),
             H5FD__onion_archival_index_list_sort_cmp);
 
-    /* Add any remaining 'dead' archival index entries to list (sorted)
-     * supplementary new archival index space for possible archived entries
+    /* Add the old archival index entries to a 'kept' list containing the
+     * old archival list entries that are not also included in the revision
+     * list.
+     *
+     * Note that kept_list will be NULL if there are no entries in the passed-in
+     * archival list.
      */
-    n_kept = 0;
-    if (NULL == (kept_list = HDcalloc(aix->n_entries, sizeof(struct H5FD__onion_index_entry))))
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list")
+    if (aix->n_entries > 0)
+        if (NULL == (kept_list = H5MM_calloc(aix->n_entries * sizeof(struct H5FD__onion_index_entry))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list")
+
     for (i = 0; i < aix->n_entries; i++) {
         const struct H5FD__onion_index_entry *_p = NULL;
 
-        /* Add only if page not already added from live index */
+        /* Add only if page not already added from revision index */
         if (H5FD_onion_archival_index_find(&new_aix, aix->list[i].logi_page, &_p) == 0) {
             HDmemcpy(&kept_list[n_kept], &aix->list[i], sizeof(struct H5FD__onion_index_entry));
             n_kept++;
         }
     }
 
-    /* Destroy prev list and replace with exact-sized buffer w/ new contents */
-    HDfree(aix->list);
-    if (NULL == (aix->list = HDcalloc(new_aix.n_entries + n_kept, sizeof(struct H5FD__onion_index_entry))))
+    /* Destroy the old archival list and replace with a list big enough to hold
+     * the revision list entries and the kept list entries
+     */
+    H5MM_xfree(aix->list);
+    if (NULL ==
+        (aix->list = H5MM_calloc((new_aix.n_entries + n_kept) * sizeof(struct H5FD__onion_index_entry))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate exact-size archival index list")
 
-    /* Copy new entries to replacement list */
+    /* Copy (new) revision list entries to replacement list */
     HDmemcpy(aix->list, new_aix.list, sizeof(struct H5FD__onion_index_entry) * new_aix.n_entries);
     aix->n_entries = new_aix.n_entries;
 
-    /* Copy old entries to replacement list */
-    HDmemcpy(&aix->list[aix->n_entries], kept_list, sizeof(struct H5FD__onion_index_entry) * n_kept);
-    aix->n_entries += n_kept;
+    /* Copy (old) kept archival list entries to replacement list */
+    if (n_kept > 0) {
+        HDmemcpy(&aix->list[aix->n_entries], kept_list, sizeof(struct H5FD__onion_index_entry) * n_kept);
+        aix->n_entries += n_kept;
+    }
 
+    /* Sort this list */
     HDqsort(aix->list, aix->n_entries, sizeof(struct H5FD__onion_index_entry),
             H5FD__onion_archival_index_list_sort_cmp);
 
 done:
-    HDfree(kept_list);
-    HDfree(new_aix.list);
+    /* Free the temporary lists */
+    H5MM_xfree(kept_list);
+    H5MM_xfree(new_aix.list);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_onion_merge_revision_index_into_entry_list() */
