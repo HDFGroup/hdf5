@@ -479,8 +479,8 @@ H5TEST_DLL void resize_entry(H5F_t *file_ptr, int32_t type, int32_t idx, size_t 
 H5TEST_DLL void row_major_scan_forward(H5F_t *file_ptr, int32_t lag, hbool_t verbose, hbool_t reset_stats,
                                        hbool_t display_stats, hbool_t display_detailed_stats,
                                        hbool_t do_inserts, hbool_t do_moves, hbool_t move_to_main_addr,
-                                       hbool_t do_destroys, hbool_t do_mult_ro_protects,
-                                       int dirty_destroys, int dirty_unprotects);
+                                       hbool_t do_destroys, hbool_t do_mult_ro_protects, int dirty_destroys,
+                                       int dirty_unprotects);
 
 H5TEST_DLL void hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose,
                                           hbool_t reset_stats, hbool_t display_stats,
@@ -489,8 +489,8 @@ H5TEST_DLL void hl_row_major_scan_forward(H5F_t *file_ptr, int32_t max_index, hb
 H5TEST_DLL void row_major_scan_backward(H5F_t *file_ptr, int32_t lag, hbool_t verbose, hbool_t reset_stats,
                                         hbool_t display_stats, hbool_t display_detailed_stats,
                                         hbool_t do_inserts, hbool_t do_moves, hbool_t move_to_main_addr,
-                                        hbool_t do_destroys, hbool_t do_mult_ro_protects,
-                                        int dirty_destroys, int dirty_unprotects);
+                                        hbool_t do_destroys, hbool_t do_mult_ro_protects, int dirty_destroys,
+                                        int dirty_unprotects);
 
 H5TEST_DLL void hl_row_major_scan_backward(H5F_t *file_ptr, int32_t max_index, hbool_t verbose,
                                            hbool_t reset_stats, hbool_t display_stats,
