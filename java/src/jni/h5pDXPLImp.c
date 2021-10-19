@@ -453,7 +453,8 @@ done:
  * Signature: (JZ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1plugin_1new_1api_1context(JNIEnv *env, jclass clss, jlong dcpl_id, jboolean new_api_ctx)
+Java_hdf_hdf5lib_H5_H5Pset_1plugin_1new_1api_1context(JNIEnv *env, jclass clss, jlong dcpl_id,
+                                                      jboolean new_api_ctx)
 {
     hbool_t new_api_ctx_val;
     herr_t  retVal = FAIL;
@@ -478,7 +479,7 @@ JNIEXPORT jboolean JNICALL
 Java_hdf_hdf5lib_H5_H5Pget_1plugin_1new_1api_1context(JNIEnv *env, jclass clss, jlong dcpl_id)
 {
     hbool_t  new_api_ctx = FALSE;
-    jboolean bval     = JNI_FALSE;
+    jboolean bval        = JNI_FALSE;
 
     UNUSED(clss);
 

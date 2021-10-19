@@ -138,7 +138,8 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1btree_1ratios(JNIEnv *, jclas
  * Method:    H5Pset_plugin_new_api_context
  * Signature: (JZ)V
  */
-JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1plugin_1new_1api_1context(JNIEnv *, jclass, jlong, jboolean);
+JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5Pset_1plugin_1new_1api_1context(JNIEnv *, jclass, jlong,
+                                                                             jboolean);
 
 /*
  * Class:     hdf_hdf5lib_H5
