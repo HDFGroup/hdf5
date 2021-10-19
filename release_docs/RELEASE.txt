@@ -19,7 +19,7 @@ Links to HDF5 documentation can be found on The HDF5 web page:
 
 The official HDF5 releases can be obtained from:
 
-     https://portal.hdfgroup.org/display/support/HDF5+1.8.22
+     https://www.hdfgroup.org/downloads/hdf5/
 
 Changes from Release to Release and New Features in the HDF5-1.8.x release series
 can be found at:
@@ -51,8 +51,8 @@ New Features
     -------------
     - Changed autotools and CMake configurations to derive both
       compilation warnings-as-errors and warnings-only-warn configurations
-      from the same files, `config/*/*error*`.  Removed redundant files
-      `config/*/*noerror*`.
+      from the same files, 'config/*/*error*'.  Removed redundant files
+      'config/*/*noerror*'.
 
       (DCY - 2021/09/29)
 

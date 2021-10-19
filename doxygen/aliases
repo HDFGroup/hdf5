@@ -16,6 +16,7 @@ ALIASES += success{1}="\Bold{Success:} \1"
 ALIASES += failure{1}="\Bold{Failure:} \1"
 
 ALIASES += herr_t="Returns a non-negative value if successful; otherwise returns a negative value."
+ALIASES += herr_t_iter="\li Zero causes the iterator to continue, returning zero when the iteration is complete. \li A positive value causes the iterator to immediately return that positive value, indicating short-circuit success. \li A negative value causes the iterator to immediately return that value, indicating failure."
 ALIASES += hid_t{1}="Returns a \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
 ALIASES += hid_ti{1}="Returns an \1 identifier if successful; otherwise returns #H5I_INVALID_HID. "
 ALIASES += hid_tv{1}="Returns an \1 identifier if successful; otherwise returns a negative value. "
@@ -118,6 +119,8 @@ ALIASES += fg_loc_id{1}="\loc_id{\1}. The identifier may be that of a file or gr
 # Property lists
 ################################################################################
 
+ALIASES += plist_unused{1}="\note The \p \1 parameter is currently not used; specify #H5P_DEFAULT."
+
 ALIASES += aapl_id="\param[in] aapl_id Attribute access property list identifier"
 ALIASES += aapl_id{1}="\param[in] \1 Attribute access property list identifier"
 
@@ -173,6 +176,7 @@ ALIASES += fgdta_loc_obj_id{1}="\loc_obj_id{\1}. The identifier may be that of a
 ALIASES += estack_id="\param[in] estack_id Error stack identifier"
 ALIASES += estack_id{1}="\param[in] \1 Error stack identifier"
 ALIASES += cpp_c_api_note="\attention \Bold{C++ Developers using HDF5 C-API functions beware:}\n Several functions in this C-API take function pointers or callbacks as arguments. Examples include H5Pset_elink_cb(), H5Pset_type_conv_cb(), H5Tconvert(), and H5Ewalk2(). Application code must ensure that those callback functions return normally such to allow the HDF5 to manage its resources and maintain a consistent state. For instance, those functions must not use the C \c setjmp / \c longjmp mechanism to leave those callback functions. Within the context of C++, any exceptions thrown within the callback function must be caught, such as with a \Code{catch(…)} statement. Any exception state can be placed within the provided user data function call arguments, and may be thrown again once the calling function has returned. Exceptions raised and not handled inside the callback are not supported as it might leave the HDF5 library in an inconsistent state. Similarly, using C++20 coroutines cannot be used as callbacks, since they do not support plain return statements. If a callback function yields execution to another C++20 coroutine calling HDF5 functions as well, this may lead to undefined behavior."
+ALIASES += par_compr_note="\attention If you are planning to use compression with parallel HDF5, ensure that calls to H5Dwrite() occur in collective mode. In other words, all MPI ranks (in the relevant communicator) call H5Dwrite() and pass a dataset transfer property list with the MPI-IO collective option property set to #H5FD_MPIO_COLLECTIVE_IO.\n Note that data transformations are currently \Bold{not} supported when writing to datasets in parallel and with compression enabled."
 ALIASES += sa_metadata_ops="\sa \li H5Pget_all_coll_metadata_ops() \li H5Pget_coll_metadata_write() \li H5Pset_all_coll_metadata_ops() \li H5Pset_coll_metadata_write() \li \ref maybe_metadata_reads"
 
 ################################################################################

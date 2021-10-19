@@ -167,6 +167,7 @@
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
 ./config/gnu-warnings/cxx-9
+./config/gnu-warnings/cxx-developer-4.8
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
 ./config/gnu-warnings/developer-4.8
@@ -183,6 +184,7 @@
 ./config/gnu-warnings/gfort-5
 ./config/gnu-warnings/gfort-6
 ./config/gnu-warnings/gfort-8
+./config/gnu-warnings/no-cxx-developer-4.8
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
@@ -197,6 +199,7 @@
 ./config/site-specific/BlankForm
 
 ./doxygen/aliases
+./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
 ./doxygen/dox/About.dox
 ./doxygen/dox/Cookbook.dox
@@ -232,6 +235,7 @@
 ./doxygen/examples/H5Pget_metadata_read_attempts.2.c
 ./doxygen/examples/H5Pget_metadata_read_attempts.3.c
 ./doxygen/examples/H5Pget_object_flush_cb.c
+./doxygen/examples/H5_examples.c
 ./doxygen/examples/ImageSpec.html
 ./doxygen/examples/PaletteExample1.gif
 ./doxygen/examples/Palettes.fm.anc.gif
