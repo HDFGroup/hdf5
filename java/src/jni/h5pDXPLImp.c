@@ -448,6 +448,51 @@ done:
 } /* end Java_hdf_hdf5lib_H5_H5Pget_1btree_1ratios */
 
 /*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pset_plugin_new_api_context
+ * Signature: (JZ)V
+ */
+JNIEXPORT void JNICALL
+Java_hdf_hdf5lib_H5_H5Pset_1plugin_1new_1api_1context(JNIEnv *env, jclass clss, jlong dcpl_id, jboolean new_api_ctx)
+{
+    hbool_t new_api_ctx_val;
+    herr_t  retVal = FAIL;
+
+    UNUSED(clss);
+
+    new_api_ctx_val = (JNI_TRUE == new_api_ctx) ? TRUE : FALSE;
+
+    if ((retVal = H5Pset_plugin_new_api_context((hid_t)dcpl_id, (hbool_t)new_api_ctx_val)) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+done:
+    return;
+} /* end Java_hdf_hdf5lib_H5_H5Pset_1plugin_1new_1api_1context */
+
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5Pget_plugin_new_api_context
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5Pget_1plugin_1new_1api_1context(JNIEnv *env, jclass clss, jlong dcpl_id)
+{
+    hbool_t  new_api_ctx = FALSE;
+    jboolean bval     = JNI_FALSE;
+
+    UNUSED(clss);
+
+    if (H5Pget_plugin_new_api_context((hid_t)dcpl_id, (hbool_t *)&new_api_ctx) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    if (new_api_ctx == TRUE)
+        bval = JNI_TRUE;
+
+done:
+    return bval;
+} /* end Java_hdf_hdf5lib_H5_H5Pget_1plugin_1new_1api_1context */
+
+/*
  * TODO: H5Pset_vlen_mem_manager
  */
 

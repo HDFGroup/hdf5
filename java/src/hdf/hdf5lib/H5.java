@@ -9622,6 +9622,38 @@ public class H5 implements java.io.Serializable {
     public synchronized static native int H5Pset_hyper_vector_size(long dxpl_id, long vector_size)
             throws HDF5LibraryException, NullPointerException;
 
+    /**
+     *
+     * Set flag to indicate that an API wrapper for a plugin's
+     *              public wrapper API call (e.g. H5VLfile_create, H5FDopen, etc)
+     *              should open a new API context for the API call.
+     *
+     * @param dxpl_id
+     *            IN: Dataset transfer property list identifier.
+     * @param new_api_ctx
+     *            IN: Indicate that API wrapper should create new API context
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     **/
+    public synchronized static native void H5Pset_plugin_new_api_context(long dxpl_id, boolean new_api_ctx)
+            throws HDF5LibraryException;
+
+    /**
+     * Retrieve "new API context" flag for plugin wrapper API calls.
+     *
+     * @param dxpl_id
+     *            IN: Dataset transfer property list identifier.
+     *
+     * @return true if the given dxpl indicates API wrapper should create new API context
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
+     *
+     **/
+    public synchronized static native boolean H5Pget_plugin_new_api_context(long dxpl_id)
+            throws HDF5LibraryException;
+
     // /////// Link creation property list (LCPL) routines ///////
 
     /**
