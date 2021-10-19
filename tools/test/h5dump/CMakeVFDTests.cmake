@@ -66,7 +66,7 @@ endmacro ()
 ##############################################################################
 
 # Run test with different Virtual File Driver
-foreach (vfd ${VFDP_LIST})
+foreach (vfd ${VFD_LIST})
   # test for signed/unsigned datasets
   ADD_VFD_H5DUMP_TEST (${vfd} packedbits 0 --enable-error-stack packedbits.h5)
 endforeach ()
