@@ -2981,7 +2981,6 @@
 
 # Utils directory
 ./utils/Makefile.am
-./utils/vds_elink_compat_vol.c
 
 # Mirror VFD utilities
 ./utils/mirror_vfd/Makefile.am
@@ -2994,6 +2993,7 @@
 # test utilities
 ./utils/test/Makefile.am
 ./utils/test/swmr_check_compat_vfd.c
+./utils/test/vds_elink_compat_vol.c
 
 # high level libraries
 ./hl/Makefile.am
