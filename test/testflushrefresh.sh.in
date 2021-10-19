@@ -60,6 +60,7 @@ fi
 ###############################################################################
 srcdir=@srcdir@
 bindir=@bindir@
+testdir=@testdir@
 
 # The build (current) directory might be different than the source directory.
 if test -z "$srcdir"; then
@@ -69,6 +70,11 @@ fi
 # If the bindir directory is not set just use current (.).
 if test -z "$bindir"; then
    bindir=.
+fi
+
+# If the testdir directory is not set just use current (.).
+if test -z "$testdir"; then
+   testdir=.
 fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
@@ -126,7 +132,7 @@ fi
 # ========================
 # Launch the Test Program.
 # ========================
-$bindir/flushrefresh &
+$testdir/flushrefresh &
 pid_main=$!
 
 # =======================================
@@ -163,7 +169,7 @@ until [ $verification_done -eq 1 ]; do
     verification_done=1
     echo "all flush verification complete" > $endsignal
   else
-    $bindir/flushrefresh $param1 $param2
+    $testdir/flushrefresh $param1 $param2
 
     # Check for core dump
     if [ $? -gt 0 ]; then
@@ -208,7 +214,7 @@ if [ $timedout -eq 0 ]; then
       verification_done=2
       echo "all refresh verification complete" > $endsignal
     else
-      $bindir/flushrefresh $param1
+      $testdir/flushrefresh $param1
 
       # Check for core dump
       if [ $? -gt 0 ]; then
