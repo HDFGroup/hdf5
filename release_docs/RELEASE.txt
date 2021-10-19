@@ -1,4 +1,4 @@
-HDF5 version 1.10.8 released on 2021-10-12
+HDF5 version 1.10.8 released on 2021-10-19
 ================================================================================
 
 
@@ -843,6 +843,13 @@ VFDs:
 
 Known Problems
 ==============
+    Corrupted files submitted with CVE-2019-08396 and CVE-2019-8398 that caused
+    segmentation faults with h5repack in HDF5 versions before 1.10.8 are no
+    longer segfaulting, but a specific fix for the problems has not yet been
+    identified and is still under investigation in jira issues HDFFV-10710 and
+    HDFFV-10712.  A third corrupted file submitted with CVE-2019-9152 still
+    causes a segmentation fault with h5repack; details in HDFFV-10719.
+
     Setting a variable-length dataset fill value will leak the memory allocated
     for the p field of the hvl_t struct. A fix is in progress for this.
     HDFFV-10840
