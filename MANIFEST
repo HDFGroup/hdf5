@@ -213,11 +213,9 @@
 ./doxygen/dox/Cookbook.dox
 ./doxygen/dox/DDLBNF110.dox
 ./doxygen/dox/DDLBNF112.dox
-./doxygen/dox/FileFormatSpec.dox
 ./doxygen/dox/GettingStarted.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
-./doxygen/dox/OtherSpecs.dox
 ./doxygen/dox/Overview.dox
 ./doxygen/dox/ReferenceManual.dox
 ./doxygen/dox/RFC.dox

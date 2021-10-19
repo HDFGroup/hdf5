@@ -24,6 +24,7 @@ ALIASES += htri_t="Returns zero (false), a positive (true) or a negative (failur
 
 ALIASES += api_vers_2{3}="\1() is a macro that is mapped to either \2() or \3().\n\see \ref api-compat-macros"
 ALIASES += api_vers_3{4}="\1() is a macro that is mapped to either \2() or \3() or \4().\n\see \ref api-compat-macros"
+ALIASES += api_vers_4{5}="\1() is a macro that is mapped to either \2() or \3() or \4() or \5().\n\see \ref api-compat-macros"
 
 ALIASES += deprecation_note{1}="\deprecated Superseded by \1."
 
