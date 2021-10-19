@@ -161,28 +161,13 @@ static herr_t  H5FD__onion_set_eoa(H5FD_t *, H5FD_mem_t, haddr_t);
 static herr_t  H5FD__onion_term(void);
 static herr_t  H5FD__onion_write(H5FD_t *, H5FD_mem_t, hid_t, haddr_t, size_t, const void *);
 
-static int      H5FD__onion_archival_index_list_sort_compar(const void *, const void *);
+static int      H5FD__onion_archival_index_list_sort_cmp(const void *, const void *);
 static herr_t   H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD_t *raw_file,
                                                  haddr_t addr, haddr_t size);
 static herr_t   H5FD__onion_open_rw(H5FD_onion_t *, unsigned int, haddr_t);
 static herr_t   H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *);
 static uint64_t H5FD__onion_whole_history_write(struct H5FD__onion_whole_history *whs, H5FD_t *file_dest,
                                                 haddr_t off_start, haddr_t filesize_curr);
-
-#if 0
-static void   *H5FD_ros3_fapl_get(H5FD_t *_file);
-static void   *H5FD_ros3_fapl_copy(const void *_old_fa);
-static herr_t  H5FD_ros3_fapl_free(void *_fa);
-static int     H5FD_ros3_cmp(const H5FD_t *_f1, const H5FD_t *_f2);
-static herr_t  H5FD_ros3_query(const H5FD_t *_f1, unsigned long *flags);
-static herr_t  H5FD_ros3_get_handle(H5FD_t *_file, hid_t fapl,
-        void **file_handle);
-static herr_t  H5FD_ros3_truncate(H5FD_t *_file, hid_t dxpl_id,
-        hbool_t closing);
-static herr_t  H5FD_ros3_lock(H5FD_t *_file, hbool_t rw);
-static herr_t  H5FD_ros3_unlock(H5FD_t *_file);
-static herr_t  H5FD_ros3_validate_config(const H5FD_ros3_fapl_t * fa);
-#endif
 
 static const H5FD_class_t H5FD_onion_g = {
     "onion",                        /* name                 */
@@ -193,40 +178,31 @@ static const H5FD_class_t H5FD_onion_g = {
     NULL,                           /* sb_encode            */
     NULL,                           /* sb_decode            */
     sizeof(H5FD_onion_fapl_info_t), /* fapl_size            */
-    NULL,
-    /*H5FD_ros3_fapl_get,*/ /* fapl_get             */
-    NULL,
-    /*H5FD_ros3_fapl_copy,*/ /* fapl_copy            */
-    NULL,
-    /*H5FD_ros3_fapl_free,*/ /* fapl_free            */
-    0,                       /* dxpl_size            */
-    NULL,                    /* dxpl_copy            */
-    NULL,                    /* dxpl_free            */
-    H5FD__onion_open,        /* open                 */
-    H5FD__onion_close,       /* close                */
-    NULL,
-    /*H5FD_ros3_cmp,*/ /* cmp                  */
-    NULL,
-    /*H5FD_ros3_query,*/ /* query                */
-    NULL,                /* get_type_map         */
-    NULL,                /* alloc                */
-    NULL,                /* free                 */
-    H5FD__onion_get_eoa, /* get_eoa              */
-    H5FD__onion_set_eoa, /* set_eoa              */
-    H5FD__onion_get_eof, /* get_eof              */
-    NULL,
-    /*H5FD_ros3_get_handle,*/ /* get_handle           */
-    H5FD__onion_read,         /* read                 */
-    H5FD__onion_write,        /* write                */
-    NULL,                     /* flush                */
-    NULL,
-    /*H5FD_ros3_truncate,*/ /* truncate             */
-    NULL,
-    /*H5FD_ros3_lock,*/ /* lock                 */
-    NULL,
-    /*H5FD_ros3_unlock,*/ /* unlock               */
-    NULL,                 /* del */
-    H5FD_FLMAP_DICHOTOMY  /* fl_map               */
+    NULL,                           /* fapl_get             */
+    NULL,                           /* fapl_copy            */
+    NULL,                           /* fapl_free            */
+    0,                              /* dxpl_size            */
+    NULL,                           /* dxpl_copy            */
+    NULL,                           /* dxpl_free            */
+    H5FD__onion_open,               /* open                 */
+    H5FD__onion_close,              /* close                */
+    NULL,                           /* cmp                  */
+    NULL,                           /* query                */
+    NULL,                           /* get_type_map         */
+    NULL,                           /* alloc                */
+    NULL,                           /* free                 */
+    H5FD__onion_get_eoa,            /* get_eoa              */
+    H5FD__onion_set_eoa,            /* set_eoa              */
+    H5FD__onion_get_eof,            /* get_eof              */
+    NULL,                           /* get_handle           */
+    H5FD__onion_read,               /* read                 */
+    H5FD__onion_write,              /* write                */
+    NULL,                           /* flush                */
+    NULL,                           /* truncate             */
+    NULL,                           /* lock                 */
+    NULL,                           /* unlock               */
+    NULL,                           /* del */
+    H5FD_FLMAP_DICHOTOMY            /* fl_map               */
 };
 
 /*-----------------------------------------------------------------------------
@@ -2609,38 +2585,35 @@ done:
  *                + Sorted by increasing logical address (no duplicates)
  *                + Logical addresses are multiples of page size.
  *
- * Return:      1 if above creteria are met.
- *              0 otherwise.
+ * Return:      TRUE if above creteria are met.
+ *              FALSE otherwise.
  *
  *-----------------------------------------------------------------------------
  */
-int
+hbool_t
 H5FD_onion_archival_index_is_valid(const struct H5FD__onion_archival_index *aix)
 {
-    hbool_t ret_value = 1;
+    hbool_t ret_value = TRUE;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
-    if (NULL == aix)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "pointer is null");
+    HDassert(aix);
+
     if (H5FD__ONION_ARCHIVAL_INDEX_MAGIC != aix->magic)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid magic");
+        HGOTO_DONE(FALSE)
     if (H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR != aix->version)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "invalid version");
+        HGOTO_DONE(FALSE)
     if (NULL == aix->list)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, 0, "list is NULL");
+        HGOTO_DONE(FALSE)
 
     if (aix->n_entries > 1) {
         uint64_t i         = 1;
         uint64_t prev_page = aix->list[0].logi_page;
         uint64_t logi_page = aix->list[1].logi_page;
 
-        for (i = 1; i < aix->n_entries; prev_page = logi_page, i++, logi_page = aix->list[i].logi_page) {
-            if (logi_page <= prev_page) {
-                ret_value = 0;
-                break;
-            }
-        }
+        for (i = 1; i < aix->n_entries; prev_page = logi_page, i++, logi_page = aix->list[i].logi_page)
+            if (logi_page <= prev_page)
+                HGOTO_DONE(FALSE)
     }
 
 done:
@@ -2676,12 +2649,12 @@ H5FD_onion_archival_index_find(const struct H5FD__onion_archival_index *aix, uin
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
-    HDassert(aix != NULL);
+    HDassert(aix);
     HDassert(H5FD__ONION_ARCHIVAL_INDEX_MAGIC == aix->magic);
     HDassert(H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
-    HDassert(entry_out_p != NULL);
+    HDassert(entry_out_p);
     if (aix->n_entries != 0)
-        HDassert(aix->list != NULL);
+        HDassert(aix->list);
 
     high  = aix->n_entries - 1;
     range = high;
@@ -2695,7 +2668,7 @@ H5FD_onion_archival_index_find(const struct H5FD__onion_archival_index *aix, uin
      * Binary search on sorted list
      */
 
-    /* winnow down to first of found or one element */
+    /* Winnow down to first of found or one element */
     while (range > 0) {
         HDassert(high < aix->n_entries);
         n = low + (range / 2);
@@ -2715,7 +2688,8 @@ H5FD_onion_archival_index_find(const struct H5FD__onion_archival_index *aix, uin
     }
 
     HDassert(high == low); /* one element */
-    /* n==low/high check because we may have tested it already above */
+
+    /* n == low/high check because we may have tested it already above */
     if ((n != low || n != high) && (aix->list[low].logi_page == logi_page)) {
         *entry_out_p = &aix->list[low];
         ret_value    = 1;
@@ -2731,8 +2705,7 @@ done:
  *
  * Purpose:     Release all resources of a revision index.
  *
- * Return:      Success: Non-negative value (SUCCEED).
- *              Failure: Negative value (FAIL).
+ * Return:      SUCCEED/FAIL
  *
  *-----------------------------------------------------------------------------
  */
@@ -2742,14 +2715,11 @@ H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *rix)
     size_t i         = 0;
     herr_t ret_value = SUCCEED;
 
-    FUNC_ENTER_NOAPI_NOINIT;
+    FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
-    if (NULL == rix)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "null index pointer");
-    if (H5FD__ONION_REVISION_INDEX_MAGIC != rix->magic)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "invalid index magic");
-    if (H5FD__ONION_REVISION_INDEX_VERSION_CURR != rix->version)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, -1, "invalid index version");
+    HDassert(rix);
+    HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix->magic);
+    HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
 
     for (i = 0; 0 < rix->_hash_table_n_keys_populated && i < rix->_hash_table_size; i++) {
         struct H5FD__onion_revision_index_hash_chain_node *next_p = NULL;
@@ -2768,10 +2738,8 @@ H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *rix)
         }
     }
     HDfree(rix->_hash_table);
-    rix->magic++;
     HDfree(rix);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_onion_revision_index_destroy() */
 
@@ -2783,8 +2751,8 @@ done:
  *              size. A new structure is allocated and populated with initial
  *              values.
  *
- * Return:      Success: Pointer to newly-allocated structure.
- *              Failure: NULL
+ * Return:      Success:    Pointer to newly-allocated structure
+ *              Failure:    NULL
  *
  *-----------------------------------------------------------------------------
  */
@@ -2797,30 +2765,20 @@ H5FD_onion_revision_index_init(uint32_t page_size)
 
     FUNC_ENTER_NOAPI_NOINIT;
 
-    if (0 == page_size) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "page size must be greater than zero (0)");
-    }
-    if (!POWER_OF_TWO(page_size)) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "page size must be a power of 2");
-    }
+    HDassert(0 != page_size);
+    HDassert(POWER_OF_TWO(page_size));
 
-    rix = (H5FD__onion_revision_index_t *)HDmalloc(sizeof(H5FD__onion_revision_index_t));
-    if (NULL == rix) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate index");
-    }
+    if (NULL == (rix = HDcalloc(1, sizeof(H5FD__onion_revision_index_t))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate index")
 
-    rix->_hash_table = NULL; /* initialize to catch error */
-    rix->_hash_table = (struct H5FD__onion_revision_index_hash_chain_node **)HDcalloc(
-        table_size, sizeof(struct H5FD__onion_revision_index_hash_chain_node *));
-
-    if (NULL == rix->_hash_table) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate hash table");
-    }
+    if (NULL == (rix->_hash_table =
+                     HDcalloc(table_size, sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate hash table")
 
     rix->magic     = H5FD__ONION_REVISION_INDEX_MAGIC;
     rix->version   = H5FD__ONION_REVISION_INDEX_VERSION_CURR;
     rix->n_entries = 0;
-    /* compute and store log2(page_size) */
+    /* Compute and store log2(page_size) */
     for (rix->page_size_log2 = 0; (((uint32_t)1 << rix->page_size_log2) & page_size) == 0;
          rix->page_size_log2++)
         ;
@@ -2848,8 +2806,7 @@ done:
  *
  *              Fails if unable to allocate space for larger hash table.
  *
- * Return:      Success: Non-negative value (SUCCEED).
- *              Failure: Negative value (FAIL).
+ * Return:      SUCCEED/FAIL
  *
  *-----------------------------------------------------------------------------
  */
@@ -2865,24 +2822,20 @@ H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *rix)
 
     FUNC_ENTER_STATIC;
 
-    /* function not user-exposed: asserts suffice for sanity-checks */
-    HDassert(rix != NULL);
+    HDassert(rix);
     HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix->magic);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
-    HDassert(rix->_hash_table != NULL);
+    HDassert(rix->_hash_table);
 
-    new_table = (struct H5FD__onion_revision_index_hash_chain_node **)HDcalloc(
-        new_size, sizeof(struct H5FD__onion_revision_index_hash_chain_node *));
-    if (NULL == new_table) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new hash table");
-    }
+    if (NULL == (new_table = HDcalloc(new_size, sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new hash table")
 
     for (i = 0; i < rix->_hash_table_size; i++) {
         while (rix->_hash_table[i] != NULL) {
             struct H5FD__onion_revision_index_hash_chain_node *node = NULL;
             uint64_t                                           key  = 0;
 
-            /* pop entry off of bucket stack and re-hash */
+            /* Pop entry off of bucket stack and re-hash */
             node                = rix->_hash_table[i];
             rix->_hash_table[i] = node->next;
             node->next          = NULL;
@@ -2920,8 +2873,7 @@ done:
  *              Entry data is copied into separate memory region; user pointer
  *              can be safley re-used or discarded after operation.
  *
- * Return:      Success: Non-negative value (SUCCEED).
- *              Failure: Negative value (FAIL).
+ * Return:      SUCCEED/FAIL
  *
  *-----------------------------------------------------------------------------
  */
@@ -2936,59 +2888,54 @@ H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *        rix,
 
     FUNC_ENTER_NOAPI_NOINIT;
 
-    if (NULL == rix)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null index pointer");
-    if (H5FD__ONION_REVISION_INDEX_MAGIC != rix->magic)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index magic");
-    if (H5FD__ONION_REVISION_INDEX_VERSION_CURR != rix->version)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid index version");
-    if (NULL == entry)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null entry pointer");
+    HDassert(rix);
+    HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix->magic);
+    HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
+    HDassert(entry);
 
-    /* Resize and re-hash table if necessary.
-     */
+    /* Resize and re-hash table if necessary */
     if (rix->n_entries >= (rix->_hash_table_size * 2) ||
         rix->_hash_table_n_keys_populated >= (rix->_hash_table_size / 2)) {
-        if (H5FD__onion_revision_index_resize(rix) < 0) {
-            HGOTO_ERROR(H5E_RESOURCE, H5E_NONE_MINOR, FAIL, "unable to resize and hash table");
-        }
+        if (H5FD__onion_revision_index_resize(rix) < 0)
+            HGOTO_ERROR(H5E_RESOURCE, H5E_NONE_MINOR, FAIL, "unable to resize and hash table")
     }
 
     key = entry->logi_page & (rix->_hash_table_size - 1);
     HDassert(key < rix->_hash_table_size);
 
     if (NULL == rix->_hash_table[key]) {
+        /* Key maps to empty bucket */
+
         append_dest = &rix->_hash_table[key];
         rix->_hash_table_n_keys_populated++;
-    } /* end if insert into unoccupied bucket */
+    }
     else {
+        /* Key maps to populated bucket */
+
         for (node = rix->_hash_table[key]; node != NULL; node = node->next) {
             append_dest = &node->next; /* look for bucket tail */
             if (entry->logi_page == node->entry_data.logi_page) {
                 if (entry->phys_addr != node->entry_data.phys_addr) {
                     HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "physical address mismatch");
                 }
-                HDmemcpy(&node->entry_data, entry, /* TODO: can fail? */
-                         sizeof(struct H5FD__onion_index_entry));
-                append_dest = NULL; /* node updated; do not append */
+                HDmemcpy(&node->entry_data, entry, sizeof(struct H5FD__onion_index_entry));
+                append_dest = NULL; /* Node updated, do not append */
                 break;
-            } /* end if page ID match with chain node; update node */
+            }
         }
-    } /* end if key maps to populated bucket */
+    }
 
+    /* Add new entry to bucket chain */
     if (append_dest != NULL) {
-        node = (struct H5FD__onion_revision_index_hash_chain_node *)HDmalloc(
-            sizeof(struct H5FD__onion_revision_index_hash_chain_node));
-        if (NULL == node) {
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new ash chain node");
-        }
+        if (NULL == (node = HDmalloc(sizeof(struct H5FD__onion_revision_index_hash_chain_node))))
+            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new ash chain node")
         node->magic   = H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_MAGIC;
         node->version = H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR;
         node->next    = NULL;
         HDmemcpy(&node->entry_data, entry, sizeof(struct H5FD__onion_index_entry));
         *append_dest = node;
         rix->n_entries++;
-    } /* end if new entry to bucket chain */
+    }
 
 done:
     FUNC_LEAVE_NOAPI(ret_value);
@@ -3018,11 +2965,11 @@ H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *rix_p, uint64
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
-    HDassert(rix_p != NULL);
+    HDassert(rix_p);
     HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix_p->magic);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix_p->version);
-    HDassert(rix_p->_hash_table != NULL);
-    HDassert(entry_out_p != NULL);
+    HDassert(rix_p->_hash_table);
+    HDassert(entry_out_p);
 
     key = logi_page & (rix_p->_hash_table_size - 1);
     HDassert(key < rix_p->_hash_table_size);
@@ -3049,7 +2996,7 @@ H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *rix_p, uint64
  *-----------------------------------------------------------------------------
  */
 static int
-H5FD__onion_archival_index_list_sort_compar(const void *_a, const void *_b)
+H5FD__onion_archival_index_list_sort_cmp(const void *_a, const void *_b)
 {
     const struct H5FD__onion_index_entry *a = (const struct H5FD__onion_index_entry *)_a;
     const struct H5FD__onion_index_entry *b = (const struct H5FD__onion_index_entry *)_b;
@@ -3059,7 +3006,7 @@ H5FD__onion_archival_index_list_sort_compar(const void *_a, const void *_b)
     else if (a->logi_page > b->logi_page)
         return 1;
     return 0;
-} /* end H5FD__onion_archival_index_list_sort_compar() */
+} /* end H5FD__onion_archival_index_list_sort_cmp() */
 
 /*-----------------------------------------------------------------------------
  *
@@ -3102,27 +3049,13 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
 
     FUNC_ENTER_NOAPI_NOINIT;
 
-    if (NULL == rix) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null revision index pointer");
-    }
-    if (NULL == aix) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null archival index pointer");
-    }
-
-    if (H5FD__ONION_REVISION_INDEX_MAGIC != rix->magic) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid revision index magic");
-    }
-    if (H5FD__ONION_ARCHIVAL_INDEX_MAGIC != aix->magic)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null archival index");
-
-    if (H5FD__ONION_REVISION_INDEX_VERSION_CURR != rix->version) {
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid revision index version");
-    }
-    if (H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR != aix->version)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "null archival version");
-
-    if (aix->page_size_log2 != rix->page_size_log2)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "page size mismatch");
+    HDassert(rix);
+    HDassert(aix);
+    HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix->magic);
+    HDassert(H5FD__ONION_ARCHIVAL_INDEX_MAGIC == aix->magic);
+    HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
+    HDassert(H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
+    HDassert(aix->page_size_log2 == rix->page_size_log2);
 
     /* Short-circuit degenerate case */
     if (rix->n_entries == 0)
@@ -3130,11 +3063,8 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
 
     /* Add all 'live' revision index entries to new list (unsorted) */
     new_aix.page_size_log2 = aix->page_size_log2;
-    new_aix.list =
-        (struct H5FD__onion_index_entry *)HDcalloc(rix->n_entries, sizeof(struct H5FD__onion_index_entry));
-    if (NULL == new_aix.list) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list");
-    }
+    if (NULL == (new_aix.list = HDcalloc(rix->n_entries, sizeof(struct H5FD__onion_index_entry))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list")
     for (i = 0; i < rix->_hash_table_size; i++) {
         const struct H5FD__onion_revision_index_hash_chain_node *node_p = NULL;
 
@@ -3145,16 +3075,14 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
         }
     }
     HDqsort(new_aix.list, new_aix.n_entries, sizeof(struct H5FD__onion_index_entry),
-            H5FD__onion_archival_index_list_sort_compar);
+            H5FD__onion_archival_index_list_sort_cmp);
 
-    /* Add any remaining 'dead' archival index entries to list (sorted) */
-    /* supplementary new archival index space for possible archived entries */
+    /* Add any remaining 'dead' archival index entries to list (sorted)
+     * supplementary new archival index space for possible archived entries
+     */
     n_kept = 0;
-    kept_list =
-        (struct H5FD__onion_index_entry *)HDcalloc(aix->n_entries, sizeof(struct H5FD__onion_index_entry));
-    if (NULL == kept_list) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list");
-    }
+    if (NULL == (kept_list = HDcalloc(aix->n_entries, sizeof(struct H5FD__onion_index_entry))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate larger archival index list")
     for (i = 0; i < aix->n_entries; i++) {
         const struct H5FD__onion_index_entry *_p = NULL;
 
@@ -3165,35 +3093,25 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
         }
     }
 
-    /* destroy prev list and replace with exact-sized buffer w/ new contents */
+    /* Destroy prev list and replace with exact-sized buffer w/ new contents */
     HDfree(aix->list);
-    aix->list = (struct H5FD__onion_index_entry *)HDcalloc(new_aix.n_entries + n_kept,
-                                                           sizeof(struct H5FD__onion_index_entry));
-    if (NULL == aix->list) {
-        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate exact-size archival index list");
-    }
-    /* copy new entries to replacement list */
+    if (NULL == (aix->list = HDcalloc(new_aix.n_entries + n_kept, sizeof(struct H5FD__onion_index_entry))))
+        HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to allocate exact-size archival index list")
+
+    /* Copy new entries to replacement list */
     HDmemcpy(aix->list, new_aix.list, sizeof(struct H5FD__onion_index_entry) * new_aix.n_entries);
     aix->n_entries = new_aix.n_entries;
-    /* copy old entries to replacement list */
+
+    /* Copy old entries to replacement list */
     HDmemcpy(&aix->list[aix->n_entries], kept_list, sizeof(struct H5FD__onion_index_entry) * n_kept);
     aix->n_entries += n_kept;
 
-    /* cleanup temporary allocs */
-    HDfree(kept_list);
-    kept_list = NULL;
-    HDfree(new_aix.list);
-    new_aix.list = NULL;
-    new_aix.magic++; /* new_aix allocated on the stack; no free */
-
     HDqsort(aix->list, aix->n_entries, sizeof(struct H5FD__onion_index_entry),
-            H5FD__onion_archival_index_list_sort_compar);
+            H5FD__onion_archival_index_list_sort_cmp);
 
 done:
-    if (kept_list != NULL)
-        HDfree(kept_list);
-    if (new_aix.list != NULL)
-        HDfree(new_aix.list);
+    HDfree(kept_list);
+    HDfree(new_aix.list);
 
     FUNC_LEAVE_NOAPI(ret_value);
 } /* end H5FD_onion_merge_revision_index_into_entry_list() */

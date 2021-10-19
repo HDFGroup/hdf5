@@ -344,12 +344,6 @@ test_revision_index(void)
     if (0 != rix_p->n_entries)
         TEST_ERROR;
 
-    /* Test obviously failing inserts
-     */
-
-    if (H5FD_onion_revision_index_insert(rix_p, NULL) != FAIL)
-        TEST_ERROR; /* cannot be NULL */
-
     /* Test missed search
      */
 
@@ -606,44 +600,6 @@ test_revision_index_to_archival_index(void)
 
     aix.list      = NULL;
     aix.n_entries = 0;
-
-    /*
-     * FAILING CASES
-     */
-
-    if (H5FD_onion_merge_revision_index_into_archival_index(NULL, NULL) != FAIL)
-        TEST_ERROR; /* both cannot be null */
-
-    if (H5FD_onion_merge_revision_index_into_archival_index(NULL, &aix) != FAIL)
-        TEST_ERROR; /* revision index cannot be null */
-
-    rix_p->magic++;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* revision index magic must be valid */
-    rix_p->magic--;
-
-    rix_p->version++;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* revision index version must be valid */
-    rix_p->version--;
-
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, NULL) != FAIL)
-        TEST_ERROR; /* archival index cannot be null */
-
-    aix.magic++;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* archival index magic must be valid */
-    aix.magic--;
-
-    aix.version++;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* archival index version must be valid */
-    aix.version--;
-
-    aix.page_size_log2 += 1;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* page sizes must match */
-    aix.page_size_log2 -= 1;
 
     /* Successful merge into empty archival index
      */
@@ -1454,15 +1410,13 @@ test_revision_record_encode_decode(void)
         25,            /* comment size */
         {
             H5FD__ONION_ARCHIVAL_INDEX_MAGIC, H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
-            12,   /* page_size_log2 */
-            4,    /* n_entries */
-            NULL, /* list - populated below */
-        },        /* archival index struct */
-        (char *)"JohnDoe",
-        /* username */ /* cast OK --JOS */
-        (char *)"Example comment message.",
-        /* comment */ /* cast OK --JOS */
-        0,            /* checksum - computed for us */
+            12,                     /* page_size_log2 */
+            4,                      /* n_entries */
+            NULL,                   /* list - populated below */
+        },                          /* archival index struct */
+        "JohnDoe",                  /* username */
+        "Example comment message.", /* comment */
+        0,                          /* checksum - computed for us */
     };
     uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
                         (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
