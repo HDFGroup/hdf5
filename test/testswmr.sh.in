@@ -18,6 +18,7 @@
 
 srcdir=@srcdir@
 bindir=@bindir@
+testdir=@testdir@
 
 ###############################################################################
 ## test parameters
@@ -110,7 +111,7 @@ fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-./swmr_check_compat_vfd
+$bindir/swmr_check_compat_vfd
 rc=$?
 if [ $rc -ne 0 ] ; then
     echo

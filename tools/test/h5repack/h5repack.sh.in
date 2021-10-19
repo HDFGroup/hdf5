@@ -39,7 +39,7 @@ H5DUMP_BIN=`pwd`/$H5DUMP                # The path of the h5dump tool binary
 H5STAT=../../src/h5stat/h5stat          # The h5stat tool name
 H5STAT_BIN=`pwd`/$H5STAT                # The path of the h5stat tool binary
 
-VDS_ELINK_COMPAT_VOL=../../../utils/vds_elink_compat_vol # The vds_elink_compat_vol tool name
+VDS_ELINK_COMPAT_VOL=../../../utils/test/vds_elink_compat_vol # The vds_elink_compat_vol tool name
 VDS_ELINK_COMPAT_VOL_BIN=`pwd`/$VDS_ELINK_COMPAT_VOL # The path of the vds_elink_compat_vol tool binary
 
 RM='rm -rf'

@@ -24,7 +24,7 @@ EXIT_FAILURE=1
 
 H5LS=../../src/h5ls/h5ls               # The tool name
 H5LS_BIN=`pwd`/$H5LS    # The path of the tool binary
-VDS_ELINK_COMPAT_VOL=../../../utils/vds_elink_compat_vol # The vds_elink_compat_vol tool name
+VDS_ELINK_COMPAT_VOL=../../../utils/test/vds_elink_compat_vol # The vds_elink_compat_vol tool name
 VDS_ELINK_COMPAT_VOL_BIN=`pwd`/$VDS_ELINK_COMPAT_VOL # The path of the vds_elink_compat_vol tool binary
 
 RM='rm -rf'

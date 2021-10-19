@@ -21,8 +21,27 @@
 # For now, it shows how to run the test cases programs. It only verifies the
 # exit codes are okay (0).
 
+###############################################################################
+## test variables
+###############################################################################
+
+# Number of errors encountered during test run.
+nerrors=0
+
+# Define variables
+verbose=yes
+
+###############################################################################
+## Main
+###############################################################################
 srcdir=@srcdir@
 bindir=@bindir@
+testdir=@testdir@
+
+# The build (current) directory might be different than the source directory.
+if test -z "$srcdir"; then
+   srcdir=.
+fi
 
 # If the bindir directory is not set just use current (.).
 if test -z "$bindir"; then
@@ -36,7 +55,7 @@ fi
 
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
-./swmr_check_compat_vfd
+$bindir/swmr_check_compat_vfd
 rc=$?
 if [[ $rc != 0 ]] ; then
     echo
@@ -57,10 +76,6 @@ RESULT_FAILED="*FAILED*"
 RESULT_SKIP="-SKIP-"
 USECASES_PROGRAMS="use_append_chunk use_append_mchunks"
 TESTNAME="Use Case"
-
-# Define variables
-nerrors=0
-verbose=yes
 
 # Source in the output filter function definitions.
 . $srcdir/../bin/output_filter.sh
@@ -128,7 +143,7 @@ TOOLTEST() {
 # the test.  Running each of these tests in its own directory should eliminate
 # the problem.
 mkdir usecases_test
-cp twriteorder usecases_test
+cp $bindir/twriteorder usecases_test
 for FILE in use_*; do
     case "$FILE" in
         *.o) continue ;;    ## don't copy the .o files
