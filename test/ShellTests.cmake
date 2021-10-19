@@ -21,6 +21,7 @@ if (UNIX)
   if (SH_PROGRAM)
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
     set (bindir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set (testdir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     ##############################################################################
     #  configure scripts to test dir
     ##############################################################################
@@ -46,9 +47,11 @@ if (UNIX)
     #shell script creates dir
     #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
 
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
+    #shell script creates dir
+    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
 
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
+    #shell script creates dir
+    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
 
     ##############################################################################
     ##############################################################################
