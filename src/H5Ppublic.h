@@ -7486,10 +7486,6 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  *          If an error occurs, the buffer pointed to by \p expression is
  *          unchanged, and the function returns a negative value.
  *
- * \par Example
- *      An example snippet from examples/h5_dtransform.c:
- *      \snippet h5_dtransform.c H5Pget_data_transform_snip
- *
  * \since 1.8.0
  *
  */
@@ -8092,7 +8088,7 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
  *          the size of the \p start, \p stride, \p count, and \p block arrays.
  *          \p rank must be between 1 and #H5S_MAX_RANK, inclusive.
  *
- *          The \op, \p start, \p stride, \p count, and \p block parameters
+ *          The \p op, \p start, \p stride, \p count, and \p block parameters
  *          behave identically to their behavior for H5Sselect_hyperslab(),
  *          please see the documentation for that routine for details about
  *          their use.

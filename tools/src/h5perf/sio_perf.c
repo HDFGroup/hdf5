@@ -310,14 +310,14 @@ run_test(iotype iot, parameters parms, struct options *opts)
     minmax *     read_mm_table        = NULL;
     minmax *     read_gross_mm_table  = NULL;
     minmax *     read_raw_mm_table    = NULL;
-    minmax       write_sys_mm         = {0.0F, 0.0F, 0.0F, 0};
-    minmax       write_mm             = {0.0F, 0.0F, 0.0F, 0};
-    minmax       write_gross_mm       = {0.0F, 0.0F, 0.0F, 0};
-    minmax       write_raw_mm         = {0.0F, 0.0F, 0.0F, 0};
-    minmax       read_sys_mm          = {0.0F, 0.0F, 0.0F, 0};
-    minmax       read_mm              = {0.0F, 0.0F, 0.0F, 0};
-    minmax       read_gross_mm        = {0.0F, 0.0F, 0.0F, 0};
-    minmax       read_raw_mm          = {0.0F, 0.0F, 0.0F, 0};
+    minmax       write_sys_mm         = {0.0, 0.0, 0.0, 0};
+    minmax       write_mm             = {0.0, 0.0, 0.0, 0};
+    minmax       write_gross_mm       = {0.0, 0.0, 0.0, 0};
+    minmax       write_raw_mm         = {0.0, 0.0, 0.0, 0};
+    minmax       read_sys_mm          = {0.0, 0.0, 0.0, 0};
+    minmax       read_mm              = {0.0, 0.0, 0.0, 0};
+    minmax       read_gross_mm        = {0.0, 0.0, 0.0, 0};
+    minmax       read_raw_mm          = {0.0, 0.0, 0.0, 0};
 
     raw_size      = (off_t)parms.num_bytes;
     parms.io_type = iot;
@@ -574,7 +574,7 @@ accumulate_minmax_stuff(const minmax *mm, int count, minmax *total_mm)
 {
     int i;
 
-    total_mm->sum = 0.0F;
+    total_mm->sum = 0.0;
     total_mm->max = -DBL_MAX;
     total_mm->min = DBL_MAX;
     total_mm->num = count;

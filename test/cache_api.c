@@ -546,7 +546,7 @@ check_file_mdc_api_calls(unsigned paged, hid_t fcpl_id)
         /* size_t      max_decrement          = */ (1 * 1024 * 1024 - 1),
         /* int         epochs_before_eviction = */ 4,
         /* hbool_t     apply_empty_reserve    = */ TRUE,
-        /* double      empty_reserve          = */ 0.05f,
+        /* double      empty_reserve          = */ 0.05,
         /* int         dirty_bytes_threshold  = */ (256 * 1024),
         /* int        metadata_write_strategy = */
         H5AC__DEFAULT_METADATA_WRITE_STRATEGY};
