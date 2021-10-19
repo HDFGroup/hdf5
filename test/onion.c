@@ -25,6 +25,12 @@
 #include "H5FDonion.h"      /* This file driver's utilities */
 #include "H5FDonion_priv.h" /* Onion file driver internals  */
 
+/* The Onion VFD uses H5MM calls internally, so any tests that allocate
+ * or free memory for said internal structures (e.g., the revision lists)
+ * will need to allocate memory using H5MM calls.
+ */
+#include "H5MMprivate.h" /* Memory management */
+
 /* 2^n for uint64_t types -- H5_EXP2 unsafe past 32 bits */
 #define U64_EXP2(n) ((uint64_t)1 << (n))
 
@@ -331,12 +337,10 @@ test_revision_index(void)
 
     TESTING("revision index");
 
-    /* Test index creation
-     */
+    /* Test index creation */
 
-    rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5);
-    if (NULL == rix_p)
-        TEST_ERROR; /* unable to initialize working index */
+    if (NULL == (rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
+        TEST_ERROR; /* Unable to initialize working index */
     if (H5FD__ONION_REVISION_INDEX_MAGIC != rix_p->magic)
         TEST_ERROR;
     if (H5FD__ONION_REVISION_INDEX_VERSION_CURR != rix_p->version)
@@ -344,20 +348,12 @@ test_revision_index(void)
     if (0 != rix_p->n_entries)
         TEST_ERROR;
 
-    /* Test obviously failing inserts
-     */
-
-    if (H5FD_onion_revision_index_insert(rix_p, NULL) != FAIL)
-        TEST_ERROR; /* cannot be NULL */
-
-    /* Test missed search
-     */
+    /* Test missed search */
 
     if (H5FD_onion_revision_index_find(rix_p, entry.logi_page, &entry_out_p) != 0)
         TEST_ERROR;
 
-    /* Test successful insertion and lookup
-     */
+    /* Test successful insertion and lookup */
 
     if (H5FD_onion_revision_index_insert(rix_p, &entry) < 0)
         TEST_ERROR; /* insertion failed */
@@ -372,8 +368,7 @@ test_revision_index(void)
     if (H5FD_onion_revision_index_find(rix_p, entry.logi_page + 1, &entry_out_p) != 0)
         TEST_ERROR; /* seeking other, absent page should miss */
 
-    /* Test / demonstrate stored entry independent of user object
-     */
+    /* Test / demonstrate stored entry independent of user object */
 
     entry.logi_page = 100;
     entry.phys_addr = 101;
@@ -587,9 +582,8 @@ test_revision_index_to_archival_index(void)
      * SETUP
      */
 
-    rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5);
-    if (NULL == rix_p)
-        TEST_ERROR; /* unable to initialize working index */
+    if (NULL == (rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
+        TEST_ERROR; /* Unable to initialize working index */
 
     /* Add scattered entries in reverse order. */
     for (i = 0; i < n_insert; i++) {
@@ -607,55 +601,16 @@ test_revision_index_to_archival_index(void)
     aix.list      = NULL;
     aix.n_entries = 0;
 
-    /*
-     * FAILING CASES
-     */
-
-    if (H5FD_onion_merge_revision_index_into_archival_index(NULL, NULL) != FAIL)
-        TEST_ERROR; /* both cannot be null */
-
-    if (H5FD_onion_merge_revision_index_into_archival_index(NULL, &aix) != FAIL)
-        TEST_ERROR; /* revision index cannot be null */
-
-    rix_p->magic++;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* revision index magic must be valid */
-    rix_p->magic--;
-
-    rix_p->version++;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* revision index version must be valid */
-    rix_p->version--;
-
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, NULL) != FAIL)
-        TEST_ERROR; /* archival index cannot be null */
-
-    aix.magic++;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* archival index magic must be valid */
-    aix.magic--;
-
-    aix.version++;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* archival index version must be valid */
-    aix.version--;
-
-    aix.page_size_log2 += 1;
-    if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) != FAIL)
-        TEST_ERROR; /* page sizes must match */
-    aix.page_size_log2 -= 1;
-
-    /* Successful merge into empty archival index
-     */
+    /* Successful merge into empty archival index */
 
     if (H5FD_onion_merge_revision_index_into_archival_index(rix_p, &aix) < 0)
         TEST_ERROR;
 
     if (!H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* entries not sorted, or other obscure issue */
+        TEST_ERROR; /* Entries not sorted, or other obscure issue */
 
     if (n_insert != aix.n_entries)
-        TEST_ERROR; /* failed to resize and/or update archival index info */
+        TEST_ERROR; /* Failed to resize and/or update archival index info */
 
     for (i = 0; i < n_insert; i++) {
         const struct H5FD__onion_index_entry *aix_entry_p = NULL;
@@ -669,13 +624,11 @@ test_revision_index_to_archival_index(void)
             TEST_ERROR;
     }
 
-    /* Successful merge into populated archival index
-     */
+    /* Successful merge into populated archival index */
 
-    HDfree(aix.list);
+    H5MM_xfree(aix.list);
     aix.list = NULL;
-    aix.list = (struct H5FD__onion_index_entry *)HDmalloc(sizeof(struct H5FD__onion_index_entry) * 2);
-    if (NULL == aix.list)
+    if (NULL == (aix.list = H5MM_malloc(sizeof(struct H5FD__onion_index_entry) * 2)))
         TEST_ERROR;
     aix.list[0].logi_page = 47;
     aix.list[0].phys_addr = 47 * 13;
@@ -707,13 +660,11 @@ test_revision_index_to_archival_index(void)
             TEST_ERROR;
     }
 
-    /* Merged enties from revision index replace existing entries
-     */
+    /* Merged enties from revision index replace existing entries */
 
-    HDfree(aix.list);
+    H5MM_xfree(aix.list);
     aix.list = NULL;
-    aix.list = (struct H5FD__onion_index_entry *)HDmalloc(sizeof(struct H5FD__onion_index_entry) * 2);
-    if (NULL == aix.list)
+    if (NULL == (aix.list = H5MM_malloc(sizeof(struct H5FD__onion_index_entry) * 2)))
         TEST_ERROR;
     aix.list[0].logi_page = 2003 * (n_insert / 2) + 47;
     aix.list[0].phys_addr = 103;
@@ -751,22 +702,17 @@ test_revision_index_to_archival_index(void)
 
     if (H5FD_onion_revision_index_destroy(rix_p) < 0)
         TEST_ERROR;
-    rix_p = NULL;
 
-    HDfree(aix.list);
-    aix.list = NULL;
-    aix.magic++;
+    H5MM_xfree(aix.list);
 
     PASSED();
     return 0;
 
 error:
-    if (rix_p != NULL) {
+    if (rix_p)
         (void)H5FD_onion_revision_index_destroy(rix_p);
-    }
-    if (aix.list != NULL) {
-        HDfree(aix.list);
-    }
+    if (aix.list)
+        H5MM_xfree(aix.list);
     return -1;
 } /* end test_revision_index_to_archival_index() */
 
@@ -1454,15 +1400,13 @@ test_revision_record_encode_decode(void)
         25,            /* comment size */
         {
             H5FD__ONION_ARCHIVAL_INDEX_MAGIC, H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
-            12,   /* page_size_log2 */
-            4,    /* n_entries */
-            NULL, /* list - populated below */
-        },        /* archival index struct */
-        (char *)"JohnDoe",
-        /* username */ /* cast OK --JOS */
-        (char *)"Example comment message.",
-        /* comment */ /* cast OK --JOS */
-        0,            /* checksum - computed for us */
+            12,                     /* page_size_log2 */
+            4,                      /* n_entries */
+            NULL,                   /* list - populated below */
+        },                          /* archival index struct */
+        "JohnDoe",                  /* username */
+        "Example comment message.", /* comment */
+        0,                          /* checksum - computed for us */
     };
     uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
                         (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
@@ -2812,7 +2756,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
 
         onion_info_p->revision_id = about[i].revision_id;
         if (about[i].comment != NULL) {
-            j = MIN(strlen(about[i].comment), H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN);
+            j = MIN(HDstrlen(about[i].comment), H5FD_ONION_FAPL_INFO_COMMENT_MAX_LEN);
             HDmemcpy(onion_info_p->comment, about[i].comment, j);
         }
         onion_info_p->comment[j] = '\0';
@@ -2846,7 +2790,7 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
                 HDputs("i  exp  act");
                 for (z = 0; z < wi->size; z++)
                     HDprintf("%02zx %c %c\n", z, _buf[z], buf_vfy[z]);
-                fflush(stdout);
+                HDfflush(stdout);
                 TEST_ERROR;
             }
             HDfree(buf_vfy);

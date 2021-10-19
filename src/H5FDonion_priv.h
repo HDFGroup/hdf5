@@ -193,9 +193,9 @@ extern "C" {
  * INTERNAL FUNCTION DECLARATIONS
  */
 
-H5_DLL int H5FD_onion_archival_index_is_valid(const struct H5FD__onion_archival_index *);
-H5_DLL int H5FD_onion_archival_index_find(const struct H5FD__onion_archival_index *, uint64_t,
-                                          const struct H5FD__onion_index_entry **);
+H5_DLL hbool_t H5FD_onion_archival_index_is_valid(const struct H5FD__onion_archival_index *);
+H5_DLL int     H5FD_onion_archival_index_find(const struct H5FD__onion_archival_index *, uint64_t,
+                                              const struct H5FD__onion_index_entry **);
 
 H5_DLL struct H5FD__onion_revision_index *H5FD_onion_revision_index_init(uint32_t page_size);
 H5_DLL herr_t                             H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *);
