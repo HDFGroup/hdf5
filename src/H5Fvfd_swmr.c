@@ -1921,6 +1921,10 @@ H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body)
     unsigned int    elap_min, elap_sec, elap_msec;
 
     FUNC_ENTER_NOAPI(FAIL)
+#if 0
+    HDassert(f);
+    HDassert(f->shared);
+#endif
     if (f == NULL)
         HGOTO_DONE(TRUE)
     else if (f->shared == NULL)
