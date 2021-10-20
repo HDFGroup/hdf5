@@ -464,7 +464,7 @@ Bug Fixes since HDF5-1.10.7 release
     -------
     - Fixed a segmentation fault
 
-      A segmentation fault occurred with a Mathworks corrupted file.
+      A segmentation fault occurred with a corrupted file.
 
       A detection of accessing a null pointer was added to prevent the problem.
 
