@@ -765,6 +765,21 @@ if (HDF5_ALLOW_EXTERNAL_SUPPORT MATCHES "GIT" OR HDF5_ALLOW_EXTERNAL_SUPPORT MAT
 endif ()
 
 #-----------------------------------------------------------------------------
+# Option to build documentation
+#-----------------------------------------------------------------------------
+option (HDF5_BUILD_DOC "Build documentation" OFF)
+if (HDF5_BUILD_DOC AND EXISTS "${HDF5_DOXYGEN_DIR}" AND IS_DIRECTORY "${HDF5_DOXYGEN_DIR}")
+# check if Doxygen is installed
+  find_package(Doxygen)
+  if (DOXYGEN_FOUND)
+    message(STATUS "Doxygen version: ${DOXYGEN_VERSION}")
+    add_subdirectory (doxygen)
+  else ()
+    message(STATUS "Doxygen needs to be installed to generate the doxygen documentation")
+  endif ()
+endif ()
+
+#-----------------------------------------------------------------------------
 # Dashboard and Testing Settings
 #-----------------------------------------------------------------------------
 option (BUILD_TESTING "Build HDF5 Unit Testing" ON)
