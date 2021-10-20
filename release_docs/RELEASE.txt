@@ -58,7 +58,13 @@ New Features
       that default ON/enabled.
 
       Add configure options (autotools - CMake):
-            enable-hltools       HDF5_BUILD_HL_TOOLS
+            --enable-hltools       HDF5_BUILD_HL_TOOLS
+
+      Disabling this option prevents building the gif tool which
+      contains the following CVEs:
+          HDFFV-10592 CVE-2018-17433
+          HDFFV-10593 CVE-2018-17436
+          HDFFV-11048 CVE-2020-10809
 
       (ADB - 2021/09/16, HDFFV-11266)
 
@@ -1653,3 +1659,11 @@ The share folder will have the most differences because CMake builds include
 a number of CMake specific files for support of CMake's find_package and support
 for the HDF5 Examples CMake project.
 
+The issues with the gif tool are:
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
+These CVE issues have not yet been addressed and can be avoided by not building
+the gif tool. Disable building the High-Level tools with these options:
+    autotools:   --disable-hltools
+    cmake:       HDF5_BUILD_HL_TOOLS=OFF
