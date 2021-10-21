@@ -39,7 +39,7 @@ Java_test_H5TestUtils_H5VLfapl_1is_1native(JNIEnv *env, jclass clss, jlong fapl_
 
     UNUSED(clss);
 
-    if (H5VL_fapl_is_native((hid_t)fapl_id, &bval) < 0)
+    if (H5VLfapl_is_native((hid_t)fapl_id, &bval) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
