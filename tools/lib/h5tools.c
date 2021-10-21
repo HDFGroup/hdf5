@@ -1893,11 +1893,10 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
 
                     for (block_index = 0; block_index < block_nelmts; block_index++) {
                         mem = ((unsigned char *)_mem) + block_index * size;
-                        if ((region_id = H5Ropen_object((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                        if ((region_id = H5Ropen_object((void *)mem, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                             H5TOOLS_INFO("H5Ropen_object H5T_STD_REF failed");
                         else {
-                            if ((region_space = H5Ropen_region((H5R_ref_t *)mem, H5P_DEFAULT, H5P_DEFAULT)) >=
-                                0) {
+                            if ((region_space = H5Ropen_region((void *)mem, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
                                 if (!h5tools_is_zero(mem, H5Tget_size(H5T_STD_REF))) {
                                     region_type = H5Sget_select_type(region_space);
                                     if (region_type == H5S_SEL_POINTS)
