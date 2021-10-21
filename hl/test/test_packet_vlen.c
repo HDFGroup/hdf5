@@ -539,8 +539,8 @@ test_VLof_VLtype(void)
                 HDfprintf(stderr, "Cannot allocate memory for VL data! uu=%u\n", uu);
                 goto error;
             }
-            t1->len = vv * 1;
-            for (ww = 0; ww < (vv * 1); ww++)
+            t1->len = vv + 1;
+            for (ww = 0; ww < (vv + 1); ww++)
                 ((unsigned int *)t1->p)[ww] = uu * 100 + vv * 10 + ww;
         } /* end for */
     }     /* end for */
