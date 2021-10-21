@@ -949,8 +949,8 @@ H5SL_create(H5SL_type_t type, H5SL_cmp_t cmp)
     new_slist->cmp = cmp;
 
     /* Set the dynamic internal fields */
-    new_slist->curr_level     = -1;
-    new_slist->nobjs          = 0;
+    new_slist->curr_level = -1;
+    new_slist->nobjs      = 0;
 
     /* Allocate the header node */
     if (NULL == (header = H5SL__new_node(NULL, NULL, (uint32_t)ULONG_MAX)))
