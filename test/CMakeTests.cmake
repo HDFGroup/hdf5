@@ -879,8 +879,6 @@ if (ENABLE_EXTENDED_TESTS)
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
 
-#  add_test (NAME H5Test-swmr_check_compat_vfd COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:swmr_check_compat_vfd>)
-
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")
   if (H5_PERL_FOUND)
