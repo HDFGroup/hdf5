@@ -30,6 +30,7 @@ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <stddef.h> /* ptrdiff_t */
 #include <stdlib.h> /* exit */
 
+
 /* These macros use decltype or the earlier __typeof GNU extension.
    As decltype is only available in newer compilers (VS2010 or gcc 4.3+
    when compiling c++ source) this code uses whatever method is needed
@@ -714,25 +715,25 @@ typedef unsigned char uint8_t;
         hashv += (unsigned)(keylen);                                                                         \
         switch (_hj_k) {                                                                                     \
             case 11:                                                                                         \
-                hashv += ((unsigned)_hj_key[10] << 24); /* FALLTHROUGH */                                    \
+                hashv += ((unsigned)_hj_key[10] << 24); H5_ATTR_FALLTHROUGH                                    \
             case 10:                                                                                         \
-                hashv += ((unsigned)_hj_key[9] << 16); /* FALLTHROUGH */                                     \
+                hashv += ((unsigned)_hj_key[9] << 16); H5_ATTR_FALLTHROUGH                                     \
             case 9:                                                                                          \
-                hashv += ((unsigned)_hj_key[8] << 8); /* FALLTHROUGH */                                      \
+                hashv += ((unsigned)_hj_key[8] << 8); H5_ATTR_FALLTHROUGH                                      \
             case 8:                                                                                          \
-                _hj_j += ((unsigned)_hj_key[7] << 24); /* FALLTHROUGH */                                     \
+                _hj_j += ((unsigned)_hj_key[7] << 24); H5_ATTR_FALLTHROUGH                                     \
             case 7:                                                                                          \
-                _hj_j += ((unsigned)_hj_key[6] << 16); /* FALLTHROUGH */                                     \
+                _hj_j += ((unsigned)_hj_key[6] << 16); H5_ATTR_FALLTHROUGH                                     \
             case 6:                                                                                          \
-                _hj_j += ((unsigned)_hj_key[5] << 8); /* FALLTHROUGH */                                      \
+                _hj_j += ((unsigned)_hj_key[5] << 8); H5_ATTR_FALLTHROUGH                                      \
             case 5:                                                                                          \
-                _hj_j += _hj_key[4]; /* FALLTHROUGH */                                                       \
+                _hj_j += _hj_key[4]; H5_ATTR_FALLTHROUGH                                                       \
             case 4:                                                                                          \
-                _hj_i += ((unsigned)_hj_key[3] << 24); /* FALLTHROUGH */                                     \
+                _hj_i += ((unsigned)_hj_key[3] << 24); H5_ATTR_FALLTHROUGH                                     \
             case 3:                                                                                          \
-                _hj_i += ((unsigned)_hj_key[2] << 16); /* FALLTHROUGH */                                     \
+                _hj_i += ((unsigned)_hj_key[2] << 16); H5_ATTR_FALLTHROUGH                                     \
             case 2:                                                                                          \
-                _hj_i += ((unsigned)_hj_key[1] << 8); /* FALLTHROUGH */                                      \
+                _hj_i += ((unsigned)_hj_key[1] << 8); H5_ATTR_FALLTHROUGH                                      \
             case 1:                                                                                          \
                 _hj_i += _hj_key[0];                                                                         \
         }                                                                                                    \
