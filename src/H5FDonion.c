@@ -687,8 +687,9 @@ done:
         /* TODO: Use the VFD's del callback instead of remove (this requires
          *       storing a copy of the fapl that was used to open it)
          */
-        if (HDremove(file->name_recov) < 0)
-            HDONE_ERROR(H5E_VFL, H5E_CANTDELETE, FAIL, "can't remove delete backing recovery file")
+        //if (HDremove(file->name_recov) < 0)
+        //    HDONE_ERROR(H5E_VFL, H5E_CANTDELETE, FAIL, "can't remove delete backing recovery file")
+        HDremove(file->name_recov);
     }
     if (file->rev_index)
         if (H5FD_onion_revision_index_destroy(file->rev_index) < 0)
@@ -1795,7 +1796,7 @@ H5FD__onion_ingest_whole_history(struct H5FD__onion_whole_history *whs_out, H5FD
 
     whs_out->record_pointer_list =
         H5MM_calloc(whs_out->n_revisions * sizeof(struct H5FD__onion_record_pointer));
-    if (NULL == whs_out->record_pointer_list) {
+    if (whs_out->n_revisions > 0 && NULL == whs_out->record_pointer_list) {
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate record pointer list");
     }
 
@@ -1867,6 +1868,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
     if (NULL == (name_recovery = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
     HDsnprintf(name_recovery, HDstrlen(name_onion) + 10, "%s.recovery", name_onion);
+	file->name_recov = name_recovery;
 
     if (NULL == (file->name_recov = H5MM_malloc(sizeof(char) * (HDstrlen(name_onion) + 10))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate recovery name string")
@@ -1975,17 +1977,17 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 /* Create backing files for onion history */
 
-                file->backing_onion = H5FD_open(name_onion, (H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC),
-                                                backing_fapl_id, maxaddr);
-                if (NULL == file->backing_onion) {
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "AAAAA cannot open the backing onion file")
+                if ((file->backing_onion = H5FD_open(name_onion, (H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC),
+                                                backing_fapl_id, maxaddr)) < 0) {
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing onion file")
                 }
 
-                file->backing_recov = H5FD_open(name_recovery, (H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC),
-                                                backing_fapl_id, maxaddr);
-                if (NULL == file->backing_recov) {
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "AAAAA cannot open the backing file")
-                }
+                /*if ((file->backing_recov = H5FD_open(name_recovery, (H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC),
+                                                backing_fapl_id, maxaddr)) < 0) {
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing recovery file")
+                } else {
+					printf("\n\n\n\n\nOPENED BACKING RECOVERY FILE: %s\n\n\n\n\n", name_recovery);
+				}*/
 
                 /// snipped from here
 
@@ -2010,10 +2012,11 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 saved_size         = size;
                 whs_p->n_revisions = 0;
-                // whs_p->n_revisions = 1;
-                // whs_p->record_pointer_list = (struct H5FD__onion_record_pointer *)HDmalloc(0);
-                // whs_p->record_pointer_list = (struct H5FD__onion_record_pointer
-                // *)HDcalloc(whs_p->n_revisions, sizeof(struct H5FD__onion_record_pointer));
+                //whs_p->n_revisions = 1;
+        		//whs_p->record_pointer_list = (struct H5FD__onion_record_pointer*)H5MM_calloc(whs_p->n_revisions * sizeof(struct H5FD__onion_record_pointer));
+                
+				// whs_p->record_pointer_list = (struct H5FD__onion_record_pointer *)HDmalloc(0);
+                //whs_p->record_pointer_list = (struct H5FD__onion_record_pointer*)HDcalloc(whs_p->n_revisions, sizeof(struct H5FD__onion_record_pointer));
                 size = H5FD_onion_whole_history_encode(whs_p, wh_buf, &whs_p->checksum);
                 // MOVED HERE
                 file->header.whole_history_size = size; /* record for later use */
@@ -2037,8 +2040,9 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 rec_p->archival_index.list = NULL;
 
-                if (NULL == (file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size)))
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize revision index")
+				// TODO: Remove these 2 lines or are they needed?
+                /*if (NULL == (file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size)))
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize revision index")*/
 
                 /// to here
                 ////
@@ -2060,9 +2064,10 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 // HDfree(buf);
                 // buf = NULL;
 
-                // TODO: move
-                // if (buf != NULL)
-                //    HDfree(buf);
+                if (head_buf != NULL)
+                	free(head_buf);
+				if (wh_buf != NULL)
+					free(wh_buf);
 
                 // if (FAIL == ret_value) {
                 //    HDremove(name_recovery); /* destroy new temp file, if 'twas created */
@@ -2457,8 +2462,14 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
 
         if (0 == i)
             page_gap_head = offset & (((uint32_t)1 << page_size_log2) - 1);
-        if (n_pages - 1 == i)
+			// If we have a page_gap_head and the number of bytes to write is evenly divisible by the page size we need to add an additional page
+			// to make up for the page_gap_head
+			if (page_gap_head > 0 && bytes_to_write % page_size == 0) {
+				n_pages++;
+			}
+        if (n_pages - 1 == i) {
             page_gap_tail = page_size - bytes_to_write - page_gap_head;
+		}
         page_n_used = page_size - page_gap_head - page_gap_tail;
 
         /* Modify page in revision index, if present */
@@ -2520,6 +2531,7 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
             } /* end if page exists in neither index */
 
             /* Copy input buffer to temporary page buffer */
+			assert((page_size - page_gap_head) >= page_n_used);
             HDmemcpy(page_buf + page_gap_head, buf, page_n_used);
             write_buf = page_buf;
 

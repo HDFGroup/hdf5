@@ -1388,6 +1388,8 @@ test_revision_record_encode_decode(void)
     uint64_t                           size_ret;
     struct H5FD__onion_revision_record r_out;
     uint32_t                           sum_out = 0;
+	char					   username[8] = "JohnDoe";
+	char					   comment[25] = "Example comment message.";
     struct H5FD__onion_revision_record record  = {
         H5FD__ONION_REVISION_RECORD_MAGIC,
         H5FD__ONION_REVISION_RECORD_VERSION_CURR,
@@ -1404,8 +1406,8 @@ test_revision_record_encode_decode(void)
             4,                      /* n_entries */
             NULL,                   /* list - populated below */
         },                          /* archival index struct */
-        "JohnDoe",                  /* username */
-        "Example comment message.", /* comment */
+        username,                  /* username */
+        comment,  /* comment */
         0,                          /* checksum - computed for us */
     };
     uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
@@ -3153,8 +3155,7 @@ test_integration_create(void)
     /*
      * Create dataspace with unlimited dimensions.
      */
-    if (H5Screate_simple(2, dims, maxdims) < 0)
-        TEST_ERROR
+    space = H5Screate_simple(2, dims, maxdims);
 
     /*
      * Create the dataset creation property list, and set the chunk
@@ -3240,9 +3241,6 @@ test_integration_create(void)
     HDputs(".");
     HDfflush(stdout);
 
-    if (H5Fclose(file_id) < 0)
-        TEST_ERROR;
-    file_id = H5I_INVALID_HID;
     HDputs(".");
     HDfflush(stdout);
 
@@ -3252,6 +3250,12 @@ test_integration_create(void)
      * CLEANUP
      */
 
+	if (H5Dclose(dset) < 0)
+		TEST_ERROR
+	dset = H5I_INVALID_HID;
+	if (H5Fclose(file_id) < 0)
+		TEST_ERROR
+	file_id = H5I_INVALID_HID;
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
@@ -3273,6 +3277,8 @@ error:
         onion_filepaths_destroy(paths);
     }
 
+	if (dset != H5I_INVALID_HID)
+		(void)H5Dclose(dset);
     if (file_id != H5I_INVALID_HID)
         (void)H5Fclose(file_id);
     if (fapl_id != H5I_INVALID_HID)
@@ -3318,7 +3324,7 @@ main(void)
     nerrors -= test_create_oniontarget(TRUE, TRUE);
     nerrors -= test_several_revisions_with_logical_gaps();
     nerrors -= test_page_aligned_history_create();
-    //    nerrors -= test_integration_create();
+    nerrors -= test_integration_create();
 
 #if H5FD_ONION_ENABLE_INDEX_STATS
     nerrors -= test_working_index_stats(); /* TODO */
