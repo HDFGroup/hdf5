@@ -93,6 +93,13 @@ JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5VLclose(JNIEnv *, jclass, jlong);
  */
 JNIEXPORT void JNICALL Java_hdf_hdf5lib_H5_H5VLunregister_1connector(JNIEnv *, jclass, jlong);
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5VLfapl_is_native
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL Java_hdf_hdf5lib_H5_H5VLfapl_1is_1native(JNIEnv *, jclass, jlong);
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

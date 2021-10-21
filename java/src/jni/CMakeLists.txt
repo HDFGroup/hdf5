@@ -73,17 +73,6 @@ set (HDF5_JAVA_JNI_CHDRS
     ${HDF5_JAVA_JNI_SOURCE_DIR}/nativeData.h
 )
 
-set (HDF5_JAVA_TEST_CSRCS
-    ${HDF5_JAVA_JNI_SOURCE_DIR}/exceptionImp.c
-    ${HDF5_JAVA_JNI_SOURCE_DIR}/h5jni_test.c
-)
-
-set (HDF5_JAVA_TEST_CHDRS
-    ${HDF5_JAVA_JNI_SOURCE_DIR}/exceptionImp.h
-    ${HDF5_JAVA_JNI_SOURCE_DIR}/h5jni.h
-    ${HDF5_JAVA_JNI_SOURCE_DIR}/h5jni_test.h
-)
-
 set (CMAKE_INCLUDE_CURRENT_DIR_IN_INTERFACE ON)
 
 ########### JNI libraries always must be built shared  ###############
@@ -97,17 +86,6 @@ target_link_libraries (${HDF5_JAVA_JNI_LIB_TARGET} PUBLIC ${HDF5_LIBSH_TARGET})
 set_target_properties (${HDF5_JAVA_JNI_LIB_TARGET} PROPERTIES FOLDER libraries/jni)
 SET_GLOBAL_VARIABLE (HDF5_LIBRARIES_TO_EXPORT "${HDF5_LIBRARIES_TO_EXPORT};${HDF5_JAVA_JNI_LIB_TARGET}")
 H5_SET_LIB_OPTIONS (${HDF5_JAVA_JNI_LIB_TARGET} ${HDF5_JAVA_JNI_LIB_NAME} SHARED "JAVA")
-
-# Build Testing library
-add_library (${HDF5_JAVA_JNI_TEST_LIB_TARGET} SHARED ${HDF5_JAVA_TEST_CSRCS} ${HDF5_JAVA_TEST_CHDRS})
-target_include_directories (${HDF5_JAVA_JNI_TEST_LIB_TARGET}
-    PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${HDF5_JAVA_JNI_SOURCE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
-)
-target_compile_options(${HDF5_JAVA_JNI_TEST_LIB_TARGET} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-TARGET_C_PROPERTIES (${HDF5_JAVA_JNI_TEST_LIB_TARGET} SHARED)
-target_link_libraries (${HDF5_JAVA_JNI_TEST_LIB_TARGET} PUBLIC ${HDF5_LIBSH_TARGET})
-set_target_properties (${HDF5_JAVA_JNI_TEST_LIB_TARGET} PROPERTIES FOLDER libraries/jni)
-H5_SET_LIB_OPTIONS (${HDF5_JAVA_JNI_TEST_LIB_TARGET} ${HDF5_JAVA_JNI_TEST_LIB_NAME} SHARED "JAVA")
 
 #-----------------------------------------------------------------------------
 # Add Target to clang-format

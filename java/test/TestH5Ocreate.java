@@ -27,8 +27,6 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5O_info_t;
 
-import test.H5TestUtils;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -278,7 +276,7 @@ public class TestH5Ocreate {
 
     @Test
     public void testH5Oget_info_externallink() {
-        if (H5TestUtils.H5VLfapl_is_native(HDF5Constants.H5P_DEFAULT)) {
+        if (H5.H5VLfapl_is_native(HDF5Constants.H5P_DEFAULT)) {
             H5O_info_t obj_info = null;
 
             _createExternalLink(H5fid, H5_EXTFILE, "DT1", H5fid, "L1", HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);

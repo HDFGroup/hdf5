@@ -600,7 +600,7 @@ $CP -f $SRC_TOOLS_TESTFILES/tvlstr.h5 $TESTDIR/tvlstr2.h5
 # Check to see if the VOL connector specified by the HDF5_VOL_CONNECTOR
 # environment variable supports virtual datasets (and external links)
 #
-# Note: Depends on vds_elink_compat_vol tool from $(topdir)/utils
+# Note: Depends on vds_elink_compat_vol tool from $(topdir)/utils/test
 $VDS_ELINK_COMPAT_VOL_BIN
 COMPAT_VOL=$?
 
@@ -975,7 +975,6 @@ TOOLTEST h5diff_402.txt --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlink
 TOOLTEST h5diff_403.txt --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_dset1_1 /softlink_dset2
 
 # extlink vs extlink (FILE)"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_404.txt --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -986,7 +985,6 @@ else
 fi
 
 # extlink vs dset"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_405.txt --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_trg.h5 /ext_link_dset1 /target_group2/x_dset"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -997,7 +995,6 @@ else
 fi
 
 # dset vs extlink"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_406.txt --follow-symlinks -v h5diff_extlink_trg.h5 h5diff_extlink_src.h5 /target_group2/x_dset /ext_link_dset1"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1008,7 +1005,6 @@ else
 fi
 
 # extlink vs extlink"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_407.txt --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_dset2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1019,7 +1015,6 @@ else
 fi
 
 # softlink vs extlink"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_408.txt --follow-symlinks -v h5diff_softlinks.h5 h5diff_extlink_src.h5 /softlink_dset1_1 /ext_link_dset2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1030,7 +1025,6 @@ else
 fi
 
 # extlink vs softlink "
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_409.txt --follow-symlinks -v h5diff_extlink_src.h5 h5diff_softlinks.h5 /ext_link_dset2 /softlink_dset1_1"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1068,7 +1062,6 @@ TOOLTEST h5diff_417.txt --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlink
 TOOLTEST h5diff_418.txt --follow-symlinks -v h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_dset2 /softlink_noexist
 
 # non-exist-extlink_file vs extlink"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_419.txt --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_noexist2 /ext_link_dset2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1079,7 +1072,6 @@ else
 fi
 
 # exlink vs non-exist-extlink_file"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_420.txt --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset2 /ext_link_noexist2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1090,7 +1082,6 @@ else
 fi
 
 # extlink vs non-exist-extlink_obj"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_421.txt --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset2 /ext_link_noexist1"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1101,7 +1092,6 @@ else
 fi
 
 # non-exist-extlink_obj vs extlink"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_422.txt --follow-symlinks -v h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_noexist1 /ext_link_dset2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1112,7 +1102,6 @@ else
 fi
 
 # extlink_to_softlink_to_dset1 vs dset2"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_423.txt --follow-symlinks -v h5diff_ext2softlink_src.h5 h5diff_ext2softlink_trg.h5 /ext_link_to_slink1 /dset2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1123,7 +1112,6 @@ else
 fi
 
 # dset2 vs extlink_to_softlink_to_dset1"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_424.txt --follow-symlinks -v h5diff_ext2softlink_trg.h5 h5diff_ext2softlink_src.h5 /dset2 /ext_link_to_slink1"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1134,7 +1122,6 @@ else
 fi
 
 # extlink_to_softlink_to_dset1 vs extlink_to_softlink_to_dset2"
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_425.txt --follow-symlinks -v h5diff_ext2softlink_src.h5 h5diff_ext2softlink_src.h5 /ext_link_to_slink1 /ext_link_to_slink2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1148,7 +1135,6 @@ fi
 # # Dangling links compare (--follow-symlinks and --no-dangling-links)
 # ##############################################################################
 # dangling links --follow-symlinks (FILE to FILE)
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_450.txt  --follow-symlinks -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1174,7 +1160,6 @@ TOOLTEST h5diff_454.txt  --follow-symlinks -v --no-dangling-links  h5diff_softli
 TOOLTEST h5diff_455.txt  --follow-symlinks -v --no-dangling-links  h5diff_softlinks.h5 h5diff_softlinks.h5 /softlink_noexist /softlink_noexist
 
 # dangling link found for ext links (FILE to FILE)
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_456.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1185,7 +1170,6 @@ else
 fi
 
 # dangling link found for ext links (obj to obj). target file exist
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_457.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_noexist1"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1196,7 +1180,6 @@ else
 fi
 
 # dangling link found for ext links (obj to obj). target file NOT exist
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_458.txt  --follow-symlinks -v --no-dangling-links  h5diff_extlink_src.h5 h5diff_extlink_src.h5 /ext_link_dset1 /ext_link_noexist2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1220,7 +1203,6 @@ TOOLTEST h5diff_467.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_dangl
 # ext dangling vs. ext dangling
 TOOLTEST h5diff_468.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link4
 # ext link vs. ext dangling
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_469.txt -v --follow-symlinks h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_link2"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1246,7 +1228,6 @@ TOOLTEST h5diff_475.txt -v h5diff_danglelinks1.h5 h5diff_danglelinks2.h5 /ext_li
 # ##############################################################################
 # root
 TOOLTEST h5diff_500.txt -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_501.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 / /"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1271,7 +1252,6 @@ TOOLTEST h5diff_506.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_r
 
 # groups vs ext-link
 TOOLTEST h5diff_507.txt -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1 /elink_grp1
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_508.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp1 /elink_grp1"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1283,7 +1263,6 @@ fi
 
 # soft-link vs ext-link
 TOOLTEST h5diff_509.txt -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp1 /elink_grp1
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_510.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp1 /elink_grp1"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1295,7 +1274,6 @@ fi
 
 # circled ext links
 TOOLTEST h5diff_511.txt -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp10 /grp11
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_512.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /grp10 /grp11"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1307,7 +1285,6 @@ fi
 
 # circled soft2ext-link vs soft2ext-link
 TOOLTEST h5diff_513.txt -v h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp10 /slink_grp11
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_514.txt -v --follow-symlinks h5diff_grp_recurse1.h5 h5diff_grp_recurse2.h5 /slink_grp10 /slink_grp11"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1324,7 +1301,6 @@ fi
 ###############################################################################
 # file vs file
 TOOLTEST h5diff_515.txt -v h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1.h5
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_516.txt -v --follow-symlinks h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1.h5"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1335,7 +1311,6 @@ else
 fi
 # group vs group
 TOOLTEST h5diff_517.txt -v h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1.h5 /g1
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_518.txt -v --follow-symlinks h5diff_grp_recurse_ext1.h5 h5diff_grp_recurse_ext2-1.h5 /g1"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1419,8 +1394,6 @@ TOOLTEST h5diff_801.txt -v h5diff_dset1.h5 h5diff_dset3.h5 /g1/array /g1/array
 # ##############################################################################
 # VDS tests
 # ##############################################################################
-
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_v1.txt -v 1_vds.h5 2_vds.h5"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS
@@ -1432,7 +1405,6 @@ fi
 
 TOOLTEST h5diff_v2.txt -r 1_vds.h5 2_vds.h5
 
-# Note: Requires VOL connector that supports external links
 ARGS="h5diff_v3.txt -c 1_vds.h5 2_vds.h5"
 if [ $COMPAT_VOL -eq $EXIT_SUCCESS ]; then
     TOOLTEST $ARGS

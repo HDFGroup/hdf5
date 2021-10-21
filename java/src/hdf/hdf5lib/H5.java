@@ -13492,7 +13492,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLregister_connector_by_name(String connector_name, long vipl_id);
+    public synchronized static native long H5VLregister_connector_by_name(String connector_name, long vipl_id) throws HDF5LibraryException;
     /**
      * H5VLregister_connector_by_value registers a new VOL connector as a member of the virtual object layer class.
      *
@@ -13507,7 +13507,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLregister_connector_by_value(int connector_value, long vipl_id);
+    public synchronized static native long H5VLregister_connector_by_value(int connector_value, long vipl_id) throws HDF5LibraryException;
     /**
      * H5VLis_connector_registered_by_name tests whether a VOL class has been registered.
      *
@@ -13519,7 +13519,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native boolean H5VLis_connector_registered_by_name(String name);
+    public synchronized static native boolean H5VLis_connector_registered_by_name(String name) throws HDF5LibraryException;
     /**
      * H5VLis_connector_registered_by_value tests whether a VOL class has been registered.
      *
@@ -13531,7 +13531,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native boolean H5VLis_connector_registered_by_value(int connector_value);
+    public synchronized static native boolean H5VLis_connector_registered_by_value(int connector_value) throws HDF5LibraryException;
     /**
      * H5VLget_connector_id retrieves the ID for a registered VOL connector for a given object.
      *
@@ -13543,7 +13543,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLget_connector_id(long object_id);
+    public synchronized static native long H5VLget_connector_id(long object_id) throws HDF5LibraryException;
     /**
      * H5VLget_connector_id_by_name retrieves the ID for a registered VOL connector.
      *
@@ -13555,7 +13555,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLget_connector_id_by_name(String name);
+    public synchronized static native long H5VLget_connector_id_by_name(String name) throws HDF5LibraryException;
     /**
      * H5VLget_connector_id_by_value retrieves the ID for a registered VOL connector.
      *
@@ -13567,7 +13567,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5VLget_connector_id_by_value(int connector_value);
+    public synchronized static native long H5VLget_connector_id_by_value(int connector_value) throws HDF5LibraryException;
     /**
      * H5VLget_connector_name returns the connector name for the VOL associated with the
      *              object or file ID.
@@ -13580,7 +13580,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native String H5VLget_connector_name(long object_id);
+    public synchronized static native String H5VLget_connector_name(long object_id) throws HDF5LibraryException;
     /**
      * H5VLclose closes a VOL connector ID.
      *
@@ -13590,7 +13590,7 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native void H5VLclose(long connector_id);
+    public synchronized static native void H5VLclose(long connector_id) throws HDF5LibraryException;
     /**
      * H5VLunregister_connector removes a VOL connector ID from the library.
      *
@@ -13600,7 +13600,17 @@ public class H5 implements java.io.Serializable {
      * @exception HDF5LibraryException
      *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native void H5VLunregister_connector(long connector_id);
+    public synchronized static native void H5VLunregister_connector(long connector_id) throws HDF5LibraryException;
+
+    /**
+     * H5VLfapl_is_native queries if a FAPL will use the native VOL connector.
+     *
+     * @param fapl_id
+     *            The ID of the FAPL to query.
+     * @return true if fapl_id uses the native VOL connector.
+     *
+     **/
+    public synchronized static native boolean H5VLfapl_is_native(long fapl_id) throws HDF5LibraryException;
 
     // /////// unimplemented ////////
     // hid_t H5VLregister_connector(const H5VL_class_t *cls, hid_t vipl_id);

@@ -29,8 +29,6 @@ import hdf.hdf5lib.structs.H5O_token_t;
 import hdf.hdf5lib.structs.H5O_hdr_info_t;
 import hdf.hdf5lib.structs.H5_ih_info_t;
 
-import test.H5TestUtils;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
