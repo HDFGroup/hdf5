@@ -101,7 +101,13 @@ New Features
       that default ON/enabled.
 
       Add configure options (autotools - CMake):
-            enable-hltools       HDF5_BUILD_HL_TOOLS
+            --enable-hltools       HDF5_BUILD_HL_TOOLS
+
+      Disabling this option prevents building the gif tool which
+      contains the following CVEs:
+          HDFFV-10592 CVE-2018-17433
+          HDFFV-10593 CVE-2018-17436
+          HDFFV-11048 CVE-2020-10809
 
       (ADB - 2021/09/16, HDFFV-11266)
 
@@ -347,6 +353,14 @@ Bug Fixes since HDF5-1.12.1 release
 
         (DER - 2021/08/12, HDFFV-11053)
 
+    - Fixed a segmentation fault
+
+      A segmentation fault occurred with a Mathworks corrupted file.
+
+      A detection of accessing a null pointer was added to prevent the problem.
+
+      (BMR - 2021/02/19, HDFFV-11150)
+
     - H5Pset_fapl_log() no longer crashes when passed an invalid fapl ID
 
         When passed an invalid fapl ID, H5Pset_fapl_log() would usually
@@ -360,212 +374,212 @@ Bug Fixes since HDF5-1.12.1 release
 
         (DER - 2021/04/28, HDFFV-11240)
 
-    - Fixes a segfault when H5Pset_mdc_log_options() is called multiple times
+- Fixes a segfault when H5Pset_mdc_log_options() is called multiple times
 
-        The call incorrectly attempts to free an internal copy of the previous
-        log location string, which causes a segfault. This only happens
-        when the call is invoked multiple times on the same property list.
-        On the first call to a given fapl, the log location is set to NULL so
-        the segfault does not occur.
+    The call incorrectly attempts to free an internal copy of the previous
+    log location string, which causes a segfault. This only happens
+    when the call is invoked multiple times on the same property list.
+    On the first call to a given fapl, the log location is set to NULL so
+    the segfault does not occur.
 
-        The string is now handled properly and the segfault no longer occurs.
+    The string is now handled properly and the segfault no longer occurs.
 
-        (DER - 2021/04/27, HDFFV-11239)
+    (DER - 2021/04/27, HDFFV-11239)
 
-    - Fixed CVE-2018-17432
+- Fixed CVE-2018-17432
 
-        The tool h5repack produced a segfault on a corrupted file which had
-        invalid rank for scalar or NULL datatype.
+    The tool h5repack produced a segfault on a corrupted file which had
+    invalid rank for scalar or NULL datatype.
 
-        The problem was fixed in HDF5 1.12.1 by modifying the dataspace encode 
-        and decode functions to detect and report invalid rank. h5repack now 
-        fails with an error message for the corrupted file.
+    The problem was fixed in HDF5 1.12.1 by modifying the dataspace encode 
+    and decode functions to detect and report invalid rank. h5repack now 
+    fails with an error message for the corrupted file.
 
-        (BMR - 2020/10/26, HDFFV-10590)
-
-
-    Java Library
-    ------------
-    -
+    (BMR - 2020/10/26, HDFFV-10590)
 
 
-    Configuration
-    -------------
-    - Reworked corrected path searched by CMake find_package command
-
-      The install path for cmake find_package files had been changed to use
-        "share/cmake"
-      for all platforms. However setting the HDF5_ROOT variable failed to locate
-      the configuration files. The build variable HDF5_INSTALL_CMAKE_DIR is now
-      set to the <INSTALL_DIR>/cmake folder. The location of the configuration 
-      files can still be specified by the "HDF5_DIR" variable.
-
-      (ADB - 2022/03/11)
-
-    - Corrected path searched by CMake find_package command
-
-      The install path for cmake find_package files had been changed to use
-        "share/cmake"
-      for all platforms. However the trailing "hdf5" directory was not removed.
-      This "hdf5" additional directory has been removed.
-
-      (ADB - 2021/09/27)
-
-    - Corrected pkg-config compile script
-
-      It was discovered that the position of the "$@" argument for the command
-      in the compile script may fail on some platforms and configurations. The
-      position of the "$@"command argument was moved before the pkg-config sub command.
-
-      (ADB - 2021/08/30)
-
-    - Fixed CMake C++ compiler flags
-
-      A recent refactoring of the C++ configure files accidentally removed the
-      file that executed the enable_language command for C++ needed by the
-      HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
-      including adding support for windows platforms.
-
-      (ADB - 2021/08/10)
-
-    - Better support for libaec (open-source Szip library) in CMake
-
-      Implemented better support for libaec 1.0.5 (or later) library. This version
-      of libaec contains improvements for better integration with HDF5. Furthermore,
-      the variable USE_LIBAEC_STATIC has been introduced to allow to make use of
-      static version of libaec library. Use libaec_DIR or libaec_ROOT to set
-      the location in which libaec can be found.
-
-      Be aware, the Szip library of libaec 1.0.4 depends on another library within
-      libaec library. This dependency is not specified in the current CMake
-      configuration which means that one can not use the static Szip library of
-      libaec 1.0.4 when building HDF5. This has been resolved in libaec 1.0.5.
-
-      (JWSB - 2021/06/22)
+Java Library
+------------
+-
 
 
-    Fortran API
-    -----------
-    -
+Configuration
+-------------
+- Reworked corrected path searched by CMake find_package command
+
+  The install path for cmake find_package files had been changed to use
+    "share/cmake"
+  for all platforms. However setting the HDF5_ROOT variable failed to locate
+  the configuration files. The build variable HDF5_INSTALL_CMAKE_DIR is now
+  set to the <INSTALL_DIR>/cmake folder. The location of the configuration 
+  files can still be specified by the "HDF5_DIR" variable.
+
+  (ADB - 2022/03/11)
+
+- Corrected path searched by CMake find_package command
+
+  The install path for cmake find_package files had been changed to use
+    "share/cmake"
+  for all platforms. However the trailing "hdf5" directory was not removed.
+  This "hdf5" additional directory has been removed.
+
+  (ADB - 2021/09/27)
+
+- Corrected pkg-config compile script
+
+  It was discovered that the position of the "$@" argument for the command
+  in the compile script may fail on some platforms and configurations. The
+  position of the "$@"command argument was moved before the pkg-config sub command.
+
+  (ADB - 2021/08/30)
+
+- Fixed CMake C++ compiler flags
+
+  A recent refactoring of the C++ configure files accidentally removed the
+  file that executed the enable_language command for C++ needed by the
+  HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
+  including adding support for windows platforms.
+
+  (ADB - 2021/08/10)
+
+- Better support for libaec (open-source Szip library) in CMake
+
+  Implemented better support for libaec 1.0.5 (or later) library. This version
+  of libaec contains improvements for better integration with HDF5. Furthermore,
+  the variable USE_LIBAEC_STATIC has been introduced to allow to make use of
+  static version of libaec library. Use libaec_DIR or libaec_ROOT to set
+  the location in which libaec can be found.
+
+  Be aware, the Szip library of libaec 1.0.4 depends on another library within
+  libaec library. This dependency is not specified in the current CMake
+  configuration which means that one can not use the static Szip library of
+  libaec 1.0.4 when building HDF5. This has been resolved in libaec 1.0.5.
+
+  (JWSB - 2021/06/22)
 
 
-    High-Level Library
-    ------------------
-    - Fixed HL_test_packet, test for packet table vlen of vlen.
-
-      Incorrect length assignment.
-
-      (ADB - 2021/10/14)
+Fortran API
+-----------
+-
 
 
-    Fortran High-Level APIs
-    -----------------------
-    -
+High-Level Library
+------------------
+- Fixed HL_test_packet, test for packet table vlen of vlen.
+
+  Incorrect length assignment.
+
+  (ADB - 2021/10/14)
 
 
-    Documentation
-    -------------
-    -
+Fortran High-Level APIs
+-----------------------
+-
 
 
-    F90 APIs
-    --------
-    -
+Documentation
+-------------
+-
 
 
-    C++ APIs
-    --------
-    - 
+F90 APIs
+--------
+-
 
 
-    Testing
-    -------
-    -
+C++ APIs
+--------
+- 
+
+
+Testing
+-------
+-
 
 
 Supported Platforms
 ===================
 
-    Linux 2.6.32-696.16.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    #1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-    (ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
-                                  IBM XL C/C++ V13.1
-                                  IBM XL Fortran V15.1
+Linux 2.6.32-696.16.1.el6.ppc64 gcc (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+#1 SMP ppc64 GNU/Linux        g++ (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+(ostrich)                     GNU Fortran (GCC) 4.4.7 20120313 (Red Hat 4.4.7-18)
+                              IBM XL C/C++ V13.1
+                              IBM XL Fortran V15.1
 
-    Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
-    #1 SMP x86_64 GNU/Linux       compilers:
-    (kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-                                    Version 4.9.3, 5.2.0, 7.1.0
-                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
-                                  compilers:
-                                     Version 17.0.0.098 Build 20160721
-                                  MPICH 3.1.4
+Linux 3.10.0-327.10.1.el7   GNU C (gcc), Fortran (gfortran), C++ (g++)
+#1 SMP x86_64 GNU/Linux       compilers:
+(kituo/moohan)                Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+                                Version 4.9.3, 5.2.0, 7.1.0
+                              Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                              compilers:
+                                 Version 17.0.0.098 Build 20160721
+                              MPICH 3.1.4
 
-    Linux-3.10.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
-    862.14.4.1chaos.ch6.ppc64le   clang/3.9,8.0
-    #1 SMP ppc64le GNU/Linux      gcc/7.3
-    (ray)                         xl/2016,2019
+Linux-3.10.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
+862.14.4.1chaos.ch6.ppc64le   clang/3.9,8.0
+#1 SMP ppc64le GNU/Linux      gcc/7.3
+(ray)                         xl/2016,2019
 
-    Linux 3.10.0-                 openmpi/3.1,4.0 with cmake>3.10 and
-    957.12.2.1chaos.ch6.x86_64    clang 5.0
-    #1 SMP x86_64 GNU/Linux       gcc/7.3,8.2
-    (serrano)                     intel/17.0,18.0/19.0
+Linux 3.10.0-                 openmpi/3.1,4.0 with cmake>3.10 and
+957.12.2.1chaos.ch6.x86_64    clang 5.0
+#1 SMP x86_64 GNU/Linux       gcc/7.3,8.2
+(serrano)                     intel/17.0,18.0/19.0
 
-    Linux 3.10.0-                 openmpi/3.1/4.0 with cmake>3.10 and
-    1062.1.1.1chaos.ch6.x86_64    clang/3.9,5.0,8.0
-    #1 SMP x86_64 GNU/Linux       gcc/7.3,8.1,8.2
-    (chama,quartz)                intel/16.0,18.0,19.0
+Linux 3.10.0-                 openmpi/3.1/4.0 with cmake>3.10 and
+1062.1.1.1chaos.ch6.x86_64    clang/3.9,5.0,8.0
+#1 SMP x86_64 GNU/Linux       gcc/7.3,8.1,8.2
+(chama,quartz)                intel/16.0,18.0,19.0
 
-    Linux 4.4.180-94.100-default  cray-mpich/7.7.6 with PrgEnv-*/6.0.5, cmake>3.10 and
-    #1 SMP x86_64 GNU/Linux       gcc/7.2.0,8.2.0
-    (mutrino)                     intel/17.0,18.0
+Linux 4.4.180-94.100-default  cray-mpich/7.7.6 with PrgEnv-*/6.0.5, cmake>3.10 and
+#1 SMP x86_64 GNU/Linux       gcc/7.2.0,8.2.0
+(mutrino)                     intel/17.0,18.0
 
-    Linux 4.14.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
-    49.18.1.bl6.ppc64le           clang/6.0,8.0
-    #1 SMP ppc64le GNU/Linux      gcc/7.3
-    (lassen)                      xl/2019
+Linux 4.14.0-                 spectrum-mpi/rolling-release with cmake>3.10 and
+49.18.1.bl6.ppc64le           clang/6.0,8.0
+#1 SMP ppc64le GNU/Linux      gcc/7.3
+(lassen)                      xl/2019
 
-    SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
-    (emu)                         Sun Fortran 95 8.6 SunOS_sparc
-                                  Sun C++ 5.12 SunOS_sparc
+SunOS 5.11 32- and 64-bit     Sun C 5.12 SunOS_sparc
+(emu)                         Sun Fortran 95 8.6 SunOS_sparc
+                              Sun C++ 5.12 SunOS_sparc
 
-    Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
-                                  Visual Studio 2017 w/ Intel Fortran 19 (cmake)
-                                  Visual Studio 2019 w/ Intel Fortran 19 (cmake)
-                                  Visual Studio 2019 w/ MSMPI 10.1 (cmake)
+Windows 10 x64                Visual Studio 2015 w/ Intel Fortran 18 (cmake)
+                              Visual Studio 2017 w/ Intel Fortran 19 (cmake)
+                              Visual Studio 2019 w/ Intel Fortran 19 (cmake)
+                              Visual Studio 2019 w/ MSMPI 10.1 (cmake)
 
-    Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
-    64-bit                        gfortran GNU Fortran (GCC) 4.9.2
-    (osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
+Mac OS X Yosemite 10.10.5     Apple clang/clang++ version 6.1 from Xcode 7.0
+64-bit                        gfortran GNU Fortran (GCC) 4.9.2
+(osx1010dev/osx1010test)      Intel icc/icpc/ifort version 15.0.3
 
-    Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
-    64-bit                        gfortran GNU Fortran (GCC) 5.2.0
-    (osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
+Mac OS X El Capitan 10.11.6   Apple clang/clang++ version 7.3.0 from Xcode 7.3
+64-bit                        gfortran GNU Fortran (GCC) 5.2.0
+(osx1011dev/osx1011test)      Intel icc/icpc/ifort version 16.0.2
 
-    Mac OS High Sierra 10.13.6    Apple LLVM version 10.0.0 (clang/clang++-1000.10.44.4)
-    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
-    (bear)                        Intel icc/icpc/ifort version 19.0.4
+Mac OS High Sierra 10.13.6    Apple LLVM version 10.0.0 (clang/clang++-1000.10.44.4)
+64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+(bear)                        Intel icc/icpc/ifort version 19.0.4
 
-    Mac OS Mojave 10.14.6         Apple LLVM version 10.0.1 (clang/clang++-1001.0.46.4)
-    64-bit                        gfortran GNU Fortran (GCC) 6.3.0
-    (bobcat)                      Intel icc/icpc/ifort version 19.0.4
+Mac OS Mojave 10.14.6         Apple LLVM version 10.0.1 (clang/clang++-1001.0.46.4)
+64-bit                        gfortran GNU Fortran (GCC) 6.3.0
+(bobcat)                      Intel icc/icpc/ifort version 19.0.4
 
 
 Tested Configuration Features Summary
 =====================================
 
-    In the tables below
-          y   = tested
-          n   = not tested in this release
-          C   = Cluster
-          W   = Workstation
-          x   = not working in this release
-          dna = does not apply
-          ( ) = footnote appears below second table
-          <blank> = testing incomplete on this feature or platform
+In the tables below
+      y   = tested
+      n   = not tested in this release
+      C   = Cluster
+      W   = Workstation
+      x   = not working in this release
+      dna = does not apply
+      ( ) = footnote appears below second table
+      <blank> = testing incomplete on this feature or platform
 
 Platform                              C         F90/   F90      C++  zlib  SZIP
-                                      parallel  F2003  parallel
+                                  parallel  F2003  parallel
 Solaris2.11 32-bit                      n        y/y    n        y    y     y
 Solaris2.11 64-bit                      n        y/n    n        y    y     y
 Windows 10                              y        y/y    n        y    y     y
@@ -583,7 +597,7 @@ Linux 2.6.32-573.18.1.el6.ppc64         n        y/n    n        y    y     y
 
 
 Platform                                 Shared  Shared    Shared    Thread-
-                                         C libs  F90 libs  C++ libs  safe
+                                     C libs  F90 libs  C++ libs  safe
 Solaris2.11 32-bit                         y       y         y         y
 Solaris2.11 64-bit                         y       y         y         y
 Windows 10                                 y       y         y         y
@@ -607,90 +621,90 @@ More Tested Platforms
 =====================
 The following platforms are not supported but have been tested for this release.
 
-    Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
-    #1 SMP x86_64 GNU/Linux       compilers:
-    (mayll/platypus)                 Version 4.4.7 20120313
-                                     Version 4.9.3, 5.3.0, 6.2.0
-                                  PGI C, Fortran, C++ for 64-bit target on
-                                  x86-64;
-                                      Version 17.10-0
-                                  Intel(R) C (icc), C++ (icpc), Fortran (icc)
-                                  compilers:
-                                     Version 17.0.4.196 Build 20170411
-                                  MPICH 3.1.4 compiled with GCC 4.9.3
+Linux 2.6.32-573.22.1.el6    GNU C (gcc), Fortran (gfortran), C++ (g++)
+#1 SMP x86_64 GNU/Linux       compilers:
+(mayll/platypus)                 Version 4.4.7 20120313
+                                 Version 4.9.3, 5.3.0, 6.2.0
+                              PGI C, Fortran, C++ for 64-bit target on
+                              x86-64;
+                                  Version 17.10-0
+                              Intel(R) C (icc), C++ (icpc), Fortran (icc)
+                              compilers:
+                                 Version 17.0.4.196 Build 20170411
+                              MPICH 3.1.4 compiled with GCC 4.9.3
 
-    Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
-    #1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
-    (jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
-                                  GCC Version 7.1.0
-                                  OpenMPI 3.0.0-GCC-7.2.0-2.29
-                                  Intel(R) C (icc) and C++ (icpc) compilers
-                                     Version 17.0.0.098 Build 20160721
-                                  with NAG Fortran Compiler Release 6.1(Tozai)
-                                  PGI C (pgcc), C++ (pgc++), Fortran (pgf90)
-                                  compilers:
-                                     Version 18.4, 19.4
-                                  MPICH 3.3
-                                  OpenMPI 2.1.5, 3.1.3, 4.0.0
+Linux 3.10.0-327.18.2.el7     GNU C (gcc) and C++ (g++) compilers
+#1 SMP x86_64 GNU/Linux          Version 4.8.5 20150623 (Red Hat 4.8.5-4)
+(jelly)                       with NAG Fortran Compiler Release 6.1(Tozai)
+                              GCC Version 7.1.0
+                              OpenMPI 3.0.0-GCC-7.2.0-2.29
+                              Intel(R) C (icc) and C++ (icpc) compilers
+                                 Version 17.0.0.098 Build 20160721
+                              with NAG Fortran Compiler Release 6.1(Tozai)
+                              PGI C (pgcc), C++ (pgc++), Fortran (pgf90)
+                              compilers:
+                                 Version 18.4, 19.4
+                              MPICH 3.3
+                              OpenMPI 2.1.5, 3.1.3, 4.0.0
 
 
-    Fedora33 5.11.18-200.fc33.x86_64
-    #1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.3.1 20210422 (Red Hat 10.3.1-1)
-                                     GNU Fortran (GCC) 10.3.1 20210422 (Red Hat 10.3.1-1)
-                                     clang version 11.0.0 (Fedora 11.0.0-2.fc33)
-                                     (cmake and autotools)
+Fedora33 5.11.18-200.fc33.x86_64
+#1 SMP x86_64  GNU/Linux         GNU gcc (GCC) 10.3.1 20210422 (Red Hat 10.3.1-1)
+                                 GNU Fortran (GCC) 10.3.1 20210422 (Red Hat 10.3.1-1)
+                                 clang version 11.0.0 (Fedora 11.0.0-2.fc33)
+                                 (cmake and autotools)
 
-    Ubuntu20.04 5.8.0-53-generic-x86_64
-    #60~20.04-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 9.3.0-17ubuntu1
-                                     GNU Fortran (GCC) 9.3.0-17ubuntu1
-                                     clang version 10.0.0-4ubuntu1
-                                     (cmake and autotools)
+Ubuntu20.04 5.8.0-53-generic-x86_64
+#60~20.04-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 9.3.0-17ubuntu1
+                                 GNU Fortran (GCC) 9.3.0-17ubuntu1
+                                 clang version 10.0.0-4ubuntu1
+                                 (cmake and autotools)
 
-    Ubuntu20.10 5.8.0-53-generic-x86_64
-    #60-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
-                                     GNU Fortran (GCC) 10.2.0-13ubuntu1
-                                     Ubuntu clang version 11.0.0-2
-                                     (cmake and autotools)
+Ubuntu20.10 5.8.0-53-generic-x86_64
+#60-Ubuntu SMP x86_64  GNU/Linux GNU gcc (GCC) 10.2.0-13ubuntu1
+                                 GNU Fortran (GCC) 10.2.0-13ubuntu1
+                                 Ubuntu clang version 11.0.0-2
+                                 (cmake and autotools)
 
-    SUSE15sp2 5.3.18-22-default
-    #1 SMP x86_64  GNU/Linux         GNU gcc (SUSE Linux) 7.5.0
-                                     GNU Fortran (SUSE Linux) 7.5.0
-                                     clang version 7.0.1 (tags/RELEASE_701/final 349238)
-                                     (cmake and autotools)
+SUSE15sp2 5.3.18-22-default
+#1 SMP x86_64  GNU/Linux         GNU gcc (SUSE Linux) 7.5.0
+                                 GNU Fortran (SUSE Linux) 7.5.0
+                                 clang version 7.0.1 (tags/RELEASE_701/final 349238)
+                                 (cmake and autotools)
 
 
 Known Problems
 ==============
 
-    testflushrefresh.sh will fail when run with "make check-passthrough-vol"
-    on centos7, with 3 Errors/Segmentation faults.  These will not occur when
-    run with "make check".  See https://github.com/HDFGroup/hdf5/issues/673
-    for details.
+testflushrefresh.sh will fail when run with "make check-passthrough-vol"
+on centos7, with 3 Errors/Segmentation faults.  These will not occur when
+run with "make check".  See https://github.com/HDFGroup/hdf5/issues/673
+for details.
 
-    The t_bigio test fails on several HPC platforms, generally by timeout with
-    OpenMPI 4.0.0 or with this error from spectrum-mpi:
-        *** on communicator MPI_COMM_WORLD
-        *** MPI_ERR_COUNT: invalid count argument
+The t_bigio test fails on several HPC platforms, generally by timeout with
+OpenMPI 4.0.0 or with this error from spectrum-mpi:
+    *** on communicator MPI_COMM_WORLD
+    *** MPI_ERR_COUNT: invalid count argument
 
-    CMake files do not behave correctly with paths containing spaces.
-    Do not use spaces in paths because the required escaping for handling spaces
-    results in very complex and fragile build files.
-    ADB - 2019/05/07
+CMake files do not behave correctly with paths containing spaces.
+Do not use spaces in paths because the required escaping for handling spaces
+results in very complex and fragile build files.
+ADB - 2019/05/07
 
-    At present, metadata cache images may not be generated by parallel
-    applications.  Parallel applications can read files with metadata cache
-    images, but since this is a collective operation, a deadlock is possible
-    if one or more processes do not participate.
+At present, metadata cache images may not be generated by parallel
+applications.  Parallel applications can read files with metadata cache
+images, but since this is a collective operation, a deadlock is possible
+if one or more processes do not participate.
 
-    CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
-    issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
+CPP ptable test fails on both VS2017 and VS2019 with Intel compiler, JIRA
+issue: HDFFV-10628.  This test will pass with VS2015 with Intel compiler.
 
-    The subsetting option in ph5diff currently will fail and should be avoided.
-    The subsetting option works correctly in serial h5diff.
+The subsetting option in ph5diff currently will fail and should be avoided.
+The subsetting option works correctly in serial h5diff.
 
-    Known problems in previous releases can be found in the HISTORY*.txt files
-    in the HDF5 source. Please report any new problems found to
-    help@hdfgroup.org.
+Known problems in previous releases can be found in the HISTORY*.txt files
+in the HDF5 source. Please report any new problems found to
+help@hdfgroup.org.
 
 
 CMake vs. Autotools installations
@@ -705,10 +719,10 @@ The bin folder contains the tools and the build scripts. Additionally, CMake
 creates dynamic versions of the tools with the suffix "-shared". Autotools
 installs one set of tools depending on the "--enable-shared" configuration
 option.
-  build scripts
-  -------------
-  Autotools: h5c++, h5cc, h5fc
-  CMake: h5c++, h5cc, h5hlc++, h5hlcc
+build scripts
+-------------
+Autotools: h5c++, h5cc, h5fc
+CMake: h5c++, h5cc, h5hlc++, h5hlcc
 
 The include folder holds the header files and the fortran mod files. CMake
 places the fortran mod files into separate shared and static subfolders,
@@ -727,3 +741,11 @@ The share folder will have the most differences because CMake builds include
 a number of CMake specific files for support of CMake's find_package and support
 for the HDF5 Examples CMake project.
 
+The issues with the gif tool are:
+HDFFV-10592 CVE-2018-17433
+HDFFV-10593 CVE-2018-17436
+HDFFV-11048 CVE-2020-10809
+These CVE issues have not yet been addressed and can be avoided by not building
+the gif tool. Disable building the High-Level tools with these options:
+autotools:   --disable-hltools
+cmake:       HDF5_BUILD_HL_TOOLS=OFF
