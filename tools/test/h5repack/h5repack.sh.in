@@ -879,13 +879,24 @@ TOOLTEST_FAIL()
     (
         cd $TESTDIR
         $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
-    ) >$actual
+    ) >&$actual
     RET=$?
-    if [ $RET == 0 ] ; then
+
+    # Normally h5repack of files tested with this function are expected
+    # to return not 0, but if the command results in "Segmentation fault"
+    # or "core dumped" it is a failure regardless of the return value.
+    failure=`grep -e 'Segmentation fault' -e 'core dumped' $actual`
+    if [ "$failure" != "" ]; then
         nerrors="`expr $nerrors + 1`"
         echo " FAILED"
+        echo "    $failure"
     else
-        echo " PASSED"
+        if [ $RET == 0 ] ; then
+            nerrors="`expr $nerrors + 1`"
+            echo " FAILED"
+        else
+            echo " PASSED"
+        fi
     fi
     rm -f $outfile
 }
