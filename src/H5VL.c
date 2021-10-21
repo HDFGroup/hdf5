@@ -1091,7 +1091,7 @@ done:
 herr_t
 H5VLfapl_is_native(hid_t fapl_id, hbool_t *is_native)
 {
-    herr_t                ret_value = SUCCEED;
+    herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_API(FAIL)
     H5TRACE2("e", "i*b", fapl_id, is_native);
@@ -1111,5 +1111,3 @@ H5VLfapl_is_native(hid_t fapl_id, hbool_t *is_native)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5VLfapl_is_native() */
-
-
