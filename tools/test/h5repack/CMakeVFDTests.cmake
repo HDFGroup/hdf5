@@ -16,19 +16,7 @@
 ##############################################################################
 ##############################################################################
 
-set (VFD_LIST
-    sec2
-    stdio
-    core
-    core_paged
-    split
-    multi
-    family
-)
-
-if (H5_HAVE_DIRECT)
-  set (VFD_LIST ${VFD_LIST} direct)
-endif ()
+H5_SET_VFD_LIST()
 
 ##############################################################################
 ##############################################################################
@@ -38,7 +26,6 @@ endif ()
 
 macro (ADD_VFD_TEST vfdname resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}")
     add_test (
         NAME H5REPACK-${vfdname}-h5repacktest-clear-objects
         COMMAND ${CMAKE_COMMAND} -E remove
