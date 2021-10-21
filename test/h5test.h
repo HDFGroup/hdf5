@@ -210,7 +210,7 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
                                                                                                              \
         ARR = (TYPE **)HDmalloc(h5taa_pointers_size + h5taa_data_size);                                      \
                                                                                                              \
-        ARR[0] = (TYPE *)(ARR + (DIMS_I));                                                                   \
+        ARR[0] = (void *)(ARR + (DIMS_I));                                                                   \
                                                                                                              \
         for (h5taa_i = 1; h5taa_i < (DIMS_I); h5taa_i++)                                                     \
             ARR[h5taa_i] = ARR[h5taa_i - 1] + (DIMS_J);                                                      \
