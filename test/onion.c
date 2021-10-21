@@ -1387,10 +1387,10 @@ test_revision_record_encode_decode(void)
     size_t                             i     = 0;
     uint64_t                           size_ret;
     struct H5FD__onion_revision_record r_out;
-    uint32_t                           sum_out = 0;
-	char					   username[8] = "JohnDoe";
-	char					   comment[25] = "Example comment message.";
-    struct H5FD__onion_revision_record record  = {
+    uint32_t                           sum_out     = 0;
+    char                               username[8] = "JohnDoe";
+    char                               comment[25] = "Example comment message.";
+    struct H5FD__onion_revision_record record      = {
         H5FD__ONION_REVISION_RECORD_MAGIC,
         H5FD__ONION_REVISION_RECORD_VERSION_CURR,
         5,             /* revision ID */
@@ -1402,13 +1402,13 @@ test_revision_record_encode_decode(void)
         25,            /* comment size */
         {
             H5FD__ONION_ARCHIVAL_INDEX_MAGIC, H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
-            12,                     /* page_size_log2 */
-            4,                      /* n_entries */
-            NULL,                   /* list - populated below */
-        },                          /* archival index struct */
-        username,                  /* username */
+            12,   /* page_size_log2 */
+            4,    /* n_entries */
+            NULL, /* list - populated below */
+        },        /* archival index struct */
+        username, /* username */
         comment,  /* comment */
-        0,                          /* checksum - computed for us */
+        0,        /* checksum - computed for us */
     };
     uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
                         (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
@@ -3250,12 +3250,12 @@ test_integration_create(void)
      * CLEANUP
      */
 
-	if (H5Dclose(dset) < 0)
-		TEST_ERROR
-	dset = H5I_INVALID_HID;
-	if (H5Fclose(file_id) < 0)
-		TEST_ERROR
-	file_id = H5I_INVALID_HID;
+    if (H5Dclose(dset) < 0)
+        TEST_ERROR
+    dset = H5I_INVALID_HID;
+    if (H5Fclose(file_id) < 0)
+        TEST_ERROR
+    file_id = H5I_INVALID_HID;
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
@@ -3277,8 +3277,8 @@ error:
         onion_filepaths_destroy(paths);
     }
 
-	if (dset != H5I_INVALID_HID)
-		(void)H5Dclose(dset);
+    if (dset != H5I_INVALID_HID)
+        (void)H5Dclose(dset);
     if (file_id != H5I_INVALID_HID)
         (void)H5Fclose(file_id);
     if (fapl_id != H5I_INVALID_HID)
