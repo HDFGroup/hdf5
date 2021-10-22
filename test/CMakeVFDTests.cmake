@@ -17,21 +17,9 @@
 ##############################################################################
 # included from CMakeTests.cmake
 
-set (VFD_LIST
-    sec2
-    stdio
-    core
-    core_paged
-    split
-    multi
-    family
-)
-if (H5_HAVE_DIRECT)
-  set (VFD_LIST ${VFD_LIST} direct)
-endif ()
+H5_SET_VFD_LIST()
 
 foreach (vfdtest ${VFD_LIST})
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles")
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/plist_files")
 endforeach ()

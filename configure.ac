@@ -4143,6 +4143,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  testpar/testpflush.sh
                  utils/Makefile
                  utils/mirror_vfd/Makefile
+                 utils/test/Makefile
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile
