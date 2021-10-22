@@ -17,8 +17,7 @@
 ##############################################################################
 # included from CMakeTests.cmake
 
-H5_SET_VFD_LIST()
-
+# create more test folders for each VFD
 foreach (vfdtest ${VFD_LIST})
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles")
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/plist_files")
