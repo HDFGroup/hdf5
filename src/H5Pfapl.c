@@ -93,7 +93,7 @@
 #define H5F_ACS_DATA_CACHE_BYTE_SIZE_DEC  H5P__decode_size_t
 /* Definition for preemption read chunks first */
 #define H5F_ACS_PREEMPT_READ_CHUNKS_SIZE sizeof(double)
-#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF  0.75f
+#define H5F_ACS_PREEMPT_READ_CHUNKS_DEF  0.75
 #define H5F_ACS_PREEMPT_READ_CHUNKS_ENC  H5P__encode_double
 #define H5F_ACS_PREEMPT_READ_CHUNKS_DEC  H5P__decode_double
 /* Definition for threshold for alignment */
