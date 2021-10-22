@@ -1,4 +1,4 @@
-HDF5 version 1.10.8 released on 2021-10-19
+HDF5 version 1.10.8 released on 2021-10-21
 ================================================================================
 
 
@@ -468,13 +468,24 @@ Bug Fixes since HDF5-1.10.7 release
 ===================================
     Library
     -------
+    - Fixed CVE-2018-17432
+
+        The tool h5repack produced a segfault on a corrupted file which had
+        invalid rank for scalar or NULL datatype.
+
+        The problem was fixed by modifying the dataspace encode and decode
+        functions to detect and report invalid rank. h5repack only fails
+        with an error now for the corrupted file.
+
+        (BMR - 2021/10/21, HDFFV-10590)
+
     - Fixed a segmentation fault
 
-      A segmentation fault occurred with a corrupted file.
+        A segmentation fault occurred with a corrupted file.
 
-      A detection of accessing a null pointer was added to prevent the problem.
+        A detection of accessing a null pointer was added to prevent the problem.
 
-      (BMR - 2021/10/14, HDFFV-11150)
+        (BMR - 2021/10/14, HDFFV-11150)
 
     - Detection of simple data transform function "x"
 
@@ -487,8 +498,8 @@ Bug Fixes since HDF5-1.10.7 release
 
         (JWSB - 2021/09/13)
 
-    - Fixed an invalid read and memory leak when parsing corrupt file space
-      info messages
+    - Fixed CVE-2020-10810 - an invalid read and memory leak when parsing
+      corrupt file space info messages
 
         When the corrupt file from CVE-2020-10810 was parsed by the library,
         the code that imports the version 0 file space info object header
