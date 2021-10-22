@@ -2068,10 +2068,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 // HDfree(buf);
                 // buf = NULL;
 
-                if (head_buf != NULL)
-                    free(head_buf);
-                if (wh_buf != NULL)
-                    free(wh_buf);
+                free(head_buf);
+                free(wh_buf);
 
                 // if (FAIL == ret_value) {
                 //    HDremove(name_recovery); /* destroy new temp file, if 'twas created */
