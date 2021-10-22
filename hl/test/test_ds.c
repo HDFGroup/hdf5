@@ -201,9 +201,7 @@ main(void)
     nerrors += test_duplicatelong_attachscales("2") < 0 ? 1 : 0;
     nerrors += test_samelong_scalenames("2") < 0 ? 1 : 0;
     nerrors += test_foreign_scaleattached(FOREIGN_FILE1) < 0 ? 1 : 0;
-#ifdef BROKEN
     nerrors += test_foreign_scaleattached(FOREIGN_FILE2) < 0 ? 1 : 0;
-#endif
     nerrors += test_detachscales() < 0 ? 1 : 0;
     nerrors += test_attach_detach() < 0 ? 1 : 0;
     /*  the following tests have not been rewritten to match those above */
