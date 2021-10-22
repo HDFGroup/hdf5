@@ -487,7 +487,7 @@ H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token
     /* Open the map */
     if (H5VL_optional(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open map")
-    map = map_args.create.map;
+    map = map_args.open.map;
 
     /* Register an ID for the map */
     if ((ret_value = H5VL_register(H5I_MAP, map, (*vol_obj_ptr)->connector, TRUE)) < 0)
@@ -1314,6 +1314,7 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
     map_args.specific.args.iterate.loc_params.type     = H5VL_OBJECT_BY_SELF;
     map_args.specific.args.iterate.loc_params.obj_type = H5I_get_type(map_id);
     map_args.specific.args.iterate.idx                 = (idx ? *idx : 0);
+    map_args.specific.args.iterate.key_mem_type_id     = key_mem_type_id;
     map_args.specific.args.iterate.op                  = op;
     map_args.specific.args.iterate.op_data             = op_data;
     vol_cb_args.op_type                                = H5VL_MAP_SPECIFIC;
@@ -1404,6 +1405,7 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_m
     map_args.specific.args.iterate.loc_params.loc_data.loc_by_name.name    = map_name;
     map_args.specific.args.iterate.loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     map_args.specific.args.iterate.idx                                     = (idx ? *idx : 0);
+    map_args.specific.args.iterate.key_mem_type_id                         = key_mem_type_id;
     map_args.specific.args.iterate.op                                      = op;
     map_args.specific.args.iterate.op_data                                 = op_data;
     vol_cb_args.op_type                                                    = H5VL_MAP_SPECIFIC;
