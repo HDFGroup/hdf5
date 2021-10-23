@@ -304,8 +304,8 @@ verify_obj_dset_cork(hbool_t swmr)
     hid_t       aid  = -1;            /* Attribute ID */
     hid_t       sid = -1, sid2 = -1;  /* Dataspace IDs */
     hid_t       did = -1, did2 = -1;  /* Dataset IDs */
-    hid_t       oid = -1;             /* Object ID */
-    hid_t       dcpl2;                /* Dataset creation property list */
+    hid_t       oid          = -1;    /* Object ID */
+    hid_t       dcpl2        = -1;    /* Dataset creation property list */
     int         i            = 0;     /* Local index variable */
     hsize_t     dim[1]       = {100}; /* Dataset dimension size */
     hsize_t     chunk_dim[1] = {7};   /* Dataset chunk dimension size */
@@ -766,8 +766,8 @@ verify_group_cork(hbool_t swmr)
     hid_t       fapl = -1;                      /* File access property list */
     hid_t       gid = -1, gid2 = -1, gid3 = -1; /* Group IDs */
     H5O_info2_t oinfo, oinfo2, oinfo3;          /* Object metadata information */
-    hid_t       aid;                            /* Attribute ID */
-    hid_t       sid;                            /* Dataspace ID */
+    hid_t       aid = -1;                       /* Attribute ID */
+    hid_t       sid = -1;                       /* Dataspace ID */
     char        attrname[500];                  /* Name of attribute */
     unsigned    flags;                          /* File access flags */
     int         i = 0;                          /* Local index variable */
@@ -937,8 +937,8 @@ verify_named_cork(hbool_t swmr)
     hid_t       gid = -1, gid2 = -1;            /* Group IDs */
     H5O_info2_t oinfo, oinfo2, oinfo3, oinfo4;  /* Object metadata information */
     hid_t       aid = -1;                       /* Attribute ID */
-    hid_t       sid;                            /* Dataspace ID */
-    hid_t       did;                            /* Dataset ID */
+    hid_t       sid = -1;                       /* Dataspace ID */
+    hid_t       did = -1;                       /* Dataset ID */
     char        attrname[500];                  /* Name of attribute */
     unsigned    flags;                          /* File access flags */
     int         i = 0;                          /* Local index variable */
@@ -1884,13 +1884,13 @@ error:
 static unsigned
 test_dset_cork(hbool_t swmr, hbool_t new_format)
 {
-    hid_t    fid;                                          /* File ID */
+    hid_t    fid = -1;                                     /* File ID */
     hid_t    fapl;                                         /* File access property list */
-    hid_t    gid;                                          /* Groupd ID */
-    hid_t    did1, did2;                                   /* Dataset IDs */
-    hid_t    tid1, tid2;                                   /* Datatype IDs */
-    hid_t    sid;                                          /* Dataspace ID */
-    hid_t    dcpl;                                         /* Dataset creation property list */
+    hid_t    gid  = -1;                                    /* Groupd ID */
+    hid_t    did1 = -1, did2 = -1;                         /* Dataset IDs */
+    hid_t    tid1 = -1, tid2 = -1;                         /* Datatype IDs */
+    hid_t    sid  = -1;                                    /* Dataspace ID */
+    hid_t    dcpl = -1;                                    /* Dataset creation property list */
     hsize_t  dims[RANK];                                   /* Dataset dimensions */
     hsize_t  maxdims[2]  = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Maximum dataset dimensions */
     hsize_t  cdims[RANK] = {2, 2};                         /* Chunk dimensions */
