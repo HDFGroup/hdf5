@@ -612,12 +612,11 @@ H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
-#define H5F_POST_VFD_SWMR_LOG_ENTRY(fp,entry_type_code,body) \
-if (fp !=NULL) \
-    if (fp->shared != NULL) \
-        if (fp->shared->vfd_swmr_log_on == TRUE) \
-            H5F_post_vfd_swmr_log_entry(fp,entry_type_code,body); 
- 
+#define H5F_POST_VFD_SWMR_LOG_ENTRY(fp, entry_type_code, body)                                               \
+    if (fp != NULL)                                                                                          \
+        if (fp->shared != NULL)                                                                              \
+            if (fp->shared->vfd_swmr_log_on == TRUE)                                                         \
+                H5F_post_vfd_swmr_log_entry(fp, entry_type_code, body);
 
 H5_DLL herr_t H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *body);
 #endif /* H5Fpkg_H */

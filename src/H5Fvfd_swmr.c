@@ -318,7 +318,7 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
         if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(shared, TRUE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick");
     }
-    //if(H5F_post_vfd_swmr_log_entry(f, 1, "File close ends")<0) 
+    // if(H5F_post_vfd_swmr_log_entry(f, 1, "File close ends")<0)
     //    HDONE_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "Fail to report VFD SMWR logging info.");
     H5F_POST_VFD_SWMR_LOG_ENTRY(f, 1, "File close ends")
 done:
@@ -904,7 +904,7 @@ done:
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
         log_msg   = HDmalloc(48);
-        temp_time = (unsigned int)(TOTAL_TIME_PASSED(start_time, end_time)*1000);
+        temp_time = (unsigned int)(TOTAL_TIME_PASSED(start_time, end_time) * 1000);
         HDsprintf(log_msg, "Writer time is %u milliseconds", temp_time);
         H5F_post_vfd_swmr_log_entry(f, 3, log_msg);
         HDfree(log_msg);
@@ -1934,7 +1934,7 @@ H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *body)
     if (f->shared->vfd_swmr_log_on == false)
         HGOTO_DONE(SUCCEED)
 #endif
-    if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0) 
+    if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
     temp_time = TOTAL_TIME_PASSED(f->shared->vfd_swmr_log_start_time, current_time);
     elap_min  = TIME_PASSED_MIN(temp_time);
@@ -1947,10 +1947,10 @@ H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *body)
               H5Fvfd_swmr_log_tags[entry_type_code], elap_min, elap_sec, elap_msec, body);
 #endif
 
-    HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%-25s: %.3lf s: %s\n",
-              H5Fvfd_swmr_log_tags[entry_type_code], temp_time, body);
+    HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%-25s: %.3lf s: %s\n", H5Fvfd_swmr_log_tags[entry_type_code],
+              temp_time, body);
 
 done:
-    //return ret_value;
+    // return ret_value;
     FUNC_LEAVE_NOAPI(ret_value)
 }
