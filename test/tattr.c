@@ -95,8 +95,7 @@ int attr_data2[ATTR2_DIM1][ATTR2_DIM2] = {{7614, -416}, {197814, -3}}; /* Test d
 #define ATTR3_DIM2 2
 #define ATTR3_DIM3 2
 double attr_data3[ATTR3_DIM1][ATTR3_DIM2][ATTR3_DIM3] = {
-    {{2.3F, -26.1F}, {0.123F, -10.0F}},
-    {{973.23F, -0.91827F}, {2.0F, 23.0F}}}; /* Test data for 3rd attribute */
+    {{2.3, -26.1}, {0.123, -10.0}}, {{973.23, -0.91827}, {2.0, 23.0}}}; /* Test data for 3rd attribute */
 
 #define ATTR4_NAME       "Attr4"
 #define ATTR4_RANK       2
@@ -113,8 +112,8 @@ struct attr4_struct {
     double d;
     char   c;
 } attr_data4[ATTR4_DIM1][ATTR4_DIM2] = {
-    {{3, -26.1F, 'd'}, {-100000, 0.123F, '3'}},
-    {{-23, 981724.2F, 'Q'}, {0, 2.0F, '\n'}}}; /* Test data for 4th attribute */
+    {{3, -26.1, 'd'}, {-100000, 0.123, '3'}},
+    {{-23, 981724.2, 'Q'}, {0, 2.0, '\n'}}}; /* Test data for 4th attribute */
 
 #define ATTR5_NAME "Attr5"
 #define ATTR5_RANK 0
@@ -2275,9 +2274,11 @@ test_attr_dense_create(hid_t fcpl, hid_t fapl)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    if (h5_using_default_driver(NULL)) {
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    }
 } /* test_attr_dense_create() */
 
 /****************************************************************
@@ -2419,9 +2420,11 @@ test_attr_dense_open(hid_t fcpl, hid_t fapl)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    if (h5_using_default_driver(NULL)) {
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    }
 } /* test_attr_dense_open() */
 
 /****************************************************************
@@ -2448,6 +2451,10 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     H5O_info2_t    oinfo;                   /* Object info                  */
     int            use_min_dset_oh = (dcpl_g != H5P_DEFAULT);
     herr_t         ret; /* Generic return value        */
+
+    /* Only run this test for sec2/default driver */
+    if (!h5_using_default_driver(NULL))
+        return;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Deleting Attributes in Dense Storage\n"));
@@ -2612,9 +2619,11 @@ test_attr_dense_delete(hid_t fcpl, hid_t fapl)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    if (h5_using_default_driver(NULL)) {
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    }
 } /* test_attr_dense_delete() */
 
 /****************************************************************
@@ -2643,6 +2652,10 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     int            use_min_dset_oh = (dcpl_g != H5P_DEFAULT);
     unsigned       use_corder; /* Track creation order or not */
     herr_t         ret;        /* Generic return value        */
+
+    /* Only run this test for sec2/default driver */
+    if (!h5_using_default_driver(NULL))
+        return;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Renaming Attributes in Dense Storage\n"));
@@ -2803,9 +2816,11 @@ test_attr_dense_rename(hid_t fcpl, hid_t fapl)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    if (h5_using_default_driver(NULL)) {
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    }
 } /* test_attr_dense_rename() */
 
 /****************************************************************
@@ -2833,6 +2848,10 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     unsigned       u;                       /* Local index variable */
     int            use_min_dset_oh = (dcpl_g != H5P_DEFAULT);
     herr_t         ret; /* Generic return value        */
+
+    /* Only run this test for sec2/default driver */
+    if (!h5_using_default_driver(NULL))
+        return;
 
     /* Output message about test being performed */
     MESSAGE(5, ("Testing Unlinking Object with Attributes in Dense Storage\n"));
@@ -2946,9 +2965,11 @@ test_attr_dense_unlink(hid_t fcpl, hid_t fapl)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    if (h5_using_default_driver(NULL)) {
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    }
 } /* test_attr_dense_unlink() */
 
 /****************************************************************
@@ -3110,9 +3131,11 @@ test_attr_dense_limits(hid_t fcpl, hid_t fapl)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    if (h5_using_default_driver(NULL)) {
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    }
 } /* test_attr_dense_limits() */
 
 /****************************************************************
@@ -3897,9 +3920,11 @@ test_attr_big(hid_t fcpl, hid_t fapl)
     ret = H5Fclose(fid);
     CHECK(ret, FAIL, "H5Fclose");
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    if (h5_using_default_driver(NULL)) {
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    }
 } /* test_attr_big() */
 
 /****************************************************************
@@ -4106,9 +4131,11 @@ test_attr_null_space(hid_t fcpl, hid_t fapl)
     ret = H5Sclose(null_sid);
     CHECK(ret, FAIL, "H5Sclose");
 
-    /* Check size of file */
-    filesize = h5_get_file_size(FILENAME, fapl);
-    VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    if (h5_using_default_driver(NULL)) {
+        /* Check size of file */
+        filesize = h5_get_file_size(FILENAME, fapl);
+        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+    }
 } /* test_attr_null_space() */
 
 /****************************************************************
@@ -8706,9 +8733,11 @@ test_attr_shared_write(hid_t fcpl, hid_t fapl)
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
 
-        /* Check size of file */
-        filesize = h5_get_file_size(FILENAME, fapl);
-        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        if (h5_using_default_driver(NULL)) {
+            /* Check size of file */
+            filesize = h5_get_file_size(FILENAME, fapl);
+            VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        }
     } /* end for */
 
     /* Close dataspaces */
@@ -9152,9 +9181,11 @@ test_attr_shared_rename(hid_t fcpl, hid_t fapl)
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
 
-        /* Check size of file */
-        filesize = h5_get_file_size(FILENAME, fapl);
-        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        if (h5_using_default_driver(NULL)) {
+            /* Check size of file */
+            filesize = h5_get_file_size(FILENAME, fapl);
+            VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        }
     } /* end for */
 
     /* Close dataspaces */
@@ -9522,9 +9553,11 @@ test_attr_shared_delete(hid_t fcpl, hid_t fapl)
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
 
-        /* Check size of file */
-        filesize = h5_get_file_size(FILENAME, fapl);
-        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        if (h5_using_default_driver(NULL)) {
+            /* Check size of file */
+            filesize = h5_get_file_size(FILENAME, fapl);
+            VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        }
     } /* end for */
 
     /* Close dataspaces */
@@ -9879,9 +9912,11 @@ test_attr_shared_unlink(hid_t fcpl, hid_t fapl)
         ret = H5Fclose(fid);
         CHECK(ret, FAIL, "H5Fclose");
 
-        /* Check size of file */
-        filesize = h5_get_file_size(FILENAME, fapl);
-        VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        if (h5_using_default_driver(NULL)) {
+            /* Check size of file */
+            filesize = h5_get_file_size(FILENAME, fapl);
+            VERIFY(filesize, empty_filesize, "h5_get_file_size");
+        }
     } /* end for */
 
     /* Close dataspaces */

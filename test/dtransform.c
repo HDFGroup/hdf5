@@ -199,6 +199,8 @@ const int transformData[ROWS][COLS] = {{36, 31, 25, 19, 13, 7, 1, 5, 11, 16, 22,
             COMPARE(TYPE, array, COMPARE_DATA, 2)                                                            \
         }                                                                                                    \
                                                                                                              \
+        if (H5Dclose(dset_nn) < 0)                                                                           \
+            TEST_ERROR;                                                                                      \
         if (H5Dclose(dset) < 0)                                                                              \
             TEST_ERROR;                                                                                      \
         if (H5Sclose(dataspace) < 0)                                                                         \
@@ -582,6 +584,7 @@ test_specials(hid_t file)
     const char *special4 = "-x";
     const char *special5 = "+x";
     const char *special6 = "2e+1*x";
+    const char *special7 = "x";
 
     TESTING("data transform of some special cases")
 
@@ -717,6 +720,32 @@ test_specials(hid_t file)
             data_res[row][col] = transformData[row][col] * 20;
 
     if ((dset_id = H5Dcreate2(file, "/special6", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT,
+                              H5P_DEFAULT)) < 0)
+        TEST_ERROR
+    if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, transformData) < 0)
+        TEST_ERROR
+    if (H5Dread(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, read_buf) < 0)
+        TEST_ERROR
+
+    COMPARE_INT(read_buf, data_res)
+
+    if (H5Dclose(dset_id) < 0)
+        TEST_ERROR
+
+    /*-----------------------------
+     * Operation 7: x
+     * This operation will be
+     * treated if no function has
+     * been specified.
+     *----------------------------*/
+    if (H5Pset_data_transform(dxpl_id, special7) < 0)
+        TEST_ERROR;
+
+    for (row = 0; row < ROWS; row++)
+        for (col = 0; col < COLS; col++)
+            data_res[row][col] = transformData[row][col];
+
+    if ((dset_id = H5Dcreate2(file, "/special7", H5T_NATIVE_INT, dataspace, H5P_DEFAULT, H5P_DEFAULT,
                               H5P_DEFAULT)) < 0)
         TEST_ERROR
     if (H5Dwrite(dset_id, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, dxpl_id, transformData) < 0)

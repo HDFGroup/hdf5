@@ -237,6 +237,7 @@ static herr_t  H5FD__ros3_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing
 static herr_t H5FD__ros3_validate_config(const H5FD_ros3_fapl_t *fa);
 
 static const H5FD_class_t H5FD_ros3_g = {
+    H5FD_ROS3_VALUE,          /* value                */
     "ros3",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
     H5F_CLOSE_WEAK,           /* fc_degree            */
@@ -269,6 +270,7 @@ static const H5FD_class_t H5FD_ros3_g = {
     NULL,                     /* lock                 */
     NULL,                     /* unlock               */
     NULL,                     /* del                  */
+    NULL,                     /* ctl                  */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
@@ -410,7 +412,7 @@ H5Pset_fapl_ros3(hid_t fapl_id, H5FD_ros3_fapl_t *fa)
     if (FAIL == H5FD__ros3_validate_config(fa))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid ros3 config")
 
-    ret_value = H5P_set_driver(plist, H5FD_ROS3, (void *)fa);
+    ret_value = H5P_set_driver(plist, H5FD_ROS3, (void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

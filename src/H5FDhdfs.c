@@ -1,15 +1,13 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Read-Only HDFS Virtual File Driver (VFD)                                  *
- * Copyright (c) 2018, The HDF Group.                                        *
- *                                                                           *
+ * Copyright by The HDF Group.                                               *
  * All rights reserved.                                                      *
  *                                                                           *
- * NOTICE:                                                                   *
- * All information contained herein is, and remains, the property of The HDF *
- * Group. The intellectual and technical concepts contained herein are       *
- * proprietary to The HDF Group. Dissemination of this information or        *
- * reproduction of this material is strictly forbidden unless prior written  *
- * permission is obtained from The HDF Group.                                *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
@@ -280,6 +278,7 @@ static herr_t  H5FD__hdfs_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing
 static herr_t H5FD__hdfs_validate_config(const H5FD_hdfs_fapl_t *fa);
 
 static const H5FD_class_t H5FD_hdfs_g = {
+    H5FD_HDFS_VALUE,          /* value                */
     "hdfs",                   /* name                 */
     MAXADDR,                  /* maxaddr              */
     H5F_CLOSE_WEAK,           /* fc_degree            */
@@ -312,6 +311,7 @@ static const H5FD_class_t H5FD_hdfs_g = {
     NULL,                     /* lock                 */
     NULL,                     /* unlock               */
     NULL,                     /* del                  */
+    NULL,                     /* ctl                  */
     H5FD_FLMAP_DICHOTOMY      /* fl_map               */
 };
 
@@ -625,7 +625,7 @@ H5Pset_fapl_hdfs(hid_t fapl_id, H5FD_hdfs_fapl_t *fa)
     if (FAIL == H5FD__hdfs_validate_config(fa))
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid hdfs config")
 
-    ret_value = H5P_set_driver(plist, H5FD_HDFS, (void *)fa);
+    ret_value = H5P_set_driver(plist, H5FD_HDFS, (void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)

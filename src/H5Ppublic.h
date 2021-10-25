@@ -100,7 +100,9 @@
 #define H5P_CRT_ORDER_TRACKED 0x0001
 #define H5P_CRT_ORDER_INDEXED 0x0002
 
-/* Default value for all property list classes */
+/**
+ * Default value of type \ref hid_t for all property list classes
+ */
 #define H5P_DEFAULT 0 /* (hid_t) */
 
 #ifdef __cplusplus
@@ -113,14 +115,23 @@ extern "C" {
 
 /* Define property list class callback function pointer types */
 //! <!-- [H5P_cls_create_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_create_func_t)(hid_t prop_id, void *create_data);
 //! <!-- [H5P_cls_create_func_t_snip] -->
 
 //! <!-- [H5P_cls_copy_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_copy_func_t)(hid_t new_prop_id, hid_t old_prop_id, void *copy_data);
 //! <!-- [H5P_cls_copy_func_t_snip] -->
 
 //! <!-- [H5P_cls_close_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_cls_close_func_t)(hid_t prop_id, void *close_data);
 //! <!-- [H5P_cls_close_func_t_snip] -->
 
@@ -159,12 +170,25 @@ typedef herr_t (*H5P_prp_cb2_t)(hid_t prop_id, const char *name, size_t size, vo
 typedef H5P_prp_cb1_t H5P_prp_create_func_t;
 typedef H5P_prp_cb2_t H5P_prp_set_func_t;
 typedef H5P_prp_cb2_t H5P_prp_get_func_t;
+//! <!-- [H5P_prp_encode_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_prp_encode_func_t)(const void *value, void **buf, size_t *size);
+//! <!-- [H5P_prp_encode_func_t_snip] -->
+//! <!-- [H5P_prp_decode_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_prp_decode_func_t)(const void **buf, void *value);
+//! <!-- [H5P_prp_decode_func_t_snip] -->
 typedef H5P_prp_cb2_t H5P_prp_delete_func_t;
 typedef H5P_prp_cb1_t H5P_prp_copy_func_t;
 
 //! <!-- [H5P_prp_compare_func_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef int (*H5P_prp_compare_func_t)(const void *value1, const void *value2, size_t size);
 //! <!-- [H5P_prp_compare_func_t_snip] -->
 
@@ -172,6 +196,9 @@ typedef H5P_prp_cb1_t H5P_prp_close_func_t;
 
 /* Define property list iteration function type */
 //! <!-- [H5P_iterate_t_snip] -->
+/**
+ * \todo Document me!
+ */
 typedef herr_t (*H5P_iterate_t)(hid_t id, const char *name, void *iter_data);
 //! <!-- [H5P_iterate_t_snip] -->
 
@@ -2211,7 +2238,7 @@ H5_DLL herr_t H5Pset_attr_creation_order(hid_t plist_id, unsigned crt_order_flag
  */
 H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, unsigned min_dense);
 /**
- * \ingroup OCPL
+ * \ingroup DCPL
  *
  * \brief Sets deflate (GNU gzip) compression method and compression level
  *
@@ -2219,6 +2246,8 @@ H5_DLL herr_t H5Pset_attr_phase_change(hid_t plist_id, unsigned max_compact, uns
  * \param[in] level Compression level
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_deflate() sets the deflate compression method and the
  *          compression level, \p level, for a dataset or group creation
@@ -3419,6 +3448,34 @@ H5_DLL const void *H5Pget_driver_info(hid_t plist_id);
 /**
  * \ingroup FAPL
  *
+ * \brief Retrieves a string representation of the configuration for
+ *        the driver set on the given FAPL. The returned string can
+ *        be used to configure the same driver in an identical way.
+ *
+ * \fapl_id
+ * \param[out] config_buf Driver configuration string output buffer
+ * \param[in]  buf_size Size of driver configuration string output buffer
+ *
+ * \return Returns the length of the driver configuration string on
+ *         success (not including the NUL terminator). Returns negative
+ *         on failure.
+ *
+ * \details H5Pget_driver_config_str() retrieves a string representation
+ *          of the configuration for the driver set on the given FAPL. The
+ *          returned string can be used to configure the same driver in
+ *          an identical way.
+ *
+ *          If \p config_buf is NULL, the length of the driver configuration
+ *          string is simply returned. The caller can then allocate a buffer
+ *          of the appropriate size and call this routine again.
+ *
+ * \version 1.12.1 Function publicized in this release.
+ *
+ */
+H5_DLL ssize_t H5Pget_driver_config_str(hid_t fapl_id, char *config_buf, size_t buf_size);
+/**
+ * \ingroup FAPL
+ *
  * \brief Retrieves the size of the external link open file cache
  *
  * \fapl_id{plist_id}
@@ -4255,6 +4312,57 @@ H5_DLL herr_t H5Pset_core_write_tracking(hid_t fapl_id, hbool_t is_enabled, size
  *
  */
 H5_DLL herr_t H5Pset_driver(hid_t plist_id, hid_t driver_id, const void *driver_info);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets a file driver according to a given driver name
+ *
+ * \plist_id
+ * \param[in] driver_name   The new driver name
+ * \param[in] driver_config Optional string containing driver properties
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_driver_by_name() sets the file driver, by the name
+ *          driver_name, for a file access or data transfer property list,
+ *          \p plist_id, and supplies an optional string containing the
+ *          driver-specific properties, \p driver_config. The driver
+ *          properties string will be copied into the property list.
+ *
+ *          If the driver specified by \p driver_name is not currently
+ *          registered, an attempt will be made to load the driver as a
+ *          plugin.
+ *
+ * \version 1.12.1 Function publicized in this release.
+ *
+ */
+H5_DLL herr_t H5Pset_driver_by_name(hid_t plist_id, const char *driver_name, const char *driver_config);
+/**
+ * \ingroup FAPL
+ *
+ * \brief Sets a file driver according to a given driver value (ID).
+ *
+ * \plist_id
+ * \param[in] driver_value  The new driver value (ID)
+ * \param[in] driver_config Optional string containing driver properties
+ *
+ * \return \herr_t
+ *
+ * \details H5Pset_driver_by_value() sets the file driver, by the value
+ *          driver_value, for a file access or data transfer property list,
+ *          \p plist_id, and supplies an optional string containing the
+ *          driver-specific properties, \p driver_config. The driver
+ *          properties string will be copied into the property list.
+ *
+ *          If the driver specified by \p driver_value is not currently
+ *          registered, an attempt will be made to load the driver as a
+ *          plugin.
+ *
+ * \version 1.12.1 Function publicized in this release.
+ *
+ */
+H5_DLL herr_t H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_value,
+                                     const char *driver_config);
 /**
  * \ingroup FAPL
  *
@@ -5237,7 +5345,7 @@ H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
 
 #ifdef H5_HAVE_PARALLEL
 /**
- * \ingroup GACPL
+ * \ingroup GAPL
  *
  * \brief Sets metadata I/O mode for read operations to collective or independent (default)
  *
@@ -5306,7 +5414,7 @@ H5_DLL herr_t H5Pget_vol_cap_flags(hid_t plist_id, unsigned *cap_flags);
  */
 H5_DLL herr_t H5Pset_all_coll_metadata_ops(hid_t plist_id, hbool_t is_collective);
 /**
- * \ingroup GACPL
+ * \ingroup GAPL
  *
  * \brief Retrieves metadata read mode setting
  *
@@ -6266,6 +6374,8 @@ H5_DLL herr_t H5Pset_fill_value(hid_t plist_id, hid_t type_id, const void *value
  *
  * \return \herr_t
  *
+ * \par_compr_note
+ *
  * \details H5Pset_shuffle() sets the shuffle filter, #H5Z_FILTER_SHUFFLE,
  *          in the dataset creation property list \p plist_id. The shuffle
  *          filter de-interlaces a block of data by reordering the bytes.
@@ -6336,6 +6446,8 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  * \dcpl_id{plist_id}
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_nbit() sets the N-Bit filter, #H5Z_FILTER_NBIT, in the
  *          dataset creation property list \p plist_id.
@@ -6429,6 +6541,8 @@ H5_DLL herr_t H5Pset_nbit(hid_t plist_id);
  *                         non-negative
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_scaleoffset() sets the scale-offset filter,
  *          #H5Z_FILTER_SCALEOFFSET, for a dataset.
@@ -6538,6 +6652,8 @@ H5_DLL herr_t H5Pset_scaleoffset(hid_t plist_id, H5Z_SO_scale_type_t scale_type,
  *            data block
  *
  * \return \herr_t
+ *
+ * \par_compr_note
  *
  * \details H5Pset_szip() sets an SZIP compression filter, #H5Z_FILTER_SZIP,
  *          for a dataset. SZIP is a compression method designed for use with
@@ -7449,10 +7565,6 @@ H5_DLL size_t H5Pget_buffer(hid_t plist_id, void **tconv /*out*/, void **bkg /*o
  *          If an error occurs, the buffer pointed to by \p expression is
  *          unchanged, and the function returns a negative value.
  *
- * \par Example
- *      An example snippet from examples/h5_dtransform.c:
- *      \snippet h5_dtransform.c H5Pget_data_transform_snip
- *
  * \since 1.8.0
  *
  */
@@ -8055,7 +8167,7 @@ H5_DLL herr_t H5Pget_mpio_no_collective_cause(hid_t plist_id, uint32_t *local_no
  *          the size of the \p start, \p stride, \p count, and \p block arrays.
  *          \p rank must be between 1 and #H5S_MAX_RANK, inclusive.
  *
- *          The \op, \p start, \p stride, \p count, and \p block parameters
+ *          The \p op, \p start, \p stride, \p count, and \p block parameters
  *          behave identically to their behavior for H5Sselect_hyperslab(),
  *          please see the documentation for that routine for details about
  *          their use.
@@ -9455,9 +9567,6 @@ H5_DLL herr_t H5Pset_mcdt_search_cb(hid_t plist_id, H5O_mcdt_search_cb_t func, v
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
  *
- *
- * \cpp_c_api_note
- *
  */
 
 /* Function prototypes */
@@ -9571,8 +9680,7 @@ H5_DLL herr_t H5Pregister1(hid_t cls_id, const char *name, size_t size, void *de
  *
  *          The #H5P_prp_cb2_t is as follows:
  *          \snippet this H5P_prp_cb2_t_snip
-
- * \cpp_c_api_note
+ *
  */
 H5_DLL herr_t H5Pinsert1(hid_t plist_id, const char *name, size_t size, void *value,
                          H5P_prp_set_func_t prp_set, H5P_prp_get_func_t prp_get,

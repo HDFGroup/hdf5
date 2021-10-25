@@ -301,6 +301,62 @@ done:
 } /* end H5FD_register() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FDis_driver_registered_by_name
+ *
+ * Purpose:     Tests whether a VFD class has been registered or not
+ *              according to a supplied driver name.
+ *
+ * Return:      >0 if a VFD with that name has been registered
+ *              0 if a VFD with that name has NOT been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FDis_driver_registered_by_name(const char *driver_name)
+{
+    htri_t ret_value = FALSE; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "*s", driver_name);
+
+    /* Check if driver with this name is registered */
+    if ((ret_value = H5FD_is_driver_registered_by_name(driver_name, NULL)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDis_driver_registered_by_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDis_driver_registered_by_value
+ *
+ * Purpose:     Tests whether a VFD class has been registered or not
+ *              according to a supplied driver value (ID).
+ *
+ * Return:      >0 if a VFD with that value has been registered
+ *              0 if a VFD with that value hasn't been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "DV", driver_value);
+
+    /* Check if driver with this value is registered */
+    if ((ret_value = H5FD_is_driver_registered_by_value(driver_value, NULL)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDis_driver_registered_by_value() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FDunregister
  *
  * Purpose:     Removes a driver ID from the library. This in no way affects
@@ -1686,6 +1742,111 @@ H5FD_unlock(H5FD_t *file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_unlock() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDctl
+ *
+ * Purpose:     Perform a CTL operation.
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  JRM -- 8/3/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE5("e", "*#ULUL*x**x", file, op_code, flags, input, output);
+
+    /* Check arguments */
+    if (!file)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file pointer cannot be NULL")
+
+    if (!file->cls)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "file class pointer cannot be NULL")
+
+    /* Don't attempt to validate the op code.  If appropriate, that will
+     * be done by the underlying VFD callback, along with the input and
+     * output parameters.
+     */
+
+    /* Call private function */
+    if (H5FD_ctl(file, op_code, flags, input, output) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+
+done:
+
+    FUNC_LEAVE_API(ret_value)
+
+} /* end H5FDctl() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ctl
+ *
+ * Purpose:     Private version of H5FDctl()
+ *
+ *              The desired operation is specified by the op_code
+ *              parameter.
+ *
+ *              The flags parameter controls management of op_codes that
+ *              are unknown to the callback
+ *
+ *              The input and output parameters allow op_code specific
+ *              input and output
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ * Programmer:  JRM -- 8/3/21
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void **output)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Sanity checks */
+    HDassert(file);
+    HDassert(file->cls);
+
+    /* Dispatch to driver if the ctl function exists.
+     *
+     * If it doesn't, fail if the H5FD_CTL__FAIL_IF_UNKNOWN_FLAG is set.
+     *
+     * Otherwise, report success.
+     */
+    if (file->cls->ctl) {
+
+        if ((file->cls->ctl)(file, op_code, flags, input, output) < 0)
+
+            HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed")
+    }
+    else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
+
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
+                    "VFD ctl request failed (no ctl callback and fail if unknown flag is set)")
+    }
+
+done:
+
+    FUNC_LEAVE_NOAPI(ret_value)
+
+} /* end H5FD_ctl() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_get_fileno

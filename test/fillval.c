@@ -1050,7 +1050,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
         for (u = 0; u < nelmts; u++) {
             buf_c[u].a = 1111.11F;
             buf_c[u].x = 2222;
-            buf_c[u].y = 3333.3333F;
+            buf_c[u].y = 3333.3333;
             buf_c[u].z = 'd';
         }
         if (H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c) < 0)
@@ -1304,7 +1304,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
         if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
             goto error;
         HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
-        fill_ctype.y = 4444.4444F;
+        fill_ctype.y = 4444.4444;
         if (H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0)
             goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset11", &fill_ctype, H5D_FILL_TIME_ALLOC, layout,
@@ -1370,7 +1370,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
         goto error;
     HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
-    fill_ctype.y = 4444.4444F;
+    fill_ctype.y = 4444.4444;
     if (H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0)
         goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset12", &fill_ctype, H5D_FILL_TIME_ALLOC, layout, H5T_COMPOUND,
@@ -2722,7 +2722,10 @@ main(int argc, char *argv[])
             nerrors += test_create(my_fapl, FILENAME[1], H5D_CONTIGUOUS);
             nerrors += test_rdwr(my_fapl, FILENAME[3], H5D_CONTIGUOUS);
             nerrors += test_extend(my_fapl, FILENAME[5], H5D_CONTIGUOUS);
-            nerrors += test_compatible();
+
+            if (!h5_driver_uses_modified_filename()) {
+                nerrors += test_compatible();
+            }
         } /* end if */
 
         /* Compact dataset storage tests */

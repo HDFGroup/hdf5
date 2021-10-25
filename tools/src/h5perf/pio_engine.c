@@ -2676,7 +2676,7 @@ do_cleanupfile(iotype iot, char *fname)
         return;
 
     if (clean_file_g == -1)
-        clean_file_g = (getenv("HDF5_NOCLEANUP") == NULL) ? 1 : 0;
+        clean_file_g = (getenv(HDF5_NOCLEANUP) == NULL) ? 1 : 0;
 
     if (clean_file_g) {
         switch (iot) {

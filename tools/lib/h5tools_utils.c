@@ -450,6 +450,7 @@ free_table(table_t *table)
             HDfree(table->objs[u].objname);
 
     HDfree(table->objs);
+    HDfree(table);
 }
 
 #ifdef H5DUMP_DEBUG

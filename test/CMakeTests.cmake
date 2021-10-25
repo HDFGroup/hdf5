@@ -127,10 +127,10 @@ set (HDF5_REFERENCE_TEST_FILES
     btree_idx_1_8.h5
     corrupt_stab_msg.h5
     deflate.h5
-    family_v16_00000.h5
-    family_v16_00001.h5
-    family_v16_00002.h5
-    family_v16_00003.h5
+    family_v16-000000.h5
+    family_v16-000001.h5
+    family_v16-000002.h5
+    family_v16-000003.h5
     file_image_core_test.h5
     filespace_1_6.h5
     filespace_1_8.h5
@@ -331,7 +331,7 @@ set (test_CLEANFILES
     sec2_file.h5
     direct_file.h5
     family_file000*.h5
-    new_family_v16_000*.h5
+    new_family_v16-000*.h5
     multi_file-*.h5
     core_file
     filter_plugin.h5
@@ -878,8 +878,6 @@ if (ENABLE_EXTENDED_TESTS)
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
-
-#  add_test (NAME H5Test-swmr_check_compat_vfd COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:swmr_check_compat_vfd>)
 
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")

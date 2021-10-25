@@ -87,11 +87,11 @@
 /**
  * For pre-releases like \c snap0. Empty string for official releases.
  */
-#define H5_VERS_SUBRELEASE ""
+#define H5_VERS_SUBRELEASE "7"
 /**
  * Full version string
  */
-#define H5_VERS_INFO "HDF5 library version: 1.13.0"
+#define H5_VERS_INFO "HDF5 library version: 1.13.0-7"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
@@ -168,12 +168,65 @@
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
 
+/* Macros for various environment variables that HDF5 interprets */
+/**
+ * Used to specify the name of an HDF5 Virtual File Driver to use as
+ * the default file driver for file access. Setting this environment
+ * variable overrides the default file driver for File Access Property
+ * Lists.
+ */
+#define HDF5_DRIVER "HDF5_DRIVER"
+/**
+ * Used to specify a configuration string for the HDF5 Virtual File
+ * Driver being used for file access.
+ */
+#define HDF5_DRIVER_CONFIG "HDF5_DRIVER_CONFIG"
+/**
+ * Used to specify the name of an HDF5 Virtual Object Layer Connector
+ * to use as the default VOL connector for file access. Setting this
+ * environment variable overrides the default VOL connector for File
+ * Access Property Lists.
+ */
+#define HDF5_VOL_CONNECTOR "HDF5_VOL_CONNECTOR"
+/**
+ * Used to specify a delimiter-separated (currently, ';' for Windows
+ * and ':' for other systems) list of paths that HDF5 should search
+ * when loading plugins.
+ */
+#define HDF5_PLUGIN_PATH "HDF5_PLUGIN_PATH"
+/**
+ * Used to control the loading of HDF5 plugins at runtime. If this
+ * environment variable is set to the special string "::" (defined
+ * in H5PLpublic.h as H5PL_NO_PLUGIN), then dynamic loading of any
+ * HDF5 plugins will be disabled. No other values are valid for this
+ * environment variable.
+ */
+#define HDF5_PLUGIN_PRELOAD "HDF5_PLUGIN_PRELOAD"
+/**
+ * Used to control whether HDF5 uses file locking when creating or
+ * opening a file. Valid values for this environment variable are
+ * as follows:
+ *
+ *  "TRUE" or "1"  - Request that file locks should be used
+ *  "FALSE" or "0" - Request that file locks should NOT be used
+ *  "BEST_EFFORT"  - Request that file locks should be used and
+ *                     that any locking errors caused by file
+ *                     locking being disabled on the system
+ *                     should be ignored
+ */
+#define HDF5_USE_FILE_LOCKING "HDF5_USE_FILE_LOCKING"
+/**
+ * Used to instruct HDF5 not to cleanup files created during testing.
+ */
+#define HDF5_NOCLEANUP "HDF5_NOCLEANUP"
+
 /**
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
  * zero for failure) while successful return is non-negative (often zero).
- * The negative failure value is most commonly -1, but don't bet on it.  The
- * proper way to detect failure is something like:
+ * The negative failure value is most commonly -1, but don't bet on it.
+ *
+ * The proper way to detect failure is something like:
  * \code
  * if((dset = H5Dopen2(file, name)) < 0)
  *    fprintf(stderr, "unable to open the requested dataset\n");
@@ -182,11 +235,17 @@
 typedef int herr_t;
 
 /**
- * Boolean type.  Successful return values are zero (false) or positive
- * (true). The typical true value is 1 but don't bet on it.  Boolean
- * functions cannot fail.  Functions that return #htri_t however return zero
- * (false), positive (true), or negative (failure). The proper way to test
- * for truth from a #htri_t function is:
+ * C99-style Boolean type. Successful return values are zero (false) or positive
+ * (true). The typical true value is 1 but don't bet on it.
+ * \attention Boolean functions cannot fail.
+ */
+#include <stdbool.h>
+typedef bool hbool_t;
+/**
+ * Three-valued Boolean type. Functions that return #htri_t however return zero
+ * (false), positive (true), or negative (failure).
+ *
+ * The proper way to test for truth from a #htri_t function is:
  * \code
  * if ((retval = H5Tcommitted(type)) > 0) {
  *     printf("data type is committed\n");
@@ -197,8 +256,7 @@ typedef int herr_t;
  * }
  * \endcode
  */
-typedef bool hbool_t;
-typedef int  htri_t;
+typedef int htri_t;
 
 /* The signed version of size_t
  *
@@ -285,9 +343,9 @@ typedef enum {
 /* (Actually, any positive value will cause the iterator to stop and pass back
  *      that positive value to the function that called the iterator)
  */
-#define H5_ITER_ERROR (-1)
-#define H5_ITER_CONT  (0)
-#define H5_ITER_STOP  (1)
+#define H5_ITER_ERROR (-1) /**< Error, stop iteration */
+#define H5_ITER_CONT  (0)  /**< Continue iteration */
+#define H5_ITER_STOP  (1)  /**< Stop iteration, short-circuit success */
 
 //! <!-- [H5_index_t_snip] -->
 /**

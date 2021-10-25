@@ -74,6 +74,10 @@ PROGRAM fortranlibtest
   CALL write_test_status(ret_total_error, ' Reopen test', total_error)
 
   ret_total_error = 0
+  CALL get_name_test(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Get name test', total_error)
+
+  ret_total_error = 0
   CALL file_close(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' File open/close test', total_error)
 
