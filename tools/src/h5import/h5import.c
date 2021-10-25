@@ -470,9 +470,9 @@ readIntegerData(FILE *strm, struct Input *in)
     H5DT_INT64 *in64;
     H5DT_INT64  temp64;
     char        buffer[256];
-    hsize_t len = 1;
-    hsize_t i;
-    int     j;
+    hsize_t     len = 1;
+    hsize_t     i;
+    int         j;
 
     const char *err1 = "Unable to get integer value from file.\n";
     const char *err2 = "Unrecognized input class type.\n";
@@ -642,12 +642,12 @@ readUIntegerData(FILE *strm, struct Input *in)
     H5DT_UINT64 *in64;
     H5DT_UINT64  temp64;
     char         buffer[256];
-    hsize_t     len = 1;
-    hsize_t     i;
-    int         j;
-    const char *err1 = "Unable to get unsigned integer value from file.\n";
-    const char *err2 = "Unrecognized input class type.\n";
-    const char *err3 = "Invalid input size.\n";
+    hsize_t      len = 1;
+    hsize_t      i;
+    int          j;
+    const char * err1 = "Unable to get unsigned integer value from file.\n";
+    const char * err2 = "Unrecognized input class type.\n";
+    const char * err3 = "Invalid input size.\n";
 
     for (j = 0; j < in->rank; j++)
         len *= in->sizeOfDimension[j];

@@ -24,8 +24,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define F_FORMAT "%-15g %-15g %-15g\n"
-#define LD_FORMAT "%-15Lg %-15Lg %-15Lg\n"
+#define F_FORMAT    "%-15g %-15g %-15g\n"
+#define LD_FORMAT   "%-15Lg %-15Lg %-15Lg\n"
 #define I_FORMAT    "%-15d %-15d %-15d\n"
 #define S_FORMAT    "%-16s %-17s\n"
 #define UI_FORMAT   "%-15u %-15u %-15u\n"
@@ -35,8 +35,8 @@
 #define ULLI_FORMAT "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u\n"
 
 /* with -p option */
-#define F_FORMAT_P "%-15.10g %-15.10g %-15.10g %-14.10g\n"
-#define LD_FORMAT_P "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
+#define F_FORMAT_P   "%-15.10g %-15.10g %-15.10g %-14.10g\n"
+#define LD_FORMAT_P  "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
 #define I_FORMAT_P   "%-15d %-15d %-15d %-14f\n"
 #define UI_FORMAT_P  "%-15u %-15u %-15u %-14f\n"
 #define LI_FORMAT_P  "%-15ld %-15ld %-15ld %-14f\n"
@@ -48,8 +48,8 @@
 #define SPACES "          "
 
 /* not comparable */
-#define F_FORMAT_P_NOTCOMP "%-15.10g %-15.10g %-15.10g not comparable\n"
-#define LD_FORMAT_P_NOTCOMP "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
+#define F_FORMAT_P_NOTCOMP   "%-15.10g %-15.10g %-15.10g not comparable\n"
+#define LD_FORMAT_P_NOTCOMP  "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
 #define I_FORMAT_P_NOTCOMP   "%-15d %-15d %-15d not comparable\n"
 #define UI_FORMAT_P_NOTCOMP  "%-15u %-15u %-15u not comparable\n"
 #define LI_FORMAT_P_NOTCOMP  "%-15ld %-15ld %-15ld not comparable\n"
@@ -3217,7 +3217,6 @@ equal_ldouble(long double value, long double expected, diff_opt_t *opts)
 
     return FALSE;
 }
-
 
 /*-------------------------------------------------------------------------
  * Function:    equal_float

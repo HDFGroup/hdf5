@@ -112,26 +112,26 @@ main(void)
     pln4i8[0] = plno4i8;
 
     for (i = 1; i < nrow; i++) {
-        row4[i]  = row4[i - 1] + rowi4;
-        row8[i]  = row8[i - 1] + rowi8;
-        row4i[i] = row4i[i - 1] + rowi4i;
+        row4[i]    = row4[i - 1] + rowi4;
+        row8[i]    = row8[i - 1] + rowi8;
+        row4i[i]   = row4i[i - 1] + rowi4i;
         row4i64[i] = row4i64[i - 1] + rowi4i64;
         row4i16[i] = (short)(row4i16[i - 1] + rowi4i16);
         row4i8[i]  = (char)(row4i8[i - 1] + rowi4i8);
     }
 
     for (j = 1; j < ncol; j++) {
-        col4[j]  = col4[j - 1] + coli4;
-        col8[j]  = col8[j - 1] + coli8;
-        col4i[j] = col4i[j - 1] + coli4i;
+        col4[j]    = col4[j - 1] + coli4;
+        col8[j]    = col8[j - 1] + coli8;
+        col4i[j]   = col4i[j - 1] + coli4i;
         col4i64[j] = col4i64[j - 1] + coli4i64;
         col4i16[j] = (short)(col4i16[j - 1] + coli4i16);
         col4i8[j]  = (char)(col4i8[j - 1] + coli4i8);
     }
     for (k = 1; k < npln; k++) {
-        pln4[k]  = pln4[k - 1] + plni4;
-        pln8[k]  = pln8[k - 1] + plni8;
-        pln4i[k] = pln4i[k - 1] + plni4i;
+        pln4[k]    = pln4[k - 1] + plni4;
+        pln8[k]    = pln8[k - 1] + plni8;
+        pln4i[k]   = pln4i[k - 1] + plni4i;
         pln4i64[k] = pln4i64[k - 1] + plni4i64;
         pln4i16[k] = (short)(pln4i16[k - 1] + plni4i16);
         pln4i8[k]  = (char)(pln4i8[k - 1] + plni4i8);

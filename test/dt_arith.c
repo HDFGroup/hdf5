@@ -3584,9 +3584,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     if ((INT_SCHAR == src_type || INT_UCHAR == src_type || INT_SHORT == src_type || INT_USHORT == src_type ||
          INT_INT == src_type || INT_UINT == src_type || INT_LONG == src_type || INT_ULONG == src_type ||
          INT_LLONG == src_type || INT_ULLONG == src_type) &&
-        (FLT_FLOAT != dst_type && FLT_DOUBLE != dst_type
-         && FLT_LDOUBLE != dst_type
-         )) {
+        (FLT_FLOAT != dst_type && FLT_DOUBLE != dst_type && FLT_LDOUBLE != dst_type)) {
         HDsnprintf(str, sizeof(str), "Testing %s %s -> %s conversions", name, src_type_name, dst_type_name);
         HDprintf("%-70s", str);
         H5_FAILED();
@@ -3594,9 +3592,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
         goto error;
     }
 
-    if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type
-         || FLT_LDOUBLE == src_type
-         ) &&
+    if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type || FLT_LDOUBLE == src_type) &&
         (INT_SCHAR != dst_type && INT_UCHAR != dst_type && INT_SHORT != dst_type && INT_USHORT != dst_type &&
          INT_INT != dst_type && INT_UINT != dst_type && INT_LONG != dst_type && INT_ULONG != dst_type &&
          INT_LLONG != dst_type && INT_ULLONG != dst_type)) {
@@ -3753,9 +3749,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
 
     /* Check the results from the library against hardware */
     for (j = 0; j < nelmts; j++) {
-        if (FLT_FLOAT == src_type || FLT_DOUBLE == src_type
-            || FLT_LDOUBLE == src_type
-        )
+        if (FLT_FLOAT == src_type || FLT_DOUBLE == src_type || FLT_LDOUBLE == src_type)
             if (my_isnan(src_type, saved + j * src_size))
                 continue;
 
@@ -4279,9 +4273,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
          * Try to follow the except_func callback function to check if the
          * desired value was set.
          */
-        if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type
-             || FLT_LDOUBLE == src_type
-             ) &&
+        if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type || FLT_LDOUBLE == src_type) &&
             (INT_SCHAR == dst_type || INT_SHORT == dst_type || INT_INT == dst_type || INT_LONG == dst_type ||
              INT_LLONG == dst_type)) {
             if (0 == H5T__bit_get_d(src_bits, src_nbits - 1, (size_t)1) &&
@@ -4321,9 +4313,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
             }
         }
 
-        if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type
-             || FLT_LDOUBLE == src_type
-             ) &&
+        if ((FLT_FLOAT == src_type || FLT_DOUBLE == src_type || FLT_LDOUBLE == src_type) &&
             (INT_UCHAR == dst_type || INT_USHORT == dst_type || INT_UINT == dst_type ||
              INT_ULONG == dst_type || INT_ULLONG == dst_type)) {
             if (H5T__bit_get_d(src_bits, src_nbits - 1, (size_t)1)) {
@@ -5164,7 +5154,7 @@ run_fp_int_conv(const char *name)
 #if H5_SIZEOF_LONG_LONG != H5_SIZEOF_LONG
 #ifdef H5_LDOUBLE_TO_LLONG_ACCURATE
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_LLONG);
-#else /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+#else  /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
         {
             char str[256]; /*string        */
 
@@ -5176,7 +5166,7 @@ run_fp_int_conv(const char *name)
 #endif /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
 #if defined(H5_LDOUBLE_TO_LLONG_ACCURATE)
         nerrors += test_conv_int_fp(name, test_values, H5T_NATIVE_LDOUBLE, H5T_NATIVE_ULLONG);
-#else /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
+#else  /*H5_LDOUBLE_TO_LLONG_ACCURATE*/
         {
             char str[256]; /*string        */
 

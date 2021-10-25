@@ -309,8 +309,8 @@ H5T__ref_set_loc(H5T_t *dt, H5VL_object_t *file, H5T_loc_t loc)
                     HGOTO_ERROR(H5E_REFERENCE, H5E_CANTGET, FAIL, "can't get encode size")
 
                 /* Size on disk, memory size is different */
-                dt->shared->size = MAX(sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE + cont_info.blob_id_size,
-                                       ref_encode_size);
+                dt->shared->size =
+                    MAX(sizeof(uint32_t) + H5R_ENCODE_HEADER_SIZE + cont_info.blob_id_size, ref_encode_size);
                 dt->shared->u.atomic.prec = 8 * dt->shared->size;
 
                 /* Set up the function pointers to access the information on
