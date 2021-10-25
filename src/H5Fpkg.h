@@ -637,5 +637,4 @@ static const char *H5Fvfd_swmr_log_tags[] = {
 #endif
 /* clang-format on */
 
-
 #endif /* H5Fpkg_H */
