@@ -89,13 +89,14 @@ H5_DLL herr_t H5F_dump_eot_queue(void);
 /***************************************/
 
 #define TOTAL_TIME_PASSED(X, Y)                                                                              \
-    ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000.0
+    ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
 #define TIME_PASSED_MIN(X)        (unsigned int)(X / 60000)
 #define TIME_PASSED_SEC(X, Y)     (unsigned int)((X - Y * 60000) / 1000)
 #define TIME_PASSED_MSEC(X, Y, Z) (unsigned int)(X - Y * 60000 - Z * 1000)
 
 /* Add more tags */
-static const char *H5Fvfd_swmr_log_tags[] = {"FILE_OPEN", "FILE_CLOSE", "EOT_TRIGGER_TIME",
+static const char *H5Fvfd_swmr_log_tags[] = {"FILE_OPEN",  
+					     "FILE_CLOSE", "EOT_TRIGGER_TIME",
                                              "EOT_PROCESSING_TIME", "EOT_META_FILE_INDEX"};
 
 #endif /* H5FDvfd_swmr_private_H */

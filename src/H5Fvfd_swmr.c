@@ -318,9 +318,10 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
         if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(shared, TRUE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick");
     }
+    //if(H5F_post_vfd_swmr_log_entry(f, 1, "File close ends")<0) 
+    //    HDONE_ERROR(H5E_FILE, H5E_LOGGING, FAIL, "Fail to report VFD SMWR logging info.");
+    H5F_POST_VFD_SWMR_LOG_ENTRY(f, 1, "File close ends")
 done:
-
-    H5F_post_vfd_swrm_log_entry(f, 1, "File close ends");
 
     if (shared->vfd_swmr_log_on) {
         HDfclose(shared->vfd_swmr_log_file_ptr);
@@ -637,7 +638,7 @@ H5F_vfd_swmr_writer__prep_for_flush_or_close(H5F_t *f)
     HDassert(shared->vfd_swmr_writer);
     HDassert(shared->page_buf);
 
-    H5F_post_vfd_swrm_log_entry(f, 1, "File close starts");
+    H5F_post_vfd_swmr_log_entry(f, 1, "File close starts");
 
     /* since we are about to flush the page buffer, force and end of
      * tick so as to avoid attempts to flush entries on the page buffer
@@ -773,7 +774,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     HDassert(shared->vfd_swmr_writer);
 
     if (f->shared->vfd_swmr_log_on == true) {
-        H5F_post_vfd_swrm_log_entry(f, 3, "EOT gets started");
+        H5F_post_vfd_swmr_log_entry(f, 3, "EOT gets started");
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
     }
@@ -903,9 +904,9 @@ done:
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
         log_msg   = HDmalloc(48);
-        temp_time = (unsigned int)(TOTAL_TIME_PASSED(start_time, end_time));
+        temp_time = (unsigned int)(TOTAL_TIME_PASSED(start_time, end_time)*1000);
         HDsprintf(log_msg, "Writer time is %u milliseconds", temp_time);
-        H5F_post_vfd_swrm_log_entry(f, 3, log_msg);
+        H5F_post_vfd_swmr_log_entry(f, 3, log_msg);
         HDfree(log_msg);
     }
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1913,7 +1914,7 @@ done:
 }
 
 herr_t
-H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body)
+H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *body)
 {
     herr_t          ret_value = SUCCEED;
     double          temp_time;
@@ -1925,13 +1926,15 @@ H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body)
     HDassert(f);
     HDassert(f->shared);
 #endif
+#if 0
     if (f == NULL)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(SUCCEED)
     else if (f->shared == NULL)
-        HGOTO_DONE(TRUE)
+        HGOTO_DONE(SUCCEED)
     if (f->shared->vfd_swmr_log_on == false)
-        HGOTO_DONE(TRUE)
-    if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0)
+        HGOTO_DONE(SUCCEED)
+#endif
+    if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0) 
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
     temp_time = TOTAL_TIME_PASSED(f->shared->vfd_swmr_log_start_time, current_time);
     elap_min  = TIME_PASSED_MIN(temp_time);
@@ -1939,9 +1942,15 @@ H5F_post_vfd_swrm_log_entry(H5F_t *f, int entry_type_code, char *body)
     elap_msec = TIME_PASSED_MSEC(temp_time, elap_min, elap_sec);
 
     /* TODO: add a check for the range of entry_type_code to separate debug mode from the production mode.*/
+#if 0
     HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%s: %u m %u s %u ms, Content -  %s\n",
               H5Fvfd_swmr_log_tags[entry_type_code], elap_min, elap_sec, elap_msec, body);
+#endif
+
+    HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%-25s: %.3lf s: %s\n",
+              H5Fvfd_swmr_log_tags[entry_type_code], temp_time, body);
 
 done:
+    //return ret_value;
     FUNC_LEAVE_NOAPI(ret_value)
 }

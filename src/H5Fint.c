@@ -2224,10 +2224,11 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Success */
     ret_value = file;
 
-done:
 #if 1 /*KENT*/
-    H5F_post_vfd_swrm_log_entry(file, 0, "File open ends");
+    //H5F_post_vfd_swmr_log_entry(file, 0, "File open ends");
+    H5F_POST_VFD_SWMR_LOG_ENTRY(file, 0, "File open ends")
 #endif
+done:
     if ((NULL == ret_value) && file) {
         if (file->shared->root_grp && file->shared->nrefs == 1) {
             if (H5AC_expunge_tag_type_metadata(file, H5G_oloc(file->shared->root_grp)->addr, H5AC_OHDR_ID,
