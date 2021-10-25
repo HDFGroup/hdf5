@@ -174,6 +174,7 @@
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
 ./config/gnu-warnings/cxx-9
+./config/gnu-warnings/cxx-developer-4.8
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
 ./config/gnu-warnings/developer-4.8
@@ -190,6 +191,7 @@
 ./config/gnu-warnings/gfort-5
 ./config/gnu-warnings/gfort-6
 ./config/gnu-warnings/gfort-8
+./config/gnu-warnings/no-cxx-developer-4.8
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
@@ -1243,7 +1245,6 @@
 ./test/stab.c
 ./test/swmr.c
 ./test/swmr_addrem_writer.c
-./test/swmr_check_compat_vfd.c
 ./test/swmr_common.c
 ./test/swmr_common.h
 ./test/swmr_generator.c
@@ -2892,6 +2893,10 @@
 ./utils/mirror_vfd/mirror_server_stop.c
 ./utils/mirror_vfd/mirror_writer.c
 
+# test utilities
+./utils/test/Makefile.am
+./utils/test/swmr_check_compat_vfd.c
+
 # high level libraries
 ./hl/Makefile.am
 ./hl/examples/Makefile.am
@@ -3003,7 +3008,6 @@
 ./hl/tools/h5watch/extend_dset.c
 ./hl/tools/h5watch/h5watch.c
 ./hl/tools/h5watch/h5watchgentest.c
-./hl/tools/h5watch/swmr_check_compat_vfd.c
 ./hl/tools/h5watch/testh5watch.sh.in
 
 # expected test output from testing h5watch
@@ -3620,7 +3624,9 @@
 ./tools/test/misc/vds/CMakeLists.txt
 ./tools/test/perform/CMakeLists.txt
 ./tools/test/perform/CMakeTests.cmake
+
 ./utils/CMakeLists.txt
+./utils/test/CMakeLists.txt
 ./utils/mirror_vfd/CMakeLists.txt
 
 # CMake-specific User Scripts
@@ -3717,6 +3723,7 @@
 ./tools/src/h5import/Makefile.in
 ./tools/src/h5jam/Makefile.in
 ./tools/src/h5ls/Makefile.in
+./tools/src/h5perf/Makefile.in
 ./tools/src/h5repack/Makefile.in
 ./tools/src/h5stat/Makefile.in
 ./tools/src/misc/Makefile.in
@@ -3735,3 +3742,4 @@
 ./tools/test/perform/Makefile.in
 ./utils/Makefile.in
 ./utils/mirror_vfd/Makefile.in
+./utils/test/Makefile.in
