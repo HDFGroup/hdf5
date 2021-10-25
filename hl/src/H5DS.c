@@ -139,12 +139,12 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
     int      has_reflist;
     int      is_ds;
     hssize_t nelmts;
-    hid_t    sid, sid_w; /* space ID */
-    hid_t    tid  = -1;  /* attribute type ID */
-    hid_t    ntid = -1;  /* attribute native type ID */
-    hid_t    aid  = -1;  /* attribute ID */
-    int      rank;       /* rank of dataset */
-    hsize_t  dims[1];    /* dimension of the "REFERENCE_LIST" array */
+    hid_t    sid, sid_w;             /* space ID */
+    hid_t    tid  = H5I_INVALID_HID; /* attribute type ID */
+    hid_t    ntid = H5I_INVALID_HID; /* attribute native type ID */
+    hid_t    aid  = H5I_INVALID_HID; /* attribute ID */
+    int      rank;                   /* rank of dataset */
+    hsize_t  dims[1];                /* dimension of the "REFERENCE_LIST" array */
 
     ds_list_t  dsl;          /* attribute data in the DS pointing to the dataset */
     ds_list_t *dsbuf = NULL; /* array of attribute data in the DS pointing to the dataset */
@@ -727,15 +727,15 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
     int          has_dimlist;
     int          has_reflist;
     hssize_t     nelmts;
-    hid_t        dsid_j;          /* DS dataset ID in DIMENSION_LIST */
-    hid_t        did_i;           /* dataset ID in REFERENCE_LIST */
-    hid_t        sid   = -1;      /* space ID */
-    hid_t        sid_w = -1;      /* space ID */
-    hid_t        tid   = -1;      /* attribute type ID */
-    hid_t        ntid  = -1;      /* attribute native type ID */
-    hid_t        aid   = -1;      /* attribute ID */
-    int          rank;            /* rank of dataset */
-    nds_list_t * ndsbuf   = NULL; /* array of attribute data in the DS pointing to the dataset */
+    hid_t        dsid_j;                  /* DS dataset ID in DIMENSION_LIST */
+    hid_t        did_i;                   /* dataset ID in REFERENCE_LIST */
+    hid_t        sid   = H5I_INVALID_HID; /* space ID */
+    hid_t        sid_w = H5I_INVALID_HID; /* space ID */
+    hid_t        tid   = H5I_INVALID_HID; /* attribute type ID */
+    hid_t        ntid  = H5I_INVALID_HID; /* attribute native type ID */
+    hid_t        aid   = H5I_INVALID_HID; /* attribute ID */
+    int          rank;                    /* rank of dataset */
+    nds_list_t * ndsbuf   = NULL;         /* array of attribute data in the DS pointing to the dataset */
     nds_list_t * ndsbuf_w = NULL; /* array of attribute data in the DS pointing to the dataset to write*/
     ds_list_t *  dsbuf    = NULL; /* array of attribute data in the DS pointing to the dataset */
     ds_list_t *  dsbuf_w  = NULL; /* array of attribute data in the DS pointing to the dataset to write*/
@@ -1229,18 +1229,18 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
     int         has_dimlist;
     int         has_reflist;
     hssize_t    nelmts;
-    hid_t       sid;           /* space ID */
-    hid_t       tid  = -1;     /* attribute type ID */
-    hid_t       ntid = -1;     /* attribute native type ID */
-    hid_t       aid  = -1;     /* attribute ID */
-    int         rank;          /* rank of dataset */
-    nds_list_t *ndsbuf = NULL; /* array of attribute data in the DS pointing to the dataset */
-    ds_list_t * dsbuf  = NULL; /* array of attribute data in the DS pointing to the dataset */
-    H5R_ref_t   nref;          /* reference to the DS */
-    hobj_ref_t  ref;           /* reference to the DS */
-    hvl_t *     buf = NULL;    /* VL buffer to store in the attribute */
-    hid_t       dsid_j;        /* DS dataset ID in DIMENSION_LIST */
-    hid_t       did_i;         /* dataset ID in REFERENCE_LIST */
+    hid_t       sid;                    /* space ID */
+    hid_t       tid  = H5I_INVALID_HID; /* attribute type ID */
+    hid_t       ntid = H5I_INVALID_HID; /* attribute native type ID */
+    hid_t       aid  = H5I_INVALID_HID; /* attribute ID */
+    int         rank;                   /* rank of dataset */
+    nds_list_t *ndsbuf = NULL;          /* array of attribute data in the DS pointing to the dataset */
+    ds_list_t * dsbuf  = NULL;          /* array of attribute data in the DS pointing to the dataset */
+    H5R_ref_t   nref;                   /* reference to the DS */
+    hobj_ref_t  ref;                    /* reference to the DS */
+    hvl_t *     buf = NULL;             /* VL buffer to store in the attribute */
+    hid_t       dsid_j;                 /* DS dataset ID in DIMENSION_LIST */
+    hid_t       did_i;                  /* dataset ID in REFERENCE_LIST */
     H5O_info2_t oi1, oi2, oi3, oi4;
     H5I_type_t  it1, it2;
     int         i;
@@ -1599,13 +1599,13 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
 {
     hid_t      scale_id;
     int        rank;
-    H5R_ref_t  nref;       /* reference to the DS */
-    hobj_ref_t ref;        /* reference to the DS */
-    hid_t      sid;        /* space ID */
-    hid_t      tid = -1;   /* attribute type ID */
-    hid_t      aid = -1;   /* attribute ID */
-    hvl_t *    buf = NULL; /* VL buffer to store in the attribute */
-    H5I_type_t it;         /* ID type */
+    H5R_ref_t  nref;                  /* reference to the DS */
+    hobj_ref_t ref;                   /* reference to the DS */
+    hid_t      sid;                   /* space ID */
+    hid_t      tid = H5I_INVALID_HID; /* attribute type ID */
+    hid_t      aid = H5I_INVALID_HID; /* attribute ID */
+    hvl_t *    buf = NULL;            /* VL buffer to store in the attribute */
+    H5I_type_t it;                    /* ID type */
     herr_t     ret_value = 0;
     int        j_idx;
     int        nscales;
@@ -1789,12 +1789,12 @@ herr_t
 H5DSset_label(hid_t did, unsigned int idx, const char *label)
 {
     int          has_labels;
-    hid_t        sid = -1; /* space ID */
-    hid_t        tid = -1; /* attribute type ID */
-    hid_t        aid = -1; /* attribute ID */
-    int          rank;     /* rank of dataset */
-    hsize_t      dims[1];  /* dimensions of dataset */
-    H5I_type_t   it;       /* ID type */
+    hid_t        sid = H5I_INVALID_HID; /* space ID */
+    hid_t        tid = H5I_INVALID_HID; /* attribute type ID */
+    hid_t        aid = H5I_INVALID_HID; /* attribute ID */
+    int          rank;                  /* rank of dataset */
+    hsize_t      dims[1];               /* dimensions of dataset */
+    H5I_type_t   it;                    /* ID type */
     unsigned int i;
     union {                     /* union is needed to eliminate compiler warnings about */
         char **      buf;       /* discarding the 'const' qualifier in the free */
@@ -1992,12 +1992,12 @@ ssize_t
 H5DSget_label(hid_t did, unsigned int idx, char *label, size_t size)
 {
     int        has_labels;
-    hid_t      sid = -1;   /* space ID */
-    hid_t      tid = -1;   /* attribute type ID */
-    hid_t      aid = -1;   /* attribute ID */
-    int        rank;       /* rank of dataset */
-    char **    buf = NULL; /* buffer to store in the attribute */
-    H5I_type_t it;         /* ID type */
+    hid_t      sid = H5I_INVALID_HID; /* space ID */
+    hid_t      tid = H5I_INVALID_HID; /* attribute type ID */
+    hid_t      aid = H5I_INVALID_HID; /* attribute ID */
+    int        rank;                  /* rank of dataset */
+    char **    buf = NULL;            /* buffer to store in the attribute */
+    H5I_type_t it;                    /* ID type */
     size_t     nbytes = 0;
     size_t     copy_len;
     int        i;
@@ -2140,10 +2140,10 @@ out:
 ssize_t
 H5DSget_scale_name(hid_t did, char *name, size_t size)
 {
-    hid_t      aid;      /* attribute ID  */
-    hid_t      tid = -1; /* attribute type ID */
-    hid_t      sid;      /* space ID  */
-    H5I_type_t it;       /* ID type */
+    hid_t      aid = H5I_INVALID_HID; /* attribute ID  */
+    hid_t      tid = H5I_INVALID_HID; /* attribute type ID */
+    hid_t      sid = H5I_INVALID_HID; /* space ID  */
+    H5I_type_t it;                    /* ID type */
     size_t     nbytes;
     size_t     copy_len;
     int        has_name;
@@ -2257,13 +2257,13 @@ out:
 htri_t
 H5DSis_scale(hid_t did)
 {
-    hid_t       tid = -1;    /* attribute type ID */
-    hid_t       aid = -1;    /* attribute ID */
-    herr_t      attr_class;  /* has the "CLASS" attribute */
-    htri_t      is_ds = -1;  /* set to "not a dimension scale" */
-    H5I_type_t  it;          /* type of identifier */
-    char *      buf = NULL;  /* buffer to read name of attribute */
-    size_t      string_size; /* size of storage for the attribute */
+    hid_t       tid = H5I_INVALID_HID; /* attribute type ID */
+    hid_t       aid = H5I_INVALID_HID; /* attribute ID */
+    herr_t      attr_class;            /* has the "CLASS" attribute */
+    htri_t      is_ds = -1;            /* set to "not a dimension scale" */
+    H5I_type_t  it;                    /* type of identifier */
+    char *      buf = NULL;            /* buffer to read name of attribute */
+    size_t      string_size;           /* size of storage for the attribute */
     H5T_class_t type_class;
     H5T_str_t   strpad;
 
@@ -2371,12 +2371,12 @@ int
 H5DSget_num_scales(hid_t did, unsigned int idx)
 {
     int        has_dimlist;
-    hid_t      sid;        /* space ID */
-    hid_t      tid = -1;   /* attribute type ID */
-    hid_t      aid = -1;   /* attribute ID */
-    int        rank;       /* rank of dataset */
-    hvl_t *    buf = NULL; /* VL buffer to store in the attribute */
-    H5I_type_t it;         /* ID type */
+    hid_t      sid;                   /* space ID */
+    hid_t      tid = H5I_INVALID_HID; /* attribute type ID */
+    hid_t      aid = H5I_INVALID_HID; /* attribute ID */
+    int        rank;                  /* rank of dataset */
+    hvl_t *    buf = NULL;            /* VL buffer to store in the attribute */
+    H5I_type_t it;                    /* ID type */
     int        nscales;
 
     /*-------------------------------------------------------------------------
@@ -2489,8 +2489,8 @@ static herr_t
 H5DS_is_reserved(hid_t did)
 {
     int    has_class;
-    hid_t  tid = -1;
-    hid_t  aid = -1;
+    hid_t  tid = H5I_INVALID_HID;
+    hid_t  aid = H5I_INVALID_HID;
     char * buf = NULL;  /* Name of attribute */
     size_t string_size; /* Size of storage for attribute */
     herr_t ret;
