@@ -3067,6 +3067,7 @@
 ./hl/test/test_ds.c
 ./hl/test/test_ds_be.h5
 ./hl/test/test_ds_be_new_ref.h5
+./hl/test/test_ds_be_new_ref-32bit.h5
 ./hl/test/test_ds_le.h5
 ./hl/test/test_ds_le_new_ref.h5
 ./hl/test/test_dset_append.c
