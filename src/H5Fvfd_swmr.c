@@ -54,6 +54,17 @@
 #define nanosecs_per_second    1000000000 /* nanoseconds per second */
 #define nanosecs_per_tenth_sec 100000000  /* nanoseconds per 0.1 second */
 
+/* clang-format off */
+/* The entry code number is listed in the comment for convenience. */
+static const char *H5Fvfd_swmr_log_tags[] = {
+                                             "FILE_OPEN",                   /* 0 */                        
+                                             "FILE_CLOSE",                  /* 1 */
+                                             "EOT_TRIGGER_TIME",            /* 2 */
+                                             "EOT_PROCESSING_TIME",         /* 3 */
+                                             "EOT_META_FILE_INDEX"          /* 4 */
+                                            };
+/* clang-format on */
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -1917,7 +1928,6 @@ H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *body)
     herr_t          ret_value = SUCCEED;
     double          temp_time;
     struct timespec current_time;
-
     FUNC_ENTER_NOAPI(FAIL)
     if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");

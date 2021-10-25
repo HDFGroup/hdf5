@@ -623,4 +623,19 @@ H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
                 H5F_post_vfd_swmr_log_entry(fp, entry_type_code, body);
 
 H5_DLL herr_t H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *body);
+/* clang-format off */
+/* The entry code number is listed in the comment for convenience. */
+
+#if 0
+static const char *H5Fvfd_swmr_log_tags[] = {
+                                             "FILE_OPEN",                   /* 0 */                        
+                                             "FILE_CLOSE",                  /* 1 */
+                                             "EOT_TRIGGER_TIME",            /* 2 */
+                                             "EOT_PROCESSING_TIME",         /* 3 */
+                                             "EOT_META_FILE_INDEX"          /* 4 */
+                                            };
+#endif
+/* clang-format on */
+
+
 #endif /* H5Fpkg_H */

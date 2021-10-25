@@ -106,6 +106,7 @@ H5_DLL herr_t H5F_dump_eot_queue(void);
  * H5F_POST_VFD_SWMR_LOG_ENTRY(f, 3, log_msg) will put the log_msg attached to
  * the entry tag "EOT_PROCESSING_TIME".
  */
+#if 0
 /* clang-format off */
 /* The entry code number is listed in the comment for convenience. */
 static const char *H5Fvfd_swmr_log_tags[] = {
@@ -116,5 +117,6 @@ static const char *H5Fvfd_swmr_log_tags[] = {
                                              "EOT_META_FILE_INDEX"          /* 4 */
                                             };
 /* clang-format on */
+#endif
 
 #endif /* H5FDvfd_swmr_private_H */
