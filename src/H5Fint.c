@@ -2013,7 +2013,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Short cuts */
     shared = file->shared;
-    
+
     /* Set up the VFD SWMR LOG file */
     /* Kent*/
     if (vfd_swmr_config_ptr->version) {

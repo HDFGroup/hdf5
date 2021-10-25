@@ -320,7 +320,7 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
     }
 #if 1 /*Kent */
     H5F_POST_VFD_SWMR_LOG_ENTRY(f, 1, "VFD SWMR File close or flush ends")
-#endif 
+#endif
 done:
 
     if (shared->vfd_swmr_log_on) {
