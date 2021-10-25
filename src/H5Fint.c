@@ -2013,9 +2013,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Short cuts */
     shared = file->shared;
-#if 1 /* Kent*/
+    
+    /* Set up the VFD SWMR LOG file */
+    /* Kent*/
     if (vfd_swmr_config_ptr->version) {
-
         if (HDstrlen(vfd_swmr_config_ptr->log_file_path) > 0)
             shared->vfd_swmr_log_on = TRUE;
         if (TRUE == shared->vfd_swmr_log_on) {
@@ -2026,7 +2027,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get time via clock_gettime");
         }
     }
-#endif
+    /* End of Kent */
+
     lf = shared->lf;
 
     /* Set the file locking flag. If the file is already open, the file
@@ -2224,8 +2226,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Success */
     ret_value = file;
 
-#if 1 /*KENT*/
-    // H5F_post_vfd_swmr_log_entry(file, 0, "File open ends");
+#if 1 /*Kent: write to the log file when H5F_open ends. Tested, now comment out.*/
     H5F_POST_VFD_SWMR_LOG_ENTRY(file, 0, "File open ends")
 #endif
 done:

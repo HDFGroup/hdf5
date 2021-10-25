@@ -612,6 +612,10 @@ H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
+/* VFD SMWR log reporting macros */
+/* The first argument is the HDF5 file pointer(H5F_t *). Its value needs to be checked
+ * to avoid a failure caused by "Low-Level File I/O " in the testhdf5 which involves
+ * the test of a non-existing HDF5 file. */
 #define H5F_POST_VFD_SWMR_LOG_ENTRY(fp, entry_type_code, body)                                               \
     if (fp != NULL)                                                                                          \
         if (fp->shared != NULL)                                                                              \
