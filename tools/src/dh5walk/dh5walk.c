@@ -841,29 +841,6 @@ copy_args(int argc, char **argv, int *mfu_argc, int *copy_len)
     return argv_copy;
 }
 
-#ifdef VALIDATE_ARG_COUNT
-static int
-check_path_count(char *h5tool)
-{
-    char *thisName;
-    char  thistool[1024];
-    strcpy(thistool, h5tool);
-    thisName = basename(thistool);
-    if ((strstr(thisName, "copy") != NULL) || (strstr(thisName, "dump") != NULL) ||
-        (strstr(thisName, "format") != NULL) || (strstr(thisName, "ls") != NULL) ||
-        (strstr(thisName, "stat") != NULL)) {
-        return 1;
-    }
-    else if ((strstr(thisName, "copy") != NULL) || (strstr(thisName, "diff") != NULL) ||
-             (strstr(thisName, "repack") != NULL)) {
-        return 2;
-    }
-    else if ((strstr(thisName, "import") != NULL) || (strstr(thisName, "jam") != NULL)) {
-        return 3;
-    }
-    return -1;
-}
-#endif
 
 typedef struct hash_entry {
     int                hash;
@@ -938,11 +915,17 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
     char  filepath[1024];
     char *toolname = argv[0];
     char *buf      = NULL;
+    int use_stdout = 0;
 
     /* create a copy of the 1st file passed to the application */
     strcpy(filepath, fname);
 
-    if (log_output_in_single_file) {
+#if 0
+    if (!log_output_in_single_file && !log_stdout_in_file)
+        use_stdout = 1;
+#endif
+
+    if (log_output_in_single_file || use_stdout) {
         pid_t   pid;
         int     pipefd[2];
         buf_t * thisbuft = NULL;
@@ -1016,7 +999,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                 thisbuft->chars += remaining;
 
                 /* Create a new read buffer */
-#if VERBOSE
+#ifdef VERBOSE
                 printf("[%d] Allocate-1 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
 #endif
                 bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
@@ -1043,7 +1026,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                         /* Update the current buffer prior to allocating the new one */
                         thisbuft->count = 0;
                         thisbuft->chars += read_bytes;
-#if VERBOSE
+#ifdef VERBOSE
                         printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank,
                                buft_count);
 #endif
@@ -1136,7 +1119,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
             free(logbase);
         if (thisapp)
             free(thisapp);
-    }
+    }  /* else if(log_stdout_in_file)  */
 }
 
 int MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg);
@@ -1183,8 +1166,11 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     for (k = 1; k < count; k++) {
         if (buf[0] == '&') {
             const char *fname_arg    = NULL;
+            mfu_flist   flist_arg;
             void *      check_ptr[2] = {NULL, NULL};
-            mfu_flist   flist_arg    = (mfu_flist)check_ptr[0];
+
+            memcpy(check_ptr, &buf[1], sizeof(void *));
+			flist_arg = (mfu_flist)check_ptr[0];
 
             /* +2 (see below) accounts for the '&' and the trailing zero pad */
             buf += sizeof(mfu_flist *) + 2;
@@ -1214,188 +1200,6 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     sprintf(&cmdline[b_offset], "\n");
     run_command(count, argv, cmdline, fname);
 
-#ifdef USE_OLD_CODE
-    if (log_output_in_single_file) {
-        pid_t   pid;
-        int     pipefd[2];
-        buf_t * thisbuft = NULL;
-        buf_t **bufs     = buf_cache;
-
-        if (bufs == NULL) {
-            bufs = (buf_t **)MFU_CALLOC(buft_max, sizeof(buf_t *));
-            assert((bufs != NULL));
-            buf_cache = bufs;
-#if VERBOSE
-            if (buft_count == 0) {
-                printf("[%d] Initial buf_cache allocation: buft_count=%d\n", sg_mpi_rank, buft_count);
-            }
-#endif
-            bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
-            assert((thisbuft != NULL));
-        }
-        else {
-            thisbuft = bufs[buft_count - 1];
-            assert((thisbuft != NULL));
-            /* Check for remaining space in the current buffer */
-            /* If none, then create a new buffer */
-            if (thisbuft->count == 0) {
-                bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
-            }
-        }
-        if ((thisbuft->buf == NULL)) {
-            thisbuft->buf = MFU_MALLOC(BUFT_SIZE);
-            assert((thisbuft->buf != NULL));
-            thisbuft->bufsize = BUFT_SIZE;
-            thisbuft->count   = BUFT_SIZE;
-            thisbuft->dt      = MPI_CHAR;
-        }
-        if (pipe(pipefd) == -1) {
-            perror("pipe");
-            exit(EXIT_FAILURE);
-        }
-        pid = fork();
-        if (pid == -1) {
-            perror("fork");
-            exit(EXIT_FAILURE);
-        }
-        if (pid == 0) {
-            close(pipefd[0]);
-            dup2(pipefd[1], fileno(stdout));
-            dup2(pipefd[1], fileno(stderr));
-            execvp(argv[0], argv);
-        }
-        else {
-            int      w_status;
-            size_t   nbytes;
-            size_t   read_bytes = 0;
-            uint64_t remaining, offset;
-            close(pipefd[1]);
-            buf       = thisbuft->buf;
-            remaining = thisbuft->count;
-            nbytes    = strlen(cmdline);
-            offset    = thisbuft->chars;
-            /* Record the command line for the log! */
-            if (nbytes < remaining) {
-                strcpy(&buf[offset], cmdline);
-                thisbuft->chars += nbytes;
-                thisbuft->count -= nbytes;
-                remaining -= nbytes;
-            }
-            else { /* We're running out of space in the current buffer  */
-                char *nextpart;
-                strncpy(&buf[offset], cmdline, remaining);
-                nextpart        = &cmdline[remaining + 1];
-                thisbuft->count = 0;
-                thisbuft->chars += remaining;
-
-                /* Create a new read buffer */
-#if VERBOSE
-                printf("[%d] Allocate-1 a new read buffer:: buft_count=%d\n", sg_mpi_rank, buft_count);
-#endif
-                bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
-                assert(thisbuft != NULL);
-                thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
-                thisbuft->bufsize = BUFT_SIZE;
-                thisbuft->dt      = MPI_CHAR;
-                /* Copy the remaining cmdline text into the new buffer */
-                strcpy(buf, nextpart);
-                /* And update our buffer info */
-                // thisbuft->chars = strlen(nextpart) +1;
-                thisbuft->chars = strlen(nextpart);
-                thisbuft->count = BUFT_SIZE - thisbuft->chars;
-            }
-            offset = thisbuft->chars;
-
-            do {
-                pid_t wpid;
-                wpid = waitpid(pid, &w_status, WNOHANG);
-                if ((nbytes = (size_t)read(pipefd[0], &buf[offset], remaining)) > 0) {
-                    offset += nbytes;
-                    read_bytes += nbytes;
-                    remaining -= nbytes;
-                    if (remaining == 0) {
-                        /* Update the current buffer prior to allocating the new one */
-                        thisbuft->count = 0;
-                        thisbuft->chars += read_bytes;
-#if VERBOSE
-                        printf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank,
-                               buft_count);
-#endif
-                        bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
-                        assert(thisbuft != NULL);
-                        thisbuft->buf     = MFU_MALLOC(BUFT_SIZE);
-                        thisbuft->bufsize = BUFT_SIZE;
-                        thisbuft->dt      = MPI_CHAR;
-                        thisbuft->chars   = BUFT_SIZE;
-                        offset            = 0;
-                        remaining         = BUFT_SIZE;
-                    }
-                }
-            } while (!WIFEXITED(w_status));
-            close(pipefd[0]);
-            wait(NULL);
-
-            thisbuft->count = remaining;
-            thisbuft->chars = thisbuft->bufsize - remaining;
-        }
-    }
-    else if (log_stdout_in_file) {
-        int    log_instance = -1;
-        pid_t  pid;
-        size_t log_len;
-        char   logpath[2048];
-        char   logErrors[2048];
-        char   current_dir[2048];
-        char * logbase = strdup(basename(filepath));
-        char * thisapp = strdup(basename(toolname));
-
-        if (txtlog == NULL) {
-            sprintf(logpath, "%s/%s_%s.log", getcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
-        }
-        else {
-            log_len = strlen(txtlog);
-            if (txtlog[log_len - 1] == '/')
-                sprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
-            else
-                sprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
-        }
-
-        if (log_errors_in_file) {
-            /* We co-locate the error logs in the same directories as the regular log files.
-             * The easiest way to do this is to simply replace the .log with .err in a
-             * copy of the logpath variable.
-             */
-            log_len = strlen(logpath);
-            strcpy(logErrors, logpath);
-            strcpy(&logErrors[log_len - 3], "err");
-        }
-        if (mfu_debug_level == MFU_LOG_VERBOSE) {
-            printf("\tCreating logfile: %s\n", logpath);
-            fflush(stdout);
-        }
-        pid = fork();
-        if (pid == 0) {
-            int efd;
-            int fd = open(logpath, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-            dup2(fd, fileno(stdout));
-            if (log_errors_in_file) {
-                efd = open(logErrors, O_RDWR | O_CREAT, S_IRUSR | S_IWUSR);
-                dup2(efd, fileno(stderr));
-                close(efd);
-            }
-            else
-                dup2(fd, fileno(stderr));
-            close(fd);
-            execvp(argv[0], argv);
-        }
-        int status;
-        pid = wait(&status);
-        if (logbase)
-            free(logbase);
-        if (thisapp)
-            free(thisapp);
-    }
-#endif /* #ifdef USE_OLD_CODE */
     mfu_free(argv);
 
     return 0;

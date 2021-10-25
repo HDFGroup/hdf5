@@ -12,9 +12,9 @@ if (NOT ONLY_SHARED_LIBS)
 	ARGS ${HDF5_TOOLS_DIR}/test ${CMAKE_BINARY_DIR}/bin
 	DEPENDS ${HDF5_TOOLS_SRC_DH5WALK_SOURCE_DIR}/copy_demo_files.sh
   )
-  add_custom_target(generate_demo ALL
-    DEPENDS "${HDF5_TOOLS_DIR}/test/demo_destfiles.test"
-  )
+#  add_custom_target(generate_demo ALL
+#    DEPENDS "${HDF5_TOOLS_DIR}/test/demo_destfiles.test"
+#  )
   target_include_directories (dh5walk PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   target_compile_options(dh5walk PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   TARGET_C_PROPERTIES (dh5walk STATIC)
