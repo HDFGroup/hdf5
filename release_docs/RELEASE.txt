@@ -49,10 +49,18 @@ New Features
 
     Configuration:
     -------------
+    - Refactored the utils folder.
+
+      Added subfolder test and moved the 'swmr_check_compat_vfd.c file'
+      from test into utils/test. Deleted the duplicate swmr_check_compat_vfd.c
+      file in hl/tools/h5watch folder. Also fixed vfd check options.
+
+      (ADB - 2021/10/18)
+
     - Changed autotools and CMake configurations to derive both
       compilation warnings-as-errors and warnings-only-warn configurations
-      from the same files, `config/*/*error*`.  Removed redundant files
-      `config/*/*noerror*`.
+      from the same files, 'config/*/*error*'.  Removed redundant files
+      'config/*/*noerror*'.
 
       (DCY - 2021/09/29)
 
@@ -136,6 +144,15 @@ Bug Fixes since HDF5-1.10.7 release
 
     High-Level Library
     ------------------
+    - Fixed HL_test_packet, test for packet table vlen of vlen.
+
+      Incorrect length assignment.
+
+        (ADB - 2021/10/14)
+
+
+    Fortran High-Level APIs
+    -----------------------
     -
 
 

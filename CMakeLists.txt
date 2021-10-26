@@ -970,10 +970,7 @@ endif ()
 # Option to build HDF5 Utilities
 #-----------------------------------------------------------------------------
 if (EXISTS "${HDF5_SOURCE_DIR}/utils" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/utils")
-  option (HDF5_BUILD_UTILS  "Build HDF5 Utils" ON)
-  if (HDF5_BUILD_UTILS)
-    add_subdirectory (utils)
-  endif ()
+  add_subdirectory (utils)
 endif ()
 
 #-----------------------------------------------------------------------------
