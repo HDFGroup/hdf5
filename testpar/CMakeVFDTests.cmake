@@ -21,8 +21,6 @@ set (H5P_VFD_TESTS
     t_pflush2
 )
 
-H5_SET_VFD_LIST()
-
 macro (ADD_VFD_TEST vfdname resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
     foreach (h5_test ${H5P_VFD_TESTS})
