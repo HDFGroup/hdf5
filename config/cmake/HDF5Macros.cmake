@@ -60,6 +60,7 @@ macro (H5_SET_LIB_OPTIONS libtarget libname libtype libpackage)
   endif ()
 endmacro ()
 
+# Initialize the list of VFDs to be used for testing and create a test folder for each VFD
 macro (H5_SET_VFD_LIST)
   set (VFD_LIST
       sec2
