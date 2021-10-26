@@ -1979,7 +1979,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 if ((file->backing_onion =
                          H5FD_open(name_onion, (H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC),
-                                   backing_fapl_id, maxaddr)) < 0) {
+                                   backing_fapl_id, maxaddr)) == NULL) {
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing onion file")
                 }
 
@@ -2068,8 +2068,8 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 // HDfree(buf);
                 // buf = NULL;
 
-                free(head_buf);
-                free(wh_buf);
+                H5MM_xfree(head_buf);
+                H5MM_xfree(wh_buf);
 
                 // if (FAIL == ret_value) {
                 //    HDremove(name_recovery); /* destroy new temp file, if 'twas created */
