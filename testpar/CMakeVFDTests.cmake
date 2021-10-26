@@ -15,27 +15,11 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-set (VFD_LIST
-    sec2
-    stdio
-    core
-    split
-    multi
-    family
-)
 
 set (H5P_VFD_TESTS
     t_pflush1
     t_pflush2
 )
-
-if (H5_HAVE_DIRECT)
-  set (VFD_LIST ${VFD_LIST} direct)
-endif ()
-
-foreach (vfdtest ${VFD_LIST})
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
-endforeach ()
 
 macro (ADD_VFD_TEST vfdname resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
