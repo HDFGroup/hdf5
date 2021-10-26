@@ -372,6 +372,17 @@ Bug Fixes since HDF5-1.12.1 release
 
         (DER - 2021/04/27, HDFFV-11239)
 
+    - Fixed CVE-2018-17432
+
+        The tool h5repack produced a segfault on a corrupted file which had
+        invalid rank for scalar or NULL datatype.
+
+        The problem was fixed in HDF5 1.12.1 by modifying the dataspace encode 
+        and decode functions to detect and report invalid rank. h5repack now 
+        fails with an error message for the corrupted file.
+
+        (BMR - 2020/10/26, HDFFV-10590)
+
 
     Java Library
     ------------
