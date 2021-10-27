@@ -23,7 +23,6 @@
 #include "mfu_errors.h"
 #include "mfu_flist_internal.h"
 
-
 #ifdef DAOS_SUPPORT
 #include "mfu_daos.h"
 #endif
@@ -82,14 +81,13 @@ struct distribute_option {
     uint64_t separators[MAX_DISTRIBUTE_SEPARATORS];
 };
 
-
 static const char *           s_opts   = "hl*E*i:o:T:";
-static struct h5_long_options l_opts[] = {{"help",     no_arg,      'h'},
-                                          {"log_text", optional_arg,'l'},
-                                          {"error",    optional_arg,'E'},
-                                          {"input",    require_arg, 'i'},
-                                          {"output",   require_arg, 'o'},
-                                          {"tool",     require_arg, 'T'},
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
+                                          {"log_text", optional_arg, 'l'},
+                                          {"error", optional_arg, 'E'},
+                                          {"input", require_arg, 'i'},
+                                          {"output", require_arg, 'o'},
+                                          {"tool", require_arg, 'T'},
                                           {NULL, 0, '\0'}};
 
 static void
@@ -361,10 +359,11 @@ out:
 static void
 usage(void)
 {
-    if (sg_mpi_rank) return;
+    if (sg_mpi_rank)
+        return;
 
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "Usage: dh5walk [options] <path> ...\n") ;
+    PRINTVALSTREAM(rawoutstream, "Usage: dh5walk [options] <path> ...\n");
 #ifdef DAOS_SUPPORT
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "DAOS paths can be specified as:\n");
@@ -374,9 +373,12 @@ usage(void)
     PRINTVALSTREAM(rawoutstream, "Options:\n");
     PRINTVALSTREAM(rawoutstream, "  -i, --input <file>      - read list from file\n");
     PRINTVALSTREAM(rawoutstream, "  -o, --output <file>     - write output summary to the named file.\n");
-    PRINTVALSTREAM(rawoutstream, "  -E, --error  <file>     - write processed errors to file in text format\n");
-    PRINTVALSTREAM(rawoutstream, "  -l, --log_text <dir>    - write individual tool outputs to a file. Logs can be written to an "
-           "optional named directory.\n");
+    PRINTVALSTREAM(rawoutstream,
+                   "  -E, --error  <file>     - write processed errors to file in text format\n");
+    PRINTVALSTREAM(
+        rawoutstream,
+        "  -l, --log_text <dir>    - write individual tool outputs to a file. Logs can be written to an "
+        "optional named directory.\n");
     PRINTVALSTREAM(rawoutstream, "  -T, --tool <executable> - name of the HDF5 tool to invoke\n");
     PRINTVALSTREAM(rawoutstream, "  -h, --help              - print usage\n");
     PRINTVALSTREAM(rawoutstream, "\n");
@@ -445,8 +447,8 @@ print_file(mfu_flist flist, uint64_t idx)
         const char *size_units;
         mfu_format_bytes(size, &size_tmp, &size_units);
 
-        HDprintf("%s %s %s %7.3f %3s %s %s\n", mode_format, username, groupname, size_tmp, size_units, modify_s,
-               file);
+        HDprintf("%s %s %s %7.3f %3s %s %s\n", mode_format, username, groupname, size_tmp, size_units,
+                 modify_s, file);
     }
     else {
         /* get type */
@@ -517,7 +519,7 @@ print_file_text(mfu_flist flist, uint64_t idx, char *buffer, size_t bufsize)
         mfu_format_bytes(size, &size_tmp, &size_units);
 
         numbytes = (size_t)snHDprintf(buffer, bufsize, "%s %s %s %7.3f %3s %s %s\n", mode_format, username,
-                                    groupname, size_tmp, size_units, modify_s, file);
+                                      groupname, size_tmp, size_units, modify_s, file);
     }
     else {
         /* get type */
@@ -1029,7 +1031,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
                         thisbuft->chars += read_bytes;
 #ifdef VERBOSE
                         HDprintf("[%d] Allocate-2 a new read buffer:: buft_count=%d\n", sg_mpi_rank,
-                               buft_count);
+                                 buft_count);
 #endif
                         bufs[buft_count++] = thisbuft = (buf_t *)MFU_CALLOC(1, sizeof(buf_t));
                         assert(thisbuft != NULL);
@@ -1064,10 +1066,11 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
         if (txtlog == NULL) {
             if (log_instance > 0) {
                 HDprintf(logpath, "%s/%s_%s.log_%d", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
-                        thisapp, log_instance);
+                         thisapp, log_instance);
             }
             else {
-                HDprintf(logpath, "%s/%s_%s.log", HDgetcwd(current_dir, sizeof(current_dir)), logbase, thisapp);
+                HDprintf(logpath, "%s/%s_%s.log", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
+                         thisapp);
             }
         }
         else {
@@ -1171,14 +1174,14 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
             void *      check_ptr[2] = {NULL, NULL};
 
             HDmemcpy(check_ptr, &buf[1], sizeof(void *));
-			flist_arg = (mfu_flist)check_ptr[0];
+            flist_arg = (mfu_flist)check_ptr[0];
 
             /* +2 (see below) accounts for the '&' and the trailing zero pad */
             buf += sizeof(mfu_flist *) + 2;
             fname_arg = mfu_flist_file_get_name(flist_arg, idx);
             if (fname_arg == NULL) {
                 HDprintf("[%d] Warning: Unable to resolve file_substitution %d (idx=%ld)\n", sg_mpi_rank,
-                       file_substituted, idx);
+                         file_substituted, idx);
                 argv[k] = HDstrdup(fname);
             }
             else {
@@ -1290,7 +1293,7 @@ process_input_file(char *inputname, int myrank, int size)
             index++;
         }
         linebuf[0] = 0;
-		HDfree(cmdline);
+        HDfree(cmdline);
     }
 
     if (output_log_file) {
@@ -1318,7 +1321,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-	/* get our rank and the size of comm_world */
+    /* get our rank and the size of comm_world */
     int rank, ranks;
     MPI_Comm_rank(MPI_COMM_WORLD, &rank);
     MPI_Comm_size(MPI_COMM_WORLD, &ranks);
@@ -1354,12 +1357,12 @@ main(int argc, const char *argv[])
      * I've reproduced it here:
      * struct option { char * name; int has_arg; int *flag; int val};
      */
-    int       opt;
-    int       tool_selected   = 0;
-    int       tool_args_start = -1;
-    int       last_mfu_arg    = 0;
+    int opt;
+    int tool_selected   = 0;
+    int tool_args_start = -1;
+    int last_mfu_arg    = 0;
 
-    mfu_pred *pred_head       = NULL;
+    mfu_pred *pred_head = NULL;
 
     while (!tool_selected) {
         opt = H5_get_option(argc, argv, s_opts, l_opts);
@@ -1373,8 +1376,8 @@ main(int argc, const char *argv[])
                 last_mfu_arg = H5_optind;
                 if (outputname) {
                     log_output_in_single_file = 1;
-                    output_log_file = HDstrdup(H5_optarg);
-                    text = 1;	/* Format TXT, not HDF5 */
+                    output_log_file           = HDstrdup(H5_optarg);
+                    text                      = 1; /* Format TXT, not HDF5 */
                 }
                 break;
             case 'E':
@@ -1401,15 +1404,15 @@ main(int argc, const char *argv[])
                 /* Don't allow any further parsing of arguments */
                 break;
             case 'h':
-                usage();                
+                usage();
                 dh5walk_exit(EXIT_SUCCESS);
                 break;
             case '?':
-                usage();                
+                usage();
                 dh5walk_exit(EXIT_SUCCESS);
                 break;
             default:
-				usage();
+                usage();
                 dh5walk_exit(EXIT_FAILURE);
         }
     }
@@ -1469,7 +1472,7 @@ main(int argc, const char *argv[])
     if (use_config_file > 0) {
         int count1 = 0, count2 = 0;
         for (i = 0; i < use_config_file; i++) {
-            int   index       = config_index[i];
+            int         index       = config_index[i];
             const char *config_file = argv[index];
             if (i == 0) {
                 flist1 = mfu_flist_new();
@@ -1487,7 +1490,7 @@ main(int argc, const char *argv[])
     else if (numpaths > 0) {
 
         /* allocate space for each path */
-        paths = (mfu_param_path *)MFU_MALLOC((size_t)numpaths * sizeof(mfu_param_path));
+        paths        = (mfu_param_path *)MFU_MALLOC((size_t)numpaths * sizeof(mfu_param_path));
         mfu_src_file = mfu_file_new();
 
         /* process each path */
@@ -1495,11 +1498,11 @@ main(int argc, const char *argv[])
 
         /* don't allow user to specify input file with walk */
         if (inputname != NULL) {
-			if (paths) {
-               mfu_free(&paths);
+            if (paths) {
+                mfu_free(&paths);
             }
             usage();
-			dh5walk_exit(EXIT_FAILURE);
+            dh5walk_exit(EXIT_FAILURE);
         }
     }
     else {
@@ -1664,14 +1667,14 @@ main(int argc, const char *argv[])
 H5_ATTR_NORETURN void
 dh5walk_exit(int status)
 {
-    int require_finalize=0;
+    int require_finalize = 0;
     h5tools_close();
     mfu_finalize();
 
-	/* Check to see whether we need to call MPI_Finalize */
-	MPI_Initialized(&require_finalize);
+    /* Check to see whether we need to call MPI_Finalize */
+    MPI_Initialized(&require_finalize);
     if (require_finalize)
-		MPI_Finalize();
+        MPI_Finalize();
 
     HDexit(status);
 }
