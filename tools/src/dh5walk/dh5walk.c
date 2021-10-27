@@ -843,7 +843,6 @@ copy_args(int argc, const char *argv[], int *mfu_argc, int *copy_len)
     return argv_copy;
 }
 
-
 typedef struct hash_entry {
     int                hash;
     char *             name;
@@ -915,9 +914,9 @@ static void
 run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const char *fname)
 {
     char  filepath[1024];
-    char *toolname = argv[0];
-    char *buf      = NULL;
-    int use_stdout = 0;
+    char *toolname   = argv[0];
+    char *buf        = NULL;
+    int   use_stdout = 0;
 
     /* create a copy of the 1st file passed to the application */
     HDstrcpy(filepath, fname);
@@ -1121,7 +1120,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
             free(logbase);
         if (thisapp)
             free(thisapp);
-    }  /* else if(log_stdout_in_file)  */
+    } /* else if(log_stdout_in_file)  */
 }
 
 int MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg);
@@ -1167,7 +1166,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
     /* Reconstruct the command line that the user provided for the h5tool */
     for (k = 1; k < count; k++) {
         if (buf[0] == '&') {
-            const char *fname_arg    = NULL;
+            const char *fname_arg = NULL;
             mfu_flist   flist_arg;
             void *      check_ptr[2] = {NULL, NULL};
 
