@@ -612,29 +612,52 @@ H5_DLL htri_t H5F__same_file_test(hid_t file_id1, hid_t file_id2);
 H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 #endif /* H5F_TESTING */
 
-/* VFD SMWR log reporting macros */
-/* The first argument is the HDF5 file pointer(H5F_t *). Its value needs to be checked
- * to avoid a failure caused by "Low-Level File I/O " in the testhdf5 which involves
- * the test of a non-existing HDF5 file. */
-#define H5F_POST_VFD_SWMR_LOG_ENTRY(fp, entry_type_code, body)                                               \
-    if (fp != NULL)                                                                                          \
-        if (fp->shared != NULL)                                                                              \
-            if (fp->shared->vfd_swmr_log_on == TRUE)                                                         \
-                H5F_post_vfd_swmr_log_entry(fp, entry_type_code, body);
+/* VFD SMWR LOG REPORTING MACROS */ 
 
-H5_DLL herr_t H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *body);
-/* clang-format off */
-/* The entry code number is listed in the comment for convenience. */
+/* H5F_POST_VFD_SWMR_LOG_ENTRY is the macro that needs to be used by the developers. 
+ * It calls an internal reporting function H5F_post_vfd_swmr_log_entry() that receives
+ * the log entry_type_code,  which generates the log tag,  and the message log_info, which 
+ * the library developer wants to save into the log file.
+ *
+ * The macro H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, number_entry_production, m) is
+ * called by H5F_POST_VFD_SWMR_LOG_ENTRY when the HDF5 library is built with the
+ * production mode. Number_entry_production will control the number of entry tags that
+ * applications can receive. Currently this number is set to 1 and is subject to change
+ * when more tags are useful to be present to applications.
+ *
+ * The first argument of the macro is the HDF5 file pointer(H5F_t *). 
+ * Its value needs to be checked to avoid a failure caused by "Low-Level File I/O " 
+ * in the testhdf5 program, which involves the test of a non-existing HDF5 file.
+ */
 
-#if 0
-static const char *H5Fvfd_swmr_log_tags[] = {
-                                             "FILE_OPEN",                   /* 0 */                        
-                                             "FILE_CLOSE",                  /* 1 */
-                                             "EOT_TRIGGER_TIME",            /* 2 */
-                                             "EOT_PROCESSING_TIME",         /* 3 */
-                                             "EOT_META_FILE_INDEX"          /* 4 */
-                                            };
+H5_DLL void H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info);
+
+#define H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(fp, entry_type_code, log_info)                                      \
+    do {                                                                                                     \
+        if (fp != NULL) {                                                                                     \
+            if (fp->shared != NULL) {                                                                          \
+                if (fp->shared->vfd_swmr_log_on == TRUE)  {                                                    \
+                    H5F_post_vfd_swmr_log_entry(fp, entry_type_code, log_info);                                  \
+                } \
+            } \
+        } \
+    } while (0)
+
+#define H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(fp, entry_type_code, max_code, log_info)                             \
+    do {                                                                                                     \
+        if (entry_type_code <max_code) {                                                                      \
+            H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(fp,entry_type_code,log_info);                                    \
+        } \
+    } while (0)
+
+/* Note: change H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, 1, m) on the following lines to 
+ *       H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, your_number_entry_production, m)
+ *       as necessary. 
+ */
+#ifndef NDEBUG
+#define H5F_POST_VFD_SWMR_LOG_ENTRY(f, c, m) H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(f, c, m)
+#else
+#define H5F_POST_VFD_SWMR_LOG_ENTRY(f, c, m) H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, 1, m)
 #endif
-/* clang-format on */
 
 #endif /* H5Fpkg_H */

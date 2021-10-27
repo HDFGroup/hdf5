@@ -369,6 +369,7 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
 
 } /* init_vfd_swmr_config() */
 
+/* Initialize the log file path in config, this function should be called after init_vfd_swmr_config.  */
 void
 init_vfd_swmr_log(H5F_vfd_swmr_config_t *config, const char *log_file_fmtstr, ...)
 
