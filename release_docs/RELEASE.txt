@@ -391,7 +391,11 @@ Bug Fixes since HDF5-1.8.22
 
     Packet Table APIs:
     ------------------
-    - None
+    - Fixed HL_test_packet, test for packet table vlen of vlen.
+
+      Incorrect length assignment.
+
+        (ADB - 2021/10/14)
 
 
 Supported Platforms
