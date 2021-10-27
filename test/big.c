@@ -56,8 +56,8 @@
 #define DNAME "big.data"
 
 #define WRT_N       50
-#define WRT_SIZE    4 * 1024
-#define FAMILY_SIZE 1024 * 1024 * 1024
+#define WRT_SIZE    (4 * 1024)
+#define FAMILY_SIZE (1024 * 1024 * 1024)
 
 #define GB (HDoff_t)0x40000000L
 
@@ -277,7 +277,7 @@ error:
  *      'name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
 enough_room(hid_t fapl)
 {
@@ -319,7 +319,7 @@ done:
 
     return ret_value;
 }
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    writer

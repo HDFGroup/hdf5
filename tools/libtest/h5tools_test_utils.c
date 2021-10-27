@@ -69,7 +69,7 @@
  *
  *****************************************************************************/
 
-H5_GCC_DIAG_OFF("format")
+H5_GCC_CLANG_DIAG_OFF("format")
 
 /*----------------------------------------------------------------------------
  *
@@ -1255,7 +1255,7 @@ error:
 #undef UTIL_TEST_DEFAULT
 #undef UTIL_TEST_CREATE
 } /* test_set_configured_fapl */
-H5_GCC_DIAG_ON("format")
+H5_GCC_CLANG_DIAG_ON("format")
 
 /*----------------------------------------------------------------------------
  *

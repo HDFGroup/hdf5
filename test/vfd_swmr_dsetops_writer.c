@@ -149,7 +149,7 @@ static bool verify_dsets_operations(state_t *s, dsets_state_t *ds, H5F_vfd_swmr_
 static bool verify_dsets_action(unsigned action, const state_t *s, const dsets_state_t *ds, unsigned which,
                                 bool fileclosed);
 static bool verify_dset(hid_t did, hid_t tid, hid_t mem_sid, hid_t file_sid, hsize_t *start, hsize_t *stride,
-                        size_t *count, hsize_t *block, unsigned int *vbuf, bool fileclosed,
+                        hsize_t *count, hsize_t *block, unsigned int *vbuf, bool fileclosed,
                         bool flush_raw_data);
 static bool verify_dset_compact(const state_t *s, const dsets_state_t *ds, bool fileclosed,
                                 bool flush_raw_data);

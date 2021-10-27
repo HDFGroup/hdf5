@@ -616,14 +616,14 @@ H5G__user_path_test(hid_t obj_id, char *user_path, size_t *user_path_len, unsign
 
     /* Retrieve a copy of the user path and put it into the buffer */
     if (obj_path->user_path_r) {
-        ssize_t len = H5RS_len(obj_path->user_path_r);
+        size_t len = H5RS_len(obj_path->user_path_r);
 
         /* Set the user path, if given */
         if (user_path)
-            HDstrncpy(user_path, H5RS_get_str(obj_path->user_path_r), (size_t)(len + 1));
+            HDstrncpy(user_path, H5RS_get_str(obj_path->user_path_r), (len + 1));
 
         /* Set the length of the path */
-        *user_path_len = (size_t)len;
+        *user_path_len = len;
 
         /* Set the user path hidden flag */
         *obj_hidden = obj_path->obj_hidden;

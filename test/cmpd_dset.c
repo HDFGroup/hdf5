@@ -110,8 +110,8 @@ typedef struct {
     long long r, s, t;
 } stype4;
 
-#define NX          100u
-#define NY          2000u
+#define NX          100U
+#define NY          2000U
 #define PACK_NMEMBS 100
 
 /*-------------------------------------------------------------------------
