@@ -54,7 +54,7 @@
 #define nanosecs_per_second    1000000000 /* nanoseconds per second */
 #define nanosecs_per_tenth_sec 100000000  /* nanoseconds per 0.1 second */
 
-/* Declare an array of string to identify the VFD SMWR Log tags. 
+/* Declare an array of string to identify the VFD SMWR Log tags.
  * Note this array is used to generate the entry tag by the log reporting macro
  * H5F_POST_VFD_SWMR_LOG_ENTRY.
  *
@@ -63,7 +63,7 @@
  * If the entry code is 0, H5Fvfd_swmr_log_tags[0] is used to report the entry tag.
  * H5F_POST_VFD_SWMR_LOG_ENTRY(f, 0, log_msg) will put the log_msg attached to
  * the entry tag "EOT_PROCESSING_TIME".
- * The entry code number is listed in the comment for convenience. 
+ * The entry code number is listed in the comment for convenience.
  * Currently for the production mode, only the "EOT_PROCESSING_TIME" is present.
  */
 
@@ -77,14 +77,14 @@ static const char *H5Fvfd_swmr_log_tags[] = {
                                             };
 /* clang-format on */
 
-/* This string defines the format of the VFD SWMR log file. 
- * The current maximum length of entry tag string is set to 26. 
- * One can enlarge or reduce this number as necessary. 
+/* This string defines the format of the VFD SWMR log file.
+ * The current maximum length of entry tag string is set to 26.
+ * One can enlarge or reduce this number as necessary.
  * For example, to enlarge the maximum length of entry tag string to 30,
- * Just change 26 to 30 in the following line, like 
- * const char *log_fmt_str="%-30s: %.3lf s: %s\n"; 
+ * Just change 26 to 30 in the following line, like
+ * const char *log_fmt_str="%-30s: %.3lf s: %s\n";
  */
-const char *log_fmt_str="%-26s: %.3lf s: %s\n";
+const char *log_fmt_str = "%-26s: %.3lf s: %s\n";
 
 /********************/
 /* Local Prototypes */
@@ -1958,8 +1958,8 @@ done:
  *
  * Parameters:
  *              H5F_t *f                IN: HDF5 file pointer
- *              int entry_type_code     IN: The entry type code to identify the 
- *                                          log entry tag.                                           
+ *              int entry_type_code     IN: The entry type code to identify the
+ *                                          log entry tag.
  *              char *log_info          IN: The information to be stored in the
  *                                          log file.
  * Return:   None
@@ -1967,29 +1967,28 @@ done:
  *-------------------------------------------------------------------------
  */
 
-void 
+void
 H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info)
 {
     double          temp_time;
     struct timespec current_time;
-    char *gettime_error;          
+    char *          gettime_error;
 
-    /* Obtain the current time. 
-       If   failed, write an error message to the log file. 
+    /* Obtain the current time.
+       If   failed, write an error message to the log file.
        else calcluate the elapsed time in seconds since the log file
             was created and wirte the time to the log file. */
     if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0) {
         gettime_error = HDmalloc(14);
         HDsprintf(gettime_error, "gettime_error");
-        HDfprintf(f->shared->vfd_swmr_log_file_ptr,
-                   "%-26s:  %s\n", H5Fvfd_swmr_log_tags[entry_type_code],
+        HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%-26s:  %s\n", H5Fvfd_swmr_log_tags[entry_type_code],
                   gettime_error);
         HDfree(gettime_error);
     }
     else {
         temp_time = TOTAL_TIME_PASSED(f->shared->vfd_swmr_log_start_time, current_time);
-        HDfprintf(f->shared->vfd_swmr_log_file_ptr,log_fmt_str, 
-                  H5Fvfd_swmr_log_tags[entry_type_code], temp_time, log_info);
+        HDfprintf(f->shared->vfd_swmr_log_file_ptr, log_fmt_str, H5Fvfd_swmr_log_tags[entry_type_code],
+                  temp_time, log_info);
     }
     return;
 }

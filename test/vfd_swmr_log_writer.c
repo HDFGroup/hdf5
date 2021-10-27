@@ -11,9 +11,9 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /* Description of this program:
- * This program shows an example on how a VFD log file can be written. 
+ * This program shows an example on how a VFD log file can be written.
  * It is adapted from the group performence test. Most options of the
- * group performance test are still kept. 
+ * group performance test are still kept.
  * To turn on the log feature, one just needs to provide the log file path as
  * indicated by the line init_vfd_swmr_log(&config, "./log-test") in the main
  * function. The init_vfd_swmr_log is defined inside the vfd_swmr_common.c.
@@ -27,7 +27,7 @@
  * This program also checks the performance of group creations for VFD SWMR.
  * Currently the group creation time, H5Fopen and H5Fclose time are measured.
  * The output can help check the contents in the log-test.
- * 
+ *
  */
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
 
