@@ -408,13 +408,13 @@ CONTAINS
      !open the INTEGER attrbute by name
      !
      CALL h5aopen_name_f(dset_id, aname5, attr5_id, error)
-     CALL check("h5aopen_idx_f",error,total_error)
+     CALL check("h5aopen_name_f",error,total_error)
 
      !
      !open the NULL attrbute by name
      !
      CALL h5aopen_name_f(dset_id, aname6, attr6_id, error)
-     CALL check("h5aopen_idx_f",error,total_error)
+     CALL check("h5aopen_name_f",error,total_error)
 
      !
      !get the attrbute name
