@@ -220,7 +220,7 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
  *          named_datatype_free must be called before the program exits
  *          to free the stack.
  *-------------------------------------------------------------------------
- */   -v, --verbose           Verbose mode, print object information
+ */
 
 hid_t
 copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt,
