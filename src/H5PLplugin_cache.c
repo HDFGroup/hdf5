@@ -263,59 +263,99 @@ H5PL__find_plugin_in_cache(const H5PL_search_params_t *search_params, hbool_t *f
 
     /* Loop over all the plugins, looking for one that matches */
     for (u = 0; u < H5PL_num_plugins_g; u++) {
-        /* If the plugin type (filter, VOL connector, etc.) match, proceed */
-        if (search_params->type == H5PL_cache_g[u].type) {
-            hbool_t matched = FALSE; /* Whether cached plugin info matches */
+        hbool_t matched = FALSE; /* Whether cached plugin info matches */
 
-            switch (search_params->type) {
-                case H5PL_TYPE_FILTER:
-                    if (search_params->key->id == H5PL_cache_g[u].key.id)
-                        matched = TRUE;
-                    break;
+        /* Determine if the plugin types match */
+        if (search_params->type != H5PL_cache_g[u].type)
+            continue;
 
-                case H5PL_TYPE_VOL:
-                    if (search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE) {
-                        if (search_params->key->vol.u.value == H5PL_cache_g[u].key.vol.u.value)
-                            matched = TRUE;
-                    } /* end if */
-                    else if (search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
-                        if (0 == HDstrcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
-                            matched = TRUE;
-                    } /* end else-if */
-                    else
-                        HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "bad VOL plugin search key type")
-                    break;
+        /* Determine if cache entry matches based on type-specific information */
+        switch (search_params->type) {
+            case H5PL_TYPE_FILTER:
+                /* Check if specified filter plugin ID matches cache entry's ID */
+                if (search_params->key->id == H5PL_cache_g[u].key.id)
+                    matched = TRUE;
 
-                case H5PL_TYPE_ERROR:
-                case H5PL_TYPE_NONE:
-                default:
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_BADVALUE, FAIL, "bad plugin type")
-            } /* end switch */
-
-            /* If the plugin type (filter, VOL connector, etc.) and key match, query the plugin for its info
-             */
-            if (matched) {
-                H5PL_get_plugin_info_t get_plugin_info_function;
-                const void *           info;
-
-                /* Get the "get plugin info" function from the plugin. */
-                if (NULL == (get_plugin_info_function = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(
-                                 (H5PL_cache_g[u]).handle, "H5PLget_plugin_info")))
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
-
-                /* Call the "get plugin info" function */
-                if (NULL == (info = (*get_plugin_info_function)()))
-                    HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
-
-                /* Set output parameters */
-                *found       = TRUE;
-                *plugin_info = info;
-
-                /* No need to continue processing */
                 break;
-            } /* end if */
-        }     /* end if */
-    }         /* end for */
+
+            case H5PL_TYPE_VOL:
+                if (search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_NAME) {
+                    /* Make sure the plugin cache entry key type matches our search key type */
+                    if (H5PL_cache_g[u].key.vol.kind != H5VL_GET_CONNECTOR_BY_NAME)
+                        continue;
+
+                    /* Check if specified VOL connector name matches cache entry's name */
+                    if (!HDstrcmp(search_params->key->vol.u.name, H5PL_cache_g[u].key.vol.u.name))
+                        matched = TRUE;
+                }
+                else {
+                    HDassert(search_params->key->vol.kind == H5VL_GET_CONNECTOR_BY_VALUE);
+
+                    /* Make sure the plugin cache entry key type matches our search key type */
+                    if (H5PL_cache_g[u].key.vol.kind != H5VL_GET_CONNECTOR_BY_VALUE)
+                        continue;
+
+                    /* Check if specified VOL connector ID matches cache entry's ID */
+                    if (search_params->key->vol.u.value == H5PL_cache_g[u].key.vol.u.value)
+                        matched = TRUE;
+                }
+
+                break;
+
+            case H5PL_TYPE_VFD:
+                if (search_params->key->vfd.kind == H5FD_GET_DRIVER_BY_NAME) {
+                    /* Make sure the plugin cache entry key type matches our search key type */
+                    if (H5PL_cache_g[u].key.vfd.kind != H5FD_GET_DRIVER_BY_NAME)
+                        continue;
+
+                    /* Check if specified VFD name matches cache entry's name */
+                    if (!HDstrcmp(search_params->key->vfd.u.name, H5PL_cache_g[u].key.vfd.u.name))
+                        matched = TRUE;
+                }
+                else {
+                    HDassert(search_params->key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
+
+                    /* Make sure the plugin cache entry key type matches our search key type */
+                    if (H5PL_cache_g[u].key.vfd.kind != H5FD_GET_DRIVER_BY_VALUE)
+                        continue;
+
+                    /* Check if specified VFD ID matches cache entry's ID */
+                    if (search_params->key->vfd.u.value == H5PL_cache_g[u].key.vfd.u.value)
+                        matched = TRUE;
+                }
+
+                break;
+
+            case H5PL_TYPE_ERROR:
+            case H5PL_TYPE_NONE:
+            default:
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "Invalid plugin type specified")
+        }
+
+        /* If the plugin type (filter, VOL connector, VFD plugin, etc.) and key match,
+         * query the plugin for its info.
+         */
+        if (matched) {
+            H5PL_get_plugin_info_t get_plugin_info_function;
+            const void *           info;
+
+            /* Get the "get plugin info" function from the plugin. */
+            if (NULL == (get_plugin_info_function = (H5PL_get_plugin_info_t)H5PL_GET_LIB_FUNC(
+                             H5PL_cache_g[u].handle, "H5PLget_plugin_info")))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get function for H5PLget_plugin_info")
+
+            /* Call the "get plugin info" function */
+            if (NULL == (info = (*get_plugin_info_function)()))
+                HGOTO_ERROR(H5E_PLUGIN, H5E_CANTGET, FAIL, "can't get plugin info")
+
+            /* Set output parameters */
+            *found       = TRUE;
+            *plugin_info = info;
+
+            /* No need to continue processing */
+            break;
+        }
+    } /* end for */
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

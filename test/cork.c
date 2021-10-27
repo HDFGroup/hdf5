@@ -26,7 +26,11 @@
  */
 #define H5C_FRIEND  /*suppress error about including H5Cpkg      */
 #define H5C_TESTING /*suppress warning about H5C testing funcs*/
+#define H5FD_FRIEND /*suppress error about including H5FDpkg      */
+#define H5FD_TESTING
+
 #include "H5Cpkg.h" /* Cache                */
+#include "H5FDpkg.h"
 
 /* ============ */
 /* Test Defines */
@@ -2243,6 +2247,19 @@ main(void)
     nerrs += verify_old_dset_cork();
 
     for (swmr = 0; swmr <= 1; swmr++) {
+        if (swmr) {
+            char *driver = NULL;
+
+            /* Skip these tests if SWMR I/O is not supported for the VFD specified
+             * by the environment variable.
+             */
+            driver = HDgetenv(HDF5_DRIVER);
+            if (!H5FD__supports_swmr_test(driver)) {
+                HDputs("-- SKIPPED SWMR tests for SWMR-incompatible VFD --");
+                continue;
+            }
+        }
+
         /* Tests with new/old library format */
         /* This is the test moved from th5o.c: test_h5o_cork() */
         nerrs += test_objs_cork(swmr, TRUE);

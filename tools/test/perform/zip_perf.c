@@ -103,7 +103,7 @@ error(const char *fmt, ...)
 static void
 cleanup(void)
 {
-    if (!HDgetenv("HDF5_NOCLEANUP"))
+    if (!HDgetenv(HDF5_NOCLEANUP))
         HDunlink(filename);
     HDfree(filename);
 }
@@ -396,7 +396,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
             error("out of memory");
         }
 
-        compression_time = 0.0F;
+        compression_time = 0.0;
 
         if (random_test)
             fill_with_random_data(src, src_len);

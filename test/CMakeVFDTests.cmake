@@ -17,21 +17,8 @@
 ##############################################################################
 # included from CMakeTests.cmake
 
-set (VFD_LIST
-    sec2
-    stdio
-    core
-    core_paged
-    split
-    multi
-    family
-)
-if (H5_HAVE_DIRECT)
-  set (VFD_LIST ${VFD_LIST} direct)
-endif ()
-
+# create more test folders for each VFD
 foreach (vfdtest ${VFD_LIST})
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles")
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}/testfiles/plist_files")
 endforeach ()
@@ -208,3 +195,22 @@ add_custom_target(HDF5_VFDTEST_LIB_files ALL COMMENT "Copying files needed by HD
   foreach (h5_vfd ${VFD_LIST})
     ADD_VFD_TEST (${h5_vfd} 0)
   endforeach ()
+
+  ##############################################################################
+  ###    V F D  P L U G I N  T E S T S
+  ##############################################################################
+  if (BUILD_SHARED_LIBS)
+    if (WIN32)
+      set (CMAKE_SEP "\;")
+      set (BIN_REL_PATH "../../")
+    else ()
+      set (CMAKE_SEP ":")
+      set (BIN_REL_PATH "../")
+    endif ()
+
+    add_test (NAME H5PLUGIN-vfd_plugin COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:vfd_plugin>)
+    set_tests_properties (H5PLUGIN-vfd_plugin PROPERTIES
+        ENVIRONMENT "HDF5_PLUGIN_PATH=${CMAKE_BINARY_DIR}/null_vfd_plugin_dir;srcdir=${HDF5_TEST_BINARY_DIR}"
+        WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}
+    )
+  endif ()
