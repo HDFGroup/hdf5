@@ -93,7 +93,10 @@ macro (H5_SET_VFD_LIST)
   if (H5_HAVE_WINDOWS)
     set (VFD_LIST ${VFD_LIST} windows)
   endif ()
+endmacro ()
 
+# Initialize the list of VFDs to be used for testing and create a test folder for each VFD
+macro (H5_CREATE_VFD_DIR)
   foreach (vfdtest ${VFD_LIST})
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
   endforeach ()

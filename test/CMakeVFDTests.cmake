@@ -16,6 +16,7 @@
 ##############################################################################
 ##############################################################################
 # included from CMakeTests.cmake
+H5_CREATE_VFD_DIR()
 
 # create more test folders for each VFD
 foreach (vfdtest ${VFD_LIST})
