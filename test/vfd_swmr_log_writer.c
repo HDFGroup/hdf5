@@ -20,7 +20,7 @@
  * For the demo of the log feature,
  * one just needs to do te following:
  * After compiling the program, just run the following line
- *     ./vfd_swmr_log_writer -n 1000 -P -q
+ *     ./vfd_swmr_log_writer -n 100000 -P -q
  * A VFD SWMR log file log-test is generated.
  * The log-test should include something like:
  * 'EOT_PROCESSING_TIME       : 0.040 s: Writer time is 1 milliseconds'
