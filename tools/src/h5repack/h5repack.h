@@ -28,8 +28,8 @@
 #define MAX_COMPACT_DSIZE 64512              /* max data size for compact layout. -1k for header size */
 
 /* timing formats */
-#define FORMAT_OBJ_TIME      " %-27s  %e/%e   %s\n"      /* obj type, name */
-#define FORMAT_OBJ_ATTR_TIME "  %-27s  %e/%e   %s\n"     /* obj type, name */
+#define FORMAT_OBJ_TIME        " %-27s  %e/%e   %s\n"                          /* obj type, name */
+#define FORMAT_OBJ_ATTR_TIME   "  %-27s  %e/%e   %s\n"                         /* obj type, name */
 #define FORMAT_OBJ_NOTIME      " %-27s                              %s\n"      /* obj type, name */
 #define FORMAT_OBJ_ATTR_NOTIME "  %-27s                              %s\n"     /* obj type, name */
 

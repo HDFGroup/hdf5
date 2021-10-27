@@ -39,8 +39,8 @@
  */
 static int  get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum,
                           hsize_t dims_hslab[], hsize_t *hslab_nbytes_p);
-static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr, pack_opt_t *options, double read_time,
-                               double write_time);
+static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr, pack_opt_t *options,
+                               double read_time, double write_time);
 static int  do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *options);
 static int  copy_user_block(const char *infile, const char *outfile, hsize_t size);
 #if defined(H5REPACK_DEBUG_USER_BLOCK)
@@ -646,7 +646,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     unsigned           crt_order_flags;    /* group creation order flag */
     struct timeval     timer_start;        /* verbose timing start time */
     struct timeval     timer_stop;         /* verbose timing stop time */
-    static double      read_time = 0;
+    static double      read_time  = 0;
     static double      write_time = 0;
     h5tool_link_info_t linkinfo;
     unsigned           i;
@@ -761,7 +761,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                 case H5TRAV_TYPE_DATASET: {
                     hbool_t use_h5ocopy;
 
-                    read_time = 0.0;
+                    read_time  = 0.0;
                     write_time = 0.0;
 
                     has_filter = 0;
@@ -1035,16 +1035,20 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                             H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
                                         if (options->verbose == 2) {
                                             HDgettimeofday(&timer_stop, NULL);
-                                            read_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                                                                ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                                            read_time += ((double)timer_stop.tv_sec +
+                                                          ((double)timer_stop.tv_usec) / MICROSECOND) -
+                                                         ((double)timer_start.tv_sec +
+                                                          ((double)timer_start.tv_usec) / MICROSECOND);
                                             HDgettimeofday(&timer_start, NULL);
                                         }
                                         if (H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, dxpl_id, buf) < 0)
                                             H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
                                         if (options->verbose == 2) {
                                             HDgettimeofday(&timer_stop, NULL);
-                                            write_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                                                                ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                                            write_time += ((double)timer_stop.tv_sec +
+                                                           ((double)timer_stop.tv_usec) / MICROSECOND) -
+                                                          ((double)timer_start.tv_sec +
+                                                           ((double)timer_start.tv_usec) / MICROSECOND);
                                         }
 
                                         /* Check if we have VL data in the dataset's
@@ -1150,8 +1154,10 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                                 H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
                                             if (options->verbose == 2) {
                                                 HDgettimeofday(&timer_stop, NULL);
-                                                read_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                                                                    ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                                                read_time += ((double)timer_stop.tv_sec +
+                                                              ((double)timer_stop.tv_usec) / MICROSECOND) -
+                                                             ((double)timer_start.tv_sec +
+                                                              ((double)timer_start.tv_usec) / MICROSECOND);
                                                 HDgettimeofday(&timer_start, NULL);
                                             }
                                             if (H5Dwrite(dset_out, wtype_id, hslab_space, f_space_id, dxpl_id,
@@ -1159,8 +1165,10 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
                                             if (options->verbose == 2) {
                                                 HDgettimeofday(&timer_stop, NULL);
-                                                write_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                                                                    ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                                                write_time += ((double)timer_stop.tv_sec +
+                                                               ((double)timer_stop.tv_usec) / MICROSECOND) -
+                                                              ((double)timer_start.tv_sec +
+                                                               ((double)timer_start.tv_usec) / MICROSECOND);
                                             }
 
                                             /* reclaim any VL memory, if necessary */
@@ -1201,12 +1209,12 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                         /* compression ratio = uncompressed size /  compressed size */
                                         if (dsize_out != 0)
                                             ratio = (double)dsize_in / (double)dsize_out;
-                                        print_dataset_info(dcpl_out, travt->objs[i].name, ratio, 1, options, read_time,
-                                                           write_time);
+                                        print_dataset_info(dcpl_out, travt->objs[i].name, ratio, 1, options,
+                                                           read_time, write_time);
                                     }
                                     else
-                                        print_dataset_info(dcpl_in, travt->objs[i].name, ratio, 0, options, read_time,
-                                                           write_time);
+                                        print_dataset_info(dcpl_in, travt->objs[i].name, ratio, 0, options,
+                                                           read_time, write_time);
 
                                     /* print a message that the filter was not applied
                                      * (in case there was a filter)
@@ -1274,8 +1282,9 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                             H5TOOLS_GOTO_ERROR((-1), "H5Ocopy failed");
                         if (options->verbose == 2) {
                             HDgettimeofday(&timer_stop, NULL);
-                            write_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                                                ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                            write_time +=
+                                ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
+                                ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
                         }
 
                         if (H5Pclose(ocpl_id) < 0)

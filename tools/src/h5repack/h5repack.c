@@ -220,7 +220,8 @@ h5repack_addlayout(const char *str, pack_opt_t *options)
  *          named_datatype_free must be called before the program exits
  *          to free the stack.
  *-------------------------------------------------------------------------
- */
+ */   -v, --verbose           Verbose mode, print object information
+
 hid_t
 copy_named_datatype(hid_t type_in, hid_t fidout, named_dt_t **named_dt_head_p, trav_table_t *travt,
                     pack_opt_t *options)
@@ -367,7 +368,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
     hsize_t        dims[H5S_MAX_RANK];         /* dimensions of dataset */
     struct timeval timer_start;                /* verbose timing start time */
     struct timeval timer_stop;                 /* verbose timing stop time */
-    static double  read_time = 0;
+    static double  read_time  = 0;
     static double  write_time = 0;
     char           name[255];
     H5O_info2_t    oinfo; /* object info */
@@ -472,7 +473,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             } /* end for each member */
         }     /* end if type_class is H5T_COMPOUND */
 
-        read_time = 0;
+        read_time  = 0;
         write_time = 0;
 
         if (!is_ref) {
@@ -492,7 +493,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             if (options->verbose == 2) {
                 HDgettimeofday(&timer_stop, NULL);
                 read_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                                    ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                             ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
             }
 
             /*-----------------------------------------------------------------
@@ -510,7 +511,7 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             if (options->verbose == 2) {
                 HDgettimeofday(&timer_stop, NULL);
                 write_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                                    ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                              ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
             }
 
             /*close*/

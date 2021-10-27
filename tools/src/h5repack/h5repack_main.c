@@ -94,10 +94,8 @@ usage(const char *prog)
     PRINTVALSTREAM(rawoutstream, "  file2                    Output HDF5 File\n");
     PRINTVALSTREAM(rawoutstream, "  OPTIONS\n");
     PRINTVALSTREAM(rawoutstream, "   -h, --help              Print a usage message and exit\n");
-    PRINTVALSTREAM(rawoutstream,
-                   "   -v N, --verbose=N       Verbose mode, print object information.\n");
-    PRINTVALSTREAM(rawoutstream,
-                  "       N - is an integer greater than 1, 2 displays read/write timing\n");
+    PRINTVALSTREAM(rawoutstream, "   -v N, --verbose=N       Verbose mode, print object information.\n");
+    PRINTVALSTREAM(rawoutstream, "       N - is an integer greater than 1, 2 displays read/write timing\n");
     PRINTVALSTREAM(rawoutstream, "   -V, --version           Print version number and exit\n");
     PRINTVALSTREAM(rawoutstream, "   -n, --native            Use a native HDF5 type when repacking\n");
     PRINTVALSTREAM(rawoutstream,
