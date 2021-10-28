@@ -54,6 +54,38 @@
 #define nanosecs_per_second    1000000000 /* nanoseconds per second */
 #define nanosecs_per_tenth_sec 100000000  /* nanoseconds per 0.1 second */
 
+/* Declare an array of string to identify the VFD SMWR Log tags.
+ * Note this array is used to generate the entry tag by the log reporting macro
+ * H5F_POST_VFD_SWMR_LOG_ENTRY.
+ *
+ * The following is the first version. Developers can add/modify the tags as necessary.
+ *
+ * If the entry code is 0, H5Fvfd_swmr_log_tags[0] is used to report the entry tag.
+ * H5F_POST_VFD_SWMR_LOG_ENTRY(f, 0, log_msg) will put the log_msg attached to
+ * the entry tag "EOT_PROCESSING_TIME".
+ * The entry code number is listed in the comment for convenience.
+ * Currently for the production mode, only the "EOT_PROCESSING_TIME" is present.
+ */
+
+/* clang-format off */
+static const char *H5Fvfd_swmr_log_tags[] = {
+                                             "EOT_PROCESSING_TIME",         /* 0 */
+                                             "FILE_OPEN",                   /* 1 */                        
+                                             "FILE_CLOSE",                  /* 2 */
+                                             "EOT_TRIGGER_TIME",            /* 3 */
+                                             "EOT_META_FILE_INDEX"          /* 4 */
+                                            };
+/* clang-format on */
+
+/* This string defines the format of the VFD SWMR log file.
+ * The current maximum length of entry tag string is set to 26.
+ * One can enlarge or reduce this number as necessary.
+ * For example, to enlarge the maximum length of entry tag string to 30,
+ * Just change 26 to 30 in the following line, like
+ * const char *log_fmt_str="%-30s: %.3lf s: %s\n";
+ */
+const char *log_fmt_str = "%-26s: %.3lf s: %s\n";
+
 /********************/
 /* Local Prototypes */
 /********************/
@@ -157,7 +189,6 @@ H5F_vfd_swmr_init(H5F_t *f, hbool_t file_create)
         /* Create the metadata file */
         if (((shared->vfd_swmr_md_fd = HDopen(shared->vfd_swmr_config.md_file_path, O_CREAT | O_RDWR,
                                               H5_POSIX_CREATE_MODE_RW))) < 0)
-
             HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, FAIL, "unable to create the metadata file")
 
         md_size = (hsize_t)shared->vfd_swmr_config.md_pages_reserved * shared->fs_page_size;
@@ -319,7 +350,16 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
         if (H5F__vfd_swmr_update_end_of_tick_and_tick_num(shared, TRUE) < 0)
             HDONE_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to update end of tick");
     }
+#if 1 /*Kent  Save the end of close or flush info. to the log file, subject to comment out. */
+    H5F_POST_VFD_SWMR_LOG_ENTRY(f, 2, "VFD SWMR File close or flush ends");
+#endif
 done:
+
+    /* Kent: close the VFD SWMR log file if it is turned on */
+    if (shared->vfd_swmr_log_on) {
+        HDfclose(shared->vfd_swmr_log_file_ptr);
+    }
+    /* Kent */
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -755,11 +795,23 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     herr_t        ret_value                 = SUCCEED; /* Return value */
     hbool_t       incr_tick                 = FALSE;
 
+    struct timespec start_time, end_time;
+    unsigned int    temp_time;
+    char *          log_msg;
+
     FUNC_ENTER_NOAPI(FAIL)
 
     HDassert(shared);
     HDassert(shared->page_buf);
     HDassert(shared->vfd_swmr_writer);
+
+    /* Kent */
+    /* Obtain the starting time for the logging info: the processing time of this function. */
+    if (shared->vfd_swmr_log_on == true) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
+    }
+    /* Kent */
 
     if (!vfd_swmr_writer_may_increase_tick_to(shared->tick_num + 1, wait_for_reader))
         goto update_eot;
@@ -883,6 +935,17 @@ update_eot:
         HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "unable to insert entry into the EOT queue")
 
 done:
+    /* Kent: Calcuate the processing time and write the time info to the log file */
+    if (shared->vfd_swmr_log_on == true) {
+        if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
+        log_msg   = HDmalloc(48);
+        temp_time = (unsigned int)(TOTAL_TIME_PASSED(start_time, end_time) * 1000);
+        HDsprintf(log_msg, "Writer time is %u milliseconds", temp_time);
+        H5F_POST_VFD_SWMR_LOG_ENTRY(f, 0, log_msg);
+        HDfree(log_msg);
+    }
+    /* Kent */
     FUNC_LEAVE_NOAPI(ret_value)
 }
 
@@ -1885,4 +1948,47 @@ H5F_vfd_swmr_process_eot_queue(hbool_t entering_api)
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
+}
+
+/*-------------------------------------------------------------------------
+ *
+ * Function:    H5F_post_vfd_swmr_log_entry
+ *
+ * Purpose:     Write the log information to the log file.
+ *
+ * Parameters:
+ *              H5F_t *f                IN: HDF5 file pointer
+ *              int entry_type_code     IN: The entry type code to identify the
+ *                                          log entry tag.
+ *              char *log_info          IN: The information to be stored in the
+ *                                          log file.
+ * Return:   None
+ *
+ *-------------------------------------------------------------------------
+ */
+
+void
+H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info)
+{
+    double          temp_time;
+    struct timespec current_time;
+    char *          gettime_error;
+
+    /* Obtain the current time.
+       If   failed, write an error message to the log file.
+       else calcluate the elapsed time in seconds since the log file
+            was created and wirte the time to the log file. */
+    if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0) {
+        gettime_error = HDmalloc(14);
+        HDsprintf(gettime_error, "gettime_error");
+        HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%-26s:  %s\n", H5Fvfd_swmr_log_tags[entry_type_code],
+                  gettime_error);
+        HDfree(gettime_error);
+    }
+    else {
+        temp_time = TOTAL_TIME_PASSED(f->shared->vfd_swmr_log_start_time, current_time);
+        HDfprintf(f->shared->vfd_swmr_log_file_ptr, log_fmt_str, H5Fvfd_swmr_log_tags[entry_type_code],
+                  temp_time, log_info);
+    }
+    return;
 }

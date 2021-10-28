@@ -5710,6 +5710,10 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
     else if (name_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "md_file_path is too long")
 
+    name_len = HDstrlen(config_ptr->log_file_path);
+    if (name_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
+        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "log_file_path is too long")
+
     /* Set the modified config */
     if (H5P_set(plist, H5F_ACS_VFD_SWMR_CONFIG_NAME, config_ptr) < 0)
         HGOTO_ERROR(H5E_PLIST, H5E_CANTSET, FAIL, "can't set metadata cache initial config")
