@@ -622,8 +622,8 @@ H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 
 /* H5F_POST_VFD_SWMR_LOG_ENTRY is the macro that can help the developers debug VFD SWMR features.
  * It calls an internal reporting function H5F_post_vfd_swmr_log_entry() that receives
- * the log entry_type_code,  which generates the log tag,  and the message log_info, which
- * the developers want to save into the log file.
+ * a log entry_type_code,  which generates a log tag,  and the message log_info, which
+ * the developers want to save into a log file.
  *
  * The macro H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, number_entry_production, m) is
  * called by H5F_POST_VFD_SWMR_LOG_ENTRY when the HDF5 library is built with the
