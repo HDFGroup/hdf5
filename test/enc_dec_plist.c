@@ -350,7 +350,7 @@ main(void)
 
             TESTING("DXPL Encoding/Decoding");
 
-            if ((H5Pset_btree_ratios(dxpl, 0.2f, 0.6f, 0.2f)) < 0)
+            if ((H5Pset_btree_ratios(dxpl, 0.2, 0.6, 0.2)) < 0)
                 FAIL_STACK_ERROR
             if ((H5Pset_hyper_vector_size(dxpl, 5)) < 0)
                 FAIL_STACK_ERROR
@@ -544,7 +544,7 @@ main(void)
                 FAIL_STACK_ERROR
             if ((H5Pset_alignment(fapl, 2, 1024)) < 0)
                 FAIL_STACK_ERROR
-            if ((H5Pset_cache(fapl, 1024, 128, 10485760, 0.3f)) < 0)
+            if ((H5Pset_cache(fapl, 1024, 128, 10485760, 0.3)) < 0)
                 FAIL_STACK_ERROR
             if ((H5Pset_elink_file_cache_size(fapl, 10485760)) < 0)
                 FAIL_STACK_ERROR

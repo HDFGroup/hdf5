@@ -116,6 +116,9 @@ typedef enum H5VL_subclass_t {
     H5VL_SUBCLS_REQUEST,  /**< 'Request' subclass */
     H5VL_SUBCLS_BLOB,     /**< 'Blob' subclass */
     H5VL_SUBCLS_TOKEN     /**< 'Token' subclass */
+                          /* NOTE: if more operations are added, the
+                           * H5VL_opt_vals_g[] array size should be updated.
+                           */
 } H5VL_subclass_t;
 
 /********************/
@@ -357,10 +360,5 @@ H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_t
 #ifdef __cplusplus
 }
 #endif
-
-/* Semi-public headers mainly for VOL connector authors */
-#include "H5VLconnector.h"          /* VOL connector author routines */
-#include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
-#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
 
 #endif /* H5VLpublic_H */

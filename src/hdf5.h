@@ -42,6 +42,7 @@
 #include "H5Zpublic.h"  /* Data filters                             */
 
 /* Plugin/component developer headers */
+#include "H5ESdevelop.h" /* Event Sets */
 #include "H5FDdevelop.h" /* File drivers */
 #include "H5Idevelop.h"  /* ID management */
 #include "H5Ldevelop.h"  /* Links */
@@ -52,6 +53,7 @@
 /* Virtual object layer (VOL) connector developer support */
 #include "H5VLconnector.h"          /* VOL connector author routines */
 #include "H5VLconnector_passthru.h" /* Pass-through VOL connector author routines */
+#include "H5VLnative.h"             /* Native VOL connector macros, for VOL connector authors */
 
 /* Predefined file drivers */
 #include "H5FDcore.h"     /* Files stored entirely in memory          */

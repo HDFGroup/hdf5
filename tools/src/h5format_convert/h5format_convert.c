@@ -39,26 +39,9 @@ static int   verbose_g = 0;
  * parameters.
  */
 static const char *           s_opts   = "hVvd:n";
-static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
-                                          {"hel", no_arg, 'h'},
-                                          {"he", no_arg, 'h'},
-                                          {"version", no_arg, 'V'},
-                                          {"version", no_arg, 'V'},
-                                          {"versio", no_arg, 'V'},
-                                          {"versi", no_arg, 'V'},
-                                          {"vers", no_arg, 'V'},
-                                          {"verbose", no_arg, 'v'},
-                                          {"verbos", no_arg, 'v'},
-                                          {"verbo", no_arg, 'v'},
-                                          {"verb", no_arg, 'v'},
-                                          {"dname", require_arg, 'd'},
-                                          {"dnam", require_arg, 'd'},
-                                          {"dna", require_arg, 'd'},
-                                          {"dn", require_arg, 'd'},
-                                          {"noop", no_arg, 'n'},
-                                          {"noo", no_arg, 'n'},
-                                          {"no", no_arg, 'n'},
-                                          {"enable-error-stack", no_arg, 'E'},
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},    {"version", no_arg, 'V'},
+                                          {"verbose", no_arg, 'v'}, {"dname", require_arg, 'd'},
+                                          {"noop", no_arg, 'n'},    {"enable-error-stack", no_arg, 'E'},
                                           {NULL, 0, '\0'}};
 
 /*-------------------------------------------------------------------------

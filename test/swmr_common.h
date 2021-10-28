@@ -64,7 +64,7 @@ H5TEST_DLLVAR unsigned       symbol_count[NLEVELS];
 extern "C" {
 #endif
 
-H5TEST_DLL symbol_info_t *choose_dataset(unsigned *, unsigned *, hbool_t);
+H5TEST_DLL symbol_info_t *choose_dataset(unsigned *levelp, unsigned *offsetp, hbool_t verbose);
 H5TEST_DLL hid_t          create_symbol_datatype(void);
 H5TEST_DLL int            generate_name(char *name_buf, unsigned level, unsigned count);
 H5TEST_DLL int            generate_symbols(void);

@@ -1079,7 +1079,7 @@ H5SM_try_share(H5F_t *f, H5O_t *open_oh, unsigned defer_flags, unsigned type_id,
     ssize_t               index_num;
     htri_t                tri_ret;
 #ifndef NDEBUG
-    unsigned deferred_type = -1u;
+    unsigned deferred_type = -1U;
 #endif
     htri_t ret_value = TRUE;
 

@@ -402,6 +402,8 @@ set (test_CLEANFILES
     mirror_rw/*
     mirror_wo/*
     event_set_*.h5
+    h5s_block.h5
+    h5s_plist.h5
 )
 
 # Remove any output file left over from previous test run
@@ -647,10 +649,10 @@ set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     WILL_FAIL "true"
 )
+# release + 1 should pass
 add_test (NAME H5TEST-tcheck_version-release COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tr")
 set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-    WILL_FAIL "true"
 )
 
 ##############################################################################

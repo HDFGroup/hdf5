@@ -47,6 +47,50 @@ typedef struct {
     H5L_info2_t *linfo; /* Buffer to return to user */
 } H5L_trav_gi_t;
 
+/* User data for path traversal routine for getting link value by index */
+typedef struct {
+    /* In */
+    H5_index_t      idx_type; /* Index to use */
+    H5_iter_order_t order;    /* Order to iterate in index */
+    hsize_t         n;        /* Offset of link within index */
+    size_t          size;     /* Size of user buffer */
+
+    /* Out */
+    void *buf; /* User buffer */
+} H5L_trav_gvbi_t;
+
+/* User data for path traversal routine for getting link info by index */
+typedef struct {
+    /* In */
+    H5_index_t      idx_type; /* Index to use */
+    H5_iter_order_t order;    /* Order to iterate in index */
+    hsize_t         n;        /* Offset of link within index */
+
+    /* Out */
+    H5L_info2_t *linfo; /* Buffer to return to user */
+} H5L_trav_gibi_t;
+
+/* User data for path traversal routine for removing link by index */
+typedef struct {
+    /* In */
+    H5_index_t      idx_type; /* Index to use */
+    H5_iter_order_t order;    /* Order to iterate in index */
+    hsize_t         n;        /* Offset of link within index */
+} H5L_trav_rmbi_t;
+
+/* User data for path traversal routine for getting name by index */
+typedef struct {
+    /* In */
+    H5_index_t      idx_type; /* Index to use */
+    H5_iter_order_t order;    /* Order to iterate in index */
+    hsize_t         n;        /* Offset of link within index */
+    size_t          size;     /* Size of name buffer */
+
+    /* Out */
+    char * name;     /* Buffer to return name to user */
+    size_t name_len; /* Length of full name */
+} H5L_trav_gnbi_t;
+
 /* User data for path traversal callback to creating a link */
 typedef struct {
     H5F_t *           file;      /* Pointer to the file */
@@ -2012,8 +2056,8 @@ H5L__get_name_by_idx_cb(H5G_loc_t H5_ATTR_UNUSED *grp_loc /*in*/, const char H5_
         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "group doesn't exist")
 
     /* Query link */
-    if ((udata->name_len = H5G_obj_get_name_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n,
-                                                   udata->name, udata->size)) < 0)
+    if (H5G_obj_get_name_by_idx(obj_loc->oloc, udata->idx_type, udata->order, udata->n, udata->name,
+                                udata->size, &udata->name_len) < 0)
         HGOTO_ERROR(H5E_LINK, H5E_NOTFOUND, FAIL, "link not found")
 
 done:
@@ -2034,18 +2078,19 @@ done:
  *
  *-------------------------------------------------------------------------
  */
-ssize_t
+herr_t
 H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t idx_type, H5_iter_order_t order,
-                     hsize_t n, char *name /*out*/, size_t size)
+                     hsize_t n, char *name /*out*/, size_t size, size_t *link_name_len)
 {
-    H5L_trav_gnbi_t udata;            /* User data for callback */
-    ssize_t         ret_value = FAIL; /* Return value */
+    H5L_trav_gnbi_t udata;               /* User data for callback */
+    herr_t          ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
     /* Check arguments */
     HDassert(loc);
     HDassert(group_name && *group_name);
+    HDassert(link_name_len);
 
     /* Set up user data for callback */
     udata.idx_type = idx_type;
@@ -2053,7 +2098,7 @@ H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
     udata.n        = n;
     udata.name     = name;
     udata.size     = size;
-    udata.name_len = -1;
+    udata.name_len = 0;
 
     /* Traverse the group hierarchy to locate the link to get name of */
     if (H5G_traverse(loc, group_name, H5G_TARGET_SLINK | H5G_TARGET_UDLINK, H5L__get_name_by_idx_cb, &udata) <
@@ -2061,7 +2106,7 @@ H5L__get_name_by_idx(const H5G_loc_t *loc, const char *group_name, H5_index_t id
         HGOTO_ERROR(H5E_LINK, H5E_CANTGET, FAIL, "can't get name")
 
     /* Set the return value */
-    ret_value = udata.name_len;
+    *link_name_len = udata.name_len;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -2104,9 +2149,9 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
     /* Expand soft or external link, if requested */
     if ((H5L_TYPE_SOFT == src_lnk->type && cpy_info->expand_soft_link) ||
         (H5L_TYPE_EXTERNAL == src_lnk->type && cpy_info->expand_ext_link)) {
-        H5G_loc_t  lnk_grp_loc;  /* Group location holding link */
-        H5G_name_t lnk_grp_path; /* Path for link */
-        htri_t     tar_exists;   /* Whether the target object exists */
+        H5G_loc_t  lnk_grp_loc;        /* Group location holding link */
+        H5G_name_t lnk_grp_path;       /* Path for link */
+        hbool_t    tar_exists = FALSE; /* Whether the target object exists */
 
         /* Set up group location for link */
         H5G_name_reset(&lnk_grp_path);
@@ -2114,7 +2159,7 @@ H5L__link_copy_file(H5F_t *dst_file, const H5O_link_t *_src_lnk, const H5O_loc_t
         lnk_grp_loc.oloc = (H5O_loc_t *)src_oloc; /* Casting away const OK -QAK */
 
         /* Check if the target object exists */
-        if ((tar_exists = H5G_loc_exists(&lnk_grp_loc, src_lnk->name)) < 0)
+        if (H5G_loc_exists(&lnk_grp_loc, src_lnk->name, &tar_exists) < 0)
             HGOTO_ERROR(H5E_LINK, H5E_CANTCOPY, FAIL, "unable to check if target object exists")
 
         if (tar_exists) {

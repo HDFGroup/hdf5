@@ -111,7 +111,7 @@ choose_dataset(unsigned *levelp, unsigned *offsetp, hbool_t verbose)
 
     ++ncalls;
     if ((ncalls % 1000) == 0 && verbose) {
-        fprintf(stderr, "%s: call %u chose level %u offset %u\n", __func__, ncalls, level, offset);
+        HDfprintf(stderr, "%s: call %u chose level %u offset %u\n", __func__, ncalls, level, offset);
     }
     if (levelp != NULL)
         *levelp = level;

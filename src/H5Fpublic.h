@@ -1114,7 +1114,7 @@ H5_DLL herr_t H5Fget_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
  * \since 1.8.0
  *
  */
-H5_DLL herr_t H5Fset_mdc_config(hid_t file_id, H5AC_cache_config_t *config_ptr);
+H5_DLL herr_t H5Fset_mdc_config(hid_t file_id, const H5AC_cache_config_t *config_ptr);
 /**
  * \ingroup MDC
  *
@@ -1888,6 +1888,7 @@ H5_DLL herr_t H5Fset_mpi_atomicity(hid_t file_id, hbool_t flag);
 H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #endif /* H5_HAVE_PARALLEL */
 
+/// \cond DEV
 /* API Wrappers for async routines */
 /* (Must be defined _after_ the function prototype) */
 /* (And must only defined when included in application code, not the library) */
@@ -1907,6 +1908,7 @@ H5_DLL herr_t H5Fget_mpi_atomicity(hid_t file_id, hbool_t *flag);
 #define H5Fflush_async_wrap  H5_NO_EXPAND(H5Fflush_async)
 #define H5Fclose_async_wrap  H5_NO_EXPAND(H5Fclose_async)
 #endif /* H5F_MODULE */
+/// \endcond
 
 /* Symbols defined for compatibility with previous versions of the HDF5 API.
  *
