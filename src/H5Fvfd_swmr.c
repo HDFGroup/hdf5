@@ -811,8 +811,10 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     /* Kent */
     /* Obtain the starting time for the logging info: the processing time of this function. */
     if (shared->vfd_swmr_log_on == true) {
+#ifndef H5_HAVE_WIN32_API  
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
+#endif
     }
     /* Kent */
 
@@ -940,6 +942,7 @@ update_eot:
 done:
     /* Kent: Calcuate the processing time and write the time info to the log file */
     if (shared->vfd_swmr_log_on == true) {
+#ifndef H5_HAVE_WIN32_API 
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
         log_msg   = HDmalloc(48);
@@ -947,6 +950,7 @@ done:
         HDsprintf(log_msg, "Writer time is %u milliseconds", temp_time);
         H5F_POST_VFD_SWMR_LOG_ENTRY(f, 0, log_msg);
         HDfree(log_msg);
+#endif
     }
     /* Kent */
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1977,6 +1981,7 @@ H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info)
     struct timespec current_time;
     char *          gettime_error;
 
+#ifndef H5_HAVE_WIN32_API
     /* Obtain the current time.
        If   failed, write an error message to the log file.
        else calcluate the elapsed time in seconds since the log file
@@ -1993,5 +1998,12 @@ H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info)
         HDfprintf(f->shared->vfd_swmr_log_file_ptr, log_fmt_str, H5Fvfd_swmr_log_tags[entry_type_code],
                   temp_time, log_info);
     }
+#else /* H5_HAVE_WIN32_API */
+    gettime_error = HDmalloc(22);
+    HDsprintf(gettime_error, "unsupported on windows");
+    HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%-26s:  %s\n", H5Fvfd_swmr_log_tags[entry_type_code],
+                  gettime_error);
+    HDfree(gettime_error);
+#endif
     return;
 }
