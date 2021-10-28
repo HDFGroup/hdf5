@@ -355,10 +355,10 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 #endif
 done:
 
-    /* Kent: close the VFD SWMR log file if it is turned on. 
-     * Please REVIEW to ensure this is the right place to 
-     * close the log file. 
-    */
+    /* Kent: close the VFD SWMR log file if it is turned on.
+     * Please REVIEW to ensure this is the right place to
+     * close the log file.
+     */
     if (shared->vfd_swmr_log_on) {
         HDfclose(shared->vfd_swmr_log_file_ptr);
     }
