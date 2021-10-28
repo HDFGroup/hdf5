@@ -811,7 +811,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     /* Kent */
     /* Obtain the starting time for the logging info: the processing time of this function. */
     if (shared->vfd_swmr_log_on == true) {
-#ifndef H5_HAVE_WIN32_API  
+#ifndef H5_HAVE_WIN32_API
         if (HDclock_gettime(CLOCK_MONOTONIC, &start_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
 #endif
@@ -942,7 +942,7 @@ update_eot:
 done:
     /* Kent: Calcuate the processing time and write the time info to the log file */
     if (shared->vfd_swmr_log_on == true) {
-#ifndef H5_HAVE_WIN32_API 
+#ifndef H5_HAVE_WIN32_API
         if (HDclock_gettime(CLOCK_MONOTONIC, &end_time) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time via clock_gettime");
         log_msg   = HDmalloc(48);
@@ -2002,7 +2002,7 @@ H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info)
     gettime_error = HDmalloc(22);
     HDsprintf(gettime_error, "unsupported on windows");
     HDfprintf(f->shared->vfd_swmr_log_file_ptr, "%-26s:  %s\n", H5Fvfd_swmr_log_tags[entry_type_code],
-                  gettime_error);
+              gettime_error);
     HDfree(gettime_error);
 #endif
     return;
