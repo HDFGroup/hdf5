@@ -21,12 +21,12 @@
  * one just needs to do te following:
  * After compiling the program, just run the following line
  *     ./vfd_swmr_log_writer -n 100000 -P -q
- * A VFD SWMR log file log-test is generated.
- * The log-test should include something like:
+ * A VFD SWMR log file "log-test" is generated.
+ * The "log-test" should include something like:
  * 'EOT_PROCESSING_TIME       : 0.040 s: Writer time is 1 milliseconds'
  * This program also checks the performance of group creations for VFD SWMR.
  * Currently the group creation time, H5Fopen and H5Fclose time are measured.
- * The output can help check the contents in the log-test.
+ * The standard output can help check the contents in the "log-test".
  *
  */
 #define H5F_FRIEND /*suppress error about including H5Fpkg   */
@@ -93,7 +93,7 @@ static void
 usage(const char *progname)
 {
     fprintf(stderr,
-            "usage: ./%s -P -n 1000 -N 5 -q (create 1000 groups, each group has 5 attributes)\n"
+            "usage: ./%s -P -n 100000 -q (create 100000 groups, each group has 1 attribute)\n"
             "Options: \n"
             " [-P] [-S] [-G] [-t tick_len] [-m max_lag][-B pbs] [-s ps]\n"
             " [-n ngroups] [-l ng_levels] [-O grp_op_pattern]\n"

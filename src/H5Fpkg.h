@@ -468,11 +468,17 @@ struct H5F_shared_t {
     H5F_fs_state_t fs_state_md; /* State of the free space
                                  * manager
                                  */
-
-    FILE *          vfd_swmr_log_file_ptr;
-    hbool_t         vfd_swmr_log_on;
-    struct timespec vfd_swmr_log_start_time;
-
+    /* Log file for VFD SWMR */
+    FILE *          vfd_swmr_log_file_ptr;   /* File pointer for the
+                                              * log file.
+                                              */
+    hbool_t         vfd_swmr_log_on;         /* flag to indicate if
+                                              * the log file is 
+                                              * created. */
+    struct timespec vfd_swmr_log_start_time; /* The starting time for
+                                              * calculating the time 
+                                              * stamp of a log message.
+                                              */
     /* Delayed free space release doubly linked list */
     shadow_defree_queue_t shadow_defrees;
 
@@ -614,10 +620,10 @@ H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
 
 /* VFD SMWR LOG REPORTING MACROS */
 
-/* H5F_POST_VFD_SWMR_LOG_ENTRY is the macro that needs to be used by the developers.
+/* H5F_POST_VFD_SWMR_LOG_ENTRY is the macro that can help the developers debug VFD SWMR features.
  * It calls an internal reporting function H5F_post_vfd_swmr_log_entry() that receives
  * the log entry_type_code,  which generates the log tag,  and the message log_info, which
- * the library developer wants to save into the log file.
+ * the developers want to save into the log file.
  *
  * The macro H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, number_entry_production, m) is
  * called by H5F_POST_VFD_SWMR_LOG_ENTRY when the HDF5 library is built with the

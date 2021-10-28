@@ -355,7 +355,10 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 #endif
 done:
 
-    /* Kent: close the VFD SWMR log file if it is turned on */
+    /* Kent: close the VFD SWMR log file if it is turned on. 
+     * Please REVIEW to ensure this is the right place to 
+     * close the log file. 
+    */
     if (shared->vfd_swmr_log_on) {
         HDfclose(shared->vfd_swmr_log_file_ptr);
     }
@@ -1977,7 +1980,7 @@ H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info)
     /* Obtain the current time.
        If   failed, write an error message to the log file.
        else calcluate the elapsed time in seconds since the log file
-            was created and wirte the time to the log file. */
+            was created and write the time to the log file. */
     if (HDclock_gettime(CLOCK_MONOTONIC, &current_time) < 0) {
         gettime_error = HDmalloc(14);
         HDsprintf(gettime_error, "gettime_error");
