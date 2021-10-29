@@ -15,13 +15,12 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
+H5_CREATE_VFD_DIR()
 
 set (H5P_VFD_TESTS
     t_pflush1
     t_pflush2
 )
-
-H5_SET_VFD_LIST()
 
 macro (ADD_VFD_TEST vfdname resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
