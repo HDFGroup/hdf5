@@ -799,7 +799,7 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     herr_t        ret_value                 = SUCCEED; /* Return value */
     hbool_t       incr_tick                 = FALSE;
 
-    /* Kent: define the local variables to calculate the EOT time 
+    /* Kent: define the local variables to calculate the EOT time
              and write them to the log file. */
     H5_timevals_t current_time;
     double        start_elapsed_time, end_elapsed_time;
