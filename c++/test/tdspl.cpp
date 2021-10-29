@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -17,29 +17,26 @@
                list functionality
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
 #include <string>
-#include "H5Cpp.h"      // C++ API header file
+#include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
 #include "h5test.h"
-#include "h5cpputil.h"  // C++ utilility header file
+#include "h5cpputil.h" // C++ utilility header file
 
 const H5std_string FILENAME("tdatatransform.h5");
 
-static void test_transfplist()
+static void
+test_transfplist()
 {
-    const char* c_to_f = "(9/5.0)*x + 32";
-    const char* simple = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */
+    const char *c_to_f = "(9/5.0)*x + 32";
+    const char *simple = "(4/2) * ( (2 + 4)/(5 - 2.5))"; /* this equals 4.8 */
     /* inverses the utrans transform in init_test to get back original array */
-    const char* utrans_inv = "(x/3)*4 - 100";
+    const char *utrans_inv = "(x/3)*4 - 100";
 
     SUBTEST("DSetMemXferPropList::set/getDataTransform()");
     try {
@@ -63,12 +60,12 @@ static void test_transfplist()
 
         // Find out the length of the transform expression, allocate the buffer
         // for it, then read and verify the expression from the copied plist
-        ssize_t tran_len = dxpl_c_to_f_copy.getDataTransform(NULL);
-        char *c_to_f_read = (char *)HDmalloc(tran_len+1);
-        HDmemset(c_to_f_read, 0, tran_len+1);
-        dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len+1);
-        verify_val((const char*)c_to_f_read, (const char*)c_to_f,
-                "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        ssize_t tran_len    = dxpl_c_to_f_copy.getDataTransform(NULL);
+        char *  c_to_f_read = (char *)HDmalloc(tran_len + 1);
+        HDmemset(c_to_f_read, 0, tran_len + 1);
+        dxpl_c_to_f_copy.getDataTransform(c_to_f_read, tran_len + 1);
+        verify_val((const char *)c_to_f_read, (const char *)c_to_f, "DSetMemXferPropList::getDataTransform",
+                   __LINE__, __FILE__);
         HDfree(c_to_f_read);
 
         //
@@ -78,39 +75,37 @@ static void test_transfplist()
 
         // Get and verify the expression with:
         // ssize_t getDataTransform(char* exp, const size_t buf_size [default=0])
-        tran_len =  dxpl_c_to_f.getDataTransform(NULL);
-        c_to_f_read = (char *)HDmalloc(tran_len+1);
-        HDmemset(c_to_f_read, 0, tran_len+1);
-        dxpl_c_to_f.getDataTransform(c_to_f_read, tran_len+1);
-        verify_val((const char*)c_to_f_read, (const char*)c_to_f,
-                "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        tran_len    = dxpl_c_to_f.getDataTransform(NULL);
+        c_to_f_read = (char *)HDmalloc(tran_len + 1);
+        HDmemset(c_to_f_read, 0, tran_len + 1);
+        dxpl_c_to_f.getDataTransform(c_to_f_read, tran_len + 1);
+        verify_val((const char *)c_to_f_read, (const char *)c_to_f, "DSetMemXferPropList::getDataTransform",
+                   __LINE__, __FILE__);
         HDfree(c_to_f_read);
 
         // Get and verify the expression with:
         // H5std_string DSetMemXferPropList::getDataTransform()
         H5std_string simple_read = dxpl_simple.getDataTransform();
-        verify_val((const char*)simple_read.c_str(), (const char*)simple,
-                "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        verify_val((const char *)simple_read.c_str(), (const char *)simple,
+                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
 
         // Get and verify the expression with:
         // ssize_t getDataTransform(char* exp, const size_t buf_size)
-        tran_len = dxpl_utrans_inv.getDataTransform(NULL, 0);
-        char *utrans_inv_read = (char *)HDmalloc(tran_len+1);
-        HDmemset(utrans_inv_read, 0, tran_len+1);
-        dxpl_utrans_inv.getDataTransform(utrans_inv_read, tran_len+1);
-        verify_val((const char*)utrans_inv_read, (const char*)utrans_inv,
-                "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
+        tran_len              = dxpl_utrans_inv.getDataTransform(NULL, 0);
+        char *utrans_inv_read = (char *)HDmalloc(tran_len + 1);
+        HDmemset(utrans_inv_read, 0, tran_len + 1);
+        dxpl_utrans_inv.getDataTransform(utrans_inv_read, tran_len + 1);
+        verify_val((const char *)utrans_inv_read, (const char *)utrans_inv,
+                   "DSetMemXferPropList::getDataTransform", __LINE__, __FILE__);
         HDfree(utrans_inv_read);
 
         PASSED();
     }
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("test_transfplist", __LINE__, __FILE__, E.getCDetailMsg());
     }
 }
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_dsproplist
  *
@@ -119,17 +114,16 @@ static void test_transfplist()
  * Return       None
  *-------------------------------------------------------------------------
  */
-extern "C"
-void test_dsproplist()
+extern "C" void
+test_dsproplist()
 {
     // Output message about test being performed
     MESSAGE(5, ("Testing Generic Dataset Property Lists\n"));
 
     test_transfplist(); // test set/getDataTransform()
 
-}   // test_dsproplist()
+} // test_dsproplist()
 
-
 /*-------------------------------------------------------------------------
  * Function:    cleanup_dsproplist
  *
@@ -138,8 +132,8 @@ void test_dsproplist()
  * Return       none
  *-------------------------------------------------------------------------
  */
-extern "C"
-void cleanup_dsproplist()
+extern "C" void
+cleanup_dsproplist()
 {
     HDremove(FILENAME.c_str());
 }

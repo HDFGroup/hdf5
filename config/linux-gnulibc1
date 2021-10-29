@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 
@@ -199,8 +199,15 @@ if test -z "$CXX"; then
   CXX_BASENAME=g++
 fi
 
+# Figure out Intel CXX compiler flags
+# Do this ahead of GNU to avoid icpc being detected as g++
+. $srcdir/config/intel-cxxflags
+
 # Figure out GNU CXX compiler flags
 . $srcdir/config/gnu-cxxflags
+
+# Figure out PGI CXX compiler flags
+. $srcdir/config/pgi-cxxflags
 
 # Figure out Clang CXX compiler flags
 . $srcdir/config/clang-cxxflags
@@ -314,6 +321,9 @@ fi
 # check if the compiler_version_info is already set
 if test -z "$cxx_version_info"; then
 case $CXX in
+    *pgc++*)
+        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'pgc++'`
+        ;;
     *g++*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS --version 2>&1 |\
             grep 'GCC' | sed 's/\(.*(GCC) [-a-z0-9\. ]*\).*/\1/'`
@@ -322,10 +332,6 @@ case $CXX in
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'Version' |\
             sed 's/\(Intel.* Compiler\).*\( Version [a-z0-9\.]*\).*\( Build [0-9]*\)/\1\2\3/'`
         ;;
-    *pgCC*)
-        cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -V 2>&1 | grep 'pgCC'`
-        ;;
-
     *mpicxx*)
         cxx_version_info=`$CXX $CXXFLAGS $H5_CXXFLAGS -v 2>&1 | grep 'version' |\
             sed 's/^[a-z0-9]* for //' |\

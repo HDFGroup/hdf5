@@ -22,7 +22,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -136,6 +136,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/ax_check_junit.m4 \
 	$(top_srcdir)/m4/ax_java_options.m4 \
 	$(top_srcdir)/m4/ax_jni_include_dir.m4 \
+	$(top_srcdir)/m4/ax_prog_doxygen.m4 \
 	$(top_srcdir)/m4/ax_prog_jar.m4 \
 	$(top_srcdir)/m4/ax_prog_java.m4 \
 	$(top_srcdir)/m4/ax_prog_java_works.m4 \
@@ -224,10 +225,11 @@ am__EXEEXT_1 = testhdf5$(EXEEXT) cache$(EXEEXT) cache_api$(EXEEXT) \
 	hyperslab$(EXEEXT) istore$(EXEEXT) bittests$(EXEEXT) \
 	dt_arith$(EXEEXT) page_buffer$(EXEEXT) dtypes$(EXEEXT) \
 	dsets$(EXEEXT) chunk_info$(EXEEXT) cmpd_dset$(EXEEXT) \
-	filter_fail$(EXEEXT) extend$(EXEEXT) direct_chunk$(EXEEXT) \
-	external$(EXEEXT) efc$(EXEEXT) objcopy$(EXEEXT) links$(EXEEXT) \
-	unlink$(EXEEXT) twriteorder$(EXEEXT) big$(EXEEXT) \
-	mtime$(EXEEXT) fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
+	cmpd_dtransform$(EXEEXT) filter_fail$(EXEEXT) extend$(EXEEXT) \
+	direct_chunk$(EXEEXT) external$(EXEEXT) efc$(EXEEXT) \
+	objcopy$(EXEEXT) links$(EXEEXT) unlink$(EXEEXT) \
+	twriteorder$(EXEEXT) big$(EXEEXT) mtime$(EXEEXT) \
+	fillval$(EXEEXT) mount$(EXEEXT) flush1$(EXEEXT) \
 	flush2$(EXEEXT) app_ref$(EXEEXT) enum$(EXEEXT) \
 	set_extent$(EXEEXT) ttsafe$(EXEEXT) enc_dec_plist$(EXEEXT) \
 	enc_dec_plist_cross_platform$(EXEEXT) getname$(EXEEXT) \
@@ -310,6 +312,10 @@ cmpd_dset_SOURCES = cmpd_dset.c
 cmpd_dset_OBJECTS = cmpd_dset.$(OBJEXT)
 cmpd_dset_LDADD = $(LDADD)
 cmpd_dset_DEPENDENCIES = libh5test.la $(LIBHDF5)
+cmpd_dtransform_SOURCES = cmpd_dtransform.c
+cmpd_dtransform_OBJECTS = cmpd_dtransform.$(OBJEXT)
+cmpd_dtransform_LDADD = $(LDADD)
+cmpd_dtransform_DEPENDENCIES = libh5test.la $(LIBHDF5)
 cork_SOURCES = cork.c
 cork_OBJECTS = cork.$(OBJEXT)
 cork_LDADD = $(LDADD)
@@ -662,8 +668,7 @@ am_testhdf5_OBJECTS = testhdf5.$(OBJEXT) tarray.$(OBJEXT) \
 	titerate.$(OBJEXT) tmeta.$(OBJEXT) tmisc.$(OBJEXT) \
 	trefer.$(OBJEXT) trefstr.$(OBJEXT) tselect.$(OBJEXT) \
 	tskiplist.$(OBJEXT) tsohm.$(OBJEXT) ttime.$(OBJEXT) \
-	ttst.$(OBJEXT) tunicode.$(OBJEXT) tvlstr.$(OBJEXT) \
-	tvltypes.$(OBJEXT)
+	tunicode.$(OBJEXT) tvlstr.$(OBJEXT) tvltypes.$(OBJEXT)
 testhdf5_OBJECTS = $(am_testhdf5_OBJECTS)
 testhdf5_LDADD = $(LDADD)
 testhdf5_DEPENDENCIES = libh5test.la $(LIBHDF5)
@@ -788,11 +793,11 @@ SOURCES = $(libfilter_plugin1_dsets_la_SOURCES) \
 	accum.c accum_swmr_reader.c app_ref.c atomic_reader.c \
 	atomic_writer.c big.c bittests.c btree2.c cache.c cache_api.c \
 	$(cache_image_SOURCES) cache_logging.c cache_tagging.c \
-	chunk_info.c cmpd_dset.c cork.c cross_read.c dangle.c \
-	del_many_dense_attrs.c direct_chunk.c dsets.c dt_arith.c \
-	dtransform.c dtypes.c earray.c efc.c enc_dec_plist.c \
-	enc_dec_plist_cross_platform.c enum.c err_compat.c \
-	error_test.c evict_on_close.c extend.c external.c \
+	chunk_info.c cmpd_dset.c cmpd_dtransform.c cork.c cross_read.c \
+	dangle.c del_many_dense_attrs.c direct_chunk.c dsets.c \
+	dt_arith.c dtransform.c dtypes.c earray.c efc.c \
+	enc_dec_plist.c enc_dec_plist_cross_platform.c enum.c \
+	err_compat.c error_test.c evict_on_close.c extend.c external.c \
 	external_env.c farray.c fheap.c file_image.c filenotclosed.c \
 	fillval.c filter_fail.c filter_plugin.c flush1.c flush2.c \
 	flushrefresh.c freespace.c gen_bad_offset.c gen_bad_ohdr.c \
@@ -823,23 +828,23 @@ DIST_SOURCES = $(am__libfilter_plugin1_dsets_la_SOURCES_DIST) \
 	$(libh5test_la_SOURCES) accum.c accum_swmr_reader.c app_ref.c \
 	atomic_reader.c atomic_writer.c big.c bittests.c btree2.c \
 	cache.c cache_api.c $(cache_image_SOURCES) cache_logging.c \
-	cache_tagging.c chunk_info.c cmpd_dset.c cork.c cross_read.c \
-	dangle.c del_many_dense_attrs.c direct_chunk.c dsets.c \
-	dt_arith.c dtransform.c dtypes.c earray.c efc.c \
-	enc_dec_plist.c enc_dec_plist_cross_platform.c enum.c \
-	err_compat.c error_test.c evict_on_close.c extend.c external.c \
-	external_env.c farray.c fheap.c file_image.c filenotclosed.c \
-	fillval.c filter_fail.c filter_plugin.c flush1.c flush2.c \
-	flushrefresh.c freespace.c gen_bad_offset.c gen_bad_ohdr.c \
-	gen_bogus.c gen_bounds.c gen_cross.c gen_deflate.c \
-	gen_file_image.c gen_filespace.c gen_filters.c gen_new_array.c \
-	gen_new_fill.c gen_new_group.c gen_new_mtime.c gen_new_super.c \
-	gen_noencoder.c gen_nullspace.c gen_plist.c gen_sizes_lheap.c \
-	gen_specmetaread.c gen_udlinks.c getname.c gheap.c hdfs.c \
-	hyperslab.c istore.c lheap.c links.c links_env.c mf.c \
-	$(mirror_vfd_SOURCES) mount.c mtime.c ntypes.c objcopy.c \
-	ohdr.c page_buffer.c pool.c reserved.c ros3.c s3comms.c \
-	set_extent.c space_overflow.c stab.c swmr.c \
+	cache_tagging.c chunk_info.c cmpd_dset.c cmpd_dtransform.c \
+	cork.c cross_read.c dangle.c del_many_dense_attrs.c \
+	direct_chunk.c dsets.c dt_arith.c dtransform.c dtypes.c \
+	earray.c efc.c enc_dec_plist.c enc_dec_plist_cross_platform.c \
+	enum.c err_compat.c error_test.c evict_on_close.c extend.c \
+	external.c external_env.c farray.c fheap.c file_image.c \
+	filenotclosed.c fillval.c filter_fail.c filter_plugin.c \
+	flush1.c flush2.c flushrefresh.c freespace.c gen_bad_offset.c \
+	gen_bad_ohdr.c gen_bogus.c gen_bounds.c gen_cross.c \
+	gen_deflate.c gen_file_image.c gen_filespace.c gen_filters.c \
+	gen_new_array.c gen_new_fill.c gen_new_group.c gen_new_mtime.c \
+	gen_new_super.c gen_noencoder.c gen_nullspace.c gen_plist.c \
+	gen_sizes_lheap.c gen_specmetaread.c gen_udlinks.c getname.c \
+	gheap.c hdfs.c hyperslab.c istore.c lheap.c links.c \
+	links_env.c mf.c $(mirror_vfd_SOURCES) mount.c mtime.c \
+	ntypes.c objcopy.c ohdr.c page_buffer.c pool.c reserved.c \
+	ros3.c s3comms.c set_extent.c space_overflow.c stab.c swmr.c \
 	swmr_addrem_writer.c swmr_check_compat_vfd.c swmr_generator.c \
 	swmr_reader.c swmr_remove_reader.c swmr_remove_writer.c \
 	swmr_sparse_reader.c swmr_sparse_writer.c swmr_start_write.c \
@@ -1087,7 +1092,7 @@ am__DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.in \
 	$(srcdir)/testvds_env.sh.in $(srcdir)/testvdsswmr.sh.in \
 	$(top_srcdir)/bin/depcomp $(top_srcdir)/bin/test-driver \
 	$(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am COPYING
+	$(top_srcdir)/config/conclude.am
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
@@ -1098,10 +1103,10 @@ AMTAR = @AMTAR@
 # AM_CFLAGS is an automake construct which should be used by Makefiles
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_builddir)/src
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_JAVACFLAGS = @AM_JAVACFLAGS@
@@ -1139,11 +1144,56 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
 DESIRED_FILE_LOCKING = @DESIRED_FILE_LOCKING@
-DEV_WARNINGS = @DEV_WARNINGS@
+DIAGS = @DIAGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
+DOXYGEN_EXAMPLES_DIRECTORY = @DOXYGEN_EXAMPLES_DIRECTORY@
+DOXYGEN_EXTERNAL_SEARCH = @DOXYGEN_EXTERNAL_SEARCH@
+DOXYGEN_HTML_EXTRA_FILES = @DOXYGEN_HTML_EXTRA_FILES@
+DOXYGEN_HTML_EXTRA_STYLESHEET = @DOXYGEN_HTML_EXTRA_STYLESHEET@
+DOXYGEN_HTML_FOOTER = @DOXYGEN_HTML_FOOTER@
+DOXYGEN_HTML_HEADER = @DOXYGEN_HTML_HEADER@
+DOXYGEN_INCLUDE_ALIASES = @DOXYGEN_INCLUDE_ALIASES@
+DOXYGEN_INPUT_DIRECTORY = @DOXYGEN_INPUT_DIRECTORY@
+DOXYGEN_LAYOUT_FILE = @DOXYGEN_LAYOUT_FILE@
+DOXYGEN_MACRO_EXPANSION = @DOXYGEN_MACRO_EXPANSION@
+DOXYGEN_OPTIMIZE_OUTPUT_FOR_C = @DOXYGEN_OPTIMIZE_OUTPUT_FOR_C@
+DOXYGEN_OUTPUT_DIRECTORY = @DOXYGEN_OUTPUT_DIRECTORY@
+DOXYGEN_PACKAGE = @DOXYGEN_PACKAGE@
+DOXYGEN_PAPER_SIZE = @DOXYGEN_PAPER_SIZE@
+DOXYGEN_PREDEFINED = @DOXYGEN_PREDEFINED@
+DOXYGEN_PROJECT_BRIEF = @DOXYGEN_PROJECT_BRIEF@
+DOXYGEN_PROJECT_LOGO = @DOXYGEN_PROJECT_LOGO@
+DOXYGEN_SEARCHENGINE_URL = @DOXYGEN_SEARCHENGINE_URL@
+DOXYGEN_SERVER_BASED_SEARCH = @DOXYGEN_SERVER_BASED_SEARCH@
+DOXYGEN_STRIP_FROM_PATH = @DOXYGEN_STRIP_FROM_PATH@
+DOXYGEN_TAG_FILE = @DOXYGEN_TAG_FILE@
+DOXYGEN_VERSION_STRING = @DOXYGEN_VERSION_STRING@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
+DX_CONFIG = @DX_CONFIG@
+DX_DOCDIR = @DX_DOCDIR@
+DX_DOT = @DX_DOT@
+DX_DOXYGEN = @DX_DOXYGEN@
+DX_DVIPS = @DX_DVIPS@
+DX_EGREP = @DX_EGREP@
+DX_ENV = @DX_ENV@
+DX_FLAG_chi = @DX_FLAG_chi@
+DX_FLAG_chm = @DX_FLAG_chm@
+DX_FLAG_doc = @DX_FLAG_doc@
+DX_FLAG_dot = @DX_FLAG_dot@
+DX_FLAG_html = @DX_FLAG_html@
+DX_FLAG_man = @DX_FLAG_man@
+DX_FLAG_pdf = @DX_FLAG_pdf@
+DX_FLAG_ps = @DX_FLAG_ps@
+DX_FLAG_rtf = @DX_FLAG_rtf@
+DX_FLAG_xml = @DX_FLAG_xml@
+DX_HHC = @DX_HHC@
+DX_LATEX = @DX_LATEX@
+DX_MAKEINDEX = @DX_MAKEINDEX@
+DX_PDFLATEX = @DX_PDFLATEX@
+DX_PERL = @DX_PERL@
+DX_PROJECT = @DX_PROJECT@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -1175,8 +1225,6 @@ H5_CFLAGS = @H5_CFLAGS@
 H5_CLASSPATH = @H5_CLASSPATH@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
-H5_ECFLAGS = @H5_ECFLAGS@
-H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
 H5_IS_DARWIN = @H5_IS_DARWIN@
@@ -1190,7 +1238,9 @@ HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
 HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
+HDF5_DOXYGEN = @HDF5_DOXYGEN@
 HDF5_HL = @HDF5_HL@
+HDF5_HL_TOOLS = @HDF5_HL_TOOLS@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF5_TESTS = @HDF5_TESTS@
 HDF5_TOOLS = @HDF5_TOOLS@
@@ -1200,6 +1250,7 @@ HDF_JAVA = @HDF_JAVA@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
+HL_TOOLS = @HL_TOOLS@
 HSIZE_T = @HSIZE_T@
 HSSIZE_T = @HSSIZE_T@
 IGNORE_DISABLED_FILE_LOCKS = @IGNORE_DISABLED_FILE_LOCKS@
@@ -1393,7 +1444,7 @@ LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
 # Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below
-# has been removed. According to the official description of DESTDIR by Gnu at
+# has been removed. According to the official description of DESTDIR by GNU at
 # http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is
 # prepended to the normal and complete install path that it precedes for the
 # purpose of installing in a temporary directory which is useful for building
@@ -1516,7 +1567,7 @@ TEST_PROG = testhdf5 \
            cache cache_api cache_image cache_tagging lheap ohdr \
            stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
-           dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
+           dtypes dsets chunk_info cmpd_dset cmpd_dtransform filter_fail extend direct_chunk \
            external efc objcopy links unlink twriteorder big mtime fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
@@ -1566,7 +1617,7 @@ VFD_LIST = sec2 stdio core core_paged split multi family \
 # Sources for testhdf5 executable
 testhdf5_SOURCES = testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
-    trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
+    trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c tunicode.c \
     tvlstr.c tvltypes.c
 
 
@@ -1768,6 +1819,10 @@ chunk_info$(EXEEXT): $(chunk_info_OBJECTS) $(chunk_info_DEPENDENCIES) $(EXTRA_ch
 cmpd_dset$(EXEEXT): $(cmpd_dset_OBJECTS) $(cmpd_dset_DEPENDENCIES) $(EXTRA_cmpd_dset_DEPENDENCIES) 
 	@rm -f cmpd_dset$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(cmpd_dset_OBJECTS) $(cmpd_dset_LDADD) $(LIBS)
+
+cmpd_dtransform$(EXEEXT): $(cmpd_dtransform_OBJECTS) $(cmpd_dtransform_DEPENDENCIES) $(EXTRA_cmpd_dtransform_DEPENDENCIES) 
+	@rm -f cmpd_dtransform$(EXEEXT)
+	$(AM_V_CCLD)$(LINK) $(cmpd_dtransform_OBJECTS) $(cmpd_dtransform_LDADD) $(LIBS)
 
 cork$(EXEEXT): $(cork_OBJECTS) $(cork_DEPENDENCIES) $(EXTRA_cork_DEPENDENCIES) 
 	@rm -f cork$(EXEEXT)
@@ -2211,6 +2266,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cache_tagging.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chunk_info.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmpd_dset.Po@am__quote@
+@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cmpd_dtransform.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cork.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/cross_read.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/dangle.Po@am__quote@
@@ -2336,7 +2392,6 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_cancel.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_dcreate.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttsafe_error.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/ttst.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tunicode.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvlstr.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/tvltypes.Po@am__quote@
@@ -2739,6 +2794,13 @@ chunk_info.log: chunk_info$(EXEEXT)
 cmpd_dset.log: cmpd_dset$(EXEEXT)
 	@p='cmpd_dset$(EXEEXT)'; \
 	b='cmpd_dset'; \
+	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
+	--log-file $$b.log --trs-file $$b.trs \
+	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
+	"$$tst" $(AM_TESTS_FD_REDIRECT)
+cmpd_dtransform.log: cmpd_dtransform$(EXEEXT)
+	@p='cmpd_dtransform$(EXEEXT)'; \
+	b='cmpd_dtransform'; \
 	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
@@ -3218,8 +3280,9 @@ uninstall-am:
 # commands that should be executed even if a file with the same name already
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
-        build-tests check-clean check-install check-p check-s check-vfd \
-        install-doc lib progs tests uninstall-doc _exec_check-s _test help
+	build-tests check-clean check-install check-p check-s check-vfd \
+	install-doc lib progs tests uninstall-doc \
+	_exec_check-s _test help trace doxygen
 
 help:
 	@$(top_srcdir)/bin/makehelp

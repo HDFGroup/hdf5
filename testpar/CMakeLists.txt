@@ -24,7 +24,7 @@ set (testphdf5_SOURCES
 add_executable (testphdf5 ${testphdf5_SOURCES})
 target_compile_options(testphdf5 PRIVATE "${HDF5_CMAKE_C_FLAGS}")
 target_include_directories (testphdf5
-    PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+    PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
 )
 if (NOT BUILD_SHARED_LIBS)
   TARGET_C_PROPERTIES (testphdf5 STATIC)
@@ -39,11 +39,18 @@ else ()
 endif ()
 set_target_properties (testphdf5 PROPERTIES FOLDER test/par)
 
-MACRO (ADD_H5P_EXE file)
+#-----------------------------------------------------------------------------
+# Add Target to clang-format
+#-----------------------------------------------------------------------------
+if (HDF5_ENABLE_FORMATTERS)
+  clang_format (HDF5_TEST_PAR_testphdf5_FORMAT testphdf5)
+endif ()
+
+macro (ADD_H5P_EXE file)
   add_executable (${file} ${HDF5_TEST_PAR_SOURCE_DIR}/${file}.c)
   target_compile_options(${file} PRIVATE "${HDF5_CMAKE_C_FLAGS}")
   target_include_directories (${file}
-      PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
+      PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>"
   )
   if (NOT BUILD_SHARED_LIBS)
     TARGET_C_PROPERTIES (${file} STATIC)
@@ -59,7 +66,14 @@ MACRO (ADD_H5P_EXE file)
     )
   endif ()
   set_target_properties (${file} PROPERTIES FOLDER test/par)
-ENDMACRO (ADD_H5P_EXE file)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_PAR_${file}_FORMAT ${file})
+  endif ()
+endmacro (ADD_H5P_EXE file)
 
 set (H5P_TESTS
     t_mpi

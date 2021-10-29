@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,12 +37,12 @@ extern "C" {
  * Signature: ([BJLjava/lang/String;IJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Rcreate
-    (JNIEnv *env, jclass clss, jbyteArray ref, jlong loc_id, jstring name, jint ref_type, jlong space_id)
+Java_hdf_hdf5lib_H5_H5Rcreate(JNIEnv *env, jclass clss, jbyteArray ref, jlong loc_id, jstring name,
+                              jint ref_type, jlong space_id)
 {
     const char *refName = NULL;
     jboolean    isCopy;
-    jbyte      *refBuf = NULL;
+    jbyte *     refBuf = NULL;
     jsize       refBufLen;
     herr_t      status = FAIL;
 
@@ -61,7 +61,8 @@ Java_hdf_hdf5lib_H5_H5Rcreate
     if ((H5R_OBJECT == ref_type) && (refBufLen != H5R_OBJ_REF_BUF_SIZE))
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rcreate: reference input array length != H5R_OBJ_REF_BUF_SIZE");
     else if ((H5R_DATASET_REGION == ref_type) && (refBufLen != H5R_DSET_REG_REF_BUF_SIZE))
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rcreate: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                              "H5Rcreate: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
     else if ((H5R_OBJECT != ref_type) && (H5R_DATASET_REGION != ref_type))
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rcreate: unknown reference type");
 
@@ -87,13 +88,13 @@ done:
  * Signature: (JJI[B)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Rdereference
-    (JNIEnv *env, jclass clss, jlong dataset, jlong access_list, jint ref_type, jbyteArray ref)
+Java_hdf_hdf5lib_H5__1H5Rdereference(JNIEnv *env, jclass clss, jlong dataset, jlong access_list,
+                                     jint ref_type, jbyteArray ref)
 {
-    jboolean  isCopy;
-    jbyte    *refBuf = NULL;
-    jsize     refBufLen;
-    hid_t     retVal = H5I_INVALID_HID;
+    jboolean isCopy;
+    jbyte *  refBuf = NULL;
+    jsize    refBufLen;
+    hid_t    retVal = H5I_INVALID_HID;
 
     UNUSED(clss);
 
@@ -106,9 +107,11 @@ Java_hdf_hdf5lib_H5__1H5Rdereference
     }
 
     if ((H5R_OBJECT == ref_type) && (refBufLen != H5R_OBJ_REF_BUF_SIZE))
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rdereference: reference input array length != H5R_OBJ_REF_BUF_SIZE");
+        H5_BAD_ARGUMENT_ERROR(ENVONLY,
+                              "H5Rdereference: reference input array length != H5R_OBJ_REF_BUF_SIZE");
     else if ((H5R_DATASET_REGION == ref_type) && (refBufLen != H5R_DSET_REG_REF_BUF_SIZE))
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rdereference: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY, "H5Rdereference: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
     else if ((H5R_OBJECT != ref_type) && (H5R_DATASET_REGION != ref_type))
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rdereference: unknown reference type");
 
@@ -130,13 +133,12 @@ done:
  * Signature: (JI[B)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5__1H5Rget_1region
-    (JNIEnv *env, jclass clss, jlong dataset, jint ref_type, jbyteArray ref)
+Java_hdf_hdf5lib_H5__1H5Rget_1region(JNIEnv *env, jclass clss, jlong dataset, jint ref_type, jbyteArray ref)
 {
-    jboolean  isCopy;
-    jbyte    *refBuf = NULL;
-    jsize     refBufLen;
-    hid_t     retVal = H5I_INVALID_HID;
+    jboolean isCopy;
+    jbyte *  refBuf = NULL;
+    jsize    refBufLen;
+    hid_t    retVal = H5I_INVALID_HID;
 
     UNUSED(clss);
 
@@ -151,7 +153,8 @@ Java_hdf_hdf5lib_H5__1H5Rget_1region
     }
 
     if (refBufLen != H5R_DSET_REG_REF_BUF_SIZE)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_region: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY, "H5Rget_region: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
 
     PIN_BYTE_ARRAY(ENVONLY, ref, refBuf, &isCopy, "H5Rget_region: reference buffer not pinned");
 
@@ -171,13 +174,12 @@ done:
  * Signature: (JI[B)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Rget_1obj_1type
-    (JNIEnv *env, jclass clss, jlong loc_id, jint ref_type, jbyteArray ref)
+Java_hdf_hdf5lib_H5_H5Rget_1obj_1type(JNIEnv *env, jclass clss, jlong loc_id, jint ref_type, jbyteArray ref)
 {
-    H5O_type_t  object_info;
-    jboolean    isCopy;
-    jbyte      *refBuf = NULL;
-    int         retVal = -1;
+    H5O_type_t object_info;
+    jboolean   isCopy;
+    jbyte *    refBuf = NULL;
+    int        retVal = -1;
 
     UNUSED(clss);
 
@@ -205,14 +207,14 @@ done:
  * Signature: (JI[B[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Rget_1obj_1type2
-    (JNIEnv *env, jclass clss, jlong loc_id, jint ref_type, jbyteArray ref, jintArray ref_obj)
+Java_hdf_hdf5lib_H5_H5Rget_1obj_1type2(JNIEnv *env, jclass clss, jlong loc_id, jint ref_type, jbyteArray ref,
+                                       jintArray ref_obj)
 {
-    jboolean  isCopy, isCopy2;
-    jbyte    *refBuf = NULL;
-    jint     *ref_objP = NULL;
-    jint      status = -1;
-    int       retVal = -1;
+    jboolean isCopy, isCopy2;
+    jbyte *  refBuf   = NULL;
+    jint *   ref_objP = NULL;
+    jint     status   = -1;
+    int      retVal   = -1;
 
     UNUSED(clss);
 
@@ -245,15 +247,15 @@ done:
  * Signature: (JI[B[Ljava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Rget_1name
-    (JNIEnv *env, jclass clss, jlong loc_id, jint ref_type, jbyteArray ref, jobjectArray name, jlong size)
+Java_hdf_hdf5lib_H5_H5Rget_1name(JNIEnv *env, jclass clss, jlong loc_id, jint ref_type, jbyteArray ref,
+                                 jobjectArray name, jlong size)
 {
-    jboolean  isCopy;
-    jstring   str;
-    jsize     refBufLen;
-    jbyte    *refBuf = NULL;
-    char     *aName = NULL;
-    jlong     ret_val = -1;
+    jboolean isCopy;
+    jstring  str;
+    jsize    refBufLen;
+    jbyte *  refBuf  = NULL;
+    char *   aName   = NULL;
+    jlong    ret_val = -1;
 
     UNUSED(clss);
 
@@ -270,7 +272,8 @@ Java_hdf_hdf5lib_H5_H5Rget_1name
     if ((H5R_OBJECT == ref_type) && (refBufLen != H5R_OBJ_REF_BUF_SIZE))
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: reference input array length != H5R_OBJ_REF_BUF_SIZE");
     else if ((H5R_DATASET_REGION == ref_type) && (refBufLen != H5R_DSET_REG_REF_BUF_SIZE))
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY, "H5Rget_name: region reference input array length != H5R_DSET_REG_REF_BUF_SIZE");
     else if ((H5R_OBJECT != ref_type) && (H5R_DATASET_REGION != ref_type))
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Rget_name: unknown reference type");
 
@@ -279,14 +282,15 @@ Java_hdf_hdf5lib_H5_H5Rget_1name
     if (NULL == (aName = HDmalloc(sizeof(char) * (size_t)size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Rget_name: failed to allocate referenced object name buffer");
 
-    if ((ret_val = (jlong)H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, aName, (size_t)size + 1)) < 0)
+    if ((ret_val = (jlong)H5Rget_name((hid_t)loc_id, (H5R_type_t)ref_type, refBuf, aName, (size_t)size + 1)) <
+        0)
         H5_LIBRARY_ERROR(ENVONLY);
     aName[(size_t)size] = '\0';
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, aName)))
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
-    ENVPTR->SetObjectArrayElement(ENVONLY, name, (jsize) 0, str);
+    ENVPTR->SetObjectArrayElement(ENVONLY, name, (jsize)0, str);
     CHECK_JNI_EXCEPTION(ENVONLY, JNI_FALSE);
 
 done:
@@ -297,7 +301,6 @@ done:
 
     return ret_val;
 } /* end Java_hdf_hdf5lib_H5_H5Rget_1name */
-
 
 #ifdef __cplusplus
 } /* end extern "C" */

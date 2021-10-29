@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -15,19 +14,32 @@ package hdf.hdf5lib.structs;
 
 import java.io.Serializable;
 
-// Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx)
+/**
+ * Information struct for object header metadata (for H5Oget_info/H5Oget_info_by_name/H5Oget_info_by_idx)
+ *
+ */
 public class H5O_hdr_info_t implements Serializable {
     private static final long serialVersionUID = 7883826382952577189L;
-    public int version;       /* Version number of header format in file */
-    public int nmesgs;        /* Number of object header messages */
-    public int nchunks;       /* Number of object header chunks */
-    public int flags;         /* Object header status flags */
-    public long space_total;  /* Total space for storing object header in file */
-    public long space_meta;   /* Space within header for object header metadata information */
-    public long space_mesg;   /* Space within header for actual message information */
-    public long space_free;   /* Free space within object header */
-    public long mesg_present; /* Flags to indicate presence of message type in header */
-    public long mesg_shared;  /* Flags to indicate message type is shared in header */
+    /** Version number of header format in file */
+    public int version;
+    /** Number of object header messages */
+    public int nmesgs;
+    /** Number of object header chunks */
+    public int nchunks;
+    /** Object header status flags */
+    public int flags;
+    /** Total space for storing object header in file */
+    public long space_total;
+    /** Space within header for object header metadata information */
+    public long space_meta;
+    /** Space within header for actual message information */
+    public long space_mesg;
+    /** Free space within object header */
+    public long space_free;
+    /** Flags to indicate presence of message type in header */
+    public long mesg_present;
+    /** Flags to indicate message type is shared in header */
+    public long mesg_shared;
 
     H5O_hdr_info_t (int version, int nmesgs, int nchunks, int flags,
         long space_total, long space_meta, long space_mesg, long space_free,
@@ -56,25 +68,25 @@ public class H5O_hdr_info_t implements Serializable {
         H5O_hdr_info_t info = (H5O_hdr_info_t) o;
 
         if (this.version != info.version)
-        	return false;
+            return false;
         if (this.nmesgs != info.nmesgs)
-        	return false;
+            return false;
         if (this.nchunks != info.nchunks)
-        	return false;
+            return false;
         if (this.flags != info.flags)
-        	return false;
+            return false;
         if (this.space_total != info.space_total)
-        	return false;
+            return false;
         if (this.space_meta != info.space_meta)
-        	return false;
+            return false;
         if (this.space_mesg != info.space_mesg)
-        	return false;
+            return false;
         if (this.space_free != info.space_free)
-        	return false;
+            return false;
         if (this.mesg_present != info.mesg_present)
-        	return false;
+            return false;
         if (this.mesg_shared != info.mesg_shared)
-        	return false;
+            return false;
 
         return true;
     }

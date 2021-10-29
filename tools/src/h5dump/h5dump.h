@@ -6,12 +6,12 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
-#ifndef H5DUMP_H__
-#define H5DUMP_H__
+#ifndef H5DUMP_H
+#define H5DUMP_H
 
 #include "hdf5.h"
 #include "H5private.h"
@@ -26,66 +26,67 @@
  **/
 /* the table of dump functions */
 typedef struct dump_functions_t {
-    void     (*dump_group_function) (hid_t, const char *);
-    void     (*dump_named_datatype_function) (hid_t, const char *);
-    void     (*dump_dataset_function) (hid_t, const char *, struct subset_t *);
-    void     (*dump_dataspace_function) (hid_t);
-    void     (*dump_datatype_function) (hid_t);
-    herr_t   (*dump_attribute_function) (hid_t, const char *, const H5A_info_t *, void *);
-    void     (*dump_data_function) (hid_t, int, struct subset_t *, int);
+    void (*dump_group_function)(hid_t, const char *);
+    void (*dump_named_datatype_function)(hid_t, const char *);
+    void (*dump_dataset_function)(hid_t, const char *, struct subset_t *);
+    void (*dump_dataspace_function)(hid_t);
+    void (*dump_datatype_function)(hid_t);
+    herr_t (*dump_attribute_function)(hid_t, const char *, const H5A_info_t *, void *);
+    void (*dump_data_function)(hid_t, int, struct subset_t *, int);
 } dump_functions;
 
 /* List of table structures.  There is one table structure for each file */
 typedef struct h5dump_table_items_t {
-    unsigned long   fileno;         /* File number that these tables refer to */
-    hid_t           oid;            /* ID of an object in this file, held open so fileno is consistent */
-    table_t         *group_table;   /* Table of groups */
-    table_t         *dset_table;    /* Table of datasets */
-    table_t         *type_table;    /* Table of datatypes */
+    unsigned long fileno;      /* File number that these tables refer to */
+    hid_t         oid;         /* ID of an object in this file, held open so fileno is consistent */
+    table_t *     group_table; /* Table of groups */
+    table_t *     dset_table;  /* Table of datasets */
+    table_t *     type_table;  /* Table of datatypes */
 } h5dump_table_items_t;
 
 typedef struct h5dump_table_list_t {
-    size_t                  nalloc;
-    size_t                  nused;
-    h5dump_table_items_t    *tables;
+    size_t                nalloc;
+    size_t                nused;
+    h5dump_table_items_t *tables;
 } h5dump_table_list_t;
 
-h5dump_table_list_t  table_list = {0, 0, NULL};
-table_t             *group_table = NULL, *dset_table = NULL, *type_table = NULL;
+h5dump_table_list_t table_list  = {0, 0, NULL};
+table_t *           group_table = NULL, *dset_table = NULL, *type_table = NULL;
 
-unsigned     dump_indent = 0;    /* how far in to indent the line */
-int          unamedtype = 0;     /* shared datatype with no name */
-hbool_t      hit_elink = FALSE;  /* whether we have traversed an external link */
-size_t       prefix_len = 1024;
-char         *prefix = NULL;
-const char   *fp_format = NULL;
+unsigned    dump_indent = 0;     /* how far in to indent the line */
+int         unamedtype  = 0;     /* shared datatype with no name */
+hbool_t     hit_elink   = FALSE; /* whether we have traversed an external link */
+size_t      prefix_len  = 1024;
+char *      prefix      = NULL;
+const char *fp_format   = NULL;
 
 /* things to display or which are set via command line parameters */
 typedef struct {
-    int          display_all;
-    int          display_oid;
-    int          display_data;
-    int          display_attr_data;
-    int          display_char;           /* print 1-byte numbers as ASCII */
-    int          usingdasho;
-    int          display_bb;             /* superblock */
-    int          display_dcpl;           /* dcpl */
-    int          display_fi;             /* file index */
-    int          display_ai;             /* array index */
-    int          display_escape;         /* escape non printable characters */
-    int          display_region;         /* print region reference data */
-    int          disable_compact_subset; /* disable compact form of subset notation */
-    int          display_packed_bits;    /* print 1-8 byte numbers as packed bits */
-    int          include_attrs;          /* Display attributes */
-    int          display_vds_first;      /* vds display to all by default */
-    int          vds_gap_size;           /* vds skip missing files default is none */
+    int display_all;
+    int display_oid;
+    int display_data;
+    int display_attr_data;
+    int display_char; /* print 1-byte numbers as ASCII */
+    int usingdasho;
+    int display_bb;             /* superblock */
+    int display_dcpl;           /* dcpl */
+    int display_fi;             /* file index */
+    int display_ai;             /* array index */
+    int display_escape;         /* escape non printable characters */
+    int display_region;         /* print region reference data */
+    int disable_compact_subset; /* disable compact form of subset notation */
+    int display_packed_bits;    /* print 1-8 byte numbers as packed bits */
+    int include_attrs;          /* Display attributes */
+    int display_vds_first;      /* vds display to all by default */
+    int vds_gap_size;           /* vds skip missing files default is none */
 } dump_opt_t;
-dump_opt_t dump_opts = {TRUE, FALSE, TRUE, TRUE, FALSE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, FALSE, FALSE, FALSE, TRUE, FALSE, 0};
+dump_opt_t dump_opts = {TRUE, FALSE, TRUE,  TRUE,  FALSE, FALSE, FALSE, FALSE, FALSE,
+                        TRUE, FALSE, FALSE, FALSE, FALSE, TRUE,  FALSE, 0};
 
-#define PACKED_BITS_MAX         8  /* Maximum number of packed-bits to display */
-#define PACKED_BITS_SIZE_MAX    (8*sizeof(long long))  /* Maximum bits size of integer types of packed-bits */
+#define PACKED_BITS_MAX      8                       /* Maximum number of packed-bits to display */
+#define PACKED_BITS_SIZE_MAX (8 * sizeof(long long)) /* Maximum bits size of integer types of packed-bits */
 /* mask list for packed bits */
-unsigned long long packed_mask[PACKED_BITS_MAX];  /* packed bits are restricted to 8*sizeof(llong) bytes */
+unsigned long long packed_mask[PACKED_BITS_MAX]; /* packed bits are restricted to 8*sizeof(llong) bytes */
 
 /* packed bits display parameters */
 unsigned packed_offset[PACKED_BITS_MAX];
@@ -98,16 +99,17 @@ unsigned packed_length[PACKED_BITS_MAX];
 const dump_functions *dump_function_table;
 
 #ifdef __cplusplus
-"C" {
+"C"
+{
 #endif
 
-void     add_prefix(char **prfx, size_t *prfx_len, const char *name);
-hid_t    h5_fileaccess(void);
-ssize_t  table_list_add(hid_t oid, unsigned long file_no);
-ssize_t  table_list_visited(unsigned long file_no);
+    void    add_prefix(char **prfx, size_t *prfx_len, const char *name);
+    hid_t   h5_fileaccess(void);
+    ssize_t table_list_add(hid_t oid, unsigned long file_no);
+    ssize_t table_list_visited(unsigned long file_no);
 
 #ifdef __cplusplus
 }
 #endif
 
-#endif  /* !H5DUMP_H__ */
+#endif /* H5DUMP_H */

@@ -15,7 +15,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -72,6 +72,10 @@ PROGRAM fortranlibtest
   ret_total_error = 0
   CALL reopentest(cleanup, ret_total_error)
   CALL write_test_status(ret_total_error, ' Reopen test', total_error)
+
+  ret_total_error = 0
+  CALL get_name_test(cleanup, ret_total_error)
+  CALL write_test_status(ret_total_error, ' Get name test', total_error)
 
   ret_total_error = 0
   CALL file_close(cleanup, ret_total_error)

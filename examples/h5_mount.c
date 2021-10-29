@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,107 +25,105 @@
 #define FILE2 "mount2.h5"
 
 #define RANK 2
-#define NX 4
-#define NY 5
+#define NX   4
+#define NY   5
 
-int main(void)
+int
+main(void)
 {
 
-   hid_t fid1, fid2, gid;  /* Files and group identifiers */
-   hid_t did, tid, sid;    /* Dataset and datatype identifiers */
+    hid_t fid1, fid2, gid; /* Files and group identifiers */
+    hid_t did, tid, sid;   /* Dataset and datatype identifiers */
 
-   herr_t status;
-   hsize_t dims[] = {NX,NY}; /* Dataset dimensions */
+    herr_t  status;
+    hsize_t dims[] = {NX, NY}; /* Dataset dimensions */
 
-   int i, j;
-   int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
+    int i, j;
+    int bm[NX][NY], bm_out[NX][NY]; /* Data buffers */
 
-   /*
-    * Initialization of buffer matrix "bm"
-    */
-   for(i =0; i < NX; i++)
-    for(j = 0; j < NY; j++)
-      bm[i][j] = i + j;
+    /*
+     * Initialization of buffer matrix "bm"
+     */
+    for (i = 0; i < NX; i++)
+        for (j = 0; j < NY; j++)
+            bm[i][j] = i + j;
 
-   /*
-    * Create first file and a group in it.
-    */
-   fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-   gid = H5Gcreate2(fid1, "/G", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /*
+     * Create first file and a group in it.
+     */
+    fid1 = H5Fcreate(FILE1, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    gid  = H5Gcreate2(fid1, "/G", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-   /*
-    * Close group and file
-    */
-   H5Gclose(gid);
-   H5Fclose(fid1);
+    /*
+     * Close group and file
+     */
+    H5Gclose(gid);
+    H5Fclose(fid1);
 
-   /*
-    * Create second file and dataset "D" in it.
-    */
-   fid2 = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
-   dims[0] = NX;
-   dims[1] = NY;
-   sid = H5Screate_simple(RANK, dims, NULL);
-   did = H5Dcreate2(fid2, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    /*
+     * Create second file and dataset "D" in it.
+     */
+    fid2    = H5Fcreate(FILE2, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+    dims[0] = NX;
+    dims[1] = NY;
+    sid     = H5Screate_simple(RANK, dims, NULL);
+    did     = H5Dcreate2(fid2, "D", H5T_NATIVE_INT, sid, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
-   /*
-    * Write data to the dataset.
-    */
-   status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm);
+    /*
+     * Write data to the dataset.
+     */
+    status = H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm);
 
-   /*
-    * Close all identifiers.
-    */
-   H5Sclose(sid);
-   H5Dclose(did);
-   H5Fclose(fid2);
+    /*
+     * Close all identifiers.
+     */
+    H5Sclose(sid);
+    H5Dclose(did);
+    H5Fclose(fid2);
 
-   /*
-    * Reopen both files
-    */
-   fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
-   fid2 = H5Fopen(FILE2, H5F_ACC_RDONLY, H5P_DEFAULT);
+    /*
+     * Reopen both files
+     */
+    fid1 = H5Fopen(FILE1, H5F_ACC_RDONLY, H5P_DEFAULT);
+    fid2 = H5Fopen(FILE2, H5F_ACC_RDONLY, H5P_DEFAULT);
 
-   /*
-    * Mount second file under G in the first file.
-    */
-   H5Fmount(fid1, "/G", fid2, H5P_DEFAULT);
+    /*
+     * Mount second file under G in the first file.
+     */
+    H5Fmount(fid1, "/G", fid2, H5P_DEFAULT);
 
-   /*
-    * Access dataset D in the first file under /G/D name.
-    */
-   did = H5Dopen2(fid1, "/G/D", H5P_DEFAULT);
-   tid = H5Dget_type(did);
-   status = H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm_out);
+    /*
+     * Access dataset D in the first file under /G/D name.
+     */
+    did    = H5Dopen2(fid1, "/G/D", H5P_DEFAULT);
+    tid    = H5Dget_type(did);
+    status = H5Dread(did, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, bm_out);
 
-   /*
-    * Print out the data.
-    */
-   for(i=0; i<NX; i++){
-    for(j=0; j<NY; j++)
-        printf("  %d", bm_out[i][j]);
-	printf("\n");
-   }
+    /*
+     * Print out the data.
+     */
+    for (i = 0; i < NX; i++) {
+        for (j = 0; j < NY; j++)
+            printf("  %d", bm_out[i][j]);
+        printf("\n");
+    }
 
-   /*
-    * Close all identifers
-    */
-   H5Tclose(tid);
-   H5Dclose(did);
+    /*
+     * Close all identifers
+     */
+    H5Tclose(tid);
+    H5Dclose(did);
 
-   /*
-    * Unmounting second file
-    */
-   H5Funmount(fid1, "/G");
+    /*
+     * Unmounting second file
+     */
+    H5Funmount(fid1, "/G");
 
-   /*
-    * Close both files
-    */
-   H5Fclose(fid1);
-   H5Fclose(fid2);
+    /*
+     * Close both files
+     */
+    H5Fclose(fid1);
+    H5Fclose(fid2);
 
-   return 0;
+    return 0;
 }
-
-
-

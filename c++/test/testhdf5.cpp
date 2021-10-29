@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -38,26 +38,21 @@
         GetTestNumErrs() -- Retrieve the number of testing errors
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
 #include <string>
-#include "H5Cpp.h"      // C++ API header file
+#include "H5Cpp.h" // C++ API header file
 using namespace H5;
 
 #include "h5test.h"
-#include "h5cpputil.h"  // C++ utilility header file
+#include "h5cpputil.h" // C++ utilility header file
 
 int
 main(int argc, char *argv[])
 {
-    try
-    {
+    try {
         // Turn of the auto-printing when failure occurs so that we can
         // handle the errors appropriately since sometime failures are
         // caused deliberately and expected.
@@ -70,39 +65,38 @@ main(int argc, char *argv[])
         // testing dataset functionalities in dset.cpp
         AddTest("dsets", test_dset, cleanup_dsets, "Dataset I/O Operations", NULL);
         // testing dataspace functionalities in th5s.cpp
-        AddTest("th5s",  test_h5s,  cleanup_h5s,  "Dataspaces", NULL);
+        AddTest("th5s", test_h5s, cleanup_h5s, "Dataspaces", NULL);
         // testing attribute functionalities in tattr.cpp
-        AddTest("tattr", test_attr, cleanup_attr,  "Attributes", NULL);
+        AddTest("tattr", test_attr, cleanup_attr, "Attributes", NULL);
         // testing object functionalities in tobject.cpp
-        AddTest("tobject", test_object, cleanup_object,  "Objects", NULL);
+        AddTest("tobject", test_object, cleanup_object, "Objects", NULL);
         // testing reference functionalities in trefer.cpp
-        AddTest("trefer", test_reference, cleanup_reference,  "References", NULL);
+        AddTest("trefer", test_reference, cleanup_reference, "References", NULL);
         // testing variable-length strings in tvlstr.cpp
-        AddTest("tvlstr", test_vlstrings, cleanup_vlstrings,  "Variable-Length Strings", NULL);
-        AddTest("ttypes", test_types, cleanup_types,  "Generic Data Types", NULL);
-        AddTest("tarray", test_array, cleanup_array,  "Array Datatypes", NULL);
-        AddTest("tcompound", test_compound, cleanup_compound,  "Compound Data Types", NULL);
-        AddTest("tdspl", test_dsproplist, cleanup_dsproplist,  "Dataset Property List", NULL);
-        AddTest("tfilter", test_filters, cleanup_filters,  "Various Filters", NULL);
-        AddTest("tlinks", test_links, cleanup_links,  "Various Links", NULL);
-/* Comment out tests that are not done yet. - BMR, Feb 2001
-        AddTest("select", test_select, cleanup_select,  "Selections", NULL);
-        AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
-        AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL);
-*/
-        AddTest("iterate", test_iterate, cleanup_iterate,  "Group & Attribute Iteration", NULL);
-/*
-        AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
-        AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
+        AddTest("tvlstr", test_vlstrings, cleanup_vlstrings, "Variable-Length Strings", NULL);
+        AddTest("ttypes", test_types, cleanup_types, "Generic Data Types", NULL);
+        AddTest("tarray", test_array, cleanup_array, "Array Datatypes", NULL);
+        AddTest("tcompound", test_compound, cleanup_compound, "Compound Data Types", NULL);
+        AddTest("tdspl", test_dsproplist, cleanup_dsproplist, "Dataset Property List", NULL);
+        AddTest("tfilter", test_filters, cleanup_filters, "Various Filters", NULL);
+        AddTest("tlinks", test_links, cleanup_links, "Various Links", NULL);
+        /* Comment out tests that are not done yet. - BMR, Feb 2001
+                AddTest("select", test_select, cleanup_select,  "Selections", NULL);
+                AddTest("time", test_time, cleanup_time,  "Time Datatypes", NULL);
+                AddTest("vltypes", test_vltypes, cleanup_vltypes,  "Variable-Length Datatypes", NULL);
+        */
+        AddTest("iterate", test_iterate, cleanup_iterate, "Group & Attribute Iteration", NULL);
+        /*
+                AddTest("genprop", test_genprop, cleanup_genprop,  "Generic Properties", NULL);
+                AddTest("id", test_ids, NULL,  "User-Created Identifiers", NULL);
 
-Comment out tests that are not done yet */
+        Comment out tests that are not done yet */
 
-/* Tentative - BMR 2007/1/12
-        AddTest("enum", test_enum, cleanup_enum,  "Enum Data Types", NULL);
-*/
+        /* Tentative - BMR 2007/1/12
+                AddTest("enum", test_enum, cleanup_enum,  "Enum Data Types", NULL);
+        */
     }
-    catch (Exception& E)
-    {
+    catch (Exception &E) {
         issue_fail_msg("Tests failed", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
@@ -110,7 +104,7 @@ Comment out tests that are not done yet */
     TestInfo(argv[0]);
 
     /* Parse command line arguments */
-    TestParseCmdLine(argc,argv);
+    TestParseCmdLine(argc, argv);
 
     /* Perform requested testing */
     PerformTests();
@@ -128,4 +122,3 @@ Comment out tests that are not done yet */
 
     return (GetTestNumErrs());
 }
-

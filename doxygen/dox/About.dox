@@ -1,0 +1,23 @@
+/** \page About About
+
+\section about_history History
+
+The implementation of this documentation set is based on the fantastic work of the
+<a href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen project</a>.
+Please refer to their <a href="https://gitlab.com/libeigen/eigen">GitLab repository</a>
+and the online version of their
+<a href="http://eigen.tuxfamily.org/dox/">Doxygen-based documentation</a>.
+Not only does Eigen set a standard as a piece of software, but also as an example
+of <em>documentation done right</em>.
+
+\section about_documentation Documentation about Documentation
+
+\li \todo Describe how to add a reference or a new RFC
+\li \todo Describe how to add an example
+\li \todo Describe how to include plain HTML
+\li \todo Describe how to add an API macro
+\li \todo Describe the custom commands
+\li \todo Describe the S3 bucket layout and update routine
+\li \todo Link the RM template
+
+*/

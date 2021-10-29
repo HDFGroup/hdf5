@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -41,20 +40,20 @@ public class TestH5P {
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
     long[] H5dims = { DIM_X, DIM_Y };
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5did = -1;
-    long lapl_id = -1;
-    long fapl_id = -1;
-    long fcpl_id = -1;
-    long ocpl_id = -1;
-    long ocp_plist_id = -1;
-    long lcpl_id = -1;
-    long plapl_id = -1;
-    long plist_id = -1;
-    long gapl_id = -1;
-    long gcpl_id = -1;
-    long acpl_id = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did = HDF5Constants.H5I_INVALID_HID;
+    long lapl_id = HDF5Constants.H5I_INVALID_HID;
+    long fapl_id = HDF5Constants.H5I_INVALID_HID;
+    long fcpl_id = HDF5Constants.H5I_INVALID_HID;
+    long ocpl_id = HDF5Constants.H5I_INVALID_HID;
+    long ocp_plist_id = HDF5Constants.H5I_INVALID_HID;
+    long lcpl_id = HDF5Constants.H5I_INVALID_HID;
+    long plapl_id = HDF5Constants.H5I_INVALID_HID;
+    long plist_id = HDF5Constants.H5I_INVALID_HID;
+    long gapl_id = HDF5Constants.H5I_INVALID_HID;
+    long gcpl_id = HDF5Constants.H5I_INVALID_HID;
+    long acpl_id = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -65,7 +64,7 @@ public class TestH5P {
     }
 
     private final long _createDataset(long fid, long dsid, String name, long dapl) {
-        long did = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
         try {
             did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_STD_I32BE, dsid,
                     HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, dapl);

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -43,13 +42,13 @@ public class TestH5A {
     private static final String H5_FILE = "testA.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5did = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did = HDF5Constants.H5I_INVALID_HID;
     long[] H5dims = { DIM_X, DIM_Y };
-    long type_id = -1;
-    long space_id = -1;
-    long lapl_id = -1;
+    long type_id = HDF5Constants.H5I_INVALID_HID;
+    long space_id = HDF5Constants.H5I_INVALID_HID;
+    long lapl_id = HDF5Constants.H5I_INVALID_HID;
 
     private final void _deleteFile(String filename) {
         File file = new File(filename);
@@ -60,7 +59,7 @@ public class TestH5A {
     }
 
     private final long _createDataset(long fid, long dsid, String name, long dapl) {
-        long did = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
         try {
             did = H5.H5Dcreate(fid, name, HDF5Constants.H5T_STD_I32BE, dsid,
                     HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT, dapl);
@@ -127,7 +126,7 @@ public class TestH5A {
 
     @Test
     public void testH5Acreate2() {
-        long attr_id = -1;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
         try {
             attr_id = H5.H5Acreate(H5did, "dset", type_id, space_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
             assertTrue("testH5Acreate2", attr_id >= 0);
@@ -155,8 +154,8 @@ public class TestH5A {
     @Test
     public void testH5Aopen() {
         String attr_name = "dset";
-        long attribute_id = -1;
-        long attr_id = -1;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attr_id = H5.H5Acreate(H5did, attr_name, type_id, space_id,
@@ -192,9 +191,8 @@ public class TestH5A {
         int idx_type = HDF5Constants.H5_INDEX_CRT_ORDER;
         int order = HDF5Constants.H5_ITER_INC;
         long n = 0;
-        long attr_id = -1;
-        long attribute_id = -1;
-        long aapl_id = HDF5Constants.H5P_DEFAULT;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attr_id = H5.H5Acreate(H5did, "file", type_id, space_id,
@@ -213,7 +211,7 @@ public class TestH5A {
             try {
                 n = 5;
                 H5.H5Aopen_by_idx(loc_id, obj_name, idx_type, order, n,
-                        aapl_id, lapl_id);
+                        HDF5Constants.H5P_DEFAULT, lapl_id);
                 fail("Negative Test Failed:- Error not Thrown when n is invalid.");
             }
             catch (AssertionError err) {
@@ -228,7 +226,7 @@ public class TestH5A {
                 n = 0;
                 obj_name = "file";
                 H5.H5Aopen_by_idx(loc_id, obj_name, idx_type, order, n,
-                        aapl_id, lapl_id);
+                        HDF5Constants.H5P_DEFAULT, lapl_id);
                 fail("Negative Test Failed:- Error not Thrown when attribute name is invalid.");
             }
             catch (AssertionError err) {
@@ -252,7 +250,7 @@ public class TestH5A {
     public void testH5Acreate_by_name() {
         String obj_name = ".";
         String attr_name = "DATASET";
-        long attribute_id = -1;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
         boolean bool_val = false;
 
         try {
@@ -284,12 +282,12 @@ public class TestH5A {
         long loc_id = H5fid;
         String old_attr_name = "old";
         String new_attr_name = "new";
-        long attr_id = -1;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
         int ret_val = -1;
         boolean bool_val = false;
 
         try {
-            attr_id = H5.H5Acreate(loc_id, old_attr_name, type_id, space_id, HDF5Constants.H5P_DEFAULT, lapl_id);
+            attr_id = H5.H5Acreate(loc_id, old_attr_name, type_id, space_id, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
 
             ret_val = H5.H5Arename(loc_id, old_attr_name, new_attr_name);
 
@@ -322,7 +320,7 @@ public class TestH5A {
         String obj_name = ".";
         String old_attr_name = "old";
         String new_attr_name = "new";
-        long attr_id = -1;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
         int ret_val = -1;
         boolean bool_val = false;
 
@@ -364,7 +362,7 @@ public class TestH5A {
         String obj_name = ".";
         String attr_name = "DATASET1";
         String ret_name = null;
-        long attribute_id = -1;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attribute_id = H5.H5Acreate_by_name(H5fid, obj_name, attr_name,
@@ -394,8 +392,8 @@ public class TestH5A {
         int idx_type = HDF5Constants.H5_INDEX_NAME;
         int order = HDF5Constants.H5_ITER_INC;
         int n = 0;
-        long attr1_id = -1;
-        long attr2_id = -1;
+        long attr1_id = HDF5Constants.H5I_INVALID_HID;
+        long attr2_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attr1_id = H5.H5Acreate_by_name(loc_id, obj_name, attr_name,
@@ -431,8 +429,8 @@ public class TestH5A {
 
     @Test
     public void testH5Aget_storage_size() {
-        long attr_id = -1;
-        long attr_size = -1;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
+        long attr_size = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attr_id = H5.H5Acreate(H5did, "dset", type_id, space_id,
@@ -454,8 +452,8 @@ public class TestH5A {
     @Test
     public void testH5Aget_info() {
         H5A_info_t attr_info = null;
-        long attribute_id = -1;
-        long attr_id = -1;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attr_id = H5.H5Acreate(H5did, "dset", type_id, space_id,
@@ -486,8 +484,8 @@ public class TestH5A {
     @Test
     public void testH5Aget_info1() {
         H5A_info_t attr_info = null;
-        long attribute_id = -1;
-        long attr_id = -1;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
         int order = HDF5Constants.H5_ITER_INC;
 
         try {
@@ -522,8 +520,8 @@ public class TestH5A {
 
     @Test
     public void testH5Aget_info_by_idx() {
-        long attr_id = -1;
-        long attr2_id = -1;;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
+        long attr2_id = HDF5Constants.H5I_INVALID_HID;;
         H5A_info_t attr_info = null;
 
         try {
@@ -578,7 +576,7 @@ public class TestH5A {
 
     @Test
     public void testH5Aget_info_by_name() {
-        long attr_id = -1;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
         H5A_info_t attr_info = null;
         String obj_name = ".";
         String attr_name = "DATASET";
@@ -603,7 +601,7 @@ public class TestH5A {
 
     @Test
     public void testH5Adelete_by_name() {
-        long attr_id = -1;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
         int ret_val = -1;
         boolean bool_val = false;
         boolean exists = false;
@@ -646,8 +644,8 @@ public class TestH5A {
     @Test
     public void testH5Aexists() {
         boolean exists = false;
-        long attr_id = -1;
-        long attribute_id = -1;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             exists = H5.H5Aexists(H5fid, "None");
@@ -685,10 +683,10 @@ public class TestH5A {
     @Test
     public void testH5Adelete_by_idx_order() {
         boolean exists = false;
-        long attr1_id = -1;
-        long attr2_id = -1;
-        long attr3_id = -1;
-        long attr4_id = -1;
+        long attr1_id = HDF5Constants.H5I_INVALID_HID;
+        long attr2_id = HDF5Constants.H5I_INVALID_HID;
+        long attr3_id = HDF5Constants.H5I_INVALID_HID;
+        long attr4_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attr1_id = H5.H5Acreate_by_name(H5fid, ".", "attribute1",
@@ -727,9 +725,9 @@ public class TestH5A {
     @Test
     public void testH5Adelete_by_idx_name1() {
         boolean exists = false;
-        long attr1_id = -1;
-        long attr2_id = -1;
-        long attr3_id = -1;
+        long attr1_id = HDF5Constants.H5I_INVALID_HID;
+        long attr2_id = HDF5Constants.H5I_INVALID_HID;
+        long attr3_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attr1_id = H5.H5Acreate_by_name(H5fid, ".", "attribute1",
@@ -762,10 +760,10 @@ public class TestH5A {
     @Test
     public void testH5Adelete_by_idx_name2() {
         boolean exists = false;
-        long attr1_id = -1;
-        long attr2_id = -1;
-        long attr3_id = -1;
-        long attr4_id = -1;
+        long attr1_id = HDF5Constants.H5I_INVALID_HID;
+        long attr2_id = HDF5Constants.H5I_INVALID_HID;
+        long attr3_id = HDF5Constants.H5I_INVALID_HID;
+        long attr4_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attr1_id = H5.H5Acreate_by_name(H5fid, ".", "attribute1",
@@ -817,8 +815,8 @@ public class TestH5A {
     public void testH5Aopen_by_name() {
         String obj_name = ".";
         String attr_name = "DATASET";
-        long attribute_id = -1;
-        long aid = -1;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
+        long aid = HDF5Constants.H5I_INVALID_HID;
 
         try {
             attribute_id = H5.H5Acreate_by_name(H5fid, obj_name, attr_name,
@@ -852,9 +850,9 @@ public class TestH5A {
     @Test
     public void testH5Awrite_readVL() {
         String attr_name = "VLdata";
-        long attr_id = -1;
-        long atype_id = -1;
-        long aspace_id = -1;
+        long attr_id = HDF5Constants.H5I_INVALID_HID;
+        long atype_id = HDF5Constants.H5I_INVALID_HID;
+        long aspace_id = HDF5Constants.H5I_INVALID_HID;
         String[] str_data = { "Parting", "is such", "sweet", "sorrow." };
         long[] dims = { str_data.length };
         long lsize = 1;
@@ -919,8 +917,8 @@ public class TestH5A {
     public void testH5Aget_create_plist() {
         String attr_name = "DATASET1";
         int char_encoding = 0;
-        long plist_id = -1;
-        long attribute_id = -1;
+        long plist_id = HDF5Constants.H5I_INVALID_HID;
+        long attribute_id = HDF5Constants.H5I_INVALID_HID;
 
         try {
             plist_id = H5.H5Pcreate(HDF5Constants.H5P_ATTRIBUTE_CREATE);
@@ -980,10 +978,10 @@ public class TestH5A {
 
     @Test
     public void testH5Aiterate() {
-        long attr1_id = -1;
-        long attr2_id = -1;
-        long attr3_id = -1;
-        long attr4_id = -1;
+        long attr1_id = HDF5Constants.H5I_INVALID_HID;
+        long attr2_id = HDF5Constants.H5I_INVALID_HID;
+        long attr3_id = HDF5Constants.H5I_INVALID_HID;
+        long attr4_id = HDF5Constants.H5I_INVALID_HID;
 
         class idata {
             public String attr_name = null;
@@ -1048,10 +1046,10 @@ public class TestH5A {
 
     @Test
     public void testH5Aiterate_by_name() {
-        long attr1_id = -1;
-        long attr2_id = -1;
-        long attr3_id = -1;
-        long attr4_id = -1;
+        long attr1_id = HDF5Constants.H5I_INVALID_HID;
+        long attr2_id = HDF5Constants.H5I_INVALID_HID;
+        long attr3_id = HDF5Constants.H5I_INVALID_HID;
+        long attr4_id = HDF5Constants.H5I_INVALID_HID;
 
         class idata {
             public String attr_name = null;

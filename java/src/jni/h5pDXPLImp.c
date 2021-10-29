@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,15 +36,15 @@ extern "C" {
  * Signature: (JJ[B[B)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1buffer
-    (JNIEnv *env, jclass clss, jlong plist, jlong size, jbyteArray tconv, jbyteArray bkg)
+Java_hdf_hdf5lib_H5_H5Pset_1buffer(JNIEnv *env, jclass clss, jlong plist, jlong size, jbyteArray tconv,
+                                   jbyteArray bkg)
 {
 #ifdef notdef
-    jboolean  isCopy;
-    jbyte    *tconvP = NULL;
-    jbyte    *bkgP = NULL;
+    jboolean isCopy;
+    jbyte *  tconvP = NULL;
+    jbyte *  bkgP   = NULL;
 #endif
-    herr_t    status = FAIL;
+    herr_t status = FAIL;
 
     UNUSED(clss);
 #ifndef notdef
@@ -85,15 +84,14 @@ done:
  * Signature: (J[B[B)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1buffer
-    (JNIEnv *env, jclass clss, jlong plist, jbyteArray tconv, jbyteArray bkg)
+Java_hdf_hdf5lib_H5_H5Pget_1buffer(JNIEnv *env, jclass clss, jlong plist, jbyteArray tconv, jbyteArray bkg)
 {
 #ifdef notdef
-    jboolean  isCopy;
-    jbyte    *tconvP = NULL;
-    jbyte    *bkgP = NULL;
+    jboolean isCopy;
+    jbyte *  tconvP = NULL;
+    jbyte *  bkgP   = NULL;
 #endif
-    herr_t    status = FAIL;
+    herr_t status = FAIL;
 
     UNUSED(clss);
 #ifndef notdef
@@ -135,8 +133,7 @@ done:
  * Signature: (JJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1buffer_1size
-    (JNIEnv *env, jclass clss, jlong plist, jlong size)
+Java_hdf_hdf5lib_H5_H5Pset_1buffer_1size(JNIEnv *env, jclass clss, jlong plist, jlong size)
 {
     UNUSED(clss);
 
@@ -153,8 +150,7 @@ done:
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1buffer_1size
-    (JNIEnv *env, jclass clss, jlong plist)
+Java_hdf_hdf5lib_H5_H5Pget_1buffer_1size(JNIEnv *env, jclass clss, jlong plist)
 {
     size_t size = 0;
 
@@ -173,10 +169,9 @@ done:
  * Signature: (JZ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1preserve
-    (JNIEnv *env, jclass clss, jlong plist, jboolean status)
+Java_hdf_hdf5lib_H5_H5Pset_1preserve(JNIEnv *env, jclass clss, jlong plist, jboolean status)
 {
-    hbool_t st = JNI_FALSE;
+    hbool_t st     = JNI_FALSE;
     herr_t  retVal = FAIL;
 
     UNUSED(clss);
@@ -201,8 +196,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1preserve
-    (JNIEnv *env, jclass clss, jlong plist)
+Java_hdf_hdf5lib_H5_H5Pget_1preserve(JNIEnv *env, jclass clss, jlong plist)
 {
     herr_t retVal = FAIL;
 
@@ -221,8 +215,7 @@ done:
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1edc_1check
-    (JNIEnv *env, jclass clss, jlong plist, jint check)
+Java_hdf_hdf5lib_H5_H5Pset_1edc_1check(JNIEnv *env, jclass clss, jlong plist, jint check)
 {
     herr_t retVal = FAIL;
 
@@ -241,8 +234,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1edc_1check
-    (JNIEnv *env, jclass clss, jlong plist)
+Java_hdf_hdf5lib_H5_H5Pget_1edc_1check(JNIEnv *env, jclass clss, jlong plist)
 {
     H5Z_EDC_t retVal = -1;
 
@@ -265,18 +257,18 @@ done:
  * Signature: (JLjava/lang/String;)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1data_1transform
-    (JNIEnv *env, jclass clss, jlong plist_id, jstring expression)
+Java_hdf_hdf5lib_H5_H5Pset_1data_1transform(JNIEnv *env, jclass clss, jlong plist_id, jstring expression)
 {
     const char *express = NULL;
-    herr_t      retVal = FAIL;
+    herr_t      retVal  = FAIL;
 
     UNUSED(clss);
 
     if (NULL == expression)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pset_data_transform: data transform expression is NULL");
 
-    PIN_JAVA_STRING(ENVONLY, expression, express, NULL, "H5Pset_data_transform: data transform expression not pinned");
+    PIN_JAVA_STRING(ENVONLY, expression, express, NULL,
+                    "H5Pset_data_transform: data transform expression not pinned");
 
     if ((retVal = H5Pset_data_transform((hid_t)plist_id, express)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -294,12 +286,12 @@ done:
  * Signature: (J[Ljava/lang/String;J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1data_1transform
-    (JNIEnv *env, jclass clss, jlong plist_id, jobjectArray expression, jlong size)
+Java_hdf_hdf5lib_H5_H5Pget_1data_1transform(JNIEnv *env, jclass clss, jlong plist_id, jobjectArray expression,
+                                            jlong size)
 {
-    jstring  str = NULL;
-    char    *express = NULL;
-    ssize_t  express_size = -1;
+    jstring str          = NULL;
+    char *  express      = NULL;
+    ssize_t express_size = -1;
 
     UNUSED(clss);
 
@@ -309,7 +301,7 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform
     if ((express_size = H5Pget_data_transform((hid_t)plist_id, (char *)NULL, (size_t)size)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
-    if (NULL == (express = (char *) HDmalloc(sizeof(char) * (size_t)express_size + 1)))
+    if (NULL == (express = (char *)HDmalloc(sizeof(char) * (size_t)express_size + 1)))
         H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_data_transform: memory allocation failed");
 
     if (H5Pget_data_transform((hid_t)plist_id, express, (size_t)express_size + 1) < 0)
@@ -318,7 +310,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1data_1transform
 
     if (NULL == (str = ENVPTR->NewStringUTF(ENVONLY, express))) {
         CHECK_JNI_EXCEPTION(ENVONLY, JNI_TRUE);
-        H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Pget_data_transform: out of memory - unable to construct string from UTF characters");
+        H5_OUT_OF_MEMORY_ERROR(
+            ENVONLY, "H5Pget_data_transform: out of memory - unable to construct string from UTF characters");
     }
 
     ENVPTR->SetObjectArrayElement(ENVONLY, expression, 0, str);
@@ -345,8 +338,7 @@ done:
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1hyper_1vector_1size
-    (JNIEnv *env, jclass clss, jlong plist, jlong vector_size)
+Java_hdf_hdf5lib_H5_H5Pset_1hyper_1vector_1size(JNIEnv *env, jclass clss, jlong plist, jlong vector_size)
 {
     herr_t retVal = FAIL;
 
@@ -365,22 +357,22 @@ done:
  * Signature: (J[J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1hyper_1vector_1size
-    (JNIEnv *env, jclass clss, jlong plist, jlongArray vector_size)
+Java_hdf_hdf5lib_H5_H5Pget_1hyper_1vector_1size(JNIEnv *env, jclass clss, jlong plist, jlongArray vector_size)
 {
-    jboolean  isCopy;
-    size_t    size;
-    jlong    *theArray = NULL;
-    herr_t    retVal = FAIL;
+    jboolean isCopy;
+    size_t   size;
+    jlong *  theArray = NULL;
+    herr_t   retVal   = FAIL;
 
     UNUSED(clss);
 
     if (NULL == vector_size)
         H5_NULL_ARGUMENT_ERROR(ENVONLY, "H5Pget_hyper_vector_size: vector_size is NULL");
 
-    PIN_LONG_ARRAY(ENVONLY, vector_size, theArray, &isCopy, "H5Pget_hyper_vector_size: vector_size not pinned");
+    PIN_LONG_ARRAY(ENVONLY, vector_size, theArray, &isCopy,
+                   "H5Pget_hyper_vector_size: vector_size not pinned");
 
-    if ((retVal =  H5Pget_hyper_vector_size((hid_t)plist, &size)) < 0)
+    if ((retVal = H5Pget_hyper_vector_size((hid_t)plist, &size)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
     theArray[0] = (jlong)size;
@@ -398,14 +390,14 @@ done:
  * Signature: (JDDD)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1btree_1ratios
-    (JNIEnv *env, jclass clss, jlong plist_id, jdouble left, jdouble middle, jdouble right)
+Java_hdf_hdf5lib_H5_H5Pset_1btree_1ratios(JNIEnv *env, jclass clss, jlong plist_id, jdouble left,
+                                          jdouble middle, jdouble right)
 {
     herr_t status = FAIL;
 
     UNUSED(clss);
 
-    if ((status = H5Pset_btree_ratios((hid_t)plist_id, (double)left,(double)middle, (double)right)) < 0)
+    if ((status = H5Pset_btree_ratios((hid_t)plist_id, (double)left, (double)middle, (double)right)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -418,15 +410,14 @@ done:
  * Signature: (J[D[D[D)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1btree_1ratios
-    (JNIEnv *env, jclass clss, jlong plist_id, jdoubleArray left,
-        jdoubleArray middle, jdoubleArray right)
+Java_hdf_hdf5lib_H5_H5Pget_1btree_1ratios(JNIEnv *env, jclass clss, jlong plist_id, jdoubleArray left,
+                                          jdoubleArray middle, jdoubleArray right)
 {
-    jboolean  isCopy;
-    jdouble  *leftP = NULL;
-    jdouble  *middleP = NULL;
-    jdouble  *rightP = NULL;
-    herr_t    status = FAIL;
+    jboolean isCopy;
+    jdouble *leftP   = NULL;
+    jdouble *middleP = NULL;
+    jdouble *rightP  = NULL;
+    herr_t   status  = FAIL;
 
     UNUSED(clss);
 
@@ -441,8 +432,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1btree_1ratios
     PIN_DOUBLE_ARRAY(ENVONLY, middle, middleP, &isCopy, "H5Pget_btree_ratios: middle array not pinned");
     PIN_DOUBLE_ARRAY(ENVONLY, right, rightP, &isCopy, "H5Pget_btree_ratios: right array not pinned");
 
-    if ((status = H5Pget_btree_ratios((hid_t)plist_id, (double *)leftP,
-            (double *)middleP, (double *)rightP)) < 0)
+    if ((status =
+             H5Pget_btree_ratios((hid_t)plist_id, (double *)leftP, (double *)middleP, (double *)rightP)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:

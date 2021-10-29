@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -23,154 +23,178 @@
 
 /* Use %ld to print the value because long should cover most cases. */
 /* Used to make certain a return value _is_not_ a value */
-#define CHECK(ret, val, where) do {                                                 \
-    if (VERBOSE_HI) {                                                               \
-        print_func("   Call to routine: %15s at line %4d "                          \
-            "in %s returned %ld \n",                                                \
-            where, (int)__LINE__, __FILE__,                                         \
-            (long)(ret));                                                           \
-    }                                                                               \
-    if ((ret) == (val)) {                                                           \
-        TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld at line %4d "           \
-            "in %s\n", where, (long)(ret), (int)__LINE__, __FILE__);                \
-        H5Eprint2(H5E_DEFAULT, stdout);                                             \
-    }                                                                               \
-} while(0)
+#define CHECK(ret, val, where)                                                                               \
+    do {                                                                                                     \
+        if (VERBOSE_HI) {                                                                                    \
+            print_func("   Call to routine: %15s at line %4d "                                               \
+                       "in %s returned %ld \n",                                                              \
+                       where, (int)__LINE__, __FILE__, (long)(ret));                                         \
+        }                                                                                                    \
+        if ((ret) == (val)) {                                                                                \
+            TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld at line %4d "                                \
+                          "in %s\n",                                                                         \
+                          where, (long)(ret), (int)__LINE__, __FILE__);                                      \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    } while (0)
 
-#define CHECK_I(ret,where) {                                                        \
-   if (VERBOSE_HI) {                                                                \
-      print_func("   Call to routine: %15s at line %4d in %s returned %ld\n",       \
-                 (where), (int)__LINE__, __FILE__, (long)(ret));                    \
-   }                                                                                \
-   if ((ret)<0) {                                                                   \
-      TestErrPrintf ("*** UNEXPECTED RETURN from %s is %ld line %4d in %s\n",       \
-                  (where), (long)(ret), (int)__LINE__, __FILE__);                   \
-      H5Eprint2(H5E_DEFAULT, stdout);                                               \
-   }                                                                                \
-}
+#define CHECK_I(ret, where)                                                                                  \
+    {                                                                                                        \
+        if (VERBOSE_HI) {                                                                                    \
+            print_func("   Call to routine: %15s at line %4d in %s returned %ld\n", (where), (int)__LINE__,  \
+                       __FILE__, (long)(ret));                                                               \
+        }                                                                                                    \
+        if ((ret) < 0) {                                                                                     \
+            TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld line %4d in %s\n", (where), (long)(ret),     \
+                          (int)__LINE__, __FILE__);                                                          \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    }
 
 /* Check that a pointer is valid (i.e.: not NULL) */
-#define CHECK_PTR(ret,where) {                                                      \
-   if (VERBOSE_HI) {                                                                \
-      print_func("   Call to routine: %15s at line %4d in %s returned %p\n",        \
-                 (where), (int)__LINE__, __FILE__, (ret));                          \
-   }                                                                                \
-   if (!(ret)) {                                                                    \
-      TestErrPrintf ("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n",      \
-                  (where), (int)__LINE__, __FILE__);                                \
-      H5Eprint2(H5E_DEFAULT, stdout);                                               \
-   }                                                                                \
-}
+#define CHECK_PTR(ret, where)                                                                                \
+    {                                                                                                        \
+        if (VERBOSE_HI) {                                                                                    \
+            print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
+                       __FILE__, (ret));                                                                     \
+        }                                                                                                    \
+        if (!(ret)) {                                                                                        \
+            TestErrPrintf("*** UNEXPECTED RETURN from %s is NULL line %4d in %s\n", (where), (int)__LINE__,  \
+                          __FILE__);                                                                         \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    }
 
 /* Check that a pointer is NULL */
-#define CHECK_PTR_NULL(ret,where) {                                                 \
-   if (VERBOSE_HI) {                                                                \
-      print_func("   Call to routine: %15s at line %4d in %s returned %p\n",        \
-                 (where), (int)__LINE__, __FILE__, (ret));                          \
-   }                                                                                \
-   if (ret) {                                                                       \
-      TestErrPrintf ("*** UNEXPECTED RETURN from %s is not NULL line %4d in %s\n",  \
-                  (where), (int)__LINE__, __FILE__);                                \
-      H5Eprint2(H5E_DEFAULT, stdout);                                               \
-   }                                                                                \
-}
+#define CHECK_PTR_NULL(ret, where)                                                                           \
+    {                                                                                                        \
+        if (VERBOSE_HI) {                                                                                    \
+            print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
+                       __FILE__, (ret));                                                                     \
+        }                                                                                                    \
+        if (ret) {                                                                                           \
+            TestErrPrintf("*** UNEXPECTED RETURN from %s is not NULL line %4d in %s\n", (where),             \
+                          (int)__LINE__, __FILE__);                                                          \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    }
 
 /* Check that two pointers are equal */
-#define CHECK_PTR_EQ(ret, val, where) {                                             \
-   if (VERBOSE_HI) {                                                                \
-      print_func("   Call to routine: %15s at line %4d in %s returned %p\n",        \
-                 (where), (int)__LINE__, __FILE__, (const void *)(ret));            \
-   }                                                                                \
-   if (ret != val) {                                                                \
-      TestErrPrintf ("*** UNEXPECTED RETURN from %s: returned value of %p is not equal to %p line %4d in %s\n",  \
-                  (where), (const void *)(ret), (const void *)(val), (int)__LINE__, __FILE__); \
-      H5Eprint2(H5E_DEFAULT, stdout);                                               \
-   }                                                                                \
-}
+#define CHECK_PTR_EQ(ret, val, where)                                                                        \
+    {                                                                                                        \
+        if (VERBOSE_HI) {                                                                                    \
+            print_func("   Call to routine: %15s at line %4d in %s returned %p\n", (where), (int)__LINE__,   \
+                       __FILE__, (const void *)(ret));                                                       \
+        }                                                                                                    \
+        if (ret != val) {                                                                                    \
+            TestErrPrintf(                                                                                   \
+                "*** UNEXPECTED RETURN from %s: returned value of %p is not equal to %p line %4d in %s\n",   \
+                (where), (const void *)(ret), (const void *)(val), (int)__LINE__, __FILE__);                 \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    }
 
 /* Used to make certain a return value _is_ a value */
-#define VERIFY(_x, _val, where) do {                                                \
-    long __x = (long)_x, __val = (long)_val;                                        \
-    if(VERBOSE_HI) {                                                                \
-        print_func("   Call to routine: %15s at line %4d in %s had value "          \
-            "%ld \n", (where), (int)__LINE__, __FILE__, __x);                       \
-    }                                                                               \
-    if((__x) != (__val)) {                                                          \
-        TestErrPrintf("*** UNEXPECTED VALUE from %s should be %ld, but is %ld at line %4d " \
-             "in %s\n", (where), __val, __x, (int)__LINE__, __FILE__);              \
-        H5Eprint2(H5E_DEFAULT, stdout);                                             \
-    }                                                                               \
-} while(0)
+#define VERIFY(_x, _val, where)                                                                              \
+    do {                                                                                                     \
+        long __x = (long)_x, __val = (long)_val;                                                             \
+        if (VERBOSE_HI) {                                                                                    \
+            print_func("   Call to routine: %15s at line %4d in %s had value "                               \
+                       "%ld \n",                                                                             \
+                       (where), (int)__LINE__, __FILE__, __x);                                               \
+        }                                                                                                    \
+        if ((__x) != (__val)) {                                                                              \
+            TestErrPrintf("*** UNEXPECTED VALUE from %s should be %ld, but is %ld at line %4d "              \
+                          "in %s\n",                                                                         \
+                          (where), __val, __x, (int)__LINE__, __FILE__);                                     \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    } while (0)
 
 /* Used to make certain a (non-'long' type's) return value _is_ a value */
-#define VERIFY_TYPE(_x, _val, _type, _format, where) do {                           \
-    _type __x = (_type)_x, __val = (_type)_val;                                     \
-    if(VERBOSE_HI) {                                                                \
-        print_func("   Call to routine: %15s at line %4d in %s had value "          \
-            _format " \n", (where), (int)__LINE__, __FILE__, __x);                  \
-    }                                                                               \
-    if((__x) != (__val)) {                                                          \
-        TestErrPrintf("*** UNEXPECTED VALUE from %s should be " _format ", but is " _format " at line %4d " \
-            "in %s\n", (where), __val, __x, (int)__LINE__, __FILE__);               \
-        H5Eprint2(H5E_DEFAULT, stdout);                                             \
-    }                                                                               \
-} while(0)
+#define VERIFY_TYPE(_x, _val, _type, _format, where)                                                         \
+    do {                                                                                                     \
+        _type __x = (_type)_x, __val = (_type)_val;                                                          \
+        if (VERBOSE_HI) {                                                                                    \
+            print_func("   Call to routine: %15s at line %4d in %s had value " _format " \n", (where),       \
+                       (int)__LINE__, __FILE__, __x);                                                        \
+        }                                                                                                    \
+        if ((__x) != (__val)) {                                                                              \
+            TestErrPrintf("*** UNEXPECTED VALUE from %s should be " _format ", but is " _format              \
+                          " at line %4d "                                                                    \
+                          "in %s\n",                                                                         \
+                          (where), __val, __x, (int)__LINE__, __FILE__);                                     \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    } while (0)
 
 /* Used to make certain a string return value _is_ a value */
-#define VERIFY_STR(x, val, where) do {                                              \
-    if (VERBOSE_HI) {                                                               \
-        print_func("   Call to routine: %15s at line %4d in %s had value "          \
-            "%s \n", (where), (int)__LINE__, __FILE__, x);                          \
-    }                                                                               \
-    if (HDstrcmp(x, val)) {                                                         \
-        TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d " \
-            "in %s\n", where, val, x, (int)__LINE__, __FILE__);                     \
-        H5Eprint2(H5E_DEFAULT, stdout);                                             \
-    }                                                                               \
-} while(0)
+#define VERIFY_STR(x, val, where)                                                                            \
+    do {                                                                                                     \
+        if (VERBOSE_HI) {                                                                                    \
+            print_func("   Call to routine: %15s at line %4d in %s had value "                               \
+                       "%s \n",                                                                              \
+                       (where), (int)__LINE__, __FILE__, x);                                                 \
+        }                                                                                                    \
+        if (HDstrcmp(x, val) != 0) {                                                                         \
+            TestErrPrintf("*** UNEXPECTED VALUE from %s should be %s, but is %s at line %4d "                \
+                          "in %s\n",                                                                         \
+                          where, val, x, (int)__LINE__, __FILE__);                                           \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    } while (0)
 
 /* Used to document process through a test and to check for errors */
-#define RESULT(ret,func) do {                                                       \
-    if (VERBOSE_MED) {                                                              \
-        print_func("   Call to routine: %15s at line %4d in %s returned "           \
-            "%ld\n", func, (int)__LINE__, __FILE__, (long)(ret));                   \
-    }                                                                               \
-    if (VERBOSE_HI)                                                                 \
-        H5Eprint2(H5E_DEFAULT, stdout);                                             \
-    if ((ret) == FAIL) {                                                            \
-        TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld at line %4d "           \
-            "in %s\n", func, (long)(ret), (int)__LINE__, __FILE__);                 \
-        H5Eprint2(H5E_DEFAULT, stdout);                                             \
-    }                                                                               \
-} while(0)
+#define RESULT(ret, func)                                                                                    \
+    do {                                                                                                     \
+        if (VERBOSE_MED) {                                                                                   \
+            print_func("   Call to routine: %15s at line %4d in %s returned "                                \
+                       "%ld\n",                                                                              \
+                       func, (int)__LINE__, __FILE__, (long)(ret));                                          \
+        }                                                                                                    \
+        if (VERBOSE_HI)                                                                                      \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        if ((ret) == FAIL) {                                                                                 \
+            TestErrPrintf("*** UNEXPECTED RETURN from %s is %ld at line %4d "                                \
+                          "in %s\n",                                                                         \
+                          func, (long)(ret), (int)__LINE__, __FILE__);                                       \
+            H5Eprint2(H5E_DEFAULT, stdout);                                                                  \
+        }                                                                                                    \
+    } while (0)
 
 /* Used to document process through a test */
 #if defined(H5_HAVE_PARALLEL) && defined(H5_PARALLEL_TEST)
-#define MESSAGE(V,A) {                                                              \
-    int mpi_rank;                                                                   \
-                                                                                    \
-    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);                                       \
-    if(mpi_rank == 0 && HDGetTestVerbosity() > (V))                                 \
-        print_func A ;                                                              \
-}
+#define MESSAGE(V, A)                                                                                        \
+    {                                                                                                        \
+        int mpi_rank;                                                                                        \
+                                                                                                             \
+        MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);                                                            \
+        if (mpi_rank == 0 && HDGetTestVerbosity() > (V))                                                     \
+            print_func A;                                                                                    \
+    }
 #else /* H5_HAVE_PARALLEL */
-#define MESSAGE(V,A) {if (HDGetTestVerbosity() > (V)) print_func A;}
+#define MESSAGE(V, A)                                                                                        \
+    {                                                                                                        \
+        if (HDGetTestVerbosity() > (V))                                                                      \
+            print_func A;                                                                                    \
+    }
 #endif /* H5_HAVE_PARALLEL */
 
 /* Used to indicate an error that is complex to check for */
-#define ERROR(where) do {                                                           \
-    if(VERBOSE_HI)                                                                  \
-        print_func("   Call to routine: %15s at line %4d in %s returned "           \
-           "invalid result\n", where, (int)__LINE__, __FILE__);                     \
-    TestErrPrintf("*** UNEXPECTED RESULT from %s at line %4d in %s\n",              \
-               where, (int)__LINE__, __FILE__);                                     \
-} while(0)
+#define ERROR(where)                                                                                         \
+    do {                                                                                                     \
+        if (VERBOSE_HI)                                                                                      \
+            print_func("   Call to routine: %15s at line %4d in %s returned "                                \
+                       "invalid result\n",                                                                   \
+                       where, (int)__LINE__, __FILE__);                                                      \
+        TestErrPrintf("*** UNEXPECTED RESULT from %s at line %4d in %s\n", where, (int)__LINE__, __FILE__);  \
+    } while (0)
 
 /* definitions for command strings */
-#define VERBOSITY_STR   "Verbosity"
-#define SKIP_STR        "Skip"
-#define TEST_STR        "Test"
-#define CLEAN_STR       "Cleanup"
+#define VERBOSITY_STR "Verbosity"
+#define SKIP_STR      "Skip"
+#define TEST_STR      "Test"
+#define CLEAN_STR     "Cleanup"
 
 #ifdef __cplusplus
 extern "C" {
@@ -179,7 +203,6 @@ extern "C" {
 /* Prototypes for the test routines */
 void test_metadata(void);
 void test_checksum(void);
-void test_tst(void);
 void test_heap(void);
 void test_refstr(void);
 void test_file(void);

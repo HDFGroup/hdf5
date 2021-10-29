@@ -5,7 +5,7 @@
  * This file is part of HDF5. The full HDF5 copyright notice, including      *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,55 +25,50 @@
 #include "H5Zpkg.h"
 
 /* Filters IDs for test filter plugins */
-#define FILTER1_ID          257
-#define FILTER2_ID          258
-#define FILTER3_ID          259
-#define FILTER4_ID          260
+#define FILTER1_ID 257
+#define FILTER2_ID 258
+#define FILTER3_ID 259
+#define FILTER4_ID 260
 
-const char *FILENAME[] = {
-    "filter_plugin",
-    NULL
-};
-#define FILENAME_BUF_SIZE       1024
+const char *FILENAME[] = {"filter_plugin", NULL};
+#define FILENAME_BUF_SIZE 1024
 
 /* Dataset names */
-#define DSET_DEFLATE_NAME    "deflate dset"
-#define DSET_FILTER1_NAME    "filter 1 dset"
-#define DSET_FILTER2_NAME    "filter 2 dset"
-#define DSET_FILTER3_NAME    "filter 3 dset"
+#define DSET_DEFLATE_NAME "deflate dset"
+#define DSET_FILTER1_NAME "filter 1 dset"
+#define DSET_FILTER2_NAME "filter 2 dset"
+#define DSET_FILTER3_NAME "filter 3 dset"
 
 /* Array sizes used throughout the test */
-#define DSET_DIM1               100
-#define DSET_DIM2               200
-#define CHUNK_DIM1              2
-#define CHUNK_DIM2              25
-#define HYPERSLAB_OFFSET1       7
-#define HYPERSLAB_OFFSET2       30
-#define HYPERSLAB_SIZE1         4
-#define HYPERSLAB_SIZE2         50
+#define DSET_DIM1         100
+#define DSET_DIM2         200
+#define CHUNK_DIM1        2
+#define CHUNK_DIM2        25
+#define HYPERSLAB_OFFSET1 7
+#define HYPERSLAB_OFFSET2 30
+#define HYPERSLAB_SIZE1   4
+#define HYPERSLAB_SIZE2   50
 
 /* Global size arrays */
-const hsize_t sizes_g[2] = {DSET_DIM1, DSET_DIM2};                      /* Dataset dimensions   */
-const hsize_t hs_sizes_g[2] = {HYPERSLAB_SIZE1, HYPERSLAB_SIZE2};       /* Hyperslab sizes      */
-const hsize_t hs_offsets_g[2] = {HYPERSLAB_OFFSET1, HYPERSLAB_OFFSET2}; /* Hyperslab offsets    */
-const hsize_t chunk_sizes_g[2] = {CHUNK_DIM1, CHUNK_DIM2};              /* Chunk dimensions     */
+const hsize_t sizes_g[2]       = {DSET_DIM1, DSET_DIM2};                 /* Dataset dimensions   */
+const hsize_t hs_sizes_g[2]    = {HYPERSLAB_SIZE1, HYPERSLAB_SIZE2};     /* Hyperslab sizes      */
+const hsize_t hs_offsets_g[2]  = {HYPERSLAB_OFFSET1, HYPERSLAB_OFFSET2}; /* Hyperslab offsets    */
+const hsize_t chunk_sizes_g[2] = {CHUNK_DIM1, CHUNK_DIM2};               /* Chunk dimensions     */
 
 /* Limit random number within 20000 */
-#define RANDOM_LIMIT    20000
+#define RANDOM_LIMIT 20000
 
 /* Things used in the groups + filter plugins test */
-#define N_SUBGROUPS             1000
-#define SUBGROUP_PREFIX         "subgroup_"
-#define TOP_LEVEL_GROUP_NAME    "top-level group"
+#define N_SUBGROUPS          1000
+#define SUBGROUP_PREFIX      "subgroup_"
+#define TOP_LEVEL_GROUP_NAME "top-level group"
 
 /* Global arrays in which to save data */
-int **orig_deflate_g  = NULL;
-int **orig_dynlib1_g  = NULL;
-int **orig_dynlib2_g  = NULL;
-int **orig_dynlib4_g  = NULL;
+int **orig_deflate_g = NULL;
+int **orig_dynlib1_g = NULL;
+int **orig_dynlib2_g = NULL;
+int **orig_dynlib4_g = NULL;
 
-
-
 /*-------------------------------------------------------------------------
  * Function:  free_2D_array
  *
@@ -85,7 +80,8 @@ int **orig_dynlib4_g  = NULL;
  *-------------------------------------------------------------------------
  */
 static herr_t
-free_2D_array(int ***arr) {
+free_2D_array(int ***arr)
+{
 
     if (arr && *arr && (*arr)[0])
         HDfree((*arr)[0]);
@@ -96,7 +92,6 @@ free_2D_array(int ***arr) {
     return SUCCEED;
 } /* end free_2D_array() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  allocate_and_init_2D_array
  *
@@ -108,11 +103,12 @@ free_2D_array(int ***arr) {
  *-------------------------------------------------------------------------
  */
 static herr_t
-allocate_and_init_2D_array(int ***arr, const hsize_t *sizes, int **initial_values) {
+allocate_and_init_2D_array(int ***arr, const hsize_t *sizes, int **initial_values)
+{
 
-    size_t r, c;        /* Data rows and columns    */
-    size_t i;           /* Iterator                 */
-    size_t n_bytes;     /* # of bytes to copy       */
+    size_t r, c;    /* Data rows and columns    */
+    size_t i;       /* Iterator                 */
+    size_t n_bytes; /* # of bytes to copy       */
 
     r = (size_t)sizes[0];
     c = (size_t)sizes[1];
@@ -138,7 +134,6 @@ error:
     return FAIL;
 } /* end allocate_and_init_2D_array() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  compare_2D_arrays
  *
@@ -149,8 +144,9 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ hbool_t *are_same) {
-    hsize_t i, j;           /* index variables */
+compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ hbool_t *are_same)
+{
+    hsize_t i, j; /* index variables */
 
     *are_same = TRUE;
 
@@ -168,7 +164,6 @@ compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ hbool_
 
 } /* end compare_2D_arrays() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  ensure_filter_works
  *
@@ -181,19 +176,19 @@ compare_2D_arrays(int **dset1, int **dset2, const hsize_t *sizes, /*OUT*/ hbool_
 static herr_t
 ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
 {
-    hid_t           did = -1;                       /* Dataset ID                                   */
-    hid_t           dxpl_id = -1;                   /* Dataset xfer property list ID                */
-    hid_t           write_dxpl_id = -1;             /* Dataset xfer property list ID for writing    */
-    hid_t           sid = -1;                       /* Dataspace ID                                 */
-    void           *tconv_buf = NULL;               /* Temporary conversion buffer                  */
-    int           **orig = NULL;                    /* Data written to the dataset                  */
-    int           **read = NULL;                    /* Data read from the dataset                   */
-    size_t          r, c;                           /* Data rows and columns                        */
-    size_t          hs_r, hs_c, hs_offr, hs_offc;   /* Hypserslab sizes and offsets                 */
-    size_t          i, j;                           /* Local index variables                        */
-    int             n = 0;                          /* Value written to point array                 */
-    hbool_t         are_same;                       /* Output from dataset compare function         */
-    int          ***save_array = NULL;              /* (Global) array where the final data go       */
+    hid_t   did           = -1;           /* Dataset ID                                   */
+    hid_t   dxpl_id       = -1;           /* Dataset xfer property list ID                */
+    hid_t   write_dxpl_id = -1;           /* Dataset xfer property list ID for writing    */
+    hid_t   sid           = -1;           /* Dataspace ID                                 */
+    void *  tconv_buf     = NULL;         /* Temporary conversion buffer                  */
+    int **  orig          = NULL;         /* Data written to the dataset                  */
+    int **  read          = NULL;         /* Data read from the dataset                   */
+    size_t  r, c;                         /* Data rows and columns                        */
+    size_t  hs_r, hs_c, hs_offr, hs_offc; /* Hypserslab sizes and offsets                 */
+    size_t  i, j;                         /* Local index variables                        */
+    int     n = 0;                        /* Value written to point array                 */
+    hbool_t are_same;                     /* Output from dataset compare function         */
+    int *** save_array = NULL;            /* (Global) array where the final data go       */
 
     /* initialize */
     r = (size_t)sizes_g[0];
@@ -348,8 +343,8 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
      */
     TESTING("    filters (partial I/O)");
 
-    hs_r = (size_t)hs_sizes_g[0];
-    hs_c = (size_t)hs_sizes_g[1];
+    hs_r    = (size_t)hs_sizes_g[0];
+    hs_c    = (size_t)hs_sizes_g[1];
     hs_offr = (size_t)hs_offsets_g[0];
     hs_offc = (size_t)hs_offsets_g[1];
     for (i = 0; i < hs_r; i++)
@@ -411,12 +406,14 @@ ensure_filter_works(hid_t fid, const char *name, hid_t dcpl_id)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(did);
         H5Sclose(sid);
         H5Pclose(dxpl_id);
         H5Pclose(write_dxpl_id);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     /* NULLs are okay here */
     free_2D_array(&orig);
@@ -428,7 +425,6 @@ error:
     return FAIL;
 } /* end ensure_filter_works() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  test_dataset_write_with_filters
  *
@@ -441,10 +437,10 @@ error:
 static herr_t
 test_dataset_write_with_filters(hid_t fid)
 {
-    hid_t           dcpl_id = -1;           /* Dataset creation property list ID        */
-    unsigned int    compress_level;         /* Deflate compression level                */
-    unsigned int    filter1_data;           /* Data used by filter 1                    */
-    unsigned int    libver_values[4];       /* Used w/ the filter that makes HDF5 calls */
+    hid_t        dcpl_id = -1;     /* Dataset creation property list ID        */
+    unsigned int compress_level;   /* Deflate compression level                */
+    unsigned int filter1_data;     /* Data used by filter 1                    */
+    unsigned int libver_values[4]; /* Used w/ the filter that makes HDF5 calls */
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.
@@ -467,7 +463,7 @@ test_dataset_write_with_filters(hid_t fid)
     /* Clean up objects used for this test */
     if (H5Pclose(dcpl_id) < 0)
         TEST_ERROR;
-#else /* H5_HAVE_FILTER_DEFLATE */
+#else  /* H5_HAVE_FILTER_DEFLATE */
     SKIPPED();
     HDputs("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -570,14 +566,15 @@ test_dataset_write_with_filters(hid_t fid)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Pclose(dcpl_id);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_dataset_write_with_filters() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  test_read_data
  *
@@ -590,9 +587,9 @@ error:
 static herr_t
 test_read_data(hid_t did, int *origin_data)
 {
-    int           **check = NULL;
-    int          *data_p = origin_data;
-    size_t        i, j;        /* Local index variables */
+    int ** check  = NULL;
+    int *  data_p = origin_data;
+    size_t i, j; /* Local index variables */
 
     if (allocate_and_init_2D_array(&check, sizes_g, NULL) < 0)
         TEST_ERROR;
@@ -602,9 +599,9 @@ test_read_data(hid_t did, int *origin_data)
         TEST_ERROR;
 
     /* Check that the values read are the same as the values written */
-    for(i = 0; i < sizes_g[0]; i++)
-        for(j = 0; j < sizes_g[1]; j++) {
-            if(*data_p != check[i][j])
+    for (i = 0; i < sizes_g[0]; i++)
+        for (j = 0; j < sizes_g[1]; j++) {
+            if (*data_p != check[i][j])
                 TEST_ERROR
             data_p++;
         }
@@ -621,8 +618,6 @@ error:
     return FAIL;
 } /* end test_read_data() */
 
-
-
 /*-------------------------------------------------------------------------
  * Function:  test_dataset_read_with_filters
  *
@@ -636,7 +631,7 @@ error:
 static herr_t
 test_dataset_read_with_filters(hid_t fid)
 {
-    hid_t   did = -1;                   /* Dataset ID */
+    hid_t did = -1; /* Dataset ID */
 
     /*----------------------------------------------------------
      * STEP 1: Test deflation by itself.
@@ -657,7 +652,7 @@ test_dataset_read_with_filters(hid_t fid)
     if (H5Dclose(did) < 0)
         TEST_ERROR;
 
-#else /* H5_HAVE_FILTER_DEFLATE */
+#else  /* H5_HAVE_FILTER_DEFLATE */
     SKIPPED();
     HDputs("    Deflate filter not enabled");
 #endif /* H5_HAVE_FILTER_DEFLATE */
@@ -711,14 +706,15 @@ test_dataset_read_with_filters(hid_t fid)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Dclose(did);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_dataset_read_with_filters() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  ensure_data_read_fails
  *
@@ -731,17 +727,19 @@ error:
 static herr_t
 ensure_data_read_fails(hid_t did)
 {
-    int       **check = NULL;
-    herr_t      ret = FAIL;
+    int ** check = NULL;
+    herr_t ret   = FAIL;
 
     if (allocate_and_init_2D_array(&check, sizes_g, NULL) < 0)
         TEST_ERROR;
 
     /* Read the dataset back (should fail) */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5Dread(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, *check);
-    } H5E_END_TRY
-    if(ret >= 0)
+    }
+    H5E_END_TRY
+    if (ret >= 0)
         TEST_ERROR;
 
     free_2D_array(&check);
@@ -755,7 +753,6 @@ error:
     return FAIL;
 } /* end ensure_data_read_fails() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  test_no_read_when_plugins_disabled
  *
@@ -769,8 +766,8 @@ error:
 static herr_t
 test_no_read_when_plugins_disabled(hid_t fid)
 {
-    hid_t       did = -1;               /* Dataset ID */
-    unsigned    plugin_flags;           /* Plugin access flags */
+    hid_t    did = -1;     /* Dataset ID */
+    unsigned plugin_flags; /* Plugin access flags */
 
     TESTING("filter plugin 1 with filter plugins disabled");
 
@@ -804,16 +801,17 @@ test_no_read_when_plugins_disabled(hid_t fid)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         plugin_flags |= (unsigned)H5PL_FILTER_PLUGIN;
         H5PLset_loading_state(plugin_flags);
         H5Dclose(did);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_no_read_when_plugins_disabled() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  test_creating_groups_using_plugins
  *
@@ -826,11 +824,11 @@ error:
 static herr_t
 test_creating_groups_using_plugins(hid_t fid)
 {
-    hid_t    gcpl_id = -1;
-    hid_t    gid = -1;
-    hid_t    sub_gid = -1;
-    int      i;
-    char     subgroup_name[256];
+    hid_t gcpl_id = -1;
+    hid_t gid     = -1;
+    hid_t sub_gid = -1;
+    int   i;
+    char  subgroup_name[256];
 
     TESTING("creating groups with filter plugin 4");
 
@@ -870,16 +868,17 @@ test_creating_groups_using_plugins(hid_t fid)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Gclose(sub_gid);
         H5Gclose(gid);
         H5Pclose(gcpl_id);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_creating_groups_using_plugins() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_opening_groups_using_plugins
  *
@@ -892,10 +891,10 @@ error:
 static herr_t
 test_opening_groups_using_plugins(hid_t fid)
 {
-    hid_t       gid = -1;
-    hid_t       sub_gid = -1;
-    int         i;
-    char        subgroup_name[256];
+    hid_t gid     = -1;
+    hid_t sub_gid = -1;
+    int   i;
+    char  subgroup_name[256];
 
     TESTING("opening groups with filter plugin 4");
 
@@ -926,16 +925,16 @@ test_opening_groups_using_plugins(hid_t fid)
 
 error:
     /* Clean up objects used for this test */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Gclose(gid);
         H5Gclose(sub_gid);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     return FAIL;
 } /* end test_opening_groups_using_plugins() */
 
-
-
 /*-------------------------------------------------------------------------
  * Function:  test_path_api_calls
  *
@@ -992,8 +991,8 @@ test_path_api_calls(void)
 
     /* Remove all existing paths */
     for (u = n_paths; u > 0; u--)
-        if (H5PLremove(u-1) < 0) {
-            HDfprintf(stderr,"    at %u: %s\n", u, path);
+        if (H5PLremove(u - 1) < 0) {
+            HDfprintf(stderr, "    at %u: %s\n", u, path);
             TEST_ERROR;
         }
 
@@ -1005,18 +1004,18 @@ test_path_api_calls(void)
 
     PASSED();
 
-
     TESTING("    remove (index 0 in empty table)");
 
     /* Try to remove index zero in an empty list (SHOULD FAIL) */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5PLremove(0);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR;
 
     PASSED();
-
 
     /****************/
     /* H5PLappend() */
@@ -1028,13 +1027,12 @@ test_path_api_calls(void)
     for (u = 0; u < n_starting_paths; u++) {
         HDsprintf(path, "a_path_%u", u);
         if (H5PLappend(path) < 0) {
-            HDfprintf(stderr,"    at %u: %s\n", u, path);
+            HDfprintf(stderr, "    at %u: %s\n", u, path);
             TEST_ERROR;
         }
     }
 
     PASSED();
-
 
     /**********************/
     /* H5PLremove() again */
@@ -1043,15 +1041,16 @@ test_path_api_calls(void)
     TESTING("    remove (index too high)");
 
     /* Try to remove a path where the index is beyond the table capacity (SHOULD FAIL) */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         ret = H5PLremove(n_starting_paths);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     if (ret >= 0)
         TEST_ERROR
 
     PASSED();
-
 
     /*************/
     /* H5PLget() */
@@ -1061,7 +1060,7 @@ test_path_api_calls(void)
 
     /* Get the path length by passing in NULL */
     if ((path_len = H5PLget(0, NULL, 0)) <= 0) {
-        HDfprintf(stderr,"    get path 0 length failed\n");
+        HDfprintf(stderr, "    get path 0 length failed\n");
         TEST_ERROR;
     }
     if (path_len != 8)
@@ -1069,16 +1068,15 @@ test_path_api_calls(void)
 
     /* Get the path */
     if ((path_len = H5PLget(0, path, 256)) <= 0) {
-        HDfprintf(stderr,"    get 0 len: %u : %s\n", path_len, path);
+        HDfprintf(stderr, "    get 0 len: %zd : %s\n", path_len, path);
         TEST_ERROR;
     }
     if (HDstrcmp(path, "a_path_0") != 0) {
-        HDfprintf(stderr,"    get 0: %s\n", path);
+        HDfprintf(stderr, "    get 0: %s\n", path);
         TEST_ERROR;
     }
 
     PASSED();
-
 
     TESTING("    get (high and low indices)");
 
@@ -1086,7 +1084,7 @@ test_path_api_calls(void)
     if ((path_len = H5PLget(1, path, 256)) <= 0)
         TEST_ERROR;
     if (HDstrcmp(path, "a_path_1") != 0) {
-        HDfprintf(stderr,"    get 1: %s\n", path);
+        HDfprintf(stderr, "    get 1: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1095,24 +1093,24 @@ test_path_api_calls(void)
         TEST_ERROR;
     HDsprintf(temp_name, "a_path_%u", n_starting_paths - 1);
     if (HDstrcmp(path, temp_name) != 0) {
-        HDfprintf(stderr,"    get %u: %s\n", n_starting_paths - 1, path);
+        HDfprintf(stderr, "    get %u: %s\n", n_starting_paths - 1, path);
         TEST_ERROR;
     }
 
     PASSED();
 
-
     TESTING("    get (index too high)");
 
     /* Get path at the last + 1 index (SHOULD FAIL) */
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         path_len = H5PLget(n_starting_paths, NULL, 0);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
     if (path_len > 0)
         TEST_ERROR;
 
     PASSED();
-
 
     /*****************/
     /* H5PLprepend() */
@@ -1132,7 +1130,7 @@ test_path_api_calls(void)
     if ((path_len = H5PLget(8, path, 256)) <= 0)
         TEST_ERROR;
     if (HDstrcmp(path, "a_path_9") != 0) {
-        HDfprintf(stderr,"    get 8: %s\n", path);
+        HDfprintf(stderr, "    get 8: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1144,13 +1142,12 @@ test_path_api_calls(void)
 
     PASSED();
 
-
     TESTING("    prepend");
 
     /* Prepend one path */
     HDsprintf(path, "a_path_%d", n_starting_paths + 1);
     if (H5PLprepend(path) < 0) {
-        HDfprintf(stderr,"    prepend %u: %s\n", n_starting_paths + 1, path);
+        HDfprintf(stderr, "    prepend %u: %s\n", n_starting_paths + 1, path);
         TEST_ERROR;
     }
 
@@ -1164,7 +1161,7 @@ test_path_api_calls(void)
     if (H5PLget(8, path, 256) <= 0)
         TEST_ERROR;
     if (HDstrcmp(path, "a_path_7") != 0) {
-        HDfprintf(stderr,"    get 8: %s\n", path);
+        HDfprintf(stderr, "    get 8: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1173,12 +1170,11 @@ test_path_api_calls(void)
         TEST_ERROR;
     HDsprintf(temp_name, "a_path_%d", n_starting_paths + 1);
     if (HDstrcmp(path, temp_name) != 0) {
-        HDfprintf(stderr,"    get 0: %s\n", path);
+        HDfprintf(stderr, "    get 0: %s\n", path);
         TEST_ERROR;
     }
 
     PASSED();
-
 
     /*****************/
     /* H5PLreplace() */
@@ -1189,7 +1185,7 @@ test_path_api_calls(void)
     /* Replace one path at index 1 */
     HDsprintf(path, "a_path_%u", n_starting_paths + 4);
     if (H5PLreplace(path, 1) < 0) {
-        HDfprintf(stderr,"    replace 1: %s\n", path);
+        HDfprintf(stderr, "    replace 1: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1208,7 +1204,7 @@ test_path_api_calls(void)
         TEST_ERROR;
     HDsprintf(temp_name, "a_path_%u", n_starting_paths + 1);
     if (HDstrcmp(path, temp_name) != 0) {
-        HDfprintf(stderr,"    get 0: %s\n", path);
+        HDfprintf(stderr, "    get 0: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1216,12 +1212,11 @@ test_path_api_calls(void)
     if (H5PLget(2, path, 256) <= 0)
         TEST_ERROR;
     if (HDstrcmp(path, "a_path_1") != 0) {
-        HDfprintf(stderr,"    get 2: %s\n", path);
+        HDfprintf(stderr, "    get 2: %s\n", path);
         TEST_ERROR;
     }
 
     PASSED();
-
 
     /****************/
     /* H5PLinsert() */
@@ -1241,7 +1236,7 @@ test_path_api_calls(void)
     if (H5PLget(4, path, 256) <= 0)
         TEST_ERROR;
     if (HDstrcmp(path, "a_path_4") != 0) {
-        HDfprintf(stderr,"    get 4: %s\n", path);
+        HDfprintf(stderr, "    get 4: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1252,13 +1247,12 @@ test_path_api_calls(void)
         TEST_ERROR;
     PASSED();
 
-
     TESTING("    insert");
 
     /* Insert one path at index 3*/
     HDsprintf(path, "a_path_%d", n_starting_paths + 5);
     if (H5PLinsert(path, 3) < 0) {
-        HDfprintf(stderr,"    insert 3: %s\n", path);
+        HDfprintf(stderr, "    insert 3: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1266,7 +1260,7 @@ test_path_api_calls(void)
     if (H5PLget(4, path, 256) <= 0)
         TEST_ERROR;
     if (HDstrcmp(path, "a_path_2") != 0) {
-        HDfprintf(stderr,"    get 4: %s\n", path);
+        HDfprintf(stderr, "    get 4: %s\n", path);
         TEST_ERROR;
     }
 
@@ -1277,7 +1271,6 @@ test_path_api_calls(void)
         TEST_ERROR;
 
     PASSED();
-
 
     /****************/
     /* H5PLremove() */
@@ -1292,8 +1285,8 @@ test_path_api_calls(void)
 
     /* Remove all existing paths */
     for (u = n_paths; u > 0; u--)
-        if (H5PLremove(u-1) < 0) {
-            HDfprintf(stderr,"    at %u: %s\n", u, path);
+        if (H5PLremove(u - 1) < 0) {
+            HDfprintf(stderr, "    at %u: %s\n", u, path);
             TEST_ERROR;
         }
 
@@ -1305,14 +1298,12 @@ test_path_api_calls(void)
 
     PASSED();
 
-
     return SUCCEED;
 
 error:
     return FAIL;
 } /* end test_path_api_calls() */
 
-
 /*-------------------------------------------------------------------------
  * Function:  disable_chunk_cache
  *
@@ -1323,11 +1314,12 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-disable_chunk_cache(hid_t fapl_id) {
-    int         mdc_nelmts;
-    size_t      rdcc_nelmts;
-    size_t      rdcc_nbytes;
-    double      rdcc_w0;
+disable_chunk_cache(hid_t fapl_id)
+{
+    int    mdc_nelmts;
+    size_t rdcc_nelmts;
+    size_t rdcc_nbytes;
+    double rdcc_w0;
 
     if (H5Pget_cache(fapl_id, &mdc_nelmts, &rdcc_nelmts, &rdcc_nbytes, &rdcc_w0) < 0)
         TEST_ERROR;
@@ -1340,7 +1332,6 @@ error:
     return FAIL;
 } /* end disable_chunk_cache() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -1353,12 +1344,12 @@ error:
 int
 main(void)
 {
-    char        filename[FILENAME_BUF_SIZE];
-    hid_t       fid = -1;
-    hid_t       old_ff_fapl_id = -1;
-    hid_t       new_ff_fapl_id = -1;
-    unsigned    new_format;
-    int         nerrors = 0;
+    char     filename[FILENAME_BUF_SIZE];
+    hid_t    fid            = -1;
+    hid_t    old_ff_fapl_id = -1;
+    hid_t    new_ff_fapl_id = -1;
+    unsigned new_format;
+    int      nerrors = 0;
 
     /*******************************************************************/
     /* ENSURE THAT WRITING TO DATASETS AND CREATING GROUPS WORKS       */
@@ -1453,7 +1444,7 @@ main(void)
         nerrors += (test_dataset_read_with_filters(fid) < 0 ? 1 : 0);
 
         /* Test creating groups using dynamically-loaded plugin filters */
-        nerrors += (test_opening_groups_using_plugins(fid) < 0  ? 1 : 0);
+        nerrors += (test_opening_groups_using_plugins(fid) < 0 ? 1 : 0);
 
         /* Close FAPLs */
         if (H5Pclose(old_ff_fapl_id) < 0)
@@ -1493,9 +1484,9 @@ main(void)
             TEST_ERROR;
 
         /* When filters are disabled, make sure we can't read data from a
-        * dataset that requires a filter plugin.
-        */
-        nerrors += (test_no_read_when_plugins_disabled(fid) < 0  ? 1 : 0);
+         * dataset that requires a filter plugin.
+         */
+        nerrors += (test_no_read_when_plugins_disabled(fid) < 0 ? 1 : 0);
 
         if (H5Fclose(fid) < 0)
             TEST_ERROR;
@@ -1530,7 +1521,7 @@ main(void)
     /************************************/
 
     /* Test the APIs for access to the filter plugin path table */
-    nerrors += (test_path_api_calls() < 0  ? 1 : 0);
+    nerrors += (test_path_api_calls() < 0 ? 1 : 0);
 
     if (nerrors)
         TEST_ERROR;
@@ -1540,11 +1531,13 @@ main(void)
     HDexit(EXIT_SUCCESS);
 
 error:
-    H5E_BEGIN_TRY {
+    H5E_BEGIN_TRY
+    {
         H5Fclose(fid);
         H5Pclose(old_ff_fapl_id);
         H5Pclose(new_ff_fapl_id);
-    } H5E_END_TRY
+    }
+    H5E_END_TRY
 
     /* Free up saved arrays (NULLs okay) */
     free_2D_array(&orig_deflate_g);
@@ -1556,4 +1549,3 @@ error:
     HDprintf("***** %d PLUGIN TEST%s FAILED! *****\n", nerrors, 1 == nerrors ? "" : "S");
     HDexit(EXIT_FAILURE);
 } /* end main() */
-

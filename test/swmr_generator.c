@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -31,27 +31,24 @@
 /*
  * This file needs to access testing codefrom the H5O package.
  */
-#define H5O_FRIEND	/*suppress error about including H5Opkg	  */
+#define H5O_FRIEND /*suppress error about including H5Opkg	  */
 #define H5O_TESTING
-#include "H5Opkg.h"     /* Object headers			*/
-
+#include "H5Opkg.h" /* Object headers			*/
 
 /****************/
 /* Local Macros */
 /****************/
 
-#define CHUNK_SIZE      50      /* Chunk size for created datasets */
+#define CHUNK_SIZE 50 /* Chunk size for created datasets */
 
 /********************/
 /* Local Prototypes */
 /********************/
 
-static int gen_skeleton(const char *filename, hbool_t verbose,
-    hbool_t swmr_write, int comp_level, const char *index_type,
-    unsigned random_seed);
+static int  gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp_level,
+                         const char *index_type, unsigned random_seed);
 static void usage(void);
 
-
 /*-------------------------------------------------------------------------
  * Function:    gen_skeleton
  *
@@ -83,34 +80,35 @@ static void usage(void);
  *-------------------------------------------------------------------------
  */
 static int
-gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
-    int comp_level, const char *index_type, unsigned random_seed)
+gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write, int comp_level,
+             const char *index_type, unsigned random_seed)
 {
-    hid_t fid;          /* File ID for new HDF5 file */
-    hid_t fcpl;         /* File creation property list */
-    hid_t fapl;         /* File access property list */
-    hid_t dcpl;         /* Dataset creation property list */
-    hid_t tid;          /* Datatype for dataset elements */
-    hid_t sid;          /* Dataspace ID */
-    hid_t aid;          /* Attribute ID */
-    hsize_t dims[2] = {1, 0}; /* Dataset starting dimensions */
-    hsize_t max_dims[2] = {1, H5S_UNLIMITED}; /* Dataset maximum dimensions */
-    hsize_t chunk_dims[2] = {1, CHUNK_SIZE}; /* Chunk dimensions */
+    hid_t   fid;                                /* File ID for new HDF5 file */
+    hid_t   fcpl;                               /* File creation property list */
+    hid_t   fapl;                               /* File access property list */
+    hid_t   dcpl;                               /* Dataset creation property list */
+    hid_t   tid;                                /* Datatype for dataset elements */
+    hid_t   sid;                                /* Dataspace ID */
+    hid_t   aid;                                /* Attribute ID */
+    hsize_t dims[2]       = {1, 0};             /* Dataset starting dimensions */
+    hsize_t max_dims[2]   = {1, H5S_UNLIMITED}; /* Dataset maximum dimensions */
+    hsize_t chunk_dims[2] = {1, CHUNK_SIZE};    /* Chunk dimensions */
 #ifdef FILLVAL_WORKS
-    symbol_t fillval;   /* Dataset fill value */
-#endif /* FILLVAL_WORKS */
-    unsigned u, v;      /* Local index variable */
+    symbol_t fillval; /* Dataset fill value */
+#endif                /* FILLVAL_WORKS */
+    unsigned u, v;    /* Local index variable */
 
     HDassert(filename);
     HDassert(index_type);
 
     /* Create file access property list */
-    if((fapl = h5_fileaccess()) < 0)
+    if ((fapl = h5_fileaccess()) < 0)
         return -1;
 
-    /* Can create a file for SWMR support with: (a) (write+latest-format) or (b) (SWMR write+non-latest-format) */
-    if(!swmr_write) {
-        if(H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
+    /* Can create a file for SWMR support with: (a) (write+latest-format) or (b) (SWMR
+     * write+non-latest-format) */
+    if (!swmr_write) {
+        if (H5Pset_libver_bounds(fapl, H5F_LIBVER_LATEST, H5F_LIBVER_LATEST) < 0)
             return -1;
     }
 
@@ -118,54 +116,54 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
      * With one unlimited dimension, we get the extensible array index
      * type, with two unlimited dimensions, we get a v2 B-tree.
      */
-    if(!HDstrcmp(index_type, "b2"))
+    if (!HDstrcmp(index_type, "b2"))
         max_dims[0] = H5S_UNLIMITED;
 
     /* Create file creation property list */
-    if((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
+    if ((fcpl = H5Pcreate(H5P_FILE_CREATE)) < 0)
         return -1;
 
     /* Emit informational message */
-    if(verbose)
+    if (verbose)
         HDfprintf(stderr, "Creating file\n");
 
     /* Create the file */
-    if((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (swmr_write ? H5F_ACC_SWMR_WRITE : 0), fcpl, fapl)) < 0)
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC | (swmr_write ? H5F_ACC_SWMR_WRITE : 0), fcpl, fapl)) < 0)
         return -1;
 
     /* Close file creation property list */
-    if(H5Pclose(fcpl) < 0)
+    if (H5Pclose(fcpl) < 0)
         return -1;
 
     /* Close file access property list */
-    if(H5Pclose(fapl) < 0)
+    if (H5Pclose(fapl) < 0)
         return -1;
 
     /* Create attribute with (shared) random number seed - for sparse test */
-    if((sid = H5Screate(H5S_SCALAR)) < 0)
+    if ((sid = H5Screate(H5S_SCALAR)) < 0)
         return -1;
-    if((aid = H5Acreate2(fid, "seed", H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+    if ((aid = H5Acreate2(fid, "seed", H5T_NATIVE_UINT, sid, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         return -1;
-    if(H5Awrite(aid, H5T_NATIVE_UINT, &random_seed) < 0)
+    if (H5Awrite(aid, H5T_NATIVE_UINT, &random_seed) < 0)
         return -1;
-    if(H5Sclose(sid) < 0)
+    if (H5Sclose(sid) < 0)
         return -1;
 
     /* Create datatype for creating datasets */
-    if((tid = create_symbol_datatype()) < 0)
+    if ((tid = create_symbol_datatype()) < 0)
         return -1;
 
     /* Create dataspace for creating datasets */
-    if((sid = H5Screate_simple(2, dims, max_dims)) < 0)
+    if ((sid = H5Screate_simple(2, dims, max_dims)) < 0)
         return -1;
 
     /* Create dataset creation property list */
-    if((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+    if ((dcpl = H5Pcreate(H5P_DATASET_CREATE)) < 0)
         return -1;
-    if(H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
+    if (H5Pset_chunk(dcpl, 2, chunk_dims) < 0)
         return -1;
-    if(comp_level >= 0) {
-        if(H5Pset_deflate(dcpl, (unsigned)comp_level) < 0)
+    if (comp_level >= 0) {
+        if (H5Pset_deflate(dcpl, (unsigned)comp_level) < 0)
             return -1;
     } /* end if */
 #ifdef FILLVAL_WORKS
@@ -174,23 +172,24 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
      * here when this is fixed.  -NAF 8/11/11 */
     HDmemset(&fillval, 0, sizeof(fillval));
     fillval.rec_id = (uint64_t)ULLONG_MAX;
-    if(H5Pset_fill_value(dcpl, tid, &fillval) < 0)
+    if (H5Pset_fill_value(dcpl, tid, &fillval) < 0)
         return -1;
 #endif /* FILLVAL_WORKS */
 
     /* Emit informational message */
-    if(verbose)
+    if (verbose)
         HDfprintf(stderr, "Creating datasets\n");
 
     /* Create the datasets */
-    for(u = 0; u < NLEVELS; u++)
-        for(v = 0; v < symbol_count[u]; v++) {
-            hid_t dsid;         /* Dataset ID */
-            char name_buf[64];
-            hbool_t move_dataspace_message = FALSE;     /* Whether to move the dataspace message out of object header chunk #0 */
+    for (u = 0; u < NLEVELS; u++)
+        for (v = 0; v < symbol_count[u]; v++) {
+            hid_t   dsid; /* Dataset ID */
+            char    name_buf[64];
+            hbool_t move_dataspace_message =
+                FALSE; /* Whether to move the dataspace message out of object header chunk #0 */
 
             generate_name(name_buf, u, v);
-            if((dsid = H5Dcreate2(fid, name_buf, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
+            if ((dsid = H5Dcreate2(fid, name_buf, tid, sid, H5P_DEFAULT, dcpl, H5P_DEFAULT)) < 0)
                 return -1;
 
             /* Determine if the dataspace message for this dataset should be
@@ -198,38 +197,38 @@ gen_skeleton(const char *filename, hbool_t verbose, hbool_t swmr_write,
              * (Set to TRUE for every fourth dataset)
              */
             move_dataspace_message = !(HDrandom() % 4);
-            if(move_dataspace_message) {
-                unsigned chunk_num;        /* Object header chunk # for dataspace message */
+            if (move_dataspace_message) {
+                unsigned chunk_num; /* Object header chunk # for dataspace message */
 
                 /* Move the dataspace message to a new object header chunk */
-                if(H5O__msg_move_to_new_chunk_test(dsid, H5O_SDSPACE_ID) < 0)
+                if (H5O__msg_move_to_new_chunk_test(dsid, H5O_SDSPACE_ID) < 0)
                     return -1;
 
                 /* Retrieve the chunk # for the dataspace message */
                 chunk_num = UINT_MAX;
-                if(H5O__msg_get_chunkno_test(dsid, H5O_SDSPACE_ID, &chunk_num) < 0)
+                if (H5O__msg_get_chunkno_test(dsid, H5O_SDSPACE_ID, &chunk_num) < 0)
                     return -1;
                 /* Should not be in chunk #0 for now */
-                if(0 == chunk_num)
+                if (0 == chunk_num)
                     return -1;
             } /* end if */
 
-            if(H5Dclose(dsid) < 0)
+            if (H5Dclose(dsid) < 0)
                 return -1;
         } /* end for */
 
     /* Emit informational message */
-    if(verbose)
+    if (verbose)
         HDfprintf(stderr, "Closing objects\n");
 
     /* Close everythign */
-    if(H5Pclose(dcpl) < 0)
+    if (H5Pclose(dcpl) < 0)
         return -1;
-    if(H5Sclose(sid) < 0)
+    if (H5Sclose(sid) < 0)
         return -1;
-    if(H5Tclose(tid) < 0)
+    if (H5Tclose(tid) < 0)
         return -1;
-    if(H5Fclose(fid) < 0)
+    if (H5Fclose(fid) < 0)
         return -1;
 
     return 0;
@@ -258,27 +257,28 @@ usage(void)
     HDexit(EXIT_FAILURE);
 } /* end usage() */
 
-int main(int argc, const char *argv[])
+int
+main(int argc, const char *argv[])
 {
-    int comp_level = -1;            /* Compression level (-1 is no compression) */
-    hbool_t verbose = TRUE;         /* Whether to emit some informational messages */
-    hbool_t swmr_write = FALSE;     /* Whether to create file with SWMR_WRITE access */
-    const char *index_type = "b1";  /* Chunk index type */
-    hbool_t use_seed = FALSE;       /* Set to TRUE if a seed was set on the command line */
-    unsigned random_seed = 0;       /* Random # seed */
-    unsigned u;                     /* Local index variables */
-    int temp;
+    int         comp_level  = -1;    /* Compression level (-1 is no compression) */
+    hbool_t     verbose     = TRUE;  /* Whether to emit some informational messages */
+    hbool_t     swmr_write  = FALSE; /* Whether to create file with SWMR_WRITE access */
+    const char *index_type  = "b1";  /* Chunk index type */
+    hbool_t     use_seed    = FALSE; /* Set to TRUE if a seed was set on the command line */
+    unsigned    random_seed = 0;     /* Random # seed */
+    unsigned    u;                   /* Local index variables */
+    int         temp;
 
     /* Parse command line options */
-    if(argc > 1) {
+    if (argc > 1) {
         u = 1;
-        while(u < (unsigned)argc) {
-            if(argv[u][0] == '-') {
-                switch(argv[u][1]) {
+        while (u < (unsigned)argc) {
+            if (argv[u][0] == '-') {
+                switch (argv[u][1]) {
                     /* Compress dataset chunks */
                     case 'c':
                         comp_level = HDatoi(argv[u + 1]);
-                        if(comp_level < -1 || comp_level > 9)
+                        if (comp_level < -1 || comp_level > 9)
                             usage();
                         u += 2;
                         break;
@@ -286,8 +286,7 @@ int main(int argc, const char *argv[])
                     /* Chunk index type */
                     case 'i':
                         index_type = argv[u + 1];
-                        if(HDstrcmp(index_type, "ea")
-                                && HDstrcmp(index_type, "b2"))
+                        if (HDstrcmp(index_type, "ea") != 0 && HDstrcmp(index_type, "b2") != 0)
                             usage();
                         u += 2;
                         break;
@@ -295,8 +294,8 @@ int main(int argc, const char *argv[])
                     /* Random # seed */
                     case 'r':
                         use_seed = TRUE;
-                        temp = HDatoi(argv[u + 1]);
-                        if(temp < 0)
+                        temp     = HDatoi(argv[u + 1]);
+                        if (temp < 0)
                             usage();
                         else
                             random_seed = (unsigned)temp;
@@ -319,12 +318,12 @@ int main(int argc, const char *argv[])
                         usage();
                         break;
                 } /* end switch */
-            } /* end if */
-        } /* end while */
-    } /* end if */
+            }     /* end if */
+        }         /* end while */
+    }             /* end if */
 
     /* Emit informational message */
-    if(verbose) {
+    if (verbose) {
         HDfprintf(stderr, "Parameters:\n");
         HDfprintf(stderr, "\tswmr writes %s\n", swmr_write ? "on" : "off");
         HDfprintf(stderr, "\tcompression level = %d\n", comp_level);
@@ -332,7 +331,7 @@ int main(int argc, const char *argv[])
     } /* end if */
 
     /* Set the random seed */
-    if(!use_seed) {
+    if (!use_seed) {
         struct timeval t;
 
         HDgettimeofday(&t, NULL);
@@ -343,11 +342,11 @@ int main(int argc, const char *argv[])
     HDfprintf(stderr, "Using generator random seed (used in sparse test only): %u\n", random_seed);
 
     /* Emit informational message */
-    if(verbose)
+    if (verbose)
         HDfprintf(stderr, "Generating skeleton file: %s\n", FILENAME);
 
     /* Generate file skeleton */
-    if(gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
+    if (gen_skeleton(FILENAME, verbose, swmr_write, comp_level, index_type, random_seed) < 0) {
         HDfprintf(stderr, "Error generating skeleton file!\n");
         HDexit(EXIT_FAILURE);
     } /* end if */

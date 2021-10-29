@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -14,6 +13,7 @@
 package test;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -24,9 +24,11 @@ import hdf.hdf5lib.H5;
 import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
+import hdf.hdf5lib.exceptions.HDF5FunctionArgumentException;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.TestName;
@@ -36,12 +38,14 @@ public class TestH5R {
     private static final String H5_FILE = "testH5R.h5";
     private static final int DIM_X = 4;
     private static final int DIM_Y = 6;
-    long H5fid = -1;
-    long H5dsid = -1;
-    long H5did = -1;
-    long H5gid = -1;
-    long H5did2 = -1;
+    long H5fid = HDF5Constants.H5I_INVALID_HID;
+    long H5dsid = HDF5Constants.H5I_INVALID_HID;
+    long H5did = HDF5Constants.H5I_INVALID_HID;
+    long H5gid = HDF5Constants.H5I_INVALID_HID;
+    long H5did2 = HDF5Constants.H5I_INVALID_HID;
     long[] H5dims = { DIM_X, DIM_Y };
+    int[][] dset_data = new int[DIM_X][DIM_Y];
+    int FILLVAL = 99;
 
     private final void _deleteFile(String filename) {
         File file = null;
@@ -51,12 +55,13 @@ public class TestH5R {
         catch (Throwable err) {}
 
         if (file.exists()) {
-            try {file.delete();} catch (SecurityException e) {}
+            try {file.delete();} catch (SecurityException e) {e.printStackTrace();}
         }
+        assertFalse("TestH5R._deleteFile file still exists ", file.exists());
     }
 
     private final long _createDataset(long fid, long dsid, String name, long dapl) {
-        long did = -1;
+        long did = HDF5Constants.H5I_INVALID_HID;
         try {
             did = H5.H5Dcreate(fid, name,
                         HDF5Constants.H5T_STD_I32BE, dsid,
@@ -66,13 +71,13 @@ public class TestH5R {
             err.printStackTrace();
             fail("H5.H5Dcreate: " + err);
         }
-        assertTrue("TestH5R._createDataset: ",did > 0);
+        assertTrue("TestH5R._createDataset: ", did > 0);
 
         return did;
     }
 
     private final long _createGroup(long fid, String name) {
-        long gid = -1;
+        long gid = HDF5Constants.H5I_INVALID_HID;
         try {
             gid = H5.H5Gcreate(fid, name, HDF5Constants.H5P_DEFAULT,
                     HDF5Constants.H5P_DEFAULT, HDF5Constants.H5P_DEFAULT);
@@ -99,6 +104,21 @@ public class TestH5R {
             H5gid = _createGroup(H5fid, "Group1");
             H5did2 = _createDataset(H5gid, H5dsid, "dset2", HDF5Constants.H5P_DEFAULT);
             H5did = _createDataset(H5fid, H5dsid, "dset", HDF5Constants.H5P_DEFAULT);
+
+            // Initialize the dataset.
+            for (int indx = 0; indx < DIM_X; indx++)
+                for (int jndx = 0; jndx < DIM_Y; jndx++)
+                    dset_data[indx][jndx] = FILLVAL;
+
+            try {
+                if (H5did >= 0)
+                    H5.H5Dwrite(H5did, HDF5Constants.H5T_NATIVE_INT,
+                            HDF5Constants.H5S_ALL, HDF5Constants.H5S_ALL,
+                            HDF5Constants.H5P_DEFAULT, dset_data[0]);
+            }
+            catch (Exception e) {
+                e.printStackTrace();
+            }
 
         }
         catch (Throwable err) {
@@ -131,11 +151,11 @@ public class TestH5R {
 
     @Test
     public void testH5Rget_name() {
-        long loc_id=H5fid;
-        int ref_type=HDF5Constants.H5R_OBJECT;
-        long ret_val=-1;
-        byte[] ref=null;
-        String[] name= {""};
+        long loc_id = H5fid;
+        int ref_type = HDF5Constants.H5R_OBJECT;
+        long ret_val = -1;
+        byte[] ref = null;
+        String[] name = {""};
         String objName = "/dset";
 
         try {
@@ -160,9 +180,8 @@ public class TestH5R {
 
     @Test
     public void testH5Rget_obj_type2() {
-        int  ref_type=HDF5Constants.H5R_OBJECT;
-        byte[] ref=null;
-
+        int  ref_type = HDF5Constants.H5R_OBJECT;
+        byte[] ref = null;
         String objName = "/dset";
         int obj_type = -1;;
 
@@ -214,20 +233,20 @@ public class TestH5R {
     public void testH5Rdereference() {
         byte[] ref1 = null;
         byte[] ref2 = null;
-        long dataset_id = -1;
-        long group_id = -1;
+        long dataset_id = HDF5Constants.H5I_INVALID_HID;
+        long group_id = HDF5Constants.H5I_INVALID_HID;
         try {
             //Create reference on dataset
             ref1 = H5.H5Rcreate(H5fid, "/dset", HDF5Constants.H5R_DATASET_REGION, H5dsid);
-            dataset_id= H5.H5Rdereference(H5fid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_DATASET_REGION, ref1);
+            dataset_id = H5.H5Rdereference(H5fid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_DATASET_REGION, ref1);
 
             //Create reference on group
             ref2 = H5.H5Rcreate(H5gid, "/Group1", HDF5Constants.H5R_OBJECT, -1);
-            group_id= H5.H5Rdereference(H5gid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_OBJECT, ref2);
+            group_id = H5.H5Rdereference(H5gid, HDF5Constants.H5P_DEFAULT, HDF5Constants.H5R_OBJECT, ref2);
             assertNotNull(ref1);
             assertNotNull(ref2);
-            assertTrue(dataset_id>=0);
-            assertTrue(group_id>=0);
+            assertTrue(dataset_id >= 0);
+            assertTrue(group_id >= 0);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -242,12 +261,12 @@ public class TestH5R {
     @Test
     public void testH5Rget_region() {
         byte[] ref = null;
-        long dsid = -1;
+        long dsid = HDF5Constants.H5I_INVALID_HID;
         try {
             ref = H5.H5Rcreate(H5fid, "/dset", HDF5Constants.H5R_DATASET_REGION, H5dsid);
             dsid = H5.H5Rget_region(H5fid, HDF5Constants.H5R_DATASET_REGION, ref);
             assertNotNull(ref);
-            assertTrue(dsid>=0);
+            assertTrue(dsid >= 0);
         }
         catch (Throwable err) {
             err.printStackTrace();
@@ -261,7 +280,7 @@ public class TestH5R {
     @Test(expected = IllegalArgumentException.class)
     public void testH5Rget_name_Invalidreftype() throws Throwable {
         byte[] ref = null;
-        String[] name= {""};
+        String[] name = {""};
         ref = H5.H5Rcreate(H5fid, "/dset", HDF5Constants.H5R_OBJECT, -1);
         H5.H5Rget_name(H5fid, HDF5Constants.H5R_DATASET_REGION, ref, name, 16);
     }
