@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -39,14 +39,14 @@ USAGE()
 {
 cat << EOF
 Usage: $0 -d <dir> [--docver BRANCHNAME] [-h] [--nocheck] [--private] <methods> ...
-   -d DIR               The name of the directory where the releas(es) should be
-                        placed.
+   -d DIR   The name of the directory where the releas(es) should be
+                placed.
    --docver BRANCHNAME  This is added for 1.8 and beyond to get the correct
                         version of documentation files from the hdf5docs
                         repository.  BRANCHNAME for v1.8 should be hdf5_1_8.
-   -h                   print the help page.
-   --nocheck            Ignore errors in MANIFEST file.
-   --private            Make a private release with today's date in version information.
+   -h           print the help page.
+   --nocheck    Ignore errors in MANIFEST file.
+   --private    Make a private release with today's date in version information.
 
 This must be run at the top level of the source directory.
 The other command-line options are the names of the programs to use
@@ -149,8 +149,8 @@ tar2zip()
     find $ztmpdir/$version | \
         while read inf; do \
             if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
-            unix2dos -q -k $inf; \
-            fi \
+                unix2dos -q -k $inf; \
+            fi\
         done
     # step 3: make zipball
     # -9 maximum compression
@@ -229,11 +229,14 @@ tar2cmakezip()
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201564 -C Release -V -O hdf5.log" > build-VS2015-64.bat; chmod 755 build-VS2015-64.bat)
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2017 -C Release -V -O hdf5.log" > build-VS2017-32.bat; chmod 755 build-VS2017-32.bat)
     (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201764 -C Release -V -O hdf5.log" > build-VS2017-64.bat; chmod 755 build-VS2017-64.bat)
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS2019 -C Release -V -O hdf5.log" > build-VS2019-32.bat; chmod 755 build-VS2019-32.bat)
+    (cd $cmziptmpsubdir; echo "ctest -S HDF5config.cmake,BUILD_GENERATOR=VS201964 -C Release -V -O hdf5.log" > build-VS2019-64.bat; chmod 755 build-VS2019-64.bat)
 
     # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmziptmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmziptmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.15-Source.zip $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.17-Source.zip $cmziptmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_10_8.zip $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmziptmpsubdir
     cp $cmziptmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmziptmpsubdir
@@ -248,7 +251,7 @@ tar2cmakezip()
         while read inf; do \
             if file $inf | grep "$inf\: .*text" > /dev/null 2>&1 ; then \
                 unix2dos -q -k $inf; \
-            fi \
+            fi\
         done
 
     # step 3: make zipball
@@ -328,7 +331,8 @@ tar2cmaketgz()
     # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.15-Source.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.17-Source.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_10_8.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5options.cmake $cmgztmpsubdir
@@ -411,7 +415,8 @@ tar2hpccmaketgz()
     # step 3: add LIBAEC.tar.gz, ZLib.tar.gz and cmake files
     cp /mnt/scr1/pre-release/hdf5/CMake/LIBAEC.tar.gz $cmgztmpsubdir
     cp /mnt/scr1/pre-release/hdf5/CMake/ZLib.tar.gz $cmgztmpsubdir
-    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.15-Source.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/HDF5Examples-1.10.17-Source.tar.gz $cmgztmpsubdir
+    cp /mnt/scr1/pre-release/hdf5/CMake/hdf5_plugins-1_10_8.tar.gz $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/CTestScript.cmake $cmgztmpsubdir
     cp $cmgztmpsubdir/$version/config/cmake/scripts/HDF5config.cmake $cmgztmpsubdir
 
@@ -442,7 +447,7 @@ check=yes
 release_date=`date +%F`
 today=`date +%Y%m%d`
 pmode='no'
-tmpdir="../#release_tmp.$$"    # tmp work directory
+tmpdir="../#release_tmp.$$"     # tmp work directory
 DOC_URL=https://git@bitbucket.hdfgroup.org/scm/hdffv/hdf5doc.git
 CPPLUS_RM_NAME=cpplus_RM
 MAINT_MODE_ENABLED=""
@@ -597,32 +602,32 @@ for comp in $methods; do
     case $comp in
         tar)
             cp -p $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.tar
-            (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file) 
+            (cd $DEST; md5sum $HDF5_VERS.tar >> $MD5file)
             ;;
         gzip)
             test "$verbose" && echo "   Running gzip..." 1>&2
             gzip -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.gz
-            (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file) 
+            (cd $DEST; md5sum $HDF5_VERS.tar.gz >> $MD5file)
             ;;
         cmake-tgz)
             test "$verbose" && echo "   Creating CMake tar.gz file..." 1>&2
             tar2cmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file) 
+            (cd $DEST; md5sum CMake-$HDF5_VERS.tar.gz >> $MD5file)
             ;;
         hpc-cmake-tgz)
             test "$verbose" && echo "   Creating HPC-CMake tar.gz file..." 1>&2
             tar2hpccmaketgz $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/HPC-CMake-$HDF5_VERS.tar.gz 1>&2
-            (cd $DEST; md5sum HPC-CMake-$HDF5_VERS.tar.gz >> $MD5file) 
+            (cd $DEST; md5sum HPC-CMake-$HDF5_VERS.tar.gz >> $MD5file)
             ;;
         bzip2)
             test "$verbose" && echo "   Running bzip2..." 1>&2
             bzip2 -9 <$tmpdir/$HDF5_VERS.tar >$DEST/$HDF5_VERS.tar.bz2
-            (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file) 
+            (cd $DEST; md5sum $HDF5_VERS.tar.bz2 >> $MD5file)
             ;;
         zip)
             test "$verbose" && echo "   Creating zip ball..." 1>&2
             tar2zip $HDF5_VERS $tmpdir/$HDF5_VERS.tar $DEST/$HDF5_VERS.zip 1>&2
-            (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file) 
+            (cd $DEST; md5sum $HDF5_VERS.zip >> $MD5file)
             ;;
         cmake-zip)
             test "$verbose" && echo "   Creating CMake-zip ball..." 1>&2

@@ -30,10 +30,13 @@ use Getopt::Std;
 
 # Global variables, for accumulating information
 my $totalcount = 0;
+my $notecount = 0;
+my $dupcount = 0;
 my %warn_count = ();
 my $warncount;
 my %warn_file = ();
 my %warn_file_line = ();
+my %warn_file_line_offset = ();
 my %file_count = ();
 my $filecount;
 my $ignorecount = 0;
@@ -48,10 +51,13 @@ my %file_warn_line = ();
 my $current_warning = 0;
 my $current_file = 0;
 my $warn_index;
+my $genericize = 1;
+
+# Info about last name / line / offset for file
 my $last_c_name;
 my $last_fort_name;
 my $last_fort_line;
-my $genericize = 1;
+my $last_fort_offset;
 
 # Display usage
 sub do_help {
@@ -98,7 +104,7 @@ if($options{h}) {
 # Parse list of file names to ignore
 if(exists $options{i}) {
     @ignorenames = split /,/, $options{i};
-#print @ignorenames;
+#print STDERR @ignorenames;
 }
 
 # Parse list of warning indices to expand file names
@@ -106,18 +112,18 @@ if(exists $options{w}) {
     my @tmp_indices;
 
     @tmp_indices = split /,/, $options{w};
-#print @tmp_indices;
+#print STDERR @tmp_indices;
     for my $x (@tmp_indices) {
-#print "x = '$x'\n";
+#print STDERR "x = '$x'\n";
         if($x =~ /\-/) {
             my $start_index;
             my $end_index;
 
-#print "matched = '$x'\n";
+#print STDERR "matched = '$x'\n";
             ($start_index, $end_index) = split /\-/, $x;
-#print "start_index = '$start_index', end_index = '$end_index'\n";
+#print STDERR "start_index = '$start_index', end_index = '$end_index'\n";
             for my $y ($start_index..$end_index) {
-#print "y = '$y'\n";
+#print STDERR "y = '$y'\n";
                 if(!exists $warn_file_indices{$y}) {
                     $warn_file_indices{$y} = $y;
                 }
@@ -130,14 +136,14 @@ if(exists $options{w}) {
         }
     }
 #foreach (sort keys %warn_file_indices) {
-#    print "$_ : $warn_file_indices{$_}\n";
+#    print STDERR "$_ : $warn_file_indices{$_}\n";
 #}
 }
 
 # Parse list of warning strings to expand file names
 if(exists $options{s}) {
     @warn_match_strings = split /,/, $options{s};
-# print @warn_match_strings;
+# print STDERR @warn_match_strings;
 }
 
 # Parse list of file indices to expand warnings
@@ -145,18 +151,18 @@ if(exists $options{f}) {
     my @tmp_indices;
 
     @tmp_indices = split /,/, $options{f};
-#print @tmp_indices;
+#print STDERR @tmp_indices;
     for my $x (@tmp_indices) {
-#print "x = '$x'\n";
+#print STDERR "x = '$x'\n";
         if($x =~ /\-/) {
             my $start_index;
             my $end_index;
 
-#print "matched = '$x'\n";
+#print STDERR "matched = '$x'\n";
             ($start_index, $end_index) = split /\-/, $x;
-#print "start_index = '$start_index', end_index = '$end_index'\n";
+#print STDERR "start_index = '$start_index', end_index = '$end_index'\n";
             for my $y ($start_index..$end_index) {
-#print "y = '$y'\n";
+#print STDERR "y = '$y'\n";
                 if(!exists $file_warn_indices{$y}) {
                     $file_warn_indices{$y} = $y;
                 }
@@ -169,14 +175,14 @@ if(exists $options{f}) {
         }
     }
 #foreach (sort keys %warn_file_indices) {
-#    print "$_ : $warn_file_indices{$_}\n";
+#    print STDERR "$_ : $warn_file_indices{$_}\n";
 #}
 }
 
 # Parse list of warning strings for files to expand warnings
 if(exists $options{S}) {
     @file_match_strings = split /,/, $options{S};
-# print @file_match_strings;
+# print STDERR @file_match_strings;
 }
 
 # Check if warnings should stay unique and not be "genericized"
@@ -197,7 +203,7 @@ while (<>) {
 
     # Retain last FORTRAN compile line, which comes a few lines before warning
     if($_ =~ /.*\.[fF]90:.*/) {
-        ($last_fort_name, $last_fort_line, $toss) = split /\:/, $_;
+        ($last_fort_name, $last_fort_line, $last_fort_offset) = split /\:/, $_;
         ($last_fort_line, $toss) = split /\./, $last_fort_line;
     }
 
@@ -217,8 +223,11 @@ while (<>) {
     # Skip warnings from linker
     next if $_ =~ /ld: warning:/;
 
-    # Skip warnings from build_py and install_lib 
+    # Skip warnings from build_py and install_lib
     next if $_ =~ /warning: (build_py|install_lib)/;
+
+    # Skip variables with the word 'warning' in them
+    next if $_ =~ /_warning_/;
 
     # "Hide" the C++ '::' symbol until we've parsed out the parts of the line
     while($_ =~ /\:\:/) {
@@ -226,29 +235,22 @@ while (<>) {
     }
 
     # Check for weird formatting of warning message
+    $line = "??";
+    $offset = "??";
     if($_ =~ /^cc1: warning:.*/) {
         $name = $last_c_name;
-        $line = "??";
         ($toss, $toss, $warning, $extra, $extra2) = split /\:/, $_;
     # Check for CMAKE build with warning on first line and no filename
     } elsif($_ =~ /^\s*[Ww]arning:.*/) {
         $name = $last_c_name;
-        $line = "??";
         ($toss, $warning, $extra, $extra2) = split /\:/, $_;
     # Check for FORTRAN warning output
     } elsif($_ =~ /^Warning:.*/) {
         $name = $last_fort_name;
         $line = $last_fort_line;
+        $offset = $last_fort_offset;
         ($toss, $warning, $extra, $extra2) = split /\:/, $_;
-#print "1:",$.,":",$_;
-#        $_ = <>;
-#print "2:",$.,":",$_;
-#        if($_ =~ /^\sFC.*/) {
-#            $_ = <>;
-#print "3:",$.,":",$_;
-#        }
-#        ($name, $line, $toss) = split /\:/, $_;
-#print "4:","'",$name,"'","-","'",$line,"'","\n";
+
         # Check for improperly parsed filename or line
         if($name =~ /^$/) {
             print "Filename is a null string! Input line #$. is: '$_'";
@@ -265,8 +267,6 @@ while (<>) {
 	    $name =~ s/^\"//g;
 	    $name =~ s/\"$//g;
 	    $line =~ s/^\s*line\s*//g;
-# print "name:'", $name, "'-'", $line, "'\n";
-# print "warning:'", $warning, "'\n";
     # Check for Intel icc warning
     } elsif($_ =~ /.*[A-Za-z0-9_]\.[chC]\(.*[0-9]\):.*#.*/) {
         ($last_c_name, $toss, $warning) = split /\:/, $last_c_name;
@@ -310,9 +310,7 @@ while (<>) {
     # Check for ignored file
     if(exists $options{i}) {
         for my $x (@ignorenames) {
-#print "x = '$x'\n";
             if($name =~ /$x/) {
-# print "matched name = '$name'\n";
                 $ignorecount++;
                 if(!(exists $ignored_files{$name})) {
                     $ignored_files{$name} = $name;
@@ -347,13 +345,22 @@ while (<>) {
 # These skipped messages & "genericizations" may be specific to GCC
 
     # Skip supplemental warning message
-    next if $warning =~ /near initialization for/;
+    if($warning =~ /near initialization for/) {
+	$notecount++;
+        next
+    }
 
     # Skip C++ supplemental warning message
-    next if $warning =~ /in call to/;
+    if($warning =~ /in call to/) {
+	$notecount++;
+        next
+    }
 
     # Skip GCC warning that should be a note
-    next if $_ =~ /\(this will be reported only once per input file\)/;
+    if($_ =~ /\(this will be reported only once per input file\)/) {
+	$notecount++;
+        next
+    }
 
     if($genericize) {
 	# Eliminate C/C++ "{aka <some type>}" and "{aka '<some type>'}" info
@@ -402,16 +409,16 @@ while (<>) {
 	    $warning =~ s/[A-Za-z_0-9]*\([A-Za-z_,0-9]*\) in [A-Za-z_0-9]*/-\(-\) in -/g;
 	}
     }
-# print "warning = $warning\n";
 # <end possible GCC-specific code>
 
     # Check if we've already seen this warning on this line in this file
     # (Can happen for warnings from inside header files)
-    if( !exists $warn_file_line{$warning}{$name}{$line} ) {
+    if( !exists $warn_file_line_offset{$warning}{$name}{$line}{$offset} ) {
 	# Increment count for [generic] warning
 	$warn_count{$warning}++;
 	$warn_file{$warning}{$name}++;
 	$warn_file_line{$warning}{$name}{$line}++;
+	$warn_file_line_offset{$warning}{$name}{$line}{$offset}++;
 
 	# Increment count for filename
 	$file_count{$name}++;
@@ -421,14 +428,20 @@ while (<>) {
 	# Increment total count of warnings
 	$totalcount++;
     }
+    else {
+	# Increment count of duplicate warnings
+	$dupcount++;
+    }
 
-#    print "name = $name\n";
-#    print "line = $line\n";
-#    print "offset = $offset\n";
-#    print "warning = \"$warning\"\n";
+#    print STDERR "name = $name\n";
+#    print STDERR "line = $line\n";
+#    print STDERR "offset = $offset\n";
+#    print STDERR "warning = \"$warning\"\n";
 }
 
 print "Total unique [non-ignored] warnings: $totalcount\n";
+print "Ignored notes / supplemental warning lines [not counted in unique warnings]: $notecount\n";
+print "Duplicated warning lines [not counted in unique warnings]: $dupcount\n";
 print "Total ignored warnings: $ignorecount\n";
 $warncount = keys %warn_count;
 print "Total unique kinds of warnings: $warncount\n";
@@ -439,7 +452,7 @@ print "Total files with warnings: $filecount\n\n";
 print "# of Warnings by frequency (file count)\n";
 print "=======================================\n";
 for my $x (sort {$warn_count{$b} <=> $warn_count{$a}} keys(%warn_count)) {
-    printf ("[%2d] %4d (%2d) - %s\n", $current_warning++, $warn_count{$x}, scalar(keys %{$warn_file_line{$x}}), $x);
+    printf ("[%2d] %4d (%2d) - %s\n", $current_warning++, $warn_count{$x}, scalar(keys %{$warn_file{$x}}), $x);
     if((exists $options{W}) || (exists $options{w}) || (exists $options{s})) {
         my $curr_index = $current_warning - 1;
 	my $match = 0;
@@ -447,9 +460,9 @@ for my $x (sort {$warn_count{$b} <=> $warn_count{$a}} keys(%warn_count)) {
 	# Check for string from list in current warning
 	if(exists $options{s}) {
 	    for my $y (@warn_match_strings) {
-# print "y = '$y'\n";
+# print STDERR "y = '$y'\n";
 		if($x =~ /$y/) {
-# print "matched warning = '$x'\n";
+# print STDERR "matched warning = '$x'\n";
 		    $match = 1;
 		    last;
 		}
@@ -477,7 +490,7 @@ for my $x (sort {$warn_count{$b} <=> $warn_count{$a}} keys(%warn_count)) {
 print "\n# of Warnings by filename (warning type)\n";
 print   "========================================\n";
 for my $x (sort {$file_count{$b} <=> $file_count{$a}} keys(%file_count)) {
-    printf ("[%3d] %4d (%2d) - %s\n", $current_file++, $file_count{$x}, scalar(keys %{$file_warn_line{$x}}), $x);
+    printf ("[%3d] %4d (%2d) - %s\n", $current_file++, $file_count{$x}, scalar(keys %{$file_warn{$x}}), $x);
     if((exists $options{F}) || (exists $options{f}) || (exists $options{S})) {
         my $curr_index = $current_file - 1;
 	my $match = 0;
@@ -485,9 +498,9 @@ for my $x (sort {$file_count{$b} <=> $file_count{$a}} keys(%file_count)) {
 	# Check for string from list in current file
 	if(exists $options{S}) {
 	    for my $y (@file_match_strings) {
-# print "y = '$y'\n";
+# print STDERR "y = '$y'\n";
 		if($x =~ /$y/) {
-# print "matched warning = '$x'\n";
+# print STDERR "matched warning = '$x'\n";
 		    $match = 1;
 		    last;
 		}

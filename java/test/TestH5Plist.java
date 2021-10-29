@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -85,7 +84,7 @@ public class TestH5Plist {
             PROP3_NAME,
             PROP4_NAME};
 
-    long plist_class_id = -1;
+    long plist_class_id = HDF5Constants.H5I_INVALID_HID;
 
     @Before
     public void createPropClass()throws NullPointerException, HDF5Exception
@@ -114,9 +113,9 @@ public class TestH5Plist {
     @Test
     public void testH5P_genprop_basic_class() {
         int         status = -1;
-        long        cid1 = -1;        // Generic Property class ID
-        long        cid2 = -1;        // Generic Property class ID
-        long        cid3 = -1;        // Generic Property class ID
+        long        cid1 = HDF5Constants.H5I_INVALID_HID;        // Generic Property class ID
+        long        cid2 = HDF5Constants.H5I_INVALID_HID;        // Generic Property class ID
+        long        cid3 = HDF5Constants.H5I_INVALID_HID;        // Generic Property class ID
         String      name = null;       // Name of class
 
         try {
@@ -162,7 +161,7 @@ public class TestH5Plist {
             // Close parent class
             try {
                 H5.H5Pclose_class(cid2);
-                cid2 = -1;
+                cid2 = HDF5Constants.H5I_INVALID_HID;
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -172,7 +171,7 @@ public class TestH5Plist {
             // Close class
             try {
                 H5.H5Pclose_class(plist_class_id);
-                plist_class_id = -1;
+                plist_class_id = HDF5Constants.H5I_INVALID_HID;
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -242,7 +241,7 @@ public class TestH5Plist {
             // Close parent class's parent
             try {
                 H5.H5Pclose_class(cid3);
-                cid3 = -1;
+                cid3 = HDF5Constants.H5I_INVALID_HID;
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -252,7 +251,7 @@ public class TestH5Plist {
             // Close parent class's parent
             try {
                 H5.H5Pclose_class(cid2);
-                cid2 = -1;
+                cid2 = HDF5Constants.H5I_INVALID_HID;
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -262,7 +261,7 @@ public class TestH5Plist {
             // Close parent class's parent
             try {
                 H5.H5Pclose_class(cid1);
-                cid1 = -1;
+                cid1 = HDF5Constants.H5I_INVALID_HID;
             }
             catch (Throwable err) {
                 err.printStackTrace();
@@ -634,7 +633,7 @@ public class TestH5Plist {
     @Test
     public void testH5P_genprop_basic_list_prop() {
         boolean     status = false;
-        long        lid1 = -1;        // Generic Property list ID
+        long        lid1 = HDF5Constants.H5I_INVALID_HID;        // Generic Property list ID
         long        nprops = -1;      // Number of properties in class
 
         try {
@@ -760,7 +759,7 @@ public class TestH5Plist {
 //    @Test
 //    public void testH5P_genprop_class_callback() {
 //        class cdata {
-//            public long cls_id = -1;
+//            public long cls_id = HDF5Constants.H5I_INVALID_HID;
 //            public int cls_count = -1;
 //            cdata(long id, int count) {
 //                this.cls_id = id;
@@ -813,11 +812,11 @@ public class TestH5Plist {
 //        }
 //        H5P_cls_close_func_cb cls_close_cb = new H5P_cls_close_callback();
 //
-//        long    cid1 = -1;        // Generic Property class ID
-//        long    cid2 = -1;        // Generic Property class ID
-//        long    lid1 = -1;        // Generic Property list ID
-//        long    lid2 = -1;        // Generic Property list ID
-//        long    lid3 = -1;        // Generic Property list ID
+//        long    cid1 = HDF5Constants.H5I_INVALID_HID;        // Generic Property class ID
+//        long    cid2 = HDF5Constants.H5I_INVALID_HID;        // Generic Property class ID
+//        long    lid1 = HDF5Constants.H5I_INVALID_HID;        // Generic Property list ID
+//        long    lid2 = HDF5Constants.H5I_INVALID_HID;        // Generic Property list ID
+//        long    lid3 = HDF5Constants.H5I_INVALID_HID;        // Generic Property list ID
 //        long    nprops = -1;    // Number of properties in class
 //
 //        try {

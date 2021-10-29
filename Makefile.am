@@ -6,7 +6,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -34,6 +34,9 @@
 #xxx
 
 include $(top_srcdir)/config/commence.am
+
+# include Doxygen rules (requires autoconf-archive >2016-03-20)
+@DX_RULES@
 
 # Define subdirectories to build.
 ## Automake understands that `make distclean' should recurse into
@@ -186,6 +189,11 @@ check-all-install:
 # so 'make trace' only needs to recurse into that directory.
 trace:
 	@(cd src && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# doxygen support
+if BUILD_DOXYGEN_CONDITIONAL
+doxygen: doxygen-doc
+endif
 
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.

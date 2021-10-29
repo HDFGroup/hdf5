@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -704,10 +704,10 @@ set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     WILL_FAIL "true"
 )
+# release + 1 should pass
 add_test (NAME H5TEST-tcheck_version-release COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tr")
 set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-    WILL_FAIL "true"
 )
 
 ##############################################################################
@@ -894,7 +894,7 @@ endif ()
 ###    F I L T E R  P L U G I N  T E S T S
 ##############################################################################
 if (BUILD_SHARED_LIBS)
-  if (WIN32 OR MINGW)
+  if (WIN32)
     set (CMAKE_SEP "\;")
     set (BIN_REL_PATH "../../")
   else ()
@@ -919,7 +919,7 @@ if (BUILD_SHARED_LIBS)
 ##############################################################################
 endif ()
 
-option (TEST_SHELL_SCRIPTS "Enable shell script tests" OFF)
+option (TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
@@ -938,8 +938,7 @@ if (ENABLE_EXTENDED_TESTS)
 
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")
-  find_package (Perl)
-  if (PERL_FOUND)
+  if (H5_PERL_FOUND)
     add_test (
         NAME H5TEST-testflushrefresh-clear-objects
         COMMAND ${CMAKE_COMMAND} -E remove flushrefresh.h5
@@ -965,9 +964,9 @@ if (ENABLE_EXTENDED_TESTS)
         ENVIRONMENT "srcdir=${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test"
         WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh_test
     )
+  else ()
+    message (STATUS "Cannot execute TEST flushrefresh - perl not found")
   endif ()
-else ()
-  message (STATUS "Cannot execute TEST flushrefresh - perl not found")
 endif ()
 
 ##############################################################################
@@ -989,10 +988,17 @@ endif ()
 if (HDF5_BUILD_GENERATORS AND NOT ONLY_SHARED_LIBS)
   macro (ADD_H5_GENERATOR genfile)
     add_executable (${genfile} ${HDF5_TEST_SOURCE_DIR}/${genfile}.c)
-    target_include_directories (${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    target_include_directories (${genfile} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
     TARGET_C_PROPERTIES (${genfile} STATIC)
     target_link_libraries (${genfile} PRIVATE ${HDF5_TEST_LIB_TARGET} ${HDF5_LIB_TARGET})
     set_target_properties (${genfile} PROPERTIES FOLDER generator/test)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_${genfile}_FORMAT ${genfile})
+    endif ()
   endmacro ()
 
   # generator executables

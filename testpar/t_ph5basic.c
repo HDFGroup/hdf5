@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -16,7 +16,6 @@
  */
 
 #include "testphdf5.h"
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_fapl_mpio_dup
@@ -36,23 +35,23 @@
 void
 test_fapl_mpio_dup(void)
 {
-    int mpi_size, mpi_rank;
+    int      mpi_size, mpi_rank;
     MPI_Comm comm, comm_tmp;
-    int mpi_size_old, mpi_rank_old;
-    int mpi_size_tmp, mpi_rank_tmp;
-    MPI_Info info = MPI_INFO_NULL;
+    int      mpi_size_old, mpi_rank_old;
+    int      mpi_size_tmp, mpi_rank_tmp;
+    MPI_Info info     = MPI_INFO_NULL;
     MPI_Info info_tmp = MPI_INFO_NULL;
-    int mrc;            /* MPI return value */
-    hid_t acc_pl;       /* File access properties */
-    herr_t ret;         /* HDF5 return value */
-    int nkeys, nkeys_tmp;
+    int      mrc;    /* MPI return value */
+    hid_t    acc_pl; /* File access properties */
+    herr_t   ret;    /* HDF5 return value */
+    int      nkeys, nkeys_tmp;
 
     if (VERBOSE_MED)
         HDprintf("Verify fapl_mpio duplicates communicator and INFO objects\n");
 
     /* set up MPI parameters */
-    MPI_Comm_size(MPI_COMM_WORLD,&mpi_size);
-    MPI_Comm_rank(MPI_COMM_WORLD,&mpi_rank);
+    MPI_Comm_size(MPI_COMM_WORLD, &mpi_size);
+    MPI_Comm_rank(MPI_COMM_WORLD, &mpi_rank);
     if (VERBOSE_MED)
         HDprintf("rank/size of MPI_COMM_WORLD are %d/%d\n", mpi_rank, mpi_size);
 
@@ -148,8 +147,7 @@ test_fapl_mpio_dup(void)
     MPI_Comm_size(comm_tmp, &mpi_size_tmp);
     MPI_Comm_rank(comm_tmp, &mpi_rank_tmp);
     if (VERBOSE_MED)
-        HDprintf("After second H5Pget_fapl_mpio: rank/size of comm are %d/%d\n",
-        mpi_rank_tmp, mpi_size_tmp);
+        HDprintf("After second H5Pget_fapl_mpio: rank/size of comm are %d/%d\n", mpi_rank_tmp, mpi_size_tmp);
     VRFY((mpi_size_tmp == mpi_size), "MPI_Comm_size");
     VRFY((mpi_rank_tmp == mpi_rank), "MPI_Comm_rank");
     if (MPI_INFO_NULL != info_tmp) {
@@ -168,8 +166,7 @@ test_fapl_mpio_dup(void)
     MPI_Comm_size(comm_tmp, &mpi_size_tmp);
     MPI_Comm_rank(comm_tmp, &mpi_rank_tmp);
     if (VERBOSE_MED)
-        HDprintf("After Property list closed: rank/size of comm are %d/%d\n",
-    mpi_rank_tmp, mpi_size_tmp);
+        HDprintf("After Property list closed: rank/size of comm are %d/%d\n", mpi_rank_tmp, mpi_size_tmp);
     if (MPI_INFO_NULL != info_tmp) {
         mrc = MPI_Info_get_nkeys(info_tmp, &nkeys_tmp);
         VRFY((mrc == MPI_SUCCESS), "MPI_Info_get_nkeys");
@@ -185,4 +182,3 @@ test_fapl_mpio_dup(void)
         VRFY((mrc == MPI_SUCCESS), "MPI_Info_free");
     }
 } /* end test_fapl_mpio_dup() */
-

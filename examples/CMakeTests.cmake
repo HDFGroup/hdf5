@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -98,11 +98,14 @@ endif ()
 
 ### Windows pops up a modal permission dialog on this test
 if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL AND NOT WIN32)
+  # Ensure that 24 is a multiple of the number of processes.
+  # The number 24 corresponds to SPACE1_DIM1 and SPACE1_DIM2 defined in ph5example.c
+  math(EXPR NUMPROCS "24 / ((24 + ${MPIEXEC_MAX_NUMPROCS} - 1) / ${MPIEXEC_MAX_NUMPROCS})")
   if (HDF5_ENABLE_USING_MEMCHECKER)
-    add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${MPIEXEC_MAX_NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example> ${MPIEXEC_POSTFLAGS})
+    add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND ${MPIEXEC_EXECUTABLE} ${MPIEXEC_NUMPROC_FLAG} ${NUMPROCS} ${MPIEXEC_PREFLAGS} $<TARGET_FILE:ph5example> ${MPIEXEC_POSTFLAGS})
   else ()
     add_test (NAME MPI_TEST_EXAMPLES-ph5example COMMAND "${CMAKE_COMMAND}"
-        -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${MPIEXEC_MAX_NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5example>;${MPIEXEC_POSTFLAGS}"
+        -D "TEST_PROGRAM=${MPIEXEC_EXECUTABLE};${MPIEXEC_NUMPROC_FLAG};${NUMPROCS};${MPIEXEC_PREFLAGS};$<TARGET_FILE:ph5example>;${MPIEXEC_POSTFLAGS}"
         -D "TEST_ARGS:STRING="
         -D "TEST_EXPECT=0"
         -D "TEST_OUTPUT=ph5example.out"

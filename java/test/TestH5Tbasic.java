@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -40,7 +39,7 @@ public class TestH5Tbasic {
 
     @Test
     public void testH5Tcopy() {
-        long H5strdid = -1;
+        long H5strdid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5strdid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
             assertTrue("H5.H5Tcopy",H5strdid > 0);
@@ -57,7 +56,7 @@ public class TestH5Tbasic {
 
     @Test
     public void testH5Tequal() {
-        long H5strdid = -1;
+        long H5strdid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5strdid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);
             assertTrue("H5.H5Tcopy",H5strdid > 0);
@@ -76,7 +75,7 @@ public class TestH5Tbasic {
 
     @Test
     public void testH5Tequal_not() {
-        long H5strdid = -1;
+        long H5strdid = HDF5Constants.H5I_INVALID_HID;
         try {
             H5strdid = H5.H5Tcopy(HDF5Constants.H5T_STD_U64LE);
             assertTrue("H5.H5Tcopy",H5strdid > 0);
@@ -98,8 +97,8 @@ public class TestH5Tbasic {
         String[] strs = {"a1234","b1234"};
         int srcLen = 5;
         int dstLen = 10;
-        long srcId = -1;
-        long dstId = -1;
+        long srcId = HDF5Constants.H5I_INVALID_HID;
+        long dstId = HDF5Constants.H5I_INVALID_HID;
         int dimSize = strs.length;
         byte[]   buf = new byte[dimSize*dstLen];
 
@@ -131,7 +130,7 @@ public class TestH5Tbasic {
 
     @Test
     public void testH5Torder_size() {
-        long H5strdid = -1;
+        long H5strdid = HDF5Constants.H5I_INVALID_HID;
         try {
             // Fixed length string
             H5strdid = H5.H5Tcopy(HDF5Constants.H5T_C_S1);

@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -17,14 +17,14 @@
 
 if (UNIX)
 
-  find_program (SH_PROGRAM sh)
+  find_program (SH_PROGRAM bash)
   if (SH_PROGRAM)
-
+    set (srcdir ${HDF5_TEST_SOURCE_DIR})
+    set (bindir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     ##############################################################################
     #  configure scripts to test dir
     ##############################################################################
-    find_package (Perl)
-    if (PERL_FOUND)
+    if (H5_PERL_FOUND)
       configure_file(${HDF5_TEST_SOURCE_DIR}/testflushrefresh.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh @ONLY)
     endif ()
     configure_file(${HDF5_TEST_SOURCE_DIR}/test_usecases.sh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh @ONLY)
@@ -34,13 +34,8 @@ if (UNIX)
     ##############################################################################
     #  copy test programs to test dir
     ##############################################################################
-    add_custom_command (
-        TARGET     swmr_check_compat_vfd
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_check_compat_vfd>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_check_compat_vfd"
-    )
-
+    #shell script creates dir
+    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
     add_custom_command (
         TARGET     swmr_check_compat_vfd
         POST_BUILD
@@ -48,118 +43,12 @@ if (UNIX)
         ARGS       -E copy_if_different "${HDF5_SOURCE_DIR}/bin/output_filter.sh" "${HDF5_TEST_BINARY_DIR}/H5TEST/bin/output_filter.sh"
     )
 
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")
-    add_custom_command (
-        TARGET     flushrefresh
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:flushrefresh>" "${HDF5_TEST_BINARY_DIR}/H5TEST/flushrefresh"
-    )
-
     #shell script creates dir
     #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
-    add_custom_command (
-        TARGET     use_append_mchunks
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:use_append_mchunks>" "${HDF5_TEST_BINARY_DIR}/H5TEST/use_append_mchunks"
-    )
-    add_custom_command (
-        TARGET     use_disable_mdc_flushes
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:use_disable_mdc_flushes>" "${HDF5_TEST_BINARY_DIR}/H5TEST/use_disable_mdc_flushes"
-    )
-    add_custom_command (
-        TARGET     twriteorder
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:twriteorder>" "${HDF5_TEST_BINARY_DIR}/H5TEST/twriteorder"
-    )
-    add_custom_command (
-        TARGET     use_append_chunk
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:use_append_chunk>" "${HDF5_TEST_BINARY_DIR}/H5TEST/use_append_chunk"
-    )
 
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
-    add_custom_command (
-        TARGET     swmr_generator
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_generator>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_generator"
-    )
-    add_custom_command (
-        TARGET     swmr_start_write
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_start_write>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_start_write"
-    )
-    add_custom_command (
-        TARGET     swmr_reader
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_reader"
-    )
-    add_custom_command (
-        TARGET     swmr_writer
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_writer"
-    )
-    add_custom_command (
-        TARGET     swmr_remove_reader
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_remove_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_remove_reader"
-    )
-    add_custom_command (
-        TARGET     swmr_remove_writer
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_remove_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_remove_writer"
-    )
-    add_custom_command (
-        TARGET     swmr_addrem_writer
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_addrem_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_addrem_writer"
-    )
-    add_custom_command (
-        TARGET     swmr_sparse_reader
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_sparse_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_sparse_reader"
-    )
-    add_custom_command (
-        TARGET     swmr_sparse_writer
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:swmr_sparse_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/swmr_test/swmr_sparse_writer"
-    )
 
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
-    add_custom_command (
-        TARGET     vds_swmr_gen
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:vds_swmr_gen>" "${HDF5_TEST_BINARY_DIR}/H5TEST/vds_swmr_gen"
-    )
-    add_custom_command (
-        TARGET     vds_swmr_writer
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:vds_swmr_writer>" "${HDF5_TEST_BINARY_DIR}/H5TEST/vds_swmr_writer"
-    )
-    add_custom_command (
-        TARGET     vds_swmr_reader
-        POST_BUILD
-        COMMAND    ${CMAKE_COMMAND}
-        ARGS       -E copy_if_different "$<TARGET_FILE:vds_swmr_reader>" "${HDF5_TEST_BINARY_DIR}/H5TEST/vds_swmr_reader"
-    )
-
-
 
     ##############################################################################
     ##############################################################################
@@ -198,18 +87,22 @@ if (UNIX)
     #       testvdsswmr.sh: vds_swmr*
     add_test (H5SHELL-testflushrefresh ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh)
     set_tests_properties (H5SHELL-testflushrefresh PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
     add_test (H5SHELL-test_usecases ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh)
     set_tests_properties (H5SHELL-test_usecases PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
     add_test (H5SHELL-testswmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.sh)
     set_tests_properties (H5SHELL-testswmr PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
     add_test (H5SHELL-testvdsswmr ${SH_PROGRAM} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.sh)
     set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
 

@@ -22,13 +22,12 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
 # HDF5 Library Performance Makefile(.in)
 #
-
 VPATH = @srcdir@
 am__is_gnu_make = { \
   if test -z '$(MAKELEVEL)'; then \
@@ -103,14 +102,7 @@ PRE_UNINSTALL = :
 POST_UNINSTALL = :
 build_triplet = @build@
 host_triplet = @host@
-@BUILD_PARALLEL_CONDITIONAL_FALSE@bin_PROGRAMS =  \
-@BUILD_PARALLEL_CONDITIONAL_FALSE@	h5perf_serial$(EXEEXT)
-@BUILD_PARALLEL_CONDITIONAL_TRUE@bin_PROGRAMS =  \
-@BUILD_PARALLEL_CONDITIONAL_TRUE@	h5perf_serial$(EXEEXT) \
-@BUILD_PARALLEL_CONDITIONAL_TRUE@	h5perf$(EXEEXT)
-check_PROGRAMS = iopipe$(EXEEXT) chunk$(EXEEXT) chunk_cache$(EXEEXT) \
-	overhead$(EXEEXT) zip_perf$(EXEEXT) perf_meta$(EXEEXT) \
-	$(am__EXEEXT_2) perf$(EXEEXT)
+check_PROGRAMS = $(am__EXEEXT_3) $(am__EXEEXT_2)
 TESTS = $(am__EXEEXT_3)
 subdir = tools/test/perform
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
@@ -122,6 +114,7 @@ am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
 	$(top_srcdir)/m4/ax_check_junit.m4 \
 	$(top_srcdir)/m4/ax_java_options.m4 \
 	$(top_srcdir)/m4/ax_jni_include_dir.m4 \
+	$(top_srcdir)/m4/ax_prog_doxygen.m4 \
 	$(top_srcdir)/m4/ax_prog_jar.m4 \
 	$(top_srcdir)/m4/ax_prog_java.m4 \
 	$(top_srcdir)/m4/ax_prog_java_works.m4 \
@@ -140,10 +133,11 @@ CONFIG_HEADER = $(top_builddir)/src/H5config.h \
 	$(top_builddir)/fortran/src/H5config_f.inc
 CONFIG_CLEAN_FILES =
 CONFIG_CLEAN_VPATH_FILES =
-am__installdirs = "$(DESTDIR)$(bindir)"
 am__EXEEXT_1 =
 @BUILD_ALL_CONDITIONAL_TRUE@am__EXEEXT_2 = $(am__EXEEXT_1)
-PROGRAMS = $(bin_PROGRAMS)
+am__EXEEXT_3 = iopipe$(EXEEXT) chunk$(EXEEXT) chunk_cache$(EXEEXT) \
+	overhead$(EXEEXT) zip_perf$(EXEEXT) perf_meta$(EXEEXT) \
+	$(am__EXEEXT_2)
 chunk_SOURCES = chunk.c
 chunk_OBJECTS = chunk.$(OBJEXT)
 chunk_LDADD = $(LDADD)
@@ -156,18 +150,6 @@ chunk_cache_SOURCES = chunk_cache.c
 chunk_cache_OBJECTS = chunk_cache.$(OBJEXT)
 chunk_cache_LDADD = $(LDADD)
 chunk_cache_DEPENDENCIES = $(LIBHDF5)
-am_h5perf_OBJECTS = pio_perf.$(OBJEXT) pio_engine.$(OBJEXT)
-h5perf_OBJECTS = $(am_h5perf_OBJECTS)
-h5perf_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-h5perf_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(h5perf_LDFLAGS) $(LDFLAGS) -o $@
-am_h5perf_serial_OBJECTS = sio_perf.$(OBJEXT) sio_engine.$(OBJEXT)
-h5perf_serial_OBJECTS = $(am_h5perf_serial_OBJECTS)
-h5perf_serial_DEPENDENCIES = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-h5perf_serial_LINK = $(LIBTOOL) $(AM_V_lt) --tag=CC $(AM_LIBTOOLFLAGS) \
-	$(LIBTOOLFLAGS) --mode=link $(CCLD) $(AM_CFLAGS) $(CFLAGS) \
-	$(h5perf_serial_LDFLAGS) $(LDFLAGS) -o $@
 iopipe_SOURCES = iopipe.c
 iopipe_OBJECTS = iopipe.$(OBJEXT)
 iopipe_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
@@ -175,9 +157,6 @@ overhead_SOURCES = overhead.c
 overhead_OBJECTS = overhead.$(OBJEXT)
 overhead_LDADD = $(LDADD)
 overhead_DEPENDENCIES = $(LIBHDF5)
-perf_SOURCES = perf.c
-perf_OBJECTS = perf.$(OBJEXT)
-perf_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
 perf_meta_SOURCES = perf_meta.c
 perf_meta_OBJECTS = perf_meta.$(OBJEXT)
 perf_meta_DEPENDENCIES = $(LIBH5TEST) $(LIBHDF5)
@@ -218,12 +197,10 @@ AM_V_CCLD = $(am__v_CCLD_@AM_V@)
 am__v_CCLD_ = $(am__v_CCLD_@AM_DEFAULT_V@)
 am__v_CCLD_0 = @echo "  CCLD    " $@;
 am__v_CCLD_1 = 
-SOURCES = chunk.c chunk_cache.c $(h5perf_SOURCES) \
-	$(h5perf_serial_SOURCES) iopipe.c overhead.c perf.c \
-	perf_meta.c zip_perf.c
-DIST_SOURCES = chunk.c chunk_cache.c $(h5perf_SOURCES) \
-	$(h5perf_serial_SOURCES) iopipe.c overhead.c perf.c \
-	perf_meta.c zip_perf.c
+SOURCES = chunk.c chunk_cache.c iopipe.c overhead.c perf_meta.c \
+	zip_perf.c
+DIST_SOURCES = chunk.c chunk_cache.c iopipe.c overhead.c perf_meta.c \
+	zip_perf.c
 am__can_run_installinfo = \
   case $$AM_UPDATE_INFO_DIR in \
     n|no|NO) false;; \
@@ -432,9 +409,6 @@ am__set_TESTS_bases = \
   bases=`echo $$bases`
 RECHECK_LOGS = $(TEST_LOGS)
 AM_RECURSIVE_TARGETS = check recheck
-am__EXEEXT_3 = iopipe$(EXEEXT) chunk$(EXEEXT) chunk_cache$(EXEEXT) \
-	overhead$(EXEEXT) zip_perf$(EXEEXT) perf_meta$(EXEEXT) \
-	h5perf_serial$(EXEEXT) $(am__EXEEXT_2)
 TEST_SUITE_LOG = test-suite.log
 LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
 LOG_COMPILE = $(LOG_COMPILER) $(AM_LOG_FLAGS) $(LOG_FLAGS)
@@ -455,7 +429,7 @@ SH_LOG_DRIVER = $(SHELL) $(top_srcdir)/bin/test-driver
 SH_LOG_COMPILE = $(SH_LOG_COMPILER) $(AM_SH_LOG_FLAGS) $(SH_LOG_FLAGS)
 am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/depcomp \
 	$(top_srcdir)/bin/test-driver $(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am COPYING
+	$(top_srcdir)/config/conclude.am
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
@@ -466,10 +440,10 @@ AMTAR = @AMTAR@
 # AM_CFLAGS is an automake construct which should be used by Makefiles
 # instead of CFLAGS, as CFLAGS is reserved solely for the user to define.
 # This applies to FCFLAGS, CXXFLAGS, CPPFLAGS, and LDFLAGS as well.
-AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@ @H5_ECFLAGS@
+AM_CFLAGS = @AM_CFLAGS@ @H5_CFLAGS@
 AM_CPPFLAGS = @AM_CPPFLAGS@ @H5_CPPFLAGS@ -I$(top_srcdir)/src \
 	-I$(top_srcdir)/test -I$(top_srcdir)/tools/lib
-AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@ @H5_ECXXFLAGS@
+AM_CXXFLAGS = @AM_CXXFLAGS@ @H5_CXXFLAGS@
 AM_DEFAULT_VERBOSITY = @AM_DEFAULT_VERBOSITY@
 AM_FCFLAGS = @AM_FCFLAGS@ @H5_FCFLAGS@
 AM_JAVACFLAGS = @AM_JAVACFLAGS@
@@ -507,11 +481,56 @@ DEFS = @DEFS@
 DEPDIR = @DEPDIR@
 DEPRECATED_SYMBOLS = @DEPRECATED_SYMBOLS@
 DESIRED_FILE_LOCKING = @DESIRED_FILE_LOCKING@
-DEV_WARNINGS = @DEV_WARNINGS@
+DIAGS = @DIAGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
+DOXYGEN_EXAMPLES_DIRECTORY = @DOXYGEN_EXAMPLES_DIRECTORY@
+DOXYGEN_EXTERNAL_SEARCH = @DOXYGEN_EXTERNAL_SEARCH@
+DOXYGEN_HTML_EXTRA_FILES = @DOXYGEN_HTML_EXTRA_FILES@
+DOXYGEN_HTML_EXTRA_STYLESHEET = @DOXYGEN_HTML_EXTRA_STYLESHEET@
+DOXYGEN_HTML_FOOTER = @DOXYGEN_HTML_FOOTER@
+DOXYGEN_HTML_HEADER = @DOXYGEN_HTML_HEADER@
+DOXYGEN_INCLUDE_ALIASES = @DOXYGEN_INCLUDE_ALIASES@
+DOXYGEN_INPUT_DIRECTORY = @DOXYGEN_INPUT_DIRECTORY@
+DOXYGEN_LAYOUT_FILE = @DOXYGEN_LAYOUT_FILE@
+DOXYGEN_MACRO_EXPANSION = @DOXYGEN_MACRO_EXPANSION@
+DOXYGEN_OPTIMIZE_OUTPUT_FOR_C = @DOXYGEN_OPTIMIZE_OUTPUT_FOR_C@
+DOXYGEN_OUTPUT_DIRECTORY = @DOXYGEN_OUTPUT_DIRECTORY@
+DOXYGEN_PACKAGE = @DOXYGEN_PACKAGE@
+DOXYGEN_PAPER_SIZE = @DOXYGEN_PAPER_SIZE@
+DOXYGEN_PREDEFINED = @DOXYGEN_PREDEFINED@
+DOXYGEN_PROJECT_BRIEF = @DOXYGEN_PROJECT_BRIEF@
+DOXYGEN_PROJECT_LOGO = @DOXYGEN_PROJECT_LOGO@
+DOXYGEN_SEARCHENGINE_URL = @DOXYGEN_SEARCHENGINE_URL@
+DOXYGEN_SERVER_BASED_SEARCH = @DOXYGEN_SERVER_BASED_SEARCH@
+DOXYGEN_STRIP_FROM_PATH = @DOXYGEN_STRIP_FROM_PATH@
+DOXYGEN_TAG_FILE = @DOXYGEN_TAG_FILE@
+DOXYGEN_VERSION_STRING = @DOXYGEN_VERSION_STRING@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
+DX_CONFIG = @DX_CONFIG@
+DX_DOCDIR = @DX_DOCDIR@
+DX_DOT = @DX_DOT@
+DX_DOXYGEN = @DX_DOXYGEN@
+DX_DVIPS = @DX_DVIPS@
+DX_EGREP = @DX_EGREP@
+DX_ENV = @DX_ENV@
+DX_FLAG_chi = @DX_FLAG_chi@
+DX_FLAG_chm = @DX_FLAG_chm@
+DX_FLAG_doc = @DX_FLAG_doc@
+DX_FLAG_dot = @DX_FLAG_dot@
+DX_FLAG_html = @DX_FLAG_html@
+DX_FLAG_man = @DX_FLAG_man@
+DX_FLAG_pdf = @DX_FLAG_pdf@
+DX_FLAG_ps = @DX_FLAG_ps@
+DX_FLAG_rtf = @DX_FLAG_rtf@
+DX_FLAG_xml = @DX_FLAG_xml@
+DX_HHC = @DX_HHC@
+DX_LATEX = @DX_LATEX@
+DX_MAKEINDEX = @DX_MAKEINDEX@
+DX_PDFLATEX = @DX_PDFLATEX@
+DX_PERL = @DX_PERL@
+DX_PROJECT = @DX_PROJECT@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -543,8 +562,6 @@ H5_CFLAGS = @H5_CFLAGS@
 H5_CLASSPATH = @H5_CLASSPATH@
 H5_CPPFLAGS = @H5_CPPFLAGS@
 H5_CXXFLAGS = @H5_CXXFLAGS@
-H5_ECFLAGS = @H5_ECFLAGS@
-H5_ECXXFLAGS = @H5_ECXXFLAGS@
 H5_FCFLAGS = @H5_FCFLAGS@
 H5_FORTRAN_SHARED = @H5_FORTRAN_SHARED@
 H5_IS_DARWIN = @H5_IS_DARWIN@
@@ -558,7 +575,9 @@ HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_Fortran_INTEGER_SIZEOF_16 = @HAVE_Fortran_INTEGER_SIZEOF_16@
 HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
+HDF5_DOXYGEN = @HDF5_DOXYGEN@
 HDF5_HL = @HDF5_HL@
+HDF5_HL_TOOLS = @HDF5_HL_TOOLS@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF5_TESTS = @HDF5_TESTS@
 HDF5_TOOLS = @HDF5_TOOLS@
@@ -568,6 +587,7 @@ HDF_JAVA = @HDF_JAVA@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
+HL_TOOLS = @HL_TOOLS@
 HSIZE_T = @HSIZE_T@
 HSSIZE_T = @HSSIZE_T@
 IGNORE_DISABLED_FILE_LOCKS = @IGNORE_DISABLED_FILE_LOCKS@
@@ -761,7 +781,7 @@ LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
 # Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below
-# has been removed. According to the official description of DESTDIR by Gnu at
+# has been removed. According to the official description of DESTDIR by GNU at
 # http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is
 # prepended to the normal and complete install path that it precedes for the
 # purpose of installing in a temporary directory which is useful for building
@@ -789,10 +809,6 @@ TRACE = perl $(top_srcdir)/bin/trace
 # *.clog and *.clog2 are from the MPE option.
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2
 
-# Add h5perf and h5perf_serial specific linker flags here
-h5perf_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
-h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
-
 # Some programs are not built or run by default, but can be built by hand or by
 # specifying --enable-build-all at configure time.
 # Also, some of these programs should only be built in parallel.
@@ -803,11 +819,9 @@ h5perf_serial_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
 # Define programs that will be run in 'make check'
 # List them in the order they should be run.
 # Parallel test programs.
-@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = h5perf perf
+@BUILD_PARALLEL_CONDITIONAL_TRUE@TEST_PROG_PARA = 
 # Serial test programs.
-TEST_PROG = iopipe chunk chunk_cache overhead zip_perf perf_meta h5perf_serial $(BUILD_ALL_PROGS)
-h5perf_SOURCES = pio_perf.c pio_engine.c
-h5perf_serial_SOURCES = sio_perf.c sio_engine.c
+TEST_PROG = iopipe chunk chunk_cache overhead zip_perf perf_meta $(BUILD_ALL_PROGS)
 
 # These are the files that `make clean' (and derivatives) will remove from
 # this directory.
@@ -816,9 +830,6 @@ CLEANFILES = *.h5 *.raw *.dat x-gnuplot perftest.out
 # All of the programs depend on the main hdf5 library, and some of them
 # depend on test or tools library.
 LDADD = $(LIBHDF5)
-h5perf_LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-h5perf_serial_LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
-perf_LDADD = $(LIBH5TEST) $(LIBHDF5)
 iopipe_LDADD = $(LIBH5TEST) $(LIBHDF5)
 zip_perf_LDADD = $(LIBH5TOOLS) $(LIBH5TEST) $(LIBHDF5)
 perf_meta_LDADD = $(LIBH5TEST) $(LIBHDF5)
@@ -877,55 +888,6 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	cd $(top_builddir) && $(MAKE) $(AM_MAKEFLAGS) am--refresh
 $(am__aclocal_m4_deps):
-install-binPROGRAMS: $(bin_PROGRAMS)
-	@$(NORMAL_INSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	if test -n "$$list"; then \
-	  echo " $(MKDIR_P) '$(DESTDIR)$(bindir)'"; \
-	  $(MKDIR_P) "$(DESTDIR)$(bindir)" || exit 1; \
-	fi; \
-	for p in $$list; do echo "$$p $$p"; done | \
-	sed 's/$(EXEEXT)$$//' | \
-	while read p p1; do if test -f $$p \
-	 || test -f $$p1 \
-	  ; then echo "$$p"; echo "$$p"; else :; fi; \
-	done | \
-	sed -e 'p;s,.*/,,;n;h' \
-	    -e 's|.*|.|' \
-	    -e 'p;x;s,.*/,,;s/$(EXEEXT)$$//;$(transform);s/$$/$(EXEEXT)/' | \
-	sed 'N;N;N;s,\n, ,g' | \
-	$(AWK) 'BEGIN { files["."] = ""; dirs["."] = 1 } \
-	  { d=$$3; if (dirs[d] != 1) { print "d", d; dirs[d] = 1 } \
-	    if ($$2 == $$4) files[d] = files[d] " " $$1; \
-	    else { print "f", $$3 "/" $$4, $$1; } } \
-	  END { for (d in files) print "f", d, files[d] }' | \
-	while read type dir files; do \
-	    if test "$$dir" = .; then dir=; else dir=/$$dir; fi; \
-	    test -z "$$files" || { \
-	    echo " $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files '$(DESTDIR)$(bindir)$$dir'"; \
-	    $(INSTALL_PROGRAM_ENV) $(LIBTOOL) $(AM_LIBTOOLFLAGS) $(LIBTOOLFLAGS) --mode=install $(INSTALL_PROGRAM) $$files "$(DESTDIR)$(bindir)$$dir" || exit $$?; \
-	    } \
-	; done
-
-uninstall-binPROGRAMS:
-	@$(NORMAL_UNINSTALL)
-	@list='$(bin_PROGRAMS)'; test -n "$(bindir)" || list=; \
-	files=`for p in $$list; do echo "$$p"; done | \
-	  sed -e 'h;s,^.*/,,;s/$(EXEEXT)$$//;$(transform)' \
-	      -e 's/$$/$(EXEEXT)/' \
-	`; \
-	test -n "$$list" || exit 0; \
-	echo " ( cd '$(DESTDIR)$(bindir)' && rm -f" $$files ")"; \
-	cd "$(DESTDIR)$(bindir)" && rm -f $$files
-
-clean-binPROGRAMS:
-	@list='$(bin_PROGRAMS)'; test -n "$$list" || exit 0; \
-	echo " rm -f" $$list; \
-	rm -f $$list || exit $$?; \
-	test -n "$(EXEEXT)" || exit 0; \
-	list=`for p in $$list; do echo "$$p"; done | sed 's/$(EXEEXT)$$//'`; \
-	echo " rm -f" $$list; \
-	rm -f $$list
 
 clean-checkPROGRAMS:
 	@list='$(check_PROGRAMS)'; test -n "$$list" || exit 0; \
@@ -944,14 +906,6 @@ chunk_cache$(EXEEXT): $(chunk_cache_OBJECTS) $(chunk_cache_DEPENDENCIES) $(EXTRA
 	@rm -f chunk_cache$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(chunk_cache_OBJECTS) $(chunk_cache_LDADD) $(LIBS)
 
-h5perf$(EXEEXT): $(h5perf_OBJECTS) $(h5perf_DEPENDENCIES) $(EXTRA_h5perf_DEPENDENCIES) 
-	@rm -f h5perf$(EXEEXT)
-	$(AM_V_CCLD)$(h5perf_LINK) $(h5perf_OBJECTS) $(h5perf_LDADD) $(LIBS)
-
-h5perf_serial$(EXEEXT): $(h5perf_serial_OBJECTS) $(h5perf_serial_DEPENDENCIES) $(EXTRA_h5perf_serial_DEPENDENCIES) 
-	@rm -f h5perf_serial$(EXEEXT)
-	$(AM_V_CCLD)$(h5perf_serial_LINK) $(h5perf_serial_OBJECTS) $(h5perf_serial_LDADD) $(LIBS)
-
 iopipe$(EXEEXT): $(iopipe_OBJECTS) $(iopipe_DEPENDENCIES) $(EXTRA_iopipe_DEPENDENCIES) 
 	@rm -f iopipe$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(iopipe_OBJECTS) $(iopipe_LDADD) $(LIBS)
@@ -959,10 +913,6 @@ iopipe$(EXEEXT): $(iopipe_OBJECTS) $(iopipe_DEPENDENCIES) $(EXTRA_iopipe_DEPENDE
 overhead$(EXEEXT): $(overhead_OBJECTS) $(overhead_DEPENDENCIES) $(EXTRA_overhead_DEPENDENCIES) 
 	@rm -f overhead$(EXEEXT)
 	$(AM_V_CCLD)$(LINK) $(overhead_OBJECTS) $(overhead_LDADD) $(LIBS)
-
-perf$(EXEEXT): $(perf_OBJECTS) $(perf_DEPENDENCIES) $(EXTRA_perf_DEPENDENCIES) 
-	@rm -f perf$(EXEEXT)
-	$(AM_V_CCLD)$(LINK) $(perf_OBJECTS) $(perf_LDADD) $(LIBS)
 
 perf_meta$(EXEEXT): $(perf_meta_OBJECTS) $(perf_meta_DEPENDENCIES) $(EXTRA_perf_meta_DEPENDENCIES) 
 	@rm -f perf_meta$(EXEEXT)
@@ -982,12 +932,7 @@ distclean-compile:
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/chunk_cache.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/iopipe.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/overhead.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/perf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/perf_meta.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_engine.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/pio_perf.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sio_engine.Po@am__quote@
-@AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/sio_perf.Po@am__quote@
 @AMDEP_TRUE@@am__include@ @am__quote@./$(DEPDIR)/zip_perf.Po@am__quote@
 
 .c.o:
@@ -1244,13 +1189,6 @@ perf_meta.log: perf_meta$(EXEEXT)
 	--log-file $$b.log --trs-file $$b.trs \
 	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
 	"$$tst" $(AM_TESTS_FD_REDIRECT)
-h5perf_serial.log: h5perf_serial$(EXEEXT)
-	@p='h5perf_serial$(EXEEXT)'; \
-	b='h5perf_serial'; \
-	$(am__check_pre) $(LOG_DRIVER) --test-name "$$f" \
-	--log-file $$b.log --trs-file $$b.trs \
-	$(am__common_driver_flags) $(AM_LOG_DRIVER_FLAGS) $(LOG_DRIVER_FLAGS) -- $(LOG_COMPILE) \
-	"$$tst" $(AM_TESTS_FD_REDIRECT)
 .sh.log:
 	@p='$<'; \
 	$(am__set_b); \
@@ -1300,11 +1238,8 @@ check-am: all-am
 	$(MAKE) $(AM_MAKEFLAGS) $(check_PROGRAMS)
 	$(MAKE) $(AM_MAKEFLAGS) check-TESTS
 check: check-am
-all-am: Makefile $(PROGRAMS) all-local
+all-am: Makefile all-local
 installdirs:
-	for dir in "$(DESTDIR)$(bindir)"; do \
-	  test -z "$$dir" || $(MKDIR_P) "$$dir"; \
-	done
 install: install-am
 install-exec: install-exec-am
 install-data: install-data-am
@@ -1341,8 +1276,8 @@ maintainer-clean-generic:
 	@echo "it deletes files that may require special tools to rebuild."
 clean: clean-am
 
-clean-am: clean-binPROGRAMS clean-checkPROGRAMS clean-generic \
-	clean-libtool mostlyclean-am
+clean-am: clean-checkPROGRAMS clean-generic clean-libtool \
+	mostlyclean-am
 
 distclean: distclean-am
 	-rm -rf ./$(DEPDIR)
@@ -1368,7 +1303,7 @@ install-dvi: install-dvi-am
 
 install-dvi-am:
 
-install-exec-am: install-binPROGRAMS
+install-exec-am:
 
 install-html: install-html-am
 
@@ -1408,16 +1343,15 @@ ps: ps-am
 
 ps-am:
 
-uninstall-am: uninstall-binPROGRAMS
+uninstall-am:
 
 .MAKE: check-am install-am install-strip
 
 .PHONY: CTAGS GTAGS TAGS all all-am all-local check check-TESTS \
-	check-am clean clean-binPROGRAMS clean-checkPROGRAMS \
-	clean-generic clean-libtool cscopelist-am ctags ctags-am \
-	distclean distclean-compile distclean-generic \
-	distclean-libtool distclean-tags distdir dvi dvi-am html \
-	html-am info info-am install install-am install-binPROGRAMS \
+	check-am clean clean-checkPROGRAMS clean-generic clean-libtool \
+	cscopelist-am ctags ctags-am distclean distclean-compile \
+	distclean-generic distclean-libtool distclean-tags distdir dvi \
+	dvi-am html html-am info info-am install install-am \
 	install-data install-data-am install-dvi install-dvi-am \
 	install-exec install-exec-am install-html install-html-am \
 	install-info install-info-am install-man install-pdf \
@@ -1425,8 +1359,7 @@ uninstall-am: uninstall-binPROGRAMS
 	installcheck installcheck-am installdirs maintainer-clean \
 	maintainer-clean-generic mostlyclean mostlyclean-compile \
 	mostlyclean-generic mostlyclean-libtool mostlyclean-local pdf \
-	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am \
-	uninstall-binPROGRAMS
+	pdf-am ps ps-am recheck tags tags-am uninstall uninstall-am
 
 .PRECIOUS: Makefile
 
@@ -1436,8 +1369,9 @@ uninstall-am: uninstall-binPROGRAMS
 # commands that should be executed even if a file with the same name already
 # exists.
 .PHONY: build-check-clean build-check-p build-check-s build-lib build-progs \
-        build-tests check-clean check-install check-p check-s check-vfd \
-        install-doc lib progs tests uninstall-doc _exec_check-s _test help
+	build-tests check-clean check-install check-p check-s check-vfd \
+	install-doc lib progs tests uninstall-doc \
+	_exec_check-s _test help trace doxygen
 
 help:
 	@$(top_srcdir)/bin/makehelp

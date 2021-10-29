@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -53,7 +53,6 @@
 
 static void usage(void);
 
-
 /*-------------------------------------------------------------------------
  * Function:    usage
  *
@@ -75,8 +74,6 @@ usage(void)
     printf("       Note**The number of integers for option i has to be positive\n");
     printf("\n");
 } /* usage() */
-
-
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -114,33 +111,33 @@ usage(void)
 int
 main(int argc, char *argv[])
 {
-    int fd = -1;                    /* file descriptor                      */
-    ssize_t bytes_wrote;            /* the nubmer of bytes written          */
-    unsigned int *buf = NULL;       /* buffer to hold written data          */
-    unsigned int n, u, i;           /* local index variable                 */
-    int temp;                       /* temporary variable                   */
-    unsigned int iterations = 0;    /* the input for "-i"                   */
-    unsigned int num = 0;           /* the input for "-n"                   */
-    int opt = 0;                    /* option char                          */
+    int           fd = -1;        /* file descriptor                      */
+    ssize_t       bytes_wrote;    /* the nubmer of bytes written          */
+    unsigned int *buf = NULL;     /* buffer to hold written data          */
+    unsigned int  n, u, i;        /* local index variable                 */
+    int           temp;           /* temporary variable                   */
+    unsigned int  iterations = 0; /* the input for "-i"                   */
+    unsigned int  num        = 0; /* the input for "-n"                   */
+    int           opt        = 0; /* option char                          */
 
     /* Ensure the # of arguments is as expected */
-    if(argc != 5) {
+    if (argc != 5) {
         usage();
         exit(EXIT_FAILURE);
     } /* end if */
 
     /* Parse command line options */
-    while((opt = getopt(argc, argv, "n:i:")) != -1) {
-        switch(opt) {
+    while ((opt = getopt(argc, argv, "n:i:")) != -1) {
+        switch (opt) {
             case 'n':
-                if((temp = atoi(optarg)) < 0) {
+                if ((temp = atoi(optarg)) < 0) {
                     usage();
                     exit(EXIT_FAILURE);
                 } /* end if */
                 num = (unsigned int)temp;
                 break;
             case 'i':
-                if((temp = atoi(optarg)) < 0) {
+                if ((temp = atoi(optarg)) < 0) {
                     usage();
                     exit(EXIT_FAILURE);
                 } /* end if */
@@ -150,78 +147,79 @@ main(int argc, char *argv[])
                 printf("Invalid option encountered\n");
                 break;
         } /* end switch */
-    } /* end while */
+    }     /* end while */
 
     printf("WRITER: # of integers to write = %u; # of iterations = %d\n", num, iterations);
 
     /* Remove existing data file if needed */
-    if(remove(FILENAME) < 0) {
-        if(errno == ENOENT)
+    if (remove(FILENAME) < 0) {
+        if (errno == ENOENT)
             printf("WRITER: remove %s--%s\n", FILENAME, strerror(errno));
         else {
             printf("WRITER: error from remove: %d--%s\n", errno, strerror(errno));
             goto error;
         } /* end else */
-    } else
+    }
+    else
         printf("WRITER: %s is removed\n", FILENAME);
 
     /* Create the data file */
-    if((fd = open(FILENAME, O_RDWR|O_TRUNC|O_CREAT, 0664)) < 0) {
+    if ((fd = open(FILENAME, O_RDWR | O_TRUNC | O_CREAT, 0664)) < 0) {
         printf("WRITER: error from open\n");
         goto error;
     } /* end if */
 
     /* Allocate buffer for holding data to be written */
-    if((buf = (unsigned int *)malloc(num * sizeof(unsigned int))) == NULL) {
+    if ((buf = (unsigned int *)malloc(num * sizeof(unsigned int))) == NULL) {
         printf("WRITER: error from malloc\n");
-        if(fd >= 0 && close(fd) < 0)
+        if (fd >= 0 && close(fd) < 0)
             printf("WRITER: error from close\n");
         goto error;
     } /* end if */
 
     printf("\n");
 
-    for(i = 1; i <= iterations; i++) {
+    for (i = 1; i <= iterations; i++) {
         printf("WRITER: *****start iteration %u*****\n", i);
 
         /* Write the series of integers to the file */
-        for(n = 0; n < num; n++)  {
+        for (n = 0; n < num; n++) {
 
             /* Set up data to be written */
-            for(u=0; u < num; u++)
+            for (u = 0; u < num; u++)
                 buf[u] = n;
 
             /* Position the file to the proper location */
-            if(lseek(fd, (off_t)(n*sizeof(unsigned int)), SEEK_SET) < 0) {
+            if (lseek(fd, (off_t)(n * sizeof(unsigned int)), SEEK_SET) < 0) {
                 printf("WRITER: error from lseek\n");
                 goto error;
             } /* end if */
 
             /* Write the data */
-            if((bytes_wrote = write(fd, buf, ((num-n) * sizeof(unsigned int)))) < 0) {
+            if ((bytes_wrote = write(fd, buf, ((num - n) * sizeof(unsigned int)))) < 0) {
                 printf("WRITER: error from write\n");
                 goto error;
             } /* end if */
 
             /* Verify the bytes written is correct */
-            if(bytes_wrote != (ssize_t)((num-n) * sizeof(unsigned int))) {
+            if (bytes_wrote != (ssize_t)((num - n) * sizeof(unsigned int))) {
                 printf("WRITER: error from bytes written\n");
                 goto error;
             } /* end if */
-        } /* end for */
+        }     /* end for */
 
         printf("WRITER: *****end iteration %u*****\n\n", i);
 
     } /* end for */
 
     /* Close the file */
-    if(close(fd) < 0) {
+    if (close(fd) < 0) {
         printf("WRITER: error from close\n");
         goto error;
     } /* end if */
 
     /* Free the buffer */
-    if(buf)
+    if (buf)
         free(buf);
 
     return EXIT_SUCCESS;
@@ -240,4 +238,3 @@ main(void)
 } /* end main() */
 
 #endif /* WIN32 / MINGW32 */
-

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -101,9 +100,9 @@ public class H5Ex_T_Commit {
     }
 
     private static void CreateDataType() {
-        long file_id = -1;
-        long strtype_id = -1;
-        long filetype_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long strtype_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
         Sensor_Datatype datatypes = new Sensor_Datatype();
         // Create a new file using default properties.
         try {
@@ -183,9 +182,9 @@ public class H5Ex_T_Commit {
     }
 
     private static void ReadDataType() {
-        long file_id = -1;
-        long typeclass_id = -1;
-        long filetype_id = -1;
+        long file_id = HDF5Constants.H5I_INVALID_HID;
+        long typeclass_id = HDF5Constants.H5I_INVALID_HID;
+        long filetype_id = HDF5Constants.H5I_INVALID_HID;
 
         // Open an existing file.
         try {

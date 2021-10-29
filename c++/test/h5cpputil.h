@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -19,8 +19,8 @@
 
  ***************************************************************************/
 
-#ifndef _h5cpputil_h
-#define _h5cpputil_h
+#ifndef H5cpputil_H
+#define H5cpputil_H
 
 #include "h5test.h"
 
@@ -28,50 +28,86 @@ using namespace H5;
 using std::cerr;
 using std::endl;
 
-#define MESSAGE(V,A) {if (HDGetTestVerbosity()>(V)) print_func A;}
-#define SUBTEST(TEST) {printf("   Subtest: %-52s",TEST); fflush(stdout);}
+#define MESSAGE(V, A)                                                                                        \
+    {                                                                                                        \
+        if (HDGetTestVerbosity() > (V))                                                                      \
+            print_func A;                                                                                    \
+    }
+#define SUBTEST(TEST)                                                                                        \
+    {                                                                                                        \
+        printf("   Subtest: %-52s", TEST);                                                                   \
+        fflush(stdout);                                                                                      \
+    }
 
-int check_values (hsize_t i, hsize_t j, int apoint, int acheck);
-void check_values(const char *value, const char* msg, int line, const char* file_name);
-int test_report (int, const H5std_string&);
-void issue_fail_msg(const char* where, int line, const char* file_name,
-                    const char* message="");
-void issue_fail_msg(const char* where, int line, const char* file_name,
-                    const char* func_name, const char* message);
+int  check_values(hsize_t i, hsize_t j, int apoint, int acheck);
+void check_values(const char *value, const char *msg, int line, const char *file_name);
+int  test_report(int, const H5std_string &);
+void issue_fail_msg(const char *where, int line, const char *file_name, const char *message = "");
+void issue_fail_msg(const char *where, int line, const char *file_name, const char *func_name,
+                    const char *message);
 
 class InvalidActionException : public Exception {
-   public:
-        InvalidActionException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
-        InvalidActionException();
-        virtual ~InvalidActionException() throw();
+  public:
+    InvalidActionException(const H5std_string &func_name, const H5std_string &message = DEFAULT_MSG);
+    InvalidActionException();
+    virtual ~InvalidActionException() throw();
 };
 
 class TestFailedException : public Exception {
-   public:
-        TestFailedException(const H5std_string func_name, const H5std_string message = DEFAULT_MSG);
-        TestFailedException();
-        virtual ~TestFailedException() throw();
+  public:
+    TestFailedException(const H5std_string &func_name, const H5std_string &message = DEFAULT_MSG);
+    TestFailedException();
+    virtual ~TestFailedException() throw();
 };
 
 // Overloaded/Template functions to verify values and display proper info
 
 // Verifies
-void verify_val(const char* x, const char* value, const char* where, int line, const char* file_name);
+void verify_val(const char *x, const char *value, const char *where, int line, const char *file_name);
 
 template <class Type1, class Type2>
-    void verify_val(Type1 x, Type2 value, const char* where, int line, const char* file_name)
+void
+verify_val(Type1 x, Type2 value, const char *where, int line, const char *file_name)
 {
-    if (GetTestVerbosity()>=VERBO_HI)
-    {
+    if (GetTestVerbosity() >= VERBO_HI) {
         cerr << endl;
-        cerr << "   Call to routine: " << where << " at line " << line
-             << " in " << file_name <<  " had value " << x << endl;
+        cerr << "   Call to routine: " << where << " at line " << line << " in " << file_name << " had value "
+             << x << endl;
     }
-    if (x != value)
-    {
+    if (x != value) {
         cerr << endl;
-        cerr << "*** UNEXPECTED VALUE from " << where << " should be "
-             << value << ", but is " << x << " at line " << line
+        cerr << "*** UNEXPECTED VALUE from " << where << " should be " << value << ", but is " << x
+             << " at line " << line << " in " << file_name << endl;
+        IncTestNumErrs();
+        throw TestFailedException(where, "");
+    }
+}
+
+template <class Type1, class Type2>
+void
+verify_val(Type1 x, Type2 value, const char *msg, const char *file_name, int line)
+{
+    if (x != value) {
+        cerr << endl;
+        cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line << ": " << msg
+             << " different: " << x << ", should be " << value << endl;
+        IncTestNumErrs();
+        throw TestFailedException(file_name, msg);
+    }
+}
+
+template <class Type1, class Type2>
+void
+verify_val_noteq(Type1 x, Type2 value, const char *where, int line, const char *file_name)
+{
+    if (GetTestVerbosity() >= VERBO_HI) {
+        cerr << endl;
+        cerr << "   Call to routine: " << where << " at line " << line << " in " << file_name << " had value "
+             << x << endl;
+    }
+    if (x == value) {
+        cerr << endl;
+        cerr << "*** UNEXPECTED VALUE from " << where << " should not be " << value << " at line " << line
              << " in " << file_name << endl;
         IncTestNumErrs();
         throw TestFailedException(where, "");
@@ -79,43 +115,10 @@ template <class Type1, class Type2>
 }
 
 template <class Type1, class Type2>
-    void verify_val(Type1 x, Type2 value, const char* msg, const char* file_name, int line)
+void
+CHECK(Type1 x, Type2 value, const char *msg, int line, const char *file_name)
 {
-    if (x != value)
-    {
-        cerr << endl;
-        cerr << "*** UNEXPECTED VALUE: " << file_name << ":line " << line
-             << ": " << msg << " different: " << x << ", should be " << value
-             << endl;
-        IncTestNumErrs();
-        throw TestFailedException(file_name, msg);
-    }
-}
-
-template <class Type1, class Type2>
-    void verify_val_noteq(Type1 x, Type2 value, const char* where, int line, const char* file_name)
-{
-    if (GetTestVerbosity()>=VERBO_HI)
-    {
-        cerr << endl;
-        cerr << "   Call to routine: " << where << " at line " << line
-             << " in " << file_name <<  " had value " << x << endl;
-    }
-    if (x == value)
-    {
-        cerr << endl;
-        cerr << "*** UNEXPECTED VALUE from " << where << " should not be "
-             << value << " at line " << line << " in " << file_name << endl;
-        IncTestNumErrs();
-        throw TestFailedException(where, "");
-    }
-}
-
-template <class Type1, class Type2>
-    void CHECK(Type1 x, Type2 value, const char* msg, int line, const char* file_name)
-{
-    if (x == value)
-    {
+    if (x == value) {
         cerr << endl;
         cerr << "*** Function " << msg << " FAILED at line " << line << endl;
         IncTestNumErrs();
@@ -124,14 +127,13 @@ template <class Type1, class Type2>
 }
 
 template <class Type1, class Type2>
-    void verify_val(Type1 x, Type2 value, float epsilon, const char* msg, int line, const char* file_name)
+void
+verify_val(Type1 x, Type2 value, float epsilon, const char *msg, int line, const char *file_name)
 {
-    if (x == value)
-    {
+    if (x == value) {
         cerr << endl;
-        cerr << "*** UNEXPECTED FLOAT VALUE: " << file_name << ":line " << line
-             << ": " << msg << " different: " << x << ", should be " << value
-             << " (epsilon=" << epsilon << ")" << endl;
+        cerr << "*** UNEXPECTED FLOAT VALUE: " << file_name << ":line " << line << ": " << msg
+             << " different: " << x << ", should be " << value << " (epsilon=" << epsilon << ")" << endl;
         IncTestNumErrs();
         throw TestFailedException(file_name, msg);
     }

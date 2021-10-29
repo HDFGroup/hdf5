@@ -5,7 +5,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -49,23 +49,21 @@ typedef struct _pthread_barrierattr {
 } pthread_barrierattr_t;
 
 typedef struct _pthread_barrier {
-    uint32_t magic;
-    unsigned int count;
-    uint64_t nentered;
-    pthread_cond_t cv;
+    uint32_t        magic;
+    unsigned int    count;
+    uint64_t        nentered;
+    pthread_cond_t  cv;
     pthread_mutex_t mtx;
 } pthread_barrier_t;
 
-int pthread_barrier_init(pthread_barrier_t *, const pthread_barrierattr_t *,
-    unsigned int);
+int pthread_barrier_init(pthread_barrier_t *, const pthread_barrierattr_t *, unsigned int);
 int pthread_barrier_wait(pthread_barrier_t *);
 int pthread_barrier_destroy(pthread_barrier_t *);
 
 static const uint32_t barrier_magic = 0xf00dd00f;
 
 int
-pthread_barrier_init(pthread_barrier_t *barrier,
-    const pthread_barrierattr_t *attr, unsigned int count)
+pthread_barrier_init(pthread_barrier_t *barrier, const pthread_barrierattr_t *attr, unsigned int count)
 {
     int rc;
 
@@ -75,7 +73,7 @@ pthread_barrier_init(pthread_barrier_t *barrier,
     if (attr != NULL)
         return EINVAL;
 
-    memset(barrier, 0, sizeof(*barrier));
+    HDmemset(barrier, 0, sizeof(*barrier));
 
     barrier->count = count;
 
@@ -98,8 +96,7 @@ barrier_lock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_lock(&barrier->mtx)) != 0) {
-        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__,
-            strerror(rc));
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_lock: %s", __func__, HDstrerror(rc));
     }
 }
 
@@ -109,8 +106,7 @@ barrier_unlock(pthread_barrier_t *barrier)
     int rc;
 
     if ((rc = pthread_mutex_unlock(&barrier->mtx)) != 0) {
-        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__,
-            strerror(rc));
+        my_errx(EXIT_FAILURE, "%s: pthread_mutex_unlock: %s", __func__, HDstrerror(rc));
     }
 }
 
@@ -125,7 +121,7 @@ pthread_barrier_destroy(pthread_barrier_t *barrier)
     else if (barrier->nentered % barrier->count != 0)
         rc = EBUSY;
     else {
-        rc = 0;
+        rc             = 0;
         barrier->magic = ~barrier->magic;
     }
     barrier_unlock(barrier);
@@ -142,7 +138,7 @@ pthread_barrier_destroy(pthread_barrier_t *barrier)
 int
 pthread_barrier_wait(pthread_barrier_t *barrier)
 {
-    int rc;
+    int      rc;
     uint64_t threshold;
 
     if (barrier == NULL)
@@ -170,7 +166,7 @@ out:
     return rc;
 }
 
-#endif  /* H5_HAVE_DARWIN */
+#endif /* H5_HAVE_DARWIN */
 
 static void my_err(int, const char *, ...) H5_ATTR_FORMAT(printf, 2, 3);
 
@@ -178,7 +174,7 @@ static void
 my_err(int code, const char *fmt, ...)
 {
     va_list ap;
-    int errno_copy = errno;
+    int     errno_copy = errno;
 
     (void)HDfprintf(stderr, "thread_id: ");
     HDva_start(ap, fmt);
@@ -188,38 +184,37 @@ my_err(int code, const char *fmt, ...)
     HDexit(code);
 }
 
-#define threads_failure(_call, _result) do {                \
-    my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__,   \
-        __LINE__, HDstrerror(_result));                       \
-} while (false)
+#define threads_failure(_call, _result)                                                                      \
+    do {                                                                                                     \
+        my_errx(EXIT_FAILURE, "%s.%d: " #_call ": %s", __func__, __LINE__, HDstrerror(_result));             \
+    } while (false)
 
 #define NTHREADS 5
 
-static volatile bool failed = false;
+static volatile bool     failed = false;
 static pthread_barrier_t barrier;
-static bool used[NTHREADS];
-static pthread_mutex_t used_lock;
+static bool              used[NTHREADS];
+static pthread_mutex_t   used_lock;
 
 static void
 atomic_printf(const char *fmt, ...)
 {
-    char buf[80];
+    char    buf[80];
     va_list ap;
     ssize_t nprinted, nwritten;
 
-    va_start(ap, fmt);
-    nprinted = vsnprintf(buf, sizeof(buf), fmt, ap);
-    va_end(ap);
+    HDva_start(ap, fmt);
+    nprinted = HDvsnprintf(buf, sizeof(buf), fmt, ap);
+    HDva_end(ap);
 
     if (nprinted == -1)
         my_err(EXIT_FAILURE, "%s.%d: vsnprintf", __func__, __LINE__);
     else if (nprinted >= (ssize_t)sizeof(buf))
         my_errx(EXIT_FAILURE, "%s.%d: vsnprintf overflowed", __func__, __LINE__);
 
-    nwritten = write(STDOUT_FILENO, buf, (size_t)nprinted);
+    nwritten = HDwrite(STDOUT_FILENO, buf, (size_t)nprinted);
     if (nwritten < nprinted) {
-        my_errx(EXIT_FAILURE, "%s.%d: write error or short write",
-            __func__, __LINE__);
+        my_errx(EXIT_FAILURE, "%s.%d: write error or short write", __func__, __LINE__);
     }
 }
 
@@ -261,8 +256,7 @@ thread_main(void H5_ATTR_UNUSED *arg)
 
     ntid = H5TS_thread_id();
     if (ntid != tid) {
-        atomic_printf("tid changed from %" PRIu64 " to %" PRIu64 " FAIL\n",
-            tid, ntid);
+        atomic_printf("tid changed from %" PRIu64 " to %" PRIu64 " FAIL\n", tid, ntid);
         failed = true;
     }
     return NULL;
@@ -275,7 +269,7 @@ pre_barrier_error:
 int
 main(void)
 {
-    int i, rc, times;
+    int       i, rc, times;
     pthread_t threads[NTHREADS];
 
     /* Run H5open() to initialize the library's thread-ID freelist,
@@ -296,7 +290,7 @@ main(void)
     for (times = 0; times < 2; times++) {
 
         for (i = 0; i < NTHREADS; i++)
-            used[i] = false;    // access synchronized by thread create/join
+            used[i] = false; // access synchronized by thread create/join
 
         for (i = 0; i < NTHREADS; i++) {
             rc = pthread_create(&threads[i], NULL, thread_main, NULL);
@@ -320,7 +314,7 @@ main(void)
     return failed ? EXIT_FAILURE : EXIT_SUCCESS;
 }
 
-#else /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/
+#else  /*H5_HAVE_THREADSAFE && !H5_HAVE_WIN_THREADS*/
 int
 main(void)
 {

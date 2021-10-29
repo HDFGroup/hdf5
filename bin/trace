@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -165,6 +165,14 @@ $Source = "";
                "ssize_t"                    => "Zs",
               );
 
+
+##############################################################################
+# Maximum length of H5TRACE macro line
+# If the ColumnLimit in .clang-format is changed, this value will need to be updated
+#
+my $max_trace_macro_line_len = 110;
+
+
 ##############################################################################
 # Print an error message.
 #
@@ -242,7 +250,7 @@ sub rewrite_func ($$$$$) {
 
   # Parse arguments
   if ($args eq "void") {
-    $trace = "H5TRACE0(\"$rettype\",\"\");\n";
+    $trace = "H5TRACE0(\"$rettype\", \"\");\n";
   } else {
     # Split arguments.  First convert `/*in,out*/' to get rid of the
     # comma, then split the arguments on commas.
@@ -286,18 +294,60 @@ sub rewrite_func ($$$$$) {
         }
       }
     }
+
+    # Compose the trace macro
     $trace = "H5TRACE" . scalar(@arg_str) . "(\"$rettype\", \"";
     $trace .= join("", @arg_str) . "\"";
-    my $len = 4 + length $trace;
-    for (@arg_name) {
-      if ($len + length >= 77) {
-        $trace .= ",\n             $_";
-        $len = 13 + length;
+    $argtrace .= join("", @arg_str) . "\"";
+
+    # Add 4 for indenting the line
+    my $len = 4 + length($trace);
+
+    for my $i (0 .. $#arg_name) {
+      # Handle wrapping
+
+      # Be VERY careful here! clang-format and this script MUST agree
+      # on which lines get wrapped or there will be churn as each tries
+      # to undo the other's output.
+      #
+      # TWO cases must be handled:
+      # 1) The argument is that last one and ');' will be appended
+      # 2) The argument is NOT the last one and ',' will be appended
+      #
+      # NB: clang-format does NOT consider terminal newlines when
+      #     counting columns for the ColumnLimit
+      #
+      # The extra '2' added after $len includes the ', ' that would be
+      # added BEFORE the argument.
+      #
+      my $adjust = ($i + 1 == scalar(@arg_str)) ? 2 : 1;
+      my $len_if_added = $len + 2 + length($arg_name[$i]) + $adjust;
+
+      # Wrap lines that will be longer than the limit
+      if ($len_if_added > $max_trace_macro_line_len) {
+        # Wrap line, with indention
+        $trace .= ",\n             ";
+        $len = 13;              # Set to 13, for indention
+
+        # Indent an extra space to account for extra digit in 'H5TRACE' macro
+        if (scalar(@arg_str) >= 10) {
+          $trace .= " ";
+          $len++;
+        }
       } else {
-        $trace .= ", $_";
-        $len += 1 + length;
+        $trace .= ", ";
+        $len += 2;     # Add 2, for ', '
       }
+
+      # Append argument
+      $trace .= "$arg_name[$i]";
+      $argtrace .= ", $arg_name[$i]";
+
+      # Add length of appended argument name
+      $len += length($arg_name[$i]);
     }
+
+    # Append final ');' for macro
     $trace .= ");\n";
   }
   goto error if grep {/!/} @arg_str;

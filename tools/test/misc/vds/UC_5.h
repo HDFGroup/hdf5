@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -28,20 +28,20 @@
 
 /* virtual dataset <---> source dataset mapping and sizes */
 
-#define UC_5_N_SOURCES      3
+#define UC_5_N_SOURCES 3
 
 /* Dataset dimensions */
-#define UC_5_SRC_PLANES     3
-#define UC_5_HEIGHT         4
-#define UC_5_WIDTH          4
+#define UC_5_SRC_PLANES 3
+#define UC_5_HEIGHT     4
+#define UC_5_WIDTH      4
 
 /* max number of planes for datasets */
-#define UC_5_MAX_PLANES     H5S_UNLIMITED
-#define UC_5_N_TEST_PLANES  9               /* number of planes in VDS */
+#define UC_5_MAX_PLANES    H5S_UNLIMITED
+#define UC_5_N_TEST_PLANES 9 /* number of planes in VDS */
 
 /* Dataset datatypes */
-#define UC_5_SOURCE_DATATYPE    H5T_STD_I32LE
-#define UC_5_VDS_DATATYPE       H5T_STD_I32LE
+#define UC_5_SOURCE_DATATYPE H5T_STD_I32LE
+#define UC_5_VDS_DATATYPE    H5T_STD_I32LE
 
 /* Starting size of datasets, both source and VDS */
 static hsize_t UC_5_SOURCE_DIMS[RANK] = {0, UC_5_HEIGHT, UC_5_WIDTH};
@@ -55,11 +55,7 @@ static hsize_t UC_5_VDS_MAX_DIMS[RANK]    = {UC_5_MAX_PLANES, UC_5_HEIGHT, UC_5_
 static hsize_t UC_5_PLANE[RANK] = {1, UC_5_HEIGHT, UC_5_WIDTH};
 
 /* File names for source datasets */
-static char UC_5_FILE_NAMES[UC_5_N_SOURCES][NAME_LEN] = {
-    {"5_a.h5"},
-    {"5_b.h5"},
-    {"5_c.h5"}
-};
+static char UC_5_FILE_NAMES[UC_5_N_SOURCES][NAME_LEN] = {{"5_a.h5"}, {"5_b.h5"}, {"5_c.h5"}};
 
 /* VDS file name */
 static char UC_5_VDS_FILE_NAME[NAME_LEN] = "5_vds.h5";
@@ -70,12 +66,7 @@ static char UC_5_SOURCE_DSET_PATH[NAME_LEN] = "/source_dset";
 static char UC_5_VDS_DSET_NAME[NAME_LEN]    = "vds_dset";
 
 /* Fill values */
-static int UC_5_FILL_VALUES[UC_5_N_SOURCES] = {
-    -1,
-    -2,
-    -3
-};
-static int UC_5_VDS_FILL_VALUE = -9;
+static int UC_5_FILL_VALUES[UC_5_N_SOURCES] = {-1, -2, -3};
+static int UC_5_VDS_FILL_VALUE              = -9;
 
 #endif /* UC_5_H */
-

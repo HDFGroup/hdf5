@@ -6,7 +6,7 @@
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -25,10 +25,9 @@
 
 #include "h5test.h"
 
-#define TESTFILE   "tsupern.h5"
-#define ISTORE_IK  64
+#define TESTFILE  "tsupern.h5"
+#define ISTORE_IK 64
 
-
 /*-------------------------------------------------------------------------
  * Function:    main
  *
@@ -44,15 +43,15 @@
 int
 main(void)
 {
-    hid_t       file;           /* File IDs for old & new files */
-    hid_t       fcpl;           /* File creation property list */
-    herr_t      H5_ATTR_NDEBUG_UNUSED ret;
+    hid_t                        file; /* File IDs for old & new files */
+    hid_t                        fcpl; /* File creation property list */
+    herr_t H5_ATTR_NDEBUG_UNUSED ret;
 
     /* Create a file creation property list */
     fcpl = H5Pcreate(H5P_FILE_CREATE);
     HDassert(fcpl >= 0);
 
-    ret = H5Pset_istore_k(fcpl,ISTORE_IK);
+    ret = H5Pset_istore_k(fcpl, ISTORE_IK);
     HDassert(ret >= 0);
 
     /* Creating a file with the non-default file creation property list should
@@ -60,7 +59,7 @@ main(void)
      */
 
     /* Create file with custom file creation property list */
-    file = H5Fcreate(TESTFILE, H5F_ACC_TRUNC , fcpl, H5P_DEFAULT);
+    file = H5Fcreate(TESTFILE, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
     HDassert(file >= 0);
 
     /* Close FCPL */
@@ -73,4 +72,3 @@ main(void)
 
     return EXIT_SUCCESS;
 }
-

@@ -7,7 +7,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -124,6 +124,9 @@ $SRC_H5REPACK_TESTFILES/h5repack_paged_nopersist.h5
 $SRC_H5REPACK_TESTFILES/h5repack_paged_persist.h5
 ########h5diff/testfile########
 $SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
+########test#HDFFV-10590########
+$SRC_H5REPACK_TESTFILES/h5repack_CVE-2018-17432.h5
+$SRC_H5REPACK_TESTFILES/h5repack_CVE-2018-14460.h5
 ########tools/testfiles#for#external#links########
 $SRC_TOOLS_TESTFILES/tsoftlinks.h5
 $SRC_TOOLS_TESTFILES/textlinkfar.h5
@@ -672,6 +675,26 @@ VERIFY_INVALIDBOUNDS()
 } # end of VERIFY_INVALIDBOUNDS
 
 # -----------------------------------------------------------------------------
+# Expect h5diff to fail
+# Use only by VERIFY_EXTERNAL_CONSOLIDATION
+# -----------------------------------------------------------------------------
+DIFFFAIL()
+{
+    VERIFY h5diff unequal $@
+    (
+        cd $TESTDIR
+        $RUNSERIAL $H5DIFF_BIN -q  "$@"
+    )
+    RET=$?
+    if [ $RET -eq 0 ] ; then
+         echo "*FAILED*"
+         nerrors="`expr $nerrors + 1`"
+    else
+         echo " PASSED"
+    fi
+}
+
+# -----------------------------------------------------------------------------
 # Catchall test for repacking with external files
 # Loops over all (internally-listed) cases and applies the given arguments
 # to h5repack.
@@ -837,6 +860,45 @@ TOOLTESTV()
 
    rm -f $actual $actual_err
    rm -f $outfile
+}
+
+# Same as TOOLTEST, but expects h5repack fails
+#
+TOOLTEST_FAIL()
+{
+    infile=$1
+    outfile=$2
+    expect="$TESTDIR/$2-$1.ddl"
+    actual="$TESTDIR/$2-$1.out"
+    actual_err="$TESTDIR/$2-$1.err"
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >&$actual
+    RET=$?
+
+    # Normally h5repack of files tested with this function are expected
+    # to return not 0, but if the command results in "Segmentation fault"
+    # or "core dumped" it is a failure regardless of the return value.
+    failure=`grep -e 'Segmentation fault' -e 'core dumped' $actual`
+    if [ "$failure" != "" ]; then
+        nerrors="`expr $nerrors + 1`"
+        echo " FAILED"
+        echo "    $failure"
+    else
+        if [ $RET == 0 ] ; then
+            nerrors="`expr $nerrors + 1`"
+            echo " FAILED"
+        else
+            echo " PASSED"
+        fi
+    fi
+    rm -f $outfile
 }
 
 # This is same as TOOLTESTV() with comparing display output
@@ -1654,6 +1716,14 @@ TOOLTEST HDFFV-5932 h5repack_attr_refs.h5
 # (HDFFV-7840, )
 # Note: this test is experimental for sharing test file among tools
 TOOLTEST HDFFV-7840 h5diff_attr1.h5
+
+# test HDFFV-10590
+arg="h5repack_CVE-2018-17432.h5 h5repack_CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6"
+TOOLTEST_FAIL $arg
+
+# test HDFFV-11223
+arg="h5repack_CVE-2018-14460.h5 h5repack_CVE-2018-14460_out.h5"
+TOOLTEST_FAIL $arg
 
 # tests for metadata block size option
 TOOLTEST_META meta_short h5repack_layout.h5 -M 8192

@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,15 +36,14 @@ extern "C" {
  * Signature: (J[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1version
-    (JNIEnv *env, jclass clss, jlong plist, jintArray version_info)
+Java_hdf_hdf5lib_H5_H5Pget_1version(JNIEnv *env, jclass clss, jlong plist, jintArray version_info)
 {
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-    jboolean  isCopy;
-    jsize     arrLen;
-    jint     *theArray = NULL;
+    jboolean isCopy;
+    jsize    arrLen;
+    jint *   theArray = NULL;
 #endif
-    herr_t    status = FAIL;
+    herr_t status = FAIL;
 
     UNUSED(clss);
 
@@ -66,8 +64,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1version
 
     PIN_INT_ARRAY(ENVONLY, version_info, theArray, &isCopy, "H5Pget_version: version_info not pinned");
 
-    if ((status = H5Pget_version((hid_t)plist, (unsigned *)&(theArray[0]),
-            (unsigned *)&(theArray[1]), (unsigned *)&(theArray[2]), (unsigned *)&(theArray[3]))) < 0)
+    if ((status = H5Pget_version((hid_t)plist, (unsigned *)&(theArray[0]), (unsigned *)&(theArray[1]),
+                                 (unsigned *)&(theArray[2]), (unsigned *)&(theArray[3]))) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 #endif
 
@@ -86,10 +84,9 @@ done:
  * Signature: (JJ)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1userblock
-    (JNIEnv *env, jclass clss, jlong plist, jlong size)
+Java_hdf_hdf5lib_H5_H5Pset_1userblock(JNIEnv *env, jclass clss, jlong plist, jlong size)
 {
-    long   sz = (long) size;
+    long   sz     = (long)size;
     herr_t retVal = FAIL;
 
     UNUSED(clss);
@@ -107,13 +104,12 @@ done:
  * Signature: (J[J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1userblock
-    (JNIEnv *env, jclass clss, jlong plist, jlongArray size)
+Java_hdf_hdf5lib_H5_H5Pget_1userblock(JNIEnv *env, jclass clss, jlong plist, jlongArray size)
 {
-    jboolean  isCopy;
-    hsize_t   s;
-    jlong    *theArray = NULL;
-    herr_t    status = FAIL;
+    jboolean isCopy;
+    hsize_t  s;
+    jlong *  theArray = NULL;
+    herr_t   status   = FAIL;
 
     UNUSED(clss);
 
@@ -140,8 +136,7 @@ done:
  * Signature: (JII)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1sizes
-    (JNIEnv *env, jclass clss, jlong plist, jint sizeof_addr, jint sizeof_size)
+Java_hdf_hdf5lib_H5_H5Pset_1sizes(JNIEnv *env, jclass clss, jlong plist, jint sizeof_addr, jint sizeof_size)
 {
     herr_t retVal = FAIL;
 
@@ -160,15 +155,14 @@ done:
  * Signature: (J[J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1sizes
-    (JNIEnv *env, jclass clss, jlong plist, jlongArray size)
+Java_hdf_hdf5lib_H5_H5Pget_1sizes(JNIEnv *env, jclass clss, jlong plist, jlongArray size)
 {
-    jboolean  isCopy;
-    jlong    *theArray = NULL;
-    jsize     arrLen;
-    size_t    ss;
-    size_t    sa;
-    herr_t    status = FAIL;
+    jboolean isCopy;
+    jlong *  theArray = NULL;
+    jsize    arrLen;
+    size_t   ss;
+    size_t   sa;
+    herr_t   status = FAIL;
 
     UNUSED(clss);
 
@@ -203,8 +197,7 @@ done:
  * Signature: (JII)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1sym_1k
-    (JNIEnv *env, jclass clss, jlong plist, jint ik, jint lk)
+Java_hdf_hdf5lib_H5_H5Pset_1sym_1k(JNIEnv *env, jclass clss, jlong plist, jint ik, jint lk)
 {
     herr_t retVal = FAIL;
 
@@ -223,13 +216,12 @@ done:
  * Signature: (J[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1sym_1k
-    (JNIEnv *env, jclass clss, jlong plist, jintArray size)
+Java_hdf_hdf5lib_H5_H5Pget_1sym_1k(JNIEnv *env, jclass clss, jlong plist, jintArray size)
 {
-    jboolean  isCopy;
-    jsize     arrLen;
-    jint     *theArray = NULL;
-    herr_t    status = FAIL;
+    jboolean isCopy;
+    jsize    arrLen;
+    jint *   theArray = NULL;
+    herr_t   status   = FAIL;
 
     UNUSED(clss);
 
@@ -261,8 +253,7 @@ done:
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1istore_1k
-    (JNIEnv *env, jclass clss, jlong plist, jint ik)
+Java_hdf_hdf5lib_H5_H5Pset_1istore_1k(JNIEnv *env, jclass clss, jlong plist, jint ik)
 {
     herr_t retVal = FAIL;
 
@@ -281,12 +272,11 @@ done:
  * Signature: (J[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1istore_1k
-    (JNIEnv *env, jclass clss, jlong plist, jintArray ik)
+Java_hdf_hdf5lib_H5_H5Pget_1istore_1k(JNIEnv *env, jclass clss, jlong plist, jintArray ik)
 {
-    jboolean  isCopy;
-    jint     *theArray = NULL;
-    herr_t    status = FAIL;
+    jboolean isCopy;
+    jint *   theArray = NULL;
+    herr_t   status   = FAIL;
 
     UNUSED(clss);
 
@@ -311,8 +301,7 @@ done:
  * Signature: (JJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1page_1size
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jlong fsp_size)
+Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1page_1size(JNIEnv *env, jclass clss, jlong fcpl_id, jlong fsp_size)
 {
     UNUSED(clss);
 
@@ -329,8 +318,7 @@ done:
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1page_1size
-    (JNIEnv *env, jclass clss, jlong fcpl_id)
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1page_1size(JNIEnv *env, jclass clss, jlong fcpl_id)
 {
     hsize_t fsp_size = 0;
 
@@ -349,12 +337,13 @@ done:
  * Signature: (JIZJ)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1strategy
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jint strategy, jboolean persist, jlong threshold)
+Java_hdf_hdf5lib_H5_H5Pset_1file_1space_1strategy(JNIEnv *env, jclass clss, jlong fcpl_id, jint strategy,
+                                                  jboolean persist, jlong threshold)
 {
     UNUSED(clss);
 
-    if (H5Pset_file_space_strategy((hid_t)fcpl_id, (H5F_fspace_strategy_t)strategy, (hbool_t)persist, (hsize_t)threshold) < 0)
+    if (H5Pset_file_space_strategy((hid_t)fcpl_id, (H5F_fspace_strategy_t)strategy, (hbool_t)persist,
+                                   (hsize_t)threshold) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -367,23 +356,25 @@ done:
  * Signature: (J[Z[J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jbooleanArray persist, jlongArray threshold)
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy(JNIEnv *env, jclass clss, jlong fcpl_id,
+                                                  jbooleanArray persist, jlongArray threshold)
 {
-    H5F_fspace_strategy_t  thestrategy = H5F_FSPACE_STRATEGY_FSM_AGGR; /* Library default */
-    jboolean               isCopy;
-    jboolean              *persistArray = NULL;
-    jlong                 *thresholdArray = NULL;
-    herr_t                 status = FAIL;
+    H5F_fspace_strategy_t thestrategy = H5F_FSPACE_STRATEGY_FSM_AGGR; /* Library default */
+    jboolean              isCopy;
+    jboolean *            persistArray   = NULL;
+    jlong *               thresholdArray = NULL;
+    herr_t                status         = FAIL;
 
     UNUSED(clss);
 
     if (persist)
         PIN_BOOL_ARRAY(ENVONLY, persist, persistArray, &isCopy, "H5Pget_file_space: persist not pinned");
     if (threshold)
-        PIN_LONG_ARRAY(ENVONLY, threshold, thresholdArray, &isCopy, "H5Pget_file_space: threshold not pinned");
+        PIN_LONG_ARRAY(ENVONLY, threshold, thresholdArray, &isCopy,
+                       "H5Pget_file_space: threshold not pinned");
 
-    if ((status = H5Pget_file_space_strategy((hid_t)fcpl_id, &thestrategy, (hbool_t *)persistArray, (hsize_t *)thresholdArray)) < 0)
+    if ((status = H5Pget_file_space_strategy((hid_t)fcpl_id, &thestrategy, (hbool_t *)persistArray,
+                                             (hsize_t *)thresholdArray)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -401,11 +392,10 @@ done:
  * Signature: (J)Z
  */
 JNIEXPORT jboolean JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1persist
-    (JNIEnv *env, jclass clss, jlong fcpl_id)
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1persist(JNIEnv *env, jclass clss, jlong fcpl_id)
 {
     hbool_t persist = FALSE;
-    herr_t  status = FAIL;
+    herr_t  status  = FAIL;
 
     UNUSED(clss);
 
@@ -422,11 +412,10 @@ done:
  * Signature: (J)J
  */
 JNIEXPORT jlong JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1threshold
-    (JNIEnv *env, jclass clss, jlong fcpl_id)
+Java_hdf_hdf5lib_H5_H5Pget_1file_1space_1strategy_1threshold(JNIEnv *env, jclass clss, jlong fcpl_id)
 {
     hsize_t threshold = 0;
-    herr_t  status = FAIL;
+    herr_t  status    = FAIL;
 
     UNUSED(clss);
 
@@ -443,15 +432,16 @@ done:
  * Signature: (JI)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1nindexes
-    (JNIEnv *env, jclass clss, jlong plist_id, jint nindexes)
+Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1nindexes(JNIEnv *env, jclass clss, jlong plist_id, jint nindexes)
 {
     herr_t retVal = FAIL;
 
     UNUSED(clss);
 
     if (nindexes > H5O_SHMESG_MAX_NINDEXES)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_shared_mesg_nindexes: number of indexes is greater than H5O_SHMESG_MAX_NINDEXES");
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY,
+            "H5Pset_shared_mesg_nindexes: number of indexes is greater than H5O_SHMESG_MAX_NINDEXES");
 
     if ((retVal = H5Pset_shared_mesg_nindexes((hid_t)plist_id, (unsigned)nindexes)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
@@ -466,8 +456,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1nindexes
-    (JNIEnv *env, jclass clss, jlong fcpl_id)
+Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1nindexes(JNIEnv *env, jclass clss, jlong fcpl_id)
 {
     unsigned nindexes;
 
@@ -486,9 +475,8 @@ done:
  * Signature: (JIII)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1index
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jint index_num,
-        jint mesg_type_flags, jint min_mesg_size)
+Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1index(JNIEnv *env, jclass clss, jlong fcpl_id, jint index_num,
+                                                jint mesg_type_flags, jint min_mesg_size)
 {
     unsigned nindexes; /* Number of SOHM indexes */
     herr_t   retVal = FAIL;
@@ -496,7 +484,7 @@ Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1index
     UNUSED(clss);
 
     /* Check arguments */
-    if ((unsigned) mesg_type_flags > H5O_SHMESG_ALL_FLAG)
+    if ((unsigned)mesg_type_flags > H5O_SHMESG_ALL_FLAG)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_shared_mesg_index: unrecognized flags in mesg_type_flags");
 
     /* Read the current number of indexes */
@@ -504,10 +492,11 @@ Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1index
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Range check */
-    if ((unsigned) index_num >= nindexes)
+    if ((unsigned)index_num >= nindexes)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_shared_mesg_index: index_num is too large; no such index");
 
-    if ((retVal = H5Pset_shared_mesg_index((hid_t)fcpl_id, (unsigned)index_num, (unsigned) mesg_type_flags, (unsigned) min_mesg_size)) < 0)
+    if ((retVal = H5Pset_shared_mesg_index((hid_t)fcpl_id, (unsigned)index_num, (unsigned)mesg_type_flags,
+                                           (unsigned)min_mesg_size)) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -520,13 +509,13 @@ done:
  * Signature: (JI[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1index
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jint index_num, jintArray mesg_info)
+Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1index(JNIEnv *env, jclass clss, jlong fcpl_id, jint index_num,
+                                                jintArray mesg_info)
 {
-    jboolean  isCopy;
-    unsigned  nindexes; /* Number of SOHM indexes */
-    jint     *theArray = NULL;
-    herr_t    retVal = FAIL;
+    jboolean isCopy;
+    unsigned nindexes; /* Number of SOHM indexes */
+    jint *   theArray = NULL;
+    herr_t   retVal   = FAIL;
 
     UNUSED(clss);
 
@@ -538,12 +527,13 @@ Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1index
         H5_LIBRARY_ERROR(ENVONLY);
 
     /* Range check */
-    if ((unsigned) index_num >= nindexes)
+    if ((unsigned)index_num >= nindexes)
         H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pget_shared_mesg_index: index_num is too large; no such index");
 
     PIN_INT_ARRAY(ENVONLY, mesg_info, theArray, &isCopy, "H5Pget_shared_mesg_index: input not pinned");
 
-    if ((retVal = H5Pget_shared_mesg_index((hid_t)fcpl_id, (unsigned)index_num, (unsigned *)&(theArray[0]), (unsigned *)&(theArray[1]))) < 0)
+    if ((retVal = H5Pget_shared_mesg_index((hid_t)fcpl_id, (unsigned)index_num, (unsigned *)&(theArray[0]),
+                                           (unsigned *)&(theArray[1]))) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -559,8 +549,8 @@ done:
  * Signature: (JII)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1phase_1change
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jint max_list, jint min_btree)
+Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1phase_1change(JNIEnv *env, jclass clss, jlong fcpl_id,
+                                                        jint max_list, jint min_btree)
 {
     herr_t retVal = FAIL;
 
@@ -573,13 +563,20 @@ Java_hdf_hdf5lib_H5_H5Pset_1shared_1mesg_1phase_1change
      */
 
     if (max_list + 1 < min_btree)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_shared_mesg_phase_change: minimum B-tree value is greater than maximum list value");
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY,
+            "H5Pset_shared_mesg_phase_change: minimum B-tree value is greater than maximum list value");
     if (max_list > H5O_SHMESG_MAX_LIST_SIZE)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_shared_mesg_phase_change: max list value is larger than H5O_SHMESG_MAX_LIST_SIZE");
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY,
+            "H5Pset_shared_mesg_phase_change: max list value is larger than H5O_SHMESG_MAX_LIST_SIZE");
     if (min_btree > H5O_SHMESG_MAX_LIST_SIZE)
-        H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Pset_shared_mesg_phase_change: min btree value is larger than H5O_SHMESG_MAX_LIST_SIZE");
+        H5_BAD_ARGUMENT_ERROR(
+            ENVONLY,
+            "H5Pset_shared_mesg_phase_change: min btree value is larger than H5O_SHMESG_MAX_LIST_SIZE");
 
-    if ((retVal = H5Pset_shared_mesg_phase_change((hid_t)fcpl_id, (unsigned)max_list, (unsigned)min_btree)) < 0)
+    if ((retVal = H5Pset_shared_mesg_phase_change((hid_t)fcpl_id, (unsigned)max_list, (unsigned)min_btree)) <
+        0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:
@@ -592,12 +589,12 @@ done:
  * Signature: (J[I)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1phase_1change
-    (JNIEnv *env, jclass clss, jlong fcpl_id, jintArray size)
+Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1phase_1change(JNIEnv *env, jclass clss, jlong fcpl_id,
+                                                        jintArray size)
 {
-    jboolean  isCopy;
-    jint     *theArray = NULL;
-    herr_t    retVal = FAIL;
+    jboolean isCopy;
+    jint *   theArray = NULL;
+    herr_t   retVal   = FAIL;
 
     UNUSED(clss);
 
@@ -606,7 +603,8 @@ Java_hdf_hdf5lib_H5_H5Pget_1shared_1mesg_1phase_1change
 
     PIN_INT_ARRAY(ENVONLY, size, theArray, &isCopy, "H5Pget_shared_mesg_phase_change: input not pinned");
 
-    if ((retVal = H5Pget_shared_mesg_phase_change((hid_t)fcpl_id, (unsigned *)&(theArray[0]), (unsigned *)&(theArray[1]))) < 0)
+    if ((retVal = H5Pget_shared_mesg_phase_change((hid_t)fcpl_id, (unsigned *)&(theArray[0]),
+                                                  (unsigned *)&(theArray[1]))) < 0)
         H5_LIBRARY_ERROR(ENVONLY);
 
 done:

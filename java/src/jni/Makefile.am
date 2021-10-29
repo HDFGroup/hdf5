@@ -1,12 +1,11 @@
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 ##
@@ -29,7 +28,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/java/src/jni $(JNIFLAGS)
 lib_LTLIBRARIES=libhdf5_java.la
 
 # Add libtool numbers to the HDF5 Java (JNI) library (from config/lt_vers.am)
-libhdf5_java_la_LDFLAGS = -avoid-version -shared -export-dynamic -version-info $(LT_JAVA_VERS_INTERFACE):$(LT_JAVA_VERS_REVISION):$(LT_JAVA_VERS_AGE) $(AM_LDFLAGS)
+libhdf5_java_la_LDFLAGS = -shared -export-dynamic -version-info $(LT_JAVA_VERS_INTERFACE):$(LT_JAVA_VERS_REVISION):$(LT_JAVA_VERS_AGE) $(AM_LDFLAGS)
 
 # Source files for the library
 libhdf5_java_la_SOURCES=exceptionImp.c h5Constants.c nativeData.c h5util.c h5Imp.c \

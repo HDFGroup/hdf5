@@ -18,7 +18,7 @@
 !   This file is part of HDF5.  The full HDF5 copyright notice, including     *
 !   terms governing use, modification, and redistribution, is contained in    *
 !   the COPYING file, which can be found at the root of the source code       *
-!   distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+!   distribution tree, or in https://www.hdfgroup.org/licenses.               *
 !   If you do not have access to either file, you may request a copy from     *
 !   help@hdfgroup.org.                                                        *
 ! * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
@@ -754,7 +754,7 @@ CONTAINS
   SUBROUTINE h5fget_name_f(obj_id, buf, size, hdferr)
     IMPLICIT NONE
     INTEGER(HID_T), INTENT(IN) :: obj_id   ! Object identifier
-    CHARACTER(LEN=*), INTENT(INOUT) :: buf
+    CHARACTER(LEN=*), INTENT(OUT) :: buf
                                            ! Buffer to hold file name
     INTEGER(SIZE_T), INTENT(OUT) :: size   ! Size of the file name
     INTEGER, INTENT(OUT) :: hdferr         ! Error code: 0 on success,
@@ -774,7 +774,7 @@ CONTAINS
          CHARACTER(KIND=C_CHAR), DIMENSION(*), INTENT(OUT) :: buf
        END FUNCTION h5fget_name_c
     END INTERFACE
-    buflen = LEN_TRIM(buf)
+    buflen = LEN(buf)
     hdferr = h5fget_name_c(obj_id, size, buf, buflen)
   END SUBROUTINE h5fget_name_f
 !****s* H5F/h5fget_filesize_f

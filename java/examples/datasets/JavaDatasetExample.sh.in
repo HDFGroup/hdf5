@@ -1,13 +1,12 @@
 #! /bin/sh
 #
 # Copyright by The HDF Group.
-# Copyright by the Board of Trustees of the University of Illinois.
 # All rights reserved.
 #
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -15,6 +14,7 @@
 top_builddir=@top_builddir@
 top_srcdir=@top_srcdir@
 srcdir=@srcdir@
+IS_DARWIN="@H5_IS_DARWIN@"
 
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
@@ -36,8 +36,8 @@ nerrors=0
 
 # where the libs exist
 HDFLIB_HOME="$top_srcdir/java/lib"
-BLDLIBDIR="$top_builddir/hdf5/lib"
 BLDDIR="."
+BLDLIBDIR="$BLDDIR/testlibs"
 HDFTEST_HOME="$top_srcdir/java/examples/datasets"
 JARFILE=jar@PACKAGE_TARNAME@-@PACKAGE_VERSION@.jar
 TESTJARFILE=jar@PACKAGE_TARNAME@datasets.jar
@@ -113,6 +113,13 @@ COPY_LIBFILES_TO_BLDLIBDIR()
             fi
         fi
     done
+    if [ "$IS_DARWIN" = "yes" ]; then
+       (cd $BLDLIBDIR; \
+         install_name_tool -add_rpath @loader_path libhdf5_java.dylib; \
+         exist_path=` otool -l libhdf5_java.dylib | grep libhdf5 | grep -v java | awk '{print $2}'`; \
+         echo $exist_path; \
+         install_name_tool -change $exist_path @rpath/libhdf5.dylib libhdf5_java.dylib)
+    fi
     # copy jar files. Used -f to make sure get a new copy
     for tstfile in $COPY_JARTESTFILES
     do

@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -282,6 +282,7 @@
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_80.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_800.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_801.txt
+      ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_830.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_90.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8625.txt
       ${HDF5_TOOLS_TEST_H5DIFF_SOURCE_DIR}/testfiles/h5diff_8639.txt
@@ -363,37 +364,41 @@
 
   macro (ADD_H5_TEST resultfile resultcode)
     if (HDF5_TEST_SERIAL)
-      # If using memchecker add tests without using scripts
-      if (HDF5_ENABLE_USING_MEMCHECKER)
-        add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> ${ARGN})
-        set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
-       if (${resultcode})
-          set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
-        endif ()
-        if (last_test)
-          set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-        endif ()
-      else ()
-        add_test (
-            NAME H5DIFF-${resultfile}
-            COMMAND "${CMAKE_COMMAND}"
-                -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
-                -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
-                -D "TEST_ARGS:STRING=${ARGN}"
-                -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
-                -D "TEST_OUTPUT=${resultfile}.out"
-                -D "TEST_EXPECT=${resultcode}"
-                -D "TEST_REFERENCE=${resultfile}.txt"
-                -D "TEST_APPEND=EXIT CODE:"
-                -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
-        )
-        if (last_test)
-          set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
-        endif ()
-      endif ()
+      ADD_SH5_TEST (${resultfile} ${resultcode} ${ARGN})
     endif ()
     if (H5_HAVE_PARALLEL AND HDF5_TEST_PARALLEL)
       ADD_PH5_TEST (${resultfile} ${resultcode} ${ARGN})
+    endif ()
+  endmacro ()
+
+  macro (ADD_SH5_TEST resultfile resultcode)
+    # If using memchecker add tests without using scripts
+    if (HDF5_ENABLE_USING_MEMCHECKER)
+      add_test (NAME H5DIFF-${resultfile} COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:h5diff${tgt_file_ext}> ${ARGN})
+      set_tests_properties (H5DIFF-${resultfile} PROPERTIES WORKING_DIRECTORY "${PROJECT_BINARY_DIR}/testfiles")
+      if (${resultcode})
+        set_tests_properties (H5DIFF-${resultfile} PROPERTIES WILL_FAIL "true")
+      endif ()
+      if (last_test)
+        set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+      endif ()
+    else ()
+      add_test (
+          NAME H5DIFF-${resultfile}
+          COMMAND "${CMAKE_COMMAND}"
+              -D "TEST_EMULATOR=${CMAKE_CROSSCOMPILING_EMULATOR}"
+              -D "TEST_PROGRAM=$<TARGET_FILE:h5diff${tgt_file_ext}>"
+              -D "TEST_ARGS:STRING=${ARGN}"
+              -D "TEST_FOLDER=${PROJECT_BINARY_DIR}/testfiles"
+              -D "TEST_OUTPUT=${resultfile}.out"
+              -D "TEST_EXPECT=${resultcode}"
+              -D "TEST_REFERENCE=${resultfile}.txt"
+              -D "TEST_APPEND=EXIT CODE:"
+              -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
+      )
+      if (last_test)
+        set_tests_properties (H5DIFF-${resultfile} PROPERTIES DEPENDS ${last_test})
+      endif ()
     endif ()
   endmacro ()
 
@@ -433,7 +438,7 @@
 
   macro (ADD_H5_UD_TEST testname resultcode resultfile)
     if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-      if (${resultcode} EQUAL 2)
+      if ("${resultcode}" STREQUAL "2")
         add_test (
             NAME H5DIFF_UD-${testname}
             COMMAND "${CMAKE_COMMAND}"
@@ -907,6 +912,8 @@
           h5diff_800.out.err
           h5diff_801.out
           h5diff_801.out.err
+          h5diff_830.out
+          h5diff_830.out.err
           h5diff_8625.out
           h5diff_8625.out.err
           h5diff_8639.out
@@ -1528,6 +1535,12 @@ ADD_H5_TEST (h5diff_646 1 -v --use-system-epsilon -p 0.05 ${FILE1} ${FILE2} /g1/
 # ##############################################################################
 ADD_H5_TEST (h5diff_800 1 -v ${FILE7} ${FILE8} /g1/array /g1/array)
 ADD_H5_TEST (h5diff_801 1 -v ${FILE7} ${FILE8A} /g1/array /g1/array)
+
+# ##############################################################################
+# # dataset subsets
+# ##############################################################################
+#serial only
+ADD_SH5_TEST (h5diff_830 1 --enable-error-stack -v ${FILE7} ${FILE8} /g1/array3D[0,0,0;2,2,1;2,2,2;] /g1/array3D[0,0,0;2,2,1;2,2,2;])
 
 # ##############################################################################
 # # VDS tests

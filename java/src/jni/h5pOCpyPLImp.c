@@ -1,12 +1,11 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
  * terms governing use, modification, and redistribution, is contained in    *
  * the COPYING file, which can be found at the root of the source code       *
- * distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.  *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
  * If you do not have access to either file, you may request a copy from     *
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
@@ -37,8 +36,7 @@ extern "C" {
  * Signature: (JI)V
  */
 JNIEXPORT void JNICALL
-Java_hdf_hdf5lib_H5_H5Pset_1copy_1object
-    (JNIEnv *env, jclass clss, jlong ocp_plist_id, jint copy_options)
+Java_hdf_hdf5lib_H5_H5Pset_1copy_1object(JNIEnv *env, jclass clss, jlong ocp_plist_id, jint copy_options)
 {
     herr_t retVal = FAIL;
 
@@ -57,8 +55,7 @@ done:
  * Signature: (J)I
  */
 JNIEXPORT jint JNICALL
-Java_hdf_hdf5lib_H5_H5Pget_1copy_1object
-    (JNIEnv *env, jclass clss, jlong ocp_plist_id)
+Java_hdf_hdf5lib_H5_H5Pget_1copy_1object(JNIEnv *env, jclass clss, jlong ocp_plist_id)
 {
     unsigned copy_options = 0;
 
