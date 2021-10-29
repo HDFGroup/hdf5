@@ -355,7 +355,7 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
 #endif
 done:
 
-    /* Kent: close the VFD SWMR log file if it is turned on.
+    /* Kent: Stop the timer and close the VFD SWMR log file if it is turned on.
      * Please REVIEW to ensure this is the right place to
      * close the log file.
      */
@@ -799,6 +799,8 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     herr_t        ret_value                 = SUCCEED; /* Return value */
     hbool_t       incr_tick                 = FALSE;
 
+    /* Kent: define the local variables to calculate the EOT time 
+             and write them to the log file. */
     H5_timevals_t current_time;
     double        start_elapsed_time, end_elapsed_time;
     unsigned int  temp_time;
@@ -813,8 +815,8 @@ H5F_vfd_swmr_writer_end_of_tick(H5F_t *f, hbool_t wait_for_reader)
     /* Kent */
     /* Obtain the starting time for the logging info: the processing time of this function. */
     if (shared->vfd_swmr_log_on == true) {
-        if (H5_timer_get_times(f->shared->vfd_swmr_log_start_time, &current_time) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get H5_timer_get_times")
+        if (H5_timer_get_times(shared->vfd_swmr_log_start_time, &current_time) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time from H5_timer_get_times")
         start_elapsed_time = current_time.elapsed;
     }
     /* Kent */
@@ -943,8 +945,8 @@ update_eot:
 done:
     /* Kent: Calcuate the processing time and write the time info to the log file */
     if (shared->vfd_swmr_log_on == true) {
-        if (H5_timer_get_times(f->shared->vfd_swmr_log_start_time, &current_time) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get H5_timer_get_times")
+        if (H5_timer_get_times(shared->vfd_swmr_log_start_time, &current_time) < 0)
+            HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get time from H5_timer_get_times")
         end_elapsed_time = current_time.elapsed;
         log_msg          = HDmalloc(48);
         temp_time        = (unsigned int)((end_elapsed_time - start_elapsed_time) * 1000);
@@ -1983,7 +1985,7 @@ H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log_info)
 
     /* Obtain the current time.
        If   failed, write an error message to the log file.
-       else calcluate the elapsed time in seconds since the log file
+       else obtain the elapsed time in seconds since the log file
             was created and write the time to the log file. */
     if (H5_timer_get_times(f->shared->vfd_swmr_log_start_time, &current_time) < 0) {
         gettime_error = HDmalloc(14);

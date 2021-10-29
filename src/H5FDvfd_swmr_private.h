@@ -88,9 +88,4 @@ H5_DLL herr_t H5F_dump_eot_queue(void);
 /* Log Macros and Functions            */
 /***************************************/
 
-/* VFD SWMR Helper macro to calcuate the elapsed time */
-/* The total time is in seconds */
-#define TOTAL_TIME_PASSED(X, Y)                                                                              \
-    ((double)((Y.tv_sec - X.tv_sec) * 1000000000 + (Y.tv_nsec - X.tv_nsec))) / 1000000000.0
-
 #endif /* H5FDvfd_swmr_private_H */

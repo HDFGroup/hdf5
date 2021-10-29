@@ -2026,7 +2026,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             if (H5_timer_init(&(shared->vfd_swmr_log_start_time)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't initialize HDF5 timer.")
             if (H5_timer_start(&(shared->vfd_swmr_log_start_time)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't start HDF5 timer.")
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't obtain the time from the HDF5 timer.")
         }
     }
     /* End of Kent */
