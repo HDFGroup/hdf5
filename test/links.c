@@ -22609,7 +22609,7 @@ main(void)
 
         for (new_format = FALSE; new_format <= TRUE; new_format++) {
             hid_t   my_fapl;
-            hbool_t is_native;  /* Whether native VOL connector is being used */
+            hbool_t is_native; /* Whether native VOL connector is being used */
 
             /* Check for FAPL to use */
             if (new_format) {
@@ -22649,7 +22649,6 @@ main(void)
             nerrors += test_deprec(my_fapl, new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
-
             /* Check for operating with native (only) VOL connector */
             is_native = FALSE;
             if (H5VL_fapl_is_native(my_fapl, &is_native) < 0)
@@ -22657,7 +22656,8 @@ main(void)
 
             /* Skip tests external link tests when using non-native VOL connectors */
             if (!is_native || 0 == HDstrcmp(env_h5_drvr, "splitter")) {
-                HDputs("    External link tests skipped - not using native VOL connector, or using splitter VFD");
+                HDputs("    External link tests skipped - not using native VOL connector, or using splitter "
+                       "VFD");
             }
             else {
                 /* tests for external link */
@@ -22713,7 +22713,8 @@ main(void)
 
                     if (driver_uses_modified_filename) {
                         HDputs("    external_link_endian() test skipped - driver uses modified filename");
-                    } else {
+                    }
+                    else {
                         nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
                     }
 
@@ -22730,7 +22731,8 @@ main(void)
 
                     if (driver_uses_modified_filename) {
                         HDputs("    external_set_elink_fapl1() test skipped - driver uses modified filename");
-                    } else {
+                    }
+                    else {
                         nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
                     }
 
