@@ -3131,11 +3131,19 @@ main(void)
     nerrors += test_enum_dtype(file) < 0 ? 1 : 0;
     nerrors += test_array_dtype(file) < 0 ? 1 : 0;
     nerrors += test_array_dtype2(file) < 0 ? 1 : 0;
-    nerrors += test_vl_dtype(file) < 0 ? 1 : 0;
-    nerrors += test_vlstr_dtype(file) < 0 ? 1 : 0;
+
+    if (!h5_using_parallel_driver(NULL)) {
+        nerrors += test_vl_dtype(file) < 0 ? 1 : 0;
+        nerrors += test_vlstr_dtype(file) < 0 ? 1 : 0;
+    }
+
     nerrors += test_str_dtype(file) < 0 ? 1 : 0;
-    nerrors += test_refer_dtype(file) < 0 ? 1 : 0;
-    nerrors += test_refer_dtype2(file) < 0 ? 1 : 0;
+
+    if (!h5_using_parallel_driver(NULL)) {
+        nerrors += test_refer_dtype(file) < 0 ? 1 : 0;
+        nerrors += test_refer_dtype2(file) < 0 ? 1 : 0;
+    }
+
     nerrors += test_opaque_dtype(file) < 0 ? 1 : 0;
     nerrors += test_bitfield_dtype(file) < 0 ? 1 : 0;
     nerrors += test_ninteger() < 0 ? 1 : 0;

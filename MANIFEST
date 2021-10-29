@@ -1200,10 +1200,10 @@
 ./test/external_common.h
 ./test/external_env.c
 ./test/external_fname.h
-./test/family_v16_00000.h5
-./test/family_v16_00001.h5
-./test/family_v16_00002.h5
-./test/family_v16_00003.h5
+./test/family_v16-000000.h5
+./test/family_v16-000001.h5
+./test/family_v16-000002.h5
+./test/family_v16-000003.h5
 ./test/farray.c
 ./test/fheap.c
 ./test/file_image.c
@@ -1288,6 +1288,8 @@
 ./test/ntypes.c
 ./test/null_vol_connector.c
 ./test/null_vol_connector.h
+./test/null_vfd_plugin.c
+./test/null_vfd_plugin.h
 ./test/objcopy.c
 ./test/objcopy_ref.c
 ./test/ohdr.c
@@ -1395,6 +1397,7 @@
 ./test/vds_swmr_reader.c
 ./test/vds_swmr_writer.c
 ./test/vfd.c
+./test/vfd_plugin.c
 ./test/vol.c
 ./test/vol_plugin.c
 
@@ -3826,6 +3829,7 @@
 ./tools/src/h5import/Makefile.in
 ./tools/src/h5jam/Makefile.in
 ./tools/src/h5ls/Makefile.in
+./tools/src/h5perf/Makefile.in
 ./tools/src/h5repack/Makefile.in
 ./tools/src/h5stat/Makefile.in
 ./tools/src/misc/Makefile.in

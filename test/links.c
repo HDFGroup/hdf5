@@ -9897,7 +9897,7 @@ external_set_elink_cb(hid_t fapl, hbool_t new_format)
        would report FALSE, causing problems */
     base_driver       = H5Pget_driver(fapl);
     op_data.base_fapl = (base_driver == H5FD_FAMILY || base_driver == H5FD_MULTI ||
-                         base_driver == H5FD_MPIO || base_driver == H5FD_CORE)
+                         base_driver == H5FD_MPIO || base_driver == H5FD_CORE || base_driver == H5FD_DIRECT)
                             ? H5P_DEFAULT
                             : fapl;
     op_data.fam_size = ELINK_CB_FAM_SIZE;
@@ -10071,8 +10071,11 @@ external_reset_register(void)
     if (H5Fclose(file) < 0)
         TEST_ERROR
 
-    if (HDremove(filename) != 0)
-        TEST_ERROR
+    H5E_BEGIN_TRY
+    {
+        H5Fdelete(filename, H5P_DEFAULT);
+    }
+    H5E_END_TRY;
 
     PASSED();
     return SUCCEED;
@@ -16629,11 +16632,14 @@ link_filters(hid_t fapl, hbool_t new_format)
         /* Close file, get file size */
         if (H5Fclose(fid) < 0)
             TEST_ERROR
-        filesize_filtered = h5_get_file_size(filename, fapl);
 
-        /* Check that the file size is smaller with the filter */
-        if ((double)filesize_filtered > ((double)filesize_unfiltered * FILTER_FILESIZE_MAX_FRACTION))
-            TEST_ERROR
+        if (h5_using_default_driver(NULL)) {
+            filesize_filtered = h5_get_file_size(filename, fapl);
+
+            /* Check that the file size is smaller with the filter */
+            if ((double)filesize_filtered > ((double)filesize_unfiltered * FILTER_FILESIZE_MAX_FRACTION))
+                TEST_ERROR
+        }
 
         /* Close */
         if (H5Pclose(fcpl) < 0)
@@ -22574,8 +22580,9 @@ main(void)
     unsigned    minimize_dset_oh;
     unsigned    efc;         /* Whether to use the external file cache */
     const char *env_h5_drvr; /* File Driver value from environment */
+    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
 
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
@@ -22602,7 +22609,7 @@ main(void)
 
         for (new_format = FALSE; new_format <= TRUE; new_format++) {
             hid_t   my_fapl;
-            hbool_t is_native; /* Whether native VOL connector is being used */
+            hbool_t is_native;  /* Whether native VOL connector is being used */
 
             /* Check for FAPL to use */
             if (new_format) {
@@ -22642,14 +22649,15 @@ main(void)
             nerrors += test_deprec(my_fapl, new_format);
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
+
             /* Check for operating with native (only) VOL connector */
             is_native = FALSE;
             if (H5VL_fapl_is_native(my_fapl, &is_native) < 0)
                 TEST_ERROR;
 
             /* Skip tests external link tests when using non-native VOL connectors */
-            if (!is_native) {
-                HDputs("    External link tests skipped - not using native VOL connector");
+            if (!is_native || 0 == HDstrcmp(env_h5_drvr, "splitter")) {
+                HDputs("    External link tests skipped - not using native VOL connector, or using splitter VFD");
             }
             else {
                 /* tests for external link */
@@ -22702,7 +22710,13 @@ main(void)
 #ifndef H5_NO_DEPRECATED_SYMBOLS
                     nerrors += external_link_closing_deprec(my_fapl, new_format) < 0 ? 1 : 0;
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
-                    nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
+
+                    if (driver_uses_modified_filename) {
+                        HDputs("    external_link_endian() test skipped - driver uses modified filename");
+                    } else {
+                        nerrors += external_link_endian(new_format) < 0 ? 1 : 0;
+                    }
+
                     nerrors += external_link_strong(my_fapl, new_format) < 0 ? 1 : 0;
 
                     nerrors += external_link_prefix(my_fapl, new_format) < 0 ? 1 : 0;
@@ -22713,7 +22727,13 @@ main(void)
                     nerrors += external_link_abstar_cur(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_reltar(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_link_chdir(my_fapl, new_format) < 0 ? 1 : 0;
-                    nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
+
+                    if (driver_uses_modified_filename) {
+                        HDputs("    external_set_elink_fapl1() test skipped - driver uses modified filename");
+                    } else {
+                        nerrors += external_set_elink_fapl1(my_fapl, new_format) < 0 ? 1 : 0;
+                    }
+
                     nerrors += external_set_elink_fapl2(my_fapl, new_format) < 0 ? 1 : 0;
                     nerrors += external_set_elink_fapl3(new_format) < 0 ? 1 : 0;
                     nerrors += external_set_elink_cb(my_fapl, new_format) < 0 ? 1 : 0;

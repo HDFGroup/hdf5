@@ -3792,8 +3792,12 @@ main(void)
 
     /* Call "main" test routine */
     nerrors += test_main(file_id, fapl);
-    nerrors += test_obj_ref(fapl);
-    nerrors += test_reg_ref(fapl);
+
+    if (!h5_using_parallel_driver(NULL)) {
+        nerrors += test_obj_ref(fapl);
+        nerrors += test_reg_ref(fapl);
+    }
+
     nerrors += test_elinks(fapl);
 
     /* Close file */

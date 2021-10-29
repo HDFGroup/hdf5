@@ -35,7 +35,7 @@ void
 cleanup(const char *filename)
 {
     if (cleanup_g == -1)
-        cleanup_g = getenv("HDF5_NOCLEANUP") ? 0 : 1;
+        cleanup_g = getenv(HDF5_NOCLEANUP) ? 0 : 1;
     if (cleanup_g)
         remove(filename);
 }

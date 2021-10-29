@@ -133,7 +133,7 @@ main(int argc, char *argv[])
         TESTING("H5Fflush (part1)");
 
     /* Don't run using the split VFD */
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
@@ -207,5 +207,7 @@ error:
     HDfflush(stderr);
     HDprintf("*** ERROR ***\n");
     HDprintf("THERE WAS A REAL ERROR IN t_pflush1.\n");
+    HDfflush(stdout);
+
     HD_exit(EXIT_FAILURE);
 } /* end main() */
