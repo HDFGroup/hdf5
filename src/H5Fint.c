@@ -2023,10 +2023,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             /* Create the log file */
             if ((shared->vfd_swmr_log_file_ptr = HDfopen(vfd_swmr_config_ptr->log_file_path, "w")) == NULL)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create the log file")
-#ifndef H5_HAVE_WIN32_API
-            if (HDclock_gettime(CLOCK_MONOTONIC, &(shared->vfd_swmr_log_start_time)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't get time via clock_gettime");
-#endif
+            if (H5_timer_init(&(shared->vfd_swmr_log_start_time)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't initialize HDF5 timer.")
+            if (H5_timer_start(&(shared->vfd_swmr_log_start_time)) <0) 
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't start HDF5 timer.")
         }
     }
     /* End of Kent */

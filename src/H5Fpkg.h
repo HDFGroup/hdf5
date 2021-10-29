@@ -475,7 +475,7 @@ struct H5F_shared_t {
     hbool_t vfd_swmr_log_on;                 /* flag to indicate if
                                               * the log file is
                                               * created. */
-    struct timespec vfd_swmr_log_start_time; /* The starting time for
+    H5_timer_t      vfd_swmr_log_start_time; /* The starting time for
                                               * calculating the time
                                               * stamp of a log message.
                                               */
