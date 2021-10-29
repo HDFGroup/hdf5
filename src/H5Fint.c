@@ -2025,7 +2025,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create the log file")
             if (H5_timer_init(&(shared->vfd_swmr_log_start_time)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't initialize HDF5 timer.")
-            if (H5_timer_start(&(shared->vfd_swmr_log_start_time)) <0) 
+            if (H5_timer_start(&(shared->vfd_swmr_log_start_time)) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't start HDF5 timer.")
         }
     }

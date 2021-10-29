@@ -469,16 +469,16 @@ struct H5F_shared_t {
                                  * manager
                                  */
     /* Log file for VFD SWMR */
-    FILE *vfd_swmr_log_file_ptr;             /* File pointer for the
-                                              * log file.
-                                              */
-    hbool_t vfd_swmr_log_on;                 /* flag to indicate if
-                                              * the log file is
-                                              * created. */
-    H5_timer_t      vfd_swmr_log_start_time; /* The starting time for
-                                              * calculating the time
-                                              * stamp of a log message.
-                                              */
+    FILE *vfd_swmr_log_file_ptr;        /* File pointer for the
+                                         * log file.
+                                         */
+    hbool_t vfd_swmr_log_on;            /* flag to indicate if
+                                         * the log file is
+                                         * created. */
+    H5_timer_t vfd_swmr_log_start_time; /* The starting time for
+                                         * calculating the time
+                                         * stamp of a log message.
+                                         */
     /* Delayed free space release doubly linked list */
     shadow_defree_queue_t shadow_defrees;
 
