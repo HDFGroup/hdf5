@@ -47,11 +47,32 @@ New Features
 
     Configuration:
     -------------
+    - Refactored the utils folder.
+
+      Added subfolder test and moved the 'swmr_check_compat_vfd.c file'
+      from test into utils/test. Deleted the duplicate swmr_check_compat_vfd.c
+      file in hl/tools/h5watch folder. Also fixed vfd check options.
+
+      (ADB - 2021/10/18)
+
+    - Changed autotools and CMake configurations to derive both
+      compilation warnings-as-errors and warnings-only-warn configurations
+      from the same files, 'config/*/*error*'.  Removed redundant files
+      'config/*/*noerror*'.
+
+      (DCY - 2021/09/29)
+
     - Added new option to control the build of High-Level tools
       that default ON/enabled.
 
       Add configure options (autotools - CMake):
-            enable-hltools       HDF5_BUILD_HL_TOOLS
+            --enable-hltools       HDF5_BUILD_HL_TOOLS
+
+      Disabling this option prevents building the gif tool which
+      contains the following CVEs:
+          HDFFV-10592 CVE-2018-17433
+          HDFFV-10593 CVE-2018-17436
+          HDFFV-11048 CVE-2020-10809
 
       (ADB - 2021/09/16, HDFFV-11266)
 
@@ -1085,6 +1106,14 @@ Bug Fixes since HDF5-1.12.0 release
 
         (ADB - 2021/03/03, #361)
 
+    - Fixed a segmentation fault
+
+      A segmentation fault occurred with a Mathworks corrupted file.
+
+      A detection of accessing a null pointer was added to prevent the problem.
+
+      (BMR - 2021/02/19, HDFFV-11150)
+
     - Fixed issue with MPI communicator and info object not being
       copied into new FAPL retrieved from H5F_get_access_plist
 
@@ -1102,6 +1131,17 @@ Bug Fixes since HDF5-1.12.0 release
         the same.
 
         (NAF - 2021/01/22)
+
+    - Fixed CVE-2018-17432
+
+        The tool h5repack produced a segfault on a corrupted file which had
+        invalid rank for scalar or NULL datatype.
+
+        The problem was fixed by modifying the dataspace encode and decode
+        functions to detect and report invalid rank. h5repack now fails
+        with an error message for the corrupted file.
+
+        (BMR - 2020/10/26, HDFFV-10590)
 
     - Creation of dataset with optional filter
 
@@ -1432,7 +1472,11 @@ Bug Fixes since HDF5-1.12.0 release
 
     High-Level Library
     ------------------
-    -
+    - Fixed HL_test_packet, test for packet table vlen of vlen.
+
+      Incorrect length assignment.
+
+        (ADB - 2021/10/14)
 
 
     Fortran High-Level APIs
@@ -1638,3 +1682,11 @@ The share folder will have the most differences because CMake builds include
 a number of CMake specific files for support of CMake's find_package and support
 for the HDF5 Examples CMake project.
 
+The issues with the gif tool are:
+    HDFFV-10592 CVE-2018-17433
+    HDFFV-10593 CVE-2018-17436
+    HDFFV-11048 CVE-2020-10809
+These CVE issues have not yet been addressed and can be avoided by not building
+the gif tool. Disable building the High-Level tools with these options:
+    autotools:   --disable-hltools
+    cmake:       HDF5_BUILD_HL_TOOLS=OFF
