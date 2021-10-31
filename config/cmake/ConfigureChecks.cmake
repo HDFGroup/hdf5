@@ -197,7 +197,7 @@ endif ()
 # Header-check flags set in config/cmake_ext_mod/ConfigureChecks.cmake
 # ----------------------------------------------------------------------
 option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)
-if (H5FD_ENABLE_MIRROR_VFD)
+if (HDF5_ENABLE_MIRROR_VFD)
   if ( ${HDF_PREFIX}_HAVE_NETINET_IN_H AND
        ${HDF_PREFIX}_HAVE_NETDB_H      AND
        ${HDF_PREFIX}_HAVE_ARPA_INET_H  AND
