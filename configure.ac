@@ -2302,6 +2302,7 @@ fi
 case "X-$DEV_WARNINGS" in
   X-yes)
     H5_CFLAGS="$H5_CFLAGS $DEVELOPER_WARNING_CFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEVELOPER_WARNING_FCFLAGS"
     AC_MSG_RESULT([yes])
     ;;
   X-no)
@@ -4001,6 +4002,7 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  testpar/testpflush.sh
                  utils/Makefile
                  utils/mirror_vfd/Makefile
+                 utils/test/Makefile
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile
