@@ -149,6 +149,7 @@ typedef struct {
     bool         test_3d;
     enum { vds_off, vds_single, vds_multi } vds;
     bool            use_vfd_swmr;
+    bool            use_legacy_swmr;
     bool            use_named_pipe;
     bool            do_perf;
     bool            cross_chunk_read;
@@ -214,6 +215,7 @@ state_initializer(void)
                      .test_3d          = false,
                      .vds              = vds_off,
                      .use_vfd_swmr     = true,
+                     .use_legacy_swmr  = false,
                      .use_named_pipe   = true,
                      .do_perf          = false,
                      .cross_chunk_read = false,
@@ -256,6 +258,7 @@ usage(const char *progname)
         "-P:                   do the performance measurement\n"
         "-R:                   flush raw data\n"
         "-S:	               do not use VFD SWMR\n"
+        "-T:                   use legacy SWMR (-S and -N must also be specified)\n"
         "-V:	               use virtual datasets and a single\n"
         "                      source file\n"
         "-a steps:	       `steps` between adding attributes\n"
@@ -339,7 +342,7 @@ state_init(state_t *s, int argc, char **argv)
     if (tfile)
         HDfree(tfile);
 
-    while ((ch = getopt(argc, argv, "CFMNPRSVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:")) != -1) {
+    while ((ch = getopt(argc, argv, "CFMNPRSTVa:bc:d:e:f:g:j:k:l:m:n:o:p:qr:s:tu:v:w:")) != -1) {
         switch (ch) {
             case 'C':
                 /* This flag indicates cross-over chunk read during data validation */
@@ -361,6 +364,9 @@ state_init(state_t *s, int argc, char **argv)
                 break;
             case 'S':
                 s->use_vfd_swmr = false;
+                break;
+            case 'T':
+                s->use_legacy_swmr = true;
                 break;
             case 'V':
                 s->vds = vds_single;
@@ -745,6 +751,18 @@ state_init(state_t *s, int argc, char **argv)
         TEST_ERROR;
     }
 
+    if (s->use_legacy_swmr) {
+        if (s->use_vfd_swmr) {
+            HDfprintf(stderr, "Can't use both VFD SWMR and Legacy SWMR\n");
+            TEST_ERROR;
+        }
+
+        if (s->use_named_pipe) {
+            HDfprintf(stderr, "Can't use named pipe for the Legacy SWMR\n");
+            TEST_ERROR;
+        }
+    }
+
     return true;
 
 error:
@@ -826,14 +844,14 @@ state_destroy(state_t *s)
 
         if (s->vds != vds_multi) {
             if (H5Fvfd_swmr_end_tick(s->file[0]) < 0) {
-                HDfprintf(stderr, "H5Fclose failed\n");
+                HDfprintf(stderr, "H5Fvfd_swmr_end_tick failed\n");
                 TEST_ERROR;
             }
         }
         else {
             for (j = 0; j < NELMTS(s->file); j++)
                 if (H5Fvfd_swmr_end_tick(s->file[j]) < 0) {
-                    HDfprintf(stderr, "H5Fclose failed\n");
+                    HDfprintf(stderr, "H5Fvfd_swmr_end_tick failed\n");
                     TEST_ERROR;
                 }
         }
@@ -869,7 +887,7 @@ state_destroy(state_t *s)
         }
 
         HDfprintf(stdout, "File close time (for running the writer alone) = %lf seconds\n",
-                  TIME_PASSED(start_time, end_time));
+                TIME_PASSED(start_time, end_time));
     }
 
     if (s->dataset)
@@ -1407,9 +1425,8 @@ open_extensible_dset(state_t *s)
         if (s->test_3d) {
             if (maxdims3[0] != three_dee_max_dims[0] || maxdims3[1] != three_dee_max_dims[1] ||
                 maxdims3[2] != three_dee_max_dims[2]) {
-                HDfprintf(stderr,
-                          "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE " x %" PRIuHSIZE,
-                          maxdims3[0], maxdims3[1], maxdims3[2]);
+                HDfprintf(stderr, "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE " x %" PRIuHSIZE,
+                        maxdims3[0], maxdims3[1], maxdims3[2]);
                 TEST_ERROR;
             }
         }
@@ -1417,17 +1434,17 @@ open_extensible_dset(state_t *s)
             if (s->expand_2d) {
                 if (maxdims2[0] != two_dee_max_dims[0] || maxdims2[1] != two_dee_max_dims[1] ||
                     maxdims2[0] != maxdims2[1]) {
-                    HDfprintf(stderr, "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE,
-                              maxdims2[0], maxdims2[1]);
+                    HDfprintf(stderr, "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE, maxdims2[0],
+                            maxdims2[1]);
                     TEST_ERROR;
                 }
             }
             else if (maxdims2[0] != s->one_dee_max_dims[0] || maxdims2[1] != s->one_dee_max_dims[1] ||
                      dims2[0] != s->chunk_dims[0]) {
                 HDfprintf(stderr,
-                          "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE
-                          " or columns %" PRIuHSIZE,
-                          maxdims2[0], maxdims2[1], dims2[1]);
+                        "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE
+                        " or columns %" PRIuHSIZE,
+                        maxdims2[0], maxdims2[1], dims2[1]);
             }
         }
 
@@ -1479,7 +1496,7 @@ create_dsets(state_t s)
         }
 
         HDfprintf(stdout, "Dataset creation time (for running the writer alone) = %lf seconds\n",
-                  TIME_PASSED(start_time, end_time));
+                TIME_PASSED(start_time, end_time));
     }
 
     return true;
@@ -2081,7 +2098,7 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
          * the validation of the chunks */
         if (s.use_named_pipe && below_speed_limit(&(last.time), &(s.ival))) {
             AT();
-            HDfprintf(stderr, "verify_extensible_dset took too long to finish\n");
+            HDfprintf(stderr, "Warning: verify_extensible_dset took too long to finish\n");
         }
 
         /* For checking the time lapse between the writer's finishing writing a batch of chunks
@@ -2109,7 +2126,7 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
     /* Print out the performance information */
     if (s.use_named_pipe && s.do_perf && counter)
         HDfprintf(stdout, "Dataset verification: mean time = %lf, max time = %lf, min time = %lf\n",
-                  total_time / (double)counter, max_time, min_time);
+                total_time / (double)counter, max_time, min_time);
 
     return true;
 
@@ -2396,18 +2413,13 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
 
         /* Calculate the write speed */
         if (s.test_3d)
-            throughput =
-                ((double)(sizeof(unsigned int) * s.depth * s.rows * s.cols * s.nsteps * s.ndatasets)) /
-                time_passed;
+            throughput = ((double)(sizeof(unsigned int) * s.depth * s.rows * s.cols * s.nsteps * s.ndatasets)) / time_passed;
         else
-            throughput =
-                ((double)(sizeof(unsigned int) * s.rows * s.cols * s.nsteps * s.ndatasets)) / time_passed;
+            throughput = ((double)(sizeof(unsigned int) *  s.rows * s.cols * s.nsteps * s.ndatasets)) / time_passed;
 
         /* Print out the performance information */
-        HDfprintf(stdout,
-                  "Dataset write time (for running the writer alone) = %lf seconds, write speed = %.2lf "
-                  "bytes/second\n",
-                  time_passed, throughput);
+        HDfprintf(stdout, "Dataset write time (for running the writer alone) = %lf seconds, write speed = %.2lf bytes/second\n",
+                time_passed, throughput);
     }
 
     return true;
@@ -2541,6 +2553,12 @@ main(int argc, char **argv)
         np.verify = 2;
         if (s.use_named_pipe && notify_and_wait_for_reader(&s, &np) < 0) {
             HDfprintf(stderr, "notify_and_wait_for_reader failed\n");
+            TEST_ERROR;
+        }
+
+        /* Enable the Legacy SWMR writing mode if specified */
+        if (s.use_legacy_swmr && H5Fstart_swmr_write(s.file[0]) < 0) {
+            HDfprintf(stderr, "failed to start the Legacy SWMR writing mode\n");
             TEST_ERROR;
         }
 
