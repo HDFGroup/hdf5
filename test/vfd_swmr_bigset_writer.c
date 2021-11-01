@@ -887,7 +887,7 @@ state_destroy(state_t *s)
         }
 
         HDfprintf(stdout, "File close time (for running the writer alone) = %lf seconds\n",
-                TIME_PASSED(start_time, end_time));
+                  TIME_PASSED(start_time, end_time));
     }
 
     if (s->dataset)
@@ -1425,8 +1425,9 @@ open_extensible_dset(state_t *s)
         if (s->test_3d) {
             if (maxdims3[0] != three_dee_max_dims[0] || maxdims3[1] != three_dee_max_dims[1] ||
                 maxdims3[2] != three_dee_max_dims[2]) {
-                HDfprintf(stderr, "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE " x %" PRIuHSIZE,
-                        maxdims3[0], maxdims3[1], maxdims3[2]);
+                HDfprintf(stderr,
+                          "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE " x %" PRIuHSIZE,
+                          maxdims3[0], maxdims3[1], maxdims3[2]);
                 TEST_ERROR;
             }
         }
@@ -1434,17 +1435,17 @@ open_extensible_dset(state_t *s)
             if (s->expand_2d) {
                 if (maxdims2[0] != two_dee_max_dims[0] || maxdims2[1] != two_dee_max_dims[1] ||
                     maxdims2[0] != maxdims2[1]) {
-                    HDfprintf(stderr, "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE, maxdims2[0],
-                            maxdims2[1]);
+                    HDfprintf(stderr, "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE,
+                              maxdims2[0], maxdims2[1]);
                     TEST_ERROR;
                 }
             }
             else if (maxdims2[0] != s->one_dee_max_dims[0] || maxdims2[1] != s->one_dee_max_dims[1] ||
                      dims2[0] != s->chunk_dims[0]) {
                 HDfprintf(stderr,
-                        "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE
-                        " or columns %" PRIuHSIZE,
-                        maxdims2[0], maxdims2[1], dims2[1]);
+                          "Unexpected maximum dimensions %" PRIuHSIZE " x %" PRIuHSIZE
+                          " or columns %" PRIuHSIZE,
+                          maxdims2[0], maxdims2[1], dims2[1]);
             }
         }
 
@@ -1496,7 +1497,7 @@ create_dsets(state_t s)
         }
 
         HDfprintf(stdout, "Dataset creation time (for running the writer alone) = %lf seconds\n",
-                TIME_PASSED(start_time, end_time));
+                  TIME_PASSED(start_time, end_time));
     }
 
     return true;
@@ -2126,7 +2127,7 @@ verify_dsets(state_t s, np_state_t *np, mat_t *mat)
     /* Print out the performance information */
     if (s.use_named_pipe && s.do_perf && counter)
         HDfprintf(stdout, "Dataset verification: mean time = %lf, max time = %lf, min time = %lf\n",
-                total_time / (double)counter, max_time, min_time);
+                  total_time / (double)counter, max_time, min_time);
 
     return true;
 
@@ -2413,13 +2414,18 @@ write_dsets(state_t s, np_state_t *np, mat_t *mat)
 
         /* Calculate the write speed */
         if (s.test_3d)
-            throughput = ((double)(sizeof(unsigned int) * s.depth * s.rows * s.cols * s.nsteps * s.ndatasets)) / time_passed;
+            throughput =
+                ((double)(sizeof(unsigned int) * s.depth * s.rows * s.cols * s.nsteps * s.ndatasets)) /
+                time_passed;
         else
-            throughput = ((double)(sizeof(unsigned int) *  s.rows * s.cols * s.nsteps * s.ndatasets)) / time_passed;
+            throughput =
+                ((double)(sizeof(unsigned int) * s.rows * s.cols * s.nsteps * s.ndatasets)) / time_passed;
 
         /* Print out the performance information */
-        HDfprintf(stdout, "Dataset write time (for running the writer alone) = %lf seconds, write speed = %.2lf bytes/second\n",
-                time_passed, throughput);
+        HDfprintf(stdout,
+                  "Dataset write time (for running the writer alone) = %lf seconds, write speed = %.2lf "
+                  "bytes/second\n",
+                  time_passed, throughput);
     }
 
     return true;
