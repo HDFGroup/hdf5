@@ -56,7 +56,6 @@ SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     vfd_swmr_zoo_reader$(EXEEXT) vfd_swmr_zoo_writer$(EXEEXT) \
     vfd_swmr_gperf_reader$(EXEEXT) vfd_swmr_gperf_writer$(EXEEXT) \
     vfd_swmr_gfail_reader$(EXEEXT) vfd_swmr_gfail_writer$(EXEEXT) \
-    vfd_swmr_log_reader$(EXEEXT) vfd_swmr_log_writer$(EXEEXT) \
     vds_env$(EXEEXT) \
     vds_swmr_gen$(EXEEXT) vds_swmr_reader$(EXEEXT) vds_swmr_writer$(EXEEXT)
 if HAVE_SHARED_CONDITIONAL
@@ -116,7 +115,6 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     vfd_swmr_attrdset_reader vfd_swmr_attrdset_writer \
     vfd_swmr_gperf_reader vfd_swmr_gperf_writer \
     vfd_swmr_gfail_reader vfd_swmr_gfail_writer \
-    vfd_swmr_log_reader vfd_swmr_log_writer \
 	vfd_swmr_check_compat \
     vfd_swmr_dsetchks_reader vfd_swmr_dsetchks_writer \
     swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
@@ -186,7 +184,6 @@ vfd_swmr_bigset_reader_SOURCES=vfd_swmr_bigset_writer.c
 vfd_swmr_group_reader_SOURCES=vfd_swmr_group_writer.c
 vfd_swmr_gperf_reader_SOURCES=vfd_swmr_gperf_writer.c
 vfd_swmr_gfail_reader_SOURCES=vfd_swmr_gfail_writer.c
-vfd_swmr_log_reader_SOURCES=vfd_swmr_log_writer.c
 vfd_swmr_dsetops_reader_SOURCES=vfd_swmr_dsetops_writer.c
 
 vfd_swmr_attrdset_writer_SOURCES=vfd_swmr_attrdset_writer.c

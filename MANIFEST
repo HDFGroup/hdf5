@@ -1444,7 +1444,6 @@
 ./test/vfd_swmr_vlstr_writer.c
 ./test/vfd_swmr_writer.c
 ./test/vfd_swmr_zoo_writer.c
-./test/vfd_swmr_log_writer.c
 ./test/vfd.c
 ./test/vol.c
 ./test/vol_plugin.c

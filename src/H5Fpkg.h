@@ -625,7 +625,7 @@ H5_DLL herr_t H5F__reparse_file_lock_variable_test(void);
  * a log entry_type_code,  which generates a log tag,  and the message log_info, which
  * the developers want to save into a log file.
  *
- * The macro H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, number_entry_production, m) is
+ * The macro H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, number_entry_production, m) is
  * called by H5F_POST_VFD_SWMR_LOG_ENTRY when the HDF5 library is built with the
  * production mode. Number_entry_production will control the number of entry tags that
  * applications can receive. Currently this number is set to 1 and is subject to change
@@ -649,21 +649,21 @@ H5_DLL void H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log
         }                                                                                                    \
     } while (0)
 
-#define H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(fp, entry_type_code, max_code, log_info)                         \
+#define H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(fp, entry_type_code, max_code, log_info)                         \
     do {                                                                                                     \
         if (entry_type_code < max_code) {                                                                    \
             H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(fp, entry_type_code, log_info);                             \
         }                                                                                                    \
     } while (0)
 
-/* Note: change H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, 1, m) on the following lines to
- *       H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, your_number_entry_production, m)
+/* Note: change H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, 1, m) on the following lines to
+ *       H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, your_number_entry_production, m)
  *       as necessary.
  */
 #ifndef NDEBUG
 #define H5F_POST_VFD_SWMR_LOG_ENTRY(f, c, m) H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(f, c, m)
 #else
-#define H5F_POST_VFD_SWMR_LOG_ENTRY(f, c, m) H5F_POST_VFD_SWMR_LOG_ENTRY_RELEASE(f, c, 1, m)
+#define H5F_POST_VFD_SWMR_LOG_ENTRY(f, c, m) H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, 1, m)
 #endif
 
 #endif /* H5Fpkg_H */
