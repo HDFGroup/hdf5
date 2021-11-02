@@ -21,6 +21,7 @@ if (UNIX)
   if (SH_PROGRAM)
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
     set (bindir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set (testdir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
     ##############################################################################
     #  configure scripts to test dir
     ##############################################################################
@@ -37,7 +38,7 @@ if (UNIX)
     #shell script creates dir
     #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
     add_custom_command (
-        TARGET     output_filter.sh
+        TARGET     accum_swmr_reader
         POST_BUILD
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "${HDF5_SOURCE_DIR}/bin/output_filter.sh" "${HDF5_TEST_BINARY_DIR}/H5TEST/bin/output_filter.sh"
@@ -46,9 +47,11 @@ if (UNIX)
     #shell script creates dir
     #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
 
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
+    #shell script creates dir
+    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
 
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
+    #shell script creates dir
+    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
 
     ##############################################################################
     ##############################################################################

@@ -18,6 +18,7 @@
 
 srcdir=@srcdir@
 bindir=@bindir@
+testdir=@testdir@
 
 ###############################################################################
 ## test parameters

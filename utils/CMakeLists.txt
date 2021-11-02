@@ -1,31 +1,13 @@
 cmake_minimum_required (VERSION 3.10)
 project (HDF5_UTILS C)
 
-add_subdirectory (mirror_vfd)
-
-#-----------------------------------------------------------------------------
-# Add the swmr_compat_vfd executable
-#-----------------------------------------------------------------------------
-
-set (swmr_compat_vfd_SOURCES ${HDF5_UTILS_SOURCE_DIR}/swmr_compat_vfd.c)
-add_executable (swmr_compat_vfd ${swmr_compat_vfd_SOURCES})
-target_include_directories (swmr_compat_vfd PRIVATE "${HDF5_UTILS_DIR};${HDF5_SRC_DIR};${HDF5_TEST_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-if (NOT BUILD_SHARED_LIBS)
-  TARGET_C_PROPERTIES (swmr_compat_vfd STATIC)
-  target_link_libraries (swmr_compat_vfd PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-else ()
-  TARGET_C_PROPERTIES (swmr_compat_vfd SHARED)
-  target_link_libraries (swmr_compat_vfd PRIVATE ${HDF5_LIBSH_TARGET} ${HDF5_TEST_LIBSH_TARGET})
+if (BUILD_TESTING)
+  add_subdirectory (test)
 endif ()
-set_target_properties (swmr_compat_vfd PROPERTIES FOLDER utils)
-set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};swmr_compat_vfd")
-set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} swmr_compat_vfd)
 
-#-----------------------------------------------------------------------------
-# Add Target to clang-format
-#-----------------------------------------------------------------------------
-if (HDF5_ENABLE_FORMATTERS)
-  clang_format (HDF5_UTILS_FORMAT swmr_compat_vfd)
+option (HDF5_BUILD_UTILS  "Build HDF5 Utils" ON)
+if (HDF5_BUILD_UTILS)
+  add_subdirectory (mirror_vfd)
 endif ()
 
 #-----------------------------------------------------------------------------
