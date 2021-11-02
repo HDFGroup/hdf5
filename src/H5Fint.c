@@ -2228,7 +2228,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     ret_value = file;
 
 #if 1 /*Kent: write to the log file when H5F_open ends. Tested, can be commented out if necessary.*/
-    H5F_POST_VFD_SWMR_LOG_ENTRY(file, 1, "File open ends");
+    H5F_POST_VFD_SWMR_LOG_ENTRY(file, FILE_OPEN, "File open ends");
 #endif
 done:
     if ((NULL == ret_value) && file) {

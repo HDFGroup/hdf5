@@ -666,4 +666,13 @@ H5_DLL void H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log
 #define H5F_POST_VFD_SWMR_LOG_ENTRY(f, c, m) H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(f, c, 1, m)
 #endif
 
+/* Macros for VFD SWMR log entry code
+ * Note: this should be consistent with const char *H5Fvfd_swmr_log_tags[] declared at
+ * H5Fvfd_swmr.c . 
+ */
+#define EOT_PROCESSING_TIME  0
+#define FILE_OPEN 1
+#define FILE_CLOSE 2 
+#define EOT_TRIGGER_TIME 3
+#define EOT_META_FILE_INDEX 4
 #endif /* H5Fpkg_H */

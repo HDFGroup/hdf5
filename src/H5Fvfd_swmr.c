@@ -61,7 +61,7 @@
  * The following is the first version. Developers can add/modify the tags as necessary.
  *
  * If the entry code is 0, H5Fvfd_swmr_log_tags[0] is used to report the entry tag.
- * H5F_POST_VFD_SWMR_LOG_ENTRY(f, 0, log_msg) will put the log_msg attached to
+ * H5F_POST_VFD_SWMR_LOG_ENTRY(f, EOT_PROCESSING_TIME, log_msg) will put the log_msg attached to
  * the entry tag "EOT_PROCESSING_TIME".
  * The entry code number is listed in the comment for convenience.
  * Currently for the production mode, only the "EOT_PROCESSING_TIME" is present.
@@ -358,7 +358,7 @@ H5F_vfd_swmr_close_or_flush(H5F_t *f, hbool_t closing)
     }
 #if 1 /*Kent  Save the end of close info. to the log file, subject to comment out. */
     if (closing)
-        H5F_POST_VFD_SWMR_LOG_ENTRY(f, 2, "VFD SWMR File close ends");
+        H5F_POST_VFD_SWMR_LOG_ENTRY(f, FILE_CLOSE, "VFD SWMR File close ends");
 #endif
 done:
 
@@ -958,7 +958,7 @@ done:
         if (NULL != (log_msg = HDmalloc(eot_pt_log_mesg_length * sizeof(char)))) {
             temp_time = (unsigned int)((end_elapsed_time - start_elapsed_time) * 1000);
             HDsprintf(log_msg, "Writer time is %u milliseconds", temp_time);
-            H5F_POST_VFD_SWMR_LOG_ENTRY(f, 0, log_msg);
+            H5F_POST_VFD_SWMR_LOG_ENTRY(f, EOT_PROCESSING_TIME, log_msg);
             HDfree(log_msg);
         }
     }
