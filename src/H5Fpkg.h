@@ -649,7 +649,7 @@ H5_DLL void H5F_post_vfd_swmr_log_entry(H5F_t *f, int entry_type_code, char *log
         }                                                                                                    \
     } while (0)
 
-#define H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(fp, entry_type_code, max_code, log_info)                         \
+#define H5F_POST_VFD_SWMR_LOG_ENTRY_PRODUCTION(fp, entry_type_code, max_code, log_info)                      \
     do {                                                                                                     \
         if (entry_type_code < max_code) {                                                                    \
             H5F_POST_VFD_SWMR_LOG_ENTRY_INTERNAL(fp, entry_type_code, log_info);                             \
