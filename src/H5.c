@@ -112,16 +112,13 @@ H5FL_DEFINE_STATIC(H5_atclose_node_t);
 static herr_t
 H5_default_vfd_init(void)
 {
-    hid_t  id;
     herr_t ret_value = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
     /* Load the hid_t for the default VFD for the side effect
      * it has of initializing the default VFD.
      */
-    id = H5FD_sec2_init();
-
-    if (id == H5I_INVALID_HID) {
+    if (H5FD_sec2_init() == H5I_INVALID_HID) {
         HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, FAIL, "unable to load default VFD ID")
     }
 done:
