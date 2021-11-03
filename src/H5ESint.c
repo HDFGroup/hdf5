@@ -114,6 +114,15 @@ static const H5I_class_t H5I_EVENTSET_CLS[1] = {{
 /* Declare a static free list to manage H5ES_t structs */
 H5FL_DEFINE_STATIC(H5ES_t);
 
+/*-------------------------------------------------------------------------
+ * Function:    H5ES_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5ES_init(void)
 {

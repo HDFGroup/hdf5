@@ -70,6 +70,15 @@ static int H5Z__check_unregister_dset_cb(void *obj_ptr, hid_t obj_id, void *key)
 static int H5Z__check_unregister_group_cb(void *obj_ptr, hid_t obj_id, void *key);
 static int H5Z__flush_file_cb(void *obj_ptr, hid_t obj_id, void *key);
 
+/*-------------------------------------------------------------------------
+ * Function:    H5Z_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5Z_init(void)
 {

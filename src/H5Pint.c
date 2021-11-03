@@ -525,7 +525,7 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_init() */
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5P_init_phase2

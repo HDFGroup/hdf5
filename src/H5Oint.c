@@ -174,6 +174,15 @@ static const H5O_obj_class_t *const H5O_obj_class_g[] = {
     H5O_OBJ_GROUP,    /* Group object (H5O_TYPE_GROUP - 0) */
 };
 
+/*-------------------------------------------------------------------------
+ * Function:    H5O_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5O_init(void)
 {

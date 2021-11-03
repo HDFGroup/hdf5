@@ -91,6 +91,15 @@ static const H5I_class_t H5I_VFL_CLS[1] = {{
     (H5I_free_t)H5FD__free_cls /* Callback routine for closing objects of this class */
 }};
 
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5FD_init(void)
 {

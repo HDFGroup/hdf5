@@ -460,6 +460,15 @@ H5FL_DEFINE_STATIC(H5CX_node_t);
 /* Declare a static free list to manage H5CX_state_t structs */
 H5FL_DEFINE_STATIC(H5CX_state_t);
 
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5CX_init(void)
 {

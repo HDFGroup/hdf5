@@ -100,6 +100,15 @@ static H5_atclose_node_t *H5_atclose_head = NULL;
 /* Declare a free list to manage the H5_atclose_node_t struct */
 H5FL_DEFINE_STATIC(H5_atclose_node_t);
 
+/*-------------------------------------------------------------------------
+ * Function:    H5_default_vfd_init
+ *
+ * Purpose:     Initialize the default VFD.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 static herr_t
 H5_default_vfd_init(void)
 {

@@ -119,6 +119,15 @@ H5PL__set_plugin_control_mask(unsigned int mask)
 
 } /* end H5PL__set_plugin_control_mask() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5PL_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
 H5PL_init(void)
 {
