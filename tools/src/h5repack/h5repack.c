@@ -366,8 +366,8 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
     int            rank;                       /* rank of dataset */
     htri_t         is_named;                   /* Whether the datatype is named */
     hsize_t        dims[H5S_MAX_RANK];         /* dimensions of dataset */
-    struct timeval timer_start;                /* verbose timing start time */
-    struct timeval timer_stop;                 /* verbose timing stop time */
+    H5_timer_t     timer;                      /* Timer for read/write operations */
+    H5_timevals_t  times;                      /* Elapsed time for each operation */
     static double  read_time  = 0;
     static double  write_time = 0;
     char           name[255];
@@ -486,14 +486,16 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             if (buf == NULL) {
                 H5TOOLS_GOTO_ERROR((-1), "HDmalloc failed");
             } /* end if */
-            if (options->verbose == 2)
-                HDgettimeofday(&timer_start, NULL);
+            if (options->verbose == 2) {
+                H5_timer_init(&timer);
+                H5_timer_start(&timer);
+            }
             if (H5Aread(attr_id, wtype_id, buf) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Aread failed");
             if (options->verbose == 2) {
-                HDgettimeofday(&timer_stop, NULL);
-                read_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                             ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                H5_timer_stop(&timer);
+                H5_timer_get_times(timer, &times);
+                read_time += times.elapsed;
             }
 
             /*-----------------------------------------------------------------
@@ -504,14 +506,16 @@ copy_attr(hid_t loc_in, hid_t loc_out, named_dt_t **named_dt_head_p, trav_table_
             if ((attr_out = H5Acreate2(loc_out, name, wtype_id, space_id, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Acreate2 failed on ,%s>", name);
 
-            if (options->verbose == 2)
-                HDgettimeofday(&timer_start, NULL);
+            if (options->verbose == 2) {
+                H5_timer_init(&timer);
+                H5_timer_start(&timer);
+            }
             if (H5Awrite(attr_out, wtype_id, buf) < 0)
                 H5TOOLS_GOTO_ERROR((-1), "H5Awrite failed");
             if (options->verbose == 2) {
-                HDgettimeofday(&timer_stop, NULL);
-                write_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
-                              ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
+                H5_timer_stop(&timer);
+                H5_timer_get_times(timer, &times);
+                write_time += times.elapsed;
             }
 
             /*close*/

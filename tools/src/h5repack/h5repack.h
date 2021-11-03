@@ -39,9 +39,6 @@
 #define FS_PERSIST_DEF   FALSE
 #define FS_THRESHOLD_DEF 1
 
-/* use in timing of functions */
-#define MICROSECOND 1000000.0
-
 /*-------------------------------------------------------------------------
  * data structures for command line options
  *-------------------------------------------------------------------------
