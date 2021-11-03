@@ -466,12 +466,12 @@ H5_term_library(void)
 
             /* log a package when its terminator needs to be retried */
             pending++;
-            nprinted = snprintf(next, nleft, "%s%s",
+            nprinted = HDsnprintf(next, nleft, "%s%s",
                 (next != loop) ? "," : "", terminator[i].name);
             if (nprinted < 0)
                 continue;
             if ((size_t)nprinted >= nleft)
-                nprinted = snprintf(next, nleft, "...");
+                nprinted = HDsnprintf(next, nleft, "...");
             if (nprinted < 0 || (size_t)nprinted >= nleft)
                 continue;
             nleft -= (size_t)nprinted;
