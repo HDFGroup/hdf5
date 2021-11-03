@@ -26,9 +26,9 @@ set (H5_UTIL_TESTS)
 
 if (HDF5_TEST_SWMR)
   set (H5_UTIL_TESTS ${H5_UTIL_TESTS}
-  swmr_check_compat_vfd
-  vds_elink_compat_vol
-)
+    swmr_check_compat_vfd
+    vds_elink_compat_vol
+  )
 endif ()
 
 if (H5_UTIL_TESTS)
