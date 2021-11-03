@@ -761,9 +761,6 @@ H5T_init(void)
 
     FUNC_ENTER_NOAPI(FAIL)
 
-    if (H5_TERM_GLOBAL)
-        HGOTO_DONE(SUCCEED)
-
     /* Initialize the ID group for the file IDs */
     if (H5I_register_type(H5I_DATATYPE_CLS) < 0)
         HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINIT, FAIL, "unable to initialize interface")
