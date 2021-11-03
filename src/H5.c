@@ -260,7 +260,7 @@ H5_init_library(void)
     } initializer[] = {
         {H5E_init, "error"}
     ,   {H5VL_init_phase1, "VOL"}
-    ,   {H5SL_init, "VOL"}
+    ,   {H5SL_init, "skip lists"}
     ,   {H5FD_init, "VFD"}
     ,   {H5_default_vfd_init, "default VFD"}
     ,   {H5P_init_phase1, "property list"}
