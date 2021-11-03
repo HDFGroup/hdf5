@@ -11,11 +11,11 @@
 CMakeLists.txt    @byrnHDF @derobins
 CMakeTests.*      @byrnHDF @derobins
 
-/bin/             @lrknox @derobins @qkoziol
+/bin/             @lrknox @derobins
 
 /c++/             @bmribler @byrnHDF @derobins
 
-/config/          @lrknox @derobins @qkoziol @byrnHDF
+/config/          @lrknox @derobins @byrnHDF
 
 /doc/             @gnuoyd @jrmainzer
 
@@ -31,11 +31,11 @@ CMakeTests.*      @byrnHDF @derobins
 
 /release_docs/    @lrknox @bmribler @byrnHDF
 
-/src/             @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup @jrmainzer
+/src/             @jhendersonHDF @derobins @fortnern @soumagne @vchoi-hdfgroup @jrmainzer
 
-/test/            @jhendersonHDF @derobins @fortnern @qkoziol @soumagne @vchoi-hdfgroup @jrmainzer
+/test/            @jhendersonHDF @derobins @fortnern @soumagne @vchoi-hdfgroup @jrmainzer
 
-/testpar/         @jhendersonHDF @rawarren @jrmainzer @qkoziol
+/testpar/         @jhendersonHDF @rawarren @jrmainzer
 
 /tools/           @byrnHDF @bmribler @derobins
 
