@@ -20,12 +20,15 @@ macro (ADD_H5_EXE file)
 endmacro ()
 
 ##############################################################################
-###                S W I M M E R   T E S T  U T I L S                      ###
+###                 T E S T  U T I L S                                     ###
 ##############################################################################
 set (H5_UTIL_TESTS)
 
 if (HDF5_TEST_SWMR)
-  set (H5_UTIL_TESTS ${H5_UTIL_TESTS} swmr_check_compat_vfd)
+  set (H5_UTIL_TESTS ${H5_UTIL_TESTS}
+    swmr_check_compat_vfd
+    vds_elink_compat_vol
+  )
 endif ()
 
 if (H5_UTIL_TESTS)

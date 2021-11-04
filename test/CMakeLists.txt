@@ -555,8 +555,8 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_thread_id_FORMAT thread_id)
 endif ()
 
-if (HDF5_BUILD_UTILS) # requires mirror server
-  #-- Adding test for mirror_vfd
+if (HDF5_BUILD_UTILS)
+  #-- Adding test for mirror_vfd (requires mirror server)
   add_executable (mirror_vfd ${mirror_vfd_SOURCES})
   target_include_directories (mirror_vfd PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
   if (NOT BUILD_SHARED_LIBS)

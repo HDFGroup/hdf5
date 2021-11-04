@@ -22659,6 +22659,10 @@ main(void)
                 HDputs("    External link tests skipped - not using native VOL connector, or using splitter "
                        "VFD");
             }
+            else if (HDstrcmp(env_h5_drvr, "splitter") == 0) {
+                HDputs("    External link tests skipped - splitter VFD does not currently support external "
+                       "links");
+            }
             else {
                 /* tests for external link */
                 /* Test external file cache first, so it sees the default efc setting on the fapl

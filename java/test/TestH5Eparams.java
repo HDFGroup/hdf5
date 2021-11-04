@@ -27,8 +27,6 @@ import hdf.hdf5lib.callbacks.H5E_walk_cb;
 import hdf.hdf5lib.callbacks.H5E_walk_t;
 import hdf.hdf5lib.structs.H5E_error2_t;
 
-import test.H5TestUtils;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;

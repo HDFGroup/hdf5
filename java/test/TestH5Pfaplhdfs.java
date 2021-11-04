@@ -24,8 +24,6 @@ import hdf.hdf5lib.exceptions.HDF5Exception;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5FD_hdfs_fapl_t;
 
-import test.H5TestUtils;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

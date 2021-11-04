@@ -35,11 +35,4 @@ endif
 # All subdirectories
 SUBDIRS=$(MIRROR_VFD_DIR) $(TESTUTIL_DIR)
 
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src -I$(top_srcdir)/test
-
-noinst_PROGRAMS = vds_elink_compat_vol
-
-# All programs depend on the hdf5 library
-LDADD=$(LIBH5TEST) $(LIBHDF5)
-
 include $(top_srcdir)/config/conclude.am

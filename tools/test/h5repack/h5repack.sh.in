@@ -39,7 +39,7 @@ H5DUMP_BIN=`pwd`/$H5DUMP                # The path of the h5dump tool binary
 H5STAT=../../src/h5stat/h5stat          # The h5stat tool name
 H5STAT_BIN=`pwd`/$H5STAT                # The path of the h5stat tool binary
 
-VDS_ELINK_COMPAT_VOL=../../../utils/vds_elink_compat_vol # The vds_elink_compat_vol tool name
+VDS_ELINK_COMPAT_VOL=../../../utils/test/vds_elink_compat_vol # The vds_elink_compat_vol tool name
 VDS_ELINK_COMPAT_VOL_BIN=`pwd`/$VDS_ELINK_COMPAT_VOL # The path of the vds_elink_compat_vol tool binary
 
 RM='rm -rf'
@@ -1353,7 +1353,7 @@ COPY_TESTFILES_TO_TESTDIR
 # Check to see if the VOL connector specified by the HDF5_VOL_CONNECTOR
 # environment variable supports virtual datasets (and external links)
 #
-# Note: Depends on vds_elink_compat_vol tool from $(topdir)/utils
+# Note: Depends on vds_elink_compat_vol tool from $(topdir)/utils/test
 $VDS_ELINK_COMPAT_VOL_BIN
 COMPAT_VOL=$?
 
@@ -1773,35 +1773,30 @@ TOOLTEST_META meta_long h5repack_layout.h5 --metadata_block_size=8192
 if test  $USE_FILTER_DEFLATE != "yes" ; then
     SKIP vds_dset_chunk_20x10x5
 else
-    # Note: Requires VOL connector that supports external links
     COMPAT_VOL_TEST VERIFY_LAYOUT_VDS vds_dset_chunk20x10x5 1_vds.h5 vds_dset CHUNKED --layout vds_dset:CHUNK=20x10x5
 fi
 
 if test  $USE_FILTER_DEFLATE != "yes" ; then
     SKIP vds_chunk2x5x8
 else
-    # Note: Requires VOL connector that supports external links
     COMPAT_VOL_TEST VERIFY_LAYOUT_VDS vds_chunk2x5x8 3_1_vds.h5 vds_dset CHUNKED -l vds_dset:CHUNK=2x5x8
 fi
 
 if test  $USE_FILTER_DEFLATE != "yes" ; then
     SKIP vds_chunk3x6x9
 else
-    # Note: Requires VOL connector that supports external links
     COMPAT_VOL_TEST VERIFY_LAYOUT_VDS vds_chunk3x6x9 2_vds.h5 vds_dset CHUNKED -l vds_dset:CHUNK=3x6x9
 fi
 
 if test  $USE_FILTER_DEFLATE != "yes" ; then
     SKIP vds_compa 4_vds.h5
 else
-    # Note: Requires VOL connector that supports external links
     COMPAT_VOL_TEST VERIFY_LAYOUT_VDS vds_compa 4_vds.h5 vds_dset COMPACT -l vds_dset:COMPA
 fi
 
 if test  $USE_FILTER_DEFLATE != "yes" ; then
     SKIP vds_conti 4_vds.h5
 else
-    # Note: Requires VOL connector that supports external links
     COMPAT_VOL_TEST VERIFY_LAYOUT_VDS vds_conti 4_vds.h5 vds_dset CONTIGUOUS -l vds_dset:CONTI
 fi
 
@@ -1835,14 +1830,10 @@ VERIFY_EXTERNAL_CONSOLIDATION -l CONTI
 #TOOLTEST_DUMP h5copy_extlinks_src-base h5copy_extlinks_src.h5 --enable-error-stack
 TOOLTEST_DUMP tsoftlinks-base tsoftlinks.h5 --enable-error-stack
 TOOLTEST_DUMP textlink-base textlink.h5 --enable-error-stack
-# Note: Requires VOL connector that supports external links
 COMPAT_VOL_TEST TOOLTEST_DUMP textlinkfar-base textlinkfar.h5 --enable-error-stack
-# Note: Requires VOL connector that supports external links
 COMPAT_VOL_TEST TOOLTEST_DUMP textlinksrc-base textlinksrc.h5 --enable-error-stack
-# Note: Requires VOL connector that supports external links
 COMPAT_VOL_TEST TOOLTEST_DUMP textlinktar-base textlinktar.h5 --enable-error-stack
 
-# Note: Requires VOL connector that supports external links
 COMPAT_VOL_TEST TOOLTESTSV h5copy_extlinks_src-merge h5copy_extlinks_src.h5 --merge
 TOOLFAILSV tsoftlinks-merge tsoftlinks.h5 --merge
 TOOLTESTSV textlink-merge textlink.h5 --merge

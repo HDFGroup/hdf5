@@ -278,6 +278,27 @@ done:
     return;
 } /* end Java_hdf_hdf5lib_H5_H5VLunregister_1connector */
 
+/*
+ * Class:     hdf_hdf5lib_H5
+ * Method:    H5VLfapl_is_native
+ * Signature: (J)Z
+ */
+JNIEXPORT jboolean JNICALL
+Java_hdf_hdf5lib_H5_H5VLfapl_1is_1native(JNIEnv *env, jclass clss, jlong fapl_id)
+{
+    hbool_t bval = JNI_FALSE;
+
+    UNUSED(clss);
+
+    if (H5VLfapl_is_native((hid_t)fapl_id, &bval) < 0)
+        H5_LIBRARY_ERROR(ENVONLY);
+
+    bval = (bval > 0) ? JNI_TRUE : JNI_FALSE;
+
+done:
+    return (jboolean)bval;
+}
+
 #ifdef __cplusplus
 } /* end extern "C" */
 #endif /* __cplusplus */

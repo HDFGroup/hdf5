@@ -1077,3 +1077,37 @@ H5VLunregister_opt_operation(H5VL_subclass_t subcls, const char *op_name)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLunregister_opt_operation() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5VLfapl_is_native
+ *
+ * Purpose:     Query if a FAPL will use the native VOL connector.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5VLfapl_is_native(hid_t fapl_id, hbool_t *is_native)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "i*b", fapl_id, is_native);
+
+    /* Check args */
+    if (NULL == is_native)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid is_native pointer")
+
+    /* Check for default property list value */
+    if (H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+
+    /* Invoke the private API call */
+    if (H5VL_fapl_is_native(fapl_id, is_native) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't get VOL connector info")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5VLfapl_is_native() */

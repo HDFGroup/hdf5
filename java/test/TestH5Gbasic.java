@@ -23,8 +23,6 @@ import hdf.hdf5lib.HDF5Constants;
 import hdf.hdf5lib.exceptions.HDF5LibraryException;
 import hdf.hdf5lib.structs.H5G_info_t;
 
-import test.H5TestUtils;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;

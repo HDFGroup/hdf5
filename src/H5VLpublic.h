@@ -357,6 +357,18 @@ H5_DLL herr_t H5VLunregister_connector(hid_t connector_id);
  */
 H5_DLL herr_t H5VLquery_optional(hid_t obj_id, H5VL_subclass_t subcls, int opt_type, uint64_t *flags);
 
+/**
+ * \ingroup H5VL
+ * \brief Determine if a fapl is set to use the native VOL connector.
+ *
+ * \fapl_id
+ * \param[out] is_native Whether the fapl uses the native VOL connector.
+ * \return \herr_t
+ *
+ * \since 1.13.0
+ */
+H5_DLL herr_t H5VLfapl_is_native(hid_t fapl_id, hbool_t *is_native);
+
 #ifdef __cplusplus
 }
 #endif
