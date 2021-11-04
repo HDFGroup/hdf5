@@ -426,21 +426,21 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     {                                                                                                        \
         if (sizeof(type) == sizeof(int)) {                                                                   \
             if (round_fun(max * pow_fun((type)10, (type)D_val) - min * pow_fun((type)10, (type)D_val)) >     \
-                pow_fun((type)2.0F, (type)(sizeof(int) * 8 - 1))) {                                          \
+                pow_fun((type)2, (type)(sizeof(int) * 8 - 1))) {                                             \
                 *minbits = sizeof(int) * 8;                                                                  \
                 goto done;                                                                                   \
             }                                                                                                \
         }                                                                                                    \
         else if (sizeof(type) == sizeof(long)) {                                                             \
             if (round_fun(max * pow_fun((type)10, (type)D_val) - min * pow_fun((type)10, (type)D_val)) >     \
-                pow_fun((type)2.0F, (type)(sizeof(long) * 8 - 1))) {                                         \
+                pow_fun((type)2, (type)(sizeof(long) * 8 - 1))) {                                            \
                 *minbits = sizeof(long) * 8;                                                                 \
                 goto done;                                                                                   \
             }                                                                                                \
         }                                                                                                    \
         else if (sizeof(type) == sizeof(long long)) {                                                        \
             if (round_fun(max * pow_fun((type)10, (type)D_val) - min * pow_fun((type)10, (type)D_val)) >     \
-                pow_fun((type)2.0F, (type)(sizeof(long long) * 8 - 1))) {                                    \
+                pow_fun((type)2, (type)(sizeof(long long) * 8 - 1))) {                                       \
                 *minbits = sizeof(long long) * 8;                                                            \
                 goto done;                                                                                   \
             }                                                                                                \
