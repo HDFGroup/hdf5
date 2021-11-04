@@ -151,6 +151,7 @@ PROGRAM FC_AVAIL_KINDS
      WRITE(8,'(I0)') max_decimal_prec
      WRITE(8,'(I0)') num_ikinds
      WRITE(8,'(I0)') num_rkinds
+     CLOSE(8)
 END PROGRAM FC_AVAIL_KINDS
 !---- END ----- Determine the available KINDs for REALs and INTEGERs
 
