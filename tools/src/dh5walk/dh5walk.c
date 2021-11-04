@@ -1,6 +1,5 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -23,6 +22,9 @@
 #include "mfu_errors.h"
 #include "mfu_flist_internal.h"
 
+/* Name of tool */
+#define PROGRAMNAME "dh5walk"
+
 #ifdef DAOS_SUPPORT
 #include "mfu_daos.h"
 #endif
@@ -31,6 +33,8 @@ static char *user_cmd = NULL;
 static char  mpierrstr[MPI_MAX_ERROR_STRING];
 static int   mpierrlen;
 static int   sg_mpi_rank = 0;
+static int   current_input_index = 0;
+static int   processing_inputfile = 0;
 
 static void dh5tool_flist_write_text(const char *name, mfu_flist bflist);
 static void run_command(int argc, char **argv, char *cmdline, const char *fname);
@@ -89,7 +93,6 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
                                           {"output", require_arg, 'o'},
                                           {"tool", require_arg, 'T'},
                                           {NULL, 0, '\0'}};
-
 static void
 save_command(const char *argv0)
 {
@@ -296,7 +299,7 @@ distribute_separator_add(struct distribute_option *option, uint64_t separator)
         pos = low;
 
     if (pos < count)
-        memmove(&option->separators[low + 1], &option->separators[low],
+        HDmemmove(&option->separators[low + 1], &option->separators[low],
                 sizeof(*option->separators) * (uint64_t)(count - pos));
 
     option->separators[pos] = separator;
@@ -912,6 +915,7 @@ get_copy_count(char *fname, char *appname)
     return 0;
 }
 
+
 static void
 run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const char *fname)
 {
@@ -919,6 +923,11 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
     char *toolname   = argv[0];
     char *buf        = NULL;
     int   use_stdout = 0;
+
+#ifdef H5_HAVE_WINDOWS
+    HDprintf("ERROR: %s %s: Unable to support fork/exec on WINDOWS\n", PROGRAMNAME, __func__);
+    dh5walk_exit(EXIT_FAILURE);    
+#else
 
     /* create a copy of the 1st file passed to the application */
     HDstrcpy(filepath, fname);
@@ -985,8 +994,8 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
             close(pipefd[1]);
             buf       = thisbuft->buf;
             remaining = thisbuft->count;
-            nbytes    = strlen(cmdline);
             offset    = thisbuft->chars;
+            nbytes    = strlen(cmdline);
             /* Record the command line for the log! */
             if (nbytes < remaining) {
                 HDstrcpy(&buf[offset], cmdline);
@@ -1061,31 +1070,36 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
         char * logbase = HDstrdup(basename(filepath));
         char * thisapp = HDstrdup(basename(toolname));
 
-        log_instance = get_copy_count(logbase, thisapp);
+        if (processing_inputfile == 0)
+            log_instance = get_copy_count(logbase, thisapp);
 
         if (txtlog == NULL) {
-            if (log_instance > 0) {
-                HDprintf(logpath, "%s/%s_%s.log_%d", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
+            if ((log_instance > 0) || processing_inputfile) {
+                if (processing_inputfile)
+                    log_instance = current_input_index;
+                HDsprintf(logpath, "%s/%s_%s.log_%d", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
                          thisapp, log_instance);
             }
             else {
-                HDprintf(logpath, "%s/%s_%s.log", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
+                HDsprintf(logpath, "%s/%s_%s.log", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
                          thisapp);
             }
         }
         else {
             log_len = strlen(txtlog);
-            if (log_instance > 0) {
+            if ((log_instance > 0) || processing_inputfile) {
+                if (processing_inputfile)
+                    log_instance = current_input_index;
                 if (txtlog[log_len - 1] == '/')
-                    HDprintf(logpath, "%s%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+                    HDsprintf(logpath, "%s%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
                 else
-                    HDprintf(logpath, "%s/%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
+                    HDsprintf(logpath, "%s/%s_%s.log_%d", txtlog, logbase, thisapp, log_instance);
             }
             else {
                 if (txtlog[log_len - 1] == '/')
-                    HDprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
+                    HDsprintf(logpath, "%s%s_%s.log", txtlog, logbase, thisapp);
                 else
-                    HDprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
+                    HDsprintf(logpath, "%s/%s_%s.log", txtlog, logbase, thisapp);
             }
         }
 
@@ -1124,6 +1138,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
         if (thisapp)
             free(thisapp);
     } /* else if(log_stdout_in_file)  */
+#endif	/* #ifdef H5_HAVE_WINDOWS */
 }
 
 int MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg);
@@ -1233,7 +1248,7 @@ static void
 add_executable(int argc, char **argv, char *cmdstring, int *f_index, int f_count __attribute__((unused)))
 {
     char cmdline[2048];
-    HDprintf(cmdline, "\n---------\nCommand: %s\n", cmdstring);
+    HDsprintf(cmdline, "\n---------\nCommand: %s\n", cmdstring);
     argv[argc] = NULL;
     run_command(argc, argv, cmdline, argv[f_index[0]]);
     return;
@@ -1246,13 +1261,18 @@ process_input_file(char *inputname, int myrank, int size)
     char linebuf[PATH_MAX] = {
         '\0',
     };
-    FILE *    config = fopen(inputname, "r");
+    FILE *    config = HDfopen(inputname, "r");
     mfu_flist flist1 = NULL;
 
     if (config == NULL)
         return -1;
 
     flist1 = mfu_flist_new();
+
+    /* Flag the fact that we're processing an inputfile (script) 
+     * so that we can generate a meaningful logfile name...
+     */
+    processing_inputfile = 1;
 
     while (HDfgets(linebuf, sizeof(linebuf), config) != NULL) {
         const char *delim   = " \n";
@@ -1288,8 +1308,10 @@ process_input_file(char *inputname, int myrank, int size)
                 arg           = strtok(NULL, delim);
             }
 
-            if (myrank == (index % size))
+            if (myrank == (index % size)) {
+				current_input_index = index;
                 add_executable(token, argv, cmdline, fileindex, filecount);
+            }
             index++;
         }
         linebuf[0] = 0;
@@ -1299,7 +1321,7 @@ process_input_file(char *inputname, int myrank, int size)
     if (output_log_file) {
         dh5tool_flist_write_text(output_log_file, flist1);
     }
-    fclose(config);
+    HDfclose(config);
 
     mfu_flist_free(&flist1);
     return 0;
@@ -1311,15 +1333,17 @@ main(int argc, const char *argv[])
     int i;
     int rc = 0;
 
+    char *env_var = NULL;
+
     /* initialize MPI */
     MPI_Init(&argc, (char ***)&argv);
     mfu_init();
 
-    h5tools_setprogname("dh5walk");
-    h5tools_setstatus(EXIT_SUCCESS);
-
     /* Initialize h5tools lib */
     h5tools_init();
+
+    h5tools_setprogname(PROGRAMNAME);
+    h5tools_setstatus(EXIT_SUCCESS);
 
     /* get our rank and the size of comm_world */
     int rank, ranks;
@@ -1329,6 +1353,15 @@ main(int argc, const char *argv[])
     /* Assign the static global mpi_rank (for debugging) */
     sg_mpi_rank = rank;
 
+#if 0
+	env_var = HDgetenv("HDF5_DH5WALK_PRINT_CMDLINE");
+    if (env_var) {
+		int enable = HDatoi(env_var);
+		if (enable) {
+			
+		}
+    }
+#endif
     /* pointer to mfu_walk_opts */
     mfu_walk_opts_t *walk_opts = mfu_walk_opts_new();
 
@@ -1367,17 +1400,23 @@ main(int argc, const char *argv[])
     while (!tool_selected) {
         opt = H5_get_option(argc, argv, s_opts, l_opts);
         switch ((char)opt) {
+            default:
+                usage();
+                dh5walk_exit(EXIT_FAILURE);
+                break;
             case 'i':
                 inputname    = HDstrdup(H5_optarg);
                 last_mfu_arg = H5_optind;
+                if (inputname)
+                   tool_selected = 1;
                 break;
             case 'o':
                 outputname   = HDstrdup(H5_optarg);
                 last_mfu_arg = H5_optind;
                 if (outputname) {
                     log_output_in_single_file = 1;
-                    output_log_file           = HDstrdup(H5_optarg);
-                    text                      = 1; /* Format TXT, not HDF5 */
+                    output_log_file = HDstrdup(H5_optarg);
+                    text = 1; /* Format TXT, not HDF5 */
                 }
                 break;
             case 'E':
@@ -1398,7 +1437,7 @@ main(int argc, const char *argv[])
                  * HDF5 tool options conflict with the MFU options.
                  */
                 tool_selected   = 1;
-                tool_args_start = mfu_argc;
+                tool_args_start = H5_optind;
                 h5tool_argc     = argc - mfu_argc;
                 last_mfu_arg    = H5_optind;
                 /* Don't allow any further parsing of arguments */
@@ -1411,16 +1450,14 @@ main(int argc, const char *argv[])
                 usage();
                 dh5walk_exit(EXIT_SUCCESS);
                 break;
-            default:
-                usage();
-                dh5walk_exit(EXIT_FAILURE);
         }
     }
 
     if (inputname != NULL) {
         if (tool_selected && (rank == 0)) {
-            puts("WARNING: When utilizing --input, the only other supported runtime argument is --output or "
-                 "-l");
+            if ((log_output_in_single_file == 0) && (log_stdout_in_file == 0))
+               puts("WARNING: When utilizing --input, the only other supported "
+                    "runtime argument is --output or -l");
         }
         rc = process_input_file(inputname, rank, ranks);
         mfu_finalize();
@@ -1442,7 +1479,7 @@ main(int argc, const char *argv[])
     /**************************************************************/
 
     int *path_indices = NULL;
-    int  numpaths     = count_dirpaths(argc, tool_args_start + 1, argv, &path_indices);
+    int  numpaths     = count_dirpaths(argc, tool_args_start, argv, &path_indices);
 
     const char **argpaths = NULL;
 
@@ -1559,7 +1596,7 @@ main(int argc, const char *argv[])
         int   k          = 0;
         char *ptr        = args_buf + sizeof(int);
         *(int *)args_buf = h5tool_argc;
-        for (i = tool_args_start; i < argc; i++) {
+        for (i = tool_args_start-1; i < argc; i++) {
             int copy_flist = -1;
             if (i == config_index[k]) {
                 copy_flist = k;
@@ -1641,6 +1678,7 @@ main(int argc, const char *argv[])
     /* delete file object */
     mfu_file_delete(&mfu_src_file);
 
+    h5tools_close();
     /* shut down MPI */
     mfu_finalize();
     MPI_Finalize();

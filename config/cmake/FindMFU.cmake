@@ -66,6 +66,7 @@ find_package_handle_standard_args(MFU
 
 if(MFU_FOUND)
   set(MFU_LIBRARIES ${MFU_LIBRARY})
+  set(MFU_LIBRARY_DEBUG ${MFU_LIBRARY})
   set(MFU_INCLUDE_DIRS "${MFU_INCLUDE_DIR}")
 
   if(NOT TARGET MFU::MFU)

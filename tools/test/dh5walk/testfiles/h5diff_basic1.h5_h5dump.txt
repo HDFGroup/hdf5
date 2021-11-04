@@ -1,0 +1,30 @@
+HDF5 "/home/riwarren/Sandbox/HDF5/GITHUB/hdf5-ph5diff-etc/hdf5/tools/test/dh5walk/testfiles/h5diff_basic1.h5" {
+FILE_CONTENTS {
+ group      /
+ group      /g1
+ dataset    /g1/d1
+ dataset    /g1/d2
+ dataset    /g1/dset1
+ dataset    /g1/dset10
+ dataset    /g1/dset11
+ dataset    /g1/dset12
+ dataset    /g1/dset3
+ dataset    /g1/dset5
+ dataset    /g1/dset6
+ dataset    /g1/dset7
+ dataset    /g1/dset8
+ dataset    /g1/dset9
+ dataset    /g1/fp1
+ dataset    /g1/fp15
+ dataset    /g1/fp16
+ dataset    /g1/fp17
+ dataset    /g1/fp18
+ dataset    /g1/fp18_COPY
+ dataset    /g1/fp19
+ dataset    /g1/fp19_COPY
+ dataset    /g1/fp2
+ dataset    /g1/fp20
+ dataset    /g1/fp20_COPY
+ dataset    /g1/ld
+ }
+}

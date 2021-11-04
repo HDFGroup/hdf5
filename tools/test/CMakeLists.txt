@@ -1,6 +1,11 @@
 cmake_minimum_required (VERSION 3.12)
 project (HDF5_TOOLS_TEST C)
 
+#-- Add the dh5walk tests
+if (HDF5_BUILD_PARALLEL_TOOLS AND HDF5_ENABLE_PARALLEL)
+  add_subdirectory (dh5walk)
+endif()
+
 #-- Add the h5diff tests
 add_subdirectory (h5diff)
 

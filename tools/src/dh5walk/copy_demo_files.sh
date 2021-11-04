@@ -69,6 +69,7 @@ echo "$TOOLS_TEST_DIR/h5diff/testfiles/h5diff_dset2.h5"          >> "$TOOLS_TEST
 echo "$TOOLS_TEST_DIR/h5diff/testfiles/h5diff_hyper2.h5"         >> "$TOOLS_TEST_DIR"/demo_destfiles.test
 echo "$TOOLS_TEST_DIR/h5diff/testfiles/h5diff_dset_zero_dim_size2.h5"  >> "$TOOLS_TEST_DIR"/demo_destfiles.test
 echo "$TOOLS_TEST_DIR/h5diff/testfiles/non_comparables2.h5"      >> "$TOOLS_TEST_DIR"/demo_destfiles.test
+
 echo "$TOOLS_H5DIFF_BIN/h5diff $TOOLS_TEST_DIR/h5diff/testfiles/h5diff_basic1.h5 $TOOLS_TEST_DIR/h5diff/testfiles/h5diff_basic2.h5" > $TOOLS_TEST_DIR/demo_dh5walk.test
 echo "$TOOLS_H5DIFF_BIN/h5diff $TOOLS_TEST_DIR/h5diff/testfiles/h5diff_basic1.h5 $TOOLS_TEST_DIR/h5diff/testfiles/h5diff_basic2.h5 g1/dset1 g1/dset2" >> "$TOOLS_TEST_DIR"/demo_dh5walk.test
 echo "$TOOLS_H5DIFF_BIN/h5diff -r $TOOLS_TEST_DIR/h5diff/testfiles/h5diff_basic1.h5 $TOOLS_TEST_DIR/h5diff/testfiles/h5diff_basic2.h5" >> "$TOOLS_TEST_DIR"/demo_dh5walk.test
