@@ -300,16 +300,6 @@ H5FD_ros3_init(void)
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
-    /* It is possible that an application will call this routine through
-     * a `H5FD_*` symbol (`H5FD_FAMILY`, `H5FD_MULTI`, `H5FD_SEC2`, et
-     * cetera) before the library has had an opportunity to initialize.
-     * Call H5_init_library() to make sure that the library has been
-     * initialized before this VFD tries to initialize.
-     */
-    if (H5_init_library() < 0) {
-        HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, H5I_INVALID_HID, "library initialization failed")
-    }
-
 #if ROS3_DEBUG
     HDfprintf(stdout, "H5FD_ros3_init() called.\n");
 #endif

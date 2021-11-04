@@ -240,15 +240,6 @@ H5FD_stdio_init(void)
 {
     char *lock_env_var = NULL; /* Environment variable pointer */
 
-    /* It is possible that an application will call this routine through
-     * a `H5FD_*` symbol (`H5FD_FAMILY`, `H5FD_MULTI`, `H5FD_SEC2`, et
-     * cetera) before the library has had an opportunity to initialize.
-     * Call H5open() to make sure that the library has been initialized
-     * before this VFD tries to initialize.
-     */
-    if (H5open() < 0)
-        return H5I_INVALID_HID;
-
     /* Clear the error stack */
     H5Eclear2(H5E_DEFAULT);
 
