@@ -35,10 +35,9 @@
  *              Failure:        H5I_INVALID_HID
  *-------------------------------------------------------------------------
  */
-hid_t
-H5FDperform_init(hid_t (*init)(void))
+hid_t H5FDperform_init(hid_t (*init)(void))
 {
-    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
+    hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
     /*NO TRACE*/
