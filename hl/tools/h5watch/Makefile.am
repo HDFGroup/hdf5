@@ -36,7 +36,7 @@ if BUILD_TESTS_CONDITIONAL
   AM_CPPFLAGS+=-I$(top_srcdir)/hl/test
   TEST_SCRIPT=testh5watch.sh
   check_SCRIPTS=$(TEST_SCRIPT)
-  SCRIPT_DEPEND=swmr_check_compat_vfd$(EXEEXT) extend_dset$(EXEEXT) h5watch$(EXEEXT)
+  SCRIPT_DEPEND=extend_dset$(EXEEXT) h5watch$(EXEEXT)
   noinst_PROGRAMS=h5watchgentest extend_dset
   # Add extend_dset specific preprocessor flags here
   # (add the main test subdirectory to the include file path)
