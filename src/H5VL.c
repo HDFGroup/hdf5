@@ -654,6 +654,37 @@ done:
     FUNC_LEAVE_API(ret_value)
 } /* H5VLobject() */
 
+/*---------------------------------------------------------------------------
+ * Function:    H5VLobject_is_native
+ *
+ * Purpose:     Determines whether an object ID represents a native VOL
+ *              connector object.
+ *
+ * Return:      Success:    TRUE/FALSE
+ *              Failure:    FAIL
+ *
+ *---------------------------------------------------------------------------
+ */
+hbool_t
+H5VLobject_is_native(hid_t obj_id)
+{
+    H5VL_object_t *vol_obj   = NULL;
+    hbool_t        ret_value = FALSE;
+
+    FUNC_ENTER_API(FALSE)
+    H5TRACE1("b", "i", obj_id);
+
+    /* Get the location object for the ID */
+    if (NULL == (vol_obj = H5VL_vol_object(obj_id)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid object identifier")
+
+    if (H5VL_object_is_native(vol_obj, &ret_value) < 0)
+        HGOTO_ERROR(H5E_VOL, H5E_CANTGET, FAIL, "can't determine if object is a native connector object")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* H5VLobject_is_native() */
+
 /*-------------------------------------------------------------------------
  * Function:    H5VLget_file_type
  *
