@@ -378,14 +378,14 @@ H5FD_stdio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
         }
         else
             H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_CANTOPENFILE,
-                        "file doesn't exist and CREATE wasn't specified", NULL);
+                        "file doesn't exist and CREAT wasn't specified", NULL);
     }
     else if (flags & H5F_ACC_EXCL) {
         /* File exists, but EXCL is passed.  Fail. */
         assert(flags & H5F_ACC_CREAT);
         fclose(f);
         H5Epush_ret(func, H5E_ERR_CLS, H5E_IO, H5E_FILEEXISTS,
-                    "file exists but CREATE and EXCL were specified", NULL);
+                    "file exists but CREAT and EXCL were specified", NULL);
     }
     else if (flags & H5F_ACC_RDWR) {
         if (flags & H5F_ACC_TRUNC)
