@@ -1143,7 +1143,7 @@ test_hrb_node_set(void)
          *********/
 
         for (mock_i = 0; test->given[mock_i] != NULL; mock_i += 2) {
-            const char *name = test->given[mock_i];
+            const char *name  = test->given[mock_i];
             const char *value = test->given[mock_i + 1];
 
             FAIL_IF(SUCCEED != H5FD_s3comms_hrb_node_set(&list, name, value))
@@ -1162,7 +1162,7 @@ test_hrb_node_set(void)
         node   = list;
         mock_i = 0;
         while (test->expected[mock_i] != NULL && node != NULL) {
-            const char *name = test->expected[mock_i];
+            const char *name  = test->expected[mock_i];
             const char *value = test->expected[mock_i + 1];
 
             JSVERIFY_STR(name, node->name, NULL)

@@ -1390,7 +1390,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1adjust(JNIEnv *env, jclass clss, jlong space_id, 
 {
     jboolean  isCopy;
     hssize_t *offst       = NULL;
-    jlong *   offset     = NULL;
+    jlong *   offset      = NULL;
     jsize     offset_rank = -1;
     int       i, rank = -1;
     herr_t    status = FAIL;
@@ -1405,7 +1405,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1adjust(JNIEnv *env, jclass clss, jlong space_id, 
 
     if (NULL == offset) {
         offset = NULL;
-        offst   = (hssize_t *)offset;
+        offst  = (hssize_t *)offset;
     }
     else {
         if ((offset_rank = ENVPTR->GetArrayLength(ENVONLY, offset)) < 0) {
