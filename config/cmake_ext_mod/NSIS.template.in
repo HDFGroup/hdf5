@@ -393,21 +393,21 @@ FunctionEnd
 ###########################################
 
 ;====================================================
-; isn't - Returns 1 if the current system is NT, 0
+; IsNT - Returns 1 if the current system is NT, 0
 ;        otherwise.
 ;     Output: head of the stack
 ;====================================================
-; isn't
+; IsNT
 ; no input
 ; output, top of the stack = 1 if NT or 0 if not
 ;
 ; Usage:
-;   Call isn't
+;   Call IsNT
 ;   Pop $R0
 ;  ($R0 at this point is 1 or 0)
 
-!macro isn't un
-Function ${un}isn't
+!macro IsNT un
+Function ${un}IsNT
   Push $0
   ReadRegStr $0 HKLM "SOFTWARE\Microsoft\Windows NT\CurrentVersion" CurrentVersion
   StrCmp $0 "" 0 IsNT_yes
@@ -422,8 +422,8 @@ Function ${un}isn't
     Push 1
 FunctionEnd
 !macroend
-!insertmacro isn't ""
-!insertmacro isn't "un."
+!insertmacro IsNT ""
+!insertmacro IsNT "un."
 
 ; StrStr
 ; input, top of stack = string to search for
