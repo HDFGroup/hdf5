@@ -131,7 +131,7 @@ typedef struct earray_iter_t {
 struct earray_test_param_t {
     earray_test_type_t   reopen_array; /* Whether to re-open the array during the test */
     earray_test_comp_t   comp;         /* Whether to compress the blocks or not */
-    const earray_iter_t *eiter;       /* Iterator to use for this test */
+    const earray_iter_t *eiter;        /* Iterator to use for this test */
 
     /* Super block information */
     size_t            nsblks;    /* Number of superblocks needed for array */
