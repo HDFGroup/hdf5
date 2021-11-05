@@ -701,7 +701,7 @@ CONTAINS
 !
 ! Outputs:
 !  majnum - major version of the library
-!  minnum - minor version of the library
+!  minum - minor version of the library
 !  relnum - release version of the library
 !  error  - Returns 0 if successful and -1 if fails
 !
@@ -710,19 +710,19 @@ CONTAINS
 !  September 24, 2002
 !
 ! Fortran90 Interface:
-  SUBROUTINE h5get_libversion_f(majnum, minnum, relnum, error)
+  SUBROUTINE h5get_libversion_f(majnum, minum, relnum, error)
     IMPLICIT NONE
-    INTEGER, INTENT(OUT) :: majnum, minnum, relnum, error
+    INTEGER, INTENT(OUT) :: majnum, minum, relnum, error
 !*****
     INTERFACE
-       INTEGER FUNCTION h5get_libversion_c(majnum, minnum, relnum) &
+       INTEGER FUNCTION h5get_libversion_c(majnum, minum, relnum) &
             BIND(C,NAME='h5get_libversion_c')
          IMPLICIT NONE
-         INTEGER, INTENT(OUT) :: majnum, minnum, relnum
+         INTEGER, INTENT(OUT) :: majnum, minum, relnum
        END FUNCTION h5get_libversion_c
     END INTERFACE
 
-    error = h5get_libversion_c(majnum, minnum, relnum)
+    error = h5get_libversion_c(majnum, minum, relnum)
 
   END SUBROUTINE h5get_libversion_f
 
@@ -747,20 +747,20 @@ CONTAINS
 !  September 24, 2002
 !
 ! Fortran90 Interface:
-  SUBROUTINE h5check_version_f(majnum, minnum, relnum, error)
+  SUBROUTINE h5check_version_f(majnum, minum, relnum, error)
     IMPLICIT NONE
-    INTEGER, INTENT(IN)  :: majnum, minnum, relnum
+    INTEGER, INTENT(IN)  :: majnum, minum, relnum
     INTEGER, INTENT(OUT) :: error
 !*****
     INTERFACE
-       INTEGER FUNCTION h5check_version_c(majnum, minnum, relnum) &
+       INTEGER FUNCTION h5check_version_c(majnum, minum, relnum) &
             BIND(C,NAME='h5check_version_c')
          IMPLICIT NONE
-         INTEGER, INTENT(IN) :: majnum, minnum, relnum
+         INTEGER, INTENT(IN) :: majnum, minum, relnum
        END FUNCTION h5check_version_c
     END INTERFACE
 
-    error = h5check_version_c(majnum, minnum, relnum)
+    error = h5check_version_c(majnum, minum, relnum)
 
   END SUBROUTINE h5check_version_f
 !****s* H5LIB/h5garbage_collect_f

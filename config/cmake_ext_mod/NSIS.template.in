@@ -244,7 +244,7 @@ Function AddToPath
   Pop $2
   StrCmp $2 "" "" AddToPath_done
 
-  Call isn't
+  Call IsNT
   Pop $1
   StrCmp $1 1 AddToPath_NT
     ; Not on NT
@@ -302,7 +302,7 @@ Function un.RemoveFromPath
 
   IntFmt $6 "%c" 26 # DOS EOF
 
-  Call un.isn't
+  Call un.IsNT
   Pop $1
   StrCmp $1 1 unRemoveFromPath_NT
     ; Not on NT
