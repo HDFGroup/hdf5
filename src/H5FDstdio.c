@@ -315,10 +315,10 @@ H5Pset_fapl_stdio(hid_t fapl_id)
  * Purpose:  Create and/or opens a Standard C file as an HDF5 file.
  *
  * Errors:
- *  IO  CANTOPENFILE    File doesn't exist and CREATE wasn't
+ *  IO  CANTOPENFILE    File doesn't exist and CREAT wasn't
  *                      specified.
  *  IO  CANTOPENFILE    fopen() failed.
- *  IO  FILEEXISTS      File exists but CREATE and EXCL were
+ *  IO  FILEEXISTS      File exists but CREAT and EXCL were
  *                      specified.
  *
  * Return:
