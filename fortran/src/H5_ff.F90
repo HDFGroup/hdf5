@@ -701,7 +701,7 @@ CONTAINS
 !
 ! Outputs:
 !  majnum - major version of the library
-!  minimum  - minor version of the library
+!  minnum - minor version of the library
 !  relnum - release version of the library
 !  error  - Returns 0 if successful and -1 if fails
 !
