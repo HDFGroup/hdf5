@@ -76,7 +76,7 @@ static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},         {"hel",
                                           {"fields", require_arg, 'f'},  {"field", require_arg, 'f'},
                                           {"fiel", require_arg, 'f'},    {"fie", require_arg, 'f'},
                                           {"fi", require_arg, 'f'},      {"version", no_arg, 'V'},
-                                          {"version", no_arg, 'V'},      {"versi", no_arg, 'V'},
+                                          {"versio", no_arg, 'V'},       {"versi", no_arg, 'V'},
                                           {"vers", no_arg, 'V'},         {"ver", no_arg, 'V'},
                                           {"ve", no_arg, 'V'},           {NULL, 0, '\0'}};
 
