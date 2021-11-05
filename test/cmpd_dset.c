@@ -531,7 +531,7 @@ test_compound(char *filename, hid_t fapl)
             HDprintf("    i==%u, row=%u, col=%u\n", i, i / NY, i % NY);
             HDprintf("    got: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", s1[i].a, s1[i].b, s1[i].c[0],
                      s1[i].c[1], s1[i].c[2], s1[i].c[3], s1[i].d, s1[i].e);
-            HDprintf("    and: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", 8 * i + 0, 8 * i + 1, 8 * i + 2,
+            HDprintf("    ans: {%7d,%7d,[%7d,%7d,%7d,%7d],%7d,%7d}\n", 8 * i + 0, 8 * i + 1, 8 * i + 2,
                      8 * i + 3, 8 * i + 4, 8 * i + 5, 8 * i + 6, 8 * i + 7);
             goto error;
         }

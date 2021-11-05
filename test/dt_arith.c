@@ -2535,7 +2535,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 break;
         }
 
-        HDprintf("        and = ");
+        HDprintf("        ans = ");
         for (k = 0; k < dst_size; k++)
             HDprintf(" %02x", hw[ENDIAN(dst_size, k, endian)]);
         HDprintf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");

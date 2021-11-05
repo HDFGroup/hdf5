@@ -7846,14 +7846,14 @@ gcd(long l0, long r0)
  * If `nelts <= 0`, results are undefined.
  */
 static void
-make_random_offset_and_increment(long nelts, long *offset, long *incp)
+make_random_offset_and_increment(long nelts, long *offsetp, long *incp)
 {
     long inc;
     long maxinc;
 
     HDassert(0 < nelts);
 
-    *offset = HDrandom() % nelts;
+    *offsetp = HDrandom() % nelts;
 
     /* `maxinc` is chosen so that for any `x` in [0, nelts - 1],
      * `x + maxinc` does not overflow a long.
