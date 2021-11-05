@@ -6,8 +6,8 @@ jobs:
   codespell:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
-      - uses: actions/setup-python@v3
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
       - run: pip install codespell flake8
       - run: |
           SKIP="./bin/runtest,./bin/trace,./bin/h5redeploy.in,./bin/snapshot,./tools/testfiles/tstring2.ddl,./hl/tools/h5watch/h5watch.c,./tools/test/h5jam/tellub.c,./tools/libtest/h5tools_test_utils.c,./src/H5T.c,./release_docs/RELEASE.txt,.github/workflows/codespell.yml"

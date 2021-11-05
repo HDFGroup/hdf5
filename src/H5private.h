@@ -682,7 +682,7 @@ typedef off_t       h5_stat_size_t;
 #define HDcosh(X) cosh(X)
 #endif
 #ifndef HDcreat
-#define HDcreat(S, M) create(S, M)
+#define HDcreat(S, M) creat(S, M)
 #endif
 #ifndef HDctermid
 #define HDctermid(S) ctermid(S)
