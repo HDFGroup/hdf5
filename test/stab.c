@@ -137,7 +137,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
     if (HDstrcmp(comment, "hello world") != 0) {
         H5_FAILED();
         HDputs("    Read the wrong comment string from the group.");
-        HDprintf("    got: \"%s\"\n    and: \"hello world\"\n", comment);
+        HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
         TEST_ERROR
     }
     if (H5Gclose(g1) < 0)

@@ -127,7 +127,7 @@ main(void)
         HDstrftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
         tm = HDlocaltime(&now);
         HDstrftime((char *)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
-        HDprintf("    got: %s\n    and: %s\n", buf1, buf2);
+        HDprintf("    got: %s\n    ans: %s\n", buf1, buf2);
         goto error;
     }
     PASSED();

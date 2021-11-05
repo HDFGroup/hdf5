@@ -159,7 +159,7 @@ main(void)
             H5_FAILED();
             HDprintf("    i=%d, heap offset=%lu\n", i, (unsigned long)(obj[i]));
             HDprintf("    got: \"%s\"\n", s);
-            HDprintf("    and: \"%s\"\n", buf);
+            HDprintf("    ans: \"%s\"\n", buf);
             goto error;
         }
 
