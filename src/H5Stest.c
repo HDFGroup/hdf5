@@ -190,7 +190,8 @@ H5S__check_spans_tail_ptr(const H5S_hyper_span_info_t *span_lst)
         cur_elem = cur_elem->next;
     } /* end while */
     if (actual_tail != span_lst->tail)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_INCONSISTENTSTATE, FAIL, "the selection has inconsistent tail pointers")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_INCONSISTENTSTATE, FAIL,
+                    "the selection has inconsistent tail pointers")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -231,7 +232,8 @@ H5S__check_points_tail_ptr(const H5S_pnt_list_t *pnt_lst)
         cur_elem    = cur_elem->next;
     } /* end while */
     if (actual_tail != pnt_lst->tail)
-        HGOTO_ERROR(H5E_DATASPACE, H5E_INCONSISTENTSTATE, FAIL, "the selection has inconsistent tail pointers")
+        HGOTO_ERROR(H5E_DATASPACE, H5E_INCONSISTENTSTATE, FAIL,
+                    "the selection has inconsistent tail pointers")
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)

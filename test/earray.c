@@ -131,7 +131,7 @@ typedef struct earray_iter_t {
 struct earray_test_param_t {
     earray_test_type_t   reopen_array; /* Whether to re-open the array during the test */
     earray_test_comp_t   comp;         /* Whether to compress the blocks or not */
-    const earray_iter_t *either;        /* Iterator to use for this test */
+    const earray_iter_t *either;       /* Iterator to use for this test */
 
     /* Super block information */
     size_t            nsblks;    /* Number of superblocks needed for array */
@@ -1709,7 +1709,7 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
                hsize_t cnt)
 {
     eiter_rnd_t *either; /* Random element iteration object */
-    size_t       u;     /* Local index variable */
+    size_t       u;      /* Local index variable */
 
     /* Allocate space for the element iteration object */
     either = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
@@ -1858,7 +1858,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
                 hsize_t cnt)
 {
     eiter_rnd_t *either; /* Random element iteration object */
-    size_t       u;     /* Local index variable */
+    size_t       u;      /* Local index variable */
 
     /* Allocate space for the element iteration object */
     either = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
