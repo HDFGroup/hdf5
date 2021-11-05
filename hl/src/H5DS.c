@@ -24,7 +24,7 @@ static herr_t H5DS_is_reserved(hid_t did);
  *
  * Purpose: Detremines if new references are used with dimension scales.
  *   The function H5DSwith_new_ref takes any object identifier and checks
- *   if new references are used for dimenison scales. Currently,
+ *   if new references are used for dimension scales. Currently,
  *   new references are used when non-native VOL connector is used or when
  *   H5_DIMENSION_SCALES_WITH_NEW_REF is set up via configure option.
  *
@@ -84,7 +84,7 @@ H5DSset_scale(hid_t dsid, const char *dimname)
         return FAIL;
 
     /*-------------------------------------------------------------------------
-     * check if the dataset is a dataset wich has references to dimension scales
+     * check if the dataset is a dataset which has references to dimension scales
      *-------------------------------------------------------------------------
      */
 
@@ -1120,7 +1120,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
             goto out;
     } /* nelmts */
 
-    /* Free refrences */
+    /* Free references */
     if (is_new_ref) {
         if (H5Treclaim(tid, sid, H5P_DEFAULT, ndsbuf) < 0)
             goto out;
@@ -1187,7 +1187,7 @@ out:
             dsbuf = NULL;
         }
         if (buf) {
-            /* Failure occured before H5Treclaim was called;
+            /* Failure occurred before H5Treclaim was called;
                free the pointers allocated when we read data in */
             for (i = 0; i < rank; i++) {
                 if (buf[i].p)
@@ -1633,7 +1633,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
     if (is_new_ref < 0)
         return FAIL;
 
-    /* get the number of scales assotiated with this DIM */
+    /* get the number of scales associated with this DIM */
     if ((nscales = H5DSget_num_scales(did, dim)) < 0)
         return FAIL;
 

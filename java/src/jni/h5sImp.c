@@ -1390,7 +1390,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1adjust(JNIEnv *env, jclass clss, jlong space_id, 
 {
     jboolean  isCopy;
     hssize_t *offst       = NULL;
-    jlong *   offsetP     = NULL;
+    jlong *   offset     = NULL;
     jsize     offset_rank = -1;
     int       i, rank = -1;
     herr_t    status = FAIL;
@@ -1404,8 +1404,8 @@ Java_hdf_hdf5lib_H5_H5Sselect_1adjust(JNIEnv *env, jclass clss, jlong space_id, 
         H5_LIBRARY_ERROR(ENVONLY);
 
     if (NULL == offset) {
-        offsetP = NULL;
-        offst   = (hssize_t *)offsetP;
+        offset = NULL;
+        offst   = (hssize_t *)offset;
     }
     else {
         if ((offset_rank = ENVPTR->GetArrayLength(ENVONLY, offset)) < 0) {
@@ -1416,7 +1416,7 @@ Java_hdf_hdf5lib_H5_H5Sselect_1adjust(JNIEnv *env, jclass clss, jlong space_id, 
         if (offset_rank != rank)
             H5_BAD_ARGUMENT_ERROR(ENVONLY, "H5Sselect_adjust: offset rank doesn't match dataspace rank!");
 
-        PIN_LONG_ARRAY(ENVONLY, offset, offsetP, &isCopy, "H5Sselect_adjust: offset not pinned");
+        PIN_LONG_ARRAY(ENVONLY, offset, offset, &isCopy, "H5Sselect_adjust: offset not pinned");
 
         if (NULL == (offst = (hssize_t *)HDmalloc((size_t)offset_rank * sizeof(hsize_t))))
             H5_OUT_OF_MEMORY_ERROR(ENVONLY, "H5Sselect_adjust: failed to allocate offset buffer");
@@ -1426,14 +1426,14 @@ Java_hdf_hdf5lib_H5_H5Sselect_1adjust(JNIEnv *env, jclass clss, jlong space_id, 
         H5_LIBRARY_ERROR(ENVONLY);
 
     for (i = 0; i < offset_rank; i++) {
-        offsetP[i] = (jlong)offst[i];
+        offset[i] = (jlong)offst[i];
     } /* end for */
 
 done:
     if (offst)
         HDfree(offst);
-    if (offsetP)
-        UNPIN_LONG_ARRAY(ENVONLY, offset, offsetP, (status < 0) ? JNI_ABORT : 0);
+    if (offset)
+        UNPIN_LONG_ARRAY(ENVONLY, offset, offset, (status < 0) ? JNI_ABORT : 0);
 
     return;
 } /* end Java_hdf_hdf5lib_H5_H5Sselect_1adjust */

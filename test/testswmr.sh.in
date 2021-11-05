@@ -198,7 +198,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -258,7 +258,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -330,7 +330,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -393,7 +393,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -474,7 +474,7 @@ do
             nerrors=`expr $nerrors + 1`
         fi
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."
@@ -544,7 +544,7 @@ do
             fi
         done
 
-        # Check for error and exit if one occured
+        # Check for error and exit if one occurred
         $DPRINT nerrors=$nerrors
         if test $nerrors -ne 0 ; then
             echo "SWMR tests failed with $nerrors errors."

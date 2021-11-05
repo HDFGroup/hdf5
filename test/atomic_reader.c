@@ -52,7 +52,7 @@
 
 static void usage(void);
 int         verify(int fd, unsigned int k);
-void        print_info(int *info, unsigned int lastr, unsigned iteration);
+void        print_info(int *info, unsigned int last, unsigned iteration);
 
 /*-------------------------------------------------------------------------
  * Function:    usage
@@ -168,7 +168,7 @@ error:
  *
  * Parameters:
  *              info -- the array storing the statistics for re-reads
- *              lastr -- the last read completed
+ *              last -- the last read completed
  *              iteration -- the current iteration
  *
  * Return:      void
@@ -176,16 +176,16 @@ error:
  *-------------------------------------------------------------------------
  */
 void
-print_info(int *info, unsigned int lastr, unsigned iteration)
+print_info(int *info, unsigned int last, unsigned iteration)
 {
     unsigned j; /* local index variable */
 
-    printf("--------statistics for %u reads (iteration %u)--------\n", lastr, iteration);
+    printf("--------statistics for %u reads (iteration %u)--------\n", last, iteration);
 
     for (j = 0; j <= READ_TRIES; j++)
         printf("# of %u re-tries = %u\n", j, info[j]);
 
-    printf("--------end statistics for %u reads (iteration %u)--------\n", lastr, iteration);
+    printf("--------end statistics for %u reads (iteration %u)--------\n", last, iteration);
 } /* print_info() */
 
 /*-------------------------------------------------------------------------

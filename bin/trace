@@ -381,9 +381,9 @@ sub rewrite_func ($$$$$) {
 
       # Wrap lines that will be longer than the limit
       if ($len_if_added > $max_trace_macro_line_len) {
-        # Wrap line, with indention
+        # Wrap line, with indentation
         $trace .= ",\n             ";
-        $len = 13;              # Set to 13, for indention
+        $len = 13;              # Set to 13, for indentation
 
         # Indent an extra space to account for extra digit in 'H5TRACE' macro
         if (scalar(@arg_str) >= 10) {

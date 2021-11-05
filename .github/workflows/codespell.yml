@@ -1,0 +1,18 @@
+# GitHub Action to automate the identification of common misspellings in text files
+# https://github.com/codespell-project/codespell
+name: codespell
+on: [push, pull_request]
+jobs:
+  codespell:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+      - run: pip install codespell
+      - run: |
+          SKIP="./bin/runtest,./bin/trace,./bin/h5redeploy.in,./bin/snapshot,./tools/testfiles/tstring2.ddl,./hl/tools/h5watch/h5watch.c,./tools/test/h5jam/tellub.c,./tools/libtest/h5tools_test_utils.c,./src/H5T.c,./release_docs/RELEASE.txt"
+          IGNORE="INOUT,inout,nd,parms,parm,IsNT,ba,offsetP,ser,ois,hDA,fiter,fo,clude,refere"
+          codespell -L $IGNORE --skip=$SKIP --quiet-level=2
+      - name: Codespell comment
+        if: ${{ failure() }}
+        uses: plettich/python_codespell_action@master

@@ -1348,7 +1348,7 @@ done:
  *      This is a special case subfunction to print the data in a region reference of type blocks.
  *
  * Return:
- *      The function returns FAIL if there was an error, otherwise SUCEED
+ *      The function returns FAIL if there was an error, otherwise SUCCEED
  *-------------------------------------------------------------------------
  */
 static int
@@ -1771,7 +1771,7 @@ done:
  * Purpose: Recursive check for variable length string of a datatype.
  *
  * Return:
- *    TRUE : type conatains any variable length string
+ *    TRUE : type contains any variable length string
  *    FALSE : type doesn't contain any variable length string
  *    Negative value: error occur
  *
@@ -2300,7 +2300,7 @@ done:
  *      This is a special case subfunction to print the data in a region reference of type blocks.
  *
  * Return:
- *      The function returns FAIL if there was an error, otherwise SUCEED
+ *      The function returns FAIL if there was an error, otherwise SUCCEED
  *
  *-------------------------------------------------------------------------
  */

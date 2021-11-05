@@ -103,9 +103,9 @@ New Features
             -JML 2006/6/21
         - If both shared and static libraries are installed, now both will be
             tested during 'make install'. -MAM 2006/06/21
-        - Added support to explicity enable stream_vfd or shared libraries
+        - Added support to explicitly enable stream_vfd or shared libraries
             when using parallel via the '--enable-stream_vfd' and
-            '--enable-shared' options, respectively. If not explicity defined,
+            '--enable-shared' options, respectively. If not explicitly defined,
             These settings default to enabled when parallel is not used,
             and disabled when parallel is used. -MAM 2006/06/17
         - Remove the flexible parallel code and the --enable-fphdf5
@@ -169,7 +169,7 @@ New Features
               variable $FC, not $F9X.  F9X still works, but is depreciated.
             The output of make may be different.  This should be only a
               cosmetic effect.
-            make depened (or make dep) is no longer recognized, since automake
+            make depend (or make dep) is no longer recognized, since automake
             handles dependency tracking.
             Some new configure options exist.  --enable-dependency-tracking
               and --disable-dependency-tracking are used to control automake's
@@ -306,11 +306,11 @@ New Features
         - Added managements of collective IO supports for chunking storage
              inside parallel HDF5
              1) Implemented One IO with collective mode for all chunks in the
-                application by building one MPI derived datatype accross all
+                application by building one MPI derived datatype across all
                 chunks.
              2) Implemented the decision-making support to do collective IO inside
                 MPI-IO per chunk.
-             3) Added the decision-making support to do one IO accross all chunks
+             3) Added the decision-making support to do one IO across all chunks
                 or to do multiple IOs with each IO per chunk.
              4) Added the support to handle the case some processes won't do any IOs in
                 collectively.
@@ -319,7 +319,7 @@ New Features
                 contributions to IOs, a special macro is added to change
                 collective IO mode to independent IO mode inside HDF5 library.
 
-                Currently we find that MPICH at Linux and vender MPI-IO package at NCSA
+                Currently we find that MPICH at Linux and vendor MPI-IO package at NCSA
                 Altix cannot handle this case.
 
              "hdf5_mpi_special_collective_io_works=${hdf5_mpi_special_collective_io_works='no'}"
@@ -469,7 +469,7 @@ New Features
             object's object header.  QAK 2003/10/06
         - Added new H5Fget_freespace() routine to query the free space in a
             given file.  QAK 2003/10/06
-        - Added backward compatability with v1.6 for new Error API. SLU -
+        - Added backward compatibility with v1.6 for new Error API. SLU -
             2003/09/24
         - Changed 'objno' field in H5G_stat_t structure from 'unsigned long[2]'
             to 'haddr_t'.  QAK - 2003/08/08
@@ -496,7 +496,7 @@ New Features
         - Add options of using atomicity and file-sync to test_mpio_1wMr.
             AKC - 2003/11/13
         - Added parallel test, test_mpio_1wMr, which tests if the
-            underlaying parallel I/O system is conforming to the POSIX
+            underlying parallel I/O system is conforming to the POSIX
             write/read requirement.  AKC - 2003/11/12
 
     Fortran Library:
@@ -606,7 +606,7 @@ New Features
             and H5LTdtype_to_text.  H5LTtext_to_dtype creates a HDF5 data type
             given a text description; H5LTdtype_to_text converts a data type
             to text description.  Only DDL definition is supported as text
-            desciption now. SLU - 2006/05/17
+            description now. SLU - 2006/05/17
         - Added Packet Table API for creating tables with less overhead than
             H5TB API.  Added C++ wrapper for Packet Tables.  See documentation.
             JML - 2004/03/28
@@ -639,7 +639,7 @@ Support for new platforms, languages and compilers.
         - Added support for HPUX11.23 for both 32 and 64-bit; HDF5 C++
         - Added support for 64-bit Windows with Visual Studio .NET and 2005.
             SJW - 2007/06/25
-        - Added suport for HPUX11.23 for both 32 and 64-bit; HDF5 C++
+        - Added support for HPUX11.23 for both 32 and 64-bit; HDF5 C++
             shared library is not supported with +DD64 flag.
                                                      EIP - 2006/06/22
         - Added support for VAX floating numbers for Alpha Open VMS 7.3.2
@@ -655,7 +655,7 @@ Support for new platforms, languages and compilers.
         - HDF5 Fortran APIs are supported on Mac OSX with IBM XL Fortran
             compiler version 8.1. This is a default compiler.
         - HDF5 Fortran APIs are supported on MAC OSX with Absoft F95 compiler
-            version 8.2; set F9X environment varibale to f95, for example
+            version 8.2; set F9X environment variable to f95, for example
             setenv F9X f95
             Use --disable-shared --enable-static configure flags when Absoft
             compiler is used.
@@ -700,7 +700,7 @@ Bug Fixes since HDF5-1.6.0 release
                 - Re-open the file
                 - Delete one of the attributes on the object
                 - Add a smaller attribute to the object
-                - Delete the smaller atttribute on the object
+                - Delete the smaller attribute on the object
                 - Add a larger attribute on the object
 
             After this, the number of header messages stored for the object
@@ -855,7 +855,7 @@ Bug Fixes since HDF5-1.6.0 release
         - Fixed dtypes "sw long double -> double" failure in QSC class
             machines.  AKC - 2004/4/16
         - Fixed problem with fletcher32 filter when converting data of different
-            endianess. PVN - 2004/03/10
+            endianness. PVN - 2004/03/10
         - Fixed problem with H5Tget_native_type() not handling opaque fields
             correctly.  QAK - 2004/01/31
         - Fixed several errors in B-tree deletion code which could cause a
@@ -1271,7 +1271,7 @@ Known Problems
   sometimes. This can be verified with t_mpi test under testpar.
 * On IRIX6.5, when C compiler version >7.4, the complicate MPI derived data type
   code will work. However, the user should be aware to enlarge MPI_TYPE_MAX environment
-  variable to some certian value in order to use collective irregular selection code.
+  variable to some certain value in order to use collective irregular selection code.
   For example, the current parallel HDF5 test needs to enlarge MPI_TYPE_MAX to
   200,000 to make the test pass.
 * The dataset created or rewritten with the v1.6.3 library or after can't
@@ -1428,7 +1428,7 @@ Known Problems
 
     exit $RETURN_VALUE
 
-  You get the HDF make files and test scipts to execute your filter script
+  You get the HDF make files and test scripts to execute your filter script
   by setting the environment variable "RUNSERIAL" to the full path of the
   script prior to running configure for parallel builds.  Remember to
   "unsetenv RUNSERIAL" before running configure for a serial build.
@@ -2098,7 +2098,7 @@ Bug Fixes since HDF5-1.6.5 Release
                 - Re-open the file.
                 - Delete one of the attributes on the object.
                 - Add a smaller attribute to the object.
-                - Delete the smaller atttribute on the object.
+                - Delete the smaller attribute on the object.
                 - Add a larger attribute on the object.
 
             After this, the number of header messages stored for the object
@@ -2399,11 +2399,11 @@ Known Problems
 
   For 32-bit:
   You may do this, under csh:
-  setenv LD_LIBRARYN32_PATH .......(existing pathes):[full path of HDF5
+  setenv LD_LIBRARYN32_PATH .......(existing paths):[full path of HDF5
   directory/test/.libs]:[full path of HDF5 directory/src/.libs]
 
   For 64-bit:
-  setenv LD_LIBRARY64_PATH ......(existing pathes):[full path of HDF5
+  setenv LD_LIBRARY64_PATH ......(existing paths):[full path of HDF5
   directory/test/.libs]:[full path of HDF5 directory/src/.libs]
 
   NOTE: This problem ONLY affects the testing of the HDF5 library when you
@@ -2723,7 +2723,7 @@ Bug Fixes since HDF5-1.6.4 Release
     -------
         - Fixed collective IO in chunking-storage.  HDF5 may have called the
             wrong routine when the shape of the dataspace in the file and in
-            the bufferred chunk were different. This bug was fixed to make sure
+            the buffered chunk were different. This bug was fixed to make sure
             the correct routine is called. KY - 2005/10/19
         - Fixed core dump when closing root groups opened through two different
             file handles that operate on the same actual file.  QAK - 2005/10/02
@@ -2744,7 +2744,7 @@ Bug Fixes since HDF5-1.6.4 Release
             together all have the same "file close degree".  QAK - 2005/07/19
         - More bug fixes on holding open files that are mounted and have
             IDs open.  QAK - 2005/07/14
-        - Dataset sieve buffer cache was inadvertantly disabled; it has been
+        - Dataset sieve buffer cache was inadvertently disabled; it has been
             re-enabled.  QAK - 2005/07/08
         - Don't unmount child files until the parent file actually closes.
             (Previously, if an object was holding open a file, the child files
@@ -3024,7 +3024,7 @@ Known Problems
      to intel forum.
 
 * When testing parallel HDF5 with the C compiler version MIPSpro 7.4.3 at IRIX
-  6.5, set enviroment variable MPI_TYPE_MAX to be a bigger number, for example
+  6.5, set environment variable MPI_TYPE_MAX to be a bigger number, for example
   120000, in order to pass the complicated collective IO tests inside parallel
   HDF5 library. This is not a problem inside parallel HDF5 library. You can
   always set a bigger number in your system.
@@ -4448,7 +4448,7 @@ New Features
             verbosity via the '-v' option.  The default is less verbose
             than before.  AKC - 2004/01/23
         - Added parallel test, test_mpio_1wMr, which tests if the
-            underlaying parallel I/O system is conforming to the POSIX
+            underlying parallel I/O system is conforming to the POSIX
             write/read requirement. This version includes options of using
             atomicity and file-sync.  AKC - 2003/11/27
 
@@ -4821,7 +4821,7 @@ Known Problems
       Testing random sw long double -> double conversions
   If -ieee is used, the converted doubles spread over the range 0.0 to 1**-308.
   If -ieee is not used, the converted double values are mostly 0.0 but
-  occassionaly as 1**-308.  This has been reported to the system staff.
+  occasionally as 1**-308.  This has been reported to the system staff.
   All other tests have passed.
 
 * On AIX 5.1 when 64-bit parallel C Library is built with zlib configured in,
@@ -5187,7 +5187,7 @@ Linux 2.4 IA64 Intel  y       n       y    n    y        y           y
 Known Problems
 ==============
 * Fortran subroutine h5pget_driver_f doesn't return a correct driver information.
-  The fix willl be available in the 1.6.2 release.
+  The fix will be available in the 1.6.2 release.
 * There are two h5dump xml tests(h5dump --xml thlink.h5 and h5dump --xml tmany.h5)
   failed on windows xp with .NET for debug and debug dll. Release and Release
   dll work fine.
@@ -5368,7 +5368,7 @@ Library:
     * The first version of szip compression support were implemented.
       User should have static szlib library installed. Using function
       H5Pset_szip to pass the szip parameters to the HDF5 library.
-      More detailed decription of the process will be followed.
+      More detailed description of the process will be followed.
       KY-2003/04/01
     * Added Fletcher32 checksum as a filter in pipeline.  It only works in
       chunked dataset.  SLU - 2003/2/11
@@ -5416,15 +5416,15 @@ Library:
       be in different locations in the same file.  The old functions H5Glink
       and H5Gmove remain valid.  SLU - 2002/04/26
     * Fill-value's behaviors for contiguous dataset have been redefined.
-      Basicly, dataset won't allocate space until it's necessary.  Full details
+      Basically, dataset won't allocate space until it's necessary.  Full details
       are available at http://hdf.ncsa.uiuc.edu/RFC/Fill_Value, at this moment.
       SLU - 2002/04/11
     * Added new routine "H5Dfill" to fill a selection with a particular value
       in memory.  QAK - 2002/04/09
     * Improved performance of "regular" hyperslab I/O when using MPI-IO and the
-      datatype conversion is unneccessary.  QAK - 2002/04/02
+      datatype conversion is unnecessary.  QAK - 2002/04/02
     * Improved performance of single hyperslab I/O when datatype conversion is
-      unneccessary.  QAK - 2002/04/02
+      unnecessary.  QAK - 2002/04/02
     * Added new "H5Sget_select_type" API function to determine which type of
       selection is defined for a dataspace ("all", "none", "hyperslab" or
       "point"). QAK - 2002/02/07
@@ -5438,7 +5438,7 @@ Library:
       compatibility is enabled.
     * Added a new file access property, file close degree, to control file
       close behavior.  It has four values, H5F_CLOSE_WEAK, H5F_CLOSE_SEMI,
-      H5F_CLOSE_STRONG, and H5F_CLOSE_DEFAULT.  Two correspont functions
+      H5F_CLOSE_STRONG, and H5F_CLOSE_DEFAULT.  Two correspond functions
       H5Pset_fclose_degree and H5Pget_fclose_degree are also provided.  Two
       new functions H5Fget_obj_count and H5Fget_obj_ids are offerted to assist
       this new feature.  For full details, please refer to the reference
@@ -5458,7 +5458,7 @@ Library:
     * Improved regular hyperslab I/O by about a factor of 6 or so.
     * Modified the Pablo build procedure to permit building of the instrumented
       library to link either with the Trace libraries as before or with the
-      Pablo Performance Caputure Facility.
+      Pablo Performance Capture Facility.
     * Added new F90 APIs for generic properties, new filters, and
       time/space allocation properties.
     * C++ API:
@@ -5536,7 +5536,7 @@ Library
     * Fixed data corruption problem which could occur when fill values were
       written to a contiguously stored dataset in parallel.  QAK - 2002/08/27
     * Fixed VL memory leak when data is overwritten.  The heap objects holding
-      old data are freed.  If the fill value writting time is set to
+      old data are freed.  If the fill value writing time is set to
       H5D_FILL_TIME_NEVER, the library prohibits user to create VL type dataset.
       The library free all the heap objects storing VL type if there is nested
       VL type(a VL type contains another VL type).  SLU - 2002/07/10
@@ -6157,7 +6157,7 @@ Known Problems
 
     * IRIX 6.5 fails to compile if configured with --enable-static-exec.
 
-    * The executables are always dynamic on Solaris 2.7 ans 2.8(64 and n32)
+    * The executables are always dynamic on Solaris 2.7 and 2.8(64 and n32)
       even if they are configured with --enable-static-exec.
 
     * The HDF5_MPI_OPT_TYPES optimization code in the parallel HDF5 will cause
@@ -6175,7 +6175,7 @@ Known Problems
       compiler optimization causes errors in many HDF5 Library tests. Use -g -h zero flags
       to build HDF5 Library.
 
-    * On Cray SV1 10.0.1. 0 datatype convertion test fails. Please check HDF FTP site
+    * On Cray SV1 10.0.1. 0 datatype conversion test fails. Please check HDF FTP site
       if patch is available. We will try to provide one in the nearest future.
 
     * For configuration, building and testing with Intel and PGI compilers see
@@ -6932,7 +6932,7 @@ Known Problems
       HDF5_MPI_OPT_TYPES to a non-zero value such as 1.
 
     * On IA64 systems one has to use -DIA64 compilation flag to compile
-      h4toh5 and h5toh4 utilites. After configuration step manually modify
+      h4toh5 and h5toh4 utilities. After configuration step manually modify
       Makefile in the tools/h4toh4 and tools/h5toh4 directories to add
       -DIA64 to the compilation flags.
 
@@ -6998,7 +6998,7 @@ New Features
       and other version information in the source code.
     * Parallel HDF5 now runs on the HP V2500 and HP N4000 machines.
     * F90 API:
-        - Added aditional parameter "dims" to the h5dread_f/h5dwrite_f and
+        - Added additional parameter "dims" to the h5dread_f/h5dwrite_f and
           h5aread_f/h5awrite_f subroutines.  This parameter is a 1-D array
           of size 7 and contains the sizes of the data buffer dimensions.
           This change enables portability between Windows and UNIX platforms.
@@ -7012,8 +7012,8 @@ New Features
     * F90 static library is available on Windows platforms.
       See INSTALL_Windows_withF90.txt for details.
     * F90 APIs are available on HPUX 11.00 and 10.20 and IBM SP platforms.
-    * H5 <-> GIF convertor has been added. This is available under
-      tools/gifconv. The convertor supports the ability to create animated
+    * H5 <-> GIF converter has been added. This is available under
+      tools/gifconv. The converter supports the ability to create animated
       gifs as well.
     * Verified correct operation of library on Solaris 2.8 in both 64-bit and
       32-bit compilation modes.  See INSTALL document for instructions on
@@ -7064,7 +7064,7 @@ Bug Fixes since HDF5-1.4.1 Release
       when --enable-hdf5v1_2 configure flag is enabled.
     * Added --enable-linux-lfs flag to allow more control over whether to
       enable or disable large file support on Linux.
-    * Fixed various bugs releated to SDS dimensional scale conversions in H4->H5
+    * Fixed various bugs related to SDS dimensional scale conversions in H4->H5
       converter.
     * Fixed a bug to correctly convert HDF4 objects with fill value into HDF5.
     * Fixed a bug of H5pubconf.h causing repeated definitions if it is included
@@ -7345,7 +7345,7 @@ Bug Fixes since HDF5-1.4.0 Release
      causing errors during I/O
    * The RCSID string in H5public.h was causing the C++ compiling problem
      because when it was included multiple times, C++ did not like
-     multiple definitions of the same static variable. All occurance of
+     multiple definitions of the same static variable. All occurrence of
      RCSID definition are removed since we have not used it consistently
      before.
 
@@ -8111,7 +8111,7 @@ Known Problems
 o SunOS 5.6 with C WorkShop Compilers 4.2:  hyperslab selections will
   fail if library is compiled using optimization of any level.
 o TFLOPS: dsets test fails if compiled with optimization turned on.
-o J90: tools fail to dispay data for the datasets with a compound datatype.
+o J90: tools fail to display data for the datasets with a compound datatype.
 
 Platforms Tested
 ================
@@ -8379,7 +8379,7 @@ C. Changes Since Version 1.0.1
 * New query functions for selections.
 
 * I/O operations bypass the stripmining loop and go directly to
-  storage for certain contiguous selections in the absense of type
+  storage for certain contiguous selections in the absence of type
   conversions.  In other cases the stripmining buffers are used more
   effectively.
 

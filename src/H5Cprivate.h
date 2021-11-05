@@ -213,7 +213,7 @@
 #define H5C_DO_TAGGING_SANITY_CHECKS 1
 #define H5C_DO_EXTREME_SANITY_CHECKS 0
 #else /* NDEBUG */
-/* With rare execptions, the following defines should be set
+/* With rare exceptions, the following defines should be set
  * to 0 if NDEBUG is defined
  */
 #define H5C_DO_SANITY_CHECKS         0
@@ -1428,7 +1428,7 @@ typedef int H5C_ring_t;
  *        with no flush dependency children.
  *
  *        Since the image_fd_height is used to order entries in the
- *        cache image so that fd parents preceed fd children, for
+ *        cache image so that fd parents proceed fd children, for
  *        purposes of this field, and entry is at flush dependency
  *        level 0 if it either has no children, or if all of its
  *        children are not in the cache image.
@@ -1543,7 +1543,7 @@ typedef int H5C_ring_t;
  *        number of times each entry is serialized during cache
  *        serialization.  While no entry should be serialized more than
  *        once in any serialization call, throw an assertion if any
- *        flush depencency parent is serialized more than once during
+ *        flush dependency parent is serialized more than once during
  *        a single cache serialization.
  *
  *        This is a debugging field, and thus is maintained only if
@@ -1734,7 +1734,7 @@ typedef struct H5C_cache_entry_t {
  *              with no flush dependency children.
  *
  *              Since the image_fd_height is used to order entries in the
- *              cache image so that fd parents preceed fd children, for
+ *              cache image so that fd parents proceed fd children, for
  *              purposes of this field, an entry is at flush dependency
  *              level 0 if it either has no children, or if all of its
  *              children are not in the cache image.
@@ -2177,7 +2177,7 @@ typedef struct H5C_auto_size_ctl_t {
  *      equivalent of H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE.
  *
  * flags: Unsigned integer containing flags controlling which aspects of the
- *    cache image functinality is actually executed.  The primary impetus
+ *    cache image functionality is actually executed.  The primary impetus
  *    behind this field is to allow development of tests for partial
  *    implementations that will require little if any modification to run
  *    with the full implementation.  In normal operation, all flags should

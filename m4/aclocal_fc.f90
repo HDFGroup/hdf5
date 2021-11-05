@@ -121,7 +121,7 @@ PROGRAM FC_AVAIL_KINDS
             k = SELECTED_REAL_KIND(ik,jk)
             IF(k.LT.0) EXIT exp
             IF(k.NE.prev_rkind)THEN
-               ! Check if we aleady have that kind
+               ! Check if we already have that kind
                new_kind = .TRUE.
                DO kk = 1, num_rkinds
                   IF(k.EQ.list_rkinds(kk))THEN

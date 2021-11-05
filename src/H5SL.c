@@ -239,7 +239,7 @@
     }
 
 /* Macro used to reduce the level of a node by 1.  Does not update the head node
- * "current level".  PREV is the previous node of the currrent height of X. */
+ * "current level".  PREV is the previous node of the current height of X. */
 #define H5SL_DEMOTE(X, PREV)                                                                                 \
     {                                                                                                        \
         size_t _lvl = X->level;                                                                              \
@@ -255,7 +255,7 @@
 #define H5SL_INSERT(CMP, SLIST, X, TYPE, KEY, HASHVAL)                                                       \
     {                                                                                                        \
         H5SL_node_t *_last = X;    /* Lowest node in the current gap */                                      \
-        H5SL_node_t *_next = NULL; /* Highest node in the currect gap */                                     \
+        H5SL_node_t *_next = NULL; /* Highest node in the current gap */                                     \
         H5SL_node_t *_drop;        /* Low node of the gap to drop into */                                    \
         int          _count;       /* Number of nodes in the current gap */                                  \
         int          _i;                                                                                     \
@@ -311,7 +311,7 @@
     {                                                                                                        \
         H5SL_node_t *_last  = X;             /* Lowest node in the current gap */                            \
         H5SL_node_t *_llast = X;             /* Lowest node in the previous gap */                           \
-        H5SL_node_t *_next  = NULL;          /* Highest node in the currect gap */                           \
+        H5SL_node_t *_next  = NULL;          /* Highest node in the current gap */                           \
         H5SL_node_t *_drop  = NULL;          /* Low node of the gap to drop into */                          \
         H5SL_node_t *_ldrop = NULL;          /* Low node of gap before the one to drop into */               \
         H5SL_node_t *_head  = SLIST->header; /* Head of the skip list */                                     \
@@ -1943,7 +1943,7 @@ H5SL_next(H5SL_node_t *slist_node)
  NAME
     H5SL_prev
  PURPOSE
-    Gets a pointer to the previos node in a skip list
+    Gets a pointer to the previous node in a skip list
  USAGE
     H5SL_node_t *H5SL_prev(slist_node)
         H5SL_node_t *slist_node;          IN: Pointer to skip list node

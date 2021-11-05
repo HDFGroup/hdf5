@@ -329,7 +329,7 @@ gtoken(char *s)
             (void)HDfprintf(stderr, err1, s);
     }
     else { /* filename */
-        token = FILNAME;
+        token = FILENAME;
     }
     return (token);
 }
@@ -2134,7 +2134,7 @@ processConfigurationFile(char *infile, struct Input *in)
                     }
                 }                              /* while (get_next_prop) */
             }                                  /* else if(!HDstrcmp("SUBSET", key)) */
-            else if (!HDstrcmp("DATA", key)) { /* FINSHED */
+            else if (!HDstrcmp("DATA", key)) { /* FINISHED */
 #ifdef H5DEBUGIMPORT
                 HDprintf("h5dump DATA key\n");
 #endif
@@ -2328,7 +2328,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         (void)HDfprintf(stderr, err12a, infile);
                         goto error;
                     }
-                    /* cant appear before dimension sizes have been provided */
+                    /* can't appear before dimension sizes have been provided */
                     if (in->configOptionVector[DIM] == 0) {
                         (void)HDfprintf(stderr, err12b, infile);
                         goto error;
@@ -2395,7 +2395,7 @@ processConfigurationFile(char *infile, struct Input *in)
                         (void)HDfprintf(stderr, err16a, infile);
                         goto error;
                     }
-                    /* cant appear before dimension sizes have been provided */
+                    /* can't appear before dimension sizes have been provided */
                     if (in->configOptionVector[DIM] == 0) {
                         (void)HDfprintf(stderr, err16b, infile);
                         goto error;
@@ -2485,14 +2485,14 @@ validateConfigurationParameters(struct Input *in)
         }
     }
 
-    /* Arch cant be STD if O/p class is FP */
+    /* Arch can't be STD if O/p class is FP */
     if (in->outputArchitecture == 1)
         if (in->outputClass == 1) {
             (void)HDfprintf(stderr, "%s", err4a);
             return (-1);
         }
 
-    /* Arch cant be IEEE if O/p class is IN */
+    /* Arch can't be IEEE if O/p class is IN */
     if (in->outputArchitecture == 2)
         if (in->outputClass == 0) {
             (void)HDfprintf(stderr, "%s", err4b);
@@ -3745,7 +3745,7 @@ getCompressionParameter(struct Input *in, FILE *strm)
 
     int         ival;
     const char *err1 = "Unable to get integer value.\n";
-    const char *err2 = "Invalid value for compression paramter.\n";
+    const char *err2 = "Invalid value for compression parameter.\n";
     const char *err3 = "Unsupported Compression Type.\n";
 
     switch (in->compressionType) {
@@ -4709,7 +4709,7 @@ process(struct Options *opt)
             }
 
             if (in->configOptionVector[EXTERNALSTORE] == 1) {
-                /* creating the external file if it doesnt exist */
+                /* creating the external file if it doesn't exist */
                 if ((extfile = HDfopen(in->externFilename, "ab")) == NULL) {
                     (void)HDfprintf(stderr, "%s", err4);
                     H5Pclose(proplist);

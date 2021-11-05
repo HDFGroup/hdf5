@@ -27,7 +27,7 @@
 #define FP_EPSILON 0.000001F
 
 /*
- * Offset from alinged memory returned by malloc().  This can be used to test
+ * Offset from aligned memory returned by malloc().  This can be used to test
  * that type conversions handle non-aligned buffers correctly.
  */
 #define ALIGNMENT 1
@@ -225,7 +225,7 @@ static int without_hardware_g = 0;
         /*The number of values if multiplied by 10 for each step.*/                                          \
         num_norm = (SRC_MAX_10_EXP - SRC_MIN_10_EXP);                                                        \
         /*Reduce the number of values by 2^factor. MULTIPLY=10^(2^factor). Using this algorithm              \
-         *instead of arithmatic operation to avoid any conversion*/                                          \
+         *instead of arithmetic operation to avoid any conversion*/                                          \
         num_norm >>= factor;                                                                                 \
                                                                                                              \
         /*Total number of values*/                                                                           \
@@ -644,7 +644,7 @@ test_particular_fp_integer(void)
     float          src_f = (float)INT_MAX;
     int            dst_i;
     int            fill_value = 13;
-    int            endian; /*endianess            */
+    int            endian; /*endianness            */
     unsigned int   fails_this_test = 0;
     size_t         j;
 
@@ -822,7 +822,7 @@ test_derived_flt(void)
     size_t         src_size, dst_size;
     unsigned char *buf = NULL, *saved_buf = NULL;
     int *          aligned = NULL;
-    int            endian; /*endianess            */
+    int            endian; /*endianness            */
     size_t         nelmts          = NTESTELEM;
     unsigned int   fails_this_test = 0;
     const size_t   max_fails       = 40; /*max number of failures*/
@@ -1271,7 +1271,7 @@ test_derived_integer(void)
     char           filename[1024];
     size_t         src_size, dst_size;
     unsigned char *buf = NULL, *saved_buf = NULL;
-    int            endian; /*endianess            */
+    int            endian; /*endianness            */
     size_t         nelmts          = NTESTELEM;
     unsigned int   fails_this_test = 0;
     const size_t   max_fails       = 40; /*max number of failures*/
@@ -1595,7 +1595,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
     dtype_t            src_type, dst_type;   /*data types        */
     const char *       src_type_name = NULL; /*source type name    */
     const char *       dst_type_name = NULL; /*destination type name    */
-    int                endian;               /*machine endianess    */
+    int                endian;               /*machine endianness    */
     size_t             src_size, dst_size;   /*type sizes        */
     unsigned char *    buf   = NULL;         /*buffer for conversion    */
     unsigned char *    saved = NULL;         /*original values    */
@@ -2535,7 +2535,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
                 break;
         }
 
-        HDprintf("        ans = ");
+        HDprintf("        and = ");
         for (k = 0; k < dst_size; k++)
             HDprintf(" %02x", hw[ENDIAN(dst_size, k, endian)]);
         HDprintf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
@@ -2581,7 +2581,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
         if (++fails_all_tests >= max_fails) {
             HDputs("    maximum failures reached, aborting test...");
-            HDputs("    (dst is library's conversion output. ans is compiler's conversion output.)");
+            HDputs("    (dst is library's conversion output. and is compiler's conversion output.)");
             goto done;
         }
     }
@@ -2835,8 +2835,8 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     int            overflow = 0; /*overflow occurred    */
     int            uflow    = 0; /*underflow debug counters*/
     size_t         j, k;         /*counters        */
-    int            sendian;      /* source type endianess */
-    int            dendian;      /* Destination type endianess */
+    int            sendian;      /* source type endianness */
+    int            dendian;      /* Destination type endianness */
     size_t         dst_ebias;    /* Destination type's exponent bias */
     size_t         src_epos;     /* Source type's exponent position */
     size_t         src_esize;    /* Source type's exponent size */
@@ -3153,7 +3153,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 
         /*
          * Assume same if both results are NaN.  There are many NaN bit
-         * patterns and the software doesn't attemt to emulate the
+         * patterns and the software doesn't attempt to emulate the
          * hardware in this regard.  Instead, software uses a single bit
          * pattern for NaN by setting the significand to all ones.
          */
@@ -3306,7 +3306,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #endif
         }
 
-        HDprintf("        ans =");
+        HDprintf("        and =");
         for (k = 0; k < dst_size; k++)
             HDprintf(" %02x", hw[ENDIAN(dst_size, k, dendian)]);
         HDprintf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
@@ -3326,7 +3326,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 HDputs("    maximum failures reached, aborting test...");
             else if (run_test == TEST_DENORM || run_test == TEST_SPECIAL)
                 HDputs("    maximum warnings reached, aborting test...");
-            HDputs("    (dst is library's conversion output. ans is compiler's conversion output.)");
+            HDputs("    (dst is library's conversion output. and is compiler's conversion output.)");
 
             goto done;
         }
@@ -3432,8 +3432,8 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
     dtype_t                dst_type;                /*data types        */
     const char *           src_type_name = NULL;    /*source type name    */
     const char *           dst_type_name = NULL;    /*destination type name    */
-    int                    sendian;                 /*source endianess    */
-    int                    dendian;                 /*destination endianess    */
+    int                    sendian;                 /*source endianness    */
+    int                    dendian;                 /*destination endianness    */
     size_t                 src_size, dst_size;      /*type sizes        */
     unsigned char *        buf   = NULL;            /*buffer for conversion    */
     unsigned char *        saved = NULL;            /*original values    */
@@ -4539,7 +4539,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 break;
         }
 
-        HDprintf("        ans = ");
+        HDprintf("        and = ");
         for (k = 0; k < dst_size; k++)
             HDprintf(" %02x", hw[ENDIAN(dst_size, k, dendian)]);
         HDprintf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
@@ -4598,7 +4598,7 @@ test_conv_int_fp(const char *name, int run_test, hid_t src, hid_t dst)
                 HDputs("    maximum failures reached, aborting test...");
             else if (run_test == TEST_DENORM || run_test == TEST_SPECIAL)
                 HDputs("    maximum warnings reached, aborting test...");
-            HDputs("    (dst is library's conversion output. ans is compiler's conversion output.)");
+            HDputs("    (dst is library's conversion output. and is compiler's conversion output.)");
 
             goto done;
         }

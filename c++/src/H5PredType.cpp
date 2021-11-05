@@ -792,7 +792,7 @@ September 2015:
         classes, such as PropList, PredType, DataSpace, etc...  Previously,
         these global constants were declared statically and the C++ library used
         a constant, called PredType::AtExit, to detect when all the global
-        contants are destroyed then close the C library (H5close).  This method
+        constants are destroyed then close the C library (H5close).  This method
         relied on the order of the constants being created and destroyed and
         that PredType constants be the last to be destroyed.  In September
         2015, it was recognized that the order in which the global constants were

@@ -20,7 +20,7 @@ dnl  Contains Macros for HDF5 Fortran
 dnl *********************************
 dnl
 dnl Special characteristics that have no autoconf counterpart but that
-dnl we need as part of the C++ support.  To distinquish these, they
+dnl we need as part of the C++ support.  To distinguish these, they
 dnl have a [PAC] prefix.
 dnl
 dnl -------------------------------------------------------------------------
@@ -264,8 +264,8 @@ AC_RUN_IFELSE([$TEST_SRC],
     if test -s pac_fconftest.out ; then
 
      dnl The output from the above program will be:
-     dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
-     dnl    -- LINE 2 --  valid real kinds (comma seperated list)
+     dnl    -- LINE 1 --  valid integer kinds (comma separated list)
+     dnl    -- LINE 2 --  valid real kinds (comma separated list)
      dnl    -- LINE 3 --  max decimal precision for reals
      dnl    -- LINE 4 --  number of valid integer kinds
      dnl    -- LINE 5 --  number of valid real kinds

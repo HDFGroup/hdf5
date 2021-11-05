@@ -390,7 +390,7 @@ if test "X$CC_BASENAME" = "Xclang"; then
   # 'address;undefined'.  Which and which combinations of these are
   #  supported varies by compiler version, but unsupported options
   # or combinations will result in configure errors reported in config.log.
-  # Comma separated lists of sanitize options wil be entered intact in
+  # Comma separated lists of sanitize options will be entered intact in
   # one -fsanitize=<list> flag.  Space separated lists will be entered in
   # separate -fsanitize=<item> flags.
   # NOTE: No sanity checking done here!
@@ -599,7 +599,7 @@ if test "X$HDF_FORTRAN" = "Xyes"; then
   AC_SUBST([OBJECT_NAMELEN_DEFAULT_F])
 
   ## --------------------------------------------------------------------
-  ## Fortran source extention
+  ## Fortran source extension
   ##
   AC_FC_SRCEXT([f90])
 
@@ -3340,7 +3340,7 @@ fi
 
 ## ----------------------------------------------------------------------
 ## Decide whether the data accuracy has higher priority during data
-## conversions.  If not, some hard conversions will still be prefered even
+## conversions.  If not, some hard conversions will still be preferred even
 ## though the data may be wrong (for example, some compilers don't
 ## support denormalized floating values) to maximize speed.
 ##
@@ -3354,7 +3354,7 @@ AC_ARG_ENABLE([dconv-accuracy],
 if test "$DATA_ACCURACY" = "yes"; then
   AC_MSG_RESULT([yes])
   AC_DEFINE([WANT_DATA_ACCURACY], [1],
-            [Data accuracy is prefered to speed during data conversions])
+            [Data accuracy is preferred to speed during data conversions])
 else
   AC_MSG_RESULT([no])
 fi

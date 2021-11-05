@@ -129,7 +129,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
 
         /* Note: HDvsnprintf() behaves differently on Windows as Unix, when
          * buffer is smaller than source string. On Unix, this function
-         * returns length of the source string and copy string upto the
+         * returns length of the source string and copy string up to the
          * buffer size with NULL at the end of the buffer. However on
          * Windows with the same condition, this function returns -1 and
          * doesn't add NULL at the end of the buffer.
@@ -147,7 +147,7 @@ h5tools_str_append(h5tools_str_t *str /*in,out*/, const char *fmt, ...)
              * following conditions, each of which indicates that the proper C99 return value probably
              *  should have been positive when the format string is
              *  something other than "%s"
-             * Alocate at least twice as much space and try again.
+             * Allocate at least twice as much space and try again.
              */
             size_t newsize = MAX(str->len + (size_t)nchars + 1, 2 * str->nalloc);
             HDassert(newsize > str->nalloc); /*overflow*/
@@ -1248,7 +1248,7 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                 /* Print the closing bracket */
                 h5tools_str_append(str, "%s", OPT(info->arr_suf, "]"));
-                is_next_arry_elmt = 1; /* set for begining of next array element */
+                is_next_arry_elmt = 1; /* set for beginning of next array element */
                 H5Tclose(memb);
             } break;
 
@@ -1506,7 +1506,7 @@ h5tools_str_is_zero(const void *_mem, size_t size)
  *              March 8, 2012
  *
  * Notes:
- *   Applications need to call free() to free the memoery allocated for
+ *   Applications need to call free() to free the memory allocated for
  *   the return string
  *
  *-------------------------------------------------------------------------

@@ -3021,7 +3021,7 @@ test_simple(void)
     }
 
     /*-------------------------------------------------------------------------
-     * dettach for DIM0
+     * detach for DIM0
      *-------------------------------------------------------------------------
      */
 
@@ -3319,11 +3319,11 @@ test_simple(void)
         goto out;
     dim = 0;
 
-    /* iterate trough the 1st dimension of "dset_a" and verify that its DS is valid  */
+    /* iterate through the 1st dimension of "dset_a" and verify that its DS is valid  */
     if (H5DSiterate_scales(did, dim, NULL, verify_scale, NULL) < 0)
         goto out;
 
-    /* iterate trough the 2nd dimension of "dset_a" and verify that its DS is valid
+    /* iterate through the 2nd dimension of "dset_a" and verify that its DS is valid
     start at DS index 2 */
     dim       = 1;
     scale_idx = 2;
@@ -3344,11 +3344,11 @@ test_simple(void)
         goto out;
     dim = 0;
 
-    /* iterate trough the 1st dimension of "dset_a" and read the DS  */
+    /* iterate through the 1st dimension of "dset_a" and read the DS  */
     if (H5DSiterate_scales(did, dim, NULL, read_scale, s1_wbuf) < 0)
         goto out;
 
-    /* iterate trough the 2nd dimension of "dset_a" and read the DS
+    /* iterate through the 2nd dimension of "dset_a" and read the DS
     start at DS index 2 */
     dim       = 1;
     scale_idx = 2;
@@ -3381,9 +3381,9 @@ test_simple(void)
         goto out;
     {
         int match_size; /* does this scale size matches the dataset DIM size */
-        int idx = 0;    /* scale index to start iterating, on return, index where iterator stoped */
+        int idx = 0;    /* scale index to start iterating, on return, index where iterator stopped */
 
-        /* iterate trough all the dimensions  */
+        /* iterate through all the dimensions  */
         for (dim = 0; dim < (unsigned)rank; dim++) {
             if ((match_size = H5DSiterate_scales(did, dim, &idx, match_dim_scale, NULL)) < 0)
                 goto out;
@@ -3475,9 +3475,9 @@ test_simple(void)
         goto out;
     {
         int match_size; /* does this scale size matches the dataset DIM size */
-        int idx;        /* scale index to start iterating, on return, index where iterator stoped */
+        int idx;        /* scale index to start iterating, on return, index where iterator stopped */
 
-        /* iterate trough all the dimensions  */
+        /* iterate through all the dimensions  */
         for (dim = 0; dim < (unsigned)rank; dim++) {
             /* always start at 1st scale */
             idx = 0;
@@ -4025,7 +4025,7 @@ test_errors(void)
     PASSED();
 
     /*-------------------------------------------------------------------------
-     * try to attach a scale to an image, pallete or table
+     * try to attach a scale to an image, palette or table
      *-------------------------------------------------------------------------
      */
 
@@ -4036,7 +4036,7 @@ test_errors(void)
         goto out;
 
     /* make a palette */
-    if (H5IMmake_palette(fid, "pallete", pal_dims, NULL) < 0)
+    if (H5IMmake_palette(fid, "palette", pal_dims, NULL) < 0)
         goto out;
 
     /* open the previous written "ds_b" */
@@ -4248,7 +4248,7 @@ test_iterators(void)
     if ((did = H5Dopen2(fid, "dset_a", H5P_DEFAULT)) < 0)
         goto out;
 
-    /* try to iterate trough the 1st dimension of "dset_a", return error */
+    /* try to iterate through the 1st dimension of "dset_a", return error */
     if (H5DSiterate_scales(did, 0, NULL, verify_scale, NULL) < 0)
         goto out;
 
@@ -4269,7 +4269,7 @@ test_iterators(void)
     if ((did = H5Dopen2(fid, "dset_a", H5P_DEFAULT)) < 0)
         goto out;
 
-    /* try to iterate trough the 3rd dimension of "dset_a", return error */
+    /* try to iterate through the 3rd dimension of "dset_a", return error */
     if (H5DSiterate_scales(did, 3, NULL, verify_scale, NULL) == SUCCEED)
         goto out;
 
@@ -4306,7 +4306,7 @@ test_iterators(void)
             goto out;
     }
 
-    /* iterate trough the 1st dimension of "dset_a" */
+    /* iterate through the 1st dimension of "dset_a" */
     if (H5DSiterate_scales(did, 0, NULL, op_continue, NULL) < 0)
         goto out;
 

@@ -61,7 +61,7 @@ fi
 #
 # PROD_CFLAGS		Flags to pass to the compiler to create a
 # PROD_CPPFLAGS		production version of the library.  These
-#			usualy exclude symbolic debugging switches
+#			usually exclude symbolic debugging switches
 #			(like `-g') and include optimization switches
 #			(like `-O').
 #
@@ -84,7 +84,7 @@ fi
 #			compiler or a descendent of gcc such as EGCS or PGCC.
 #
 # AM_CFLAGS             Flags added directly into this variable will
-#                       be propogated to the compiler wrapper scripts (h5cc,
+#                       be propagated to the compiler wrapper scripts (h5cc,
 #                       h5c++, et cetera) in addition to being used to compile 
 #                       the library.
 #

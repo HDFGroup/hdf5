@@ -3912,13 +3912,13 @@ H5_DLL herr_t H5Pget_meta_block_size(hid_t fapl_id, hsize_t *size);
  *
  * The second example illustrates the two cases for retrieving the
  * number of read attempts from the file access property list of a file
- * opened with SWMR acccess.
+ * opened with SWMR access.
  *
  * \include H5Pget_metadata_read_attempts.2.c
  *
  * The third example illustrates the two cases for retrieving the number
  * of read attempts from the file access property list of a file opened
- * with non-SWMR acccess.
+ * with non-SWMR access.
  *
  * \include H5Pget_metadata_read_attempts.3.c
  *
@@ -4374,7 +4374,7 @@ H5_DLL herr_t H5Pset_driver_by_value(hid_t plist_id, H5FD_class_value_t driver_v
  * The <em>external link open file cache</em> holds files open after
  * they have been accessed via an external link. This cache reduces
  * the number of times such files are opened when external links are
- * accessed repeatedly and can siginificantly improves performance in
+ * accessed repeatedly and can significantly improves performance in
  * certain heavy-use situations and when low-level file opens or closes
  * are expensive.
  *

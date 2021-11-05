@@ -1293,7 +1293,7 @@ H5Pset_append_flush(hid_t plist_id, unsigned ndims, const hsize_t *boundary, H5D
     herr_t             ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_API(FAIL)
-    H5TRACE5("e", "iIu*hDA*x", plist_id, ndims, boundary, func, udata);
+    H5TRACE5("e", "iIu*had*x", plist_id, ndims, boundary, func, udata);
 
     /* Check arguments */
     if (0 == ndims)

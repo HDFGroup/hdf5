@@ -236,7 +236,7 @@ typedef struct s1_t {
 #define ARRAY3_DIM2 3
 
 /* VL string datatype name */
-/* TODO remove complier error not used, remove the link when everything is OK */
+/* TODO remove compiler error not used, remove the link when everything is OK */
 /* #define VLSTR_TYPE      "vl_string_type" */
 
 /* "File 41" macros */
@@ -1128,7 +1128,7 @@ gent_compound_dt(void)
     H5Dclose(dataset);
     H5Gclose(group);
 
-    /* unamed data type */
+    /* unnamed data type */
     group = H5Gcreate2(fid, "/group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     type = H5Tcreate(H5T_COMPOUND, sizeof(dset5_t));
@@ -1312,7 +1312,7 @@ gent_compound_dt2(void)
     H5Dclose(dataset);
     H5Gclose(group);
 
-    /* unamed data type */
+    /* unnamed data type */
     group = H5Gcreate2(fid, "/group2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
 
     type = H5Tcreate(H5T_COMPOUND, sizeof(dset5_t));
@@ -1522,11 +1522,11 @@ gent_loop2(void)
 
     fid = H5Fcreate(FILE11, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
 
-    /* create group object g1 and implcit path from root object */
+    /* create group object g1 and implicit path from root object */
     group = H5Gcreate2(fid, "/g1", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group);
 
-    /* create group object g2 and implcit path from root object */
+    /* create group object g2 and implicit path from root object */
     group = H5Gcreate2(fid, "/g2", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
     H5Gclose(group);
 
@@ -2468,7 +2468,7 @@ gent_attrreg(void)
 static void
 gent_nestcomp(void)
 {
-    /* Compound memeber of the compound datatype*/
+    /* Compound member of the compound datatype*/
     typedef struct cmp_t {
         char  a;
         float b[2];
@@ -2541,7 +2541,7 @@ gent_nestcomp(void)
     H5Tinsert(s2_tid, "c_name", HOFFSET(s2_t, c), H5T_NATIVE_DOUBLE);
     H5Tinsert(s2_tid, "b_name", HOFFSET(s2_t, b), H5T_NATIVE_FLOAT);
 
-    /* Insert compound memeber created above */
+    /* Insert compound member created above */
     H5Tinsert(s2_tid, "d_name", HOFFSET(s2_t, d), cmp_tid);
 
     /*
@@ -5218,7 +5218,7 @@ gent_named_dtype_attr(void)
     sid = H5Screate(H5S_SCALAR);
     HDassert(sid > 0);
 
-    /* Create attribute on commited datatype */
+    /* Create attribute on committed datatype */
     aid = H5Acreate2(tid, F42_ATTRNAME, H5T_STD_I32LE, sid, H5P_DEFAULT, H5P_DEFAULT);
     HDassert(aid > 0);
 
@@ -5735,7 +5735,7 @@ gent_filters(void)
     HDassert(ret >= 0);
 
     if (supports_comments & H5VL_OPT_QUERY_SUPPORTED) {
-        ret = H5Oset_comment_by_name(fid, "mytype", "This is a commited datatype", H5P_DEFAULT);
+        ret = H5Oset_comment_by_name(fid, "mytype", "This is a committed datatype", H5P_DEFAULT);
         HDassert(ret >= 0);
     }
 
@@ -6803,7 +6803,7 @@ gent_attr_creation_order(void)
         goto out;
 
     /*-------------------------------------------------------------------------
-     * create a dataset with creation order tracked for attributes and atributes in it
+     * create a dataset with creation order tracked for attributes and attributes in it
      *-------------------------------------------------------------------------
      */
 
@@ -6827,7 +6827,7 @@ gent_attr_creation_order(void)
     did = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
-     * create a dataset without creation order tracked for attributes and atributes in it
+     * create a dataset without creation order tracked for attributes and attributes in it
      *-------------------------------------------------------------------------
      */
 
@@ -6851,7 +6851,7 @@ gent_attr_creation_order(void)
     did = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
-     * create a group with creation order tracked for attributes and atributes in it
+     * create a group with creation order tracked for attributes and attributes in it
      *-------------------------------------------------------------------------
      */
 
@@ -6874,7 +6874,7 @@ gent_attr_creation_order(void)
     gid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
-     * create a group without creation order tracked for attributes and atributes in it
+     * create a group without creation order tracked for attributes and attributes in it
      *-------------------------------------------------------------------------
      */
 
@@ -6897,7 +6897,7 @@ gent_attr_creation_order(void)
     gid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
-     * create a named datatype with creation order tracked for attributes and atributes in it
+     * create a named datatype with creation order tracked for attributes and attributes in it
      *-------------------------------------------------------------------------
      */
 
@@ -6923,7 +6923,7 @@ gent_attr_creation_order(void)
     tid = H5I_INVALID_HID;
 
     /*-------------------------------------------------------------------------
-     * create a named datatype without creation order tracked for attributes and atributes in it
+     * create a named datatype without creation order tracked for attributes and attributes in it
      *-------------------------------------------------------------------------
      */
 

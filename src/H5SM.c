@@ -117,7 +117,7 @@ H5SM_init(H5F_t *f, H5P_genplist_t *fc_plist, const H5O_loc_t *ext_loc)
     haddr_t              table_addr = HADDR_UNDEF;   /* Address of SOHM master table in file */
     unsigned             list_max, btree_min;        /* Phase change limits for SOHM indices */
     unsigned             index_type_flags[H5O_SHMESG_MAX_NINDEXES]; /* Messages types stored in each index */
-    unsigned minsizes[H5O_SHMESG_MAX_NINDEXES]; /* Message size sharing threshhold for each index */
+    unsigned minsizes[H5O_SHMESG_MAX_NINDEXES]; /* Message size sharing threshold for each index */
     unsigned type_flags_used;                   /* Message type flags used, for sanity checking */
     unsigned x;                                 /* Local index variable */
     herr_t   ret_value = SUCCEED;               /* Return value */
@@ -1599,7 +1599,7 @@ H5SM_delete(H5F_t *f, H5O_t *open_oh, H5O_shared_t *sh_mesg)
      */
     if (H5SM__delete_from_index(f, open_oh, &(table->indexes[index_num]), sh_mesg, &cache_flags, &mesg_size,
                                 &mesg_buf) < 0)
-        HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete mesage from SOHM index")
+        HGOTO_ERROR(H5E_SOHM, H5E_CANTDELETE, FAIL, "unable to delete message from SOHM index")
 
     /* Release the master SOHM table */
     if (H5AC_unprotect(f, H5AC_SOHM_TABLE, H5F_SOHM_ADDR(f), table, cache_flags) < 0)

@@ -166,7 +166,7 @@ if test $? -ne 0; then
     nerrors=`expr $nerrors + 1`
 fi
 
-# Check for error and exit if one occured
+# Check for error and exit if one occurred
 $DPRINT nerrors=$nerrors
 if test $nerrors -ne 0 ; then
     echo "VDS SWMR tests failed with $nerrors errors."
@@ -221,7 +221,7 @@ for xpid in $pid_readers; do
     fi
 done
 
-# Check for error and exit if one occured
+# Check for error and exit if one occurred
 $DPRINT nerrors=$nerrors
 if test $nerrors -ne 0 ; then
     echo "VDS SWMR tests failed with $nerrors errors."

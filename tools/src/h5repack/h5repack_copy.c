@@ -66,7 +66,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     hid_t                 fcpl    = H5P_DEFAULT;     /* file creation property list ID */
     trav_table_t *        travt   = NULL;
     hsize_t               ub_size = 0;     /* size of user block */
-    H5F_fspace_strategy_t set_strategy;    /* Strategy to be set in outupt file */
+    H5F_fspace_strategy_t set_strategy;    /* Strategy to be set in output file */
     hbool_t               set_persist;     /* Persist free-space status to be set in output file */
     hsize_t               set_threshold;   /* Free-space section threshold to be set in output file */
     hsize_t               set_pagesize;    /* File space page size to be set in output file */
@@ -187,7 +187,7 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
                     H5TOOLS_GOTO_ERROR((-1), "H5Pset_shared_mesg_nindexes failed to set the number of shared "
                                              "object header message indexes");
 
-                /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipleline, 4=attribute */
+                /* msg_size[0]=dataspace, 1=datatype, 2=file value, 3=filter pipeline, 4=attribute */
                 for (i = 0; i < (nindex - 1); i++)
                     if (H5Pset_shared_mesg_index(fcpl, i, mesg_type_flags[i], min_mesg_sizes[i]) < 0)
                         H5TOOLS_GOTO_ERROR((-1), "H5Pset_shared_mesg_index failed to configure the specified "
@@ -401,18 +401,18 @@ done:
 /*-------------------------------------------------------------------------
  * Function: get_hyperslab
  *
- * Purpose: Calulate a hyperslab from a dataset for higher performance.
- *          The size of hyperslab is limitted by H5TOOLS_BUFSIZE.
- *          Return the hyperslab dimentions and size in byte.
+ * Purpose: Calculate a hyperslab from a dataset for higher performance.
+ *          The size of hyperslab is limited by H5TOOLS_BUFSIZE.
+ *          Return the hyperslab dimensions and size in byte.
  *
  * Return:  0 - SUCCEED, -1 FAILED
  *
  * Parameters:
  *   dcpl_id : [IN] dataset creation property.
  *   rank_dset : [IN] dataset rank
- *   dims_dset[] : [IN] dataset dimentions
+ *   dims_dset[] : [IN] dataset dimensions
  *   size_datum : [IN] size of a data element in byte
- *   dims_hslab[] : [OUT] calculated hyperslab dimentions
+ *   dims_hslab[] : [OUT] calculated hyperslab dimensions
  *   * hslab_nbytes_p : [OUT] total byte of the hyperslab
  *
  * Update:
@@ -427,7 +427,7 @@ done:
  *   3. If not chunked, each data element would be a unit of collection and
  *      the boundary would be dataset's dims.
  *
- *   The calulation starts from the last dimention (h5dump dims output).
+ *   The calculation starts from the last dimension (h5dump dims output).
  *-----------------------------------------*/
 
 int
@@ -441,8 +441,8 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
     hsize_t      size_chunk = 1;
     hsize_t      nchunk_fit; /* number of chunks that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
     hsize_t      ndatum_fit; /* number of dataum that fits in hyperslab buffer (H5TOOLS_BUFSIZE) */
-    hsize_t      chunk_dims_map[H5S_MAX_RANK]; /* mapped chunk dimentions */
-    hsize_t      hs_dims_map[H5S_MAX_RANK];    /* mapped hyperslab dimentions */
+    hsize_t      chunk_dims_map[H5S_MAX_RANK]; /* mapped chunk dimensions */
+    hsize_t      hs_dims_map[H5S_MAX_RANK];    /* mapped hyperslab dimensions */
     hsize_t      hslab_nbytes;                 /* size of hyperslab in byte */
     int          ret_value = 0;
 
@@ -467,18 +467,18 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
 
         /* 1. if a chunk fit in hyperslab buffer */
         if (nchunk_fit >= 1) {
-            /* Calulate a hyperslab that contains as many chunks that can fit
+            /* Calculate a hyperslab that contains as many chunks that can fit
              * in hyperslab buffer. Hyperslab will be increased starting from
-             * the last dimention of the dataset (see h5dump's dims output).
+             * the last dimension of the dataset (see h5dump's dims output).
              * The calculation boundary is dataset dims.
              * In the loop, used mapping from a datum to a chunk to figure out
              * chunk based hyperslab.
              */
             for (k = rank_dset; k > 0; --k) {
-                /* map dataset dimentions with a chunk dims */
+                /* map dataset dimensions with a chunk dims */
                 chunk_dims_map[k - 1] = dims_dset[k - 1] / dims_chunk[k - 1];
 
-                /* if reminder exist, increse by 1 to cover partial edge chunks */
+                /* if reminder exist, increase by 1 to cover partial edge chunks */
                 if (dims_dset[k - 1] % dims_chunk[k - 1] > 0)
                     chunk_dims_map[k - 1]++;
 
@@ -491,7 +491,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
                 if (nchunk_fit == 0)
                     nchunk_fit = 1;
 
-                /* get hyperslab dimentions as unmapping to actual size */
+                /* get hyperslab dimensions as unmapping to actual size */
                 dims_hslab[k - 1] = MIN((hs_dims_map[k - 1] * dims_chunk[k - 1]), dims_dset[k - 1]);
 
                 /* calculate total size for the hyperslab */
@@ -500,9 +500,9 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
         }
         /* 2. if a chunk is bigger than hyperslab buffer */
         else {
-            /* Calulate a hyperslab that contains as many data elements that
+            /* Calculate a hyperslab that contains as many data elements that
              * can fit in hyperslab buffer. Hyperslab will be increased
-             * starting from the last dimention of the chunk (see h5dump's dims
+             * starting from the last dimension of the chunk (see h5dump's dims
              * output).
              * The calculation boundary is a chunk dims.
              */
@@ -512,7 +512,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
                 /* if a datum is bigger than rest of buffer */
                 if (ndatum_fit == 0)
                     ndatum_fit = 1;
-                /* get hyperslab dimentions within a chunk boundary */
+                /* get hyperslab dimensions within a chunk boundary */
                 dims_hslab[k - 1] = MIN(dims_chunk[k - 1], ndatum_fit);
 
                 /* calculate total size for the hyperslab */
@@ -525,9 +525,9 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
     }
     /* 3. if dataset is not chunked */
     else {
-        /* Calulate a hyperslab that contains as many data elements that can
+        /* Calculate a hyperslab that contains as many data elements that can
          * fit in hyperslab buffer. Hyperslab will be increased starting from
-         * the last dimention of the dataset (see h5dump's dims output).
+         * the last dimension of the dataset (see h5dump's dims output).
          * The calculation boundary is dataset dims.
          */
         for (k = rank_dset; k > 0; --k) {
@@ -536,7 +536,7 @@ get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t si
             /* if a datum is bigger than rest of buffer */
             if (ndatum_fit == 0)
                 ndatum_fit = 1;
-            /* get hyperslab dimentions within dataset boundary */
+            /* get hyperslab dimensions within dataset boundary */
             dims_hslab[k - 1] = MIN(dims_dset[k - 1], ndatum_fit);
 
             /* calculate total size for the hyperslab */
@@ -600,7 +600,7 @@ done:
  *  in (2) is that, when using the strip mine size, it assures that the "remaining" part
  *  of the dataset that does not fill an entire strip mine is processed.
  *
- *  1. figure out a hyperslab (dimentions) and size  (refer to get_hyperslab()).
+ *  1. figure out a hyperslab (dimensions) and size  (refer to get_hyperslab()).
  *  2. Calculate the hyperslab selections as the selection is moving forward.
  *     Selection would be same as the hyperslab except for the remaining edge portion
  *     of the dataset. The code take care of the remaining portion if exist.
@@ -1550,7 +1550,7 @@ copy_user_block(const char *infile, const char *outfile, hsize_t size)
 
     /* Copy the userblock from the input file to the output file */
     while (size > 0) {
-        ssize_t     nread, nbytes;             /* # of bytes transfered, etc. */
+        ssize_t     nread, nbytes;             /* # of bytes transferred, etc. */
         char        rbuf[USERBLOCK_XFER_SIZE]; /* Buffer for reading */
         const char *wbuf;                      /* Pointer into buffer, for writing */
 

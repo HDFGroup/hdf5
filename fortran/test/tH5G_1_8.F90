@@ -654,7 +654,7 @@ SUBROUTINE group_info(cleanup, fapl, total_error)
      INTEGER(HID_T) :: file, scalar, grp, d1
      CHARACTER(LEN=12), PARAMETER :: filename ='TestLinks.h5'
      INTEGER(HSIZE_T), DIMENSION(1) :: adims2 = (/1/) ! Attribute dimension
-     INTEGER ::   arank = 1                      ! Attribure rank
+     INTEGER ::   arank = 1                      ! Attribute rank
      INTEGER :: error
 
      INTEGER :: cset ! Indicates the character set used for the link’s name.
@@ -1194,7 +1194,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
   !
   CHARACTER(LEN=80) :: fix_filename1
   CHARACTER(LEN=80) :: fix_filename2
-  INTEGER(HSIZE_T) :: htmp
+  INTEGER(HSIZE_T) :: html
 
   LOGICAL :: cleanup
 
@@ -1293,9 +1293,9 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
            ! IF(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
            !  Check for out of bound deletion
-           htmp =9
+           html =9
 !EP           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(u,HSIZE_T), error)
-           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, htmp, error)
+           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, html, error)
            CALL verify("H5Ldelete_by_idx_f", error, -1, total_error) ! test should fail (error = -1)
 
 

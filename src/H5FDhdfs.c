@@ -553,16 +553,16 @@ done:
  * Function:    H5FD__hdfs_validate_config()
  *
  * Purpose:     Test to see if the supplied instance of H5FD_hdfs_fapl_t
- *              contains internally consistant data.  Return SUCCEED if so,
+ *              contains internally consistent data.  Return SUCCEED if so,
  *              and FAIL otherwise.
  *
- *              Note the difference between internally consistant and
+ *              Note the difference between internally consistent and
  *              correct.  As we will have to try to access the target
  *              object to determine whether the supplied data is correct,
- *              we will settle for internal consistancy at this point
+ *              we will settle for internal consistency at this point
  *
  * Return:      SUCCEED if instance of H5FD_hdfs_fapl_t contains internally
- *              consistant data, FAIL otherwise.
+ *              consistent data, FAIL otherwise.
  *
  * Programmer:  Jacob Smith
  *              9/10/17

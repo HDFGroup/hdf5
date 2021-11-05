@@ -682,7 +682,7 @@ typedef off_t       h5_stat_size_t;
 #define HDcosh(X) cosh(X)
 #endif
 #ifndef HDcreat
-#define HDcreat(S, M) creat(S, M)
+#define HDcreat(S, M) create(S, M)
 #endif
 #ifndef HDctermid
 #define HDctermid(S) ctermid(S)
@@ -1986,7 +1986,7 @@ extern H5_api_t H5_g;
 #define H5_API_LOCK
 #define H5_API_UNLOCK
 
-/* disable cancelability (sequential version) */
+/* disable cancellability (sequential version) */
 #define H5_API_UNSET_CANCEL
 #define H5_API_SET_CANCEL
 

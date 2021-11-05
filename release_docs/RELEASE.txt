@@ -550,7 +550,7 @@ New Features
                       void **output);
 
       This newly-added "ctl" callback allows Virtual File
-      Drivers to intercept and handle arbitary operations
+      Drivers to intercept and handle arbitrary operations
       identified by an operation code. Its parameters are
       as follows:
 
@@ -1055,7 +1055,7 @@ Bug Fixes since HDF5-1.12.0 release
         function. This improves the I/O performance. In the case of the parallel
         library, it also avoids breaking to independent I/O, which makes it
         possible to apply a filter when writing or reading data to or from
-        teh HDF5 file.
+        the HDF5 file.
 
         (JWSB - 2021/09/13)
 
@@ -1084,7 +1084,7 @@ Bug Fixes since HDF5-1.12.0 release
         dimension sizes.
 
         The problem was fixed by ensuring that decoding the dimension sizes
-        and max values will not go beyong the end of the buffer.
+        and max values will not go beyond the end of the buffer.
 
         (BMR - 2021/05/12, HDFFV-11223)
 
@@ -1290,7 +1290,7 @@ Bug Fixes since HDF5-1.12.0 release
 
     - Fixed CMake C++ compiler flags
 
-      A recent refactoring of the C++ configure files accidently removed the
+      A recent refactoring of the C++ configure files accidentally removed the
       file that executed the enable_language command for C++ needed by the
       HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
       including adding support for windows platforms.
@@ -1418,7 +1418,7 @@ Bug Fixes since HDF5-1.12.0 release
     - h5diff fixed a command line parsing error.
 
         h5diff would ignore the argument to -d (delta) if it is smaller than DBL_EPSILON.
-        The macro H5_DBL_ABS_EQUAL was removed and a direct value comparision was used.
+        The macro H5_DBL_ABS_EQUAL was removed and a direct value comparison was used.
 
         (ADB - 2020/07/20, HDFFV-10897)
 

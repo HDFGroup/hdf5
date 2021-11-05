@@ -14,7 +14,7 @@
 !
 ! NOTES
 !  This program uses the Fortran 2008 intrinsic function STORAGE_SIZE or SIZEOF
-!  depending on availablity.It generates code that makes use of
+!  depending on availability.It generates code that makes use of
 !  STORAGE_SIZE/SIZEOF in H5fortran_detect.f90. STORAGE_SIZE is standard
 !  compliant and should always be chosen over SIZEOF.
 !

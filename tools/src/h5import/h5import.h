@@ -23,7 +23,7 @@
 /*
  * state table tokens
  */
-#define FILNAME 0
+#define FILENAME 0
 /* filename */
 #define OPT_o 1
 /* output filename */
@@ -128,7 +128,7 @@ char keytable[NUM_KEYS][30] = {"PATH",
                                "INPUT-BYTE-ORDER"};
 
 static int state_table[15][8] = {
-    /* token ordering: FILNAME      OPT_o   OPT_c  OPT_h  OPT_d  OPT_p  OPT_t  OPT_s   */
+    /* token ordering: FILENAME      OPT_o   OPT_c  OPT_h  OPT_d  OPT_p  OPT_t  OPT_s   */
 
     /* state 0: start */
     {1, ERR, ERR, 6, ERR, ERR, ERR, ERR},

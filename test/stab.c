@@ -125,7 +125,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
     if (H5Gclose(g3) < 0)
         TEST_ERROR
 
-    /* Open all groups with absolute names to check for exsistence */
+    /* Open all groups with absolute names to check for existence */
     if ((g1 = H5Gopen2(fid, "/test_1a", H5P_DEFAULT)) < 0)
         TEST_ERROR
     if ((g2 = H5Gopen2(fid, "/test_1a/sub_1", H5P_DEFAULT)) < 0)
@@ -137,7 +137,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
     if (HDstrcmp(comment, "hello world") != 0) {
         H5_FAILED();
         HDputs("    Read the wrong comment string from the group.");
-        HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
+        HDprintf("    got: \"%s\"\n    and: \"hello world\"\n", comment);
         TEST_ERROR
     }
     if (H5Gclose(g1) < 0)
@@ -1416,7 +1416,7 @@ main(void)
     hid_t       fcpl, fcpl2;     /* File creation property list ID */
     unsigned    new_format;      /* Whether to use the new format or not */
     const char *env_h5_drvr;     /* File Driver value from environment */
-    hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
+    hbool_t     contig_addr_vfd; /* Whether VFD used has a contiguous address space */
     hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
     int         nerrors                       = 0;
 
@@ -1425,7 +1425,7 @@ main(void)
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
-    /* VFD that does not support contigous address space */
+    /* VFD that does not support contiguous address space */
     contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Reset library */

@@ -150,7 +150,7 @@ test_non_extendible(hid_t file)
     if (1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        HDprintf("   got: %d\n    ans: 1\n", n);
+        HDprintf("   got: %d\n    and: 1\n", n);
         goto error;
     }
 
@@ -160,13 +160,13 @@ test_non_extendible(hid_t file)
     if (file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        HDprintf("    got: %lu\n    and: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (file_size != (max_size[0] * sizeof(int))) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %lu\n    ans: %lu\n", (unsigned long)file_size,
+        HDprintf("    got: %lu\n    and: %lu\n", (unsigned long)file_size,
                  (unsigned long)max_size[0] * sizeof(int));
         goto error;
     }
@@ -420,7 +420,7 @@ test_unlimited(hid_t file)
     if (1 != n) {
         H5_FAILED();
         HDputs("    Returned external count is wrong.");
-        HDprintf("    got: %d\n    ans: 1\n", n);
+        HDprintf("    got: %d\n    and: 1\n", n);
         goto error;
     } /* end if */
 
@@ -429,13 +429,13 @@ test_unlimited(hid_t file)
     if (file_offset != 0) {
         H5_FAILED();
         HDputs("    Wrong file offset.");
-        HDprintf("    got: %lu\n    ans: 0\n", (unsigned long)file_offset);
+        HDprintf("    got: %lu\n    and: 0\n", (unsigned long)file_offset);
         goto error;
     }
     if (H5F_UNLIMITED != file_size) {
         H5_FAILED();
         HDputs("    Wrong file size.");
-        HDprintf("    got: %lu\n    ans: INF\n", (unsigned long)file_size);
+        HDprintf("    got: %lu\n    and: INF\n", (unsigned long)file_size);
         goto error;
     }
 
@@ -1217,7 +1217,7 @@ test_path_relative_cwd(hid_t fapl)
     }
     H5E_END_TRY;
     if (dset3 >= 0)
-        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeded");
+        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
     HDmemset(whole, 0, sizeof(whole));
@@ -1233,7 +1233,7 @@ test_path_relative_cwd(hid_t fapl)
     if (H5Dclose(dset) < 0)
         FAIL_STACK_ERROR
 
-    /* Open dataset (use a differend prefix than for create.
+    /* Open dataset (use a different prefix than for create.
      * This works because the dataset was closed.
      */
     if (H5Pset_efile_prefix(dapl2, "${ORIGIN}/.") < 0)
@@ -1254,7 +1254,7 @@ test_path_relative_cwd(hid_t fapl)
     }
     H5E_END_TRY;
     if (dset3 >= 0)
-        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeded");
+        FAIL_PUTS_ERROR("reopening the dataset with a different efile_prefix succeeded");
 
     /* Read the entire dataset and compare with the original */
     HDmemset(whole, 0, sizeof(whole));

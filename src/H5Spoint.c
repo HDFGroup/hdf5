@@ -1505,7 +1505,7 @@ done:
     dataspace they are located within.  The list of points is formatted as
     follows: <coordinate> followed by the next coordinate, etc. until all the
     point information in the selection have been put into the user's buffer.
-        The points are returned in the order they will be interated through
+        The points are returned in the order they will be iterated through
     when a selection is read/written from/to disk.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS
@@ -1579,7 +1579,7 @@ H5S__get_select_elem_pointlist(const H5S_t *space, hsize_t startpoint, hsize_t n
     dataspace they are located within.  The list of points is formatted as
     follows: <coordinate> followed by the next coordinate, etc. until all the
     point information in the selection have been put into the user's buffer.
-        The points are returned in the order they will be interated through
+        The points are returned in the order they will be iterated through
     when a selection is read/written from/to disk.
  GLOBAL VARIABLES
  COMMENTS, BUGS, ASSUMPTIONS

@@ -275,7 +275,7 @@ H5O__cache_verify_chksum(const void *_image, size_t len, void *_udata)
  *
  *		Note that the object header is read with with a speculative read.
  *		If the initial read is too small, make note of this fact and return
- *     		without error.  H5C__load_entry() will note the size discrepency
+ *     		without error.  H5C__load_entry() will note the size discrepancy
  *		and retry the deserialize operation with the correct size read.
  *
  * Return:      Success:        Pointer to in core representation

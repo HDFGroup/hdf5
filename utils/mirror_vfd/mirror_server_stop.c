@@ -15,7 +15,7 @@
  *              Exists for cross-platform, optionally remote shutdown.
  */
 
-#include "H5private.h" /* System compatability call-wrapper macros */
+#include "H5private.h" /* System compatibility call-wrapper macros */
 
 #ifdef H5_HAVE_MIRROR_VFD
 
@@ -66,7 +66,7 @@ usage(void)
              "\n"
              "Options:\n"
              "    -h | --help Print this usage message and exit.\n"
-             "    --ip=ADDR   IP Address of remote server (defaut %s)\n"
+             "    --ip=ADDR   IP Address of remote server (default %s)\n"
              "    --port=PORT Handshake port of remote server (default %d)\n",
              MSHS_DEFAULT_IP, MSHS_DEFAULT_PORTNO);
 } /* end usage() */

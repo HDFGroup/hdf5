@@ -56,7 +56,7 @@ static herr_t H5T__cmp_offset(size_t *comp_size, size_t *offset, size_t elem_siz
  *                      H5T_NATIVE_LDOUBLE
  *
  *              Compound, array, enum, and VL types all choose among these
- *              types for theire members.  Time, Bifield, Opaque, Reference
+ *              types for their members.  Time, Bifield, Opaque, Reference
  *              types are only copy out.
  *
  * Return:      Success:        Returns the native data type if successful.

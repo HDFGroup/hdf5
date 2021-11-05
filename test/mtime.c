@@ -117,7 +117,7 @@ main(void)
     if (0 == oi1.ctime) {
         SKIPPED();
         HDputs("    The modification time could not be decoded on this OS.");
-        HDputs("    Modification times will be mantained in the file but");
+        HDputs("    Modification times will be maintained in the file but");
         HDputs("    cannot be queried on this system.  See H5O_mtime_decode().");
         return 0;
     }
@@ -127,7 +127,7 @@ main(void)
         HDstrftime((char *)buf1, sizeof buf1, "%Y-%m-%d %H:%M:%S", tm);
         tm = HDlocaltime(&now);
         HDstrftime((char *)buf2, sizeof buf2, "%Y-%m-%d %H:%M:%S", tm);
-        HDprintf("    got: %s\n    ans: %s\n", buf1, buf2);
+        HDprintf("    got: %s\n    and: %s\n", buf1, buf2);
         goto error;
     }
     PASSED();
