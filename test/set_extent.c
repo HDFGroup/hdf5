@@ -269,11 +269,11 @@ do_ranks(hid_t fapl, hbool_t new_format)
 
         /* Run tests */
         if (do_fillvalue) {
-            unsigned if set;
+            unsigned ifset;
 
             /* Iterate over different fill times */
-            for (if set = 0; if set <= 1; if set++) {
-                if (if set) {
+            for (ifset = 0; ifset <= 1; ifset++) {
+                if (ifset) {
                     if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_IFSET) < 0)
                         TEST_ERROR
                 } /* end if */
@@ -282,22 +282,22 @@ do_ranks(hid_t fapl, hbool_t new_format)
 
                 if (test_rank1(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 1")
-                    HDprintf("   Fill time: %s\n", (if set ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
+                    HDprintf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
                 if (test_rank2(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 2")
-                    HDprintf("   Fill time: %s\n", (if set ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
+                    HDprintf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
                 if (test_rank3(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 3")
-                    HDprintf("   Fill time: %s\n", (if set ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
+                    HDprintf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
                 if (test_rank2(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE) < 0) {
                     DO_RANKS_PRINT_CONFIG("Rank 2 with non-default indexed storage B-tree")
-                    HDprintf("   Fill time: %s\n", (if set ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
+                    HDprintf("   Fill time: %s\n", (ifset ? "H5D_FILL_TIME_IFSET" : "H5D_FILL_TIME_ALLOC"));
                     goto error;
                 } /* end if */
             }     /* end for */

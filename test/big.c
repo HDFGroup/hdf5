@@ -607,9 +607,9 @@ usage(void)
               "\t-fsize\tChange family size default to <fsize> where <fsize> is\n"
               "\t\ta positive float point number.  Default value is %" PRIuHSIZE ".\n"
               "Examples:\n"
-              "\tbig -fsize 2.1e9 \t# test with file size just under 2GB\n"
-              "\tbig -fsize 2.2e9 \t# test with file size just above 2GB\n"
-              "\tBe sure the file system can support the file size requested\n",
+              "\t big -fsize 2.1e9 \t# test with file size just under 2GB\n"
+              "\t big -fsize 2.2e9 \t# test with file size just above 2GB\n"
+              "\t Be sure the file system can support the file size requested\n",
               (hsize_t)FAMILY_SIZE);
 }
 

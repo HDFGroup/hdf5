@@ -1298,18 +1298,18 @@ static void *
 eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_param_t H5_ATTR_UNUSED *tparam,
               hsize_t H5_ATTR_UNUSED cnt)
 {
-    eiter_fw_t *either; /* Forward element iteration object */
+    eiter_fw_t *eiter; /* Forward element iteration object */
 
     /* Allocate space for the element iteration object */
-    either = (eiter_fw_t *)HDmalloc(sizeof(eiter_fw_t));
-    HDassert(either);
+    eiter = (eiter_fw_t *)HDmalloc(sizeof(eiter_fw_t));
+    HDassert(eiter);
 
     /* Initialize the element iteration object */
     eiter->idx           = 0;
     eiter->base_sblk_idx = UINT_MAX;
 
     /* Return iteration object */
-    return (either);
+    return (eiter);
 } /* end eiter_fw_init() */
 
 /*-------------------------------------------------------------------------
@@ -1328,11 +1328,11 @@ eiter_fw_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_para
 static hssize_t
 eiter_fw_next(void *in_eiter)
 {
-    eiter_fw_t *either = (eiter_fw_t *)in_eiter;
+    eiter_fw_t *eiter = (eiter_fw_t *)in_eiter;
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx++;
@@ -1356,10 +1356,10 @@ eiter_fw_next(void *in_eiter)
 static H5_ATTR_PURE hssize_t
 eiter_fw_max(const void *in_eiter)
 {
-    const eiter_fw_t *either = (const eiter_fw_t *)in_eiter;
+    const eiter_fw_t *eiter = (const eiter_fw_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)(eiter->idx - 1));
@@ -1382,10 +1382,10 @@ static int
 eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
                earray_state_t *state, hsize_t idx)
 {
-    eiter_fw_t *either = (eiter_fw_t *)in_eiter;
+    eiter_fw_t *eiter = (eiter_fw_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
     HDassert(cparam);
     HDassert(tparam);
     HDassert(state);
@@ -1439,13 +1439,13 @@ eiter_fw_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
  *-------------------------------------------------------------------------
  */
 static int
-eiter_fw_term(void *either)
+eiter_fw_term(void *eiter)
 {
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Free iteration object */
-    HDfree(either);
+    HDfree(eiter);
 
     return (0);
 } /* end eiter_fw_term() */
@@ -1485,11 +1485,11 @@ typedef struct eiter_rv_t {
 static void *
 eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hsize_t cnt)
 {
-    eiter_rv_t *either; /* Reverse element iteration object */
+    eiter_rv_t *eiter; /* Reverse element iteration object */
 
     /* Allocate space for the element iteration object */
-    either = (eiter_rv_t *)HDmalloc(sizeof(eiter_rv_t));
-    HDassert(either);
+    eiter = (eiter_rv_t *)HDmalloc(sizeof(eiter_rv_t));
+    HDassert(eiter);
 
     /* Initialize reverse iteration info */
     eiter->idx = cnt - 1;
@@ -1509,7 +1509,7 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
     } /* end else */
 
     /* Return iteration object */
-    return (either);
+    return (eiter);
 } /* end eiter_rv_init() */
 
 /*-------------------------------------------------------------------------
@@ -1528,11 +1528,11 @@ eiter_rv_init(const H5EA_create_t *cparam, const earray_test_param_t *tparam, hs
 static hssize_t
 eiter_rv_next(void *in_eiter)
 {
-    eiter_rv_t *either = (eiter_rv_t *)in_eiter;
+    eiter_rv_t *eiter = (eiter_rv_t *)in_eiter;
     hssize_t    ret_val;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx--;
@@ -1556,10 +1556,10 @@ eiter_rv_next(void *in_eiter)
 static H5_ATTR_PURE hssize_t
 eiter_rv_max(const void *in_eiter)
 {
-    const eiter_rv_t *either = (const eiter_rv_t *)in_eiter;
+    const eiter_rv_t *eiter = (const eiter_rv_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -1582,10 +1582,10 @@ static int
 eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_param_t *tparam,
                earray_state_t *state, hsize_t idx)
 {
-    eiter_rv_t *either = (eiter_rv_t *)in_eiter;
+    eiter_rv_t *eiter = (eiter_rv_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
     HDassert(cparam);
     HDassert(tparam);
     HDassert(state);
@@ -1664,13 +1664,13 @@ eiter_rv_state(void *in_eiter, const H5EA_create_t *cparam, const earray_test_pa
  *-------------------------------------------------------------------------
  */
 static int
-eiter_rv_term(void *either)
+eiter_rv_term(void *eiter)
 {
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Free iteration object */
-    HDfree(either);
+    HDfree(eiter);
 
     return (0);
 } /* end eiter_rv_term() */
@@ -1708,12 +1708,12 @@ static void *
 eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_param_t H5_ATTR_UNUSED *tparam,
                hsize_t cnt)
 {
-    eiter_rnd_t *either; /* Random element iteration object */
-    size_t       u;      /* Local index variable */
+    eiter_rnd_t *eiter; /* Random element iteration object */
+    size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    either = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
-    HDassert(either);
+    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
+    HDassert(eiter);
 
     /* Allocate space for the array of shuffled indices */
     eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
@@ -1739,7 +1739,7 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     }     /* end if */
 
     /* Return iteration object */
-    return (either);
+    return (eiter);
 } /* end eiter_rnd_init() */
 
 /*-------------------------------------------------------------------------
@@ -1758,11 +1758,11 @@ eiter_rnd_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
 static hssize_t
 eiter_rnd_next(void *in_eiter)
 {
-    eiter_rnd_t *either = (eiter_rnd_t *)in_eiter;
+    eiter_rnd_t *eiter = (eiter_rnd_t *)in_eiter;
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->idx[eiter->pos];
@@ -1791,10 +1791,10 @@ eiter_rnd_next(void *in_eiter)
 static H5_ATTR_PURE hssize_t
 eiter_rnd_max(const void *in_eiter)
 {
-    const eiter_rnd_t *either = (const eiter_rnd_t *)in_eiter;
+    const eiter_rnd_t *eiter = (const eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -1816,17 +1816,17 @@ eiter_rnd_max(const void *in_eiter)
 static int
 eiter_rnd_term(void *in_eiter)
 {
-    eiter_rnd_t *either = (eiter_rnd_t *)in_eiter;
+    eiter_rnd_t *eiter = (eiter_rnd_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
     HDassert(eiter->idx);
 
     /* Free shuffled index array */
     HDfree(eiter->idx);
 
     /* Free iteration object */
-    HDfree(either);
+    HDfree(eiter);
 
     return (0);
 } /* end eiter_rnd_term() */
@@ -1857,12 +1857,12 @@ static void *
 eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_param_t H5_ATTR_UNUSED *tparam,
                 hsize_t cnt)
 {
-    eiter_rnd_t *either; /* Random element iteration object */
-    size_t       u;      /* Local index variable */
+    eiter_rnd_t *eiter; /* Random element iteration object */
+    size_t       u;     /* Local index variable */
 
     /* Allocate space for the element iteration object */
-    either = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
-    HDassert(either);
+    eiter = (eiter_rnd_t *)HDmalloc(sizeof(eiter_rnd_t));
+    HDassert(eiter);
 
     /* Allocate space for the array of shuffled indices */
     eiter->idx = (hsize_t *)HDmalloc(sizeof(hsize_t) * (size_t)cnt);
@@ -1903,7 +1903,7 @@ eiter_rnd2_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_pa
     } /* end else */
 
     /* Return iteration object */
-    return (either);
+    return (eiter);
 } /* end eiter_rnd2_init() */
 
 /* Extensible array iterator class for random iteration */
@@ -1940,11 +1940,11 @@ static void *
 eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_param_t H5_ATTR_UNUSED *tparam,
                hsize_t cnt)
 {
-    eiter_cyc_t *either; /* Cyclic element iteration object */
+    eiter_cyc_t *eiter; /* Cyclic element iteration object */
 
     /* Allocate space for the element iteration object */
-    either = (eiter_cyc_t *)HDmalloc(sizeof(eiter_cyc_t));
-    HDassert(either);
+    eiter = (eiter_cyc_t *)HDmalloc(sizeof(eiter_cyc_t));
+    HDassert(eiter);
 
     /* Initialize reverse iteration info */
     eiter->max = 0;
@@ -1953,7 +1953,7 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
     eiter->cyc = 0;
 
     /* Return iteration object */
-    return (either);
+    return (eiter);
 } /* end eiter_cyc_init() */
 
 /*-------------------------------------------------------------------------
@@ -1972,11 +1972,11 @@ eiter_cyc_init(const H5EA_create_t H5_ATTR_UNUSED *cparam, const earray_test_par
 static hssize_t
 eiter_cyc_next(void *in_eiter)
 {
-    eiter_cyc_t *either = (eiter_cyc_t *)in_eiter;
+    eiter_cyc_t *eiter = (eiter_cyc_t *)in_eiter;
     hssize_t     ret_val;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Get the next array index to test */
     ret_val = (hssize_t)eiter->pos;
@@ -2007,10 +2007,10 @@ eiter_cyc_next(void *in_eiter)
 static H5_ATTR_PURE hssize_t
 eiter_cyc_max(const void *in_eiter)
 {
-    const eiter_cyc_t *either = (const eiter_cyc_t *)in_eiter;
+    const eiter_cyc_t *eiter = (const eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Return the max. array index used */
     return ((hssize_t)eiter->max);
@@ -2032,13 +2032,13 @@ eiter_cyc_max(const void *in_eiter)
 static int
 eiter_cyc_term(void *in_eiter)
 {
-    eiter_cyc_t *either = (eiter_cyc_t *)in_eiter;
+    eiter_cyc_t *eiter = (eiter_cyc_t *)in_eiter;
 
     /* Sanity check */
-    HDassert(either);
+    HDassert(eiter);
 
     /* Free iteration object */
-    HDfree(either);
+    HDfree(eiter);
 
     return (0);
 } /* end eiter_cyc_term() */
@@ -2498,31 +2498,31 @@ main(void)
                 /* "Forward" testing parameters */
                 case EARRAY_ITER_FW:
                     HDputs("Testing with forward iteration");
-                    tparam.either = &ea_iter_fw;
+                    tparam.eiter = &ea_iter_fw;
                     break;
 
                 /* "Reverse" testing parameters */
                 case EARRAY_ITER_RV:
                     HDputs("Testing with reverse iteration");
-                    tparam.either = &ea_iter_rv;
+                    tparam.eiter = &ea_iter_rv;
                     break;
 
                 /* "Random" testing parameters */
                 case EARRAY_ITER_RND:
                     HDputs("Testing with random iteration");
-                    tparam.either = &ea_iter_rnd;
+                    tparam.eiter = &ea_iter_rnd;
                     break;
 
                 /* "Random #2" testing parameters */
                 case EARRAY_ITER_RND2:
                     HDputs("Testing with random #2 iteration");
-                    tparam.either = &ea_iter_rnd2;
+                    tparam.eiter = &ea_iter_rnd2;
                     break;
 
                 /* "Cyclic" testing parameters */
                 case EARRAY_ITER_CYC:
                     HDputs("Testing with cyclic iteration");
-                    tparam.either = &ea_iter_cyc;
+                    tparam.eiter = &ea_iter_cyc;
                     break;
 
                 /* An unknown iteration? */
