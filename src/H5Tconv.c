@@ -7009,14 +7009,12 @@ H5T__conv_float_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_float_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_fF(FLOAT, LDOUBLE, float, long double, -, -);
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_double_float
@@ -7051,14 +7049,12 @@ H5T__conv_double_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t ne
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_double_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_fF(DOUBLE, LDOUBLE, double, long double, -, -);
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_ldouble_float
@@ -7073,14 +7069,12 @@ H5T__conv_double_ldouble(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t 
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_ldouble_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                         size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_Ff(LDOUBLE, FLOAT, long double, float, -FLT_MAX, FLT_MAX);
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_ldouble_double
@@ -7095,14 +7089,12 @@ H5T__conv_ldouble_float(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t n
  *
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 herr_t
 H5T__conv_ldouble_double(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, size_t nelmts, size_t buf_stride,
                          size_t H5_ATTR_UNUSED bkg_stride, void *buf, void H5_ATTR_UNUSED *bkg)
 {
     H5T_CONV_Ff(LDOUBLE, DOUBLE, long double, double, -DBL_MAX, DBL_MAX);
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE != 0 */
 
 /*-------------------------------------------------------------------------
  * Function:    H5T__conv_schar_float
