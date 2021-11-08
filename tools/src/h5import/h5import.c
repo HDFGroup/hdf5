@@ -329,7 +329,7 @@ gtoken(char *s)
             (void)HDfprintf(stderr, err1, s);
     }
     else { /* filename */
-        token = FILENAME;
+        token = FILNAME;
     }
     return (token);
 }
