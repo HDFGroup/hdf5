@@ -3306,7 +3306,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
 #endif
         }
 
-        HDprintf("        and =");
+        HDprintf("        ans =");
         for (k = 0; k < dst_size; k++)
             HDprintf(" %02x", hw[ENDIAN(dst_size, k, dendian)]);
         HDprintf("%*s", (int)(3 * MAX(0, (ssize_t)src_size - (ssize_t)dst_size)), "");
