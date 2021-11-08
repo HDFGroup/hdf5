@@ -175,16 +175,16 @@ H5TEST_DLLVAR MPI_Info h5_io_info_g; /* MPI INFO object for IO */
 /* Fill an array on the heap with an increasing count value.  BUF
  * is expected to point to a `struct { TYPE arr[...][...]; }`.
  */
-#define H5TEST_FILL_2D_HEAP_ARRAY(BUF, TYPE)                                                      \
+#define H5TEST_FILL_2D_HEAP_ARRAY(BUF, TYPE)                                                                 \
     do {                                                                                                     \
         /* Prefix with h5tfa to avoid shadow warnings */                                                     \
-        size_t  h5tfa_i     = 0;                                                                                \
-        size_t  h5tfa_j     = 0;                                                                                \
-        TYPE h5tfa_count = 0;                                                                                \
+        size_t h5tfa_i     = 0;                                                                              \
+        size_t h5tfa_j     = 0;                                                                              \
+        TYPE   h5tfa_count = 0;                                                                              \
                                                                                                              \
-        for (h5tfa_i = 0; h5tfa_i < NELMTS((BUF)->arr); h5tfa_i++)                                                     \
-            for (h5tfa_j = 0; h5tfa_j < NELMTS((BUF)->arr[0]); h5tfa_j++) {                                               \
-                (BUF)->arr[h5tfa_i][h5tfa_j] = h5tfa_count;                                                         \
+        for (h5tfa_i = 0; h5tfa_i < NELMTS((BUF)->arr); h5tfa_i++)                                           \
+            for (h5tfa_j = 0; h5tfa_j < NELMTS((BUF)->arr[0]); h5tfa_j++) {                                  \
+                (BUF)->arr[h5tfa_i][h5tfa_j] = h5tfa_count;                                                  \
                 h5tfa_count++;                                                                               \
             }                                                                                                \
     } while (0)

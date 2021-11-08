@@ -56,17 +56,17 @@ const char *FILENAME_ENHANCE[] = {
 static int
 gen_cache_image_file(const char *fname)
 {
-    hid_t                     fid = H5I_INVALID_HID;           /* File ID */
-    hid_t                     did = -1, sid = H5I_INVALID_HID; /* Dataset ID, dataspace ID */
-    hid_t                     fapl = H5I_INVALID_HID;          /* File access property list */
-    hid_t                     dcpl = H5I_INVALID_HID;          /* Dataset creation property list */
-    hsize_t                   dims[2];                         /* Dimension sizes */
-    hsize_t                   chunks[2];                       /* Chunked dimension sizes */
-    int                       i, j;                            /* Local index variables */
+    hid_t   fid = H5I_INVALID_HID;           /* File ID */
+    hid_t   did = -1, sid = H5I_INVALID_HID; /* Dataset ID, dataspace ID */
+    hid_t   fapl = H5I_INVALID_HID;          /* File access property list */
+    hid_t   dcpl = H5I_INVALID_HID;          /* Dataset creation property list */
+    hsize_t dims[2];                         /* Dimension sizes */
+    hsize_t chunks[2];                       /* Chunked dimension sizes */
+    int     i, j;                            /* Local index variables */
     struct {
         int arr[50][100];
-    } *buf;       /* Buffer for data to write */
-    H5AC_cache_image_config_t cache_image_config =             /* Cache image input configuration */
+    } * buf;                                       /* Buffer for data to write */
+    H5AC_cache_image_config_t cache_image_config = /* Cache image input configuration */
         {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE, H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
 
     /* Create and fill array */
