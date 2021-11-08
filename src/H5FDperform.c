@@ -39,7 +39,7 @@ hid_t H5FDperform_init(hid_t (*init)(void))
 {
     hid_t ret_value = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_API_NOINIT
     /*NO TRACE*/
 
     /* It is possible that an application will evaluate an
@@ -54,5 +54,5 @@ hid_t H5FDperform_init(hid_t (*init)(void))
 
     ret_value = init();
 done:
-    FUNC_LEAVE_NOAPI(ret_value)
+    FUNC_LEAVE_API_NOINIT(ret_value)
 }

@@ -383,13 +383,13 @@ H5_term_library(void)
                                   * some dependent modules, first.
                                   */
         const char *name;        /* name of the module */
-        bool        completed;   /* true iff this terminator was already
+        hbool_t     completed;   /* true iff this terminator was already
                                   * completed
                                   */
-        const bool  await_prior; /* true iff all prior terminators in the list
-                                  * must complete before this terminator is
-                                  * attempted
-                                  */
+        const hbool_t await_prior;  /* true iff all prior terminators in the
+                                     * list must complete before this
+                                     * terminator is attempted
+                                     */
     } terminator[] = {
         /* Close the event sets first, so that all asynchronous operations
          * complete before anything else attempts to shut down.
