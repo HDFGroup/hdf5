@@ -2529,11 +2529,9 @@ H5LT_dtype_to_text(hid_t dtype, char *dt_str, H5LT_lang_t lang, size_t *slen, hb
             }
             else if (H5Tequal(dtype, H5T_NATIVE_DOUBLE)) {
                 HDsnprintf(dt_str, *slen, "H5T_NATIVE_DOUBLE");
-#if H5_SIZEOF_LONG_DOUBLE != 0
             }
             else if (H5Tequal(dtype, H5T_NATIVE_LDOUBLE)) {
                 HDsnprintf(dt_str, *slen, "H5T_NATIVE_LDOUBLE");
-#endif
             }
             else {
                 HDsnprintf(dt_str, *slen, "undefined float");

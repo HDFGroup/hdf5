@@ -705,7 +705,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                     HDmemcpy(&tempdouble, vp, sizeof(double));
                     h5tools_str_append(str, OPT(info->fmt_double, "%g"), tempdouble);
-#if H5_SIZEOF_LONG_DOUBLE != 0
                 }
                 else if (sizeof(long double) == nsize) {
                     /* if (H5Tequal(type, H5T_NATIVE_LDOUBLE)) */
@@ -713,7 +712,6 @@ h5tools_str_sprint(h5tools_str_t *str, const h5tool_format_t *info, hid_t contai
 
                     HDmemcpy(&templdouble, vp, sizeof(long double));
                     h5tools_str_append(str, "%Lg", templdouble);
-#endif
                 }
                 else {
                     size_t i;
