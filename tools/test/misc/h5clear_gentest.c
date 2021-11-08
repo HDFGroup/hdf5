@@ -63,17 +63,19 @@ gen_cache_image_file(const char *fname)
     hsize_t                   dims[2];                         /* Dimension sizes */
     hsize_t                   chunks[2];                       /* Chunked dimension sizes */
     int                       i, j;                            /* Local index variables */
-    int **                    buf                = NULL;       /* Buffer for data to write */
+    struct {
+        int arr[50][100];
+    } *buf;       /* Buffer for data to write */
     H5AC_cache_image_config_t cache_image_config =             /* Cache image input configuration */
         {H5AC__CURR_CACHE_IMAGE_CONFIG_VERSION, TRUE, FALSE, H5AC__CACHE_IMAGE__ENTRY_AGEOUT__NONE};
 
     /* Create and fill array */
-    H5TEST_ALLOCATE_2D_ARRAY(buf, int, 50, 100);
+    buf = malloc(sizeof(*buf));
     if (NULL == buf)
         goto error;
     for (i = 0; i < 50; i++)
         for (j = 0; j < 100; j++)
-            buf[i][j] = i * j;
+            buf->arr[i][j] = i * j;
 
     /* Create a copy of file access property list */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
@@ -108,7 +110,7 @@ gen_cache_image_file(const char *fname)
         goto error;
 
     /* Write to the dataset */
-    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf[0]) < 0)
+    if (H5Dwrite(did, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) < 0)
         goto error;
 
     /* Closing */
