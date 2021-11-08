@@ -24,12 +24,8 @@
  *-------------------------------------------------------------------------
  */
 
-#define F_FORMAT "%-15g %-15g %-15g\n"
-
-#if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT "%-15Lg %-15Lg %-15Lg\n"
-#endif
-
+#define F_FORMAT    "%-15g %-15g %-15g\n"
+#define LD_FORMAT   "%-15Lg %-15Lg %-15Lg\n"
 #define I_FORMAT    "%-15d %-15d %-15d\n"
 #define S_FORMAT    "%-16s %-17s\n"
 #define UI_FORMAT   "%-15u %-15u %-15u\n"
@@ -39,12 +35,8 @@
 #define ULLI_FORMAT "%-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u %-15" H5_PRINTF_LL_WIDTH "u\n"
 
 /* with -p option */
-#define F_FORMAT_P "%-15.10g %-15.10g %-15.10g %-14.10g\n"
-
-#if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
-#endif
-
+#define F_FORMAT_P   "%-15.10g %-15.10g %-15.10g %-14.10g\n"
+#define LD_FORMAT_P  "%-15.10Lg %-15.10Lg %-15.10Lg %-14.10Lg\n"
 #define I_FORMAT_P   "%-15d %-15d %-15d %-14f\n"
 #define UI_FORMAT_P  "%-15u %-15u %-15u %-14f\n"
 #define LI_FORMAT_P  "%-15ld %-15ld %-15ld %-14f\n"
@@ -56,12 +48,8 @@
 #define SPACES "          "
 
 /* not comparable */
-#define F_FORMAT_P_NOTCOMP "%-15.10g %-15.10g %-15.10g not comparable\n"
-
-#if H5_SIZEOF_LONG_DOUBLE != 0
-#define LD_FORMAT_P_NOTCOMP "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
-#endif
-
+#define F_FORMAT_P_NOTCOMP   "%-15.10g %-15.10g %-15.10g not comparable\n"
+#define LD_FORMAT_P_NOTCOMP  "%-15.10Lg %-15.10Lg %-15.10Lg not comparable\n"
 #define I_FORMAT_P_NOTCOMP   "%-15d %-15d %-15d not comparable\n"
 #define UI_FORMAT_P_NOTCOMP  "%-15u %-15u %-15u not comparable\n"
 #define LI_FORMAT_P_NOTCOMP  "%-15ld %-15ld %-15ld not comparable\n"
@@ -145,9 +133,7 @@ static hsize_t character_compare_opt(unsigned char *mem1, unsigned char *mem2, h
                                      diff_opt_t *opts);
 static hbool_t equal_float(float value, float expected, diff_opt_t *opts);
 static hbool_t equal_double(double value, double expected, diff_opt_t *opts);
-#if H5_SIZEOF_LONG_DOUBLE != 0
 static hbool_t equal_ldouble(long double value, long double expected, diff_opt_t *opts);
-#endif
 
 static int  print_data(diff_opt_t *opts);
 static void print_pos(diff_opt_t *opts, hsize_t elemtno, size_t u);
@@ -162,10 +148,8 @@ static hsize_t diff_float_element(unsigned char *mem1, unsigned char *mem2, hsiz
                                   diff_opt_t *opts);
 static hsize_t diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                                    diff_opt_t *opts);
-#if H5_SIZEOF_LONG_DOUBLE != 0
 static hsize_t diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                                     diff_opt_t *opts);
-#endif
 static hsize_t diff_schar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
                                   diff_opt_t *opts);
 static hsize_t diff_uchar_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
@@ -191,12 +175,7 @@ static hsize_t diff_ullong_element(unsigned char *mem1, unsigned char *mem2, hsi
  *-------------------------------------------------------------------------
  */
 
-#if H5_SIZEOF_LONG_DOUBLE != 0
 typedef enum dtype_t { FLT_FLOAT, FLT_DOUBLE, FLT_LDOUBLE } dtype_t;
-#else
-
-typedef enum dtype_t { FLT_FLOAT, FLT_DOUBLE } dtype_t;
-#endif
 
 /*-------------------------------------------------------------------------
  * XCAO, 11/10/2010
@@ -278,7 +257,6 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
                         return nfound;
                 } /* nelmts */
             }
-#if H5_SIZEOF_LONG_DOUBLE != 0
             else if (H5Tequal(opts->m_tid, H5T_NATIVE_LDOUBLE)) {
                 for (i = 0; i < opts->hs_nelmts; i++) {
                     nfound += diff_ldouble_element(mem1, mem2, i, opts);
@@ -289,7 +267,6 @@ diff_array(void *_mem1, void *_mem2, diff_opt_t *opts, hid_t container1_id, hid_
                         return nfound;
                 } /* nelmts */
             }
-#endif
             break;
 
         case H5T_INTEGER:
@@ -2034,7 +2011,6 @@ diff_double_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, 
  * Return:   number of differences found
  *-------------------------------------------------------------------------
  */
-#if H5_SIZEOF_LONG_DOUBLE != 0
 
 static hsize_t
 diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx, diff_opt_t *opts)
@@ -2200,7 +2176,6 @@ diff_ldouble_element(unsigned char *mem1, unsigned char *mem2, hsize_t elem_idx,
 
     return nfound;
 }
-#endif /* H5_SIZEOF_LONG_DOUBLE */
 
 /*-------------------------------------------------------------------------
  * Function: diff_schar_element
@@ -3203,7 +3178,6 @@ equal_double(double value, double expected, diff_opt_t *opts)
  *-------------------------------------------------------------------------
  */
 
-#if H5_SIZEOF_LONG_DOUBLE != 0
 static hbool_t
 equal_ldouble(long double value, long double expected, diff_opt_t *opts)
 {
@@ -3243,8 +3217,6 @@ equal_ldouble(long double value, long double expected, diff_opt_t *opts)
 
     return FALSE;
 }
-
-#endif /* #if H5_SIZEOF_LONG_DOUBLE !=0 */
 
 /*-------------------------------------------------------------------------
  * Function:    equal_float

@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - Added new configure options to enable dimension scales APIs (H5DS*) to
+      use new object references with the native VOL connector (aka native HDF5
+      library). New references are always used for non-native terminal VOL
+      connectors (e.g., DAOS).
+
+      Autotools   --enable-dimension-scales-with-new-ref
+      CMake       HDF5_DIMENSION_SCALES_NEW_REF=ON
+
+      (EIP - 2021/10/25, HDFFV-11180)
+
     - Refactored the utils folder.
 
       Added subfolder test and moved the 'swmr_check_compat_vfd.c file'
@@ -1131,6 +1141,17 @@ Bug Fixes since HDF5-1.12.0 release
         the same.
 
         (NAF - 2021/01/22)
+
+    - Fixed CVE-2018-17432
+
+        The tool h5repack produced a segfault on a corrupted file which had
+        invalid rank for scalar or NULL datatype.
+
+        The problem was fixed by modifying the dataspace encode and decode
+        functions to detect and report invalid rank. h5repack now fails
+        with an error message for the corrupted file.
+
+        (BMR - 2020/10/26, HDFFV-10590)
 
     - Creation of dataset with optional filter
 

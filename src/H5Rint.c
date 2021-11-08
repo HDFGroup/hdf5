@@ -1068,7 +1068,7 @@ H5R__encode_obj_token(const H5O_token_t *obj_token, size_t token_size, unsigned 
         /* Encode token */
         H5MM_memcpy(p, obj_token, token_size);
     }
-    *nalloc = token_size + H5_SIZEOF_UINT8_T;
+    *nalloc = token_size + sizeof(uint8_t);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__encode_obj_token() */
@@ -1096,7 +1096,7 @@ H5R__decode_obj_token(const unsigned char *buf, size_t *nbytes, H5O_token_t *obj
     HDassert(token_size);
 
     /* Don't decode if buffer size isn't big enough */
-    if (*nbytes < H5_SIZEOF_UINT8_T)
+    if (*nbytes < sizeof(uint8_t))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
     /* Get token size */
@@ -1110,7 +1110,7 @@ H5R__decode_obj_token(const unsigned char *buf, size_t *nbytes, H5O_token_t *obj
     /* Decode token */
     H5MM_memcpy(obj_token, p, *token_size);
 
-    *nbytes = (size_t)(*token_size + H5_SIZEOF_UINT8_T);
+    *nbytes = (size_t)(*token_size + sizeof(uint8_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1143,7 +1143,7 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
                     "Cannot determine amount of space needed for serializing selection")
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
-    if (buf && *nalloc >= ((size_t)buf_size + 2 * H5_SIZEOF_UINT32_T)) {
+    if (buf && *nalloc >= ((size_t)buf_size + 2 * sizeof(uint32_t))) {
         int rank;
         p = (uint8_t *)buf;
 
@@ -1159,7 +1159,7 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
         if (H5S_SELECT_SERIALIZE(space, (unsigned char **)&p) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "can't serialize selection")
     } /* end if */
-    *nalloc = (size_t)buf_size + 2 * H5_SIZEOF_UINT32_T;
+    *nalloc = (size_t)buf_size + 2 * sizeof(uint32_t);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1190,16 +1190,16 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
     HDassert(space_ptr);
 
     /* Don't decode if buffer size isn't big enough */
-    if (*nbytes < (2 * H5_SIZEOF_UINT32_T))
+    if (*nbytes < (2 * sizeof(uint32_t)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
     /* Decode the selection size */
     UINT32DECODE(p, buf_size);
-    buf_size += H5_SIZEOF_UINT32_T;
+    buf_size += sizeof(uint32_t);
 
     /* Decode the extent rank */
     UINT32DECODE(p, rank);
-    buf_size += H5_SIZEOF_UINT32_T;
+    buf_size += sizeof(uint32_t);
 
     /* Don't decode if buffer size isn't big enough */
     if (*nbytes < buf_size)
