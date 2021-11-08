@@ -23,7 +23,7 @@
 /*
  * state table tokens
  */
-#define FILENAME 0
+#define FILNAME 0
 /* filename */
 #define OPT_o 1
 /* output filename */

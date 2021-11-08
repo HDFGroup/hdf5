@@ -101,7 +101,7 @@
 #define HDclosedir(D)            closedir(D)
 #define HDcos(X)                 cos(X)
 #define HDcosh(X)                cosh(X)
-#define HDcreat(S, M)            create(S, M)
+#define HDcreat(S, M)            creat(S, M)
 #define HDctermid(S)             ctermid(S)
 #define HDctime(T)               ctime(T)
 #define HDcuserid(S)             cuserid(S)

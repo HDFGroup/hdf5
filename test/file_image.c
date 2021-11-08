@@ -673,7 +673,7 @@ test_core(void)
         FAIL_STACK_ERROR
 
     /* Test open with file image */
-    if ((file = H5Fopen("done.h5", H5F_ACC_RDONLY, fapl)) < 0)
+    if ((file = H5Fopen("dne.h5", H5F_ACC_RDONLY, fapl)) < 0)
         FAIL_STACK_ERROR
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR

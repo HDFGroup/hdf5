@@ -223,9 +223,9 @@ usage(void)
            "\t\tflush data to disk after closing a dataset \n"
            "\t\t\t\tor attribute.  Valid options are \"d\" for \n"
            "\t\t\t\tdataset, \"a\" for attribute.  Disabled is \n"
-           "\t\t\t\the default.\n");
+           "\t\t\t\tthe default.\n");
     printf("\t-t<tests>"
-           "\t\turn specific test.  Give only one number each \n"
+           "\t\trun specific test.  Give only one number each \n"
            "\t\t\t\ttime. i.e. \"-t1 -t3\" will run test 1 and 3. \n"
            "\t\t\t\tDefault is all three tests.  The 3 tests are: \n\n"
            "\t\t\t\t1. Create <num_attributes> attributes for each \n"
