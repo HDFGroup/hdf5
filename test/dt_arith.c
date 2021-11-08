@@ -2581,7 +2581,7 @@ test_conv_int_1(const char *name, hid_t src, hid_t dst)
 
         if (++fails_all_tests >= max_fails) {
             HDputs("    maximum failures reached, aborting test...");
-            HDputs("    (dst is library's conversion output. and is compiler's conversion output.)");
+            HDputs("    (dst is library's conversion output. ans is compiler's conversion output.)");
             goto done;
         }
     }
