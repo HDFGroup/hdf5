@@ -3144,11 +3144,14 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 herr_t
 H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata)
 {
-    H5D_rdcc_ent_t *     ent       = NULL; /* Cache entry */
-    H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
-    unsigned             idx       = 0;       /* Index of chunk in cache, if present */
-    hbool_t              found     = FALSE;   /* In cache? */
-    herr_t               ret_value = SUCCEED; /* Return value */
+    H5D_rdcc_ent_t *     ent   = NULL; /* Cache entry */
+    H5O_storage_chunk_t *sc    = &(dset->shared->layout.storage.u.chunk);
+    unsigned             idx   = 0;     /* Index of chunk in cache, if present */
+    hbool_t              found = FALSE; /* In cache? */
+#ifdef H5_HAVE_PARALLEL
+    hbool_t reenable_coll_md_reads = FALSE;
+#endif
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3219,8 +3222,13 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
              * highly unlikely that users would read the same chunks from all
              * processes.
              */
-            if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI))
-                H5CX_set_coll_metadata_read(FALSE);
+            if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
+                hbool_t do_coll_md_reads = H5CX_get_coll_metadata_read();
+                if (do_coll_md_reads) {
+                    H5CX_set_coll_metadata_read(FALSE);
+                    reenable_coll_md_reads = TRUE;
+                }
+            }
 #endif /* H5_HAVE_PARALLEL */
 
             /* Go get the chunk information */
@@ -3263,6 +3271,12 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
     }     /* end else */
 
 done:
+#ifdef H5_HAVE_PARALLEL
+    /* Re-enable collective metadata reads if we disabled them */
+    if (reenable_coll_md_reads)
+        H5CX_set_coll_metadata_read(TRUE);
+#endif /* H5_HAVE_PARALLEL */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_lookup() */
 
