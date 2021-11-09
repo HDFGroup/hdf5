@@ -1401,6 +1401,19 @@ H5D__chunk_mem_xfree(void *chk, const void *_pline)
 } /* H5D__chunk_mem_xfree() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_mem_free
+ *
+ * Purpose:    Wrapper with H5MM_free_t-compatible signature that just
+ *             calls H5D__chunk_mem_xfree and discards the return value.
+ *-------------------------------------------------------------------------
+ */
+static void
+H5D__chunk_mem_free(void *chk, const void *_pline)
+{
+    (void)H5D__chunk_mem_xfree(chk, _pline);
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__chunk_mem_realloc
  *
  * Purpose:     Reallocate space for a chunk in memory.  This routine allocates
@@ -4387,7 +4400,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         /* (casting away const OK - QAK) */
         if (H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc, (void *)pline,
-                           (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline, &dset->shared->dcpl_cache.fill,
+                           (H5MM_free_t)H5D__chunk_mem_free, (void *)pline, &dset->shared->dcpl_cache.fill,
                            dset->shared->type, dset->shared->type_id, (size_t)0, orig_chunk_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;

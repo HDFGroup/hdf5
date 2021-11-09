@@ -69,9 +69,6 @@ static herr_t H5RS__resize_for_append(H5RS_str_t *rs, size_t len);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
