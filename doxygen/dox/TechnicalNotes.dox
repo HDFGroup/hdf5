@@ -1,11 +1,12 @@
 /** \page TN Technical Notes
 
 \li \link api-compat-macros API Compatibility Macros \endlink
+\li \ref FMTDISC "File Format Walkthrough"
+\li \ref FILTER "Filters"
+\li \ref IOFLOW "HDF5 Raw I/O Flow Notes"
 \li \ref TNMDC "Metadata Caching in HDF5"
 \li \ref MT "Thread Safe library"
-\li \ref IOFLOW "HDF5 Raw I/O Flow Notes"
 \li \ref VFL "Virtual File Layer"
-\li \ref FMTDISC "File Format Walkthrough"
 
  */
 
@@ -30,5 +31,9 @@
 /** \page FMTDISC HDF5 File Format Discussion
 
 \htmlinclude FileFormat.html
+
+/** \page FILTER HDF5 Filters
+
+\htmlinclude Filters.html
 
 */
