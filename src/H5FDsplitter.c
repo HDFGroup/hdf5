@@ -196,7 +196,7 @@ H5FD_splitter_init(void)
 {
     hid_t ret_value = H5I_INVALID_HID;
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
 
     H5FD_SPLITTER_LOG_CALL(__func__);
 
@@ -205,7 +205,6 @@ H5FD_splitter_init(void)
 
     ret_value = H5FD_SPLITTER_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_splitter_init() */
 
