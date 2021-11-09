@@ -1194,7 +1194,7 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
   !
   CHARACTER(LEN=80) :: fix_filename1
   CHARACTER(LEN=80) :: fix_filename2
-  INTEGER(HSIZE_T) :: html
+  INTEGER(HSIZE_T) :: htmp
 
   LOGICAL :: cleanup
 
@@ -1293,9 +1293,9 @@ SUBROUTINE delete_by_idx(cleanup, fapl, total_error)
            ! IF(H5G_has_links_test(group_id, NULL) != TRUE) TEST_ERROR
 
            !  Check for out of bound deletion
-           html =9
+           htmp =9
 !EP           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, INT(u,HSIZE_T), error)
-           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, html, error)
+           CALL H5Ldelete_by_idx_f(group_id, ".", idx_type, iorder, htmp, error)
            CALL verify("H5Ldelete_by_idx_f", error, -1, total_error) ! test should fail (error = -1)
 
 

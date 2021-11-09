@@ -11,8 +11,8 @@ jobs:
       - run: pip install codespell flake8
       - run: |
           SKIP="./bin/trace,./hl/tools/h5watch/h5watch.c,./tools/test/h5jam/tellub.c,./.git"
-          IGNORE="isnt,inout,nd,parms,parm,ba,offsetP,ser,ois,had,fiter,fo,clude,refere,minnum,offsetp,creat,ans:,eiter,lastr,minum,ans,isn't,ifset,sur,trun,dne,tthe,hda,filname,te"
-          codespell -L $IGNORE --skip=$SKIP --quiet-level=2 -x .github/workflows/codespell.yml
+          IGNORE="isnt,inout,nd,parms,parm,ba,offsetP,ser,ois,had,fiter,fo,clude,refere,minnum,offsetp,creat,ans:,eiter,lastr,minum,ans,isn't,ifset,sur,trun,dne,tthe,hda,filname,te,htmp"
+          codespell -L $IGNORE --skip=$SKIP --quiet-level=2
       - name: Codespell comment
         if: ${{ failure() }}
         uses: plettich/python_codespell_action@master
