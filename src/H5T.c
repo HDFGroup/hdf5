@@ -3331,6 +3331,7 @@ H5T__create(H5T_class_t type, size_t size)
             if (type == H5T_COMPOUND) {
                 dt->shared->u.compnd.packed    = FALSE; /* Start out unpacked */
                 dt->shared->u.compnd.memb_size = 0;
+                dt->shared->u.compnd.idx_name=NULL;
             } /* end if */
             else if (type == H5T_OPAQUE)
                 /* Initialize the tag in case it's not set later.  A null tag will
@@ -3626,7 +3627,19 @@ H5T__complete_copy(H5T_t *new_dt, const H5T_t *old_dt, H5T_shared_t *reopened_fo
 
                 /* Apply the accumulated size change to the size of the compound struct */
                 new_dt->shared->size += (size_t)accum_change;
-            } break;
+
+                    /* Copy sorting index */
+                    if (new_dt->shared->u.compnd.idx_name!=NULL) {
+						unsigned * idx_name_orig = new_dt->shared->u.compnd.idx_name;
+
+						if(NULL == (new_dt->shared->u.compnd.idx_name = H5MM_malloc(new_dt->shared->u.compnd.nalloc * sizeof(H5T_cmemb_t))))
+                            HGOTO_ERROR(H5E_DATATYPE, H5E_CANTALLOC, FAIL, "memory allocation failed")
+
+                        H5MM_memcpy(new_dt->shared->u.compnd.idx_name, old_dt->shared->u.compnd.idx_name,
+                        new_dt->shared->u.compnd.nmembs * sizeof(unsigned));
+		    }
+                }
+                break;
 
             case H5T_ENUM:
                 /*
@@ -4034,6 +4047,10 @@ H5T__free(H5T_t *dt)
             }
             dt->shared->u.compnd.memb   = (H5T_cmemb_t *)H5MM_xfree(dt->shared->u.compnd.memb);
             dt->shared->u.compnd.nmembs = 0;
+            if (dt->shared->u.compnd.idx_name!=NULL) {
+				dt->shared->u.compnd.idx_name = (unsigned *)H5MM_xfree(dt->shared->u.compnd.idx_name);
+				dt->shared->u.compnd.idx_name = NULL;
+			}
             break;
 
         case H5T_ENUM:
@@ -4535,12 +4552,13 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                 HGOTO_DONE(1);
 
             /* Build an index for each type so the names are sorted */
-            if (NULL == (idx1 = (unsigned *)H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned))) ||
-                NULL == (idx2 = (unsigned *)H5MM_malloc(dt2->shared->u.compnd.nmembs * sizeof(unsigned))))
-                HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed");
+            if(NULL == dt1->shared->u.compnd.idx_name) {
+				dt1->shared->u.compnd.idx_name = (unsigned *)H5MM_malloc(dt1->shared->u.compnd.nmembs * sizeof(unsigned));
+				if(NULL == (idx1 = dt1->shared->u.compnd.idx_name))
+					HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
             for (u = 0; u < dt1->shared->u.compnd.nmembs; u++)
-                idx1[u] = idx2[u] = u;
-            if (dt1->shared->u.enumer.nmembs > 1) {
+					idx1[u] = u;
+				if(dt1->shared->u.compnd.nmembs > 1) {
                 int i;
 
                 for (i = (int)dt1->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
@@ -4555,6 +4573,20 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                             swapped          = TRUE;
                         }
                 }
+				}
+			}
+			else {
+				idx1 = dt1->shared->u.compnd.idx_name;
+			}
+			if(dt2->shared->type == H5T_COMPOUND && NULL == dt2->shared->u.compnd.idx_name) {
+				dt2->shared->u.compnd.idx_name = (unsigned *)H5MM_malloc(dt2->shared->u.compnd.nmembs * sizeof(unsigned));
+				if(NULL == (idx2 = dt2->shared->u.compnd.idx_name))
+					HGOTO_ERROR(H5E_RESOURCE, H5E_NOSPACE, 0, "memory allocation failed")
+				for(u = 0; u < dt2->shared->u.compnd.nmembs; u++)
+					idx2[u] = u;
+				if(dt2->shared->u.compnd.nmembs > 1) {
+					int i;
+
                 for (i = (int)dt2->shared->u.compnd.nmembs - 1, swapped = TRUE; swapped && i >= 0; --i) {
                     int j;
 
@@ -4568,6 +4600,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
                         }
                 }
             } /* end if */
+		}
+		else {
+			idx2 = dt2->shared->u.compnd.idx_name;
+		}
 
 #ifdef H5T_DEBUG
             /* I don't quite trust the code above yet :-)  --RPM */
@@ -4927,10 +4963,10 @@ H5T_cmp(const H5T_t *dt1, const H5T_t *dt2, hbool_t superset)
     } /* end switch */
 
 done:
-    if (NULL != idx1)
+/*    if (NULL != idx1)
         H5MM_xfree(idx1);
     if (NULL != idx2)
-        H5MM_xfree(idx2);
+        H5MM_xfree(idx2);*/
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T_cmp() */
