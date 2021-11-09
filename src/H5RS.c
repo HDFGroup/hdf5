@@ -313,8 +313,16 @@ H5RS_wrap(const char *s)
     if (NULL == (ret_value = H5FL_MALLOC(H5RS_str_t)))
         HGOTO_ERROR(H5E_RS, H5E_CANTALLOC, NULL, "memory allocation failed")
 
-    /* Set the internal fields */
-    ret_value->s   = (char *)s;
+    /* Set the internal fields
+     *
+     * We ignore warnings about storing a const char pointer in the struct
+     * since we never modify or free the string when the wrapped struct
+     * field is set to TRUE.
+     */
+    H5_GCC_CLANG_DIAG_OFF("cast-qual")
+    ret_value->s = (char *)s;
+    H5_GCC_CLANG_DIAG_ON("cast-qual")
+
     ret_value->len = HDstrlen(s);
     ret_value->end = ret_value->s + ret_value->len;
 
