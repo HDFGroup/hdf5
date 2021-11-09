@@ -123,7 +123,7 @@ static herr_t H5P__free_del_name_cb(void *item, void H5_ATTR_UNUSED *key, void H
 
 /*
  * Predefined property list classes. These are initialized at runtime by
- * H5P__init_package() in this source file.
+ * H5P_init() in this source file.
  */
 hid_t           H5P_CLS_ROOT_ID_g             = H5I_INVALID_HID;
 H5P_genclass_t *H5P_CLS_ROOT_g                = NULL;
@@ -172,7 +172,7 @@ H5P_genclass_t *H5P_CLS_REFERENCE_ACCESS_g    = NULL;
 
 /*
  * Predefined property lists for each predefined class. These are initialized
- * at runtime by H5P__init_package() in this source file.
+ * at runtime by H5P_init() in this source file.
  */
 hid_t H5P_LST_FILE_CREATE_ID_g      = H5I_INVALID_HID;
 hid_t H5P_LST_FILE_ACCESS_ID_g      = H5I_INVALID_HID;
@@ -429,63 +429,12 @@ static const H5I_class_t H5I_GENPROPLST_CLS[1] = {{
 herr_t
 H5P_init_phase1(void)
 {
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_init_phase1() */
-
-/*-------------------------------------------------------------------------
- * Function:    H5P_init_phase2
- *
- * Purpose:     Finish initializing the interface from some other package.
- *
- * Note:        This is broken out as a separate routine so that the
- *              library's default VFL driver can be chosen and initialized
- *              after the entire H5P interface has been initialized.
- *
- * Return:      Success:    Non-negative
- *              Failure:    Negative
- *
- *-------------------------------------------------------------------------
- */
-herr_t
-H5P_init_phase2(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_NOAPI(FAIL)
-
-    /* Set up the default VFL driver */
-    if (H5P__facc_set_def_driver() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "unable to set default VFL driver")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P_init_phase2() */
-
-/*--------------------------------------------------------------------------
-NAME
-   H5P__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5P__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
---------------------------------------------------------------------------*/
-herr_t
-H5P__init_package(void)
-{
     size_t tot_init = 0; /* Total # of classes initialized */
     size_t pass_init;    /* # of classes initialized in each pass */
     size_t u;
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_PACKAGE
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Sanity check */
     HDcompile_assert(H5P_TYPE_REFERENCE_ACCESS == (H5P_TYPE_MAX_TYPE - 1));
@@ -576,7 +525,36 @@ done:
     }
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5P__init_package() */
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    H5P_init_phase2
+ *
+ * Purpose:     Finish initializing the interface from some other package.
+ *
+ * Note:        This is broken out as a separate routine so that the
+ *              library's default VFL driver can be chosen and initialized
+ *              after the entire H5P interface has been initialized.
+ *
+ * Return:      Success:    Non-negative
+ *              Failure:    Negative
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5P_init_phase2(void)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    /* Set up the default VFL driver */
+    if (H5P__facc_set_def_driver() < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTSET, FAIL, "unable to set default VFL driver")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5P_init_phase2() */
 
 /*--------------------------------------------------------------------------
  NAME
@@ -602,77 +580,70 @@ H5P_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        int64_t nlist, nclass;
+    int64_t nlist, nclass;
 
-        /* Destroy HDF5 library property classes & lists */
+    /* Destroy HDF5 library property classes & lists */
 
-        /* Check if there are any open property list classes or lists */
-        nclass = H5I_nmembers(H5I_GENPROP_CLS);
-        nlist  = H5I_nmembers(H5I_GENPROP_LST);
+    /* Check if there are any open property list classes or lists */
+    nclass = H5I_nmembers(H5I_GENPROP_CLS);
+    nlist  = H5I_nmembers(H5I_GENPROP_LST);
 
-        /* If there are any open classes or groups, attempt to get rid of them. */
-        if ((nclass + nlist) > 0) {
-            /* Clear the lists */
-            if (nlist > 0) {
-                (void)H5I_clear_type(H5I_GENPROP_LST, FALSE, FALSE);
+    /* If there are any open classes or groups, attempt to get rid of them. */
+    if ((nclass + nlist) > 0) {
+        /* Clear the lists */
+        if (nlist > 0) {
+            (void)H5I_clear_type(H5I_GENPROP_LST, FALSE, FALSE);
 
-                /* Reset the default property lists, if they've been closed */
-                if (H5I_nmembers(H5I_GENPROP_LST) == 0) {
-                    H5P_LST_FILE_CREATE_ID_g = H5P_LST_FILE_ACCESS_ID_g = H5P_LST_DATASET_CREATE_ID_g =
-                        H5P_LST_DATASET_ACCESS_ID_g = H5P_LST_DATASET_XFER_ID_g = H5P_LST_GROUP_CREATE_ID_g =
-                            H5P_LST_GROUP_ACCESS_ID_g                       = H5P_LST_DATATYPE_CREATE_ID_g =
-                                H5P_LST_DATATYPE_ACCESS_ID_g                = H5P_LST_MAP_CREATE_ID_g =
-                                    H5P_LST_MAP_ACCESS_ID_g                 = H5P_LST_ATTRIBUTE_CREATE_ID_g =
-                                        H5P_LST_ATTRIBUTE_ACCESS_ID_g       = H5P_LST_OBJECT_COPY_ID_g =
-                                            H5P_LST_LINK_CREATE_ID_g        = H5P_LST_LINK_ACCESS_ID_g =
-                                                H5P_LST_VOL_INITIALIZE_ID_g = H5P_LST_REFERENCE_ACCESS_ID_g =
-                                                    H5P_LST_FILE_MOUNT_ID_g = H5I_INVALID_HID;
-                } /* end if */
-            }     /* end if */
+            /* Reset the default property lists, if they've been closed */
+            if (H5I_nmembers(H5I_GENPROP_LST) == 0) {
+                H5P_LST_FILE_CREATE_ID_g = H5P_LST_FILE_ACCESS_ID_g = H5P_LST_DATASET_CREATE_ID_g =
+                    H5P_LST_DATASET_ACCESS_ID_g = H5P_LST_DATASET_XFER_ID_g = H5P_LST_GROUP_CREATE_ID_g =
+                        H5P_LST_GROUP_ACCESS_ID_g                           = H5P_LST_DATATYPE_CREATE_ID_g =
+                            H5P_LST_DATATYPE_ACCESS_ID_g = H5P_LST_MAP_CREATE_ID_g = H5P_LST_MAP_ACCESS_ID_g =
+                                H5P_LST_ATTRIBUTE_CREATE_ID_g             = H5P_LST_ATTRIBUTE_ACCESS_ID_g =
+                                    H5P_LST_OBJECT_COPY_ID_g              = H5P_LST_LINK_CREATE_ID_g =
+                                        H5P_LST_LINK_ACCESS_ID_g          = H5P_LST_VOL_INITIALIZE_ID_g =
+                                            H5P_LST_REFERENCE_ACCESS_ID_g = H5P_LST_FILE_MOUNT_ID_g =
+                                                H5I_INVALID_HID;
+            } /* end if */
+        }     /* end if */
 
-            /* Only attempt to close the classes after all the lists are closed */
-            if (nlist == 0 && nclass > 0) {
-                (void)H5I_clear_type(H5I_GENPROP_CLS, FALSE, FALSE);
+        /* Only attempt to close the classes after all the lists are closed */
+        if (nlist == 0 && nclass > 0) {
+            (void)H5I_clear_type(H5I_GENPROP_CLS, FALSE, FALSE);
 
-                /* Reset the default property classes, if they've been closed */
-                if (H5I_nmembers(H5I_GENPROP_CLS) == 0) {
-                    H5P_CLS_ROOT_g = H5P_CLS_OBJECT_CREATE_g = H5P_CLS_FILE_CREATE_g = H5P_CLS_FILE_ACCESS_g =
-                        H5P_CLS_DATASET_CREATE_g = H5P_CLS_DATASET_ACCESS_g = H5P_CLS_DATASET_XFER_g =
-                            H5P_CLS_GROUP_CREATE_g = H5P_CLS_GROUP_ACCESS_g = H5P_CLS_DATATYPE_CREATE_g =
-                                H5P_CLS_DATATYPE_ACCESS_g = H5P_CLS_MAP_CREATE_g = H5P_CLS_MAP_ACCESS_g =
-                                    H5P_CLS_STRING_CREATE_g              = H5P_CLS_ATTRIBUTE_CREATE_g =
-                                        H5P_CLS_ATTRIBUTE_ACCESS_g       = H5P_CLS_OBJECT_COPY_g =
-                                            H5P_CLS_LINK_CREATE_g        = H5P_CLS_LINK_ACCESS_g =
-                                                H5P_CLS_VOL_INITIALIZE_g = H5P_CLS_REFERENCE_ACCESS_g =
-                                                    H5P_CLS_FILE_MOUNT_g = NULL;
+            /* Reset the default property classes, if they've been closed */
+            if (H5I_nmembers(H5I_GENPROP_CLS) == 0) {
+                H5P_CLS_ROOT_g = H5P_CLS_OBJECT_CREATE_g = H5P_CLS_FILE_CREATE_g = H5P_CLS_FILE_ACCESS_g =
+                    H5P_CLS_DATASET_CREATE_g = H5P_CLS_DATASET_ACCESS_g = H5P_CLS_DATASET_XFER_g =
+                        H5P_CLS_GROUP_CREATE_g = H5P_CLS_GROUP_ACCESS_g = H5P_CLS_DATATYPE_CREATE_g =
+                            H5P_CLS_DATATYPE_ACCESS_g = H5P_CLS_MAP_CREATE_g = H5P_CLS_MAP_ACCESS_g =
+                                H5P_CLS_STRING_CREATE_g                      = H5P_CLS_ATTRIBUTE_CREATE_g =
+                                    H5P_CLS_ATTRIBUTE_ACCESS_g               = H5P_CLS_OBJECT_COPY_g =
+                                        H5P_CLS_LINK_CREATE_g                = H5P_CLS_LINK_ACCESS_g =
+                                            H5P_CLS_VOL_INITIALIZE_g         = H5P_CLS_REFERENCE_ACCESS_g =
+                                                H5P_CLS_FILE_MOUNT_g         = NULL;
 
-                    H5P_CLS_ROOT_ID_g = H5P_CLS_OBJECT_CREATE_ID_g = H5P_CLS_FILE_CREATE_ID_g =
-                        H5P_CLS_FILE_ACCESS_ID_g = H5P_CLS_DATASET_CREATE_ID_g = H5P_CLS_DATASET_ACCESS_ID_g =
-                            H5P_CLS_DATASET_XFER_ID_g                          = H5P_CLS_GROUP_CREATE_ID_g =
-                                H5P_CLS_GROUP_ACCESS_ID_g                    = H5P_CLS_DATATYPE_CREATE_ID_g =
-                                    H5P_CLS_DATATYPE_ACCESS_ID_g             = H5P_CLS_MAP_CREATE_ID_g =
-                                        H5P_CLS_MAP_ACCESS_ID_g              = H5P_CLS_STRING_CREATE_ID_g =
-                                            H5P_CLS_ATTRIBUTE_CREATE_ID_g    = H5P_CLS_ATTRIBUTE_ACCESS_ID_g =
-                                                H5P_CLS_OBJECT_COPY_ID_g     = H5P_CLS_LINK_CREATE_ID_g =
-                                                    H5P_CLS_LINK_ACCESS_ID_g = H5P_CLS_VOL_INITIALIZE_ID_g =
-                                                        H5P_CLS_REFERENCE_ACCESS_ID_g =
-                                                            H5P_CLS_FILE_MOUNT_ID_g = H5I_INVALID_HID;
-                } /* end if */
-            }     /* end if */
+                H5P_CLS_ROOT_ID_g = H5P_CLS_OBJECT_CREATE_ID_g = H5P_CLS_FILE_CREATE_ID_g =
+                    H5P_CLS_FILE_ACCESS_ID_g = H5P_CLS_DATASET_CREATE_ID_g = H5P_CLS_DATASET_ACCESS_ID_g =
+                        H5P_CLS_DATASET_XFER_ID_g = H5P_CLS_GROUP_CREATE_ID_g = H5P_CLS_GROUP_ACCESS_ID_g =
+                            H5P_CLS_DATATYPE_CREATE_ID_g                      = H5P_CLS_DATATYPE_ACCESS_ID_g =
+                                H5P_CLS_MAP_CREATE_ID_g                       = H5P_CLS_MAP_ACCESS_ID_g =
+                                    H5P_CLS_STRING_CREATE_ID_g              = H5P_CLS_ATTRIBUTE_CREATE_ID_g =
+                                        H5P_CLS_ATTRIBUTE_ACCESS_ID_g       = H5P_CLS_OBJECT_COPY_ID_g =
+                                            H5P_CLS_LINK_CREATE_ID_g        = H5P_CLS_LINK_ACCESS_ID_g =
+                                                H5P_CLS_VOL_INITIALIZE_ID_g = H5P_CLS_REFERENCE_ACCESS_ID_g =
+                                                    H5P_CLS_FILE_MOUNT_ID_g = H5I_INVALID_HID;
+            } /* end if */
+        }     /* end if */
 
-            n++; /*H5I*/
-        }
-        else {
-            /* Destroy the property list and class id groups */
-            n += (H5I_dec_type_ref(H5I_GENPROP_LST) > 0);
-            n += (H5I_dec_type_ref(H5I_GENPROP_CLS) > 0);
-
-            /* Mark closed */
-            if (0 == n)
-                H5_PKG_INIT_VAR = FALSE;
-        } /* end else */
-    }     /* end if */
+        n++; /*H5I*/
+    }
+    else {
+        /* Destroy the property list and class id groups */
+        n += (H5I_dec_type_ref(H5I_GENPROP_LST) > 0);
+        n += (H5I_dec_type_ref(H5I_GENPROP_CLS) > 0);
+    } /* end else */
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5P_term_package() */
@@ -3553,7 +3524,7 @@ H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops, hbool_t recu
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(pclass);
     HDassert(nprops);
@@ -3568,7 +3539,6 @@ H5P_get_nprops_pclass(const H5P_genclass_t *pclass, size_t *nprops, hbool_t recu
             *nprops += pclass->nprops;
         } /* end while */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P_get_nprops_pclass() */
 
@@ -3999,7 +3969,7 @@ H5P_class_isa(const H5P_genclass_t *pclass1, const H5P_genclass_t *pclass2)
 {
     htri_t ret_value = FAIL; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(pclass1);
     HDassert(pclass2);
@@ -5301,14 +5271,13 @@ H5P_get_class_name(H5P_genclass_t *pclass)
 {
     char *ret_value = NULL; /* Return value */
 
-    FUNC_ENTER_NOAPI(NULL)
+    FUNC_ENTER_NOAPI_NOERR
 
     HDassert(pclass);
 
     /* Get class name */
     ret_value = H5MM_xstrdup(pclass->name);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5P_get_class_name() */
 

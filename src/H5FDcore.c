@@ -442,39 +442,6 @@ H5FD__core_get_default_config(void)
 } /* end H5FD__core_get_default_config() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    char * lock_env_var = NULL; /* Environment variable pointer */
-    herr_t ret_value    = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
-    else
-        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
-
-    if (H5FD_core_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize core VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_core_init
  *
  * Purpose:     Initialize this driver by registering the driver with the
@@ -491,9 +458,19 @@ done:
 hid_t
 H5FD_core_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    char *lock_env_var = NULL;            /* Environment variable pointer */
+    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5I_VFL != H5I_get_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FD_register(&H5FD_core_g, sizeof(H5FD_class_t), FALSE);

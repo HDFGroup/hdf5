@@ -25,6 +25,8 @@ typedef herr_t (*H5DS_iterate_t)(hid_t dset, unsigned dim, hid_t scale, void *vi
 extern "C" {
 #endif
 
+H5_HLDLL hbool_t H5DSwith_new_ref(hid_t obj_id);
+
 H5_HLDLL herr_t H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx);
 
 H5_HLDLL herr_t H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx);

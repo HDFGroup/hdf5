@@ -61,9 +61,6 @@
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* v2 B-tree client ID to class mapping */
 
 /* Remember to add client ID to H5B2_subid_t in H5B2private.h when adding a new

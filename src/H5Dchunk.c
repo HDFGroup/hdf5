@@ -1401,6 +1401,19 @@ H5D__chunk_mem_xfree(void *chk, const void *_pline)
 } /* H5D__chunk_mem_xfree() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_mem_free
+ *
+ * Purpose:    Wrapper with H5MM_free_t-compatible signature that just
+ *             calls H5D__chunk_mem_xfree and discards the return value.
+ *-------------------------------------------------------------------------
+ */
+static void
+H5D__chunk_mem_free(void *chk, const void *_pline)
+{
+    (void)H5D__chunk_mem_xfree(chk, _pline);
+}
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__chunk_mem_realloc
  *
  * Purpose:     Reallocate space for a chunk in memory.  This routine allocates
@@ -3153,11 +3166,14 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 herr_t
 H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata)
 {
-    H5D_rdcc_ent_t *     ent       = NULL; /* Cache entry */
-    H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
-    unsigned             idx       = 0;       /* Index of chunk in cache, if present */
-    hbool_t              found     = FALSE;   /* In cache? */
-    herr_t               ret_value = SUCCEED; /* Return value */
+    H5D_rdcc_ent_t *     ent   = NULL; /* Cache entry */
+    H5O_storage_chunk_t *sc    = &(dset->shared->layout.storage.u.chunk);
+    unsigned             idx   = 0;     /* Index of chunk in cache, if present */
+    hbool_t              found = FALSE; /* In cache? */
+#ifdef H5_HAVE_PARALLEL
+    hbool_t reenable_coll_md_reads = FALSE;
+#endif
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3228,8 +3244,13 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
              * highly unlikely that users would read the same chunks from all
              * processes.
              */
-            if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI))
-                H5CX_set_coll_metadata_read(FALSE);
+            if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
+                hbool_t do_coll_md_reads = H5CX_get_coll_metadata_read();
+                if (do_coll_md_reads) {
+                    H5CX_set_coll_metadata_read(FALSE);
+                    reenable_coll_md_reads = TRUE;
+                }
+            }
 #endif /* H5_HAVE_PARALLEL */
 
             /* Go get the chunk information */
@@ -3272,6 +3293,12 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
     }     /* end else */
 
 done:
+#ifdef H5_HAVE_PARALLEL
+    /* Re-enable collective metadata reads if we disabled them */
+    if (reenable_coll_md_reads)
+        H5CX_set_coll_metadata_read(TRUE);
+#endif /* H5_HAVE_PARALLEL */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_lookup() */
 
@@ -4387,7 +4414,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         /* (casting away const OK - QAK) */
         if (H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc, (void *)pline,
-                           (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline, &dset->shared->dcpl_cache.fill,
+                           (H5MM_free_t)H5D__chunk_mem_free, (void *)pline, &dset->shared->dcpl_cache.fill,
                            dset->shared->type, dset->shared->type_id, (size_t)0, orig_chunk_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;

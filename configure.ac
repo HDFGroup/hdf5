@@ -876,6 +876,38 @@ fi
 
 
 ## ----------------------------------------------------------------------
+## Enable new references for dimension scales
+##
+AC_SUBST([DIMENSION_SCALES_WITH_NEW_REF])
+AC_MSG_CHECKING([whether to use new references with dimension scales]);
+AC_ARG_ENABLE([dimension-scales-with-new-ref],
+              [AS_HELP_STRING([--enable-dimension-scales-with-new-ref],
+                     [Use new references when creating dimension scales.
+                      [default=no]
+                     ])],
+             [DIMENSION_SCALES_WITH_NEW_REF=$enableval])
+
+## Set the default value to use old references.
+if test "X-$DIMENSION_SCALES_WITH_NEW_REF" = X- ; then
+  DIMENSION_SCALES_WITH_NEW_REF=no
+fi
+
+case "X-$DIMENSION_SCALES_WITH_NEW_REF" in 
+  X-yes)
+    AC_MSG_RESULT([yes])
+    AC_DEFINE([DIMENSION_SCALES_WITH_NEW_REF], [1],
+              [Define if new references for dimension scales were requested])
+
+    ;;
+  X-no)
+    AC_MSG_RESULT([no])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $DIMENSION_SCALES_WITH_NEW_REF])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Check which archiving tool to use. This needs to be done before
 ## the AM_PROG_LIBTOOL macro.
 ##
