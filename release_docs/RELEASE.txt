@@ -47,6 +47,12 @@ New Features
 
     Configuration:
     -------------
+    - Added new configure option to support building parallel tools.
+      See Tools below (autotools - CMake):
+            --with-libmfu=DIR      HDF5_BUILD_PARALLEL_TOOLS
+
+      (RAW - 2021/10/25)
+
     - Added new configure options to enable dimension scales APIs (H5DS*) to
       use new object references with the native VOL connector (aka native HDF5
       library). New references are always used for non-native terminal VOL
@@ -929,6 +935,19 @@ New Features
 
     Tools:
     ------
+    - Added a new (unix ONLY) parallel meta tool 'dh5walk', which utilizes the
+      mpifileutils (https://hpc.github.io/mpifileutils) open source utility
+      library to enable parallel execution of other HDF5 tools.
+      This approach can greatly enhance the serial hdf5 tool performance over large
+      collections of files by utilizing MPI parallelism to distribute an application
+      load over many independent MPI ranks and files.
+
+      An introduction to the mpifileutils library and initial 'User Guide' for
+      the new 'dh5walk" tool can be found at:
+      https://github.com/HDFGroup/hdf5doc/tree/master/RFCs/HDF5/tools/parallel_tools
+
+      (RAW - 2021/10/25)
+
     - Refactored the perform tools and removed depends on test library.
 
         Moved the perf and h5perf tools from tools/test/perform to

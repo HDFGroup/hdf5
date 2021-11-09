@@ -13,26 +13,26 @@
 ## Run automake to generate a Makefile.in from this file.
 ##
 #
-# Utils HDF5 Makefile(.in)
+# Tools HDF5 Makefile(.in)
 #
 
 include $(top_srcdir)/config/commence.am
 
-CONFIG=ordered
+if PARALLEL_TOOLS_CONDITIONAL
+  DH5WALK=dh5walk
+else
+  DH5WALK=
+endif
 
 if BUILD_TESTS_CONDITIONAL
-   TESTUTIL_DIR =test
+   TESTSERIAL_DIR =test
 else
-   TESTUTIL_DIR=
+   TESTSERIAL_DIR=
 endif
 
-if MIRROR_VFD_CONDITIONAL
-   MIRROR_VFD_DIR = mirror_vfd
-else
-   MIRROR_VFD_DIR=
-endif
+CONFIG=ordered
 
 # All subdirectories
-SUBDIRS=$(MIRROR_VFD_DIR) $(TESTUTIL_DIR) tools
+SUBDIRS=$(DH5WALK) $(TESTSERIAL_DIR)
 
 include $(top_srcdir)/config/conclude.am

@@ -1,0 +1,373 @@
+#! /bin/sh
+#
+# Copyright by The HDF Group.
+# All rights reserved.
+#
+# This file is part of HDF5.  The full HDF5 copyright notice, including
+# terms governing use, modification, and redistribution, is contained in
+# the COPYING file, which can be found at the root of the source code
+# distribution tree, or in https://www.hdfgroup.org/licenses.
+# If you do not have access to either file, you may request a copy from
+# help@hdfgroup.org.
+#
+# Tests for the dh5walk tool
+#
+#
+
+srcdir=@srcdir@
+
+# Determine which filters are available
+USE_FILTER_SZIP="@USE_FILTER_SZIP@"
+USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
+
+TESTNAME=dh5walk
+EXIT_SUCCESS=0
+EXIT_FAILURE=1
+
+THIS_DIR=`pwd`
+ROOTDIR=`cd ../../..; pwd`; cd "$THIS_DIR"
+TOP_DIR="$ROOTDIR"
+
+DH5WALK=../../src/dh5walk/dh5walk
+DH5WALK_BIN="$TOP_DIR/tools/src/dh5walk/dh5walk"
+
+H5DUMP=../../src/h5dump/h5dump
+H5DUMP_BIN="$TOP_DIR/tools/src/h5dump/h5dump"
+
+RM='rm -rf'
+CMP='cmp -s'
+DIFF='diff -c'
+CP='cp'
+DIRNAME='dirname'
+LS='ls'
+AWK='awk'
+WC='wc'
+
+nerrors=0
+verbose=yes
+
+# source dirs
+SRC_TOOLS="$TOP_DIR/tools/test"
+SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"
+
+# testfiles source dirs for tools
+SRC_H5LS_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DUMP_TESTFILES="$SRC_TOOLS_TESTFILES"
+SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
+SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
+SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
+SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
+SRC_DH5WALK_TESTFILES="$SRC_TOOLS/dh5walk/testfiles"
+SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
+
+TESTDIR=./testfiles
+test -d $TESTDIR || mkdir $TESTDIR
+
+echo "SRC_H5DIFF_TESTFILES = $SRC_H5DIFF_TESTFILES"
+
+######################################################################
+# test files
+# --------------------------------------------------------------------
+# All the test files copy from source directory to test directory
+# NOTE: Keep this framework to add/remove test files.
+#       Any test files from other tools can be used in this framework.
+#       This list are also used for checking exist.
+#       Comment '#' without space can be used.
+# --------------------------------------------------------------------
+LIST_H5DIFF_TEST_FILES="
+$SRC_H5DIFF_TESTFILES/tudfilter2.h5
+$SRC_H5DIFF_TESTFILES/compounds_array_vlen1.h5
+$SRC_H5DIFF_TESTFILES/compounds_array_vlen2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_attr1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_attr2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_attr3.h5
+$SRC_H5DIFF_TESTFILES/h5diff_attr_v_level1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_attr_v_level2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_basic1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_basic2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_comp_vl_strs.h5
+$SRC_H5DIFF_TESTFILES/h5diff_danglelinks1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_danglelinks2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_dset1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_dset2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_dset3.h5
+$SRC_H5DIFF_TESTFILES/h5diff_dset_zero_dim_size1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_dset_zero_dim_size2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_dtypes.h5
+$SRC_H5DIFF_TESTFILES/h5diff_empty.h5
+$SRC_H5DIFF_TESTFILES/h5diff_enum_invalid_values.h5
+$SRC_H5DIFF_TESTFILES/h5diff_eps1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_eps2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude1-1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude1-2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude2-1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude2-2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude3-1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_exclude3-2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_ext2softlink_src.h5
+$SRC_H5DIFF_TESTFILES/h5diff_ext2softlink_trg.h5
+$SRC_H5DIFF_TESTFILES/h5diff_extlink_src.h5
+$SRC_H5DIFF_TESTFILES/h5diff_extlink_trg.h5
+$SRC_H5DIFF_TESTFILES/h5diff_grp_recurse1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_grp_recurse2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_grp_recurse_ext1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_grp_recurse_ext2-1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_grp_recurse_ext2-2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_grp_recurse_ext2-3.h5
+$SRC_H5DIFF_TESTFILES/h5diff_hyper1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_hyper2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_linked_softlink.h5
+$SRC_H5DIFF_TESTFILES/h5diff_links.h5
+$SRC_H5DIFF_TESTFILES/h5diff_softlinks.h5
+$SRC_H5DIFF_TESTFILES/h5diff_strings1.h5
+$SRC_H5DIFF_TESTFILES/h5diff_strings2.h5
+$SRC_H5DIFF_TESTFILES/h5diff_types.h5
+$SRC_H5DIFF_TESTFILES/non_comparables1.h5
+$SRC_H5DIFF_TESTFILES/non_comparables2.h5
+$SRC_H5DIFF_TESTFILES/trefer_attr.h5
+$SRC_H5DIFF_TESTFILES/trefer_compat.h5
+$SRC_H5DIFF_TESTFILES/trefer_ext1.h5
+$SRC_H5DIFF_TESTFILES/trefer_ext2.h5
+$SRC_H5DIFF_TESTFILES/trefer_grp.h5
+$SRC_H5DIFF_TESTFILES/trefer_obj_del.h5
+$SRC_H5DIFF_TESTFILES/trefer_obj.h5
+$SRC_H5DIFF_TESTFILES/trefer_param.h5
+$SRC_H5DIFF_TESTFILES/trefer_reg_1d.h5
+$SRC_H5DIFF_TESTFILES/trefer_reg.h5
+$SRC_H5DIFF_TESTFILES/tudfilter2.h5
+$SRC_H5DIFF_TESTFILES/tudfilter.h5
+$SRC_H5DIFF_TESTFILES/tvlstr2.h5
+$SRC_H5DIFF_TESTFILES/tvlstr.h5
+"
+
+LIST_HDLS_TEST_FILES="
+$SRC_H5LS_TESTFILES/tall.h5
+$SRC_H5LS_TESTFILES/tarray1.h5
+$SRC_H5LS_TESTFILES/tattr2.h5
+$SRC_H5LS_TESTFILES/tattrreg.h5
+$SRC_H5LS_TESTFILES/tcompound.h5
+$SRC_H5LS_TESTFILES/tdatareg.h5
+$SRC_H5LS_TESTFILES/tdset.h5
+$SRC_H5LS_TESTFILES/tempty.h5
+$SRC_H5LS_TESTFILES/textlink.h5
+$SRC_H5LS_TESTFILES/textlinksrc.h5
+$SRC_H5LS_TESTFILES/textlinktar.h5
+$SRC_H5LS_TESTFILES/tgroup.h5
+$SRC_H5LS_TESTFILES/tgrp_comments.h5
+$SRC_H5LS_TESTFILES/tgrpnullspace.h5
+$SRC_H5LS_TESTFILES/thlink.h5
+$SRC_H5LS_TESTFILES/tloop.h5
+$SRC_H5LS_TESTFILES/tnestedcomp.h5
+$SRC_H5LS_TESTFILES/tsaf.h5
+$SRC_H5LS_TESTFILES/tslink.h5
+$SRC_H5LS_TESTFILES/tsoftlinks.h5
+$SRC_H5LS_TESTFILES/tstr.h5
+$SRC_H5LS_TESTFILES/tudlink.h5
+$SRC_H5LS_TESTFILES/tvldtypes1.h5
+$SRC_H5LS_TESTFILES/tdset_idx.h5
+"
+
+
+#
+# copy test files and expected output files from source dirs to test dir
+#
+COPY_TESTFILES="$LIST_H5DIFF_TEST_FILES $LIST_H5LS_TEST_FILES"
+
+COPY_TESTFILES_TO_TESTDIR()
+{
+    # copy test files. Used -f to make sure get a new copy
+    for tstfile in $COPY_TESTFILES
+    do
+        # ignore '#' comment
+        echo $tstfile | tr -d ' ' | grep '^#' > /dev/null
+        RET=$?
+        if [ $RET -eq 1 ]; then
+            # skip cp if srcdir is same as destdir
+            # this occurs when build/test performed in source dir and
+            # make cp fail
+            SDIR=`$DIRNAME $tstfile`
+            INODE_SDIR=`$LS -i -d $SDIR | $AWK -F' ' '{print $1}'`
+            INODE_DDIR=`$LS -i -d $TESTDIR | $AWK -F' ' '{print $1}'`
+            if [ "$INODE_SDIR" != "$INODE_DDIR" ]; then
+                $CP -f $tstfile $TESTDIR
+                if [ $? -ne 0 ]; then
+                    echo "Error: FAILED to copy $tstfile ."
+
+                    # Comment out this to CREATE expected file
+                    exit $EXIT_FAILURE
+                fi
+            fi
+        fi
+    done
+}
+
+CLEAN_TESTFILES_AND_TESTDIR()
+{
+    echo "cleaning logfiles"
+    $RM $TESTDIR/*log*
+}
+
+# Print a line-line message left justified in a field of 70 characters
+# beginning with the word "Testing".
+#
+TESTING() {
+   SPACES="                                                               "
+   echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
+}
+
+# Source in the output filter function definitions.
+. $srcdir/../../../bin/output_filter.sh
+
+# Run a test and print PASS or *FAIL*.  If a test fails then increment
+# the `nerrors' global variable and (if $verbose is set) display the
+# difference between the actual output and the expected output. The
+# expected output is given as the first argument to this function and
+# the actual output file is calculated by replacing the `.ddl' with
+# `.out'.  The actual output is not removed if $HDF5_NOCLEANUP has a
+# non-zero value.
+#
+TOOLTEST() {
+   expect="$TESTDIR/$1"
+   expect_err="$TESTDIR/`basename $1`.err"
+   actual="$TESTDIR/`basename $1`.out"
+   actual_err="$TESTDIR/`basename $1`.out.err"
+   actual_sav=${actual}-sav
+   actual_err_sav=${actual_err}-sav
+   shift
+
+   # Run test.
+   TESTING $DH5WALK $@
+   (
+      cd $TESTDIR
+      $RUNSERIAL $DH5WALK_BIN $@
+   ) 1> $actual 2> $actual_err
+
+   # save actual and actual_err in case they are needed later.
+   cp $actual $actual_sav
+   STDOUT_FILTER $actual
+   cp $actual_err $actual_err_sav
+   STDERR_FILTER $actual_err
+
+   if [ ! -f $expect ]; then
+      # Compare error files if the expect file doesn't exist.
+      if $CMP $expect_err $actual_err; then
+         echo " PASSED"
+      else
+         echo "*FAILED*"
+         echo "    Expected result (*.err) differs from actual result (*.out.err)"
+         nerrors="`expr $nerrors + 1`"
+         test yes = "$verbose" && $DIFF $expect_err $actual_err |sed 's/^/    /'
+      fi
+   elif $CMP $expect $actual; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
+
+   # Clean up output file
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual $actual_err $actual_sav $actual_err_sav
+   fi
+}
+
+TOOL_LOGTEST() {
+   expect="$TESTDIR/`basename $1`.txt"
+   expect_err="$TESTDIR/`basename $1`.err"
+   actual="$TESTDIR/`basename $1`.log"
+   actual_err="$TESTDIR/`basename $1`.out.err"
+   actual_sav=${actual}-sav
+   actual_err_sav=${actual_err}-sav
+   shift
+
+   echo "running logtest"
+
+   # Run test.
+   TESTING $DH5WALK $@
+   (
+      cd $TESTDIR
+      $RUNSERIAL $DH5WALK_BIN $@
+   ) 1> $actual 2> $actual_err
+
+   if [ ! -f $expect ]; then
+      # Compare error files if the expect file doesn't exist.
+      if $CMP $expect_err $actual_err; then
+         echo " PASSED"
+      else
+         echo "*FAILED*"
+         echo "    Expected result (*.err) differs from actual result (*.out.err)"
+         nerrors="`expr $nerrors + 1`"
+         test yes = "$verbose" && $DIFF $expect_err $actual_err |sed 's/^/    /'
+      fi
+   elif $CMP $expect $actual; then
+      echo " PASSED"
+   else
+      echo "*FAILED*"
+      echo "    Expected result (*.ddl) differs from actual result (*.out)"
+      nerrors="`expr $nerrors + 1`"
+      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
+   fi
+
+   # Clean up output file
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual $actual_err $actual_sav $actual_err_sav
+   fi
+}
+
+TOOL_CHK_LOGLEN() {
+   expect=$1
+   shift
+
+   echo "running tool_chk_loglen"
+
+   # Run test.
+   TESTING $DH5WALK $@
+   (
+      cd $TESTDIR
+      $RUNSERIAL $DH5WALK_BIN $@
+   )
+	   
+   # Clean up output file
+   if test -z "$HDF5_NOCLEANUP"; then
+      rm -f $actual
+   fi
+}
+
+
+# Print a "SKIP" message
+SKIP() {
+    TESTING $DH5WALK $@
+    echo  " -SKIP-"
+}
+
+
+
+##############################################################################
+##############################################################################
+###              T H E   T E S T S                                ###
+##############################################################################
+##############################################################################
+# prepare for test
+COPY_TESTFILES_TO_TESTDIR
+
+TOOLTEST help-1.txt -h
+TOOLTEST help-2.txt --help
+TOOL_LOGTEST h5diff_basic1.h5_h5dump -l -T $H5DUMP_BIN -n ./h5diff_basic1.h5
+TOOL_CHK_LOGLEN showme-h5dump.log -o showme-h5dump.log -T $H5DUMP_BIN -n `pwd`
+
+
+#
+#
+# Clean up temporary files/directories
+CLEAN_TESTFILES_AND_TESTDIR
+
+if test $nerrors -eq 0 ; then
+    echo "All $TESTNAME tests passed."
+    exit $EXIT_SUCCESS
+else
+    echo "$TESTNAME tests failed with $nerrors errors."
+    exit $EXIT_FAILURE
+fi
+
