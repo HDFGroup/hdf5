@@ -7199,7 +7199,6 @@ H5C__load_entry(H5F_t *f,
                     else
 #endif
                         HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
-
                 }
 
 #ifdef H5_HAVE_PARALLEL

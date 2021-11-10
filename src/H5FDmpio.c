@@ -1270,7 +1270,7 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                     /* If MPI_File_read_at fails, push an error, but continue
                      * to participate in following MPI_Bcast */
                     if (MPI_SUCCESS !=
-                            (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
+                        (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
                         HMPI_DONE_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
                 }
 
