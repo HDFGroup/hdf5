@@ -238,6 +238,7 @@
 ./doxygen/examples/FF-IH_FileObject.gif
 ./doxygen/examples/FileFormat.html
 ./doxygen/examples/FileFormatSpecChunkDiagram.jpg
+./doxygen/examples/Filters.html
 ./doxygen/examples/H5Pset_metadata_read_attempts.c
 ./doxygen/examples/H5Pset_object_flush_cb.c
 ./doxygen/examples/H5.format.1.0.html
