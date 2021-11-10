@@ -3209,8 +3209,10 @@ test_integration_create(void)
     fflush(stdout);
     HDputs(".");
     fflush(stdout);
-    // file_id = H5Fopen("example.h5", H5F_ACC_RDWR, fapl_id);
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+
+    //file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id;
+    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, H5P_DEFAULT);
+
     HDputs(".");
     fflush(stdout);
     // file_id = H5Fopen(paths->canon, H5F_ACC_RDONLY, fapl_id);
@@ -3230,9 +3232,9 @@ test_integration_create(void)
     }
     HDputs(".");
     HDfflush(stdout);
-    int dset_data[2][2];
-    for (i = 0; i < 2; i++)
-        for (j = 0; j < 2; j++)
+    int dset_data[4][7];
+    for (i = 0; i < 4; i++)
+        for (j = 0; j < 7; j++)
             dset_data[i][j] = i * 6 + j + 1;
     HDputs(".");
     HDfflush(stdout);
@@ -3243,8 +3245,6 @@ test_integration_create(void)
 
     HDputs(".");
     HDfflush(stdout);
-
-    /* TODO */
 
     /*
      * CLEANUP
