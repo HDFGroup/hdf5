@@ -25,11 +25,11 @@ EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
 THIS_DIR=`pwd`
-ROOTDIR=`cd ../../..; pwd`; cd "$THIS_DIR"
+ROOTDIR=`cd ../../../..; pwd`; cd "$THIS_DIR"
 TOP_DIR="$ROOTDIR"
 
-DH5WALK=../../src/dh5walk/dh5walk
-DH5WALK_BIN="$TOP_DIR/tools/src/dh5walk/dh5walk"
+DH5WALK=../../dh5walk/dh5walk
+DH5WALK_BIN="$TOP_DIR/utils/tools/dh5walk/dh5walk"
 
 H5DUMP=../../src/h5dump/h5dump
 H5DUMP_BIN="$TOP_DIR/tools/src/h5dump/h5dump"
@@ -64,6 +64,9 @@ TESTDIR=./testfiles
 test -d $TESTDIR || mkdir $TESTDIR
 
 echo "SRC_H5DIFF_TESTFILES = $SRC_H5DIFF_TESTFILES"
+echo "Creating demo files"
+. ./copy_demo_files.sh
+
 
 ######################################################################
 # test files
@@ -216,7 +219,7 @@ TESTING() {
 }
 
 # Source in the output filter function definitions.
-. $srcdir/../../../bin/output_filter.sh
+. $ROOTDIR/bin/output_filter.sh
 
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the

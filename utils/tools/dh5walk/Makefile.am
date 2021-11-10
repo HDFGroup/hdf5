@@ -19,20 +19,15 @@ include $(top_srcdir)/config/commence.am
 
 install-examples:
 	@echo "Creating demo files" && \
-	$(SHELL) $(abs_builddir)/copy_demo_files.sh $(abs_top_srcdir)/tools/test $(abs_top_srcdir)/tools/src/h5diff $(abs_top_srcdir)/tools/src/h5ls;
+	$(SHELL) $(abs_top_srcdir)/utils/tools/test/copy_demo_files.sh $(abs_top_srcdir)/utils/tools/test $(abs_top_srcdir)/tools/src/h5diff $(abs_top_srcdir)/tools/src/h5ls;
 
 # Include src directory
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
-
-TOOLSOURCES=h5tools.c h5tools_dump.c h5tools_str.c h5tools_utils.c h5diff.c \
-    h5diff_array.c h5diff_attr.c h5diff_dset.c h5diff_util.c h5trav.c  \
-    h5tools_filters.c h5tools_ref.c h5tools_type.c io_timer.c
 
 # These are our main targets, the tools
 # dh5walk_SOURCES=dh5walk.c $(TOOLSOURCES)
 bin_PROGRAMS=dh5walk
 # bin_SCRIPTS=install-examples
-bin_SCRIPTS=
 
 # Add h5stat specific linker flags here
 dh5walk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)

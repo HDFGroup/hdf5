@@ -4115,6 +4115,8 @@ AC_CONFIG_FILES([src/libhdf5.settings
                  utils/tools/dh5walk/Makefile
                  utils/tools/test/Makefile
                  utils/tools/test/dh5walk/Makefile
+                 utils/tools/test/dh5walk/copy_demo_files.sh
+                 utils/tools/test/dh5walk/testdh5walk.sh
                  tools/Makefile
                  tools/lib/Makefile
                  tools/libtest/Makefile

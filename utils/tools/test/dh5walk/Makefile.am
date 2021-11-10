@@ -20,10 +20,16 @@ include $(top_srcdir)/config/commence.am
 # Include src directory
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
+install-examples:
+	@echo "Creating demo files" && \
+	. copy_demo_files.sh
+
+bin_SCRIPTS:install-examples
+
 #test script and program
 TEST_SCRIPT=testdh5walk.sh copy_demo_files.sh
 check_SCRIPTS=$(TEST_SCRIPT)
-SCRIPT_DEPEND=../../src/dh5walk/dh5walk$(EXEEXT)
+SCRIPT_DEPEND=../../dh5walk/dh5walk$(EXEEXT)
 
 # Tell automake to clean h5redeploy script
 CLEANFILES=
