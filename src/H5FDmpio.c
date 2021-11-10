@@ -863,13 +863,18 @@ H5FD__mpio_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t H5_ATTR
     file->mpi_size = mpi_size;
 
     /* Only processor p0 will get the filesize and broadcast it. */
-    if (mpi_rank == 0)
+    if (mpi_rank == 0) {
+        /* If MPI_File_get_size fails, broadcast file size as -1 to signal error */
         if (MPI_SUCCESS != (mpi_code = MPI_File_get_size(fh, &file_size)))
-            HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
+            file_size = (MPI_Offset)-1;
+    }
 
     /* Broadcast file size */
     if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&file_size, (int)sizeof(MPI_Offset), MPI_BYTE, 0, comm)))
         HMPI_GOTO_ERROR(NULL, "MPI_Bcast failed", mpi_code)
+
+    if (file_size < 0)
+        HMPI_GOTO_ERROR(NULL, "MPI_File_get_size failed", mpi_code)
 
     /* Determine if the file should be truncated */
     if (file_size && (flags & H5F_ACC_TRUNC)) {
@@ -1261,10 +1266,14 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
                 rank0_bcast = TRUE;
 
                 /* Read on rank 0 Bcast to other ranks */
-                if (file->mpi_rank == 0)
+                if (file->mpi_rank == 0) {
+                    /* If MPI_File_read_at fails, push an error, but continue
+                     * to participate in following MPI_Bcast */
                     if (MPI_SUCCESS !=
-                        (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
-                        HMPI_GOTO_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                            (mpi_code = MPI_File_read_at(file->f, mpi_off, buf, size_i, buf_type, &mpi_stat)))
+                        HMPI_DONE_ERROR(FAIL, "MPI_File_read_at failed", mpi_code)
+                }
+
                 if (MPI_SUCCESS != (mpi_code = MPI_Bcast(buf, size_i, buf_type, 0, file->comm)))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
             } /* end if */
@@ -1308,11 +1317,21 @@ H5FD__mpio_read(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_ATTR_UNU
     if (!rank0_bcast || (rank0_bcast && file->mpi_rank == 0)) {
         /* How many bytes were actually read? */
 #if MPI_VERSION >= 3
-        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements_x(&mpi_stat, buf_type, &bytes_read))) {
 #else
-        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Get_elements(&mpi_stat, MPI_BYTE, &bytes_read))) {
 #endif
-            HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+            if (rank0_bcast && file->mpi_rank == 0) {
+                /* If MPI_Get_elements(_x) fails for a rank 0 bcast strategy,
+                 * push an error, but continue to participate in the following
+                 * MPI_Bcast.
+                 */
+                bytes_read = -1;
+                HMPI_DONE_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+            }
+            else
+                HMPI_GOTO_ERROR(FAIL, "MPI_Get_elements failed", mpi_code)
+        }
     } /* end if */
 
     /* If the rank0-bcast feature was used, broadcast the # of bytes read to
@@ -1702,16 +1721,18 @@ H5FD__mpio_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR
                 HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
         /* Only processor p0 will get the filesize and broadcast it. */
-        /* (Note that throwing an error here will cause non-rank 0 processes
-         *      to hang in following Bcast.  -QAK, 3/17/2018)
-         */
-        if (0 == file->mpi_rank)
+        if (0 == file->mpi_rank) {
+            /* If MPI_File_get_size fails, broadcast file size as -1 to signal error */
             if (MPI_SUCCESS != (mpi_code = MPI_File_get_size(file->f, &size)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_File_get_size failed", mpi_code)
+                size = (MPI_Offset)-1;
+        }
 
         /* Broadcast file size */
         if (MPI_SUCCESS != (mpi_code = MPI_Bcast(&size, (int)sizeof(MPI_Offset), MPI_BYTE, 0, file->comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Bcast failed", mpi_code)
+
+        if (size < 0)
+            HMPI_GOTO_ERROR(FAIL, "MPI_File_get_size failed", mpi_code)
 
         if (H5FD_mpi_haddr_to_MPIOff(file->eoa, &needed_eof) < 0)
             HGOTO_ERROR(H5E_INTERNAL, H5E_BADRANGE, FAIL, "cannot convert from haddr_t to MPI_Offset")
@@ -1795,9 +1816,13 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
         HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
     /* Delete the file */
-    if (mpi_rank == 0)
+    if (mpi_rank == 0) {
+        /* If MPI_File_delete fails, push an error but
+         * still participate in the following MPI_Barrier
+         */
         if (MPI_SUCCESS != (mpi_code = MPI_File_delete(filename, info)))
-            HMPI_GOTO_ERROR(FAIL, "MPI_File_delete failed", mpi_code)
+            HMPI_DONE_ERROR(FAIL, "MPI_File_delete failed", mpi_code)
+    }
 
     /* Set up a barrier (don't want processes to run ahead of the delete) */
     if (MPI_SUCCESS != (mpi_code = MPI_Barrier(comm)))

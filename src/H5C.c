@@ -2307,9 +2307,14 @@ H5C_protect(H5F_t *f, const H5C_class_t *type, haddr_t addr, void *udata, unsign
                     H5MM_memcpy(((uint8_t *)entry_ptr->image_ptr) + entry_ptr->size, H5C_IMAGE_SANITY_VALUE,
                                 H5C_IMAGE_EXTRA_SPACE);
 #endif /* H5C_DO_MEMORY_SANITY_CHECKS */
-                    if (0 == mpi_rank)
-                        if (H5C__generate_image(f, cache_ptr, entry_ptr) < 0)
-                            HGOTO_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't generate entry's image")
+                    if (0 == mpi_rank) {
+                        if (H5C__generate_image(f, cache_ptr, entry_ptr) < 0) {
+                            /* If image generation fails, push an error but
+                             * still participate in the following MPI_Bcast
+                             */
+                            HDONE_ERROR(H5E_CACHE, H5E_CANTGET, NULL, "can't generate entry's image")
+                        }
+                    }
                 } /* end if */
                 HDassert(entry_ptr->image_ptr);
 
@@ -7182,8 +7187,21 @@ H5C__load_entry(H5F_t *f,
 #ifdef H5_HAVE_PARALLEL
             if (!coll_access || 0 == mpi_rank) {
 #endif /* H5_HAVE_PARALLEL */
-                if (H5F_block_read(f, type->mem_type, addr, len, image) < 0)
-                    HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
+
+                if (H5F_block_read(f, type->mem_type, addr, len, image) < 0) {
+
+#ifdef H5_HAVE_PARALLEL
+                    if (coll_access) {
+                        /* Push an error, but still participate in following MPI_Bcast */
+                        HDmemset(image, 0, len);
+                        HDONE_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
+                    }
+                    else
+#endif
+                        HGOTO_ERROR(H5E_CACHE, H5E_READERROR, NULL, "Can't read image*")
+
+                }
+
 #ifdef H5_HAVE_PARALLEL
             } /* end if */
             /* if the collective metadata read optimization is turned on,
@@ -7230,8 +7248,19 @@ H5C__load_entry(H5F_t *f,
                              * loaded thing, go get the on-disk image again (the extra portion).
                              */
                             if (H5F_block_read(f, type->mem_type, addr + len, actual_len - len, image + len) <
-                                0)
-                                HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+                                0) {
+
+#ifdef H5_HAVE_PARALLEL
+                                if (coll_access) {
+                                    /* Push an error, but still participate in following MPI_Bcast */
+                                    HDmemset(image + len, 0, actual_len - len);
+                                    HDONE_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+                                }
+                                else
+#endif
+                                    HGOTO_ERROR(H5E_CACHE, H5E_CANTLOAD, NULL, "can't read image")
+                            }
+
 #ifdef H5_HAVE_PARALLEL
                         }
                         /* If the collective metadata read optimization is turned on,
