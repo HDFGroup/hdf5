@@ -796,7 +796,7 @@ am__DIST_COMMON = $(srcdir)/H5srcdir_str.h.in $(srcdir)/Makefile.in \
 	$(srcdir)/testlinks_env.sh.in $(top_srcdir)/bin/depcomp \
 	$(top_srcdir)/bin/mkinstalldirs $(top_srcdir)/bin/test-driver \
 	$(top_srcdir)/config/commence.am \
-	$(top_srcdir)/config/conclude.am COPYING
+	$(top_srcdir)/config/conclude.am
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 ACLOCAL = @ACLOCAL@
 ADD_PARALLEL_FILES = @ADD_PARALLEL_FILES@
@@ -891,6 +891,7 @@ HDF_FORTRAN2003 = @HDF_FORTRAN2003@
 HID_T = @HID_T@
 HL = @HL@
 HL_FOR = @HL_FOR@
+HL_TOOLS = @HL_TOOLS@
 HSIZE_T = @HSIZE_T@
 HSSIZE_T = @HSSIZE_T@
 INSTALL = @INSTALL@

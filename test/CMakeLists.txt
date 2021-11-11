@@ -208,8 +208,8 @@ set (H5_TESTS
     ohdr
     stab
     gheap
-    cache # multiple source
-    cache_api # multiple source
+    cache
+    cache_api
     pool
     hyperslab
     istore
@@ -276,8 +276,6 @@ endmacro ()
 
 set (H5_TESTS_MULTIPLE
     testhdf5
-    cache
-    cache_api
     ttsafe
 )
 # Only build single source tests here
@@ -311,46 +309,6 @@ set_target_properties (testhdf5 PROPERTIES FOLDER test)
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_testhdf5_FORMAT testhdf5)
-endif ()
-
-#-- Adding test for cache
-add_executable (cache ${HDF5_TEST_SOURCE_DIR}/cache.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-target_compile_options(cache PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories(cache PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-if (NOT BUILD_SHARED_LIBS)
-  TARGET_C_PROPERTIES (cache STATIC)
-  target_link_libraries (cache PRIVATE ${HDF5_LIB_TARGET} ${HDF5_TEST_LIB_TARGET})
-else ()
-  TARGET_C_PROPERTIES (cache SHARED)
-  target_link_libraries (cache PRIVATE ${HDF5_TEST_LIBSH_TARGET} ${HDF5_LIBSH_TARGET})
-endif ()
-set_target_properties (cache PROPERTIES FOLDER test)
-
-#-----------------------------------------------------------------------------
-# Add Target to clang-format
-#-----------------------------------------------------------------------------
-if (HDF5_ENABLE_FORMATTERS)
-  clang_format (HDF5_TEST_cache_FORMAT cache)
-endif ()
-
-#-- Adding test for cache_api
-add_executable (cache_api ${HDF5_TEST_SOURCE_DIR}/cache_api.c ${HDF5_TEST_SOURCE_DIR}/cache_common.c)
-target_compile_options(cache_api PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories(cache_api PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-if (NOT BUILD_SHARED_LIBS)
-  TARGET_C_PROPERTIES (cache_api STATIC)
-  target_link_libraries (cache_api PRIVATE ${HDF5_TEST_LIB_TARGET})
-else ()
-  TARGET_C_PROPERTIES (cache_api SHARED)
-  target_link_libraries (cache_api PRIVATE ${HDF5_TEST_LIBSH_TARGET})
-endif ()
-set_target_properties (cache_api PROPERTIES FOLDER test)
-
-#-----------------------------------------------------------------------------
-# Add Target to clang-format
-#-----------------------------------------------------------------------------
-if (HDF5_ENABLE_FORMATTERS)
-  clang_format (HDF5_TEST_cache_api_FORMAT cache_api)
 endif ()
 
 #-- Adding test for ttsafe

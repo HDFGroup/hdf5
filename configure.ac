@@ -261,6 +261,41 @@ elif test $hdf5_cv_host != $host; then
 fi
 
 ## ----------------------------------------------------------------------
+## Check if we should consider certain compiler warnings as errors
+##
+## We have to set WARNINGS_AS_ERRORS before sourcing a $host_config
+## file, below.
+##
+## These should NOT be on by default as the risk of breakage is high
+## when compiling HDF5 on new (or new versions) of platforms and
+## compilers. It can also cause failures when header files we have no
+## control over (e.g. MPI, HDFS) raise warnings.
+##
+AC_MSG_CHECKING([enable warnings as errors])
+AC_ARG_ENABLE([warnings-as-errors],
+              [AS_HELP_STRING([--enable-warnings-as-errors],
+                              [Determines whether certain warnings will be
+                               considered errors. This is mainly for use
+                               by HDF5 library developers.
+                               [default=no]
+                               ])],
+              [WARNINGS_AS_ERRORS=$enableval])
+
+## Set default
+if test "X-$WARNINGS_AS_ERRORS" = X- ; then
+  WARNINGS_AS_ERRORS=no
+fi
+
+case "X-$WARNINGS_AS_ERRORS" in
+  X-yes|X-no)
+    AC_MSG_RESULT([$WARNINGS_AS_ERRORS])
+    ;;
+  *)
+    AC_MSG_ERROR([Unrecognized value: $WARNINGS_AS_ERRORS])
+    ;;
+esac
+
+## ----------------------------------------------------------------------
 ## Source any special files that we need.  These files normally aren't
 ## present but can be used by the maintainers to fine tune things like
 ## turning on debug or profiling flags for the compiler.  The search order
@@ -617,6 +652,8 @@ AC_LANG_POP(C++)
 AC_SUBST(HL) HL=""
 ## name of fortran folder inside "hl", if FORTRAN compile is requested
 AC_SUBST(HL_FOR) HL_FOR=""
+## name of tools folder inside "hl", if HL_TOOLS compile is requested
+AC_SUBST(HL_TOOLS) HL_TOOLS=""
 AC_MSG_CHECKING([if high level library is enabled])
 AC_ARG_ENABLE([hl],
      [AS_HELP_STRING([--enable-hl],
@@ -637,6 +674,21 @@ if test "X$HDF5_HL" = "Xyes"; then
   fi
 else
  echo "no"
+fi
+
+AC_MSG_CHECKING([if the high-level tools are enabled])
+AC_ARG_ENABLE([hltools],
+     [AS_HELP_STRING([--enable-hltools],
+                     [Enable the high-level tools.
+                     [default=yes)]
+                     ])],
+     [HDF5_HL_TOOLS=$enableval])
+
+if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
+ AC_MSG_RESULT([yes])
+ HL_TOOLS="tools"
+else
+  AC_MSG_RESULT([no])
 fi
 
 
@@ -827,6 +879,89 @@ if test "X$HDF5_TOOLS" = "Xno"; then
 else
   AC_MSG_RESULT([no])
 fi
+
+## ----------------------------------------------------------------------
+## Check if they would like to enable building doxygen files
+##
+
+## This needs to be exposed for the library info file.
+AC_SUBST([HDF5_DOXYGEN])
+
+## Default is to not build DOXYGEN
+HDF5_DOXYGEN=no
+
+AC_MSG_CHECKING([if building doxygen is enabled])
+
+AC_ARG_ENABLE([doxygen],
+              [AS_HELP_STRING([--enable-doxygen],
+                              [Compile the HDF5 doxygen files [default=no]])],
+              [HDF5_DOXYGEN=$enableval])
+
+if test "X$HDF5_DOXYGEN" = "Xyes"; then
+  AC_MSG_RESULT([yes])
+  DX_DOXYGEN_FEATURE(ON)
+  DX_DOT_FEATURE(OFF)
+  DX_HTML_FEATURE(ON)
+  DX_CHM_FEATURE(OFF)
+  DX_CHI_FEATURE(OFF)
+  DX_MAN_FEATURE(ON)
+  DX_RTF_FEATURE(OFF)
+  DX_XML_FEATURE(OFF)
+  DX_PDF_FEATURE(OFF)
+  DX_PS_FEATURE(OFF)
+
+  AC_SUBST([DOXYGEN_PACKAGE])
+  AC_SUBST([DOXYGEN_VERSION_STRING])
+  AC_SUBST([DOXYGEN_INCLUDE_ALIASES])
+  AC_SUBST([DOXYGEN_PROJECT_LOGO])
+  AC_SUBST([DOXYGEN_PROJECT_BRIEF])
+  AC_SUBST([DOXYGEN_INPUT_DIRECTORY])
+  AC_SUBST([DOXYGEN_OPTIMIZE_OUTPUT_FOR_C])
+  AC_SUBST([DOXYGEN_MACRO_EXPANSION])
+  AC_SUBST([DOXYGEN_OUTPUT_DIRECTORY])
+  AC_SUBST([DOXYGEN_EXAMPLES_DIRECTORY])
+  AC_SUBST([DOXYGEN_LAYOUT_FILE])
+  AC_SUBST([DOXYGEN_HTML_HEADER])
+  AC_SUBST([DOXYGEN_HTML_FOOTER])
+  AC_SUBST([DOXYGEN_HTML_EXTRA_STYLESHEET])
+  AC_SUBST([DOXYGEN_HTML_EXTRA_FILES])
+  AC_SUBST([DOXYGEN_TAG_FILE])
+  AC_SUBST([DOXYGEN_SERVER_BASED_SEARCH])
+  AC_SUBST([DOXYGEN_EXTERNAL_SEARCH])
+  AC_SUBST([DOXYGEN_SEARCHENGINE_URL])
+  AC_SUBST([DOXYGEN_STRIP_FROM_PATH])
+  AC_SUBST([DOXYGEN_PREDEFINED])
+
+# SRCDIR Environment variables used inside doxygen macro for the source location:
+  DOXYGEN_PACKAGE=${PACKAGE_NAME}
+  DOXYGEN_VERSION_STRING=${PACKAGE_VERSION}
+  DOXYGEN_INCLUDE_ALIASES='$(SRCDIR)/doxygen/aliases'
+  DOXYGEN_PROJECT_LOGO='$(SRCDIR)/doxygen/img/HDFG-logo.png'
+  DOXYGEN_PROJECT_BRIEF='C-API Reference'
+  DOXYGEN_INPUT_DIRECTORY='$(SRCDIR) $(SRCDIR)/doxygen/dox'
+  DOXYGEN_OPTIMIZE_OUTPUT_FOR_C=YES
+  DOXYGEN_MACRO_EXPANSION=YES
+  DOXYGEN_OUTPUT_DIRECTORY=hdf5lib_docs
+  DOXYGEN_EXAMPLES_DIRECTORY='$(SRCDIR)/doxygen/dox/cookbook $(SRCDIR)/doxygen/examples $(SRCDIR)/src $(SRCDIR)/examples $(SRCDIR)/test'
+  DOXYGEN_LAYOUT_FILE='$(SRCDIR)/doxygen/hdf5doxy_layout.xml'
+  DOXYGEN_HTML_HEADER='$(SRCDIR)/doxygen/hdf5_header.html'
+  DOXYGEN_HTML_FOOTER='$(SRCDIR)/doxygen/hdf5_footer.html'
+  DOXYGEN_HTML_EXTRA_STYLESHEET='$(SRCDIR)/doxygen/hdf5doxy.css'
+  DOXYGEN_HTML_EXTRA_FILES='$(SRCDIR)/doxygen/hdf5_navtree_hacks.js $(SRCDIR)/doxygen/img/ftv2node.png $(SRCDIR)/doxygen/img/ftv2pnode.png'
+  DOXYGEN_TAG_FILE=hdf5.tag
+  DOXYGEN_SERVER_BASED_SEARCH=NO
+  DOXYGEN_EXTERNAL_SEARCH=NO
+  DOXYGEN_SEARCHENGINE_URL=
+  DOXYGEN_STRIP_FROM_PATH='$(SRCDIR)'
+  DOXYGEN_PREDEFINED='H5_HAVE_DIRECT H5_HAVE_LIBHDFS H5_HAVE_MAP_API H5_HAVE_PARALLEL H5_HAVE_ROS3_VFD'
+
+  DX_INIT_DOXYGEN([HDF5], [./doxygen/Doxyfile], [hdf5lib_docs])
+
+else
+  AC_MSG_RESULT([no])
+  echo "Doxygen support is disabled"
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Create libtool.  If shared/static libraries are going to be enabled
@@ -1997,6 +2132,7 @@ AC_SUBST([DEV_WARNINGS])
 case "X-$DEV_WARNINGS" in
   X-yes)
     H5_CFLAGS="$H5_CFLAGS $DEVELOPER_WARNING_CFLAGS"
+    H5_FCFLAGS="$H5_FCFLAGS $DEVELOPER_WARNING_FCFLAGS"
     AC_MSG_RESULT([yes])
     ;;
   X-no)
@@ -2008,44 +2144,12 @@ case "X-$DEV_WARNINGS" in
     ;;
 esac
 
-## ----------------------------------------------------------------------
-## Check if we should consider certain compiler warnings as errors
+## Incorporate the potentially warning-to-error promoting flags after
+## feature tests.  Some of the tests (e.g., `off_t`) generate compilation
+## errors with the flags we chose for the HDF5 library and tools.
 ##
-## These should NOT be on by default as the risk of breakage is high
-## when compiling HDF5 on new (or new versions) of platforms and
-## compilers. It can also cause failures when header files we have no
-## control over (e.g. MPI, HDFS) raise warnings.
-##
-AC_MSG_CHECKING([enable warnings as errors])
-AC_ARG_ENABLE([warnings-as-errors],
-              [AS_HELP_STRING([--enable-warnings-as-errors],
-                              [Determines whether certain warnings will be
-                               considered errors. This is mainly for use
-                               by HDF5 library developers.
-                               [default=no]
-                               ])],
-              [WARNINGS_AS_ERRORS=$enableval])
-
-## Set default
-if test "X-$WARNINGS_AS_ERRORS" = X- ; then
-  WARNINGS_AS_ERRORS=no
-fi
-
-case "X-$WARNINGS_AS_ERRORS" in
-  X-yes)
-    H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
-    H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
-    AC_MSG_RESULT([yes])
-    ;;
-  X-no)
-    H5_CFLAGS="$H5_CFLAGS $H5_NECFLAGS"
-    H5_CXXFLAGS="$H5_CXXFLAGS $H5_NECXXFLAGS"
-    AC_MSG_RESULT([no])
-    ;;
-  *)
-    AC_MSG_ERROR([Unrecognized value: $WARNINGS_AS_ERRORS])
-    ;;
-esac
+H5_CFLAGS="$H5_CFLAGS $H5_ECFLAGS"
+H5_CXXFLAGS="$H5_CXXFLAGS $H5_ECXXFLAGS"
 
 ## ----------------------------------------------------------------------
 ## Check if the compiler should use profiling flags/settings
@@ -3480,6 +3584,7 @@ AM_CONDITIONAL([BUILD_HDF5_HL_CONDITIONAL], [test "X$HDF5_HL" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
+AM_CONDITIONAL([BUILD_TOOLS_HL_CONDITIONAL], [test "X$HDF5_HL_TOOLS" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
@@ -3580,6 +3685,7 @@ AM_CONDITIONAL([HAVE_SHARED_CONDITIONAL], [test "X$enable_shared" = "Xyes"])
 
 AC_CONFIG_FILES([src/libhdf5.settings
                  Makefile
+                 doxygen/Doxyfile
                  src/Makefile
                  test/Makefile
                  test/testcheck_version.sh

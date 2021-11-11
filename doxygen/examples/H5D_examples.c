@@ -166,7 +166,6 @@ fail_delete:
         H5Fclose(file);
 fail_file:;
     }
-
     //! <!-- [delete] -->
 
     return ret_val;

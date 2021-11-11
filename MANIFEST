@@ -129,6 +129,7 @@
 ./config/cygwin
 ./config/ibm-aix
 ./config/ibm-flags
+./config/intel-cxxflags
 ./config/intel-fflags
 ./config/intel-flags
 ./config/libhdf5.pc.in
@@ -140,6 +141,7 @@
 ./config/lt_vers.am
 ./config/Makefile.am.blank
 ./config/netbsd
+./config/pgi-cxxflags
 ./config/pgi-fflags
 ./config/pgi-flags
 ./config/solaris
@@ -151,7 +153,6 @@
 ./config/clang-warnings/error-general
 ./config/clang-warnings/general
 ./config/clang-warnings/no-developer-general
-./config/clang-warnings/noerror-general
 ./config/gnu-warnings/4.8-4.last
 ./config/gnu-warnings/4.8
 ./config/gnu-warnings/4.9
@@ -165,10 +166,10 @@
 ./config/gnu-warnings/cxx-4.8
 ./config/gnu-warnings/cxx-4.9
 ./config/gnu-warnings/cxx-5
+./config/gnu-warnings/cxx-9
+./config/gnu-warnings/cxx-developer-4.8
 ./config/gnu-warnings/cxx-error-5
 ./config/gnu-warnings/cxx-error-general
-./config/gnu-warnings/cxx-noerror-5
-./config/gnu-warnings/cxx-noerror-general
 ./config/gnu-warnings/developer-4.8
 ./config/gnu-warnings/developer-7
 ./config/gnu-warnings/developer-8
@@ -180,21 +181,25 @@
 ./config/gnu-warnings/general
 ./config/gnu-warnings/gfort-general
 ./config/gnu-warnings/gfort-4.8
-./config/gnu-warnings/gfort-5
+./config/gnu-warnings/developer-gfort-5
 ./config/gnu-warnings/gfort-6
 ./config/gnu-warnings/gfort-8
+./config/gnu-warnings/no-cxx-developer-4.8
 ./config/gnu-warnings/no-developer-4.8
 ./config/gnu-warnings/no-developer-8
 ./config/gnu-warnings/no-developer-general
-./config/gnu-warnings/noerror-5
-./config/gnu-warnings/noerror-8
-./config/gnu-warnings/noerror-general
-./config/intel-warnings/ifort-general
+./config/intel-warnings/15
+./config/intel-warnings/18
+./config/intel-warnings/developer-general
 ./config/intel-warnings/general
+./config/intel-warnings/win-developer-general
+./config/intel-warnings/win-general
+./config/intel-warnings/ifort-general
 
 ./config/site-specific/BlankForm
 
 ./doxygen/aliases
+./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
 ./doxygen/dox/About.dox
 ./doxygen/dox/Cookbook.dox
@@ -230,6 +235,7 @@
 ./doxygen/examples/H5Pget_metadata_read_attempts.2.c
 ./doxygen/examples/H5Pget_metadata_read_attempts.3.c
 ./doxygen/examples/H5Pget_object_flush_cb.c
+./doxygen/examples/H5_examples.c
 ./doxygen/examples/ImageSpec.html
 ./doxygen/examples/PaletteExample1.gif
 ./doxygen/examples/Palettes.fm.anc.gif

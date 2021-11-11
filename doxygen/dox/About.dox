@@ -1,5 +1,7 @@
 /** \page About About
 
+\section about_history History
+
 The implementation of this documentation set is based on the fantastic work of the
 <a href="https://eigen.tuxfamily.org/index.php?title=Main_Page">Eigen project</a>.
 Please refer to their <a href="https://gitlab.com/libeigen/eigen">GitLab repository</a>

@@ -19,7 +19,7 @@ Links to HDF5 documentation can be found on The HDF5 web page:
 
 The official HDF5 releases can be obtained from:
 
-     https://portal.hdfgroup.org/display/support/HDF5+1.8.22
+     https://www.hdfgroup.org/downloads/hdf5/
 
 Changes from Release to Release and New Features in the HDF5-1.8.x release series
 can be found at:
@@ -49,6 +49,21 @@ New Features
 
     Configuration:
     -------------
+    - Changed autotools and CMake configurations to derive both
+      compilation warnings-as-errors and warnings-only-warn configurations
+      from the same files, 'config/*/*error*'.  Removed redundant files
+      'config/*/*noerror*'.
+
+      (DCY - 2021/09/29)
+
+    - Added new option to control the build of High-Level tools
+      that default ON/enabled.
+
+      Add configure options (autotools - CMake):
+            enable-hltools       HDF5_BUILD_HL_TOOLS
+
+      (ADB - 2021/09/16, HDFFV-11266)
+
     - CMake no longer builds the C++ library by default
 
       HDF5_BUILD_CPP_LIB now defaults to OFF, which is in line with the
@@ -156,7 +171,11 @@ New Features
 
     Fortran Library:
     ----------------
-    -
+    - H5Fget_name_f fixed to handle correctly trailing whitespaces and
+      newly allocated buffers.
+
+      (MSB - 2021/08/30, github-826,972)
+
 
     C++ Library:
     ------------
@@ -211,6 +230,32 @@ Bug Fixes since HDF5-1.8.22
 
     Configuration
     -------------
+    - Corrected path searched by CMake find_package command
+
+      The install path for cmake find_package files had been changed to use
+        "share/cmake"
+      for all platforms. However the trailing "hdf5" directory was not removed.
+      This "hdf5" additional directory has been removed.
+
+      (ADB - 2021/09/27)
+
+    - Corrected pkg-config compile script
+
+      It was discovered that the position of the "$@" argument for the command
+      in the compile script may fail on some platforms and configurations. The
+      position of the "$@"command argument was moved before the pkg-config sub command.
+
+      (ADB - 2021/08/30)
+
+    - Fixed CMake C++ compiler flags
+
+      A recent refactoring of the C++ configure files accidently removed the
+      file that executed the enable_language command for C++ needed by the
+      HDFCXXCompilerFlags.cmake file. Also updated the intel warnings files,
+      including adding support for windows platforms.
+
+      (ADB - 2021/08/10)
+
     - Remove arbitrary warning flag groups from CMake builds
 
       The arbitrary groups were created to reduce the quantity of warnings being
@@ -346,7 +391,11 @@ Bug Fixes since HDF5-1.8.22
 
     Packet Table APIs:
     ------------------
-    - None
+    - Fixed HL_test_packet, test for packet table vlen of vlen.
+
+      Incorrect length assignment.
+
+        (ADB - 2021/10/14)
 
 
 Supported Platforms

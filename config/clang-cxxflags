@@ -20,15 +20,15 @@
 #
 # For now, do not promote any warnings to errors.
 #
-PROMOTE_ERRORS_DFLT=no
+WARNINGS_AS_ERRORS_DFLT=no
 
 #
 # This filter rewrites -Werror= as -W, in that way demoting warnings
-# promoted to errors back to warnings, if PROMOTE_ERRORS is no.
+# promoted to errors back to warnings, if WARNINGS_AS_ERRORS is no.
 #
 demote_errors()
 {
-    if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
+    if [ ${WARNINGS_AS_ERRORS:-${WARNINGS_AS_ERRORS_DFLT}} = no ]; then
         sed 's,-Werror=,-W,g'
     else
         cat
@@ -44,7 +44,7 @@ demote_errors()
 load_clang_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/clang-warnings/${arg}
+        sed 's,#.*$,,' $srcdir/config/clang-warnings/${arg} | demote_errors
     done)
     IFS=' ' echo "$*"
 }
@@ -113,18 +113,6 @@ if test "X-clang" = "X-$cxx_vendor" -o "X-Apple LLVM" = "X-$cxx_vendor"; then
             ;;
     esac
 
-    case "$host_os-$host_cpu" in
-        # cygwin needs the "-std=c99" flag removed, so make
-        # a specific case for Cygwin without the flag and a default
-        # case to add the flag everywhere else
-        cygwin-*)
-            ;;
-
-        *)
-            H5_CXXFLAGS="$H5_CXXFLAGS -std=c++11"
-            ;;
-    esac
-
     H5_CXXFLAGS="$H5_CXXFLAGS $arch"
 
     ##############
@@ -173,7 +161,6 @@ if test "X-clang" = "X-$cxx_vendor" -o "X-Apple LLVM" = "X-$cxx_vendor"; then
 
     H5_CXXFLAGS="$H5_CXXFLAGS $(load_clang_arguments general)"
     H5_ECXXFLAGS="$H5_ECXXFLAGS $(load_clang_arguments error-general)"
-    H5_NECXXFLAGS="$H5_NECXXFLAGS $(load_clang_arguments noerror-general)"
 
     ######################
     # Developer warnings #

@@ -20,15 +20,15 @@
 #
 # For now, do not promote any warnings to errors.
 #
-PROMOTE_ERRORS_DFLT=no
+WARNINGS_AS_ERRORS_DFLT=no
 
 #
 # This filter rewrites -Werror= as -W, in that way demoting warnings
-# promoted to errors back to warnings, if PROMOTE_ERRORS is no.
+# promoted to errors back to warnings, if WARNINGS_AS_ERRORS is no.
 #
 demote_errors()
 {
-    if [ ${PROMOTE_ERRORS:-${PROMOTE_ERRORS_DFLT}} = no ]; then
+    if [ ${WARNINGS_AS_ERRORS:-${WARNINGS_AS_ERRORS_DFLT}} = no ]; then
         sed 's,-Werror=,-W,g'
     else
         cat
@@ -44,7 +44,7 @@ demote_errors()
 load_gnu_arguments()
 {
     set -- $(for arg; do
-        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg}
+        sed 's,#.*$,,' $srcdir/config/gnu-warnings/${arg} | demote_errors
     done)
     IFS=' ' echo "$*"
 }
@@ -205,11 +205,10 @@ if test "X-gcc" = "X-$cc_vendor"; then
     if test $cc_vers_major -eq 4 -a $cc_vers_minor -ge 8 -o $cc_vers_major -gt 4; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments general)"
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-general)"
-        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-general)"
 
-    ######################
-    # Developer warnings #
-    ######################
+        ######################
+        # Developer warnings #
+        ######################
 
         NO_DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments no-developer-general)
         DEVELOPER_WARNING_CFLAGS=$(load_gnu_arguments developer-general)
@@ -245,7 +244,6 @@ if test "X-gcc" = "X-$cc_vendor"; then
     if test $cc_vers_major -ge 5; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 5)"
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-5)"
-        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-5)"
     fi
 
     # gcc >= 6
@@ -263,7 +261,6 @@ if test "X-gcc" = "X-$cc_vendor"; then
     if test $cc_vers_major -ge 8; then
         H5_CFLAGS="$H5_CFLAGS $(load_gnu_arguments 8)"
         H5_ECFLAGS="$H5_ECFLAGS $(load_gnu_arguments error-8)"
-        H5_NECFLAGS="$H5_NECFLAGS $(load_gnu_arguments noerror-8)"
         DEVELOPER_WARNING_CFLAGS="$DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments developer-8)"
         NO_DEVELOPER_WARNING_CFLAGS="$NO_DEVELOPER_WARNING_CFLAGS $(load_gnu_arguments no-developer-8)"
     fi

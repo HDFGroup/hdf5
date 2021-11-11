@@ -642,6 +642,8 @@ HAVE_SHARED_CONDITIONAL_FALSE
 HAVE_SHARED_CONDITIONAL_TRUE
 fortran_linux_linker_option
 SEARCH
+BUILD_TOOLS_HL_CONDITIONAL_FALSE
+BUILD_TOOLS_HL_CONDITIONAL_TRUE
 BUILD_TOOLS_CONDITIONAL_FALSE
 BUILD_TOOLS_CONDITIONAL_TRUE
 BUILD_TESTS_PARALLEL_CONDITIONAL_FALSE
@@ -737,6 +739,7 @@ TIME
 TR
 AR
 PERL
+HL_TOOLS
 HL_FOR
 HL
 CXXCPP
@@ -908,6 +911,7 @@ enable_fortran
 enable_fortran2003
 enable_cxx
 enable_hl
+enable_hltools
 enable_tests
 enable_tools
 enable_shared
@@ -1610,6 +1614,7 @@ Optional Features:
                           specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
   --enable-hl             Enable the high level library [default=yes]
+  --enable-hltools        Enable the high-level tools. [default=yes)]
   --enable-tests          Compile the HDF5 tests [default=yes]
   --enable-tools          Compile the HDF5 tools [default=yes]
   --enable-shared[=PKGS]  build shared libraries [default=yes]
@@ -7536,6 +7541,8 @@ ac_compiler_gnu=$ac_cv_c_compiler_gnu
  HL=""
 ## name of fortran folder inside "hl", if FORTRAN compile is requested
  HL_FOR=""
+## name of tools folder inside "hl", if HL_TOOLS compile is requested
+ HL_TOOLS=""
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking if high level library is enabled" >&5
 $as_echo_n "checking if high level library is enabled... " >&6; }
 # Check whether --enable-hl was given.
@@ -7560,6 +7567,23 @@ $as_echo "#define INCLUDE_HL 1" >>confdefs.h
   fi
 else
  echo "no"
+fi
+
+{ $as_echo "$as_me:${as_lineno-$LINENO}: checking if the high-level tools are enabled" >&5
+$as_echo_n "checking if the high-level tools are enabled... " >&6; }
+# Check whether --enable-hltools was given.
+if test "${enable_hltools+set}" = set; then :
+  enableval=$enable_hltools; HDF5_HL_TOOLS=$enableval
+fi
+
+
+if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
+ { $as_echo "$as_me:${as_lineno-$LINENO}: result: yes" >&5
+$as_echo "yes" >&6; }
+ HL_TOOLS="tools"
+else
+  { $as_echo "$as_me:${as_lineno-$LINENO}: result: no" >&5
+$as_echo "no" >&6; }
 fi
 
 
@@ -29959,6 +29983,14 @@ else
   BUILD_TOOLS_CONDITIONAL_FALSE=
 fi
 
+ if test "X$HDF5_HL_TOOLS" = "Xyes"; then
+  BUILD_TOOLS_HL_CONDITIONAL_TRUE=
+  BUILD_TOOLS_HL_CONDITIONAL_FALSE='#'
+else
+  BUILD_TOOLS_HL_CONDITIONAL_TRUE='#'
+  BUILD_TOOLS_HL_CONDITIONAL_FALSE=
+fi
+
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.
@@ -32073,6 +32105,10 @@ Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${BUILD_TOOLS_CONDITIONAL_TRUE}" && test -z "${BUILD_TOOLS_CONDITIONAL_FALSE}"; then
   as_fn_error $? "conditional \"BUILD_TOOLS_CONDITIONAL\" was never defined.
+Usually this means the macro was only invoked conditionally." "$LINENO" 5
+fi
+if test -z "${BUILD_TOOLS_HL_CONDITIONAL_TRUE}" && test -z "${BUILD_TOOLS_HL_CONDITIONAL_FALSE}"; then
+  as_fn_error $? "conditional \"BUILD_TOOLS_HL_CONDITIONAL\" was never defined.
 Usually this means the macro was only invoked conditionally." "$LINENO" 5
 fi
 if test -z "${HAVE_SHARED_CONDITIONAL_TRUE}" && test -z "${HAVE_SHARED_CONDITIONAL_FALSE}"; then
