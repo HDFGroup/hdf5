@@ -3056,7 +3056,7 @@ error:
 static int
 test_integration_create(void)
 {
-    const char *basename = "example.h5";
+    const char *basename = "integration.h5";
     // const char *basename = "somesuch.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
@@ -3210,8 +3210,8 @@ test_integration_create(void)
     HDputs(".");
     fflush(stdout);
 
-    //file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id;
-    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, H5P_DEFAULT);
+    file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
+    //file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, H5P_DEFAULT);
 
     HDputs(".");
     fflush(stdout);
@@ -3230,6 +3230,7 @@ test_integration_create(void)
         printf("\n\n\n\nERROR OPENING DSET\n\n\n\n");
         TEST_ERROR
     }
+
     HDputs(".");
     HDfflush(stdout);
     int dset_data[4][7];
@@ -3260,10 +3261,10 @@ test_integration_create(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    HDremove(paths->canon);
-    HDremove(paths->onion);
-    HDremove(paths->recovery);
-    onion_filepaths_destroy(paths);
+    //HDremove(paths->canon);
+    //HDremove(paths->onion);
+    //HDremove(paths->recovery);
+    //onion_filepaths_destroy(paths);
 
     PASSED();
     return 0;
@@ -3271,10 +3272,10 @@ test_integration_create(void)
 error:
 
     if (paths != NULL) {
-        HDremove(paths->canon);
-        HDremove(paths->onion);
-        HDremove(paths->recovery);
-        onion_filepaths_destroy(paths);
+        //HDremove(paths->canon);
+        //HDremove(paths->onion);
+        //HDremove(paths->recovery);
+        //onion_filepaths_destroy(paths);
     }
 
     if (dset != H5I_INVALID_HID)
@@ -3308,7 +3309,7 @@ main(void)
     flags_create_s = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
     /* Run tests. Return values on error are negative. */
-    nerrors -= test_archival_index();
+    /*nerrors -= test_archival_index();
     nerrors -= test_revision_index();
     nerrors -= test_revision_index_collisions();
     nerrors -= test_revision_index_resizing();
@@ -3323,7 +3324,7 @@ main(void)
     nerrors -= test_create_oniontarget(FALSE, TRUE);
     nerrors -= test_create_oniontarget(TRUE, TRUE);
     nerrors -= test_several_revisions_with_logical_gaps();
-    nerrors -= test_page_aligned_history_create();
+    nerrors -= test_page_aligned_history_create();*/
     nerrors -= test_integration_create();
 
 #if H5FD_ONION_ENABLE_INDEX_STATS
