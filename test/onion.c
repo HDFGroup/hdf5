@@ -3211,7 +3211,7 @@ test_integration_create(void)
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
-    //file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, H5P_DEFAULT);
+    // file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, H5P_DEFAULT);
 
     HDputs(".");
     fflush(stdout);
@@ -3261,10 +3261,10 @@ test_integration_create(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    //HDremove(paths->canon);
-    //HDremove(paths->onion);
-    //HDremove(paths->recovery);
-    //onion_filepaths_destroy(paths);
+    // HDremove(paths->canon);
+    // HDremove(paths->onion);
+    // HDremove(paths->recovery);
+    // onion_filepaths_destroy(paths);
 
     PASSED();
     return 0;
@@ -3272,10 +3272,10 @@ test_integration_create(void)
 error:
 
     if (paths != NULL) {
-        //HDremove(paths->canon);
-        //HDremove(paths->onion);
-        //HDremove(paths->recovery);
-        //onion_filepaths_destroy(paths);
+        // HDremove(paths->canon);
+        // HDremove(paths->onion);
+        // HDremove(paths->recovery);
+        // onion_filepaths_destroy(paths);
     }
 
     if (dset != H5I_INVALID_HID)
