@@ -80,7 +80,7 @@ H5_GCC_DIAG_OFF("cast-align")
 #define H5SETJMP(buf)       HDsigsetjmp(buf, 1)
 #define H5LONGJMP(buf, val) HDsiglongjmp(buf, val)
 #define H5HAVE_SIGJMP       /* sigsetjmp/siglongjmp are supported. */
-#elif defined(H5_HAVE_LONGJMP)
+#else
 #define H5JMP_BUF           jmp_buf
 #define H5SETJMP(buf)       HDsetjmp(buf)
 #define H5LONGJMP(buf, val) HDlongjmp(buf, val)
@@ -149,12 +149,8 @@ static int          sigbus_handler_called_g  = 0; /* how many times called */
 static int          sigsegv_handler_called_g = 0; /* how many times called */
 static int          sigill_handler_called_g  = 0; /* how many times called */
 static int          signal_handler_tested_g  = 0; /* how many times tested */
-#if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
-static int verify_signal_handlers(int signum, void (*handler)(int));
-#endif
-#ifdef H5JMP_BUF
-static H5JMP_BUF jbuf_g;
-#endif
+static int          verify_signal_handlers(int signum, void (*handler)(int));
+static H5JMP_BUF    jbuf_g;
 
 /*-------------------------------------------------------------------------
  * Function:    precision
@@ -389,7 +385,6 @@ precision(detected_t *d)
         COMP_ALIGN = (unsigned int)((char *)(&(s.x)) - (char *)(&s));                                        \
     }
 
-#if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
 #define ALIGNMENT(TYPE, INFO)                                                                                \
     {                                                                                                        \
         char *volatile _buf    = NULL;                                                                       \
@@ -436,15 +431,6 @@ precision(detected_t *d)
         HDsignal(SIGSEGV, _handler2); /*restore original handler*/                                           \
         HDsignal(SIGILL, _handler3);  /*restore original handler*/                                           \
     }
-#else
-#define ALIGNMENT(TYPE, INFO)                                                                                \
-    {                                                                                                        \
-        align_status_g |= STA_NoALIGNMENT;                                                                   \
-        (INFO.align) = 0;                                                                                    \
-    }
-#endif
-
-#if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 
 /*-------------------------------------------------------------------------
  * Function:    sigsegv_handler
@@ -474,9 +460,6 @@ sigsegv_handler(int H5_ATTR_UNUSED signo)
     HDsignal(SIGSEGV, sigsegv_handler);
     H5LONGJMP(jbuf_g, SIGSEGV);
 }
-#endif
-
-#if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 
 /*-------------------------------------------------------------------------
  * Function:    sigbus_handler
@@ -506,9 +489,6 @@ sigbus_handler(int H5_ATTR_UNUSED signo)
     HDsignal(SIGBUS, sigbus_handler);
     H5LONGJMP(jbuf_g, SIGBUS);
 }
-#endif
-
-#if defined(H5LONGJMP) && defined(H5_HAVE_SIGNAL)
 
 /*-------------------------------------------------------------------------
  * Function:    sigill_handler
@@ -538,7 +518,6 @@ sigill_handler(int H5_ATTR_UNUSED signo)
     HDsignal(SIGILL, sigill_handler);
     H5LONGJMP(jbuf_g, SIGILL);
 }
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    print_results
@@ -779,21 +758,6 @@ done:\n\
         fprintf(rawoutstream, "/* Signal handlers verify test is not available */\n");
         /* The following is available in H5pubconf.h. Printing them here for */
         /* convenience. */
-#ifdef H5_HAVE_SIGNAL
-    fprintf(rawoutstream, "/* Signal() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* Signal() support: no */\n");
-#endif
-#ifdef H5_HAVE_SETJMP
-    fprintf(rawoutstream, "/* setjmp() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* setjmp() support: no */\n");
-#endif
-#ifdef H5_HAVE_LONGJMP
-    fprintf(rawoutstream, "/* longjmp() support: yes */\n");
-#else
-    fprintf(rawoutstream, "/* longjmp() support: no */\n");
-#endif
 #ifdef H5_HAVE_SIGSETJMP
     fprintf(rawoutstream, "/* sigsetjmp() support: yes */\n");
 #else
@@ -1568,7 +1532,6 @@ detect_alignments(void)
     na_g++;
 }
 
-#if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
 /* Verify the signal handler for signal signum works correctly multiple times.
  * One possible cause of failure is that the signal handling is blocked or
  * changed to SIG_DFL after H5LONGJMP.
@@ -1625,7 +1588,6 @@ verify_signal_handlers(int signum, void (*handler)(int))
         return 0;
     }
 }
-#endif
 
 /*-------------------------------------------------------------------------
  * Function:    main
@@ -1655,22 +1617,6 @@ main(int argc, char *argv[])
     if (!rawoutstream)
         rawoutstream = stdout;
 
-#if defined(H5_HAVE_SETSYSINFO) && defined(SSI_NVPAIRS)
-#if defined(UAC_NOPRINT) && defined(UAC_SIGBUS)
-    /*
-     * Make sure unaligned access generates SIGBUS and doesn't print warning
-     * messages so that we can detect alignment constraints on the DEC Alpha.
-     */
-    int nvpairs[2];
-    nvpairs[0] = SSIN_UACPROC;
-    nvpairs[1] = UAC_NOPRINT | UAC_SIGBUS;
-    if (setsysinfo(SSI_NVPAIRS, nvpairs, 1, 0, 0) < 0) {
-        fprintf(stderr, "H5detect: unable to turn off UAC handling: %s\n", HDstrerror(errno));
-    }
-#endif
-#endif
-
-#if defined(H5SETJMP) && defined(H5_HAVE_SIGNAL)
     /* verify the SIGBUS and SIGSEGV handlers work properly */
     if (verify_signal_handlers(SIGBUS, sigbus_handler) != 0) {
         fprintf(stderr, "Signal handler %s for signal %d failed\n", "sigbus_handler", SIGBUS);
@@ -1681,9 +1627,6 @@ main(int argc, char *argv[])
     if (verify_signal_handlers(SIGILL, sigill_handler) != 0) {
         fprintf(stderr, "Signal handler %s for signal %d failed\n", "sigill_handler", SIGILL);
     }
-#else
-    align_status_g |= STA_NoHandlerVerify;
-#endif
 
     print_header();
 

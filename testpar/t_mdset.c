@@ -347,7 +347,7 @@ null_dataset(void)
     hid_t       iof, plist, dxpl, dataset, attr, sid;
     unsigned    uval = 2; /* Buffer for writing to dataset */
     int         val  = 1; /* Buffer for writing to attribute */
-    int         nelem;
+    hssize_t    nelem;
     char        dname[]     = "dataset";
     char        attr_name[] = "attribute";
     herr_t      ret;
@@ -597,7 +597,7 @@ dataset_fillvalue(void)
 
     /* Set the dataset dimension to be one row more than number of processes */
     /* and calculate the actual dataset size. */
-    dset_dims[0] = mpi_size + 1;
+    dset_dims[0] = (hsize_t)(mpi_size + 1);
     dset_size    = dset_dims[0] * dset_dims[1] * dset_dims[2] * dset_dims[3];
 
     /* Allocate space for the buffers */

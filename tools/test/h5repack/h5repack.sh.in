@@ -862,6 +862,45 @@ TOOLTESTV()
    rm -f $outfile
 }
 
+# Same as TOOLTEST, but expects h5repack fails
+#
+TOOLTEST_FAIL()
+{
+    infile=$1
+    outfile=$2
+    expect="$TESTDIR/$2-$1.ddl"
+    actual="$TESTDIR/$2-$1.out"
+    actual_err="$TESTDIR/$2-$1.err"
+    shift
+    shift
+
+    # Run test.
+    TESTING $H5REPACK $@
+    (
+        cd $TESTDIR
+        $ENVCMD $RUNSERIAL $H5REPACK_BIN "$@" $infile $outfile
+    ) >&$actual
+    RET=$?
+
+    # Normally h5repack of files tested with this function are expected
+    # to return not 0, but if the command results in "Segmentation fault"
+    # or "core dumped" it is a failure regardless of the return value.
+    failure=`grep -e 'Segmentation fault' -e 'core dumped' $actual`
+    if [ "$failure" != "" ]; then
+        nerrors="`expr $nerrors + 1`"
+        echo " FAILED"
+        echo "    $failure"
+    else
+        if [ $RET == 0 ] ; then
+            nerrors="`expr $nerrors + 1`"
+            echo " FAILED"
+        else
+            echo " PASSED"
+        fi
+    fi
+    rm -f $outfile
+}
+
 # This is same as TOOLTESTV() with comparing display output
 # with actual filename swapped
 #

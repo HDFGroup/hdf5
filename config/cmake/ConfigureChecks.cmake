@@ -86,14 +86,6 @@ else ()
   set (HDF5_FILE_LOCKING_SETTING "no")
 endif ()
 
-#-----------------------------------------------------------------------------
-#  Are we going to use HSIZE_T
-#-----------------------------------------------------------------------------
-option (HDF5_ENABLE_HSIZET "Enable datasets larger than memory" ON)
-if (HDF5_ENABLE_HSIZET)
-  set (${HDF_PREFIX}_HAVE_LARGE_HSIZET 1)
-endif ()
-
 # so far we have no check for this
 set (${HDF_PREFIX}_HAVE_TMPFILE 1)
 
@@ -159,7 +151,7 @@ if (NOT WINDOWS)
         OUTPUT_VARIABLE OUTPUT
     )
     if (TEST_DIRECT_VFD_WORKS_COMPILE)
-      if (TEST_DIRECT_VFD_WORKS_RUN MATCHES 0)
+      if (TEST_DIRECT_VFD_WORKS_RUN EQUAL "0")
         HDF_FUNCTION_TEST (HAVE_DIRECT)
         set (CMAKE_REQUIRED_DEFINITIONS "${CMAKE_REQUIRED_DEFINITIONS} -D_GNU_SOURCE")
         add_definitions ("-D_GNU_SOURCE")
@@ -205,7 +197,7 @@ endif ()
 # Header-check flags set in config/cmake_ext_mod/ConfigureChecks.cmake
 # ----------------------------------------------------------------------
 option (HDF5_ENABLE_MIRROR_VFD "Build the Mirror Virtual File Driver" OFF)
-if (H5FD_ENABLE_MIRROR_VFD)
+if (HDF5_ENABLE_MIRROR_VFD)
   if ( ${HDF_PREFIX}_HAVE_NETINET_IN_H AND
        ${HDF_PREFIX}_HAVE_NETDB_H      AND
        ${HDF_PREFIX}_HAVE_ARPA_INET_H  AND
@@ -269,9 +261,9 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
       message (VERBOSE "* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * ")
     endif ()
 
-    if (${COMPILE_RESULT_VAR})
-      if (${RUN_RESULT_VAR} MATCHES 0)
-        set (${RUN_RESULT_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+    if (COMPILE_RESULT_VAR)
+      if (RUN_RESULT_VAR EQUAL "0")
+        set (${RETURN_VAR} 1 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
           message (VERBOSE "Testing C ${FUNCTION_NAME} - OK")
         endif ()
@@ -283,7 +275,7 @@ macro (C_RUN FUNCTION_NAME SOURCE_CODE RETURN_VAR)
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
           message (VERBOSE "Testing C ${FUNCTION_NAME} - Fail")
         endif ()
-        set (${RUN_RESULT_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
+        set (${RETURN_VAR} 0 CACHE INTERNAL "Have C function ${FUNCTION_NAME}")
         file (APPEND ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeError.log
             "Determining if the C ${FUNCTION_NAME} exists failed with the following output:\n"
             "${OUTPUT_VAR}\n\n")
@@ -328,7 +320,7 @@ message (STATUS "Testing maximum decimal precision for C - ${PROG_OUTPUT4}")
 list (GET PROG_OUTPUT4 0 H5_LDBL_DIG)
 list (GET PROG_OUTPUT4 1 H5_FLT128_DIG)
 
-if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL 0 OR FLT128_DIG EQUAL 0)
+if (${HDF_PREFIX}_SIZEOF___FLOAT128 EQUAL "0" OR FLT128_DIG EQUAL "0")
   set (${HDF_PREFIX}_HAVE_FLOAT128 0)
   set (${HDF_PREFIX}_SIZEOF___FLOAT128 0)
   set (_PAC_C_MAX_REAL_PRECISION ${H5_LDBL_DIG})
@@ -354,7 +346,7 @@ macro (H5ConversionTests TEST msg)
         OUTPUT_VARIABLE OUTPUT
     )
     if (${TEST}_COMPILE)
-      if (${TEST}_RUN MATCHES 0)
+      if (${TEST}_RUN EQUAL "0")
         set (${TEST} 1 CACHE INTERNAL ${msg})
         if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
           message (VERBOSE "${msg}... yes")

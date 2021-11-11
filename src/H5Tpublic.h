@@ -196,9 +196,9 @@ typedef enum H5T_pers_t {
  */
 //! <!-- [H5T_direction_t_snip] -->
 typedef enum H5T_direction_t {
-    H5T_DIR_DEFAULT = 0, /**< default direction is inscendent        */
-    H5T_DIR_ASCEND  = 1, /**< in inscendent order                    */
-    H5T_DIR_DESCEND = 2  /**< in descendent order                    */
+    H5T_DIR_DEFAULT = 0, /**< default direction is ascending         */
+    H5T_DIR_ASCEND  = 1, /**< in ascending order                     */
+    H5T_DIR_DESCEND = 2  /**< in descending order                    */
 } H5T_direction_t;
 //! <!-- [H5T_direction_t_snip] -->
 
@@ -279,7 +279,7 @@ typedef herr_t (*H5T_conv_t)(hid_t src_id, hid_t dst_id, H5T_cdata_t *cdata, siz
  * \returns Valid callback function return values are #H5T_CONV_ABORT,
  *          #H5T_CONV_UNHANDLED and #H5T_CONV_HANDLED.
  *
- * \details If an exception like overflow happenes during conversion, this
+ * \details If an exception like overflow happens during conversion, this
  *          function is called if it's registered through H5Pset_type_conv_cb().
  *
  */

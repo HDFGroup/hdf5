@@ -189,7 +189,6 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tskiplist.c
     ${HDF5_TEST_SOURCE_DIR}/tsohm.c
     ${HDF5_TEST_SOURCE_DIR}/ttime.c
-    ${HDF5_TEST_SOURCE_DIR}/ttst.c
     ${HDF5_TEST_SOURCE_DIR}/tunicode.c
     ${HDF5_TEST_SOURCE_DIR}/tvltypes.c
     ${HDF5_TEST_SOURCE_DIR}/tvlstr.c
@@ -268,7 +267,7 @@ set (H5_TESTS
     ros3
     s3comms
     hdfs
-    mirror_vfd
+    #mirror_vfd # multiple source
     ntypes
     dangle
     dtransform
@@ -285,8 +284,12 @@ set (H5_TESTS
     swmr
     thread_id # special link
     timer
+    cmpd_dtransform
     version_bounds_1_10
 )
+if (HDF5_BUILD_UTILS)
+  set (H5_TESTS ${H5_TESTS} mirror_vfd)
+endif ()
 
 macro (ADD_H5_EXE file)
   add_executable (${file} ${HDF5_TEST_SOURCE_DIR}/${file}.c)
@@ -461,23 +464,25 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_thread_id_FORMAT thread_id)
 endif ()
 
-#-- Adding test for mirror_vfd
-add_executable (mirror_vfd ${mirror_vfd_SOURCES})
-target_include_directories (mirror_vfd PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-if (NOT BUILD_SHARED_LIBS)
-  TARGET_C_PROPERTIES (mirror_vfd STATIC)
-  target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIB_TARGET})
-else ()
-  TARGET_C_PROPERTIES (mirror_vfd SHARED)
-  target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIBSH_TARGET})
-endif ()
-set_target_properties (mirror_vfd PROPERTIES FOLDER test)
+if (HDF5_BUILD_UTILS) # requires mirror server
+  #-- Adding test for mirror_vfd
+  add_executable (mirror_vfd ${mirror_vfd_SOURCES})
+  target_include_directories (mirror_vfd PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  if (NOT BUILD_SHARED_LIBS)
+    TARGET_C_PROPERTIES (mirror_vfd STATIC)
+    target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIB_TARGET})
+  else ()
+    TARGET_C_PROPERTIES (mirror_vfd SHARED)
+    target_link_libraries (mirror_vfd PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+  endif ()
+  set_target_properties (mirror_vfd PROPERTIES FOLDER test)
 
-#-----------------------------------------------------------------------------
-# Add Target to clang-format
-#-----------------------------------------------------------------------------
-if (HDF5_ENABLE_FORMATTERS)
-  clang_format (HDF5_TEST_mirror_vfd_FORMAT mirror_vfd)
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_mirror_vfd_FORMAT mirror_vfd)
+  endif ()
 endif ()
 
 ##############################################################################
@@ -519,7 +524,6 @@ endif ()
 
 set (H5_SWMR_TESTS
     swmr_addrem_writer
-    swmr_check_compat_vfd
     swmr_generator
     swmr_reader
     swmr_remove_reader

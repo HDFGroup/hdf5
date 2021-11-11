@@ -1129,9 +1129,10 @@ h5_set_info_object(void)
                 valp++;
 
             /* copy key/value pair into temporary buffer */
-            len     = strcspn(valp, ";");
-            next    = &valp[len];
-            key_val = (char *)HDcalloc(1, len + 1);
+            len  = HDstrcspn(valp, ";");
+            next = &valp[len];
+            if (NULL == (key_val = (char *)HDcalloc(1, len + 1)))
+                return -1;
 
             /* increment the next pointer past the terminating semicolon */
             if (*next == ';')
@@ -1526,6 +1527,9 @@ h5_make_local_copy(const char *origfilename, const char *local_copy_name)
     ssize_t     nread;                                           /* Number of bytes read in */
     void *      buf      = NULL;                                 /* Buffer for copying data */
     const char *filename = H5_get_srcdir_filename(origfilename); /* Get the test file name to copy */
+
+    if (!filename)
+        goto error;
 
     /* Allocate copy buffer */
     if (NULL == (buf = HDcalloc((size_t)1, (size_t)READ_BUF_SIZE)))

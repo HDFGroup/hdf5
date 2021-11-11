@@ -70,7 +70,7 @@
         FAIL_STACK_ERROR                                                                                     \
     if ((NMEMBS) != H5I_nmembers(H5I_DATATYPE)) {                                                            \
         H5_FAILED();                                                                                         \
-        HDprintf("    #dtype ids expected: %lld; found: %lld\n", (long long)NMEMBS,                          \
+        HDprintf("    #dtype ids expected: %lld; found: %lld\n", (long long)(NMEMBS),                        \
                  (long long)H5I_nmembers(H5I_DATATYPE));                                                     \
         goto error;                                                                                          \
     }
@@ -783,9 +783,12 @@ test_compound_2(void)
         FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
-    buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt));
-    orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st));
+    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+        goto error;
+    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+        goto error;
+    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+        goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
         s_ptr->a    = i * 8 + 0;
@@ -857,6 +860,10 @@ test_compound_2(void)
     return 0;
 
 error:
+    HDfree(buf);
+    HDfree(bkg);
+    HDfree(orig);
+
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
 
@@ -903,9 +910,12 @@ test_compound_3(void)
         FAIL_STACK_ERROR
 
     /* Initialize */
-    buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt));
-    orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st));
+    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+        goto error;
+    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+        goto error;
+    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+        goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
         s_ptr->a    = i * 8 + 0;
@@ -973,6 +983,10 @@ test_compound_3(void)
     return 0;
 
 error:
+    HDfree(buf);
+    HDfree(bkg);
+    HDfree(orig);
+
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
 
@@ -1023,9 +1037,12 @@ test_compound_4(void)
         FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
-    buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt));
-    orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st));
+    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+        goto error;
+    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+        goto error;
+    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+        goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr       = ((struct st *)((void *)orig)) + i;
         s_ptr->a    = i * 8 + 0;
@@ -1096,6 +1113,10 @@ test_compound_4(void)
     return 0;
 
 error:
+    HDfree(buf);
+    HDfree(bkg);
+    HDfree(orig);
+
     /* Restore the default error handler (set in h5_reset()) */
     h5_restore_err();
 
@@ -1145,6 +1166,12 @@ test_compound_5(void)
     int         retval = 1;
 
     TESTING("optimized struct converter");
+
+    if (!buf || !bkg) {
+        HDfree(buf);
+        HDfree(bkg);
+        return 1;
+    }
 
     /* Build datatypes */
     short_array = H5Tcreate(H5T_COMPOUND, 4 * sizeof(short));
@@ -1238,9 +1265,12 @@ test_compound_6(void)
         FAIL_STACK_ERROR
 
     /* Sizes should be the same, but be careful just in case */
-    buf  = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)));
-    bkg  = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt));
-    orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st));
+    if (NULL == (buf = (unsigned char *)HDmalloc(nelmts * MAX(sizeof(struct st), sizeof(struct dt)))))
+        goto error;
+    if (NULL == (bkg = (unsigned char *)HDmalloc(nelmts * sizeof(struct dt))))
+        goto error;
+    if (NULL == (orig = (unsigned char *)HDmalloc(nelmts * sizeof(struct st))))
+        goto error;
     for (i = 0; i < (int)nelmts; i++) {
         s_ptr    = ((struct st *)((void *)orig)) + i;
         s_ptr->b = (int16_t)((i * 8 + 1) & 0x7fff);
@@ -1485,7 +1515,7 @@ test_compound_8(void)
     struct s2 {
         char c;
         s1   d;
-    } s2;
+    };
     hid_t   tid1, tid1_copy, tid2, tid2_copy, tid3, arr_tid;
     size_t  tsize;
     hsize_t dims[1] = {ARRAY_DIM};
@@ -6651,13 +6681,13 @@ static int
 test_int_float_except(void)
 {
 #if H5_SIZEOF_INT == 4 && H5_SIZEOF_FLOAT == 4
-    float  buf[CONVERT_SIZE]       = {(float)INT_MIN - 172.0f, (float)INT_MAX - 32.0f, (float)INT_MAX - 68.0f,
-                               (float)4.5f};
+    float  buf[CONVERT_SIZE]       = {(float)INT_MIN - 172.0F, (float)INT_MAX - 32.0F, (float)INT_MAX - 68.0F,
+                               (float)4.5F};
     int    buf_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 4};
-    float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0f, (float)INT_MAX - 127.0f, 4};
+    float  buf_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX + 1.0F, (float)INT_MAX - 127.0F, 4};
     int *  intp; /* Pointer to buffer, as integers */
     int    buf2[CONVERT_SIZE]       = {INT_MIN, INT_MAX, INT_MAX - 72, 0};
-    float  buf2_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX, (float)INT_MAX - 127.0f, (float)0.0f};
+    float  buf2_float[CONVERT_SIZE] = {(float)INT_MIN, (float)INT_MAX, (float)INT_MAX - 127.0F, (float)0.0F};
     int    buf2_int[CONVERT_SIZE]   = {INT_MIN, INT_MAX, INT_MAX - 127, 0};
     float *floatp;   /* Pointer to buffer #2, as floats */
     hid_t  dxpl;     /* Dataset transfer property list */
@@ -8121,7 +8151,7 @@ test_utf_ascii_conv(void)
     /* Test conversion in memory */
     H5E_BEGIN_TRY
     {
-        status = H5Tconvert(utf8_vtid, ascii_vtid, 1, (void *)utf8_w, NULL, H5P_DEFAULT);
+        status = H5Tconvert(utf8_vtid, ascii_vtid, 1, &utf8_w, NULL, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)
@@ -8163,7 +8193,7 @@ test_utf_ascii_conv(void)
     /* Test conversion in memory */
     H5E_BEGIN_TRY
     {
-        status = H5Tconvert(ascii_vtid, utf8_vtid, 1, (void *)ascii_w, NULL, H5P_DEFAULT);
+        status = H5Tconvert(ascii_vtid, utf8_vtid, 1, &ascii_w, NULL, H5P_DEFAULT);
     }
     H5E_END_TRY
     if (status >= 0)

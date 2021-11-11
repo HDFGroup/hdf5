@@ -456,6 +456,59 @@ error:
 } /* test_ohdr_swmr() */
 
 /*
+ * Tests bad object header messages.
+ *
+ * Currently tests for CVE-2020-10810 fixes but can be expanded to handle
+ * other CVE badness.
+ */
+
+/* This is a generated file that can be obtained from:
+ *
+ * https://nvd.nist.gov/vuln/detail/CVE-2020-10810
+ *
+ * It was formerly named H5AC_unpin_entry_POC
+ */
+#define CVE_2020_10810_FILENAME "cve_2020_10810.h5"
+
+static herr_t
+test_ohdr_badness(hid_t fapl)
+{
+    hid_t fid = H5I_INVALID_HID;
+
+    /* CVE-2020-10810 involved a malformed fsinfo message
+     * This test ensures the fundamental problem is fixed. Running it under
+     * valgrind et al. will ensure that the memory leaks and invalid access
+     * are fixed.
+     */
+    TESTING("Fix for CVE-2020-10810");
+
+    H5E_BEGIN_TRY
+    {
+        /* This should fail due to the malformed fsinfo message. It should
+         * fail gracefully and not segfault.
+         */
+        fid = H5Fopen(CVE_2020_10810_FILENAME, H5F_ACC_RDWR, fapl);
+    }
+    H5E_END_TRY;
+
+    if (fid >= 0)
+        FAIL_PUTS_ERROR("should not have been able to open malformed file");
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+}
+
+/*
  *  To test objects with unknown messages in a file with:
  *      a) H5O_BOGUS_VALID_ID:
  *       --the bogus_id is within the range of H5O_msg_class_g[]
@@ -2045,6 +2098,9 @@ main(void)
 
         } /* high */
     }     /* low */
+
+    /* Verify bad ohdr message fixes work */
+    test_ohdr_badness(fapl);
 
     /* Verify symbol table messages are cached */
     if (h5_verify_cached_stabs(FILENAME, fapl) < 0)

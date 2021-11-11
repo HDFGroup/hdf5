@@ -546,7 +546,7 @@ PropList::getPropSize(const H5std_string &name) const
 // Function:    PropList::getClassName
 ///\brief       Return the name of a generic property list class.
 ///\return      A string containing the class name, if success, otherwise,
-///             a NULL string.
+///             an empty string.
 // Programmer:  Binh-Minh Ribler - April, 2004
 //--------------------------------------------------------------------------
 H5std_string
@@ -560,8 +560,9 @@ PropList::getClassName() const
         return (class_name);
     }
     else
-        return 0;
+        return "";
 }
+
 //--------------------------------------------------------------------------
 // Function:    PropList::getNumProps
 ///\brief       Returns the number of properties in this property list or class.

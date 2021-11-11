@@ -15,19 +15,7 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-
-set (VFD_LIST
-    sec2
-    stdio
-    core
-    split
-    multi
-    family
-)
-
-if (H5_HAVE_DIRECT)
-  set (VFD_LIST ${VFD_LIST} direct)
-endif ()
+H5_CREATE_VFD_DIR()
 
 ##############################################################################
 ##############################################################################
@@ -37,7 +25,6 @@ endif ()
 
 macro (ADD_VFD_TEST vfdname resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)
-    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdname}")
     add_test (
         NAME CPP_VFD-${vfdname}-cpp_testhdf5-clear-objects
         COMMAND ${CMAKE_COMMAND} -E remove

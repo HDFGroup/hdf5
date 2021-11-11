@@ -2884,9 +2884,9 @@ test_h5s(void)
 void
 cleanup_h5s(void)
 {
-    remove(DATAFILE);
-    remove(NULLFILE);
-    remove(BASICFILE);
-    remove(ZEROFILE);
-    remove(VERBFNAME);
+    HDremove(DATAFILE);
+    HDremove(NULLFILE);
+    HDremove(BASICFILE);
+    HDremove(ZEROFILE);
+    HDremove(VERBFNAME);
 }

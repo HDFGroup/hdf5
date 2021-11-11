@@ -36,8 +36,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_builddir)/src
 #       test_mirror.sh: mirror_vfd ../utils/mirror_vfd/*
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 TEST_SCRIPT = testerror.sh testlibinfo.sh testcheck_version.sh testlinks_env.sh testexternal_env.sh \
-    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh \
-    test_mirror.sh
+    testswmr.sh testvds_env.sh testvdsswmr.sh testflushrefresh.sh test_usecases.sh testabort_fail.sh
 SCRIPT_DEPEND = error_test$(EXEEXT) err_compat$(EXEEXT) links_env$(EXEEXT) \
     external_env$(EXEEXT) filenotclosed$(EXEEXT) del_many_dense_attrs$(EXEEXT) \
     flushrefresh$(EXEEXT) use_append_chunk$(EXEEXT) use_append_mchunks$(EXEEXT) use_disable_mdc_flushes$(EXEEXT) \
@@ -50,6 +49,10 @@ if HAVE_SHARED_CONDITIONAL
   SCRIPT_DEPEND += filter_plugin$(EXEEXT)
 endif
 
+if MIRROR_VFD_CONDITIONAL
+  TEST_SCRIPT += test_mirror.sh
+endif
+
 check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
@@ -60,7 +63,7 @@ TEST_PROG= testhdf5 \
            cache cache_api cache_image cache_tagging lheap ohdr \
            stab gheap evict_on_close farray earray btree2 fheap \
            pool accum hyperslab istore bittests dt_arith page_buffer \
-           dtypes dsets chunk_info cmpd_dset filter_fail extend direct_chunk \
+           dtypes dsets chunk_info cmpd_dset cmpd_dtransform filter_fail extend direct_chunk \
            external efc objcopy links unlink twriteorder big mtime fillval mount \
            flush1 flush2 app_ref enum set_extent ttsafe enc_dec_plist \
            enc_dec_plist_cross_platform getname vfd ros3 s3comms hdfs ntypes \
@@ -91,10 +94,13 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
     use_append_chunk use_append_chunk_mirror use_append_mchunks use_disable_mdc_flushes \
     swmr_generator swmr_start_write swmr_reader swmr_writer swmr_remove_reader \
     swmr_remove_writer swmr_addrem_writer swmr_sparse_reader swmr_sparse_writer \
-    swmr_check_compat_vfd vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer \
-    mirror_vfd
+    vds_env vds_swmr_gen vds_swmr_reader vds_swmr_writer
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin
+endif
+
+if MIRROR_VFD_CONDITIONAL
+  check_PROGRAMS+= mirror_vfd
 endif
 
 # These programs generate test files for the tests.  They don't need to be
@@ -158,7 +164,6 @@ timings _timings: testmeta
 	   fi;                                                                \
 	done;
 
-
 # The flush1 test must run before the flush2 test
 flush2.chkexe_: flush1.chkexe_
 
@@ -213,7 +218,7 @@ CHECK_CLEANFILES+=accum.h5 cmpd_dset.h5 compact_dataset.h5 dataset.h5 dset_offse
 # Sources for testhdf5 executable
 testhdf5_SOURCES=testhdf5.c tarray.c tattr.c tchecksum.c tconfig.c tfile.c \
     tgenprop.c th5o.c th5s.c tcoords.c theap.c tid.c titerate.c tmeta.c tmisc.c \
-    trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c ttst.c tunicode.c \
+    trefer.c trefstr.c tselect.c tskiplist.c tsohm.c ttime.c tunicode.c \
     tvlstr.c tvltypes.c
 
 # Sources for Use Cases

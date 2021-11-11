@@ -268,7 +268,6 @@ H5T__bit_get_d(uint8_t *buf, size_t offset, size_t size)
     /* Set return value */
     ret_value = val;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5T__bit_get_d() */
 

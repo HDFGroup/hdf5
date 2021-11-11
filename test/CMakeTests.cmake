@@ -704,10 +704,10 @@ set_tests_properties (H5TEST-tcheck_version-minor PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     WILL_FAIL "true"
 )
+# release + 1 should pass
 add_test (NAME H5TEST-tcheck_version-release COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:tcheck_version> "-tr")
 set_tests_properties (H5TEST-tcheck_version-release PROPERTIES
     WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-    WILL_FAIL "true"
 )
 
 ##############################################################################
@@ -919,7 +919,7 @@ if (BUILD_SHARED_LIBS)
 ##############################################################################
 endif ()
 
-option (TEST_SHELL_SCRIPTS "Enable shell script tests" OFF)
+option (TEST_SHELL_SCRIPTS "Enable shell script tests" ON)
 if (TEST_SHELL_SCRIPTS)
   include (ShellTests.cmake)
 endif()
@@ -933,8 +933,6 @@ if (ENABLE_EXTENDED_TESTS)
 #       test_usecases.sh: use_append_chunk, use_append_mchunks, use_disable_mdc_flushes
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
-
-#  add_test (NAME H5Test-swmr_check_compat_vfd COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:swmr_check_compat_vfd>)
 
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")

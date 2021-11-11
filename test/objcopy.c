@@ -11026,7 +11026,7 @@ test_copy_dataset_contig_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl,
         buf[i].b.p   = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for (j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1.0F / ((float)i + 1.0F);
+        buf[i].c = 1.0 / ((double)i + 1.0);
     } /* end for */
 
     /* Initialize the filenames */
@@ -11202,7 +11202,7 @@ test_copy_dataset_chunked_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         buf[i].b.p   = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for (j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1.0F / ((float)i + 1.0F);
+        buf[i].c = 1.0 / ((double)i + 1.0);
     } /* end for */
 
     /* Initialize the filenames */
@@ -11387,7 +11387,7 @@ test_copy_dataset_compact_cmpd_vl(hid_t fcpl_src, hid_t fcpl_dst, hid_t src_fapl
         buf[i].b.p   = (int *)HDmalloc(buf[i].b.len * sizeof(int));
         for (j = 0; j < buf[i].b.len; j++)
             ((int *)buf[i].b.p)[j] = (int)(i * 10 + j);
-        buf[i].c = 1.0F / ((float)i + 1.0F);
+        buf[i].c = 1.0 / ((double)i + 1.0);
     } /* end for */
 
     /* Initialize the filenames */

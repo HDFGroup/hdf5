@@ -8401,7 +8401,7 @@ test_shape_same(void)
 
     /* Output message about test being performed */
     MESSAGE(6, ("Testing Same Shape Comparisons\n"));
-    assert(SPACE9_DIM2 >= POINT1_NPOINTS);
+    HDassert(SPACE9_DIM2 >= POINT1_NPOINTS);
 
     /* Create dataspace for "all" selection */
     all_sid = H5Screate_simple(SPACE9_RANK, dims, NULL);

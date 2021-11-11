@@ -214,7 +214,7 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * exception handlers to print out the HDF-5 error stack.
  * <hr>
  *
- * @version HDF5 1.10.8 <BR>
+ * @version HDF5 1.10.9 <BR>
  *          <b>See also: <a href ="./hdf.hdf5lib.HDFArray.html"> hdf.hdf5lib.HDFArray</a> </b><BR>
  *          <a href ="./hdf.hdf5lib.HDF5Constants.html"> hdf.hdf5lib.HDF5Constants</a><BR>
  *          <a href ="./hdf.hdf5lib.HDF5CDataTypes.html"> hdf.hdf5lib.HDF5CDataTypes</a><BR>
@@ -237,7 +237,7 @@ public class H5 implements java.io.Serializable {
      *
      * Make sure to update the versions number when a different library is used.
      */
-    public final static int LIB_VERSION[] = { 1, 10, 8 };
+    public final static int LIB_VERSION[] = { 1, 10, 9 };
 
     /**
     *  add system property to load library by path
@@ -12231,8 +12231,11 @@ public class H5 implements java.io.Serializable {
      *            IN: Field name of the field index to retrieve.
      *
      * @return if field is defined, the index; else negative.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native int H5Tget_member_index(long type_id, String field_name);
+    public synchronized static native int H5Tget_member_index(long type_id, String field_name) throws HDF5LibraryException;
 
     /**
      * H5Tget_member_name retrieves the name of a field of a compound datatype or an element of an enumeration datatype.
@@ -12243,8 +12246,11 @@ public class H5 implements java.io.Serializable {
      *            IN: Field index (0-based) of the field name to retrieve.
      *
      * @return a valid pointer to the name if successful; otherwise null.
+     *
+     * @exception HDF5LibraryException
+     *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native String H5Tget_member_name(long type_id, int field_idx);
+    public synchronized static native String H5Tget_member_name(long type_id, int field_idx) throws HDF5LibraryException;
 
     /**
      * H5Tget_member_offset returns the byte offset of the specified member of the compound datatype. This is the byte
@@ -12256,11 +12262,8 @@ public class H5 implements java.io.Serializable {
      *            IN: Field index (0-based) of the field type to retrieve.
      *
      * @return the offset of the member.
-     *
-     * @exception HDF5LibraryException
-     *                - Error from the HDF-5 Library.
      **/
-    public synchronized static native long H5Tget_member_offset(long type_id, int membno) throws HDF5LibraryException;
+    public synchronized static native long H5Tget_member_offset(long type_id, int membno);
 
     /**
      * H5Tget_member_type returns the datatype of the specified member.
