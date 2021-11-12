@@ -3261,10 +3261,10 @@ test_integration_create(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    //HDremove(paths->canon);
-    //HDremove(paths->onion);
-    //HDremove(paths->recovery);
-    //onion_filepaths_destroy(paths);
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+    onion_filepaths_destroy(paths);
 
     PASSED();
     return 0;

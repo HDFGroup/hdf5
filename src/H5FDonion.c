@@ -2054,15 +2054,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing onion file")
                 }
 
-                if ((file->backing_recov = H5FD_open(name_recovery, (H5F_ACC_RDWR | H5F_ACC_CREAT |
-                		H5F_ACC_TRUNC), backing_fapl_id, maxaddr)) == NULL) {
-					HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "cannot open the backing recovery file")
-                }
-
-
-                /* Write history header with "no" whole-history summary to history.
-                 * Size of the "recovery" history recorded for later use on close.
-                 */
+                // Write history header with "no" whole-history summary to history.
                 hdr_p->whole_history_size = H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY; /* record for later use */
                 hdr_p->whole_history_addr =
                     H5FD__ONION_ENCODED_SIZE_HEADER + 1; /* TODO: comment these 2 or do some other way */
@@ -2072,8 +2064,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                 size = H5FD_onion_history_header_encode(hdr_p, head_buf, &hdr_p->checksum);
                 if (H5FD__ONION_ENCODED_SIZE_HEADER != size)
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode history header")
-                // if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, size) < 0)
-                //    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, FAIL, "can't extend EOA");
                 /* must use public API to correclty set DXPL context :( */
 
                 wh_buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY);
@@ -2081,27 +2071,14 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 saved_size         = size;
                 whs_p->n_revisions = 0;
-                // whs_p->n_revisions = 1;
-                // whs_p->record_pointer_list = (struct
-                // H5FD__onion_record_pointer*)H5MM_calloc(whs_p->n_revisions * sizeof(struct
-                // H5FD__onion_record_pointer));
-
-                // whs_p->record_pointer_list = (struct H5FD__onion_record_pointer *)HDmalloc(0);
-                // whs_p->record_pointer_list = (struct
-                // H5FD__onion_record_pointer*)HDcalloc(whs_p->n_revisions, sizeof(struct
-                // H5FD__onion_record_pointer));
                 size = H5FD_onion_whole_history_encode(whs_p, wh_buf, &whs_p->checksum);
                 file->header.whole_history_size = size; /* record for later use */
-                                                        // TODO: double check
                 if (H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY != size) {
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode whole-history")
                 }
                 if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, saved_size + size + 1) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
                 
-				if (H5FD_set_eoa(file->backing_recov, H5FD_MEM_DRAW, size) < 0)
-                    HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
-
                 /* must use public API to correclty set DXPL context :( */
                 if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, 0, saved_size, head_buf) < 0) {
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
@@ -2115,26 +2092,15 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
                 rec_p->archival_index.list = NULL;
 
-                // TODO: Remove these 2 lines or are they needed?
-                if (NULL == (file->rev_index = H5FD_onion_revision_index_init(file->fa.page_size)))
-                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, NULL, "can't initialize revision index")
-
                 file->header.whole_history_addr = file->history_eof;
 
-                /* Write nascent whole-history summary (with no revisions) to the backing onion and recovery file
-                 */
+                // Write nascent whole-history summary (with no revisions) to the backing onion file
                 if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, saved_size + 1, size, wh_buf) <
                     0) {
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
                                 "cannot write summary to the backing onion file")
                 }
                 
-				if (H5FDwrite(file->backing_recov, H5FD_MEM_DRAW, H5P_DEFAULT, 0, size, wh_buf) <
-                    0) {
-                    HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
-                                "cannot write summary to the backing recovery file")
-				}
-
                 file->header.whole_history_size = size; /* record for later use */
 
                 H5MM_xfree(head_buf);
