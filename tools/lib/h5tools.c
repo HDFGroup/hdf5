@@ -1890,20 +1890,21 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                     hid_t        region_id    = H5I_INVALID_HID;
                     hid_t        region_space = H5I_INVALID_HID;
                     H5S_sel_type region_type;
-                    H5R_ref_t *  tref;
-                    size_t       trefsize = (sizeof(*tref) > size) ? sizeof(*tref) : size;
+                    H5R_ref_t tref;
 
-                    if ((tref = HDmalloc(trefsize)) == NULL)
-                        H5TOOLS_THROW((-1), "malloc failed");
+                    if (size > sizeof(tref))
+                        H5TOOLS_THROW((-1), "unexpectedly large ref");
+
+                    HDmemset(&tref, 0, sizeof(tref));
 
                     for (block_index = 0; block_index < block_nelmts; block_index++) {
                         mem = ((unsigned char *)_mem) + block_index * size;
-                        HDmemcpy(tref, mem, size);
-                        if ((region_id = H5Ropen_object(tref, H5P_DEFAULT, H5P_DEFAULT)) < 0)
+                        HDmemcpy(&tref, mem, size);
+                        if ((region_id = H5Ropen_object(&tref, H5P_DEFAULT, H5P_DEFAULT)) < 0)
                             H5TOOLS_INFO("H5Ropen_object H5T_STD_REF failed");
                         else {
-                            if ((region_space = H5Ropen_region(tref, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
-                                if (!h5tools_is_zero(tref, H5Tget_size(H5T_STD_REF))) {
+                            if ((region_space = H5Ropen_region(&tref, H5P_DEFAULT, H5P_DEFAULT)) >= 0) {
+                                if (!h5tools_is_zero(&tref, H5Tget_size(H5T_STD_REF))) {
                                     region_type = H5Sget_select_type(region_space);
                                     if (region_type == H5S_SEL_POINTS)
                                         render_bin_output_region_points(region_space, region_id, stream,
@@ -1920,7 +1921,6 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                             H5Dclose(region_id);
                         }
                     }
-                    HDfree(tref);
                 } /* end if (region_output... */
             }
             else if (H5Tequal(tid, H5T_STD_REF_DSETREG)) {
