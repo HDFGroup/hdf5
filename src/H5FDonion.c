@@ -2069,15 +2069,15 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "can't allocate buffer")
                 saved_size         = size;
                 whs_p->n_revisions = 0;
-                size = H5FD_onion_whole_history_encode(whs_p, wh_buf, &whs_p->checksum);
+                size               = H5FD_onion_whole_history_encode(whs_p, wh_buf, &whs_p->checksum);
                 file->header.whole_history_size = size; /* record for later use */
                 if (H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY != size) {
                     HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, NULL, "can't encode whole-history")
                 }
                 if (H5FD_set_eoa(file->backing_onion, H5FD_MEM_DRAW, saved_size + size + 1) < 0)
                     HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
-                
-				/* must use public API to correclty set DXPL context :( */
+
+                /* must use public API to correclty set DXPL context :( */
                 if (H5FDwrite(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT, 0, saved_size, head_buf) < 0) {
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
                                 "cannot write header to the backing onion file")
@@ -2098,7 +2098,7 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                     HGOTO_ERROR(H5E_FILE, H5E_WRITEERROR, NULL,
                                 "cannot write summary to the backing onion file")
                 }
-                
+
                 file->header.whole_history_size = size; /* record for later use */
 
                 H5MM_xfree(head_buf);
