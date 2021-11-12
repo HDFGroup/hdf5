@@ -1580,10 +1580,21 @@ AC_SUBST([PARALLELTOOLS])
 ## Default is not present
 HAVE_LIBMFU=no
 
-AC_ARG_WITH([libmfu],
-            [AS_HELP_STRING([--with-libmfu=DIR],
-                            [Use the libmfu library [default=no]])],,
-            [withval=no])
+AC_ARG_ENABLE([parallel-tools],
+              [AS_HELP_STRING([--enable-parallel-tools],
+                              [Search for MpiFileUtils (libmfu) support files])])
+
+AC_MSG_CHECKING([if libfmu installed])
+dwalk_bin="`which dwalk`"
+if test -z "$dwalk_bin"; then
+    AC_MSG_ERROR([could't find libfmu library])
+    withval="no"
+else
+	dwalk_bin_dir=`dirname "$dwalk_bin"`
+	mfu_install_dir=`dirname "$dwalk_bin_dir"`
+    withval="$mfu_install_dir"
+    AC_MSG_RESULT([yes])
+fi
 
 case "X-$withval" in
   X-yes)

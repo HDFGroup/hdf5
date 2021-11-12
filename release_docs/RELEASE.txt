@@ -49,7 +49,7 @@ New Features
     -------------
     - Added new configure option to support building parallel tools.
       See Tools below (autotools - CMake):
-            --with-libmfu=DIR      HDF5_BUILD_PARALLEL_TOOLS
+            --enable-parallel-tools      HDF5_BUILD_PARALLEL_TOOLS
 
       (RAW - 2021/10/25)
 

@@ -22,7 +22,7 @@ AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 install-examples:
 	@echo "Creating demo files" && \
-	. copy_demo_files.sh
+	. copy_demo_files.sh $(top_srcdir)/src
 
 bin_SCRIPTS:install-examples
 
