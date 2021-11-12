@@ -1890,7 +1890,7 @@ render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t 
                     hid_t        region_id    = H5I_INVALID_HID;
                     hid_t        region_space = H5I_INVALID_HID;
                     H5S_sel_type region_type;
-                    H5R_ref_t tref;
+                    H5R_ref_t    tref;
 
                     if (size > sizeof(tref))
                         H5TOOLS_THROW((-1), "unexpectedly large ref");
