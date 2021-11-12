@@ -1804,6 +1804,12 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
         HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
 done:
+    /* Free duplicated MPI Communicator and Info objects */
+    if (H5_mpi_comm_free(&comm) < 0)
+        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI communicator")
+    if (H5_mpi_info_free(&info) < 0)
+        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mpio_delete() */
 
