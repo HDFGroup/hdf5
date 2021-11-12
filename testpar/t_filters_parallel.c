@@ -2356,10 +2356,11 @@ test_write_cmpd_filtered_dataset_no_conversion_shared(void)
  * chunks using a compound datatype which requires a
  * datatype conversion.
  *
- * NOTE: This test currently should fail because the
- * datatype conversion causes the parallel library to
- * break to independent I/O and this isn't allowed when
- * there are filters in the pipeline.
+ * NOTE: This test currently should fail for mpi_size > 1
+ * because the datatype conversion causes the parallel
+ * library to break to independent I/O and this isn't
+ * allowed when there are filters in the pipeline,
+ * unless there is only one MPI rank.
  *
  * Programmer: Jordan Henderson
  *             02/07/2017
@@ -2384,6 +2385,12 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(void)
     if (MAINPROCESS)
         HDputs("Testing write to unshared filtered chunks in Compound Datatype dataset with Datatype "
                "conversion");
+
+    /* Skip for MPI communicator size of 1 */
+    if (mpi_size == 1) {
+        SKIPPED();
+        return;
+    }
 
     CHECK_CUR_FILTER_AVAIL();
 
@@ -2549,10 +2556,11 @@ test_write_cmpd_filtered_dataset_type_conversion_unshared(void)
  * chunks using a compound datatype which requires
  * a datatype conversion.
  *
- * NOTE: This test currently should fail because the
- * datatype conversion causes the parallel library to
- * break to independent I/O and this isn't allowed when
- * there are filters in the pipeline.
+ * NOTE: This test currently should fail for mpi_size > 1
+ * because the datatype conversion causes the parallel
+ * library to break to independent I/O and this isn't
+ * allowed when there are filters in the pipeline,
+ * unless there is only one MPI rank.
  *
  * Programmer: Jordan Henderson
  *             02/10/2017
@@ -2577,6 +2585,12 @@ test_write_cmpd_filtered_dataset_type_conversion_shared(void)
     if (MAINPROCESS)
         HDputs(
             "Testing write to shared filtered chunks in Compound Datatype dataset with Datatype conversion");
+
+    /* Skip for MPI communicator size of 1 */
+    if (mpi_size == 1) {
+        SKIPPED();
+        return;
+    }
 
     CHECK_CUR_FILTER_AVAIL();
 
