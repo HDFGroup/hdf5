@@ -190,9 +190,9 @@ static const H5FD_class_t H5FD_core_g = {
 };
 
 /* Default configurations, if none provided */
-static const H5FD_core_fapl_t H5FD_core_default_config_g       = {H5_MB, TRUE, H5FD_CORE_WRITE_TRACKING_FLAG,
-                                                            H5FD_CORE_WRITE_TRACKING_PAGE_SIZE};
-static const H5FD_core_fapl_t H5FD_core_default_paged_config_g = {H5_MB, TRUE, TRUE, (size_t)4096};
+static const H5FD_core_fapl_t H5FD_core_default_config_g = {
+    (size_t)H5_MB, TRUE, H5FD_CORE_WRITE_TRACKING_FLAG, H5FD_CORE_WRITE_TRACKING_PAGE_SIZE};
+static const H5FD_core_fapl_t H5FD_core_default_paged_config_g = {(size_t)H5_MB, TRUE, TRUE, (size_t)4096};
 
 /* Define a free list to manage the region type */
 H5FL_DEFINE(H5FD_core_region_t);
@@ -398,7 +398,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
                         "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, "
                         "errno = %d, error message = '%s', ptr = %p, total write size = %llu, bytes this "
                         "sub-write = %llu, bytes actually written = %llu, offset = %llu",
-                        HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), ptr,
+                        HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), (void *)ptr,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
@@ -442,39 +442,6 @@ H5FD__core_get_default_config(void)
 } /* end H5FD__core_get_default_config() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5FD__init_package
- *
- * Purpose:     Initializes any interface-specific data or routines.
- *
- * Return:      Non-negative on success/Negative on failure
- *
- *-------------------------------------------------------------------------
- */
-static herr_t
-H5FD__init_package(void)
-{
-    char * lock_env_var = NULL; /* Environment variable pointer */
-    herr_t ret_value    = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
-    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
-        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
-    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
-        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
-    else
-        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
-
-    if (H5FD_core_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize core VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
-/*-------------------------------------------------------------------------
  * Function:    H5FD_core_init
  *
  * Purpose:     Initialize this driver by registering the driver with the
@@ -491,9 +458,19 @@ done:
 hid_t
 H5FD_core_init(void)
 {
-    hid_t ret_value = H5I_INVALID_HID; /* Return value */
+    char *lock_env_var = NULL;            /* Environment variable pointer */
+    hid_t ret_value    = H5I_INVALID_HID; /* Return value */
 
-    FUNC_ENTER_NOAPI(H5I_INVALID_HID)
+    FUNC_ENTER_NOAPI_NOERR
+
+    /* Check the use disabled file locks environment variable */
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
+    if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
+        ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
+    else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
+        ignore_disabled_file_locks_s = FALSE; /* Override: Don't ignore disabled locks */
+    else
+        ignore_disabled_file_locks_s = FAIL; /* Environment variable not set, or not set correctly */
 
     if (H5I_VFL != H5I_get_type(H5FD_CORE_g))
         H5FD_CORE_g = H5FD_register(&H5FD_core_g, sizeof(H5FD_class_t), FALSE);
@@ -501,7 +478,6 @@ H5FD_core_init(void)
     /* Set return value */
     ret_value = H5FD_CORE_g;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_core_init() */
 
@@ -952,8 +928,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                             "error message = '%s', file->mem = %p, total read size = %llu, bytes this "
                             "sub-read = %llu, bytes actually read = %llu, offset = %llu",
-                            HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), file->mem,
-                            (unsigned long long)size, (unsigned long long)bytes_in,
+                            HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno),
+                            (void *)file->mem, (unsigned long long)size, (unsigned long long)bytes_in,
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
 

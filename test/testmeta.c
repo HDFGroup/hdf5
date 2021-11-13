@@ -195,7 +195,7 @@ main(void)
 
             start[0] = 0;
             status   = H5Sselect_hyperslab(memspace_id, H5S_SELECT_SET, start, stride, count, NULL);
-            start[0] = (hssize_t)j;
+            start[0] = (hsize_t)j;
             status   = H5Sselect_hyperslab(dataspace_id, H5S_SELECT_SET, start, stride, count, NULL);
             status   = H5Dwrite(dataset_id, type_id, memspace_id, dataspace_id, H5P_DEFAULT, &floatval);
             if (status < 0) {

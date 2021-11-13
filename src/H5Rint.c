@@ -141,9 +141,6 @@ static herr_t H5R__decode_string(const unsigned char *buf, size_t *nbytes, char 
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -152,106 +149,27 @@ hbool_t H5_PKG_INIT_VAR = FALSE;
 /* Local Variables */
 /*******************/
 
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5R_top_package_initialize_s = FALSE;
-
-/*--------------------------------------------------------------------------
-NAME
-   H5R__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5R__init_package()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
-
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5R_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5R__init_package(void)
+H5R_init(void)
 {
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
+    herr_t ret_value = SUCCEED;
 
-    /* Mark "top" of interface as initialized */
-    H5R_top_package_initialize_s = TRUE;
+    FUNC_ENTER_NOAPI_NOINIT_NOERR
 
     /* Sanity check, if assert fails, H5R_REF_BUF_SIZE must be increased */
     HDcompile_assert(sizeof(H5R_ref_priv_t) <= H5R_REF_BUF_SIZE);
 
-    FUNC_LEAVE_NOAPI(SUCCEED)
-} /* end H5R__init_package() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R_top_term_package
- PURPOSE
-    Terminate various H5R objects
- USAGE
-    void H5R_top_term_package()
- RETURNS
-    void
- DESCRIPTION
-    Release IDs for the ID group, deferring full interface shutdown
-    until later (in H5R_term_package).
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5R_top_term_package(void)
-{
-    int n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    /* Mark closed if initialized */
-    if (H5R_top_package_initialize_s)
-        if (0 == n)
-            H5R_top_package_initialize_s = FALSE;
-
-    FUNC_LEAVE_NOAPI(n)
-} /* end H5R_top_term_package() */
-
-/*--------------------------------------------------------------------------
- NAME
-    H5R_term_package
- PURPOSE
-    Terminate various H5R objects
- USAGE
-    void H5R_term_package()
- RETURNS
-    void
- DESCRIPTION
-    Release the ID group and any other resources allocated.
- GLOBAL VARIABLES
- COMMENTS, BUGS, ASSUMPTIONS
-     Can't report errors...
-
-     Finishes shutting down the interface, after H5R_top_term_package()
-     is called
- EXAMPLES
- REVISION LOG
---------------------------------------------------------------------------*/
-int
-H5R_term_package(void)
-{
-    int n = 0;
-
-    FUNC_ENTER_NOAPI_NOINIT_NOERR
-
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(FALSE == H5R_top_package_initialize_s);
-
-        /* Mark closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    }
-
-    FUNC_LEAVE_NOAPI(n)
-} /* end H5R_term_package() */
+    FUNC_LEAVE_NOAPI(ret_value)
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5R__create_object
@@ -1150,7 +1068,7 @@ H5R__encode_obj_token(const H5O_token_t *obj_token, size_t token_size, unsigned 
         /* Encode token */
         H5MM_memcpy(p, obj_token, token_size);
     }
-    *nalloc = token_size + H5_SIZEOF_UINT8_T;
+    *nalloc = token_size + sizeof(uint8_t);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5R__encode_obj_token() */
@@ -1178,7 +1096,7 @@ H5R__decode_obj_token(const unsigned char *buf, size_t *nbytes, H5O_token_t *obj
     HDassert(token_size);
 
     /* Don't decode if buffer size isn't big enough */
-    if (*nbytes < H5_SIZEOF_UINT8_T)
+    if (*nbytes < sizeof(uint8_t))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
     /* Get token size */
@@ -1192,7 +1110,7 @@ H5R__decode_obj_token(const unsigned char *buf, size_t *nbytes, H5O_token_t *obj
     /* Decode token */
     H5MM_memcpy(obj_token, p, *token_size);
 
-    *nbytes = (size_t)(*token_size + H5_SIZEOF_UINT8_T);
+    *nbytes = (size_t)(*token_size + sizeof(uint8_t));
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1225,7 +1143,7 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
                     "Cannot determine amount of space needed for serializing selection")
 
     /* Don't encode if buffer size isn't big enough or buffer is empty */
-    if (buf && *nalloc >= ((size_t)buf_size + 2 * H5_SIZEOF_UINT32_T)) {
+    if (buf && *nalloc >= ((size_t)buf_size + 2 * sizeof(uint32_t))) {
         int rank;
         p = (uint8_t *)buf;
 
@@ -1241,7 +1159,7 @@ H5R__encode_region(H5S_t *space, unsigned char *buf, size_t *nalloc)
         if (H5S_SELECT_SERIALIZE(space, (unsigned char **)&p) < 0)
             HGOTO_ERROR(H5E_REFERENCE, H5E_CANTENCODE, FAIL, "can't serialize selection")
     } /* end if */
-    *nalloc = (size_t)buf_size + 2 * H5_SIZEOF_UINT32_T;
+    *nalloc = (size_t)buf_size + 2 * sizeof(uint32_t);
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
@@ -1272,16 +1190,16 @@ H5R__decode_region(const unsigned char *buf, size_t *nbytes, H5S_t **space_ptr)
     HDassert(space_ptr);
 
     /* Don't decode if buffer size isn't big enough */
-    if (*nbytes < (2 * H5_SIZEOF_UINT32_T))
+    if (*nbytes < (2 * sizeof(uint32_t)))
         HGOTO_ERROR(H5E_REFERENCE, H5E_CANTDECODE, FAIL, "Buffer size is too small")
 
     /* Decode the selection size */
     UINT32DECODE(p, buf_size);
-    buf_size += H5_SIZEOF_UINT32_T;
+    buf_size += sizeof(uint32_t);
 
     /* Decode the extent rank */
     UINT32DECODE(p, rank);
-    buf_size += H5_SIZEOF_UINT32_T;
+    buf_size += sizeof(uint32_t);
 
     /* Don't decode if buffer size isn't big enough */
     if (*nbytes < buf_size)

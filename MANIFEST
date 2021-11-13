@@ -207,6 +207,7 @@
 ./doc/branches-explained.md
 ./doc/code-conventions.md
 ./doc/contributing.md
+./doc/library-init-shutdown.md
 ./doxygen/aliases
 ./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
@@ -807,6 +808,7 @@
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDperform.c
 ./src/H5FDros3.c
 ./src/H5FDros3.h
 ./src/H5FDpkg.h
@@ -3066,7 +3068,10 @@
 ./hl/test/sepia.pal
 ./hl/test/test_ds.c
 ./hl/test/test_ds_be.h5
+./hl/test/test_ds_be_new_ref.h5
+./hl/test/test_ds_be_new_ref-32bit.h5
 ./hl/test/test_ds_le.h5
+./hl/test/test_ds_le_new_ref.h5
 ./hl/test/test_dset_append.c
 ./hl/test/test_file_image.c
 ./hl/test/test_h5do_compat.c
@@ -3583,7 +3588,6 @@
 ./config/cmake/HDF5UseFortran.cmake
 ./config/cmake/javaTargets.cmake.in
 ./config/cmake/jrunTest.cmake
-./config/cmake/jvolTest.cmake
 ./config/cmake/libh5cc.in
 ./config/cmake/libhdf5.settings.cmake.in
 ./config/cmake/mccacheinit.cmake

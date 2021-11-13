@@ -155,35 +155,6 @@ static int H5FD_mpio_debug_rank_s = -1;
     (H5FD_mpio_debug_rank_s < 0 || H5FD_mpio_debug_rank_s == (file)->mpi_rank)
 #endif
 
-/*--------------------------------------------------------------------------
-NAME
-   H5FD__init_package -- Initialize interface-specific information
-
-USAGE
-    herr_t H5FD__init_package()
-
-RETURNS
-    SUCCEED/FAIL
-
-DESCRIPTION
-    Initializes any interface-specific data or routines.  (Just calls
-    H5FD_mpio_init currently).
-
---------------------------------------------------------------------------*/
-static herr_t
-H5FD__init_package(void)
-{
-    herr_t ret_value = SUCCEED;
-
-    FUNC_ENTER_STATIC
-
-    if (H5FD_mpio_init() < 0)
-        HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "unable to initialize mpio VFD")
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* H5FD__init_package() */
-
 #ifdef H5FDmpio_DEBUG
 
 /*---------------------------------------------------------------------------
@@ -1833,6 +1804,12 @@ H5FD__mpio_delete(const char *filename, hid_t fapl_id)
         HMPI_GOTO_ERROR(FAIL, "MPI_Barrier failed", mpi_code)
 
 done:
+    /* Free duplicated MPI Communicator and Info objects */
+    if (H5_mpi_comm_free(&comm) < 0)
+        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI communicator")
+    if (H5_mpi_info_free(&info) < 0)
+        HDONE_ERROR(H5E_VFL, H5E_CANTFREE, FAIL, "unable to free MPI info object")
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__mpio_delete() */
 
