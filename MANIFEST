@@ -3003,7 +3003,6 @@
 ./utils/tools/CMakeLists.txt
 ./utils/tools/Makefile.am
 ./utils/tools/dh5walk/CMakeLists.txt
-./utils/tools/dh5walk/Makefile
 ./utils/tools/dh5walk/Makefile.am
 ./utils/tools/dh5walk/dh5walk.1
 ./utils/tools/dh5walk/dh5walk.c
