@@ -15,45 +15,12 @@
 ###           T E S T I N G                                                ###
 ##############################################################################
 ##############################################################################
-set (VFD_LIST
-    sec2
-    stdio
-    core
-    core_paged
-    split
-    multi
-    family
-    splitter
-    #log - log VFD currently has file space allocation bugs
-)
+H5_CREATE_VFD_DIR()
 
 set (H5P_VFD_TESTS
     t_pflush1
     t_pflush2
 )
-
-if (H5_HAVE_DIRECT)
-  set (VFD_LIST ${VFD_LIST} direct)
-endif ()
-if (H5_HAVE_PARALLEL)
-  set (VFD_LIST ${VFD_LIST} mpio)
-endif ()
-if (H5_HAVE_MIRROR_VFD)
-  set (VFD_LIST ${VFD_LIST} mirror)
-endif ()
-if (H5_HAVE_ROS3_VFD)
-  set (VFD_LIST ${VFD_LIST} ros3)
-endif ()
-if (H5_HAVE_LIBHDFS)
-  set (VFD_LIST ${VFD_LIST} hdfs)
-endif ()
-if (H5_HAVE_WINDOWS)
-  set (VFD_LIST ${VFD_LIST} windows)
-endif ()
-
-foreach (vfdtest ${VFD_LIST})
-  file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/${vfdtest}")
-endforeach ()
 
 macro (ADD_VFD_TEST vfdname resultcode)
   if (NOT HDF5_ENABLE_USING_MEMCHECKER)

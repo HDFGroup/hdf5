@@ -21,7 +21,7 @@
 #define H5FDdirect_H
 
 #ifdef H5_HAVE_DIRECT
-#define H5FD_DIRECT       (H5FD_direct_init())
+#define H5FD_DIRECT       (H5FDperform_init(H5FD_direct_init))
 #define H5FD_DIRECT_VALUE H5_VFD_DIRECT
 #else
 #define H5FD_DIRECT       (H5I_INVALID_HID)

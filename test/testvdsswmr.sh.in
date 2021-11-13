@@ -18,6 +18,7 @@
 
 srcdir=@srcdir@
 bindir=@bindir@
+testdir=@testdir@
 
 ###############################################################################
 ## test parameters
@@ -89,6 +90,11 @@ if test -z "$bindir"; then
    bindir=.
 fi
 
+# If the testdir directory is not set just use current (.).
+if test -z "$testdir"; then
+   testdir=.
+fi
+
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
 $bindir/swmr_check_compat_vfd
@@ -154,7 +160,7 @@ echo "##########################################################################
 
 # Launch the file generator
 echo launch the generator
-$bindir/vds_swmr_gen
+$testdir/vds_swmr_gen
 if test $? -ne 0; then
     echo generator had error
     nerrors=`expr $nerrors + 1`
@@ -172,7 +178,7 @@ echo "launch the $Nwriters SWMR VDS writers (1 per source)"
 pid_writers=""
 n=0
 while [ $n -lt $Nwriters ]; do
-    $bindir/vds_swmr_writer $n &
+    $testdir/vds_swmr_writer $n &
     pid_writers="$pid_writers $!"
     n=`expr $n + 1`
 done
@@ -187,7 +193,7 @@ echo launch $Nreaders SWMR readers
 pid_readers=""
 n=0
 while [ $n -lt $Nreaders ]; do
-    $bindir/vds_swmr_reader &
+    $testdir/vds_swmr_reader &
     pid_readers="$pid_readers $!"
     n=`expr $n + 1`
 done
