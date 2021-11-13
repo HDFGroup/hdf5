@@ -525,10 +525,10 @@ H5FD__onion_whole_history_write(struct H5FD__onion_whole_history *whs, H5FD_t *f
     FUNC_ENTER_STATIC;
 
     if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY +
-                      (H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * whs->n_revisions))))
+                                   (H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * whs->n_revisions))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, 0, "can't allocate buffer for updated whole-history")
 
-    if ( 0 == (size = H5FD_onion_whole_history_encode(whs, buf, &_sum)))
+    if (0 == (size = H5FD_onion_whole_history_encode(whs, buf, &_sum)))
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, 0, "problem encoding updated whole-history")
 
     if ((size + off_start > filesize_curr) && (H5FD_set_eoa(file_dest, H5FD_MEM_DRAW, off_start + size) < 0))
@@ -565,7 +565,7 @@ H5FD__onion_update_and_write_whole_history(H5FD_onion_t *file)
     /* TODO: history EOF may not be correct (under what circumstances?) */
 
     if (0 == (size = H5FD__onion_whole_history_write(&file->summary, file->backing_onion, file->history_eof,
-                                           file->history_eof)))
+                                                     file->history_eof)))
         HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "can't write updated whole-history")
 
     if (size != file->header.whole_history_size)
@@ -618,8 +618,8 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         HGOTO_ERROR(H5E_VFL, H5E_INTERNAL, FAIL, "unable to update index to write")
 
     if (NULL == (buf = H5MM_malloc(H5FD__ONION_ENCODED_SIZE_REVISION_RECORD + (size_t)rec_p->comment_size +
-                      (size_t)rec_p->username_size +
-                      (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * rec_p->archival_index.n_entries))))
+                                   (size_t)rec_p->username_size +
+                                   (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * rec_p->archival_index.n_entries))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate buffer for encoded revision record")
 
     if (0 == (size = H5FD_onion_revision_record_encode(rec_p, buf, &_sum)))
@@ -642,7 +642,7 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
         unsigned char *ptr = buf; /* re-use buffer space to compute checksum */
 
         HDassert(whs_p->record_pointer_list == NULL);
-        whs_p->n_revisions         = 1;
+        whs_p->n_revisions = 1;
         if (NULL == (whs_p->record_pointer_list = H5MM_calloc(sizeof(struct H5FD__onion_record_pointer))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "can't allocate temporary record pointer list")
 
@@ -659,7 +659,8 @@ H5FD__onion_commit_new_revision_record(H5FD_onion_t *file)
 
         HDassert(whs_p->record_pointer_list != NULL);
 
-        if (NULL == (new_list = H5MM_calloc((whs_p->n_revisions + 1) * sizeof(struct H5FD__onion_record_pointer))))
+        if (NULL ==
+            (new_list = H5MM_calloc((whs_p->n_revisions + 1) * sizeof(struct H5FD__onion_record_pointer))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "unable to resize record pointer list")
         HDmemcpy(new_list, whs_p->record_pointer_list,
                  sizeof(struct H5FD__onion_record_pointer) * whs_p->n_revisions);
@@ -1740,10 +1741,10 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
         if (r_out->checksum != sum)
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
 
-        if (revision_id != r_out->revision_id) 
+        if (revision_id != r_out->revision_id)
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
                         "could not find target revision!") /* TODO: corrupted? */
-    } /* end if revision ID at 'leaf' in binary search */
+    }                                                      /* end if revision ID at 'leaf' in binary search */
 
     if (r_out->username_size > 0)
         if (NULL == (r_out->username = H5MM_malloc(sizeof(char) * r_out->username_size)))
@@ -2199,7 +2200,7 @@ H5FD__onion_open_rw(H5FD_onion_t *file, unsigned int flags, haddr_t maxaddr)
     /* Copy whole-history to recovery file */
 
     if (NULL == (file->backing_recov = H5FD_open(file->name_recov, (flags | H5F_ACC_CREAT | H5F_ACC_TRUNC),
-                                    file->fa.backing_fapl_id, maxaddr)))
+                                                 file->fa.backing_fapl_id, maxaddr)))
         HGOTO_ERROR(H5E_VFL, H5E_CANTOPENFILE, FAIL, "unable to create recovery file")
 
     if (0 == (size = H5FD__onion_whole_history_write(&file->summary, file->backing_recov, 0, 0)))
