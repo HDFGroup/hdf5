@@ -40,7 +40,6 @@
 #define ONION_TEST_FIXNAME_SIZE                   1024
 #define ONION_TEST_EXPECTED_HISTORY_REVISIONS_MAX 16
 #define ONION_TEST_REV_REV_WRITES_MAX             8
-#define ONION_TEST_REV_REV_MAGIC                  0xDEADBEEF
 
 #define WIP 1 /* development toggle */
 
@@ -71,7 +70,6 @@ struct write_info {
     const unsigned char *buf;
 };
 struct revise_revision {
-    uint64_t          magic;
     hbool_t           truncate; /* onion-create, truncating any existing data */
     uint64_t          revision_id;
     size_t            n_writes;
@@ -208,9 +206,7 @@ test_archival_index(void)
     struct H5FD__onion_index_entry    sorted_partial[8] = {e1, e4, e5, e7, e0, e6, e2, e3}; /* 0..3 sorted */
     struct H5FD__onion_index_entry    unsorted[8]       = {e3, e1, e4, e5, e0, e6, e2, e7};
     struct H5FD__onion_archival_index aix               = {
-        H5FD__ONION_ARCHIVAL_INDEX_MAGIC,
-        H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
-        1,      /* page_size_log2 */
+        H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 1, /* page_size_log2 */
         8,      /* list must be populated and sorted through 0 .. (count-1) */
         sorted, /* list */
     };
@@ -221,11 +217,6 @@ test_archival_index(void)
     /*
      * Failing validity checks
      */
-
-    aix.magic++;
-    if (H5FD_onion_archival_index_is_valid(&aix))
-        TEST_ERROR; /* invalid magic should fail */
-    aix.magic--;
 
     aix.version++;
     if (H5FD_onion_archival_index_is_valid(&aix))
@@ -340,8 +331,6 @@ test_revision_index(void)
     /* Test index creation */
 
     if (NULL == (rix_p = H5FD_onion_revision_index_init(ONION_TEST_PAGE_SIZE_5)))
-        TEST_ERROR; /* Unable to initialize working index */
-    if (H5FD__ONION_REVISION_INDEX_MAGIC != rix_p->magic)
         TEST_ERROR;
     if (H5FD__ONION_REVISION_INDEX_VERSION_CURR != rix_p->version)
         TEST_ERROR;
@@ -567,7 +556,6 @@ test_revision_index_to_archival_index(void)
         0, /* phys_addr */
     };
     struct H5FD__onion_archival_index aix = {
-        H5FD__ONION_ARCHIVAL_INDEX_MAGIC,
         H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
         5, /* page_size_log2 */
         0, /* n_entries to be set */
@@ -731,7 +719,6 @@ static int
 test_fapl(void)
 {
     H5FD_onion_fapl_info_t info_in = {
-        H5FD_ONION_FAPL_INFO_MAGIC,
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5P_DEFAULT,                   /* backing_fapl_id                */
         ONION_TEST_PAGE_SIZE_1,        /* page_size                      */
@@ -782,16 +769,6 @@ test_fapl(void)
     H5E_END_TRY;
     if (SUCCEED == ret)
         TEST_ERROR; /* info pointer cannot be NULL */
-
-    info_in.magic++;
-    H5E_BEGIN_TRY
-    {
-        ret = H5Pset_fapl_onion(fapl_id, &info_in);
-    }
-    H5E_END_TRY;
-    if (SUCCEED == ret)
-        TEST_ERROR; /* info magic must be valid */
-    info_in.magic--;
 
     info_in.version++;
     H5E_BEGIN_TRY
@@ -873,8 +850,6 @@ test_fapl(void)
         TEST_ERROR; /* wrong fapl_id in */
 
     if (H5Pget_fapl_onion(fapl_id, &info_out) < 0)
-        TEST_ERROR;
-    if (H5FD_ONION_FAPL_INFO_MAGIC != info_out.magic)
         TEST_ERROR;
     if (H5FD_ONION_FAPL_INFO_VERSION_CURR != info_out.version)
         TEST_ERROR;
@@ -961,7 +936,6 @@ test_header_encode_decode(void)
     ptr = exp + H5FD__ONION_ENCODED_SIZE_HEADER - 4;
     UINT32ENCODE(ptr, sum);
 
-    hdr.magic      = H5FD__ONION_HEADER_MAGIC;
     hdr.version    = H5FD__ONION_HEADER_VERSION_CURR;
     hdr.flags      = 12;
     hdr.origin_eof = 8589934609ull, hdr.page_size = 4096;
@@ -981,7 +955,6 @@ test_header_encode_decode(void)
         }
     }
 
-    hdr_out.magic              = H5FD__ONION_HEADER_MAGIC;
     hdr_out.version            = H5FD__ONION_HEADER_VERSION_CURR;
     hdr_out.flags              = 0;
     hdr_out.page_size          = 0;
@@ -1030,8 +1003,6 @@ test_header_encode_decode(void)
 
     if (H5FD_onion_history_header_decode(buf, &hdr_out) != H5FD__ONION_ENCODED_SIZE_HEADER)
         TEST_ERROR;
-    if (H5FD__ONION_HEADER_MAGIC != hdr_out.magic)
-        TEST_ERROR;
     if (H5FD__ONION_HEADER_VERSION_CURR != hdr_out.version)
         TEST_ERROR;
     if (hdr.flags != hdr_out.flags)
@@ -1078,18 +1049,14 @@ test_whole_history_encode_decode_empty(void)
     size_t                           i        = 0;
     uint64_t                         size_ret = 0;
     struct H5FD__onion_whole_history whs      = {
-        H5FD__ONION_WHOLE_HISTORY_MAGIC,
-        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR,
-        0,    /* n_revisions */
-        NULL, /* list */
-        0,    /* checksum */
+        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions */
+        NULL,                                      /* list */
+        0,                                         /* checksum */
     };
     struct H5FD__onion_whole_history whs_out = {
-        H5FD__ONION_WHOLE_HISTORY_MAGIC,
-        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR,
-        0,    /* n_revisions */
-        NULL, /* list */
-        0,    /* checksum */
+        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions */
+        NULL,                                      /* list */
+        0,                                         /* checksum */
     };
 
     TESTING("encode/decode whole-history (empty and failures)");
@@ -1153,8 +1120,6 @@ test_whole_history_encode_decode_empty(void)
 
     if (H5FD_onion_whole_history_decode(buf, &whs_out) != H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY)
         TEST_ERROR;
-    if (H5FD__ONION_WHOLE_HISTORY_MAGIC != whs_out.magic)
-        TEST_ERROR;
     if (H5FD__ONION_WHOLE_HISTORY_VERSION_CURR != whs_out.version)
         TEST_ERROR;
     if (whs.n_revisions != whs_out.n_revisions)
@@ -1204,18 +1169,14 @@ test_whole_history_encode_decode(void)
     uint32_t                         sum_out = 0;
     size_t                           i       = 0;
     struct H5FD__onion_whole_history whs     = {
-        H5FD__ONION_WHOLE_HISTORY_MAGIC,
-        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR,
-        3,    /* n_revisions */
-        NULL, /* list set below */
-        0,    /* checksum  not set by us */
+        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 3, /* n_revisions */
+        NULL,                                      /* list set below */
+        0,                                         /* checksum  not set by us */
     };
     struct H5FD__onion_whole_history whs_out = {
-        H5FD__ONION_WHOLE_HISTORY_MAGIC,
-        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR,
-        0,    /* n_revisions must start as zero */
-        NULL, /* list */
-        0,    /* checksum */
+        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions must start as zero */
+        NULL,                                      /* list */
+        0,                                         /* checksum */
     };
     uint64_t exp_size =
         H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY + H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * whs.n_revisions;
@@ -1274,8 +1235,6 @@ test_whole_history_encode_decode(void)
     whs_out.n_revisions = 0; /* must be initialized to 0 */
     if (H5FD_onion_whole_history_decode(exp, &whs_out) != exp_size)
         TEST_ERROR;
-    if (H5FD__ONION_WHOLE_HISTORY_MAGIC != whs_out.magic)
-        TEST_ERROR;
     if (H5FD__ONION_WHOLE_HISTORY_VERSION_CURR != whs_out.version)
         TEST_ERROR;
     if (whs.n_revisions != whs_out.n_revisions)
@@ -1292,8 +1251,6 @@ test_whole_history_encode_decode(void)
         TEST_ERROR;
 
     if (H5FD_onion_whole_history_decode(exp, &whs_out) != exp_size)
-        TEST_ERROR;
-    if (H5FD__ONION_WHOLE_HISTORY_MAGIC != whs_out.magic)
         TEST_ERROR;
     if (H5FD__ONION_WHOLE_HISTORY_VERSION_CURR != whs_out.version)
         TEST_ERROR;
@@ -1391,7 +1348,6 @@ test_revision_record_encode_decode(void)
     char                               username[8] = "JohnDoe";
     char                               comment[25] = "Example comment message.";
     struct H5FD__onion_revision_record record      = {
-        H5FD__ONION_REVISION_RECORD_MAGIC,
         H5FD__ONION_REVISION_RECORD_VERSION_CURR,
         5,             /* revision ID */
         2,             /* parent revision ID */
@@ -1401,14 +1357,13 @@ test_revision_record_encode_decode(void)
         8,             /* username size */
         25,            /* comment size */
         {
-            H5FD__ONION_ARCHIVAL_INDEX_MAGIC, H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
-            12,   /* page_size_log2 */
-            4,    /* n_entries */
-            NULL, /* list - populated below */
-        },        /* archival index struct */
-        username, /* username */
-        comment,  /* comment */
-        0,        /* checksum - computed for us */
+            H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 12, /* page_size_log2 */
+            4,                                           /* n_entries */
+            NULL,                                        /* list - populated below */
+        },                                               /* archival index struct */
+        username,                                        /* username */
+        comment,                                         /* comment */
+        0,                                               /* checksum - computed for us */
     };
     uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
                         (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
@@ -1457,13 +1412,11 @@ test_revision_record_encode_decode(void)
     UINT32ENCODE(buf_p, record.checksum);
 
     /* required initialization for record-out structure */
-    r_out.magic                    = H5FD__ONION_REVISION_RECORD_MAGIC;
     r_out.version                  = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
     r_out.username_size            = 0;
     r_out.comment_size             = 0;
     r_out.username                 = NULL;
     r_out.comment                  = NULL;
-    r_out.archival_index.magic     = H5FD__ONION_ARCHIVAL_INDEX_MAGIC;
     r_out.archival_index.version   = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
     r_out.archival_index.n_entries = 0;
     r_out.archival_index.list      = NULL;
@@ -1550,8 +1503,6 @@ test_revision_record_encode_decode(void)
     /* Decode into all components */
     if (H5FD_onion_revision_record_decode(exp, &r_out) != exp_size)
         TEST_ERROR;
-    if (H5FD__ONION_REVISION_RECORD_MAGIC != r_out.magic)
-        TEST_ERROR;
     if (H5FD__ONION_REVISION_RECORD_VERSION_CURR != r_out.version)
         TEST_ERROR;
     if (record.user_id != r_out.user_id)
@@ -1583,8 +1534,6 @@ test_revision_record_encode_decode(void)
     if (HDstrcmp(record.comment, r_out.comment) != 0)
         TEST_ERROR;
 
-    if (H5FD__ONION_ARCHIVAL_INDEX_MAGIC != r_out.archival_index.magic)
-        TEST_ERROR;
     if (H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR != r_out.archival_index.version)
         TEST_ERROR;
     if (record.archival_index.page_size_log2 != r_out.archival_index.page_size_log2)
@@ -1710,17 +1659,13 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
     uint64_t                           readsize = 0;
     size_t                             i        = 0;
 
-    hdr_out.magic   = H5FD__ONION_HEADER_MAGIC;
     hdr_out.version = H5FD__ONION_HEADER_VERSION_CURR;
 
-    whs_out.magic               = H5FD__ONION_WHOLE_HISTORY_MAGIC;
     whs_out.version             = H5FD__ONION_WHOLE_HISTORY_VERSION_CURR;
     whs_out.n_revisions         = 0;
     whs_out.record_pointer_list = NULL;
 
-    rev_out.magic                  = H5FD__ONION_REVISION_RECORD_MAGIC;
     rev_out.version                = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
-    rev_out.archival_index.magic   = H5FD__ONION_ARCHIVAL_INDEX_MAGIC;
     rev_out.archival_index.version = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
 
     filesize = (uint64_t)H5FDget_eof(raw_file, H5FD_MEM_DRAW);
@@ -1833,8 +1778,6 @@ verify_history_as_expected_onion(H5FD_t *raw_file, struct expected_history *filt
         if (0 == readsize)
             TEST_ERROR;
         if (rpp->record_size != readsize)
-            TEST_ERROR;
-        if (H5FD__ONION_REVISION_RECORD_MAGIC != rev_out.magic)
             TEST_ERROR;
         if (H5FD__ONION_REVISION_RECORD_VERSION_CURR != rev_out.version)
             TEST_ERROR;
@@ -2060,7 +2003,6 @@ test_create_oniontarget(hbool_t truncate_canonical, hbool_t with_initial_data)
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
-        H5FD_ONION_FAPL_INFO_MAGIC,
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
@@ -2390,7 +2332,6 @@ test_several_revisions_with_logical_gaps(void)
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
-        H5FD_ONION_FAPL_INFO_MAGIC,
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
@@ -2422,12 +2363,9 @@ test_several_revisions_with_logical_gaps(void)
      *********/
 
 #if 0
-    hdr_out.magic = H5FD__ONION_HEADER_MAGIC;
     hdr_out.version = H5FD__ONION_HEADER_VERSION_CURR;
-    rev_out.magic = H5FD__ONION_REVISION_RECORD_MAGIC;
     rev_out.version = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
 #endif
-    whs_out.magic               = H5FD__ONION_WHOLE_HISTORY_MAGIC;
     whs_out.version             = H5FD__ONION_WHOLE_HISTORY_VERSION_CURR;
     whs_out.n_revisions         = 0;
     whs_out.record_pointer_list = NULL;
@@ -2443,13 +2381,11 @@ test_several_revisions_with_logical_gaps(void)
     HDremove(paths->recovery);
 
     /* Empty first revision */
-    about[0].magic       = ONION_TEST_REV_REV_MAGIC;
     about[0].truncate    = TRUE;
     about[0].revision_id = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[0].comment     = "first";
     about[0].n_writes    = 0;
 
-    about[1].magic            = ONION_TEST_REV_REV_MAGIC;
     about[1].truncate         = FALSE;
     about[1].revision_id      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[1].comment          = "second";
@@ -2458,7 +2394,6 @@ test_several_revisions_with_logical_gaps(void)
     about[1].writes[0].size   = a_list_size_s;
     about[1].writes[0].buf    = a_list_s;
 
-    about[2].magic            = ONION_TEST_REV_REV_MAGIC;
     about[2].truncate         = FALSE;
     about[2].revision_id      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[2].comment          = "third";
@@ -2467,7 +2402,6 @@ test_several_revisions_with_logical_gaps(void)
     about[2].writes[0].size   = b_list_size_s;
     about[2].writes[0].buf    = b_list_s;
 
-    about[3].magic            = ONION_TEST_REV_REV_MAGIC;
     about[3].truncate         = FALSE;
     about[3].revision_id      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[3].comment          = "fourth";
@@ -2748,8 +2682,6 @@ do_onion_open_and_writes(const char *filename, H5FD_onion_fapl_info_t *onion_inf
         size_t       j     = 0;
         unsigned int flags = H5F_ACC_RDWR;
 
-        if (about[i].magic != ONION_TEST_REV_REV_MAGIC)
-            goto error;
         if (i != 0 && about[i].truncate == TRUE)
             goto error;
 
@@ -2839,7 +2771,6 @@ test_page_aligned_history_create(void)
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
-        H5FD_ONION_FAPL_INFO_MAGIC,
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
@@ -2866,13 +2797,10 @@ test_page_aligned_history_create(void)
      * SETUP *
      *********/
 
-    hdr_out.magic   = H5FD__ONION_HEADER_MAGIC;
     hdr_out.version = H5FD__ONION_HEADER_VERSION_CURR;
 #if 0
-    rev_out.magic = H5FD__ONION_REVISION_RECORD_MAGIC;
     rev_out.version = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
 #endif
-    whs_out.magic               = H5FD__ONION_WHOLE_HISTORY_MAGIC;
     whs_out.version             = H5FD__ONION_WHOLE_HISTORY_VERSION_CURR;
     whs_out.n_revisions         = 0;
     whs_out.record_pointer_list = NULL;
@@ -2892,7 +2820,6 @@ test_page_aligned_history_create(void)
     HDremove(paths->onion);
     HDremove(paths->recovery);
 
-    about[0].magic            = ONION_TEST_REV_REV_MAGIC;
     about[0].truncate         = TRUE;
     about[0].revision_id      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[0].comment          = "initial_commit";
@@ -2901,7 +2828,6 @@ test_page_aligned_history_create(void)
     about[0].writes[0].size   = b_list_size_s;
     about[0].writes[0].buf    = b_list_s;
 
-    about[1].magic            = ONION_TEST_REV_REV_MAGIC;
     about[1].truncate         = FALSE;
     about[1].revision_id      = H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST;
     about[1].comment          = "second";
@@ -3061,7 +2987,6 @@ test_integration_create(void)
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
-        H5FD_ONION_FAPL_INFO_MAGIC,
         H5FD_ONION_FAPL_INFO_VERSION_CURR,
         H5I_INVALID_HID,               /* backing_fapl_id  */
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */

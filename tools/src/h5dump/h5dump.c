@@ -51,7 +51,6 @@ static H5FD_hdfs_fapl_t hdfs_fa_g = {
 #endif /* H5_HAVE_LIBHDFS */
 
 static H5FD_onion_fapl_info_t onion_fa_g = {
-    H5FD_ONION_FAPL_INFO_MAGIC,
     H5FD_ONION_FAPL_INFO_VERSION_CURR,
     H5P_DEFAULT,                   /* backing_fapl_id                */
     32,                            /* page_size                      */
