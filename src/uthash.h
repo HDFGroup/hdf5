@@ -727,8 +727,9 @@ typedef unsigned char uint8_t;
                 H5_ATTR_FALLTHROUGH                                                                          \
             case 7:                                                                                          \
                 _hj_j += ((unsigned)_hj_key[6] << 16);                                                       \
-                H5_ATTR_FALLTHROUGH                                                                          \               
-            case 6 : _hj_j += ((unsigned)_hj_key[5] << 8);                                                   \
+                H5_ATTR_FALLTHROUGH                                                                          \
+            case 6:                                                                                          \
+                _hj_j += ((unsigned)_hj_key[5] << 8);                                                        \
                 H5_ATTR_FALLTHROUGH                                                                          \
             case 5:                                                                                          \
                 _hj_j += _hj_key[4];                                                                         \
