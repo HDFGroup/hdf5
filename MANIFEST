@@ -3283,7 +3283,6 @@
 ./java/src/hdf/hdf5lib/exceptions/HDF5FunctionArgumentException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5HeapException.java
-./java/src/hdf/hdf5lib/exceptions/HDF5IdException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5InternalErrorException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5JavaException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5LibraryException.java
