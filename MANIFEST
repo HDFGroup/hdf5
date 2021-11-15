@@ -3267,6 +3267,7 @@
 ./java/src/hdf/hdf5lib/callbacks/H5P_prp_set_func_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/package-info.java
 
 ./java/src/hdf/hdf5lib/exceptions/HDF5AtomException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5AttributeException.java
@@ -3282,6 +3283,7 @@
 ./java/src/hdf/hdf5lib/exceptions/HDF5FunctionArgumentException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5FunctionEntryExitException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5HeapException.java
+./java/src/hdf/hdf5lib/exceptions/HDF5IdException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5InternalErrorException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5JavaException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5LibraryException.java
@@ -3292,6 +3294,7 @@
 ./java/src/hdf/hdf5lib/exceptions/HDF5ReferenceException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java
+./java/src/hdf/hdf5lib/exceptions/package-info.java
 
 ./java/src/hdf/hdf5lib/structs/H5_ih_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5A_info_t.java
@@ -3306,12 +3309,14 @@
 ./java/src/hdf/hdf5lib/structs/H5O_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_native_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_token_t.java
+./java/src/hdf/hdf5lib/structs/package-info.java
 
 ./java/src/hdf/hdf5lib/H5.java
 ./java/src/hdf/hdf5lib/HDF5Constants.java
 ./java/src/hdf/hdf5lib/HDF5GroupInfo.java
 ./java/src/hdf/hdf5lib/HDFArray.java
 ./java/src/hdf/hdf5lib/HDFNativeData.java
+./java/src/hdf/hdf5lib/package-info.java
 
 ./java/examples/Makefile.am
 ./java/examples/CMakeLists.txt
