@@ -206,8 +206,7 @@ test_archival_index(void)
     struct H5FD__onion_index_entry    sorted_partial[8] = {e1, e4, e5, e7, e0, e6, e2, e3}; /* 0..3 sorted */
     struct H5FD__onion_index_entry    unsorted[8]       = {e3, e1, e4, e5, e0, e6, e2, e7};
     struct H5FD__onion_archival_index aix               = {
-        H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
-        1,      /* page_size_log2 */
+        H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 1, /* page_size_log2 */
         8,      /* list must be populated and sorted through 0 .. (count-1) */
         sorted, /* list */
     };
@@ -1050,16 +1049,14 @@ test_whole_history_encode_decode_empty(void)
     size_t                           i        = 0;
     uint64_t                         size_ret = 0;
     struct H5FD__onion_whole_history whs      = {
-        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR,
-        0,    /* n_revisions */
-        NULL, /* list */
-        0,    /* checksum */
+        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions */
+        NULL,                                      /* list */
+        0,                                         /* checksum */
     };
     struct H5FD__onion_whole_history whs_out = {
-        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR,
-        0,    /* n_revisions */
-        NULL, /* list */
-        0,    /* checksum */
+        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions */
+        NULL,                                      /* list */
+        0,                                         /* checksum */
     };
 
     TESTING("encode/decode whole-history (empty and failures)");
@@ -1172,16 +1169,14 @@ test_whole_history_encode_decode(void)
     uint32_t                         sum_out = 0;
     size_t                           i       = 0;
     struct H5FD__onion_whole_history whs     = {
-        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR,
-        3,    /* n_revisions */
-        NULL, /* list set below */
-        0,    /* checksum  not set by us */
+        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 3, /* n_revisions */
+        NULL,                                      /* list set below */
+        0,                                         /* checksum  not set by us */
     };
     struct H5FD__onion_whole_history whs_out = {
-        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR,
-        0,    /* n_revisions must start as zero */
-        NULL, /* list */
-        0,    /* checksum */
+        H5FD__ONION_WHOLE_HISTORY_VERSION_CURR, 0, /* n_revisions must start as zero */
+        NULL,                                      /* list */
+        0,                                         /* checksum */
     };
     uint64_t exp_size =
         H5FD__ONION_ENCODED_SIZE_WHOLE_HISTORY + H5FD__ONION_ENCODED_SIZE_RECORD_POINTER * whs.n_revisions;
@@ -1362,14 +1357,13 @@ test_revision_record_encode_decode(void)
         8,             /* username size */
         25,            /* comment size */
         {
-            H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
-            12,   /* page_size_log2 */
-            4,    /* n_entries */
-            NULL, /* list - populated below */
-        },        /* archival index struct */
-        username, /* username */
-        comment,  /* comment */
-        0,        /* checksum - computed for us */
+            H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 12, /* page_size_log2 */
+            4,                                           /* n_entries */
+            NULL,                                        /* list - populated below */
+        },                                               /* archival index struct */
+        username,                                        /* username */
+        comment,                                         /* comment */
+        0,                                               /* checksum - computed for us */
     };
     uint64_t exp_size = H5FD__ONION_ENCODED_SIZE_REVISION_RECORD +
                         (H5FD__ONION_ENCODED_SIZE_INDEX_ENTRY * record.archival_index.n_entries) +
