@@ -318,8 +318,6 @@ H5Pget_fapl_onion(hid_t fapl_id, H5FD_onion_fapl_info_t *fa_out)
     info_ptr = (const H5FD_onion_fapl_info_t *)H5P_peek_driver_info(plist);
     if (NULL == info_ptr)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad VFL driver info")
-    if (H5FD_ONION_FAPL_INFO_MAGIC != info_ptr->magic)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "bad VFL driver info")
 
     HDmemcpy(fa_out, info_ptr, sizeof(H5FD_onion_fapl_info_t));
 
@@ -354,8 +352,6 @@ H5Pset_fapl_onion(hid_t fapl_id, const H5FD_onion_fapl_info_t *fa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "Not a valid FAPL ID")
     if (NULL == fa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "NULL info pointer")
-    if (H5FD_ONION_FAPL_INFO_MAGIC != fa->magic)
-        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info magic")
     if (H5FD_ONION_FAPL_INFO_VERSION_CURR != fa->version)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid info version")
     if (!POWER_OF_TWO(fa->page_size))
@@ -849,7 +845,6 @@ H5FD_onion_history_header_decode(unsigned char *buf, struct H5FD__onion_history_
 
     HDassert(buf != NULL);
     HDassert(header != NULL);
-    HDassert(H5FD__ONION_HEADER_MAGIC == header->magic);
     HDassert(H5FD__ONION_HEADER_VERSION_CURR == header->version);
 
     if (HDstrncmp((const char *)buf, H5FD__ONION_HEADER_SIGNATURE, 4))
@@ -932,7 +927,6 @@ H5FD_onion_history_header_encode(struct H5FD__onion_history_header *header, unsi
     HDassert(buf != NULL);
     HDassert(sum_out != NULL);
     HDassert(header != NULL);
-    HDassert(H5FD__ONION_HEADER_MAGIC == header->magic);
     HDassert(H5FD__ONION_HEADER_VERSION_CURR == header->version);
     HDassert(0 == (header->flags & 0xFF000000)); /* max three bits long */
 
@@ -1007,9 +1001,7 @@ H5FD_onion_revision_record_decode(unsigned char *buf, struct H5FD__onion_revisio
 
     HDassert(buf != NULL);
     HDassert(record != NULL);
-    HDassert(H5FD__ONION_REVISION_RECORD_MAGIC == record->magic);
     HDassert(H5FD__ONION_REVISION_RECORD_VERSION_CURR == record->version);
-    HDassert(H5FD__ONION_ARCHIVAL_INDEX_MAGIC == record->archival_index.magic);
     HDassert(H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
     if (HDstrncmp((const char *)buf, H5FD__ONION_REVISION_RECORD_SIGNATURE, 4))
@@ -1193,9 +1185,7 @@ H5FD_onion_revision_record_encode(struct H5FD__onion_revision_record *record, un
     HDassert(buf != NULL);
     HDassert(record != NULL);
     HDassert(vers_u32 < 0x100);
-    HDassert(H5FD__ONION_REVISION_RECORD_MAGIC == record->magic);
     HDassert(H5FD__ONION_REVISION_RECORD_VERSION_CURR == record->version);
-    HDassert(H5FD__ONION_ARCHIVAL_INDEX_MAGIC == record->archival_index.magic);
     HDassert(H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR == record->archival_index.version);
 
     page_size = (uint32_t)(1 << record->archival_index.page_size_log2);
@@ -1297,7 +1287,6 @@ H5FD_onion_whole_history_decode(unsigned char *buf, struct H5FD__onion_whole_his
 
     HDassert(buf != NULL);
     HDassert(summary != NULL);
-    HDassert(H5FD__ONION_WHOLE_HISTORY_MAGIC == summary->magic);
     HDassert(H5FD__ONION_WHOLE_HISTORY_VERSION_CURR == summary->version);
 
     if (HDstrncmp((const char *)buf, "OWHS", 4))
@@ -1394,7 +1383,6 @@ H5FD_onion_whole_history_encode(struct H5FD__onion_whole_history *summary, unsig
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
     HDassert(summary != NULL);
-    HDassert(H5FD__ONION_WHOLE_HISTORY_MAGIC == summary->magic);
     HDassert(H5FD__ONION_WHOLE_HISTORY_VERSION_CURR == summary->version);
     HDassert(buf != NULL);
     HDassert(sum_out != NULL);
@@ -1908,16 +1896,12 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
 
     HDmemcpy(&(file->fa), fa, sizeof(H5FD_onion_fapl_info_t));
 
-    file->header.magic     = H5FD__ONION_HEADER_MAGIC;
     file->header.version   = H5FD__ONION_HEADER_VERSION_CURR;
     file->header.page_size = file->fa.page_size; /* guarded on FAPL-set */
 
-    file->summary.magic   = H5FD__ONION_WHOLE_HISTORY_MAGIC;
     file->summary.version = H5FD__ONION_WHOLE_HISTORY_VERSION_CURR;
 
-    file->rev_record.magic                  = H5FD__ONION_REVISION_RECORD_MAGIC;
     file->rev_record.version                = H5FD__ONION_REVISION_RECORD_VERSION_CURR;
-    file->rev_record.archival_index.magic   = H5FD__ONION_ARCHIVAL_INDEX_MAGIC;
     file->rev_record.archival_index.version = H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR;
 
     /* Check that the page size is a power of two */
@@ -2534,7 +2518,6 @@ done:
  *
  * Purpose:     Determine whether an archival index structure is valid.
  *
- *              + Verify magic number and version (sanity checking).
  *              + Verify page size (power of two).
  *              + Verify list exists.
  *              + Verify list contents:
@@ -2555,8 +2538,6 @@ H5FD_onion_archival_index_is_valid(const struct H5FD__onion_archival_index *aix)
 
     HDassert(aix);
 
-    if (H5FD__ONION_ARCHIVAL_INDEX_MAGIC != aix->magic)
-        HGOTO_DONE(FALSE)
     if (H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR != aix->version)
         HGOTO_DONE(FALSE)
     if (NULL == aix->list)
@@ -2602,7 +2583,6 @@ H5FD_onion_archival_index_find(const struct H5FD__onion_archival_index *aix, uin
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
     HDassert(aix);
-    HDassert(H5FD__ONION_ARCHIVAL_INDEX_MAGIC == aix->magic);
     HDassert(H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
     HDassert(entry_out_p);
     if (aix->n_entries != 0)
@@ -2669,7 +2649,6 @@ H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *rix)
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
     HDassert(rix);
-    HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix->magic);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
 
     for (i = 0; 0 < rix->_hash_table_n_keys_populated && i < rix->_hash_table_size; i++) {
@@ -2680,7 +2659,6 @@ H5FD_onion_revision_index_destroy(H5FD__onion_revision_index_t *rix)
             rix->_hash_table_n_keys_populated -= 1;
 
         while (node_p != NULL) {
-            HDassert(H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_MAGIC == node_p->magic);
             HDassert(H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR == node_p->version);
 
             next_p = node_p->next;
@@ -2726,7 +2704,6 @@ H5FD_onion_revision_index_init(uint32_t page_size)
                      H5MM_calloc(table_size * sizeof(struct H5FD__onion_revision_index_hash_chain_node *))))
         HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "cannot allocate hash table")
 
-    rix->magic     = H5FD__ONION_REVISION_INDEX_MAGIC;
     rix->version   = H5FD__ONION_REVISION_INDEX_VERSION_CURR;
     rix->n_entries = 0;
     /* Compute and store log2(page_size) */
@@ -2774,7 +2751,6 @@ H5FD__onion_revision_index_resize(H5FD__onion_revision_index_t *rix)
     FUNC_ENTER_STATIC;
 
     HDassert(rix);
-    HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix->magic);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
     HDassert(rix->_hash_table);
 
@@ -2841,7 +2817,6 @@ H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *        rix,
     FUNC_ENTER_NOAPI_NOINIT;
 
     HDassert(rix);
-    HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix->magic);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
     HDassert(entry);
 
@@ -2881,7 +2856,6 @@ H5FD_onion_revision_index_insert(H5FD__onion_revision_index_t *        rix,
     if (append_dest != NULL) {
         if (NULL == (node = H5MM_malloc(sizeof(struct H5FD__onion_revision_index_hash_chain_node))))
             HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL, "cannot allocate new ash chain node")
-        node->magic   = H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_MAGIC;
         node->version = H5FD__ONION_REVISION_INDEX_HASH_CHAIN_NODE_VERSION_CURR;
         node->next    = NULL;
         HDmemcpy(&node->entry_data, entry, sizeof(struct H5FD__onion_index_entry));
@@ -2918,7 +2892,6 @@ H5FD_onion_revision_index_find(const H5FD__onion_revision_index_t *rix_p, uint64
     FUNC_ENTER_NOAPI_NOINIT_NOERR;
 
     HDassert(rix_p);
-    HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix_p->magic);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix_p->version);
     HDassert(rix_p->_hash_table);
     HDassert(entry_out_p);
@@ -2986,7 +2959,6 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
     uint64_t                          n_kept    = 0;
     struct H5FD__onion_index_entry *  kept_list = NULL;
     struct H5FD__onion_archival_index new_aix   = {
-        H5FD__ONION_ARCHIVAL_INDEX_MAGIC,
         H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
         0,    /* page_size_log2 tbd */
         0,    /* n_entries */
@@ -2998,8 +2970,6 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
 
     HDassert(rix);
     HDassert(aix);
-    HDassert(H5FD__ONION_REVISION_INDEX_MAGIC == rix->magic);
-    HDassert(H5FD__ONION_ARCHIVAL_INDEX_MAGIC == aix->magic);
     HDassert(H5FD__ONION_REVISION_INDEX_VERSION_CURR == rix->version);
     HDassert(H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR == aix->version);
     HDassert(aix->page_size_log2 == rix->page_size_log2);

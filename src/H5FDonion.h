@@ -22,7 +22,6 @@
 
 #define H5FD_ONION_ENABLE_INDEX_STATS 0
 
-#define H5FD_ONION_FAPL_INFO_MAGIC                                0x10101010 /* TODO */
 #define H5FD_ONION_FAPL_INFO_VERSION_CURR                         1
 #define H5FD_ONION_FAPL_INFO_FLAG_FORCE_OPEN                      1
 #define H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_DIVERGENT_HISTORY 1
@@ -40,9 +39,6 @@ enum H5FD_onion_target_file_constant {
  * Structure    H5FD_onion_fapl_info_t
  *
  * Purpose:     Encapsulate info for the Onion driver FAPL entry.
- *
- * magic:       "Magic number" identifying struct.
- *              Must equal H5FD_ONION_FAPL_MAGIC to be considered valid.
  *
  * version:     Future-proofing identifier. Informs struct membership.
  *              Must equal H5FD_ONION_FAPL_VERSION_CURR to be considered valid.
@@ -117,7 +113,6 @@ enum H5FD_onion_target_file_constant {
  *-----------------------------------------------------------------------------
  */
 typedef struct H5FD_onion_fapl_info_t {
-    uint32_t                             magic;
     uint8_t                              version;
     hid_t                                backing_fapl_id;
     uint32_t                             page_size;
