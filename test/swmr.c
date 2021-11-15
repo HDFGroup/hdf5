@@ -5221,8 +5221,8 @@ test_file_lock_swmr_concur(hid_t H5_ATTR_UNUSED in_fapl)
 static int
 test_file_lock_swmr_concur(hid_t in_fapl)
 {
-    hid_t fid;                     /* File ID */
-    hid_t fapl;                    /* File access property list */
+    hid_t fid = H5I_INVALID_HID;                     /* File ID */
+    hid_t fapl = H5I_INVALID_HID;                    /* File access property list */
     char  filename[NAME_BUF_SIZE]; /* file name */
     pid_t childpid = 0;            /* Child process ID */
     int   child_status;            /* Status passed to waitpid */
@@ -6722,8 +6722,8 @@ test_refresh_concur(hid_t H5_ATTR_UNUSED in_fapl, hbool_t new_format)
 static int
 test_refresh_concur(hid_t in_fapl, hbool_t new_format)
 {
-    hid_t fid;                     /* File ID */
-    hid_t fapl;                    /* File access property list */
+    hid_t fid = H5I_INVALID_HID;                     /* File ID */
+    hid_t fapl = H5I_INVALID_HID;                    /* File access property list */
     pid_t childpid = 0;            /* Child process ID */
     pid_t tmppid;                  /* Child process ID returned by waitpid */
     int   child_status;            /* Status passed to waitpid */
