@@ -2960,10 +2960,9 @@ H5FD_onion_merge_revision_index_into_archival_index(const H5FD__onion_revision_i
     uint64_t                          n_kept    = 0;
     struct H5FD__onion_index_entry *  kept_list = NULL;
     struct H5FD__onion_archival_index new_aix   = {
-        H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR,
-        0,    /* page_size_log2 tbd */
-        0,    /* n_entries */
-        NULL, /* list pointer (allocated later) */
+        H5FD__ONION_ARCHIVAL_INDEX_VERSION_CURR, 0, /* page_size_log2 tbd */
+        0,                                          /* n_entries */
+        NULL,                                       /* list pointer (allocated later) */
     };
     herr_t ret_value = SUCCEED;
 
