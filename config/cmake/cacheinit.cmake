@@ -5,7 +5,7 @@
 # This file is part of HDF5.  The full HDF5 copyright notice, including
 # terms governing use, modification, and redistribution, is contained in
 # the COPYING file, which can be found at the root of the source code
-# distribution tree, or in https://support.hdfgroup.org/ftp/HDF5/releases.
+# distribution tree, or in https://www.hdfgroup.org/licenses.
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
@@ -67,7 +67,7 @@ set (PLUGIN_PACKAGE_NAME "pl" CACHE STRING "Name of PLUGIN package" FORCE)
 # bitshuffle
 ###########
 
-set (BSHUF_GIT_URL "https://github.com/hyoklee/bitshuffle.git" CACHE STRING "Use BSHUF from HDF repository" FORCE)
+set (BSHUF_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/bitshuffle.git" CACHE STRING "Use BSHUF from HDF repository" FORCE)
 set (BSHUF_GIT_BRANCH "master" CACHE STRING "" FORCE)
 
 set (BSHUF_TGZ_NAME "bitshuffle.tar.gz" CACHE STRING "Use BSHUF from compressed file" FORCE)
@@ -85,29 +85,19 @@ set (BLOSC_TGZ_NAME "c-blosc.tar.gz" CACHE STRING "Use BLOSC from compressed fil
 
 set (BLOSC_PACKAGE_NAME "blosc" CACHE STRING "Name of BLOSC package" FORCE)
 
-#######
-# zlib
-#######
-set (ZLIB_GIT_URL "https://github.com/hyoklee/zlib.git" CACHE STRING "Use ZLIB from HDF repo" FORCE)
+set (ZLIB_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/zlib.git" CACHE STRING "Use ZLIB from HDF repo" FORCE)
 set (ZLIB_GIT_BRANCH "master" CACHE STRING "" FORCE)
+
 set (ZLIB_TGZ_NAME "ZLib.tar.gz" CACHE STRING "Use ZLib from compressed file" FORCE)
+
 set (ZLIB_PACKAGE_NAME "zlib" CACHE STRING "Name of ZLIB package" FORCE)
-
-#######
-# szip
-#######
-# HDF5 1.13 uses libaec instead of szip.
-set (SZIP_GIT_URL "https://github.com/hyoklee/libaec.git" CACHE STRING "Use SZIP from HDF repo" FORCE)
-set (SZIP_GIT_BRANCH "main" CACHE STRING "" FORCE)
-
 
 #######
 # bzip2
 ######
 #
-set (BZ2_GIT_URL "https://github.com/hyoklee/bzip2.git" CACHE STRING "Use BZ2 from HDF repository" FORCE)
-# set (BZ2_GIT_BRANCH "master" CACHE STRING "" FORCE)
-set (BZ2_GIT_BRANCH "main" CACHE STRING "" FORCE)
+set (BZ2_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/bzip2.git" CACHE STRING "Use BZ2 from HDF repository" FORCE)
+set (BZ2_GIT_BRANCH "master" CACHE STRING "" FORCE)
 
 set (BZ2_TGZ_NAME "BZ2.tar.gz" CACHE STRING "Use BZ2 from compressed file" FORCE)
 
@@ -128,9 +118,8 @@ set (FPZIP_PACKAGE_NAME "fpzip" CACHE STRING "Name of FPZIP package" FORCE)
 # jpeg
 ######
 
-set (JPEG_GIT_URL "https://github.com/hyoklee/jpeg.git" CACHE STRING "Use JPEG from HDF repository" FORCE)
-# set (JPEG_GIT_BRANCH "jpeg9c" CACHE STRING "" FORCE)
-set (JPEG_GIT_BRANCH "main" CACHE STRING "" FORCE)
+set (JPEG_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/jpeg.git" CACHE STRING "Use JPEG from HDF repository" FORCE)
+set (JPEG_GIT_BRANCH "jpeg9c" CACHE STRING "" FORCE)
 
 #set (JPEG_TGZ_NAME "JPEG9c.tar.gz" CACHE STRING "Use JPEG from compressed file" FORCE)
 set (JPEG_TGZ_NAME "JPEG.tar.gz" CACHE STRING "Use JPEG from compressed file" FORCE)
@@ -143,7 +132,7 @@ set (JPEG_PACKAGE_NAME "jpeg" CACHE STRING "Name of JPEG package" FORCE)
 
 set (BUILD_LZ4_LIBRARY_SOURCE ON CACHE BOOL "build the lz4 library within the plugin" FORCE)
 
-set (LZ4_GIT_URL "https://github.com/hyoklee/lz4.git" CACHE STRING "Use LZ4 from HDF repository" FORCE)
+set (LZ4_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/lz4.git" CACHE STRING "Use LZ4 from HDF repository" FORCE)
 set (LZ4_GIT_BRANCH "master" CACHE STRING "" FORCE)
 
 set (LZ4_TGZ_NAME "lz4.tar.gz" CACHE STRING "Use LZ4 from compressed file" FORCE)
@@ -154,7 +143,7 @@ set (LZ4_PACKAGE_NAME "lz4" CACHE STRING "Name of LZ4 package" FORCE)
 # lzf
 ######
 
-set (LZF_GIT_URL "https://github.com/hyoklee/lzf.git" CACHE STRING "Use LZF from HDF repository" FORCE)
+set (LZF_GIT_URL "https://git@bitbucket.hdfgroup.org/scm/test/lzf.git" CACHE STRING "Use LZF from HDF repository" FORCE)
 set (LZF_GIT_BRANCH "master" CACHE STRING "" FORCE)
 
 set (LZF_TGZ_NAME "lzf.tar.gz" CACHE STRING "Use LZF from compressed file" FORCE)
@@ -165,9 +154,9 @@ set (LZF_PACKAGE_NAME "lzf" CACHE STRING "Name of LZF package" FORCE)
 # mafisc
 ########
 
-# set (BUILD_MAFISC_LIBRARY_SOURCE OFF CACHE BOOL "build the mafisc library within the plugin" FORCE)
+#set (BUILD_MAFISC_LIBRARY_SOURCE OFF CACHE BOOL "build the mafisc library within the plugin" FORCE)
 
-set (MAFISC_PACKAGE_NAME "mafisc" CACHE STRING "Name of MAFISC package" FORCE)
+#set (MAFISC_PACKAGE_NAME "mafisc" CACHE STRING "Name of MAFISC package" FORCE)
 
 ######
 # szf
@@ -191,37 +180,3 @@ set (ZFP_TGZ_NAME "zfp.tar.gz" CACHE STRING "Use ZFP from compressed file" FORCE
 
 set (ZFP_PACKAGE_NAME "zfp" CACHE STRING "Name of ZFP package" FORCE)
 
-######
-# zstd
-######
-set (ZSTD_GIT_URL "https://github.com/hyoklee/zstd.git" CACHE STRING "Use ZSTD from Github" FORCE)
-set (ZSTD_GIT_BRANCH "master" CACHE STRING "" FORCE)
-
-set (ZSTD_TGZ_NAME "zstd.tar.gz" CACHE STRING "Use ZSTD from compressed file" FORCE)
-
-set (ZSTD_PACKAGE_NAME "zstd" CACHE STRING "Name of ZSTD package" FORCE)
-
-##########
-# bitgroom
-##########
-# set (BITGROOM_GIT_URL "https://github.com/hyoklee/bitgroom.git" CACHE STRING "Use BITGROOM from Github" FORCE)
-# set (BITGROOM_GIT_BRANCH "master" CACHE STRING "" FORCE)
-
-# set (BITGROOM_TGZ_NAME "bitgroom.tar.gz" CACHE STRING "Use BITGROOM from compressed file" FORCE)
-
-set (BITGROOM_PACKAGE_NAME "bitgroom" CACHE STRING "Name of BITGROOM package" FORCE)
-
-###########################
-# Pass-through external VOL
-###########################
-set (PV_PACKAGE_NAME "pv" CACHE STRING "Name of PV package" FORCE)
-
-###########
-# Async VOL
-###########
-set (AV_PACKAGE_NAME "av" CACHE STRING "Name of AV package" FORCE)
-
-###########
-# Cache VOL
-###########
-set (CV_PACKAGE_NAME "cv" CACHE STRING "Name of CV package" FORCE)
