@@ -32,15 +32,10 @@ macro (READ_SOURCE SOURCE_START SOURCE_END RETURN_VAR)
 endmacro ()
 
 set (RUN_OUTPUT_PATH_DEFAULT ${CMAKE_BINARY_DIR})
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  if (HDF5_REQUIRED_LIBRARIES)
-    set (CMAKE_REQUIRED_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}")
-  endif ()
-else ()
 # The provided CMake Fortran macros don't provide a general compile/run function
 # so this one is used.
 #-----------------------------------------------------------------------------
-macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1 RETURN_VAR)
+macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1 RETURN_VAR RETURN_OUTPUT_VAR)
     if (CMAKE_VERSION VERSION_GREATER_EQUAL "3.15.0")
       message (VERBOSE "Detecting Fortran ${FUNCTION_NAME}")
     endif ()
@@ -52,7 +47,9 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
         ${CMAKE_BINARY_DIR}
         ${CMAKE_BINARY_DIR}${CMAKE_FILES_DIRECTORY}/CMakeTmp/testFortranCompiler1.f90
         LINK_LIBRARIES "${HDF5_REQUIRED_LIBRARIES}"
+        RUN_OUTPUT_VARIABLE OUTPUT_VAR
     )
+    set (${RETURN_OUTPUT_VAR} ${OUTPUT_VAR})
 
     if (${COMPILE_RESULT_VAR})
       set(${RETURN_VAR} ${RUN_RESULT_VAR})
@@ -81,7 +78,6 @@ macro (FORTRAN_RUN FUNCTION_NAME SOURCE_CODE RUN_RESULT_VAR1 COMPILE_RESULT_VAR1
         set(${RETURN_VAR} ${COMPILE_RESULT_VAR})
     endif ()
 endmacro ()
-endif ()
 #-----------------------------------------------------------------------------
 #  Check to see C_LONG_DOUBLE is available
 
@@ -130,25 +126,20 @@ endif ()
 #-----------------------------------------------------------------------------
 
 READ_SOURCE ("PROGRAM FC_AVAIL_KINDS" "END PROGRAM FC_AVAIL_KINDS" SOURCE_CODE)
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_fortran_source_runs (${SOURCE_CODE} FC_AVAIL_KINDS_RESULT SRC_EXT f90)
-else ()
 FORTRAN_RUN ("REAL and INTEGER KINDs"
     "${SOURCE_CODE}"
     XX
     YY
     FC_AVAIL_KINDS_RESULT
+    PROG_OUTPUT
 )
-endif ()
-
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
 # dnl    -- LINE 2 --  valid real kinds (comma seperated list)
 # dnl    -- LINE 3 --  max decimal precision for reals
 # dnl    -- LINE 4 --  number of valid integer kinds
 # dnl    -- LINE 5 --  number of valid real kinds
-
-file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_fconftest.out" PROG_OUTPUT)
+#
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
 string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
@@ -196,20 +187,14 @@ foreach (KIND ${VAR})
   "
        PROGRAM main
           USE ISO_C_BINDING
+          USE ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
           IMPLICIT NONE
           INTEGER (KIND=${KIND}) a
-          OPEN(8,FILE='pac_validIntKinds.${KIND}.out',FORM='formatted')
-          WRITE(8,'(I0)') ${FC_SIZEOF_A}
-          CLOSE(8)
+          WRITE(stderr,'(I0)') ${FC_SIZEOF_A}
        END
    "
   )
-  if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-    check_fortran_source_runs (${PROG_SRC_${KIND}} VALIDINTKINDS_RESULT_${KIND} SRC_EXT f90)
-  else ()
-    FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND})
-  endif ()
-  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validIntKinds.${KIND}.out" PROG_OUTPUT1)
+  FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND} PROG_OUTPUT1)
   string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
@@ -245,22 +230,16 @@ foreach (KIND ${VAR} )
   "
        PROGRAM main
           USE ISO_C_BINDING
+          USE ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
           IMPLICIT NONE
           REAL (KIND=${KIND}) a
-          OPEN(8,FILE='pac_validRealKinds.${KIND}.out',FORM='formatted')
-          WRITE(8,'(I0)') ${FC_SIZEOF_A}
-          CLOSE(8)
+          WRITE(stderr,'(I0)') ${FC_SIZEOF_A}
        END
   "
   )
-  if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-    check_fortran_source_runs (${PROG_SRC2_${KIND}} VALIDREALKINDS_RESULT_${KIND} SRC_EXT f90)
-  else ()
-    FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND})
-  endif ()
-  file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_validRealKinds.${KIND}.out" PROG_OUTPUT1)
-  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
-  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT1},")
+  FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND} PROG_OUTPUT2)
+  string (REGEX REPLACE "\n" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
+  set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
 endforeach ()
 
 if (pack_real_sizeof STREQUAL "")
@@ -293,27 +272,21 @@ set (PROG_SRC3
   "
        PROGRAM main
           USE ISO_C_BINDING
+          USE ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
           IMPLICIT NONE
           INTEGER a
           REAL b
           DOUBLE PRECISION c
-          OPEN(8,FILE='pac_sizeof_native_kinds.out',FORM='formatted')
-          WRITE(8,*) ${FC_SIZEOF_A}
-          WRITE(8,*) kind(a)
-          WRITE(8,*) ${FC_SIZEOF_B}
-          WRITE(8,*) kind(b)
-          WRITE(8,*) ${FC_SIZEOF_C}
-          WRITE(8,*) kind(c)
-          CLOSE(8)
+          WRITE(stderr,*) ${FC_SIZEOF_A}
+          WRITE(stderr,*) kind(a)
+          WRITE(stderr,*) ${FC_SIZEOF_B}
+          WRITE(stderr,*) kind(b)
+          WRITE(stderr,*) ${FC_SIZEOF_C}
+          WRITE(stderr,*) kind(c)
        END
   "
 )
-if (NOT CMAKE_VERSION VERSION_LESS "3.14.0")
-  check_fortran_source_runs (${PROG_SRC3} PAC_SIZEOF_NATIVE_KINDS_RESULT SRC_EXT f90)
-else ()
-  FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT)
-endif ()
-file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT3)
+FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RESULT PROG_OUTPUT3)
 # dnl The output from the above program will be:
 # dnl    -- LINE 1 --  sizeof INTEGER
 # dnl    -- LINE 2 --  kind of INTEGER
@@ -321,7 +294,7 @@ file (READ "${RUN_OUTPUT_PATH_DEFAULT}/pac_sizeof_native_kinds.out" PROG_OUTPUT3
 # dnl    -- LINE 4 --  kind of REAL
 # dnl    -- LINE 5 --  sizeof DOUBLE PRECISION
 # dnl    -- LINE 6 --  kind of DOUBLE PRECISION
-
+#
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
 string (REGEX REPLACE "\n" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
 
