@@ -259,7 +259,6 @@ AC_LANG_PUSH([Fortran])
 TEST_SRC="`sed -n '/PROGRAM FC_AVAIL_KINDS/,/END PROGRAM FC_AVAIL_KINDS/p' $srcdir/m4/aclocal_fc.f90`"
 AC_RUN_IFELSE([$TEST_SRC],
  [
-dnl    if test -s pac_fconftest.out ; then
         dnl The output from the above program will be:
         dnl    -- LINE 1 --  valid integer kinds (comma seperated list)
         dnl    -- LINE 2 --  valid real kinds (comma seperated list)
@@ -294,10 +293,6 @@ dnl    if test -s pac_fconftest.out ; then
         AC_MSG_RESULT([$PAC_FC_ALL_REAL_KINDS])
         AC_MSG_CHECKING([for Fortran REALs maximum decimal precision])
         AC_MSG_RESULT([$PAC_FC_MAX_REAL_PRECISION])
-dnl    else
-dnl        AC_MSG_RESULT([Error])
-dnl        AC_MSG_ERROR([No output from Fortran test program!])
-dnl    fi
 ],[
     AC_MSG_RESULT([Error])
     AC_MSG_ERROR([Failed to run Fortran program to determine available KINDs])
@@ -394,17 +389,12 @@ rm -f pac_fconftest.out
             ])
         ])
         AC_RUN_IFELSE([],[
-            if test -s pac_fconftest.out ; then
-                PAC_FORTRAN_NATIVE_INTEGER_SIZEOF=$(./conftest$EXEEXT 2>&1 | sed -n '1p')
-                PAC_FORTRAN_NATIVE_INTEGER_KIND=$(./conftest$EXEEXT 2>&1 | sed -n '2p')
-                PAC_FORTRAN_NATIVE_REAL_SIZEOF=$(./conftest$EXEEXT 2>&1 | sed -n '3p')
-                PAC_FORTRAN_NATIVE_REAL_KIND=$(./conftest$EXEEXT 2>&1 | sed -n '4p')
-                PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF=$(./conftest$EXEEXT 2>&1 | sed -n '5p')
-                PAC_FORTRAN_NATIVE_DOUBLE_KIND=$(./conftest$EXEEXT 2>&1 | sed -n '6p')
-            else
-                AC_MSG_ERROR([No output from Fortran test program!])
-            fi
-            rm -f pac_fconftest.out
+            PAC_FORTRAN_NATIVE_INTEGER_SIZEOF=$(./conftest$EXEEXT 2>&1 | sed -n '1p')
+            PAC_FORTRAN_NATIVE_INTEGER_KIND=$(./conftest$EXEEXT 2>&1 | sed -n '2p')
+            PAC_FORTRAN_NATIVE_REAL_SIZEOF=$(./conftest$EXEEXT 2>&1 | sed -n '3p')
+            PAC_FORTRAN_NATIVE_REAL_KIND=$(./conftest$EXEEXT 2>&1 | sed -n '4p')
+            PAC_FORTRAN_NATIVE_DOUBLE_SIZEOF=$(./conftest$EXEEXT 2>&1 | sed -n '5p')
+            PAC_FORTRAN_NATIVE_DOUBLE_KIND=$(./conftest$EXEEXT 2>&1 | sed -n '6p')
         ],[
             AC_MSG_ERROR([Fortran program fails to build or run!])
         ],[
