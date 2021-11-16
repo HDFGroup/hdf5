@@ -2013,7 +2013,8 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Short cuts */
     shared = file->shared;
-    lf     = shared->lf;
+
+    lf = shared->lf;
 
     /* Set the file locking flag. If the file is already open, the file
      * requested file locking flag must match that of the open file.
@@ -2092,6 +2093,22 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
     /* Checked if configured for VFD SWMR */
     if (H5F_VFD_SWMR_CONFIG(file)) {
+
+        /* Set up the VFD SWMR LOG file */
+        /* Kent*/
+        if (HDstrlen(vfd_swmr_config_ptr->log_file_path) > 0)
+            shared->vfd_swmr_log_on = TRUE;
+        if (TRUE == shared->vfd_swmr_log_on) {
+            /* Create the log file */
+            if ((shared->vfd_swmr_log_file_ptr = HDfopen(vfd_swmr_config_ptr->log_file_path, "w")) == NULL)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to create the log file")
+            if (H5_timer_init(&(shared->vfd_swmr_log_start_time)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't initialize HDF5 timer.")
+            if (H5_timer_start(&(shared->vfd_swmr_log_start_time)) < 0)
+                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, NULL, "can't obtain the time from the HDF5 timer.")
+        }
+        /* End of Kent */
+
         /* Initialization for VFD SWMR writer and reader */
         if (1 == shared->nrefs) {
             if (H5F_vfd_swmr_init(file, file_create) < 0)
@@ -2210,6 +2227,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     /* Success */
     ret_value = file;
 
+#if 1 /*Kent: write to the log file when H5F_open ends. Tested, can be commented out if necessary.*/
+    H5F_POST_VFD_SWMR_LOG_ENTRY(file, FILE_OPEN, "File open ends");
+#endif
 done:
     if ((NULL == ret_value) && file) {
         if (file->shared->root_grp && file->shared->nrefs == 1) {
