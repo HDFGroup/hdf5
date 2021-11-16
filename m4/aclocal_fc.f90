@@ -82,7 +82,7 @@ END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
 
 !---- START ----- Determine the available KINDs for REALs and INTEGERs
 PROGRAM FC_AVAIL_KINDS
-      USE ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+      USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
       IMPLICIT NONE
       INTEGER :: ik, jk, k, kk, max_decimal_prec
       INTEGER :: prev_rkind, num_rkinds = 1, num_ikinds = 1

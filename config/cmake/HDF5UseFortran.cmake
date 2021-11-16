@@ -187,7 +187,7 @@ foreach (KIND ${VAR})
   "
        PROGRAM main
           USE ISO_C_BINDING
-          USE ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
           IMPLICIT NONE
           INTEGER (KIND=${KIND}) a
           WRITE(stderr,'(I0)') ${FC_SIZEOF_A}
@@ -230,7 +230,7 @@ foreach (KIND ${VAR} )
   "
        PROGRAM main
           USE ISO_C_BINDING
-          USE ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
           IMPLICIT NONE
           REAL (KIND=${KIND}) a
           WRITE(stderr,'(I0)') ${FC_SIZEOF_A}
@@ -272,7 +272,7 @@ set (PROG_SRC3
   "
        PROGRAM main
           USE ISO_C_BINDING
-          USE ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
+          USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
           IMPLICIT NONE
           INTEGER a
           REAL b
