@@ -594,18 +594,19 @@ done:
  */
 herr_t
 H5_mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t array_entry_size,
-                      void **gathered_array, size_t *gathered_array_num_entries, hbool_t allgather,
-                      int root, MPI_Comm comm, H5_sort_func_cb_t sort_func)
+                      void **gathered_array, size_t *gathered_array_num_entries, hbool_t allgather, int root,
+                      MPI_Comm comm, H5_sort_func_cb_t sort_func)
 {
-    size_t  _gathered_array_num_entries = 0;    /* The size of the newly-constructed array */
-    void   *_gathered_array             = NULL; /* The newly-constructed array returned to the caller */
-    int    *recv_counts_disps_array     = NULL; /* Array containing number of entries each processor is contributing
-                                                   and displacements where each processor places its data in the final array */
-    int     send_count                  = 0;
-    int     mpi_code                    = MPI_SUCCESS;
-    int     mpi_rank                    = 0;
-    int     mpi_size                    = 0;
-    herr_t  ret_value                   = SUCCEED;
+    size_t _gathered_array_num_entries = 0;    /* The size of the newly-constructed array */
+    void * _gathered_array             = NULL; /* The newly-constructed array returned to the caller */
+    int *  recv_counts_disps_array =
+        NULL; /* Array containing number of entries each processor is contributing
+                 and displacements where each processor places its data in the final array */
+    int    send_count = 0;
+    int    mpi_code   = MPI_SUCCESS;
+    int    mpi_rank   = 0;
+    int    mpi_size   = 0;
+    herr_t ret_value  = SUCCEED;
 
     FUNC_ENTER_NOAPI(FAIL)
 
@@ -619,7 +620,7 @@ H5_mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t 
         HMPI_GOTO_ERROR(FAIL, "MPI_Comm_rank failed", mpi_code)
 
     /* Since the data is sent as bytes, calculate the true send_count for the processor-local data. */
-    H5_CHECKED_ASSIGN(send_count, int, local_array_num_entries * array_entry_size, size_t);
+    H5_CHECKED_ASSIGN(send_count, int, local_array_num_entries *array_entry_size, size_t);
 
     /* Allocate array to store the amounts of data being sent by each processor, as
      * well as the displacements into the final array where each processor will place
@@ -627,13 +628,16 @@ H5_mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t 
      * order), while the latter half contains the displacements (also in rank order).
      */
     if (allgather || (mpi_rank == root)) {
-        if (NULL == (recv_counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(recv_counts_disps_array)))) {
+        if (NULL ==
+            (recv_counts_disps_array = H5MM_malloc(2 * (size_t)mpi_size * sizeof(recv_counts_disps_array)))) {
             if (!allgather) {
                 /* Push an error, but still participate in collective gather operation */
-                HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate receive counts and displacements array")
+                HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate receive counts and displacements array")
             }
             else
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate receive counts and displacements array")
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate receive counts and displacements array")
         }
     }
 
@@ -644,13 +648,13 @@ H5_mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t 
      * contributing.
      */
     if (allgather) {
-        if (MPI_SUCCESS != (mpi_code = MPI_Allgather(&send_count, 1, MPI_INT, recv_counts_disps_array,
-                                                     1, MPI_INT, comm)))
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Allgather(&send_count, 1, MPI_INT, recv_counts_disps_array, 1, MPI_INT, comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
     }
     else {
-        if (MPI_SUCCESS != (mpi_code = MPI_Gather(&send_count, 1, MPI_INT, recv_counts_disps_array,
-                                                  1, MPI_INT, root, comm)))
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Gather(&send_count, 1, MPI_INT, recv_counts_disps_array, 1, MPI_INT, root, comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
     }
 
@@ -659,7 +663,7 @@ H5_mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t 
      */
     if (allgather || (mpi_rank == root)) {
         size_t i, total_data_size;
-        int *displacements_ptr;
+        int *  displacements_ptr;
 
         for (i = 0, total_data_size = 0; i < (size_t)mpi_size; i++)
             total_data_size += (size_t)recv_counts_disps_array[i];
@@ -669,10 +673,12 @@ H5_mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t 
             if (NULL == (_gathered_array = H5MM_malloc(total_data_size))) {
                 if (!allgather) {
                     /* Push an error, but still participate in collective gather operation */
-                    HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate array for gather operation")
+                    HDONE_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate array for gather operation")
                 }
                 else
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate array for gather operation")
+                    HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate array for gather operation")
             }
         }
 
@@ -688,17 +694,15 @@ H5_mpio_array_gatherv(void *local_array, size_t local_array_num_entries, size_t 
 
     /* Perform the actual gather operation */
     if (allgather) {
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Allgatherv(local_array, send_count, MPI_BYTE, _gathered_array,
-                                       recv_counts_disps_array, &recv_counts_disps_array[mpi_size],
-                                       MPI_BYTE, comm)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Allgatherv(local_array, send_count, MPI_BYTE, _gathered_array,
+                                                      recv_counts_disps_array,
+                                                      &recv_counts_disps_array[mpi_size], MPI_BYTE, comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
     }
     else {
-        if (MPI_SUCCESS !=
-            (mpi_code = MPI_Gatherv(local_array, send_count, MPI_BYTE, _gathered_array,
-                                    recv_counts_disps_array, &recv_counts_disps_array[mpi_size],
-                                    MPI_BYTE, root, comm)))
+        if (MPI_SUCCESS != (mpi_code = MPI_Gatherv(local_array, send_count, MPI_BYTE, _gathered_array,
+                                                   recv_counts_disps_array,
+                                                   &recv_counts_disps_array[mpi_size], MPI_BYTE, root, comm)))
             HMPI_GOTO_ERROR(FAIL, "MPI_Gatherv failed", mpi_code)
     }
 

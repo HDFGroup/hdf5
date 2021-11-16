@@ -30,23 +30,23 @@
 #include "stdlib.h"
 #include "testpar.h"
 
+#define ARRAY_SIZE(a) sizeof(a) / sizeof(a[0])
+
 /* Used to load other filters than GZIP */
 /* #define DYNAMIC_FILTER */ /* Uncomment and define the fields below to use a dynamically loaded filter */
+
+#ifdef DYNAMIC_FILTER
 #define FILTER_NUM_CDVALUES 1
 const unsigned int cd_values[FILTER_NUM_CDVALUES] = {0};
-H5Z_filter_t       filter_id;
-unsigned int       flags     = 0;
-size_t             cd_nelmts = FILTER_NUM_CDVALUES;
-
-/* Utility Macros */
-#define STRINGIFY(type) #type
+unsigned int       flags                          = 0;
+size_t             cd_nelmts                      = FILTER_NUM_CDVALUES;
+#endif
 
 /* Common defines for all tests */
-#define C_DATATYPE           long
-#define C_DATATYPE_MPI       MPI_LONG
-#define COMPOUND_C_DATATYPE  cmpd_filtered_t
-#define C_DATATYPE_STR(type) STRINGIFY(type)
-#define HDF5_DATATYPE_NAME   H5T_NATIVE_LONG
+#define C_DATATYPE          long
+#define C_DATATYPE_MPI      MPI_LONG
+#define COMPOUND_C_DATATYPE cmpd_filtered_t
+#define HDF5_DATATYPE_NAME  H5T_NATIVE_LONG
 
 /* Macro used to generate data for datasets for later verification */
 #define GEN_DATA(i) INCREMENTAL_DATA(i)
@@ -59,7 +59,7 @@ size_t             cd_nelmts = FILTER_NUM_CDVALUES;
 #define RANK_DATA(i)                                                                                         \
     (mpi_rank) /* Generates test data to visibly show which rank wrote to which parts of the dataset */
 
-#define DEFAULT_DEFLATE_LEVEL 6
+#define DEFAULT_DEFLATE_LEVEL 9
 
 #define DIM0_SCALE_FACTOR 4
 #define DIM1_SCALE_FACTOR 2

@@ -1260,9 +1260,8 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
          * of the chunks in the file.
          */
         if (H5_mpio_array_gatherv(chunk_list, chunk_list_num_entries,
-                                  sizeof(H5D_filtered_collective_io_info_t),
-                                  (void **)&collective_chunk_list, &collective_chunk_list_num_entries, true,
-                                  0, io_info->comm, NULL) < 0)
+                                  sizeof(H5D_filtered_collective_io_info_t), (void **)&collective_chunk_list,
+                                  &collective_chunk_list_num_entries, true, 0, io_info->comm, NULL) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather new chunk sizes")
 
         /* Collectively re-allocate the modified chunks (from each process) in the file */
