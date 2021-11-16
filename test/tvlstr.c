@@ -289,7 +289,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Write dataset to disk */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata);
@@ -348,7 +348,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Try to write nil strings to disk. */
     ret = H5Dwrite(dataset, tid1, H5S_ALL, H5S_ALL, H5P_DEFAULT, wdata2);
@@ -361,7 +361,7 @@ test_vlstrings_special(void)
     /* Check data read in */
     for (i = 0; i < SPACE1_DIM1; i++)
         if (rdata[i] != NULL)
-            TestErrPrintf("VL doesn't match!, rdata[%d]=%p\n", (int)i, rdata[i]);
+            TestErrPrintf("VL doesn't match!, rdata[%d]=%s\n", (int)i, rdata[i]);
 
     /* Close Dataset */
     ret = H5Dclose(dataset);
