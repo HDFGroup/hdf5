@@ -278,7 +278,7 @@ dnl    if test -s pac_fconftest.out ; then
         PAC_FORTRAN_NUM_INTEGER_KINDS=$(./conftest$EXEEXT 2>&1 | sed -n '4p')
         H5CONFIG_F_NUM_IKIND="INTEGER, PARAMETER :: num_ikinds = `echo $PAC_FORTRAN_NUM_INTEGER_KINDS`"
         H5CONFIG_F_IKIND="INTEGER, DIMENSION(1:num_ikinds) :: ikind = (/`echo $pac_validIntKinds`/)"
-        H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = $(./conftest$EXEEXT 2>&1 | sed -n '5p')
+        H5CONFIG_F_NUM_RKIND="INTEGER, PARAMETER :: num_rkinds = $(./conftest$EXEEXT 2>&1 | sed -n '5p')"
         H5CONFIG_F_RKIND="INTEGER, DIMENSION(1:num_rkinds) :: rkind = (/`echo $pac_validRealKinds`/)"
 
         AC_DEFINE_UNQUOTED([H5CONFIG_F_NUM_RKIND], $H5CONFIG_F_NUM_RKIND, [Define number of valid Fortran REAL KINDs])
