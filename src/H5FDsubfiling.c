@@ -898,8 +898,8 @@ done:
 static herr_t
 H5FD__subfiling_close(H5FD_t *_file)
 {
-    H5FD_subfiling_t *file_ptr  = (H5FD_subfiling_t *)_file;
-    herr_t            ret_value = SUCCEED; /* Return value */
+    H5FD_subfiling_t *   file_ptr   = (H5FD_subfiling_t *)_file;
+    herr_t               ret_value  = SUCCEED; /* Return value */
     subfiling_context_t *sf_context = NULL;
 
     FUNC_ENTER_NOAPI_NOINIT
@@ -1017,13 +1017,18 @@ done:
  * Purpose:     Set the flags that this VFL driver is capable of supporting.
  *              (listed in H5FDpublic.h)
  *
+ *              For now, duplicate the flags used for the MPIO VFD.
+ *              Revisit this when we have a version of the subfiling VFD
+ *              that is usable in serial builds.
+ *
  * Return:      SUCCEED (Can't fail)
  *
- * Programmer:  Quincey Koziol
- *              Friday, August 25, 2000
+ * Programmer:  John Mainzer
+ *              11/15/21
  *
  *-------------------------------------------------------------------------
  */
+#if 0 /* JRM */ /* original version -- delete if all goes well */ 
 static herr_t
 H5FD__subfiling_query(const H5FD_t *_file, unsigned long *flags /* out */)
 {
@@ -1062,6 +1067,28 @@ H5FD__subfiling_query(const H5FD_t *_file, unsigned long *flags /* out */)
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD_subfiling_query() */
+#else /* JRM */ /* new version copied from MPIO VFD */
+
+static herr_t
+H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /* out */)
+{
+    FUNC_ENTER_STATIC_NOERR
+
+    /* Set the VFL feature flags that this driver supports */
+    if (flags) {
+        *flags = 0;
+        *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
+        *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
+        // *flags |= H5FD_FEAT_HAS_MPI;                 /* This driver uses MPI */
+        *flags |= H5FD_FEAT_ALLOCATE_EARLY; /* Allocate space early instead of late                        */
+        *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
+                                                       VFD */
+    }
+
+    FUNC_LEAVE_NOAPI(SUCCEED)
+} /* end H5FD__mpio_query() */
+
+#endif /* JRM */ /* new version copied from MPIO VFD */
 
 /*-------------------------------------------------------------------------
  * Function:    H5FD_subfiling_get_eoa
@@ -1577,15 +1604,15 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_AT
         size,         /* (in)  IO size */
         1);           /* (in)  data extent of the 'type' assumes byte */
 #else  /* JRM */
-        count     = init__indep_io(sf_context, /* We use the context to look up config info */
+        count = init__indep_io(sf_context, /* We use the context to look up config info */
                                max_depth, ioc_total, (int64_t *)source_data_offset, /* (out) Memory offset */
                                (int64_t *)sf_data_size, /* (out) Length of this contiguous block */
                                (int64_t *)sf_offset,    /* (out) File offset */
-                               &ioc_start,    /* (out) IOC index corresponding to starting offset */
-                               &ioc_count,    /* (out) number of actual IOCs used */
-                               offset,        /* (in)  Starting file offset */
-                               (int64_t)size, /* (in)  IO size */
-                               1);            /* (in)  data extent of the 'type' assumes byte */
+                               &ioc_start,              /* (out) IOC index corresponding to starting offset */
+                               &ioc_count,              /* (out) number of actual IOCs used */
+                               offset,                  /* (in)  Starting file offset */
+                               (int64_t)size,           /* (in)  IO size */
+                               1);                      /* (in)  data extent of the 'type' assumes byte */
 #endif /* JRM */
 
         next = ioc_start;
@@ -1626,7 +1653,7 @@ H5FD__subfiling_write(H5FD_t *_file, H5FD_mem_t H5_ATTR_UNUSED type, hid_t H5_AT
 #if 0  /* JRM */
         int vectorlen = ioc_count;
 #else  /* JRM */
-                uint32_t    vectorlen = (uint32_t)ioc_count;
+                uint32_t vectorlen = (uint32_t)ioc_count;
 #endif /* JRM */
 
                 /*
@@ -1725,7 +1752,9 @@ done:
 /*-------------------------------------------------------------------------
  * Function:    H5FD__subfile_read_vector  (internal function)
  *
- * Purpose:     Perform count reads from the specified file at the offsets
+ * Purpose:     Vector Read function for the sub-filing VFD.
+ *
+ *              Perform count reads from the specified file at the offsets
  *              provided in the addrs array, with the lengths and memory
  *              types provided in the sizes and types arrays.  Data read
  *              is returned in the buffers provided in the bufs array.
@@ -1741,9 +1770,20 @@ done:
  *              Failure:    FAIL
  *                          The contents of supplied buffers are undefined.
  *
- * Programmer:  JRM -- 6/10/20
+ * Programmer:  RAW -- ??/??/21
  *
  * Changes:     None.
+ *
+ * Notes:       Thus function doesn't actually implement vector read.
+ *              Instead, it comverts the vector read call into a series
+ *              of scalar read calls.  Fix this when time permits.
+ *
+ *              Also, it didn't support the sizes and types optimization.
+ *              I implemented a version of this which is more generous
+ *              than that currently defined in the RFC.  This is good
+ *              enough for now, but the final version should follow
+ *              the RFC.
+ *                                                    JRM -- 10/5/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1787,10 +1827,64 @@ H5FD__subfiling_read_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_m
 
     /* Set DXPL for operation */
     H5CX_set_dxpl(dxpl_id);
+
+    /* TODO: setup real support for vector I/O */
     if (file_ptr->fa.require_ioc) {
-        int k;
+
+        hbool_t    extend_sizes = FALSE;
+        hbool_t    extend_types = FALSE;
+        int        k;
+        size_t     size;
+        H5FD_mem_t type;
+        haddr_t    eoa;
+
+        HDassert((count == 0) || (sizes[0] != 0));
+        HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+
+        /* Note that the following code does not let the sub-filing VFD participate
+         * in collective calls when thre is no data to write.  This is not an issue
+         * now, as we don't do anything special with collective operations.  However
+         * this needs to be fixed.
+         */
         for (k = 0; k < (int)count; k++) {
-            if (H5FD__subfiling_read(_file, types[k], dxpl_id, addrs[k], sizes[k], bufs[k]) != SUCCEED)
+
+            if (!extend_sizes) {
+
+                if (sizes[k] == 0) {
+
+                    extend_sizes = TRUE;
+                    size         = sizes[k - 1];
+                }
+                else {
+
+                    size = sizes[k];
+                }
+            }
+
+            if (!extend_types) {
+
+                if (types[k] == H5FD_MEM_NOLIST) {
+
+                    extend_types = TRUE;
+                    type         = types[k - 1];
+                }
+                else {
+
+                    type = types[k];
+                }
+            }
+
+            if (HADDR_UNDEF == (eoa = H5FD__subfiling_get_eoa(_file, type)))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+
+            if ((addrs[k] + size) > eoa)
+
+                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
+                            "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)k,
+                            (unsigned long long)(addrs[k]), (int)k, (unsigned long long)size,
+                            (unsigned long long)eoa)
+
+            if (H5FD__subfiling_read(_file, type, dxpl_id, addrs[k], size, bufs[k]) != SUCCEED)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "file vector read request failed")
         }
     }
@@ -1826,9 +1920,20 @@ done:
  *                          input arguments are not valid, or the actual
  *                          subfiling writes have failed for some reason.
  *
- * Programmer:  JRM -- 6/10/20
+ * Programmer:  RAW -- ??/??/21
  *
  * Changes:     None.
+ *
+ * Notes:       Thus function doesn't actually implement vector write.
+ *              Instead, it comverts the vector write call into a series
+ *              of scalar read calls.  Fix this when time permits.
+ *
+ *              Also, it didn't support the sizes and types optimization.
+ *              I implemented a version of this which is more generous
+ *              than that currently defined in the RFC.  This is good
+ *              enough for now, but the final version should follow
+ *              the RFC.
+ *                                                    JRM -- 10/5/21
  *
  *-------------------------------------------------------------------------
  */
@@ -1873,9 +1978,61 @@ H5FD__subfiling_write_vector(H5FD_t *_file, hid_t dxpl_id, uint32_t count, H5FD_
     }
     /* Call the subfiling IOC write*/
     if (file_ptr->fa.require_ioc) {
-        int k;
+
+        hbool_t    extend_sizes = FALSE;
+        hbool_t    extend_types = FALSE;
+        int        k;
+        size_t     size;
+        H5FD_mem_t type;
+        haddr_t    eoa;
+
+        HDassert((count == 0) || (sizes[0] != 0));
+        HDassert((count == 0) || (types[0] != H5FD_MEM_NOLIST));
+
+        /* Note that the following code does not let the sub-filing VFD participate
+         * in collective calls when thre is no data to write.  This is not an issue
+         * now, as we don't do anything special with collective operations.  However
+         * this needs to be fixed.
+         */
         for (k = 0; k < (int)count; k++) {
-            if (H5FD__subfiling_write(_file, types[k], dxpl_id, addrs[k], sizes[k], bufs[k]) != SUCCEED)
+
+            if (!extend_sizes) {
+
+                if (sizes[k] == 0) {
+
+                    extend_sizes = TRUE;
+                    size         = sizes[k - 1];
+                }
+                else {
+
+                    size = sizes[k];
+                }
+            }
+
+            if (!extend_types) {
+
+                if (types[k] == H5FD_MEM_NOLIST) {
+
+                    extend_types = TRUE;
+                    type         = types[k - 1];
+                }
+                else {
+
+                    type = types[k];
+                }
+            }
+
+            if (HADDR_UNDEF == (eoa = H5FD__subfiling_get_eoa(_file, type)))
+                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, FAIL, "driver get_eoa request failed")
+
+            if ((addrs[k] + size) > eoa)
+
+                HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, FAIL,
+                            "addr overflow, addrs[%d] = %llu, sizes[%d] = %llu, eoa = %llu", (int)k,
+                            (unsigned long long)(addrs[k]), (int)k, (unsigned long long)size,
+                            (unsigned long long)eoa)
+
+            if (H5FD__subfiling_write(_file, type, dxpl_id, addrs[k], size, bufs[k]) != SUCCEED)
                 HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "file vector write request failed")
         }
     }

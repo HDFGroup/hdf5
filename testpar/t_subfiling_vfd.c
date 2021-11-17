@@ -2683,8 +2683,11 @@ main(int argc, char **argv)
 
     if (nerrors == 0) {
         nerrors -= test_fapl_configuration();
+        // sleep(1);
         nerrors -= test_create_and_close();
+        // sleep(1);
         nerrors -= test_basic_dataset_write();
+        // sleep(1);
 #if 0
         nerrors -= test_chunked_dataset_write();
         nerrors -= test_on_disk_zoo();

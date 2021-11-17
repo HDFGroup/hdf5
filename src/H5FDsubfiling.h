@@ -20,6 +20,14 @@
 #ifndef H5FDsubfiling_H
 #define H5FDsubfiling_H
 
+#if 1 /* JRM */ /* For now, H5FDsubfiling_priv.h needs mercury.  Since the code that needs it will           \
+                 * move to its own header, just hack it for now.                                             \
+                 */
+#include "mercury_thread.h"
+#include "mercury_thread_mutex.h"
+#include "mercury_thread_pool.h"
+#endif /* JRM */
+
 #include "H5FDsubfiling_priv.h"
 
 #define H5FD_SUBFILING (H5FD_subfiling_init())
@@ -112,6 +120,8 @@
  *
  *     The full pathname of the user HDF5 file.
  *
+
+WARNING -- this code is commented out
 
 #define H5FD_SUBFILING_PATH_MAX 4096
 
@@ -234,13 +244,20 @@ H5_DLL herr_t H5FD__write_vector(hid_t h5_fid, hssize_t count, haddr_t *addrs, h
 H5_DLL int    H5FD__truncate(hid_t h5_fid, haddr_t addr);
 H5_DLL int    H5FD__shutdown_local_ioc(hid_t fid);
 H5_DLL void   manage_client_logfile(int client_rank, int flag_value);
+#if 0  /* JRM */
 H5_DLL int    initialize_ioc_threads(void *sf_context);
+#endif /* JRM */
 H5_DLL herr_t H5FD__write_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
                                           const void *bufs[] /* data_in */);
 
 H5_DLL herr_t H5FD__read_vector_internal(hid_t h5_fid, hssize_t count, haddr_t addrs[], size_t sizes[],
                                          void *bufs[] /* data_out */);
+#if 0  /* JRM */
 H5_DLL int    queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
+#else  /* JRM */
+H5_DLL int queue_write_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm,
+                             int counter);
+#endif /* JRM */
 
 H5_DLL int queue_read_indep(sf_work_request_t *msg, int subfile_rank, int source, MPI_Comm comm);
 

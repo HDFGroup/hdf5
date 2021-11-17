@@ -71,7 +71,7 @@ static stat_record_t subfiling_stats[TOTAL_STAT_COUNT];
 #define SF_READ_WAIT_TIME  (subfiling_stats[READ_WAIT].total / (double)subfiling_stats[READ_WAIT].op_count)
 #define SF_QUEUE_DELAYS    (subfiling_stats[QUEUE_STAT].total)
 
-#define SF_ALIGNMENT       8
+#define SF_ALIGNMENT 8
 
 static void
 maybe_initialize_statistics(void)
@@ -460,7 +460,9 @@ close__subfiles(subfiling_context_t *sf_context, uint64_t fid)
     HDassert((sf_context != NULL));
     t0 = MPI_Wtime();
 
-#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
+/* TODO: can't use comm world here -- must use communicator set in the file open */
+//#if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
+#if 0 /* JRM */ /* Just use regular barrier */
     MPI_Request b_req      = MPI_REQUEST_NULL;
     int         mpi_status = MPI_Ibarrier(MPI_COMM_WORLD, &b_req);
     if (mpi_status == MPI_SUCCESS) {
@@ -502,6 +504,7 @@ close__subfiles(subfiling_context_t *sf_context, uint64_t fid)
          * currently open, we can shutdown the IO concentrator
          * as part of the file close.
          */
+#if 0 /* JRM */ /* delete this if all goes well */
         if (file_open_count == 1) {
             /* Shutdown the main IOC thread */
             H5FD_ioc_set_shutdown_flag(1);
@@ -514,8 +517,36 @@ close__subfiles(subfiling_context_t *sf_context, uint64_t fid)
             t1          = t2;
             t_main_exit = t2 - t1;
             H5FD_ioc_finalize_threads();
+
             t2 = MPI_Wtime();
         }
+#else           /* JRM */
+        if (file_open_count == 1) {
+
+            HDassert(0 == atomic_load(&sf_shutdown_flag));
+
+            /* Shutdown the main IOC thread */
+            atomic_init(&sf_shutdown_flag, 1);
+
+            /* Allow ioc_main to exit.*/
+            do {
+
+                usleep(20);
+
+            } while (0 != atomic_load(&sf_shutdown_flag));
+
+            t1 = MPI_Wtime();
+            H5FD_ioc_wait_thread_main();
+            t2          = MPI_Wtime();
+            t1          = t2;
+            t_main_exit = t2 - t1;
+
+            H5FD_ioc_take_down_thread_pool();
+
+            t2 = MPI_Wtime();
+        }
+
+#endif /* JRM */
 
         t_finalize_threads = t2 - t1;
 
@@ -654,8 +685,10 @@ sf_write_data(int fd, int64_t file_offset, void *data_buffer, int64_t data_size,
     ssize_t written         = 0;
     while (bytes_remaining) {
         if ((written = pwrite(fd, this_data, (size_t)bytes_remaining, file_offset)) < 0) {
+            int         saved_errno = errno;
             struct stat statbuf;
             perror("pwrite failed!");
+            HDprintf("\nerrno = %d (%s)\n\n", saved_errno, strerror(saved_errno));
             fstat(fd, &statbuf);
             HDprintf("[ioc(%d) %s] pwrite(fd, data, bytes_remaining=%ld, "
                      "file_offset=%ld), fd=%d, st_size=%ld\n",
@@ -1502,7 +1535,11 @@ H5FD__open_subfiles(void *_config_info, uint64_t h5_file_id, int flags)
     /* Ensure that the IOC service won't exit
      * as we prepare to start up..
      */
+#if 0 /* JRM */ /* delete if all goes well */
     H5FD_ioc_set_shutdown_flag(0);
+#else           /* JRM */
+    atomic_init(&sf_shutdown_flag, 0);
+#endif          /* JRM */
 
     /* If we're actually using the IOCs, we will
      * start the service threads on the identified

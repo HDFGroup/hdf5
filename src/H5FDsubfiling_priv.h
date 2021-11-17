@@ -213,10 +213,23 @@ typedef struct _info_header { /* Header for a driver info message */
 /* Bit 3 SET indicates collectives */
 #define COLL_FUNC (0x1 << 3)
 
+#if 0 /* JRM */ /* original version */
+
 #define ACK_PART  (0x0acc << 8)
 #define DATA_PART (0xd8da << 8)
 #define READY     (0xfeed << 8)
 #define COMPLETED (0xfed1 << 8)
+
+#else /* JRM */ /* reduce size to make space for counters to disambiguate multiple concurrent requests from  \
+                   same rank */
+
+#define ACK_PART  (0x01 << 8)
+#define DATA_PART (0x02 << 8)
+#define READY     (0x04 << 8)
+#define COMPLETED (0x08 << 8)
+
+#endif /* JRM */ /* reduce size to make space for counters to disambiguate multiple concurrent requests from \
+                    same rank */
 
 #define READ_INDEP  (READ_OP)
 #define READ_COLL   (COLL_FUNC | READ_OP)
@@ -363,6 +376,377 @@ extern int        sf_verbose_flag;
 extern atomic_int sf_work_pending;
 extern atomic_int sf_file_open_count;
 extern atomic_int sf_file_close_count;
+extern atomic_int sf_shutdown_flag;
+extern atomic_int sf_io_ops_pending;
+
+#if 1 /* JRM */ /* this belongs in an IOC private header file */
+
+#define H5FD_IOC__COLLECT_STATS TRUE
+
+/****************************************************************************
+ *
+ * IOC I/O Queue management macros:
+ *
+ * The following macros perform the necessary operations on the IOC I/O
+ * Queue, which is implemented as a doubly linked list of instances of
+ * H5FD_ioc_io_queue_entry_t.
+ *
+ * WARNING: q_ptr->q_mutex must be held when these macros are executed..
+ *
+ * At present, the necessary operations are append (insert an entry at the
+ * end of the queue), and delete (remove an entry from the queue).
+ *
+ * At least initially, all sanity checking is done with asserts, as the
+ * the existing I/O concentrator code is not well integrated into the HDF5
+ * error reporting system.  This will have to be revisited for a production
+ * version, but it should be suficient for now.
+ *
+ *                                                 JRM -- 11/2/21
+ *
+ ****************************************************************************/
+
+/* clang-format off */
+
+#define H5FD_IOC__Q_APPEND(q_ptr, entry_ptr)                                                      \
+do {                                                                                              \
+    HDassert(q_ptr);                                                                              \
+    HDassert((q_ptr)->magic == H5FD_IOC__IO_Q_MAGIC);                                             \
+    HDassert((((q_ptr)->q_len == 0) && ((q_ptr)->q_head == NULL) && ((q_ptr)->q_tail == NULL)) || \
+             (((q_ptr)->q_len > 0) && ((q_ptr)->q_head != NULL) && ((q_ptr)->q_tail != NULL)));   \
+    HDassert(entry_ptr);                                                                          \
+    HDassert((entry_ptr)->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);                                   \
+    HDassert((entry_ptr)->next == NULL);                                                          \
+    HDassert((entry_ptr)->prev == NULL);                                                          \
+    HDassert((entry_ptr)->in_progress == FALSE);                                                  \
+                                                                                                  \
+    if ( ((q_ptr)->q_head) == NULL )                                                              \
+    {                                                                                             \
+       ((q_ptr)->q_head) = (entry_ptr);                                                           \
+       ((q_ptr)->q_tail) = (entry_ptr);                                                           \
+    }                                                                                             \
+    else                                                                                          \
+    {                                                                                             \
+       ((q_ptr)->q_tail)->next = (entry_ptr);                                                     \
+       (entry_ptr)->prev = ((q_ptr)->q_tail);                                                     \
+       ((q_ptr)->q_tail) = (entry_ptr);                                                           \
+    }                                                                                             \
+    ((q_ptr)->q_len)++;                                                                           \
+} while ( FALSE ) /* H5FD_IOC__Q_APPEND() */
+
+#define H5FD_IOC__Q_REMOVE(q_ptr, entry_ptr)                                                                         \
+do {                                                                                                                 \
+    HDassert(q_ptr);                                                                                                 \
+    HDassert((q_ptr)->magic == H5FD_IOC__IO_Q_MAGIC);                                                                \
+    HDassert((((q_ptr)->q_len == 1) && ((q_ptr)->q_head ==((q_ptr)->q_tail)) && ((q_ptr)->q_head == (entry_ptr))) || \
+             (((q_ptr)->q_len > 0) && ((q_ptr)->q_head != NULL) && ((q_ptr)->q_tail != NULL)));                      \
+    HDassert(entry_ptr);                                                                                             \
+    HDassert((entry_ptr)->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);                                                      \
+    HDassert((((q_ptr)->q_len == 1) && ((entry_ptr)->next == NULL) && ((entry_ptr)->prev == NULL)) ||                \
+             (((q_ptr)->q_len > 1) && (((entry_ptr)->next != NULL) || ((entry_ptr)->prev != NULL))));                \
+    HDassert((entry_ptr)->in_progress == TRUE);                                                                      \
+                                                                                                                     \
+    {                                                                                                                \
+       if ( (((q_ptr)->q_head)) == (entry_ptr) )                                                                     \
+       {                                                                                                             \
+          (((q_ptr)->q_head)) = (entry_ptr)->next;                                                                   \
+          if ( (((q_ptr)->q_head)) != NULL )                                                                         \
+             (((q_ptr)->q_head))->prev = NULL;                                                                       \
+       }                                                                                                             \
+       else                                                                                                          \
+       {                                                                                                             \
+          (entry_ptr)->prev->next = (entry_ptr)->next;                                                               \
+       }                                                                                                             \
+       if (((q_ptr)->q_tail) == (entry_ptr) )                                                                        \
+       {                                                                                                             \
+          ((q_ptr)->q_tail) = (entry_ptr)->prev;                                                                     \
+          if ( ((q_ptr)->q_tail) != NULL )                                                                           \
+             ((q_ptr)->q_tail)->next = NULL;                                                                         \
+       }                                                                                                             \
+       else                                                                                                          \
+       {                                                                                                             \
+          (entry_ptr)->next->prev = (entry_ptr)->prev;                                                               \
+       }                                                                                                             \
+       (entry_ptr)->next = NULL;                                                                                     \
+       (entry_ptr)->prev = NULL;                                                                                     \
+       ((q_ptr)->q_len)--;                                                                                           \
+    }                                                                                                                \
+} while ( FALSE ) /* H5FD_IOC__Q_REMOVE() */
+
+/* clang-format on */
+
+/****************************************************************************
+ *
+ * structure H5FD_ioc_io_queue_entry
+ *
+ * magic:  Unsigned 32 bit integer always set to H5FD_IOC__IO_Q_ENTRY_MAGIC.
+ *         This field is used to validate pointers to instances of
+ *         H5FD_ioc_io_queue_entry_t.
+ *
+ * next:   Next pointer in the doubly linked list used to implement
+ *         the IOC I/O Queue.  This field points to the next entry
+ *         in the queue, or NULL if there is no next entry.
+ *
+ * prev:   Prev pointer in the doubly linked list used to implement
+ *         the IOC I/O Queue.  This field points to the previous entry
+ *         in the queue, or NULL if there is no previous entry.
+ *
+ * in_progress: Boolean flag that must be FALSE when the entry is insterted
+ *         into the IOC I/O Queue, and set to TRUE when the entry is dispatched
+ *         to the worker thread pool for execution.
+ *
+ *         When in_progress is FALS, the enty is said to be pending.
+ *
+ * counter: uint32_t containing a serial number assigned to this IOC
+ *         I/O Queue entry.  Note that this will roll over on long
+ *         computations, and thus is not in general unique.
+ *
+ *         The counter fields is used to construct a tag to distinguish
+ *         multiple concurrent I/O requests from a give rank, and thus
+ *         this should not be a problem as long as there is sufficient
+ *         time between roll overs.  As only the lower bits of the counter
+ *         are used in tag construction, this is more frequent than the
+ *         size of the counter field would suggest -- albeit hopefully
+ *         still infrequent enough.
+ *
+ * wk_req: Instance of sf_work_request_t.  Replace with individual
+ *         fields when convenient.
+ *
+ *
+ * Statistics:
+ *
+ * The following fields are only defined if H5FD_IOC__COLLECT_STATS is TRUE.
+ * They are intended to allow collection of basic statistics on the
+ * behaviour of the IOC I/O Queue for purposes of debugging and performance
+ * optimization.
+ *
+ * q_time:      uint64_t containing the time the entry was place on the
+ *              IOC I/O Queue in usec after the UNIX epoch.
+ *
+ *              This value is used to compute the queue wait time, and the
+ *              total processing time for the entry.
+ *
+ * dispatch_time:  uint64_t containing the time the entry is dispatched in
+ *              usec after the UNIX epoch.  This field is undefined if the
+ *              entry is pending.
+ *
+ *              This value is used to compute the execution time for the
+ *              entry.
+ *
+ ****************************************************************************/
+
+#define H5FD_IOC__IO_Q_ENTRY_MAGIC 0x1357
+
+typedef struct H5FD_ioc_io_queue_entry {
+
+    uint32_t                        magic;
+    struct H5FD_ioc_io_queue_entry *next;
+    struct H5FD_ioc_io_queue_entry *prev;
+    hbool_t                         in_progress;
+    uint32_t                        counter;
+
+    /* rework these fileds */ /* JRM */
+    sf_work_request_t     wk_req;
+    struct hg_thread_work thread_wk;
+
+    /* statistics */
+#if H5FD_IOC__COLLECT_STATS
+
+    uint64_t q_time;
+    uint64_t dispatch_time;
+
+#endif /* H5FD_IOC__COLLECT_STATS */
+
+} H5FD_ioc_io_queue_entry_t;
+
+#if 0 /* JRM */ /* keep this copy for convenience for now */
+typedef struct {
+    /* {Datasize, Offset, FileID} */
+    int64_t header[3];        /* The basic RPC input plus       */
+    int     tag;              /* the supplied OPCODE tag        */
+    int     source;           /* Rank of who sent the message   */
+    int     subfile_rank;     /* The IOC rank                   */
+    hid_t   context_id;       /* context to be used to complete */
+    double  start_time;       /* the request, + time of receipt */
+                              /* from which we calc Time(queued) */
+    void *buffer;             /* for writes, we keep the buffer */
+                              /* around for awhile...           */
+    volatile int in_progress; /* Not used!               */
+    volatile int serialize;   /* worker thread needs to wait while true */
+    volatile int dependents;  //* If current work item has dependents */
+    int          depend_id;   /* work queue index of the dependent */
+} sf_work_request_t;
+
+struct hg_thread_work {
+    hg_thread_func_t func;
+    void *           args;
+    HG_QUEUE_ENTRY(hg_thread_work) entry; /* Internal */
+};
+
+#endif /* JRM */
+
+/****************************************************************************
+ *
+ * structure H5FD_ioc_io_queue
+ *
+ * This is a temporary structure -- its fields should be moved to an I/O
+ * concentrator Catchall structure eventualy.
+ *
+ * The fields of this structure support the io queue used to receive and
+ * sequence I/O requests for execution by the worker threads.  The rules
+ * for sequencing are as follows:
+ *
+ * 1) Non-overlaping I/O requests must be fed to the worker threads in
+ *    the order received, and may execute concurrently
+ *
+ * 2) Overlaping read requests must be fed to the worker threads in
+ *    the order received, but may execute concurrently.
+ *
+ * 3) If any pair of I/O requests overlap, and at least one is a write
+ *    request, they must be executed in strict arrival order, and the
+ *    first must complete before the second starts.
+ *
+ * Due to the strict ordering requirment in rule 3, entries must be
+ * inserted at the tail of the queue in receipt order, and retained on
+ * the queue until completed.  Entries in the queue are marked pending
+ * when inserted on the queue, in progress when handed to a worker
+ * thread, and deleted from the queue when completed.
+ *
+ * The dispatch algorith is as follows:
+ *
+ * 1) Set X equal to the element at the head of the queue.
+ *
+ * 2) If X is pending, and there exists no prior element (i.e. between X
+ *    and the head of the queue) that intersects with X, goto 5).
+ *
+ * 3) If X is pending, X is a read, and all prior intersecting elements
+ *    are reads, goto 5).
+ *
+ * 4) If X is in progress, or if any prior intersecting element is a
+ *    write, or if X is a write, set X equal to its successor in the
+ *    queue (i.e. the next element further down the queue from the head)
+ *    and goto 2)  If there is no next element, exit without dispatching
+ *    any I/O request.
+ *
+ * 5) If we get to 5, X must be pending.  Mark it in progress, and
+ *    dispatch it.  If the number of in progress entries is less than
+ *    the number of worker threads, and X has a successor in the queue,
+ *    set X equal to its predecessor, and goto 2).  Otherwise exit without
+ *    dispatching further I/O requests.
+ *
+ * Note that the above dispatch algorithm doesn't address collective
+ * I/O requests -- this should be OK for now, but it will have to
+ * addressed prior to production release.
+ *
+ * On I/O request completion, worker threads must delete their assigned
+ * I/O requests from the queue, check to see if there are any pending
+ * requests, and trigger the dispatch algorithm if there are.
+ *
+ * The fileds in the structure are discussed individually below.
+ *
+ * magic:  Unsigned 32 bit integer always set to H5FD_IOC__IO_Q_MAGIC.
+ *         This field is used to validate pointers to instances of
+ *         H5C_t.
+ *
+ * q_head: Pointer to the head of the doubly linked list of entries in
+ *         the I/O queue.
+ *
+ *         This field is NULL if the I/O queue is empty.
+ *
+ * q_tail: Pointer to the tail of the doubly linked list of entries in
+ *         the I/O queue.
+ *
+ *         This field is NULL if the I/O queue is empty.
+ *
+ * num_pending:  Number of I/O request pending on the I/O queue.
+ *
+ * num_in_progress: Number of I/O requests in progress on the I/O queue.
+ *
+ * q_len:  Number of I/O requests on the I/O queue.  Observe that q_len
+ *         must equal (num_pending + num_in_progress).
+ *
+ * req_counter: unsigned 16 bit integer used to provide a "unique" tag for
+ *         each I/O request.  This value is incremented by 1, and then
+ *         passed to the worker thread where its lower bits are incorporated
+ *         into the tag used to disambiguate multiple, concurrent I/O
+ *         requests from a single rank.  The value is 32 bits, as MPI tags
+ *         are limited to 32 bits.  The value is unsigned as it is expected
+ *         to wrap around once its maximum value is reached.
+ *
+ * q_mutex: Mutex used to ensure that only one thread accesses the IOC I/O
+ *         Queue at once.  This mutex must be held to access of modifiy
+ *         all fields of the
+ *
+ *
+ * Statistics:
+ *
+ * The following fields are only defined if H5FD_IOC__COLLECT_STATS is TRUE.
+ * They are intended to allow collection of basic statistics on the
+ * behaviour of the IOC I/O Queue for purposes of debugging and performance
+ * optimization.
+ *
+ * max_q_len: Maximum number of requests residing on the IOC I/O Queue at
+ *         any point in time in the current run.
+ *
+ * max_num_pending: Maximum number of pending rquests residing on the IOC
+ *         I/O Queue at any point in time in the current run.
+ *
+ * max_num_in_progress: Maximum number of in progress rquests residing on
+ *         the IOC I/O Queue at any point in time in the current run.
+ *
+ * ind_read_requests:  Number of independent read requests received by the
+ *          IOC to date.
+ *
+ * ind_write_requests Number of independent write requests received by the
+ *          IOC to date.
+ *
+ * requests_queued: Number of I/O requests received and placed on the IOC
+ *          I/O queue.
+ *
+ * requests_dispatched: Number of I/O requests dispatched for execution by
+ *          the worker threads.
+ *
+ * requests_completed: Number of I/O requests completed by the worker threads.
+ *          Observe that on file close, requests_queued, requests_dispatched,
+ *          and requests_completed should be equal.
+ *
+ ****************************************************************************/
+
+#define H5FD_IOC__IO_Q_MAGIC 0x2468
+
+typedef struct H5FD_ioc_io_queue {
+
+    uint32_t                   magic;
+    H5FD_ioc_io_queue_entry_t *q_head;
+    H5FD_ioc_io_queue_entry_t *q_tail;
+    int32_t                    num_pending;
+    int32_t                    num_in_progress;
+    int32_t                    q_len;
+    uint32_t                   req_counter;
+    hg_thread_mutex_t          q_mutex;
+
+    /* statistics */
+#if H5FD_IOC__COLLECT_STATS
+    int32_t max_q_len;
+    int32_t max_num_pending;
+    int32_t max_num_in_progress;
+    int64_t ind_read_requests;
+    int64_t ind_write_requests;
+    int64_t requests_queued;
+    int64_t requests_dispatched;
+    int64_t requests_completed;
+#endif /* H5FD_IOC__COLLECT_STATS */
+
+} H5FD_ioc_io_queue_t;
+
+H5_DLL void H5FD_ioc_take_down_thread_pool(void);
+
+H5_DLL H5FD_ioc_io_queue_entry_t *H5FD_ioc__alloc_io_q_entry(void);
+H5_DLL void                       H5FD_ioc__complete_io_q_entry(H5FD_ioc_io_queue_entry_t *entry_ptr);
+H5_DLL void                       H5FD_ioc__dispatch_elegible_io_q_entries(void);
+H5_DLL void                       H5FD_ioc__free_io_q_entry(H5FD_ioc_io_queue_entry_t *q_entry_ptr);
+H5_DLL void                       H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr);
+
+#endif /* JRM */
 
 #ifdef __cplusplus
 }

@@ -46,6 +46,12 @@ void __attribute__((destructor)) finalize_ioc_threads(void);
 int  wait_for_thread_main(void);
 bool tpool_is_empty(void);
 
+#if 1 /* JRM */
+
+extern H5FD_ioc_io_queue_t io_queue_g;
+
+#endif /* JRM */
+
 /*-------------------------------------------------------------------------
  * Function:    local ioc_thread_main
  *
@@ -110,6 +116,15 @@ initialize_ioc_threads(void *_sf_context)
     char *               envValue;
     double               t_start = 0.0, t_end = 0.0;
 
+#if 0 /* JRM */ /* delete this evenutually */
+    HDprintf("\nworld_size = %d\n", world_size);
+#endif          /* JRM */
+
+#if 1 /* JRM */ /* try doubling the size of the pool_request array */
+    world_size *= 4;
+    alloc_size *= 4;
+#endif /* JRM */
+
     assert(context_id != NULL);
 
     file_open_count = atomic_load(&sf_file_open_count);
@@ -153,6 +168,16 @@ initialize_ioc_threads(void *_sf_context)
         puts("hg_thread_mutex_init failed");
         goto err_exit;
     }
+
+#if 1 /* JRM */ /* needed for new dispatch code */
+
+    status = hg_thread_mutex_init(&(io_queue_g.q_mutex));
+    if (status) {
+        puts("hg_thread_mutex_init failed for io_queue_g.q_mutex");
+        goto err_exit;
+    }
+
+#endif /* JRM */
 
     /* Allow experimentation with the number of helper threads */
     if ((envValue = getenv("IOC_THREAD_POOL_COUNT")) != NULL) {
@@ -267,9 +292,13 @@ translate_opcode(io_op_t op)
  *
  *-------------------------------------------------------------------------
  */
+#if 0 /* JRM */ /* Original version -- expects sf_work_request_t * as its arguement */
 static HG_THREAD_RETURN_TYPE
 handle_work_request(void *arg)
 {
+#if 1           /* JRM */
+    int                  curr_io_ops_pending;
+#endif          /* JRM */
     int                  status          = 0;
     hg_thread_ret_t      ret             = 0;
     sf_work_request_t *  msg             = (sf_work_request_t *)arg;
@@ -298,6 +327,11 @@ handle_work_request(void *arg)
     }
     fflush(stdout);
 
+#if 1  /* JRM */ 
+    curr_io_ops_pending = atomic_fetch_sub(&sf_io_ops_pending, 1);
+    HDassert(curr_io_ops_pending > 0);
+#endif /* JRM */
+
     atomic_fetch_sub(&sf_work_pending, 1); // atomic
     msg->in_progress = 0;
     if (msg->dependents) {
@@ -314,6 +348,80 @@ handle_work_request(void *arg)
     }
     return ret;
 }
+
+#else /* JRM */ /* Modified version -- expects H5FD_ioc_io_queue_entry_t * as its argument */
+
+static HG_THREAD_RETURN_TYPE
+handle_work_request(void *arg)
+{
+#if 1           /* JRM */
+    int                        curr_io_ops_pending;
+#endif          /* JRM */
+    int                        status          = 0;
+    hg_thread_ret_t            ret             = 0;
+    H5FD_ioc_io_queue_entry_t *q_entry_ptr     = (H5FD_ioc_io_queue_entry_t *)arg;
+    sf_work_request_t *        msg             = &(q_entry_ptr->wk_req);
+    int64_t                    file_context_id = msg->header[2];
+    subfiling_context_t *      sf_context      = NULL;
+
+    HDassert(q_entry_ptr);
+    HDassert(q_entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
+    HDassert(q_entry_ptr->in_progress);
+
+    sf_context = get__subfiling_object(file_context_id);
+    assert(sf_context != NULL);
+
+    atomic_fetch_add(&sf_work_pending, 1); // atomic
+    msg->in_progress = 1;
+    switch (msg->tag) {
+        case WRITE_INDEP:
+            status = queue_write_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm,
+                                       q_entry_ptr->counter);
+            break;
+        case READ_INDEP:
+            status = queue_read_indep(msg, msg->subfile_rank, msg->source, sf_context->sf_data_comm);
+            break;
+        default:
+            HDprintf("[ioc(%d)] received message tag(%x)from rank %d\n", msg->subfile_rank, msg->tag,
+                     msg->source);
+            status = -1;
+            break;
+    }
+    fflush(stdout);
+
+    atomic_fetch_sub(&sf_work_pending, 1); // atomic
+
+    if (status < 0) {
+        HDprintf("[ioc(%d) %s]: request(%s) filename=%s from "
+                 "rank(%d), size=%ld, offset=%ld FAILED\n",
+                 msg->subfile_rank, __func__, translate_opcode((io_op_t)msg->tag), sf_context->sf_filename,
+                 msg->source, msg->header[0], msg->header[1]);
+
+        fflush(stdout);
+    }
+
+#if 1  /* JRM */
+    curr_io_ops_pending = atomic_fetch_sub(&sf_io_ops_pending, 1);
+    if (curr_io_ops_pending <= 0) {
+
+        HDprintf("\n\nhandle_work_request: curr_io_ops_pending = %d, op = %d, offset/len = %lld/%lld.\n\n",
+                 curr_io_ops_pending, (msg->tag), (long long)(msg->header[1]), (long long)(msg->header[0]));
+        HDfflush(stdout);
+    }
+
+    HDassert(curr_io_ops_pending > 0);
+#endif /* JRM */
+
+    /* complete the I/O request */
+    H5FD_ioc__complete_io_q_entry(q_entry_ptr);
+
+    /* Check the I/O Queue to see if there are any dispatchable entries */
+    H5FD_ioc__dispatch_elegible_io_q_entries();
+
+    return ret;
+}
+
+#endif /* JRM */ /* Modified version -- expects H5FD_ioc_io_queue_entry_t * as its argument */
 
 void
 ioc__wait_for_serialize(void *_work)
@@ -425,6 +533,9 @@ check__overlap(void *_work, int current_index, int *conflict_id)
 int
 tpool_add_work(void *_work)
 {
+#if 1 /* JRM */
+    int curr_io_ops_pending;
+#endif /* JRM */
     static int         work_index  = 0;
     int                conflict_id = -1;
     sf_work_request_t *work        = (sf_work_request_t *)_work;
@@ -448,6 +559,17 @@ tpool_add_work(void *_work)
 
     pool_request[work_index].func = handle_work_request;
     pool_request[work_index].args = work;
+#if 1 /* JRM */
+    curr_io_ops_pending = atomic_fetch_add(&sf_io_ops_pending, 1);
+
+    HDassert(curr_io_ops_pending >= 0);
+
+    if (curr_io_ops_pending >= pool_concurrent_max) {
+
+        HDfprintf(stderr, "\n\n*** curr_io_ops_pending = %d >= pool_concurrent_max = %d ***\n\n",
+                  curr_io_ops_pending, pool_concurrent_max);
+    }
+#endif /* JRM */
     hg_thread_pool_post(ioc_thread_pool, &pool_request[work_index++]);
     hg_thread_mutex_unlock(&ioc_mutex);
     return 0;
@@ -538,3 +660,418 @@ wait_for_thread_main(void)
     }
     return 0;
 }
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ioc_take_down_thread_pool
+ *
+ * Purpose:     Destroy the thread pool if it exists.
+ *
+ *              This function should only be called on shutdown after all
+ *              pending I/O operations have completed.
+ *
+ * Return:      void
+ *
+ * Programmer:  JRM -- 10/27/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+void
+H5FD_ioc_take_down_thread_pool(void)
+{
+    HDassert(0 == atomic_load(&sf_io_ops_pending));
+
+    if (ioc_thread_pool != NULL) {
+        hg_thread_pool_destroy(ioc_thread_pool);
+        ioc_thread_pool = NULL;
+    }
+
+    return;
+
+} /* H5FD_ioc_take_down_thread_pool() */
+
+#if 1 /* JRM */ /* dispatch code -- move elsewhere? */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ioc__alloc_io_q_entry
+ *
+ * Purpose:     Allocate and initialize an instance of
+ *              H5FD_ioc_io_queue_entry_t.  Return pointer to the new
+ *              instance on success, and NULL on failure.
+ *
+ * Return:      Pointer to new instance of H5FD_ioc_io_queue_entry_t
+ *              on success, and NULL on failure.
+ *
+ * Programmer:  JRM -- 11/6/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+/* TODO: update function when we decide how to handle error reporting in the IOCs */
+H5FD_ioc_io_queue_entry_t *
+H5FD_ioc__alloc_io_q_entry(void)
+{
+    H5FD_ioc_io_queue_entry_t *q_entry_ptr = NULL;
+
+    q_entry_ptr = (H5FD_ioc_io_queue_entry_t *)HDmalloc(sizeof(H5FD_ioc_io_queue_entry_t));
+
+    if (q_entry_ptr) {
+
+        q_entry_ptr->magic       = H5FD_IOC__IO_Q_ENTRY_MAGIC;
+        q_entry_ptr->next        = NULL;
+        q_entry_ptr->prev        = NULL;
+        q_entry_ptr->in_progress = FALSE;
+        q_entry_ptr->counter     = 0;
+
+        /* will memcpy the wk_req field, so don't bother to initialize */
+        /* will initialize thread_wk field before use */
+
+#if H5FD_IOC__COLLECT_STATS
+        q_entry_ptr->q_time        = 0;
+        q_entry_ptr->dispatch_time = 0;
+#endif /* H5FD_IOC__COLLECT_STATS */
+    }
+
+    return (q_entry_ptr);
+
+} /* H5FD_ioc__alloc_io_q_entry() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ioc__complete_io_q_entry
+ *
+ * Purpose:     Update the IOC I/O Queue for the completion of an I/O
+ *              request.
+ *
+ *              To do this:
+ *
+ *              1) Remove the entry from the I/O Queue
+ *
+ *              2) If so configured, update statistics
+ *
+ *              3) Discard the instance of H5FD_ioc_io_queue_entry_t.
+ *
+ * Return:      void.
+ *
+ * Programmer:  JRM -- 11/7/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+/* TODO: update function when we decide how to handle error reporting in the IOCs */
+/* TODO: Update for per file I/O Queue */
+void
+H5FD_ioc__complete_io_q_entry(H5FD_ioc_io_queue_entry_t *entry_ptr)
+{
+#if 0  /* H5FD_IOC__COLLECT_STATS */
+    uint64_t queued_time;
+    uint64_t execution_time;
+#endif /* H5FD_IOC__COLLECT_STATS */
+
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
+
+    /* must obtain io_queue_g mutex before deleting and updating stats */
+    hg_thread_mutex_lock(&(io_queue_g.q_mutex));
+
+    HDassert(io_queue_g.magic == H5FD_IOC__IO_Q_MAGIC);
+    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
+    HDassert(io_queue_g.num_in_progress > 0);
+
+    H5FD_IOC__Q_REMOVE(&io_queue_g, entry_ptr);
+
+    io_queue_g.num_in_progress--;
+
+    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
+
+#if H5FD_IOC__COLLECT_STATS
+#if 0 /* no place to collect this yet */
+    /* Compute the queued and execution time */
+    queued_time = entry_ptr->dispatch_time - entry_ptr->q_time;
+    execution_time = H5_now_usec() = entry_ptr->dispatch_time;
+#endif
+
+    io_queue_g.requests_completed++;
+
+    entry_ptr->q_time = H5_now_usec();
+
+#endif /* H5FD_IOC__COLLECT_STATS */
+
+    hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
+
+    HDassert(entry_ptr->wk_req.buffer == NULL);
+
+    H5FD_ioc__free_io_q_entry(entry_ptr);
+
+    entry_ptr = NULL;
+
+    return;
+
+} /* H5FD_ioc__complete_io_q_entry() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ioc__dispatch_elegible_io_q_entries
+ *
+ * Purpose:     Scan the IOC I/O Queue for dispatchable entries, and
+ *              dispatch any such entries found.
+ *
+ *              Do this by scanning the I/O queue from head to tail for
+ *              entries that:
+ *
+ *              1) Have not already been dispatched
+ *
+ *              2) Either:
+ *
+ *                 a) do not intersect with any prior entries on the
+ *                    I/O queue, or
+ *
+ *                 b) Are read requests, and all intersections are with
+ *                    prior read requests.
+ *
+ *              Dispatch any such entries found.
+ *
+ *              Do this to maintain the POSIX semantics required by
+ *              HDF5.
+ *
+ * Return:      void.
+ *
+ * Programmer:  JRM -- 11/7/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+/* TODO: update function when we decide how to handle error reporting in the IOCs */
+/* TODO: Update for per file I/O Queue */
+/* TODO: Keep an eye on statistics and optimize this algorithm if necessary.  While it is O(N)
+ *       where N is the number of elements in the I/O Queue if there are are no-overlaps, it
+ *       can become O(N**2) in the worst case.
+ */
+void
+H5FD_ioc__dispatch_elegible_io_q_entries(void)
+{
+    hbool_t                    conflict_detected;
+    int64_t                    entry_offset;
+    int64_t                    entry_len;
+    int64_t                    scan_offset;
+    int64_t                    scan_len;
+    H5FD_ioc_io_queue_entry_t *entry_ptr = NULL;
+    H5FD_ioc_io_queue_entry_t *scan_ptr  = NULL;
+
+    hg_thread_mutex_lock(&(io_queue_g.q_mutex));
+
+    HDassert(io_queue_g.magic == H5FD_IOC__IO_Q_MAGIC);
+
+    entry_ptr = io_queue_g.q_head;
+
+    /* sanity check on first element in the I/O queue */
+    HDassert((entry_ptr == NULL) || (entry_ptr->prev == NULL));
+
+    while ((entry_ptr) && (io_queue_g.num_pending > 0)) {
+
+        HDassert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
+
+        if (!entry_ptr->in_progress) {
+
+            entry_offset = entry_ptr->wk_req.header[1];
+            entry_len    = entry_ptr->wk_req.header[0];
+
+            conflict_detected = FALSE;
+
+            scan_ptr = entry_ptr->prev;
+
+            HDassert((scan_ptr == NULL) || (scan_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC));
+
+            while ((scan_ptr) && (!conflict_detected)) {
+
+                /* check for overlaps */
+                scan_offset = scan_ptr->wk_req.header[1];
+                scan_len    = scan_ptr->wk_req.header[0];
+
+                /* at present, I/O requests are scalar -- i.e. single blocks specified by offset and length.
+                 * when this changes, this if statment will have to be updated accordingly.
+                 */
+                if (!(((scan_offset + scan_len) < entry_offset) ||
+                      ((entry_offset + entry_len) < scan_offset))) {
+
+                    /* the two request overlap -- unless they are both reads, we have detected a conflict */
+
+                    /* TODO: update this if statement when we add collective I/O */
+                    if ((entry_ptr->wk_req.tag != READ_INDEP) || (scan_ptr->wk_req.tag != READ_INDEP)) {
+
+                        conflict_detected = TRUE;
+                    }
+                }
+
+                scan_ptr = scan_ptr->prev;
+            }
+
+            if (!conflict_detected) { /* dispatch I/O request */
+
+                HDassert(scan_ptr == NULL);
+                HDassert(!entry_ptr->in_progress);
+
+                entry_ptr->in_progress = TRUE;
+
+                HDassert(io_queue_g.num_pending > 0);
+
+                io_queue_g.num_pending--;
+                io_queue_g.num_in_progress++;
+
+                HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
+
+                entry_ptr->thread_wk.func = handle_work_request;
+                entry_ptr->thread_wk.args = entry_ptr;
+
+#if H5FD_IOC__COLLECT_STATS
+                if (io_queue_g.num_in_progress > io_queue_g.max_num_in_progress) {
+
+                    io_queue_g.max_num_in_progress = io_queue_g.num_in_progress;
+                }
+
+                io_queue_g.requests_dispatched++;
+
+                entry_ptr->dispatch_time = H5_now_usec();
+
+#endif /* H5FD_IOC__COLLECT_STATS */
+
+                hg_thread_pool_post(ioc_thread_pool, &(entry_ptr->thread_wk));
+            }
+        }
+
+        entry_ptr = entry_ptr->next;
+    }
+
+    hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
+
+} /* H5FD_ioc__dispatch_elegible_io_q_entries() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ioc__free_io_q_entry
+ *
+ * Purpose:     Free the supplied instance of H5FD_ioc_io_queue_entry_t.
+ *
+ *              Verify that magic field is set to
+ *              H5FD_IOC__IO_Q_ENTRY_MAGIC, and that the next and prev
+ *              fields are NULL.
+ *
+ * Return:      void.
+ *
+ * Programmer:  JRM -- 11/6/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+/* TODO: update function when we decide how to handle error reporting in the IOCs */
+void
+H5FD_ioc__free_io_q_entry(H5FD_ioc_io_queue_entry_t *q_entry_ptr)
+{
+    /* use assertions for error checking, since the following should never fail. */
+
+    HDassert(q_entry_ptr);
+    HDassert(q_entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
+    HDassert(q_entry_ptr->next == NULL);
+    HDassert(q_entry_ptr->prev == NULL);
+    HDassert(q_entry_ptr->wk_req.buffer == NULL);
+
+    q_entry_ptr->magic = 0;
+
+    HDfree(q_entry_ptr);
+
+    q_entry_ptr = NULL;
+
+    return;
+
+} /* H5FD_ioc__free_c_io_q_entry() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD_ioc__queue_io_q_entry
+ *
+ * Purpose:     Add an I/O request to the tail of the IOC I/O Queue.
+ *
+ *              To do this, we must:
+ *
+ *              1) allocate a new instance of H5FD_ioc_io_queue_entry_t
+ *
+ *              2) Initialize the new instance and copy the supplied
+ *                 instance of sf_work_request_t into it.
+ *
+ *              3) Append it to the IOC I/O queue.
+ *
+ *              Note that this does not dispatch the request even if it
+ *              is eligible for immediate dispatch.  This is done with
+ *              a call to H5FD_ioc__dispatch_elegible_io_q_entries().
+ *
+ * Return:      void.
+ *
+ * Programmer:  JRM -- 11/7/21
+ *
+ * Changes:     None.
+ *
+ *-------------------------------------------------------------------------
+ */
+/* TODO: update function when we decide how to handle error reporting in the IOCs */
+/* TODO: Update for per file I/O Queue */
+void
+H5FD_ioc__queue_io_q_entry(sf_work_request_t *wk_req_ptr)
+{
+    H5FD_ioc_io_queue_entry_t *entry_ptr = NULL;
+
+    HDassert(wk_req_ptr);
+    HDassert(io_queue_g.magic == H5FD_IOC__IO_Q_MAGIC);
+
+    entry_ptr = H5FD_ioc__alloc_io_q_entry();
+
+    HDassert(entry_ptr);
+    HDassert(entry_ptr->magic == H5FD_IOC__IO_Q_ENTRY_MAGIC);
+
+    HDmemcpy((void *)(&(entry_ptr->wk_req)), (const void *)wk_req_ptr, sizeof(sf_work_request_t));
+
+    /* must obtain io_queue_g mutex before appending */
+    hg_thread_mutex_lock(&(io_queue_g.q_mutex));
+
+    entry_ptr->counter = io_queue_g.req_counter++;
+
+    io_queue_g.num_pending++;
+
+    H5FD_IOC__Q_APPEND(&io_queue_g, entry_ptr);
+
+    HDassert(io_queue_g.num_pending + io_queue_g.num_in_progress == io_queue_g.q_len);
+
+#if H5FD_IOC__COLLECT_STATS
+
+    entry_ptr->q_time = H5_now_usec();
+
+    if (io_queue_g.q_len > io_queue_g.max_q_len) {
+
+        io_queue_g.max_q_len = io_queue_g.q_len;
+    }
+
+    if (io_queue_g.num_pending > io_queue_g.max_num_pending) {
+
+        io_queue_g.max_num_pending = io_queue_g.num_pending;
+    }
+
+    if (entry_ptr->wk_req.tag == READ_INDEP) {
+
+        io_queue_g.ind_read_requests++;
+    }
+    else if (entry_ptr->wk_req.tag == WRITE_INDEP) {
+
+        io_queue_g.ind_write_requests++;
+    }
+
+    io_queue_g.requests_queued++;
+
+#endif /* H5FD_IOC__COLLECT_STATS */
+
+    hg_thread_mutex_unlock(&(io_queue_g.q_mutex));
+
+    return;
+
+} /* H5FD_ioc__queue_io_q_entry() */
+
+#endif /* JRM */ /* dispatch code -- move elsewhere? */

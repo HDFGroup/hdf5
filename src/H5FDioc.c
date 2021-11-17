@@ -30,11 +30,21 @@
 #include "H5Pprivate.h"  /* Property lists           */
 #include "H5private.h"   /* Generic Functions        */
 
+#if 1 /* JRM */ /* For now, H5FDsubfiling_priv.h needs mercury.  Since the code that needs it will           \
+                 * move to its own header, just hack it for now.                                             \
+                 */
+#include "mercury_thread.h"
+#include "mercury_thread_mutex.h"
+#include "mercury_thread_pool.h"
+#endif /* JRM */
+
 #include "H5FDsubfiling_priv.h"
 
 /* The driver identification number, initialized at runtime */
-static hid_t        H5FD_IOC_g = 0;
+static hid_t H5FD_IOC_g = 0;
+#if 0 /* JRM */ /* delete if all goes well */
 extern volatile int sf_shutdown_flag;
+#endif          /* JRM */
 
 /*
  * These macros check for overflow of various quantities.  These macros
@@ -227,6 +237,7 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_ioc_init() */
 
+#if 0 /* JRM */ /* delete if all goes well */
 /*-------------------------------------------------------------------------
  * Function:    H5FD_ioc_set_shutdown_flag
  *
@@ -246,6 +257,7 @@ H5FD_ioc_set_shutdown_flag(int flag)
         usleep(100);
     return;
 } /* end H5FD_ioc_set_shutdown_flag() */
+#endif          /* JRM */
 
 /*---------------------------------------------------------------------------
  * Function:    H5FD__ioc_term
@@ -854,30 +866,30 @@ H5FD__ioc_open(const char *name, unsigned flags, hid_t ioc_fapl_id, haddr_t maxa
 
         else if (file_ptr->inode > 0) { /* No errors opening the subfiles */
             subfiling_context_t *sf_context = get__subfiling_object(file_ptr->fa.common.context_id);
-        if (sf_context && sf_context->topology->rank_is_ioc) {
-            if (initialize_ioc_threads(sf_context) < 0) {
-                HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Unable to initialize IOC threads")
+            if (sf_context && sf_context->topology->rank_is_ioc) {
+                if (initialize_ioc_threads(sf_context) < 0) {
+                    HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "Unable to initialize IOC threads")
+                }
             }
         }
     }
-}
-else
-{
-    HDputs("We only support sec2 file opens at the moment.");
-    HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file = %s\n", name)
-}
-
-ret_value = (H5FD_t *)file_ptr;
-
-done : if (NULL == ret_value) {
-    if (file_ptr) {
-        if (file_ptr->ioc_file)
-            H5FD_close(file_ptr->ioc_file);
-        H5FL_FREE(H5FD_ioc_t, file_ptr);
+    else {
+        HDputs("We only support sec2 file opens at the moment.");
+        HGOTO_ERROR(H5E_FILE, H5E_CANTOPENFILE, NULL, "unable to open file = %s\n", name)
     }
-} /* end if error */
 
-FUNC_LEAVE_NOAPI(ret_value)
+    ret_value = (H5FD_t *)file_ptr;
+
+done:
+    if (NULL == ret_value) {
+        if (file_ptr) {
+            if (file_ptr->ioc_file)
+                H5FD_close(file_ptr->ioc_file);
+            H5FL_FREE(H5FD_ioc_t, file_ptr);
+        }
+    } /* end if error */
+
+    FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__ioc_open() */
 
 /*-------------------------------------------------------------------------
@@ -1430,5 +1442,6 @@ H5FD_ioc_wait_thread_main(void)
 void
 H5FD_ioc_finalize_threads(void)
 {
+
     return;
 }
