@@ -931,11 +931,6 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
     /* create a copy of the 1st file passed to the application */
     HDstrcpy(filepath, fname);
 
-#if 0
-    if (!log_output_in_single_file && !log_stdout_in_file)
-        use_stdout = 1;
-#endif
-
     if (log_output_in_single_file || use_stdout) {
         pid_t   pid;
         int     pipefd[2];
@@ -1076,7 +1071,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
             if ((log_instance > 0) || processing_inputfile) {
                 if (processing_inputfile)
                     log_instance = current_input_index;
-                HDsprintf(logpath, "%s/%s_%s.log_%d", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
+                    HDsprintf(logpath, "%s/%s_%s.log_%d", HDgetcwd(current_dir, sizeof(current_dir)), logbase,
                           thisapp, log_instance);
             }
             else {
