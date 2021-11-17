@@ -101,6 +101,8 @@ swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
                                     .tick_len          = 4,
                                     .max_lag           = max_lag,
                                     .writer            = true,
+                                    .maintain_metadata_file = true,
+                                    .generate_updater_files = false,
                                     .md_pages_reserved = 128};
     char *                bname  = NULL;
     char *                dname  = NULL;

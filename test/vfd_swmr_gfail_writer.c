@@ -544,8 +544,9 @@ main(int argc, char **argv)
         TEST_ERROR;
     }
 
-    /* config, tick_len, max_lag, writer, flush_raw_data, md_pages_reserved, md_file_path */
-    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, TRUE, 128, "./group-shadow");
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    init_vfd_swmr_config(&config, s.tick_len, s.max_lag, writer, TRUE, FALSE, TRUE, 128, "./group-shadow", NULL);
 
     /* If old-style option is chosen, use the earliest file format(H5F_LIBVER_EARLIEST)
      * as the second parameter of H5Pset_libver_bound() that is called by

@@ -2121,7 +2121,7 @@ H5PB_vfd_swmr__update_index(H5F_t *f, uint32_t *idx_ent_added_ptr, uint32_t *idx
             /* partial initialization of new entry -- rest done later */
             ie_ptr->hdf5_page_offset    = target_page;
             ie_ptr->md_file_page_offset = 0; /* undefined at this point */
-            ie_ptr->chksum              = 0; /* undefined at this point */
+            ie_ptr->checksum            = 0; /* undefined at this point */
             /* ie_ptr->entry_ptr            initialized below */
             /* ie_ptr->tick_of_last_change  initialized below */
             /* ie_ptr->clean                initialized below */

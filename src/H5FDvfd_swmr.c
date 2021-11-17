@@ -857,7 +857,7 @@ H5FD__vfd_swmr_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id
      * signature.
      */
     if (file->pb_configured && entry->length == init_size &&
-        H5_checksum_metadata(buf, entry->length, 0) != entry->chksum) {
+        H5_checksum_metadata(buf, entry->length, 0) != entry->checksum) {
         H5FD_vfd_swmr_md_header tmp_header;
 
         if (H5FD__vfd_swmr_header_deserialize(file, &tmp_header) != TRUE)
@@ -1331,7 +1331,7 @@ H5FD__vfd_swmr_index_deserialize(const H5FD_vfd_swmr_t *file, H5FD_vfd_swmr_md_i
             UINT32DECODE(p, md_index->entries[i].hdf5_page_offset);
             UINT32DECODE(p, md_index->entries[i].md_file_page_offset);
             UINT32DECODE(p, md_index->entries[i].length);
-            UINT32DECODE(p, md_index->entries[i].chksum);
+            UINT32DECODE(p, md_index->entries[i].checksum);
         }
     }
     else

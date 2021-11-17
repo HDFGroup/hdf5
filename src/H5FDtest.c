@@ -162,7 +162,7 @@ H5FD__vfd_swmr_reader_md_test(H5FD_t *file, unsigned num_entries, H5FD_vfd_swmr_
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
                             "incorrect md_file_page_offset read from metadata file")
 
-            if (vfd_index[i].chksum != index[i].chksum)
+            if (vfd_index[i].checksum != index[i].checksum)
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect chksum read from metadata file")
         }
     }

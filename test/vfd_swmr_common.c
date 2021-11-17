@@ -345,10 +345,10 @@ await_signal(hid_t fid)
 
 /* Revised support routines that can be used for all VFD SWMR integration tests
  */
-/* Initialize fields in config with the input parameters */
 void
 init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag, hbool_t writer,
-                     hbool_t flush_raw_data, uint32_t md_pages_reserved, const char *md_file_fmtstr, ...)
+                      hbool_t maintain_metadata_file, hbool_t generate_updater_files, hbool_t flush_raw_data,
+                      uint32_t md_pages_reserved, const char *md_file_fmtstr, const char *updater_file_path, ...)
 {
     va_list ap;
 
@@ -360,12 +360,19 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
     config->tick_len          = tick_len;
     config->max_lag           = max_lag;
     config->writer            = writer;
+    config->maintain_metadata_file = maintain_metadata_file;
+    config->generate_updater_files = generate_updater_files;
     config->flush_raw_data    = flush_raw_data;
     config->md_pages_reserved = md_pages_reserved;
 
-    HDva_start(ap, md_file_fmtstr);
+    HDva_start(ap, updater_file_path);
+
     evsnprintf(config->md_file_path, sizeof(config->md_file_path), md_file_fmtstr, ap);
+
     HDva_end(ap);
+
+    if(config->generate_updater_files && updater_file_path != NULL)
+        HDstrcpy(config->updater_file_path, updater_file_path);
 
 } /* init_vfd_swmr_config() */
 

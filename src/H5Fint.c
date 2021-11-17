@@ -1853,6 +1853,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
     hbool_t                ci_write            = FALSE;    /* Whether MDC CI write requested */
     hbool_t                file_create         = FALSE;    /* Creating a new file or not */
     H5F_vfd_swmr_config_t *vfd_swmr_config_ptr = NULL;     /* Points to VFD SMWR config info */
+    H5F_generate_md_ck_cb_t cb_info = {NULL};
     H5F_t *                ret_value           = NULL;     /* Actual return value */
 
     FUNC_ENTER_NOAPI(NULL)
@@ -1876,6 +1877,10 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is writer but VFD SWMR config is reader")
         if ((flags & H5F_ACC_RDWR) == 0 && vfd_swmr_config_ptr->writer)
             HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "file access is reader but VFD SWMR config is writer")
+
+        /* Retrieve the private property for VFD SWMR testing */
+        if (H5P_get(a_plist, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info) < 0)
+            HGOTO_ERROR(H5E_PLIST, H5E_CANTGET, NULL, "can't get generate_md_ck_cb info")
     }
 
     /*
@@ -2111,6 +2116,9 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 
         /* Initialization for VFD SWMR writer and reader */
         if (1 == shared->nrefs) {
+            /* Private property for VFD SWMR testing: generate checksum for metadata file */
+            if(cb_info.func)
+                shared->generate_md_ck_cb = cb_info.func;
             if (H5F_vfd_swmr_init(file, file_create) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "file open fail with initialization for VFD SWMR")
         }

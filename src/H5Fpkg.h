@@ -455,12 +455,35 @@ struct H5F_shared_t {
     uint32_t                   old_mdf_idx_len;
     uint32_t                   old_mdf_idx_entries_used;
 
-    /* Metadata file for VFD SWMR writer */
+    /* Metadata file and updater file for VFD SWMR writer */
     int vfd_swmr_md_fd;      /* POSIX: file descriptor for the
-                              * metadata file
+                              * metadata file or -1 if the metadata file 
+                              * is not currently open.
+                              * The vfd_swmr_config.generate_updater_files
+                              * is FALSE.
                               */
+                             /* NFS: 
+                              * The vfd_swmr_config.generate_updater_files
+                              * is TRUE and:
+                              * --if vfd_swmr_config.writer is FALSE,
+                              * this field is the file descriptor of the local
+                              * copy of the metadata file, or -1 if the local
+                              * copy is not currently open.
+                              * --if vfd_swmr_config.writer is TRUE, this field
+                              * is not used and is set to -1.
+                              */
+    H5F_generate_md_ck_t generate_md_ck_cb;
+                             /* For testing only:
+                              * Invoke the user-defined callback if exists to 
+                              * generate checksum for the metadata file
+                              */
+    
     haddr_t vfd_swmr_md_eoa; /* POSIX: eoa for the metadata
                               * file
+                              */
+    uint64_t updater_seq_num;/* Sequence number of the next updater file to be
+                              * genereated.  This field must be initialized to zero,
+                              * and incremented after each updater file is generated.
                               */
 
     /* Free space manager for the metadata file */

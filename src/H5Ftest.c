@@ -344,24 +344,10 @@ H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t file_create)
     /* Verify the minimum size for the metadata file */
     if (HDstat(f->shared->vfd_swmr_config.md_file_path, &stat_buf) < 0)
         HGOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat the metadata file")
-    if (stat_buf.st_size <
-        (HDoff_t)((hsize_t)f->shared->vfd_swmr_config.md_pages_reserved * f->shared->fs_page_size))
-        HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect metadata file size")
 
     if (file_create) { /* Creating file */
-        uint32_t hdr_magic;
-
-        /* Seek to the beginning of the file */
-        if (HDlseek(md_fd, (HDoff_t)H5FD_MD_HEADER_OFF, SEEK_SET) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_SEEKERROR, FAIL, "error seeking metadata file")
-
-        /* Try to read the magic for header */
-        if (HDread(md_fd, &hdr_magic, H5_SIZEOF_MAGIC) < 0)
-            HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "error reading metadata file")
-
-        /* Verify that there is no header magic in the metadata file */
-        if (HDmemcmp(&hdr_magic, H5FD_MD_HEADER_MAGIC, (size_t)H5_SIZEOF_MAGIC) == 0)
-            HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "error finding header magic in the metadata file")
+        if(stat_buf.st_size != 0)
+            HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "metadata file should be empty for file create")
     }
     else { /* Opening or flushing the file */
 
@@ -494,7 +480,7 @@ H5F__vfd_swmr_decode_md_idx(int md_fd, H5FD_vfd_swmr_md_header *md_hdr, H5FD_vfd
             UINT32DECODE(p, md_idx->entries[i].hdf5_page_offset);
             UINT32DECODE(p, md_idx->entries[i].md_file_page_offset);
             UINT32DECODE(p, md_idx->entries[i].length);
-            UINT32DECODE(p, md_idx->entries[i].chksum);
+            UINT32DECODE(p, md_idx->entries[i].checksum);
         } /* end for */
 
     } /* end if */
@@ -546,7 +532,7 @@ H5F__vfd_swmr_verify_md_hdr_and_idx(H5F_t *f, H5FD_vfd_swmr_md_header *md_hdr, H
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect index_length read from metadata file")
 
     /* Verify index_offset read from header in the metadata file is the size of md header */
-    if (md_hdr->index_offset != f->shared->fs_page_size)
+    if (md_hdr->index_offset != H5FD_MD_HEADER_SIZE)
         HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect index_offset read from metadata file")
 
     /* Verify num_entries read from index in the metadata file is num_entries */
@@ -573,8 +559,8 @@ H5F__vfd_swmr_verify_md_hdr_and_idx(H5F_t *f, H5FD_vfd_swmr_md_header *md_hdr, H
                 HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL,
                             "incorrect md_file_page_offset read from metadata file")
 
-            if (md_idx->entries[i].chksum != index[i].chksum)
-                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect chksum read from metadata file")
+            if (md_idx->entries[i].checksum != index[i].checksum)
+                HGOTO_ERROR(H5E_FILE, H5E_BADVALUE, FAIL, "incorrect checksum read from metadata file")
         }
     }
 
