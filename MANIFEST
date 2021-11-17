@@ -207,6 +207,7 @@
 ./doc/branches-explained.md
 ./doc/code-conventions.md
 ./doc/contributing.md
+./doc/library-init-shutdown.md
 ./doxygen/aliases
 ./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
@@ -807,6 +808,7 @@
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDperform.c
 ./src/H5FDros3.c
 ./src/H5FDros3.h
 ./src/H5FDpkg.h
@@ -3066,7 +3068,10 @@
 ./hl/test/sepia.pal
 ./hl/test/test_ds.c
 ./hl/test/test_ds_be.h5
+./hl/test/test_ds_be_new_ref.h5
+./hl/test/test_ds_be_new_ref-32bit.h5
 ./hl/test/test_ds_le.h5
+./hl/test/test_ds_le_new_ref.h5
 ./hl/test/test_dset_append.c
 ./hl/test/test_file_image.c
 ./hl/test/test_h5do_compat.c
@@ -3288,6 +3293,7 @@
 ./java/src/hdf/hdf5lib/callbacks/H5P_prp_set_func_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/package-info.java
 
 ./java/src/hdf/hdf5lib/exceptions/HDF5AttributeException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5BtreeException.java
@@ -3313,6 +3319,7 @@
 ./java/src/hdf/hdf5lib/exceptions/HDF5ReferenceException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java
+./java/src/hdf/hdf5lib/exceptions/package-info.java
 
 ./java/src/hdf/hdf5lib/structs/H5_ih_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5A_info_t.java
@@ -3327,12 +3334,14 @@
 ./java/src/hdf/hdf5lib/structs/H5O_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_native_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_token_t.java
+./java/src/hdf/hdf5lib/structs/package-info.java
 
 ./java/src/hdf/hdf5lib/H5.java
 ./java/src/hdf/hdf5lib/HDF5Constants.java
 ./java/src/hdf/hdf5lib/HDF5GroupInfo.java
 ./java/src/hdf/hdf5lib/HDFArray.java
 ./java/src/hdf/hdf5lib/HDFNativeData.java
+./java/src/hdf/hdf5lib/package-info.java
 
 ./java/examples/Makefile.am
 ./java/examples/CMakeLists.txt

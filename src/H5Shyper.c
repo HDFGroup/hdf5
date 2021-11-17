@@ -12036,7 +12036,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space, hbo
     hsize_t num_slices;    /* Number of slices in unlimited dimension */
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check parameters */
     HDassert(clip_space);
@@ -12058,7 +12058,6 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space, hbo
     /* Call "real" get_clip_extent function */
     ret_value = H5S__hyper_get_clip_extent_real(clip_space, num_slices, incl_trail);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent() */
 
@@ -12094,7 +12093,7 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_spac
     hsize_t num_slices; /* Number of slices in unlimited dimension */
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check parameters */
     HDassert(clip_space);
@@ -12140,7 +12139,6 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_spac
     /* Call "real" get_clip_extent function */
     ret_value = H5S__hyper_get_clip_extent_real(clip_space, num_slices, incl_trail);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent_match() */
 
@@ -12256,7 +12254,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, hbool_t *pa
     H5S_hyper_dim_t *diminfo; /* Convenience pointer to diminfo in unlimited dimension */
     hsize_t          ret_value = 0;
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check parameters */
     HDassert(space);
@@ -12286,7 +12284,6 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, hbool_t *pa
         } /* end if */
     }     /* end else */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_first_inc_block */
 
