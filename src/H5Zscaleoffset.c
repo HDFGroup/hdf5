@@ -364,12 +364,12 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 #define H5Z_scaleoffset_max_min_3(i, d_nelmts, buf, filval, max, min, D_val)                                 \
     {                                                                                                        \
         i = 0;                                                                                               \
-        while (i < d_nelmts && HDfabs(buf[i] - filval) < HDpow(10.0, -D_val))                                \
+        while (i < d_nelmts && HDfabs((double)(buf[i] - filval)) < HDpow(10.0, -D_val))                      \
             i++;                                                                                             \
         if (i < d_nelmts)                                                                                    \
             min = max = buf[i];                                                                              \
         for (; i < d_nelmts; i++) {                                                                          \
-            if (HDfabs(buf[i] - filval) < HDpow(10.0, -D_val))                                               \
+            if (HDfabs((double)(buf[i] - filval)) < HDpow(10.0, -D_val))                                     \
                 continue; /* ignore fill value */                                                            \
             if (buf[i] > max)                                                                                \
                 max = buf[i];                                                                                \
@@ -425,22 +425,22 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
 #define H5Z_scaleoffset_check_3(i, type, pow_fun, round_fun, max, min, minbits, D_val)                       \
     {                                                                                                        \
         if (sizeof(type) == sizeof(int)) {                                                                   \
-            if (round_fun(max * pow_fun(10.0f, (type)D_val) - min * pow_fun(10.0f, (type)D_val)) >           \
-                pow_fun(2.0f, (type)(sizeof(int) * 8 - 1))) {                                                \
+            if (round_fun(max * pow_fun((type)10, (type)D_val) - min * pow_fun((type)10, (type)D_val)) >     \
+                pow_fun((type)2, (type)(sizeof(int) * 8 - 1))) {                                             \
                 *minbits = sizeof(int) * 8;                                                                  \
                 goto done;                                                                                   \
             }                                                                                                \
         }                                                                                                    \
         else if (sizeof(type) == sizeof(long)) {                                                             \
-            if (round_fun(max * pow_fun(10.0f, (type)D_val) - min * pow_fun(10.0f, (type)D_val)) >           \
-                pow_fun(2.0f, (type)(sizeof(long) * 8 - 1))) {                                               \
+            if (round_fun(max * pow_fun((type)10, (type)D_val) - min * pow_fun((type)10, (type)D_val)) >     \
+                pow_fun((type)2, (type)(sizeof(long) * 8 - 1))) {                                            \
                 *minbits = sizeof(long) * 8;                                                                 \
                 goto done;                                                                                   \
             }                                                                                                \
         }                                                                                                    \
         else if (sizeof(type) == sizeof(long long)) {                                                        \
-            if (round_fun(max * pow_fun(10.0f, (type)D_val) - min * pow_fun(10.0f, (type)D_val)) >           \
-                pow_fun(2.0f, (type)(sizeof(long long) * 8 - 1))) {                                          \
+            if (round_fun(max * pow_fun((type)10, (type)D_val) - min * pow_fun((type)10, (type)D_val)) >     \
+                pow_fun((type)2, (type)(sizeof(long long) * 8 - 1))) {                                       \
                 *minbits = sizeof(long long) * 8;                                                            \
                 goto done;                                                                                   \
             }                                                                                                \
@@ -530,27 +530,27 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     {                                                                                                        \
         if (sizeof(type) == sizeof(int))                                                                     \
             for (i = 0; i < d_nelmts; i++) {                                                                 \
-                if (abs_fun(buf[i] - filval) < pow_fun(10.0f, (type)-D_val))                                 \
+                if (abs_fun(buf[i] - filval) < pow_fun((type)10, (type)-D_val))                              \
                     *(int *)((void *)&buf[i]) = (int)(((unsigned int)1 << *minbits) - 1);                    \
                 else                                                                                         \
-                    *(int *)((void *)&buf[i]) = (int)lround_fun(buf[i] * pow_fun(10.0f, (type)D_val) -       \
-                                                                min * pow_fun(10.0f, (type)D_val));          \
+                    *(int *)((void *)&buf[i]) = (int)lround_fun(buf[i] * pow_fun((type)10, (type)D_val) -    \
+                                                                min * pow_fun((type)10, (type)D_val));       \
             }                                                                                                \
         else if (sizeof(type) == sizeof(long))                                                               \
             for (i = 0; i < d_nelmts; i++) {                                                                 \
-                if (abs_fun(buf[i] - filval) < pow_fun(10.0f, (type)-D_val))                                 \
+                if (abs_fun(buf[i] - filval) < pow_fun((type)10, (type)-D_val))                              \
                     *(long *)((void *)&buf[i]) = (long)(((unsigned long)1 << *minbits) - 1);                 \
                 else                                                                                         \
-                    *(long *)((void *)&buf[i]) = lround_fun(buf[i] * pow_fun(10.0f, (type)D_val) -           \
-                                                            min * pow_fun(10.0f, (type)D_val));              \
+                    *(long *)((void *)&buf[i]) = lround_fun(buf[i] * pow_fun((type)10, (type)D_val) -        \
+                                                            min * pow_fun((type)10, (type)D_val));           \
             }                                                                                                \
         else if (sizeof(type) == sizeof(long long))                                                          \
             for (i = 0; i < d_nelmts; i++) {                                                                 \
-                if (abs_fun(buf[i] - filval) < pow_fun(10.0f, (type)-D_val))                                 \
+                if (abs_fun(buf[i] - filval) < pow_fun((type)10, (type)-D_val))                              \
                     *(long long *)((void *)&buf[i]) = (long long)(((unsigned long long)1 << *minbits) - 1);  \
                 else                                                                                         \
-                    *(long long *)((void *)&buf[i]) = llround_fun(buf[i] * pow_fun(10.0f, (type)D_val) -     \
-                                                                  min * pow_fun(10.0f, (type)D_val));        \
+                    *(long long *)((void *)&buf[i]) = llround_fun(buf[i] * pow_fun((type)10, (type)D_val) -  \
+                                                                  min * pow_fun((type)10, (type)D_val));     \
             }                                                                                                \
         else                                                                                                 \
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
@@ -561,16 +561,16 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     {                                                                                                        \
         if (sizeof(type) == sizeof(int))                                                                     \
             for (i = 0; i < d_nelmts; i++)                                                                   \
-                *(int *)((void *)&buf[i]) = (int)lround_fun(buf[i] * pow_fun(10.0f, (type)D_val) -           \
-                                                            min * pow_fun(10.0f, (type)D_val));              \
+                *(int *)((void *)&buf[i]) = (int)lround_fun(buf[i] * pow_fun((type)10, (type)D_val) -        \
+                                                            min * pow_fun((type)10, (type)D_val));           \
         else if (sizeof(type) == sizeof(long))                                                               \
             for (i = 0; i < d_nelmts; i++)                                                                   \
-                *(long *)((void *)&buf[i]) =                                                                 \
-                    lround_fun(buf[i] * pow_fun(10.0f, (type)D_val) - min * pow_fun(10.0f, (type)D_val));    \
+                *(long *)((void *)&buf[i]) = lround_fun(buf[i] * pow_fun((type)10, (type)D_val) -            \
+                                                        min * pow_fun((type)10, (type)D_val));               \
         else if (sizeof(type) == sizeof(long long))                                                          \
             for (i = 0; i < d_nelmts; i++)                                                                   \
-                *(long long *)((void *)&buf[i]) =                                                            \
-                    llround_fun(buf[i] * pow_fun(10.0f, (type)D_val) - min * pow_fun(10.0f, (type)D_val));   \
+                *(long long *)((void *)&buf[i]) = llround_fun(buf[i] * pow_fun((type)10, (type)D_val) -      \
+                                                              min * pow_fun((type)10, (type)D_val));         \
         else                                                                                                 \
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
     }
@@ -606,8 +606,8 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
             H5Z_scaleoffset_get_filval_2(type, cd_values, filval)                                            \
                 H5Z_scaleoffset_max_min_3(i, d_nelmts, buf, filval, max, min, D_val)                         \
                     H5Z_scaleoffset_check_3(i, type, pow_fun, round_fun, max, min, minbits, D_val) span =    \
-                        (unsigned long long)(llround_fun(max * pow_fun(10.0f, (type)D_val) -                 \
-                                                         min * pow_fun(10.0f, (type)D_val)) +                \
+                        (unsigned long long)(llround_fun(max * pow_fun((type)10, (type)D_val) -              \
+                                                         min * pow_fun((type)10, (type)D_val)) +             \
                                              1);                                                             \
             *minbits = H5Z__scaleoffset_log2(span + 1);                                                      \
             if (*minbits != sizeof(type) * 8) /* change values if minbits != full precision */               \
@@ -617,8 +617,8 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
         else { /* fill value undefined */                                                                    \
             H5Z_scaleoffset_max_min_2(i, d_nelmts, buf, max, min)                                            \
                 H5Z_scaleoffset_check_3(i, type, pow_fun, round_fun, max, min, minbits, D_val) span =        \
-                    (unsigned long long)(llround_fun(max * pow_fun(10.0f, (type)D_val) -                     \
-                                                     min * pow_fun(10.0f, (type)D_val)) +                    \
+                    (unsigned long long)(llround_fun(max * pow_fun((type)10, (type)D_val) -                  \
+                                                     min * pow_fun((type)10, (type)D_val)) +                 \
                                          1);                                                                 \
             *minbits = H5Z__scaleoffset_log2(span);                                                          \
             if (*minbits != sizeof(type) * 8) /* change values if minbits != full precision */               \
@@ -685,19 +685,19 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
                 buf[i] =                                                                                     \
                     (type)((*(int *)((void *)&buf[i]) == (int)(((unsigned int)1 << minbits) - 1))            \
                                ? filval                                                                      \
-                               : (type)(*(int *)((void *)&buf[i])) / pow_fun(10.0f, (type)D_val) + min);     \
+                               : (type)(*(int *)((void *)&buf[i])) / pow_fun((type)10, (type)D_val) + min);  \
         else if (sizeof(type) == sizeof(long))                                                               \
             for (i = 0; i < d_nelmts; i++)                                                                   \
                 buf[i] =                                                                                     \
                     (type)((*(long *)((void *)&buf[i]) == (long)(((unsigned long)1 << minbits) - 1))         \
                                ? filval                                                                      \
-                               : (type)(*(long *)((void *)&buf[i])) / pow_fun(10.0f, (type)D_val) + min);    \
+                               : (type)(*(long *)((void *)&buf[i])) / pow_fun((type)10, (type)D_val) + min); \
         else if (sizeof(type) == sizeof(long long))                                                          \
             for (i = 0; i < d_nelmts; i++)                                                                   \
                 buf[i] = (type)(                                                                             \
                     (*(long long *)((void *)&buf[i]) == (long long)(((unsigned long long)1 << minbits) - 1)) \
                         ? filval                                                                             \
-                        : (type)(*(long long *)((void *)&buf[i])) / pow_fun(10.0f, (type)D_val) + min);      \
+                        : (type)(*(long long *)((void *)&buf[i])) / pow_fun((type)10, (type)D_val) + min);   \
         else                                                                                                 \
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
     }
@@ -707,13 +707,13 @@ H5Z_class2_t H5Z_SCALEOFFSET[1] = {{
     {                                                                                                        \
         if (sizeof(type) == sizeof(int))                                                                     \
             for (i = 0; i < d_nelmts; i++)                                                                   \
-                buf[i] = ((type)(*(int *)((void *)&buf[i])) / pow_fun(10.0f, (type)D_val) + min);            \
+                buf[i] = ((type)(*(int *)((void *)&buf[i])) / pow_fun((type)10, (type)D_val) + min);         \
         else if (sizeof(type) == sizeof(long))                                                               \
             for (i = 0; i < d_nelmts; i++)                                                                   \
-                buf[i] = ((type)(*(long *)((void *)&buf[i])) / pow_fun(10.0f, (type)D_val) + min);           \
+                buf[i] = ((type)(*(long *)((void *)&buf[i])) / pow_fun((type)10, (type)D_val) + min);        \
         else if (sizeof(type) == sizeof(long long))                                                          \
             for (i = 0; i < d_nelmts; i++)                                                                   \
-                buf[i] = ((type)(*(long long *)((void *)&buf[i])) / pow_fun(10.0f, (type)D_val) + min);      \
+                buf[i] = ((type)(*(long long *)((void *)&buf[i])) / pow_fun((type)10, (type)D_val) + min);   \
         else                                                                                                 \
             HGOTO_ERROR(H5E_PLINE, H5E_BADTYPE, FAIL, "cannot find matched integer dataype")                 \
     }

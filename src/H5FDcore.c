@@ -383,7 +383,7 @@ H5FD__core_write_to_bstore(H5FD_core_t *file, haddr_t addr, size_t size)
                         "write to backing store failed: time = %s, filename = '%s', file descriptor = %d, "
                         "errno = %d, error message = '%s', ptr = %p, total write size = %llu, bytes this "
                         "sub-write = %llu, bytes actually written = %llu, offset = %llu",
-                        HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), ptr,
+                        HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), (void *)ptr,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_wrote, (unsigned long long)offset);
         } /* end if */
@@ -811,8 +811,8 @@ H5FD__core_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr
                             "file read failed: time = %s, filename = '%s', file descriptor = %d, errno = %d, "
                             "error message = '%s', file->mem = %p, total read size = %llu, bytes this "
                             "sub-read = %llu, bytes actually read = %llu, offset = %llu",
-                            HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno), file->mem,
-                            (unsigned long long)size, (unsigned long long)bytes_in,
+                            HDctime(&mytime), file->name, file->fd, myerrno, HDstrerror(myerrno),
+                            (void *)file->mem, (unsigned long long)size, (unsigned long long)bytes_in,
                             (unsigned long long)bytes_read, (unsigned long long)offset);
                     } /* end if */
 

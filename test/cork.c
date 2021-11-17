@@ -89,10 +89,11 @@ static unsigned
 verify_old_dset_cork(void)
 {
     /* Variable Declarations */
-    hid_t      fid = -1;                             /* File ID */
-    hid_t      did = -1, did2 = -1, did3 = -1;       /* Dataset IDs */
-    hid_t      dcpl = -1, dcpl2 = -1, dcpl3 = -1;    /* Dataset creation property lists */
-    hid_t      sid = -1, sid2 = -1, sid3 = -1;       /* Dataspace IDs */
+    hid_t fid = H5I_INVALID_HID;                                                 /* File ID */
+    hid_t did = H5I_INVALID_HID, did2 = H5I_INVALID_HID, did3 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t dcpl = H5I_INVALID_HID, dcpl2 = H5I_INVALID_HID,
+          dcpl3    = H5I_INVALID_HID; /* Dataset creation property lists */
+    hid_t      sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID, sid3 = H5I_INVALID_HID; /* Dataspace IDs */
     hsize_t    dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t    max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t    chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
@@ -295,19 +296,19 @@ static unsigned
 verify_obj_dset_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    hid_t      fid  = -1;            /* File ID */
-    hid_t      fapl = -1;            /* File access property list */
-    hid_t      aid  = -1;            /* Attribute ID */
-    hid_t      sid = -1, sid2 = -1;  /* Dataspace IDs */
-    hid_t      did = -1, did2 = -1;  /* Dataset IDs */
-    hid_t      oid = -1;             /* Object ID */
-    hid_t      dcpl2;                /* Dataset creation property list */
-    int        i            = 0;     /* Local index variable */
-    hsize_t    dim[1]       = {100}; /* Dataset dimension size */
-    hsize_t    chunk_dim[1] = {7};   /* Dataset chunk dimension size */
-    H5O_info_t oinfo, oinfo2;        /* Object metadata information */
-    char       attrname[500];        /* Name of attribute */
-    unsigned   flags;                /* File access flags */
+    hid_t      fid  = H5I_INVALID_HID;                        /* File ID */
+    hid_t      fapl = H5I_INVALID_HID;                        /* File access property list */
+    hid_t      aid  = H5I_INVALID_HID;                        /* Attribute ID */
+    hid_t      sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID; /* Dataspace IDs */
+    hid_t      did = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t      oid          = H5I_INVALID_HID;                /* Object ID */
+    hid_t      dcpl2        = H5I_INVALID_HID;                /* Dataset creation property list */
+    int        i            = 0;                              /* Local index variable */
+    hsize_t    dim[1]       = {100};                          /* Dataset dimension size */
+    hsize_t    chunk_dim[1] = {7};                            /* Dataset chunk dimension size */
+    H5O_info_t oinfo, oinfo2;                                 /* Object metadata information */
+    char       attrname[500];                                 /* Name of attribute */
+    unsigned   flags;                                         /* File access flags */
 
     if (swmr) {
         TESTING("cork status for dataset objects with attributes (SWMR)");
@@ -500,11 +501,11 @@ static unsigned
 verify_dset_cork(hbool_t swmr, hbool_t new_format)
 {
     /* Variable Declarations */
-    hid_t      fid  = -1;                            /* File ID */
-    hid_t      fapl = -1;                            /* File access property list */
-    hid_t      did = -1, did2 = -1, did3 = -1;       /* Dataset IDs */
-    hid_t      dcpl = -1;                            /* Dataset creation property list */
-    hid_t      sid = -1, sid2 = -1, sid3 = -1;       /* Dataspace IDs */
+    hid_t      fid  = H5I_INVALID_HID; /* File ID */
+    hid_t      fapl = H5I_INVALID_HID; /* File access property list */
+    hid_t      did = H5I_INVALID_HID, did2 = H5I_INVALID_HID, did3 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t      dcpl = H5I_INVALID_HID; /* Dataset creation property list */
+    hid_t      sid = H5I_INVALID_HID, sid2 = H5I_INVALID_HID, sid3 = H5I_INVALID_HID; /* Dataspace IDs */
     hsize_t    dims[2]       = {100, 20};            /* Dataset dimension sizes */
     hsize_t    max_dims[2]   = {100, H5S_UNLIMITED}; /* Dataset maximum dimension sizes */
     hsize_t    chunk_dims[2] = {2, 5};               /* Dataset chunked dimension sizes */
@@ -758,15 +759,15 @@ static unsigned
 verify_group_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    hid_t      fid  = -1;                      /* File ID */
-    hid_t      fapl = -1;                      /* File access property list */
-    hid_t      gid = -1, gid2 = -1, gid3 = -1; /* Group IDs */
-    H5O_info_t oinfo, oinfo2, oinfo3;          /* Object metadata information */
-    hid_t      aid;                            /* Attribute ID */
-    hid_t      sid;                            /* Dataspace ID */
-    char       attrname[500];                  /* Name of attribute */
-    unsigned   flags;                          /* File access flags */
-    int        i = 0;                          /* Local index variable */
+    hid_t      fid  = H5I_INVALID_HID; /* File ID */
+    hid_t      fapl = H5I_INVALID_HID; /* File access property list */
+    hid_t      gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID, gid3 = H5I_INVALID_HID; /* Group IDs */
+    H5O_info_t oinfo, oinfo2, oinfo3; /* Object metadata information */
+    hid_t      aid = H5I_INVALID_HID; /* Attribute ID */
+    hid_t      sid = H5I_INVALID_HID; /* Dataspace ID */
+    char       attrname[500];         /* Name of attribute */
+    unsigned   flags;                 /* File access flags */
+    int        i = 0;                 /* Local index variable */
 
     /* Testing Macro */
     if (swmr) {
@@ -927,17 +928,17 @@ static unsigned
 verify_named_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    hid_t      fid  = -1;                      /* File ID */
-    hid_t      fapl = -1;                      /* File access property list */
-    hid_t      tid = -1, tid2 = -1, tid3 = -1; /* Datatype IDs */
-    hid_t      gid = -1, gid2 = -1;            /* Group IDs */
-    H5O_info_t oinfo, oinfo2, oinfo3, oinfo4;  /* Object metadata information */
-    hid_t      aid = -1;                       /* Attribute ID */
-    hid_t      sid;                            /* Dataspace ID */
-    hid_t      did;                            /* Dataset ID */
-    char       attrname[500];                  /* Name of attribute */
-    unsigned   flags;                          /* File access flags */
-    int        i = 0;                          /* Local index variable */
+    hid_t      fid  = H5I_INVALID_HID; /* File ID */
+    hid_t      fapl = H5I_INVALID_HID; /* File access property list */
+    hid_t      tid = H5I_INVALID_HID, tid2 = H5I_INVALID_HID, tid3 = H5I_INVALID_HID; /* Datatype IDs */
+    hid_t      gid = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;                         /* Group IDs */
+    H5O_info_t oinfo, oinfo2, oinfo3, oinfo4; /* Object metadata information */
+    hid_t      aid = H5I_INVALID_HID;         /* Attribute ID */
+    hid_t      sid = H5I_INVALID_HID;         /* Dataspace ID */
+    hid_t      did = H5I_INVALID_HID;         /* Dataset ID */
+    char       attrname[500];                 /* Name of attribute */
+    unsigned   flags;                         /* File access flags */
+    int        i = 0;                         /* Local index variable */
 
     /* Testing Macro */
     if (swmr) {
@@ -1204,20 +1205,20 @@ static unsigned
 verify_multiple_cork(hbool_t swmr)
 {
     /* Variable Declarations */
-    hid_t      fid1 = -1, fid2 = -1;   /* File ID */
-    hid_t      fapl = -1;              /* File access property list */
-    hid_t      tid1 = -1, tid2 = -1;   /* Datatype IDs */
-    hid_t      gid1 = -1, gid2 = -1;   /* Group IDs */
-    hid_t      did1 = -1, did2 = -1;   /* Dataset ID */
-    hid_t      aidg1 = -1, aidg2 = -1; /* Attribute ID */
-    hid_t      aidd1 = -1, aidd2 = -1; /* Attribute ID */
-    hid_t      aidt1 = -1, aidt2 = -1; /* Attribute ID */
-    hid_t      sid = -1;               /* Dataspace ID */
-    H5O_info_t oinfo1, oinfo2, oinfo3; /* Object metadata information */
-    hsize_t    dim[1] = {5};           /* Dimension sizes */
-    unsigned   flags;                  /* File access flags */
-    hbool_t    corked;                 /* Cork status */
-    herr_t     ret;                    /* Return value */
+    hid_t      fid1 = H5I_INVALID_HID, fid2 = H5I_INVALID_HID;   /* File ID */
+    hid_t      fapl = H5I_INVALID_HID;                           /* File access property list */
+    hid_t      tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID;   /* Datatype IDs */
+    hid_t      gid1 = H5I_INVALID_HID, gid2 = H5I_INVALID_HID;   /* Group IDs */
+    hid_t      did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID;   /* Dataset ID */
+    hid_t      aidg1 = H5I_INVALID_HID, aidg2 = H5I_INVALID_HID; /* Attribute ID */
+    hid_t      aidd1 = H5I_INVALID_HID, aidd2 = H5I_INVALID_HID; /* Attribute ID */
+    hid_t      aidt1 = H5I_INVALID_HID, aidt2 = H5I_INVALID_HID; /* Attribute ID */
+    hid_t      sid = H5I_INVALID_HID;                            /* Dataspace ID */
+    H5O_info_t oinfo1, oinfo2, oinfo3;                           /* Object metadata information */
+    hsize_t    dim[1] = {5};                                     /* Dimension sizes */
+    unsigned   flags;                                            /* File access flags */
+    hbool_t    corked;                                           /* Cork status */
+    herr_t     ret;                                              /* Return value */
 
     /* Testing Macro */
     if (swmr) {
@@ -1880,18 +1881,18 @@ error:
 static unsigned
 test_dset_cork(hbool_t swmr, hbool_t new_format)
 {
-    hid_t    fid;                                          /* File ID */
-    hid_t    fapl;                                         /* File access property list */
-    hid_t    gid;                                          /* Groupd ID */
-    hid_t    did1, did2;                                   /* Dataset IDs */
-    hid_t    tid1, tid2;                                   /* Datatype IDs */
-    hid_t    sid;                                          /* Dataspace ID */
-    hid_t    dcpl;                                         /* Dataset creation property list */
-    hsize_t  dims[RANK];                                   /* Dataset dimensions */
-    hsize_t  maxdims[2]  = {H5S_UNLIMITED, H5S_UNLIMITED}; /* Maximum dataset dimensions */
-    hsize_t  cdims[RANK] = {2, 2};                         /* Chunk dimensions */
-    int      fillval     = 0;                              /* Fill value */
-    int      i, j, k = 0;                                  /* Local index variables */
+    hid_t    fid  = H5I_INVALID_HID;                         /* File ID */
+    hid_t    fapl = H5I_INVALID_HID;                         /* File access property list */
+    hid_t    gid  = H5I_INVALID_HID;                         /* Groupd ID */
+    hid_t    did1 = H5I_INVALID_HID, did2 = H5I_INVALID_HID; /* Dataset IDs */
+    hid_t    tid1 = H5I_INVALID_HID, tid2 = H5I_INVALID_HID; /* Datatype IDs */
+    hid_t    sid  = H5I_INVALID_HID;                         /* Dataspace ID */
+    hid_t    dcpl = H5I_INVALID_HID;                         /* Dataset creation property list */
+    hsize_t  dims[RANK];                                     /* Dataset dimensions */
+    hsize_t  maxdims[2]  = {H5S_UNLIMITED, H5S_UNLIMITED};   /* Maximum dataset dimensions */
+    hsize_t  cdims[RANK] = {2, 2};                           /* Chunk dimensions */
+    int      fillval     = 0;                                /* Fill value */
+    int      i, j, k = 0;                                    /* Local index variables */
     int **   wbuf      = NULL; /* Data buffer for writes (pointers to fake 2D array) */
     int *    wbuf_data = NULL; /* Data buffer for writes (real data) */
     int *    rbuf_data = NULL; /* Data buffer for reads (real data) */
