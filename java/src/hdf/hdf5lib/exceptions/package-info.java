@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
+ *                                                                           *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,42 +11,21 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
- * Purpose:	The public header file for the sec2 driver.
- */
-#ifndef H5FDstdio_H
-#define H5FDstdio_H
-
-#include "H5Ipublic.h"
-
-#define H5FD_STDIO (H5FDperform_init(H5FD_stdio_init))
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-H5_DLL hid_t H5FD_stdio_init(void);
 /**
- * \ingroup FAPL
- *
- * \brief Sets the standard I/O driver
- *
- * \fapl_id
- * \returns \herr_t
- *
- * \details H5Pset_fapl_stdio() modifies the file access property list to use
- *          the standard I/O driver, H5FDstdio().
- *
- * \since 1.4.0
+ * <p>
+ * The package exceptions contains error classes for the Java HDF5 Interface.
+ * <p>
+ * There are two sub-classes of exceptions defined:
+ * <ol>
+ * <li>
+ * HDF5LibraryException -- errors raised the HDF5 library code
+ * <li>
+ * HDF5JavaException -- errors raised the HDF5 Java wrapper code
+ * </ol>
+ * <p>
+ * The HDF5LibraryException is the base class for the classes that represent specific error conditions.
+ * In particular, HDF5LibraryException has a sub-class for each major
+ * error code returned by the HDF5 library.
  *
  */
-H5_DLL herr_t H5Pset_fapl_stdio(hid_t fapl_id);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+package hdf.hdf5lib.exceptions;
