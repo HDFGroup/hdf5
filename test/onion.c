@@ -3161,14 +3161,14 @@ test_integration_create(void)
         for (j = 0; j < 7; j++)
             dset_data[i][j] = i * 6 + j + 1;
 
-	printf("First revision\n");
-	for (i = 0; i < 4; i++) {
-		printf(" [");
-		for (j = 0; j < 7; j++)
-			printf(" %3d", dset_data[i][j]);
-		printf("]\n");
-	}
-		
+    printf("First revision\n");
+    for (i = 0; i < 4; i++) {
+        printf(" [");
+        for (j = 0; j < 7; j++)
+            printf(" %3d", dset_data[i][j]);
+        printf("]\n");
+    }
+
     HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
@@ -3218,13 +3218,13 @@ test_integration_create(void)
         for (j = 0; j < 7; j++)
             dset_data[i][j] = i * 3 + j + 5;
 
-	printf("Second revision\n");
-	for (i = 0; i < 4; i++) {
-		printf(" [");
-		for (j = 0; j < 7; j++)
-			printf(" %3d", dset_data[i][j]);
-		printf("]\n");
-	}
+    printf("Second revision\n");
+    for (i = 0; i < 4; i++) {
+        printf(" [");
+        for (j = 0; j < 7; j++)
+            printf(" %3d", dset_data[i][j]);
+        printf("]\n");
+    }
 
     HDputs(".");
     HDfflush(stdout);
@@ -3364,9 +3364,9 @@ test_integration_create_simple(void)
         ONION_TEST_PAGE_SIZE_5,        /* page_size        */
         H5FD_ONION_STORE_TARGET_ONION, /* store_target     */
         H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST,
-        0, /* force_write_open */
-        0, /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
-		"initial commit" /* comment          */
+        0,               /* force_write_open */
+        0,               /* creation flags, was H5FD_ONION_FAPL_INFO_CREATE_FLAG_ENABLE_PAGE_ALIGNMENT */
+        "initial commit" /* comment          */
     };
     hid_t file_id = H5I_INVALID_HID;
 
@@ -3404,7 +3404,7 @@ test_integration_create_simple(void)
      * Initialize data.
      */
     for (i = 0; i < 1024; i++)
-    	wdata[0][i] = i;
+        wdata[0][i] = i;
 
     /*
      * Create a new file using the default properties.
@@ -3470,8 +3470,8 @@ test_integration_create_simple(void)
         printf("\n\n\n\nERROR OPENING\n\n\n\n");
         TEST_ERROR;
     }
-    
-	HDputs(".");
+
+    HDputs(".");
     HDfflush(stdout);
 
     dset = H5Dopen(file_id, "DS1", H5P_DEFAULT);
@@ -3484,17 +3484,16 @@ test_integration_create_simple(void)
     HDfflush(stdout);
     int dset_data[1][1024];
     for (i = 0; i < 1024; i++)
-    	dset_data[0][i] = i + 1024;
+        dset_data[0][i] = i + 1024;
 
+    printf("First revision\n");
+    for (i = 0; i < 1; i++) {
+        printf(" [");
+        for (j = 0; j < 1024; j++)
+            printf(" %3d", dset_data[i][j]);
+        printf("]\n");
+    }
 
-	printf("First revision\n");
-	for (i = 0; i < 1; i++) {
-		printf(" [");
-		for (j = 0; j < 1024; j++)
-			printf(" %3d", dset_data[i][j]);
-		printf("]\n");
-	}
-		
     HDputs(".");
     HDfflush(stdout);
     if (H5Dwrite(dset, H5T_STD_I32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset_data) < 0)
@@ -3512,10 +3511,9 @@ test_integration_create_simple(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
 
+    //////////////////
 
-	//////////////////
-    
-	HDputs(".");
+    HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3535,17 +3533,17 @@ test_integration_create_simple(void)
 
     HDputs(".");
     HDfflush(stdout);
-    //dset_data[4][7];
+    // dset_data[4][7];
     for (i = 0; i < 1024; i++)
-    	dset_data[0][i] = i + 2048;
+        dset_data[0][i] = i + 2048;
 
-	printf("Second revision\n");
-	for (i = 0; i < 1; i++) {
-		printf(" [");
-		for (j = 0; j < 1024; j++)
-			printf(" %3d", dset_data[i][j]);
-		printf("]\n");
-	}
+    printf("Second revision\n");
+    for (i = 0; i < 1; i++) {
+        printf(" [");
+        for (j = 0; j < 1024; j++)
+            printf(" %3d", dset_data[i][j]);
+        printf("]\n");
+    }
 
     HDputs(".");
     HDfflush(stdout);
@@ -3568,9 +3566,9 @@ test_integration_create_simple(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
 
-	///////////////////////
+    ///////////////////////
 
-	HDputs(".");
+    HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3590,17 +3588,17 @@ test_integration_create_simple(void)
 
     HDputs(".");
     HDfflush(stdout);
-    //dset_data[4][7];
-    for (i = 0; i < 1024; i+=20)
-    	dset_data[0][i] = i + 3072;
+    // dset_data[4][7];
+    for (i = 0; i < 1024; i += 20)
+        dset_data[0][i] = i + 3072;
 
-	printf("Second revision\n");
-	for (i = 0; i < 1; i++) {
-		printf(" [");
-		for (j = 0; j < 1024; j++)
-			printf(" %3d", dset_data[i][j]);
-		printf("]\n");
-	}
+    printf("Second revision\n");
+    for (i = 0; i < 1; i++) {
+        printf(" [");
+        for (j = 0; j < 1024; j++)
+            printf(" %3d", dset_data[i][j]);
+        printf("]\n");
+    }
 
     HDputs(".");
     HDfflush(stdout);
@@ -3626,19 +3624,19 @@ test_integration_create_simple(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-	/////////////////////////
+    /////////////////////////
 
-	// Read back data to check for validtiy
-	onion_info.revision_id = 3;
-	//onion_info.revision_id = 2;
-	//onion_info.revision_id = 1;
-    fapl_id                    = H5Pcreate(H5P_FILE_ACCESS);
+    // Read back data to check for validtiy
+    onion_info.revision_id = 3;
+    // onion_info.revision_id = 2;
+    // onion_info.revision_id = 1;
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
-	
-	HDputs(".");
+
+    HDputs(".");
     fflush(stdout);
 
     file_id = H5Fopen(paths->canon, H5F_ACC_RDWR, fapl_id);
@@ -3659,40 +3657,40 @@ test_integration_create_simple(void)
     }
 
     HDputs(".");
-	HDputs("\n\nREADING\n\n");
+    HDputs("\n\nREADING\n\n");
     HDfflush(stdout);
-	int rdata[1][1024];
-	if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
-		TEST_ERROR
+    int rdata[1][1024];
+    if (H5Dread(dset, H5T_NATIVE_INT, H5S_ALL, H5S_ALL, H5P_DEFAULT, rdata[0]) < 0)
+        TEST_ERROR
 
-	HDputs("\n\nDONE READING\n\n");
-	HDfflush(stdout);
+    HDputs("\n\nDONE READING\n\n");
+    HDfflush(stdout);
 
-	for (i = 0; i < 1; i++) {
-		printf(" [");
-		for (j = 0; j < 1024; j++)
-			printf(" %3d", rdata[i][j]);
-		printf("]\n");
-	}
+    for (i = 0; i < 1; i++) {
+        printf(" [");
+        for (j = 0; j < 1024; j++)
+            printf(" %3d", rdata[i][j]);
+        printf("]\n");
+    }
 
-	for (i = 0; i < 1; i++) {
-		//for (j = 0; j < 1024; j++) {
-		for (j = 0; j < 1024; j+=20) {
-			printf("i: %d, j: %d\n", i, j);
-			//int expected = j + 1024;
-			//int expected = j + 2048;
-			int expected = j + 3072;
-			if (rdata[i][j] != expected) {
-				printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
-				HDfflush(stdout);
-				TEST_ERROR
-			} else {
-				//printf("Expected: %d, Got: %d\n", expected, rdata[i][j]);
-				HDfflush(stdout);
-			}
-		}
-	}
-
+    for (i = 0; i < 1; i++) {
+        // for (j = 0; j < 1024; j++) {
+        for (j = 0; j < 1024; j += 20) {
+            printf("i: %d, j: %d\n", i, j);
+            // int expected = j + 1024;
+            // int expected = j + 2048;
+            int expected = j + 3072;
+            if (rdata[i][j] != expected) {
+                printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
+                HDfflush(stdout);
+                TEST_ERROR
+            }
+            else {
+                // printf("Expected: %d, Got: %d\n", expected, rdata[i][j]);
+                HDfflush(stdout);
+            }
+        }
+    }
 
     if (H5Dclose(dset) < 0)
         TEST_ERROR
@@ -3704,10 +3702,10 @@ test_integration_create_simple(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    //HDremove(paths->canon);
-    //HDremove(paths->onion);
-    //HDremove(paths->recovery);
-    //onion_filepaths_destroy(paths);
+    // HDremove(paths->canon);
+    // HDremove(paths->onion);
+    // HDremove(paths->recovery);
+    // onion_filepaths_destroy(paths);
 
     PASSED();
     return 0;
@@ -3715,10 +3713,10 @@ test_integration_create_simple(void)
 error:
 
     if (paths != NULL) {
-        //HDremove(paths->canon);
-        //HDremove(paths->onion);
-        //HDremove(paths->recovery);
-        //onion_filepaths_destroy(paths);
+        // HDremove(paths->canon);
+        // HDremove(paths->onion);
+        // HDremove(paths->recovery);
+        // onion_filepaths_destroy(paths);
     }
 
     if (dset != H5I_INVALID_HID)
@@ -3730,8 +3728,6 @@ error:
 
     return -1;
 } /* end test_integration_create_simple() */
-
-
 
 /*-----------------------------------------------------------------------------
  *
