@@ -1590,7 +1590,7 @@ case "X-$withval" in
     HAVE_LIBMFU="yes"
     AC_CHECK_HEADERS([mfu.h],, [unset HAVE_LIBMFU])
     if test "x$HAVE_LIBMFU" = "xyes"; then
-      AC_CHECK_LIB([mfu], [mfu_init],, [unset HAVE_LIBMFU])
+      AC_SEARCH_LIBS([mfu], [mfu_init],[DH5WALK_LIBS="-lmfu"], [unset HAVE_LIBMFU])
     fi
     if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find libmfu library])
@@ -1632,10 +1632,10 @@ case "X-$withval" in
     if test "x$HAVE_LIBMFU" = "xyes"; then
       if test -n "$libmfu_lib"; then
         LDFLAGS="$LDFLAGS -L$libmfu_lib"
-        AM_LDFLAGS="$AM_LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+        DH5WALK_LDFLAGS="$AM_LDFLAGS -L$libmfu_lib -L$libcircle_lib"
       fi
 
-      AC_CHECK_LIB([mfu], [mfu_init],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
+      AC_SEARCH_LIBS([mfu], [mfu_init],[AM_LDFLAGS="$saved_AM_LDFLAGS"], [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
     fi
 
     if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then

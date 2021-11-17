@@ -30,7 +30,7 @@ bin_PROGRAMS=dh5walk
 # bin_SCRIPTS=install-examples
 
 # Add h5stat specific linker flags here
-dh5walk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS)
+dh5walk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS) $(DH5WALK_LDFLAGS)
 
 # Tell automake to clean h5redeploy script
 CLEANFILES=
