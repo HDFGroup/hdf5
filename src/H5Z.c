@@ -594,14 +594,9 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARA
     /* Do a global flush if the file is opened for write */
     if (H5F_ACC_RDWR & H5F_INTENT(f)) {
 
-/* When parallel HDF5 is defined, check for collective metadata reads on this
- *      file and set the flag for metadata I/O in the API context.  -QAK, 2018/02/14
- */
 #ifdef H5_HAVE_PARALLEL
         /* Check if MPIO driver is used */
         if (H5F_HAS_FEATURE(f, H5FD_FEAT_HAS_MPI)) {
-            H5P_coll_md_read_flag_t coll_md_read; /* Do all metadata reads collectively */
-
             /* Sanity check for collectively calling H5Zunregister, if requested */
             /* (Sanity check assumes that a barrier on one file's comm
              *  is sufficient (i.e. that there aren't different comms for
@@ -621,13 +616,8 @@ H5Z__flush_file_cb(void *obj_ptr, hid_t H5_ATTR_UNUSED obj_id, void H5_ATTR_PARA
                 /* Set the "sanity checked" flag */
                 object->sanity_checked = TRUE;
             } /* end if */
-
-            /* Check whether to use the collective metadata read DXPL */
-            coll_md_read = H5F_COLL_MD_READ(f);
-            if (H5P_USER_TRUE == coll_md_read)
-                H5CX_set_coll_metadata_read(TRUE);
-        } /* end if */
-#endif    /* H5_HAVE_PARALLEL */
+        }     /* end if */
+#endif        /* H5_HAVE_PARALLEL */
 
         /* Call the flush routine for mounted file hierarchies */
         if (H5F_flush_mounts((H5F_t *)obj_ptr) < 0)
