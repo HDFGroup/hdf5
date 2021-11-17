@@ -346,7 +346,7 @@ H5F__vfd_swmr_writer_create_open_flush_test(hid_t file_id, hbool_t file_create)
         HGOTO_ERROR(H5E_FILE, H5E_BADFILE, FAIL, "unable to stat the metadata file")
 
     if (file_create) { /* Creating file */
-        if(stat_buf.st_size != 0)
+        if (stat_buf.st_size != 0)
             HGOTO_ERROR(H5E_FILE, H5E_READERROR, FAIL, "metadata file should be empty for file create")
     }
     else { /* Opening or flushing the file */

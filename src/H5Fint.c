@@ -1835,26 +1835,26 @@ done:
 H5F_t *
 H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
 {
-    H5F_t *                file   = NULL; /*the success return value      */
-    H5F_shared_t *         shared = NULL; /*shared part of `file'         */
-    H5FD_t *               lf     = NULL; /*file driver part of `shared'  */
-    unsigned               tent_flags;    /*tentative flags               */
-    H5FD_class_t *         drvr;          /*file driver class info        */
-    H5P_genplist_t *       a_plist;       /*file access property list     */
-    H5F_close_degree_t     fc_degree;     /*file close degree             */
-    size_t                 page_buf_size;
-    unsigned               page_buf_min_meta_perc = 0;
-    unsigned               page_buf_min_raw_perc  = 0;
-    hbool_t                set_flag               = FALSE; /* Set the status_flags in the superblock */
-    hbool_t                clear                  = FALSE; /* Clear the status_flags */
-    hbool_t                evict_on_close;                 /* Evict on close value from plist */
-    hbool_t                use_file_locking    = TRUE;     /* Using file locks? */
-    hbool_t                ci_load             = FALSE;    /* Whether MDC ci load requested */
-    hbool_t                ci_write            = FALSE;    /* Whether MDC CI write requested */
-    hbool_t                file_create         = FALSE;    /* Creating a new file or not */
-    H5F_vfd_swmr_config_t *vfd_swmr_config_ptr = NULL;     /* Points to VFD SMWR config info */
-    H5F_generate_md_ck_cb_t cb_info = {NULL};
-    H5F_t *                ret_value           = NULL;     /* Actual return value */
+    H5F_t *                 file   = NULL; /*the success return value      */
+    H5F_shared_t *          shared = NULL; /*shared part of `file'         */
+    H5FD_t *                lf     = NULL; /*file driver part of `shared'  */
+    unsigned                tent_flags;    /*tentative flags               */
+    H5FD_class_t *          drvr;          /*file driver class info        */
+    H5P_genplist_t *        a_plist;       /*file access property list     */
+    H5F_close_degree_t      fc_degree;     /*file close degree             */
+    size_t                  page_buf_size;
+    unsigned                page_buf_min_meta_perc = 0;
+    unsigned                page_buf_min_raw_perc  = 0;
+    hbool_t                 set_flag               = FALSE; /* Set the status_flags in the superblock */
+    hbool_t                 clear                  = FALSE; /* Clear the status_flags */
+    hbool_t                 evict_on_close;                 /* Evict on close value from plist */
+    hbool_t                 use_file_locking    = TRUE;     /* Using file locks? */
+    hbool_t                 ci_load             = FALSE;    /* Whether MDC ci load requested */
+    hbool_t                 ci_write            = FALSE;    /* Whether MDC CI write requested */
+    hbool_t                 file_create         = FALSE;    /* Creating a new file or not */
+    H5F_vfd_swmr_config_t * vfd_swmr_config_ptr = NULL;     /* Points to VFD SMWR config info */
+    H5F_generate_md_ck_cb_t cb_info             = {NULL};
+    H5F_t *                 ret_value           = NULL; /* Actual return value */
 
     FUNC_ENTER_NOAPI(NULL)
 
@@ -2117,7 +2117,7 @@ H5F_open(const char *name, unsigned flags, hid_t fcpl_id, hid_t fapl_id)
         /* Initialization for VFD SWMR writer and reader */
         if (1 == shared->nrefs) {
             /* Private property for VFD SWMR testing: generate checksum for metadata file */
-            if(cb_info.func)
+            if (cb_info.func)
                 shared->generate_md_ck_cb = cb_info.func;
             if (H5F_vfd_swmr_init(file, file_create) < 0)
                 HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "file open fail with initialization for VFD SWMR")

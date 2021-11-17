@@ -86,8 +86,8 @@ open_skeleton(const char *filename, unsigned verbose)
     if ((config = (H5F_vfd_swmr_config_t *)HDcalloc(1, sizeof(H5F_vfd_swmr_config_t))) == NULL)
         goto error;
 
-     /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
-      * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
+     * flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config, 4, 5, TRUE, TRUE, FALSE, TRUE, 128, "rw-shadow", NULL);
 
     /* use_latest_format, use_vfd_swmr, only_meta_page, page_buf_size, config */

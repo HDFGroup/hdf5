@@ -49,34 +49,34 @@
 #define FILENAME3    "vfd_swmr_file3.h5"
 #define MD_FILENAME3 "vfd_swmr_metadata_file3"
 
-#define FILENAME4    "vfd_swmr_file4.h5"
-#define MD_FILE      "vfd_swmr_md_file"
-#define UD_FILE      "vfd_swmr_ud_file"
+#define FILENAME4 "vfd_swmr_file4.h5"
+#define MD_FILE   "vfd_swmr_md_file"
+#define UD_FILE   "vfd_swmr_ud_file"
 
 #define FNAME "non_vfd_swmr_file.h5"
 
 /* Defines used by verify_updater_flags() and verify_ud_chk() helper routine */
 
 /* Offset of "flags" in updater file header */
-#define UD_HD_FLAGS_OFFSET                      6   
+#define UD_HD_FLAGS_OFFSET 6
 
 /* Offset of "sequence number" in updater file header */
-#define UD_HD_SEQ_NUM_OFFSET                    12  
+#define UD_HD_SEQ_NUM_OFFSET 12
 
 /* Offset of "change list length" in updater file header */
-#define UD_HD_CHANGE_LIST_LEN_OFFSET            36  
+#define UD_HD_CHANGE_LIST_LEN_OFFSET 36
 
 /* Offset of "number of change list entries" in updater file change list header */
-#define UD_CL_NUM_CHANGE_LIST_ENTRIES_OFFSET    H5F_UD_HEADER_SIZE + 44
+#define UD_CL_NUM_CHANGE_LIST_ENTRIES_OFFSET H5F_UD_HEADER_SIZE + 44
 
 /* Size of "sequence number", "tick number" and "change list length" fields in the updater file header */
-#define UD_SIZE_8                                  8
+#define UD_SIZE_8 8
 
 /* Size of checksum and "number of change list entries" field in the updater change list header */
-#define UD_SIZE_4                                  4
+#define UD_SIZE_4 4
 
 /* Size of "flags" field in the updater file header */
-#define UD_SIZE_2                                  2 
+#define UD_SIZE_2 2
 
 /* test routines for VFD SWMR */
 static unsigned test_fapl(void);
@@ -86,13 +86,12 @@ static unsigned test_writer_md(void);
 
 static unsigned test_updater_flags(void);
 static unsigned test_updater_flags_same_file_opens(void);
-static herr_t verify_updater_flags(char *ud_name, uint16_t expected_flags);
+static herr_t   verify_updater_flags(char *ud_name, uint16_t expected_flags);
 
-static void clean_chk_ud_files(char *md_file_path, char *updater_file_path);
-static herr_t verify_ud_chk(char *md_file_path, char *ud_file_path);
-static herr_t md_ck_cb(char *md_file_path, uint64_t tick_num);
+static void     clean_chk_ud_files(char *md_file_path, char *updater_file_path);
+static herr_t   verify_ud_chk(char *md_file_path, char *ud_file_path);
+static herr_t   md_ck_cb(char *md_file_path, uint64_t tick_num);
 static unsigned test_updater_generate_md_checksums(hbool_t file_create);
-
 
 /*-------------------------------------------------------------------------
  * Function:    test_fapl()
@@ -108,7 +107,7 @@ static unsigned test_updater_generate_md_checksums(hbool_t file_create);
  *                   must be true
  *                 --if both the writer and maintain_metadata_file fields are true,
  *                   then md_file_path field shouldn't be empty
- *                 --if both the writer and generate_updater_files fields are true, 
+ *                 --if both the writer and generate_updater_files fields are true,
  *                   then updater_file_path field shouldn't be empty
  *              B) Verify that info set in the fapl is retrieved correctly.
  *
@@ -201,7 +200,7 @@ test_fapl(void)
     if (ret >= 0)
         TEST_ERROR;
 
-    my_config->writer = TRUE;
+    my_config->writer                 = TRUE;
     my_config->maintain_metadata_file = TRUE;
     /* Should fail: empty md_file_path */
     H5E_BEGIN_TRY
@@ -344,12 +343,11 @@ test_file_fapl(void)
     if ((file_config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
 
-
-    /* 
-     * Configured as VFD SWMR reader + no page buffering 
+    /*
+     * Configured as VFD SWMR reader + no page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 7, FALSE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -370,11 +368,11 @@ test_file_fapl(void)
     if (H5Pclose(fapl1) < 0)
         FAIL_STACK_ERROR
 
-    /* 
-     * Configured as VFD SWMR writer + no page buffering 
+    /*
+     * Configured as VFD SWMR writer + no page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 7, TRUE, TRUE, TRUE, TRUE, 2, MD_FILENAME, UD_FILENAME);
 
@@ -410,11 +408,11 @@ test_file_fapl(void)
     if (H5Pclose(fapl1) < 0)
         FAIL_STACK_ERROR
 
-    /* 
-     * Configured as VFD SWMR writer + page buffering 
+    /*
+     * Configured as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 7, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -482,11 +480,11 @@ test_file_fapl(void)
     if (H5Pclose(fapl1) < 0)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set up different VFD SWMR configuration + page_buffering 
+    /*
+     * Set up different VFD SWMR configuration + page_buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config2, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -522,12 +520,11 @@ test_file_fapl(void)
     /* The file previously opened as VDF SWMR writer is still open */
     /* with VFD SWMR configuration in config2 */
 
-
-    /* 
-     * Set up as VFD SWMR writer in config1 but different from config2 
+    /*
+     * Set up as VFD SWMR writer in config1 but different from config2
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 3, 8, TRUE, TRUE, FALSE, TRUE, 3, MD_FILENAME, NULL);
 
@@ -551,8 +548,8 @@ test_file_fapl(void)
     if (H5Pclose(fapl1) < 0)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set up as VFD SWMR reader in config1 which is same as config2 
+    /*
+     * Set up as VFD SWMR reader in config1 which is same as config2
      */
 
     init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
@@ -634,7 +631,6 @@ error:
     return 1;
 } /* test_file_fapl() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    test_file_end_tick()
  *
@@ -694,11 +690,11 @@ test_file_end_tick(void)
     if ((config3 = HDmalloc(sizeof(*config3))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Configured file 1 as VFD SWMR writer + page buffering 
+    /*
+     * Configured file 1 as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 10, 15, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -708,11 +704,11 @@ test_file_end_tick(void)
     if (fapl1 == H5I_INVALID_HID)
         TEST_ERROR
 
-    /* 
-     * Configured file 2 as VFD SWMR writer + page buffering 
+    /*
+     * Configured file 2 as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config2, 5, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME2, NULL);
 
@@ -722,11 +718,11 @@ test_file_end_tick(void)
     if (fapl2 == H5I_INVALID_HID)
         TEST_ERROR
 
-    /* 
-     * Configured file 3 as VFD SWMR writer + page buffering 
+    /*
+     * Configured file 3 as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config3, 3, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME3, NULL);
 
@@ -905,11 +901,11 @@ test_writer_create_open_flush(void)
     if ((my_config = HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set up the VFD SWMR configuration + page buffering 
+    /*
+     * Set up the VFD SWMR configuration + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(my_config, 1, 3, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -1023,7 +1019,7 @@ test_writer_md(void)
     hsize_t        chunk_dims[2]     = {2, 5};                         /* Dataset chunked dimension sizes */
     H5FD_vfd_swmr_idx_entry_t *index = NULL;                           /* Pointer to the index entries */
     H5F_vfd_swmr_config_t *    my_config = NULL;                       /* Configuration for VFD SWMR */
-    H5F_t * f        = NULL;                                           /* Internal file object pointer */
+    H5F_t *                    f         = NULL;                       /* Internal file object pointer */
 
     TESTING("Verify the metadata file for VFD SWMR writer");
 
@@ -1031,7 +1027,7 @@ test_writer_md(void)
     if ((my_config = HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(my_config, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
 
@@ -1108,7 +1104,7 @@ test_writer_md(void)
 
     /* (B) Update every other entry in the index */
     for (i = 0; i < num_entries; i += 2) {
-        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
+        index[i].entry_ptr           = &buf[i * FS_PAGE_SIZE];
         index[i].tick_of_last_change = f->shared->tick_num;
     }
 
@@ -1147,7 +1143,7 @@ test_writer_md(void)
 
     /* (C) Update every 3 entry in the index */
     for (i = 0; i < num_entries; i += 3) {
-        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
+        index[i].entry_ptr           = &buf[i * FS_PAGE_SIZE];
         index[i].tick_of_last_change = f->shared->tick_num;
     }
 
@@ -1182,9 +1178,9 @@ test_writer_md(void)
     }
 
     /* (D) Update two entries in the index */
-    index[1].entry_ptr = &buf[1 * FS_PAGE_SIZE];
+    index[1].entry_ptr           = &buf[1 * FS_PAGE_SIZE];
     index[1].tick_of_last_change = f->shared->tick_num;
-    index[5].entry_ptr = &buf[5 * FS_PAGE_SIZE];
+    index[5].entry_ptr           = &buf[5 * FS_PAGE_SIZE];
     index[5].tick_of_last_change = f->shared->tick_num;
 
     /* Update with index and verify info in the metadata file */
@@ -1345,11 +1341,11 @@ test_reader_md_concur(void)
     if ((config_writer = HDmalloc(sizeof(*config_writer))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set up the VFD SWMR configuration + page buffering 
+    /*
+     * Set up the VFD SWMR configuration + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config_writer, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
 
@@ -1421,11 +1417,11 @@ test_reader_md_concur(void)
         if ((config_reader = HDmalloc(sizeof(*config_reader))) == NULL)
             HDexit(EXIT_FAILURE);
 
-        /* 
-         * Set up the VFD SWMR configuration as reader + page buffering 
+        /*
+         * Set up the VFD SWMR configuration as reader + page buffering
          */
 
-        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
         flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
         init_vfd_swmr_config(config_reader, 1, 3, FALSE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
 
@@ -1761,7 +1757,7 @@ test_reader_md_concur(void)
     /* Update 3 entries in the index */
     num_entries = 3;
     for (i = 0; i < num_entries; i++) {
-        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
+        index[i].entry_ptr           = &buf[i * FS_PAGE_SIZE];
         index[i].tick_of_last_change = file_writer->shared->tick_num;
     }
 
@@ -1816,7 +1812,7 @@ test_reader_md_concur(void)
     /* Update 5 entries in the index */
     num_entries = 5;
     for (i = 0; i < num_entries; i++) {
-        index[i].entry_ptr = &buf[i * FS_PAGE_SIZE];
+        index[i].entry_ptr           = &buf[i * FS_PAGE_SIZE];
         index[i].tick_of_last_change = file_writer->shared->tick_num;
     }
 
@@ -2040,7 +2036,7 @@ test_multiple_file_opens_concur(void)
 
         /* Set the VFD SWMR configuration in fapl_writer + page buffering */
 
-        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
         flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
         init_vfd_swmr_config(config_writer, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME2, NULL);
 
@@ -2108,7 +2104,7 @@ test_multiple_file_opens_concur(void)
     if ((config1 = HDmalloc(sizeof(*config1))) == NULL)
         FAIL_STACK_ERROR
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 7, 10, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
 
@@ -2151,7 +2147,7 @@ test_multiple_file_opens_concur(void)
     if ((config2 = HDmalloc(sizeof(*config2))) == NULL)
         FAIL_STACK_ERROR
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config2, 1, 3, FALSE, TRUE, FALSE, TRUE, 256, MD_FILENAME2, NULL);
 
@@ -2290,11 +2286,11 @@ test_disable_enable_eot_concur(void)
     if ((config_writer = HDmalloc(sizeof(*config_writer))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set up the VFD SWMR configuration + page buffering 
+    /*
+     * Set up the VFD SWMR configuration + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config_writer, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
 
@@ -2370,11 +2366,11 @@ test_disable_enable_eot_concur(void)
         if ((config_reader = HDmalloc(sizeof(*config_reader))) == NULL)
             HDexit(EXIT_FAILURE);
 
-        /* 
-         * Set up the VFD SWMR configuration as reader + page buffering 
+        /*
+         * Set up the VFD SWMR configuration as reader + page buffering
          */
 
-        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
            flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
         init_vfd_swmr_config(config_reader, 1, 3, FALSE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
 
@@ -2582,11 +2578,11 @@ test_file_end_tick_concur(void)
     if ((config_writer = HDmalloc(sizeof(*config_writer))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set up the VFD SWMR configuration + page buffering 
+    /*
+     * Set up the VFD SWMR configuration + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config_writer, 1, 3, TRUE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
 
@@ -2662,7 +2658,7 @@ test_file_end_tick_concur(void)
         if ((config_reader = HDmalloc(sizeof(*config_reader))) == NULL)
             HDexit(EXIT_FAILURE);
 
-        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+        /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
            flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
         init_vfd_swmr_config(config_reader, 1, 3, FALSE, TRUE, FALSE, TRUE, 256, MD_FILENAME, NULL);
 
@@ -2857,11 +2853,11 @@ test_multiple_file_opens(void)
     if ((config2 = HDmalloc(sizeof(*config2))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Configured as VFD SWMR writer + page buffering 
+    /*
+     * Configured as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -2870,7 +2866,7 @@ test_multiple_file_opens(void)
     if (fapl1 == H5I_INVALID_HID)
         FAIL_STACK_ERROR;
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config2, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME2, NULL);
 
@@ -3071,11 +3067,11 @@ test_same_file_opens(void)
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set the VFD SWMR configuration in fapl1 + page buffering 
+    /*
+     * Set the VFD SWMR configuration in fapl1 + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -3099,11 +3095,11 @@ test_same_file_opens(void)
     if (H5Fclose(fid2) < 0)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set the VFD SWMR configuration in fapl2 + page buffering 
+    /*
+     * Set the VFD SWMR configuration in fapl2 + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config2, 3, 8, FALSE, TRUE, FALSE, TRUE, 3, MD_FILENAME, NULL);
 
@@ -3154,12 +3150,11 @@ test_same_file_opens(void)
      * Tests for second column
      */
 
-
-    /* 
-     * Set up as VFD SWMR reader + page buffering 
+    /*
+     * Set up as VFD SWMR reader + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 10, FALSE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -3192,11 +3187,11 @@ test_same_file_opens(void)
     if ((fid = H5Fopen(FILENAME, H5F_ACC_RDWR, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* 
-     * Set up as VFD SWMR writer + page buffering 
+    /*
+     * Set up as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -3248,11 +3243,11 @@ test_same_file_opens(void)
     if ((fid = H5Fopen(FILENAME, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
         TEST_ERROR;
 
-    /* 
-     * Set up as VFD SWMR writer + page buffering 
+    /*
+     * Set up as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -3459,11 +3454,11 @@ test_enable_disable_eot(void)
     if ((config3 = HDmalloc(sizeof(*config3))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Configured first file as VFD SWMR writer + page buffering 
+    /*
+     * Configured first file as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME, NULL);
 
@@ -3473,11 +3468,11 @@ test_enable_disable_eot(void)
     if (fapl1 == H5I_INVALID_HID)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Configured second file as VFD SWMR writer + page buffering 
+    /*
+     * Configured second file as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config2, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME2, NULL);
 
@@ -3487,11 +3482,11 @@ test_enable_disable_eot(void)
     if (fapl2 == H5I_INVALID_HID)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Configured third file as VFD SWMR writer + page buffering 
+    /*
+     * Configured third file as VFD SWMR writer + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config3, 4, 6, TRUE, TRUE, FALSE, TRUE, 2, MD_FILENAME3, NULL);
 
@@ -3707,21 +3702,20 @@ error:
 static herr_t
 verify_updater_flags(char *ud_name, uint16_t expected_flags)
 {
-    FILE* ud_fp;        /* Updater file pointer */
+    FILE *   ud_fp; /* Updater file pointer */
     uint16_t flags;
-    size_t ret;         /* Return value */
+    size_t   ret; /* Return value */
 
-    
     /* Open the updater file */
-    if((ud_fp = HDfopen(ud_name, "r")) == NULL)
+    if ((ud_fp = HDfopen(ud_name, "r")) == NULL)
         FAIL_STACK_ERROR;
 
     /* Seek to the position of "flags" in the updater file's header */
-    if(HDfseek(ud_fp, (HDoff_t)UD_HD_FLAGS_OFFSET, SEEK_SET) < 0)
+    if (HDfseek(ud_fp, (HDoff_t)UD_HD_FLAGS_OFFSET, SEEK_SET) < 0)
         FAIL_STACK_ERROR;
 
     /* Read "flags" from the updater file */
-    if((ret = HDfread(&flags, UD_SIZE_2, 1, ud_fp)) != (size_t)1)
+    if ((ret = HDfread(&flags, UD_SIZE_2, 1, ud_fp)) != (size_t)1)
         FAIL_STACK_ERROR;
 
     if (flags != expected_flags)
@@ -3740,7 +3734,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_updater_flags
  *
- * Purpose:     Verify "flags" in the updater file is as expected for 
+ * Purpose:     Verify "flags" in the updater file is as expected for
  *              file creation.
  *
  * Return:      0 if test is sucessful
@@ -3759,10 +3753,10 @@ test_updater_flags(void)
     hid_t                  file_fapl   = -1;   /* File access property list ID associated with the file */
     H5F_vfd_swmr_config_t *config      = NULL; /* Configuration for VFD SWMR */
     H5F_vfd_swmr_config_t *file_config = NULL; /* Configuration for VFD SWMR */
-    uint64_t seq_num = 0;                      /* Sequence number for updater file */
-    uint64_t i = 0;                             /* Local index variable */
-    char namebuf[H5F__MAX_VFD_SWMR_FILE_NAME_LEN];  /* Updater file path */
-    h5_stat_t sb;                               /* Info returned by stat system call */
+    uint64_t               seq_num     = 0;    /* Sequence number for updater file */
+    uint64_t               i           = 0;    /* Local index variable */
+    char                   namebuf[H5F__MAX_VFD_SWMR_FILE_NAME_LEN]; /* Updater file path */
+    h5_stat_t              sb;                                       /* Info returned by stat system call */
 
     TESTING("VFD SWMR updater file flags");
 
@@ -3780,11 +3774,11 @@ test_updater_flags(void)
     if ((file_config = (H5F_vfd_swmr_config_t *)HDmalloc(sizeof(H5F_vfd_swmr_config_t))) == NULL)
         FAIL_STACK_ERROR;
 
-    /* 
+    /*
      * Configured as VFD SWMR writer + page buffering + generate updater files
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
        flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config, 4, 7, TRUE, TRUE, TRUE, TRUE, 2, MD_FILENAME, UD_FILENAME);
 
@@ -3818,7 +3812,7 @@ test_updater_flags(void)
     HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num);
 
     /* Verify "flags" of the first updater file */
-    if(verify_updater_flags(namebuf, CREATE_METADATA_FILE_ONLY_FLAG) < 0)
+    if (verify_updater_flags(namebuf, CREATE_METADATA_FILE_ONLY_FLAG) < 0)
         TEST_ERROR;
 
     /* Check updater file size */
@@ -3830,15 +3824,15 @@ test_updater_flags(void)
         FAIL_STACK_ERROR;
 
     /* Look for the last updater file */
-    for (seq_num = 0; ; seq_num++) {
+    for (seq_num = 0;; seq_num++) {
         HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num);
         if (HDaccess(namebuf, F_OK) != 0)
             break;
     }
-    HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num-1);
+    HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num - 1);
 
     /* Verify "flags" of the last updater file */
-    if(verify_updater_flags(namebuf, FINAL_UPDATE_FLAG) < 0)
+    if (verify_updater_flags(namebuf, FINAL_UPDATE_FLAG) < 0)
         TEST_ERROR;
 
     if (H5Pclose(file_fapl) < 0)
@@ -3883,7 +3877,7 @@ error:
 /*-------------------------------------------------------------------------
  * Function:    test_updater_flags_same_file_opens()
  *
- * Purpose:     Verify "flags" in the updater file is as expected for 
+ * Purpose:     Verify "flags" in the updater file is as expected for
  *              multiple opens of the same file.
  *
  * Return:      0 if test is sucessful
@@ -3896,14 +3890,14 @@ error:
 static unsigned
 test_updater_flags_same_file_opens(void)
 {
-    hid_t                  fid     = -1;    /* File ID */
-    hid_t                  fid2    = -1;    /* File ID */
-    hid_t                  fcpl    = -1;    /* File creation property list ID */
-    hid_t                  fapl1   = -1;    /* File access property list ID */
-    H5F_vfd_swmr_config_t *config1 = NULL;  /* Configuration for VFD SWMR */
-    uint64_t seq_num = 0;                   /* Sequence number for updater file */
-    uint64_t i = 0;                         /* Local index variable */
-    char namebuf[H5F__MAX_VFD_SWMR_FILE_NAME_LEN];  /* Updater file path */
+    hid_t                  fid     = -1;                             /* File ID */
+    hid_t                  fid2    = -1;                             /* File ID */
+    hid_t                  fcpl    = -1;                             /* File creation property list ID */
+    hid_t                  fapl1   = -1;                             /* File access property list ID */
+    H5F_vfd_swmr_config_t *config1 = NULL;                           /* Configuration for VFD SWMR */
+    uint64_t               seq_num = 0;                              /* Sequence number for updater file */
+    uint64_t               i       = 0;                              /* Local index variable */
+    char                   namebuf[H5F__MAX_VFD_SWMR_FILE_NAME_LEN]; /* Updater file path */
 
     TESTING("VFD SWMR updater file flags for multiple opens of the same file");
 
@@ -3932,11 +3926,11 @@ test_updater_flags_same_file_opens(void)
     if (H5Fclose(fid) < 0)
         FAIL_STACK_ERROR;
 
-    /* 
-     * Set the VFD SWMR configuration in fapl1 + page buffering 
+    /*
+     * Set the VFD SWMR configuration in fapl1 + page buffering
      */
 
-    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files, 
+    /* config, tick_len, max_lag, writer, maintain_metadata_file, generate_updater_files,
     flush_raw_data, md_pages_reserved, md_file_path, updater_file_path */
     init_vfd_swmr_config(config1, 4, 10, TRUE, TRUE, TRUE, TRUE, 2, MD_FILENAME, UD_FILENAME);
 
@@ -3960,24 +3954,23 @@ test_updater_flags_same_file_opens(void)
     if (H5Fclose(fid2) < 0)
         FAIL_STACK_ERROR;
 
-
     /* Verify the first updater file for first file open */
     HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num);
 
     /* Verify "flags" of the first updater file is 0*/
-    if(verify_updater_flags(namebuf, 0) < 0)
+    if (verify_updater_flags(namebuf, 0) < 0)
         TEST_ERROR;
 
     /* Look for the last updater file */
-    for (seq_num = 0; ; seq_num++) {
+    for (seq_num = 0;; seq_num++) {
         HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num);
         if (HDaccess(namebuf, F_OK) != 0)
             break;
     }
-    HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num-1);
+    HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num - 1);
 
     /* Verify "flags" of the last updater file is 0 */
-    if(verify_updater_flags(namebuf, 0) < 0)
+    if (verify_updater_flags(namebuf, 0) < 0)
         TEST_ERROR;
 
     /* Close the 1st open file */
@@ -3985,15 +3978,15 @@ test_updater_flags_same_file_opens(void)
         FAIL_STACK_ERROR;
 
     /* Look for the last updater file */
-    for (seq_num = 0; ; seq_num++) {
+    for (seq_num = 0;; seq_num++) {
         HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num);
         if (HDaccess(namebuf, F_OK) != 0)
             break;
     }
-    HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num-1);
+    HDsprintf(namebuf, "%s.%lu", UD_FILENAME, seq_num - 1);
 
     /* Verify "flags" of the last updater file after closing file */
-    if(verify_updater_flags(namebuf, FINAL_UPDATE_FLAG) < 0)
+    if (verify_updater_flags(namebuf, FINAL_UPDATE_FLAG) < 0)
         TEST_ERROR;
 
     /* Clean up updater files */
@@ -4026,7 +4019,6 @@ error:
     return 1;
 } /* test_updater_flags_same_file_opens() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    clean_chk_ud_files()
  *
@@ -4042,41 +4034,40 @@ error:
 static void
 clean_chk_ud_files(char *md_file_path, char *updater_file_path)
 {
-    char chk_name[1024 + 4];
-    char ud_name[1024 + 4];
+    char     chk_name[1024 + 4];
+    char     ud_name[1024 + 4];
     uint64_t i;
 
     /* Name of the checksum file: <md_file_path>.chk */
     HDsprintf(chk_name, "%s.chk", md_file_path);
 
-    /* Remove the checksum file if exists. 
+    /* Remove the checksum file if exists.
        If not, the callback will just continue appending
        checksums to the existing file */
-    if(HDaccess(chk_name, F_OK) == 0) {
+    if (HDaccess(chk_name, F_OK) == 0) {
         HDremove(chk_name);
     }
 
     /* Remove all the updater files if exist: <updater_file_path>.<i> */
-    for(i = 0; ; i++) {
+    for (i = 0;; i++) {
         sprintf(ud_name, "%s.%lu", updater_file_path, i);
-        if(HDaccess(ud_name, F_OK) != 0) 
+        if (HDaccess(ud_name, F_OK) != 0)
             break;
         HDremove(ud_name);
     }
 
 } /* clean_chk_ud_files() */
 
-
 /*-------------------------------------------------------------------------
  * Function:    verify_ud_chk()
  *
- * Purpose:     This is the helper routine used by 
- *              test_updater_generate_md_checksums() to verify 
+ * Purpose:     This is the helper routine used by
+ *              test_updater_generate_md_checksums() to verify
  *              contents of the checksum file and the updater files.
  *              --verify the sequence number in each updater's file header
- *                corresponds to the ith sequence number of the updater 
+ *                corresponds to the ith sequence number of the updater
  *                file name.
- *              --verify the tick number in each updater's file header 
+ *              --verify the tick number in each updater's file header
  *                corresponds to the tick number stored in the checksum file
  *              --verify the change_list_len in each updater's file header
  *                is consistent with num_change_list_entries in each updater's
@@ -4092,23 +4083,23 @@ clean_chk_ud_files(char *md_file_path, char *updater_file_path)
 static herr_t
 verify_ud_chk(char *md_file_path, char *ud_file_path)
 {
-    char chk_name[1024 + 4];        /* Checksum file name */
-    char ud_name[1024 + 4];         /* Updater file name */
-    FILE* chk_fp;                   /* Checksum file pointer */
-    FILE* ud_fp;                    /* Updater file pointer */
-    uint64_t ud_seq_num;            /* Sequence number in the updater file */
-    uint64_t chk_ud_seq_num;        /* Updater sequence number in the checksum file */
-    uint64_t i;                     /* Local index variable */
-    long size = 0;                  /* Size of the file */
-    size_t change_list_len;         /* change_list_len in the updater file header */
-    uint32_t num_change_list_entries;  /* num_change_list_entries in the updater change list header */
+    char     chk_name[1024 + 4];      /* Checksum file name */
+    char     ud_name[1024 + 4];       /* Updater file name */
+    FILE *   chk_fp;                  /* Checksum file pointer */
+    FILE *   ud_fp;                   /* Updater file pointer */
+    uint64_t ud_seq_num;              /* Sequence number in the updater file */
+    uint64_t chk_ud_seq_num;          /* Updater sequence number in the checksum file */
+    uint64_t i;                       /* Local index variable */
+    long     size = 0;                /* Size of the file */
+    size_t   change_list_len;         /* change_list_len in the updater file header */
+    uint32_t num_change_list_entries; /* num_change_list_entries in the updater change list header */
 
     /* Open the checksum file */
     HDsprintf(chk_name, "%s.chk", md_file_path);
-    if((chk_fp = HDfopen(chk_name, "r")) == NULL)
+    if ((chk_fp = HDfopen(chk_name, "r")) == NULL)
         FAIL_STACK_ERROR;
 
-    for(i = 0; ; i++) {
+    for (i = 0;; i++) {
         /* Generate updater file name: <ud_file_path>.<i> */
         HDsprintf(ud_name, "%s.%lu", ud_file_path, i);
 
@@ -4117,48 +4108,49 @@ verify_ud_chk(char *md_file_path, char *ud_file_path)
             break;
         else {
             /* Seek to the position of the sequence number in the updater file's header */
-            if(HDfseek(ud_fp, (off_t)UD_HD_SEQ_NUM_OFFSET, SEEK_SET) < 0)
+            if (HDfseek(ud_fp, (off_t)UD_HD_SEQ_NUM_OFFSET, SEEK_SET) < 0)
                 FAIL_STACK_ERROR;
 
             /* Read the sequence number from the updater file */
-            if(HDfread(&ud_seq_num, UD_SIZE_8, 1, ud_fp) != 1)
+            if (HDfread(&ud_seq_num, UD_SIZE_8, 1, ud_fp) != 1)
                 FAIL_STACK_ERROR;
 
             /* Compare the sequence number with i */
-            if(ud_seq_num != i)
+            if (ud_seq_num != i)
                 TEST_ERROR;
 
             /* Read change_list_len from updater file's header */
-            if(HDfseek(ud_fp, (off_t)UD_HD_CHANGE_LIST_LEN_OFFSET, SEEK_SET) < 0)
+            if (HDfseek(ud_fp, (off_t)UD_HD_CHANGE_LIST_LEN_OFFSET, SEEK_SET) < 0)
                 FAIL_STACK_ERROR;
 
-            if(HDfread(&change_list_len, UD_SIZE_8, 1, ud_fp) != 1)
+            if (HDfread(&change_list_len, UD_SIZE_8, 1, ud_fp) != 1)
                 FAIL_STACK_ERROR;
 
-            if(i != 0) {
-            
+            if (i != 0) {
+
                 /* Read num_change_list_entries from updater file's change list */
-                if(HDfseek(ud_fp, (off_t)UD_CL_NUM_CHANGE_LIST_ENTRIES_OFFSET, SEEK_SET) < 0)
+                if (HDfseek(ud_fp, (off_t)UD_CL_NUM_CHANGE_LIST_ENTRIES_OFFSET, SEEK_SET) < 0)
                     FAIL_STACK_ERROR;
 
-                if(HDfread(&num_change_list_entries, UD_SIZE_4, 1, ud_fp) != 1)
+                if (HDfread(&num_change_list_entries, UD_SIZE_4, 1, ud_fp) != 1)
                     FAIL_STACK_ERROR;
 
-                if(num_change_list_entries == 0) {
-                    if(change_list_len != H5F_UD_CL_SIZE(0))
+                if (num_change_list_entries == 0) {
+                    if (change_list_len != H5F_UD_CL_SIZE(0))
                         TEST_ERROR;
-                } else {
+                }
+                else {
                     if (change_list_len != H5F_UD_CL_SIZE(num_change_list_entries))
                         TEST_ERROR
                 }
             }
 
             /* Close the updater file */
-            if(HDfclose(ud_fp) < 0)
+            if (HDfclose(ud_fp) < 0)
                 FAIL_STACK_ERROR;
 
             /* Read the updater sequence number from checksum file */
-            if(HDfread(&chk_ud_seq_num, UD_SIZE_8, 1, chk_fp) != 1)
+            if (HDfread(&chk_ud_seq_num, UD_SIZE_8, 1, chk_fp) != 1)
                 FAIL_STACK_ERROR;
 
             /* Compare sequence number in updater file with sequence number in checksum file */
@@ -4166,7 +4158,7 @@ verify_ud_chk(char *md_file_path, char *ud_file_path)
                 TEST_ERROR;
 
             /* Advance checksum file to the next sequence number */
-            if(HDfseek(chk_fp, (off_t)UD_SIZE_4, SEEK_CUR) < 0)
+            if (HDfseek(chk_fp, (off_t)UD_SIZE_4, SEEK_CUR) < 0)
                 FAIL_STACK_ERROR;
         }
     }
@@ -4176,7 +4168,7 @@ verify_ud_chk(char *md_file_path, char *ud_file_path)
         FAIL_STACK_ERROR;
 
     /* Size of sequence number and checksum in the checksum file */
-    if((unsigned)size != (i * (UD_SIZE_8 + UD_SIZE_4)))
+    if ((unsigned)size != (i * (UD_SIZE_8 + UD_SIZE_4)))
         TEST_ERROR;
 
     return 0;
@@ -4184,16 +4176,16 @@ verify_ud_chk(char *md_file_path, char *ud_file_path)
 error:
     return (-1);
 
-}  /* verify_ud_chk() */
+} /* verify_ud_chk() */
 
 /*-------------------------------------------------------------------------
  * Function:    md_ck_cb()
  *
- * Purpose:     This is the callback function used by 
- *              test_updater_generate_md_checksums() when the 
+ * Purpose:     This is the callback function used by
+ *              test_updater_generate_md_checksums() when the
  *              H5F_ACS_GENERATE_MD_CK_CB_NAME property is set in fapl.
  *                  --Opens and read the metadata file into a buffer.
- *                  --Generate checksum for the metadata file 
+ *                  --Generate checksum for the metadata file
  *                  --Write the tick number and the checksum to the checksum file
  *
  * Return:      0 if test is sucessful
@@ -4203,34 +4195,34 @@ error:
  *
  *-------------------------------------------------------------------------
  */
-static herr_t 
+static herr_t
 md_ck_cb(char *md_file_path, uint64_t updater_seq_num)
 {
-    FILE* md_fp = NULL;     /* Metadata file pointer */
-    FILE* chk_fp = NULL;    /* Checksum file pointer */
-    long size = 0;          /* File size returned from HDftell() */
-    void *buf = NULL;       /* Buffer for holding the metadata file content */
-    uint32_t chksum = 0;    /* The checksum generated for the metadata file */
-    char chk_name[1024 + 4];    /* Buffer for the checksum file name */
-    size_t ret;             /* Return value */
+    FILE *   md_fp  = NULL;      /* Metadata file pointer */
+    FILE *   chk_fp = NULL;      /* Checksum file pointer */
+    long     size   = 0;         /* File size returned from HDftell() */
+    void *   buf    = NULL;      /* Buffer for holding the metadata file content */
+    uint32_t chksum = 0;         /* The checksum generated for the metadata file */
+    char     chk_name[1024 + 4]; /* Buffer for the checksum file name */
+    size_t   ret;                /* Return value */
 
     /* Open the metadata file */
-    if((md_fp = HDfopen(md_file_path, "r")) == NULL)
+    if ((md_fp = HDfopen(md_file_path, "r")) == NULL)
         FAIL_STACK_ERROR;
 
     /* Set file pointer at end of file.*/
-    if(HDfseek(md_fp, 0, SEEK_END) < 0)
+    if (HDfseek(md_fp, 0, SEEK_END) < 0)
         FAIL_STACK_ERROR;
 
     /* Get the current position of the file pointer.*/
     if ((size = HDftell(md_fp)) < 0)
         FAIL_STACK_ERROR;
 
-    if(size != 0) {
+    if (size != 0) {
 
         HDrewind(md_fp);
 
-        if((buf = HDmalloc((size_t)size)) == NULL)
+        if ((buf = HDmalloc((size_t)size)) == NULL)
             FAIL_STACK_ERROR;
 
         /* Read the metadata file to buf */
@@ -4242,7 +4234,7 @@ md_ck_cb(char *md_file_path, uint64_t updater_seq_num)
     }
 
     /* Close the metadata file */
-    if(md_fp && HDfclose(md_fp) < 0)
+    if (md_fp && HDfclose(md_fp) < 0)
         FAIL_STACK_ERROR;
 
     /*
@@ -4253,36 +4245,36 @@ md_ck_cb(char *md_file_path, uint64_t updater_seq_num)
     HDsprintf(chk_name, "%s.chk", md_file_path);
 
     /* Open checksum file for append */
-    if((chk_fp = HDfopen(chk_name, "a")) == NULL)
+    if ((chk_fp = HDfopen(chk_name, "a")) == NULL)
         FAIL_STACK_ERROR;
 
     /* Write the updater sequence number to the checksum file */
-    if((ret = HDfwrite(&updater_seq_num, sizeof(uint64_t), 1, chk_fp)) != 1)
+    if ((ret = HDfwrite(&updater_seq_num, sizeof(uint64_t), 1, chk_fp)) != 1)
         FAIL_STACK_ERROR;
 
     /* Write the checksum to the checksum file */
-    if((ret = HDfwrite(&chksum, sizeof(uint32_t), 1, chk_fp)) != 1)
+    if ((ret = HDfwrite(&chksum, sizeof(uint32_t), 1, chk_fp)) != 1)
         FAIL_STACK_ERROR;
 
     /* Close the checksum file */
-    if(chk_fp && HDfclose(chk_fp) != 0)
+    if (chk_fp && HDfclose(chk_fp) != 0)
         FAIL_STACK_ERROR;
 
-    if(buf) 
+    if (buf)
         HDfree(buf);
 
     return 0;
 
 error:
-    if(buf) 
+    if (buf)
         HDfree(buf);
-    if(md_fp)
+    if (md_fp)
         HDfclose(md_fp);
-    if(chk_fp)
+    if (chk_fp)
         HDfclose(chk_fp);
 
     return -1;
-}  /* md_ck_cb() */
+} /* md_ck_cb() */
 
 /*-------------------------------------------------------------------------
  * Function:    test_updater_generate_md_checksums()
@@ -4307,15 +4299,16 @@ error:
 static unsigned
 test_updater_generate_md_checksums(hbool_t file_create)
 {
-    hid_t                  fid         = -1;   /* File ID */
-    hid_t                  fcpl        = -1;   /* File creation property list ID */
-    hid_t                  fapl        = -1;   /* File access property list ID */
-    H5F_vfd_swmr_config_t config;              /* Configuration for VFD SWMR */
-    H5F_generate_md_ck_cb_t cb_info;           /* Callback */
+    hid_t                   fid  = -1; /* File ID */
+    hid_t                   fcpl = -1; /* File creation property list ID */
+    hid_t                   fapl = -1; /* File access property list ID */
+    H5F_vfd_swmr_config_t   config;    /* Configuration for VFD SWMR */
+    H5F_generate_md_ck_cb_t cb_info;   /* Callback */
 
-    if(file_create) {
+    if (file_create) {
         TESTING("VFD SWMR updater generate checksums for metadata file with H5Fcreate");
-    } else {
+    }
+    else {
         TESTING("VFD SWMR updater generate checksums for metadata file with H5Fopen");
     }
 
@@ -4341,10 +4334,11 @@ test_updater_generate_md_checksums(hbool_t file_create)
     H5Pset(fapl, H5F_ACS_GENERATE_MD_CK_CB_NAME, &cb_info);
 
     /* Use file creation or file open for testing */
-    if(file_create) {
-        if((fid = H5Fcreate(FILENAME4, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
+    if (file_create) {
+        if ((fid = H5Fcreate(FILENAME4, H5F_ACC_TRUNC, fcpl, fapl)) < 0)
             TEST_ERROR;
-    } else {
+    }
+    else {
         fid = H5Fcreate(FILENAME4, H5F_ACC_TRUNC, fcpl, H5P_DEFAULT);
         H5Fclose(fid);
 
@@ -4361,7 +4355,7 @@ test_updater_generate_md_checksums(hbool_t file_create)
         FAIL_STACK_ERROR;
 
     /* Verify contents of checksum file and updater files */
-    if(verify_ud_chk(config.md_file_path, config.updater_file_path) < 0)
+    if (verify_ud_chk(config.md_file_path, config.updater_file_path) < 0)
         TEST_ERROR;
 
     /*  It's important to clean up the chechsum and updater files. */
@@ -4386,7 +4380,6 @@ error:
     return 1;
 
 } /* test_updater_generate_md_checksums() */
-
 
 /*-------------------------------------------------------------------------
  * Function:    main()

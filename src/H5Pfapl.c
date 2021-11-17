@@ -319,13 +319,13 @@
 #define H5F_ACS_VFD_SWMR_CONFIG_DEC  H5P__facc_vfd_swmr_config_dec
 
 /*  Private property for VFD SWMR testing:
- *      Callback function to generate checksum for metadata file 
+ *      Callback function to generate checksum for metadata file
  */
 #define H5F_ACS_GENERATE_MD_CK_CB_SIZE sizeof(H5F_generate_md_ck_cb_t)
 
-#define H5F_ACS_GENERATE_MD_CK_CB_DEF                                       \
-    {                                                                       \
-        NULL                                                                \
+#define H5F_ACS_GENERATE_MD_CK_CB_DEF                                                                        \
+    {                                                                                                        \
+        NULL                                                                                                 \
     }
 
 /******************/
@@ -526,8 +526,7 @@ static const hbool_t H5F_def_ignore_disabled_file_locks_g =
 static const H5F_vfd_swmr_config_t H5F_def_vfd_swmr_config_g =
     H5F_ACS_VFD_SWMR_CONFIG_DEF; /* Default vfd swmr configuration */
 /* For VFD SWMR testing only: Default to generate checksum for metadata file */
-static const H5F_generate_md_ck_t H5F_def_generate_md_ck_cb_g =
-    H5F_ACS_GENERATE_MD_CK_CB_DEF;
+static const H5F_generate_md_ck_t H5F_def_generate_md_ck_cb_g = H5F_ACS_GENERATE_MD_CK_CB_DEF;
 
 /*-------------------------------------------------------------------------
  * Function:    H5P__facc_reg_prop
@@ -4125,7 +4124,8 @@ H5P__facc_vfd_swmr_config_enc(const void *value, void **_pp, size_t *size)
         INT32ENCODE(*pp, (int32_t)config->pb_expansion_threshold);
         HDmemcpy(*pp, (const uint8_t *)(config->md_file_path), (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
         *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
-        HDmemcpy(*pp, (const uint8_t *)(config->updater_file_path), (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
+        HDmemcpy(*pp, (const uint8_t *)(config->updater_file_path),
+                 (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
         *pp += H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1;
         HDmemcpy(*pp, (const uint8_t *)(config->log_file_path),
                  (size_t)(H5F__MAX_VFD_SWMR_FILE_NAME_LEN + 1));
@@ -5734,12 +5734,13 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
         HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "pb_expansion_threshold out of range")
 
     /* If writer is TRUE, at least one of maintain_metadata_file and generate_updater_files must be TRUE */
-    if(config_ptr->writer) {
-        if(!config_ptr->maintain_metadata_file && !config_ptr->generate_updater_files)
-            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "either maintain_metadata_file or generate_updater_files must be TRUE")
+    if (config_ptr->writer) {
+        if (!config_ptr->maintain_metadata_file && !config_ptr->generate_updater_files)
+            HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL,
+                        "either maintain_metadata_file or generate_updater_files must be TRUE")
     }
 
-    if((config_ptr->writer && config_ptr->maintain_metadata_file) || !config_ptr->writer) {
+    if ((config_ptr->writer && config_ptr->maintain_metadata_file) || !config_ptr->writer) {
         /* Must provide the path and base name of the metadata file */
         name_len = HDstrlen(config_ptr->md_file_path);
         if (name_len == 0)
@@ -5748,7 +5749,7 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "md_file_path is too long")
     }
 
-    if(config_ptr->writer && config_ptr->generate_updater_files) {
+    if (config_ptr->writer && config_ptr->generate_updater_files) {
         /* Must provide the path and base name of the metadata updater files */
         name_len = HDstrlen(config_ptr->updater_file_path);
         if (name_len == 0)
@@ -5756,7 +5757,6 @@ H5Pset_vfd_swmr_config(hid_t plist_id, H5F_vfd_swmr_config_t *config_ptr)
         else if (name_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)
             HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, FAIL, "updater_file_path is too long")
     }
-
 
     name_len = HDstrlen(config_ptr->log_file_path);
     if (name_len > H5F__MAX_VFD_SWMR_FILE_NAME_LEN)

@@ -347,8 +347,9 @@ await_signal(hid_t fid)
  */
 void
 init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t max_lag, hbool_t writer,
-                      hbool_t maintain_metadata_file, hbool_t generate_updater_files, hbool_t flush_raw_data,
-                      uint32_t md_pages_reserved, const char *md_file_fmtstr, const char *updater_file_path, ...)
+                     hbool_t maintain_metadata_file, hbool_t generate_updater_files, hbool_t flush_raw_data,
+                     uint32_t md_pages_reserved, const char *md_file_fmtstr, const char *updater_file_path,
+                     ...)
 {
     va_list ap;
 
@@ -357,13 +358,13 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
     config->version                = H5F__CURR_VFD_SWMR_CONFIG_VERSION;
     config->pb_expansion_threshold = 0;
 
-    config->tick_len          = tick_len;
-    config->max_lag           = max_lag;
-    config->writer            = writer;
+    config->tick_len               = tick_len;
+    config->max_lag                = max_lag;
+    config->writer                 = writer;
     config->maintain_metadata_file = maintain_metadata_file;
     config->generate_updater_files = generate_updater_files;
-    config->flush_raw_data    = flush_raw_data;
-    config->md_pages_reserved = md_pages_reserved;
+    config->flush_raw_data         = flush_raw_data;
+    config->md_pages_reserved      = md_pages_reserved;
 
     HDva_start(ap, updater_file_path);
 
@@ -371,7 +372,7 @@ init_vfd_swmr_config(H5F_vfd_swmr_config_t *config, uint32_t tick_len, uint32_t 
 
     HDva_end(ap);
 
-    if(config->generate_updater_files && updater_file_path != NULL)
+    if (config->generate_updater_files && updater_file_path != NULL)
         HDstrcpy(config->updater_file_path, updater_file_path);
 
 } /* init_vfd_swmr_config() */

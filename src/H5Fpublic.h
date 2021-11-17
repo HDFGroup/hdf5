@@ -277,20 +277,20 @@ typedef herr_t (*H5F_flush_cb_t)(hid_t object_id, void *udata);
  *
  *      maintain_metadata_file
  *          A boolean flag indicating whether the writer should create and
- *          maintain the metadata file.  Note that this field is only revelant 
+ *          maintain the metadata file.  Note that this field is only revelant
  *          if the above writer flag is TRUE.
  *          If this flag is TRUE, the writer must create and maintain the
  *          metadata file in the location specified in the md_file_path.
- *          Observe that at least one of maintain_metadata_file and 
+ *          Observe that at least one of maintain_metadata_file and
  *          generate_updater_files fields must be TRUE if writer is TRUE.
  *
  *      generate_updater_files
  *          A boolean flag indicating whether the writer should generate a
  *          sequence of updater files describing how the metadata file
  *          should be updated at the end of each tick.
- *          If the flag is TRUE, all modifications to the metadata file 
- *          (including its creation) are described in an ordered sequence of 
- *          updater files.  These files are read in order by auxiliary processes, 
+ *          If the flag is TRUE, all modifications to the metadata file
+ *          (including its creation) are described in an ordered sequence of
+ *          updater files.  These files are read in order by auxiliary processes,
  *          and used to generate local copies of the metadata file as required.
  *          This mechanism exists to allow VFD SWMR to operate on storage
  *          systems that do not support POSIX semantics.

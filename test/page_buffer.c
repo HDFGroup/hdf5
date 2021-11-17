@@ -97,13 +97,13 @@ error:
 static int
 swmr_fapl_augment(hid_t fapl, const char *filename, uint32_t max_lag)
 {
-    H5F_vfd_swmr_config_t config = {.version           = H5F__CURR_VFD_SWMR_CONFIG_VERSION,
-                                    .tick_len          = 4,
-                                    .max_lag           = max_lag,
-                                    .writer            = true,
+    H5F_vfd_swmr_config_t config = {.version                = H5F__CURR_VFD_SWMR_CONFIG_VERSION,
+                                    .tick_len               = 4,
+                                    .max_lag                = max_lag,
+                                    .writer                 = true,
                                     .maintain_metadata_file = true,
                                     .generate_updater_files = false,
-                                    .md_pages_reserved = 128};
+                                    .md_pages_reserved      = 128};
     char *                bname  = NULL;
     char *                dname  = NULL;
 
