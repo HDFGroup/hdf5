@@ -208,7 +208,7 @@ foreach ($index_type in $IndexTypeLoop) {
         foreach ($xpid in $pid_readers) {
             #Write-Output "checked reader $xpid"
             Wait-Process -Id  $xpid
-            if ($? -ne 0) {
+            if ($LastExitCode -ne 0) {
                 Write-Warning "reader had error"
                 $nerrors += 1
             }
@@ -217,7 +217,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Collect exit code of the writer
         #Write-Output "checked writer $pid_writer"
         Wait-Process -Id  $pid_writer
-        if ($? -ne 0) {
+        if ($LastExitCode -ne 0) {
             Write-Warning "writer had error"
             $nerrors += 1
         }
@@ -279,7 +279,7 @@ foreach ($index_type in $IndexTypeLoop) {
         foreach ($xpid in $pid_readers) {
             #Write-Output "checked reader $xpid"
             Wait-Process -Id  $xpid
-            if ($? -ne 0) {
+            if ($LastExitCode -ne 0) {
                 Write-Warning "reader had error"
                 $nerrors += 1
             }
@@ -288,7 +288,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Collect exit code of the writer
         #Write-Output "checked writer $pid_writer"
         Wait-Process -Id  $pid_writer
-        if ($? -ne 0) {
+        if ($LastExitCode -ne 0) {
             Write-Warning "writer had error"
             $nerrors += 1
         }
@@ -341,7 +341,7 @@ foreach ($index_type in $IndexTypeLoop) {
         foreach ($xpid in $pid_readers) {
             #Write-Output "checked reader $xpid"
             Wait-Process -Id  $xpid
-            if ($? -ne 0) {
+            if ($LastExitCode -ne 0) {
                 Write-Warning "reader had error"
                 $nerrors += 1
             }
@@ -350,7 +350,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Collect exit code of the writer
         #Write-Output "checked writer $pid_writer"
         Wait-Process -Id  $pid_writer
-        if ($? -ne 0) {
+        if ($LastExitCode -ne 0) {
             Write-Warning "writer had error"
             $nerrors += 1
         }
@@ -421,7 +421,7 @@ foreach ($index_type in $IndexTypeLoop) {
         foreach ($xpid in $pid_readers) {
             #Write-Output "checked reader $xpid"
             Wait-Process -Id  $xpid
-            if ($? -ne 0) {
+            if ($LastExitCode -ne 0) {
                 Write-Warning "reader had error"
                 $nerrors += 1
             }
@@ -430,7 +430,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Collect exit code of the writer
         #Write-Output "checked writer $pid_writer"
         Wait-Process -Id  $pid_writer
-        if ($? -ne 0) {
+        if ($LastExitCode -ne 0) {
             Write-Warning "writer had error"
             $nerrors += 1
         }
@@ -489,7 +489,7 @@ foreach ($index_type in $IndexTypeLoop) {
         # Collect exit code of the writer
         #Write-Output "checked writer $pid_writer"
         Wait-Process -Id  $pid_writer
-        if ($? -ne 0) {
+        if ($LastExitCode -ne 0) {
             Write-Warning "writer had error"
             $nerrors += 1
         }
@@ -498,7 +498,7 @@ foreach ($index_type in $IndexTypeLoop) {
         foreach ($xpid in $pid_readers) {
             #Write-Output "checked reader $xpid"
             Wait-Process -Id  $xpid
-            if ($? -ne 0) {
+            if ($LastExitCode -ne 0) {
                 Write-Warning "reader had error"
                 $nerrors += 1
             }
