@@ -1143,7 +1143,7 @@ MFU_PRED_EXEC(mfu_flist flist, uint64_t idx, void *arg)
 {
     /* get file name for this item */
     int         file_substituted = 0;
-    const char *fname            = mfu_flist_file_get_name(flist, idx);
+    const char *fname = mfu_flist_file_get_name(flist, idx);
 
     char *toolname = NULL;
     char  filepath[1024];

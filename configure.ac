@@ -1576,6 +1576,9 @@ esac
 ## Is the mpiFileUtils library (libmfu) required and available?
 ##
 AC_SUBST([PARALLELTOOLS])
+AC_SUBST([DH5WALK_LDFLAGS])
+
+DH5WALK_LDFLAGS="${DH5WALK_LDFLAGS}"
 
 ## Default is not present
 HAVE_LIBMFU=no
@@ -1590,7 +1593,7 @@ case "X-$withval" in
     HAVE_LIBMFU="yes"
     AC_CHECK_HEADERS([mfu.h],, [unset HAVE_LIBMFU])
     if test "x$HAVE_LIBMFU" = "xyes"; then
-      AC_SEARCH_LIBS([mfu], [mfu_init],[DH5WALK_LIBS="-lmfu"], [unset HAVE_LIBMFU])
+      AC_CHECK_LIB([mfu], [mfu_init],, [unset HAVE_LIBMFU])
     fi
     if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
       AC_MSG_ERROR([couldn't find libmfu library])
@@ -1627,15 +1630,13 @@ case "X-$withval" in
       AM_CPPFLAGS="$AM_CPPFLAGS -I$libmfu_inc"
     fi
 
-    AC_CHECK_HEADERS([mfu.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_LIBMFU])
-
     if test "x$HAVE_LIBMFU" = "xyes"; then
       if test -n "$libmfu_lib"; then
         LDFLAGS="$LDFLAGS -L$libmfu_lib"
-        DH5WALK_LDFLAGS="$AM_LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+        AM_LDFLAGS="$AM_LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+        DH5WALK_LDFLAGS="$AM_LDFLAGS"
       fi
-
-      AC_SEARCH_LIBS([mfu], [mfu_init],[AM_LDFLAGS="$saved_AM_LDFLAGS"], [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
+#      AC_CHECK_LIB([mfu], [mfu_init],[AM_LDFLAGS="$saved_AM_LDFLAGS"], [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
     fi
 
     if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then
@@ -1704,15 +1705,13 @@ if test -z "$HAVE_LIBMFU"; then
           AM_CPPFLAGS="$AM_CPPFLAGS -I$libmfu_inc"
         fi
 
-        AC_CHECK_HEADERS([mfu.h],,[CPPFLAGS="$saved_CPPFLAGS"; AM_CPPFLAGS="$saved_AM_CPPFLAGS"] [unset HAVE_LIBMFU])
-
         if test "x$HAVE_LIBMFU" = "xyes"; then
           if test -n "$libmfu_lib"; then
             LDFLAGS="$LDFLAGS -L$libmfu_lib"
             AM_LDFLAGS="$AM_LDFLAGS -L$libmfu_lib -L$libcircle_lib"
+            DH5WALK_LDFLAGS="$AM_LDFLAGS"
           fi
-
-          AC_CHECK_LIB([mfu], [mfu_init],, [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
+#          AC_CHECK_LIB([mfu], [mfu_init],[AM_LDFLAGS="$saved_AM_LDFLAGS"], [LDFLAGS="$saved_LDFLAGS"; AM_LDFLAGS="$saved_AM_LDFLAGS"; unset HAVE_LIBMFU])
         fi
 
         if test -z "$HAVE_LIBMFU" -a -n "$HDF5_CONFIG_ABORT"; then

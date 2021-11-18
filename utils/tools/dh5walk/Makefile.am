@@ -17,17 +17,13 @@
 
 include $(top_srcdir)/config/commence.am
 
-install-examples:
-	@echo "Creating demo files" && \
-	$(SHELL) $(abs_top_srcdir)/utils/tools/test/copy_demo_files.sh $(abs_top_srcdir)/utils/tools/test $(abs_top_srcdir)/tools/src/h5diff $(abs_top_srcdir)/tools/src/h5ls;
-
 # Include src directory
 AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
 
 # These are our main targets, the tools
 # dh5walk_SOURCES=dh5walk.c $(TOOLSOURCES)
 bin_PROGRAMS=dh5walk
-# bin_SCRIPTS=install-examples
+#bin_SCRIPTS=install-examples
 
 # Add h5stat specific linker flags here
 dh5walk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS) $(DH5WALK_LDFLAGS)
@@ -36,7 +32,6 @@ dh5walk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS) $(DH5WALK_LDFLAGS)
 CLEANFILES=
 
 # All programs rely on hdf5 library and h5tools library
-dh5walk_LDADD=$(LIBH5TOOLS) $(LIBHDF5) $(LIBMFU)
-# dh5walk_LDADD=$(LIBHDF5) $(LIBMFU)
+dh5walk_LDADD=$(LIBH5TOOLS) $(LIBHDF5) -lmfu
 
 include $(top_srcdir)/config/conclude.am
