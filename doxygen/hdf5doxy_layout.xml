@@ -12,6 +12,7 @@
     <tab type="user" url="@ref TN" title="Technical Notes" />
     <tab type="user" url="@ref SPEC" title="Specifications" />
     <tab type="user" url="@ref RFC" title="RFCs" />
+    <tab type="user" url="https://cse.google.com/cse?cx=75c754173f9b90804" title="Full-Text Search (via GOOGL)" />
     <tab type="user" url="@ref About" title="About" />
   </navindex>
 
