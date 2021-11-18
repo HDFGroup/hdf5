@@ -47,6 +47,16 @@ New Features
 
     Configuration:
     -------------
+    - CMake will now run the power shell script tests in test/ by default
+      on Windows.
+
+      The test directory includes several shell script tests that previously
+      were not run by CMake on Windows. These are now run by default.
+      If TEST_SHELL_SCRIPTS is ON and PWSH is found, the Powershell scripts
+      will execute. Similar to the bash scripts on unix platforms.
+
+      (ADB - 2021/11/23)
+
     - Added new configure option to support building parallel tools.
       See Tools below (autotools - CMake):
             --enable-parallel-tools      HDF5_BUILD_PARALLEL_TOOLS

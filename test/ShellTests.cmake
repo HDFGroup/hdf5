@@ -15,8 +15,38 @@
 ###           T E S T I N G  S H E L L  S C R I P T S                      ###
 ##############################################################################
 
-if (UNIX)
-
+find_program (PWSH NAMES pwsh powershell)
+if (PWSH)
+    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
+    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
+    file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
+#  add_test (NAME testswmr
+#      COMMAND ${PWSH} -c \"Get-Content ${CMAKE_CURRENT_SOURCE_DIR}/myfile.txt | $<TARGET_FILE:myexe>\")
+#    add_test (H5SHELL-testflushrefresh ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh)
+#    set_tests_properties (H5SHELL-testflushrefresh PROPERTIES
+#            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+#            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+#    )
+#    add_test (H5SHELL-test_usecases ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh)
+#    set_tests_properties (H5SHELL-test_usecases PROPERTIES
+#            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+#            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+#    )
+    set (srcdir ${HDF5_TEST_SOURCE_DIR})
+    set (bindir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set (testdir ${HDF5_TEST_BINARY_DIR}/H5TEST)
+    configure_file(${HDF5_TEST_SOURCE_DIR}/testswmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1 @ONLY)
+    add_test (H5SHELL-testswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1)
+    set_tests_properties (H5SHELL-testswmr PROPERTIES
+            ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    )
+#    add_test (H5SHELL-testvdsswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.sh)
+#    set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
+#            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+#            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+#    )
+elseif (UNIX)
   find_program (SH_PROGRAM bash)
   if (SH_PROGRAM)
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
@@ -35,8 +65,6 @@ if (UNIX)
     ##############################################################################
     #  copy test programs to test dir
     ##############################################################################
-    #shell script creates dir
-    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
     add_custom_command (
         TARGET     accum_swmr_reader
         POST_BUILD

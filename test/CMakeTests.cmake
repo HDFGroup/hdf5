@@ -879,6 +879,15 @@ if (ENABLE_EXTENDED_TESTS)
 #       testswmr.sh: swmr*
 #       testvdsswmr.sh: vds_swmr*
 
+#  find_program(PWSH NAMES pwsh powershell)
+#  if(PWSH)
+#    add_test(NAME testswmr
+#      COMMAND ${PWSH} -c \"Get-Content ${CMAKE_CURRENT_SOURCE_DIR}/myfile.txt | $<TARGET_FILE:myexe>\")
+#  elseif(UNIX)
+#    add_test(NAME testswmr
+#      COMMAND sh -c "$<TARGET_FILE:myexe> < ${CMAKE_CURRENT_SOURCE_DIR}/myfile.txt")
+#  endif()
+
 #-- Adding test for flushrefresh
   file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/flushrefresh_test")
   if (H5_PERL_FOUND)
