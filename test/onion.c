@@ -2571,13 +2571,14 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
-    H5E_BEGIN_TRY
-    {
-        file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-    }
-    H5E_END_TRY;
-    if (NULL != file)
+    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+	// TODO: why was this !=
+    if (NULL == file)
         TEST_ERROR;
+
+    if (H5FDclose(file) < 0)
+        TEST_ERROR;
+    file = NULL;
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
@@ -3324,10 +3325,10 @@ test_integration_create(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    // HDremove(paths->canon);
-    // HDremove(paths->onion);
-    // HDremove(paths->recovery);
-    // onion_filepaths_destroy(paths);
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+    onion_filepaths_destroy(paths);
 
     PASSED();
     return 0;
@@ -3335,10 +3336,10 @@ test_integration_create(void)
 error:
 
     if (paths != NULL) {
-        // HDremove(paths->canon);
-        // HDremove(paths->onion);
-        // HDremove(paths->recovery);
-        // onion_filepaths_destroy(paths);
+        HDremove(paths->canon);
+        HDremove(paths->onion);
+        HDremove(paths->recovery);
+        onion_filepaths_destroy(paths);
     }
 
     if (dset != H5I_INVALID_HID)
@@ -3702,10 +3703,10 @@ test_integration_create_simple(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    // HDremove(paths->canon);
-    // HDremove(paths->onion);
-    // HDremove(paths->recovery);
-    // onion_filepaths_destroy(paths);
+    HDremove(paths->canon);
+    HDremove(paths->onion);
+    HDremove(paths->recovery);
+    onion_filepaths_destroy(paths);
 
     PASSED();
     return 0;
@@ -3713,10 +3714,10 @@ test_integration_create_simple(void)
 error:
 
     if (paths != NULL) {
-        // HDremove(paths->canon);
-        // HDremove(paths->onion);
-        // HDremove(paths->recovery);
-        // onion_filepaths_destroy(paths);
+        HDremove(paths->canon);
+        HDremove(paths->onion);
+        HDremove(paths->recovery);
+        onion_filepaths_destroy(paths);
     }
 
     if (dset != H5I_INVALID_HID)
@@ -3750,7 +3751,7 @@ main(void)
     flags_create_s = H5F_ACC_RDWR | H5F_ACC_CREAT | H5F_ACC_TRUNC;
 
     /* Run tests. Return values on error are negative. */
-    /*nerrors -= test_archival_index();
+    nerrors -= test_archival_index();
     nerrors -= test_revision_index();
     nerrors -= test_revision_index_collisions();
     nerrors -= test_revision_index_resizing();
@@ -3766,7 +3767,7 @@ main(void)
     nerrors -= test_create_oniontarget(TRUE, TRUE);
     nerrors -= test_several_revisions_with_logical_gaps();
     nerrors -= test_page_aligned_history_create();
-    nerrors -= test_integration_create();*/
+    nerrors -= test_integration_create();
     nerrors -= test_integration_create_simple();
 
 #if H5FD_ONION_ENABLE_INDEX_STATS
