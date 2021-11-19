@@ -235,6 +235,7 @@
 ./doxygen/dox/cookbook/Files.c
 ./doxygen/dox/cookbook/Files.dox
 ./doxygen/dox/cookbook/Performance.dox
+./doxygen/examples/DebuggingHDF5Applications.html
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
 ./doxygen/examples/FileFormat.html

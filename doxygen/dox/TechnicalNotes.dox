@@ -1,6 +1,7 @@
 /** \page TN Technical Notes
 
 \li \link api-compat-macros API Compatibility Macros \endlink
+\li \ref APPDBG "Debugging HDF5 Applications"
 \li \ref FMTDISC "File Format Walkthrough"
 \li \ref FILTER "Filters"
 \li \ref IOFLOW "HDF5 Raw I/O Flow Notes"
@@ -35,5 +36,11 @@
 /** \page FILTER HDF5 Filters
 
 \htmlinclude Filters.html
+
+*/
+
+/** \page APPDBG Debugging HDF5 Applications
+
+\htmlinclude DebuggingHDF5Applications.html
 
 */
