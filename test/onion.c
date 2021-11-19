@@ -2572,7 +2572,7 @@ test_several_revisions_with_logical_gaps(void)
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
         TEST_ERROR;
     file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-	// TODO: why was this !=
+    // TODO: why was this !=
     if (NULL == file)
         TEST_ERROR;
 
