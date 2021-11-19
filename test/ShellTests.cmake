@@ -41,6 +41,7 @@ if (PWSH)
             ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
+    configure_file(${HDF5_TEST_SOURCE_DIR}/testvdsswmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.ps1 @ONLY)
     add_test (H5SHELL-testvdsswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.ps1)
     set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
