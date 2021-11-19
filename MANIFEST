@@ -216,6 +216,7 @@
 ./doxygen/dox/Cookbook.dox
 ./doxygen/dox/DDLBNF110.dox
 ./doxygen/dox/DDLBNF112.dox
+./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
@@ -233,7 +234,6 @@
 ./doxygen/dox/cookbook/Attributes.dox
 ./doxygen/dox/cookbook/Files.c
 ./doxygen/dox/cookbook/Files.dox
-./doxygen/dox/cookbook/FTS.dox
 ./doxygen/dox/cookbook/Performance.dox
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
