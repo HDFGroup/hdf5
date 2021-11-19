@@ -115,7 +115,7 @@ if (![System.IO.Directory]::Exists($testdir)) {
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
 $testprog = Join-Path -Path $bindir -ChildPath swmr_check_compat_vfd.exe
-$rp = Start-Process -FilePath $testprog -PassThru -Wait
+$rp = Start-Process -FilePath $testprog -PassThru -Wait -NoNewWindow
 if ($rp.ExitCode -ne 0) {
     Write-Output ""
     Write-Output "The VFD specified by the HDF5_DRIVER environment variable"
@@ -373,7 +373,7 @@ foreach ($index_type in $IndexTypeLoop) {
 
         # Launch the Generator
         Write-Output "launch the swmr_generator"
-        $rp = Start-Process -FilePath $bindir/swmr_generator.exe  -NoNewWindow-PassThru -Wait -ArgumentList "$compress $index_type"
+        $rp = Start-Process -FilePath $bindir/swmr_generator.exe -NoNewWindow-PassThru -Wait -ArgumentList "$compress $index_type"
         if ($rp.ExitCode -ne 0) {
             Write-Warning "generator had error"
             $nerrors += 1
