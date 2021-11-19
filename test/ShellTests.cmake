@@ -41,11 +41,11 @@ if (PWSH)
             ENVIRONMENT "PATH=$ENV{PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
-#    add_test (H5SHELL-testvdsswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.sh)
-#    set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
-#            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-#            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-#    )
+    add_test (H5SHELL-testvdsswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testvdsswmr.ps1)
+    set_tests_properties (H5SHELL-testvdsswmr PROPERTIES
+            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
+            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
+    )
 elseif (UNIX)
   find_program (SH_PROGRAM bash)
   if (SH_PROGRAM)
