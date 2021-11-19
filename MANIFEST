@@ -233,6 +233,7 @@
 ./doxygen/dox/cookbook/Attributes.dox
 ./doxygen/dox/cookbook/Files.c
 ./doxygen/dox/cookbook/Files.dox
+./doxygen/dox/cookbook/FTS.dox
 ./doxygen/dox/cookbook/Performance.dox
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
