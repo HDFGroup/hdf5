@@ -24,14 +24,15 @@ TESTNAME=dh5walk
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
-THIS_DIR=`pwd`
-ROOTDIR=`cd ../../../..; pwd`; cd "$THIS_DIR"
+THIS_DIR="`pwd`"
+ROOTDIR="`cd ../../../..; pwd`"
+cd "$THIS_DIR"
 TOP_DIR="$ROOTDIR"
 
 DH5WALK=../../dh5walk/dh5walk
 DH5WALK_BIN="$TOP_DIR/utils/tools/dh5walk/dh5walk"
 
-H5DUMP=../../src/h5dump/h5dump
+H5DUMP="$TOP_DIR/src/h5dump/h5dump"
 H5DUMP_BIN="$TOP_DIR/tools/src/h5dump/h5dump"
 
 RM='rm -rf'
@@ -159,23 +160,20 @@ TOOL_LOGTEST() {
       $RUNSERIAL $DH5WALK_BIN $@
    ) 1> $actual 2> $actual_err
 
-   if [ ! -f $expect ]; then
-      # Compare error files if the expect file doesn't exist.
-      if $CMP $expect_err $actual_err; then
+   expect_len="`wc -l < $expect`"
+
+   if [ ! -f $actual ]; then
+      echo "*FAILED*"
+      echo "    The expected .log file is missing"
+      echo "    Perhaps the test failed to run?"
+   else
+      actual_len="`wc -l < $actual`"
+      if [ $actual_len -eq $expect_len ]; then
          echo " PASSED"
       else
          echo "*FAILED*"
-         echo "    Expected result (*.err) differs from actual result (*.out.err)"
-         nerrors="`expr $nerrors + 1`"
-         test yes = "$verbose" && $DIFF $expect_err $actual_err |sed 's/^/    /'
+         echo "    The generated .log file length does not match the expected length.  $actual_len != $expected_len"
       fi
-   elif $CMP $expect $actual; then
-      echo " PASSED"
-   else
-      echo "*FAILED*"
-      echo "    Expected result (*.ddl) differs from actual result (*.out)"
-      nerrors="`expr $nerrors + 1`"
-      test yes = "$verbose" && $DIFF $expect $actual |sed 's/^/    /'
    fi
 
    # Clean up output file
@@ -197,9 +195,17 @@ TOOL_CHK_LOGLEN() {
       $RUNSERIAL $DH5WALK_BIN $@
    )
 	   
+   expect_len="`wc -l < $expect`"
+   if [ "$expect_len" -gt 0 ]; then
+	   echo " PASSED"
+   else
+       echo "*FAILED*"
+       echo "    The generated .log file is empty!."
+   fi
+
    # Clean up output file
    if test -z "$HDF5_NOCLEANUP"; then
-      rm -f $actual
+      rm -f $expect
    fi
 }
 
@@ -221,7 +227,7 @@ SKIP() {
 TOOLTEST help-1.txt -h
 TOOLTEST help-2.txt --help
 TOOL_LOGTEST h5diff_basic1.h5_h5dump -l -T $H5DUMP_BIN -n ./h5diff_basic1.h5
-TOOL_CHK_LOGLEN showme-h5dump.log -o showme-h5dump.log -T $H5DUMP_BIN -n `pwd`
+TOOL_CHK_LOGLEN showme-h5dump.log -o `pwd`/showme-h5dump.log -T $H5DUMP_BIN -n `pwd`
 
 
 #
