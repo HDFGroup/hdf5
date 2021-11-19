@@ -35,7 +35,7 @@ $nerrors      = 0
 ## definitions for message file to coordinate test runs
 ###############################################################################
 $WRITER_MESSAGE = 'SWMR_WRITER_MESSAGE'    # The message file created by writer that the open is complete
-                                           # This should be the same as the define in "./swmr_common.h"
+                                           # This should be the same as the define in "$bindir/swmr_common.h"
 $MESSAGE_TIMEOUT = 300                     # Message timeout length in secs
                                            # This should be the same as the define in "./h5test.h"
 
@@ -146,7 +146,7 @@ foreach ($index_type in $IndexTypeLoop) {
         Write-Output "###############################################################################"
         # Launch the Generator without SWMR_WRITE
         Write-Output "launch the swmr_generator"
-        $rp = Start-Process -FilePath $bindir\swmr_generator.exe -NoNewWindow -ArgumentList "$compress $index_type" -PassThru -Wait
+        $rp = Start-Process -FilePath $bindir/swmr_generator.exe -NoNewWindow -ArgumentList "$compress $index_type" -PassThru -Wait
         if ($rp.ExitCode -ne 0) {
             Write-Warning "generator had error"
             $nerrors += 1
@@ -201,7 +201,6 @@ foreach ($index_type in $IndexTypeLoop) {
             $n += 1
         }
         #Write-Output "pid_readers=$pid_readers"
-        #$IFDEBUG ps
 
         # Collect exit code of the readers first because they usually finish
         # before the writer.
