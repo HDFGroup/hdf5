@@ -33,7 +33,7 @@ if (PWSH)
 #            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
 #    )
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
-    set (bindir ${CMAKE_RUNTIME_OUTPUT_DIRECTORY})
+    set (bindir ${CMAKE_TEST_OUTPUT_DIRECTORY})
     set (testdir ${HDF5_TEST_BINARY_DIR}/H5TEST)
     configure_file(${HDF5_TEST_SOURCE_DIR}/testswmr.pwsh.in ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1 @ONLY)
     add_test (H5SHELL-testswmr ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testswmr.ps1)
