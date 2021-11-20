@@ -257,14 +257,13 @@ typedef struct H5D_chunk_coll_fill_info_t {
 static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                 hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-                                 H5D_chunk_map_t *fm);
+                                 hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                             H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                              const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                              H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                               const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                               H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_flush(H5D_t *dset);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_dest(H5D_t *dset);
@@ -1061,7 +1060,7 @@ H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
  */
 static herr_t
 H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm)
+                   H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm)
 {
     const H5D_t *dataset = io_info->dset;       /* Local pointer to dataset info */
     hssize_t     old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
@@ -1092,7 +1091,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
      * speed up hyperslab calculations by removing the extra checks and/or
      * additions involving the offset and the hyperslab selection -QAK)
      */
-    if ((file_space_normalized = H5S_hyper_normalize_offset((H5S_t *)file_space, old_offset)) < 0)
+    if ((file_space_normalized = H5S_hyper_normalize_offset(file_space, old_offset)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to normalize selection")
 
     /* Decide the number of chunks in each dimension */
@@ -2463,8 +2462,7 @@ done:
  */
 static herr_t
 H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t H5_ATTR_UNUSED nelmts,
-                const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
-                H5D_chunk_map_t *fm)
+                H5S_t H5_ATTR_UNUSED *file_space, H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t *fm)
 {
     H5SL_node_t * chunk_node;                    /* Current node in chunk skip list */
     H5D_io_info_t nonexistent_io_info;           /* "nonexistent" I/O info object */
@@ -2614,8 +2612,7 @@ done:
  */
 static herr_t
 H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t H5_ATTR_UNUSED nelmts,
-                 const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
-                 H5D_chunk_map_t *fm)
+                 H5S_t H5_ATTR_UNUSED *file_space, H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t *fm)
 {
     H5SL_node_t * chunk_node;                   /* Current node in chunk skip list */
     H5D_io_info_t ctg_io_info;                  /* Contiguous I/O info object */
