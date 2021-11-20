@@ -62,8 +62,8 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * This code is the called by Java programs to access the entry points of the HDF5 library. Each routine wraps a single
  * HDF5 entry point, generally with the arguments and return codes analogous to the C interface.
  * <p>
- * For details of the HDF5 library, see the HDF5 Documentation at: <a
- * href="http://hdfgroup.org/HDF5/">http://hdfgroup.org/HDF5/</a>
+ * For details of the HDF5 library, see the HDF5 Documentation at:
+ * <a href="http://hdfgroup.org/HDF5/">http://hdfgroup.org/HDF5/</a>
  * <hr>
  * <p>
  * <b>Mapping of arguments for Java</b>
@@ -160,8 +160,8 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * <p>
  * For Java, this ``ANY'' is a problem, as the type of data must always be declared. Furthermore, multidimensional
  * arrays are definitely <i>not</i> layed out contiguously in memory. It would be infeasible to declare a separate
- * routine for every combination of number type and dimensionality. For that reason, the <a
- * href="./hdf.hdf5lib.HDFArray.html"><b>HDFArray</b></a> class is used to discover the type, shape, and size of the
+ * routine for every combination of number type and dimensionality. For that reason, the
+ * <a href="./hdf.hdf5lib.HDFArray.html"><b>HDFArray</b></a> class is used to discover the type, shape, and size of the
  * data array at run time, and to convert to and from a contiguous array of bytes in synchronized static native C order.
  * <p>
  * The upshot is that any Java array of numbers (either primitive or sub-classes of type <b>Number</b>) can be passed as
@@ -185,8 +185,8 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * <b><i>H5F_ACC_RDWR</i></b> and <b><i>H5P_DEFAULT</i></b>.
  * <p>
  * The HDF-5 API defines a set of values that describe number types and sizes, such as "H5T_NATIVE_INT" and "hsize_t".
- * These values are determined at run time by the HDF-5 C library. To support these parameters, the Java class <a
- * href="./hdf.hdf5lib.HDF5CDataTypes.html"> <b>HDF5CDataTypes</b></a> looks up the values when initiated. The values
+ * These values are determined at run time by the HDF-5 C library. To support these parameters, the Java class
+ * <a href="./hdf.hdf5lib.HDF5CDataTypes.html"> <b>HDF5CDataTypes</b></a> looks up the values when initiated. The values
  * can be accessed as public variables of the Java class, such as:
  *
  * <pre>
@@ -202,8 +202,8 @@ import hdf.hdf5lib.structs.H5O_info_t;
  * JHI5. Errors are converted into Java exceptions. This is totally different from the C interface, but is very natural
  * for Java programming.
  * <p>
- * The exceptions of the JHI5 are organized as sub-classes of the class <a
- * href="./hdf.hdf5lib.exceptions.HDF5Exception.html"> <b>HDF5Exception</b></a>. There are two subclasses of
+ * The exceptions of the JHI5 are organized as sub-classes of the class
+ * <a href="./hdf.hdf5lib.exceptions.HDF5Exception.html"> <b>HDF5Exception</b></a>. There are two subclasses of
  * <b>HDF5Exception</b>, <a href="./hdf.hdf5lib.exceptions.HDF5LibraryException.html"> <b>HDF5LibraryException</b></a>
  * and <a href="./hdf.hdf5lib.exceptions.HDF5JavaException.html"> <b>HDF5JavaException</b></a>. The sub-classes of the
  * former represent errors from the HDF-5 C library, while sub-classes of the latter represent errors in the JHI5
