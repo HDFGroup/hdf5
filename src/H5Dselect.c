@@ -44,8 +44,8 @@
 /* Local Prototypes */
 /********************/
 
-static herr_t H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts,
-                             const H5S_t *file_space, const H5S_t *mem_space);
+static herr_t H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5S_t *file_space,
+                             H5S_t *mem_space);
 
 /*********************/
 /* Package Variables */
@@ -77,8 +77,8 @@ H5FL_EXTERN(H5S_sel_iter_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, const H5S_t *file_space,
-               const H5S_t *mem_space)
+H5D__select_io(const H5D_io_info_t *io_info, size_t elmt_size, size_t nelmts, H5S_t *file_space,
+               H5S_t *mem_space)
 {
     H5S_sel_iter_t *mem_iter       = NULL;  /* Memory selection iteration info */
     hbool_t         mem_iter_init  = FALSE; /* Memory selection iteration info has been initialized */
@@ -270,7 +270,7 @@ done:
  */
 herr_t
 H5D__select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                 const H5S_t *file_space, const H5S_t *mem_space)
+                 H5S_t *file_space, H5S_t *mem_space)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -299,7 +299,7 @@ done:
  */
 herr_t
 H5D__select_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                  const H5S_t *file_space, const H5S_t *mem_space)
+                  H5S_t *file_space, H5S_t *mem_space)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

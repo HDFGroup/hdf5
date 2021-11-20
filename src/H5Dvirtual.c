@@ -84,9 +84,9 @@
 /* Layout operation callbacks */
 static hbool_t H5D__virtual_is_data_cached(const H5D_shared_t *shared_dset);
 static herr_t  H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                 const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                                 H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t  H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                                  const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                                  H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t  H5D__virtual_flush(H5D_t *dset);
 
 /* Other functions */
@@ -103,26 +103,37 @@ static herr_t H5D__virtual_build_source_name(char *                             
                                              size_t static_strlen, size_t nsubs, hsize_t blockno,
                                              char **built_name);
 static herr_t H5D__virtual_init_all(const H5D_t *dset);
-static herr_t H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage,
-                                  const H5S_t *file_space, const H5S_t *mem_space, hsize_t *tot_nelmts);
+static herr_t H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
+                                  H5S_t *mem_space, hsize_t *tot_nelmts);
 static herr_t H5D__virtual_post_io(H5O_storage_virtual_t *storage);
 static herr_t H5D__virtual_read_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                    const H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
+                                    H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
 static herr_t H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                     const H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
+                                     H5S_t *file_space, H5O_storage_virtual_srcdset_t *source_dset);
 
 /*********************/
 /* Package Variables */
 /*********************/
 
 /* Contiguous storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{NULL, H5D__virtual_init, H5D__virtual_is_space_alloc,
-                                               H5D__virtual_is_data_cached, NULL, H5D__virtual_read,
-                                               H5D__virtual_write,
+const H5D_layout_ops_t H5D_LOPS_VIRTUAL[1] = {{
+    NULL,                        /* construct */
+    H5D__virtual_init,           /* init */
+    H5D__virtual_is_space_alloc, /* is_space_alloc */
+    H5D__virtual_is_data_cached, /* is_data_cached */
+    NULL,                        /* io_init */
+    H5D__virtual_read,           /* ser_read */
+    H5D__virtual_write,          /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-                                               NULL, NULL,
-#endif /* H5_HAVE_PARALLEL */
-                                               NULL, NULL, H5D__virtual_flush, NULL, NULL}};
+    NULL, /* par_read */
+    NULL, /* par_write */
+#endif
+    NULL,               /* readvv */
+    NULL,               /* writevv */
+    H5D__virtual_flush, /* flush */
+    NULL,               /* io_term */
+    NULL                /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -2376,8 +2387,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, const H5S_t *file_space,
-                    const H5S_t *mem_space, hsize_t *tot_nelmts)
+H5D__virtual_pre_io(H5D_io_info_t *io_info, H5O_storage_virtual_t *storage, H5S_t *file_space,
+                    H5S_t *mem_space, hsize_t *tot_nelmts)
 {
     hssize_t select_nelmts;              /* Number of elements in selection */
     hsize_t  bounds_start[H5S_MAX_RANK]; /* Selection bounds start */
@@ -2687,7 +2698,7 @@ H5D__virtual_post_io(H5O_storage_virtual_t *storage)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, const H5S_t *file_space,
+H5D__virtual_read_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                       H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t *projected_src_space = NULL;    /* File space for selection in a single source dataset */
@@ -2747,8 +2758,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                  const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+H5D__virtual_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
+                  H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
@@ -2877,7 +2888,7 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, const H5S_t *file_space,
+H5D__virtual_write_one(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, H5S_t *file_space,
                        H5O_storage_virtual_srcdset_t *source_dset)
 {
     H5S_t *projected_src_space = NULL;    /* File space for selection in a single source dataset */
@@ -2940,7 +2951,7 @@ done:
  */
 static herr_t
 H5D__virtual_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+                   H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5O_storage_virtual_t *storage;             /* Convenient pointer into layout struct */
     hsize_t                tot_nelmts;          /* Total number of elements mapped to mem_space */
