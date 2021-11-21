@@ -6353,7 +6353,8 @@ main(int argc, char **argv)
                 }
             }
 
-            HDputs("");
+            if (MAINPROCESS)
+                HDputs("");
         }
     }
 

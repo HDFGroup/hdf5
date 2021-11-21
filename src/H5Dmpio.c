@@ -1257,18 +1257,15 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
                                        H5D_chunk_map_t *fm)
 {
     H5D_filtered_collective_io_info_t *chunk_list = NULL; /* The list of chunks being read/written */
-    H5D_filtered_collective_io_info_t *collective_chunk_list =
-        NULL;                /* The list of chunks used during collective operations */
-    H5D_storage_t ctg_store; /* Chunk storage information as contiguous dataset */
-    MPI_Datatype  mem_type             = MPI_BYTE;
-    MPI_Datatype  file_type            = MPI_BYTE;
-    hbool_t       mem_type_is_derived  = FALSE;
-    hbool_t       file_type_is_derived = FALSE;
-    size_t        chunk_list_num_entries;
-    size_t *      num_chunks_selected_array = NULL; /* Array of number of chunks selected on each rank */
-    size_t        i;
-    int           mpi_rank, mpi_size, mpi_code;
-    herr_t        ret_value = SUCCEED;
+    H5D_storage_t                      ctg_store; /* Chunk storage information as contiguous dataset */
+    MPI_Datatype                       mem_type             = MPI_BYTE;
+    MPI_Datatype                       file_type            = MPI_BYTE;
+    hbool_t                            mem_type_is_derived  = FALSE;
+    hbool_t                            file_type_is_derived = FALSE;
+    size_t                             chunk_list_num_entries;
+    size_t                             i;
+    int                                mpi_rank, mpi_size, mpi_code;
+    herr_t                             ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1374,6 +1371,14 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
         if (H5D__final_collective_io(io_info, type_info, mpi_buf_count, file_type, mem_type) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish MPI-IO")
 
+        /* Free up resources in anticipation of following collective operation */
+        for (i = 0; i < chunk_list_num_entries; i++) {
+            if (chunk_list[i].buf) {
+                H5MM_free(chunk_list[i].buf);
+                chunk_list[i].buf = NULL;
+            }
+        }
+
         /* Participate in the collective re-insertion of all chunks modified
          * into the chunk index
          */
@@ -1396,11 +1401,6 @@ done:
 
         H5MM_free(chunk_list);
     } /* end if */
-
-    if (num_chunks_selected_array)
-        H5MM_free(num_chunks_selected_array);
-    if (collective_chunk_list)
-        H5MM_free(collective_chunk_list);
 
     /* Free the MPI buf and file types, if they were derived */
     if (mem_type_is_derived && MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type)))
@@ -1669,21 +1669,15 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                                         H5D_chunk_map_t *fm)
 {
     H5D_filtered_collective_io_info_t *chunk_list = NULL; /* The list of chunks being read/written */
-    H5D_filtered_collective_io_info_t *collective_chunk_list =
-        NULL;                  /* The list of chunks used during collective operations */
-    H5D_storage_t store;       /* union of EFL and chunk pointer in file space */
-    H5D_io_info_t ctg_io_info; /* Contiguous I/O info object */
-    H5D_storage_t ctg_store;   /* Chunk storage information as contiguous dataset */
-    MPI_Datatype *file_type_array            = NULL;
-    MPI_Datatype *mem_type_array             = NULL;
-    hbool_t *     file_type_is_derived_array = NULL;
-    hbool_t *     mem_type_is_derived_array  = NULL;
-    hbool_t *     has_chunk_selected_array =
-        NULL; /* Array of whether or not each rank is contributing a chunk to each iteration */
-    size_t chunk_list_num_entries;
-    size_t i;
-    int    mpi_rank, mpi_size, mpi_code;
-    herr_t ret_value = SUCCEED;
+    H5D_storage_t                      store;             /* union of EFL and chunk pointer in file space */
+    H5D_io_info_t                      ctg_io_info;       /* Contiguous I/O info object */
+    H5D_storage_t                      ctg_store; /* Chunk storage information as contiguous dataset */
+    MPI_Datatype *                     write_type_array            = NULL;
+    hbool_t *                          write_type_is_derived_array = NULL;
+    size_t                             chunk_list_num_entries;
+    size_t                             i;
+    int                                mpi_rank, mpi_size, mpi_code;
+    herr_t                             ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -1769,20 +1763,14 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                             "unable to send chunk modification data between MPI ranks")
         }
 
-        /* Allocate arrays for storing MPI file and mem types and whether or not the
+        /* Allocate arrays for storing MPI datatypes and whether or not the
          * types were derived.
          */
-        if (NULL == (file_type_array = H5MM_malloc(max_num_chunks * sizeof(MPI_Datatype))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate file type array")
+        if (NULL == (write_type_array = H5MM_malloc(max_num_chunks * sizeof(MPI_Datatype))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate MPI Datatype array")
 
-        if (NULL == (file_type_is_derived_array = H5MM_calloc(max_num_chunks * sizeof(hbool_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate file type is derived array")
-
-        if (NULL == (mem_type_array = H5MM_malloc(max_num_chunks * sizeof(MPI_Datatype))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate mem type array")
-
-        if (NULL == (mem_type_is_derived_array = H5MM_calloc(max_num_chunks * sizeof(hbool_t))))
-            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate mem type is derived array")
+        if (NULL == (write_type_is_derived_array = H5MM_calloc(max_num_chunks * sizeof(hbool_t))))
+            HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate MPI Datatype is derived array")
 
         /* Iterate over the max number of chunks among all ranks, as this rank could
          * have no chunks left to work on, but it still needs to participate in the
@@ -1804,37 +1792,20 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                             "couldn't collectively re-allocate file space for chunks")
 
-            if (NULL == (has_chunk_selected_array = H5MM_malloc((size_t)mpi_size * sizeof(hbool_t))))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate num chunks selected array")
-
-            if (MPI_SUCCESS !=
-                (mpi_code = MPI_Allgather(&have_chunk_to_process, 1, MPI_C_BOOL, has_chunk_selected_array, 1,
-                                          MPI_C_BOOL, io_info->comm)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
-
-            /* If this rank has a chunk to work on, create a MPI type for the
-             * memory and file for writing out the chunk
+            /* If this rank has a chunk to work on, create a MPI type
+             * for writing out the chunk
              */
             if (have_chunk_to_process) {
                 int mpi_type_count;
 
                 H5_CHECKED_ASSIGN(mpi_type_count, int, chunk_list[i].fspace_info.chunk_new.length, hsize_t);
 
-                /* Create MPI memory type for writing to chunk */
                 if (MPI_SUCCESS !=
-                    (mpi_code = MPI_Type_contiguous(mpi_type_count, MPI_BYTE, &mem_type_array[i])))
+                    (mpi_code = MPI_Type_contiguous(mpi_type_count, MPI_BYTE, &write_type_array[i])))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&mem_type_array[i])))
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&write_type_array[i])))
                     HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
-                mem_type_is_derived_array[i] = TRUE;
-
-                /* Create MPI file type for writing to chunk */
-                if (MPI_SUCCESS !=
-                    (mpi_code = MPI_Type_contiguous(mpi_type_count, MPI_BYTE, &file_type_array[i])))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(&file_type_array[i])))
-                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
-                file_type_is_derived_array[i] = TRUE;
+                write_type_is_derived_array[i] = TRUE;
 
                 mpi_buf_count = 1;
 
@@ -1847,14 +1818,20 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                 ctg_io_info.u.wbuf = chunk_list[i].buf;
             } /* end if */
             else {
-                mem_type_array[i] = file_type_array[i] = MPI_BYTE;
-                mpi_buf_count                          = 0;
+                write_type_array[i] = MPI_BYTE;
+                mpi_buf_count       = 0;
             } /* end else */
 
             /* Perform the I/O */
-            if (H5D__final_collective_io(&ctg_io_info, type_info, mpi_buf_count, file_type_array[i],
-                                         mem_type_array[i]) < 0)
+            if (H5D__final_collective_io(&ctg_io_info, type_info, mpi_buf_count, write_type_array[i],
+                                         write_type_array[i]) < 0)
                 HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish MPI-IO")
+
+            /* Free up resources in anticipation of following collective operation */
+            if (have_chunk_to_process && chunk_list[i].buf) {
+                H5MM_free(chunk_list[i].buf);
+                chunk_list[i].buf = NULL;
+            }
 
             /* Participate in the collective re-insertion of all chunks modified
              * in this iteration into the chunk index
@@ -1864,25 +1841,12 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                                                              &index_info, mpi_rank, mpi_size) < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL,
                             "couldn't collectively re-insert modified chunks into chunk index")
+        } /* end for */
 
-            if (collective_chunk_list) {
-                H5MM_free(collective_chunk_list);
-                collective_chunk_list = NULL;
-            } /* end if */
-            if (has_chunk_selected_array) {
-                H5MM_free(has_chunk_selected_array);
-                has_chunk_selected_array = NULL;
-            } /* end if */
-        }     /* end for */
-
-        /* Free the MPI file and memory types, if they were derived */
+        /* Free the MPI types, if they were derived */
         for (i = 0; i < max_num_chunks; i++) {
-            if (file_type_is_derived_array[i])
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&file_type_array[i])))
-                    HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-
-            if (mem_type_is_derived_array[i])
-                if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&mem_type_array[i])))
+            if (write_type_is_derived_array[i])
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&write_type_array[i])))
                     HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
         } /* end for */
     }
@@ -1901,16 +1865,10 @@ done:
         H5MM_free(chunk_list);
     } /* end if */
 
-    if (collective_chunk_list)
-        H5MM_free(collective_chunk_list);
-    if (file_type_array)
-        H5MM_free(file_type_array);
-    if (mem_type_array)
-        H5MM_free(mem_type_array);
-    if (file_type_is_derived_array)
-        H5MM_free(file_type_is_derived_array);
-    if (mem_type_is_derived_array)
-        H5MM_free(mem_type_is_derived_array);
+    if (write_type_array)
+        H5MM_free(write_type_array);
+    if (write_type_is_derived_array)
+        H5MM_free(write_type_is_derived_array);
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__multi_chunk_filtered_collective_io() */
