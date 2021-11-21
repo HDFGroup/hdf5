@@ -324,6 +324,23 @@ typedef uint64_t haddr_t;
 
 #ifdef H5_HAVE_PARALLEL
 #define HADDR_AS_MPI_TYPE MPI_LONG_LONG_INT
+
+/* Define a macro to safely send an hsize_t with MPI. Note
+ * that it assumes HSIZE_UNDEF == matching type's max value. */
+#if HSIZE_UNDEF == UCHAR_MAX
+#define H5_MPI_HSIZE_T MPI_UNSIGNED_CHAR
+#elif HSIZE_UNDEF == USHRT_MAX
+#define H5_MPI_HSIZE_T MPI_UNSIGNED_SHORT
+#elif HSIZE_UNDEF == UINT_MAX
+#define H5_MPI_HSIZE_T MPI_UNSIGNED
+#elif HSIZE_UNDEF == ULONG_MAX
+#define H5_MPI_HSIZE_T MPI_UNSIGNED_LONG
+#elif HSIZE_UNDEF == ULLONG_MAX
+#define H5_MPI_HSIZE_T MPI_UNSIGNED_LONG_LONG
+#else
+#error "no suitable MPI type found for hsize_t"
+#endif
+
 #endif
 
 //! <!-- [H5_iter_order_t_snip] -->

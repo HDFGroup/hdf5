@@ -524,4 +524,68 @@ H5F_set_coll_metadata_reads(H5F_t *file, H5P_coll_md_read_flag_t *file_flag, hbo
     FUNC_LEAVE_NOAPI_VOID
 } /* end H5F_set_coll_metadata_reads() */
 
+/*-------------------------------------------------------------------------
+ * Function:    H5F_mpi_get_file_block_type
+ *
+ * Purpose:     Creates an MPI derived datatype for communicating an
+ *              H5F_block_t structure. If `commit` is specified as TRUE,
+ *              the resulting datatype will be committed and ready for
+ *              use in communication. Otherwise, the type is only suitable
+ *              for building other derived types.
+ *
+ *              If TRUE is returned through `new_type_derived`, this lets
+ *              the caller know that the datatype has been derived and
+ *              should be freed with MPI_Type_free once it is no longer
+ *              needed.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5F_mpi_get_file_block_type(hbool_t commit, MPI_Datatype *new_type, hbool_t *new_type_derived)
+{
+    MPI_Datatype types[2];
+    MPI_Aint     displacements[2];
+    int          block_lengths[2];
+    int          field_count;
+    int          mpi_code;
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(new_type);
+    HDassert(new_type_derived);
+
+    *new_type_derived = FALSE;
+
+    field_count = 2;
+    HDassert(field_count == sizeof(types) / sizeof(MPI_Datatype));
+
+    block_lengths[0] = 1;
+    block_lengths[1] = 1;
+    displacements[0] = offsetof(H5F_block_t, offset);
+    displacements[1] = offsetof(H5F_block_t, length);
+    types[0]         = HADDR_AS_MPI_TYPE;
+    types[1]         = H5_MPI_HSIZE_T;
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, new_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+    *new_type_derived = TRUE;
+
+    if (commit && MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+
+done:
+    if (ret_value < 0) {
+        if (*new_type_derived) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(new_type)))
+                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+            *new_type_derived = FALSE;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5F_mpi_get_file_block_type() */
+
 #endif /* H5_HAVE_PARALLEL */

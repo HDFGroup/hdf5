@@ -550,6 +550,220 @@ done:
 } /* end H5_mpio_create_large_type() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5_mpio_gatherv_to_contig_array
+ *
+ * Purpose:     A wrapper around MPI_(All)gatherv that performs allocation
+ *              of the receive buffer on the caller's behalf and gathers
+ *              data to a contiguous array. This routine's parameters are
+ *              as follows:
+ *
+ *              `send_buf` - The buffer that data will be sent from for
+ *                           the calling MPI rank. Analogous to
+ *                           MPI_(All)gatherv's `sendbuf` parameter.
+ *
+ *              `send_count` - The number of `send_type` elements in the
+ *                             send buffer. Analogous to MPI_(All)gatherv's
+ *                             `sendcount` parameter.
+ *
+ *              `send_type` - The MPI Datatype of the elements in the send
+ *                            buffer. Analogous to MPI_(All)gatherv's
+ *                            `sendtype` parameter.
+ *
+ *              `recv_type` - The MPI Datatype of the elements in the
+ *                            receive buffer. Analogous to
+ *                            MPI_(All)gatherv's `recvtype` parameter.
+ *
+ *              `allgather` - Specifies whether the gather operation to be
+ *                            performed should be MPI_Allgatherv (TRUE) or
+ *                            MPI_Gatherv (FALSE).
+ *
+ *              `sort_func` - An optional qsort callback. If non-NULL, the
+ *                            resulting array will be sorted according to
+ *                            the callback function before being returned.
+ *
+ *              `root` - For MPI_Gatherv operations, specifies the rank
+ *                       that will receive the data sent by other ranks.
+ *                       Analogous to MPI_Gatherv's `root` parameter. For
+ *                       MPI_Allgatherv operations, this parameter is
+ *                       ignored.
+ *
+ *              `comm` - Specifies the MPI Communicator for the operation.
+ *                       Analogous to MPI_(All)gatherv's `comm` parameter.
+ *
+ *              `mpi_rank` - Specifies the calling rank's rank value, as
+ *                           obtained by calling MPI_Comm_rank on the
+ *                           MPI Communicator `comm`.
+ *
+ *              `mpi_size` - Specifies the MPI Communicator size, as
+ *                           obtained by calling MPI_Comm_size on the
+ *                           MPI Communicator `comm`.
+ *
+ *              `out_array` - Resulting array that is allocated and
+ *                            returned to the caller after data has been
+ *                            gathered into it. Returned only to the rank
+ *                            specified by `root` for MPI_Gatherv
+ *                            operations, or to all ranks for
+ *                            MPI_Allgatherv operations.
+ *
+ *              `out_array_num_entries` - The number of elements in the
+ *                                        resulting array, in terms of
+ *                                        the MPI Datatype provided for
+ *                                        `recv_type`.
+ *
+ * Notes:       This routine is collective across `comm`.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5_mpio_gatherv_to_contig_array(void *send_buf, int send_count, MPI_Datatype send_type,
+                                MPI_Datatype recv_type, hbool_t allgather, H5_sort_func_cb_t sort_func,
+                                int root, MPI_Comm comm, int mpi_rank, int mpi_size, void **out_array,
+                                size_t *out_array_num_entries)
+{
+    size_t recv_buf_num_entries = 0;
+    void * recv_buf             = NULL;
+#if MPI_VERSION >= 3
+    MPI_Count type_lb;
+    MPI_Count type_extent;
+#else
+    int type_lb;
+    int type_extent;
+#endif
+    int    mpi_code;
+    int *  recv_counts_disps_array = NULL;
+    herr_t ret_value               = SUCCEED;
+
+    FUNC_ENTER_NOAPI(FAIL)
+
+    HDassert(send_buf || send_count == 0);
+    if (allgather || (mpi_rank == root))
+        HDassert(out_array && out_array_num_entries);
+
+        /* Retrieve the extent of the MPI Datatype being used */
+#if MPI_VERSION >= 3
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent_x(recv_type, &type_lb, &type_extent)))
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_get_extent(recv_type, &type_lb, &type_extent)))
+#endif
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_get_extent(_x) failed", mpi_code)
+
+    HDassert(type_lb == 0);
+
+    /* Allocate array to store the send counts of each rank, as well as
+     * the displacements into the final array where each rank will place
+     * their data. The first half of the array contains the send counts
+     * (in rank order), while the latter half contains the displacements
+     * (also in rank order).
+     */
+    if (allgather || (mpi_rank == root)) {
+        if (NULL == (recv_counts_disps_array =
+                         H5MM_malloc(2 * (size_t)mpi_size * sizeof(*recv_counts_disps_array)))) {
+            if (!allgather) {
+                /* Push an error, but still participate in collective gather operation */
+                HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate receive counts and displacements array")
+            }
+            else
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "couldn't allocate receive counts and displacements array")
+        }
+    }
+
+    /* If gathering to all ranks, inform each rank of how many copies of
+     * the `send_type` datatype each other rank is contributing to the
+     * resulting array. Otherwise, inform only the root rank of how many
+     * copies of `send_type` each rank is contributing.
+     */
+    if (allgather) {
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Allgather(&send_count, 1, MPI_INT, recv_counts_disps_array, 1, MPI_INT, comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Allgather failed", mpi_code)
+    }
+    else {
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Gather(&send_count, 1, MPI_INT, recv_counts_disps_array, 1, MPI_INT, root, comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Gather failed", mpi_code)
+    }
+
+    /* Calculate the total size of and allocate the final array, then
+     * set the displacements into the array for the final gather operation.
+     */
+    if (allgather || (mpi_rank == root)) {
+        size_t i;
+        size_t total_data_size;
+        int *  displacements_ptr;
+
+#if MPI_VERSION >= 3
+        H5_CHECK_OVERFLOW(type_extent, MPI_Count, size_t);
+#endif
+
+        for (i = 0, recv_buf_num_entries = 0; i < (size_t)mpi_size; i++)
+            recv_buf_num_entries += (size_t)recv_counts_disps_array[i];
+        total_data_size = recv_buf_num_entries * (size_t)type_extent;
+
+        /* Check if there is no work to do */
+        if (total_data_size != 0) {
+            if (NULL == (recv_buf = H5MM_malloc(total_data_size))) {
+                if (!allgather) {
+                    /* Push an error, but still participate in collective gather operation */
+                    HDONE_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate buffer for gather operation")
+                }
+                else
+                    HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                                "couldn't allocate buffer for gather operation")
+            }
+        }
+
+        displacements_ptr = &recv_counts_disps_array[mpi_size];
+
+        *displacements_ptr = 0;
+        for (i = 1; i < (size_t)mpi_size; i++)
+            displacements_ptr[i] = displacements_ptr[i - 1] + recv_counts_disps_array[i - 1];
+    }
+
+    /* Perform the actual gather operation */
+    if (allgather) {
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Allgatherv(send_buf, send_count, send_type, recv_buf, recv_counts_disps_array,
+                                       &recv_counts_disps_array[mpi_size], recv_type, comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Allgatherv failed", mpi_code)
+    }
+    else {
+        if (MPI_SUCCESS !=
+            (mpi_code = MPI_Gatherv(send_buf, send_count, send_type, recv_buf, recv_counts_disps_array,
+                                    &recv_counts_disps_array[mpi_size], recv_type, root, comm)))
+            HMPI_GOTO_ERROR(FAIL, "MPI_Gatherv failed", mpi_code)
+    }
+
+    if (allgather || (mpi_rank == root)) {
+#if MPI_VERSION >= 3
+        H5_CHECK_OVERFLOW(type_extent, MPI_Count, size_t);
+#endif
+
+        /* Sort the gathered array, if requested */
+        if (sort_func)
+            HDqsort(recv_buf, recv_buf_num_entries, (size_t)type_extent, sort_func);
+
+        *out_array             = recv_buf;
+        *out_array_num_entries = recv_buf_num_entries;
+    }
+
+done:
+    if (recv_counts_disps_array)
+        H5MM_free(recv_counts_disps_array);
+
+    if (ret_value < 0) {
+        if (recv_buf)
+            H5MM_free(recv_buf);
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5_mpio_gatherv_to_contig_array() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5_mpio_array_gatherv
  *
  * Purpose:     Given an array, specified in `local_array`, by each

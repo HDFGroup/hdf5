@@ -2620,6 +2620,11 @@ H5_DLL herr_t  H5_mpi_comm_cmp(MPI_Comm comm1, MPI_Comm comm2, int *result);
 H5_DLL herr_t  H5_mpi_info_cmp(MPI_Info info1, MPI_Info info2, int *result);
 H5_DLL herr_t  H5_mpio_create_large_type(hsize_t num_elements, MPI_Aint stride_bytes, MPI_Datatype old_type,
                                          MPI_Datatype *new_type);
+H5_DLL herr_t  H5_mpio_gatherv_to_contig_array(void *send_buf, int send_count, MPI_Datatype send_type,
+                                               MPI_Datatype recv_type, hbool_t allgather,
+                                               H5_sort_func_cb_t sort_func, int root, MPI_Comm comm,
+                                               int mpi_rank, int mpi_size, void **out_array,
+                                               size_t *out_array_num_entries);
 H5_DLL herr_t  H5_mpio_array_gatherv(void *local_array, size_t local_array_num_entries,
                                      size_t array_entry_size, void **gathered_array,
                                      size_t *gathered_array_num_entries, hbool_t allgather, int root,
