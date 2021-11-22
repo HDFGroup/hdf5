@@ -2426,9 +2426,9 @@ test_several_revisions_with_logical_gaps(void)
     if (NULL == file)
         TEST_ERROR;
     if (0 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-		HDprintf("\nEOF is not zero, it is: %llu\n", H5FDget_eof(file, H5FD_MEM_DRAW));
+        HDprintf("\nEOF is not zero, it is: %llu\n", H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
-	}
+    }
     if (H5FDclose(file) < 0)
         TEST_ERROR;
     file = NULL;
@@ -3092,7 +3092,7 @@ test_integration_create(void)
     if (H5Fclose(file) < 0)
         TEST_ERROR
 
-	/*
+    /*
      * Create first revision
      */
     HDputs(".");
@@ -3148,7 +3148,7 @@ test_integration_create(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
 
-	/*
+    /*
      * Create second revision
      */
     HDputs(".");
@@ -3211,7 +3211,7 @@ test_integration_create(void)
 
     // Read back data to check for validtiy
     onion_info.revision_id = 2;
-    //onion_info.revision_id = 1;
+    // onion_info.revision_id = 1;
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
@@ -3263,7 +3263,7 @@ test_integration_create(void)
         for (j = 0; j < 7; j++) {
             // printf("i: %d, j: %d\n", i, j);
             int expected = i * 3 + j + 5;
-            //int expected = i * 6 + j + 1;
+            // int expected = i * 6 + j + 1;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
                 HDfflush(stdout);
@@ -3316,7 +3316,7 @@ error:
 static int
 test_integration_create_simple(void)
 {
-    const char *basename = "integration.h5";
+    const char *            basename   = "integration.h5";
     hid_t                   fapl_id    = H5I_INVALID_HID;
     struct onion_filepaths *paths      = NULL;
     H5FD_onion_fapl_info_t  onion_info = {
@@ -3472,7 +3472,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
 
-	/*
+    /*
      * Create second revision
      */
     HDputs(".");
@@ -3529,7 +3529,7 @@ test_integration_create_simple(void)
         TEST_ERROR
     file_id = H5I_INVALID_HID;
 
-	/*
+    /*
      * Create third revision
      */
 
@@ -3595,8 +3595,8 @@ test_integration_create_simple(void)
     // Read back data to check for validtiy
     // onion_info.revision_id = 3;
     onion_info.revision_id = 2;
-    //onion_info.revision_id = 1;
-	//onion_info.revision_id = 0;
+    // onion_info.revision_id = 1;
+    // onion_info.revision_id = 0;
     fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
@@ -3649,10 +3649,10 @@ test_integration_create_simple(void)
         // for (j = 0; j < 1024; j++) {
         for (j = 0; j < 1024; j += 20) {
             // printf("i: %d, j: %d\n", i, j);
-            //int expected = j;
-            //int expected = j + 1024;
+            // int expected = j;
+            // int expected = j + 1024;
             int expected = j + 2048;
-            //int expected = j + 3072;
+            // int expected = j + 3072;
             if (rdata[i][j] != expected) {
                 printf("ERROR!!! Expected: %d, Got: %d\n", expected, rdata[i][j]);
                 HDfflush(stdout);
@@ -3675,10 +3675,10 @@ test_integration_create_simple(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-    //HDremove(paths->canon);
-    //HDremove(paths->onion);
-    //HDremove(paths->recovery);
-    //onion_filepaths_destroy(paths);
+    // HDremove(paths->canon);
+    // HDremove(paths->onion);
+    // HDremove(paths->recovery);
+    // onion_filepaths_destroy(paths);
 
     PASSED();
     return 0;
@@ -3686,10 +3686,10 @@ test_integration_create_simple(void)
 error:
 
     if (paths != NULL) {
-        //HDremove(paths->canon);
-        //HDremove(paths->onion);
-        //HDremove(paths->recovery);
-        //onion_filepaths_destroy(paths);
+        // HDremove(paths->canon);
+        // HDremove(paths->onion);
+        // HDremove(paths->recovery);
+        // onion_filepaths_destroy(paths);
     }
 
     if (dset != H5I_INVALID_HID)

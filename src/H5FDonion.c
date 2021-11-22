@@ -2098,9 +2098,9 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range")
 
             if (file->summary.n_revisions > 0 &&
-                H5FD__onion_ingest_revision_record(&file->rev_record, file->backing_onion, &file->summary,
-                                                   MIN(fa->revision_id - 1, (file->summary.n_revisions - 1))) <
-                    0) {
+                H5FD__onion_ingest_revision_record(
+                    &file->rev_record, file->backing_onion, &file->summary,
+                    MIN(fa->revision_id - 1, (file->summary.n_revisions - 1))) < 0) {
 #if 0
                 HDprintf("fa->revision_id: %d, file->summary.n_revisions: %d, min: %d\n", fa->revision_id,
                          file->summary.n_revisions, MIN(fa->revision_id, file->summary.n_revisions));
@@ -2346,7 +2346,8 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
                          (haddr_t)entry_out_p->phys_addr + page_gap_head, page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
         } /* end if page exists in 'live' revision index */
-        else if (file->fa.revision_id != 0 && H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out_p)) {
+        else if (file->fa.revision_id != 0 &&
+                 H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out_p)) {
 #if 0
             HDputs("READING from archival index");
             HDprintf("page_size: %llu, page_gap_head: %llu, page_gap_tail: %llu, page_readsize: %llu\n",
