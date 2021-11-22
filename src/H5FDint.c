@@ -2392,7 +2392,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, hbool_t *
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity checks */
     HDassert(cls);
@@ -2404,7 +2404,7 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, hbool_t *
         /* Check if plugin name matches VFD class name */
         if (cls->name && !HDstrcmp(cls->name, key->vfd.u.name))
             *success = TRUE;
-    } /* end if */
+    }
     else {
         /* Sanity check */
         HDassert(key->vfd.kind == H5FD_GET_DRIVER_BY_VALUE);
@@ -2412,9 +2412,8 @@ H5FD_check_plugin_load(const H5FD_class_t *cls, const H5PL_key_t *key, hbool_t *
         /* Check if plugin value matches VFD class value */
         if (cls->value == key->vfd.u.value)
             *success = TRUE;
-    } /* end else */
+    }
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD_check_plugin_load() */
 

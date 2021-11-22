@@ -51,13 +51,13 @@ typedef enum H5ES_status_t {
 /* Information about operations in an event set */
 typedef struct H5ES_op_info_t {
     /* API call info */
-    char *api_name; /* Name of HDF5 API routine called */
-    char *api_args; /* "Argument string" for arguments to HDF5 API routine called */
+    const char *api_name; /* Name of HDF5 API routine called */
+    char *      api_args; /* "Argument string" for arguments to HDF5 API routine called */
 
     /* Application info */
-    char *   app_file_name; /* Name of source file where the HDF5 API routine was called */
-    char *   app_func_name; /* Name of function where the HDF5 API routine was called */
-    unsigned app_line_num;  /* Line # of source file where the HDF5 API routine was called */
+    const char *app_file_name; /* Name of source file where the HDF5 API routine was called */
+    const char *app_func_name; /* Name of function where the HDF5 API routine was called */
+    unsigned    app_line_num;  /* Line # of source file where the HDF5 API routine was called */
 
     /* Operation info */
     uint64_t op_ins_count; /* Counter of operation's insertion into event set */

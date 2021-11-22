@@ -181,9 +181,9 @@ if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-4.8")
     if (HDF5_ENABLE_DEV_WARNINGS)
       # Use the C warnings as CXX warnings are the same
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/developer-4.8")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/cxx-developer-4.8")
     else ()
-      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-developer-4.8")
+      ADD_H5_FLAGS (H5_CXXFLAGS "${HDF5_SOURCE_DIR}/config/gnu-warnings/no-cxx-developer-4.8")
     endif ()
   endif ()
 
