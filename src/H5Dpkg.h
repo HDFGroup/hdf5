@@ -591,6 +591,10 @@ H5_DLL herr_t H5D__select_read(const H5D_io_info_t *io_info, const H5D_type_info
 H5_DLL herr_t H5D__select_write(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                 hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space);
 
+/* Functions that perform direct copying between memory buffers */
+H5_DLL herr_t H5D_select_io_mem(void *dst_buf, const H5S_t *dst_space, const void *src_buf,
+                                const H5S_t *src_space, size_t elmt_size, size_t nelmts);
+
 /* Functions that perform scatter-gather serial I/O operations */
 H5_DLL herr_t H5D__scatter_mem(const void *_tscat_buf, H5S_sel_iter_t *iter, size_t nelmts, void *_buf);
 H5_DLL size_t H5D__gather_mem(const void *_buf, H5S_sel_iter_t *iter, size_t nelmts,

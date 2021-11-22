@@ -3072,12 +3072,9 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
     hbool_t           sel_iter_init = FALSE;
     size_t            buf_size;
     size_t            i;
-    H5S_t *           dataspace    = NULL;
-    void *            tmp_gath_buf = NULL; /* Temporary gather buffer to gather into from application buffer
-                                              before scattering out to the chunk data buffer (when writing data),
-                                              or vice versa (when reading data) */
-    int    mpi_code;
-    herr_t ret_value = SUCCEED;
+    H5S_t *           dataspace = NULL;
+    int               mpi_code;
+    herr_t            ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -3160,10 +3157,6 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
         chunk_entry->fspace_info.chunk_new.length = true_chunk_size;
     } /* end else */
 
-    /* Initialize iterator for memory selection */
-    if (NULL == (sel_iter = H5MM_malloc(sizeof(H5S_sel_iter_t))))
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate memory iterator")
-
     /* If this is a read operation, scatter the read chunk data to the user's buffer.
      *
      * If this is a write operation, update the chunk data buffer with the modifications
@@ -3172,80 +3165,29 @@ H5D__filtered_collective_chunk_entry_io(H5D_filtered_collective_io_info_t *chunk
      */
     switch (io_info->op_type) {
         case H5D_IO_OP_READ:
-            if (H5S_select_iter_init(sel_iter, chunk_info->fspace, type_info->src_type_size,
-                                     H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize memory selection information")
-            sel_iter_init = TRUE;
-
             iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
 
-            if (NULL == (tmp_gath_buf = H5MM_malloc(iter_nelmts * type_info->src_type_size)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
-
-            if (!H5D__gather_mem(chunk_entry->buf, sel_iter, (size_t)iter_nelmts, tmp_gath_buf))
-                HGOTO_ERROR(H5E_IO, H5E_READERROR, FAIL, "couldn't gather from chunk buffer")
-
-            if (H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release file selection iterator")
-            sel_iter_init = FALSE;
-
-            if (H5S_select_iter_init(sel_iter, chunk_info->mspace, type_info->dst_type_size,
-                                     H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize memory selection information")
-            sel_iter_init = TRUE;
-
-            iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace);
-
-            if (H5D__scatter_mem(tmp_gath_buf, sel_iter, (size_t)iter_nelmts, io_info->u.rbuf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't scatter to read buffer")
+            if (H5D_select_io_mem(io_info->u.rbuf, chunk_info->mspace, chunk_entry->buf, chunk_info->fspace,
+                                  type_info->src_type_size, (size_t)iter_nelmts) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't copy chunk data to read buffer")
 
             break;
 
         case H5D_IO_OP_WRITE:
-            if (H5S_select_iter_init(sel_iter, chunk_info->mspace, type_info->src_type_size,
-                                     H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize memory selection information")
-            sel_iter_init = TRUE;
-
             iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->mspace);
 
-            if (NULL == (tmp_gath_buf = H5MM_malloc(iter_nelmts * type_info->src_type_size)))
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate temporary gather buffer")
-
-            /* Gather modification data from the application write buffer into a temporary buffer */
-            if (0 == H5D__gather_mem(io_info->u.wbuf, sel_iter, (size_t)iter_nelmts, tmp_gath_buf))
-                HGOTO_ERROR(H5E_IO, H5E_WRITEERROR, FAIL, "couldn't gather from write buffer")
-
-            if (H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release memory selection iterator")
-            sel_iter_init = FALSE;
-
-            /* Initialize iterator for file selection */
-            if (H5S_select_iter_init(sel_iter, chunk_info->fspace, type_info->dst_type_size,
-                                     H5S_SEL_ITER_SHARE_WITH_DATASPACE) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL,
-                            "unable to initialize file selection information")
-            sel_iter_init = TRUE;
-
-            iter_nelmts = H5S_GET_SELECT_NPOINTS(chunk_info->fspace);
-
-            /* Scatter the owner's modification data into the chunk data buffer according to
-             * the file space.
-             */
-            if (H5D__scatter_mem(tmp_gath_buf, sel_iter, (size_t)iter_nelmts, chunk_entry->buf) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't scatter to chunk data buffer")
-
-            if (H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
-                HGOTO_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
-            sel_iter_init = FALSE;
+            if (H5D_select_io_mem(chunk_entry->buf, chunk_info->fspace, io_info->u.wbuf, chunk_info->mspace,
+                                  type_info->dst_type_size, (size_t)iter_nelmts) < 0)
+                HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "couldn't copy chunk data to write buffer")
 
             if (MPI_SUCCESS !=
                 (mpi_code = MPI_Waitall(chunk_entry->async_info.num_receive_requests,
                                         chunk_entry->async_info.receive_requests_array, MPI_STATUSES_IGNORE)))
                 HMPI_GOTO_ERROR(FAIL, "MPI_Waitall failed", mpi_code)
+
+            /* Initialize iterator for memory selection */
+            if (NULL == (sel_iter = H5MM_malloc(sizeof(H5S_sel_iter_t))))
+                HGOTO_ERROR(H5E_DATASET, H5E_CANTALLOC, FAIL, "couldn't allocate memory iterator")
 
             /* For each non-blocking receive call previously posted, receive the chunk
              * modification buffer from another rank and update the chunk data
@@ -3306,8 +3248,6 @@ done:
         H5MM_free(chunk_entry->async_info.receive_buffer_array);
     if (chunk_entry->async_info.receive_requests_array)
         H5MM_free(chunk_entry->async_info.receive_requests_array);
-    if (tmp_gath_buf)
-        H5MM_free(tmp_gath_buf);
     if (sel_iter) {
         if (sel_iter_init && H5S_SELECT_ITER_RELEASE(sel_iter) < 0)
             HDONE_ERROR(H5E_DATASET, H5E_CANTFREE, FAIL, "couldn't release selection iterator")
