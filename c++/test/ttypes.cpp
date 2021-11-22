@@ -16,11 +16,7 @@
    ttypes.cpp - HDF5 C++ testing the general datatype functionality
 
  ***************************************************************************/
-#ifdef OLD_HEADER_FILENAME
-#include <iostream.h>
-#else
 #include <iostream>
-#endif
 using std::cerr;
 using std::endl;
 
@@ -114,8 +110,8 @@ test_classes()
         // PredType::NATIVE_DOUBLE should be in H5T_FLOAT class
         tcls = PredType::NATIVE_DOUBLE.getClass();
         if (H5T_FLOAT != tcls) {
-            verify_val(tcls, H5T_FLOAT, "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__,
-                       __FILE__);
+            verify_val(static_cast<long>(tcls), static_cast<long>(H5T_FLOAT),
+                       "test_class: invalid type class for NATIVE_DOUBLE -", __LINE__, __FILE__);
         }
         PASSED();
     } // end of try block
@@ -660,7 +656,6 @@ static void
 test_named()
 {
     static hsize_t ds_size[2] = {10, 20};
-    hsize_t        i;
     unsigned       attr_data[10][20];
     DataType *     ds_type = NULL;
 
@@ -704,7 +699,7 @@ test_named()
         }
 
         // Check that it is committed.
-        if (itype.committed() == false)
+        if (!itype.committed())
             cerr << "IntType::committed() returned false" << endl;
 
         // We should not be able to modify a type after it has been committed.
@@ -730,8 +725,11 @@ test_named()
 
         // It should be possible to define an attribute for the named type
         Attribute attr1 = itype.createAttribute("attr1", PredType::NATIVE_UCHAR, space);
-        for (i = 0; i < ds_size[0] * ds_size[1]; i++)
-            attr_data[0][i] = (int)i; /*tricky*/
+        for (hsize_t i = 0; i < ds_size[0]; i++) {
+            for (hsize_t j = 0; j < ds_size[1]; j++) {
+                attr_data[i][j] = static_cast<unsigned>(i * ds_size[1] + j);
+            }
+        }
         attr1.write(PredType::NATIVE_UINT, attr_data);
         attr1.close();
 
@@ -806,8 +804,7 @@ test_named()
         issue_fail_msg("test_named", __LINE__, __FILE__, E.getCDetailMsg());
     }
 
-    if (ds_type)
-        delete ds_type;
+    delete ds_type;
 } // test_named
 
 /*-------------------------------------------------------------------------
@@ -992,7 +989,8 @@ test_encode_decode()
         // Create an IntType instance from the decoded pointer and verify it
         IntType *  decoded_int_ptr(static_cast<IntType *>(inttyp.decode()));
         H5T_sign_t int_sign = decoded_int_ptr->getSign();
-        verify_val(int_sign, H5T_SGN_NONE, "DataType::decode", __LINE__, __FILE__);
+        verify_val(static_cast<long>(int_sign), static_cast<long>(H5T_SGN_NONE), "DataType::decode", __LINE__,
+                   __FILE__);
         verify_val(inttyp == *decoded_int_ptr, true, "DataType::decode", __LINE__, __FILE__);
 
         delete decoded_int_ptr;

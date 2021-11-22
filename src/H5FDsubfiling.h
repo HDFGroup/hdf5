@@ -20,6 +20,9 @@
 #ifndef H5FDsubfiling_H
 #define H5FDsubfiling_H
 
+#define H5FD_SUBFILING       (H5FD_subfiling_init())
+#define H5FD_SUBFILING_VALUE H5_VFD_SUBFILING
+
 #if 1 /* JRM */ /* For now, H5FDsubfiling_priv.h needs mercury.  Since the code that needs it will           \
                  * move to its own header, just hack it for now.                                             \
                  */
@@ -29,8 +32,6 @@
 #endif /* JRM */
 
 #include "H5FDsubfiling_priv.h"
-
-#define H5FD_SUBFILING (H5FD_subfiling_init())
 
 #ifndef H5FD_SUBFILING_FAPL_T_MAGIC
 #define H5FD_CURR_SUBFILING_FAPL_T_VERSION 1

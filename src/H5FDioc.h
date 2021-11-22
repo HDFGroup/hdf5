@@ -20,7 +20,8 @@
 #ifndef H5FDioc_H
 #define H5FDioc_H
 
-#define H5FD_IOC (H5FD_ioc_init())
+#define H5FD_IOC       (H5FD_ioc_init())
+#define H5FD_IOC_VALUE H5_VFD_IOC
 
 #ifndef H5FD_IOC_FAPL_T_MAGIC
 #define H5FD_CURR_IOC_FAPL_T_VERSION 1

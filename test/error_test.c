@@ -129,13 +129,8 @@ test_error(hid_t file)
         TEST_ERROR;
     if (old_data != NULL)
         TEST_ERROR;
-#ifdef H5_USE_16_API
-    if (old_func != (H5E_auto_t)H5Eprint)
+    if (old_func == NULL)
         TEST_ERROR;
-#else  /* H5_USE_16_API */
-    if (old_func != (H5E_auto2_t)H5Eprint2)
-        TEST_ERROR;
-#endif /* H5_USE_16_API */
 
     if (H5Eset_auto2(H5E_DEFAULT, NULL, NULL) < 0)
         TEST_ERROR;
@@ -200,7 +195,7 @@ init_error(void)
 
     if (cls_size != H5Eget_class_name(ERR_CLS, cls_name, (size_t)cls_size) + 1)
         TEST_ERROR;
-    if (HDstrcmp(ERR_CLS_NAME, cls_name))
+    if (HDstrcmp(ERR_CLS_NAME, cls_name) != 0)
         TEST_ERROR;
 
     if ((ERR_MAJ_TEST = H5Ecreate_msg(ERR_CLS, H5E_MAJOR, ERR_MAJ_TEST_MSG)) < 0)
@@ -225,7 +220,7 @@ init_error(void)
         TEST_ERROR;
     if (msg_type != H5E_MINOR)
         TEST_ERROR;
-    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG))
+    if (HDstrcmp(msg, ERR_MIN_SUBROUTINE_MSG) != 0)
         TEST_ERROR;
 
     /* Register another class for later testing. */
@@ -324,7 +319,7 @@ long_desc_cb(unsigned H5_ATTR_UNUSED n, const H5E_error2_t *err_desc, void *clie
  *      'full_desc' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_long_desc(void)
 {
@@ -380,7 +375,7 @@ error:
 
     return -1;
 } /* end test_long_desc() */
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    dump_error
@@ -563,7 +558,10 @@ test_copy(void)
     /* Try to close error stack copy.  Should fail because
      * the current H5Eset_current_stack closes the stack to be set.
      */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(estack_id); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -629,15 +627,24 @@ test_append(void)
         TEST_ERROR
 
     /* Try to append bad error stack IDs */
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(H5E_DEFAULT, H5E_DEFAULT, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(estack_id1, H5E_DEFAULT, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, FALSE); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eappend_stack(H5E_DEFAULT, estack_id2, FALSE);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -663,7 +670,10 @@ test_append(void)
     /* Try to close error stack #2.  Should fail because H5Eappend_stack
      * should have already closed it.
      */
-    H5E_BEGIN_TRY { ret = H5Eclose_stack(estack_id2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Eclose_stack(estack_id2);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -728,7 +738,7 @@ error:
  *-------------------------------------------------------------------------
  */
 static herr_t
-test_filter_error(const char *fname)
+test_filter_error(const char *fname, hid_t fapl)
 {
     const char *pathname = H5_get_srcdir_filename(fname); /* Corrected test file name */
     hid_t       file     = -1;
@@ -738,7 +748,7 @@ test_filter_error(const char *fname)
     HDfprintf(stderr, "\nTesting error message during data reading when filter isn't registered\n");
 
     /* Open the file */
-    if ((file = H5Fopen(pathname, H5F_ACC_RDONLY, H5P_DEFAULT)) < 0)
+    if ((file = H5Fopen(pathname, H5F_ACC_RDONLY, fapl)) < 0)
         TEST_ERROR;
 
     /* Open the regular dataset */
@@ -775,8 +785,14 @@ main(void)
     hid_t       fapl      = -1;
     hid_t       estack_id = -1;
     char        filename[1024];
+    const char *env_h5_drvr; /* File driver value from environment */
     const char *FUNC_main = "main";
     int         i;
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
 
     HDfprintf(stderr, "   This program tests the Error API.  There're supposed to be some error messages\n");
 
@@ -867,7 +883,15 @@ main(void)
      * the test file was pre-generated.
      */
     h5_fixname(DATAFILE, H5P_DEFAULT, filename, sizeof filename);
-    if (test_filter_error(filename) < 0)
+    if (!h5_using_default_driver(env_h5_drvr) && HDstrcmp(env_h5_drvr, "stdio")) {
+        /* If not using the library's default VFD or the stdio VFD, force
+         * the library's default VFD here. The test file was pre-generated
+         * and can cause issues with many VFDs.
+         */
+        if (H5Pset_driver(fapl, H5_DEFAULT_VFD, NULL) < 0)
+            TEST_ERROR;
+    }
+    if (test_filter_error(filename, fapl) < 0)
         TEST_ERROR;
 
     h5_clean_files(FILENAME, fapl);

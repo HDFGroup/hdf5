@@ -11,23 +11,20 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef IO_TIMER__
-#define IO_TIMER__
+#ifndef IO_TIMER
+#define IO_TIMER
 
 #include "hdf5.h"
 
-#if defined(H5_TIME_WITH_SYS_TIME)
-#include <sys/time.h>
 #include <time.h>
-#elif defined(H5_HAVE_SYS_TIME_H)
+
+#ifdef H5_HAVE_SYS_TIME_H
 #include <sys/time.h>
-#else
-#include <time.h>
 #endif
 
-#ifdef H5_HAVE_WINSOCK2_H
+#ifdef H5_HAVE_WIN32_API
 #include <winsock2.h>
-#endif /* H5_HAVE_WINSOCK2_H */
+#endif
 
 /* The different types of timers we can have */
 typedef enum timer_type_ {
@@ -88,4 +85,4 @@ H5TOOLS_DLL double     io_time_get(io_time_t *pt, timer_type t);
 }
 #endif /* __cplusplus */
 
-#endif /* IO_TIMER__ */
+#endif /* IO_TIMER */

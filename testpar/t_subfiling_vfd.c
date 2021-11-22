@@ -2633,6 +2633,8 @@ error:
  *              2019
  * ---------------------------------------------------------------------------
  */
+extern hbool_t H5_use_selection_io_g;
+
 int
 main(int argc, char **argv)
 {
@@ -2651,6 +2653,8 @@ main(int argc, char **argv)
     }
 
     h5_reset();
+
+    H5_use_selection_io_g = TRUE;
 
     g_log_stream = stdout; /* default debug/logging output stream */
 

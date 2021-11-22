@@ -169,6 +169,11 @@ find_palette(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
     if (name == NULL)
         return -1;
 
+    /* Shut compiler up */
+    (void)loc_id;
+    (void)ainfo;
+    (void)op_data;
+
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success

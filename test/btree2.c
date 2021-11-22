@@ -676,7 +676,10 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to index record in B-tree with no records */
     idx = 0;
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, find_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)0, find_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -731,7 +734,10 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to index non-existant record in B-tree with 1 record */
     idx = 0;
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, find_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, find_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -793,7 +799,10 @@ test_insert_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to index non-existant record in B-tree with several records */
     idx = 0;
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, find_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, find_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -3120,12 +3129,18 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
     } /* end for */
 
     /* Attempt to index non-existant record in level-4 B-tree, in increasing & decreasing order */
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY * 3), find_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY * 3), find_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY * 3), find_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY * 3), find_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -3156,7 +3171,10 @@ HDfprintf(stderr,"curr_time=%lu\n",(unsigned long)curr_time);
         TEST_ERROR
 
     record = INSERT_MANY / 2;
-    H5E_BEGIN_TRY { ret = H5B2_insert(bt2, &record); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_insert(bt2, &record);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -3288,7 +3306,10 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         TEST_ERROR
 
     /* Attempt to index non-existant record in B-tree with 1 record */
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -3362,7 +3383,10 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         TEST_ERROR
 
     /* Attempt to index non-existant record in B-tree with 1 record */
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)1, index_rec_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -3436,7 +3460,10 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         TEST_ERROR
 
     /* Attempt to index non-existant record in B-tree with several records */
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -3527,7 +3554,10 @@ test_update_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         TEST_ERROR
 
     /* Attempt to index non-existant record in B-tree with several records */
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)4, index_rec_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -5187,12 +5217,18 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
     } /* end for */
 
     /* Attempt to index non-existant record in level-4 B-tree, in increasing & decreasing order */
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_INC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
         TEST_ERROR
-    H5E_BEGIN_TRY { ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_index(bt2, H5_ITER_DEC, (hsize_t)(INSERT_MANY_REC * 3), find_rec_cb, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -5330,7 +5366,10 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to remove a record from a B-tree with no records */
     record = 0;
-    H5E_BEGIN_TRY { ret = H5B2_remove(bt2, &record, NULL, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_remove(bt2, &record, NULL, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -5367,7 +5406,10 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
 
     /* Attempt to remove a non-existant record from a B-tree with 1 record */
     record = 0;
-    H5E_BEGIN_TRY { ret = H5B2_remove(bt2, &record, NULL, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_remove(bt2, &record, NULL, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -5448,7 +5490,10 @@ test_remove_basic(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_
         TEST_ERROR
 
     record = 0;
-    H5E_BEGIN_TRY { ret = H5B2_remove(bt2, &record, NULL, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_remove(bt2, &record, NULL, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -5650,7 +5695,10 @@ test_remove_level1_noredistrib(hid_t fapl, const H5B2_create_t *cparam, const bt
 
     /* Attempt to remove a non-existant record from a B-tree with 1 record */
     record = (INSERT_SPLIT_ROOT_NREC * 2) + 1;
-    H5E_BEGIN_TRY { ret = H5B2_remove(bt2, &record, NULL, NULL); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_remove(bt2, &record, NULL, NULL);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -8801,8 +8849,7 @@ HDfprintf(stderr, "curr_time = %lu\n", (unsigned long)curr_time);
         TEST_ERROR
 
     /* Check for VFD which stores data in multiple files */
-    single_file_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi") &&
-                                HDstrcmp(env_h5_drvr, "family"));
+    single_file_vfd = !h5_driver_uses_multiple_files(env_h5_drvr, H5_EXCLUDE_NON_MULTIPART_DRIVERS);
     if (single_file_vfd) {
         /* Make a copy of the file in memory, in order to speed up deletion testing */
 
@@ -9229,7 +9276,10 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param
 
     /* Attempt to find record B-tree less than a value */
     search = 0;
-    H5E_BEGIN_TRY { ret = H5B2_neighbor(bt2, H5B2_COMPARE_LESS, &search, neighbor_cb, &record); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_neighbor(bt2, H5B2_COMPARE_LESS, &search, neighbor_cb, &record);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -9306,7 +9356,10 @@ test_find_neighbor(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param
 
     /* Attempt to find record B-tree less than a value */
     search = (FIND_NEIGHBOR * 2) + 1;
-    H5E_BEGIN_TRY { ret = H5B2_neighbor(bt2, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_neighbor(bt2, H5B2_COMPARE_GREATER, &search, neighbor_cb, &record);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -9721,7 +9774,10 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to modify a non-existant record */
     record = 3;
     modify = 4;
-    H5E_BEGIN_TRY { ret = H5B2_modify(bt2, &record, modify_cb, &modify); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -9769,7 +9825,10 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to find original record */
     record = 4330;
     found  = HSIZET_MAX;
-    H5E_BEGIN_TRY { ret = H5B2_modify(bt2, &record, modify_cb, &modify); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -9817,7 +9876,10 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to find original record */
     record = 5350;
     found  = 5350;
-    H5E_BEGIN_TRY { ret = H5B2_modify(bt2, &record, modify_cb, &modify); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -9865,7 +9927,10 @@ test_modify(hid_t fapl, const H5B2_create_t *cparam, const bt2_test_param_t *tpa
     /* Attempt to find original record */
     record = 9445;
     found  = 9445;
-    H5E_BEGIN_TRY { ret = H5B2_modify(bt2, &record, modify_cb, &modify); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5B2_modify(bt2, &record, modify_cb, &modify);
+    }
     H5E_END_TRY;
     /* Should fail */
     if (ret != FAIL)
@@ -10061,7 +10126,7 @@ main(void)
     const char *     envval         = NULL;
     hbool_t          api_ctx_pushed = FALSE; /* Whether API context pushed */
 
-    envval = HDgetenv("HDF5_DRIVER");
+    envval = HDgetenv(HDF5_DRIVER);
     if (envval == NULL)
         envval = "nomatch";
 
@@ -10069,6 +10134,11 @@ main(void)
     h5_reset();
     fapl        = h5_fileaccess();
     ExpressMode = GetTestExpress();
+
+    /* For the Direct I/O driver, skip intensive tests due to poor performance */
+    if (!HDstrcmp(envval, "direct"))
+        ExpressMode = 2;
+
     if (ExpressMode > 1)
         HDprintf("***Express test mode on.  Some tests may be skipped\n");
 
@@ -10185,7 +10255,10 @@ main(void)
 error:
     HDputs("*** TESTS FAILED ***");
 
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

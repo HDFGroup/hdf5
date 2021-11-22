@@ -86,7 +86,10 @@ create_compound_type(void)
     return ret_value;
 
 error:
-    H5E_BEGIN_TRY { H5Tclose(ret_value); }
+    H5E_BEGIN_TRY
+    {
+        H5Tclose(ret_value);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -197,7 +200,10 @@ test_getset(void)
      * Reading the fill value from a dataset creation property list that has
      * no fill value should result in a failure.
      */
-    H5E_BEGIN_TRY { H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i); }
+    H5E_BEGIN_TRY
+    {
+        H5Pget_fill_value(dcpl, H5T_NATIVE_INT, &fill_i);
+    }
     H5E_END_TRY;
     if (fill_i != 0) {
         H5_FAILED();
@@ -318,7 +324,7 @@ test_getset_vl(hid_t fapl)
         TEST_ERROR
 
     /* Verify that the fill value is the original value */
-    if (HDstrcmp(f2, orig_fill_value))
+    if (HDstrcmp(f2, orig_fill_value) != 0)
         TEST_ERROR
 
     /* Release the fill value retrieved */
@@ -360,7 +366,7 @@ test_getset_vl(hid_t fapl)
         TEST_ERROR
 
     /* Verify that the fill value is the original value */
-    if (HDstrcmp(f2, orig_fill_value))
+    if (HDstrcmp(f2, orig_fill_value) != 0)
         TEST_ERROR
 
     /* Release the fill value retrieved */
@@ -380,7 +386,9 @@ test_getset_vl(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY {}
+    H5E_BEGIN_TRY
+    {
+    }
     H5E_END_TRY;
     return 1;
 } /* end test_getset_vl() */
@@ -1042,7 +1050,7 @@ test_rdwr_cases(hid_t file, hid_t dcpl, const char *dname, void *_fillval, H5D_f
         for (u = 0; u < nelmts; u++) {
             buf_c[u].a = 1111.11F;
             buf_c[u].x = 2222;
-            buf_c[u].y = 3333.3333F;
+            buf_c[u].y = 3333.3333;
             buf_c[u].z = 'd';
         }
         if (H5Dwrite(dset2, ctype_id, mspace, fspace, H5P_DEFAULT, buf_c) < 0)
@@ -1296,7 +1304,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
         if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
             goto error;
         HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
-        fill_ctype.y = 4444.4444F;
+        fill_ctype.y = 4444.4444;
         if (H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0)
             goto error;
         nerrors += test_rdwr_cases(file, dcpl, "dset11", &fill_ctype, H5D_FILL_TIME_ALLOC, layout,
@@ -1362,7 +1370,7 @@ test_rdwr(hid_t fapl, const char *base_name, H5D_layout_t layout)
     if (H5Pset_fill_time(dcpl, H5D_FILL_TIME_ALLOC) < 0)
         goto error;
     HDmemset(&fill_ctype, 0, sizeof(fill_ctype));
-    fill_ctype.y = 4444.4444F;
+    fill_ctype.y = 4444.4444;
     if (H5Pset_fill_value(dcpl, ctype_id, &fill_ctype) < 0)
         goto error;
     nerrors += test_rdwr_cases(file, dcpl, "dset12", &fill_ctype, H5D_FILL_TIME_ALLOC, layout, H5T_COMPOUND,
@@ -1529,8 +1537,8 @@ test_extend_verify_cmpd_vl(unsigned lineno, const hsize_t *offset, const void *_
         (const comp_vl_datatype *)_compare_val; /* Value to compare against */
 
     /* Verify value */
-    if ((test_val->x != compare_val->x) || HDstrcmp(test_val->a, compare_val->a) ||
-        HDstrcmp(test_val->b, compare_val->b) || (test_val->y != compare_val->y)) {
+    if ((test_val->x != compare_val->x) || HDstrcmp(test_val->a, compare_val->a) != 0 ||
+        HDstrcmp(test_val->b, compare_val->b) != 0 || (test_val->y != compare_val->y)) {
         HDfprintf(stdout, "%u: Value read was not expected.\n", lineno);
         HDfprintf(stdout,
                   "    Elmt = {%" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE ", %" PRIuHSIZE
@@ -1586,7 +1594,7 @@ test_extend_release_cmpd_vl(void *_elmt)
  *-------------------------------------------------------------------------
  */
 static int
-test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, hsize_t *ch_size, hsize_t *start_size,
+test_extend_cases(hid_t file, hid_t _dcpl, const char *dset_name, const hsize_t *ch_size, hsize_t *start_size,
                   hsize_t *max_size, hid_t dtype, void *fillval)
 {
     hid_t       fspace = -1, mspace = -1; /* File & memory dataspaces */
@@ -2714,7 +2722,10 @@ main(int argc, char *argv[])
             nerrors += test_create(my_fapl, FILENAME[1], H5D_CONTIGUOUS);
             nerrors += test_rdwr(my_fapl, FILENAME[3], H5D_CONTIGUOUS);
             nerrors += test_extend(my_fapl, FILENAME[5], H5D_CONTIGUOUS);
-            nerrors += test_compatible();
+
+            if (!h5_driver_uses_modified_filename()) {
+                nerrors += test_compatible();
+            }
         } /* end if */
 
         /* Compact dataset storage tests */

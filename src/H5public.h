@@ -34,129 +34,238 @@
 #ifdef H5_HAVE_FEATURES_H
 #include <features.h> /* For setting POSIX, BSD, etc. compatibility */
 #endif
+
+/* C library header files for things that appear in HDF5 public headers */
+#ifdef __cplusplus
+#define __STDC_FORMAT_MACROS
+#endif
+#include <inttypes.h>
+#include <limits.h>
+#include <stdarg.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+
+/* Unlike most sys/ headers, which are POSIX-only, sys/types.h is avaible
+ * on Windows, though it doesn't necessarily contain all the POSIX types
+ * we need for HDF5 (e.g. ssize_t).
+ */
 #ifdef H5_HAVE_SYS_TYPES_H
 #include <sys/types.h>
 #endif
-#ifdef H5_STDC_HEADERS
-#include <limits.h> /* For H5T_NATIVE_CHAR defn in H5Tpublic.h  */
-#include <stdarg.h> /* For variadic functions in H5VLpublic.h   */
-#endif
-#ifndef __cplusplus
-#ifdef H5_HAVE_STDINT_H
-#include <stdint.h> /* For C9x types */
-#endif
-#else
-#ifdef H5_HAVE_STDINT_H_CXX
-#include <stdint.h> /* For C9x types (when included from C++) */
-#endif
-#endif
-#ifdef H5_HAVE_INTTYPES_H
-#include <inttypes.h> /* C99/POSIX.1 header for uint64_t, PRIu64 */
-#endif
-#ifdef H5_HAVE_STDDEF_H
-#include <stddef.h>
-#endif
+
 #ifdef H5_HAVE_PARALLEL
 /* Don't link against MPI C++ bindings */
+#ifndef MPICH_SKIP_MPICXX
 #define MPICH_SKIP_MPICXX 1
-#define OMPI_SKIP_MPICXX  1
+#endif
+#ifndef OMPI_SKIP_MPICXX
+#define OMPI_SKIP_MPICXX 1
+#endif
 #include <mpi.h>
 #ifndef MPI_FILE_NULL /* MPIO may be defined in mpi.h already */
 #include <mpio.h>
 #endif
 #endif
 
-/* Include the Windows API adapter header early */
-#include "H5api_adpt.h"
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-/* Macros for enabling/disabling particular GCC warnings */
-/* (see the following web-sites for more info:
- *      http://www.dbp-consulting.com/tutorials/SuppressingGCCWarnings.html
- *      http://gcc.gnu.org/onlinedocs/gcc/Diagnostic-Pragmas.html#Diagnostic-Pragmas
- */
-/* These pragmas are only implemented usefully in gcc 4.6+ */
-#if ((__GNUC__ * 100) + __GNUC_MINOR__) >= 406
-#define H5_GCC_DIAG_JOINSTR(x, y) x y
-#define H5_GCC_DIAG_DO_PRAGMA(x)  _Pragma(#x)
-#define H5_GCC_DIAG_PRAGMA(x)     H5_GCC_DIAG_DO_PRAGMA(GCC diagnostic x)
-
-#define H5_GCC_DIAG_OFF(x) H5_GCC_DIAG_PRAGMA(push) H5_GCC_DIAG_PRAGMA(ignored H5_GCC_DIAG_JOINSTR("-W", x))
-#define H5_GCC_DIAG_ON(x)  H5_GCC_DIAG_PRAGMA(pop)
-#else
-#define H5_GCC_DIAG_OFF(x)
-#define H5_GCC_DIAG_ON(x)
-#endif
-
 /* Macro to hide a symbol from further preprocessor substitutions */
 #define H5_NO_EXPAND(x) (x)
 
 /* Version numbers */
-#define H5_VERS_MAJOR      1  /* For major interface/format changes       */
-#define H5_VERS_MINOR      13 /* For minor interface/format changes       */
-#define H5_VERS_RELEASE    0  /* For tweaks, bug-fixes, or development    */
-#define H5_VERS_SUBRELEASE "" /* For pre-releases like snap0          */
-/* Empty string for real releases.           */
-#define H5_VERS_INFO "HDF5 library version: 1.13.0" /* Full version string */
+/**
+ * For major interface/format changes
+ */
+#define H5_VERS_MAJOR 1
+/**
+ * For minor interface/format changes
+ */
+#define H5_VERS_MINOR 13
+/**
+ * For tweaks, bug-fixes, or development
+ */
+#define H5_VERS_RELEASE 0
+/**
+ * For pre-releases like \c snap0. Empty string for official releases.
+ */
+#define H5_VERS_SUBRELEASE "7"
+/**
+ * Full version string
+ */
+#define H5_VERS_INFO "HDF5 library version: 1.13.0-7"
 
 #define H5check() H5check_version(H5_VERS_MAJOR, H5_VERS_MINOR, H5_VERS_RELEASE)
 
 /* macros for comparing the version */
+/**
+ * \brief Determines whether the version of the library being used is greater
+ *        than or equal to the specified version
+ *
+ * \param[in] Maj Major version number - A non-negative integer value
+ * \param[in] Min Minor version number - A non-negative integer value
+ * \param[in] Rel Release version number - A non-negative integer value
+ * \returns A value of 1 is returned if the library version is greater than
+ *          or equal to the version number specified.\n
+ *          A value of 0 is returned if the library version is less than the
+ *          version number specified.\n
+ *          A library version is greater than the specified version number if
+ *          its major version is larger than the specified major version
+ *          number. If the major version numbers are the same, it is greater
+ *          than the specified version number if its minor version is larger
+ *          than the specified minor version number. If the minor version
+ *          numbers are the same, then a library version would be greater than
+ *          the specified version number if its release number is larger than
+ *          the specified release number.
+ *
+ * \details The #H5_VERSION_GE and #H5_VERSION_LE macros are used at compile
+ *          time to conditionally include or exclude code based on the version
+ *          of the HDF5 library against which an application will be linked.
+ *
+ *          The #H5_VERSION_GE macro compares the version of the HDF5 library
+ *          being used against the version number specified in the parameters.
+ *
+ *          For more information about release versioning, see \ref_h5lib_relver.
+ *
+ * \since 1.8.7
+ *
+ */
 #define H5_VERSION_GE(Maj, Min, Rel)                                                                         \
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE >= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR > Min)) || (H5_VERS_MAJOR > Maj))
 
+/**
+ * \brief Determines whether the version of the library being used is less
+ *        than or equal to the specified version
+ *
+ * \param[in] Maj Major version number - A non-negative integer value
+ * \param[in] Min Minor version number - A non-negative integer value
+ * \param[in] Rel Release version number - A non-negative integer value
+ * \returns A value of 1 is returned if the library version is less than
+ *          or equal to the version number specified.\n
+ *          A value of 0 is returned if the library version is greater than the
+ *          version number specified.\n
+ *          A library version is less than the specified version number if
+ *          its major version is smaller than the specified major version
+ *          number. If the major version numbers are the same, it is smaller
+ *          than the specified version number if its minor version is smaller
+ *          than the specified minor version number. If the minor version
+ *          numbers are the same, then a library version would be smaller than
+ *          the specified version number if its release number is smaller than
+ *          the specified release number.
+ *
+ * \details The #H5_VERSION_GE and #H5_VERSION_LE macros are used at compile
+ *          time to conditionally include or exclude code based on the version
+ *          of the HDF5 library against which an application will be linked.
+ *
+ *          The #H5_VERSION_LE macro compares the version of the HDF5 library
+ *          being used against the version number specified in the parameters.
+ *
+ *          For more information about release versioning, see \ref_h5lib_relver.
+ *
+ * \since 1.8.7
+ *
+ */
 #define H5_VERSION_LE(Maj, Min, Rel)                                                                         \
     (((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR == Min) && (H5_VERS_RELEASE <= Rel)) ||                       \
      ((H5_VERS_MAJOR == Maj) && (H5_VERS_MINOR < Min)) || (H5_VERS_MAJOR < Maj))
 
-/*
+/* Macros for various environment variables that HDF5 interprets */
+/**
+ * Used to specify the name of an HDF5 Virtual File Driver to use as
+ * the default file driver for file access. Setting this environment
+ * variable overrides the default file driver for File Access Property
+ * Lists.
+ */
+#define HDF5_DRIVER "HDF5_DRIVER"
+/**
+ * Used to specify a configuration string for the HDF5 Virtual File
+ * Driver being used for file access.
+ */
+#define HDF5_DRIVER_CONFIG "HDF5_DRIVER_CONFIG"
+/**
+ * Used to specify the name of an HDF5 Virtual Object Layer Connector
+ * to use as the default VOL connector for file access. Setting this
+ * environment variable overrides the default VOL connector for File
+ * Access Property Lists.
+ */
+#define HDF5_VOL_CONNECTOR "HDF5_VOL_CONNECTOR"
+/**
+ * Used to specify a delimiter-separated (currently, ';' for Windows
+ * and ':' for other systems) list of paths that HDF5 should search
+ * when loading plugins.
+ */
+#define HDF5_PLUGIN_PATH "HDF5_PLUGIN_PATH"
+/**
+ * Used to control the loading of HDF5 plugins at runtime. If this
+ * environment variable is set to the special string "::" (defined
+ * in H5PLpublic.h as H5PL_NO_PLUGIN), then dynamic loading of any
+ * HDF5 plugins will be disabled. No other values are valid for this
+ * environment variable.
+ */
+#define HDF5_PLUGIN_PRELOAD "HDF5_PLUGIN_PRELOAD"
+/**
+ * Used to control whether HDF5 uses file locking when creating or
+ * opening a file. Valid values for this environment variable are
+ * as follows:
+ *
+ *  "TRUE" or "1"  - Request that file locks should be used
+ *  "FALSE" or "0" - Request that file locks should NOT be used
+ *  "BEST_EFFORT"  - Request that file locks should be used and
+ *                     that any locking errors caused by file
+ *                     locking being disabled on the system
+ *                     should be ignored
+ */
+#define HDF5_USE_FILE_LOCKING "HDF5_USE_FILE_LOCKING"
+/**
+ * Used to instruct HDF5 not to cleanup files created during testing.
+ */
+#define HDF5_NOCLEANUP "HDF5_NOCLEANUP"
+
+/**
  * Status return values.  Failed integer functions in HDF5 result almost
  * always in a negative value (unsigned failing functions sometimes return
  * zero for failure) while successful return is non-negative (often zero).
- * The negative failure value is most commonly -1, but don't bet on it.  The
- * proper way to detect failure is something like:
+ * The negative failure value is most commonly -1, but don't bet on it.
  *
- *  if((dset = H5Dopen2(file, name)) < 0)
- *      fprintf(stderr, "unable to open the requested dataset\n");
+ * The proper way to detect failure is something like:
+ * \code
+ * if((dset = H5Dopen2(file, name)) < 0)
+ *    fprintf(stderr, "unable to open the requested dataset\n");
+ * \endcode
  */
 typedef int herr_t;
 
-/*
- * Boolean type.  Successful return values are zero (false) or positive
- * (true). The typical true value is 1 but don't bet on it.  Boolean
- * functions cannot fail.  Functions that return `htri_t' however return zero
- * (false), positive (true), or negative (failure). The proper way to test
- * for truth from a htri_t function is:
- *
- *  if ((retval = H5Tcommitted(type)) > 0) {
- *      printf("data type is committed\n");
- *  } else if (!retval) {
- *      printf("data type is not committed\n");
- *  } else {
- *      printf("error determining whether data type is committed\n");
- *  }
+/**
+ * C99-style Boolean type. Successful return values are zero (false) or positive
+ * (true). The typical true value is 1 but don't bet on it.
+ * \attention Boolean functions cannot fail.
  */
-#ifdef H5_HAVE_STDBOOL_H
 #include <stdbool.h>
-#else /* H5_HAVE_STDBOOL_H */
-#ifndef __cplusplus
-#if defined(H5_SIZEOF_BOOL) && (H5_SIZEOF_BOOL != 0)
-#define bool _Bool
-#else
-#define bool unsigned int
-#endif
-#define true 1
-#define false 0
-#endif /* __cplusplus */
-#endif /* H5_HAVE_STDBOOL_H */
 typedef bool hbool_t;
-typedef int  htri_t;
+/**
+ * Three-valued Boolean type. Functions that return #htri_t however return zero
+ * (false), positive (true), or negative (failure).
+ *
+ * The proper way to test for truth from a #htri_t function is:
+ * \code
+ * if ((retval = H5Tcommitted(type)) > 0) {
+ *     printf("data type is committed\n");
+ * } else if (!retval) {
+ *     printf("data type is not committed\n");
+ * } else {
+ *     printf("error determining whether data type is committed\n");
+ * }
+ * \endcode
+ */
+typedef int htri_t;
 
-/* Define the ssize_t type if it not is defined */
+/* The signed version of size_t
+ *
+ * ssize_t is POSIX and not defined in any C standard. It's used in some
+ * public HDF5 API calls so this work-around will define it if it's not
+ * present.
+ *
+ * Use of ssize_t should be discouraged in new code.
+ */
 #if H5_SIZEOF_SSIZE_T == 0
 /* Undefine this size, we will re-define it in one of the sections below */
 #undef H5_SIZEOF_SSIZE_T
@@ -174,141 +283,50 @@ typedef long long ssize_t;
 #endif
 #endif
 
-/* int64_t type is used for creation order field for links.  It may be
- * defined in Posix.1g, otherwise it is defined here.
+/**
+ * The size of file objects.
+ *
+ * \internal Defined as a (minimum) 64-bit integer type.
  */
-#if H5_SIZEOF_INT64_T >= 8
-#elif H5_SIZEOF_INT >= 8
-typedef int           int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 8
-typedef long               int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef long long          int64_t;
-#undef H5_SIZEOF_INT64_T
-#define H5_SIZEOF_INT64_T H5_SIZEOF_LONG_LONG
-#else
-#error "nothing appropriate for int64_t"
-#endif
+typedef uint64_t hsize_t;
+/**
+ * The size of file objects. Used when negative values are needed to indicate errors.
+ *
+ * \internal Defined as a (minimum) 64-bit integer type. Use of hssize_t
+ * should be discouraged in new code.
+ */
+typedef int64_t hssize_t;
+#define PRIdHSIZE          PRId64
+#define PRIiHSIZE          PRIi64
+#define PRIoHSIZE          PRIo64
+#define PRIuHSIZE          PRIu64
+#define PRIxHSIZE          PRIx64
+#define PRIXHSIZE          PRIX64
+#define H5_SIZEOF_HSIZE_T  8
+#define H5_SIZEOF_HSSIZE_T 8
+#define HSIZE_UNDEF        UINT64_MAX
 
-/* uint64_t type is used for fields for H5O_info_t.  It may be
- * defined in Posix.1g, otherwise it is defined here.
+/**
+ * The address of an object in the file.
+ *
+ * \internal Defined as a (minimum) 64-bit unsigned integer type.
  */
-#if H5_SIZEOF_UINT64_T >= 8
-#ifndef UINT64_MAX
-#define UINT64_MAX ((uint64_t)-1)
-#endif
-#elif H5_SIZEOF_INT >= 8
-typedef unsigned      uint64_t;
-#define UINT64_MAX UINT_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 8
-typedef unsigned long      uint64_t;
-#define UINT64_MAX ULONG_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef unsigned long long uint64_t;
-#define UINT64_MAX ULLONG_MAX
-#undef H5_SIZEOF_UINT64_T
-#define H5_SIZEOF_UINT64_T H5_SIZEOF_LONG_LONG
-#else
-#error "nothing appropriate for uint64_t"
-#endif
-
-/*
- * The sizes of file objects have their own types defined here, use a minimum
- * 64-bit type.
- */
-#if H5_SIZEOF_LONG_LONG >= 8
-H5_GCC_DIAG_OFF("long-long")
-typedef unsigned long long hsize_t;
-typedef signed long long   hssize_t;
-H5_GCC_DIAG_ON("long-long")
-#define PRIdHSIZE          H5_PRINTF_LL_WIDTH "d"
-#define PRIiHSIZE          H5_PRINTF_LL_WIDTH "i"
-#define PRIoHSIZE          H5_PRINTF_LL_WIDTH "o"
-#define PRIuHSIZE          H5_PRINTF_LL_WIDTH "u"
-#define PRIxHSIZE          H5_PRINTF_LL_WIDTH "x"
-#define PRIXHSIZE          H5_PRINTF_LL_WIDTH "X"
-#define H5_SIZEOF_HSIZE_T  H5_SIZEOF_LONG_LONG
-#define H5_SIZEOF_HSSIZE_T H5_SIZEOF_LONG_LONG
-#define HSIZE_UNDEF        ULLONG_MAX
-#else
-#error "nothing appropriate for hsize_t"
-#endif
-
-/*
- * File addresses have their own types.
- */
-#if H5_SIZEOF_INT >= 8
-typedef unsigned haddr_t;
-#define HADDR_UNDEF       UINT_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_INT
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_UNSIGNED
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR "d"
-#define PRIoHADDR "o"
-#define PRIuHADDR "u"
-#define PRIxHADDR "x"
-#define PRIXHADDR "X"
-#elif H5_SIZEOF_LONG >= 8
-typedef unsigned long haddr_t;
-#define HADDR_UNDEF       ULONG_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_LONG
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_UNSIGNED_LONG
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR "ld"
-#define PRIoHADDR "lo"
-#define PRIuHADDR "lu"
-#define PRIxHADDR "lx"
-#define PRIXHADDR "lX"
-#elif H5_SIZEOF_LONG_LONG >= 8
-typedef unsigned long long haddr_t;
-#define HADDR_UNDEF       ULLONG_MAX
-#define H5_SIZEOF_HADDR_T H5_SIZEOF_LONG_LONG
-#ifdef H5_HAVE_PARALLEL
-#define HADDR_AS_MPI_TYPE MPI_LONG_LONG_INT
-#endif /* H5_HAVE_PARALLEL */
-#define PRIdHADDR H5_PRINTF_LL_WIDTH "d"
-#define PRIoHADDR H5_PRINTF_LL_WIDTH "o"
-#define PRIuHADDR H5_PRINTF_LL_WIDTH "u"
-#define PRIxHADDR H5_PRINTF_LL_WIDTH "x"
-#define PRIXHADDR H5_PRINTF_LL_WIDTH "X"
-#else
-#error "nothing appropriate for haddr_t"
-#endif
+typedef uint64_t haddr_t;
+#define PRIdHADDR           PRId64
+#define PRIoHADDR           PRIo64
+#define PRIuHADDR           PRIu64
+#define PRIxHADDR           PRIx64
+#define PRIXHADDR           PRIX64
+#define H5_SIZEOF_HADDR_T   8
+#define HADDR_UNDEF         UINT64_MAX
 #define H5_PRINTF_HADDR_FMT "%" PRIuHADDR
 #define HADDR_MAX           (HADDR_UNDEF - 1)
 
-/* uint32_t type is used for creation order field for messages.  It may be
- * defined in Posix.1g, otherwise it is defined here.
- */
-#if H5_SIZEOF_UINT32_T >= 4
-#elif H5_SIZEOF_SHORT >= 4
-typedef short         uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_SHORT
-#elif H5_SIZEOF_INT >= 4
-typedef unsigned int       uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_INT
-#elif H5_SIZEOF_LONG >= 4
-typedef unsigned long      uint32_t;
-#undef H5_SIZEOF_UINT32_T
-#define H5_SIZEOF_UINT32_T H5_SIZEOF_LONG
-#else
-#error "nothing appropriate for uint32_t"
+#ifdef H5_HAVE_PARALLEL
+#define HADDR_AS_MPI_TYPE MPI_LONG_LONG_INT
 #endif
 
-//! [H5_iter_order_t_snip]
-
+//! <!-- [H5_iter_order_t_snip] -->
 /**
  * Common iteration orders
  */
@@ -319,19 +337,17 @@ typedef enum {
     H5_ITER_NATIVE,       /**< No particular order, whatever is fastest */
     H5_ITER_N             /**< Number of iteration orders */
 } H5_iter_order_t;
-
-//! [H5_iter_order_t_snip]
+//! <!-- [H5_iter_order_t_snip] -->
 
 /* Iteration callback values */
 /* (Actually, any positive value will cause the iterator to stop and pass back
  *      that positive value to the function that called the iterator)
  */
-#define H5_ITER_ERROR (-1)
-#define H5_ITER_CONT  (0)
-#define H5_ITER_STOP  (1)
+#define H5_ITER_ERROR (-1) /**< Error, stop iteration */
+#define H5_ITER_CONT  (0)  /**< Continue iteration */
+#define H5_ITER_STOP  (1)  /**< Stop iteration, short-circuit success */
 
-//! [H5_index_t_snip]
-
+//! <!-- [H5_index_t_snip] -->
 /**
  * The types of indices on links in groups/attributes on objects.
  * Primarily used for "<do> <foo> by index" routines and for iterating over
@@ -343,18 +359,17 @@ typedef enum H5_index_t {
     H5_INDEX_CRT_ORDER,    /**< Index on creation order              */
     H5_INDEX_N             /**< Number of indices defined            */
 } H5_index_t;
-
-//! [H5_index_t_snip]
+//! <!-- [H5_index_t_snip] -->
 
 /**
  * Storage info struct used by H5O_info_t and H5F_info_t
  */
-//! [H5_ih_info_t_snip]
+//! <!-- [H5_ih_info_t_snip] -->
 typedef struct H5_ih_info_t {
     hsize_t index_size; /**< btree and/or list */
     hsize_t heap_size;
 } H5_ih_info_t;
-//! [H5_ih_info_t_snip]
+//! <!-- [H5_ih_info_t_snip] -->
 
 /**
  * The maximum size allowed for tokens
@@ -364,17 +379,17 @@ typedef struct H5_ih_info_t {
  */
 #define H5O_MAX_TOKEN_SIZE (16)
 
-//! [H5O_token_t_snip]
-
+//! <!-- [H5O_token_t_snip] -->
 /**
+ * Type for object tokens
+ *
  * \internal (Hoisted here, since it's used by both the
- *            H5Lpublic.h and H5Opublic.h headers) */
-/* Type for object tokens */
+ *            H5Lpublic.h and H5Opublic.h headers)
+ */
 typedef struct H5O_token_t {
     uint8_t __data[H5O_MAX_TOKEN_SIZE];
 } H5O_token_t;
-
-//! [H5O_token_t_snip]
+//! <!-- [H5O_token_t_snip] -->
 
 /**
  * Allocation statistics info struct
@@ -393,6 +408,13 @@ typedef struct H5_alloc_stats_t {
  * Library shutdown callback, used by H5atclose().
  */
 typedef void (*H5_atclose_func_t)(void *ctx);
+
+/* API adapter header (defines H5_DLL, etc.) */
+#include "H5api_adpt.h"
+
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 /* Functions in H5.c */
 /**
@@ -435,7 +457,7 @@ H5_DLL herr_t H5open(void);
  *          If the HDF5 library is initialized and closed more than once, the
  *          \p func callback must be registered within each open/close cycle.
  *
- * \since 1.12.1
+ * \since 1.13.0
  */
 H5_DLL herr_t H5atclose(H5_atclose_func_t func, void *ctx);
 /**
@@ -659,7 +681,7 @@ H5_DLL herr_t H5check_version(unsigned majnum, unsigned minnum, unsigned relnum)
  *          after it has been closed.  The value of \p is_terminating is
  *          undefined if this routine fails.
  *
- * \since 1.12.1
+ * \since 1.13.0
  */
 H5_DLL herr_t H5is_library_terminating(hbool_t *is_terminating);
 /**

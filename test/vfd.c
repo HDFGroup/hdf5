@@ -48,25 +48,27 @@
 #define DSET2_DIM  4
 #endif /* H5_HAVE_DIRECT */
 
-const char *FILENAME[] = {"sec2_file",          /*0*/
-                          "core_file",          /*1*/
-                          "family_file",        /*2*/
-                          "new_family_v16_",    /*3*/
-                          "multi_file",         /*4*/
-                          "direct_file",        /*5*/
-                          "log_file",           /*6*/
-                          "stdio_file",         /*7*/
-                          "windows_file",       /*8*/
-                          "new_multi_file_v16", /*9*/
-                          "ro_s3_file",         /*10*/
-                          "splitter_rw_file",   /*11*/
-                          "splitter_wo_file",   /*12*/
-                          "splitter.log",       /*13*/
+const char *FILENAME[] = {"sec2_file",            /*0*/
+                          "core_file",            /*1*/
+                          "family_file",          /*2*/
+                          "new_family_v16",       /*3*/
+                          "multi_file",           /*4*/
+                          "direct_file",          /*5*/
+                          "log_file",             /*6*/
+                          "stdio_file",           /*7*/
+                          "windows_file",         /*8*/
+                          "new_multi_file_v16",   /*9*/
+                          "ro_s3_file",           /*10*/
+                          "splitter_rw_file",     /*11*/
+                          "splitter_wo_file",     /*12*/
+                          "splitter.log",         /*13*/
+                          "ctl_file",             /*14*/
+                          "ctl_splitter_wo_file", /*15*/
                           NULL};
 
 #define LOG_FILENAME "log_vfd_out.log"
 
-#define COMPAT_BASENAME       "family_v16_"
+#define COMPAT_BASENAME       "family_v16"
 #define MULTI_COMPAT_BASENAME "multi_file_v16"
 #define SPLITTER_DATASET_NAME "dataset"
 
@@ -148,15 +150,35 @@ struct splitter_dataset_def {
     int            n_dims;      /* rank */
 };
 
+/* Op code type enum for ctl callback test */
+typedef enum {
+    CTL_OPC_KNOWN_PASSTHROUGH, /* op code known to passthrough VFD */
+    CTL_OPC_KNOWN_TERMINAL,    /* op code known to terminal VFD    */
+    CTL_OPC_UNKNOWN            /* unknown op code                  */
+} ctl_test_opc_type;
+
 static int splitter_prepare_file_paths(H5FD_splitter_vfd_config_t *vfd_config, char *filename_rw_out);
 static int splitter_create_single_file_at(const char *filename, hid_t fapl_id,
                                           const struct splitter_dataset_def *data);
 static int splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def *data);
 static int run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                             hbool_t provide_logfile_path, hid_t sub_fapl_ids[2]);
+                             hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2]);
 static int splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id);
 static int splitter_tentative_open_test(hid_t child_fapl_id);
 static int file_exists(const char *filename, hid_t fapl_id);
+
+static herr_t  run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t fapl_id);
+static H5FD_t *H5FD__ctl_test_vfd_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr);
+static herr_t  H5FD__ctl_test_vfd_close(H5FD_t *_file);
+static haddr_t H5FD__ctl_test_vfd_get_eoa(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t  H5FD__ctl_test_vfd_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr);
+static haddr_t H5FD__ctl_test_vfd_get_eof(const H5FD_t *_file, H5FD_mem_t type);
+static herr_t  H5FD__ctl_test_vfd_read(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
+                                       size_t size, void *buf);
+static herr_t  H5FD__ctl_test_vfd_write(H5FD_t *_file, H5FD_mem_t type, hid_t dxpl_id, haddr_t addr,
+                                        size_t size, const void *buf);
+static herr_t  H5FD__ctl_test_vfd_ctl(H5FD_t *_file, uint64_t op_code, uint64_t flags, const void *input,
+                                      void **output);
 
 /*-------------------------------------------------------------------------
  * Function:    test_sec2
@@ -394,7 +416,7 @@ test_core(void)
     if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
         TEST_ERROR;
 
-    /* Retrieve the access property list... */
+    /* Retrieve the access property list */
     if ((fapl_id_out = H5Fget_access_plist(fid)) < 0)
         TEST_ERROR;
 
@@ -607,6 +629,38 @@ test_core(void)
         TEST_ERROR;
     h5_delete_test_file(FILENAME[1], fapl_id);
 
+    /************************************************************************
+     * Check that delete behavior works correctly
+     ************************************************************************/
+
+    /* Create and close a file */
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+    if ((fid = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl_id)) < 0)
+        TEST_ERROR;
+    if (H5Fclose(fid) < 0)
+        TEST_ERROR;
+
+    /* Try to delete the file with the backing store off (shouldn't delete anything) */
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, FALSE) < 0)
+        TEST_ERROR;
+    if (H5Fdelete(filename, fapl_id) < 0)
+        TEST_ERROR;
+    if (-1 == HDaccess(filename, F_OK))
+        FAIL_PUTS_ERROR("file deleted when backing store set to FALSE");
+
+    /* Try to delete the file with the backing store on (should work) */
+    if (H5Pset_fapl_core(fapl_id, (size_t)CORE_INCREMENT, TRUE) < 0)
+        TEST_ERROR;
+    if (H5Fdelete(filename, fapl_id) < 0)
+        TEST_ERROR;
+    if (0 == HDaccess(filename, F_OK))
+        FAIL_PUTS_ERROR("file not deleted when backing store set to TRUE");
+
+    /************************************************************************
+     * Clean up
+     ************************************************************************/
+
     /* Close the fapl */
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
@@ -690,7 +744,10 @@ test_direct(void)
     if (H5Pset_alignment(fapl, (hsize_t)THRESHOLD, (hsize_t)FBSIZE) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fcreate(filename, H5F_ACC_TRUNC, H5P_DEFAULT, fapl);
+    }
     H5E_END_TRY;
     if (file < 0) {
         H5Pclose(fapl);
@@ -878,7 +935,7 @@ error:
  *      'first_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_family_opens(char *fname, hid_t fa_pl)
 {
@@ -890,13 +947,19 @@ test_family_opens(char *fname, hid_t fa_pl)
     /* Case 1: reopen file with 1st member file name and default property list */
     HDsnprintf(first_name, sizeof(first_name), fname, 0);
 
-    H5E_BEGIN_TRY { file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(first_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
 
     /* Case 2: reopen file with correct name template but default property list */
-    H5E_BEGIN_TRY { file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(fname, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -905,7 +968,10 @@ test_family_opens(char *fname, hid_t fa_pl)
     if (H5Pset_fapl_family(fa_pl, (hsize_t)128, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fopen(fname, H5F_ACC_RDWR, fa_pl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(fname, H5F_ACC_RDWR, fa_pl);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -921,7 +987,10 @@ test_family_opens(char *fname, hid_t fa_pl)
     if (H5Pset_fapl_family(fa_pl, (hsize_t)FAMILY_SIZE, H5P_DEFAULT) < 0)
         TEST_ERROR;
 
-    H5E_BEGIN_TRY { file = H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl); }
+    H5E_BEGIN_TRY
+    {
+        file = H5Fopen(wrong_name, H5F_ACC_RDWR, fa_pl);
+    }
     H5E_END_TRY;
     if (file >= 0)
         TEST_ERROR
@@ -931,7 +1000,7 @@ test_family_opens(char *fname, hid_t fa_pl)
 error:
     return -1;
 } /* end test_family_opens() */
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    test_family
@@ -1157,7 +1226,7 @@ error:
  *      'newname_individual', etc. in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_family_compat(void)
 {
@@ -1243,7 +1312,7 @@ error:
 
     return -1;
 } /* end test_family_compat() */
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    test_family_member_fapl
@@ -1383,7 +1452,7 @@ error:
  *      'sf_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static herr_t
 test_multi_opens(char *fname)
 {
@@ -1395,12 +1464,15 @@ test_multi_opens(char *fname)
     HDsnprintf(super_name, sizeof(super_name), "%%s-%c.h5", 's');
     HDsnprintf(sf_name, sizeof(sf_name), super_name, fname);
 
-    H5E_BEGIN_TRY { fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        fid = H5Fopen(sf_name, H5F_ACC_RDWR, H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     return (fid >= 0 ? FAIL : SUCCEED);
 } /* end test_multi_opens() */
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    test_multi
@@ -1871,12 +1943,23 @@ test_log(void)
     hsize_t       file_size = 0;
     unsigned int  flags     = H5FD_LOG_ALL;
     size_t        buf_size  = 4 * KB;
+    herr_t        ret       = SUCCEED;
 
     TESTING("LOG file driver");
 
-    /* Set property list and file name for log driver. */
     if ((fapl = H5Pcreate(H5P_FILE_ACCESS)) < 0)
         TEST_ERROR;
+
+    /* Make sure calling with an invalid fapl doesn't crash */
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_fapl_log(H5I_INVALID_HID, LOG_FILENAME, 0, 0);
+    }
+    H5E_END_TRY;
+    if (SUCCEED == ret)
+        TEST_ERROR;
+
+    /* Set property list and file name for log driver. */
     if (H5Pset_fapl_log(fapl, LOG_FILENAME, flags, buf_size) < 0)
         TEST_ERROR;
     h5_fixname(FILENAME[6], fapl, filename, sizeof filename);
@@ -2358,7 +2441,7 @@ compare_splitter_config_info(hid_t fapl_id, H5FD_splitter_vfd_config_t *info)
         }
     }
     if ((HDstrlen(info->wo_path) != HDstrlen(fetched_info->wo_path)) ||
-        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX)) {
+        HDstrncmp(info->wo_path, fetched_info->wo_path, H5FD_SPLITTER_PATH_MAX) != 0) {
         HDfprintf(stderr, "MISMATCH: '%s' :: '%s'\n", info->wo_path, fetched_info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, info->wo_path);
         HEXPRINT(H5FD_SPLITTER_PATH_MAX, fetched_info->wo_path);
@@ -2390,7 +2473,7 @@ done:
  */
 static int
 run_splitter_test(const struct splitter_dataset_def *data, hbool_t ignore_wo_errors,
-                  hbool_t provide_logfile_path, hid_t sub_fapl_ids[2])
+                  hbool_t provide_logfile_path, const hid_t sub_fapl_ids[2])
 {
     hid_t                       file_id     = H5I_INVALID_HID;
     hid_t                       fapl_id     = H5I_INVALID_HID;
@@ -2583,7 +2666,10 @@ driver_is_splitter_compatible(hid_t fapl_id)
     HDstrncpy(vfd_config->wo_path, "nonesuch", H5FD_SPLITTER_PATH_MAX);
     vfd_config->log_file_path[0] = '\0';
 
-    H5E_BEGIN_TRY { ret = H5Pset_fapl_splitter(split_fapl_id, vfd_config); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_fapl_splitter(split_fapl_id, vfd_config);
+    }
     H5E_END_TRY;
     if (SUCCEED == ret) {
         ret_value = -1;
@@ -2599,7 +2685,10 @@ driver_is_splitter_compatible(hid_t fapl_id)
     return ret_value;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(split_fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(split_fapl_id);
+    }
     H5E_END_TRY;
 
     HDfree(vfd_config);
@@ -2660,7 +2749,10 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
      * Should fail.
      */
 
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open on nonexistent files unexpectedly successful\n");
@@ -2673,7 +2765,10 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     if (splitter_create_single_file_at(vfd_config->wo_path, vfd_config->wo_fapl_id, data) < 0) {
         SPLITTER_TEST_FAULT("can't write W/O file\n");
     }
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open with extant W/O file unexpectedly successful\n");
@@ -2687,7 +2782,10 @@ splitter_RO_test(const struct splitter_dataset_def *data, hid_t child_fapl_id)
     if (splitter_create_single_file_at(filename_rw, vfd_config->rw_fapl_id, data) < 0) {
         SPLITTER_TEST_FAULT("can't create R/W file\n");
     }
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDONLY, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id >= 0) {
         SPLITTER_TEST_FAULT("R/O open with extant R/W file unexpectedly successful\n");
@@ -2922,7 +3020,10 @@ splitter_compare_expected_data(hid_t file_id, const struct splitter_dataset_def 
 
 done:
     if (ret_value < 0) {
-        H5E_BEGIN_TRY { H5Dclose(dset_id); }
+        H5E_BEGIN_TRY
+        {
+            H5Dclose(dset_id);
+        }
         H5E_END_TRY;
     }
     return ret_value;
@@ -3020,7 +3121,10 @@ splitter_tentative_open_test(hid_t child_fapl_id)
      * Should fail.
      */
 
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with both nonexistent files unexpectedly succeeded\n");
@@ -3041,7 +3145,10 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_duplicate_file_by_bytes(filename_tmp, vfd_config->wo_path) < 0) {
         SPLITTER_TEST_FAULT("Can't create W/O file copy.\n");
     }
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with nonexistent R/W file unexpectedly succeeded\n");
@@ -3066,7 +3173,10 @@ splitter_tentative_open_test(hid_t child_fapl_id)
     if (h5_duplicate_file_by_bytes(filename_tmp, filename_rw) < 0) {
         SPLITTER_TEST_FAULT("Can't create R/W file copy.\n");
     }
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename_rw, H5F_ACC_RDWR, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id != H5I_INVALID_HID) {
         SPLITTER_TEST_FAULT("open with nonexistent W/O unexpectedly succeeded\n");
@@ -3232,7 +3342,10 @@ file_exists(const char *filename, hid_t fapl_id)
     hid_t file_id   = H5I_INVALID_HID;
     int   ret_value = 0;
 
-    H5E_BEGIN_TRY { file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        file_id = H5Fopen(filename, H5F_ACC_RDONLY, fapl_id);
+    }
     H5E_END_TRY;
     if (file_id != H5I_INVALID_HID) {
         ret_value = 1;
@@ -3244,7 +3357,10 @@ file_exists(const char *filename, hid_t fapl_id)
     return ret_value;
 
 error:
-    H5E_BEGIN_TRY { H5Fclose(file_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(file_id);
+    }
     H5E_END_TRY;
     return ret_value;
 } /* end file_exists() */
@@ -3389,7 +3505,7 @@ setup_rand(void)
 
         seed = predefined_seed;
 
-        HDfprintf(stdout, "\n%s: predefined_seed = %d.\n\n", FUNC, seed);
+        HDfprintf(stdout, "\n%s: predefined_seed = %d.\n\n", __func__, seed);
         HDfflush(stdout);
 
         HDsrand(seed);
@@ -3398,14 +3514,14 @@ setup_rand(void)
 
         if (HDgettimeofday(&tv, NULL) != 0) {
 
-            HDfprintf(stdout, "\n%s: gettimeofday() failed -- srand() not called.\n\n", FUNC);
+            HDfprintf(stdout, "\n%s: gettimeofday() failed -- srand() not called.\n\n", __func__);
             HDfflush(stdout);
         }
         else {
 
             seed = (unsigned)tv.tv_usec;
 
-            HDfprintf(stdout, "\n%s: seed = %d.\n\n", FUNC, seed);
+            HDfprintf(stdout, "\n%s: seed = %d.\n\n", __func__, seed);
             HDfflush(stdout);
 
             HDsrand(seed);
@@ -3415,6 +3531,504 @@ setup_rand(void)
     return;
 
 } /* setup_rand() */
+
+/*
+ * Callback implementations for ctl feature testing VFD
+ */
+static H5FD_t *
+H5FD__ctl_test_vfd_open(const char H5_ATTR_UNUSED *name, unsigned H5_ATTR_UNUSED flags,
+                        hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED maxaddr)
+{
+    return HDcalloc(1, sizeof(H5FD_t));
+}
+static herr_t
+H5FD__ctl_test_vfd_close(H5FD_t H5_ATTR_UNUSED *_file)
+{
+    HDfree(_file);
+    return SUCCEED;
+}
+static haddr_t
+H5FD__ctl_test_vfd_get_eoa(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type)
+{
+    return HADDR_UNDEF;
+}
+static herr_t
+H5FD__ctl_test_vfd_set_eoa(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type,
+                           haddr_t H5_ATTR_UNUSED addr)
+{
+    return FAIL;
+}
+static haddr_t
+H5FD__ctl_test_vfd_get_eof(const H5FD_t H5_ATTR_UNUSED *file, H5FD_mem_t H5_ATTR_UNUSED type)
+{
+    return HADDR_UNDEF;
+}
+static herr_t
+H5FD__ctl_test_vfd_read(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type,
+                        hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr, size_t H5_ATTR_UNUSED size,
+                        void H5_ATTR_UNUSED *buf)
+{
+    return FAIL;
+}
+static herr_t
+H5FD__ctl_test_vfd_write(H5FD_t H5_ATTR_UNUSED *_file, H5FD_mem_t H5_ATTR_UNUSED type,
+                         hid_t H5_ATTR_UNUSED fapl_id, haddr_t H5_ATTR_UNUSED addr,
+                         size_t H5_ATTR_UNUSED size, const void H5_ATTR_UNUSED *buf)
+{
+    return FAIL;
+}
+static herr_t
+H5FD__ctl_test_vfd_ctl(H5FD_t H5_ATTR_UNUSED *_file, uint64_t op_code, uint64_t flags,
+                       const void H5_ATTR_UNUSED *input, void H5_ATTR_UNUSED **output)
+{
+    herr_t ret_value = SUCCEED;
+
+    switch (op_code) {
+        /* Op code for testing purposes */
+        case H5FD_CTL__TEST_OPCODE:
+            break;
+
+        /* Unknown op code */
+        default:
+            if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG)
+                ret_value = FAIL;
+            break;
+    }
+
+    return ret_value;
+}
+
+/* Minimal VFD for ctl feature tests */
+static const H5FD_class_t H5FD_ctl_test_vfd_g = {
+    (H5FD_class_value_t)201,    /* value                 */
+    "ctl_test_vfd",             /* name                  */
+    HADDR_MAX,                  /* maxaddr               */
+    H5F_CLOSE_SEMI,             /* fc_degree             */
+    NULL,                       /* terminate             */
+    NULL,                       /* sb_size               */
+    NULL,                       /* sb_encode             */
+    NULL,                       /* sb_decode             */
+    0,                          /* fapl_size             */
+    NULL,                       /* fapl_get              */
+    NULL,                       /* fapl_copy             */
+    NULL,                       /* fapl_free             */
+    0,                          /* dxpl_size             */
+    NULL,                       /* dxpl_copy             */
+    NULL,                       /* dxpl_free             */
+    H5FD__ctl_test_vfd_open,    /* open                  */
+    H5FD__ctl_test_vfd_close,   /* close                 */
+    NULL,                       /* cmp                   */
+    NULL,                       /* query                 */
+    NULL,                       /* get_type_map          */
+    NULL,                       /* alloc                 */
+    NULL,                       /* free                  */
+    H5FD__ctl_test_vfd_get_eoa, /* get_eoa               */
+    H5FD__ctl_test_vfd_set_eoa, /* set_eoa               */
+    H5FD__ctl_test_vfd_get_eof, /* get_eof               */
+    NULL,                       /* get_handle            */
+    H5FD__ctl_test_vfd_read,    /* read                  */
+    H5FD__ctl_test_vfd_write,   /* write                 */
+    NULL,                       /* read_vector           */
+    NULL,                       /* write_vector          */
+    NULL,                       /* read_selection        */
+    NULL,                       /* write_selection       */
+    NULL,                       /* flush                 */
+    NULL,                       /* truncate              */
+    NULL,                       /* lock                  */
+    NULL,                       /* unlock                */
+    NULL,                       /* del                   */
+    H5FD__ctl_test_vfd_ctl,     /* ctl                   */
+    H5FD_FLMAP_DICHOTOMY        /* fl_map                */
+};
+
+/*-------------------------------------------------------------------------
+ * Function:    run_ctl_test
+ *
+ * Purpose:     Helper method for VFD "ctl" callback test
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+run_ctl_test(uint64_t op_code, uint64_t flags, ctl_test_opc_type opc_type, hid_t fapl_id)
+{
+    hbool_t fail_if_unknown    = FALSE;
+    hbool_t routing_flag_set   = FALSE;
+    hbool_t is_passthrough_vfd = FALSE;
+    hbool_t expect_fail        = FALSE;
+    H5FD_t *file_drv_ptr       = NULL;
+    herr_t  ctl_result         = SUCCEED;
+    hid_t   driver_id          = H5I_INVALID_HID;
+    char    filename[1024];
+
+    /* Check for a few ctl function flags */
+    fail_if_unknown  = (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG);
+    routing_flag_set = (flags & H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG);
+
+    /* Determine if the top-level VFD is a passthrough VFD */
+    if ((driver_id = H5Pget_driver(fapl_id)) < 0)
+        PUTS_ERROR("couldn't get VFD ID from FAPL");
+
+    is_passthrough_vfd = ((driver_id == H5FD_SPLITTER) || (driver_id == H5FD_MULTI));
+
+    /*
+     * "Open" testing file. Note that our VFD for testing the ctl
+     * feature doesn't actually create or open files, so we don't
+     * need to create the testing file; we just need the VFD to
+     * give us a pointer to a H5FD_t structure.
+     */
+    h5_fixname(FILENAME[14], fapl_id, filename, sizeof(filename));
+    if (NULL == (file_drv_ptr = H5FDopen(filename, H5F_ACC_RDWR, fapl_id, HADDR_UNDEF)))
+        PUTS_ERROR("couldn't get pointer to H5FD_t structure");
+
+    /* Determine whether the H5FDctl call is expected to fail */
+    expect_fail = fail_if_unknown && (CTL_OPC_UNKNOWN == opc_type);
+    if (is_passthrough_vfd) {
+        /* Should fail if op code is unknown to passthrough VFD
+         * (but known to terminal VFD), no routing flag is specified
+         * and the "fail if unknown" flag is specified.
+         */
+        expect_fail =
+            expect_fail || ((CTL_OPC_KNOWN_TERMINAL == opc_type) && !routing_flag_set && fail_if_unknown);
+    }
+
+    /* Issue opcode to VFD */
+    if (expect_fail) {
+        H5E_BEGIN_TRY
+        {
+            ctl_result = H5FDctl(file_drv_ptr, op_code, flags, NULL, NULL);
+        }
+        H5E_END_TRY;
+    }
+    else
+        ctl_result = H5FDctl(file_drv_ptr, op_code, flags, NULL, NULL);
+
+    /* Verify result of H5FDctl call */
+    if (expect_fail) {
+        if (ctl_result == SUCCEED)
+            PUTS_ERROR("H5FDctl call succeeded when it should have failed");
+    }
+    else {
+        if (ctl_result != SUCCEED)
+            PUTS_ERROR("H5FDctl call failed when it should have succeeded");
+    }
+
+    /* Close H5FD_t structure pointer */
+    if (H5FDclose(file_drv_ptr) < 0)
+        PUTS_ERROR("couldn't close H5FD_t structure pointer");
+    file_drv_ptr = NULL;
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5FDclose(file_drv_ptr);
+    }
+    H5E_END_TRY;
+
+    return -1;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_ctl
+ *
+ * Purpose:     Tests the VFD "ctl" callback
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_ctl(void)
+{
+    H5FD_splitter_vfd_config_t *splitter_config = NULL;
+    uint64_t                    op_code;
+    uint64_t                    flags;
+    hid_t                       driver_id   = H5I_INVALID_HID;
+    hid_t                       fapl_id     = H5I_INVALID_HID;
+    hid_t                       sub_fapl_id = H5I_INVALID_HID;
+
+    TESTING("VFD ctl callback");
+    HDputs("");
+
+    /* Register VFD for test */
+    if ((driver_id = H5FDregister(&H5FD_ctl_test_vfd_g)) < 0)
+        PUTS_ERROR("couldn't register VFD for testing");
+
+    if ((fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        PUTS_ERROR("couldn't create FAPL");
+    if (H5Pset_driver(fapl_id, driver_id, NULL) < 0)
+        PUTS_ERROR("couldn't set testing VFD on FAPL");
+
+    TESTING_2("known op code to terminal VFD (without fail on unknown flag)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = 0;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code to terminal VFD (with fail on unknown flag)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code to terminal VFD (without fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code to terminal VFD (with fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should succeed normally */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = 0;
+
+    /* H5FDctl call should silently ignore unknown op code and succeed */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /* H5FDctl call should fail due to 'fail if unknown' flag being specified */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (without fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should silently ignore unknown op code and succeed */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to terminal VFD (with fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /* H5FDctl call should fail due to 'fail if unknown' flag being specified */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    /* Set up splitter VFD config */
+    if (NULL == (splitter_config = HDcalloc(1, sizeof(H5FD_splitter_vfd_config_t))))
+        TEST_ERROR;
+
+    splitter_config->magic          = H5FD_SPLITTER_MAGIC;
+    splitter_config->version        = H5FD_CURR_SPLITTER_VFD_CONFIG_VERSION;
+    splitter_config->ignore_wo_errs = TRUE;
+    splitter_config->rw_fapl_id     = H5P_DEFAULT;
+    splitter_config->wo_fapl_id     = H5P_DEFAULT;
+    h5_fixname(FILENAME[15], splitter_config->wo_fapl_id, splitter_config->wo_path, H5FD_SPLITTER_PATH_MAX);
+
+    if ((sub_fapl_id = H5Pcreate(H5P_FILE_ACCESS)) < 0)
+        PUTS_ERROR("couldn't create FAPL");
+    if (H5Pset_driver(sub_fapl_id, driver_id, NULL) < 0)
+        PUTS_ERROR("couldn't set testing VFD on FAPL");
+    splitter_config->rw_fapl_id = sub_fapl_id;
+
+    if (H5Pset_fapl_splitter(fapl_id, splitter_config) < 0)
+        PUTS_ERROR("couldn't set splitter VFD on FAPL");
+
+    TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/no "
+              "routing flag)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = 0;
+
+    /*
+     * H5FDctl call should silently ignore unknown op code in
+     * passthrough VFD since no routing flag is specified and
+     * 'fail if unknown' flag is not specified.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2(
+        "known op code through passthrough VFD to terminal VFD (with fail on unknown flag/no routing flag)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /*
+     * H5FDctl call should fail since op code is unknown to
+     * passthrough VFD (though known to terminal VFD), no
+     * routing flag is specified and the 'fail if unknown'
+     * flag is specified.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code through passthrough VFD to terminal VFD (without fail on unknown flag/route to "
+              "terminal VFD)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /*
+     * H5Dctl call should succeed since the passthrough VFD
+     * doesn't recognize the op code, but has been instructed
+     * to route it down to the terminal VFD.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("known op code through passthrough VFD to terminal VFD (with fail on unknown flag/route to "
+              "terminal VFD)")
+
+    op_code = H5FD_CTL__TEST_OPCODE;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /*
+     * H5Dctl call should succeed since the passthrough VFD
+     * doesn't recognize the op code, but has been instructed
+     * to route it down to the terminal VFD.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_KNOWN_TERMINAL, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = 0;
+
+    /*
+     * H5FDctl call should silently ignore unknown op code in
+     * passthrough VFD since no routing flag is specified and
+     * 'fail if unknown' flag is not specified.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG;
+
+    /*
+     * H5FDctl call should fail since op code is unknown to
+     * passthrough VFD, no routing flag is specified and the
+     * 'fail if unknown' flag is specified.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to passthrough VFD (without fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /*
+     * H5Dctl call should succeed since the passthrough VFD
+     * doesn't recognize the op code, but has been instructed
+     * to route it down to the terminal VFD and the 'fail if
+     * unknown' flag has not been specified. Therefore, the
+     * terminal VFD should silently ignore the unknown op
+     * code.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("unknown op code to passthrough VFD (with fail on unknown flag/route to terminal VFD)")
+
+    op_code = H5FD_CTL_OPC_RESERVED;
+    flags   = H5FD_CTL__FAIL_IF_UNKNOWN_FLAG | H5FD_CTL__ROUTE_TO_TERMINAL_VFD_FLAG;
+
+    /*
+     * H5Dctl call should fail since the passthrough VFD
+     * doesn't recognize the op code, but has been instructed
+     * to route it down to the terminal VFD and the 'fail if
+     * unknown' flag has been specified. Therefore, the
+     * terminal VFD will throw an error for the unknown op
+     * code.
+     */
+    if (run_ctl_test(op_code, flags, CTL_OPC_UNKNOWN, fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    TESTING_2("test cleanup")
+
+    HDfree(splitter_config);
+
+    if (H5FDunregister(driver_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(sub_fapl_id) < 0)
+        TEST_ERROR;
+    if (H5Pclose(fapl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return 0;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        if (splitter_config)
+            HDfree(splitter_config);
+        H5FDunregister(driver_id);
+        H5Pclose(sub_fapl_id);
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return -1;
+}
 
 /*-------------------------------------------------------------------------
  * Function:    test_vector_io__setup_v
@@ -3473,7 +4087,7 @@ test_vector_io__setup_v(uint32_t count, H5FD_mem_t types[], haddr_t addrs[], siz
 
         if ((NULL == write_bufs[i]) || (NULL == read_bufs[i])) {
 
-            HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", FUNC);
+            HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
             result = FALSE;
             break;
         }
@@ -3608,7 +4222,7 @@ test_vector_io__setup_fixed_size_v(uint32_t count, H5FD_mem_t types[], haddr_t a
 
         if ((NULL == write_bufs[i]) || (NULL == read_bufs[i])) {
 
-            HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", FUNC);
+            HDfprintf(stderr, "%s: can't malloc read / write bufs.\n", __func__);
             result = FALSE;
             break;
         }
@@ -3694,7 +4308,7 @@ test_vector_io__read_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], had
 
             if (verbose) {
 
-                HDfprintf(stdout, "%s: HDread() failed on entry %d.\n", FUNC, i);
+                HDfprintf(stdout, "%s: HDread() failed on entry %d.\n", __func__, i);
             }
             result = FALSE;
             break;
@@ -3749,7 +4363,7 @@ test_vector_io__write_v_indiv(H5FD_t *lf, uint32_t count, H5FD_mem_t types[], ha
 
             if (verbose) {
 
-                HDfprintf(stdout, "%s: HDwrite() failed on entry %d.\n", FUNC, i);
+                HDfprintf(stdout, "%s: HDwrite() failed on entry %d.\n", __func__, i);
             }
             result = FALSE;
             break;
@@ -5342,7 +5956,18 @@ error:
 int
 main(void)
 {
-    int nerrors = 0;
+    char *env_h5_drvr = NULL;
+    int   nerrors     = 0;
+
+    /* Don't run VFD tests when HDF5_DRIVER is set. These tests expect a
+     * specific VFD to be set and HDF5_DRIVER being set can interfere
+     * with that.
+     */
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr) {
+        HDprintf(" -- SKIPPED VFD tests because %s is set -- \n", HDF5_DRIVER);
+        HDexit(EXIT_SUCCESS);
+    }
 
     h5_reset();
 
@@ -5367,6 +5992,7 @@ main(void)
     nerrors += test_vector_io("stdio") < 0 ? 1 : 0;
     nerrors += test_selection_io("sec2") < 0 ? 1 : 0;
     nerrors += test_selection_io("stdio") < 0 ? 1 : 0;
+    nerrors += test_ctl() < 0 ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d Virtual File Driver TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

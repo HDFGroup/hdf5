@@ -24,8 +24,9 @@
 #ifndef H5ESprivate_H
 #define H5ESprivate_H
 
-/* Include package's public header */
-#include "H5ESpublic.h" /* Event Sets                  */
+/* Include package's public headers */
+#include "H5ESpublic.h"
+#include "H5ESdevelop.h"
 
 /* Private headers needed by this file */
 #include "H5VLprivate.h" /* Virtual Object Layer        */

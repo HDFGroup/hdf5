@@ -10,8 +10,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef _Included_hdf_hdf5lib_H5_H5POCpyPL
-#define _Included_hdf_hdf5lib_H5_H5POCpyPL
+#ifndef Included_hdf_hdf5lib_H5_H5POCpyPL
+#define Included_hdf_hdf5lib_H5_H5POCpyPL
 
 #include <jni.h>
 
@@ -53,4 +53,4 @@ JNIEXPORT jint JNICALL Java_hdf_hdf5lib_H5_H5Pget_1copy_1object(JNIEnv *, jclass
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_H5POCpyPL */
+#endif /* Included_hdf_hdf5lib_H5_H5POCpyPL */

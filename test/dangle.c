@@ -176,7 +176,10 @@ test_dangle_group(H5F_close_degree_t degree)
         TEST_ERROR;
 
     /* Try creating duplicate group */
-    H5E_BEGIN_TRY { gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gcreate2(fid, GROUPNAME, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY;
     if (gid >= 0)
         TEST_ERROR
@@ -657,7 +660,21 @@ error:
 int
 main(void)
 {
-    int nerrors = 0;
+    const char *env_h5_drvr; /* File Driver value from environment */
+    int         nerrors = 0;
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /* Don't run this test with the multi/split VFD. A bug in library shutdown
+     * ordering causes problems with the multi VFD when IDs are left dangling.
+     */
+    if (!HDstrcmp(env_h5_drvr, "multi") || !HDstrcmp(env_h5_drvr, "split")) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        return 0;
+    }
 
     /* Run tests w/weak file close */
     HDputs("Testing dangling objects with weak file close:");

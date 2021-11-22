@@ -622,7 +622,7 @@ size1_helper(hid_t file, const char *filename, hid_t fapl_id, hbool_t test_file_
             HDprintf("Can't read data\n");                                                                   \
             goto error;                                                                                      \
         }                                                                                                    \
-        if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str)) {            \
+        if ((rdata.i1 != wdata.i1) || (rdata.i2 != wdata.i2) || HDstrcmp(rdata.str, wdata.str) != 0) {       \
             H5_FAILED();                                                                                     \
             AT();                                                                                            \
             HDprintf("incorrect read data\n");                                                               \
@@ -3815,23 +3815,45 @@ test_sohm_external_dtype(void)
 void
 test_sohm(void)
 {
+    const char *env_h5_drvr;
+    hbool_t     default_driver;
+
     MESSAGE(5, ("Testing Shared Object Header Messages\n"));
 
-    test_sohm_fcpl();          /* Test SOHMs and file creation plists */
-    test_sohm_fcpl_errors();   /* Bogus H5P* calls for SOHMs */
-    test_sohm_size1();         /* Tests the sizes of files with one SOHM */
-#if 0                          /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    default_driver = h5_using_default_driver(env_h5_drvr);
+
+    test_sohm_fcpl();        /* Test SOHMs and file creation plists */
+    test_sohm_fcpl_errors(); /* Bogus H5P* calls for SOHMs */
+
+    /* Only run this test with sec2/default driver */
+    if (default_driver)
+        test_sohm_size1(); /* Tests the sizes of files with one SOHM */
+
+#if 0                  /* TODO: REVEALS BUG TO BE FIXED - SEE JIRA HDFFV-10645 */
     test_sohm_size_consistency_open_create();
-#endif                         /* Jira HDFFV-10645 */
-    test_sohm_attrs();         /* Tests shared messages in attributes */
-    test_sohm_size2(0);        /* Tests the sizes of files with multiple SOHMs */
-    test_sohm_size2(1);        /* Tests the sizes of files with multiple
-                                * SOHMs, closing and reopening file after
-                                * each write. */
+#endif                 /* Jira HDFFV-10645 */
+    test_sohm_attrs(); /* Tests shared messages in attributes */
+
+    /* Only run these tests with sec2/default driver */
+    if (default_driver) {
+        test_sohm_size2(0); /* Tests the sizes of files with multiple SOHMs */
+        test_sohm_size2(1); /* Tests the sizes of files with multiple
+                             * SOHMs, closing and reopening file after
+                             * each write. */
+    }
+
     test_sohm_delete();        /* Test deleting shared messages */
     test_sohm_delete_revert(); /* Test that a file with SOHMs becomes an
                                 * empty file again when they are deleted. */
-    test_sohm_extlink();       /* Test SOHMs when external links are used */
+
+    if (!h5_driver_uses_modified_filename()) {
+        test_sohm_extlink(); /* Test SOHMs when external links are used */
+    }
 
     test_sohm_extend_dset();    /* Test extending shared datasets */
     test_sohm_external_dtype(); /* Test using datatype in another file */

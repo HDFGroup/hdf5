@@ -822,7 +822,7 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     char     file_name[64];           /* Filename buffer */
     size_t   alloc_incr;              /* Buffer allocation increment */
     size_t   min_incr  = 65536;       /* Minimum buffer increment */
-    double   buf_prcnt = 0.1f;        /* Percentage of buffer size to set
+    double   buf_prcnt = 0.1;         /* Percentage of buffer size to set
                                           as increment */
     static long                 file_name_counter;
     H5FD_file_image_callbacks_t callbacks = {&image_malloc, &image_memcpy, &image_realloc, &image_free,
@@ -907,7 +907,10 @@ H5LTopen_file_image(void *buf_ptr, size_t buf_size, unsigned flags)
     return file_id;
 
 out:
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
     return -1;
 } /* end H5LTopen_file_image() */
@@ -1309,6 +1312,10 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
     if (name == NULL)
         return ret;
 
+    /* Shut the compiler up */
+    (void)loc_id;
+    (void)linfo;
+
     /* Define a positive value for return value if the dataset was found. This will
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success
@@ -1345,13 +1352,13 @@ find_dataset(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const
  * modify the op_data buffer (i.e.: dset_name) during the traversal, and the
  * library never modifies that buffer.
  */
-H5_GCC_DIAG_OFF("cast-qual")
+H5_GCC_CLANG_DIAG_OFF("cast-qual")
 herr_t
 H5LTfind_dataset(hid_t loc_id, const char *dset_name)
 {
     return H5Literate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, 0, find_dataset, (void *)dset_name);
 }
-H5_GCC_DIAG_ON("cast-qual")
+H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  *
@@ -1769,6 +1776,32 @@ H5LTset_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
 }
 
 /*-------------------------------------------------------------------------
+ * Function: H5LTset_attribute_ullong
+ *
+ * Purpose: Create and write an attribute.
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Alessandro Felder
+ *
+ * Date: August 27, 2021
+ *
+ * Comments:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5LTset_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_name,
+                         const unsigned long long *data, size_t size)
+{
+
+    if (H5LT_set_attribute_numerical(loc_id, obj_name, attr_name, size, H5T_NATIVE_ULLONG, data) < 0)
+        return -1;
+
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
  * Function: H5LTset_attribute_float
  *
  * Purpose: Create and write an attribute.
@@ -1847,6 +1880,10 @@ find_attr(H5_ATTR_UNUSED hid_t loc_id, const char *name, H5_ATTR_UNUSED const H5
     if (name == NULL)
         return H5_ITER_CONT;
 
+    /* Shut compiler up */
+    (void)loc_id;
+    (void)ainfo;
+
     /* Define a positive value for return value if the attribute was found. This will
      * cause the iterator to immediately return that positive value,
      * indicating short-circuit success
@@ -1908,13 +1945,13 @@ H5LTfind_attribute(hid_t loc_id, const char *attr_name)
  * modify the op_data buffer (i.e.: attr_name) during the traversal, and the
  * library never modifies that buffer.
  */
-H5_GCC_DIAG_OFF("cast-qual")
+H5_GCC_CLANG_DIAG_OFF("cast-qual")
 herr_t
 H5LT_find_attribute(hid_t loc_id, const char *attr_name)
 {
     return H5Aiterate2(loc_id, H5_INDEX_NAME, H5_ITER_INC, NULL, find_attr, (void *)attr_name);
 }
-H5_GCC_DIAG_ON("cast-qual")
+H5_GCC_CLANG_DIAG_ON("cast-qual")
 
 /*-------------------------------------------------------------------------
  * Function: H5LTget_attribute_ndims
@@ -2135,19 +2172,28 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
     size_t size_str_to_add, size_str;
 
     if (_no_user_buf) {
+        char *tmp_realloc;
+
+        if (!buf)
+            goto out;
+
         /* If the buffer isn't big enough, reallocate it.  Otherwise, go to do strcat. */
         if (str_to_add && ((ssize_t)(*len - (HDstrlen(buf) + HDstrlen(str_to_add) + 1)) < LIMIT)) {
             *len += ((HDstrlen(buf) + HDstrlen(str_to_add) + 1) / INCREMENT + 1) * INCREMENT;
-            buf = (char *)HDrealloc(buf, *len);
         }
         else if (!str_to_add && ((ssize_t)(*len - HDstrlen(buf) - 1) < LIMIT)) {
             *len += INCREMENT;
-            buf = (char *)HDrealloc(buf, *len);
         }
-    }
 
-    if (!buf)
-        goto out;
+        tmp_realloc = (char *)HDrealloc(buf, *len);
+        if (tmp_realloc == NULL) {
+            HDfree(buf);
+            buf = NULL;
+            goto out;
+        }
+        else
+            buf = tmp_realloc;
+    }
 
     if (str_to_add) {
         /* find the size of the buffer to add */
@@ -2160,7 +2206,7 @@ realloc_and_append(hbool_t _no_user_buf, size_t *len, char *buf, const char *str
          */
         if (size_str < *len - 1) {
             if (size_str + size_str_to_add < *len - 1) {
-                HDstrncat(buf, str_to_add, size_str_to_add);
+                HDstrcat(buf, str_to_add);
             }
             else {
                 HDstrncat(buf, str_to_add, (*len - 1) - size_str);
@@ -2363,9 +2409,9 @@ out:
 herr_t
 H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
 {
-    size_t str_len = INCREMENT;
-    char * text_str;
-    herr_t ret = SUCCEED;
+    size_t str_len  = INCREMENT;
+    char * text_str = NULL;
+    herr_t ret      = SUCCEED;
 
     if (lang_type <= H5LT_LANG_ERR || lang_type >= H5LT_NO_LANG)
         goto out;
@@ -2389,6 +2435,8 @@ H5LTdtype_to_text(hid_t dtype, char *str, H5LT_lang_t lang_type, size_t *len)
     return ret;
 
 out:
+    HDfree(text_str);
+
     return FAIL;
 }
 
@@ -2768,10 +2816,14 @@ next:
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char *)HDcalloc(super_len, sizeof(char));
-            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
+            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
+                HDfree(stmp);
                 goto out;
-            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp)))
+            }
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
+                HDfree(stmp);
                 goto out;
+            }
 
             if (stmp)
                 HDfree(stmp);
@@ -2811,10 +2863,14 @@ next:
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char *)HDcalloc(super_len, sizeof(char));
-            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
+            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
+                HDfree(stmp);
                 goto out;
-            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp)))
+            }
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
+                HDfree(stmp);
                 goto out;
+            }
 
             if (stmp)
                 HDfree(stmp);
@@ -2868,10 +2924,14 @@ next:
             if (H5LTdtype_to_text(super, NULL, lang, &super_len) < 0)
                 goto out;
             stmp = (char *)HDcalloc(super_len, sizeof(char));
-            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0)
+            if (H5LTdtype_to_text(super, stmp, lang, &super_len) < 0) {
+                HDfree(stmp);
                 goto out;
-            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp)))
+            }
+            if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, stmp))) {
+                HDfree(stmp);
                 goto out;
+            }
             if (stmp)
                 HDfree(stmp);
             stmp = NULL;
@@ -2922,10 +2982,14 @@ next:
                 if (H5LTdtype_to_text(mtype, NULL, lang, &mlen) < 0)
                     goto out;
                 mtmp = (char *)HDcalloc(mlen, sizeof(char));
-                if (H5LTdtype_to_text(mtype, mtmp, lang, &mlen) < 0)
+                if (H5LTdtype_to_text(mtype, mtmp, lang, &mlen) < 0) {
+                    HDfree(mtmp);
                     goto out;
-                if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, mtmp)))
+                }
+                if (!(dt_str = realloc_and_append(no_user_buf, slen, dt_str, mtmp))) {
+                    HDfree(mtmp);
                     goto out;
+                }
                 if (mtmp)
                     HDfree(mtmp);
                 mtmp = NULL;
@@ -3273,6 +3337,33 @@ H5LTget_attribute_ulong(hid_t loc_id, const char *obj_name, const char *attr_nam
 {
     /* Get the attribute */
     if (H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_ULONG, data) < 0)
+        return -1;
+
+    return 0;
+}
+
+/*-------------------------------------------------------------------------
+ * Function: H5LTget_attribute_ullong
+ *
+ * Purpose: Reads an attribute named attr_name
+ *
+ * Return: Success: 0, Failure: -1
+ *
+ * Programmer: Alessandro Felder
+ *
+ * Date: August 27, 2021
+ *
+ * Comments:
+ *
+ * Modifications:
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5LTget_attribute_ullong(hid_t loc_id, const char *obj_name, const char *attr_name, unsigned long long *data)
+{
+    /* Get the attribute */
+    if (H5LT_get_attribute_mem(loc_id, obj_name, attr_name, H5T_NATIVE_ULLONG, data) < 0)
         return -1;
 
     return 0;

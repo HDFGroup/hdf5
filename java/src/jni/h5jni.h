@@ -21,8 +21,8 @@
 #include <string.h>
 #include "H5private.h"
 
-#ifndef _Included_h5jni
-#define _Included_h5jni
+#ifndef Included_h5jni
+#define Included_h5jni
 
 #ifdef __cplusplus
 #define ENVPTR (env)
@@ -344,4 +344,4 @@ extern jobject create_H5O_token_t(JNIEnv *env, const H5O_token_t *token, hbool_t
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_h5jni */
+#endif /* Included_h5jni */

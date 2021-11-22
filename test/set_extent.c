@@ -39,7 +39,7 @@ const char *FILENAME[] = {"set_extent1", "set_extent2", "set_extent3", "set_exte
 #define CONFIG_EARLY_ALLOC 0x04u
 #define CONFIG_UNFILT_EDGE 0x08u
 #define CONFIG_ALL         (CONFIG_COMPRESS + CONFIG_FILL + CONFIG_EARLY_ALLOC + CONFIG_UNFILT_EDGE)
-#define FILL_VALUE         -1
+#define FILL_VALUE         (-1)
 #define DO_RANKS_PRINT_CONFIG(TEST)                                                                          \
     {                                                                                                        \
         HDprintf("  Config:\n");                                                                             \
@@ -117,11 +117,11 @@ main(void)
     const char *env_h5_drvr;     /* File Driver value from environment */
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
 
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
     /* Current VFD that does not support contigous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Initialize random number seed */
     HDsrandom((unsigned)HDtime(NULL));
@@ -134,11 +134,11 @@ main(void)
         TEST_ERROR
 
     /* Set chunk cache so only part of the chunks can be cached on fapl */
-    if (H5Pset_cache(fapl, 0, (size_t)8, 256 * sizeof(int), 0.75F) < 0)
+    if (H5Pset_cache(fapl, 0, (size_t)8, 256 * sizeof(int), 0.75) < 0)
         TEST_ERROR
 
     /* Disable chunk caching on fapl2 */
-    if (H5Pset_cache(fapl2, 0, (size_t)0, (size_t)0, 0.0F) < 0)
+    if (H5Pset_cache(fapl2, 0, (size_t)0, (size_t)0, 0.0) < 0)
         TEST_ERROR
 
     /* Set the "use the latest version of the format" bounds for creating objects in the file */
@@ -343,14 +343,18 @@ do_ranks(hid_t fapl, hbool_t new_format)
                 goto error;
             } /* end if */
 
-            /* VL test */
-            if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) < 0) {
-                DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length")
-                HDprintf("   Index: %s\n", index_type == RANK4_INDEX_BTREE
-                                               ? "btree"
-                                               : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
-                goto error;
-            } /* end if */
+            if (!h5_using_parallel_driver(NULL)) {
+                /* VL test */
+                if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, FALSE, index_type) <
+                    0) {
+                    DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length")
+                    HDprintf("   Index: %s\n",
+                             index_type == RANK4_INDEX_BTREE
+                                 ? "btree"
+                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                    goto error;
+                } /* end if */
+            }
 
             /* Sparse allocation test (regular and VL) */
             if (!(config & CONFIG_EARLY_ALLOC)) {
@@ -362,16 +366,19 @@ do_ranks(hid_t fapl, hbool_t new_format)
                                  : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
                     goto error;
                 } /* end if */
-                if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE, index_type) <
-                    0) {
-                    DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length with sparse allocation")
-                    HDprintf("   Index: %s\n",
-                             index_type == RANK4_INDEX_BTREE
-                                 ? "btree"
-                                 : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
-                    goto error;
-                } /* end if */
-            }     /* end if */
+
+                if (!h5_using_parallel_driver(NULL)) {
+                    if (test_random_rank4_vl(fapl, dcpl, do_fillvalue, disable_edge_filters, TRUE,
+                                             index_type) < 0) {
+                        DO_RANKS_PRINT_CONFIG("Randomized rank 4 variable length with sparse allocation")
+                        HDprintf("   Index: %s\n",
+                                 index_type == RANK4_INDEX_BTREE
+                                     ? "btree"
+                                     : (index_type == RANK4_INDEX_FARRAY ? "farray" : "earray"));
+                        goto error;
+                    } /* end if */
+                }
+            } /* end if */
 
             /* Break out if using the old format */
             if (!new_format)
@@ -388,7 +395,10 @@ do_ranks(hid_t fapl, hbool_t new_format)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(dcpl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl);
+    }
     H5E_END_TRY
 
     return -1;
@@ -414,7 +424,10 @@ do_layouts(hid_t fapl)
             new_fapl = H5Pcopy(fapl);
 
             /* Set version bounds */
-            H5E_BEGIN_TRY { ret = H5Pset_libver_bounds(new_fapl, low, high); }
+            H5E_BEGIN_TRY
+            {
+                ret = H5Pset_libver_bounds(new_fapl, low, high);
+            }
             H5E_END_TRY;
 
             if (ret < 0) /* Invalid low/high combinations */
@@ -440,7 +453,10 @@ do_layouts(hid_t fapl)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(new_fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(new_fapl);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -2075,7 +2091,10 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
      *-------------------------------------------------------------------------
      */
 
-    H5E_BEGIN_TRY { ret = H5Dset_extent(did, dims_e); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(did, dims_e);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)
@@ -2121,7 +2140,10 @@ test_layouts(H5D_layout_t layout, hid_t fapl)
      *-------------------------------------------------------------------------
      */
 
-    H5E_BEGIN_TRY { ret = H5Dset_extent(did, dims_s); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dset_extent(did, dims_s);
+    }
     H5E_END_TRY;
 
     if (ret >= 0)
@@ -2677,6 +2699,4 @@ test_random_rank4_dump(unsigned ndim_sets, hsize_t dim_log[][4], hsize_t cdims[4
                  (unsigned)dim_log[i][1], (unsigned)dim_log[i][2], (unsigned)dim_log[i][3]);
     if (j >= 0)
         HDprintf("  First incorrect value read: ( %d, %d, %d, %d )\n", j, k, l, m);
-
-    return;
 } /* end test_random_rank4_dump */

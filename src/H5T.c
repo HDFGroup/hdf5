@@ -290,7 +290,7 @@
 #define H5T_INIT_TYPE_SET_SIZE(SIZE)                                                                         \
     {                                                                                                        \
         dt->shared->size          = SIZE;                                                                    \
-        dt->shared->u.atomic.prec = 8 * SIZE;                                                                \
+        dt->shared->u.atomic.prec = 8 * (SIZE);                                                              \
     }
 
 #define H5T_INIT_TYPE_NOSET_SIZE(SIZE)                                                                       \
@@ -327,7 +327,7 @@
             H5_GLUE3(H5T_INIT_TYPE_, GUTS, _CORE)                                                            \
                                                                                                              \
             /* Register result */                                                                            \
-            if ((GLOBAL = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                        \
+            if (((GLOBAL) = H5I_register(H5I_DATATYPE, dt, FALSE)) < 0)                                      \
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTREGISTER, FAIL, "unable to register datatype atom")        \
     }
 
@@ -560,10 +560,10 @@ size_t H5T_NATIVE_UINT_FAST64_ALIGN_g  = 0;
 
 /* Useful floating-point values for conversion routines */
 /* (+/- Inf for all floating-point types) */
-float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0f;
-float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0f;
-double H5T_NATIVE_DOUBLE_POS_INF_g = (double)0.0f;
-double H5T_NATIVE_DOUBLE_NEG_INF_g = (double)0.0f;
+float  H5T_NATIVE_FLOAT_POS_INF_g  = 0.0F;
+float  H5T_NATIVE_FLOAT_NEG_INF_g  = 0.0F;
+double H5T_NATIVE_DOUBLE_POS_INF_g = 0.0;
+double H5T_NATIVE_DOUBLE_NEG_INF_g = 0.0;
 
 /* Declare the free list for H5T_t's and H5T_shared_t's */
 H5FL_DEFINE(H5T_t);
@@ -1512,7 +1512,8 @@ H5T__unlock_cb(void *_dt, hid_t H5_ATTR_UNUSED id, void *_udata)
 
     FUNC_ENTER_STATIC_NOERR
 
-    HDassert(dt && dt->shared);
+    HDassert(dt);
+    HDassert(dt->shared);
 
     if (H5T_STATE_IMMUTABLE == dt->shared->state) {
         dt->shared->state = H5T_STATE_RDONLY;
@@ -1891,19 +1892,24 @@ H5Tcopy(hid_t obj_id)
             break;
 
         case H5I_DATASET: {
-            H5VL_object_t *vol_obj = NULL; /* Dataset structure */
+            H5VL_object_t *         vol_obj;     /* Object for obj_id */
+            H5VL_dataset_get_args_t vol_cb_args; /* Arguments to VOL callback */
 
             /* The argument is a dataset handle */
             if (NULL == (vol_obj = (H5VL_object_t *)H5I_object_verify(obj_id, H5I_DATASET)))
                 HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, H5I_INVALID_HID, "type_id is not a dataset ID")
 
+            /* Set up VOL callback arguments */
+            vol_cb_args.op_type               = H5VL_DATASET_GET_TYPE;
+            vol_cb_args.args.get_type.type_id = H5I_INVALID_HID;
+
             /* Get the datatype from the dataset
              * NOTE: This will have to be closed after we're done with it.
              */
-            if (H5VL_dataset_get(vol_obj, H5VL_DATASET_GET_TYPE, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL,
-                                 &dset_tid) < 0)
+            if (H5VL_dataset_get(vol_obj, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, H5_REQUEST_NULL) < 0)
                 HGOTO_ERROR(H5E_DATATYPE, H5E_CANTGET, H5I_INVALID_HID,
                             "unable to get datatype from the dataset")
+            dset_tid = vol_cb_args.args.get_type.type_id;
 
             /* Unwrap the type ID */
             if (NULL == (dt = (H5T_t *)H5I_object(dset_tid)))
@@ -2039,7 +2045,7 @@ H5Tclose_async(const char *app_file, const char *app_func, unsigned app_line, hi
     /* If a token was created, add the token to the event set */
     if (NULL != token)
         if (H5ES_insert(es_id, vol_obj->connector, token,
-                        H5ARG_TRACE5(FUNC, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
+                        H5ARG_TRACE5(__func__, "*s*sIuii", app_file, app_func, app_line, type_id, es_id)) < 0)
             HGOTO_ERROR(H5E_DATATYPE, H5E_CANTINSERT, FAIL, "can't insert token into event set")
 
 done:
@@ -2834,7 +2840,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
         for (i = H5T_g.nsoft - 1; i >= 0; --i) {
             soft = H5T_g.soft + i;
             HDassert(soft);
-            if (name && *name && HDstrcmp(name, soft->name))
+            if (name && *name && HDstrcmp(name, soft->name) != 0)
                 continue;
             if (src && src->shared->type != soft->src)
                 continue;
@@ -2856,7 +2862,7 @@ H5T__unregister(H5T_pers_t pers, const char *name, H5T_t *src, H5T_t *dst, H5T_c
 
         /* Not a match */
         if (((H5T_PERS_SOFT == pers && path->is_hard) || (H5T_PERS_HARD == pers && !path->is_hard)) ||
-            (name && *name && HDstrcmp(name, path->name)) || (src && H5T_cmp(src, path->src, FALSE)) ||
+            (name && *name && HDstrcmp(name, path->name) != 0) || (src && H5T_cmp(src, path->src, FALSE)) ||
             (dst && H5T_cmp(dst, path->dst, FALSE)) || (func && func != path->conv.u.app_func)) {
             /*
              * Notify all other functions to recalculate private data since some

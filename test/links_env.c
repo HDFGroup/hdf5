@@ -69,7 +69,7 @@ external_link_env(hid_t fapl, hbool_t new_format)
 
     if ((envval = HDgetenv("HDF5_EXT_PREFIX")) == NULL)
         envval = "nomatch";
-    if (HDstrcmp(envval, ".:tmp_links_env"))
+    if (HDstrcmp(envval, ".:tmp_links_env") != 0)
         TEST_ERROR
 
     /* Set up name for main file:"extlinks_env0" */
@@ -106,7 +106,10 @@ external_link_env(hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Open object through external link */
-    H5E_BEGIN_TRY { gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        gid = H5Gopen2(fid, "ext_link", H5P_DEFAULT);
+    }
     H5E_END_TRY;
 
     /* Should be able to find the target file from pathnames set via HDF5_EXT_PREFIX */
@@ -149,8 +152,20 @@ error:
 int
 main(void)
 {
-    hid_t fapl;        /* File access property lists */
-    int   nerrors = 0; /* Error from tests */
+    const char *env_h5_drvr; /* File driver value from environment */
+    hid_t       fapl;        /* File access property lists */
+    int         nerrors = 0; /* Error from tests */
+
+    /* Get the VFD to use */
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /* Splitter VFD has issues with external links */
+    if (!HDstrcmp(env_h5_drvr, "splitter")) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        HDexit(EXIT_SUCCESS);
+    }
 
     h5_reset();
     fapl = h5_fileaccess();

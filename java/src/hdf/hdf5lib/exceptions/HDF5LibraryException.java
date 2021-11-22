@@ -30,7 +30,9 @@ import hdf.hdf5lib.HDF5Constants;
 
 @SuppressWarnings("serial")
 public class HDF5LibraryException extends HDF5Exception {
+    /** major error number of the first error on the HDF5 library error stack. */
     private final long majorErrorNumber;
+    /** minor error number of the first error on the HDF5 library error stack. */
     private final long minorErrorNumber;
 
     /**

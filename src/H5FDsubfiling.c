@@ -240,6 +240,7 @@ static herr_t H5FD__subfiling_get_info(H5FD_t *_file, void **mpi_info);
 #endif          /* JRM */
 
 static const H5FD_class_t H5FD_subfiling_g = {
+    H5FD_SUBFILING_VALUE,            /* value                */
     "subfiling",                     /* name                 */
     MAXADDR,                         /* maxaddr              */
     H5F_CLOSE_WEAK,                  /* fc_degree            */
@@ -247,7 +248,7 @@ static const H5FD_class_t H5FD_subfiling_g = {
     NULL,                            /* sb_size              */
     NULL,                            /* sb_encode            */
     NULL,                            /* sb_decode            */
-    sizeof(H5FD_subfiling_config_t), /* fapl_size           */
+    sizeof(H5FD_subfiling_config_t), /* fapl_size            */
     H5FD__subfiling_fapl_get,        /* fapl_get             */
     H5FD__subfiling_fapl_copy,       /* fapl_copy            */
     H5FD__subfiling_fapl_free,       /* fapl_free            */
@@ -275,6 +276,7 @@ static const H5FD_class_t H5FD_subfiling_g = {
     H5FD__subfiling_truncate,        /* truncate             */
     H5FD__subfiling_lock,            /* lock                 */
     H5FD__subfiling_unlock,          /* unlock               */
+    NULL,                            /* del                  */
     H5FD__subfiling_ctl,             /* ctl                  */
     H5FD_FLMAP_DICHOTOMY             /* fl_map               */
 };
@@ -509,7 +511,7 @@ H5Pset_fapl_subfiling(hid_t fapl_id, H5FD_subfiling_config_t *fa)
         HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "invalid subfiling config")
     }
 
-    ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)fa);
+    ret_value = H5P_set_driver(plist, H5FD_SUBFILING, (void *)fa, NULL);
 
 done:
     FUNC_LEAVE_API(ret_value)
@@ -1079,7 +1081,7 @@ H5FD__subfiling_query(const H5FD_t H5_ATTR_UNUSED *_file, unsigned long *flags /
         *flags = 0;
         *flags |= H5FD_FEAT_AGGREGATE_METADATA;  /* OK to aggregate metadata allocations  */
         *flags |= H5FD_FEAT_AGGREGATE_SMALLDATA; /* OK to aggregate "small" raw data allocations */
-        // *flags |= H5FD_FEAT_HAS_MPI;                 /* This driver uses MPI */
+        //*flags |= H5FD_FEAT_HAS_MPI;                 /* This driver uses MPI */
         *flags |= H5FD_FEAT_ALLOCATE_EARLY; /* Allocate space early instead of late                        */
         *flags |= H5FD_FEAT_DEFAULT_VFD_COMPATIBLE; /* VFD creates a file which can be opened with the default
                                                        VFD */

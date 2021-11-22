@@ -32,11 +32,10 @@
 #define ONE_MB (ONE_KB * ONE_KB)
 #define ONE_GB (ONE_MB * ONE_KB)
 
-#define MICROSECOND 1000000.0F
+#define MICROSECOND 1000000.0
 
 /* report 0.0 in case t is zero too */
-#define MB_PER_SEC(bytes, t)                                                                                 \
-    ((fabs(t) < (double)0.0000000001F) ? (double)0.0F : ((((double)bytes) / (double)ONE_MB) / (t)))
+#define MB_PER_SEC(bytes, t) ((fabs(t) < 0.0000000001) ? 0.0 : ((((double)(bytes)) / (double)ONE_MB) / (t)))
 
 #ifndef TRUE
 #define TRUE 1
@@ -65,66 +64,15 @@ static void error(const char *fmt, ...);
 static void compress_buffer(Bytef *dest, uLongf *destLen, const Bytef *source, uLong sourceLen);
 
 /* commandline options : long and short form */
-static const char *        s_opts   = "hB:b:c:p:rs:0123456789";
-static struct long_options l_opts[] = {{"help", no_arg, 'h'},
-                                       {"compressability", require_arg, 'c'},
-                                       {"compressabilit", require_arg, 'c'},
-                                       {"compressabili", require_arg, 'c'},
-                                       {"compressabil", require_arg, 'c'},
-                                       {"compressabi", require_arg, 'c'},
-                                       {"compressab", require_arg, 'c'},
-                                       {"compressa", require_arg, 'c'},
-                                       {"compress", require_arg, 'c'},
-                                       {"compres", require_arg, 'c'},
-                                       {"compre", require_arg, 'c'},
-                                       {"compr", require_arg, 'c'},
-                                       {"comp", require_arg, 'c'},
-                                       {"com", require_arg, 'c'},
-                                       {"co", require_arg, 'c'},
-                                       {"file-size", require_arg, 's'},
-                                       {"file-siz", require_arg, 's'},
-                                       {"file-si", require_arg, 's'},
-                                       {"file-s", require_arg, 's'},
-                                       {"file", require_arg, 's'},
-                                       {"fil", require_arg, 's'},
-                                       {"fi", require_arg, 's'},
-                                       {"max-buffer-size", require_arg, 'B'},
-                                       {"max-buffer-siz", require_arg, 'B'},
-                                       {"max-buffer-si", require_arg, 'B'},
-                                       {"max-buffer-s", require_arg, 'B'},
-                                       {"max-buffer", require_arg, 'B'},
-                                       {"max-buffe", require_arg, 'B'},
-                                       {"max-buff", require_arg, 'B'},
-                                       {"max-buf", require_arg, 'B'},
-                                       {"max-bu", require_arg, 'B'},
-                                       {"max-b", require_arg, 'B'},
-                                       {"max", require_arg, 'B'},
-                                       {"min-buffer-size", require_arg, 'b'},
-                                       {"min-buffer-siz", require_arg, 'b'},
-                                       {"min-buffer-si", require_arg, 'b'},
-                                       {"min-buffer-s", require_arg, 'b'},
-                                       {"min-buffer", require_arg, 'b'},
-                                       {"min-buffe", require_arg, 'b'},
-                                       {"min-buff", require_arg, 'b'},
-                                       {"min-buf", require_arg, 'b'},
-                                       {"min-bu", require_arg, 'b'},
-                                       {"min-b", require_arg, 'b'},
-                                       {"min", require_arg, 'b'},
-                                       {"prefix", require_arg, 'p'},
-                                       {"prefi", require_arg, 'p'},
-                                       {"pref", require_arg, 'p'},
-                                       {"pre", require_arg, 'p'},
-                                       {"pr", require_arg, 'p'},
-                                       {"random-test", no_arg, 'r'},
-                                       {"random-tes", no_arg, 'r'},
-                                       {"random-te", no_arg, 'r'},
-                                       {"random-t", no_arg, 'r'},
-                                       {"random", no_arg, 'r'},
-                                       {"rando", no_arg, 'r'},
-                                       {"rand", no_arg, 'r'},
-                                       {"ran", no_arg, 'r'},
-                                       {"ra", no_arg, 'r'},
-                                       {NULL, 0, '\0'}};
+static const char *           s_opts   = "hB:b:c:p:rs:0123456789";
+static struct h5_long_options l_opts[] = {{"help", no_arg, 'h'},
+                                          {"compressability", require_arg, 'c'},
+                                          {"file-size", require_arg, 's'},
+                                          {"max-buffer-size", require_arg, 'B'},
+                                          {"min-buffer-size", require_arg, 'b'},
+                                          {"prefix", require_arg, 'p'},
+                                          {"random-test", no_arg, 'r'},
+                                          {NULL, 0, '\0'}};
 
 /*
  * Function:    error
@@ -155,7 +103,7 @@ error(const char *fmt, ...)
 static void
 cleanup(void)
 {
-    if (!HDgetenv("HDF5_NOCLEANUP"))
+    if (!HDgetenv(HDF5_NOCLEANUP))
         HDunlink(filename);
     HDfree(filename);
 }
@@ -169,7 +117,7 @@ write_file(Bytef *source, uLongf sourceLen)
 
     /* destination buffer needs to be at least 0.1% larger than sourceLen
      * plus 12 bytes */
-    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * (double)0.1F)) + 12;
+    destLen = (uLongf)((double)sourceLen + ((double)sourceLen * 0.1)) + 12;
     dest    = (Bytef *)HDmalloc(destLen);
 
     if (!dest)
@@ -179,8 +127,8 @@ write_file(Bytef *source, uLongf sourceLen)
     compress_buffer(dest, &destLen, source, sourceLen);
     HDgettimeofday(&timer_stop, NULL);
 
-    compression_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / (double)MICROSECOND) -
-                        ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / (double)MICROSECOND);
+    compression_time += ((double)timer_stop.tv_sec + ((double)timer_stop.tv_usec) / MICROSECOND) -
+                        ((double)timer_start.tv_sec + ((double)timer_start.tv_usec) / MICROSECOND);
 
     if (report_once_flag) {
         HDfprintf(stdout, "\tCompression Ratio: %g\n", ((double)destLen) / (double)sourceLen);
@@ -448,7 +396,7 @@ do_write_test(unsigned long file_size, unsigned long min_buf_size, unsigned long
             error("out of memory");
         }
 
-        compression_time = 0.0F;
+        compression_time = 0.0;
 
         if (random_test)
             fill_with_random_data(src, src_len);
@@ -552,7 +500,7 @@ main(int argc, const char *argv[])
     /* Initialize h5tools lib */
     h5tools_init();
 
-    while ((opt = get_option(argc, argv, s_opts, l_opts)) > 0) {
+    while ((opt = H5_get_option(argc, argv, s_opts, l_opts)) > 0) {
         switch ((char)opt) {
             case '0':
             case '1':
@@ -567,13 +515,13 @@ main(int argc, const char *argv[])
                 compress_level = opt - '0';
                 break;
             case 'B':
-                max_buf_size = parse_size_directive(opt_arg);
+                max_buf_size = parse_size_directive(H5_optarg);
                 break;
             case 'b':
-                min_buf_size = parse_size_directive(opt_arg);
+                min_buf_size = parse_size_directive(H5_optarg);
                 break;
             case 'c':
-                compress_percent = (int)HDstrtol(opt_arg, NULL, 10);
+                compress_percent = (int)HDstrtol(H5_optarg, NULL, 10);
 
                 if (compress_percent < 0)
                     compress_percent = 0;
@@ -582,13 +530,13 @@ main(int argc, const char *argv[])
 
                 break;
             case 'p':
-                option_prefix = opt_arg;
+                option_prefix = H5_optarg;
                 break;
             case 'r':
                 random_test = TRUE;
                 break;
             case 's':
-                file_size = parse_size_directive(opt_arg);
+                file_size = parse_size_directive(H5_optarg);
                 break;
             case '?':
                 usage();

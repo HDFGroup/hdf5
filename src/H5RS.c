@@ -349,7 +349,7 @@ done:
  *      format_templ in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 H5_ATTR_FORMAT(printf, 2, 3)
 herr_t
 H5RS_asprintf_cat(H5RS_str_t *rs, const char *fmt, ...)
@@ -392,7 +392,7 @@ H5RS_asprintf_cat(H5RS_str_t *rs, const char *fmt, ...)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5RS_asprintf_cat() */
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /*-------------------------------------------------------------------------
  * Function:    H5RS_acat
@@ -698,7 +698,7 @@ H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
         const H5RS_str_t *rs;  IN: Ref-counted string to compute length of
 
  RETURNS
-    Returns non-negative value on success, negative value on failure
+    Returns non-negative value on success, can't fail
  DESCRIPTION
     Compute the length of a ref-counted string.  [same as strlen()]
  GLOBAL VARIABLES
@@ -706,7 +706,7 @@ H5RS_cmp(const H5RS_str_t *rs1, const H5RS_str_t *rs2)
  EXAMPLES
  REVISION LOG
 --------------------------------------------------------------------------*/
-ssize_t
+size_t
 H5RS_len(const H5RS_str_t *rs)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
@@ -715,7 +715,7 @@ H5RS_len(const H5RS_str_t *rs)
     HDassert(rs);
     HDassert(rs->s);
 
-    FUNC_LEAVE_NOAPI((ssize_t)HDstrlen(rs->s))
+    FUNC_LEAVE_NOAPI(HDstrlen(rs->s))
 } /* end H5RS_len() */
 
 /*--------------------------------------------------------------------------

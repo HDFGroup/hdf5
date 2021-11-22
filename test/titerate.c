@@ -271,19 +271,28 @@ test_iter_group(hid_t fapl, hbool_t new_format)
     /* Test invalid indices for starting iteration */
     info.command = RET_ZERO;
     idx          = (hsize_t)-1;
-    H5E_BEGIN_TRY { ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test skipping exactly as many entries as in the group */
     idx = NDATASETS + 2;
-    H5E_BEGIN_TRY { ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate2");
 
     /* Test skipping more entries than are in the group */
     idx = NDATASETS + 3;
-    H5E_BEGIN_TRY { ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Literate2(file, H5_INDEX_NAME, H5_ITER_INC, &idx, liter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Literate2");
 
@@ -461,13 +470,19 @@ test_iter_attr(hid_t fapl, hbool_t new_format)
 
     /* Test skipping exactly as many attributes as there are */
     idx = NATTR;
-    H5E_BEGIN_TRY { ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate2");
 
     /* Test skipping more attributes than there are */
     idx = NATTR + 1;
-    H5E_BEGIN_TRY { ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Aiterate2(dataset, H5_INDEX_NAME, H5_ITER_INC, &idx, aiter_cb, &info);
+    }
     H5E_END_TRY;
     VERIFY(ret, FAIL, "H5Aiterate2");
 
@@ -570,7 +585,7 @@ liter_cb2(hid_t loc_id, const char *name, const H5L_info2_t H5_ATTR_UNUSED *link
     H5O_info2_t      oinfo;
     herr_t           ret; /* Generic return value        */
 
-    if (HDstrcmp(name, test_info->name)) {
+    if (HDstrcmp(name, test_info->name) != 0) {
         TestErrPrintf("name = '%s', test_info = '%s'\n", name, test_info->name);
         return (H5_ITER_ERROR);
     } /* end if */
@@ -937,7 +952,7 @@ test_links(hid_t fapl)
         else if (!HDstrcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
-            CHECK(0, 0, "unknown object name");
+            ERROR("unknown object name");
     } /* end for */
 
     ret = H5Gclose(gid);
@@ -1107,7 +1122,7 @@ test_links_deprec(hid_t fapl)
         else if (!HDstrcmp(obj_name, "softlink"))
             VERIFY(linfo.type, H5L_TYPE_SOFT, "H5Lget_name_by_idx");
         else
-            CHECK(0, 0, "unknown object name");
+            ERROR("unknown object name");
     } /* end for */
 
     ret = H5Gclose(gid);
@@ -1160,8 +1175,10 @@ test_iterate(void)
 #endif
     } /* end for */
 
-    /* Test the fix for issue HDFFV-10588 */
-    test_corrupted_attnamelen();
+    if (!h5_driver_uses_modified_filename()) {
+        /* Test the fix for issue HDFFV-10588 */
+        test_corrupted_attnamelen();
+    }
 
     /* Close FAPLs */
     ret = H5Pclose(fapl);

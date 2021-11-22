@@ -78,12 +78,12 @@ char vds_test_str_g[128]   = "";
 #endif /* VDS_TEST_VERBOSE */
 
 /* I/O test config flags */
-#define TEST_IO_CLOSE_SRC      0x01u
-#define TEST_IO_DIFFERENT_FILE 0x02u
-#define TEST_IO_REOPEN_VIRT    0x04u
-#define TEST_IO_FCLOSE_SEMI    0x08u
-#define TEST_IO_FCLOSE_STRONG  0x10u
-#define TEST_IO_NTESTS         0x20u
+#define TEST_IO_CLOSE_SRC      0x01U
+#define TEST_IO_DIFFERENT_FILE 0x02U
+#define TEST_IO_REOPEN_VIRT    0x04U
+#define TEST_IO_FCLOSE_SEMI    0x08U
+#define TEST_IO_FCLOSE_STRONG  0x10U
+#define TEST_IO_NTESTS         0x20U
 
 #define LIST_DOUBLE_SIZE (H5D_VIRTUAL_DEF_LIST_SIZE + 1)
 
@@ -323,7 +323,10 @@ vds_check_mapping(hid_t dcpl, size_t i, hid_t vspace, hid_t srcspace, const char
     return 0;
 
 error:
-    H5E_BEGIN_TRY { H5Sclose(space_out); }
+    H5E_BEGIN_TRY
+    {
+        H5Sclose(space_out);
+    }
     H5E_END_TRY
 
     return -1;
@@ -999,7 +1002,10 @@ test_api(test_api_config_t config, hid_t fapl, H5F_libver_t low)
         TEST_ERROR
 
     /* Attempt to add virtual layout mapping */
-    H5E_BEGIN_TRY { ret = H5Pset_virtual(dcpl, vspace[0], src_file[0], src_dset[0], srcspace[0]); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Pset_virtual(dcpl, vspace[0], src_file[0], src_dset[0], srcspace[0]);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR
@@ -3549,7 +3555,10 @@ test_basic_io(unsigned config, hid_t vds_fapl, hid_t src_fapl)
     count[1] = 9;
     if (H5Sselect_hyperslab(memspace, H5S_SELECT_SET, start, NULL, count, NULL) < 0)
         TEST_ERROR_SUPPRESSED
-    H5E_BEGIN_TRY { ret = H5Dwrite(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Dwrite(vdset, H5T_NATIVE_INT, memspace, H5S_ALL, H5P_DEFAULT, buf[0]);
+    }
     H5E_END_TRY
     if (ret >= 0)
         TEST_ERROR_SUPPRESSED
@@ -12279,8 +12288,23 @@ main(void)
     hid_t        src_fapl = -1; /* File access property list */
     int          test_api_config;
     unsigned     bit_config;
-    H5F_libver_t low, high; /* Low and high bounds */
+    H5F_libver_t low, high;   /* Low and high bounds */
+    const char * env_h5_drvr; /* File Driver value from environment */
     int          nerrors = 0;
+
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
+    if (env_h5_drvr == NULL)
+        env_h5_drvr = "nomatch";
+
+    /*
+     * Skip VDS tests for parallel-enabled and splitter VFDs. VDS currently
+     * doesn't support parallel reads and the splitter VFD has external
+     * link-related bugs.
+     */
+    if (h5_using_parallel_driver(env_h5_drvr) || !HDstrcmp(env_h5_drvr, "splitter")) {
+        HDputs(" -- SKIPPED for incompatible VFD --");
+        HDexit(EXIT_SUCCESS);
+    }
 
     /* Testing setup */
     h5_reset();

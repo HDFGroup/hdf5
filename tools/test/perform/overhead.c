@@ -23,17 +23,11 @@
 #include "hdf5.h"
 #include "H5private.h"
 
-#ifdef H5_STDC_HEADERS
 #include <ctype.h>
 #include <fcntl.h>
 #include <stdlib.h>
 #include <sys/stat.h>
 #include <string.h>
-#endif
-
-#ifdef H5_HAVE_IO_H
-#include <io.h>
-#endif
 
 #ifdef H5_HAVE_UNISTD_H
 #include <sys/types.h>
@@ -125,7 +119,7 @@ usage(const char *prog)
 static void
 cleanup(void)
 {
-    if (!getenv("HDF5_NOCLEANUP")) {
+    if (!getenv(HDF5_NOCLEANUP)) {
         remove(FILE_NAME_1);
     }
 }
@@ -193,7 +187,7 @@ test(fill_t fill_style, const double splits[], hbool_t verbose, hbool_t use_rdcc
     if (!use_rdcc) {
         if (H5Pget_cache(fapl, &mdc_nelmts, NULL, NULL, NULL) < 0)
             goto error;
-        if (H5Pset_cache(fapl, mdc_nelmts, 0, 0, 0.0F) < 0)
+        if (H5Pset_cache(fapl, mdc_nelmts, 0, 0, 0.0) < 0)
             goto error;
     }
     if ((file = H5Fcreate(FILE_NAME_1, H5F_ACC_TRUNC, H5P_DEFAULT, fapl)) < 0)

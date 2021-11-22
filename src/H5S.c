@@ -84,7 +84,7 @@ H5FL_ARR_DEFINE(hsize_t, H5S_MAX_RANK);
 static const H5I_class_t H5I_DATASPACE_CLS[1] = {{
     H5I_DATASPACE,            /* ID class value */
     0,                        /* Class flags */
-    2,                        /* # of reserved IDs for class */
+    3,                        /* # of reserved IDs for class */
     (H5I_free_t)H5S__close_cb /* Callback routine for closing objects of this class */
 }};
 
@@ -275,6 +275,8 @@ done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S__close_cb() */
 
+#if 1 /* JRM */ /* restore this function for now */
+
 /*--------------------------------------------------------------------------
  NAME
     H5S_get_validiated_dataspace
@@ -323,6 +325,8 @@ H5S_get_validated_dataspace(hid_t space_id, const H5S_t **space)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_get_validated_dataspace() */
+
+#endif /* JRM */ /* restore this function for now */
 
 /*--------------------------------------------------------------------------
  NAME

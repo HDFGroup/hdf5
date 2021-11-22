@@ -1,15 +1,14 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
- * Read-Only S3 Virtual File Driver (VFD)                                    *
- * Copyright (c) 2017-2018, The HDF Group.                                   *
+ * Copyright by The HDF Group.                                               *
  *                                                                           *
  * All rights reserved.                                                      *
  *                                                                           *
- * NOTICE:                                                                   *
- * All information contained herein is, and remains, the property of The HDF *
- * Group. The intellectual and technical concepts contained herein are       *
- * proprietary to The HDF Group. Dissemination of this information or        *
- * reproduction of this material is strictly forbidden unless prior written  *
- * permission is obtained from The HDF Group.                                *
+ * This file is part of HDF5.  The full HDF5 copyright notice, including     *
+ * terms governing use, modification, and redistribution, is contained in    *
+ * the COPYING file, which can be found at the root of the source code       *
+ * distribution tree, or in https://www.hdfgroup.org/licenses.               *
+ * If you do not have access to either file, you may request a copy from     *
+ * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 package hdf.hdf5lib.structs;
@@ -46,10 +45,15 @@ import java.io.Serializable;
 public class H5FD_ros3_fapl_t implements Serializable {
     private static final long serialVersionUID = 8985533001471224030L;
 
+    /** Version number of the H5FD_ros3_fapl_t structure */
     private int   version;
+    /** Flag TRUE or FALSE whether or not requests are to be authenticated with the AWS4 algorithm. */
     private boolean authenticate;
+    /** region "aws region" for authenticating request */
     private String aws_region;
+    /** id "secret id" or "access id" for authenticating request */
     private String secret_id;
+    /** key "secret key" or "access key" for authenticating request */
     private String secret_key;
 
     /**

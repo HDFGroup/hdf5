@@ -112,7 +112,7 @@ size_t H5TOOLS_MALLOCSIZE = (128 * 1024 * 1024);
 #define SPACE1_DIM2 0
 
 /* Error macros */
-#define AT() HDprintf("ERROR at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);
+#define AT() HDprintf("ERROR at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);
 #define PROGRAM_ERROR                                                                                        \
     do {                                                                                                     \
         AT();                                                                                                \
@@ -358,10 +358,10 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
      */
 
     {
-        double data1[3][2] = {{1.0F, 1.0F}, {1.00F, 1.000F}, {0.0F, 0.0F}};
-        double data2[3][2] = {{0.0F, 1.1F}, {1.01F, 1.001F}, {0.0F, 1.0F}};
-        double data3[3][2] = {{100.0F, 100.0F}, {100.00F, 100.000F}, {100.0F, 100.0F}};
-        double data4[3][2] = {{105.0F, 120.0F}, {160.00F, 95.000F}, {80.0F, 40.0F}};
+        double data1[3][2] = {{1.0, 1.0}, {1.00, 1.000}, {0.0, 0.0}};
+        double data2[3][2] = {{0.0, 1.1}, {1.01, 1.001}, {0.0, 1.0}};
+        double data3[3][2] = {{100.0, 100.0}, {100.00, 100.000}, {100.0, 100.0}};
+        double data4[3][2] = {{105.0, 120.0}, {160.00, 95.000}, {80.0, 40.0}};
 
         write_dset(gid1, 2, dims2, "dset1", H5T_NATIVE_DOUBLE, data1);
         write_dset(gid2, 2, dims2, "dset2", H5T_NATIVE_DOUBLE, data2);
@@ -409,8 +409,8 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
      *-------------------------------------------------------------------------
      */
     {
-        double data9[3][2]  = {{100.0F, 100.0F}, {100.0F, 0.0F}, {0.0F, 100.0F}};
-        double data10[3][2] = {{120.0F, 80.0F}, {0.0F, 100.0F}, {0.0F, 50.0F}};
+        double data9[3][2]  = {{100.0, 100.0}, {100.0, 0.0}, {0.0, 100.0}};
+        double data10[3][2] = {{120.0, 80.0}, {0.0, 100.0}, {0.0, 50.0}};
 
         write_dset(gid1, 2, dims2, "dset9", H5T_NATIVE_DOUBLE, data9);
         write_dset(gid1, 2, dims2, "dset10", H5T_NATIVE_DOUBLE, data10);
@@ -465,19 +465,19 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         float data15[6];
         float data16[6];
 
-        data15[0] = (float)HDsqrt(-1.0F);
-        data15[1] = 1.0F;
-        data15[2] = (float)HDsqrt(-1.0F);
-        data15[3] = 1.0F;
-        data15[4] = 1.0F;
-        data15[5] = 1.0F;
+        data15[0] = (float)HDsqrt(-1.0);
+        data15[1] = 1.0;
+        data15[2] = (float)HDsqrt(-1.0);
+        data15[3] = 1.0;
+        data15[4] = 1.0;
+        data15[5] = 1.0;
 
-        data16[0] = (float)HDsqrt(-1.0F);
-        data16[1] = (float)HDsqrt(-1.0F);
-        data16[2] = 1.0F;
-        data16[3] = 1.0F;
-        data16[4] = 1.0F;
-        data16[5] = 1.0F;
+        data16[0] = (float)HDsqrt(-1.0);
+        data16[1] = (float)HDsqrt(-1.0);
+        data16[2] = 1.0;
+        data16[3] = 1.0;
+        data16[4] = 1.0;
+        data16[5] = 1.0;
 
         write_dset(gid1, 1, dims1, "fp15", H5T_NATIVE_FLOAT, data15);
         write_dset(gid1, 1, dims1, "fp16", H5T_NATIVE_FLOAT, data16);
@@ -492,19 +492,19 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         double data17[6];
         double data18[6];
 
-        data17[0] = HDsqrt(-1.0F);
-        data17[1] = 1.0F;
-        data17[2] = HDsqrt(-1.0F);
-        data17[3] = 1.0F;
-        data17[4] = 1.0F;
-        data17[5] = 1.0F;
+        data17[0] = HDsqrt(-1.0);
+        data17[1] = 1.0;
+        data17[2] = HDsqrt(-1.0);
+        data17[3] = 1.0;
+        data17[4] = 1.0;
+        data17[5] = 1.0;
 
-        data18[0] = HDsqrt(-1.0F);
-        data18[1] = HDsqrt(-10000.0F);
-        data18[2] = 1.0F;
-        data18[3] = 1.0F;
-        data18[4] = 1.0F;
-        data18[5] = 1.0F;
+        data18[0] = HDsqrt(-1.0);
+        data18[1] = HDsqrt(-10000.0);
+        data18[2] = 1.0;
+        data18[3] = 1.0;
+        data18[4] = 1.0;
+        data18[5] = 1.0;
 
         write_dset(gid1, 1, dims1, "fp17", H5T_NATIVE_DOUBLE, data17);
         write_dset(gid1, 1, dims1, "fp18", H5T_NATIVE_DOUBLE, data18);
@@ -519,11 +519,11 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         float  data19[6];
         double data20[6];
 
-        data19[0] = data19[1] = data19[2] = (float)HDlog(0.0F);
-        data19[3] = data19[4] = data19[5] = (float)-HDlog(0.0F);
+        data19[0] = data19[1] = data19[2] = (float)HDlog(0.0);
+        data19[3] = data19[4] = data19[5] = (float)-HDlog(0.0);
 
-        data20[0] = data20[1] = data20[2] = HDlog(0.0F);
-        data20[3] = data20[4] = data20[5] = -HDlog(0.0F);
+        data20[0] = data20[1] = data20[2] = HDlog(0.0);
+        data20[3] = data20[4] = data20[5] = -HDlog(0.0);
 
         write_dset(gid1, 1, dims1, "fp19", H5T_NATIVE_FLOAT, data19);
         write_dset(gid1, 1, dims1, "fp19_COPY", H5T_NATIVE_FLOAT, data19);
@@ -547,15 +547,15 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
         size_t  type_size;
         hid_t   tid;
 
-        buf1[0].d = HDsqrt(-1.0F);
-        buf1[0].f = (float)HDsqrt(-1.0F);
-        buf2[0].d = HDsqrt(-1.0F);
-        buf2[0].f = (float)HDsqrt(-1.0F);
+        buf1[0].d = HDsqrt(-1.0);
+        buf1[0].f = (float)HDsqrt(-1.0);
+        buf2[0].d = HDsqrt(-1.0);
+        buf2[0].f = (float)HDsqrt(-1.0);
 
-        buf1[1].d = HDsqrt(-1.0F);
-        buf1[1].f = (float)HDsqrt(-1.0F);
-        buf2[1].d = 0.0F;
-        buf2[1].f = 0.0F;
+        buf1[1].d = HDsqrt(-1.0);
+        buf1[1].f = (float)HDsqrt(-1.0);
+        buf2[1].d = 0.0;
+        buf2[1].f = 0.0;
 
         type_size = sizeof(cmp1_t);
         tid       = H5Tcreate(H5T_COMPOUND, type_size);
@@ -583,13 +583,13 @@ test_basic(const char *fname1, const char *fname2, const char *fname3)
             int i;
         } cmp3_t;
 
-        double       data2[6]    = {0.0F, 0.0F, 0.0F, 0.0F, 0.0F, 0.0F};
+        double       data2[6]    = {0.0, 0.0, 0.0, 0.0, 0.0, 0.0};
         int          data3[6]    = {0, 0, 0, 0, 0, 0};
         int          data4[3][2] = {{0, 0}, {0, 0}, {0, 0}};
         int          data5[2][2] = {{0, 0}, {0, 0}};
         unsigned int data6[3][2] = {{0, 0}, {0, 0}, {0, 0}};
-        cmp1_t       data7[1]    = {{1.0f, 2}};
-        cmp2_t       data8[1]    = {{1, 2.0f}};
+        cmp1_t       data7[1]    = {{1.0, 2}};
+        cmp2_t       data8[1]    = {{1, 2.0}};
         hsize_t      dims3[2]    = {2, 2};
         hsize_t      dims4[1]    = {1};
         size_t       type_size;
@@ -789,10 +789,10 @@ test_datatypes(const char *fname)
     int     buf3b[3][2] = {{1, 1}, {3, 4}, {5, 6}};
     long    buf4a[3][2] = {{1, 1}, {1, 1}, {1, 1}};
     long    buf4b[3][2] = {{1, 1}, {3, 4}, {5, 6}};
-    float   buf5a[3][2] = {{1.0F, 1.0F}, {1.0F, 1.0F}, {1.0F, 1.0F}};
-    float   buf5b[3][2] = {{1.0F, 1.0F}, {3.0F, 4.0F}, {5.0F, 6.0F}};
-    double  buf6a[3][2] = {{1.0F, 1.0F}, {1.0F, 1.0F}, {1.0F, 1.0F}};
-    double  buf6b[3][2] = {{1.0F, 1.0F}, {3.0F, 4.0F}, {5.0F, 6.0F}};
+    float   buf5a[3][2] = {{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
+    float   buf5b[3][2] = {{1.0, 1.0}, {3.0, 4.0}, {5.0, 6.0}};
+    double  buf6a[3][2] = {{1.0, 1.0}, {1.0, 1.0}, {1.0, 1.0}};
+    double  buf6b[3][2] = {{1.0, 1.0}, {3.0, 4.0}, {5.0, 6.0}};
 
     /*unsigned/signed test
     signed char -128 to 127
@@ -5009,8 +5009,6 @@ error:
         H5Tclose(tid2);
     }
     H5E_END_TRY;
-
-    return;
 }
 
 static hid_t
@@ -5214,27 +5212,27 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
     char       buf1[2][STR_SIZE] = {"ab", "de"};     /* string */
     char *     buf1a[2];                             /* VL string */
     char       buf2[2] = {1, 2};                     /* bitfield, opaque */
-    s_t        buf3[2] = {{1, 2.0F}, {3, 4.0F}};     /* compound */
+    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};       /* compound */
     hobj_ref_t buf4[2];                              /* reference */
     e_t        buf45[2] = {RED, RED};                /* enum */
     hvl_t      buf5[2];                              /* vlen */
     hsize_t    dimarray[1] = {3};                    /* array dimension */
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
-    float      buf8[2]     = {1.0F, 2.0F};           /* float */
+    float      buf8[2]     = {1.0, 2.0};             /* float */
 
     /* create 2D attributes with dimension [3][2], 6 elements */
-    hsize_t dims2[2]              = {3, 2};
-    char    buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
-    char *  buf12a[3][2];                                                       /* VL string */
-    char    buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
-    s_t     buf32[6] = {{1, 2.0F}, {3, 4.0F}, {5, 6.0F}, {7, 8.0F}, {9, 10.0F}, {11, 12.0F}}; /* compound */
+    hsize_t    dims2[2]              = {3, 2};
+    char       buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
+    char *     buf12a[3][2];                                                       /* VL string */
+    char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
+    s_t        buf32[6]    = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
     hobj_ref_t buf42[3][2];                                                                   /* reference */
     e_t        buf452[3][2];                                                                  /* enum */
     hvl_t      buf52[3][2];                                                                   /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
-    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                     /* integer */
-    float buf82[3][2] = {{1.0F, 2.0F}, {3.0F, 4.0F}, {5.0F, 6.0F}}; /* float */
+    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};               /* integer */
+    float buf82[3][2] = {{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}}; /* float */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]                 = {4, 3, 2};
@@ -5935,7 +5933,7 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
             for (k = 0; k < 2; k++)
                 if (make_diffs) {
                     buf33[i][j][k].a = 0;
-                    buf33[i][j][k].b = 0.0F;
+                    buf33[i][j][k].b = 0.0;
                 }
                 else {
                     buf33[i][j][k].a = (char)n++;
@@ -6145,7 +6143,7 @@ write_attr_strings(hid_t loc_id, const char *dset_name, hid_t fid,
             for (k = 0; k < 2; k++) {
                 if (make_diffs) {
                     buf73[i][j][k] = 0;
-                    buf83[i][j][k] = 0.0F;
+                    buf83[i][j][k] = 0.0;
                 }
                 else {
                     buf73[i][j][k] = n++;
@@ -6203,27 +6201,27 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
     char       buf1[2][STR_SIZE] = {"ab", "de"};     /* string */
     char *     buf1a[2];                             /* VL string */
     char       buf2[2] = {1, 2};                     /* bitfield, opaque */
-    s_t        buf3[2] = {{1, 2.0F}, {3, 4.0F}};     /* compound */
+    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};       /* compound */
     hobj_ref_t buf4[2];                              /* reference */
     e_t        buf45[2] = {RED, RED};                /* enum */
     hvl_t      buf5[2];                              /* vlen */
     hsize_t    dimarray[1] = {3};                    /* array dimension */
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
-    float      buf8[2]     = {1.0F, 2.0F};           /* float */
+    float      buf8[2]     = {1.0, 2.0};             /* float */
 
     /* create 2D attributes with dimension [3][2], 6 elements */
-    hsize_t dims2[2]              = {3, 2};
-    char    buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
-    char *  buf12a[3][2];                                                       /* VL string */
-    char    buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
-    s_t     buf32[6] = {{1, 2.0F}, {3, 4.0F}, {5, 6.0F}, {7, 8.0F}, {9, 10.0F}, {11, 12.0F}}; /* compound */
+    hsize_t    dims2[2]              = {3, 2};
+    char       buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
+    char *     buf12a[3][2];                                                       /* VL string */
+    char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
+    s_t        buf32[6]    = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
     hobj_ref_t buf42[3][2];                                                                   /* reference */
     e_t        buf452[3][2];                                                                  /* enum */
     hvl_t      buf52[3][2];                                                                   /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
-    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                     /* integer */
-    float buf82[3][2] = {{1.0F, 2.0F}, {3.0F, 4.0F}, {5.0F, 6.0F}}; /* float */
+    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};               /* integer */
+    float buf82[3][2] = {{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}}; /* float */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]                 = {4, 3, 2};
@@ -6924,7 +6922,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
             for (k = 0; k < 2; k++) {
                 if (make_diffs) {
                     buf33[i][j][k].a = 0;
-                    buf33[i][j][k].b = 0.0F;
+                    buf33[i][j][k].b = 0.0;
                 }
                 else {
                     buf33[i][j][k].a = (char)n++;
@@ -7134,7 +7132,7 @@ write_attr_in(hid_t loc_id, const char *dset_name, hid_t fid,
             for (k = 0; k < 2; k++) {
                 if (make_diffs) {
                     buf73[i][j][k] = 0;
-                    buf83[i][j][k] = 0.0F;
+                    buf83[i][j][k] = 0.0;
                 }
                 else {
                     buf73[i][j][k] = n++;
@@ -7195,26 +7193,26 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
     char       buf1[2][STR_SIZE] = {"ab", "de"};     /* string */
     char *     buf1a[2];                             /* VL string */
     char       buf2[2] = {1, 2};                     /* bitfield, opaque */
-    s_t        buf3[2] = {{1, 2.0F}, {3, 4.0F}};     /* compound */
+    s_t        buf3[2] = {{1, 2.0}, {3, 4.0}};       /* compound */
     hobj_ref_t buf4[2];                              /* reference */
     e_t        buf45[2] = {RED, GREEN};              /* enum */
     hvl_t      buf5[2];                              /* vlen */
     hsize_t    dimarray[1] = {3};                    /* array dimension */
     int        buf6[2][3]  = {{1, 2, 3}, {4, 5, 6}}; /* array */
     int        buf7[2]     = {1, 2};                 /* integer */
-    float      buf8[2]     = {1.0F, 2.0F};           /* float */
+    float      buf8[2]     = {1.0, 2.0};             /* float */
 
     /* create 2D attributes with dimension [3][2], 6 elements */
-    hsize_t dims2[2]              = {3, 2};
-    char    buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
-    char *  buf12a[3][2];                                                       /* VL string */
-    char    buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
-    s_t     buf32[6] = {{1, 2.0F}, {3, 4.0F}, {5, 6.0F}, {7, 8.0F}, {9, 10.0F}, {11, 12.0F}}; /* compound */
+    hsize_t    dims2[2]              = {3, 2};
+    char       buf12[3][2][STR_SIZE] = {{"ab", "cd"}, {"ef", "gh"}, {"ij", "kl"}}; /* string */
+    char *     buf12a[3][2];                                                       /* VL string */
+    char       buf22[3][2] = {{1, 2}, {3, 4}, {5, 6}};                             /* bitfield, opaque */
+    s_t        buf32[6]    = {{1, 2.0}, {3, 4.0}, {5, 6.0}, {7, 8.0}, {9, 10.0}, {11, 12.0}}; /* compound */
     hobj_ref_t buf42[3][2];                                                                   /* reference */
     hvl_t      buf52[3][2];                                                                   /* vlen */
     int buf62[6][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 9}, {10, 11, 12}, {13, 14, 15}, {16, 17, 18}}; /* array */
-    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};                     /* integer */
-    float buf82[3][2] = {{1.0F, 2.0F}, {3.0F, 4.0F}, {5.0F, 6.0F}}; /* float */
+    int buf72[3][2] = {{1, 2}, {3, 4}, {5, 6}};               /* integer */
+    float buf82[3][2] = {{1.0, 2.0}, {3.0, 4.0}, {5.0, 6.0}}; /* float */
 
     /* create 3D attributes with dimension [4][3][2], 24 elements */
     hsize_t    dims3[3]                 = {4, 3, 2};
@@ -7682,7 +7680,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
             for (k = 0; k < 2; k++) {
                 if (make_diffs) {
                     buf33[i][j][k].a = 0;
-                    buf33[i][j][k].b = 0.0F;
+                    buf33[i][j][k].b = 0.0;
                 }
                 else {
                     buf33[i][j][k].a = (char)n++;
@@ -7780,7 +7778,7 @@ write_dset_in(hid_t loc_id, const char *dset_name, hid_t fid,
             for (k = 0; k < 2; k++) {
                 if (make_diffs) {
                     buf73[i][j][k] = 0;
-                    buf83[i][j][k] = 0.0F;
+                    buf83[i][j][k] = 0.0;
                 }
                 else {
                     buf73[i][j][k] = n++;
@@ -8058,8 +8056,6 @@ error:
         H5Fclose(fid2);
     }
     H5E_END_TRY;
-
-    return;
 }
 
 /*-------------------------------------------------------------------------

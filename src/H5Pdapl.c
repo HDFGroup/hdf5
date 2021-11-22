@@ -768,7 +768,7 @@ H5Pset_chunk_cache(hid_t dapl_id, size_t rdcc_nslots, size_t rdcc_nbytes, double
 
     /* Check arguments.  Note that we allow negative values - they are
      * considered to "unset" the property. */
-    if (rdcc_w0 > (double)1.0f)
+    if (rdcc_w0 > 1.0)
         HGOTO_ERROR(
             H5E_ARGS, H5E_BADVALUE, FAIL,
             "raw data cache w0 value must be between 0.0 and 1.0 inclusive, or H5D_CHUNK_CACHE_W0_DEFAULT");
@@ -1453,7 +1453,7 @@ H5Pget_efile_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
         /* Copy to user's buffer, if given */
         len = HDstrlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, MIN(len + 1, size));
+            HDstrncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */
@@ -1543,7 +1543,7 @@ H5Pget_virtual_prefix(hid_t plist_id, char *prefix /*out*/, size_t size)
         /* Copy to user's buffer, if given */
         len = HDstrlen(my_prefix);
         if (prefix) {
-            HDstrncpy(prefix, my_prefix, MIN(len + 1, size));
+            HDstrncpy(prefix, my_prefix, size);
             if (len >= size)
                 prefix[size - 1] = '\0';
         } /* end if */

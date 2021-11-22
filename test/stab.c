@@ -134,7 +134,7 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR
     if (H5Oget_comment_by_name(g3, "././.", comment, sizeof comment, H5P_DEFAULT) < 0)
         TEST_ERROR
-    if (HDstrcmp(comment, "hello world")) {
+    if (HDstrcmp(comment, "hello world") != 0) {
         H5_FAILED();
         HDputs("    Read the wrong comment string from the group.");
         HDprintf("    got: \"%s\"\n    ans: \"hello world\"\n", comment);
@@ -148,12 +148,18 @@ test_misc(hid_t fcpl, hid_t fapl, hbool_t new_format)
         TEST_ERROR
 
     /* Check that creating groups with no-op names isn't allowed */
-    H5E_BEGIN_TRY { g1 = H5Gcreate2(fid, "/", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        g1 = H5Gcreate2(fid, "/", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (g1 >= 0)
         TEST_ERROR
 
-    H5E_BEGIN_TRY { g1 = H5Gcreate2(fid, "./././", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        g1 = H5Gcreate2(fid, "./././", H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (g1 >= 0)
         TEST_ERROR
@@ -1358,7 +1364,10 @@ corrupt_stab_msg(void)
         TEST_ERROR
 
     /* Verify that an error is thrown when we try to access the dataset */
-    H5E_BEGIN_TRY { did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT); }
+    H5E_BEGIN_TRY
+    {
+        did = H5Dopen2(fid, CORRUPT_STAB_DSET, H5P_DEFAULT);
+    }
     H5E_END_TRY
     if (did >= 0)
         TEST_ERROR
@@ -1408,15 +1417,16 @@ main(void)
     unsigned    new_format;      /* Whether to use the new format or not */
     const char *env_h5_drvr;     /* File Driver value from environment */
     hbool_t     contig_addr_vfd; /* Whether VFD used has a contigous address space */
-    int         nerrors = 0;
+    hbool_t     driver_uses_modified_filename = h5_driver_uses_modified_filename();
+    int         nerrors                       = 0;
 
     /* Get the VFD to use */
-    env_h5_drvr = HDgetenv("HDF5_DRIVER");
+    env_h5_drvr = HDgetenv(HDF5_DRIVER);
     if (env_h5_drvr == NULL)
         env_h5_drvr = "nomatch";
 
     /* VFD that does not support contigous address space */
-    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") && HDstrcmp(env_h5_drvr, "multi"));
+    contig_addr_vfd = (hbool_t)(HDstrcmp(env_h5_drvr, "split") != 0 && HDstrcmp(env_h5_drvr, "multi") != 0);
 
     /* Reset library */
     h5_reset();
@@ -1464,14 +1474,21 @@ main(void)
     if (contig_addr_vfd) {
         nerrors += lifecycle(fcpl2, fapl2);
         nerrors += long_compact(fcpl2, fapl2);
-        nerrors += read_old();
+
+        if (!driver_uses_modified_filename) {
+            nerrors += read_old();
+        }
+
         nerrors += no_compact(fcpl2, fapl2);
         nerrors += gcpl_on_root(fapl2);
     }
 
     /* Old group API specific tests */
     nerrors += old_api(fapl);
-    nerrors += corrupt_stab_msg();
+
+    if (!driver_uses_modified_filename) {
+        nerrors += corrupt_stab_msg();
+    }
 
     /* Close 2nd FAPL */
     H5Pclose(fapl2);

@@ -36,7 +36,7 @@ class H5_DLLCPP FloatType : public AtomType {
 
     // Returns an FloatType object via DataType* by decoding the
     // binary object description of this type.
-    virtual DataType *decode() const;
+    virtual DataType *decode() const override;
 
     // Retrieves the exponent bias of a floating-point type.
     size_t getEbias() const;
@@ -64,7 +64,7 @@ class H5_DLLCPP FloatType : public AtomType {
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const override
     {
         return ("FloatType");
     }
@@ -79,7 +79,7 @@ class H5_DLLCPP FloatType : public AtomType {
     FloatType(const FloatType &original);
 
     // Noop destructor.
-    virtual ~FloatType();
+    virtual ~FloatType() override;
 
 }; // end of FloatType
 } // namespace H5

@@ -15,7 +15,6 @@
 #include <iostream>
 using namespace std;
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -45,7 +44,9 @@ namespace H5 {
 // Function:    H5Location default constructor (protected)
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Location::H5Location() : IdComponent() {}
+H5Location::H5Location() : IdComponent()
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    H5Location overloaded constructor (protected)
@@ -346,10 +347,10 @@ H5Location::getComment(const char *name, size_t buf_size) const
 {
     // Initialize string to "", so that if there is no comment, the returned
     // string will be empty
-    H5std_string comment("");
+    H5std_string comment;
 
     // Preliminary call to get the comment's length
-    ssize_t comment_len = H5Oget_comment_by_name(getId(), name, NULL, (size_t)0, H5P_DEFAULT);
+    ssize_t comment_len = H5Oget_comment_by_name(getId(), name, NULL, 0, H5P_DEFAULT);
 
     // If H5Oget_comment_by_name returns a negative value, raise an exception
     if (comment_len < 0) {
@@ -365,8 +366,7 @@ H5Location::getComment(const char *name, size_t buf_size) const
             tmp_len = comment_len;
 
         // Temporary buffer for char* comment
-        char *comment_C = new char[tmp_len + 1];
-        HDmemset(comment_C, 0, tmp_len + 1); // clear buffer
+        char *comment_C = new char[tmp_len + 1]();
 
         // Used overloaded function
         ssize_t temp_len = getComment(name, tmp_len + 1, comment_C);
@@ -398,6 +398,7 @@ H5Location::getComment(const H5std_string &name, size_t buf_size) const
 {
     return (getComment(name.c_str(), buf_size));
 }
+
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
@@ -646,6 +647,7 @@ H5Location::p_get_obj_type(void *ref, H5R_type_t ref_type) const
     return (obj_type);
 }
 #endif // DOXYGEN_SHOULD_SKIP_THIS
+
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
@@ -704,6 +706,7 @@ H5Location::p_get_ref_obj_type(void *ref, H5R_type_t ref_type) const
     }
     return (obj_type);
 }
+#endif // DOXYGEN_SHOULD_SKIP_THIS
 
 //--------------------------------------------------------------------------
 // Function:    H5Location::getRegion
@@ -1816,7 +1819,7 @@ H5Location::getLinkval(const char *name, size_t size) const
     H5L_info2_t  linkinfo;
     char *       value_C; // value in C string
     size_t       val_size = size;
-    H5std_string value    = "";
+    H5std_string value;
     herr_t       ret_value;
 
     // if user doesn't provide buffer size, determine it
@@ -1830,8 +1833,8 @@ H5Location::getLinkval(const char *name, size_t size) const
 
     // if link has value, retrieve the value, otherwise, return null string
     if (val_size > 0) {
-        value_C = new char[val_size + 1];   // temporary C-string for C API
-        HDmemset(value_C, 0, val_size + 1); // clear buffer
+        // Create buffer for C string
+        value_C = new char[val_size + 1]();
 
         ret_value = H5Lget_val(getId(), name, value_C, val_size, H5P_DEFAULT);
         if (ret_value < 0) {
@@ -2041,9 +2044,8 @@ H5Location::getObjnameByIdx(hsize_t idx) const
     if (name_len < 0)
         throwException("getObjnameByIdx", "H5Lget_name_by_idx failed");
 
-    // now, allocate C buffer to get the name
-    char *name_C = new char[name_len + 1];
-    HDmemset(name_C, 0, name_len + 1); // clear buffer
+    // Create buffer for C string
+    char *name_C = new char[name_len + 1]();
 
     name_len =
         H5Lget_name_by_idx(getId(), ".", H5_INDEX_NAME, H5_ITER_INC, idx, name_C, name_len + 1, H5P_DEFAULT);
@@ -2097,8 +2099,8 @@ H5Location::getObjnameByIdx(hsize_t idx, char *name, size_t size) const
 ssize_t
 H5Location::getObjnameByIdx(hsize_t idx, H5std_string &name, size_t size) const
 {
-    char *name_C = new char[size + 1]; // temporary C-string for object name
-    HDmemset(name_C, 0, size + 1);     // clear buffer
+    // Create buffer for C string
+    char *name_C = new char[size + 1]();
 
     // call overloaded function to get the name
     ssize_t name_len = getObjnameByIdx(idx, name_C, size + 1);
@@ -2294,7 +2296,6 @@ H5Location::childObjVersion(const H5std_string &objname) const
 }
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
-#ifndef DOXYGEN_SHOULD_SKIP_THIS
 //--------------------------------------------------------------------------
 // Function:    H5Location::getObjTypeByIdx
 ///\brief       Returns the type of an object in this group, given the
@@ -2372,7 +2373,6 @@ H5Location::getObjTypeByIdx(hsize_t idx, H5std_string &type_name) const
     return (obj_type);
 }
 
-#endif // DOXYGEN_SHOULD_SKIP_THIS
 #endif /* H5_NO_DEPRECATED_SYMBOLS */
 
 //--------------------------------------------------------------------------
@@ -2431,8 +2431,8 @@ f_DataSpace_setId(DataSpace *dspace, hid_t new_id)
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-H5Location::~H5Location() {}
-
-#endif // DOXYGEN_SHOULD_SKIP_THIS
+H5Location::~H5Location()
+{
+}
 
 } // namespace H5
