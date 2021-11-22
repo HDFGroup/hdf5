@@ -80,12 +80,24 @@ static herr_t H5D__efl_write(const H5O_efl_t *efl, const H5D_t *dset, haddr_t ad
 /*********************/
 
 /* External File List (EFL) storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{H5D__efl_construct, NULL, H5D__efl_is_space_alloc, NULL,
-                                           H5D__efl_io_init, H5D__contig_read, H5D__contig_write,
+const H5D_layout_ops_t H5D_LOPS_EFL[1] = {{
+    H5D__efl_construct,      /* construct */
+    NULL,                    /* init */
+    H5D__efl_is_space_alloc, /* is_space_alloc */
+    NULL,                    /* is_data_cached */
+    H5D__efl_io_init,        /* io_init */
+    H5D__contig_read,        /* ser_read */
+    H5D__contig_write,       /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-                                           NULL, NULL,
-#endif /* H5_HAVE_PARALLEL */
-                                           H5D__efl_readvv, H5D__efl_writevv, NULL, NULL, NULL}};
+    NULL, /* par_read */
+    NULL, /* par_write */
+#endif
+    H5D__efl_readvv,  /* readvv */
+    H5D__efl_writevv, /* writevv */
+    NULL,             /* flush */
+    NULL,             /* io_term */
+    NULL              /* dest */
+}};
 
 /*******************/
 /* Local Variables */

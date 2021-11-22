@@ -76,9 +76,6 @@ static herr_t  H5SM__read_mesg(H5F_t *f, const H5SM_sohm_t *mesg, H5HF_t *fheap,
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 H5FL_DEFINE(H5SM_master_table_t);
 H5FL_ARR_DEFINE(H5SM_index_header_t, H5O_SHMESG_MAX_NINDEXES);
 H5FL_DEFINE(H5SM_list_t);

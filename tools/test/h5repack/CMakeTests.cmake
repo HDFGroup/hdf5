@@ -1544,7 +1544,7 @@
 # the references in attribute of compund or vlen datatype
   ADD_H5_TEST (HDFFV-5932 "TEST" ${FILE_ATTR_REF})
 
-# Add test for memory leak in attirbute. This test is verified by CTEST.
+# Add test for memory leak in attribute. This test is verified by CTEST.
 # 1. leak from vlen string
 # 2. leak from compound type without reference member
 # (HDFFV-7840, )
@@ -1552,12 +1552,12 @@
   ADD_H5_TEST (HDFFV-7840 "TEST" h5diff_attr1.h5)
 
 # test CVE-2018-17432 fix
-  set (arg h5repack_CVE-2018-17432.h5 h5repack__CVE-2018-17432_out.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
+  set (arg h5repack_CVE-2018-17432.h5 --low=1 --high=2 -f GZIP=8 -l dset1:CHUNK=5x6)
   set (TESTTYPE "TEST")
   ADD_H5_FILTER_TEST (HDFFV-10590 "" ${TESTTYPE} 1 ${arg})
 
 # test CVE-2018-14460 fix
-  set (arg h5repack_CVE-2018-14460.h5 h5repack_CVE-2018-14460_out.h5)
+  set (arg h5repack_CVE-2018-14460.h5)
   set (TESTTYPE "TEST")
   ADD_H5_FILTER_TEST (HDFFV-11223 "" ${TESTTYPE} 1 ${arg})
 

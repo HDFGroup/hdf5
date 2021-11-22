@@ -99,8 +99,14 @@
 #include <dirent.h>
 #endif
 
-/* Define the default VFD for this platform.
- * Since the removal of the Windows VFD, this is sec2 for all platforms.
+/* Define the default VFD for this platform.  Since the removal of the
+ * Windows VFD, this is sec2 for all platforms.
+ *
+ * Note well: if you change the default, then be sure to change
+ * H5_default_vfd_init() to call that default's initializer.  Also,
+ * make sure that the initializer for each *non*-default VFD calls
+ * H5_init_library(); also, make sure that the initializer for default
+ * VFD does *not* call H5_init_library().
  */
 #define H5_DEFAULT_VFD H5FD_SEC2
 
@@ -252,10 +258,10 @@
 #define H5_ATTR_NORETURN __attribute__((noreturn))
 #define H5_ATTR_CONST    __attribute__((const))
 #define H5_ATTR_PURE     __attribute__((pure))
-#if defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
+#if defined(__clang__) || defined(__GNUC__) && __GNUC__ >= 7 && !defined(__INTEL_COMPILER)
 #define H5_ATTR_FALLTHROUGH __attribute__((fallthrough));
 #else
-#define H5_ATTR_FALLTHROUGH /*void*/
+#define H5_ATTR_FALLTHROUGH /* FALLTHROUGH */
 #endif
 #else
 #define H5_ATTR_FORMAT(X, Y, Z) /*void*/
@@ -2021,33 +2027,6 @@ extern hbool_t H5_use_selection_io_g;
 extern hbool_t H5_MPEinit_g; /* Has the MPE Library been initialized? */
 #endif
 
-/* Macros for referencing package initialization symbols */
-#define H5_PACKAGE_INIT_VAR(x)  H5_GLUE(x, _init_g)
-#define H5_PACKAGE_INIT_FUNC(x) H5_GLUE(x, __init_package)
-
-/* Macros for defining package initialization routines */
-#ifdef H5_MY_PKG
-#define H5_PKG_INIT_VAR  H5_PACKAGE_INIT_VAR(H5_MY_PKG)
-#define H5_PKG_INIT_FUNC H5_PACKAGE_INIT_FUNC(H5_MY_PKG)
-#define H5_PACKAGE_YES_INIT(err)                                                                             \
-    /* Initialize this interface or bust */                                                                  \
-    if (!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL) {                                                               \
-        H5_PKG_INIT_VAR = TRUE;                                                                              \
-        if (H5_PKG_INIT_FUNC() < 0) {                                                                        \
-            H5_PKG_INIT_VAR = FALSE;                                                                         \
-            HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "interface initialization failed")                      \
-        }                                                                                                    \
-    }
-#define H5_PACKAGE_NO_INIT(err)                                                                              \
-    /* Initialize this interface or bust */                                                                  \
-    if (!H5_PKG_INIT_VAR && !H5_TERM_GLOBAL)                                                                 \
-        H5_PKG_INIT_VAR = TRUE;
-#define H5_PACKAGE_INIT(pkg_init, err) H5_GLUE3(H5_PACKAGE_, pkg_init, _INIT)(err)
-#else /* H5_MY_PKG */
-#define H5_PKG_INIT_VAR (TRUE)
-#define H5_PACKAGE_INIT(pkg_init, err)
-#endif /* H5_MY_PKG */
-
 /* Forward declaration of H5CXpush() / H5CXpop() */
 /* (Including H5CXprivate.h creates bad circular dependencies - QAK, 3/18/2018) */
 H5_DLL herr_t H5CX_push(void);
@@ -2103,10 +2082,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     if (!H5_INIT_GLOBAL && !H5_TERM_GLOBAL) {                                                                \
         if (H5_init_library() < 0)                                                                           \
             HGOTO_ERROR(H5E_FUNC, H5E_CANTINIT, err, "library initialization failed")                        \
-    } /* end if */                                                                                           \
-                                                                                                             \
-    /* Initialize the package, if appropriate */                                                             \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)
+    }
 
 #define FUNC_ENTER_API_PUSH(err)                                                                             \
     /* Push the name of this function on the function stack */                                               \
@@ -2215,27 +2191,19 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                             FUNC_ENTER_COMMON_NOERR(H5_IS_API(__func__));                                    \
                             {
 
-/* Note: this macro only works when there's _no_ interface initialization routine for the module */
-#define FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-    /* Initialize the package, if appropriate */                                                             \
-    H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                                                     \
-                                                                                                             \
-    /* Push the name of this function on the function stack */                                               \
-    H5_PUSH_FUNC
-
 /* Use this macro for all "normal" non-API functions */
 #define FUNC_ENTER_NOAPI(err)                                                                                \
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
-        FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        H5_PUSH_FUNC                                                                                         \
+        {
 
 /* Use this macro for all non-API functions, which propagate errors, but don't issue them */
 #define FUNC_ENTER_NOAPI_NOERR                                                                               \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
-        FUNC_ENTER_NOAPI_INIT(-)                                                                             \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        H5_PUSH_FUNC                                                                                         \
+        {
 
 /*
  * Use this macro for non-API functions which fall into these categories:
@@ -2249,7 +2217,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions which fall into these categories:
@@ -2264,7 +2232,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions which fall into these categories:
@@ -2276,9 +2244,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     {                                                                                                        \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
                                                                                                              \
-        /* Initialize the package, if appropriate */                                                         \
-        H5_PACKAGE_INIT(H5_MY_PKG_INIT, err)                                                                 \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions which fall into these categories:
@@ -2292,7 +2258,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
 #define FUNC_ENTER_NOAPI_NOERR_NOFS                                                                          \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(!H5_IS_API(__func__));                                                       \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions that shouldn't perform _any_ initialization
@@ -2314,8 +2280,8 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
                                                                                                              \
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
-        FUNC_ENTER_NOAPI_INIT(err)                                                                           \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        H5_PUSH_FUNC                                                                                         \
+        {
 
 #define FUNC_ENTER_NOAPI_NOINIT_TAG(tag)                                                                     \
     {                                                                                                        \
@@ -2324,21 +2290,21 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         FUNC_ENTER_COMMON(!H5_IS_API(__func__));                                                             \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for all "normal" package-level functions */
 #define FUNC_ENTER_PACKAGE                                                                                   \
     {                                                                                                        \
         FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for package-level functions which propgate errors, but don't issue them */
 #define FUNC_ENTER_PACKAGE_NOERR                                                                             \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use the following macro as replacement for the FUNC_ENTER_PACKAGE
  * macro when the function needs to set up a metadata tag. */
@@ -2349,28 +2315,28 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for all "normal" staticly-scoped functions */
 #define FUNC_ENTER_STATIC                                                                                    \
     {                                                                                                        \
         FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 #define FUNC_ENTER_STATIC_NOERR                                                                              \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /* Use this macro for staticly-scoped functions which propgate errors, but don't issue them */
 /* And that shouldn't push their name on the function stack */
 #define FUNC_ENTER_STATIC_NOERR_NOFS                                                                         \
     {                                                                                                        \
         FUNC_ENTER_COMMON_NOERR(H5_IS_PKG(__func__));                                                        \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*
  * Use this macro for non-API functions that shouldn't perform _any_ initialization
@@ -2392,7 +2358,7 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
         FUNC_ENTER_COMMON(H5_IS_PKG(__func__));                                                              \
         H5AC_tag(tag, &prev_tag);                                                                            \
         H5_PUSH_FUNC                                                                                         \
-        if (H5_PKG_INIT_VAR || !H5_TERM_GLOBAL) {
+        {
 
 /*-------------------------------------------------------------------------
  * Purpose:  Register function exit for code profiling.  This should be
@@ -2520,27 +2486,6 @@ H5_DLL herr_t H5CX_pop(hbool_t update_dxpl_props);
     H5_POP_FUNC                                                                                              \
     return (ret_value);                                                                                      \
     } /*end scope from beginning of FUNC_ENTER*/
-
-/* Macros to declare package initialization function, if a package initialization routine is defined */
-#ifdef H5_PKG_SINGLE_SOURCE
-#define H5_PKG_DECLARE_YES_FUNC(pkg) static herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
-#else
-#define H5_PKG_DECLARE_YES_FUNC(pkg) extern herr_t H5_PACKAGE_INIT_FUNC(pkg)(void);
-#endif
-#define H5_PKG_DECLARE_NO_FUNC(pkg)
-
-/* Declare package initialization symbols (if in a package) */
-#ifdef H5_PKG_SINGLE_SOURCE
-#define H5_PKG_DECLARE_VAR(pkg) static hbool_t H5_PACKAGE_INIT_VAR(pkg);
-#else
-#define H5_PKG_DECLARE_VAR(pkg) extern hbool_t H5_PACKAGE_INIT_VAR(pkg);
-#endif
-#define H5_PKG_DECLARE_FUNC(pkg_init, pkg) H5_GLUE3(H5_PKG_DECLARE_, pkg_init, _FUNC)(pkg)
-
-#ifdef H5_MY_PKG
-H5_PKG_DECLARE_VAR(H5_MY_PKG)
-H5_PKG_DECLARE_FUNC(H5_MY_PKG_INIT, H5_MY_PKG)
-#endif
 
 /* Macro to begin/end tagging (when FUNC_ENTER_*TAG macros are insufficient).
  * Make sure to use HGOTO_ERROR_TAG and HGOTO_DONE_TAG between these macros! */
