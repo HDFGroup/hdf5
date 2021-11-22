@@ -1274,6 +1274,7 @@ end_collect:
                 break;
             case 'F':
                 onion_revision_g = atol(H5_optarg);
+				HDprintf("Using revision %d\n", onion_revision_g);
                 break;
             case '?':
             default:
@@ -1414,7 +1415,7 @@ main(int argc, const char *argv[])
 #endif
         }
         else if (!HDstrcmp(driver_name_g, drivernames[ONION_VFD_IDX])) {
-            onion_fa_g.revision_id = onion_revision_g;
+		    onion_fa_g.revision_id = onion_revision_g;
             vfd_info.info          = (void *)&onion_fa_g;
         }
 

@@ -1730,7 +1730,9 @@ H5FD__onion_ingest_revision_record(struct H5FD__onion_revision_record *r_out, H5
             HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "checksum mismatch between buffer and stored")
 
         if (revision_id != r_out->revision_id) {
+#if 0
             HDprintf("revision_id: %d, r_out->revision_id: %d\n", revision_id, r_out->revision_id);
+#endif
             HGOTO_ERROR(H5E_ARGS, H5E_BADRANGE, FAIL,
                         "could not find target revision!") /* TODO: corrupted? */
         }
@@ -2087,21 +2089,22 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
                                                  file->header.whole_history_size) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get whole-history from backing store")
 
+#if 0
+HDprintf("File has %d revisions\n", file->summary.n_revisions);
+#endif
             /* Sanity check on revision ID */
-            // if (fa->revision_id >= file->summary.n_revisions &&
             if (fa->revision_id > file->summary.n_revisions &&
                 fa->revision_id != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range")
 
             if (file->summary.n_revisions > 0 &&
                 H5FD__onion_ingest_revision_record(&file->rev_record, file->backing_onion, &file->summary,
-                                                   MIN(fa->revision_id, (file->summary.n_revisions - 1))) <
+                                                   MIN(fa->revision_id - 1, (file->summary.n_revisions - 1))) <
                     0) {
-                // H5FD__onion_ingest_revision_record(&file->rev_record, file->backing_onion, &file->summary,
-                //                                   MIN(fa->revision_id, (file->summary.n_revisions - 1))) <
-                //                                   0)
+#if 0
                 HDprintf("fa->revision_id: %d, file->summary.n_revisions: %d, min: %d\n", fa->revision_id,
                          file->summary.n_revisions, MIN(fa->revision_id, file->summary.n_revisions));
+#endif
                 HGOTO_ERROR(H5E_VFL, H5E_CANTDECODE, NULL, "can't get revision record from backing store")
             }
 
@@ -2283,8 +2286,9 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     herr_t         ret_value      = SUCCEED;
 
     FUNC_ENTER_STATIC;
+#if 0
     HDprintf("ONION READ - offset: %" PRIuHADDR ", len: %zu\n", offset, len);
-
+#endif
     HDassert(file != NULL);
     HDassert(buf_out != NULL);
 
@@ -2298,7 +2302,9 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
     page_size_log2 = file->rev_record.archival_index.page_size_log2;
     page_0         = offset >> page_size_log2;
     n_pages        = (len + page_size - 1) >> page_size_log2;
+#if 0
     HDprintf("n_pages: %d\n", n_pages);
+#endif
 
     /* Read, page-by-page */
     for (i = 0; i < n_pages; i++) {
@@ -2314,30 +2320,38 @@ H5FD__onion_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, h
             if (page_gap_head > 0 &&
                 (page_gap_head + (bytes_to_read % page_size) > page_size || bytes_to_read % page_size == 0)) {
                 n_pages++;
+#if 0
                 HDputs("Incremented n_pages");
+#endif
             }
         }
 
         if (n_pages - 1 == i) {
             page_gap_tail = page_size - bytes_to_read - page_gap_head;
+#if 0
             HDprintf("Last page?: %d\n", i);
+#endif
         }
 
         page_readsize = (size_t)page_size - page_gap_head - page_gap_tail;
 
-        if (TRUE == file->is_open_rw &&
+        if (TRUE == file->is_open_rw && file->fa.revision_id != 0 &&
             H5FD_onion_revision_index_find(file->rev_index, page_i, &entry_out_p)) {
+#if 0
             HDputs("READING from revision index");
             HDprintf("page_size: %llu, page_gap_head: %llu, page_gap_tail: %llu, page_readsize: %llu\n",
                      page_size, page_gap_head, page_gap_tail, page_readsize);
+#endif
             if (H5FDread(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT,
                          (haddr_t)entry_out_p->phys_addr + page_gap_head, page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get working file data")
         } /* end if page exists in 'live' revision index */
-        else if (H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out_p)) {
+        else if (file->fa.revision_id != 0 && H5FD_onion_archival_index_find(&file->rev_record.archival_index, page_i, &entry_out_p)) {
+#if 0
             HDputs("READING from archival index");
             HDprintf("page_size: %llu, page_gap_head: %llu, page_gap_tail: %llu, page_readsize: %llu\n",
                      page_size, page_gap_head, page_gap_tail, page_readsize);
+#endif
             if (H5FDread(file->backing_onion, H5FD_MEM_DRAW, H5P_DEFAULT,
                          (haddr_t)entry_out_p->phys_addr + page_gap_head, page_readsize, buf_out) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_READERROR, FAIL, "can't get previously-amended file data")
@@ -2425,7 +2439,9 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
     herr_t               ret_value      = SUCCEED;
 
     FUNC_ENTER_STATIC;
+#if 0
     HDfprintf(stdout, "ONION WRITE - offset: %" PRIuHADDR ", len: %zu\n", offset, len);
+#endif
     HDassert(file != NULL);
     HDassert(buf != NULL);
     HDassert(file->rev_index != NULL);
@@ -2539,8 +2555,10 @@ H5FD__onion_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, 
                       write_buf) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_WRITEERROR, FAIL, "write amended page data to backing file")
 
+#if 0
         HDfprintf(stdout, "ADDING TO REVISION INDEX - page: %d, phys_addr = %" PRIuHADDR "\n",
                   new_entry.logi_page, new_entry.phys_addr);
+#endif
         if (H5FD_onion_revision_index_insert(file->rev_index, &new_entry) < 0)
             HGOTO_ERROR(H5E_VFL, H5E_CANTINSERT, FAIL, "can't insert new index entry into revision index")
 

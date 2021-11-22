@@ -569,6 +569,12 @@ h5tools_set_fapl_vfd(hid_t fapl_id, h5tools_vfd_info_t *vfd_info)
         H5TOOLS_GOTO_ERROR(FAIL, "The HDFS VFD is not enabled");
 #endif
     }
+    else if (!HDstrcmp(vfd_info->name, drivernames[ONION_VFD_IDX])) {
+        if (!vfd_info->info)
+            H5TOOLS_GOTO_ERROR(FAIL, "Onion VFD info is invalid");
+        if (H5Pset_fapl_onion(fapl_id, (H5FD_onion_fapl_info_t *)vfd_info->info) < 0)
+            H5TOOLS_GOTO_ERROR(FAIL, "H5Pset_fapl_onion() failed");
+    }
     else
         H5TOOLS_GOTO_ERROR(FAIL, "invalid VFD name");
 
