@@ -22,31 +22,35 @@ static herr_t H5DS_is_reserved(hid_t did);
 /*-------------------------------------------------------------------------
  * Function: H5DSwith_new_ref
  *
- * Purpose: Detremines if new references are used with dimension scales.
+ * Purpose: Determines if new references are used with dimension scales.
  *   The function H5DSwith_new_ref takes any object identifier and checks
- *   if new references are used for dimenison scales. Currently,
+ *   if new references are used for dimension scales. Currently,
  *   new references are used when non-native VOL connector is used or when
  *   H5_DIMENSION_SCALES_WITH_NEW_REF is set up via configure option.
  *
- * Return: Success: TRUE/FALSE, Failure: FAIL
+ * Return: Non-negative on success/Negative on failure
  *
  *-------------------------------------------------------------------------
  */
-hbool_t
-H5DSwith_new_ref(hid_t obj_id)
+herr_t
+H5DSwith_new_ref(hid_t obj_id, hbool_t *with_new_ref)
 {
-    hbool_t ret_value   = FALSE;
     hbool_t config_flag = FALSE;
     hbool_t native      = FALSE;
 
-    native = H5VLobject_is_native(obj_id);
-    if (native < 0)
+    if (!with_new_ref)
         return FAIL;
+
+    if (H5VLobject_is_native(obj_id, &native) < 0)
+        return FAIL;
+
 #ifdef H5_DIMENSION_SCALES_WITH_NEW_REF
     config_flag = TRUE;
 #endif
-    ret_value = (config_flag || !native);
-    return ret_value;
+
+    *with_new_ref = (config_flag || !native);
+
+    return SUCCEED;
 }
 
 /*-------------------------------------------------------------------------
@@ -205,8 +209,7 @@ H5DSattach_scale(hid_t did, hid_t dsid, unsigned int idx)
      *-------------------------------------------------------------------------
      */
 
-    is_new_ref = H5DSwith_new_ref(did);
-    if (is_new_ref < 0)
+    if (H5DSwith_new_ref(did, &is_new_ref) < 0)
         return FAIL;
 
     /* get ID type */
@@ -793,8 +796,7 @@ H5DSdetach_scale(hid_t did, hid_t dsid, unsigned int idx)
      * determine if old or new references should be used
      *-------------------------------------------------------------------------
      */
-    is_new_ref = H5DSwith_new_ref(did);
-    if (is_new_ref < 0)
+    if (H5DSwith_new_ref(did, &is_new_ref) < 0)
         return FAIL;
 
     /*-------------------------------------------------------------------------
@@ -1283,8 +1285,7 @@ H5DSis_attached(hid_t did, hid_t dsid, unsigned int idx)
      *-------------------------------------------------------------------------
      */
 
-    is_new_ref = H5DSwith_new_ref(did);
-    if (is_new_ref < 0)
+    if (H5DSwith_new_ref(did, &is_new_ref) < 0)
         return FAIL;
 
     /* get ID type */
@@ -1629,8 +1630,7 @@ H5DSiterate_scales(hid_t did, unsigned int dim, int *ds_idx, H5DS_iterate_t visi
      *-------------------------------------------------------------------------
      */
 
-    is_new_ref = H5DSwith_new_ref(did);
-    if (is_new_ref < 0)
+    if (H5DSwith_new_ref(did, &is_new_ref) < 0)
         return FAIL;
 
     /* get the number of scales assotiated with this DIM */

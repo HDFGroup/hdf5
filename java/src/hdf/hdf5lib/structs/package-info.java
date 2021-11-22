@@ -1,6 +1,6 @@
 /* * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * *
  * Copyright by The HDF Group.                                               *
- * Copyright by the Board of Trustees of the University of Illinois.         *
+ *                                                                           *
  * All rights reserved.                                                      *
  *                                                                           *
  * This file is part of HDF5.  The full HDF5 copyright notice, including     *
@@ -11,42 +11,7 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-/*
- * Programmer:  Robb Matzke
- *              Monday, August  2, 1999
- *
- * Purpose:	The public header file for the sec2 driver.
+/** All structure definitions define java equivalents of the C structures needed
+ * by the C API calls. See the C API for information about the structures.
  */
-#ifndef H5FDstdio_H
-#define H5FDstdio_H
-
-#include "H5Ipublic.h"
-
-#define H5FD_STDIO (H5FDperform_init(H5FD_stdio_init))
-
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-H5_DLL hid_t H5FD_stdio_init(void);
-/**
- * \ingroup FAPL
- *
- * \brief Sets the standard I/O driver
- *
- * \fapl_id
- * \returns \herr_t
- *
- * \details H5Pset_fapl_stdio() modifies the file access property list to use
- *          the standard I/O driver, H5FDstdio().
- *
- * \since 1.4.0
- *
- */
-H5_DLL herr_t H5Pset_fapl_stdio(hid_t fapl_id);
-
-#ifdef __cplusplus
-}
-#endif
-
-#endif
+package hdf.hdf5lib.structs;
