@@ -62,6 +62,16 @@ srcdir=@srcdir@
 utils_testdir=@abs_top_builddir@/@H5_UTILS_TEST_BUILDDIR@
 testdir=@abs_top_builddir@/@H5_TEST_BUILDDIR@
 
+# If the bindir directory is not set just use current (.).
+if test -z "$bindir"; then
+   bindir=.
+fi
+
+# If the testdir directory is not set just use current (.).
+if test -z "$testdir"; then
+   testdir=.
+fi
+
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
 $utils_testdir/swmr_check_compat_vfd

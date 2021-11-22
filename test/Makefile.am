@@ -54,6 +54,10 @@ if MIRROR_VFD_CONDITIONAL
   TEST_SCRIPT += test_mirror.sh
 endif
 
+if MIRROR_VFD_CONDITIONAL
+  TEST_SCRIPT += test_mirror.sh
+endif
+
 check_SCRIPTS = $(TEST_SCRIPT)
 
 # These are our main targets. They should be listed in the order to be
@@ -102,6 +106,10 @@ check_PROGRAMS=$(TEST_PROG) error_test err_compat tcheck_version \
 if HAVE_SHARED_CONDITIONAL
   check_PROGRAMS+= filter_plugin vfd_plugin vol_plugin
 endif
+if MIRROR_VFD_CONDITIONAL
+  check_PROGRAMS+= mirror_vfd
+endif
+
 if MIRROR_VFD_CONDITIONAL
   check_PROGRAMS+= mirror_vfd
 endif

@@ -95,6 +95,11 @@ WAIT_MESSAGE() {
 ##
 ###############################################################################
 
+# If the testdir directory is not set just use current (.).
+if test -z "$testdir"; then
+   testdir=.
+fi
+
 # Check to see if the VFD specified by the HDF5_DRIVER environment variable
 # supports SWMR.
 $utils_testdir/swmr_check_compat_vfd
