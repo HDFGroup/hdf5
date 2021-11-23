@@ -940,6 +940,8 @@ H5Pget_filter_by_id2(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
     H5TRACE8("e", "iZfx*zxzxx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name, filter_config);
 
     /* Check args */
+    if (id < 0 || id > H5Z_FILTER_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range")
     if (cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so
@@ -1838,6 +1840,8 @@ H5Pget_filter_by_id1(hid_t plist_id, H5Z_filter_t id, unsigned int *flags /*out*
     H5TRACE7("e", "iZfx*zxzx", plist_id, id, flags, cd_nelmts, cd_values, namelen, name);
 
     /* Check args */
+    if (id < 0 || id > H5Z_FILTER_MAX)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "filter ID value out of range")
     if (cd_nelmts || cd_values) {
         /*
          * It's likely that users forget to initialize this on input, so
