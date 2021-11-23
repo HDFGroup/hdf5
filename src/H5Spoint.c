@@ -59,22 +59,22 @@ static void            H5S__free_pnt_list(H5S_pnt_list_t *pnt_lst);
 static herr_t   H5S__point_copy(H5S_t *dst, const H5S_t *src, hbool_t share_selection);
 static herr_t   H5S__point_release(H5S_t *space);
 static htri_t   H5S__point_is_valid(const H5S_t *space);
-static hssize_t H5S__point_serial_size(const H5S_t *space);
-static herr_t   H5S__point_serialize(const H5S_t *space, uint8_t **p);
+static hssize_t H5S__point_serial_size(H5S_t *space);
+static herr_t   H5S__point_serialize(H5S_t *space, uint8_t **p);
 static herr_t   H5S__point_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t   H5S__point_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__point_offset(const H5S_t *space, hsize_t *off);
 static int      H5S__point_unlim_dim(const H5S_t *space);
 static htri_t   H5S__point_is_contiguous(const H5S_t *space);
 static htri_t   H5S__point_is_single(const H5S_t *space);
-static htri_t   H5S__point_is_regular(const H5S_t *space);
-static htri_t   H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2);
-static htri_t   H5S__point_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end);
+static htri_t   H5S__point_is_regular(H5S_t *space);
+static htri_t   H5S__point_shape_same(H5S_t *space1, H5S_t *space2);
+static htri_t   H5S__point_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end);
 static herr_t   H5S__point_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t   H5S__point_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t   H5S__point_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t   H5S__point_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t   H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
+static herr_t   H5S__point_iter_init(H5S_t *space, H5S_sel_iter_t *iter);
 static herr_t   H5S__point_get_version_enc_size(const H5S_t *space, uint32_t *version, uint8_t *enc_size);
 
 /* Selection iteration callbacks */
@@ -170,7 +170,7 @@ H5FL_DEFINE_STATIC(H5S_pnt_list_t);
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__point_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
+H5S__point_iter_init(H5S_t *space, H5S_sel_iter_t *iter)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -1159,7 +1159,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S__point_serial_size(const H5S_t *space)
+H5S__point_serial_size(H5S_t *space)
 {
     uint32_t version;        /* Version number */
     uint8_t  enc_size;       /* Encoded size of point selection info */
@@ -1204,7 +1204,7 @@ done:
     Serialize the current selection into a user-provided buffer.
  USAGE
     herr_t H5S__point_serialize(space, p)
-        const H5S_t *space;     IN: Dataspace with selection to serialize
+        H5S_t *space;           IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -1219,7 +1219,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__point_serialize(const H5S_t *space, uint8_t **p)
+H5S__point_serialize(H5S_t *space, uint8_t **p)
 {
     H5S_pnt_node_t *curr;                /* Point information nodes */
     uint8_t *       pp;                  /* Local pointer for encoding */
@@ -1844,7 +1844,7 @@ H5S__point_is_single(const H5S_t *space)
     Check if a point selection is "regular"
  USAGE
     htri_t H5S__point_is_regular(space)
-        const H5S_t *space;     IN: Dataspace pointer to check
+        H5S_t *space;     IN: Dataspace pointer to check
  RETURNS
     TRUE/FALSE/FAIL
  DESCRIPTION
@@ -1859,7 +1859,7 @@ H5S__point_is_single(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__point_is_regular(const H5S_t *space)
+H5S__point_is_regular(H5S_t *space)
 {
     htri_t ret_value = FAIL; /* Return value */
 
@@ -1884,8 +1884,8 @@ H5S__point_is_regular(const H5S_t *space)
     Check if a two "point" selections are the same shape
  USAGE
     htri_t H5S__point_shape_same(space1, space2)
-        const H5S_t *space1;     IN: First dataspace to check
-        const H5S_t *space2;     IN: Second dataspace to check
+        H5S_t *space1;           IN: First dataspace to check
+        H5S_t *space2;           IN: Second dataspace to check
  RETURNS
     TRUE / FALSE / FAIL
  DESCRIPTION
@@ -1897,7 +1897,7 @@ H5S__point_is_regular(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__point_shape_same(const H5S_t *space1, const H5S_t *space2)
+H5S__point_shape_same(H5S_t *space1, H5S_t *space2)
 {
     H5S_pnt_node_t *pnt1, *pnt2;          /* Point information nodes */
     hssize_t        offset[H5S_MAX_RANK]; /* Offset between the selections */
@@ -1990,7 +1990,7 @@ done:
     Detect intersections of selection with block
  USAGE
     htri_t H5S__point_intersect_block(space, start, end)
-        const H5S_t *space;     IN: Dataspace with selection to use
+        H5S_t *space;           IN: Dataspace with selection to use
         const hsize_t *start;   IN: Starting coordinate for block
         const hsize_t *end;     IN: Ending coordinate for block
  RETURNS
@@ -2003,7 +2003,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5S__point_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end)
+H5S__point_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end)
 {
     H5S_pnt_node_t *pnt;               /* Point information node */
     htri_t          ret_value = FALSE; /* Return value */

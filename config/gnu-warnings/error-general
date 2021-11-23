@@ -12,7 +12,6 @@
 -Werror=pointer-sign
 -Werror=pointer-to-int-cast
 -Werror=int-to-pointer-cast
--Werror=int-conversion
 -Werror=redundant-decls
 -Werror=strict-prototypes
 -Werror=switch
