@@ -173,8 +173,8 @@ static herr_t   H5S__hyper_copy(H5S_t *dst, const H5S_t *src, hbool_t share_sele
 static herr_t   H5S__hyper_release(H5S_t *space);
 static htri_t   H5S__hyper_is_valid(const H5S_t *space);
 static hsize_t  H5S__hyper_span_nblocks(H5S_hyper_span_info_t *spans);
-static hssize_t H5S__hyper_serial_size(const H5S_t *space);
-static herr_t   H5S__hyper_serialize(const H5S_t *space, uint8_t **p);
+static hssize_t H5S__hyper_serial_size(H5S_t *space);
+static herr_t   H5S__hyper_serialize(H5S_t *space, uint8_t **p);
 static herr_t   H5S__hyper_deserialize(H5S_t **space, const uint8_t **p);
 static herr_t   H5S__hyper_bounds(const H5S_t *space, hsize_t *start, hsize_t *end);
 static herr_t   H5S__hyper_offset(const H5S_t *space, hsize_t *offset);
@@ -182,14 +182,14 @@ static int      H5S__hyper_unlim_dim(const H5S_t *space);
 static herr_t   H5S__hyper_num_elem_non_unlim(const H5S_t *space, hsize_t *num_elem_non_unlim);
 static htri_t   H5S__hyper_is_contiguous(const H5S_t *space);
 static htri_t   H5S__hyper_is_single(const H5S_t *space);
-static htri_t   H5S__hyper_is_regular(const H5S_t *space);
-static htri_t   H5S__hyper_shape_same(const H5S_t *space1, const H5S_t *space2);
-static htri_t   H5S__hyper_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end);
+static htri_t   H5S__hyper_is_regular(H5S_t *space);
+static htri_t   H5S__hyper_shape_same(H5S_t *space1, H5S_t *space2);
+static htri_t   H5S__hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end);
 static herr_t   H5S__hyper_adjust_u(H5S_t *space, const hsize_t *offset);
 static herr_t   H5S__hyper_adjust_s(H5S_t *space, const hssize_t *offset);
 static herr_t   H5S__hyper_project_scalar(const H5S_t *space, hsize_t *offset);
 static herr_t   H5S__hyper_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset);
-static herr_t   H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter);
+static herr_t   H5S__hyper_iter_init(H5S_t *space, H5S_sel_iter_t *iter);
 
 /* Selection iteration callbacks */
 static herr_t  H5S__hyper_iter_coords(const H5S_sel_iter_t *iter, hsize_t *coords);
@@ -559,7 +559,7 @@ H5S__hyper_get_op_gen(void)
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
+H5S__hyper_iter_init(H5S_t *space, H5S_sel_iter_t *iter)
 {
     hsize_t *slab_size;           /* Pointer to the dataspace dimensions to use for calc. slab */
     hsize_t  acc;                 /* Accumulator for computing cumulative sizes */
@@ -586,7 +586,7 @@ H5S__hyper_iter_init(const H5S_t *space, H5S_sel_iter_t *iter)
      * to be impossible.
      */
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO)
-        H5S__hyper_rebuild((H5S_t *)space); /* Casting away const OK -NAF */
+        H5S__hyper_rebuild(space);
 
     /* Check for the special case of just one H5Sselect_hyperslab call made */
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
@@ -3575,7 +3575,7 @@ H5S__hyper_get_enc_size_real(hsize_t max_size)
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__hyper_get_version_enc_size(const H5S_t *space, hsize_t block_count, uint32_t *version, uint8_t *enc_size)
+H5S__hyper_get_version_enc_size(H5S_t *space, hsize_t block_count, uint32_t *version, uint8_t *enc_size)
 {
     hsize_t      bounds_start[H5S_MAX_RANK]; /* Starting coordinate of bounding box */
     hsize_t      bounds_end[H5S_MAX_RANK];   /* Opposite coordinate of bounding box */
@@ -3728,7 +3728,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static hssize_t
-H5S__hyper_serial_size(const H5S_t *space)
+H5S__hyper_serial_size(H5S_t *space)
 {
     hsize_t  block_count = 0; /* block counter for regular hyperslabs */
     uint32_t version;         /* Version number */
@@ -3928,7 +3928,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans, hsize_t *start, 
     Serialize the current selection into a user-provided buffer.
  USAGE
     herr_t H5S__hyper_serialize(space, p)
-        const H5S_t *space;     IN: Dataspace with selection to serialize
+        H5S_t *space;           IN: Dataspace with selection to serialize
         uint8_t **p;            OUT: Pointer to buffer to put serialized
                                 selection.  Will be advanced to end of
                                 serialized selection.
@@ -3943,7 +3943,7 @@ H5S__hyper_serialize_helper(const H5S_hyper_span_info_t *spans, hsize_t *start, 
  REVISION LOG
 --------------------------------------------------------------------------*/
 static herr_t
-H5S__hyper_serialize(const H5S_t *space, uint8_t **p)
+H5S__hyper_serialize(H5S_t *space, uint8_t **p)
 {
     const H5S_hyper_dim_t *diminfo;                 /* Alias for dataspace's diminfo information */
     hsize_t                tmp_count[H5S_MAX_RANK]; /* Temporary hyperslab counts */
@@ -5326,7 +5326,7 @@ done:
     Check if a hyperslab selection is "regular"
  USAGE
     htri_t H5S__hyper_is_regular(space)
-        const H5S_t *space;     IN: Dataspace pointer to check
+        H5S_t *space;     IN: Dataspace pointer to check
  RETURNS
     TRUE/FALSE/FAIL
  DESCRIPTION
@@ -5339,7 +5339,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__hyper_is_regular(const H5S_t *space)
+H5S__hyper_is_regular(H5S_t *space)
 {
     htri_t ret_value = FAIL; /* return value */
 
@@ -5352,7 +5352,7 @@ H5S__hyper_is_regular(const H5S_t *space)
      * to be impossible.
      */
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO)
-        H5S__hyper_rebuild((H5S_t *)space); /* Casting away const OK -NAF */
+        H5S__hyper_rebuild(space);
 
     /* Only simple check for regular hyperslabs for now... */
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES)
@@ -5576,8 +5576,8 @@ H5S__hyper_spans_shape_same(const H5S_hyper_span_info_t *span_info1, const H5S_h
     Check if a two hyperslab selections are the same shape
  USAGE
     htri_t H5S__hyper_shape_same(space1, space2)
-        const H5S_t *space1;     IN: First dataspace to check
-        const H5S_t *space2;     IN: Second dataspace to check
+        H5S_t *space1;           IN: First dataspace to check
+        H5S_t *space2;           IN: Second dataspace to check
  RETURNS
     TRUE / FALSE / FAIL
  DESCRIPTION
@@ -5594,7 +5594,7 @@ H5S__hyper_spans_shape_same(const H5S_hyper_span_info_t *span_info1, const H5S_h
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__hyper_shape_same(const H5S_t *space1, const H5S_t *space2)
+H5S__hyper_shape_same(H5S_t *space1, H5S_t *space2)
 {
     unsigned space1_rank;      /* Number of dimensions of first dataspace */
     unsigned space2_rank;      /* Number of dimensions of second dataspace */
@@ -5617,9 +5617,9 @@ H5S__hyper_shape_same(const H5S_t *space1, const H5S_t *space2)
     /* Rebuild diminfo if it is invalid and has not been confirmed to be
      * impossible */
     if (space1->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO)
-        H5S__hyper_rebuild((H5S_t *)space1); /* Casting away const OK -QAK */
+        H5S__hyper_rebuild(space1);
     if (space2->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO)
-        H5S__hyper_rebuild((H5S_t *)space2); /* Casting away const OK -QAK */
+        H5S__hyper_rebuild(space2);
 
     /* If both are regular hyperslabs, compare their diminfo values */
     if (space1->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES &&
@@ -5664,11 +5664,11 @@ H5S__hyper_shape_same(const H5S_t *space1, const H5S_t *space2)
 
         /* Make certain that both selections have span trees */
         if (NULL == space1->select.sel_info.hslab->span_lst)
-            if (H5S__hyper_generate_spans((H5S_t *)space1) < 0) /* Casting away const OK -QAK */
+            if (H5S__hyper_generate_spans(space1) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
                             "can't construct span tree for hyperslab selection")
         if (NULL == space2->select.sel_info.hslab->span_lst)
-            if (H5S__hyper_generate_spans((H5S_t *)space2) < 0) /* Casting away const OK -QAK */
+            if (H5S__hyper_generate_spans(space2) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
                             "can't construct span tree for hyperslab selection")
 
@@ -6255,7 +6255,7 @@ done:
     Detect intersections of selection with block
  USAGE
     htri_t H5S__hyper_intersect_block(space, start, end)
-        const H5S_t *space;     IN: Dataspace with selection to use
+        H5S_t *space;           IN: Dataspace with selection to use
         const hsize_t *start;   IN: Starting coordinate for block
         const hsize_t *end;     IN: Ending coordinate for block
  RETURNS
@@ -6270,7 +6270,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 static htri_t
-H5S__hyper_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end)
+H5S__hyper_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end)
 {
     htri_t ret_value = FAIL; /* Return value */
 
@@ -6286,7 +6286,7 @@ H5S__hyper_intersect_block(const H5S_t *space, const hsize_t *start, const hsize
      * to be impossible.
      */
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_NO)
-        H5S__hyper_rebuild((H5S_t *)space); /* Casting away const OK -QAK */
+        H5S__hyper_rebuild(space);
 
     /* Check for regular hyperslab intersection */
     if (space->select.sel_info.hslab->diminfo_valid == H5S_DIMINFO_VALID_YES) {
@@ -11592,8 +11592,8 @@ also that proj_space can share some span trees with dst_space, so proj_space mus
 if dst_space must be preserved. GLOBAL VARIABLES COMMENTS, BUGS, ASSUMPTIONS EXAMPLES REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
-                                const H5S_t *src_intersect_space, H5S_t *proj_space, hbool_t share_selection)
+H5S__hyper_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_intersect_space,
+                                H5S_t *proj_space, hbool_t share_selection)
 {
     H5S_hyper_project_intersect_ud_t udata; /* User data for subroutines */
     const H5S_hyper_span_info_t *    ss_span_info;
@@ -11622,7 +11622,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     if (H5S_GET_SELECT_TYPE(src_space) == H5S_SEL_HYPERSLABS) {
         /* Make certain the selection has a span tree */
         if (NULL == src_space->select.sel_info.hslab->span_lst)
-            if (H5S__hyper_generate_spans((H5S_t *)src_space) < 0) /* Casting away const OK -NAF */
+            if (H5S__hyper_generate_spans(src_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
                             "can't construct span tree for source hyperslab selection")
 
@@ -11644,7 +11644,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
     if (H5S_GET_SELECT_TYPE(dst_space) == H5S_SEL_HYPERSLABS) {
         /* Make certain the selection has a span tree */
         if (NULL == dst_space->select.sel_info.hslab->span_lst)
-            if (H5S__hyper_generate_spans((H5S_t *)dst_space) < 0) /* Casting away const OK -NAF */
+            if (H5S__hyper_generate_spans(dst_space) < 0)
                 HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
                             "can't construct span tree for dsetination hyperslab selection")
 
@@ -11664,7 +11664,7 @@ H5S__hyper_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
 
     /* Make certain the source intersect selection has a span tree */
     if (NULL == src_intersect_space->select.sel_info.hslab->span_lst)
-        if (H5S__hyper_generate_spans((H5S_t *)src_intersect_space) < 0) /* Casting away const OK -NAF */
+        if (H5S__hyper_generate_spans(src_intersect_space) < 0)
             HGOTO_ERROR(H5E_DATASPACE, H5E_UNINITIALIZED, FAIL,
                         "can't construct span tree for source intersect hyperslab selection")
 
@@ -12036,7 +12036,7 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space, hbo
     hsize_t num_slices;    /* Number of slices in unlimited dimension */
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check parameters */
     HDassert(clip_space);
@@ -12058,7 +12058,6 @@ H5S_hyper_get_clip_extent(const H5S_t *clip_space, const H5S_t *match_space, hbo
     /* Call "real" get_clip_extent function */
     ret_value = H5S__hyper_get_clip_extent_real(clip_space, num_slices, incl_trail);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent() */
 
@@ -12094,7 +12093,7 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_spac
     hsize_t num_slices; /* Number of slices in unlimited dimension */
     hsize_t ret_value = 0; /* Return value */
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check parameters */
     HDassert(clip_space);
@@ -12140,7 +12139,6 @@ H5S_hyper_get_clip_extent_match(const H5S_t *clip_space, const H5S_t *match_spac
     /* Call "real" get_clip_extent function */
     ret_value = H5S__hyper_get_clip_extent_real(clip_space, num_slices, incl_trail);
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_clip_extent_match() */
 
@@ -12256,7 +12254,7 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, hbool_t *pa
     H5S_hyper_dim_t *diminfo; /* Convenience pointer to diminfo in unlimited dimension */
     hsize_t          ret_value = 0;
 
-    FUNC_ENTER_NOAPI(0)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Check parameters */
     HDassert(space);
@@ -12286,7 +12284,6 @@ H5S_hyper_get_first_inc_block(const H5S_t *space, hsize_t clip_size, hbool_t *pa
         } /* end if */
     }     /* end else */
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5S_hyper_get_first_inc_block */
 

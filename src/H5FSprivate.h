@@ -186,9 +186,6 @@ H5FL_SEQ_EXTERN(H5FS_section_class_t);
 /* Library-private Function Prototypes */
 /***************************************/
 
-/* Package initialization routine */
-H5_DLL herr_t H5FS_init(void);
-
 /* Free space manager routines */
 H5_DLL H5FS_t *H5FS_create(H5F_t *f, haddr_t *fs_addr, const H5FS_create_t *fs_create, uint16_t nclasses,
                            const H5FS_section_class_t *classes[], void *cls_init_udata, hsize_t alignment,

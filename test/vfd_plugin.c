@@ -313,8 +313,53 @@ test_get_config_str(void)
     if (H5Pclose(fapl_id) < 0)
         TEST_ERROR;
 
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
+    H5E_END_TRY;
+
+    return FAIL;
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    test_env_var
+ *
+ * Purpose:     Tests loading of NULL VFD plugin with HDF5_DRIVER
+ *              environment variable and setting of VFD configuration
+ *              string with HDF5_DRIVER_CONFIG environment variable
+ *
+ * Return:      EXIT_SUCCESS/EXIT_FAILURE
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+test_env_var(void)
+{
+    const char *const config_str     = "{name: null}";
+    ssize_t           config_str_len = 0;
+    htri_t            driver_is_registered;
+    char              config_str_buf[128];
+
+    TESTING("Loading of VFD plugin with HDF5_DRIVER environment variable");
+
+    /* Try to retrieve length of default configuration string - should be 0 */
+    HDmemset(config_str_buf, 0, 128);
+
+    if ((config_str_len = H5Pget_driver_config_str(H5P_FILE_ACCESS_DEFAULT, config_str_buf, 128)) < 0)
+        TEST_ERROR;
+    if (0 != config_str_len)
+        TEST_ERROR;
+    if (HDstrlen(config_str_buf) > 0)
+        TEST_ERROR;
+
     /* Set default driver and driver configuration using environment variables */
-    if (HDsetenv(HDF5_DRIVER, "sec2", 1) < 0)
+    if (HDsetenv(HDF5_DRIVER, "null_vfd_plugin", 1) < 0)
         TEST_ERROR;
     if (HDsetenv(HDF5_DRIVER_CONFIG, config_str, 1) < 0)
         TEST_ERROR;
@@ -325,7 +370,15 @@ test_get_config_str(void)
     if (H5open() < 0)
         TEST_ERROR;
 
-    /* Retrieve configuration string from default FAPL */
+    /* Check driver */
+    if ((driver_is_registered = H5FDis_driver_registered_by_name("null_vfd_plugin")) < 0)
+        TEST_ERROR;
+    if (!driver_is_registered)
+        TEST_ERROR;
+    if (H5Pget_driver(H5P_FILE_ACCESS_DEFAULT) == H5_DEFAULT_VFD)
+        TEST_ERROR;
+
+    /* Check driver configuration string */
     HDmemset(config_str_buf, 0, 128);
     if ((config_str_len = H5Pget_driver_config_str(H5P_FILE_ACCESS_DEFAULT, config_str_buf, 128)) < 0)
         TEST_ERROR;
@@ -345,11 +398,8 @@ test_get_config_str(void)
     return SUCCEED;
 
 error:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(fapl_id);
-    }
-    H5E_END_TRY;
+    HDsetenv(HDF5_DRIVER, "", 1);
+    HDsetenv(HDF5_DRIVER_CONFIG, "", 1);
 
     return FAIL;
 }
@@ -376,6 +426,7 @@ main(void)
     nerrors += (test_set_by_value() < 0) ? 1 : 0;
     nerrors += (test_set_multi() < 0) ? 1 : 0;
     nerrors += (test_get_config_str() < 0) ? 1 : 0;
+    nerrors += (test_env_var() < 0) ? 1 : 0;
 
     if (nerrors) {
         HDprintf("***** %d VFD plugin TEST%s FAILED! *****\n", nerrors, nerrors > 1 ? "S" : "");

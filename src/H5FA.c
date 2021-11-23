@@ -64,9 +64,6 @@ static H5FA_t *H5FA__new(H5F_t *f, haddr_t fa_addr, hbool_t from_open, void *ctx
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Fixed array client ID to class mapping */
 
 /* Remember to add client ID to H5FA_cls_id_t in H5FAprivate.h when adding a new

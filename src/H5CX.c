@@ -428,9 +428,6 @@ static H5CX_node_t *H5CX__pop_common(hbool_t update_dxpl_props);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*******************/
 /* Local Variables */
 /*******************/
@@ -463,18 +460,17 @@ H5FL_DEFINE_STATIC(H5CX_node_t);
 /* Declare a static free list to manage H5CX_state_t structs */
 H5FL_DEFINE_STATIC(H5CX_state_t);
 
-/*--------------------------------------------------------------------------
-NAME
-    H5CX__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5CX__init_package()
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
---------------------------------------------------------------------------*/
+/*-------------------------------------------------------------------------
+ * Function:    H5CX_init
+ *
+ * Purpose:     Initialize the interface from some other layer.
+ *
+ * Return:      Success:        non-negative
+ *              Failure:        negative
+ *-------------------------------------------------------------------------
+ */
 herr_t
-H5CX__init_package(void)
+H5CX_init(void)
 {
     H5P_genplist_t *dx_plist;            /* Data transfer property list */
     H5P_genplist_t *lc_plist;            /* Link creation property list */
@@ -484,7 +480,7 @@ H5CX__init_package(void)
     H5P_genplist_t *fa_plist;            /* File access property list */
     herr_t          ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_STATIC
+    FUNC_ENTER_NOAPI(FAIL)
 
     /* Reset the "default DXPL cache" information */
     HDmemset(&H5CX_def_dxpl_cache, 0, sizeof(H5CX_dxpl_cache_t));
@@ -649,10 +645,9 @@ H5CX__init_package(void)
 
     if (H5P_get(fa_plist, H5F_ACS_LIBVER_HIGH_BOUND_NAME, &H5CX_def_fapl_cache.high_bound) < 0)
         HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "Can't retrieve dataset minimize flag")
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5CX__init_package() */
+}
 
 /*-------------------------------------------------------------------------
  * Function: H5CX_term_package
@@ -673,23 +668,19 @@ H5CX_term_package(void)
 {
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        H5CX_node_t *cnode; /* Context node */
+    H5CX_node_t *cnode; /* Context node */
 
-        /* Pop the top context node from the stack */
-        /* (Can't check for errors, as rest of library is shut down) */
-        cnode = H5CX__pop_common(FALSE);
+    /* Pop the top context node from the stack */
+    /* (Can't check for errors, as rest of library is shut down) */
+    cnode = H5CX__pop_common(FALSE);
 
-        /* Free the context node */
-        /* (Allocated with HDmalloc() in H5CX_push_special() ) */
-        HDfree(cnode);
+    /* Free the context node */
+    /* (Allocated with HDmalloc() in H5CX_push_special() ) */
+    HDfree(cnode);
 
 #ifndef H5_HAVE_THREADSAFE
-        H5CX_head_g = NULL;
+    H5CX_head_g = NULL;
 #endif /* H5_HAVE_THREADSAFE */
-
-        H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
 
     FUNC_LEAVE_NOAPI(0)
 } /* end H5CX_term_package() */
@@ -1227,7 +1218,7 @@ H5CX_set_libver_bounds(H5F_t *f)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -1241,7 +1232,6 @@ H5CX_set_libver_bounds(H5F_t *f)
     (*head)->ctx.low_bound_valid  = TRUE;
     (*head)->ctx.high_bound_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_libver_bounds() */
 
@@ -1509,7 +1499,7 @@ H5CX_set_vol_wrap_ctx(void *vol_wrap_ctx)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -1521,7 +1511,6 @@ H5CX_set_vol_wrap_ctx(void *vol_wrap_ctx)
     /* Mark the value as valid */
     (*head)->ctx.vol_wrap_ctx_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_vol_wrap_ctx() */
 
@@ -1543,7 +1532,7 @@ H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -1555,7 +1544,6 @@ H5CX_set_vol_connector_prop(const H5VL_connector_prop_t *vol_connector_prop)
     /* Mark the value as valid */
     (*head)->ctx.vol_connector_prop_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_vol_connector_prop() */
 
@@ -1637,7 +1625,7 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(vol_wrap_ctx);
@@ -1651,7 +1639,6 @@ H5CX_get_vol_wrap_ctx(void **vol_wrap_ctx)
     else
         *vol_wrap_ctx = NULL;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_wrap_ctx() */
 
@@ -1673,7 +1660,7 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(vol_connector_prop);
@@ -1687,7 +1674,6 @@ H5CX_get_vol_connector_prop(H5VL_connector_prop_t *vol_connector_prop)
     else
         HDmemset(vol_connector_prop, 0, sizeof(H5VL_connector_prop_t));
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_vol_connector_prop() */
 
@@ -3135,7 +3121,7 @@ H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -3150,7 +3136,6 @@ H5CX_set_vlen_alloc_info(H5MM_allocate_t alloc_func, void *alloc_info, H5MM_free
     /* Mark the value as valid */
     (*head)->ctx.vl_alloc_info_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_vlen_alloc_info() */
 
@@ -3172,7 +3157,7 @@ H5CX_set_nlinks(size_t nlinks)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -3184,7 +3169,6 @@ H5CX_set_nlinks(size_t nlinks)
     /* Mark the value as valid */
     (*head)->ctx.nlinks_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_nlinks() */
 

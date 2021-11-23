@@ -1412,7 +1412,7 @@ detect_C99_floats(void)
      */
     DETECT_F(double, LDOUBLE, d_g[nd_g]);
     nd_g++;
-#elif H5_SIZEOF_LONG_DOUBLE != 0
+#else
     DETECT_F(long double, LDOUBLE, d_g[nd_g]);
     nd_g++;
 #endif

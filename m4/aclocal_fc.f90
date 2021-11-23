@@ -82,14 +82,13 @@ END PROGRAM PROG_FC_C_LONG_DOUBLE_EQ_C_DOUBLE
 
 !---- START ----- Determine the available KINDs for REALs and INTEGERs
 PROGRAM FC_AVAIL_KINDS
+      USE, INTRINSIC :: ISO_FORTRAN_ENV, ONLY : stderr=>ERROR_UNIT
       IMPLICIT NONE
       INTEGER :: ik, jk, k, kk, max_decimal_prec
       INTEGER :: prev_rkind, num_rkinds = 1, num_ikinds = 1
       INTEGER, DIMENSION(1:10) :: list_ikinds = -1
       INTEGER, DIMENSION(1:10) :: list_rkinds = -1
       LOGICAL :: new_kind
-
-      OPEN(8, FILE='pac_fconftest.out', FORM='formatted')
 
       ! Find integer KINDs
       list_ikinds(num_ikinds)=SELECTED_INT_KIND(1)
@@ -103,11 +102,11 @@ PROGRAM FC_AVAIL_KINDS
       ENDDO
 
       DO k = 1, num_ikinds
-         WRITE(8,'(I0)', ADVANCE='NO') list_ikinds(k)
+         WRITE(stderr,'(I0)', ADVANCE='NO') list_ikinds(k)
          IF(k.NE.num_ikinds)THEN
-            WRITE(8,'(A)',ADVANCE='NO') ','
+            WRITE(stderr,'(A)',ADVANCE='NO') ','
          ELSE
-            WRITE(8,'()')
+            WRITE(stderr,'()')
          ENDIF
       ENDDO
 
@@ -140,17 +139,17 @@ PROGRAM FC_AVAIL_KINDS
       ENDDO prec
 
       DO k = 1, num_rkinds
-         WRITE(8,'(I0)', ADVANCE='NO') list_rkinds(k)
+         WRITE(stderr,'(I0)', ADVANCE='NO') list_rkinds(k)
          IF(k.NE.num_rkinds)THEN
-            WRITE(8,'(A)',ADVANCE='NO') ','
+            WRITE(stderr,'(A)',ADVANCE='NO') ','
          ELSE
-            WRITE(8,'()')
+            WRITE(stderr,'()')
          ENDIF
       ENDDO
 
-     WRITE(8,'(I0)') max_decimal_prec
-     WRITE(8,'(I0)') num_ikinds
-     WRITE(8,'(I0)') num_rkinds
+     WRITE(stderr,'(I0)') max_decimal_prec
+     WRITE(stderr,'(I0)') num_ikinds
+     WRITE(stderr,'(I0)') num_rkinds
 END PROGRAM FC_AVAIL_KINDS
 !---- END ----- Determine the available KINDs for REALs and INTEGERs
 

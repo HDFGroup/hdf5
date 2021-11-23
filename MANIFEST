@@ -208,6 +208,7 @@
 ./doc/branches-explained.md
 ./doc/code-conventions.md
 ./doc/contributing.md
+./doc/library-init-shutdown.md
 ./doxygen/aliases
 ./doxygen/CMakeLists.txt
 ./doxygen/Doxyfile.in
@@ -216,11 +217,10 @@
 ./doxygen/dox/Cookbook.dox
 ./doxygen/dox/DDLBNF110.dox
 ./doxygen/dox/DDLBNF112.dox
-./doxygen/dox/FileFormatSpec.dox
+./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
-./doxygen/dox/OtherSpecs.dox
 ./doxygen/dox/Overview.dox
 ./doxygen/dox/ReferenceManual.dox
 ./doxygen/dox/RFC.dox
@@ -236,9 +236,12 @@
 ./doxygen/dox/cookbook/Files.c
 ./doxygen/dox/cookbook/Files.dox
 ./doxygen/dox/cookbook/Performance.dox
+./doxygen/examples/DebuggingHDF5Applications.html
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
+./doxygen/examples/FileFormat.html
 ./doxygen/examples/FileFormatSpecChunkDiagram.jpg
+./doxygen/examples/Filters.html
 ./doxygen/examples/H5Pset_metadata_read_attempts.c
 ./doxygen/examples/H5Pset_object_flush_cb.c
 ./doxygen/examples/H5.format.1.0.html
@@ -267,6 +270,7 @@
 ./doxygen/examples/H5Z_examples.c
 ./doxygen/examples/H5_examples.c
 ./doxygen/examples/ImageSpec.html
+./doxygen/examples/IOFlow.html
 ./doxygen/examples/PaletteExample1.gif
 ./doxygen/examples/Palettes.fm.anc.gif
 ./doxygen/examples/TableSpec.html
@@ -282,6 +286,9 @@
 ./doxygen/img/FF-IH_FileObject.gif
 ./doxygen/img/FileFormatSpecChunkDiagram.jpg
 ./doxygen/img/HDFG-logo.png
+./doxygen/img/IOFlow.gif
+./doxygen/img/IOFlow2.gif
+./doxygen/img/IOFlow3.gif
 ./doxygen/img/PaletteExample1.gif
 ./doxygen/img/Palettes.fm.anc.gif
 ./doxygen/img/ftv2node.png
@@ -808,6 +815,7 @@
 ./src/H5FDmpio.h
 ./src/H5FDmulti.c
 ./src/H5FDmulti.h
+./src/H5FDperform.c
 ./src/H5FDros3.c
 ./src/H5FDros3.h
 ./src/H5FDpkg.h
@@ -3292,6 +3300,7 @@
 ./java/src/hdf/hdf5lib/callbacks/H5P_prp_set_func_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_cb.java
 ./java/src/hdf/hdf5lib/callbacks/H5P_iterate_t.java
+./java/src/hdf/hdf5lib/callbacks/package-info.java
 
 ./java/src/hdf/hdf5lib/exceptions/HDF5AttributeException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5BtreeException.java
@@ -3317,6 +3326,7 @@
 ./java/src/hdf/hdf5lib/exceptions/HDF5ReferenceException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5ResourceUnavailableException.java
 ./java/src/hdf/hdf5lib/exceptions/HDF5SymbolTableException.java
+./java/src/hdf/hdf5lib/exceptions/package-info.java
 
 ./java/src/hdf/hdf5lib/structs/H5_ih_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5A_info_t.java
@@ -3331,12 +3341,14 @@
 ./java/src/hdf/hdf5lib/structs/H5O_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_native_info_t.java
 ./java/src/hdf/hdf5lib/structs/H5O_token_t.java
+./java/src/hdf/hdf5lib/structs/package-info.java
 
 ./java/src/hdf/hdf5lib/H5.java
 ./java/src/hdf/hdf5lib/HDF5Constants.java
 ./java/src/hdf/hdf5lib/HDF5GroupInfo.java
 ./java/src/hdf/hdf5lib/HDFArray.java
 ./java/src/hdf/hdf5lib/HDFNativeData.java
+./java/src/hdf/hdf5lib/package-info.java
 
 ./java/examples/Makefile.am
 ./java/examples/CMakeLists.txt

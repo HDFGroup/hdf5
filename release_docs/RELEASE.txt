@@ -1039,6 +1039,13 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed an issue with collective metadata reads being permanently disabled
+      after a dataset chunk lookup operation. This would usually cause a
+      mismatched MPI_Bcast and MPI_ERR_TRUNCATE issue in the library for
+      simple cases of H5Dcreate() -> H5Dwrite() -> H5Dcreate().
+
+      (JTH - 2021/11/08, HDFFV-11090)
+
     - Fixed cross platform incompatibility of references within variable length
       types
 

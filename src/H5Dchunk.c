@@ -258,14 +258,13 @@ typedef struct H5D_chunk_iter_ud_t {
 static herr_t H5D__chunk_construct(H5F_t *f, H5D_t *dset);
 static herr_t H5D__chunk_init(H5F_t *f, const H5D_t *dset, hid_t dapl_id);
 static herr_t H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                 hsize_t nelmts, const H5S_t *file_space, const H5S_t *mem_space,
-                                 H5D_chunk_map_t *fm);
+                                 hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_io_init_selections(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                             H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                              const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                              H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                               const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm);
+                               H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_flush(H5D_t *dset);
 static herr_t H5D__chunk_io_term(const H5D_chunk_map_t *fm);
 static herr_t H5D__chunk_dest(H5D_t *dset);
@@ -329,13 +328,24 @@ static int H5D__chunk_dump_index_cb(const H5D_chunk_rec_t *chunk_rec, void *_uda
 /*********************/
 
 /* Chunked storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {
-    {H5D__chunk_construct, H5D__chunk_init, H5D__chunk_is_space_alloc, H5D__chunk_is_data_cached,
-     H5D__chunk_io_init, H5D__chunk_read, H5D__chunk_write,
+const H5D_layout_ops_t H5D_LOPS_CHUNK[1] = {{
+    H5D__chunk_construct,      /* construct */
+    H5D__chunk_init,           /* init */
+    H5D__chunk_is_space_alloc, /* is_space_alloc */
+    H5D__chunk_is_data_cached, /* is_data_cached */
+    H5D__chunk_io_init,        /* io_init */
+    H5D__chunk_read,           /* ser_read */
+    H5D__chunk_write,          /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-     H5D__chunk_collective_read, H5D__chunk_collective_write,
-#endif /* H5_HAVE_PARALLEL */
-     NULL, NULL, H5D__chunk_flush, H5D__chunk_io_term, H5D__chunk_dest}};
+    H5D__chunk_collective_read,  /* par_read */
+    H5D__chunk_collective_write, /* par_write */
+#endif
+    NULL,               /* readvv */
+    NULL,               /* writevv */
+    H5D__chunk_flush,   /* flush */
+    H5D__chunk_io_term, /* io_term */
+    H5D__chunk_dest     /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -1057,7 +1067,7 @@ H5D__chunk_is_data_cached(const H5D_shared_t *shared_dset)
  */
 static herr_t
 H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                   const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t *fm)
+                   H5S_t *file_space, H5S_t *mem_space, H5D_chunk_map_t *fm)
 {
     const H5D_t *dataset = io_info->dset;       /* Local pointer to dataset info */
     hssize_t     old_offset[H5O_LAYOUT_NDIMS];  /* Old selection offset */
@@ -1088,7 +1098,7 @@ H5D__chunk_io_init(const H5D_io_info_t *io_info, const H5D_type_info_t *type_inf
      * speed up hyperslab calculations by removing the extra checks and/or
      * additions involving the offset and the hyperslab selection -QAK)
      */
-    if ((file_space_normalized = H5S_hyper_normalize_offset((H5S_t *)file_space, old_offset)) < 0)
+    if ((file_space_normalized = H5S_hyper_normalize_offset(file_space, old_offset)) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTSET, FAIL, "unable to normalize selection")
 
     /* Decide the number of chunks in each dimension */
@@ -1399,6 +1409,19 @@ H5D__chunk_mem_xfree(void *chk, const void *_pline)
 
     FUNC_LEAVE_NOAPI(NULL)
 } /* H5D__chunk_mem_xfree() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__chunk_mem_free
+ *
+ * Purpose:    Wrapper with H5MM_free_t-compatible signature that just
+ *             calls H5D__chunk_mem_xfree and discards the return value.
+ *-------------------------------------------------------------------------
+ */
+static void
+H5D__chunk_mem_free(void *chk, const void *_pline)
+{
+    (void)H5D__chunk_mem_xfree(chk, _pline);
+}
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__chunk_mem_realloc
@@ -2451,8 +2474,7 @@ done:
  */
 static herr_t
 H5D__chunk_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t H5_ATTR_UNUSED nelmts,
-                const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
-                H5D_chunk_map_t *fm)
+                H5S_t H5_ATTR_UNUSED *file_space, H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t *fm)
 {
     H5SL_node_t * chunk_node;                    /* Current node in chunk skip list */
     H5D_io_info_t nonexistent_io_info;           /* "nonexistent" I/O info object */
@@ -2602,8 +2624,7 @@ done:
  */
 static herr_t
 H5D__chunk_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t H5_ATTR_UNUSED nelmts,
-                 const H5S_t H5_ATTR_UNUSED *file_space, const H5S_t H5_ATTR_UNUSED *mem_space,
-                 H5D_chunk_map_t *fm)
+                 H5S_t H5_ATTR_UNUSED *file_space, H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t *fm)
 {
     H5SL_node_t * chunk_node;                   /* Current node in chunk skip list */
     H5D_io_info_t ctg_io_info;                  /* Contiguous I/O info object */
@@ -3153,11 +3174,14 @@ H5D__chunk_hash_val(const H5D_shared_t *shared, const hsize_t *scaled)
 herr_t
 H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udata)
 {
-    H5D_rdcc_ent_t *     ent       = NULL; /* Cache entry */
-    H5O_storage_chunk_t *sc        = &(dset->shared->layout.storage.u.chunk);
-    unsigned             idx       = 0;       /* Index of chunk in cache, if present */
-    hbool_t              found     = FALSE;   /* In cache? */
-    herr_t               ret_value = SUCCEED; /* Return value */
+    H5D_rdcc_ent_t *     ent   = NULL; /* Cache entry */
+    H5O_storage_chunk_t *sc    = &(dset->shared->layout.storage.u.chunk);
+    unsigned             idx   = 0;     /* Index of chunk in cache, if present */
+    hbool_t              found = FALSE; /* In cache? */
+#ifdef H5_HAVE_PARALLEL
+    hbool_t reenable_coll_md_reads = FALSE;
+#endif
+    herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 
@@ -3228,8 +3252,13 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
              * highly unlikely that users would read the same chunks from all
              * processes.
              */
-            if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI))
-                H5CX_set_coll_metadata_read(FALSE);
+            if (H5F_HAS_FEATURE(idx_info.f, H5FD_FEAT_HAS_MPI)) {
+                hbool_t do_coll_md_reads = H5CX_get_coll_metadata_read();
+                if (do_coll_md_reads) {
+                    H5CX_set_coll_metadata_read(FALSE);
+                    reenable_coll_md_reads = TRUE;
+                }
+            }
 #endif /* H5_HAVE_PARALLEL */
 
             /* Go get the chunk information */
@@ -3272,6 +3301,12 @@ H5D__chunk_lookup(const H5D_t *dset, const hsize_t *scaled, H5D_chunk_ud_t *udat
     }     /* end else */
 
 done:
+#ifdef H5_HAVE_PARALLEL
+    /* Re-enable collective metadata reads if we disabled them */
+    if (reenable_coll_md_reads)
+        H5CX_set_coll_metadata_read(TRUE);
+#endif /* H5_HAVE_PARALLEL */
+
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5D__chunk_lookup() */
 
@@ -4387,7 +4422,7 @@ H5D__chunk_allocate(const H5D_io_info_t *io_info, hbool_t full_overwrite, const 
         /* (delay allocating fill buffer for VL datatypes until refilling) */
         /* (casting away const OK - QAK) */
         if (H5D__fill_init(&fb_info, NULL, (H5MM_allocate_t)H5D__chunk_mem_alloc, (void *)pline,
-                           (H5MM_free_t)H5D__chunk_mem_xfree, (void *)pline, &dset->shared->dcpl_cache.fill,
+                           (H5MM_free_t)H5D__chunk_mem_free, (void *)pline, &dset->shared->dcpl_cache.fill,
                            dset->shared->type, dset->shared->type_id, (size_t)0, orig_chunk_size) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "can't initialize fill buffer info")
         fb_info_init = TRUE;
