@@ -84,9 +84,6 @@ TESTING() {
    echo "Testing $* $SPACES" | cut -c1-70 | tr -d '\012'
 }
 
-# Source in the output filter function definitions.
-. $ROOTDIR/bin/output_filter.sh
-
 # Run a test and print PASS or *FAIL*.  If a test fails then increment
 # the `nerrors' global variable and (if $verbose is set) display the
 # difference between the actual output and the expected output. The
@@ -113,9 +110,7 @@ TOOLTEST() {
 
    # save actual and actual_err in case they are needed later.
    cp $actual $actual_sav
-   STDOUT_FILTER $actual
    cp $actual_err $actual_err_sav
-   STDERR_FILTER $actual_err
 
    if [ ! -f $expect ]; then
       # Compare error files if the expect file doesn't exist.

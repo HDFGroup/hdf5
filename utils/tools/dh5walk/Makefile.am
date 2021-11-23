@@ -18,7 +18,7 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src directory
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib $(DH5WALK_CPPFLAGS)
 
 # These are our main targets, the tools
 # dh5walk_SOURCES=dh5walk.c $(TOOLSOURCES)
@@ -32,6 +32,6 @@ dh5walk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS) $(DH5WALK_LDFLAGS)
 CLEANFILES=
 
 # All programs rely on hdf5 library and h5tools library
-dh5walk_LDADD=$(LIBH5TOOLS) $(LIBHDF5) -lmfu
+dh5walk_LDADD=$(LIBH5TOOLS) $(LIBHDF5) $(DH5WALK_LIBS)
 
 include $(top_srcdir)/config/conclude.am

@@ -10,7 +10,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-srcdir=.
+srcdir=@srcdir@
 TOP_BUILDDIR=..
 
 # Determine if backward compatibility options enabled
@@ -22,10 +22,7 @@ EXIT_FAILURE=1
 CP='cp'
 
 THIS_DIR=`pwd`
-cd "../../../../tools"
-TOOLS_DIR=`pwd`
-
-cd "$THIS_DIR"
+SRC_TOOLS_DIR=$srcdir/../../../../tools
 
 nerrors=0
 verbose=yes
@@ -83,7 +80,7 @@ For more information see https://mpifileutils.readthedocs.io.
 " > "$THIS_DIR"/testfiles/help-1.txt
 
 # Make a copy of the help-1.txt output file for --help validation
-$CP "$THIS_DIR"/help.dh5walk "$THIS_DIR"/testfiles/help-1.txt
-$CP "$THIS_DIR"/help.dh5walk "$THIS_DIR"/testfiles/help-2.txt
+$CP "$srcdir"/help.dh5walk "$THIS_DIR"/testfiles/help-1.txt
+$CP "$srcdir"/help.dh5walk "$THIS_DIR"/testfiles/help-2.txt
 # Make a copy of a simple HDF5 datafile which will be used as input for h5dump -n (see the expected output above)
-$CP "$TOOLS_DIR"/test/h5diff/testfiles/h5diff_basic1.h5 "$THIS_DIR"/testfiles
+$CP "$SRC_TOOLS_DIR"/test/h5diff/testfiles/h5diff_basic1.h5 "$THIS_DIR"/testfiles
