@@ -54,7 +54,7 @@
 
     <p>Two types of filters can be applied to raw data I/O: permanent
       filters and transient filters.  The permanent filter pipeline is
-      defned when the dataset is created while the transient pipeline
+      defined when the dataset is created while the transient pipeline
       is defined for each I/O operation.  During an
       <code>H5Dwrite()</code> the transient filters are applied first
       in the order defined and then the permanent filters are applied
@@ -211,7 +211,7 @@
       should be turned on so such cases can be handled gracefully by
       storing the original data instead of the compressed data.  The
       <em>cd_nvalues</em> should be one with <em>cd_value[0]</em>
-      being a compression agression level between zero and nine,
+      being a compression aggression level between zero and nine,
       inclusive (zero is the fastest compression while nine results in
       the best compression ratio).
 
@@ -252,7 +252,7 @@
 
     </p><p>The function that acts as the filter always returns zero
       (failure) if the <code>md5()</code> function was not detected at
-      configuration time (left as an excercise for the reader).
+      configuration time (left as an exercise for the reader).
       Otherwise the function is broken down to an input and output
       half.  The output half calculates a checksum, increases the size
       of the output buffer if necessary, and appends the checksum to
@@ -374,7 +374,7 @@
 	      <tr valign="top">
 	        <td>Method</td>
 	        <td>This is the name of the method as defined with
-	          <code>H5Zregister()</code> with the charaters
+	          <code>H5Zregister()</code> with the characters
 	          "&lt; or "&gt;" prepended to indicate
 	          input or output.</td>
 	      </tr>
