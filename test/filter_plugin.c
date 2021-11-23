@@ -1358,7 +1358,7 @@ test_filter_numbers(void)
     if (status != FAIL)
         TEST_ERROR;
 
-    /* Test id > H5Z_FILTER_MAX and < 0, deprecated version */
+        /* Test id > H5Z_FILTER_MAX and < 0, deprecated version */
 
 #ifndef H5_NO_DEPRECATED_SYMBOLS
     H5E_BEGIN_TRY
