@@ -2444,6 +2444,7 @@ main(int argc, char **argv)
     np_state_t np;
     size_t     i;
 
+
     if (!state_init(&s, argc, argv)) {
         HDfprintf(stderr, "state_init failed\n");
         TEST_ERROR;
