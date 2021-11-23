@@ -191,7 +191,6 @@ H5VL_init_phase2(void)
     ,   {H5CX_init, "context"}
     ,   {H5ES_init, "event set"}
     ,   {H5Z_init, "transform"}
-    ,   {H5PL_init, "plugin"}
     ,   {H5R_init, "reference"}
     };
 
