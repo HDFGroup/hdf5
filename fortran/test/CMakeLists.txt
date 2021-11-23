@@ -91,27 +91,27 @@ if (HDF5_ENABLE_FORMATTERS)
 endif ()
 
 if (NOT BUILD_SHARED_LIBS)
-  add_custom_command (
-      OUTPUT ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
+  add_custom_command (TARGET H5_test_buildiface POST_BUILD
+      BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static
       DEPENDS H5_test_buildiface
-      COMMENT "Generating the tf_gen.F90 file"
+      COMMENT "Generating the tf_gen.F90 static file"
   )
   add_custom_target (H5testgen ALL
-      DEPENDS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
+      DEPENDS H5_test_buildiface ${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90
   )
   set_source_files_properties (${HDF5_FORTRAN_TESTS_BINARY_DIR}/static/tf_gen.F90 PROPERTIES GENERATED TRUE)
 else ()
-  add_custom_command (
-      OUTPUT ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
+  add_custom_command (TARGET H5_test_buildiface POST_BUILD
+      BYPRODUCTS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
       COMMAND ${CMAKE_CROSSCOMPILING_EMULATOR} $<TARGET_FILE:H5_test_buildiface>
       WORKING_DIRECTORY ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared
       DEPENDS H5_test_buildiface
       COMMENT "Generating the tf_gen.F90 shared file"
   )
   add_custom_target (H5testgenSH ALL
-      DEPENDS ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
+      DEPENDS H5_test_buildiface ${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90
   )
   set_source_files_properties (${HDF5_FORTRAN_TESTS_BINARY_DIR}/shared/tf_gen.F90 PROPERTIES GENERATED TRUE)
 endif ()

@@ -106,7 +106,7 @@
  */
 #define JSFAILED_AT()                                                                                        \
     {                                                                                                        \
-        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, FUNC);                                \
+        HDprintf("*FAILED* at %s:%d in %s()...\n", __FILE__, __LINE__, __func__);                            \
     }
 
 /*----------------------------------------------------------------------------
@@ -625,7 +625,10 @@ error:
      ***********/
 
     if (fapl_id < 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     return 1;
@@ -699,7 +702,10 @@ test_ros3_fapl(void)
     return 0;
 
 error:
-    H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        (void)H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     return 1;
@@ -867,7 +873,10 @@ test_vfd_open(void)
         else if (T.which_fapl == FAPL_ROS3_ANON)
             _fapl_id = fapl_id;
 
-        H5E_BEGIN_TRY { fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr); }
+        H5E_BEGIN_TRY
+        {
+            fd = H5FDopen(T.url, T.flags, _fapl_id, T.maxaddr);
+        }
         H5E_END_TRY;
         if (NULL != fd)
             JSVERIFY(1, 0, T.message); /* wrapper to print message and fail */
@@ -908,11 +917,17 @@ error:
         (void)H5FDclose(fd);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (fapl_file_access >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_file_access); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_file_access);
+        }
         H5E_END_TRY;
     }
     if (curl_ready == TRUE) {
@@ -1043,7 +1058,10 @@ error:
     if (TRUE == curl_ready)
         curl_global_cleanup();
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1138,7 +1156,10 @@ error:
         (void)H5FDclose(file_shakespeare);
     }
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1338,7 +1359,10 @@ error:
     if (file_raven)
         (void)H5FDclose(file_raven);
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1448,7 +1472,10 @@ error:
      ***********/
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file) {
@@ -1579,7 +1606,10 @@ error:
     if (TRUE == curl_ready)
         curl_global_cleanup();
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
 
@@ -1685,7 +1715,10 @@ error:
     HDfflush(stdout);
 
     if (fapl_id >= 0) {
-        H5E_BEGIN_TRY { (void)H5Pclose(fapl_id); }
+        H5E_BEGIN_TRY
+        {
+            (void)H5Pclose(fapl_id);
+        }
         H5E_END_TRY;
     }
     if (file > 0)

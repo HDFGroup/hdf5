@@ -129,7 +129,7 @@ H5E__get_msg(const H5E_msg_t *msg, H5E_type_t *type, char *msg_str, size_t size)
 
     /* Copy the message into the user's buffer, if given */
     if (msg_str) {
-        HDstrncpy(msg_str, msg->msg, MIN((size_t)(len + 1), size));
+        HDstrncpy(msg_str, msg->msg, size);
         if ((size_t)len >= size)
             msg_str[size - 1] = '\0';
     } /* end if */
@@ -218,7 +218,7 @@ H5E__walk1_cb(int n, H5E_error1_t *err_desc, void *client_data)
     cls_ptr = maj_ptr->cls;
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
+    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -346,7 +346,7 @@ H5E__walk2_cb(unsigned n, const H5E_error2_t *err_desc, void *client_data)
         HGOTO_DONE(FAIL)
 
     /* Print error class header if new class */
-    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name)) {
+    if (eprint->cls.lib_name == NULL || HDstrcmp(cls_ptr->lib_name, eprint->cls.lib_name) != 0) {
         /* update to the new class information */
         if (cls_ptr->cls_name)
             eprint->cls.cls_name = cls_ptr->cls_name;
@@ -772,11 +772,12 @@ H5E__push_stack(H5E_t *estack, const char *file, const char *func, unsigned line
         if (H5I_inc_ref(min_id, FALSE) < 0)
             HGOTO_DONE(FAIL)
         estack->slot[estack->nused].min_num = min_id;
-        if (NULL == (estack->slot[estack->nused].func_name = H5MM_xstrdup(func)))
-            HGOTO_DONE(FAIL)
-        if (NULL == (estack->slot[estack->nused].file_name = H5MM_xstrdup(file)))
-            HGOTO_DONE(FAIL)
-        estack->slot[estack->nused].line = line;
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * there's no need to duplicate them.
+         */
+        estack->slot[estack->nused].func_name = func;
+        estack->slot[estack->nused].file_name = file;
+        estack->slot[estack->nused].line      = line;
         if (NULL == (estack->slot[estack->nused].desc = H5MM_xstrdup(desc)))
             HGOTO_DONE(FAIL)
         estack->nused++;
@@ -826,10 +827,11 @@ H5E__clear_entries(H5E_t *estack, size_t nentries)
             HGOTO_ERROR(H5E_ERROR, H5E_CANTDEC, FAIL, "unable to decrement ref count on error class")
 
         /* Release strings */
-        if (error->func_name)
-            error->func_name = (const char *)H5MM_xfree_const(error->func_name);
-        if (error->file_name)
-            error->file_name = (const char *)H5MM_xfree_const(error->file_name);
+        /* The 'func' & 'file' strings are statically allocated (by the compiler)
+         * and are not allocated, so there's no need to free them.
+         */
+        error->func_name = NULL;
+        error->file_name = NULL;
         if (error->desc)
             error->desc = (const char *)H5MM_xfree_const(error->desc);
     }

@@ -37,7 +37,7 @@
  * local functions
  *-------------------------------------------------------------------------
  */
-static int  get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[], size_t size_datum,
+static int  get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum,
                           hsize_t dims_hslab[], hsize_t *hslab_nbytes_p);
 static void print_dataset_info(hid_t dcpl_id, char *objname, double per, int pr);
 static int  do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *options);
@@ -81,8 +81,8 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
      * open input file
      *-------------------------------------------------------------------------
      */
-    if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl,
-                               (options->fin_fapl == H5P_DEFAULT) ? FALSE : TRUE, NULL, (size_t)0)) < 0)
+    if ((fidin = h5tools_fopen(fnamein, H5F_ACC_RDONLY, options->fin_fapl, (options->fin_fapl != H5P_DEFAULT),
+                               NULL, (size_t)0)) < 0)
         H5TOOLS_GOTO_ERROR((-1), "h5tools_fopen failed <%s>: %s", fnamein, H5FOPENERROR);
 
     /* get user block size and file space strategy/persist/threshold */
@@ -305,14 +305,6 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
         H5TOOLS_GOTO_ERROR((-1), "H5Fcreate could not create file <%s>:", fnameout);
 
     /*-------------------------------------------------------------------------
-     * write a new user block if requested
-     *-------------------------------------------------------------------------
-     */
-    if (options->ublock_size > 0)
-        if (copy_user_block(options->ublock_filename, fnameout, options->ublock_size) < 0)
-            H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
-
-    /*-------------------------------------------------------------------------
      * get list of objects
      *-------------------------------------------------------------------------
      */
@@ -346,27 +338,60 @@ copy_objects(const char *fnamein, const char *fnameout, pack_opt_t *options)
     }
 
     /*-------------------------------------------------------------------------
-     * write only the input file user block if there is no user block file input
+     * Close the file and everything in it so the lock is removed
+     *-------------------------------------------------------------------------
+     */
+    if (H5Pclose(fcpl) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    if (H5Pclose(options->fout_fapl) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    options->fout_fapl = H5P_DEFAULT;
+    if (H5Pclose(gcpl_in) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    if (H5Gclose(grp_in) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    if (H5Fclose(fidout) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+    if (H5Fclose(fidin) < 0)
+        H5TOOLS_GOTO_ERROR((-1), "could not close fcpl");
+
+    /*-------------------------------------------------------------------------
+     * NOTE: The userblock MUST be written out AFTER the file is closed or
+     * the file locking will cause failures on Windows, where file locks
+     * are mandatory, not advisory.
      *-------------------------------------------------------------------------
      */
 
-    if (ub_size > 0 && options->ublock_size == 0)
+    /*-------------------------------------------------------------------------
+     * Write a new user block if requested, using the input file user block if
+     * there is no separate user block file input
+     *-------------------------------------------------------------------------
+     */
+
+    if (options->ublock_size > 0) {
+        if (copy_user_block(options->ublock_filename, fnameout, options->ublock_size) < 0)
+            H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
+    }
+    else if (ub_size > 0 && options->ublock_size == 0) {
         if (copy_user_block(fnamein, fnameout, ub_size) < 0)
             H5TOOLS_GOTO_ERROR((-1), "Could not copy user block. Exiting...");
+    }
 
 done:
-    H5E_BEGIN_TRY
-    {
-        H5Pclose(fcpl);
-        H5Pclose(options->fout_fapl);
-        options->fout_fapl = H5P_DEFAULT;
-        H5Pclose(gcpl_in);
-        H5Gclose(grp_in);
-        H5Pclose(fcpl_in);
-        H5Fclose(fidout);
-        H5Fclose(fidin);
+    if (-1 == ret_value) {
+        H5E_BEGIN_TRY
+        {
+            H5Pclose(fcpl);
+            H5Pclose(options->fout_fapl);
+            options->fout_fapl = H5P_DEFAULT;
+            H5Pclose(gcpl_in);
+            H5Gclose(grp_in);
+            H5Pclose(fcpl_in);
+            H5Fclose(fidout);
+            H5Fclose(fidin);
+        }
+        H5E_END_TRY;
     }
-    H5E_END_TRY;
     if (travt)
         trav_table_free(travt);
 
@@ -406,8 +431,8 @@ done:
  *-----------------------------------------*/
 
 int
-get_hyperslab(hid_t dcpl_id, int rank_dset, hsize_t dims_dset[], size_t size_datum, hsize_t dims_hslab[],
-              hsize_t *hslab_nbytes_p)
+get_hyperslab(hid_t dcpl_id, int rank_dset, const hsize_t dims_dset[], size_t size_datum,
+              hsize_t dims_hslab[], hsize_t *hslab_nbytes_p)
 {
     int          k;
     H5D_layout_t dset_layout;
@@ -601,6 +626,7 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
     hid_t              wtype_id      = H5I_INVALID_HID; /* read/write type ID */
     hid_t              ocpl_id       = H5I_INVALID_HID; /* property to pass copy options */
     hid_t              lcpl_id       = H5I_INVALID_HID; /* link creation property list */
+    hid_t              dxpl_id       = H5I_INVALID_HID; /* dataset transfer property list */
     named_dt_t *       named_dt_head = NULL;            /* Pointer to the stack of named datatypes copied */
     size_t             msize;                           /* size of type */
     hsize_t            nelmts;                          /* number of elements in dataset */
@@ -970,12 +996,27 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                     if (need < H5TOOLS_MALLOCSIZE)
                                         buf = HDmalloc(need);
 
+                                    /* Set up collective write if using filters in parallel */
+                                    {
+#ifdef H5_HAVE_PARALLEL
+                                        hbool_t parallel = (H5FD_MPIO == H5Pget_driver(options->fout_fapl));
+
+                                        if (parallel && apply_s && apply_f) {
+                                            if ((dxpl_id = H5Pcreate(H5P_DATASET_XFER)) < 0)
+                                                H5TOOLS_GOTO_ERROR((-1), "H5Pcreate failed");
+                                            if (H5Pset_dxpl_mpio(dxpl_id, H5FD_MPIO_COLLECTIVE) < 0)
+                                                H5TOOLS_GOTO_ERROR((-1), "H5Pset_dxpl_mpio failed");
+                                        }
+                                        else
+#endif
+                                            dxpl_id = H5P_DEFAULT;
+                                    }
+
                                     if (buf != NULL) {
                                         if (H5Dread(dset_in, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) <
                                             0)
                                             H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
-                                        if (H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, H5P_DEFAULT, buf) <
-                                            0)
+                                        if (H5Dwrite(dset_out, wtype_id, H5S_ALL, H5S_ALL, dxpl_id, buf) < 0)
                                             H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                                         /* Check if we have VL data in the dataset's
@@ -1077,8 +1118,8 @@ do_copy_objects(hid_t fidin, hid_t fidout, trav_table_t *travt, pack_opt_t *opti
                                             if (H5Dread(dset_in, wtype_id, hslab_space, f_space_id,
                                                         H5P_DEFAULT, hslab_buf) < 0)
                                                 H5TOOLS_GOTO_ERROR((-1), "H5Dread failed");
-                                            if (H5Dwrite(dset_out, wtype_id, hslab_space, f_space_id,
-                                                         H5P_DEFAULT, hslab_buf) < 0)
+                                            if (H5Dwrite(dset_out, wtype_id, hslab_space, f_space_id, dxpl_id,
+                                                         hslab_buf) < 0)
                                                 H5TOOLS_GOTO_ERROR((-1), "H5Dwrite failed");
 
                                             /* reclaim any VL memory, if necessary */
@@ -1337,7 +1378,10 @@ done:
             H5TOOLS_ERROR((-1), "named_datatype_free failed");
     }
     else {
-        H5E_BEGIN_TRY { named_datatype_free(&named_dt_head, 1); }
+        H5E_BEGIN_TRY
+        {
+            named_datatype_free(&named_dt_head, 1);
+        }
         H5E_END_TRY;
     }
 
@@ -1354,6 +1398,7 @@ done:
         H5Pclose(dcpl_in);
         H5Pclose(gcpl_in);
         H5Pclose(gcpl_out);
+        H5Pclose(dxpl_id);
         H5Sclose(f_space_id);
         H5Dclose(dset_in);
         H5Dclose(dset_out);

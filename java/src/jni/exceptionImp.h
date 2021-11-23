@@ -13,8 +13,8 @@
 #include <jni.h>
 /* Header for class hdf_hdf5lib_H5_exception */
 
-#ifndef _Included_hdf_hdf5lib_H5_exception
-#define _Included_hdf_hdf5lib_H5_exception
+#ifndef Included_hdf_hdf5lib_H5_exception
+#define Included_hdf_hdf5lib_H5_exception
 
 #ifdef __cplusplus
 extern "C" {
@@ -67,4 +67,4 @@ JNIEXPORT jlong JNICALL Java_hdf_hdf5lib_exceptions_HDF5LibraryException__1getMi
 } /* end extern "C" */
 #endif /* __cplusplus */
 
-#endif /* _Included_hdf_hdf5lib_H5_exception */
+#endif /* Included_hdf_hdf5lib_H5_exception */

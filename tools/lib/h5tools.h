@@ -17,8 +17,8 @@
  *
  * Purpose:     Support functions for the various tools.
  */
-#ifndef H5TOOLS_H__
-#define H5TOOLS_H__
+#ifndef H5TOOLS_H
+#define H5TOOLS_H
 
 #include "hdf5.h"
 #include "h5tools_error.h"
@@ -553,6 +553,7 @@ typedef struct h5tools_context_t {
  */
 
 typedef enum { VOL_BY_NAME, VOL_BY_VALUE } h5tools_vol_info_type_t;
+typedef enum { VFD_BY_NAME, VFD_BY_VALUE } h5tools_vfd_info_type_t;
 
 typedef struct h5tools_vol_info_t {
     h5tools_vol_info_type_t type;
@@ -568,12 +569,16 @@ typedef struct h5tools_vol_info_t {
 } h5tools_vol_info_t;
 
 typedef struct h5tools_vfd_info_t {
+    h5tools_vfd_info_type_t type;
 
     /* Pointer to information to be passed to the driver for its setup */
     const void *info;
 
-    /* Name of the VFD */
-    const char *name;
+    /* Field specifying either the driver's name or value (ID) */
+    union {
+        const char *       name;
+        H5FD_class_value_t value;
+    } u;
 } h5tools_vfd_info_t;
 
 /* This enum should match the entries in the above 'volnames'
@@ -672,8 +677,9 @@ H5TOOLS_DLL hid_t   h5tools_get_big_endian_type(hid_t type);
 H5TOOLS_DLL htri_t  h5tools_detect_vlen(hid_t tid);
 H5TOOLS_DLL htri_t  h5tools_detect_vlen_str(hid_t tid);
 H5TOOLS_DLL hbool_t h5tools_is_obj_same(hid_t loc_id1, const char *name1, hid_t loc_id2, const char *name2);
-H5TOOLS_DLL void init_acc_pos(unsigned ndims, hsize_t *dims, hsize_t *acc, hsize_t *pos, hsize_t *p_min_idx);
-H5TOOLS_DLL hsize_t calc_acc_pos(unsigned ndims, hsize_t elemtno, hsize_t *acc, hsize_t *pos);
+H5TOOLS_DLL void    init_acc_pos(unsigned ndims, const hsize_t *dims, hsize_t *acc, hsize_t *pos,
+                                 hsize_t *p_min_idx);
+H5TOOLS_DLL hsize_t calc_acc_pos(unsigned ndims, hsize_t elemtno, const hsize_t *acc, hsize_t *pos);
 H5TOOLS_DLL hbool_t h5tools_is_zero(const void *_mem, size_t size);
 H5TOOLS_DLL int     h5tools_canreadf(const char *name, hid_t dcpl_id);
 H5TOOLS_DLL int     h5tools_can_encode(H5Z_filter_t filtn);
@@ -687,7 +693,7 @@ H5TOOLS_DLL void h5tools_region_simple_prefix(FILE *stream, const h5tool_format_
 H5TOOLS_DLL int     render_bin_output(FILE *stream, hid_t container, hid_t tid, void *_mem, hsize_t nelmts);
 H5TOOLS_DLL int     render_bin_output_region_data_blocks(hid_t region_id, FILE *stream, hid_t container,
                                                          unsigned ndims, hid_t type_id, hsize_t nblocks,
-                                                         hsize_t *ptdata);
+                                                         const hsize_t *ptdata);
 H5TOOLS_DLL hbool_t render_bin_output_region_blocks(hid_t region_space, hid_t region_id, FILE *stream,
                                                     hid_t container);
 H5TOOLS_DLL int     render_bin_output_region_data_points(hid_t region_space, hid_t region_id, FILE *stream,
@@ -708,4 +714,4 @@ H5TOOLS_DLL hbool_t h5tools_render_region_element(FILE *stream, const h5tool_for
 }
 #endif
 
-#endif /* H5TOOLS_H__ */
+#endif /* H5TOOLS_H */

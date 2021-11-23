@@ -102,8 +102,9 @@ test_properties(void)
      * property list functions. In the file driver tests further down, this will
      * not be the case.
      */
-    size   = (size_t)count * sizeof(char);
-    buffer = (char *)HDmalloc(size);
+    size = (size_t)count * sizeof(char);
+    if (NULL == (buffer = (char *)HDmalloc(size)))
+        TEST_ERROR
     for (i = 0; i < count - 1; i++)
         buffer[i] = (char)(65 + i);
     buffer[count - 1] = '\0';
@@ -338,8 +339,8 @@ test_callbacks(void)
     H5FD_file_image_callbacks_t callbacks;
     hid_t                       fapl_1;
     hid_t                       fapl_2;
-    udata_t *                   udata;
-    char *                      file_image;
+    udata_t *                   udata      = NULL;
+    char *                      file_image = NULL;
     char *                      temp_file_image;
     int                         count = 10;
     int                         i;
@@ -350,6 +351,7 @@ test_callbacks(void)
 
     /* Allocate and initialize udata */
     udata = (udata_t *)HDmalloc(sizeof(udata_t));
+    VERIFY(udata != NULL, "udata malloc failed");
     reset_udata(udata);
 
     /* copy the address of the user data into read_callbacks */
@@ -358,6 +360,7 @@ test_callbacks(void)
     /* Allocate and initialize file image buffer */
     size       = (size_t)count * sizeof(char);
     file_image = (char *)HDmalloc(size);
+    VERIFY(file_image != NULL, "file_image malloc failed");
     for (i = 0; i < count - 1; i++)
         file_image[i] = (char)(65 + i);
     file_image[count - 1] = '\0';
@@ -529,6 +532,9 @@ test_callbacks(void)
     return 0;
 
 error:
+    HDfree(file_image);
+    HDfree(udata);
+
     return 1;
 } /* test_callbacks() */
 
@@ -706,7 +712,7 @@ error:
  *      'member_file_name' in the code below, but early (4.4.7, at least) gcc only
  *      allows diagnostic pragmas to be toggled outside of functions.
  */
-H5_GCC_DIAG_OFF("format-nonliteral")
+H5_GCC_CLANG_DIAG_OFF("format-nonliteral")
 static int
 test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl, hbool_t user)
 {
@@ -970,7 +976,7 @@ test_get_file_image(const char *test_banner, const int file_name_num, hid_t fapl
 error:
     return 1;
 } /* end test_get_file_image() */
-H5_GCC_DIAG_ON("format-nonliteral")
+H5_GCC_CLANG_DIAG_ON("format-nonliteral")
 
 /******************************************************************************
  * Function:    test_get_file_image_error_rejection
@@ -1064,21 +1070,30 @@ test_get_file_image_error_rejection(void)
     VERIFY(image_ptr != NULL, "HDmalloc(1) failed.");
 
     /* load the image of the file into the buffer */
-    H5E_BEGIN_TRY { bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)(image_size - 1)); }
+    H5E_BEGIN_TRY
+    {
+        bytes_read = H5Fget_file_image(file_id, image_ptr, (size_t)(image_size - 1));
+    }
     H5E_END_TRY;
     VERIFY(bytes_read < 0, "H5Fget_file_image(2 -- test 1) succeeded.");
 
     /* Call H5Fget_file_image() with good buffer and buffer size,
      * but non-existant file_id.  Should fail.
      */
-    H5E_BEGIN_TRY { bytes_read = H5Fget_file_image((hid_t)0, image_ptr, (size_t)(image_size)); }
+    H5E_BEGIN_TRY
+    {
+        bytes_read = H5Fget_file_image((hid_t)0, image_ptr, (size_t)(image_size));
+    }
     H5E_END_TRY;
     VERIFY(bytes_read < 0, "H5Fget_file_image(3 -- test 1) succeeded.");
 
     /* Call H5Fget_file_image() with good buffer and buffer size,
      * but a file_id of the wrong type.  Should fail.
      */
-    H5E_BEGIN_TRY { bytes_read = H5Fget_file_image(dset_id, image_ptr, (size_t)(image_size)); }
+    H5E_BEGIN_TRY
+    {
+        bytes_read = H5Fget_file_image(dset_id, image_ptr, (size_t)(image_size));
+    }
     H5E_END_TRY;
     VERIFY(bytes_read < 0, "H5Fget_file_image(4 -- test 1) succeeded.");
 
@@ -1179,7 +1194,10 @@ test_get_file_image_error_rejection(void)
     VERIFY(err >= 0, "H5Fflush failed");
 
     /* attempt to get the size of the file -- should fail */
-    H5E_BEGIN_TRY { image_size = H5Fget_file_image(file_id, NULL, (size_t)0); }
+    H5E_BEGIN_TRY
+    {
+        image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
+    }
     H5E_END_TRY;
     VERIFY(image_size == -1, "H5Fget_file_image(5) succeeded.");
 
@@ -1238,7 +1256,10 @@ test_get_file_image_error_rejection(void)
     VERIFY(err >= 0, "H5Fflush failed");
 
     /* attempt to get the size of the file -- should fail */
-    H5E_BEGIN_TRY { image_size = H5Fget_file_image(file_id, NULL, (size_t)0); }
+    H5E_BEGIN_TRY
+    {
+        image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
+    }
     H5E_END_TRY;
     VERIFY(image_size == -1, "H5Fget_file_image(6) succeeded.");
 
@@ -1295,7 +1316,10 @@ test_get_file_image_error_rejection(void)
     VERIFY(err >= 0, "H5Fflush failed");
 
     /* attempt to get the size of the file -- should fail */
-    H5E_BEGIN_TRY { image_size = H5Fget_file_image(file_id, NULL, (size_t)0); }
+    H5E_BEGIN_TRY
+    {
+        image_size = H5Fget_file_image(file_id, NULL, (size_t)0);
+    }
     H5E_END_TRY;
     VERIFY(image_size == -1, "H5Fget_file_image(7) succeeded.");
 
@@ -1337,7 +1361,10 @@ main(void)
 
     errors += test_properties();
     errors += test_callbacks();
-    errors += test_core();
+
+    if (!h5_driver_uses_modified_filename()) {
+        errors += test_core();
+    }
 
     /* Perform tests with/without user block */
     for (user = FALSE; user <= TRUE; user++) {

@@ -12,8 +12,8 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
-#ifndef __Group_H
-#define __Group_H
+#ifndef H5Group_H
+#define H5Group_H
 
 namespace H5 {
 
@@ -24,20 +24,20 @@ namespace H5 {
 class H5_DLLCPP Group : public H5Object, public CommonFG {
   public:
     // Close this group.
-    virtual void close();
+    virtual void close() override;
 
     ///\brief Returns this class name.
     virtual H5std_string
-    fromClass() const
+    fromClass() const override
     {
         return ("Group");
     }
 
     // Throw group exception.
-    virtual void throwException(const H5std_string &func_name, const H5std_string &msg) const;
+    virtual void throwException(const H5std_string &func_name, const H5std_string &msg) const override;
 
     // for CommonFG to get the file id.
-    virtual hid_t getLocId() const;
+    virtual hid_t getLocId() const override;
 
     // Creates a group by way of dereference.
     Group(const H5Location &loc, const void *ref, H5R_type_t ref_type = H5R_OBJECT,
@@ -63,10 +63,10 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
     Group(const Group &original);
 
     // Gets the group id.
-    virtual hid_t getId() const;
+    virtual hid_t getId() const override;
 
     // Destructor
-    virtual ~Group();
+    virtual ~Group() override;
 
     // Creates a copy of an existing group using its id.
     Group(const hid_t group_id);
@@ -74,7 +74,7 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
   protected:
 #ifndef DOXYGEN_SHOULD_SKIP_THIS
     // Sets the group id.
-    virtual void p_setId(const hid_t new_id);
+    virtual void p_setId(const hid_t new_id) override;
 #endif // DOXYGEN_SHOULD_SKIP_THIS
 
   private:
@@ -83,4 +83,4 @@ class H5_DLLCPP Group : public H5Object, public CommonFG {
 }; // end of Group
 } // namespace H5
 
-#endif // __Group_H
+#endif // H5Group_H

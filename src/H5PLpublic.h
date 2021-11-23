@@ -28,23 +28,23 @@
  */
 #define H5PL_NO_PLUGIN "::"
 
-//! [H5PL_type_t_snip]
-
+//! <!-- [H5PL_type_t_snip] -->
 /**
  * Plugin type (bit-position) used by the plugin library
  */
 typedef enum H5PL_type_t {
     H5PL_TYPE_ERROR  = -1, /**< Error                */
     H5PL_TYPE_FILTER = 0,  /**< Filter               */
-    H5PL_TYPE_VOL    = 1,  /**< VOL driver           */
-    H5PL_TYPE_NONE   = 2   /**< Sentinel: This must be last!   */
+    H5PL_TYPE_VOL    = 1,  /**< VOL connector        */
+    H5PL_TYPE_VFD    = 2,  /**< VFD                  */
+    H5PL_TYPE_NONE   = 3   /**< Sentinel: This must be last!   */
 } H5PL_type_t;
-
-//! [H5PL_type_t_snip]
+//! <!-- [H5PL_type_t_snip] -->
 
 /* Common dynamic plugin type flags used by the set/get_loading_state functions */
 #define H5PL_FILTER_PLUGIN 0x0001
 #define H5PL_VOL_PLUGIN    0x0002
+#define H5PL_VFD_PLUGIN    0x0004
 #define H5PL_ALL_PLUGIN    0xFFFF
 
 #ifdef __cplusplus
@@ -100,7 +100,9 @@ H5_DLL herr_t H5PLset_loading_state(unsigned int plugin_control_mask);
  *                                 A plugin bit set to 1 (one) indicates that that the dynamic plugin type is
  *                                 enabled.\n
  *                                 If the value of \p plugin_control_mask is negative, all dynamic plugin
- * types are enabled.\n If the value of \p plugin_control_mask is 0 (zero), all dynamic plugins are disabled.
+ *                                 types are enabled.\n
+ *                                 If the value of \p plugin_control_mask is 0 (zero), all dynamic plugins
+ *                                 are disabled.
  * \return \herr_t
  *
  * \details H5PLget_loading_state() retrieves the bitmask that controls whether a certain type of plugins

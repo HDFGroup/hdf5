@@ -21,8 +21,8 @@
 
 #include "H5FDpublic.h"  /* Basic H5FD definitions   */
 #include "H5Eprivate.h"  /* Error handling           */
-#include "H5FDioc.h"     /* IOC file driver          */
 #include "H5FDprivate.h" /* File drivers             */
+#include "H5FDioc.h"     /* IOC file driver          */
 #include "H5FLprivate.h" /* Free Lists               */
 #include "H5Fprivate.h"  /* File access              */
 #include "H5Iprivate.h"  /* IDs                      */
@@ -127,6 +127,7 @@ static herr_t H5FD__ioc_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags,
 */
 
 static const H5FD_class_t H5FD_ioc_g = {
+    H5FD_IOC_VALUE,            /* value                */
     "ioc",                     /* name                 */
     MAXADDR,                   /* maxaddr              */
     H5F_CLOSE_WEAK,            /* fc_degree            */
@@ -162,6 +163,7 @@ static const H5FD_class_t H5FD_ioc_g = {
     H5FD__ioc_truncate,        /* truncate             */
     H5FD__ioc_lock,            /* lock                 */
     H5FD__ioc_unlock,          /* unlock               */
+    NULL,                      /* del                  */
     NULL,                      /* ctl                  */
     H5FD_FLMAP_DICHOTOMY       /* fl_map               */
 };
@@ -359,7 +361,7 @@ H5Pset_fapl_ioc(hid_t fapl_id, H5FD_ioc_config_t *vfd_config)
 
     memcpy(info, vfd_config, sizeof(H5FD_ioc_config_t));
     info->common.ioc_fapl_id = fapl_id;
-    ret_value                = H5P_set_driver(plist_ptr, H5FD_IOC, info);
+    ret_value                = H5P_set_driver(plist_ptr, H5FD_IOC, info, NULL);
 
 done:
     if (info)

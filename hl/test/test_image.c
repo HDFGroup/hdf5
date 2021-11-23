@@ -301,7 +301,10 @@ out:
         HDfree(buf1_out);
     if (buf2_out)
         HDfree(buf2_out);
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     H5_FAILED();
     return FAIL;
@@ -488,7 +491,10 @@ out:
     if (image_data)
         HDfree(image_data);
 
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
 
     H5_FAILED();
@@ -574,11 +580,11 @@ test_generate(void)
     !
     */
 
-    if (fscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && HDferror(f)) {
+    if (HDfscanf(f, "%d %d %d", &imax, &jmax, &kmax) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
-    if (fscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && HDferror(f)) {
+    if (HDfscanf(f, "%f %f %f", &valex, &xmin, &xmax) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
@@ -609,7 +615,7 @@ test_generate(void)
         goto out;
 
     for (i = 0; i < n_elements; i++) {
-        if (fscanf(f, "%f ", &value) < 0 && HDferror(f)) {
+        if (HDfscanf(f, "%f ", &value) < 0 && HDferror(f)) {
             HDprintf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
@@ -644,10 +650,10 @@ test_generate(void)
     HL_TESTING2("make indexed image from land data");
 
     for (i = 0; i < n_elements; i++) {
-        if (data[i] < 0)
+        if (data[i] < 0.0f)
             image_data[i] = 0;
         else
-            image_data[i] = (unsigned char)((255 * (data[i])) / xmax);
+            image_data[i] = (unsigned char)((255 * data[i]) / xmax);
     }
 
     /* make the image */
@@ -665,10 +671,11 @@ test_generate(void)
     HL_TESTING2("make indexed image from sea data");
 
     for (i = 0; i < n_elements; i++) {
-        if (data[i] > 0)
+        if (data[i] > 0.0f)
             image_data[i] = 0;
-        else
-            image_data[i] = (unsigned char)((255 * (data[i] - xmin)) / xmin);
+        else {
+            image_data[i] = (unsigned char)((255.0f * (data[i] - xmin)) / (xmax - xmin));
+        }
     }
 
     /* make the image */
@@ -720,7 +727,10 @@ out:
     if (image_data)
         HDfree(image_data);
 
-    H5E_BEGIN_TRY { H5Fclose(fid); }
+    H5E_BEGIN_TRY
+    {
+        H5Fclose(fid);
+    }
     H5E_END_TRY;
     if (f)
         HDfclose(f);
@@ -769,32 +779,32 @@ read_data(const char *fname, /*IN*/
         goto out;
     }
 
-    if (fscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (fscanf(f, "%d", &color_planes) < 0 && HDferror(f)) {
+    if (HDfscanf(f, "%d", &color_planes) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (fscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (fscanf(f, "%d", &h) < 0 && HDferror(f)) {
+    if (HDfscanf(f, "%d", &h) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (fscanf(f, "%s", str) < 0 && HDferror(f)) {
+    if (HDfscanf(f, "%s", str) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
 
-    if (fscanf(f, "%d", &w) < 0 && HDferror(f)) {
+    if (HDfscanf(f, "%d", &w) < 0 && HDferror(f)) {
         HDprintf("fscanf error in file %s.\n", data_file);
         goto out;
     } /* end if */
@@ -828,7 +838,7 @@ read_data(const char *fname, /*IN*/
 
     /* Read data elements */
     for (i = 0; i < n_elements; i++) {
-        if (fscanf(f, "%d", &n) < 0 && HDferror(f)) {
+        if (HDfscanf(f, "%d", &n) < 0 && HDferror(f)) {
             HDprintf("fscanf error in file %s.\n", data_file);
             goto out;
         } /* end if */
@@ -926,7 +936,7 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
         return -1;
     }
 
-    if (sscanf(buffer, "%u", &nentries) != 1) {
+    if (HDsscanf(buffer, "%u", &nentries) != 1) {
         HDfclose(file);
         return -1;
     }
@@ -940,7 +950,7 @@ read_palette(const char *fname, rgb_t *palette, size_t palette_size)
     /* read the palette entries */
     for (u = 0; u < nentries; u++) {
         /* extract the red, green and blue color components.  */
-        if (fscanf(file, "%u %u %u", &red, &green, &blue) != 3) {
+        if (HDfscanf(file, "%u %u %u", &red, &green, &blue) != 3) {
             HDfclose(file);
             return -1;
         }

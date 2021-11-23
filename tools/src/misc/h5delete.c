@@ -37,7 +37,7 @@ main(int argc, const char *argv[])
 
     switch (argc) {
         case 3:
-            if (HDstrcmp(argv[1], "-f")) {
+            if (HDstrcmp(argv[1], "-f") != 0) {
                 usage();
                 return EXIT_FAILURE;
             }
@@ -58,13 +58,6 @@ main(int argc, const char *argv[])
         ret = (int)H5Fdelete(name, H5P_DEFAULT);
     }
     H5E_END_TRY;
-
-    /* The native VOL connector does not implement the H5Fdelete() call
-     * at this time, so try to remove the file via the POSIX remove(3)
-     * call on failures.
-     */
-    if (ret < 0)
-        ret = HDremove(name);
 
     if (ret < 0 && !quiet)
         HDfprintf(stderr, "Unable to delete storage at: %s\n", name);

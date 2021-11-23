@@ -43,8 +43,9 @@
 #define ATTR7_NAME    "attr ushort"
 #define ATTR8_NAME    "attr uint"
 #define ATTR9_NAME    "attr ulong"
-#define ATTR10_NAME   "attr float"
-#define ATTR11_NAME   "attr double"
+#define ATTR10_NAME   "attr ullong"
+#define ATTR11_NAME   "attr float"
+#define ATTR12_NAME   "attr double"
 
 static herr_t make_attributes(hid_t loc_id, const char *obj_name);
 
@@ -472,28 +473,30 @@ make_attributes(hid_t loc_id, const char *obj_name)
     size_t      type_size;
     int         i;
 
-    char           attr_str_in[] = {"My attribute"};
-    char           attr_str_out[20];
-    char           attr_char_in[5] = {1, 2, 3, 4, 5};
-    char           attr_char_out[5];
-    short          attr_short_in[5] = {1, 2, 3, 4, 5};
-    short          attr_short_out[5];
-    int            attr_int_in[5] = {1, 2, 3, 4, 5};
-    int            attr_int_out[5];
-    long           attr_long_in[5] = {1, 2, 3, 4, 5};
-    long           attr_long_out[5];
-    float          attr_float_in[5] = {1, 2, 3, 4, 5};
-    float          attr_float_out[5];
-    double         attr_double_in[5] = {1, 2, 3, 4, 5};
-    double         attr_double_out[5];
-    unsigned char  attr_uchar_in[5] = {1, 2, 3, 4, 5};
-    unsigned char  attr_uchar_out[5];
-    unsigned short attr_ushort_in[5] = {1, 2, 3, 4, 5};
-    unsigned short attr_ushort_out[5];
-    unsigned int   attr_uint_in[5] = {1, 2, 3, 4, 5};
-    unsigned int   attr_uint_out[5];
-    unsigned long  attr_ulong_in[5] = {1, 2, 3, 4, 5};
-    unsigned long  attr_ulong_out[5];
+    char               attr_str_in[] = {"My attribute"};
+    char               attr_str_out[20];
+    char               attr_char_in[5] = {1, 2, 3, 4, 5};
+    char               attr_char_out[5];
+    short              attr_short_in[5] = {1, 2, 3, 4, 5};
+    short              attr_short_out[5];
+    int                attr_int_in[5] = {1, 2, 3, 4, 5};
+    int                attr_int_out[5];
+    long               attr_long_in[5] = {1, 2, 3, 4, 5};
+    long               attr_long_out[5];
+    float              attr_float_in[5] = {1, 2, 3, 4, 5};
+    float              attr_float_out[5];
+    double             attr_double_in[5] = {1, 2, 3, 4, 5};
+    double             attr_double_out[5];
+    unsigned char      attr_uchar_in[5] = {1, 2, 3, 4, 5};
+    unsigned char      attr_uchar_out[5];
+    unsigned short     attr_ushort_in[5] = {1, 2, 3, 4, 5};
+    unsigned short     attr_ushort_out[5];
+    unsigned int       attr_uint_in[5] = {1, 2, 3, 4, 5};
+    unsigned int       attr_uint_out[5];
+    unsigned long      attr_ulong_in[5] = {1, 2, 3, 4, 5};
+    unsigned long      attr_ulong_out[5];
+    unsigned long long attr_ullong_in[5] = {1, 2, 3, 4, 5};
+    unsigned long long attr_ullong_out[5];
 
     /*-------------------------------------------------------------------------
      * H5LTset_attribute_string test
@@ -509,7 +512,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     PASSED();
 
     /*-------------------------------------------------------------------------
-     * H5LTset_attribute_string test
+     * H5LTget_attribute_string test
      *-------------------------------------------------------------------------
      */
 
@@ -859,7 +862,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     PASSED();
 
     /*-------------------------------------------------------------------------
-     * H5LTget_attribute_long test
+     * H5LTget_attribute_ulong test
      *-------------------------------------------------------------------------
      */
 
@@ -888,6 +891,48 @@ make_attributes(hid_t loc_id, const char *obj_name)
     PASSED();
 
     /*-------------------------------------------------------------------------
+     * H5LTset_attribute_ullong test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTset_attribute_ullong");
+
+    /* Set the attribute */
+    if (H5LTset_attribute_ullong(loc_id, obj_name, ATTR10_NAME, attr_ullong_in, (size_t)5) < 0)
+        return -1;
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
+     * H5LTget_attribute_ullong test
+     *-------------------------------------------------------------------------
+     */
+
+    HL_TESTING2("H5LTget_attribute_ullong");
+
+    /* Get the attribute */
+    if (H5LTget_attribute_ullong(loc_id, obj_name, ATTR10_NAME, attr_ullong_out) < 0)
+        return -1;
+
+    for (i = 0; i < 5; i++) {
+        if (attr_ullong_in[i] != attr_ullong_out[i]) {
+            return -1;
+        }
+    }
+
+    /* Get the attribute */
+    if (H5LTget_attribute(loc_id, obj_name, ATTR10_NAME, H5T_NATIVE_ULLONG, attr_ullong_out) < 0)
+        return -1;
+
+    for (i = 0; i < 5; i++) {
+        if (attr_ullong_in[i] != attr_ullong_out[i]) {
+            return -1;
+        }
+    }
+
+    PASSED();
+
+    /*-------------------------------------------------------------------------
      * H5LTset_attribute_float test
      *-------------------------------------------------------------------------
      */
@@ -895,7 +940,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTset_attribute_float");
 
     /* Set the attribute */
-    if (H5LTset_attribute_float(loc_id, obj_name, ATTR10_NAME, attr_float_in, (size_t)5) < 0)
+    if (H5LTset_attribute_float(loc_id, obj_name, ATTR11_NAME, attr_float_in, (size_t)5) < 0)
         return -1;
 
     PASSED();
@@ -908,7 +953,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTget_attribute_float");
 
     /* Get the attribute */
-    if (H5LTget_attribute_float(loc_id, obj_name, ATTR10_NAME, attr_float_out) < 0)
+    if (H5LTget_attribute_float(loc_id, obj_name, ATTR11_NAME, attr_float_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -918,7 +963,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     }
 
     /* Get the attribute */
-    if (H5LTget_attribute(loc_id, obj_name, ATTR10_NAME, H5T_NATIVE_FLOAT, attr_float_out) < 0)
+    if (H5LTget_attribute(loc_id, obj_name, ATTR11_NAME, H5T_NATIVE_FLOAT, attr_float_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -937,7 +982,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTset_attribute_double");
 
     /* Set the attribute */
-    if (H5LTset_attribute_double(loc_id, obj_name, ATTR11_NAME, attr_double_in, (size_t)5) < 0)
+    if (H5LTset_attribute_double(loc_id, obj_name, ATTR12_NAME, attr_double_in, (size_t)5) < 0)
         return -1;
 
     PASSED();
@@ -950,7 +995,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     HL_TESTING2("H5LTget_attribute_double");
 
     /* Get the attribute */
-    if (H5LTget_attribute_double(loc_id, obj_name, ATTR11_NAME, attr_double_out) < 0)
+    if (H5LTget_attribute_double(loc_id, obj_name, ATTR12_NAME, attr_double_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -960,7 +1005,7 @@ make_attributes(hid_t loc_id, const char *obj_name)
     }
 
     /* Get the attribute */
-    if (H5LTget_attribute(loc_id, obj_name, ATTR11_NAME, H5T_NATIVE_DOUBLE, attr_double_out) < 0)
+    if (H5LTget_attribute(loc_id, obj_name, ATTR12_NAME, H5T_NATIVE_DOUBLE, attr_double_out) < 0)
         return -1;
 
     for (i = 0; i < 5; i++) {
@@ -1054,7 +1099,7 @@ test_integers(void)
         HDfree(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_STD_I8BE")) {
+    if (HDstrcmp(dt_str, "H5T_STD_I8BE") != 0) {
         HDfree(dt_str);
         goto out;
     }
@@ -1112,7 +1157,7 @@ test_fps(void)
         HDfree(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_IEEE_F32BE")) {
+    if (HDstrcmp(dt_str, "H5T_IEEE_F32BE") != 0) {
         HDfree(dt_str);
         goto out;
     }
@@ -1184,7 +1229,7 @@ test_strings(void)
         goto out;
     }
     if (HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE 13;\n      STRPAD H5T_STR_NULLTERM;\n      CSET "
-                         "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
+                         "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1219,7 +1264,7 @@ test_strings(void)
         goto out;
     }
     if (HDstrcmp(dt_str, "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      "
-                         "CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }")) {
+                         "CSET H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }") != 0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1238,7 +1283,7 @@ test_strings(void)
     if (HDstrncmp(dt_str,
                   "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
                   "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
-                  str_len - 1)) {
+                  str_len - 1) != 0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1261,7 +1306,7 @@ test_strings(void)
     if (HDstrncmp(dt_str,
                   "H5T_STRING {\n      STRSIZE H5T_VARIABLE;\n      STRPAD H5T_STR_NULLPAD;\n      CSET "
                   "H5T_CSET_ASCII;\n      CTYPE H5T_C_S1;\n   }",
-                  str_len)) {
+                  str_len) != 0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1322,7 +1367,8 @@ test_opaques(void)
     }
     if (HDstrcmp(
             dt_str,
-            "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }")) {
+            "H5T_OPAQUE {\n      OPQ_SIZE 19;\n      OPQ_TAG \"This is a tag for opaque type\";\n   }") !=
+        0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1376,7 +1422,7 @@ test_enums(void)
 
     if (H5Tenum_nameof(dtype, &value1, name1, size) < 0)
         goto out;
-    if (HDstrcmp(name1, "BLUE"))
+    if (HDstrcmp(name1, "BLUE") != 0)
         goto out;
 
     if (H5Tenum_valueof(dtype, name2, &value2) < 0)
@@ -1399,8 +1445,9 @@ test_enums(void)
         HDfree(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"   "
-                         "         6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }")) {
+    if (HDstrcmp(dt_str,
+                 "H5T_ENUM {\n      H5T_STD_I32LE;\n      \"RED\"              5;\n      \"GREEN\"   "
+                 "         6;\n      \"BLUE\"             7;\n      \"WHITE\"            8;\n   }") != 0) {
 
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
@@ -1462,7 +1509,7 @@ test_variables(void)
         HDfree(dt_str);
         goto out;
     }
-    if (HDstrcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }")) {
+    if (HDstrcmp(dt_str, "H5T_VLEN {\n      H5T_VLEN {\n         H5T_STD_I32BE\n      }\n   }") != 0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1526,7 +1573,7 @@ test_arrays(void)
     }
     if (HDstrcmp(dt_str, "H5T_ARRAY {\n      [5][7][13] H5T_ARRAY {\n         [17][19] H5T_COMPOUND {\n      "
                          "      H5T_STD_I8BE \"arr_compound_1\" : 0;\n            H5T_STD_I32BE "
-                         "\"arr_compound_2\" : 1;\n         }\n      }\n   }")) {
+                         "\"arr_compound_2\" : 1;\n         }\n      }\n   }") != 0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1586,7 +1633,7 @@ test_compounds(void)
         goto out;
     }
     if (HDstrcmp(dt_str, "H5T_COMPOUND {\n      H5T_STD_I16BE \"one_field\" : 2;\n      H5T_STD_U8LE "
-                         "\"two_field\" : 6;\n   }")) {
+                         "\"two_field\" : 6;\n   }") != 0) {
         HDprintf("dt=\n%s\n", dt_str);
         HDfree(dt_str);
         goto out;
@@ -1605,7 +1652,7 @@ test_compounds(void)
 
     if ((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
-    if (HDstrcmp(memb_name, "i16_field")) {
+    if (HDstrcmp(memb_name, "i16_field") != 0) {
         H5free_memory(memb_name);
         goto out;
     }
@@ -1683,7 +1730,7 @@ test_compound_bug(void)
 
     if ((memb_name = H5Tget_member_name(dtype, 2)) == NULL)
         goto out;
-    if (HDstrcmp(memb_name, "sub")) {
+    if (HDstrcmp(memb_name, "sub") != 0) {
         H5free_memory(memb_name);
         goto out;
     }
@@ -1720,7 +1767,7 @@ test_compound_bug(void)
     if ((memb_name = H5Tget_member_name(dtype, 1)) == NULL)
         goto out;
     if (HDstrcmp(memb_name, "desc____________________________________________________________________________"
-                            "_____________")) {
+                            "_____________") != 0) {
         H5free_memory(memb_name);
         goto out;
     }

@@ -53,7 +53,7 @@ const char *FILENAME[] = {"dt_arith1", "dt_arith2", NULL};
  * endian.  If local variable `endian' is H5T_ORDER_BE then the result will
  * be I, otherwise the result will be Z-(I+1).
  */
-#define ENDIAN(Z, I, E) (H5T_ORDER_BE == E ? (I) : (Z) - ((I) + 1))
+#define ENDIAN(Z, I, E) (H5T_ORDER_BE == (E) ? (I) : (Z) - ((I) + 1))
 
 typedef enum dtype_t {
     INT_SCHAR,
@@ -74,9 +74,6 @@ typedef enum dtype_t {
     OTHER
 } dtype_t;
 
-/* Skip overflow tests if non-zero */
-static int skip_overflow_tests_g = 0;
-
 /*
  * Although we check whether a floating point overflow generates a SIGFPE and
  * turn off overflow tests in that case, it might still be possible for an
@@ -84,7 +81,7 @@ static int skip_overflow_tests_g = 0;
  * be allowed to continue (cf. Posix signals) so in order to recover from a
  * SIGFPE we run tests that might generate one in a child process.
  */
-#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
+#ifdef H5_HAVE_UNISTD_H
 #define HANDLE_SIGFPE
 #endif
 
@@ -394,11 +391,10 @@ static int without_hardware_g = 0;
         HDfree(value);                                                                                       \
     }
 
-void           some_dummy_func(float x);
 static hbool_t overflows(unsigned char *origin_bits, hid_t src_id, size_t dst_num_bits);
 static int     my_isnan(dtype_t type, void *val);
-static int     my_isinf(int endian, unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
-                        size_t esize);
+static int my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
+                    size_t esize);
 
 /*-------------------------------------------------------------------------
  * Function:    fpe_handler
@@ -512,92 +508,6 @@ except_func(H5T_conv_except_t except_type, hid_t H5_ATTR_UNUSED src_id, hid_t H5
         *(int *)dst_buf = *(int *)user_data;
 
     return ret;
-}
-
-/*-------------------------------------------------------------------------
- * Function:    some_dummy_func
- *
- * Purpose:    A dummy function to help check for overflow.
- *
- * Note:    DO NOT DECLARE THIS FUNCTION STATIC OR THE COMPILER MIGHT
- *        PROMOTE ARGUMENT `x' TO DOUBLE AND DEFEAT THE OVERFLOW
- *        CHECKING.
- *
- * Return:    void
- *
- * Programmer:    Robb Matzke
- *              Tuesday, July 21, 1998
- *
- *-------------------------------------------------------------------------
- */
-void
-some_dummy_func(float x)
-{
-    char s[128];
-
-    HDsnprintf(s, sizeof(s), "%g", (double)x);
-}
-
-/*-------------------------------------------------------------------------
- * Function:    generates_sigfpe
- *
- * Purpose:    Determines if SIGFPE is generated from overflows.  We must be
- *        able to fork() and waitpid() in order for this test to work
- *        properly.  Sets skip_overflow_tests_g to non-zero if they
- *        would generate SIGBUS, zero otherwise.
- *
- * Programmer:    Robb Matzke
- *              Tuesday, July 21, 1998
- *
- * Modifications:
- *
- *-------------------------------------------------------------------------
- */
-static void
-generates_sigfpe(void)
-{
-#if defined(H5_HAVE_FORK) && defined(H5_HAVE_WAITPID)
-    pid_t          pid;
-    int            status;
-    size_t         i, j;
-    double         d;
-    unsigned char *dp = (unsigned char *)&d;
-    float          f;
-
-    HDfflush(stdout);
-    HDfflush(stderr);
-    if ((pid = HDfork()) < 0) {
-        HDperror("fork");
-        HDexit(EXIT_FAILURE);
-    }
-    else if (0 == pid) {
-        for (i = 0; i < 2000; i++) {
-            for (j = 0; j < sizeof(double); j++)
-                dp[j] = (unsigned char)HDrand();
-            f = (float)d;
-            some_dummy_func((float)f);
-        }
-        HDexit(EXIT_SUCCESS);
-    }
-
-    while (pid != HDwaitpid(pid, &status, 0))
-        /*void*/;
-    if (WIFEXITED(status) && 0 == WEXITSTATUS(status)) {
-        HDputs("Floating-point overflow cases will be tested.");
-        skip_overflow_tests_g = FALSE;
-    }
-    else if (WIFSIGNALED(status) && SIGFPE == WTERMSIG(status)) {
-        HDputs("Floating-point overflow cases cannot be safely tested.");
-        skip_overflow_tests_g = TRUE;
-        /* delete the core dump file that SIGFPE may have created */
-        HDunlink("core");
-    }
-#else
-    HDputs("Cannot determine if floating-point overflows generate a SIGFPE;");
-    HDputs("assuming yes.");
-    HDputs("Overflow cases will not be tested.");
-    skip_overflow_tests_g = TRUE;
-#endif
 }
 
 /*-------------------------------------------------------------------------
@@ -864,7 +774,10 @@ test_particular_fp_integer(void)
 
 error:
     HDfflush(stdout);
-    H5E_BEGIN_TRY { H5Pclose(dxpl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dxpl_id);
+    }
     H5E_END_TRY;
     if (buf1)
         HDfree(buf1);
@@ -2853,7 +2766,8 @@ my_isnan(dtype_t type, void *val)
  *-------------------------------------------------------------------------
  */
 static int
-my_isinf(int endian, unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos, size_t esize)
+my_isinf(int endian, const unsigned char *val, size_t size, size_t mpos, size_t msize, size_t epos,
+         size_t esize)
 {
     unsigned char *bits;
     int            retval = 0;
@@ -3144,10 +3058,10 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
     /* Check the software results against the hardware */
     for (j = 0; j < nelmts; j++) {
         underflow = 0;
-        hw_f      = 911.0f;
-        hw_d      = 911.0f;
+        hw_f      = 911.0F;
+        hw_d      = 911.0F;
 #if H5_SIZEOF_LONG_DOUBLE != H5_SIZEOF_DOUBLE
-        hw_ld = 911.0f;
+        hw_ld = 911.0L;
 #endif
 
         /* The hardware conversion */
@@ -3318,7 +3232,7 @@ test_conv_flt_1(const char *name, int run_test, hid_t src, hid_t dst)
                 int expo_diff = check_expo[0] - check_expo[1];
                 int valid_bits =
                     (int)((dst_ebias + dst_msize) + (size_t)MIN(check_expo[0], check_expo[1])) - 1;
-                double epsilon = 1.0F;
+                double epsilon = 1.0;
 
                 /* Re-scale the mantissas based on any exponent difference */
                 if (expo_diff != 0)
@@ -5401,9 +5315,6 @@ main(void)
     /* Test user-define, query functions and software conversion
      * for user-defined integer types */
     nerrors += (unsigned long)test_derived_integer();
-
-    /* Does floating point overflow generate a SIGFPE? */
-    generates_sigfpe();
 
     /* Test degenerate cases */
     nerrors += (unsigned long)run_fp_tests("noop");

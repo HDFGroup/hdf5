@@ -143,7 +143,10 @@
  */
 #define HG_LOG_OUTLET_INITIALIZER(name, state, parent, debug_log)                                            \
     {                                                                                                        \
-        HG_UTIL_STRINGIFY(name), state, HG_LOG_LEVEL_NONE, parent, debug_log, { NULL }                       \
+        HG_UTIL_STRINGIFY(name), state, HG_LOG_LEVEL_NONE, parent, debug_log,                                \
+        {                                                                                                    \
+            NULL                                                                                             \
+        }                                                                                                    \
     }
 
 /* HG_LOG_OUTLET_SUBSYS_INITIALIZER: initializer for a sub-system log. */
@@ -158,7 +161,10 @@
 /* HG_LOG_SUBSYS_REGISTER: register a name */
 #define HG_LOG_SUBSYS_REGISTER(name)                                                                         \
     static void HG_UTIL_CAT(hg_log_outlet_, name)(void) HG_UTIL_CONSTRUCTOR;                                 \
-    static void HG_UTIL_CAT(hg_log_outlet_, name)(void) { hg_log_outlet_register(&HG_LOG_OUTLET(name)); }    \
+    static void HG_UTIL_CAT(hg_log_outlet_, name)(void)                                                      \
+    {                                                                                                        \
+        hg_log_outlet_register(&HG_LOG_OUTLET(name));                                                        \
+    }                                                                                                        \
     /* Keep unused prototype to use semicolon at end of macro */                                             \
     void hg_log_outlet_##name##_unused(void)
 

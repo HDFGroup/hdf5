@@ -78,7 +78,7 @@ if (HDF5_ENABLE_FORMATTERS)
 endif ()
 
 #################################################################################
-# If filter and vol plugin tests can be tested
+# If filter, vfd and vol plugin tests can be tested
 #################################################################################
 if (BUILD_SHARED_LIBS)
   # make plugins dir
@@ -162,6 +162,50 @@ if (BUILD_SHARED_LIBS)
   endforeach ()
 
   #################################################################################
+  # make vfd plugins dir
+  #################################################################################
+  file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/null_vfd_plugin_dir")
+
+  #-----------------------------------------------------------------------------
+  # Define VFD Plugin Test Sources
+  #-----------------------------------------------------------------------------
+  set (VFD_PLUGIN_LIBS
+      null_vfd_plugin
+  )
+
+  foreach (vfd_lib ${VFD_PLUGIN_LIBS})
+    set (HDF5_VFD_PLUGIN_LIB_CORENAME           "${vfd_lib}")
+    set (HDF5_VFD_PLUGIN_LIB_NAME               "${HDF5_EXTERNAL_LIB_PREFIX}${HDF5_VFD_PLUGIN_LIB_CORENAME}")
+    set (HDF5_VFD_PLUGIN_LIB_TARGET             ${HDF5_VFD_PLUGIN_LIB_CORENAME})
+
+    add_library (${HDF5_VFD_PLUGIN_LIB_TARGET} SHARED ${HDF5_TEST_SOURCE_DIR}/${vfd_lib}.c)
+    target_include_directories (${HDF5_VFD_PLUGIN_LIB_TARGET} PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+    TARGET_C_PROPERTIES (${HDF5_VFD_PLUGIN_LIB_TARGET} SHARED)
+    target_link_libraries (${HDF5_VFD_PLUGIN_LIB_TARGET} PUBLIC ${HDF5_TEST_LIBSH_TARGET})
+    H5_SET_LIB_OPTIONS (${HDF5_VFD_PLUGIN_LIB_TARGET} ${HDF5_VFD_PLUGIN_LIB_NAME} SHARED "LIB")
+    set_target_properties (${HDF5_VFD_PLUGIN_LIB_TARGET} PROPERTIES FOLDER libraries/TEST_PLUGIN)
+
+    #-----------------------------------------------------------------------------
+    # Add Target to clang-format
+    #-----------------------------------------------------------------------------
+    if (HDF5_ENABLE_FORMATTERS)
+      clang_format (HDF5_TEST_${HDF5_VFD_PLUGIN_LIB_TARGET}_FORMAT ${HDF5_VFD_PLUGIN_LIB_TARGET})
+    endif ()
+
+    #-----------------------------------------------------------------------------
+    # Copy VFD plugin to a plugins folder
+    #-----------------------------------------------------------------------------
+    add_custom_command (
+        TARGET     ${HDF5_VFD_PLUGIN_LIB_TARGET}
+        POST_BUILD
+        COMMAND    ${CMAKE_COMMAND}
+        ARGS       -E copy_if_different
+          "$<TARGET_FILE:${HDF5_VFD_PLUGIN_LIB_TARGET}>"
+          "${CMAKE_BINARY_DIR}/null_vfd_plugin_dir/$<TARGET_FILE_NAME:${HDF5_VFD_PLUGIN_LIB_TARGET}>"
+    )
+  endforeach ()
+
+  #################################################################################
   # make vol plugins dir
   #################################################################################
   file (MAKE_DIRECTORY "${CMAKE_BINARY_DIR}/null_vol_plugin_dir")
@@ -234,7 +278,6 @@ set (testhdf5_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/tskiplist.c
     ${HDF5_TEST_SOURCE_DIR}/tsohm.c
     ${HDF5_TEST_SOURCE_DIR}/ttime.c
-    ${HDF5_TEST_SOURCE_DIR}/ttst.c
     ${HDF5_TEST_SOURCE_DIR}/tunicode.c
     ${HDF5_TEST_SOURCE_DIR}/tvltypes.c
     ${HDF5_TEST_SOURCE_DIR}/tvlstr.c
@@ -258,10 +301,6 @@ set (ttsafe_SOURCES
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_cancel.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_acreate.c
     ${HDF5_TEST_SOURCE_DIR}/ttsafe_attr_vlen.c
-)
-
-set (event_set_SOURCES
-    ${HDF5_TEST_SOURCE_DIR}/event_set.c
 )
 
 set (H5_TESTS
@@ -337,7 +376,7 @@ set (H5_TESTS
     vol
     timer
     cmpd_dtransform
-    event_set # multiple source
+    event_set
 )
 
 macro (ADD_H5_EXE file)
@@ -369,7 +408,6 @@ set (H5_TESTS_MULTIPLE
     ttsafe
     thread_id # special link
     mirror_vfd
-    event_set
 )
 # Only build single source tests here
 foreach (h5_test ${H5_TESTS})
@@ -533,19 +571,6 @@ if (HDF5_ENABLE_FORMATTERS)
   clang_format (HDF5_TEST_mirror_vfd_FORMAT mirror_vfd)
 endif ()
 
-#-- Adding test for event_set
-add_executable (event_set ${event_set_SOURCES})
-target_compile_options(event_set PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-target_include_directories (event_set PRIVATE "${HDF5_SRC_DIR};${HDF5_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-if (NOT BUILD_SHARED_LIBS)
-  TARGET_C_PROPERTIES (event_set STATIC)
-  target_link_libraries (event_set PRIVATE ${HDF5_TEST_LIB_TARGET})
-else ()
-  TARGET_C_PROPERTIES (event_set SHARED)
-  target_link_libraries (event_set PRIVATE ${HDF5_TEST_LIBSH_TARGET})
-endif ()
-set_target_properties (event_set PROPERTIES FOLDER test)
-
 #-----------------------------------------------------------------------------
 # Add Target to clang-format
 #-----------------------------------------------------------------------------
@@ -678,6 +703,19 @@ if (BUILD_SHARED_LIBS)
   #-----------------------------------------------------------------------------
   if (HDF5_ENABLE_FORMATTERS)
     clang_format (HDF5_TEST_filter_plugin_FORMAT filter_plugin)
+  endif ()
+
+  add_executable (vfd_plugin ${HDF5_TEST_SOURCE_DIR}/vfd_plugin.c)
+  target_include_directories (vfd_plugin PRIVATE "${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  TARGET_C_PROPERTIES (vfd_plugin SHARED)
+  target_link_libraries (vfd_plugin PRIVATE ${HDF5_TEST_LIBSH_TARGET})
+  set_target_properties (vfd_plugin PROPERTIES FOLDER test)
+
+  #-----------------------------------------------------------------------------
+  # Add Target to clang-format
+  #-----------------------------------------------------------------------------
+  if (HDF5_ENABLE_FORMATTERS)
+    clang_format (HDF5_TEST_vfd_plugin_FORMAT vfd_plugin)
   endif ()
 
   add_executable (vol_plugin ${HDF5_TEST_SOURCE_DIR}/vol_plugin.c)

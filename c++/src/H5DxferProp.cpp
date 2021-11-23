@@ -13,7 +13,6 @@
 
 #include <string>
 
-#include "H5private.h" // for HDmemset
 #include "H5Include.h"
 #include "H5Exception.h"
 #include "H5IdComponent.h"
@@ -72,8 +71,7 @@ DSetMemXferPropList::getConstant()
 void
 DSetMemXferPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
@@ -89,7 +87,9 @@ const DSetMemXferPropList &DSetMemXferPropList::DEFAULT = *getConstant();
 ///             transfer property list object.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER) {}
+DSetMemXferPropList::DSetMemXferPropList() : PropList(H5P_DATASET_XFER)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function     DSetMemXferPropList constructor
@@ -110,7 +110,9 @@ DSetMemXferPropList::DSetMemXferPropList(const char *exp) : PropList(H5P_DATASET
 ///                            list object to copy
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original) : PropList(original) {}
+DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original) : PropList(original)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function     DSetMemXferPropList overloaded constructor
@@ -120,7 +122,9 @@ DSetMemXferPropList::DSetMemXferPropList(const DSetMemXferPropList &original) : 
 ///                            property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::DSetMemXferPropList(const hid_t plist_id) : PropList(plist_id) {}
+DSetMemXferPropList::DSetMemXferPropList(const hid_t plist_id) : PropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetMemXferPropList::setBuffer
@@ -170,7 +174,7 @@ DSetMemXferPropList::getBuffer(void **tconv, void **bkg) const
 void
 DSetMemXferPropList::setPreserve(bool status) const
 {
-    herr_t ret_value = H5Pset_preserve(id, (hbool_t)status);
+    herr_t ret_value = H5Pset_preserve(id, static_cast<hbool_t>(status));
     if (ret_value < 0) {
         throw PropListIException("DSetMemXferPropList::setPreserve", "H5Pset_preserve failed");
     }
@@ -306,10 +310,10 @@ DSetMemXferPropList::getDataTransform() const
 {
     // Initialize string to "", so that if there is no expression, the returned
     // string will be empty
-    H5std_string expression("");
+    H5std_string expression;
 
     // Preliminary call to get the expression's length
-    ssize_t exp_len = H5Pget_data_transform(id, NULL, (size_t)0);
+    ssize_t exp_len = H5Pget_data_transform(id, NULL, 0);
 
     // If H5Pget_data_transform returns a negative value, raise an exception
     if (exp_len < 0) {
@@ -319,8 +323,7 @@ DSetMemXferPropList::getDataTransform() const
     // If expression exists, calls C routine again to get it
     else if (exp_len > 0) {
         // Temporary buffer for char* expression
-        char *exp_C = new char[exp_len + 1];
-        HDmemset(exp_C, 0, exp_len + 1); // clear buffer
+        char *exp_C = new char[exp_len + 1]();
 
         // Used overloaded function
         exp_len = getDataTransform(exp_C, exp_len + 1);
@@ -552,6 +555,8 @@ DSetMemXferPropList::getEDCCheck() const
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetMemXferPropList::~DSetMemXferPropList() {}
+DSetMemXferPropList::~DSetMemXferPropList()
+{
+}
 
 } // namespace H5

@@ -301,6 +301,62 @@ done:
 } /* end H5FD_register() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5FDis_driver_registered_by_name
+ *
+ * Purpose:     Tests whether a VFD class has been registered or not
+ *              according to a supplied driver name.
+ *
+ * Return:      >0 if a VFD with that name has been registered
+ *              0 if a VFD with that name has NOT been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FDis_driver_registered_by_name(const char *driver_name)
+{
+    htri_t ret_value = FALSE; /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "*s", driver_name);
+
+    /* Check if driver with this name is registered */
+    if ((ret_value = H5FD_is_driver_registered_by_name(driver_name, NULL)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDis_driver_registered_by_name() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDis_driver_registered_by_value
+ *
+ * Purpose:     Tests whether a VFD class has been registered or not
+ *              according to a supplied driver value (ID).
+ *
+ * Return:      >0 if a VFD with that value has been registered
+ *              0 if a VFD with that value hasn't been registered
+ *              <0 on errors
+ *
+ *-------------------------------------------------------------------------
+ */
+htri_t
+H5FDis_driver_registered_by_value(H5FD_class_value_t driver_value)
+{
+    htri_t ret_value = FALSE;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE1("t", "DV", driver_value);
+
+    /* Check if driver with this value is registered */
+    if ((ret_value = H5FD_is_driver_registered_by_value(driver_value, NULL)) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTGET, FAIL, "can't check if VFD is registered")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDis_driver_registered_by_value() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5FDunregister
  *
  * Purpose:     Removes a driver ID from the library. This in no way affects
@@ -496,9 +552,9 @@ H5FD_sb_load(H5FD_t *file, const char *name, const uint8_t *buf)
     /* Check if driver matches driver information saved. Unfortunately, we can't push this
      * function to each specific driver because we're checking if the driver is correct.
      */
-    if (!HDstrncmp(name, "NCSAfami", (size_t)8) && HDstrcmp(file->cls->name, "family"))
+    if (!HDstrncmp(name, "NCSAfami", (size_t)8) && HDstrcmp(file->cls->name, "family") != 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "family driver should be used")
-    if (!HDstrncmp(name, "NCSAmult", (size_t)8) && HDstrcmp(file->cls->name, "multi"))
+    if (!HDstrncmp(name, "NCSAmult", (size_t)8) && HDstrcmp(file->cls->name, "multi") != 0)
         HGOTO_ERROR(H5E_VFL, H5E_BADVALUE, FAIL, "multi driver should be used")
 
     /* Decode driver information */
@@ -2147,7 +2203,8 @@ H5FD_ctl(H5FD_t *file, uint64_t op_code, uint64_t flags, const void *input, void
     }
     else if (flags & H5FD_CTL__FAIL_IF_UNKNOWN_FLAG) {
 
-        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL, "VFD ctl request failed (no ctl and fail if unknown)")
+        HGOTO_ERROR(H5E_VFL, H5E_FCNTL, FAIL,
+                    "VFD ctl request failed (no ctl and fail if unknown flag is set)")
     }
 
 done:
@@ -2355,3 +2412,37 @@ H5FDdriver_query(hid_t driver_id, unsigned long *flags /*out*/)
 done:
     FUNC_LEAVE_API(ret_value)
 } /* end H5FDdriver_query() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FDdelete
+ *
+ * Purpose:     Deletes a file
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5FDdelete(const char *filename, hid_t fapl_id)
+{
+    herr_t ret_value = SUCCEED;
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE2("e", "*si", filename, fapl_id);
+
+    /* Check arguments */
+    if (!filename || !*filename)
+        HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, FAIL, "no file name specified")
+
+    if (H5P_DEFAULT == fapl_id)
+        fapl_id = H5P_FILE_ACCESS_DEFAULT;
+    else if (TRUE != H5P_isa_class(fapl_id, H5P_FILE_ACCESS))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
+
+    /* Call private function */
+    if (H5FD_delete(filename, fapl_id) < 0)
+        HGOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5FDdelete() */

@@ -818,8 +818,10 @@ main(int argc, char **argv)
         goto error;
 #ifdef H5_HAVE_PARALLEL
     if (facc_type != FACC_DEFAULT && MAINPROCESS)
-#endif /*H5_HAVE_PARALLEL*/
         printf("All metadata performance tests passed.\n");
+#else
+    printf("All metadata performance tests passed.\n");
+#endif /*H5_HAVE_PARALLEL*/
 
     return 0;
 

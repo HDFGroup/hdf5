@@ -26,7 +26,11 @@
  */
 #define H5C_FRIEND  /*suppress error about including H5Cpkg      */
 #define H5C_TESTING /*suppress warning about H5C testing funcs*/
+#define H5FD_FRIEND /*suppress error about including H5FDpkg      */
+#define H5FD_TESTING
+
 #include "H5Cpkg.h" /* Cache                */
+#include "H5FDpkg.h"
 
 /* ============ */
 /* Test Defines */
@@ -1469,19 +1473,28 @@ verify_multiple_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Should fail to cork the attribute: aidg2; not an object */
-    H5E_BEGIN_TRY { ret = H5Odisable_mdc_flushes(aidg2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Odisable_mdc_flushes(aidg2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* Should fail to uncork the attribute: aidd1; not an object */
-    H5E_BEGIN_TRY { ret = H5Odisable_mdc_flushes(aidd1); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Odisable_mdc_flushes(aidd1);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
 
     /* Should fail to check cork status of the attribute: aidt2; not an object */
-    H5E_BEGIN_TRY { ret = H5Oare_mdc_flushes_disabled(aidt2, &corked); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oare_mdc_flushes_disabled(aidt2, &corked);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1511,7 +1524,10 @@ verify_multiple_cork(hbool_t swmr)
         TEST_ERROR
 
     /* Should fail to uncork the file: fid2; not an object */
-    H5E_BEGIN_TRY { ret = H5Oenable_mdc_flushes(fid2); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oenable_mdc_flushes(fid2);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1646,7 +1662,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to cork the datatype: not an object */
-    H5E_BEGIN_TRY { ret = H5Odisable_mdc_flushes(tid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Odisable_mdc_flushes(tid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1682,7 +1701,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to uncork the dataspace: not an object */
-    H5E_BEGIN_TRY { ret = H5Oenable_mdc_flushes(sid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oenable_mdc_flushes(sid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1696,7 +1718,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to check cork status of the attribute: not an object */
-    H5E_BEGIN_TRY { ret = H5Oare_mdc_flushes_disabled(aid, &corked); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oare_mdc_flushes_disabled(aid, &corked);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1736,7 +1761,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to cork the group again */
-    H5E_BEGIN_TRY { ret = H5Odisable_mdc_flushes(gid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Odisable_mdc_flushes(gid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -1758,7 +1786,10 @@ test_objs_cork(hbool_t swmr, hbool_t new_format)
         TEST_ERROR
 
     /* Should fail to un-cork the named datatype that is not corked yet */
-    H5E_BEGIN_TRY { ret = H5Oenable_mdc_flushes(tid); }
+    H5E_BEGIN_TRY
+    {
+        ret = H5Oenable_mdc_flushes(tid);
+    }
     H5E_END_TRY;
     if (ret >= 0)
         TEST_ERROR
@@ -2216,6 +2247,19 @@ main(void)
     nerrs += verify_old_dset_cork();
 
     for (swmr = 0; swmr <= 1; swmr++) {
+        if (swmr) {
+            char *driver = NULL;
+
+            /* Skip these tests if SWMR I/O is not supported for the VFD specified
+             * by the environment variable.
+             */
+            driver = HDgetenv(HDF5_DRIVER);
+            if (!H5FD__supports_swmr_test(driver)) {
+                HDputs("-- SKIPPED SWMR tests for SWMR-incompatible VFD --");
+                continue;
+            }
+        }
+
         /* Tests with new/old library format */
         /* This is the test moved from th5o.c: test_h5o_cork() */
         nerrs += test_objs_cork(swmr, TRUE);

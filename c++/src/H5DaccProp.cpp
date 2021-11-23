@@ -72,8 +72,7 @@ DSetAccPropList::getConstant()
 void
 DSetAccPropList::deleteConstants()
 {
-    if (DEFAULT_ != 0)
-        delete DEFAULT_;
+    delete DEFAULT_;
 }
 
 //--------------------------------------------------------------------------
@@ -88,7 +87,9 @@ const DSetAccPropList &DSetAccPropList::DEFAULT = *getConstant();
 ///\brief       Default constructor: creates a stub dataset creation property list
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList() : LinkAccPropList(H5P_DATASET_ACCESS) {}
+DSetAccPropList::DSetAccPropList() : LinkAccPropList(H5P_DATASET_ACCESS)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList copy constructor
@@ -96,7 +97,9 @@ DSetAccPropList::DSetAccPropList() : LinkAccPropList(H5P_DATASET_ACCESS) {}
 ///             DSetAccPropList object
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList(const DSetAccPropList &orig) : LinkAccPropList(orig) {}
+DSetAccPropList::DSetAccPropList(const DSetAccPropList &orig) : LinkAccPropList(orig)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList overloaded constructor
@@ -104,7 +107,9 @@ DSetAccPropList::DSetAccPropList(const DSetAccPropList &orig) : LinkAccPropList(
 ///             existing dataset creation property list.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetAccPropList::DSetAccPropList(const hid_t plist_id) : LinkAccPropList(plist_id) {}
+DSetAccPropList::DSetAccPropList(const hid_t plist_id) : LinkAccPropList(plist_id)
+{
+}
 
 //--------------------------------------------------------------------------
 // Function:    DSetAccPropList::setChunkCache
@@ -159,6 +164,8 @@ DSetAccPropList::getChunkCache(size_t &rdcc_nslots, size_t &rdcc_nbytes, double 
 ///\brief       Noop destructor.
 // Programmer   Binh-Minh Ribler - 2000
 //--------------------------------------------------------------------------
-DSetAccPropList::~DSetAccPropList() {}
+DSetAccPropList::~DSetAccPropList()
+{
+}
 
 } // namespace H5

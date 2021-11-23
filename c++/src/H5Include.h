@@ -14,19 +14,6 @@
 
 #include <hdf5.h>
 
-// Define bool type for platforms that don't support bool yet
-#ifdef BOOL_NOTDEFINED
-#ifdef false
-#undef false
-#endif
-#ifdef true
-#undef true
-#endif
-typedef int bool;
-const bool false = 0;
-const bool true  = 1;
-#endif
-
 // These are defined in H5Opkg.h, which should not be included in the C++ API,
 // so re-define them here for now.
 

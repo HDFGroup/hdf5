@@ -1046,6 +1046,65 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         }     /* end block */
                         break;
 
+                        case 'V': /* H5FD_class_value_t */
+                        {
+                            H5FD_class_value_t class_val =
+                                (H5FD_class_value_t)HDva_arg(ap, H5FD_class_value_t);
+
+                            switch (class_val) {
+                                case H5_VFD_INVALID:
+                                    H5RS_acat(rs, "H5_VFD_INVALID");
+                                    break;
+                                case H5_VFD_SEC2:
+                                    H5RS_acat(rs, "H5_VFD_SEC2");
+                                    break;
+                                case H5_VFD_CORE:
+                                    H5RS_acat(rs, "H5_VFD_CORE");
+                                    break;
+                                case H5_VFD_LOG:
+                                    H5RS_acat(rs, "H5_VFD_LOG");
+                                    break;
+                                case H5_VFD_FAMILY:
+                                    H5RS_acat(rs, "H5_VFD_FAMILY");
+                                    break;
+                                case H5_VFD_MULTI:
+                                    H5RS_acat(rs, "H5_VFD_MULTI");
+                                    break;
+                                case H5_VFD_STDIO:
+                                    H5RS_acat(rs, "H5_VFD_STDIO");
+                                    break;
+#ifdef H5_HAVE_PARALLEL
+                                case H5_VFD_MPIO:
+                                    H5RS_acat(rs, "H5_VFD_MPIO");
+                                    break;
+#endif
+#ifdef H5_HAVE_DIRECT
+                                case H5_VFD_DIRECT:
+                                    H5RS_acat(rs, "H5_VFD_DIRECT");
+                                    break;
+#endif
+#ifdef H5_HAVE_MIRROR_VFD
+                                case H5_VFD_MIRROR:
+                                    H5RS_acat(rs, "H5_VFD_MIRROR");
+                                    break;
+#endif
+#ifdef H5_HAVE_LIBHDFS
+                                case H5_VFD_HDFS:
+                                    H5RS_acat(rs, "H5_VFD_HDFS");
+                                    break;
+#endif
+#ifdef H5_HAVE_ROS3_VFD
+                                case H5_VFD_ROS3:
+                                    H5RS_acat(rs, "H5_VFD_ROS3");
+                                    break;
+#endif
+                                default:
+                                    H5RS_asprintf_cat(rs, "%ld", (long)class_val);
+                                    break;
+                            }
+                        } /* end block */
+                        break;
+
                         default:
                             H5RS_asprintf_cat(rs, "BADTYPE(D%c)", type[1]);
                             goto error;
@@ -1083,6 +1142,15 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         } /* end block */
                         break;
 
+                        case 'C': /* H5ES_event_complete_func_t */
+                        {
+                            H5ES_event_complete_func_t cfunc =
+                                (H5ES_event_complete_func_t)HDva_arg(ap, H5ES_event_complete_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)cfunc);
+                        } /* end block */
+                        break;
+
                         case 'd': /* H5E_direction_t */
                         {
                             H5E_direction_t direction = (H5E_direction_t)HDva_arg(ap, int);
@@ -1111,6 +1179,15 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         } /* end block */
                         break;
 
+                        case 'I': /* H5ES_event_insert_func_t */
+                        {
+                            H5ES_event_insert_func_t ifunc =
+                                (H5ES_event_insert_func_t)HDva_arg(ap, H5ES_event_insert_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)ifunc);
+                        } /* end block */
+                        break;
+
                         case 's': /* H5ES_status_t */
                         {
                             H5ES_status_t status = (H5ES_status_t)HDva_arg(ap, int);
@@ -1122,6 +1199,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5ES_STATUS_SUCCEED:
                                     H5RS_acat(rs, "H5ES_STATUS_SUCCEED");
+                                    break;
+
+                                case H5ES_STATUS_CANCELED:
+                                    H5RS_acat(rs, "H5ES_STATUS_CANCELED");
                                     break;
 
                                 case H5ES_STATUS_FAIL:
@@ -1464,6 +1545,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                               stats.peak_alloc_bytes, stats.max_block_size,
                                               stats.total_alloc_blocks_count, stats.curr_alloc_blocks_count,
                                               stats.peak_alloc_blocks_count);
+                        } /* end block */
+                        break;
+
+                        case 'c': /* H5_atclose_func_t */
+                        {
+                            H5_atclose_func_t cfunc = (H5_atclose_func_t)HDva_arg(ap, H5_atclose_func_t);
+
+                            H5RS_asprintf_cat(rs, "%p", (void *)(uintptr_t)cfunc);
                         } /* end block */
                         break;
 
@@ -2873,6 +2962,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_ATTR_DELETE");
                                     break;
 
+                                case H5VL_ATTR_DELETE_BY_IDX:
+                                    H5RS_acat(rs, "H5VL_ATTR_DELETE_BY_IDX");
+                                    break;
+
                                 case H5VL_ATTR_EXISTS:
                                     H5RS_acat(rs, "H5VL_ATTR_EXISTS");
                                     break;
@@ -2899,10 +2992,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             switch (specific) {
                                 case H5VL_BLOB_DELETE:
                                     H5RS_acat(rs, "H5VL_BLOB_DELETE");
-                                    break;
-
-                                case H5VL_BLOB_GETSIZE:
-                                    H5RS_acat(rs, "H5VL_BLOB_GETSIZE");
                                     break;
 
                                 case H5VL_BLOB_ISNULL:
@@ -2985,10 +3074,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_DATASET_REFRESH");
                                     break;
 
-                                case H5VL_DATASET_WAIT:
-                                    H5RS_acat(rs, "H5VL_DATASET_WAIT");
-                                    break;
-
                                 default:
                                     H5RS_asprintf_cat(rs, "%ld", (long)specific);
                                     break;
@@ -3001,6 +3086,10 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5VL_datatype_get_t get = (H5VL_datatype_get_t)HDva_arg(ap, int);
 
                             switch (get) {
+                                case H5VL_DATATYPE_GET_BINARY_SIZE:
+                                    H5RS_acat(rs, "H5VL_DATATYPE_GET_BINARY_SIZE");
+                                    break;
+
                                 case H5VL_DATATYPE_GET_BINARY:
                                     H5RS_acat(rs, "H5VL_DATATYPE_GET_BINARY");
                                     break;
@@ -3093,14 +3182,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_FILE_REOPEN");
                                     break;
 
-                                case H5VL_FILE_MOUNT:
-                                    H5RS_acat(rs, "H5VL_FILE_MOUNT");
-                                    break;
-
-                                case H5VL_FILE_UNMOUNT:
-                                    H5RS_acat(rs, "H5VL_FILE_UNMOUNT");
-                                    break;
-
                                 case H5VL_FILE_IS_ACCESSIBLE:
                                     H5RS_acat(rs, "H5VL_FILE_IS_ACCESSIBLE");
                                     break;
@@ -3111,10 +3192,6 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
 
                                 case H5VL_FILE_IS_EQUAL:
                                     H5RS_acat(rs, "H5VL_FILE_IS_EQUAL");
-                                    break;
-
-                                case H5VL_FILE_WAIT:
-                                    H5RS_acat(rs, "H5VL_FILE_WAIT");
                                     break;
 
                                 default:
@@ -3149,6 +3226,14 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5VL_group_specific_t specific = (H5VL_group_specific_t)HDva_arg(ap, int);
 
                             switch (specific) {
+                                case H5VL_GROUP_MOUNT:
+                                    H5RS_acat(rs, "H5VL_GROUP_MOUNT");
+                                    break;
+
+                                case H5VL_GROUP_UNMOUNT:
+                                    H5RS_acat(rs, "H5VL_GROUP_UNMOUNT");
+                                    break;
+
                                 case H5VL_GROUP_FLUSH:
                                     H5RS_acat(rs, "H5VL_GROUP_FLUSH");
                                     break;
@@ -3164,9 +3249,9 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                         }     /* end block */
                         break;
 
-                        case 'k': /* H5VL_link_create_type_t */
+                        case 'k': /* H5VL_link_create_t */
                         {
-                            H5VL_link_create_type_t create = (H5VL_link_create_type_t)HDva_arg(ap, int);
+                            H5VL_link_create_t create = (H5VL_link_create_t)HDva_arg(ap, int);
 
                             switch (create) {
                                 case H5VL_LINK_CREATE_HARD:
@@ -3334,20 +3419,12 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                             H5VL_request_specific_t specific = (H5VL_request_specific_t)HDva_arg(ap, int);
 
                             switch (specific) {
-                                case H5VL_REQUEST_WAITANY:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITANY");
-                                    break;
-
-                                case H5VL_REQUEST_WAITSOME:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITSOME");
-                                    break;
-
-                                case H5VL_REQUEST_WAITALL:
-                                    H5RS_acat(rs, "H5VL_REQUEST_WAITALL");
-                                    break;
-
                                 case H5VL_REQUEST_GET_ERR_STACK:
                                     H5RS_acat(rs, "H5VL_REQUEST_GET_ERR_STACK");
+                                    break;
+
+                                case H5VL_REQUEST_GET_EXEC_TIME:
+                                    H5RS_acat(rs, "H5VL_REQUEST_GET_EXEC_TIME");
                                     break;
 
                                 default:
@@ -3608,6 +3685,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                     H5RS_acat(rs, "H5VL_NATIVE_FILE_SET_MIN_DSET_OHDR_FLAG");
                                     break;
 
+#ifdef H5_HAVE_PARALLEL
                                 case H5VL_NATIVE_FILE_GET_MPI_ATOMICITY:
                                     H5RS_acat(rs, "H5VL_NATIVE_FILE_GET_MPI_ATOMICITY");
                                     break;
@@ -3615,6 +3693,7 @@ H5_trace_args(H5RS_str_t *rs, const char *type, va_list ap)
                                 case H5VL_NATIVE_FILE_SET_MPI_ATOMICITY:
                                     H5RS_acat(rs, "H5VL_NATIVE_FILE_SET_MPI_ATOMICITY");
                                     break;
+#endif /* H5_HAVE_PARALLEL */
 
                                 case H5VL_NATIVE_FILE_POST_OPEN:
                                     H5RS_acat(rs, "H5VL_NATIVE_FILE_POST_OPEN");
@@ -3883,8 +3962,8 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     hssize_t          i;
     FILE *            out                 = H5_debug_g.trace;
     static hbool_t    is_first_invocation = TRUE;
-    H5_timer_t        function_timer      = {{0}, {0}, {0}, FALSE};
-    H5_timevals_t     function_times;
+    H5_timer_t        function_timer;
+    H5_timevals_t     function_times = {0.0, 0.0, 0.0};
     static H5_timer_t running_timer;
     H5_timevals_t     running_times;
     static int        current_depth   = 0;
@@ -3893,36 +3972,39 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     /* FUNC_ENTER() should not be called */
 
     if (!out)
-        return (double)0.0F; /*tracing is off*/
+        return 0.0; /* Tracing is off */
+
+    /* Initialize the timer for this function */
+    if (H5_debug_g.ttimes)
+        H5_timer_init(&function_timer);
 
     if (H5_debug_g.ttop) {
         if (returning) {
             if (current_depth > 1) {
                 --current_depth;
-                return (double)0.0F;
-            } /* end if */
-        }     /* end if */
+                return 0.0;
+            }
+        }
         else {
             if (current_depth > 0) {
-                /*do not update last_call_depth*/
+                /* Do not update last_call_depth */
                 current_depth++;
-                return (double)0.0F;
-            } /* end if */
-        }     /* end else */
-    }         /* end if */
+                return 0.0;
+            }
+        }
+    }
 
     /* Get time for event if the trace times flag is set */
     if (is_first_invocation && H5_debug_g.ttimes) {
-        /* start the library-wide timer */
+        /* Start the library-wide timer */
         is_first_invocation = FALSE;
         H5_timer_init(&running_timer);
         H5_timer_start(&running_timer);
-    } /* end if */
-    if (H5_debug_g.ttimes) {
-        /* start the timer for this function */
-        H5_timer_init(&function_timer);
+    }
+
+    /* Start the timer for this function */
+    if (H5_debug_g.ttimes)
         H5_timer_start(&function_timer);
-    } /* end if */
 
     /* Create the ref-counted string */
     rs = H5RS_create(NULL);
@@ -3945,15 +4027,15 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
                 H5_timer_get_times(running_timer, &running_times);
                 HDsprintf(tmp, "%.6f", (function_times.elapsed - running_times.elapsed));
                 H5RS_asprintf_cat(rs, " %*s ", (int)HDstrlen(tmp), "");
-            } /* end if */
+            }
             for (i = 0; i < current_depth; i++)
                 H5RS_aputc(rs, '+');
             H5RS_asprintf_cat(rs, "%*s%s = ", 2 * current_depth, "", func);
-        } /* end if */
+        }
         else
             /* Continue current line with return value */
             H5RS_acat(rs, " = ");
-    } /* end if */
+    }
     else {
         if (current_depth > last_call_depth)
             H5RS_acat(rs, " = <delayed>\n");
@@ -3961,11 +4043,11 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
             H5_timer_get_times(function_timer, &function_times);
             H5_timer_get_times(running_timer, &running_times);
             H5RS_asprintf_cat(rs, "@%.6f ", (function_times.elapsed - running_times.elapsed));
-        } /* end if */
+        }
         for (i = 0; i < current_depth; i++)
             H5RS_aputc(rs, '+');
         H5RS_asprintf_cat(rs, "%*s%s(", 2 * current_depth, "", func);
-    } /* end else */
+    }
 
     /* Format arguments into the refcounted string */
     HDva_start(ap, type);
@@ -3978,7 +4060,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
         H5_timer_get_times(running_timer, &running_times);
         H5RS_asprintf_cat(rs, " @%.6f [dt=%.6f]", (function_times.elapsed - running_times.elapsed),
                           (function_times.elapsed - *returning));
-    } /* end if */
+    }
 
     /* Display generated string */
     if (returning)
@@ -3986,7 +4068,7 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     else {
         last_call_depth = current_depth++;
         H5RS_acat(rs, ")");
-    } /* end else */
+    }
     HDfputs(H5RS_get_str(rs), out);
     HDfflush(out);
     H5RS_decr(rs);
@@ -3994,5 +4076,5 @@ H5_trace(const double *returning, const char *func, const char *type, ...)
     if (H5_debug_g.ttimes)
         return function_times.elapsed;
     else
-        return (double)0.0F;
+        return 0.0;
 } /* end H5_trace() */

@@ -49,7 +49,7 @@ main(void)
     hid_t       string_type;
     hid_t       file_id;
     hsize_t     chunk_size   = 10;
-    Particle    fill_data[1] = {{"no data", -1, -1, -99.0f, -99.0}}; /* Fill value particle */
+    Particle    fill_data[1] = {{"no data", -1, -1, -99.0F, -99.0}}; /* Fill value particle */
     int         compress     = 0;
     hsize_t     nfields_out;
     hsize_t     nrecords_out;

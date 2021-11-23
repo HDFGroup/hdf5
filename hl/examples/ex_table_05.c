@@ -64,7 +64,7 @@ main(void)
     hid_t       string_type;
     hid_t       file_id;
     hsize_t     chunk_size   = 10;
-    Particle    fill_data[1] = {{"no data", -1, -1, -99.0f, -99.0}}; /* Fill value particle */
+    Particle    fill_data[1] = {{"no data", -1, -1, -99.0F, -99.0}}; /* Fill value particle */
     int         compress     = 0;
     hsize_t     nfields;
     hsize_t     start;    /* Record to start reading/writing */
@@ -72,7 +72,7 @@ main(void)
     int         i;
 
     /* Define new values for the field "Pressure"  */
-    float pressure_in[NRECORDS_ADD] = {0.0f, 1.0f, 2.0f};
+    float pressure_in[NRECORDS_ADD] = {0.0F, 1.0F, 2.0F};
     int   field_index_pre[1]        = {3};
     int   field_index_pos[2]        = {1, 2};
 

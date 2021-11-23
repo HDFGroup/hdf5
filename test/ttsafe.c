@@ -70,8 +70,6 @@ tts_is_threadsafe(void)
 
     if (is_ts != should_be)
         TestErrPrintf("Thread-safety value incorrect - test failed\n");
-
-    return;
 }
 
 /* Routine to generate attribute names for numeric values */
@@ -134,7 +132,7 @@ main(int argc, char *argv[])
         TestSummary();
 
     /* Clean up test files, if allowed */
-    if (GetTestCleanup() && !HDgetenv("HDF5_NOCLEANUP"))
+    if (GetTestCleanup() && !HDgetenv(HDF5_NOCLEANUP))
         TestCleanup();
 
     /* Release test infrastructure */

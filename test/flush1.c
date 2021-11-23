@@ -201,7 +201,7 @@ main(void)
         TEST_ERROR
 
     /* Check if the current VFD supports SWMR */
-    driver            = HDgetenv("HDF5_DRIVER");
+    driver            = HDgetenv(HDF5_DRIVER);
     vfd_supports_swmr = H5FD__supports_swmr_test(driver);
 
     /*************************************************/
@@ -327,7 +327,10 @@ main(void)
     HD_exit(EXIT_SUCCESS);
 
 error:
-    H5E_BEGIN_TRY { H5Pclose(fapl_id); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl_id);
+    }
     H5E_END_TRY;
 
     HDexit(EXIT_FAILURE);

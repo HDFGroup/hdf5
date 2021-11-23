@@ -23,6 +23,8 @@ set (VFD_LIST
     split
     multi
     family
+    splitter
+    #log - log VFD currently has file space allocation bugs
 )
 
 set (H5P_VFD_TESTS
@@ -30,8 +32,23 @@ set (H5P_VFD_TESTS
     t_pflush2
 )
 
-if (DIRECT_VFD)
+if (H5_HAVE_DIRECT)
   set (VFD_LIST ${VFD_LIST} direct)
+endif ()
+if (H5_HAVE_PARALLEL)
+  set (VFD_LIST ${VFD_LIST} mpio)
+endif ()
+if (H5_HAVE_MIRROR_VFD)
+  set (VFD_LIST ${VFD_LIST} mirror)
+endif ()
+if (H5_HAVE_ROS3_VFD)
+  set (VFD_LIST ${VFD_LIST} ros3)
+endif ()
+if (H5_HAVE_LIBHDFS)
+  set (VFD_LIST ${VFD_LIST} hdfs)
+endif ()
+if (H5_HAVE_WINDOWS)
+  set (VFD_LIST ${VFD_LIST} windows)
 endif ()
 
 foreach (vfdtest ${VFD_LIST})
@@ -58,9 +75,9 @@ macro (ADD_VFD_TEST vfdname resultcode)
           WORKING_DIRECTORY ${HDF5_TEST_PAR_BINARY_DIR}/${vfdname}
       )
     endforeach ()
-    set_tests_properties (MPI_TEST_VFD-${vfdname}-pflush1 PROPERTIES WILL_FAIL "true")
+    set_tests_properties (MPI_TEST_VFD-${vfdname}-t_pflush1 PROPERTIES WILL_FAIL "true")
     #set_property (TEST MPI_TEST_t_pflush1 PROPERTY PASS_REGULAR_EXPRESSION "PASSED")
-    set_tests_properties (MPI_TEST_VFD-${vfdname}-pflush2 PROPERTIES DEPENDS MPI_TEST_VFD-${vfdname}-pflush1)
+    set_tests_properties (MPI_TEST_VFD-${vfdname}-t_pflush2 PROPERTIES DEPENDS MPI_TEST_VFD-${vfdname}-t_pflush1)
   endif ()
 endmacro ()
 

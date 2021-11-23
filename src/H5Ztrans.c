@@ -90,8 +90,7 @@ static void       H5Z__do_op(H5Z_node *tree);
 static hbool_t    H5Z__op_is_numbs(H5Z_node *_tree);
 static hbool_t    H5Z__op_is_numbs2(H5Z_node *_tree);
 static hid_t      H5Z__xform_find_type(const H5T_t *type);
-static herr_t     H5Z__xform_eval_full(H5Z_node *tree, const size_t array_size, const hid_t array_type,
-                                       H5Z_result *res);
+static herr_t     H5Z__xform_eval_full(H5Z_node *tree, size_t array_size, hid_t array_type, H5Z_result *res);
 static void       H5Z__xform_destroy_parse_tree(H5Z_node *tree);
 static void *     H5Z__xform_parse(const char *expression, H5Z_datval_ptrs *dat_val_pointers);
 static void *     H5Z__xform_copy_tree(H5Z_node *tree, H5Z_datval_ptrs *dat_val_pointers,
@@ -1548,11 +1547,11 @@ H5Z_xform_create(const char *expr)
                     (HDisdigit(expr[i - 1]) || (expr[i - 1] == '.')) &&
                     (HDisdigit(expr[i + 1]) || (expr[i + 1] == '-') || (expr[i + 1] == '+')))
                     continue;
-            }
+            } /* end if */
 
             count++;
-        }
-    }
+        } /* end if */
+    }     /* end for */
 
     /* When there are no "x"'s in the equation (ie, simple transform case),
      * we don't need to allocate any space since no array will have to be
@@ -1750,11 +1749,19 @@ done:
 hbool_t
 H5Z_xform_noop(const H5Z_data_xform_t *data_xform_prop)
 {
-    hbool_t ret_value = FALSE; /* Return value */
+    hbool_t ret_value = TRUE; /* Return value */
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    ret_value = (data_xform_prop ? FALSE : TRUE);
+    if (data_xform_prop) {
+        ret_value = FALSE;
+
+        /* Check for trivial data tranformation: expression = "x" */
+        if ((HDstrlen(data_xform_prop->xform_exp) == 1) && data_xform_prop->dat_val_pointers &&
+            (data_xform_prop->dat_val_pointers->num_ptrs == 1)) {
+            ret_value = TRUE;
+        } /* end if */
+    }     /* end if */
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* H5Z_xform_noop() */

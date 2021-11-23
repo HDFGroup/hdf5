@@ -116,6 +116,7 @@
 #define FILE86     "err_attr_dspace.h5"
 #define FILE87     "tintsnodata.h5"
 #define FILE88     "tldouble_scalar.h5"
+#define FILE89     "tfloatsattrs.h5"
 
 /*-------------------------------------------------------------------------
  * prototypes
@@ -154,13 +155,13 @@ static size_t H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const un
 
 /* This message derives from H5Z */
 const H5Z_class2_t H5Z_DYNLIBUD[1] = {{
-    H5Z_CLASS_T_VERS,                /* H5Z_class_t version             */
-    H5Z_FILTER_DYNLIBUD,             /* Filter id number        */
-    1, 1,                            /* Encoding and decoding enabled   */
-    "dynlibud",                      /* Filter name for debugging    */
-    NULL,                            /* The "can apply" callback        */
-    NULL,                            /* The "set local" callback        */
-    (H5Z_func_t)H5Z_filter_dynlibud, /* The actual filter function    */
+    H5Z_CLASS_T_VERS,    /* H5Z_class_t version             */
+    H5Z_FILTER_DYNLIBUD, /* Filter id number        */
+    1, 1,                /* Encoding and decoding enabled   */
+    "dynlibud",          /* Filter name for debugging    */
+    NULL,                /* The "can apply" callback        */
+    NULL,                /* The "set local" callback        */
+    H5Z_filter_dynlibud, /* The actual filter function    */
 }};
 
 /* A UD link traversal function.  Shouldn't actually be called. */
@@ -198,8 +199,8 @@ const H5L_class_t UD_link_class[1] = {{
 
 #define DIM1  20
 #define DIM2  10
-#define CDIM1 DIM1 / 2
-#define CDIM2 DIM2 / 2
+#define CDIM1 (DIM1 / 2)
+#define CDIM2 (DIM2 / 2)
 #define RANK  2
 
 /* Dataspace of 0 dimension size */
@@ -396,6 +397,15 @@ typedef struct s1_t {
 #define F83_RANK     1
 #define F83_ARRAYDIM 3
 
+/* "FILE89" macros */
+#define F89_XDIM        8
+#define F89_DATASETF32  "DS32BITS"
+#define F89_YDIM32      32
+#define F89_DATASETF64  "DS64BITS"
+#define F89_YDIM64      64
+#define F89_DATASETF128 "DS128BITS"
+#define F89_YDIM128     128
+
 static void
 gent_group(void)
 {
@@ -488,7 +498,7 @@ gent_dataset(void)
 
     for (i = 0; i < 30; i++)
         for (j = 0; j < 20; j++)
-            dset2[i][j] = 0.0001F * (float)j + (float)i;
+            dset2[i][j] = 0.0001 * (double)j + (double)i;
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset2_data);
 
@@ -595,7 +605,7 @@ gent_attribute(void)
     attr    = H5Acreate2(root, "attr3", H5T_IEEE_F64BE, space, H5P_DEFAULT, H5P_DEFAULT);
 
     for (i = 0; i < 10; i++)
-        d[i] = 0.1F * (float)i;
+        d[i] = 0.1 * (double)i;
 
     H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
     H5Sclose(space);
@@ -1009,7 +1019,7 @@ gent_compound_dt(void)
     for (i = 0; i < (int)sdim; i++) {
         dset1[i].a = i;
         dset1[i].b = (float)(i * i);
-        dset1[i].c = (float)(1.0F / (float)(i + 1));
+        dset1[i].c = (double)(1.0 / (double)(i + 1));
 
         dset2[i].a = i;
         dset2[i].b = (float)((float)i + (float)i * 0.1F);
@@ -1196,7 +1206,7 @@ gent_compound_dt2(void)
     for (i = 0; i < (int)sdim; i++) {
         dset1[i].a = i;
         dset1[i].b = (float)(i * i);
-        dset1[i].c = (float)(1.0F / (float)(i + 1));
+        dset1[i].c = (double)(1.0 / (double)(i + 1));
 
         dset2[i].a = i;
         dset2[i].b = (float)((float)i + (float)i * 0.1F);
@@ -1636,7 +1646,7 @@ gent_many(void)
     space2  = H5Screate_simple(1, dims, NULL);
     attr    = H5Acreate2(dataset, "attr3", H5T_IEEE_F64BE, space2, H5P_DEFAULT, H5P_DEFAULT);
     for (i = 0; i < 10; i++)
-        d[i] = 0.1F * (float)i;
+        d[i] = 0.1 * (double)i;
     H5Awrite(attr, H5T_NATIVE_DOUBLE, d);
     H5Sclose(space2);
     H5Aclose(attr);
@@ -2493,7 +2503,7 @@ gent_nestcomp(void)
     for (i = 0; i < 10; i++) {
         s1[i].a      = i;
         s1[i].b      = (float)(i * i);
-        s1[i].c      = 1.0F / (float)(i + 1);
+        s1[i].c      = 1.0 / (double)(i + 1);
         s1[i].d.a    = (char)(65 + i);
         s1[i].d.b[0] = -100.0F;
         s1[i].d.b[1] = 100.0F;
@@ -5067,7 +5077,7 @@ gent_compound_complex(void)
         Array1[m].e = (float)((float)m * 0.96F);
 
         for (n = 0; n < F41_ARRAY_DIMf; n++)
-            Array1[m].f[n] = ((float)m * 1024.9637F);
+            Array1[m].f[n] = ((double)m * 1024.9637);
 
         Array1[m].g = 'm';
     }
@@ -5375,7 +5385,10 @@ make_dset(hid_t loc_id, const char *name, hid_t sid, hid_t tid, hid_t dcpl, void
     return 0;
 
 out:
-    H5E_BEGIN_TRY { H5Dclose(dsid); }
+    H5E_BEGIN_TRY
+    {
+        H5Dclose(dsid);
+    }
     H5E_END_TRY;
     return -1;
 }
@@ -6348,7 +6361,7 @@ gent_ldouble_scalar(void)
     hid_t       tid;
     hid_t       sid;
     hsize_t     dims[1] = {6};
-    long double buf[6]  = {0.0, 1.0, 2.0, 3.0, 4.0, 5.0};
+    long double buf[6]  = {0.0L, 1.0L, 2.0L, 3.0L, 4.0L, 5.0L};
 
     if ((fid = H5Fcreate(FILE88, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT)) < 0)
         goto error;
@@ -6356,7 +6369,7 @@ gent_ldouble_scalar(void)
     if ((sid = H5Screate(H5S_SCALAR)) < 0)
         goto error;
 
-    if ((tid = H5Tarray_create(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
+    if ((tid = H5Tarray_create2(H5T_NATIVE_LDOUBLE, 1, dims)) < 0)
         goto error;
 
     if (H5Tget_size(tid) == 0)
@@ -6548,7 +6561,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6734,7 +6746,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -6994,7 +7005,6 @@ out:
         H5Fclose(fid);
     }
     H5E_END_TRY;
-    return;
 }
 
 /*-------------------------------------------------------------------------
@@ -7012,7 +7022,7 @@ gent_fpformat(void)
 {
     hid_t   fid, sid, did;
     hsize_t dims[1] = {6};
-    double  dbuf[6] = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
+    double  dbuf[6] = {-0.1234567, 0.1234567, 0, 0, 0, 0};
     float   fbuf[6] = {-0.1234567f, 0.1234567f, 0, 0, 0, 0};
 
     fid = H5Fcreate(FILE60, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
@@ -7440,7 +7450,7 @@ gent_packedbits(void)
 
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001F * (float)j + (float)i;
+            dsetdbl[i][j] = 0.0001 * (double)j + (double)i;
 
     H5Dwrite(dataset, H5T_NATIVE_DOUBLE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl[0]);
 
@@ -7674,7 +7684,7 @@ gent_attr_intsize(void)
 
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001F * (float)j + (float)i;
+            dsetdbl[i][j] = 0.0001 * (double)j + (double)i;
 
     H5Awrite(attr, H5T_NATIVE_DOUBLE, dsetdbl[0]);
 
@@ -7984,7 +7994,7 @@ gent_compound_intsizes(void)
 
         for (n = 0; n < (int)dims[0]; n++)
             for (o = 0; o < (int)dims[1]; o++)
-                Array1[m].dsetdbl[n][o] = 0.0001F * (float)o + (float)n;
+                Array1[m].dsetdbl[n][o] = 0.0001 * (double)o + (double)n;
     }
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -8274,7 +8284,7 @@ gent_compound_attr_intsizes(void)
 
         for (n = 0; n < (int)dims[0]; n++)
             for (o = 0; o < (int)dims[1]; o++)
-                Array1[m].dsetdbl[n][o] = 0.0001F * (float)o + (float)n;
+                Array1[m].dsetdbl[n][o] = 0.0001 * (double)o + (double)n;
     }
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -8779,7 +8789,7 @@ gent_intscalars(void)
 
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001F * (float)j + (float)i;
+            dsetdbl[i][j] = 0.0001 * (double)j + (double)i;
 
     H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl[0]);
 
@@ -9023,7 +9033,7 @@ gent_attr_intscalars(void)
 
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001F * (float)j + (float)i;
+            dsetdbl[i][j] = 0.0001 * (double)j + (double)i;
 
     H5Awrite(attr, tid, dsetdbl[0]);
 
@@ -9226,7 +9236,7 @@ gent_compound_int_array(void)
         dims[0] = F76_DIM8;
 
         for (n = 0; n < (int)dims[0]; n++)
-            Cmpd1[m].dsetdbl[n] = 0.0001F + (float)n;
+            Cmpd1[m].dsetdbl[n] = 0.0001 + (double)n;
     }
 
     /* Create the array data type for the 8 bits signed int array             */
@@ -9467,8 +9477,8 @@ gent_compound_ints(void)
         val64bits <<= 1;
 
         /* Double Dummy set for failure tests */
-        Cmpd1[m].dsetdbl = 0.0001F + (float)m;
-        Cmpd2[m].dsetdbl = 0.0001F + (float)m;
+        Cmpd1[m].dsetdbl = 0.0001 + (double)m;
+        Cmpd2[m].dsetdbl = 0.0001 + (double)m;
     }
 
     /* Create the dataspace                                           */
@@ -9843,7 +9853,7 @@ gent_intattrscalars(void)
 
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++)
-            dsetdbl[i][j] = 0.0001F * (float)j + (float)i;
+            dsetdbl[i][j] = 0.0001 * (double)j + (double)i;
 
     H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dsetdbl);
     /* Attribute of double */
@@ -10172,7 +10182,7 @@ gent_intsattrs(void)
 
     for (i = 0; i < dims[0]; i++)
         for (j = 0; j < dims[1]; j++) {
-            dsetdbl[i][j]            = 0.0001F * (float)j + (float)i;
+            dsetdbl[i][j]            = 0.0001 * (double)j + (double)i;
             asetdbl[i * dims[1] + j] = dsetdbl[i][j];
         }
 
@@ -10207,6 +10217,152 @@ gent_intsattrs(void)
     HDfree(aset32);
     HDfree(aset64);
     HDfree(asetdbl);
+}
+
+/*-------------------------------------------------------------------------
+ * Function:    gent_floatsattrs
+ *
+ * Purpose:     Generate a file to be used in the h5dump tests.
+ *   Three datasets of 4, 8 and 16 bytes of float types are created.
+ *   Fill them with raw data such that no bit will be all zero in a dataset.
+ *-------------------------------------------------------------------------
+ */
+static void
+gent_floatsattrs(void)
+{
+    hid_t   fid     = H5I_INVALID_HID;
+    hid_t   tid     = H5I_INVALID_HID;
+    hid_t   attr    = H5I_INVALID_HID;
+    hid_t   dataset = H5I_INVALID_HID;
+    hid_t   space   = H5I_INVALID_HID;
+    hid_t   aspace  = H5I_INVALID_HID;
+    hsize_t dims[2], adims[1];
+
+    float **      dset32  = NULL;
+    double **     dset64  = NULL;
+    long double **dset128 = NULL;
+
+    float *      aset32  = NULL;
+    double *     aset64  = NULL;
+    long double *aset128 = NULL;
+
+    float       val32bits;
+    double      val64bits;
+    long double val128bits;
+
+    unsigned int i, j;
+
+    /* Create arrays */
+    H5TEST_ALLOCATE_2D_ARRAY(dset32, float, F89_XDIM, F89_YDIM32);
+    H5TEST_ALLOCATE_2D_ARRAY(dset64, double, F89_XDIM, F89_YDIM64);
+    H5TEST_ALLOCATE_2D_ARRAY(dset128, long double, F89_XDIM, F89_YDIM128);
+
+    aset32  = HDcalloc(F89_XDIM * F89_YDIM32, sizeof(float));
+    aset64  = HDcalloc(F89_XDIM * F89_YDIM64, sizeof(double));
+    aset128 = HDcalloc(F89_XDIM * F89_YDIM128, sizeof(long double));
+
+    fid = H5Fcreate(FILE89, H5F_ACC_TRUNC, H5P_DEFAULT, H5P_DEFAULT);
+
+    if ((tid = H5Tcopy(H5T_NATIVE_LDOUBLE)) < 0)
+        goto error;
+
+    if (H5Tget_size(tid) == 0)
+        goto error;
+
+    /* Dataset of 32 bits float */
+    dims[0] = F89_XDIM;
+    dims[1] = F89_YDIM32;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F89_DATASETF32, H5T_IEEE_F32LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val32bits = (float)F89_YDIM32;
+    for (i = 0; i < dims[0]; i++) {
+        dset32[i][0]        = val32bits;
+        aset32[i * dims[1]] = dset32[i][0];
+        for (j = 1; j < dims[1]; j++) {
+            dset32[i][j]            = (float)(j * dims[0] + i) / (float)F89_YDIM32;
+            aset32[i * dims[1] + j] = dset32[i][j];
+        }
+        val32bits -= (float)1;
+    }
+
+    H5Dwrite(dataset, H5T_IEEE_F32LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset32[0]);
+    /* Attribute of 32 bits float */
+    adims[0] = F89_XDIM * F89_YDIM32;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F89_DATASETF32, H5T_IEEE_F32LE, aspace, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, H5T_IEEE_F32LE, aset32);
+    H5Aclose(attr);
+    H5Sclose(aspace);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 64 bits double */
+    dims[0] = F89_XDIM;
+    dims[1] = F89_YDIM64;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F89_DATASETF64, H5T_IEEE_F64LE, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val64bits = (double)F89_YDIM64;
+    for (i = 0; i < dims[0]; i++) {
+        dset64[i][0]        = val64bits;
+        aset64[i * dims[1]] = dset64[i][0];
+        for (j = 1; j < dims[1]; j++) {
+            dset64[i][j]            = (double)(j * dims[0] + i) / (double)F89_YDIM64;
+            aset64[i * dims[1] + j] = dset64[i][j];
+        }
+        val64bits -= (double)1;
+    }
+
+    H5Dwrite(dataset, H5T_IEEE_F64LE, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset64[0]);
+    /* Attribute of 64 bits double */
+    adims[0] = F89_XDIM * F89_YDIM64;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F89_DATASETF64, H5T_IEEE_F64LE, aspace, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, H5T_IEEE_F64LE, aset64);
+    H5Aclose(attr);
+    H5Sclose(aspace);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+    /* Dataset of 128 bits long double */
+    dims[0] = F89_XDIM;
+    dims[1] = F89_YDIM128;
+    space   = H5Screate_simple(2, dims, NULL);
+    dataset = H5Dcreate2(fid, F89_DATASETF128, tid, space, H5P_DEFAULT, H5P_DEFAULT, H5P_DEFAULT);
+
+    val128bits = (long double)F89_YDIM128;
+    for (i = 0; i < dims[0]; i++) {
+        dset128[i][0]        = val128bits;
+        aset128[i * dims[1]] = dset128[i][0];
+        for (j = 1; j < dims[1]; j++) {
+            dset128[i][j]            = (long double)(j * dims[0] + i) / (long double)F89_YDIM128;
+            aset128[i * dims[1] + j] = dset128[i][j];
+        }
+        val128bits -= (long double)1;
+    }
+
+    H5Dwrite(dataset, tid, H5S_ALL, H5S_ALL, H5P_DEFAULT, dset128[0]);
+    /* Attribute of 128 bits long double */
+    adims[0] = F89_XDIM * F89_YDIM128;
+    aspace   = H5Screate_simple(1, adims, NULL);
+    attr     = H5Acreate2(dataset, F89_DATASETF128, tid, aspace, H5P_DEFAULT, H5P_DEFAULT);
+    H5Awrite(attr, tid, aset128);
+    H5Aclose(attr);
+    H5Sclose(aspace);
+    H5Sclose(space);
+    H5Dclose(dataset);
+
+error:
+    H5Fclose(fid);
+
+    HDfree(dset32);
+    HDfree(dset64);
+    HDfree(dset128);
+
+    HDfree(aset32);
+    HDfree(aset64);
+    HDfree(aset128);
 }
 
 static void
@@ -10921,7 +11077,7 @@ H5Z_filter_dynlibud(unsigned int flags, size_t cd_nelmts, const unsigned int *cd
         return (0);
 
     /* Assignment to eliminate unused parameter warning. */
-    cd_values = cd_values;
+    (void)cd_values;
 
     if (flags & H5Z_FLAG_REVERSE) { /*read*/
         /* Subtract the original value with MULTIPLIER */
@@ -11138,6 +11294,7 @@ main(void)
     gent_aindices();
     gent_longlinks();
     gent_ldouble();
+    gent_ldouble_scalar();
     gent_binary();
     gent_bigdims();
     gent_hyperslab();
@@ -11161,6 +11318,7 @@ main(void)
     gent_compound_ints();
     gent_intattrscalars();
     gent_intsattrs();
+    gent_floatsattrs();
     gent_bitnopaquefields();
     gent_nodata();
 

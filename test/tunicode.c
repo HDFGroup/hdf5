@@ -33,8 +33,8 @@
 
 #define RANK            1
 #define COMP_INT_VAL    7
-#define COMP_FLOAT_VAL  -42.0F
-#define COMP_DOUBLE_VAL 42.0F
+#define COMP_FLOAT_VAL  (-42.0F)
+#define COMP_DOUBLE_VAL 42.0
 
 /* Test function prototypes */
 void test_fl_string(hid_t fid, const char *string);

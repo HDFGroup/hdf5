@@ -177,46 +177,52 @@ static herr_t  H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t fapl_id, ha
 static herr_t  H5FD__log_truncate(H5FD_t *_file, hid_t dxpl_id, hbool_t closing);
 static herr_t  H5FD__log_lock(H5FD_t *_file, hbool_t rw);
 static herr_t  H5FD__log_unlock(H5FD_t *_file);
+static herr_t  H5FD__log_delete(const char *filename, hid_t fapl_id);
 
 static const H5FD_class_t H5FD_log_g = {
-    "log",                   /* name			*/
-    MAXADDR,                 /* maxaddr		*/
-    H5F_CLOSE_WEAK,          /*  fc_degree		*/
-    H5FD__log_term,          /* terminate            */
-    NULL,                    /* sb_size		*/
-    NULL,                    /* sb_encode		*/
-    NULL,                    /* sb_decode		*/
-    sizeof(H5FD_log_fapl_t), /* fapl_size		*/
-    H5FD__log_fapl_get,      /* fapl_get		*/
-    H5FD__log_fapl_copy,     /* fapl_copy		*/
-    H5FD__log_fapl_free,     /* fapl_free		*/
-    0,                       /* dxpl_size		*/
-    NULL,                    /* dxpl_copy		*/
-    NULL,                    /* dxpl_free		*/
-    H5FD__log_open,          /* open			*/
-    H5FD__log_close,         /* close		*/
-    H5FD__log_cmp,           /* cmp			*/
-    H5FD__log_query,         /* query		*/
-    NULL,                    /* get_type_map		*/
-    H5FD__log_alloc,         /* alloc		*/
-    H5FD__log_free,          /* free			*/
-    H5FD__log_get_eoa,       /* get_eoa		*/
-    H5FD__log_set_eoa,       /* set_eoa		*/
-    H5FD__log_get_eof,       /* get_eof		*/
-    H5FD__log_get_handle,    /* get_handle           */
-    H5FD__log_read,          /* read			*/
-    H5FD__log_write,         /* write		*/
-    NULL,                    /* read vector             */
-    NULL,                    /* write vector            */
-    NULL,                    /* read_selection       */
-    NULL,                    /* write_selection      */
-    NULL,                    /* flush		*/
-    H5FD__log_truncate,      /* truncate		*/
-    H5FD__log_lock,          /* lock                 */
-    H5FD__log_unlock,        /* unlock               */
-    NULL,                    /* ctl                  */
-    H5FD_FLMAP_DICHOTOMY     /* fl_map		*/
+    H5FD_LOG_VALUE,          /* value               */
+    "log",                   /* name                */
+    MAXADDR,                 /* maxaddr             */
+    H5F_CLOSE_WEAK,          /*  fc_degree          */
+    H5FD__log_term,          /* terminate           */
+    NULL,                    /* sb_size             */
+    NULL,                    /* sb_encode           */
+    NULL,                    /* sb_decode           */
+    sizeof(H5FD_log_fapl_t), /* fapl_size           */
+    H5FD__log_fapl_get,      /* fapl_get            */
+    H5FD__log_fapl_copy,     /* fapl_copy           */
+    H5FD__log_fapl_free,     /* fapl_free           */
+    0,                       /* dxpl_size           */
+    NULL,                    /* dxpl_copy           */
+    NULL,                    /* dxpl_free           */
+    H5FD__log_open,          /* open                */
+    H5FD__log_close,         /* close               */
+    H5FD__log_cmp,           /* cmp                 */
+    H5FD__log_query,         /* query               */
+    NULL,                    /* get_type_map        */
+    H5FD__log_alloc,         /* alloc               */
+    H5FD__log_free,          /* free                */
+    H5FD__log_get_eoa,       /* get_eoa             */
+    H5FD__log_set_eoa,       /* set_eoa             */
+    H5FD__log_get_eof,       /* get_eof             */
+    H5FD__log_get_handle,    /* get_handle          */
+    H5FD__log_read,          /* read                */
+    H5FD__log_write,         /* write               */
+    NULL,                    /* read vector         */
+    NULL,                    /* write vector        */
+    NULL,                    /* read_selection      */
+    NULL,                    /* write_selection     */
+    NULL,                    /* flush               */
+    H5FD__log_truncate,      /* truncate            */
+    H5FD__log_lock,          /* lock                */
+    H5FD__log_unlock,        /* unlock              */
+    H5FD__log_delete,        /* del                 */
+    NULL,                    /* ctl                 */
+    H5FD_FLMAP_DICHOTOMY     /* fl_map              */
 };
+
+/* Default configuration, if none provided */
+static const H5FD_log_fapl_t H5FD_log_default_config_g = {NULL, H5FD_LOG_LOC_IO | H5FD_LOG_ALLOC, 4096};
 
 /* Declare a free list to manage the H5FD_log_t struct */
 H5FL_DEFINE_STATIC(H5FD_log_t);
@@ -239,7 +245,7 @@ H5FD__init_package(void)
     FUNC_ENTER_STATIC
 
     /* Check the use disabled file locks environment variable */
-    lock_env_var = HDgetenv("HDF5_USE_FILE_LOCKING");
+    lock_env_var = HDgetenv(HDF5_USE_FILE_LOCKING);
     if (lock_env_var && !HDstrcmp(lock_env_var, "BEST_EFFORT"))
         ignore_disabled_file_locks_s = TRUE; /* Override: Ignore disabled locks */
     else if (lock_env_var && (!HDstrcmp(lock_env_var, "TRUE") || !HDstrcmp(lock_env_var, "1")))
@@ -331,11 +337,14 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
     FUNC_ENTER_API(FAIL)
     H5TRACE4("e", "i*sULz", fapl_id, logfile, flags, buf_size);
 
+    /* Do this first, so that we don't try to free a wild pointer if
+     * H5P_object_verify() fails.
+     */
+    HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
+
     /* Check arguments */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "not a file access property list")
-
-    HDmemset(&fa, 0, sizeof(H5FD_log_fapl_t));
 
     /* Duplicate the log file string
      * A little wasteful, since this string will just be copied later, but
@@ -347,7 +356,7 @@ H5Pset_fapl_log(hid_t fapl_id, const char *logfile, unsigned long long flags, si
 
     fa.flags    = flags;
     fa.buf_size = buf_size;
-    ret_value   = H5P_set_driver(plist, H5FD_LOG, &fa);
+    ret_value   = H5P_set_driver(plist, H5FD_LOG, &fa, NULL);
 
 done:
     if (fa.logfile)
@@ -431,7 +440,7 @@ done:
             if (new_fa->logfile)
                 new_fa->logfile = (char *)H5MM_xfree(new_fa->logfile);
             H5MM_free(new_fa);
-        } /* end if */
+        }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__log_fapl_copy() */
@@ -482,15 +491,16 @@ static H5FD_t *
 H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 {
     H5FD_log_t *           file = NULL;
-    H5P_genplist_t *       plist;   /* Property list */
-    const H5FD_log_fapl_t *fa;      /* File access property list information */
-    int                    fd = -1; /* File descriptor */
-    int                    o_flags; /* Flags for open() call */
+    H5P_genplist_t *       plist; /* Property list */
+    const H5FD_log_fapl_t *fa;    /* File access property list information */
+    H5FD_log_fapl_t        default_fa = H5FD_log_default_config_g;
+    int                    fd         = -1; /* File descriptor */
+    int                    o_flags;         /* Flags for open() call */
 #ifdef H5_HAVE_WIN32_API
     struct _BY_HANDLE_FILE_INFORMATION fileinfo;
 #endif
-    H5_timer_t open_timer = {{0}, {0}, {0}, FALSE}; /* Timer for open() call */
-    H5_timer_t stat_timer = {{0}, {0}, {0}, FALSE}; /* Timer for stat() call */
+    H5_timer_t open_timer; /* Timer for open() call */
+    H5_timer_t stat_timer; /* Timer for stat() call */
     h5_stat_t  sb;
     H5FD_t *   ret_value = NULL; /* Return value */
 
@@ -507,6 +517,10 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     if (ADDR_OVERFLOW(maxaddr))
         HGOTO_ERROR(H5E_ARGS, H5E_OVERFLOW, NULL, "bogus maxaddr")
 
+    /* Initialize timers */
+    H5_timer_init(&open_timer);
+    H5_timer_init(&stat_timer);
+
     /* Build the open flags */
     o_flags = (H5F_ACC_RDWR & flags) ? O_RDWR : O_RDONLY;
     if (H5F_ACC_TRUNC & flags)
@@ -519,14 +533,14 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
     /* Get the driver specific information */
     if (NULL == (plist = H5P_object_verify(fapl_id, H5P_FILE_ACCESS)))
         HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, NULL, "not a file access property list")
-    if (NULL == (fa = (const H5FD_log_fapl_t *)H5P_peek_driver_info(plist)))
-        HGOTO_ERROR(H5E_PLIST, H5E_BADVALUE, NULL, "bad VFL driver info")
+    if (NULL == (fa = (const H5FD_log_fapl_t *)H5P_peek_driver_info(plist))) {
+        /* Use default driver configuration*/
+        fa = &default_fa;
+    }
 
     /* Start timer for open() call */
-    if (fa->flags & H5FD_LOG_TIME_OPEN) {
-        H5_timer_init(&open_timer);
+    if (fa->flags & H5FD_LOG_TIME_OPEN)
         H5_timer_start(&open_timer);
-    } /* end if */
 
     /* Open the file */
     if ((fd = HDopen(name, o_flags, H5_POSIX_CREATE_MODE_RW)) < 0) {
@@ -536,17 +550,15 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
             H5E_FILE, H5E_CANTOPENFILE, NULL,
             "unable to open file: name = '%s', errno = %d, error message = '%s', flags = %x, o_flags = %x",
             name, myerrno, HDstrerror(myerrno), flags, (unsigned)o_flags);
-    } /* end if */
+    }
 
     /* Stop timer for open() call */
     if (fa->flags & H5FD_LOG_TIME_OPEN)
         H5_timer_stop(&open_timer);
 
     /* Start timer for stat() call */
-    if (fa->flags & H5FD_LOG_TIME_STAT) {
-        H5_timer_init(&stat_timer);
+    if (fa->flags & H5FD_LOG_TIME_STAT)
         H5_timer_start(&stat_timer);
-    } /* end if */
 
     /* Get the file stats */
     if (HDfstat(fd, &sb) < 0)
@@ -599,15 +611,15 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (file->fa.flags & H5FD_LOG_FILE_READ) {
             file->nread = (unsigned char *)H5MM_calloc(file->iosize);
             HDassert(file->nread);
-        } /* end if */
+        }
         if (file->fa.flags & H5FD_LOG_FILE_WRITE) {
             file->nwrite = (unsigned char *)H5MM_calloc(file->iosize);
             HDassert(file->nwrite);
-        } /* end if */
+        }
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
             file->flavor = (unsigned char *)H5MM_calloc(file->iosize);
             HDassert(file->flavor);
-        } /* end if */
+        }
 
         /* Set the log file pointer */
         if (fa->logfile)
@@ -621,14 +633,14 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
 
             H5_timer_get_times(open_timer, &open_times);
             HDfprintf(file->logfp, "Open took: (%f s)\n", open_times.elapsed);
-        } /* end if */
+        }
         if (file->fa.flags & H5FD_LOG_TIME_STAT) {
             H5_timevals_t stat_times; /* Elapsed time for stat() call */
 
             H5_timer_get_times(stat_timer, &stat_times);
             HDfprintf(file->logfp, "Stat took: (%f s)\n", stat_times.elapsed);
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     /* Check the file locking flags in the fapl */
     if (ignore_disabled_file_locks_s != FAIL)
@@ -650,7 +662,7 @@ H5FD__log_open(const char *name, unsigned flags, hid_t fapl_id, haddr_t maxaddr)
         if (H5P_exist_plist(plist, H5F_ACS_FAMILY_TO_SINGLE_NAME) > 0)
             if (H5P_get(plist, H5F_ACS_FAMILY_TO_SINGLE_NAME, &file->fam_to_single) < 0)
                 HGOTO_ERROR(H5E_VFL, H5E_CANTGET, NULL, "can't get property of changing family to single")
-    } /* end if */
+    }
 
     /* Set return value */
     ret_value = (H5FD_t *)file;
@@ -661,7 +673,7 @@ done:
             HDclose(fd);
         if (file)
             file = H5FL_FREE(H5FD_log_t, file);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__log_open() */
@@ -682,20 +694,21 @@ done:
 static herr_t
 H5FD__log_close(H5FD_t *_file)
 {
-    H5FD_log_t *file        = (H5FD_log_t *)_file;
-    H5_timer_t  close_timer = {{0}, {0}, {0}, FALSE}; /* Timer for close() call */
-    herr_t      ret_value   = SUCCEED;                /* Return value */
+    H5FD_log_t *file = (H5FD_log_t *)_file;
+    H5_timer_t  close_timer;         /* Timer for close() call */
+    herr_t      ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     /* Sanity check */
     HDassert(file);
 
+    /* Initialize timer */
+    H5_timer_init(&close_timer);
+
     /* Start timer for close() call */
-    if (file->fa.flags & H5FD_LOG_TIME_CLOSE) {
-        H5_timer_init(&close_timer);
+    if (file->fa.flags & H5FD_LOG_TIME_CLOSE)
         H5_timer_start(&close_timer);
-    } /* end if */
 
     /* Close the underlying file */
     if (HDclose(file->fd) < 0)
@@ -716,7 +729,7 @@ H5FD__log_close(H5FD_t *_file)
 
             H5_timer_get_times(close_timer, &close_times);
             HDfprintf(file->logfp, "Close took: (%f s)\n", close_times.elapsed);
-        } /* end if */
+        }
 
         /* Dump the total number of seek/read/write operations */
         if (file->fa.flags & H5FD_LOG_NUM_READ)
@@ -751,13 +764,13 @@ H5FD__log_close(H5FD_t *_file)
                               last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
                     last_val  = file->nwrite[addr];
                     last_addr = addr;
-                } /* end if */
+                }
                 addr++;
-            } /* end while */
+            }
             HDfprintf(file->logfp,
                       "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) written to %3d times\n",
                       last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
-        } /* end if */
+        }
 
         /* Dump the read I/O information */
         if (file->fa.flags & H5FD_LOG_FILE_READ) {
@@ -772,13 +785,13 @@ H5FD__log_close(H5FD_t *_file)
                               last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
                     last_val  = file->nread[addr];
                     last_addr = addr;
-                } /* end if */
+                }
                 addr++;
-            } /* end while */
+            }
             HDfprintf(file->logfp,
                       "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) read from %3d times\n",
                       last_addr, (addr - 1), (unsigned long)(addr - last_addr), (int)last_val);
-        } /* end if */
+        }
 
         /* Dump the I/O flavor information */
         if (file->fa.flags & H5FD_LOG_FLAVOR) {
@@ -793,12 +806,12 @@ H5FD__log_close(H5FD_t *_file)
                               last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
                     last_val  = file->flavor[addr];
                     last_addr = addr;
-                } /* end if */
+                }
                 addr++;
-            } /* end while */
+            }
             HDfprintf(file->logfp, "\tAddr %10" PRIuHADDR "-%10" PRIuHADDR " (%10lu bytes) flavor is %s\n",
                       last_addr, (addr - 1), (unsigned long)(addr - last_addr), flavors[last_val]);
-        } /* end if */
+        }
 
         /* Free the logging information */
         if (file->fa.flags & H5FD_LOG_FILE_WRITE)
@@ -925,7 +938,7 @@ H5FD__log_query(const H5FD_t *_file, unsigned long *flags /* out */)
         if (file && file->fam_to_single)
             *flags |= H5FD_FEAT_IGNORE_DRVRINFO; /* Ignore the driver info when file is opened (which
                                                     eliminates it) */
-    }                                            /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__log_query() */
@@ -964,13 +977,13 @@ H5FD__log_alloc(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, hs
             HDassert(addr < file->iosize);
             H5_CHECK_OVERFLOW(size, hsize_t, size_t);
             HDmemset(&file->flavor[addr], (int)type, (size_t)size);
-        } /* end if */
+        }
 
         if (file->fa.flags & H5FD_LOG_ALLOC)
             HDfprintf(file->logfp,
                       "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n", addr,
                       (haddr_t)((addr + size) - 1), size, flavors[type]);
-    } /* end if */
+    }
 
     /* Set return value */
     ret_value = addr;
@@ -1003,13 +1016,13 @@ H5FD__log_free(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             HDassert(addr < file->iosize);
             H5_CHECK_OVERFLOW(size, hsize_t, size_t);
             HDmemset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
-        } /* end if */
+        }
 
         /* Log the file memory freed */
         if (file->fa.flags & H5FD_LOG_FREE)
             HDfprintf(file->logfp, "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n",
                       addr, (haddr_t)((addr + size) - 1), size, flavors[type]);
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(SUCCEED)
 } /* end H5FD__log_free() */
@@ -1070,14 +1083,14 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
                 HDassert(addr < file->iosize);
                 H5_CHECK_OVERFLOW(size, hsize_t, size_t);
                 HDmemset(&file->flavor[file->eoa], (int)type, (size_t)size);
-            } /* end if */
+            }
 
             /* Log the extension like an allocation */
             if (file->fa.flags & H5FD_LOG_ALLOC)
                 HDfprintf(file->logfp,
                           "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Allocated\n",
                           file->eoa, addr, size, flavors[type]);
-        } /* end if */
+        }
 
         /* Check for decreasing file size */
         if (H5F_addr_lt(addr, file->eoa) && H5F_addr_gt(addr, 0)) {
@@ -1088,15 +1101,15 @@ H5FD__log_set_eoa(H5FD_t *_file, H5FD_mem_t type, haddr_t addr)
                 HDassert((addr + size) < file->iosize);
                 H5_CHECK_OVERFLOW(size, hsize_t, size_t);
                 HDmemset(&file->flavor[addr], H5FD_MEM_DEFAULT, (size_t)size);
-            } /* end if */
+            }
 
             /* Log the shrink like a free */
             if (file->fa.flags & H5FD_LOG_FREE)
                 HDfprintf(file->logfp,
                           "%10" PRIuHADDR "-%10" PRIuHADDR " (%10" PRIuHSIZE " bytes) (%s) Freed\n",
                           file->eoa, addr, size, flavors[type]);
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
     file->eoa = addr;
 
@@ -1179,22 +1192,21 @@ static herr_t
 H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
                void *buf /*out*/)
 {
-    H5FD_log_t *  file       = (H5FD_log_t *)_file;
-    size_t        orig_size  = size; /* Save the original size for later */
-    haddr_t       orig_addr  = addr;
-    H5_timer_t    read_timer = {{0}, {0}, {0}, FALSE}; /* Timer for read operation */
-    H5_timevals_t read_times;                          /* Elapsed time for read operation */
-#ifndef H5_HAVE_PREADWRITE
-    H5_timer_t    seek_timer; /* Timer for seek operation */
-    H5_timevals_t seek_times; /* Elapsed time for seek operation */
-#endif                        /* H5_HAVE_PREADWRITE */
-    HDoff_t offset    = (HDoff_t)addr;
-    herr_t  ret_value = SUCCEED; /* Return value */
+    H5FD_log_t *  file      = (H5FD_log_t *)_file;
+    size_t        orig_size = size; /* Save the original size for later */
+    haddr_t       orig_addr = addr;
+    H5_timer_t    read_timer; /* Timer for read operation */
+    H5_timevals_t read_times; /* Elapsed time for read operation */
+    HDoff_t       offset    = (HDoff_t)addr;
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
     HDassert(file && file->pub.cls);
     HDassert(buf);
+
+    /* Initialize timer */
+    H5_timer_init(&read_timer);
 
     /* Check for overflow conditions */
     if (!H5F_addr_defined(addr))
@@ -1212,17 +1224,21 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             HDassert((addr + size) < file->iosize);
             while (tmp_size-- > 0)
                 file->nread[tmp_addr++]++;
-        } /* end if */
-    }     /* end if */
+        }
+    }
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pread) */
     if (addr != file->pos || OP_READ != file->op) {
+        H5_timer_t    seek_timer; /* Timer for seek operation */
+        H5_timevals_t seek_times; /* Elapsed time for seek operation */
+
+        /* Initialize timer */
+        H5_timer_init(&seek_timer);
+
         /* Start timer for seek() call */
-        if (file->fa.flags & H5FD_LOG_TIME_SEEK) {
-            H5_timer_init(&seek_timer);
+        if (file->fa.flags & H5FD_LOG_TIME_SEEK)
             H5_timer_start(&seek_timer);
-        } /* end if */
 
         if (HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
@@ -1239,7 +1255,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
         if (file->fa.flags & H5FD_LOG_TIME_SEEK) {
             H5_timer_get_times(seek_timer, &seek_times);
             file->total_seek_time += seek_times.elapsed;
-        } /* end if */
+        }
 
         /* Emit log string if we're tracking individual seek events. */
         if (file->fa.flags & H5FD_LOG_LOC_SEEK) {
@@ -1253,15 +1269,13 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
                 HDfprintf(file->logfp, " (%fs @ %f)\n", seek_times.elapsed, seek_timer.initial.elapsed);
             else
                 HDfprintf(file->logfp, "\n");
-        } /* end if */
-    }     /* end if */
-#endif    /* H5_HAVE_PREADWRITE */
+        }
+    }
+#endif /* H5_HAVE_PREADWRITE */
 
     /* Start timer for read operation */
-    if (file->fa.flags & H5FD_LOG_TIME_READ) {
-        H5_timer_init(&read_timer);
+    if (file->fa.flags & H5FD_LOG_TIME_READ)
         H5_timer_start(&read_timer);
-    } /* end if */
 
     /*
      * Read data, being careful of interrupted system calls, partial results,
@@ -1306,13 +1320,13 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
                         HDctime(&mytime), file->filename, file->fd, myerrno, HDstrerror(myerrno), buf,
                         (unsigned long long)size, (unsigned long long)bytes_in,
                         (unsigned long long)bytes_read, (unsigned long long)offset);
-        } /* end if */
+        }
 
         if (0 == bytes_read) {
-            /* end of file but not end of format address space */
+            /* End of file but not end of format address space */
             HDmemset(buf, 0, size);
             break;
-        } /* end if */
+        }
 
         HDassert(bytes_read >= 0);
         HDassert((size_t)bytes_read <= size);
@@ -1320,8 +1334,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
         size -= (size_t)bytes_read;
         addr += (haddr_t)bytes_read;
         buf = (char *)buf + bytes_read;
-
-    } /* end while */
+    }
 
     /* Stop timer for read operation */
     if (file->fa.flags & H5FD_LOG_TIME_READ)
@@ -1335,7 +1348,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
     if (file->fa.flags & H5FD_LOG_TIME_READ) {
         H5_timer_get_times(read_timer, &read_times);
         file->total_read_time += read_times.elapsed;
-    } /* end if */
+    }
 
     /* Log information about the read */
     if (file->fa.flags & H5FD_LOG_LOC_READ) {
@@ -1349,7 +1362,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             HDassert(type == H5FD_MEM_DEFAULT ||
                      type == (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] ||
                      (H5FD_mem_t)file->flavor[(orig_addr + orig_size) - 1] == H5FD_MEM_DEFAULT);
-        } /* end if */
+        }
 
         /* Add the read time, if we're tracking that.
          * Note that the read time is NOT emitted for when just H5FD_LOG_TIME_READ
@@ -1359,7 +1372,7 @@ H5FD__log_read(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, had
             HDfprintf(file->logfp, " (%fs @ %f)\n", read_times.elapsed, read_timer.initial.elapsed);
         else
             HDfprintf(file->logfp, "\n");
-    } /* end if */
+    }
 
     /* Update current position */
     file->pos = addr;
@@ -1370,7 +1383,7 @@ done:
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__log_read() */
@@ -1393,17 +1406,13 @@ static herr_t
 H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, haddr_t addr, size_t size,
                 const void *buf)
 {
-    H5FD_log_t *  file        = (H5FD_log_t *)_file;
-    size_t        orig_size   = size; /* Save the original size for later */
-    haddr_t       orig_addr   = addr;
-    H5_timer_t    write_timer = {{0}, {0}, {0}, FALSE}; /* Timer for write operation */
-    H5_timevals_t write_times;                          /* Elapsed time for write operation */
-#ifndef H5_HAVE_PREADWRITE
-    H5_timer_t    seek_timer; /* Timer for seek operation */
-    H5_timevals_t seek_times; /* Elapsed time for seek operation */
-#endif                        /* H5_HAVE_PREADWRITE */
-    HDoff_t offset    = (HDoff_t)addr;
-    herr_t  ret_value = SUCCEED; /* Return value */
+    H5FD_log_t *  file      = (H5FD_log_t *)_file;
+    size_t        orig_size = size; /* Save the original size for later */
+    haddr_t       orig_addr = addr;
+    H5_timer_t    write_timer; /* Timer for write operation */
+    H5_timevals_t write_times; /* Elapsed time for write operation */
+    HDoff_t       offset    = (HDoff_t)addr;
+    herr_t        ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_STATIC
 
@@ -1411,13 +1420,16 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     HDassert(size > 0);
     HDassert(buf);
 
+    /* Initialize timer */
+    H5_timer_init(&write_timer);
+
     /* Verify that we are writing out the type of data we allocated in this location */
     if (file->flavor) {
         HDassert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[addr] ||
                  (H5FD_mem_t)file->flavor[addr] == H5FD_MEM_DEFAULT);
         HDassert(type == H5FD_MEM_DEFAULT || type == (H5FD_mem_t)file->flavor[(addr + size) - 1] ||
                  (H5FD_mem_t)file->flavor[(addr + size) - 1] == H5FD_MEM_DEFAULT);
-    } /* end if */
+    }
 
     /* Check for overflow conditions */
     if (!H5F_addr_defined(addr))
@@ -1435,16 +1447,20 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
         HDassert((addr + size) < file->iosize);
         while (tmp_size-- > 0)
             file->nwrite[tmp_addr++]++;
-    } /* end if */
+    }
 
 #ifndef H5_HAVE_PREADWRITE
     /* Seek to the correct location (if we don't have pwrite) */
     if (addr != file->pos || OP_WRITE != file->op) {
+        H5_timer_t    seek_timer; /* Timer for seek operation */
+        H5_timevals_t seek_times; /* Elapsed time for seek operation */
+
+        /* Initialize timer */
+        H5_timer_init(&seek_timer);
+
         /* Start timer for seek() call */
-        if (file->fa.flags & H5FD_LOG_TIME_SEEK) {
-            H5_timer_init(&seek_timer);
+        if (file->fa.flags & H5FD_LOG_TIME_SEEK)
             H5_timer_start(&seek_timer);
-        } /* end if */
 
         if (HDlseek(file->fd, (HDoff_t)addr, SEEK_SET) < 0)
             HSYS_GOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to seek to proper position")
@@ -1461,7 +1477,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
         if (file->fa.flags & H5FD_LOG_TIME_SEEK) {
             H5_timer_get_times(seek_timer, &seek_times);
             file->total_seek_time += seek_times.elapsed;
-        } /* end if */
+        }
 
         /* Emit log string if we're tracking individual seek events. */
         if (file->fa.flags & H5FD_LOG_LOC_SEEK) {
@@ -1475,15 +1491,13 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
                 HDfprintf(file->logfp, " (%fs @ %f)\n", seek_times.elapsed, seek_timer.initial.elapsed);
             else
                 HDfprintf(file->logfp, "\n");
-        } /* end if */
-    }     /* end if */
-#endif    /* H5_HAVE_PREADWRITE */
+        }
+    }
+#endif /* H5_HAVE_PREADWRITE */
 
     /* Start timer for write operation */
-    if (file->fa.flags & H5FD_LOG_TIME_WRITE) {
-        H5_timer_init(&write_timer);
+    if (file->fa.flags & H5FD_LOG_TIME_WRITE)
         H5_timer_start(&write_timer);
-    } /* end if */
 
     /*
      * Write the data, being careful of interrupted system calls and partial
@@ -1550,7 +1564,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
     if (file->fa.flags & H5FD_LOG_TIME_WRITE) {
         H5_timer_get_times(write_timer, &write_times);
         file->total_write_time += write_times.elapsed;
-    } /* end if */
+    }
 
     /* Log information about the write */
     if (file->fa.flags & H5FD_LOG_LOC_WRITE) {
@@ -1563,8 +1577,8 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
             if ((H5FD_mem_t)file->flavor[orig_addr] == H5FD_MEM_DEFAULT) {
                 HDmemset(&file->flavor[orig_addr], (int)type, orig_size);
                 HDfprintf(file->logfp, " (fresh)");
-            } /* end if */
-        }     /* end if */
+            }
+        }
 
         /* Add the write time, if we're tracking that.
          * Note that the write time is NOT emitted for when just H5FD_LOG_TIME_WRITE
@@ -1574,7 +1588,7 @@ H5FD__log_write(H5FD_t *_file, H5FD_mem_t type, hid_t H5_ATTR_UNUSED dxpl_id, ha
             HDfprintf(file->logfp, " (%fs @ %f)\n", write_times.elapsed, write_timer.initial.elapsed);
         else
             HDfprintf(file->logfp, "\n");
-    } /* end if */
+    }
 
     /* Update current position and eof */
     file->pos = addr;
@@ -1587,7 +1601,7 @@ done:
         /* Reset last file I/O information */
         file->pos = HADDR_UNDEF;
         file->op  = OP_UNKNOWN;
-    } /* end if */
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__log_write() */
@@ -1617,14 +1631,15 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
 
     /* Extend the file to make sure it's large enough */
     if (!H5F_addr_eq(file->eoa, file->eof)) {
-        H5_timer_t    trunc_timer = {{0}, {0}, {0}, FALSE}; /* Timer for truncate operation */
-        H5_timevals_t trunc_times;                          /* Elapsed time for truncate operation */
+        H5_timer_t    trunc_timer; /* Timer for truncate operation */
+        H5_timevals_t trunc_times; /* Elapsed time for truncate operation */
+
+        /* Initialize timer */
+        H5_timer_init(&trunc_timer);
 
         /* Start timer for truncate operation */
-        if (file->fa.flags & H5FD_LOG_TIME_TRUNCATE) {
-            H5_timer_init(&trunc_timer);
+        if (file->fa.flags & H5FD_LOG_TIME_TRUNCATE)
             H5_timer_start(&trunc_timer);
-        } /* end if */
 
 #ifdef H5_HAVE_WIN32_API
         {
@@ -1648,7 +1663,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
                 dwError = GetLastError();
                 if (dwError != NO_ERROR)
                     HGOTO_ERROR(H5E_FILE, H5E_FILEOPEN, FAIL, "unable to set file pointer")
-            } /* end if */
+            }
 
             if (0 == SetEndOfFile(file->hFile))
                 HGOTO_ERROR(H5E_IO, H5E_SEEKERROR, FAIL, "unable to extend file properly")
@@ -1671,7 +1686,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
         if (file->fa.flags & H5FD_LOG_TIME_TRUNCATE) {
             H5_timer_get_times(trunc_timer, &trunc_times);
             file->total_truncate_time += trunc_times.elapsed;
-        } /* end if */
+        }
 
         /* Emit log string if we're tracking individual truncate events. */
         if (file->fa.flags & H5FD_LOG_TRUNCATE) {
@@ -1685,7 +1700,7 @@ H5FD__log_truncate(H5FD_t *_file, hid_t H5_ATTR_UNUSED dxpl_id, hbool_t H5_ATTR_
                 HDfprintf(file->logfp, " (%fs @ %f)\n", trunc_times.elapsed, trunc_timer.initial.elapsed);
             else
                 HDfprintf(file->logfp, "\n");
-        } /* end if */
+        }
 
         /* Update the eof value */
         file->eof = file->eoa;
@@ -1777,3 +1792,28 @@ H5FD__log_unlock(H5FD_t *_file)
 done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5FD__log_unlock() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5FD__log_delete
+ *
+ * Purpose:     Delete a file
+ *
+ * Return:      SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5FD__log_delete(const char *filename, hid_t H5_ATTR_UNUSED fapl_id)
+{
+    herr_t ret_value = SUCCEED; /* Return value */
+
+    FUNC_ENTER_STATIC
+
+    HDassert(filename);
+
+    if (HDremove(filename) < 0)
+        HSYS_GOTO_ERROR(H5E_VFL, H5E_CANTDELETEFILE, FAIL, "unable to delete file")
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5FD__log_delete() */

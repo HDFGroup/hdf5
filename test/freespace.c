@@ -661,13 +661,16 @@ test_fs_sect_add(hid_t fapl)
     /* Close the file */
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR
+    sect_node = NULL;
 
-    /* Get the size of a file w/empty heap*/
-    if ((tmp_file_size = h5_get_file_size(filename, fapl)) < 0)
-        TEST_ERROR
+    if (h5_using_default_driver(NULL)) {
+        /* Get the size of a file w/empty heap*/
+        if ((tmp_file_size = h5_get_file_size(filename, fapl)) < 0)
+            TEST_ERROR
 
-    if (tmp_file_size <= (file_size + fr_meta_size))
-        TEST_ERROR
+        if (tmp_file_size <= (file_size + fr_meta_size))
+            TEST_ERROR
+    }
 
     PASSED();
 
@@ -723,13 +726,16 @@ test_fs_sect_add(hid_t fapl)
     /* Close the file */
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR
+    sect_node = NULL;
 
-    /* Get the size of a file w/empty heap*/
-    if ((tmp_file_size = h5_get_file_size(filename, fapl)) < 0)
-        TEST_ERROR
+    if (h5_using_default_driver(NULL)) {
+        /* Get the size of a file w/empty heap*/
+        if ((tmp_file_size = h5_get_file_size(filename, fapl)) < 0)
+            TEST_ERROR
 
-    if (tmp_file_size != (file_size + fr_meta_size))
-        TEST_ERROR
+        if (tmp_file_size != (file_size + fr_meta_size))
+            TEST_ERROR
+    }
 
     PASSED();
 
@@ -799,6 +805,7 @@ test_fs_sect_add(hid_t fapl)
     /* Close the file */
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR
+    sect_node = NULL;
 
     PASSED();
 
@@ -878,6 +885,7 @@ test_fs_sect_add(hid_t fapl)
     /* Close the file */
     if (H5Fclose(file) < 0)
         FAIL_STACK_ERROR
+    sect_node = NULL;
 
     PASSED();
 
@@ -2916,7 +2924,10 @@ main(void)
 
 error:
     HDputs("*** TESTS FAILED ***");
-    H5E_BEGIN_TRY { H5Pclose(fapl); }
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(fapl);
+    }
     H5E_END_TRY;
 
     if (api_ctx_pushed)

@@ -12,13 +12,13 @@
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
 /*
- * Purpose:	This file contains the framework for ensuring that the global
- *		library lock is held when an API routine is called.  This
+ * Purpose:    This file contains the framework for ensuring that the global
+ *        library lock is held when an API routine is called.  This
  *              framework works in concert with the FUNC_ENTER_API / FUNC_LEAVE_API
- *		macros defined in H5private.h.
+ *        macros defined in H5private.h.
  *
- * Note:	Because this threadsafety framework operates outside the library,
- *		it does not use the error stack and only uses the "namecheck only"
+ * Note:    Because this threadsafety framework operates outside the library,
+ *        it does not use the error stack and only uses the "namecheck only"
  *              FUNC_ENTER_* / FUNC_LEAVE_* macros.
  */
 
@@ -70,23 +70,45 @@ static herr_t H5TS__mutex_unlock(H5TS_mutex_t *mutex, unsigned int *lock_count);
 /* Global variable definitions */
 #ifdef H5_HAVE_WIN_THREADS
 H5TS_once_t H5TS_first_init_g;
-#else  /* H5_HAVE_WIN_THREADS */
-H5TS_once_t H5TS_first_init_g = PTHREAD_ONCE_INIT;
-#endif /* H5_HAVE_WIN_THREADS */
+#else
+H5TS_once_t       H5TS_first_init_g = PTHREAD_ONCE_INIT;
+#endif
 
 /* Thread-local keys, used by other interfaces */
-H5TS_key_t H5TS_errstk_key_g; /* Error stack */
+/* Error stack */
+#ifdef H5_HAVE_WIN_THREADS
+H5TS_key_t H5TS_errstk_key_g = TLS_OUT_OF_INDEXES;
+#else
+H5TS_key_t        H5TS_errstk_key_g;
+#endif
+
 #ifdef H5_HAVE_CODESTACK
-H5TS_key_t H5TS_funcstk_key_g; /* Function stack */
-#endif                         /* H5_HAVE_CODESTACK */
-H5TS_key_t H5TS_apictx_key_g;  /* API context */
+/* Function stack */
+#ifdef H5_HAVE_WIN_THREADS
+H5TS_key_t H5TS_funcstk_key_g = TLS_OUT_OF_INDEXES;
+#else
+H5TS_key_t H5TS_funcstk_key_g;
+#endif
+#endif /* H5_HAVE_CODESTACK */
+
+/* API context */
+#ifdef H5_HAVE_WIN_THREADS
+H5TS_key_t H5TS_apictx_key_g = TLS_OUT_OF_INDEXES;
+#else
+H5TS_key_t        H5TS_apictx_key_g;
+#endif
 
 /*******************/
 /* Local Variables */
 /*******************/
 
 /* Thread-local keys, used in this module */
-static H5TS_key_t H5TS_cancel_key_s; /* Thread cancellation state */
+/* Thread cancellation state */
+#ifdef H5_HAVE_WIN_THREADS
+static H5TS_key_t H5TS_cancel_key_s = TLS_OUT_OF_INDEXES;
+#else
+static H5TS_key_t H5TS_cancel_key_s;
+#endif
 
 #ifndef H5_HAVE_WIN_THREADS
 
@@ -871,11 +893,14 @@ H5TS_win32_process_exit(void)
     DeleteCriticalSection(&H5_g.init_lock.CriticalSection);
 
     /* Clean up per-process thread local storage */
-    TlsFree(H5TS_errstk_key_g);
+    if (H5TS_errstk_key_g != TLS_OUT_OF_INDEXES)
+        TlsFree(H5TS_errstk_key_g);
 #ifdef H5_HAVE_CODESTACK
-    TlsFree(H5TS_funcstk_key_g);
+    if (H5TS_funcstk_key_g != TLS_OUT_OF_INDEXES)
+        TlsFree(H5TS_funcstk_key_g);
 #endif /* H5_HAVE_CODESTACK */
-    TlsFree(H5TS_apictx_key_g);
+    if (H5TS_apictx_key_g != TLS_OUT_OF_INDEXES)
+        TlsFree(H5TS_apictx_key_g);
 
     FUNC_LEAVE_NOAPI_VOID_NAMECHECK_ONLY
 } /* H5TS_win32_process_exit() */
@@ -909,19 +934,25 @@ H5TS_win32_thread_exit(void)
      */
 
     /* Clean up per-thread thread local storage */
-    lpvData = TlsGetValue(H5TS_errstk_key_g);
-    if (lpvData)
-        LocalFree((HLOCAL)lpvData);
+    if (H5TS_errstk_key_g != TLS_OUT_OF_INDEXES) {
+        lpvData = TlsGetValue(H5TS_errstk_key_g);
+        if (lpvData)
+            LocalFree((HLOCAL)lpvData);
+    }
 
 #ifdef H5_HAVE_CODESTACK
-    lpvData = TlsGetValue(H5TS_funcstk_key_g);
-    if (lpvData)
-        LocalFree((HLOCAL)lpvData);
+    if (H5TS_funcstk_key_g != TLS_OUT_OF_INDEXES) {
+        lpvData = TlsGetValue(H5TS_funcstk_key_g);
+        if (lpvData)
+            LocalFree((HLOCAL)lpvData);
+    }
 #endif /* H5_HAVE_CODESTACK */
 
-    lpvData = TlsGetValue(H5TS_apictx_key_g);
-    if (lpvData)
-        LocalFree((HLOCAL)lpvData);
+    if (H5TS_apictx_key_g != TLS_OUT_OF_INDEXES) {
+        lpvData = TlsGetValue(H5TS_apictx_key_g);
+        if (lpvData)
+            LocalFree((HLOCAL)lpvData);
+    }
 
     FUNC_LEAVE_NOAPI_NAMECHECK_ONLY(ret_value)
 } /* H5TS_win32_thread_exit() */
