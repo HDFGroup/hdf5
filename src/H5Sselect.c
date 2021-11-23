@@ -304,7 +304,7 @@ done:
  *-------------------------------------------------------------------------
  */
 hssize_t
-H5S_select_serial_size(const H5S_t *space)
+H5S_select_serial_size(H5S_t *space)
 {
     hssize_t ret_value = -1; /* Return value */
 
@@ -343,7 +343,7 @@ H5S_select_serial_size(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_serialize(const H5S_t *space, uint8_t **p)
+H5S_select_serialize(H5S_t *space, uint8_t **p)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -880,7 +880,7 @@ H5S_select_is_single(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5S_select_is_regular(const H5S_t *space)
+H5S_select_is_regular(H5S_t *space)
 {
     herr_t ret_value = FAIL; /* Return value */
 
@@ -1116,7 +1116,7 @@ H5S_select_project_simple(const H5S_t *space, H5S_t *new_space, hsize_t *offset)
     in the dataspace's selection.
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iter_init(H5S_sel_iter_t *sel_iter, const H5S_t *space, size_t elmt_size, unsigned flags)
+H5S_select_iter_init(H5S_sel_iter_t *sel_iter, H5S_t *space, size_t elmt_size, unsigned flags)
 {
     herr_t ret_value = FAIL; /* Return value */
 
@@ -1497,8 +1497,7 @@ H5S_select_iter_release(H5S_sel_iter_t *sel_iter)
         the selection is not modified.
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_iterate(void *buf, const H5T_t *type, const H5S_t *space, const H5S_sel_iter_op_t *op,
-                   void *op_data)
+H5S_select_iterate(void *buf, const H5T_t *type, H5S_t *space, const H5S_sel_iter_op_t *op, void *op_data)
 {
     H5S_sel_iter_t *iter      = NULL;         /* Selection iteration info */
     hbool_t         iter_init = FALSE;        /* Selection iteration info has been initialized */
@@ -1739,7 +1738,7 @@ H5S_get_select_type(const H5S_t *space)
  REVISION LOG
 --------------------------------------------------------------------------*/
 htri_t
-H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
+H5S_select_shape_same(H5S_t *space1, H5S_t *space2)
 {
     H5S_sel_iter_t *iter_a      = NULL;  /* Selection a iteration info */
     H5S_sel_iter_t *iter_b      = NULL;  /* Selection b iteration info */
@@ -1760,8 +1759,8 @@ H5S_select_shape_same(const H5S_t *space1, const H5S_t *space2)
     /* Check special cases if both dataspaces aren't scalar */
     /* (If only one is, the number of selected points check is sufficient) */
     if (space1->extent.rank > 0 && space2->extent.rank > 0) {
-        const H5S_t *space_a;      /* Dataspace with larger rank */
-        const H5S_t *space_b;      /* Dataspace with smaller rank */
+        H5S_t *      space_a;      /* Dataspace with larger rank */
+        H5S_t *      space_b;      /* Dataspace with smaller rank */
         unsigned     space_a_rank; /* Number of dimensions of dataspace A */
         unsigned     space_b_rank; /* Number of dimensions of dataspace B */
         int          space_a_dim;  /* Current dimension in dataspace A */
@@ -2063,7 +2062,7 @@ done:
     don't call it directly, use the appropriate macro defined in H5Sprivate.h.
 --------------------------------------------------------------------------*/
 htri_t
-H5S_select_intersect_block(const H5S_t *space, const hsize_t *start, const hsize_t *end)
+H5S_select_intersect_block(H5S_t *space, const hsize_t *start, const hsize_t *end)
 {
     htri_t ret_value = TRUE; /* Return value */
 
@@ -2214,7 +2213,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_construct_projection(const H5S_t *base_space, H5S_t **new_space_ptr, unsigned new_space_rank,
+H5S_select_construct_projection(H5S_t *base_space, H5S_t **new_space_ptr, unsigned new_space_rank,
                                 const void *buf, void const **adj_buf_ptr, hsize_t element_size)
 {
     H5S_t *  new_space = NULL;                         /* New dataspace constructed */
@@ -2452,7 +2451,7 @@ done:
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_fill(const void *fill, size_t fill_size, const H5S_t *space, void *_buf)
+H5S_select_fill(const void *fill, size_t fill_size, H5S_t *space, void *_buf)
 {
     H5S_sel_iter_t *iter      = NULL;    /* Selection iteration info */
     hbool_t         iter_init = FALSE;   /* Selection iteration info has been initialized */
@@ -2568,9 +2567,8 @@ to share structures inside dst_space with proj_space
  REVISION LOG
 --------------------------------------------------------------------------*/
 herr_t
-H5S_select_project_intersection(const H5S_t *src_space, const H5S_t *dst_space,
-                                const H5S_t *src_intersect_space, H5S_t **new_space_ptr,
-                                hbool_t share_selection)
+H5S_select_project_intersection(H5S_t *src_space, H5S_t *dst_space, H5S_t *src_intersect_space,
+                                H5S_t **new_space_ptr, hbool_t share_selection)
 {
     H5S_t *         new_space               = NULL;    /* New dataspace constructed */
     H5S_t *         tmp_src_intersect_space = NULL;    /* Temporary SIS converted from points->hyperslabs */

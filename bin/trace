@@ -500,7 +500,7 @@ for $file (@ARGV) {
   $file_args = 0;
 
   # Ignore some files that do not need tracing macros
-  unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c" or $file eq "src/H5TS.c") {
+  unless ($file eq "H5FDmulti.c" or $file eq "src/H5FDmulti.c" or $file eq "H5FDstdio.c" or $file eq "src/H5FDstdio.c" or $file eq "src/H5TS.c" or $file eq "src/H5FDperform.c") {
 
     # Snarf up the entire file
     open SOURCE, $file or die "$file: $!\n";

@@ -221,8 +221,8 @@ if test "X-g++" = "X-$cxx_vendor"; then
     if test $cxx_vers_major -ge 5 -o $cxx_vers_major -eq 4 -a $cxx_vers_minor -ge 8; then
         H5_CXXFLAGS="$H5_CXXFLAGS $(load_gnu_arguments cxx-4.8)"
         # Use the C warnings as CXX warnings are the same
-        DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments developer-4.8)"
-        NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-developer-4.8)"
+        DEVELOPER_WARNING_CXXFLAGS="$DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments cxx-developer-4.8)"
+        NO_DEVELOPER_WARNING_CXXFLAGS="$NO_DEVELOPER_WARNING_CXXFLAGS $(load_gnu_arguments no-cxx-developer-4.8)"
     fi
 
     # gcc >= 4.9

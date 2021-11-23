@@ -110,13 +110,24 @@ static htri_t H5D__contig_may_use_select_io(const H5D_io_info_t *io_info, H5D_io
 /*********************/
 
 /* Contiguous storage layout I/O ops */
-const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {
-    {H5D__contig_construct, H5D__contig_init, H5D__contig_is_space_alloc, H5D__contig_is_data_cached,
-     H5D__contig_io_init, H5D__contig_read, H5D__contig_write,
+const H5D_layout_ops_t H5D_LOPS_CONTIG[1] = {{
+    H5D__contig_construct,      /* construct */
+    H5D__contig_init,           /* init */
+    H5D__contig_is_space_alloc, /* is_space_alloc */
+    H5D__contig_is_data_cached, /* is_data_cached */
+    H5D__contig_io_init,        /* io_init */
+    H5D__contig_read,           /* ser_read */
+    H5D__contig_write,          /* ser_write */
 #ifdef H5_HAVE_PARALLEL
-     H5D__contig_collective_read, H5D__contig_collective_write,
-#endif /* H5_HAVE_PARALLEL */
-     H5D__contig_readvv, H5D__contig_writevv, H5D__contig_flush, NULL, NULL}};
+    H5D__contig_collective_read,  /* par_read */
+    H5D__contig_collective_write, /* par_write */
+#endif
+    H5D__contig_readvv,  /* readvv */
+    H5D__contig_writevv, /* writevv */
+    H5D__contig_flush,   /* flush */
+    NULL,                /* io_term */
+    NULL                 /* dest */
+}};
 
 /*******************/
 /* Local Variables */
@@ -637,8 +648,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                 const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+H5D__contig_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
+                 H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -684,8 +695,8 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts,
-                  const H5S_t *file_space, const H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
+H5D__contig_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info, hsize_t nelmts, H5S_t *file_space,
+                  H5S_t *mem_space, H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

@@ -58,9 +58,6 @@ static herr_t H5M__get_api_common(hid_t map_id, hid_t key_mem_type_id, const voi
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /*****************************/
 /* Library Private Variables */
 /*****************************/
@@ -76,9 +73,6 @@ static const H5I_class_t H5I_MAP_CLS[1] = {{
     0,                        /* # of reserved IDs for class */
     (H5I_free_t)H5M__close_cb /* Callback routine for closing objects of this class */
 }};
-
-/* Flag indicating "top" of interface has been initialized */
-static hbool_t H5M_top_package_initialize_s = FALSE;
 
 /*-------------------------------------------------------------------------
  * Function: H5M_init
@@ -96,41 +90,14 @@ H5M_init(void)
     herr_t ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_NOAPI(FAIL)
-    /* FUNC_ENTER() does all the work */
-
-done:
-    FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5M_init() */
-
-/*-------------------------------------------------------------------------
-NAME
-    H5M__init_package -- Initialize interface-specific information
-USAGE
-    herr_t H5M__init_package()
-
-RETURNS
-    Non-negative on success/Negative on failure
-DESCRIPTION
-    Initializes any interface-specific data or routines.
----------------------------------------------------------------------------
-*/
-herr_t
-H5M__init_package(void)
-{
-    herr_t ret_value = SUCCEED; /* Return value */
-
-    FUNC_ENTER_PACKAGE
 
     /* Initialize the ID group for the map IDs */
     if (H5I_register_type(H5I_MAP_CLS) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTINIT, FAIL, "unable to initialize interface")
 
-    /* Mark "top" of interface as initialized, too */
-    H5M_top_package_initialize_s = TRUE;
-
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5M__init_package() */
+} /* end H5M_init() */
 
 /*-------------------------------------------------------------------------
  * Function: H5M_top_term_package
@@ -149,16 +116,10 @@ H5M_top_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5M_top_package_initialize_s) {
-        if (H5I_nmembers(H5I_MAP) > 0) {
-            (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
-            n++; /*H5I*/
-        }        /* end if */
-
-        /* Mark closed */
-        if (0 == n)
-            H5M_top_package_initialize_s = FALSE;
-    } /* end if */
+    if (H5I_nmembers(H5I_MAP) > 0) {
+        (void)H5I_clear_type(H5I_MAP, FALSE, FALSE);
+        n++;
+    }
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5M_top_term_package() */
@@ -183,18 +144,11 @@ H5M_term_package(void)
 
     FUNC_ENTER_NOAPI_NOINIT_NOERR
 
-    if (H5_PKG_INIT_VAR) {
-        /* Sanity checks */
-        HDassert(0 == H5I_nmembers(H5I_MAP));
-        HDassert(FALSE == H5M_top_package_initialize_s);
+    /* Sanity checks */
+    HDassert(0 == H5I_nmembers(H5I_MAP));
 
-        /* Destroy the dataset object id group */
-        n += (H5I_dec_type_ref(H5I_MAP) > 0);
-
-        /* Mark closed */
-        if (0 == n)
-            H5_PKG_INIT_VAR = FALSE;
-    } /* end if */
+    /* Destroy the dataset object id group */
+    n += (H5I_dec_type_ref(H5I_MAP) > 0);
 
     FUNC_LEAVE_NOAPI(n)
 } /* end H5M_term_package() */
@@ -533,7 +487,7 @@ H5M__open_api_common(hid_t loc_id, const char *name, hid_t mapl_id, void **token
     /* Open the map */
     if (H5VL_optional(*vol_obj_ptr, &vol_cb_args, H5P_DATASET_XFER_DEFAULT, token_ptr) < 0)
         HGOTO_ERROR(H5E_MAP, H5E_CANTOPENOBJ, H5I_INVALID_HID, "unable to open map")
-    map = map_args.create.map;
+    map = map_args.open.map;
 
     /* Register an ID for the map */
     if ((ret_value = H5VL_register(H5I_MAP, map, (*vol_obj_ptr)->connector, TRUE)) < 0)
@@ -1360,6 +1314,7 @@ H5Miterate(hid_t map_id, hsize_t *idx, hid_t key_mem_type_id, H5M_iterate_t op, 
     map_args.specific.args.iterate.loc_params.type     = H5VL_OBJECT_BY_SELF;
     map_args.specific.args.iterate.loc_params.obj_type = H5I_get_type(map_id);
     map_args.specific.args.iterate.idx                 = (idx ? *idx : 0);
+    map_args.specific.args.iterate.key_mem_type_id     = key_mem_type_id;
     map_args.specific.args.iterate.op                  = op;
     map_args.specific.args.iterate.op_data             = op_data;
     vol_cb_args.op_type                                = H5VL_MAP_SPECIFIC;
@@ -1450,6 +1405,7 @@ H5Miterate_by_name(hid_t loc_id, const char *map_name, hsize_t *idx, hid_t key_m
     map_args.specific.args.iterate.loc_params.loc_data.loc_by_name.name    = map_name;
     map_args.specific.args.iterate.loc_params.loc_data.loc_by_name.lapl_id = lapl_id;
     map_args.specific.args.iterate.idx                                     = (idx ? *idx : 0);
+    map_args.specific.args.iterate.key_mem_type_id                         = key_mem_type_id;
     map_args.specific.args.iterate.op                                      = op;
     map_args.specific.args.iterate.op_data                                 = op_data;
     vol_cb_args.op_type                                                    = H5VL_MAP_SPECIFIC;

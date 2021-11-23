@@ -61,9 +61,6 @@ static herr_t H5FS__sinfo_free_node_cb(void *item, void *key, void *op_data);
 /* Package Variables */
 /*********************/
 
-/* Package initialization variable */
-hbool_t H5_PKG_INIT_VAR = FALSE;
-
 /* Declare a free list to manage the H5FS_section_class_t sequence information */
 H5FL_SEQ_DEFINE(H5FS_section_class_t);
 
