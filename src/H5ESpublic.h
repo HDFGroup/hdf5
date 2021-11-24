@@ -207,6 +207,7 @@ H5_DLL herr_t H5ESget_count(hid_t es_id, size_t *count);
  */
 H5_DLL herr_t H5ESget_op_counter(hid_t es_id, uint64_t *counter);
 
+
 /**
  * \ingroup H5ES
  *

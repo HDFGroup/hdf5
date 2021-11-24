@@ -236,6 +236,44 @@ done:
 } /* end H5ESget_op_counter() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5ESget_requests
+ *
+ * Purpose:     Retrieve the requests in an event set
+ *
+ * Return:      SUCCEED / FAIL
+ *
+ * Programmer:  Neil Fortner
+ *              Tuesday, November 23, 2021
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5ESget_requests(hid_t es_id, hid_t *connector_ids, void **requests, size_t *count/*out*/)
+{
+    H5ES_t *es;                         /* Event set */
+    herr_t ret_value = SUCCEED;         /* Return value */
+
+    FUNC_ENTER_API(FAIL)
+    H5TRACE4("e", "i*i**xx", es_id, connector_ids, requests, count);
+
+    /* Check arguments */
+    if (NULL == (es = H5I_object_verify(es_id, H5I_EVENTSET)))
+        HGOTO_ERROR(H5E_ARGS, H5E_BADTYPE, FAIL, "invalid event set identifier")
+
+    /* Call internal routine */
+    if (count && *count > 0 && (requests || connector_ids))
+        if (H5ES__get_requests(es, connector_ids, requests, *count) < 0)
+            HGOTO_ERROR(H5E_EVENTSET, H5E_CANTGET, FAIL, "can't get requests")
+
+    /* Retrieve the count, if non-NULL */
+    if (count)
+        *count = H5ES__list_count(&es->active);
+
+done:
+    FUNC_LEAVE_API(ret_value)
+} /* end H5ESget_requests() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5ESwait
  *
  * Purpose:     Wait (with timeout) for operations in event set to complete
