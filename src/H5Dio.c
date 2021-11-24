@@ -82,8 +82,7 @@ H5FL_DEFINE(H5D_chunk_map_t);
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__read(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t *file_space,
-          void *buf /*out*/)
+H5D__read(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space, void *buf /*out*/)
 {
     H5D_chunk_map_t *fm = NULL;                   /* Chunk file<->memory mapping */
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
@@ -295,8 +294,7 @@ done:
  *-------------------------------------------------------------------------
  */
 herr_t
-H5D__write(H5D_t *dataset, hid_t mem_type_id, const H5S_t *mem_space, const H5S_t *file_space,
-           const void *buf)
+H5D__write(H5D_t *dataset, hid_t mem_type_id, H5S_t *mem_space, H5S_t *file_space, const void *buf)
 {
     H5D_chunk_map_t *fm = NULL;                   /* Chunk file<->memory mapping */
     H5D_io_info_t    io_info;                     /* Dataset I/O info     */
