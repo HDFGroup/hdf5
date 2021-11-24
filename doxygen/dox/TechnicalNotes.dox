@@ -33,6 +33,8 @@
 
 \htmlinclude FileFormat.html
 
+*/
+
 /** \page FILTER HDF5 Filters
 
 \htmlinclude Filters.html
