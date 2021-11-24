@@ -40,6 +40,11 @@ set (HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES
     callbacks/Callbacks.java
 )
 
+set (HDF5_JAVADOC_HDF_HDF5_CALLBACKS_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES}
+    callbacks/package-info.java
+)
+
 set (HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES
     exceptions/HDF5Exception.java
     exceptions/HDF5AtomException.java
@@ -67,6 +72,11 @@ set (HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES
     exceptions/HDF5SymbolTableException.java
 )
 
+set (HDF5_JAVADOC_HDF_HDF5_EXCEPTIONS_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES}
+    exceptions/package-info.java
+)
+
 set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
     structs/H5_ih_info_t.java
     structs/H5A_info_t.java
@@ -81,12 +91,22 @@ set (HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES
     structs/H5O_info_t.java
 )
 
+set (HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES}
+    structs/package-info.java
+)
+
 set (HDF5_JAVA_HDF_HDF5_SOURCES
     HDFArray.java
     HDF5Constants.java
     HDF5GroupInfo.java
     HDFNativeData.java
     H5.java
+)
+
+set (HDF5_JAVADOC_HDF_HDF5_SOURCES
+    ${HDF5_JAVA_HDF_HDF5_SOURCES}
+    package-info.java
 )
 
 set (CMAKE_JNI_TARGET TRUE)
@@ -112,7 +132,7 @@ add_dependencies (${HDF5_JAVA_HDF5_LIB_TARGET} ${HDF5_JAVA_JNI_LIB_TARGET})
 set_target_properties (${HDF5_JAVA_HDF5_LIB_TARGET} PROPERTIES FOLDER libraries/java)
 
 create_javadoc(hdf5_java_doc
-    FILES ${HDF5_JAVA_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVA_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVA_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVA_HDF_HDF5_SOURCES}
+    FILES ${HDF5_JAVADOC_HDF_HDF5_CALLBACKS_SOURCES} ${HDF5_JAVADOC_HDF_HDF5_EXCEPTIONS_SOURCES} ${HDF5_JAVADOC_HDF_HDF5_STRUCTS_SOURCES} ${HDF5_JAVADOC_HDF_HDF5_SOURCES}
     OVERVIEW ${HDF5_JAVA_HDF5_SRC_DIR}/overview.html
     CLASSPATH ${CMAKE_JAVA_INCLUDE_PATH}
     WINDOWTITLE "HDF5 Java"
