@@ -194,7 +194,7 @@
 #   -d --di=15
   ADD_H5_ERR_TEST (h5stat_err1_dims 1 -d --dims=-1 h5stat_threshold.h5)
   ADD_H5_TEST (h5stat_dims1 0 -gd -m 5 h5stat_threshold.h5)
-  ADD_H5_TEST (h5stat_dims2 0 -d --di=15 h5stat_threshold.h5)
+  ADD_H5_TEST (h5stat_dims2 0 -d --dims=15 h5stat_threshold.h5)
 #
 # Tests for -a option on h5stat_threshold.h5
 #   -a -2 (incorrect threshold value)
