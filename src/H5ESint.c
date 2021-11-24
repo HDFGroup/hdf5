@@ -52,10 +52,10 @@
 
 /* Callback context for get events operations */
 typedef struct H5ES_get_requests_ctx_t {
-    hid_t *connector_ids;     /* Output buffer for list of connector IDs that match the above requests */
-    void **requests;          /* Output buffer for list of requests in event set */
-    size_t count;             /* Length of the above output buffers */
-    size_t i;                 /* Number of elements filled in output buffers */
+    hid_t *connector_ids; /* Output buffer for list of connector IDs that match the above requests */
+    void **requests;      /* Output buffer for list of requests in event set */
+    size_t count;         /* Length of the above output buffers */
+    size_t i;             /* Number of elements filled in output buffers */
 } H5ES_get_requests_ctx_t;
 
 /* Callback context for wait operations */
@@ -443,8 +443,8 @@ done:
 static int
 H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
 {
-    H5ES_get_requests_ctx_t *ctx = (H5ES_get_requests_ctx_t *)_ctx; /* Callback context */
-    int      ret_value = H5_ITER_CONT;         /* Return value */
+    H5ES_get_requests_ctx_t *ctx       = (H5ES_get_requests_ctx_t *)_ctx; /* Callback context */
+    int                      ret_value = H5_ITER_CONT;                    /* Return value */
 
     FUNC_ENTER_STATIC_NOERR
 
@@ -483,8 +483,8 @@ H5ES__get_requests_cb(H5ES_event_t *ev, void *_ctx)
 herr_t
 H5ES__get_requests(H5ES_t *es, hid_t *connector_ids, void **requests, size_t count)
 {
-    H5ES_get_requests_ctx_t ctx;        /* Callback context */
-    herr_t ret_value = SUCCEED;         /* Return value */
+    H5ES_get_requests_ctx_t ctx;                 /* Callback context */
+    herr_t                  ret_value = SUCCEED; /* Return value */
 
     FUNC_ENTER_PACKAGE
 

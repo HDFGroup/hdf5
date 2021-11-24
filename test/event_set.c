@@ -32,13 +32,13 @@ herr_t fake_wait_request_free(void *req);
  * functionality, other than a wait that returns success.
  */
 static const H5VL_class_t fake_wait_vol_g = {
-    H5VL_VERSION,   /* VOL class struct version */
+    H5VL_VERSION,              /* VOL class struct version */
     ((H5VL_class_value_t)501), /* value        */
-    "fake_wait",    /* name         */
-    0,              /* connector version */
-    0,              /* capability flags */
-    NULL,           /* initialize   */
-    NULL,           /* terminate    */
+    "fake_wait",               /* name         */
+    0,                         /* connector version */
+    0,                         /* capability flags */
+    NULL,                      /* initialize   */
+    NULL,                      /* terminate    */
     {
         /* info_cls */
         (size_t)0, /* size    */
@@ -80,12 +80,12 @@ static const H5VL_class_t fake_wait_vol_g = {
     },
     {
         /* datatype_cls */
-        NULL,                 /* commit       */
-        NULL,                 /* open         */
-        NULL,                 /* get          */
-        NULL,                 /* specific     */
-        NULL,                 /* optional     */
-        NULL                  /* close        */
+        NULL, /* commit       */
+        NULL, /* open         */
+        NULL, /* get          */
+        NULL, /* specific     */
+        NULL, /* optional     */
+        NULL  /* close        */
     },
     {
         /* file_cls */
@@ -131,10 +131,10 @@ static const H5VL_class_t fake_wait_vol_g = {
     {
         /* request_cls */
         fake_wait_request_wait, /* wait         */
-        NULL, /* notify       */
-        NULL, /* cancel       */
-        NULL, /* specific     */
-        NULL, /* optional     */
+        NULL,                   /* notify       */
+        NULL,                   /* cancel       */
+        NULL,                   /* specific     */
+        NULL,                   /* optional     */
         fake_wait_request_free  /* free         */
     },
     {
@@ -154,10 +154,11 @@ static const H5VL_class_t fake_wait_vol_g = {
 };
 
 herr_t
-fake_wait_request_wait(void H5_ATTR_UNUSED *req, uint64_t H5_ATTR_UNUSED timeout, H5VL_request_status_t *status)
+fake_wait_request_wait(void H5_ATTR_UNUSED *req, uint64_t H5_ATTR_UNUSED timeout,
+                       H5VL_request_status_t *status)
 {
     /* Set status if requested */
-    if(status)
+    if (status)
         *status = H5VL_REQUEST_STATUS_SUCCEED;
 
     return 0;
@@ -322,12 +323,12 @@ error:
 static int
 test_es_get_requests(void)
 {
-    hid_t    es_id;        /* Event set ID */
-    hid_t    connector_ids[2]; /* Connector IDs */
-    void     *requests[2]; /* Requests */
-    int      req_targets[2]; /* Dummy targets for void * requests */
-    size_t   count;        /* # of events in set */
-    hbool_t  op_failed;    /* Whether an operation failed (unused) */
+    hid_t   es_id;            /* Event set ID */
+    hid_t   connector_ids[2]; /* Connector IDs */
+    void *  requests[2];      /* Requests */
+    int     req_targets[2];   /* Dummy targets for void * requests */
+    size_t  count;            /* # of events in set */
+    hbool_t op_failed;        /* Whether an operation failed (unused) */
 
     TESTING("event set get requests");
 
@@ -375,7 +376,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Get only connector IDs */
-    count = 2;
+    count            = 2;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, connector_ids, NULL, &count) < 0)
@@ -388,7 +389,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Get only requests */
-    count = 2;
+    count       = 2;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, NULL, requests, &count) < 0)
@@ -401,11 +402,11 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Get both */
-    count = 2;
+    count            = 2;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
-    requests[0] = NULL;
-    requests[1] = NULL;
+    requests[0]      = NULL;
+    requests[1]      = NULL;
     if (H5ESget_requests(es_id, connector_ids, requests, &count) < 0)
         TEST_ERROR
     if (count != 1)
@@ -431,7 +432,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Get only connector IDs */
-    count = 2;
+    count            = 2;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, connector_ids, NULL, &count) < 0)
@@ -450,7 +451,7 @@ test_es_get_requests(void)
     }
 
     /* Get only requests */
-    count = 2;
+    count       = 2;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, NULL, requests, &count) < 0)
@@ -469,11 +470,11 @@ test_es_get_requests(void)
     }
 
     /* Get both */
-    count = 2;
+    count            = 2;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
-    requests[0] = NULL;
-    requests[1] = NULL;
+    requests[0]      = NULL;
+    requests[1]      = NULL;
     if (H5ESget_requests(es_id, connector_ids, requests, &count) < 0)
         TEST_ERROR
     if (count != 2)
@@ -498,7 +499,7 @@ test_es_get_requests(void)
     }
 
     /* Get only first connector ID */
-    count = 1;
+    count            = 1;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
     if (H5ESget_requests(es_id, connector_ids, NULL, &count) < 0)
@@ -511,7 +512,7 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Get only first request */
-    count = 1;
+    count       = 1;
     requests[0] = NULL;
     requests[1] = NULL;
     if (H5ESget_requests(es_id, NULL, requests, &count) < 0)
@@ -524,11 +525,11 @@ test_es_get_requests(void)
         TEST_ERROR
 
     /* Get only first of both */
-    count = 1;
+    count            = 1;
     connector_ids[0] = H5I_INVALID_HID;
     connector_ids[1] = H5I_INVALID_HID;
-    requests[0] = NULL;
-    requests[1] = NULL;
+    requests[0]      = NULL;
+    requests[1]      = NULL;
     if (H5ESget_requests(es_id, connector_ids, requests, &count) < 0)
         TEST_ERROR
     if (count != 2)
@@ -619,5 +620,5 @@ main(void)
 
 error:
     HDputs("***** EVENT SET TESTS FAILED *****");
-        HDexit(EXIT_FAILURE);
+    HDexit(EXIT_FAILURE);
 } /* end main() */
