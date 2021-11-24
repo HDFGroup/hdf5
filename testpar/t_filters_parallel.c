@@ -780,14 +780,16 @@ test_write_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fi
     data_size        = sel_dims[0] * sel_dims[1] * sizeof(*data);
     correct_buf_size = dataset_dims[0] * dataset_dims[1] * sizeof(*correct_buf);
 
-    data = (C_DATATYPE *)HDcalloc(1, data_size);
-    VRFY((NULL != data), "HDcalloc succeeded");
+    if (mpi_rank != WRITE_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC) {
+        data = (C_DATATYPE *)HDcalloc(1, data_size);
+        VRFY((NULL != data), "HDcalloc succeeded");
+
+        for (i = 0; i < data_size / sizeof(*data); i++)
+            data[i] = (C_DATATYPE)GEN_DATA(i);
+    }
 
     correct_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
     VRFY((NULL != correct_buf), "HDcalloc succeeded");
-
-    for (i = 0; i < data_size / sizeof(*data); i++)
-        data[i] = (C_DATATYPE)GEN_DATA(i);
 
     for (i = 0; i < correct_buf_size / sizeof(*correct_buf); i++)
         correct_buf[i] = (C_DATATYPE)((i % (dataset_dims[0] / (hsize_t)mpi_size * dataset_dims[1])) +
@@ -3396,8 +3398,14 @@ test_read_filtered_dataset_single_no_selection(const char *parent_group, H5Z_fil
     read_buf = (C_DATATYPE *)HDcalloc(1, read_buf_size);
     VRFY((NULL != read_buf), "HDcalloc succeeded");
 
-    VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
-         "Dataset read succeeded");
+    if (mpi_rank == READ_SINGLE_NO_SELECTION_FILTERED_CHUNKS_NO_SELECT_PROC) {
+        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, NULL) >= 0),
+             "Dataset read succeeded");
+    }
+    else {
+        VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
+             "Dataset read succeeded");
+    }
 
     global_buf = (C_DATATYPE *)HDcalloc(1, correct_buf_size);
     VRFY((NULL != global_buf), "HDcalloc succeeded");
@@ -3563,6 +3571,8 @@ test_read_filtered_dataset_all_no_selection(const char *parent_group, H5Z_filter
 
     VRFY((H5Dread(dset_id, HDF5_DATATYPE_NAME, memspace, filespace, dxpl_id, read_buf) >= 0),
          "Dataset read succeeded");
+
+    VRFY((0 == HDmemcmp(read_buf, correct_buf, correct_buf_size)), "Data verification succeeded");
 
     if (read_buf)
         HDfree(read_buf);
