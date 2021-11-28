@@ -1039,6 +1039,14 @@ Bug Fixes since HDF5-1.12.0 release
 ===================================
     Library
     -------
+    - Fixed an H5Pget_filter_by_id1/2() assert w/ out of range filter IDs
+
+      Both H5Pget_filter_by_id1 and 2 did not range check the filter ID, which
+      could trip as assert in debug versions of the library. The library now
+      returns a normal HDF5 error when the filter ID is out of range.
+
+      (DER - 2021/11/23, HDFFV-11286)
+
     - Fixed an issue with collective metadata reads being permanently disabled
       after a dataset chunk lookup operation. This would usually cause a
       mismatched MPI_Bcast and MPI_ERR_TRUNCATE issue in the library for
