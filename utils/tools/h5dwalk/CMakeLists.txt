@@ -1,34 +1,34 @@
 cmake_minimum_required (VERSION 3.12)
-project (HDF5_TOOLS_SRC_DH5WALK C)
+project (HDF5_UTILS_TOOLS_H5DWALK C)
 
 # --------------------------------------------------------------------
-# Add the dh5walk and test executables
+# Add the h5dwalk and test executables
 # --------------------------------------------------------------------
 if (NOT ONLY_SHARED_LIBS)
-  add_executable (dh5walk ${HDF5_TOOLS_SRC_DH5WALK_SOURCE_DIR}/dh5walk.c)
+  add_executable (h5dwalk ${HDF5_UTILS_TOOLS_H5DWALK_SOURCE_DIR}/h5dwalk.c)
 #  add_custom_target(generate_demo ALL
 #    DEPENDS "${HDF5_TOOLS_DIR}/test/demo_destfiles.test"
 #  )
-  target_include_directories (dh5walk PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  target_compile_options(dh5walk PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  TARGET_C_PROPERTIES (dh5walk STATIC)
-  target_link_libraries (dh5walk PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} ${MFU_LIBRARY} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
-  set_target_properties (dh5walk PROPERTIES FOLDER tools)
-  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};dh5walk")
+  target_include_directories (h5dwalk PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_compile_options(h5dwalk PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  TARGET_C_PROPERTIES (h5dwalk STATIC)
+  target_link_libraries (h5dwalk PRIVATE ${HDF5_TOOLS_LIB_TARGET} ${HDF5_LIB_TARGET} ${MFU_LIBRARY} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
+  set_target_properties (h5dwalk PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5dwalk")
 
-  set (H5_DEP_EXECUTABLES dh5walk)
+  set (H5_DEP_EXECUTABLES h5dwalk)
 endif ()
 
 if (BUILD_SHARED_LIBS)
-  add_executable (dh5walk-shared ${HDF5_TOOLS_SRC_DH5WALK_SOURCE_DIR}/dh5walk.c)
-  target_include_directories (dh5walk-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
-  target_compile_options(dh5walk-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
-  TARGET_C_PROPERTIES (dh5walk-shared SHARED)
-  target_link_libraries (dh5walk-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${MFU_LIBRARY} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
-  set_target_properties (dh5walk-shared PROPERTIES FOLDER tools)
-  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};dh5walk-shared")
+  add_executable (h5dwalk-shared ${HDF5_UTILS_TOOLS_H5DWALK_SOURCE_DIR}/h5dwalk.c)
+  target_include_directories (h5dwalk-shared PRIVATE "${HDF5_TOOLS_DIR}/lib;${HDF5_SRC_DIR};${HDF5_SRC_BINARY_DIR};${CIRCLE_INCLUDE_DIR};$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_INCLUDE_DIRS}>")
+  target_compile_options(h5dwalk-shared PRIVATE "${HDF5_CMAKE_C_FLAGS}")
+  TARGET_C_PROPERTIES (h5dwalk-shared SHARED)
+  target_link_libraries (h5dwalk-shared PRIVATE ${HDF5_TOOLS_LIBSH_TARGET} ${HDF5_LIBSH_TARGET} ${MFU_LIBRARY} "$<$<BOOL:${HDF5_ENABLE_PARALLEL}>:${MPI_C_LIBRARIES}>")
+  set_target_properties (h5dwalk-shared PROPERTIES FOLDER tools)
+  set_global_variable (HDF5_UTILS_TO_EXPORT "${HDF5_UTILS_TO_EXPORT};h5dwalk-shared")
 
-  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} dh5walk-shared)
+  set (H5_DEP_EXECUTABLES ${H5_DEP_EXECUTABLES} h5dwalk-shared)
 endif ()
 
 #-----------------------------------------------------------------------------
@@ -36,9 +36,9 @@ endif ()
 #-----------------------------------------------------------------------------
 if (HDF5_ENABLE_FORMATTERS)
   if (NOT ONLY_SHARED_LIBS)
-    clang_format (HDF5_DH5WALK_SRC_FORMAT dh5walk)
+    clang_format (HDF5_H5DWALK_SRC_FORMAT h5dwalk)
   else ()
-    clang_format (HDF5_DH5WALK_SRC_FORMAT dh5walk-shared)
+    clang_format (HDF5_H5DWALK_SRC_FORMAT h5dwalk-shared)
   endif ()
 endif ()
 

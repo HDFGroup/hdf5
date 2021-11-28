@@ -3,6 +3,6 @@ project (HDF5_TOOLS_TEST C)
 
 #-- Add the h5diff tests
 if (HDF5_BUILD_PARALLEL_TOOLS)
-   add_subdirectory (dh5walk)
+   add_subdirectory (h5dwalk)
 endif()
 

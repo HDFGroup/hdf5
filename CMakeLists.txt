@@ -1013,6 +1013,8 @@ if (EXISTS "${HDF5_SOURCE_DIR}/utils" AND IS_DIRECTORY "${HDF5_SOURCE_DIR}/utils
     set (CMAKE_PREFIX_PATH "$HDF_RESOURCES_DIR")
     find_package(MFU REQUIRED)
     if (MFU_FOUND)
+      message(STATUS "LL_PATH=${LL_PATH}")
+      set (ENV{H5DWALK_TEST_ENV} "${LL_PATH}")
       set (H5_HAVE_LIBMFU 1)
       set (H5_HAVE_MFU_H 1)
       set (CMAKE_REQUIRED_INCLUDES "${MFU_INCLUDE_DIR}")

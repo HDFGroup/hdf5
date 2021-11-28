@@ -47,6 +47,8 @@ WC='wc'
 nerrors=0
 verbose=yes
 
+export LD_LIBRARY_PATH="$LL_PATH"
+
 # source dirs
 SRC_TOOLS="$TOP_DIR/tools/test"
 SRC_TOOLS_TESTFILES="$SRC_TOOLS/testfiles"

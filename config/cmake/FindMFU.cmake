@@ -44,21 +44,22 @@
 #########################################################################
 
 
-find_path(MFU_INCLUDE_DIR mfu.h)
 
-set(mfu_names ${MFU_NAMES} mfu libmfu)
-foreach(name ${mfu_names})
-  list (APPEND mfu_names_debug "${name}_debug")
-endforeach()
+FIND_PATH(MFU_INCLUDE_DIR
+  NAMES mfu.h
+  HINTS "$ENV{MFU_ROOT}/include"
+)
+FIND_LIBRARY(MFU_LIBRARY
+  NAMES mfu
+  HINTS "$ENV{MFU_ROOT}/lib64"
+)
 
 if(NOT MFU_LIBRARY)
+  set(mfu_names ${MFU_NAMES} mfu libmfu)
   find_library(MFU_LIBRARY NAMES ${mfu_names})
   include(SelectLibraryConfigurations)
   select_library_configurations(MFU)
-  mark_as_advanced(MFU_LIBRARY)
 endif()
-unset(mfu_names)
-unset(mfu_names_debug)
 
 include(FindPackageHandleStandardArgs)
 find_package_handle_standard_args(MFU
@@ -66,10 +67,8 @@ find_package_handle_standard_args(MFU
 
 if(MFU_FOUND)
   set(MFU_LIBRARIES "${MFU_LIBRARY}")
-  set(MFU_LIBRARY_DEBUG "${MFU_LIBRARY}")
-  set(MFU_LIBRARY_RELEASE "${MFU_LIBRARY}")
   set(MFU_INCLUDE_DIRS "${MFU_INCLUDE_DIR}")
-
+  set(LL_PATH "$ENV{MFU_ROOT}/lib64:$ENV{MFU_ROOT}/lib")
   if(NOT TARGET MFU::MFU)
     add_library(MFU::MFU UNKNOWN IMPORTED)
     if(MFU_INCLUDE_DIRS)
@@ -83,8 +82,6 @@ if(MFU_FOUND)
     endif()
   endif()
 endif()
-
-mark_as_advanced(MFU_LIBRARY MFU_INCLUDE_DIR)
 
 # Report the results.
 if (NOT MFU_FOUND)
