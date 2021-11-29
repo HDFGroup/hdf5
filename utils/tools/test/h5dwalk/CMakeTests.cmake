@@ -47,12 +47,11 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.h5dwalk"
+              -D "TEST_LIBRARY_DIRECTORY=$ENV{H5DWALK_TEST_ENV}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()
 
-#  get_property(_h5dwalk_llenv GLOBAL PROPERTY H5DWALK_ENVIRONMENT)
-  message(STATUS "H5DWALK_TEST_ENV = $ENV{H5DWALK_TEST_ENV}")
-  set(LD_LIBRARY_PATH "ENV{LD_LIBRARY_PATH}:$ENV{H5DWALK_TEST_ENV}")
+  message("LL_PATH=$ENV{H5DWALK_TEST_ENV}")
   ADD_H5_TEST(help-1 0 -h)
