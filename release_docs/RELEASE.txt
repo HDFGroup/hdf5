@@ -935,7 +935,7 @@ New Features
 
     Tools:
     ------
-    - Added a new (unix ONLY) parallel meta tool 'dh5walk', which utilizes the
+    - Added a new (unix ONLY) parallel meta tool 'h5dwalk', which utilizes the
       mpifileutils (https://hpc.github.io/mpifileutils) open source utility
       library to enable parallel execution of other HDF5 tools.
       This approach can greatly enhance the serial hdf5 tool performance over large
@@ -943,7 +943,7 @@ New Features
       load over many independent MPI ranks and files.
 
       An introduction to the mpifileutils library and initial 'User Guide' for
-      the new 'dh5walk" tool can be found at:
+      the new 'h5dwalk" tool can be found at:
       https://github.com/HDFGroup/hdf5doc/tree/master/RFCs/HDF5/tools/parallel_tools
 
       (RAW - 2021/10/25)

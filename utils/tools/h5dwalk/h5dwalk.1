@@ -1,10 +1,10 @@
-.TH "dh5walk" 1
+.TH "h5dwalk" 1
 .SH NAME
-dh5walk \- Provides a means of extending HDF5 tools by using parallelism on groups of files.
+h5dwalk \- Provides a means of extending HDF5 tools by using parallelism on groups of files.
 .SH SYNOPSIS
-dh5walk [OPTIONS] -T h5tool [H5TOOL_options...] 
+h5dwalk [OPTIONS] -T h5tool [H5TOOL_options...] 
 .SH DESCRIPTION
-dh5walk utilizes the mpiFileUtils library to invoke a selected HDF5 tool on a collection of files.  The mpiFileUtils library provides the facilities to walk directory trees and provide a selection of files contained therein.  This selection can be filtered in various ways.  At present, dh5walk filters the original file selection to include only HDF5 formatted files.  The resulting collection or collections can be utilized as the file inputs to the selected h5tool.
+h5dwalk utilizes the mpiFileUtils library to invoke a selected HDF5 tool on a collection of files.  The mpiFileUtils library provides the facilities to walk directory trees and provide a selection of files contained therein.  This selection can be filtered in various ways.  At present, h5dwalk filters the original file selection to include only HDF5 formatted files.  The resulting collection or collections can be utilized as the file inputs to the selected h5tool.
 .SH OPTIONS
 .TP
 .B \-h   

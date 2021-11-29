@@ -18,20 +18,20 @@
 include $(top_srcdir)/config/commence.am
 
 # Include src directory
-AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib $(DH5WALK_CPPFLAGS)
+AM_CPPFLAGS+=-I$(top_srcdir)/src -I$(top_srcdir)/tools/lib $(H5DWALK_CPPFLAGS)
 
 # These are our main targets, the tools
-# dh5walk_SOURCES=dh5walk.c $(TOOLSOURCES)
-bin_PROGRAMS=dh5walk
+# h5dwalk_SOURCES=h5dwalk.c $(TOOLSOURCES)
+bin_PROGRAMS=h5dwalk
 #bin_SCRIPTS=install-examples
 
 # Add h5stat specific linker flags here
-dh5walk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS) $(DH5WALK_LDFLAGS)
+h5dwalk_LDFLAGS = $(LT_STATIC_EXEC) $(AM_LDFLAGS) $(H5DWALK_LDFLAGS)
 
 # Tell automake to clean h5redeploy script
 CLEANFILES=
 
 # All programs rely on hdf5 library and h5tools library
-dh5walk_LDADD=$(LIBH5TOOLS) $(LIBHDF5) $(DH5WALK_LIBS)
+h5dwalk_LDADD=$(LIBH5TOOLS) $(LIBHDF5) $(H5DWALK_LIBS)
 
 include $(top_srcdir)/config/conclude.am
