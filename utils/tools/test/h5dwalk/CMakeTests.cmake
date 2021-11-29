@@ -47,11 +47,10 @@
               -D "TEST_OUTPUT=${resultfile}.out"
               -D "TEST_EXPECT=${resultcode}"
               -D "TEST_REFERENCE=${resultfile}.h5dwalk"
-              -D "TEST_LIBRARY_DIRECTORY=$ENV{H5DWALK_TEST_ENV}"
+              -D "TEST_LIBRARY_DIRECTORY=${LL_PATH}"
               -P "${HDF_RESOURCES_EXT_DIR}/runTest.cmake"
       )
     endif ()
   endmacro ()
 
-  message("LL_PATH=$ENV{H5DWALK_TEST_ENV}")
   ADD_H5_TEST(help-1 0 -h)
