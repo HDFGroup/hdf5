@@ -10,7 +10,9 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
+
 # Tests for the h5dwalk tool
+
 #
 #
 
@@ -20,7 +22,9 @@ srcdir=@srcdir@
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 
+
 TESTNAME=h5dwalk
+
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
@@ -29,8 +33,10 @@ ROOTDIR="`cd ../../../..; pwd`"
 cd "$THIS_DIR"
 TOP_DIR="$ROOTDIR"
 
+
 H5DWALK=../../h5dwalk/h5dwalk
 H5DWALK_BIN="$TOP_DIR/utils/tools/h5dwalk/h5dwalk"
+
 
 H5DUMP="$TOP_DIR/src/h5dump/h5dump"
 H5DUMP_BIN="$TOP_DIR/tools/src/h5dump/h5dump"
@@ -104,6 +110,7 @@ TOOLTEST() {
    shift
 
    # Run test.
+
    TESTING $H5DWALK $@
    (
       cd $TESTDIR
@@ -155,8 +162,8 @@ TOOL_LOGTEST() {
    (
       cd $TESTDIR
       $RUNSERIAL $H5DWALK_BIN $@
-   ) 1> $actual 2> $actual_err
 
+   ) 1> $actual 2> $actual_err
    expect_len="`wc -l < $expect`"
 
    if [ ! -f $actual ]; then
@@ -209,7 +216,7 @@ TOOL_CHK_LOGLEN() {
 
 # Print a "SKIP" message
 SKIP() {
-    TESTING $H5DWALK $@
+    TESTING $H5DWALK $@6
     echo  " -SKIP-"
 }
 
