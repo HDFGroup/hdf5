@@ -1,5 +1,5 @@
 
-Usage: dh5walk [options] <path> ...
+Usage: h5dwalk [options] <path> ...
 
 Options:
   -i, --input <file>      - read list from file
