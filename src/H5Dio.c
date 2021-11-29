@@ -808,98 +808,35 @@ H5D__ioinfo_adjust(H5D_io_info_t *io_info, const H5D_t *dset, const H5S_t *file_
             io_info->io_ops.single_write = H5D__mpio_select_write;
         } /* end if */
         else {
-            int comm_size = 0;
-
-            /* Retrieve size of MPI communicator used for file */
-            if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
-                HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
-
             /* Check if there are any filters in the pipeline. If there are,
              * we cannot break to independent I/O if this is a write operation
              * with multiple ranks involved; otherwise, there will be metadata
              * inconsistencies in the file.
              */
-            if (comm_size > 1 && io_info->op_type == H5D_IO_OP_WRITE &&
-                io_info->dset->shared->dcpl_cache.pline.nused > 0) {
-                H5D_mpio_no_collective_cause_t cause;
-                uint32_t                       local_no_collective_cause;
-                uint32_t                       global_no_collective_cause;
-                hbool_t                        local_error_message_previously_written  = FALSE;
-                hbool_t                        global_error_message_previously_written = FALSE;
-                size_t                         idx;
-                size_t                         cause_strings_len;
-                char                           local_no_collective_cause_string[512]  = "";
-                char                           global_no_collective_cause_string[512] = "";
-                const char *                   cause_strings[]                        = {
-                    "independent I/O was requested",
-                    "datatype conversions were required",
-                    "data transforms needed to be applied",
-                    "optimized MPI types flag wasn't set",
-                    "one of the dataspaces was neither simple nor scalar",
-                    "dataset was not contiguous or chunked",
-                    "parallel writes to filtered datasets are disabled",
-                    "an error occurred while checking if collective I/O was possible"};
+            if (io_info->op_type == H5D_IO_OP_WRITE && io_info->dset->shared->dcpl_cache.pline.nused > 0) {
+                int comm_size = 0;
 
-                cause_strings_len = sizeof(cause_strings) / sizeof(cause_strings[0]);
+                /* Retrieve size of MPI communicator used for file */
+                if ((comm_size = H5F_shared_mpi_get_size(io_info->f_sh)) < 0)
+                    HGOTO_ERROR(H5E_FILE, H5E_CANTGET, FAIL, "can't get MPI communicator size")
 
-                if (H5CX_get_mpio_local_no_coll_cause(&local_no_collective_cause) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                "unable to get local no collective cause value")
-                if (H5CX_get_mpio_global_no_coll_cause(&global_no_collective_cause) < 0)
-                    HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
-                                "unable to get global no collective cause value")
+                if (comm_size > 1) {
+                    char local_no_coll_cause_string[512];
+                    char global_no_coll_cause_string[512];
 
-                /* Append each of the "reason for breaking collective I/O" error messages to the
-                 * local and global no collective cause strings */
-                for (cause = 1, idx = 0;
-                     (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (idx < cause_strings_len);
-                     cause <<= 1, idx++) {
-                    if (cause & local_no_collective_cause) {
-                        size_t local_buffer_space = sizeof(local_no_collective_cause_string) -
-                                                    HDstrlen(local_no_collective_cause_string) - 1;
+                    if (H5D__mpio_get_no_coll_cause_strings(local_no_coll_cause_string, 512,
+                                                            global_no_coll_cause_string, 512) < 0)
+                        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                                    "can't get reasons for breaking collective I/O")
 
-                        /* Check if there were any previous error messages included. If so, prepend a
-                         * semicolon to separate the messages.
-                         */
-                        if (local_buffer_space && local_error_message_previously_written) {
-                            HDstrncat(local_no_collective_cause_string, "; ", local_buffer_space);
-                            local_buffer_space -= MIN(local_buffer_space, 2);
-                        }
-
-                        if (local_buffer_space)
-                            HDstrncat(local_no_collective_cause_string, cause_strings[idx],
-                                      local_buffer_space);
-
-                        local_error_message_previously_written = TRUE;
-                    } /* end if */
-
-                    if (cause & global_no_collective_cause) {
-                        size_t global_buffer_space = sizeof(global_no_collective_cause_string) -
-                                                     HDstrlen(global_no_collective_cause_string) - 1;
-
-                        /* Check if there were any previous error messages included. If so, prepend a
-                         * semicolon to separate the messages.
-                         */
-                        if (global_buffer_space && global_error_message_previously_written) {
-                            HDstrncat(global_no_collective_cause_string, "; ", global_buffer_space);
-                            global_buffer_space -= MIN(global_buffer_space, 2);
-                        }
-
-                        if (global_buffer_space)
-                            HDstrncat(global_no_collective_cause_string, cause_strings[idx],
-                                      global_buffer_space);
-
-                        global_error_message_previously_written = TRUE;
-                    } /* end if */
-                }     /* end for */
-
-                HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
-                            "Can't perform independent write with filters in pipeline.\n"
-                            "    The following caused a break from collective I/O:\n"
-                            "        Local causes: %s\n"
-                            "        Global causes: %s",
-                            local_no_collective_cause_string, global_no_collective_cause_string);
-            } /* end if */
+                    HGOTO_ERROR(H5E_IO, H5E_NO_INDEPENDENT, FAIL,
+                                "Can't perform independent write with filters in pipeline.\n"
+                                "    The following caused a break from collective I/O:\n"
+                                "        Local causes: %s\n"
+                                "        Global causes: %s",
+                                local_no_coll_cause_string, global_no_coll_cause_string);
+                }
+            }
 
             /* If we won't be doing collective I/O, but the user asked for
              * collective I/O, change the request to use independent I/O

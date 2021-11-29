@@ -731,6 +731,8 @@ H5_DLL herr_t H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type
  * memory and the file */
 H5_DLL htri_t H5D__mpio_opt_possible(const H5D_io_info_t *io_info, const H5S_t *file_space,
                                      const H5S_t *mem_space, const H5D_type_info_t *type_info);
+H5_DLL herr_t H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len,
+                                                  char *global_cause, size_t global_cause_len);
 
 #endif /* H5_HAVE_PARALLEL */
 

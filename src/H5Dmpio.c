@@ -510,6 +510,125 @@ done:
 } /* H5D__mpio_opt_possible() */
 
 /*-------------------------------------------------------------------------
+ * Function:    H5D__mpio_get_no_coll_cause_strings
+ *
+ * Purpose:     When collective I/O is broken internally, it can be useful
+ *              for users to see a representative string for the reason(s)
+ *              why it was broken. This routine inspects the current
+ *              "cause" flags from the API context and prints strings into
+ *              the caller's buffers for the local and global reasons that
+ *              collective I/O was broken.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+herr_t
+H5D__mpio_get_no_coll_cause_strings(char *local_cause, size_t local_cause_len, char *global_cause,
+                                    size_t global_cause_len)
+{
+    H5D_mpio_no_collective_cause_t cause;
+    uint32_t                       local_no_coll_cause;
+    uint32_t                       global_no_coll_cause;
+    size_t                         local_cause_bytes_written  = 0;
+    size_t                         global_cause_bytes_written = 0;
+    size_t                         idx;
+    size_t                         num_cause_strings;
+    herr_t                         ret_value = SUCCEED;
+
+    FUNC_ENTER_PACKAGE
+
+    HDassert((local_cause && local_cause_len > 0) || (global_cause && global_cause_len > 0));
+
+    /* Ensure things are in order for our cause string table */
+    HDcompile_assert(H5D_MPIO_SET_INDEPENDENT == (H5D_mpio_no_collective_cause_t)1);
+    HDcompile_assert(H5D_MPIO_DATATYPE_CONVERSION == (H5D_mpio_no_collective_cause_t)2);
+    HDcompile_assert(H5D_MPIO_DATA_TRANSFORMS == (H5D_mpio_no_collective_cause_t)4);
+    HDcompile_assert(H5D_MPIO_MPI_OPT_TYPES_ENV_VAR_DISABLED == (H5D_mpio_no_collective_cause_t)8);
+    HDcompile_assert(H5D_MPIO_NOT_SIMPLE_OR_SCALAR_DATASPACES == (H5D_mpio_no_collective_cause_t)16);
+    HDcompile_assert(H5D_MPIO_NOT_CONTIGUOUS_OR_CHUNKED_DATASET == (H5D_mpio_no_collective_cause_t)32);
+    HDcompile_assert(H5D_MPIO_PARALLEL_FILTERED_WRITES_DISABLED == (H5D_mpio_no_collective_cause_t)64);
+    HDcompile_assert(H5D_MPIO_ERROR_WHILE_CHECKING_COLLECTIVE_POSSIBLE ==
+                     (H5D_mpio_no_collective_cause_t)128);
+    HDcompile_assert(H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE == (H5D_mpio_no_collective_cause_t)256);
+
+    /* Initialize output buffers */
+    if (local_cause && local_cause_len > 0)
+        *local_cause = '\0';
+    if (global_cause && global_cause_len > 0)
+        *global_cause = '\0';
+
+    /* Retrieve the local and global cause flags from the API context */
+    if (H5CX_get_mpio_local_no_coll_cause(&local_no_coll_cause) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "unable to get local no collective cause value")
+    if (H5CX_get_mpio_global_no_coll_cause(&global_no_coll_cause) < 0)
+        HGOTO_ERROR(H5E_CONTEXT, H5E_CANTGET, FAIL, "unable to get global no collective cause value")
+
+    {
+        const char *cause_strings[8] = {"independent I/O was requested",
+                                        "datatype conversions were required",
+                                        "data transforms needed to be applied",
+                                        "optimized MPI types flag wasn't set",
+                                        "one of the dataspaces was neither simple nor scalar",
+                                        "dataset was not contiguous or chunked",
+                                        "parallel writes to filtered datasets are disabled",
+                                        "an error occurred while checking if collective I/O was possible"};
+
+        num_cause_strings = sizeof(cause_strings) / sizeof(cause_strings[0]);
+
+        /*
+         * Append each of the "reason for breaking collective I/O" error messages
+         * to the local and global cause string buffers
+         */
+        for (cause = H5D_MPIO_SET_INDEPENDENT, idx = 0;
+             (cause < H5D_MPIO_NO_COLLECTIVE_MAX_CAUSE) && (idx < num_cause_strings); cause <<= 1, idx++) {
+            size_t buf_space_left;
+
+            if (local_cause && (cause & local_no_coll_cause)) {
+                buf_space_left = local_cause_len - local_cause_bytes_written;
+
+                /*
+                 * Check if there were any previous error messages included. If
+                 * so, prepend a semicolon to separate the messages.
+                 */
+                if (buf_space_left && local_cause_bytes_written) {
+                    HDstrncat(local_cause, "; ", buf_space_left);
+                    local_cause_bytes_written += MIN(buf_space_left, 2);
+                    buf_space_left -= MIN(buf_space_left, 2);
+                }
+
+                if (buf_space_left) {
+                    HDstrncat(local_cause, cause_strings[idx], buf_space_left);
+                    local_cause_bytes_written += MIN(buf_space_left, HDstrlen(cause_strings[idx]));
+                }
+            }
+
+            if (global_cause && (cause & global_no_coll_cause)) {
+                buf_space_left = global_cause_len - global_cause_bytes_written;
+
+                /*
+                 * Check if there were any previous error messages included. If
+                 * so, prepend a semicolon to separate the messages.
+                 */
+                if (buf_space_left && global_cause_bytes_written) {
+                    HDstrncat(global_cause, "; ", buf_space_left);
+                    global_cause_bytes_written += MIN(buf_space_left, 2);
+                    buf_space_left -= MIN(buf_space_left, 2);
+                }
+
+                if (buf_space_left) {
+                    HDstrncat(global_cause, cause_strings[idx], buf_space_left);
+                    global_cause_bytes_written += MIN(buf_space_left, HDstrlen(cause_strings[idx]));
+                }
+            }
+        }
+    }
+
+done:
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__mpio_get_no_coll_cause_strings() */
+
+/*-------------------------------------------------------------------------
  * Function:    H5D__mpio_select_read
  *
  * Purpose:     MPI-IO function to read directly from app buffer to file.
