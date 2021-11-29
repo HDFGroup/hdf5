@@ -2070,7 +2070,6 @@ H5FD__onion_open(const char *filename, unsigned flags, hid_t fapl_id, haddr_t ma
         }
         if (H5FD_set_eoa(file->backing_canon, H5FD_MEM_DRAW, canon_eof) < 0)
             HGOTO_ERROR(H5E_FILE, H5E_CANTSET, NULL, "can't extend EOA")
-        ////
 
         /* Get the history header from the onion file */
         if (H5FD__onion_ingest_history_header(&file->header, file->backing_onion, 0) < 0)
@@ -2097,7 +2096,7 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
                 fa->revision_id != H5FD_ONION_FAPL_INFO_REVISION_ID_LATEST)
                 HGOTO_ERROR(H5E_ARGS, H5E_BADVALUE, NULL, "target revision ID out of range")
 
-            if (file->summary.n_revisions > 0 &&
+            if (file->summary.n_revisions > 0 && fa->revision_id != 0 &&
                 H5FD__onion_ingest_revision_record(&file->rev_record, file->backing_onion, &file->summary,
                                                    MIN(fa->revision_id - 1, (file->summary.n_revisions - 1))) <
                     0) {
@@ -2128,9 +2127,13 @@ HDprintf("File has %d revisions\n", file->summary.n_revisions);
                 HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, NULL, "unable to allocate comment string")
         }
     }
-
     file->origin_eof = file->header.origin_eof;
-    file->logi_eof   = MAX(file->rev_record.logi_eof, file->logi_eof);
+#if 0
+HDprintf("fa->revision_id: %d\n", fa->revision_id);
+HDprintf("file->origin_eof: %llu\n", file->origin_eof);
+HDprintf("file->rev_record.logi_eof: %llu, file->logi_eof: %llu, canon_eof: %llu\n", file->rev_record.logi_eof, file->logi_eof, canon_eof);
+#endif
+   	file->logi_eof   = MAX(file->rev_record.logi_eof, file->logi_eof);
     // file->logi_eof   = file->rev_record.logi_eof;
     file->logi_eoa = 0;
 
