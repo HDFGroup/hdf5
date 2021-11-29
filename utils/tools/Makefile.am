@@ -19,9 +19,9 @@
 include $(top_srcdir)/config/commence.am
 
 if PARALLEL_TOOLS_CONDITIONAL
-  DH5WALK=dh5walk
+  H5DWALK=h5dwalk
 else
-  DH5WALK=
+  H5DWALK=
 endif
 
 if BUILD_TESTS_CONDITIONAL
@@ -33,6 +33,6 @@ endif
 CONFIG=ordered
 
 # All subdirectories
-SUBDIRS=$(DH5WALK) $(TESTSERIAL_DIR)
+SUBDIRS=$(H5DWALK) $(TESTSERIAL_DIR)
 
 include $(top_srcdir)/config/conclude.am

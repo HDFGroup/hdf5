@@ -23,7 +23,7 @@
 #include "mfu_flist_internal.h"
 
 /* Name of tool */
-#define PROGRAMNAME "dh5walk"
+#define PROGRAMNAME "h5dwalk"
 
 #ifdef DAOS_SUPPORT
 #include "mfu_daos.h"
@@ -42,7 +42,7 @@ static void add_executable(int argc, char **argv, char *cmdstring, int *f_index,
 static int  process_input_file(char *inputname, int myrank, int size);
 static void usage(void);
 
-H5_ATTR_NORETURN void dh5walk_exit(int status);
+H5_ATTR_NORETURN void h5dwalk_exit(int status);
 
 /* keep stats during walk */
 uint64_t total_dirs    = 0;
@@ -139,7 +139,7 @@ create_default_separators(struct distribute_option *option, mfu_flist *flist, ui
 }
 
 static int
-dh5walk_map_fn(mfu_flist flist __attribute__((unused)), uint64_t idx, int ranks,
+h5dwalk_map_fn(mfu_flist flist __attribute__((unused)), uint64_t idx, int ranks,
                void *args __attribute__((unused)))
 {
     int rank = (int)((int)idx % ranks);
@@ -366,7 +366,7 @@ usage(void)
         return;
 
     PRINTVALSTREAM(rawoutstream, "\n");
-    PRINTVALSTREAM(rawoutstream, "Usage: dh5walk [options] <path> ...\n");
+    PRINTVALSTREAM(rawoutstream, "Usage: h5dwalk [options] <path> ...\n");
 #ifdef DAOS_SUPPORT
     PRINTVALSTREAM(rawoutstream, "\n");
     PRINTVALSTREAM(rawoutstream, "DAOS paths can be specified as:\n");
@@ -925,7 +925,7 @@ run_command(int argc __attribute__((unused)), char **argv, char *cmdline, const 
 
 #ifdef H5_HAVE_WINDOWS
     HDprintf("ERROR: %s %s: Unable to support fork/exec on WINDOWS\n", PROGRAMNAME, __func__);
-    dh5walk_exit(EXIT_FAILURE);
+    h5dwalk_exit(EXIT_FAILURE);
 #else
 
     /* create a copy of the 1st file passed to the application */
@@ -1348,7 +1348,7 @@ main(int argc, const char *argv[])
     sg_mpi_rank = rank;
 
 #if 0
-	env_var = HDgetenv("HDF5_DH5WALK_PRINT_CMDLINE");
+	env_var = HDgetenv("HDF5_H5DWALK_PRINT_CMDLINE");
     if (env_var) {
 		int enable = HDatoi(env_var);
 		if (enable) {
@@ -1396,7 +1396,7 @@ main(int argc, const char *argv[])
         switch ((char)opt) {
             default:
                 usage();
-                dh5walk_exit(EXIT_FAILURE);
+                h5dwalk_exit(EXIT_FAILURE);
                 break;
             case 'i':
                 inputname    = HDstrdup(H5_optarg);
@@ -1438,11 +1438,11 @@ main(int argc, const char *argv[])
                 break;
             case 'h':
                 usage();
-                dh5walk_exit(EXIT_SUCCESS);
+                h5dwalk_exit(EXIT_SUCCESS);
                 break;
             case '?':
                 usage();
-                dh5walk_exit(EXIT_SUCCESS);
+                h5dwalk_exit(EXIT_SUCCESS);
                 break;
         }
     }
@@ -1455,7 +1455,7 @@ main(int argc, const char *argv[])
         }
         rc = process_input_file(inputname, rank, ranks);
         mfu_finalize();
-        dh5walk_exit(rc);
+        h5dwalk_exit(rc);
     }
 
     /**************************************************************/
@@ -1533,7 +1533,7 @@ main(int argc, const char *argv[])
                 mfu_free(&paths);
             }
             usage();
-            dh5walk_exit(EXIT_FAILURE);
+            h5dwalk_exit(EXIT_FAILURE);
         }
     }
     else {
@@ -1544,7 +1544,7 @@ main(int argc, const char *argv[])
                 MFU_LOG(MFU_LOG_ERR, "Either a <path> or --input is required.");
             }
             usage();
-            dh5walk_exit(EXIT_FAILURE);
+            h5dwalk_exit(EXIT_FAILURE);
         }
     }
 
@@ -1681,7 +1681,7 @@ main(int argc, const char *argv[])
 }
 
 /*-------------------------------------------------------------------------
- * Function: dh5walk_exit
+ * Function: h5dwalk_exit
  *
  * Purpose: close the tools library and exit
  *
@@ -1697,7 +1697,7 @@ main(int argc, const char *argv[])
  *-------------------------------------------------------------------------
  */
 H5_ATTR_NORETURN void
-dh5walk_exit(int status)
+h5dwalk_exit(int status)
 {
     int require_finalize = 0;
     h5tools_close();

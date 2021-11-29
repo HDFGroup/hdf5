@@ -10,7 +10,7 @@ if (HDF5_BUILD_UTILS)
   add_subdirectory (mirror_vfd)
 endif ()
 
-#-- Add the dh5walk and test executables
+#-- Add the h5dwalk and test executables
 if (HDF5_BUILD_PARALLEL_TOOLS AND HDF5_ENABLE_PARALLEL)
   add_subdirectory(tools)
 endif()

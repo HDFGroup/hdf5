@@ -10,7 +10,7 @@
 # If you do not have access to either file, you may request a copy from
 # help@hdfgroup.org.
 #
-# Tests for the dh5walk tool
+# Tests for the h5dwalk tool
 #
 #
 
@@ -20,7 +20,7 @@ srcdir=@srcdir@
 USE_FILTER_SZIP="@USE_FILTER_SZIP@"
 USE_FILTER_DEFLATE="@USE_FILTER_DEFLATE@"
 
-TESTNAME=dh5walk
+TESTNAME=h5dwalk
 EXIT_SUCCESS=0
 EXIT_FAILURE=1
 
@@ -29,8 +29,8 @@ ROOTDIR="`cd ../../../..; pwd`"
 cd "$THIS_DIR"
 TOP_DIR="$ROOTDIR"
 
-DH5WALK=../../dh5walk/dh5walk
-DH5WALK_BIN="$TOP_DIR/utils/tools/dh5walk/dh5walk"
+H5DWALK=../../h5dwalk/h5dwalk
+H5DWALK_BIN="$TOP_DIR/utils/tools/h5dwalk/h5dwalk"
 
 H5DUMP="$TOP_DIR/src/h5dump/h5dump"
 H5DUMP_BIN="$TOP_DIR/tools/src/h5dump/h5dump"
@@ -47,7 +47,7 @@ WC='wc'
 nerrors=0
 verbose=yes
 
-export LD_LIBRARY_PATH="$LL_PATH"
+export LD_LIBRARY_PATH=@LL_PATH@
 
 # source dirs
 SRC_TOOLS="$TOP_DIR/tools/test"
@@ -60,7 +60,7 @@ SRC_H5DIFF_TESTFILES="$SRC_TOOLS/h5diff/testfiles"
 SRC_H5COPY_TESTFILES="$SRC_TOOLS/h5copy/testfiles"
 SRC_H5REPACK_TESTFILES="$SRC_TOOLS/h5repack/testfiles"
 SRC_H5JAM_TESTFILES="$SRC_TOOLS/h5jam/testfiles"
-SRC_DH5WALK_TESTFILES="$SRC_TOOLS/dh5walk/testfiles"
+SRC_H5DWALK_TESTFILES="$SRC_TOOLS/h5dwalk/testfiles"
 SRC_H5IMPORT_TESTFILES="$SRC_TOOLS/h5import/testfiles"
 
 TESTDIR=./testfiles
@@ -104,10 +104,10 @@ TOOLTEST() {
    shift
 
    # Run test.
-   TESTING $DH5WALK $@
+   TESTING $H5DWALK $@
    (
       cd $TESTDIR
-      $RUNSERIAL $DH5WALK_BIN $@
+      $RUNSERIAL $H5DWALK_BIN $@
    ) 1> $actual 2> $actual_err
 
    # save actual and actual_err in case they are needed later.
@@ -151,10 +151,10 @@ TOOL_LOGTEST() {
    echo "running logtest"
 
    # Run test.
-   TESTING $DH5WALK $@
+   TESTING $H5DWALK $@
    (
       cd $TESTDIR
-      $RUNSERIAL $DH5WALK_BIN $@
+      $RUNSERIAL $H5DWALK_BIN $@
    ) 1> $actual 2> $actual_err
 
    expect_len="`wc -l < $expect`"
@@ -186,10 +186,10 @@ TOOL_CHK_LOGLEN() {
    echo "running tool_chk_loglen"
 
    # Run test.
-   TESTING $DH5WALK $@
+   TESTING $H5DWALK $@
    (
       cd $TESTDIR
-      $RUNSERIAL $DH5WALK_BIN $@
+      $RUNSERIAL $H5DWALK_BIN $@
    )
 	   
    expect_len="`wc -l < $expect`"
@@ -209,7 +209,7 @@ TOOL_CHK_LOGLEN() {
 
 # Print a "SKIP" message
 SKIP() {
-    TESTING $DH5WALK $@
+    TESTING $H5DWALK $@
     echo  " -SKIP-"
 }
 

@@ -66,7 +66,7 @@ echo "FILE_CONTENTS {
 
 # Create the help-1.txt output file for '-h' validation
 echo "
-Usage: dh5walk [options] <path> ...
+Usage: h5dwalk [options] <path> ...
 
 Options:
   -i, --input <file>      - read list from file
@@ -80,7 +80,7 @@ For more information see https://mpifileutils.readthedocs.io.
 " > "$THIS_DIR"/testfiles/help-1.txt
 
 # Make a copy of the help-1.txt output file for --help validation
-$CP "$srcdir"/help.dh5walk "$THIS_DIR"/testfiles/help-1.txt
-$CP "$srcdir"/help.dh5walk "$THIS_DIR"/testfiles/help-2.txt
+$CP "$srcdir"/help.h5dwalk "$THIS_DIR"/testfiles/help-1.txt
+$CP "$srcdir"/help.h5dwalk "$THIS_DIR"/testfiles/help-2.txt
 # Make a copy of a simple HDF5 datafile which will be used as input for h5dump -n (see the expected output above)
 $CP "$SRC_TOOLS_DIR"/test/h5diff/testfiles/h5diff_basic1.h5 "$THIS_DIR"/testfiles
