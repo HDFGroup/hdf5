@@ -2133,7 +2133,7 @@ HDprintf("fa->revision_id: %d\n", fa->revision_id);
 HDprintf("file->origin_eof: %llu\n", file->origin_eof);
 HDprintf("file->rev_record.logi_eof: %llu, file->logi_eof: %llu, canon_eof: %llu\n", file->rev_record.logi_eof, file->logi_eof, canon_eof);
 #endif
-   	file->logi_eof   = MAX(file->rev_record.logi_eof, file->logi_eof);
+    file->logi_eof = MAX(file->rev_record.logi_eof, file->logi_eof);
     // file->logi_eof   = file->rev_record.logi_eof;
     file->logi_eoa = 0;
 

@@ -2415,7 +2415,7 @@ test_several_revisions_with_logical_gaps(void)
 
     /* Inspect logical file */
 
-	/* THIS IS THE INITIAL FILE, SHOULD BE EMPTY */
+    /* THIS IS THE INITIAL FILE, SHOULD BE EMPTY */
     onion_info.revision_id = 0;
     fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
@@ -2447,9 +2447,9 @@ test_several_revisions_with_logical_gaps(void)
     if (NULL == file)
         TEST_ERROR;
     if (0 != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-		HDprintf("\nEOF is not zero, it is: %llu\n", H5FDget_eof(file, H5FD_MEM_DRAW));
+        HDprintf("\nEOF is not zero, it is: %llu\n", H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
-	}
+    }
     if (H5FDclose(file) < 0)
         TEST_ERROR;
     file = NULL;
@@ -2457,11 +2457,10 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     fapl_id = H5I_INVALID_HID;
 
-
     /* One offset block in second revision */
     onion_info.revision_id = 2;
-    //onion_info.revision_id = 1;
-    fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
+    // onion_info.revision_id = 1;
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
@@ -2471,9 +2470,9 @@ test_several_revisions_with_logical_gaps(void)
         TEST_ERROR;
     size = a_off + a_list_size_s;
     if (size != H5FDget_eof(file, H5FD_MEM_DRAW)) {
-		HDprintf("\nEOF is not %llu, it is: %llu\n",size, H5FDget_eof(file, H5FD_MEM_DRAW));
+        HDprintf("\nEOF is not %llu, it is: %llu\n", size, H5FDget_eof(file, H5FD_MEM_DRAW));
         TEST_ERROR;
-	}
+    }
     buf = (unsigned char *)HDmalloc(sizeof(unsigned char) * size);
     if (NULL == buf)
         TEST_ERROR;
@@ -2513,8 +2512,8 @@ test_several_revisions_with_logical_gaps(void)
 
     /* Two offset blocks in third revision */
     onion_info.revision_id = 3;
-    //onion_info.revision_id = 2;
-    fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
+    // onion_info.revision_id = 2;
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
@@ -2555,8 +2554,8 @@ test_several_revisions_with_logical_gaps(void)
 
     /* From start and partial overwrite in fourth revision */
     onion_info.revision_id = 4;
-    //onion_info.revision_id = 3;
-    fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
+    // onion_info.revision_id = 3;
+    fapl_id = H5Pcreate(H5P_FILE_ACCESS);
     if (H5I_INVALID_HID == fapl_id)
         TEST_ERROR;
     if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
@@ -2594,25 +2593,25 @@ test_several_revisions_with_logical_gaps(void)
     fapl_id = H5I_INVALID_HID;
 
     /* No fifth revision */
-	// TODO: Can this be done without triggering an error?
-/*    onion_info.revision_id = 5;
-    //onion_info.revision_id = 4;
-    fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
-    if (H5I_INVALID_HID == fapl_id)
-        TEST_ERROR;
-    if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
-        TEST_ERROR;
-    file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
-    if (NULL != file)
-        TEST_ERROR;
+    // TODO: Can this be done without triggering an error?
+    /*    onion_info.revision_id = 5;
+        //onion_info.revision_id = 4;
+        fapl_id                = H5Pcreate(H5P_FILE_ACCESS);
+        if (H5I_INVALID_HID == fapl_id)
+            TEST_ERROR;
+        if (H5Pset_fapl_onion(fapl_id, &onion_info) < 0)
+            TEST_ERROR;
+        file = H5FDopen(paths->canon, H5F_ACC_RDONLY, fapl_id, HADDR_UNDEF);
+        if (NULL != file)
+            TEST_ERROR;
 
-    if (H5FDclose(file) < 0)
-        TEST_ERROR;
-    file = NULL;
-    if (H5Pclose(fapl_id) < 0)
-        TEST_ERROR;
-    fapl_id = H5I_INVALID_HID;
-*/
+        if (H5FDclose(file) < 0)
+            TEST_ERROR;
+        file = NULL;
+        if (H5Pclose(fapl_id) < 0)
+            TEST_ERROR;
+        fapl_id = H5I_INVALID_HID;
+    */
     /* Inspect history construction */
 
     file = H5FDopen(paths->onion, H5F_ACC_RDONLY, onion_info.backing_fapl_id, HADDR_UNDEF);
