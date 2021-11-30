@@ -125,6 +125,17 @@ typedef enum H5D_mpio_no_rank0_bcast_cause_t {
 } H5D_mpio_no_rank0_bcast_cause_t;
 
 /*
+ * Information necessary for redistributing shared chunks during
+ * a parallel write of a chunk datasets with filters applied.
+ */
+typedef struct H5D_filtered_collective_io_redistribute_info_t {
+    H5F_block_t chunk_block;
+    int         orig_owner;
+    int         new_owner;
+    int         num_writers;
+} H5D_filtered_collective_io_redistribute_info_t;
+
+/*
  * Information necessary for re-allocating file space for a chunk
  * during a parallel write of a chunked dataset with filters
  * applied.
@@ -149,8 +160,8 @@ typedef struct H5D_filtered_collective_io_insert_info_t {
 /*
  * Information about a single chunk when performing collective filtered I/O. All
  * of the fields of one of these structs are initialized at the start of collective
- * filtered I/O in the function H5D__construct_filtered_io_info_list(). This struct's
- * fields are as follows:
+ * filtered I/O in the function H5D__mpio_collective_filtered_chunk_io_setup(). This
+ * struct's fields are as follows:
  *
  * fspace_info - A structure containing the information needed when collectively
  *               re-allocating space in the file for the chunk. The structure is
@@ -202,17 +213,17 @@ typedef struct H5D_filtered_collective_io_insert_info_t {
  *
  * chunk_buf_size - The size in bytes of the data buffer allocated for the chunk
  *
- * num_writers - The total number of MPI ranks writing to this chunk. This field is used when
- *               the new owner of a chunk is receiving messages from other MPI ranks that
- *               contain their selections in the chunk and the data to update the chunk with.
- *               The new owner must know how many MPI ranks it should expect messages from so
- *               that it can post an equal number of receive calls.
- *
  * orig_owner - The MPI rank which originally had this chunk selected at the beginning of
  *              the collective filtered I/O operation. This field is currently used when
  *              redistributing shared chunks among MPI ranks.
  *
  * new_owner - The MPI rank which has been selected to perform the modifications to this chunk.
+ *
+ * num_writers - The total number of MPI ranks writing to this chunk. This field is used when
+ *               the new owner of a chunk is receiving messages from other MPI ranks that
+ *               contain their selections in the chunk and the data to update the chunk with.
+ *               The new owner must know how many MPI ranks it should expect messages from so
+ *               that it can post an equal number of receive calls.
  *
  * buf - A pointer which serves the dual purpose of holding either the chunk data which is to be
  *       written to the file or the chunk data which has been read from the file.
@@ -242,9 +253,9 @@ typedef struct H5D_filtered_collective_io_info_t {
     hbool_t           need_read;
     size_t            io_size;
     size_t            chunk_buf_size;
-    int               num_writers;
     int               orig_owner;
     int               new_owner;
+    int               num_writers;
     void *            buf;
 
     struct {
@@ -257,10 +268,10 @@ typedef struct H5D_filtered_collective_io_info_t {
 /* Function pointer typedef for function to redistribute
  * shared chunks during parallel filtered writes
  */
-typedef herr_t (*chunk_redistribute_func)(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                          const H5D_chunk_map_t *            fm,
-                                          H5D_filtered_collective_io_info_t *local_chunk_array,
-                                          size_t *local_chunk_array_num_entries, int mpi_rank, int mpi_size);
+typedef herr_t (*chunk_redistribute_func)(H5D_filtered_collective_io_info_t *local_chunk_array,
+                                          size_t local_chunk_array_num_entries, const H5D_io_info_t *io_info,
+                                          const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm,
+                                          int mpi_rank, int mpi_size, int *num_chunks_assigned);
 
 /********************/
 /* Local Prototypes */
@@ -285,17 +296,17 @@ static herr_t H5D__obtain_mpio_mode(H5D_io_info_t *io_info, H5D_chunk_map_t *fm,
                                     haddr_t chunk_addr[]);
 static herr_t H5D__mpio_get_sum_chunk(const H5D_io_info_t *io_info, const H5D_chunk_map_t *fm,
                                       int *sum_chunkf);
-static herr_t H5D__construct_filtered_io_info_list(const H5D_io_info_t *               io_info,
-                                                   const H5D_type_info_t *             type_info,
-                                                   const H5D_chunk_map_t *             fm,
-                                                   H5D_filtered_collective_io_info_t **chunk_list,
-                                                   size_t *num_entries, int mpi_rank);
-static herr_t H5D__mpio_redistribute_shared_chunks_p0(const H5D_io_info_t *              io_info,
-                                                      const H5D_type_info_t *            type_info,
-                                                      const H5D_chunk_map_t *            fm,
-                                                      H5D_filtered_collective_io_info_t *local_chunk_array,
-                                                      size_t *local_chunk_array_num_entries, int mpi_rank,
-                                                      int mpi_size);
+static herr_t H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *               io_info,
+                                                           const H5D_type_info_t *             type_info,
+                                                           const H5D_chunk_map_t *             fm,
+                                                           H5D_filtered_collective_io_info_t **chunk_list,
+                                                           size_t *num_entries, int mpi_rank);
+static herr_t H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *local_chunk_array,
+                                                      size_t                 local_chunk_array_num_entries,
+                                                      const H5D_io_info_t *  io_info,
+                                                      const H5D_type_info_t *type_info,
+                                                      const H5D_chunk_map_t *fm, int mpi_rank, int mpi_size,
+                                                      int *num_chunks_assigned);
 static herr_t H5D__mpio_share_chunk_modification_data(H5D_filtered_collective_io_info_t *chunk_list,
                                                       size_t *chunk_list_num_entries, H5D_io_info_t *io_info,
                                                       const H5D_type_info_t *type_info, int mpi_rank,
@@ -322,12 +333,16 @@ static herr_t H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collecti
                                                            H5D_io_info_t *     io_info,
                                                            H5D_chk_idx_info_t *idx_info, int mpi_rank,
                                                            int mpi_size);
+static herr_t H5D__mpio_get_chunk_redistribute_info_types(MPI_Datatype *contig_type,
+                                                          hbool_t *     contig_type_derived,
+                                                          MPI_Datatype *resized_type,
+                                                          hbool_t *     resized_type_derived);
 static herr_t H5D__mpio_get_chunk_fspace_info_types(MPI_Datatype *struct_type, hbool_t *struct_type_derived,
                                                     MPI_Datatype *resized_type,
                                                     hbool_t *     resized_type_derived);
-static herr_t H5D__mpio_get_chunk_insert_info_types(H5D_chk_idx_info_t *idx_info, MPI_Datatype *contig_type,
-                                                    hbool_t *contig_type_derived, MPI_Datatype *true_type,
-                                                    hbool_t *true_type_derived);
+static herr_t H5D__mpio_get_chunk_insert_info_types(MPI_Datatype *contig_type, hbool_t *contig_type_derived,
+                                                    MPI_Datatype *resized_type,
+                                                    hbool_t *     resized_type_derived);
 static herr_t H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_list,
                                                     size_t num_entries, H5D_io_op_type_t op_type,
                                                     MPI_Datatype *new_mem_type, hbool_t *mem_type_derived,
@@ -335,8 +350,8 @@ static herr_t H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_i
 static int    H5D__cmp_chunk_addr(const void *chunk_addr_info1, const void *chunk_addr_info2);
 static int    H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_info_entry1,
                                                          const void *filtered_collective_io_info_entry2);
-static int    H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered_collective_io_info_entry1,
-                                                               const void *filtered_collective_io_info_entry2);
+static int H5D__cmp_filtered_collective_io_redistribute_info_offset(const void *entry1, const void *entry2);
+static int H5D__cmp_filtered_collective_io_redistribute_info_owner(const void *entry1, const void *entry2);
 
 /*********************/
 /* Package Variables */
@@ -1428,16 +1443,11 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
     H5CX_set_coll_metadata_read(TRUE);
 
     /* Build a list of selected chunks in the collective io operation */
-    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries,
-                                             mpi_rank) < 0)
+    if (H5D__mpio_collective_filtered_chunk_io_setup(io_info, type_info, fm, &chunk_list,
+                                                     &chunk_list_num_entries, mpi_rank) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't construct filtered I/O info list")
 
     if (io_info->op_type == H5D_IO_OP_READ) { /* Filtered collective read */
-        /* Ensure the chunk list is sorted in ascending order of offset in the file */
-        if (chunk_list_num_entries)
-            HDqsort(chunk_list, chunk_list_num_entries, sizeof(H5D_filtered_collective_io_info_t),
-                    H5D__cmp_filtered_collective_io_info_entry);
-
         if (H5D__mpio_collective_filtered_chunk_read(chunk_list, chunk_list_num_entries, io_info, type_info) <
             0)
             HGOTO_ERROR(H5E_DATASET, H5E_READERROR, FAIL, "couldn't read filtered chunks")
@@ -1459,8 +1469,8 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
             redistribute_func = H5D__mpio_redistribute_shared_chunks_p0;
 
             /* Perform redistribution operation */
-            result = (*redistribute_func)(io_info, type_info, fm, chunk_list, &chunk_list_num_entries,
-                                          mpi_rank, mpi_size);
+            result = (*redistribute_func)(chunk_list, chunk_list_num_entries, io_info, type_info, fm,
+                                          mpi_rank, mpi_size, NULL);
             if (result < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to redistribute shared chunks")
 
@@ -1868,8 +1878,8 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
     H5CX_set_coll_metadata_read(TRUE);
 
     /* Build a list of selected chunks in the collective IO operation */
-    if (H5D__construct_filtered_io_info_list(io_info, type_info, fm, &chunk_list, &chunk_list_num_entries,
-                                             mpi_rank) < 0)
+    if (H5D__mpio_collective_filtered_chunk_io_setup(io_info, type_info, fm, &chunk_list,
+                                                     &chunk_list_num_entries, mpi_rank) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTINIT, FAIL, "couldn't construct filtered I/O info list")
 
     /* Retrieve the maximum number of chunks selected for any rank */
@@ -1927,8 +1937,8 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
             redistribute_func = H5D__mpio_redistribute_shared_chunks_p0;
 
             /* Perform redistribution operation */
-            result = (*redistribute_func)(io_info, type_info, fm, chunk_list, &chunk_list_num_entries,
-                                          mpi_rank, mpi_size);
+            result = (*redistribute_func)(chunk_list, chunk_list_num_entries, io_info, type_info, fm,
+                                          mpi_rank, mpi_size, NULL);
             if (result < 0)
                 HGOTO_ERROR(H5E_DATASET, H5E_WRITEERROR, FAIL, "unable to redistribute shared chunks")
 
@@ -2239,43 +2249,77 @@ H5D__cmp_filtered_collective_io_info_entry(const void *filtered_collective_io_in
 } /* end H5D__cmp_filtered_collective_io_info_entry() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__cmp_filtered_collective_io_info_entry_owner
+ * Function:    H5D__cmp_filtered_collective_io_redistribute_info_offset
  *
- * Purpose:     Routine to compare filtered collective chunk io info
- *              entries's original owner fields
+ * Purpose:     Routine to compare the chunk offset fields for two
+ *              H5D_filtered_collective_io_redistribute_info_t structures
  *
- * Description: Callback for qsort() to compare filtered collective chunk
- *              io info entries's original owner fields
+ * Description: Callback for qsort() to compare the chunk offset fields for
+ *              two H5D_filtered_collective_io_redistribute_info_t
+ *              structures
  *
- * Return:      The difference between the two
- *              H5D_filtered_collective_io_info_t's original owner fields
+ * Return:      -1, 0, 1
  *
  *-------------------------------------------------------------------------
  */
 static int
-H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered_collective_io_info_entry1,
-                                                 const void *filtered_collective_io_info_entry2)
+H5D__cmp_filtered_collective_io_redistribute_info_offset(const void *entry1, const void *entry2)
 {
-    const H5D_filtered_collective_io_info_t *entry1;
-    const H5D_filtered_collective_io_info_t *entry2;
-    int                                      owner1 = -1;
-    int                                      owner2 = -1;
-    int                                      ret_value;
+    const H5D_filtered_collective_io_redistribute_info_t *_entry1;
+    const H5D_filtered_collective_io_redistribute_info_t *_entry2;
+    haddr_t                                               addr1 = HADDR_UNDEF;
+    haddr_t                                               addr2 = HADDR_UNDEF;
 
     FUNC_ENTER_STATIC_NOERR
 
-    entry1 = (const H5D_filtered_collective_io_info_t *)filtered_collective_io_info_entry1;
-    entry2 = (const H5D_filtered_collective_io_info_t *)filtered_collective_io_info_entry2;
+    _entry1 = (const H5D_filtered_collective_io_redistribute_info_t *)entry1;
+    _entry2 = (const H5D_filtered_collective_io_redistribute_info_t *)entry2;
 
-    owner1 = entry1->orig_owner;
-    owner2 = entry2->orig_owner;
+    addr1 = _entry1->chunk_block.offset;
+    addr2 = _entry2->chunk_block.offset;
+
+    FUNC_LEAVE_NOAPI(H5F_addr_cmp(addr1, addr2))
+} /* end H5D__cmp_filtered_collective_io_redistribute_info_offset() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__cmp_filtered_collective_io_redistribute_info_owner
+ *
+ * Purpose:     Routine to compare the original owning MPI rank for two
+ *              H5D_filtered_collective_io_redistribute_info_t structures
+ *
+ * Description: Callback for qsort() to compare the original owning MPI
+ *              rank for two H5D_filtered_collective_io_redistribute_info_t
+ *              structures
+ *
+ * Return:      The difference between the two
+ *              H5D_filtered_collective_io_redistribute_info_t structure's
+ *              original owner fields
+ *
+ *-------------------------------------------------------------------------
+ */
+static int
+H5D__cmp_filtered_collective_io_redistribute_info_owner(const void *entry1, const void *entry2)
+{
+    const H5D_filtered_collective_io_redistribute_info_t *_entry1;
+    const H5D_filtered_collective_io_redistribute_info_t *_entry2;
+    int                                                   owner1 = -1;
+    int                                                   owner2 = -1;
+    int                                                   ret_value;
+
+    FUNC_ENTER_STATIC_NOERR
+
+    _entry1 = (const H5D_filtered_collective_io_redistribute_info_t *)entry1;
+    _entry2 = (const H5D_filtered_collective_io_redistribute_info_t *)entry2;
+
+    owner1 = _entry1->orig_owner;
+    owner2 = _entry2->orig_owner;
 
     if (owner1 == owner2) {
         haddr_t addr1 = HADDR_UNDEF;
         haddr_t addr2 = HADDR_UNDEF;
 
-        addr1 = entry1->fspace_info.chunk_new.offset;
-        addr2 = entry2->fspace_info.chunk_new.offset;
+        addr1 = _entry1->chunk_block.offset;
+        addr2 = _entry2->chunk_block.offset;
 
         ret_value = H5F_addr_cmp(addr1, addr2);
     }
@@ -2283,7 +2327,7 @@ H5D__cmp_filtered_collective_io_info_entry_owner(const void *filtered_collective
         ret_value = owner1 - owner2;
 
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__cmp_filtered_collective_io_info_entry_owner() */
+} /* end H5D__cmp_filtered_collective_io_redistribute_info_owner() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__sort_chunk
@@ -2684,7 +2728,7 @@ done:
 } /* end H5D__obtain_mpio_mode() */
 
 /*-------------------------------------------------------------------------
- * Function:    H5D__construct_filtered_io_info_list
+ * Function:    H5D__mpio_collective_filtered_chunk_io_setup
  *
  * Purpose:     Constructs a list of entries which contain the necessary
  *              information for inter-process communication when performing
@@ -2699,10 +2743,10 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                     const H5D_chunk_map_t *             fm,
-                                     H5D_filtered_collective_io_info_t **chunk_list, size_t *num_entries,
-                                     int mpi_rank)
+H5D__mpio_collective_filtered_chunk_io_setup(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
+                                             const H5D_chunk_map_t *             fm,
+                                             H5D_filtered_collective_io_info_t **chunk_list,
+                                             size_t *num_entries, int mpi_rank)
 {
     H5D_filtered_collective_io_info_t *local_info_array = NULL;
     size_t                             num_chunks_selected;
@@ -2781,15 +2825,19 @@ H5D__construct_filtered_io_info_list(const H5D_io_info_t *io_info, const H5D_typ
             local_info_array[i].async_info.num_receive_requests   = 0;
 
             chunk_node = H5SL_next(chunk_node);
-        } /* end for */
-    }     /* end if */
+        }
+
+        /* Ensure the chunk list is sorted in ascending order of offset in the file */
+        HDqsort(local_info_array, num_chunks_selected, sizeof(H5D_filtered_collective_io_info_t),
+                H5D__cmp_filtered_collective_io_info_entry);
+    }
 
     *chunk_list  = local_info_array;
     *num_entries = num_chunks_selected;
 
 done:
     FUNC_LEAVE_NOAPI(ret_value)
-} /* end H5D__construct_filtered_io_info_list() */
+} /* end H5D__mpio_collective_filtered_chunk_io_setup() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__mpio_redistribute_shared_chunks_p0
@@ -2833,44 +2881,60 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__mpio_redistribute_shared_chunks_p0(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                                        const H5D_chunk_map_t *            fm,
-                                        H5D_filtered_collective_io_info_t *local_chunk_array,
-                                        size_t *local_chunk_array_num_entries, int mpi_rank, int mpi_size)
+H5D__mpio_redistribute_shared_chunks_p0(H5D_filtered_collective_io_info_t *local_chunk_array,
+                                        size_t local_chunk_array_num_entries, const H5D_io_info_t *io_info,
+                                        const H5D_type_info_t *type_info, const H5D_chunk_map_t *fm,
+                                        int mpi_rank, int mpi_size, int *num_chunks_assigned)
 {
-    H5D_filtered_collective_io_info_t *all_chunks_array =
-        NULL; /* The list of all chunks selected in the operation by all ranks */
-    size_t all_chunks_array_num_entries = 0;
-    size_t i;
-    int *  rank_info               = NULL;
-    int *  send_counts_ptr         = NULL;
-    int *  displacements_ptr       = NULL;
-    int *  num_chunks_assigned_ptr = NULL;
-    int    scatter_recvcount_int;
-    int    mpi_code;
-    herr_t ret_value = SUCCEED;
+    MPI_Datatype struct_type;
+    MPI_Datatype packed_type;
+    hbool_t      struct_type_derived          = FALSE;
+    hbool_t      packed_type_derived          = FALSE;
+    size_t       all_chunks_array_num_entries = 0;
+    size_t       i;
+    void *       all_chunks_array        = NULL;
+    int *        rank_info               = NULL;
+    int *        send_counts_ptr         = NULL;
+    int *        displacements_ptr       = NULL;
+    int *        num_chunks_assigned_ptr = NULL;
+    int          scatter_recvcount_int;
+    int          mpi_code;
+    herr_t       ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
+    HDassert(local_chunk_array || 0 == local_chunk_array_num_entries);
     HDassert(io_info);
     HDassert(type_info);
     HDassert(fm);
-    HDassert(local_chunk_array_num_entries);
     HDassert(mpi_size > 1); /* No chunk sharing is possible for MPI Comm size of 1 */
 
-    /* Phase 1 - Participate in collective gathering of every rank's
+    /*
+     * Phase 1 - Participate in collective gathering of every rank's
      * list of chunks to rank 0 to allow it to perform the redistribution
      * operation. After this call, the gathered list will initially be
      * sorted in increasing order of chunk offset in the file.
      */
-    if (H5_mpio_array_gatherv(local_chunk_array, *local_chunk_array_num_entries,
-                              sizeof(H5D_filtered_collective_io_info_t), (void **)&all_chunks_array,
-                              &all_chunks_array_num_entries, false, 0, io_info->comm,
-                              H5D__cmp_filtered_collective_io_info_entry) < 0)
-        HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "couldn't gather selected chunks")
+
+    /* Construct MPI derived types for extracting information necessary for communication */
+    if (H5D__mpio_get_chunk_redistribute_info_types(&packed_type, &packed_type_derived, &struct_type,
+                                                    &struct_type_derived) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
+                    "can't create derived datatypes for chunk redistribution info")
+
+    H5_CHECK_OVERFLOW(local_chunk_array_num_entries, size_t, int);
+    if (H5_mpio_gatherv_alloc_simple(local_chunk_array, (int)local_chunk_array_num_entries, struct_type,
+                                     packed_type, FALSE, 0, io_info->comm, mpi_rank, mpi_size,
+                                     &all_chunks_array, &all_chunks_array_num_entries) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "can't gather chunk redistribution info to/from ranks")
 
     /* Phase 2 - Rank 0 now redistributes any shared chunks to new owners as necessary */
     if (mpi_rank == 0) {
+        /* Sort collective chunk list in ascending order of offset in the file */
+        HDqsort(all_chunks_array, all_chunks_array_num_entries,
+                sizeof(H5D_filtered_collective_io_redistribute_info_t),
+                H5D__cmp_filtered_collective_io_redistribute_info_offset);
+
         /* Allocate an array to hold info about other ranks for rank 0's bookkeeping.
          * This array contains the amount of data to send back to each rank, the
          * displacements in the total array for each rank's piece of contributed data
@@ -2886,11 +2950,11 @@ H5D__mpio_redistribute_shared_chunks_p0(const H5D_io_info_t *io_info, const H5D_
                         "unable to allocate MPI rank info bookkeeping array")
         }
         else {
-            H5D_filtered_collective_io_info_t *chunk_entry;
-            haddr_t                            last_seen_addr;
-            size_t                             set_begin_index;
-            int                                num_writers;
-            int                                new_chunk_owner;
+            H5D_filtered_collective_io_redistribute_info_t *chunk_entry;
+            haddr_t                                         last_seen_addr;
+            size_t                                          set_begin_index;
+            int                                             num_writers;
+            int                                             new_chunk_owner;
 
             /* Setup indexing into bookkeeping array */
             send_counts_ptr         = &rank_info[0];
@@ -2898,7 +2962,7 @@ H5D__mpio_redistribute_shared_chunks_p0(const H5D_io_info_t *io_info, const H5D_
             num_chunks_assigned_ptr = &rank_info[2 * mpi_size];
 
             /* Process all chunks in the collective list */
-            chunk_entry = &all_chunks_array[0];
+            chunk_entry = &((H5D_filtered_collective_io_redistribute_info_t *)all_chunks_array)[0];
             for (i = 0; i < all_chunks_array_num_entries;) {
                 /* Set chunk's initial new owner to the first rank seen */
                 new_chunk_owner = chunk_entry->orig_owner;
@@ -2906,7 +2970,7 @@ H5D__mpio_redistribute_shared_chunks_p0(const H5D_io_info_t *io_info, const H5D_
                 /* Set the last seen chunk address so we know when we've processed
                  * all duplicate entries for a particular chunk
                  */
-                last_seen_addr = chunk_entry->fspace_info.chunk_current.offset;
+                last_seen_addr = chunk_entry->chunk_block.offset;
 
                 /* Reset the initial number of writers to this chunk */
                 num_writers = 0;
@@ -2925,19 +2989,24 @@ H5D__mpio_redistribute_shared_chunks_p0(const H5D_io_info_t *io_info, const H5D_
                         new_chunk_owner = chunk_entry->orig_owner;
 
                     /* Update the amount of data being sent back to the rank that owns this chunk entry */
-                    send_counts_ptr[chunk_entry->orig_owner] += (int)sizeof(*chunk_entry);
+                    send_counts_ptr[chunk_entry->orig_owner]++;
 
                     /* Update the number of writers to this particular chunk */
                     num_writers++;
 
                     chunk_entry++;
                 } while (++i < all_chunks_array_num_entries &&
-                         chunk_entry->fspace_info.chunk_current.offset == last_seen_addr);
+                         chunk_entry->chunk_block.offset == last_seen_addr);
 
                 /* Set all processed chunk entries' "new_owner" and "num_writers" fields */
                 for (; set_begin_index < i; set_begin_index++) {
-                    all_chunks_array[set_begin_index].new_owner   = new_chunk_owner;
-                    all_chunks_array[set_begin_index].num_writers = num_writers;
+                    H5D_filtered_collective_io_redistribute_info_t *entry;
+
+                    entry = &(
+                        (H5D_filtered_collective_io_redistribute_info_t *)all_chunks_array)[set_begin_index];
+
+                    entry->new_owner   = new_chunk_owner;
+                    entry->num_writers = num_writers;
                 }
 
                 /* Update the number of chunks assigned to the MPI rank that now owns this chunk */
@@ -2948,8 +3017,9 @@ H5D__mpio_redistribute_shared_chunks_p0(const H5D_io_info_t *io_info, const H5D_
              * entry gets that entry back, with the possibly newly-modified "new_owner" and "num_writers"
              * field
              */
-            HDqsort(all_chunks_array, all_chunks_array_num_entries, sizeof(H5D_filtered_collective_io_info_t),
-                    H5D__cmp_filtered_collective_io_info_entry_owner);
+            HDqsort(all_chunks_array, all_chunks_array_num_entries,
+                    sizeof(H5D_filtered_collective_io_redistribute_info_t),
+                    H5D__cmp_filtered_collective_io_redistribute_info_owner);
 
             /* Setup displacements for MPI_Scatterv to scatter each
              * rank's contributed piece of the array back to them
@@ -2961,23 +3031,25 @@ H5D__mpio_redistribute_shared_chunks_p0(const H5D_io_info_t *io_info, const H5D_
     }
 
     /* Scatter the segments of the list back to each rank */
-    H5_CHECKED_ASSIGN(scatter_recvcount_int, int,
-                      *local_chunk_array_num_entries * sizeof(H5D_filtered_collective_io_info_t), size_t);
+    H5_CHECKED_ASSIGN(scatter_recvcount_int, int, local_chunk_array_num_entries, size_t);
     if (MPI_SUCCESS !=
-        (mpi_code = MPI_Scatterv(all_chunks_array, send_counts_ptr, displacements_ptr, MPI_BYTE,
-                                 local_chunk_array, scatter_recvcount_int, MPI_BYTE, 0, io_info->comm)))
+        (mpi_code = MPI_Scatterv(all_chunks_array, send_counts_ptr, displacements_ptr, packed_type,
+                                 local_chunk_array, scatter_recvcount_int, struct_type, 0, io_info->comm)))
         HMPI_GOTO_ERROR(FAIL, "unable to scatter shared chunks info buffer", mpi_code)
-
-    if (all_chunks_array) {
-        H5MM_free(all_chunks_array);
-        all_chunks_array = NULL;
-    }
 
 done:
     if (rank_info)
         H5MM_free(rank_info);
     if (all_chunks_array)
         H5MM_free(all_chunks_array);
+    if (struct_type_derived) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&struct_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    }
+    if (packed_type_derived) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&packed_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_redistribute_shared_chunks_p0() */
@@ -3731,9 +3803,9 @@ H5D__mpio_collective_filtered_chunk_reallocate(H5D_filtered_collective_io_info_t
      * of the chunks in the file.
      */
     H5_CHECK_OVERFLOW(chunk_list_num_entries, size_t, int);
-    if (H5_mpio_gatherv_to_contig_array(chunk_list, (int)chunk_list_num_entries, send_type, recv_type, TRUE,
-                                        NULL, 0, io_info->comm, mpi_rank, mpi_size, &gathered_array,
-                                        &collective_num_entries) < 0)
+    if (H5_mpio_gatherv_alloc_simple(chunk_list, (int)chunk_list_num_entries, send_type, recv_type, TRUE, 0,
+                                     io_info->comm, mpi_rank, mpi_size, &gathered_array,
+                                     &collective_num_entries) < 0)
         HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL, "can't gather chunk file space info to/from ranks")
     collective_list = (H5D_filtered_collective_io_fspace_info_t *)gathered_array;
 
@@ -3842,7 +3914,7 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
         H5D_MPIO_INIT_CHUNK_UD_INFO(chunk_ud, idx_info);
 
         /* Create derived datatypes for the chunk re-insertion info needed */
-        if (H5D__mpio_get_chunk_insert_info_types(idx_info, &recv_type, &recv_type_derived, &send_type,
+        if (H5D__mpio_get_chunk_insert_info_types(&recv_type, &recv_type_derived, &send_type,
                                                   &send_type_derived) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                         "can't create derived datatypes for chunk re-insertion info")
@@ -3852,9 +3924,9 @@ H5D__mpio_collective_filtered_chunk_reinsert(H5D_filtered_collective_io_info_t *
          * of the modified chunks into the chunk index
          */
         H5_CHECK_OVERFLOW(chunk_list_num_entries, size_t, int);
-        if (H5_mpio_gatherv_to_contig_array(chunk_list, (int)chunk_list_num_entries, send_type, recv_type,
-                                            TRUE, NULL, 0, io_info->comm, mpi_rank, mpi_size, &gathered_array,
-                                            &collective_num_entries) < 0)
+        if (H5_mpio_gatherv_alloc_simple(chunk_list, (int)chunk_list_num_entries, send_type, recv_type, TRUE,
+                                         0, io_info->comm, mpi_rank, mpi_size, &gathered_array,
+                                         &collective_num_entries) < 0)
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGATHER, FAIL,
                         "can't gather chunk index re-insertion info to/from ranks")
 
@@ -3895,6 +3967,155 @@ done:
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_collective_filtered_chunk_reinsert() */
+
+/*-------------------------------------------------------------------------
+ * Function:    H5D__mpio_get_chunk_redistribute_info_types
+ *
+ * Purpose:     Constructs MPI derived datatypes for communicating the
+ *              info from a H5D_filtered_collective_io_info_t structure
+ *              that is necessary for redistributing shared chunks during a
+ *              collective write of filtered chunks.
+ *
+ *              The datatype returned through `contig_type` has an extent
+ *              equal to the size of an H5F_block_t structure (chunk's
+ *              offset and length) plus the size of 3 integers (chunk's
+ *              original owner, chunk's new owner and the number of writers
+ *              to the chunk). This datatype packs the related info into a
+ *              contiguous area of memory for easy access.
+ *
+ *              The datatype returned through `resized_type` has an extent
+ *              equal to the size of an H5D_filtered_collective_io_info_t
+ *              structure. This makes it suitable for sending an array of
+ *              those structures, while extracting out just the info
+ *              necessary for the chunk redistribution operation during
+ *              communication.
+ *
+ * Return:      Non-negative on success/Negative on failure
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+H5D__mpio_get_chunk_redistribute_info_types(MPI_Datatype *contig_type, hbool_t *contig_type_derived,
+                                            MPI_Datatype *resized_type, hbool_t *resized_type_derived)
+{
+    MPI_Datatype struct_type              = MPI_DATATYPE_NULL;
+    hbool_t      struct_type_derived      = FALSE;
+    MPI_Datatype chunk_block_type         = MPI_DATATYPE_NULL;
+    hbool_t      chunk_block_type_derived = FALSE;
+#if MPI_VERSION >= 3
+    MPI_Count chunk_block_type_size;
+#else
+    int chunk_block_type_size;
+#endif
+    MPI_Datatype types[4];
+    MPI_Aint     displacements[4];
+    int          block_lengths[4];
+    int          field_count;
+    int          mpi_code;
+    herr_t       ret_value = SUCCEED;
+
+    FUNC_ENTER_STATIC
+
+    HDassert(contig_type);
+    HDassert(contig_type_derived);
+    HDassert(resized_type);
+    HDassert(resized_type_derived);
+
+    *contig_type_derived  = FALSE;
+    *resized_type_derived = FALSE;
+
+    /* Create struct type for the inner H5F_block_t structure */
+    if (H5F_mpi_get_file_block_type(FALSE, &chunk_block_type, &chunk_block_type_derived) < 0)
+        HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL, "can't create derived type for chunk file description")
+
+        /* Retrieve the size of the chunk block type */
+#if MPI_VERSION >= 3
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_size_x(chunk_block_type, &chunk_block_type_size)))
+#else
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_size(chunk_block_type, &chunk_block_type_size)))
+#endif
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_size(_x) failed", mpi_code)
+
+#if MPI_VERSION >= 3
+    H5_CHECK_OVERFLOW(chunk_block_type_size, MPI_Count, MPI_Aint);
+#endif
+
+    /*
+     * Create stucture type to pack chunk H5F_block_t structure right
+     * next to orig_owner, new_owner and num_writers fields
+     */
+    field_count      = 2;
+    block_lengths[0] = 1;
+    block_lengths[1] = 3;
+    displacements[0] = 0;
+    displacements[1] = (MPI_Aint)chunk_block_type_size;
+    types[0]         = chunk_block_type;
+    types[1]         = MPI_INT;
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, contig_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+    *contig_type_derived = TRUE;
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(contig_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+
+    field_count = 4;
+    HDassert(field_count == (sizeof(types) / sizeof(MPI_Datatype)));
+
+    /* Create struct type to extract the chunk_current, orig_owner, new_owner
+     * and num_writers fields from a H5D_filtered_collective_io_info_t
+     * structure
+     */
+    block_lengths[0] = 1;
+    block_lengths[1] = 1;
+    block_lengths[2] = 1;
+    block_lengths[3] = 1;
+    displacements[0] = offsetof(H5D_filtered_collective_io_info_t, fspace_info.chunk_current);
+    displacements[1] = offsetof(H5D_filtered_collective_io_info_t, orig_owner);
+    displacements[2] = offsetof(H5D_filtered_collective_io_info_t, new_owner);
+    displacements[3] = offsetof(H5D_filtered_collective_io_info_t, num_writers);
+    types[0]         = chunk_block_type;
+    types[1]         = MPI_INT;
+    types[2]         = MPI_INT;
+    types[3]         = MPI_INT;
+    if (MPI_SUCCESS !=
+        (mpi_code = MPI_Type_create_struct(field_count, block_lengths, displacements, types, &struct_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_struct failed", mpi_code)
+    struct_type_derived = TRUE;
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_create_resized(
+                            struct_type, 0, sizeof(H5D_filtered_collective_io_info_t), resized_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_resized failed", mpi_code)
+    *resized_type_derived = TRUE;
+
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(resized_type)))
+        HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+
+done:
+    if (struct_type_derived) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&struct_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    }
+    if (chunk_block_type_derived) {
+        if (MPI_SUCCESS != (mpi_code = MPI_Type_free(&chunk_block_type)))
+            HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+    }
+
+    if (ret_value < 0) {
+        if (*resized_type_derived) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(resized_type)))
+                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+            *resized_type_derived = FALSE;
+        }
+        if (*contig_type_derived) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(contig_type)))
+                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+            *contig_type_derived = FALSE;
+        }
+    }
+
+    FUNC_LEAVE_NOAPI(ret_value)
+} /* end H5D__mpio_get_chunk_redistribute_info_types() */
 
 /*-------------------------------------------------------------------------
  * Function:    H5D__mpio_get_chunk_fspace_info_types
@@ -4020,7 +4241,7 @@ done:
  *              their corresponding H5F_block_t structures into a
  *              contiguous array.
  *
- *              The datatype returned through `true_type` has an extent
+ *              The datatype returned through `resized_type` has an extent
  *              equal to the size of the encompassing
  *              H5D_filtered_collective_io_info_t structure. This makes it
  *              suitable for sending an array of
@@ -4033,9 +4254,8 @@ done:
  *-------------------------------------------------------------------------
  */
 static herr_t
-H5D__mpio_get_chunk_insert_info_types(H5D_chk_idx_info_t *idx_info, MPI_Datatype *contig_type,
-                                      hbool_t *contig_type_derived, MPI_Datatype *true_type,
-                                      hbool_t *true_type_derived)
+H5D__mpio_get_chunk_insert_info_types(MPI_Datatype *contig_type, hbool_t *contig_type_derived,
+                                      MPI_Datatype *resized_type, hbool_t *resized_type_derived)
 {
     MPI_Datatype struct_type              = MPI_DATATYPE_NULL;
     hbool_t      struct_type_derived      = FALSE;
@@ -4055,14 +4275,13 @@ H5D__mpio_get_chunk_insert_info_types(H5D_chk_idx_info_t *idx_info, MPI_Datatype
 
     FUNC_ENTER_STATIC
 
-    HDassert(idx_info);
     HDassert(contig_type);
     HDassert(contig_type_derived);
-    HDassert(true_type);
-    HDassert(true_type_derived);
+    HDassert(resized_type);
+    HDassert(resized_type_derived);
 
-    *contig_type_derived = FALSE;
-    *true_type_derived   = FALSE;
+    *contig_type_derived  = FALSE;
+    *resized_type_derived = FALSE;
 
     /* Create struct type for the H5F_block_t structure from the `fspace_info` struct */
     if (H5F_mpi_get_file_block_type(FALSE, &chunk_block_type, &chunk_block_type_derived) < 0)
@@ -4137,11 +4356,11 @@ H5D__mpio_get_chunk_insert_info_types(H5D_chk_idx_info_t *idx_info, MPI_Datatype
     struct_type_derived = TRUE;
 
     if (MPI_SUCCESS != (mpi_code = MPI_Type_create_resized(
-                            struct_type, 0, sizeof(H5D_filtered_collective_io_info_t), true_type)))
+                            struct_type, 0, sizeof(H5D_filtered_collective_io_info_t), resized_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_resized failed", mpi_code)
-    *true_type_derived = TRUE;
+    *resized_type_derived = TRUE;
 
-    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(true_type)))
+    if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(resized_type)))
         HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
 
 done:
@@ -4155,10 +4374,10 @@ done:
     }
 
     if (ret_value < 0) {
-        if (*true_type_derived) {
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(true_type)))
+        if (*resized_type_derived) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(resized_type)))
                 HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
-            *true_type_derived = FALSE;
+            *resized_type_derived = FALSE;
         }
         if (*contig_type_derived) {
             if (MPI_SUCCESS != (mpi_code = MPI_Type_free(contig_type)))
