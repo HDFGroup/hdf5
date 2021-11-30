@@ -72,7 +72,7 @@ jobs:
 #  Threadsafe runs
           - name: "Windows TS MSVC"
             artifact: "Windows-MSVCTS.tar.xz"
-            os: windows-2016
+            os: windows-latest
             build_type: "Release"
             toolchain: ""
             cpp: OFF
