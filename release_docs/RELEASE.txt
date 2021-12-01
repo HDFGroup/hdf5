@@ -47,25 +47,22 @@ New Features
 
     Configuration:
     -------------
-    - CMake will now run the power shell script tests in test/ by default
+    - CMake will now run the PowerShell script tests in test/ by default
       on Windows.
 
       The test directory includes several shell script tests that previously
       were not run by CMake on Windows. These are now run by default.
-      If TEST_SHELL_SCRIPTS is ON and PWSH is found, the Powershell scripts
+      If TEST_SHELL_SCRIPTS is ON and PWSH is found, the PowerShell scripts
       will execute. Similar to the bash scripts on unix platforms.
 
       (ADB - 2021/11/23)
 
-<<<<<<< HEAD
     - Added new configure option to support building parallel tools.
       See Tools below (autotools - CMake):
             --enable-parallel-tools      HDF5_BUILD_PARALLEL_TOOLS
 
       (RAW - 2021/10/25)
 
-=======
->>>>>>> branch 'develop-pwsh' of https://github.com/byrnHDF/hdf5.git
     - Added new configure options to enable dimension scales APIs (H5DS*) to
       use new object references with the native VOL connector (aka native HDF5
       library). New references are always used for non-native terminal VOL

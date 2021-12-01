@@ -20,18 +20,7 @@ if (PWSH)
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
     file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
-#  add_test (NAME testswmr
-#      COMMAND ${PWSH} -c \"Get-Content ${CMAKE_CURRENT_SOURCE_DIR}/myfile.txt | $<TARGET_FILE:myexe>\")
-#    add_test (H5SHELL-testflushrefresh ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/testflushrefresh.sh)
-#    set_tests_properties (H5SHELL-testflushrefresh PROPERTIES
-#            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-#            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-#    )
-#    add_test (H5SHELL-test_usecases ${PWSH} ${HDF5_TEST_BINARY_DIR}/H5TEST/test_usecases.sh)
-#    set_tests_properties (H5SHELL-test_usecases PROPERTIES
-#            ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
-#            WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
-#    )
+
     set (srcdir ${HDF5_TEST_SOURCE_DIR})
     set (bindir ${CMAKE_TEST_OUTPUT_DIRECTORY})
     set (testdir ${HDF5_TEST_BINARY_DIR}/H5TEST)
@@ -72,15 +61,6 @@ elseif (UNIX)
         COMMAND    ${CMAKE_COMMAND}
         ARGS       -E copy_if_different "${HDF5_SOURCE_DIR}/bin/output_filter.sh" "${HDF5_TEST_BINARY_DIR}/H5TEST/bin/output_filter.sh"
     )
-
-    #shell script creates dir
-    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/usecases_test")
-
-    #shell script creates dir
-    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/swmr_test")
-
-    #shell script creates dir
-    #file (MAKE_DIRECTORY "${PROJECT_BINARY_DIR}/H5TEST/vds_swmr_test")
 
     ##############################################################################
     ##############################################################################
@@ -137,6 +117,5 @@ elseif (UNIX)
             ENVIRONMENT "LD_LIBRARY_PATH=$ENV{LD_LIBRARY_PATH}:${CMAKE_RUNTIME_OUTPUT_DIRECTORY}"
             WORKING_DIRECTORY ${HDF5_TEST_BINARY_DIR}/H5TEST
     )
-
   endif ()
 endif ()
