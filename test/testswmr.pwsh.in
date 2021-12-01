@@ -52,11 +52,13 @@ function Wait-Message {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory, ValueFromPipeline)]
+        [string]$TestPath,                             # Get the path of the message file to wait for
+        [Parameter(Mandatory, ValueFromPipeline)]
         [string]$Message                              # Get the name of the message file to wait for
     )
 
     PROCESS {
-        $message = Join-Path -Path $testdir -ChildPath $Message
+        $message = Join-Path -Path $TestPath -ChildPath $Message
         $t0 = Get-Date                                # Get current time
         $t1 = $t0
         $difft = New-Timespan -Start $t0 -End $t1     # Initialize the time difference
@@ -183,7 +185,7 @@ foreach ($index_type in $IndexTypeLoop) {
         #Write-Output "pid_writer=$pid_writer"
 
         # Wait for message from writer process before starting reader(s)
-        Wait-Message $WRITER_MESSAGE
+        Wait-Message $testdir $WRITER_MESSAGE
 
         #
         # Launch the Readers
@@ -255,7 +257,7 @@ foreach ($index_type in $IndexTypeLoop) {
         #Write-Output "pid_writer=$pid_writer"
 
         # Wait for message from writer process before starting reader(s)
-        Wait-Message $WRITER_MESSAGE
+        Wait-Message $testdir $WRITER_MESSAGE
         #
         # Launch the Readers
         #declare -a seeds = (<seed1> <seed2> <seed3> ... )
@@ -317,7 +319,7 @@ foreach ($index_type in $IndexTypeLoop) {
         #Write-Output "pid_writer=$pid_writer"
 
         # Wait for message from writer process before starting reader(s)
-        Wait-Message $WRITER_MESSAGE
+        Wait-Message $testdir $WRITER_MESSAGE
         #
         # Launch the Remove Readers
         #declare -a seeds = (<seed1> <seed2> <seed3> ... )
@@ -397,7 +399,7 @@ foreach ($index_type in $IndexTypeLoop) {
         #Write-Output "pid_writer=$pid_writer"
 
         # Wait for message from writer process before starting reader(s)
-        Wait-Message $WRITER_MESSAGE
+        Wait-Message $testdir $WRITER_MESSAGE
         #
         # Launch the Add/Remove Readers
         #declare -a seeds = (<seed1> <seed2> <seed3> ... )
@@ -469,7 +471,7 @@ foreach ($index_type in $IndexTypeLoop) {
         #Write-Output "pid_writer=$pid_writer"
 
         # Wait for message from writer process before starting reader(s)
-        Wait-Message $WRITER_MESSAGE
+        Wait-Message $testdir $WRITER_MESSAGE
         #
         # Launch the Sparse readers
         $n = 0

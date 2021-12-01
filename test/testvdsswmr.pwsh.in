@@ -49,11 +49,13 @@ function Wait-Message {
     [CmdletBinding()]
     param (
         [Parameter(Mandatory, ValueFromPipeline)]
+        [string]$TestPath,                             # Get the path of the message file to wait for
+        [Parameter(Mandatory, ValueFromPipeline)]
         [string]$Message                              # Get the name of the message file to wait for
     )
 
     PROCESS {
-        $message = Join-Path -Path $testdir -ChildPath $Message
+        $message = Join-Path -Path $TestPath -ChildPath $Message
         $t0 = Get-Date                                # Get current time
         $t1 = $t0
         $difft = New-Timespan -Start $t0 -End $t1     # Initialize the time difference
