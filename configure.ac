@@ -3585,6 +3585,7 @@ AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TOOLS_HL_CONDITIONAL], [test "X$HDF5_HL_TOOLS" = "Xyes"])
+AM_CONDITIONAL([BUILD_DOXYGEN_CONDITIONAL], [test "X$HDF5_DOXYGEN" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.

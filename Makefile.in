@@ -121,7 +121,8 @@ host_triplet = @host@
 subdir = .
 ACLOCAL_M4 = $(top_srcdir)/aclocal.m4
 am__aclocal_m4_deps = $(top_srcdir)/m4/aclocal_cxx.m4 \
-	$(top_srcdir)/m4/aclocal_fc.m4 $(top_srcdir)/configure.ac
+	$(top_srcdir)/m4/aclocal_fc.m4 \
+	$(top_srcdir)/m4/ax_prog_doxygen.m4 $(top_srcdir)/configure.ac
 am__configure_deps = $(am__aclocal_m4_deps) $(CONFIGURE_DEPENDENCIES) \
 	$(ACLOCAL_M4)
 DIST_COMMON = $(srcdir)/Makefile.am $(top_srcdir)/configure \
@@ -130,7 +131,7 @@ am__CONFIG_DISTCLEAN_FILES = config.status config.cache config.log \
  configure.lineno config.status.lineno
 mkinstalldirs = $(SHELL) $(top_srcdir)/bin/mkinstalldirs
 CONFIG_HEADER = $(top_builddir)/src/H5config.h
-CONFIG_CLEAN_FILES =
+CONFIG_CLEAN_FILES = doxygen/Doxyfile
 CONFIG_CLEAN_VPATH_FILES =
 AM_V_P = $(am__v_P_@AM_V@)
 am__v_P_ = $(am__v_P_@AM_DEFAULT_V@)
@@ -191,7 +192,8 @@ am__DIST_COMMON = $(srcdir)/Makefile.in $(top_srcdir)/bin/compile \
 	$(top_srcdir)/bin/config.guess $(top_srcdir)/bin/config.sub \
 	$(top_srcdir)/bin/install-sh $(top_srcdir)/bin/ltmain.sh \
 	$(top_srcdir)/bin/missing $(top_srcdir)/bin/mkinstalldirs \
-	$(top_srcdir)/config/commence.am COPYING
+	$(top_srcdir)/config/commence.am \
+	$(top_srcdir)/doxygen/Doxyfile.in COPYING
 DISTFILES = $(DIST_COMMON) $(DIST_SOURCES) $(TEXINFOS) $(EXTRA_DIST)
 distdir = $(PACKAGE)-$(VERSION)
 top_distdir = $(distdir)
@@ -282,8 +284,53 @@ DEV_WARNINGS = @DEV_WARNINGS@
 DIAGS = @DIAGS@
 DIRECT_VFD = @DIRECT_VFD@
 DLLTOOL = @DLLTOOL@
+DOXYGEN_EXAMPLES_DIRECTORY = @DOXYGEN_EXAMPLES_DIRECTORY@
+DOXYGEN_EXTERNAL_SEARCH = @DOXYGEN_EXTERNAL_SEARCH@
+DOXYGEN_HTML_EXTRA_FILES = @DOXYGEN_HTML_EXTRA_FILES@
+DOXYGEN_HTML_EXTRA_STYLESHEET = @DOXYGEN_HTML_EXTRA_STYLESHEET@
+DOXYGEN_HTML_FOOTER = @DOXYGEN_HTML_FOOTER@
+DOXYGEN_HTML_HEADER = @DOXYGEN_HTML_HEADER@
+DOXYGEN_INCLUDE_ALIASES = @DOXYGEN_INCLUDE_ALIASES@
+DOXYGEN_INPUT_DIRECTORY = @DOXYGEN_INPUT_DIRECTORY@
+DOXYGEN_LAYOUT_FILE = @DOXYGEN_LAYOUT_FILE@
+DOXYGEN_MACRO_EXPANSION = @DOXYGEN_MACRO_EXPANSION@
+DOXYGEN_OPTIMIZE_OUTPUT_FOR_C = @DOXYGEN_OPTIMIZE_OUTPUT_FOR_C@
+DOXYGEN_OUTPUT_DIRECTORY = @DOXYGEN_OUTPUT_DIRECTORY@
+DOXYGEN_PACKAGE = @DOXYGEN_PACKAGE@
+DOXYGEN_PAPER_SIZE = @DOXYGEN_PAPER_SIZE@
+DOXYGEN_PREDEFINED = @DOXYGEN_PREDEFINED@
+DOXYGEN_PROJECT_BRIEF = @DOXYGEN_PROJECT_BRIEF@
+DOXYGEN_PROJECT_LOGO = @DOXYGEN_PROJECT_LOGO@
+DOXYGEN_SEARCHENGINE_URL = @DOXYGEN_SEARCHENGINE_URL@
+DOXYGEN_SERVER_BASED_SEARCH = @DOXYGEN_SERVER_BASED_SEARCH@
+DOXYGEN_STRIP_FROM_PATH = @DOXYGEN_STRIP_FROM_PATH@
+DOXYGEN_TAG_FILE = @DOXYGEN_TAG_FILE@
+DOXYGEN_VERSION_STRING = @DOXYGEN_VERSION_STRING@
 DSYMUTIL = @DSYMUTIL@
 DUMPBIN = @DUMPBIN@
+DX_CONFIG = @DX_CONFIG@
+DX_DOCDIR = @DX_DOCDIR@
+DX_DOT = @DX_DOT@
+DX_DOXYGEN = @DX_DOXYGEN@
+DX_DVIPS = @DX_DVIPS@
+DX_EGREP = @DX_EGREP@
+DX_ENV = @DX_ENV@
+DX_FLAG_chi = @DX_FLAG_chi@
+DX_FLAG_chm = @DX_FLAG_chm@
+DX_FLAG_doc = @DX_FLAG_doc@
+DX_FLAG_dot = @DX_FLAG_dot@
+DX_FLAG_html = @DX_FLAG_html@
+DX_FLAG_man = @DX_FLAG_man@
+DX_FLAG_pdf = @DX_FLAG_pdf@
+DX_FLAG_ps = @DX_FLAG_ps@
+DX_FLAG_rtf = @DX_FLAG_rtf@
+DX_FLAG_xml = @DX_FLAG_xml@
+DX_HHC = @DX_HHC@
+DX_LATEX = @DX_LATEX@
+DX_MAKEINDEX = @DX_MAKEINDEX@
+DX_PDFLATEX = @DX_PDFLATEX@
+DX_PERL = @DX_PERL@
+DX_PROJECT = @DX_PROJECT@
 ECHO_C = @ECHO_C@
 ECHO_N = @ECHO_N@
 ECHO_T = @ECHO_T@
@@ -316,6 +363,7 @@ HAVE_DMALLOC = @HAVE_DMALLOC@
 HAVE_FORTRAN_2003 = @HAVE_FORTRAN_2003@
 HAVE_LIBHDFS = @HAVE_LIBHDFS@
 HAVE_PTHREAD = @HAVE_PTHREAD@
+HDF5_DOXYGEN = @HDF5_DOXYGEN@
 HDF5_HL = @HDF5_HL@
 HDF5_INTERFACES = @HDF5_INTERFACES@
 HDF5_TESTS = @HDF5_TESTS@
@@ -487,7 +535,7 @@ LIBH5F_HL = $(top_builddir)/hl/fortran/src/libhdf5hl_fortran.la
 LIBH5CPP_HL = $(top_builddir)/hl/c++/src/libhdf5_hl_cpp.la
 
 # Note that in svn revision 19400 the '/' after DESTDIR in H5* variables below
-# has been removed. According to the official description of DESTDIR by Gnu at
+# has been removed. According to the official description of DESTDIR by GNU at
 # http://www.gnu.org/prep/standards/html_node/DESTDIR.html, DESTDIR is
 # prepended to the normal and complete install path that it precedes for the
 # purpose of installing in a temporary directory which is useful for building
@@ -518,6 +566,9 @@ TRACE = perl $(top_srcdir)/bin/trace
 CHECK_CLEANFILES = *.chkexe *.chklog *.clog *.clog2 *-tmp
 @BUILD_CXX_CONDITIONAL_FALSE@CXX_DIR = 
 
+# include Doxygen rules (requires autoconf-archive >2016-03-20)
+# @DX_RULES@
+#
 # Define subdirectories to build.
 # Add this directory to SUBDIRS so that examples get built after tools
 # but before examples in extra interfaces (c++ and fortran).
@@ -580,6 +631,8 @@ $(top_srcdir)/configure: @MAINTAINER_MODE_TRUE@ $(am__configure_deps)
 $(ACLOCAL_M4): @MAINTAINER_MODE_TRUE@ $(am__aclocal_m4_deps)
 	$(am__cd) $(srcdir) && $(ACLOCAL) $(ACLOCAL_AMFLAGS)
 $(am__aclocal_m4_deps):
+doxygen/Doxyfile: $(top_builddir)/config.status $(top_srcdir)/doxygen/Doxyfile.in
+	cd $(top_builddir) && $(SHELL) ./config.status $@
 
 mostlyclean-libtool:
 	-rm -f *.lo
@@ -1114,6 +1167,9 @@ check-all-install:
 # so 'make trace' only needs to recurse into that directory.
 trace:
 	@(cd src && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# doxygen support
+@BUILD_DOXYGEN_CONDITIONAL_TRUE@doxygen: doxygen-doc
 
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
