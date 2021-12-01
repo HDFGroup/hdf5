@@ -214,21 +214,22 @@ H5FD_mpio_init(void)
     FUNC_ENTER_NOAPI(H5I_INVALID_HID)
 
     /* Register the MPI-IO VFD, if it isn't already */
-    if (H5I_VFL != H5I_get_type(H5FD_MPIO_g))
+    if (H5I_VFL != H5I_get_type(H5FD_MPIO_g)) {
         H5FD_MPIO_g = H5FD_register((const H5FD_class_t *)&H5FD_mpio_g, sizeof(H5FD_class_t), FALSE);
 
-    /* Check if MPI driver has been loaded dynamically */
-    env = HDgetenv(HDF5_DRIVER);
-    if (env && !HDstrcmp(env, "mpio")) {
-        int mpi_initialized = 0;
+        /* Check if MPI driver has been loaded dynamically */
+        env = HDgetenv(HDF5_DRIVER);
+        if (env && !HDstrcmp(env, "mpio")) {
+            int mpi_initialized = 0;
 
-        /* Initialize MPI if not already initialized */
-        if (MPI_SUCCESS != MPI_Initialized(&mpi_initialized))
-            HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, H5I_INVALID_HID, "can't check if MPI is initialized")
-        if (!mpi_initialized) {
-            if (MPI_SUCCESS != MPI_Init(NULL, NULL))
-                HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't initialize MPI")
-            H5FD_mpi_self_initialized = TRUE;
+            /* Initialize MPI if not already initialized */
+            if (MPI_SUCCESS != MPI_Initialized(&mpi_initialized))
+                HGOTO_ERROR(H5E_VFL, H5E_UNINITIALIZED, H5I_INVALID_HID, "can't check if MPI is initialized")
+            if (!mpi_initialized) {
+                if (MPI_SUCCESS != MPI_Init(NULL, NULL))
+                    HGOTO_ERROR(H5E_VFL, H5E_CANTINIT, H5I_INVALID_HID, "can't initialize MPI")
+                H5FD_mpi_self_initialized = TRUE;
+            }
         }
     }
 
