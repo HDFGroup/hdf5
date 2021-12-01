@@ -195,11 +195,7 @@ foreach (KIND ${VAR})
    "
   )
   FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND} PROG_OUTPUT1)
-<<<<<<< Upstream, based on branch 'develop' of https://github.com/HDFGroup/hdf5.git
   string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
-=======
-  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
->>>>>>> 87940e8 Github #969 Use stdout instead of file for configure check (#1089)
   set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
 
@@ -242,11 +238,7 @@ foreach (KIND ${VAR} )
   "
   )
   FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND} PROG_OUTPUT2)
-<<<<<<< Upstream, based on branch 'develop' of https://github.com/HDFGroup/hdf5.git
   string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
-=======
-  string (REGEX REPLACE "\n" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
->>>>>>> 87940e8 Github #969 Use stdout instead of file for configure check (#1089)
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
 endforeach ()
 

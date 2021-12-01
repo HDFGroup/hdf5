@@ -57,12 +57,15 @@ New Features
 
       (ADB - 2021/11/23)
 
+<<<<<<< HEAD
     - Added new configure option to support building parallel tools.
       See Tools below (autotools - CMake):
             --enable-parallel-tools      HDF5_BUILD_PARALLEL_TOOLS
 
       (RAW - 2021/10/25)
 
+=======
+>>>>>>> branch 'develop-pwsh' of https://github.com/byrnHDF/hdf5.git
     - Added new configure options to enable dimension scales APIs (H5DS*) to
       use new object references with the native VOL connector (aka native HDF5
       library). New references are always used for non-native terminal VOL
