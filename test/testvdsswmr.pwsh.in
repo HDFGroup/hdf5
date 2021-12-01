@@ -138,7 +138,7 @@ if ($nerrors -ne 0) {
 
 # Launch the writers
 Write-Output "launch the $Nwriters SWMR VDS writers (1 per source)"
-pid_writers = @()
+$pid_writers = @()
 $n = 0
 while ($n -lt $Nwriters) {
     $rp = Start-Process -FilePath $bindir/vds_swmr_writer.exe -NoNewWindow -PassThru -ArgumentList "$n" 2>&1 | tee swmr_writer.out.$n
