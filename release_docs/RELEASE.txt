@@ -35,7 +35,7 @@ CONTENTS
 ========
 
 - New Features
-- Support for new platforms and languages
+- New platforms, languages and compilers tested
 - Bug Fixes since HDF5-1.12.0
 - Platforms Tested
 - Known Problems
@@ -1050,9 +1050,19 @@ New Features
     --------------
     -
 
-Support for new platforms, languages and compilers
-==================================================
-    -
+
+New platforms, languages and compilers tested
+=============================================
+    - Linux 5.13.14-200.fc34 #1 SMP x86_64  GNU/Linux Fedora34
+    - Linux 5.11.0-34-generic #36-Ubuntu SMP x86_64 GNU/Linux Ubuntu 20.04
+    - Linux 5.3.18-22-default #1 SMP x86_64  GNU/Linux SUSE15sp2
+    - Linux-4.14.0-115.21.2 #1 SMP ppc64le GNU/Linux
+    - Linux-4.12.14-150.75-default #1 SMP x86_64 GNU/Linux
+    - macOS Apple M1 11.6 Darwin 20.6.0 arm64
+    - macOS Big Sur 11.3.1 Darwin 20.4.0 x86_64
+    - clang versions 11.0.1, 12.0.5
+    - Visual Studio 2019 w/ clang 12.0.0 with MSVC-like command-line
+
 
 Bug Fixes since HDF5-1.12.0 release
 ===================================

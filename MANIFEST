@@ -3881,3 +3881,7 @@
 ./utils/Makefile.in
 ./utils/mirror_vfd/Makefile.in
 ./utils/test/Makefile.in
+./utils/tools/Makefile.in
+./utils/tools/h5dwalk/Makefile.in
+./utils/tools/test/Makefile.in
+./utils/tools/test/h5dwalk/Makefile.in
