@@ -1693,7 +1693,7 @@ Optional Features:
                           specify --enable-fortran [default=no]
   --enable-cxx            Compile the C++ interface [default=no]
   --enable-hl             Enable the high level library [default=yes]
-  --enable-hltools        Enable the high-level tools. [default=yes)]
+  --enable-hltools        Enable the high-level tools [default=yes)]
   --enable-tests          Compile the HDF5 tests [default=yes]
   --enable-tools          Compile the HDF5 tools [default=yes]
   --enable-doxygen        Compile the HDF5 doxygen files [default=no]
@@ -7696,6 +7696,8 @@ $as_echo_n "checking if the high-level tools are enabled... " >&6; }
 # Check whether --enable-hltools was given.
 if test "${enable_hltools+set}" = set; then :
   enableval=$enable_hltools; HDF5_HL_TOOLS=$enableval
+else
+  HDF5_HL_TOOLS=yes
 fi
 
 

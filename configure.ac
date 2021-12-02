@@ -679,10 +679,9 @@ fi
 AC_MSG_CHECKING([if the high-level tools are enabled])
 AC_ARG_ENABLE([hltools],
      [AS_HELP_STRING([--enable-hltools],
-                     [Enable the high-level tools.
-                     [default=yes)]
-                     ])],
-     [HDF5_HL_TOOLS=$enableval])
+                     [Enable the high-level tools [default=yes)]])],
+     [HDF5_HL_TOOLS=$enableval],
+     [HDF5_HL_TOOLS=yes])
 
 if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
  AC_MSG_RESULT([yes])
