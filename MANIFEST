@@ -202,6 +202,10 @@
 ./config/intel-warnings/win-general
 ./config/intel-warnings/ifort-general
 
+./config/cmake/FindMFU.cmake
+./config/cmake/FindDTCMP.cmake
+./config/cmake/FindCIRCLE.cmake
+
 ./config/site-specific/BlankForm
 
 ./doc/branches-explained.md
@@ -3000,6 +3004,22 @@
 # test utilities
 ./utils/test/Makefile.am
 ./utils/test/swmr_check_compat_vfd.c
+
+# parallel tools (h5dwalk) and tests
+./utils/tools/CMakeLists.txt
+./utils/tools/Makefile.am
+./utils/tools/h5dwalk/CMakeLists.txt
+./utils/tools/h5dwalk/Makefile.am
+./utils/tools/h5dwalk/h5dwalk.1
+./utils/tools/h5dwalk/h5dwalk.c
+./utils/tools/test/CMakeLists.txt
+./utils/tools/test/Makefile.am
+./utils/tools/test/h5dwalk/CMakeLists.txt
+./utils/tools/test/h5dwalk/CMakeTests.cmake
+./utils/tools/test/h5dwalk/Makefile.am
+./utils/tools/test/h5dwalk/copy_demo_files.sh.in
+./utils/tools/test/h5dwalk/help.h5dwalk
+./utils/tools/test/h5dwalk/testh5dwalk.sh.in
 
 # high level libraries
 ./hl/Makefile.am

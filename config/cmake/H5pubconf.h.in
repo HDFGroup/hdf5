@@ -71,13 +71,13 @@
 /* Define Fortran compiler ID */
 #define H5_Fortran_COMPILER_ID @CMAKE_Fortran_COMPILER_ID@
 
+/* Define number of valid Fortran INTEGER KINDs (must be defined before F_IKIND)*/
+#cmakedefine H5_H5CONFIG_F_NUM_IKIND @H5_H5CONFIG_F_NUM_IKIND@
+
 /* Define valid Fortran INTEGER KINDs */
 #cmakedefine H5_H5CONFIG_F_IKIND @H5_H5CONFIG_F_IKIND@
 
-/* Define number of valid Fortran INTEGER KINDs */
-#cmakedefine H5_H5CONFIG_F_NUM_IKIND @H5_H5CONFIG_F_NUM_IKIND@
-
-/* Define number of valid Fortran REAL KINDs */
+/* Define number of valid Fortran REAL KINDs (must be defined before F_RKIND) */
 #cmakedefine H5_H5CONFIG_F_NUM_RKIND @H5_H5CONFIG_F_NUM_RKIND@
 
 /* Define valid Fortran REAL KINDs */
