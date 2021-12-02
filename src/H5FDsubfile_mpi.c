@@ -169,17 +169,29 @@ cast_to_void(const void *data)
 static char *get_ioc_subfile_path(int ioc, int ioc_count, subfiling_context_t *sf_context);
 static int   async_completion(void *arg);
 
-static int numDigits (int n) {
-    if (n < 0) n = (n == INT_MIN) ? INT_MAX : -n;
-    if (n < 10) return 1;
-    if (n < 100) return 2;
-    if (n < 1000) return 3;
-    if (n < 10000) return 4;
-    if (n < 100000) return 5;
-    if (n < 1000000) return 6;
-    if (n < 10000000) return 7;
-    if (n < 100000000) return 8;
-    if (n < 1000000000) return 9;
+static int
+numDigits(int n)
+{
+    if (n < 0)
+        n = (n == INT_MIN) ? INT_MAX : -n;
+    if (n < 10)
+        return 1;
+    if (n < 100)
+        return 2;
+    if (n < 1000)
+        return 3;
+    if (n < 10000)
+        return 4;
+    if (n < 100000)
+        return 5;
+    if (n < 1000000)
+        return 6;
+    if (n < 10000000)
+        return 7;
+    if (n < 100000000)
+        return 8;
+    if (n < 1000000000)
+        return 9;
     return 10;
 }
 
@@ -843,7 +855,7 @@ get_ioc_subfile_path(int ioc, int ioc_count, subfiling_context_t *sf_context)
 
     int numD = numDigits(ioc_count);
     if (prefix != NULL) {
-        sprintf(filepath, "%s/"SF_FILENAME_TEMPLATE, prefix, sf_context->h5_file_id, numD, ioc, ioc_count);
+        sprintf(filepath, "%s/" SF_FILENAME_TEMPLATE, prefix, sf_context->h5_file_id, numD, ioc, ioc_count);
     }
     else {
         strcpy(filepath, sf_context->h5_filename);
@@ -2456,7 +2468,7 @@ get__subfile_name(subfiling_context_t *sf_context, int64_t h5_file_id, int subfi
      *   ABC.h5.subfile_<file-number>.config
      */
     int numD = numDigits(n_io_concentrators);
-    sprintf(filepath, "%s/%s"SF_FILENAME_TEMPLATE, subfile_dir, base, h5_file_id, numD, subfile_rank,
+    sprintf(filepath, "%s/%s" SF_FILENAME_TEMPLATE, subfile_dir, base, h5_file_id, numD, subfile_rank,
             n_io_concentrators);
     if (prefix)
         HDfree(prefix);
@@ -2578,8 +2590,8 @@ subfiling_open_file(sf_work_request_t *msg, int subfile_rank, int flags)
 
                     int numD = numDigits(n_io_concentrators);
                     for (k = 0; k < n_io_concentrators; k++) {
-                      sprintf(linebuf, "%s"SF_FILENAME_TEMPLATE"\n", base, h5_file_id, numD, k,
-                              n_io_concentrators);
+                        sprintf(linebuf, "%s" SF_FILENAME_TEMPLATE "\n", base, h5_file_id, numD, k,
+                                n_io_concentrators);
                         HDfwrite(linebuf, 1, strlen(linebuf), f);
                     }
 
