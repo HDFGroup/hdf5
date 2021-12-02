@@ -33,7 +33,6 @@
  * \ingroup H5F
  */
 
-
 /*
  * This file contains public declarations for the H5F module.
  */
