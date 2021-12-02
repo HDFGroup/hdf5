@@ -679,10 +679,9 @@ fi
 AC_MSG_CHECKING([if the high-level tools are enabled])
 AC_ARG_ENABLE([hltools],
      [AS_HELP_STRING([--enable-hltools],
-                     [Enable the high-level tools.
-                     [default=yes)]
-                     ])],
-     [HDF5_HL_TOOLS=$enableval])
+                     [Enable the high-level tools [default=yes)]])],
+     [HDF5_HL_TOOLS=$enableval],
+     [HDF5_HL_TOOLS=yes])
 
 if test "X${HDF5_HL}" = "Xyes" -a "X-$HDF5_HL_TOOLS" = "X-yes"; then
  AC_MSG_RESULT([yes])
@@ -3585,6 +3584,7 @@ AM_CONDITIONAL([BUILD_TESTS_CONDITIONAL], [test "X$HDF5_TESTS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TESTS_PARALLEL_CONDITIONAL], [test -n "$TESTPARALLEL"])
 AM_CONDITIONAL([BUILD_TOOLS_CONDITIONAL], [test "X$HDF5_TOOLS" = "Xyes"])
 AM_CONDITIONAL([BUILD_TOOLS_HL_CONDITIONAL], [test "X$HDF5_HL_TOOLS" = "Xyes"])
+AM_CONDITIONAL([BUILD_DOXYGEN_CONDITIONAL], [test "X$HDF5_DOXYGEN" = "Xyes"])
 
 ## ----------------------------------------------------------------------
 ## Build the Makefiles.

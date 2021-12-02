@@ -1188,6 +1188,7 @@ AC_SUBST([am__untar])
 
 m4_include([m4/aclocal_cxx.m4])
 m4_include([m4/aclocal_fc.m4])
+m4_include([m4/ax_prog_doxygen.m4])
 # libtool.m4 - Configure libtool for the host system. -*-Autoconf-*-
 #
 #   Copyright (C) 1996-2001, 2003-2015 Free Software Foundation, Inc.

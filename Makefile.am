@@ -35,6 +35,9 @@
 
 include $(top_srcdir)/config/commence.am
 
+# include Doxygen rules (requires autoconf-archive >2016-03-20)
+# @DX_RULES@
+#
 # Define subdirectories to build.
 ## Automake understands that `make distclean' should recurse into
 ## conditional subdirectories even if `make all' does not.
@@ -181,6 +184,11 @@ check-all-install:
 # so 'make trace' only needs to recurse into that directory.
 trace:
 	@(cd src && $(MAKE) $(AM_MAKEFLAGS) $@) || exit 1;
+
+# doxygen support
+if BUILD_DOXYGEN_CONDITIONAL
+doxygen: doxygen-doc
+endif
 
 # Run tests with different Virtual File Drivers.
 # Currently, only invoke check-vfd in the test directory.
