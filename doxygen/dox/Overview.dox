@@ -1,14 +1,11 @@
 
 /** \mainpage notitle
 
-This is the documentation set for HDF5. You can
-<a href="hdf5-doc.tgz">download</a> it as a tgz archive for offline reading.
-
-This is the documention set for HDF5 in terms of specifications and software
-developed and maintained by <a href="https://www.hdfgroup.org/">The HDF
-Group</a>. It is impractical to document the entire HDF5 ecosystem in one place,
-and you should also consult the documentation sets of the many outstanding
-community projects.
+This is the documention set for HDF5 and includes specifications and documentation
+of software and tools developed and maintained by
+<a href="https://www.hdfgroup.org/">The HDF Group</a>. It is impractical to document
+the entire HDF5 ecosystem in one place, and you should also consult the documentation
+sets of the many outstanding community projects.
 
 For a first contact with HDF5, the best place is to have a look at the \link
 GettingStarted getting started \endlink page that shows you how to write and
@@ -22,9 +19,25 @@ while the \link Cookbook \endlink is focused on tasks. The different guide-type
 documents cover a mix of tasks, concepts, and reference, to help a certain
 <em>audience</em> succeed.
 
-Finally, do not miss the search engine (top right-hand corner)! If you are
-looking for a specific function, it'll take you there directly. If unsure, it'll
-give you an idea of what's on offer and a few promising leads.
+\par Versions
+     Version-specific documentation (see the version in the title area) can be found
+     here:
+     - <a href="https://docs.hdfgroup.org/hdf5/develop/index.html">HDF5 <code>develop</code> branch</a>
+     - <a href="https://docs.hdfgroup.org/hdf5/v1_12/index.html">HDF5 1.12.x</a>
+     - <a href="https://docs.hdfgroup.org/hdf5/v1_10/index.html">HDF5 1.10.x</a>
+     - <a href="https://docs.hdfgroup.org/hdf5/v1_8/index.html">HDF5 1.8.x</a>
+
+\par Search
+     If you are looking for a specific function, constant, type, etc., use the
+     search box in the top right-hand corner! Otherwise, check out the
+     \link FTS full-text search\endlink.
+
+\par Offline reading
+     You can <a href="hdf5-doc.tgz">download</a> it as a tgz archive for offline reading.
+
+\par History
+     A snapshot of an earlier version (April 2017) can be found
+     <a href="https://hdfgroup.github.io/archive/hdf5doc/">here</a>.
 
 \par ToDo List
      There is plenty of <a href="./todo.html">unfinished business</a>.
