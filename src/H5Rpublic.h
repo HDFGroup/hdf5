@@ -201,7 +201,7 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  * \param[in] id The dataset containing the reference object or the group
  *            containing that dataset
  * \param[in] ref_type Type of reference to query
- * \param[in] ref Reference to query
+ * \param[in] _ref Reference to query
  * \param[out] obj_type Type of referenced object
  *
  * \return \herr_t

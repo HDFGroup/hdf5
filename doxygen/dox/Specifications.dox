@@ -3,7 +3,6 @@
 \section DDL
 
 \li \ref DDLBNF110 "DDL in BNF through HDF5 1.10"
-\li \ref DDLBNF112 "DDL in BNF for HDF5 1.12 and above"
 
 \section File Format
 
