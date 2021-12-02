@@ -11,6 +11,15 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**
+ * \defgroup H5R H5R
+ *
+ * Use the functions in this module to manage HDF5 references. Referents can
+ * be HDF5 objects, attributes, and selections on datasets a.k.a. dataset
+ * regions.
+ *
+ */
+
 /*
  * This file contains public declarations for the H5R module.
  */
@@ -127,7 +136,7 @@ H5_DLL herr_t H5Rcreate(void *ref, hid_t loc_id, const char *name, H5R_type_t re
  *
  * \brief Opens the HDF5 object referenced
  *
- * \obj_id
+ * \dset_id{dataset}
  * \param[in] ref_type The reference type of \p ref
  * \param[in] ref Reference to open
  *
@@ -199,7 +208,7 @@ H5_DLL hid_t H5Rget_region(hid_t dataset, H5R_type_t ref_type, const void *ref);
  * \param[in] id The dataset containing the reference object or the group
  *            containing that dataset
  * \param[in] ref_type Type of reference to query
- * \param[in] ref Reference to query
+ * \param[in] _ref Reference to query
  * \param[out] obj_type Type of referenced object
  *
  * \return \herr_t

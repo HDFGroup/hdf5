@@ -11,6 +11,13 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**\defgroup H5 H5
+ *
+ * Use the functions in this module to manage the life cycle of HDF5 library
+ * instances.
+ *
+ */
+
 /*
  * This file contains public declarations for the HDF5 module.
  */

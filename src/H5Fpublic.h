@@ -11,6 +11,29 @@
  * help@hdfgroup.org.                                                        *
  * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * * */
 
+/**\defgroup H5F H5F
+ *
+ * Use the functions in this module to manage HDF5 files.
+ *
+ * In the code snippets below, we show the skeletal life cycle of an HDF5 file,
+ * when creating a new file (left) or when opening an existing file (right).
+ * File creation is essentially controlled through \ref FCPL, and file access to
+ * new and existing files is controlled through \ref FAPL. The file \c name and
+ * creation or access \c mode control the interaction with the underlying
+ * storage such as file systems.
+ *
+ * In addition to general file management functions, there are three categories
+ * of functions that deal with advanced file management tasks and use cases:
+ * 1. The control of the HDF5 \ref MDC
+ * 2. The use of (MPI-) \ref PH5F HDF5
+ *
+ * \defgroup MDC Metadata Cache
+ * \ingroup H5F
+ * \defgroup PH5F Parallel
+ * \ingroup H5F
+ */
+
+
 /*
  * This file contains public declarations for the H5F module.
  */
@@ -266,12 +289,6 @@ H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_
  * \param[in] flags    File access flags. Allowable values are:
  *                     - #H5F_ACC_RDWR: Allows read and write access to file
  *                     - #H5F_ACC_RDONLY: Allows read-only access to file
- *                     - #H5F_ACC_RDWR \c | #H5F_ACC_SWMR_WRITE: Indicates that
- *                       the file is open for writing in a
- *                       single-writer/multi-writer (SWMR) scenario.
- *                     - #H5F_ACC_RDONLY \c | #H5F_ACC_SWMR_READ:  Indicates
- *                       that the file is open for reading in a
- *                       single-writer/multi-reader (SWMR) scenario.
  *                     - An additional flag, #H5F_ACC_DEBUG, prints debug
  *                       information. This flag can be combined with one of the
  *                       above values using the bit-wise OR operator (\c |), but
@@ -343,8 +360,6 @@ H5_DLL hid_t H5Fcreate(const char *filename, unsigned flags, hid_t fcpl_id, hid_
  *            external link call, the file access property list used in the
  *            open call must include the file close degree setting
  *            #H5F_CLOSE_WEAK or the open will fail.
- *
- * \version 1.10.0 The #H5F_ACC_SWMR_WRITE and #H5F_ACC_SWMR_READ flags were added.
  *
  * \see H5Fclose()
  *
