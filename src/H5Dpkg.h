@@ -698,11 +698,11 @@ H5_DLL herr_t H5D__fill_term(H5D_fill_buf_info_t *fb_info);
 
 #ifdef H5_HAVE_PARALLEL
 
-#ifdef H5S_DEBUG
+#ifdef H5D_DEBUG
 #ifndef H5Dmpio_DEBUG
 #define H5Dmpio_DEBUG
 #endif /*H5Dmpio_DEBUG*/
-#endif /*H5S_DEBUG*/
+#endif /*H5D_DEBUG*/
 /* MPI-IO function to read, it will select either regular or irregular read */
 H5_DLL herr_t H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
                                     hsize_t nelmts, H5S_t *file_space, H5S_t *mem_space);
