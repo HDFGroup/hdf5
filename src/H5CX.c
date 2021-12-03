@@ -1789,7 +1789,7 @@ H5CX_get_mpi_coll_datatypes(MPI_Datatype *btype, MPI_Datatype *ftype)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     HDassert(btype);
@@ -1801,7 +1801,6 @@ H5CX_get_mpi_coll_datatypes(MPI_Datatype *btype, MPI_Datatype *ftype)
     *btype = (*head)->ctx.btype;
     *ftype = (*head)->ctx.ftype;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_get_mpi_coll_datatypes() */
 
@@ -2963,7 +2962,7 @@ H5CX_set_mpi_coll_datatypes(MPI_Datatype btype, MPI_Datatype ftype)
 
     herr_t ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -2973,7 +2972,6 @@ H5CX_set_mpi_coll_datatypes(MPI_Datatype btype, MPI_Datatype ftype)
     (*head)->ctx.btype = btype;
     (*head)->ctx.ftype = ftype;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_mpi_coll_datatypes() */
 
@@ -2995,7 +2993,7 @@ H5CX_set_io_xfer_mode(H5FD_mpio_xfer_t io_xfer_mode)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -3007,7 +3005,6 @@ H5CX_set_io_xfer_mode(H5FD_mpio_xfer_t io_xfer_mode)
     /* Mark the value as valid */
     (*head)->ctx.io_xfer_mode_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_io_xfer_mode() */
 
@@ -3029,7 +3026,7 @@ H5CX_set_mpio_coll_opt(H5FD_mpio_collective_opt_t mpio_coll_opt)
     H5CX_node_t **head      = NULL;    /* Pointer to head of API context list */
     herr_t        ret_value = SUCCEED; /* Return value */
 
-    FUNC_ENTER_NOAPI(FAIL)
+    FUNC_ENTER_NOAPI_NOERR
 
     /* Sanity check */
     head = H5CX_get_my_context(); /* Get the pointer to the head of the API context, for this thread */
@@ -3041,7 +3038,6 @@ H5CX_set_mpio_coll_opt(H5FD_mpio_collective_opt_t mpio_coll_opt)
     /* Mark the value as valid */
     (*head)->ctx.mpio_coll_opt_valid = TRUE;
 
-done:
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5CX_set_mpio_coll_opt() */
 

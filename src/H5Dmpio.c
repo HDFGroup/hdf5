@@ -449,8 +449,8 @@ done:
  */
 herr_t
 H5D__mpio_select_read(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
-                      hsize_t mpi_buf_count, const H5S_t H5_ATTR_UNUSED *file_space,
-                      const H5S_t H5_ATTR_UNUSED *mem_space)
+                      hsize_t mpi_buf_count, H5S_t H5_ATTR_UNUSED *file_space,
+                      H5S_t H5_ATTR_UNUSED *mem_space)
 {
     const H5D_contig_storage_t *store_contig =
         &(io_info->store->contig); /* Contiguous storage info for this I/O operation */
@@ -480,8 +480,8 @@ done:
  */
 herr_t
 H5D__mpio_select_write(const H5D_io_info_t *io_info, const H5D_type_info_t H5_ATTR_UNUSED *type_info,
-                       hsize_t mpi_buf_count, const H5S_t H5_ATTR_UNUSED *file_space,
-                       const H5S_t H5_ATTR_UNUSED *mem_space)
+                       hsize_t mpi_buf_count, H5S_t H5_ATTR_UNUSED *file_space,
+                       H5S_t H5_ATTR_UNUSED *mem_space)
 {
     const H5D_contig_storage_t *store_contig =
         &(io_info->store->contig); /* Contiguous storage info for this I/O operation */
@@ -690,7 +690,7 @@ done:
  */
 herr_t
 H5D__contig_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                            hsize_t H5_ATTR_UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+                            hsize_t H5_ATTR_UNUSED nelmts, H5S_t *file_space, H5S_t *mem_space,
                             H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
@@ -729,7 +729,7 @@ done:
  */
 herr_t
 H5D__contig_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                             hsize_t H5_ATTR_UNUSED nelmts, const H5S_t *file_space, const H5S_t *mem_space,
+                             hsize_t H5_ATTR_UNUSED nelmts, H5S_t *file_space, H5S_t *mem_space,
                              H5D_chunk_map_t H5_ATTR_UNUSED *fm)
 {
     H5D_mpio_actual_io_mode_t actual_io_mode = H5D_MPIO_CONTIGUOUS_COLLECTIVE;
@@ -929,8 +929,8 @@ done:
  */
 herr_t
 H5D__chunk_collective_read(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                           hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space,
-                           const H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t *fm)
+                           hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
+                           H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t *fm)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 
@@ -959,8 +959,8 @@ done:
  */
 herr_t
 H5D__chunk_collective_write(H5D_io_info_t *io_info, const H5D_type_info_t *type_info,
-                            hsize_t H5_ATTR_UNUSED nelmts, const H5S_t H5_ATTR_UNUSED *file_space,
-                            const H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t *fm)
+                            hsize_t H5_ATTR_UNUSED nelmts, H5S_t H5_ATTR_UNUSED *file_space,
+                            H5S_t H5_ATTR_UNUSED *mem_space, H5D_chunk_map_t *fm)
 {
     herr_t ret_value = SUCCEED; /* Return value */
 

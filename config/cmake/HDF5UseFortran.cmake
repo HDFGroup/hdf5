@@ -141,7 +141,7 @@ FORTRAN_RUN ("REAL and INTEGER KINDs"
 # dnl    -- LINE 5 --  number of valid real kinds
 #
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT "${PROG_OUTPUT}")
+string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT "${PROG_OUTPUT}")
 
 list (GET PROG_OUTPUT 0 pac_validIntKinds)
 list (GET PROG_OUTPUT 1 pac_validRealKinds)
@@ -195,7 +195,7 @@ foreach (KIND ${VAR})
    "
   )
   FORTRAN_RUN("INTEGER KIND SIZEOF" ${PROG_SRC_${KIND}} XX YY VALIDINTKINDS_RESULT_${KIND} PROG_OUTPUT1)
-  string (REGEX REPLACE "\n" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
+  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT1 "${PROG_OUTPUT1}")
   set (pack_int_sizeof "${pack_int_sizeof} ${PROG_OUTPUT1},")
 endforeach ()
 
@@ -238,7 +238,7 @@ foreach (KIND ${VAR} )
   "
   )
   FORTRAN_RUN ("REAL KIND SIZEOF" ${PROG_SRC2_${KIND}} XX YY VALIDREALKINDS_RESULT_${KIND} PROG_OUTPUT2)
-  string (REGEX REPLACE "\n" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
+  string (REGEX REPLACE "[\r\n]+" "" PROG_OUTPUT2 "${PROG_OUTPUT2}")
   set (pack_real_sizeof "${pack_real_sizeof} ${PROG_OUTPUT2},")
 endforeach ()
 
@@ -296,7 +296,7 @@ FORTRAN_RUN ("SIZEOF NATIVE KINDs" ${PROG_SRC3} XX YY PAC_SIZEOF_NATIVE_KINDS_RE
 # dnl    -- LINE 6 --  kind of DOUBLE PRECISION
 #
 # Convert the string to a list of strings by replacing the carriage return with a semicolon
-string (REGEX REPLACE "\n" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
+string (REGEX REPLACE "[\r\n]+" ";" PROG_OUTPUT3 "${PROG_OUTPUT3}")
 
 list (GET PROG_OUTPUT3 0 PAC_FORTRAN_NATIVE_INTEGER_SIZEOF)
 list (GET PROG_OUTPUT3 1 PAC_FORTRAN_NATIVE_INTEGER_KIND)

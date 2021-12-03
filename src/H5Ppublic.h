@@ -6471,10 +6471,10 @@ H5_DLL herr_t H5Pset_layout(hid_t plist_id, H5D_layout_t layout);
  *            <td>byte 0</td>
  *          </tr>
  *          <tr>
- *            <td>????????</td>
- *            <td>????SPPP</td>
- *            <td>PPPPPPPP</td>
- *            <td>PPPP????</td>
+ *            <td> ???????? </td>
+ *            <td> ????SPPP </td>
+ *            <td> PPPPPPPP </td>
+ *            <td> PPPP???? </td>
  *          </tr>
  *          </table>
  *          Note: S - sign bit, P - significant bit, ? - padding bit; For
