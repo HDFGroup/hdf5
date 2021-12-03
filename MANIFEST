@@ -202,6 +202,10 @@
 ./config/intel-warnings/win-general
 ./config/intel-warnings/ifort-general
 
+./config/cmake/FindMFU.cmake
+./config/cmake/FindDTCMP.cmake
+./config/cmake/FindCIRCLE.cmake
+
 ./config/site-specific/BlankForm
 
 ./doc/branches-explained.md
@@ -216,11 +220,10 @@
 ./doxygen/dox/Cookbook.dox
 ./doxygen/dox/DDLBNF110.dox
 ./doxygen/dox/DDLBNF112.dox
-./doxygen/dox/FileFormatSpec.dox
+./doxygen/dox/FTS.dox
 ./doxygen/dox/GettingStarted.dox
 ./doxygen/dox/H5AC_cache_config_t.dox
 ./doxygen/dox/MetadataCachingInHDF5.dox
-./doxygen/dox/OtherSpecs.dox
 ./doxygen/dox/Overview.dox
 ./doxygen/dox/ReferenceManual.dox
 ./doxygen/dox/RFC.dox
@@ -236,9 +239,12 @@
 ./doxygen/dox/cookbook/Files.c
 ./doxygen/dox/cookbook/Files.dox
 ./doxygen/dox/cookbook/Performance.dox
+./doxygen/examples/DebuggingHDF5Applications.html
 ./doxygen/examples/FF-IH_FileGroup.gif
 ./doxygen/examples/FF-IH_FileObject.gif
+./doxygen/examples/FileFormat.html
 ./doxygen/examples/FileFormatSpecChunkDiagram.jpg
+./doxygen/examples/Filters.html
 ./doxygen/examples/H5Pset_metadata_read_attempts.c
 ./doxygen/examples/H5Pset_object_flush_cb.c
 ./doxygen/examples/H5.format.1.0.html
@@ -267,6 +273,7 @@
 ./doxygen/examples/H5Z_examples.c
 ./doxygen/examples/H5_examples.c
 ./doxygen/examples/ImageSpec.html
+./doxygen/examples/IOFlow.html
 ./doxygen/examples/PaletteExample1.gif
 ./doxygen/examples/Palettes.fm.anc.gif
 ./doxygen/examples/TableSpec.html
@@ -282,6 +289,9 @@
 ./doxygen/img/FF-IH_FileObject.gif
 ./doxygen/img/FileFormatSpecChunkDiagram.jpg
 ./doxygen/img/HDFG-logo.png
+./doxygen/img/IOFlow.gif
+./doxygen/img/IOFlow2.gif
+./doxygen/img/IOFlow3.gif
 ./doxygen/img/PaletteExample1.gif
 ./doxygen/img/Palettes.fm.anc.gif
 ./doxygen/img/ftv2node.png
@@ -2995,6 +3005,22 @@
 # test utilities
 ./utils/test/Makefile.am
 ./utils/test/swmr_check_compat_vfd.c
+
+# parallel tools (h5dwalk) and tests
+./utils/tools/CMakeLists.txt
+./utils/tools/Makefile.am
+./utils/tools/h5dwalk/CMakeLists.txt
+./utils/tools/h5dwalk/Makefile.am
+./utils/tools/h5dwalk/h5dwalk.1
+./utils/tools/h5dwalk/h5dwalk.c
+./utils/tools/test/CMakeLists.txt
+./utils/tools/test/Makefile.am
+./utils/tools/test/h5dwalk/CMakeLists.txt
+./utils/tools/test/h5dwalk/CMakeTests.cmake
+./utils/tools/test/h5dwalk/Makefile.am
+./utils/tools/test/h5dwalk/copy_demo_files.sh.in
+./utils/tools/test/h5dwalk/help.h5dwalk
+./utils/tools/test/h5dwalk/testh5dwalk.sh.in
 
 # high level libraries
 ./hl/Makefile.am
