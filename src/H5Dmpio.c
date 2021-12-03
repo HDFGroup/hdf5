@@ -1738,19 +1738,27 @@ H5D__link_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_in
             HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                         "couldn't create MPI type for writing filtered chunks")
 
-        mpi_buf_count = (file_type_is_derived && mem_type_is_derived) ? 1 : 0;
+        mpi_buf_count = (file_type_is_derived || mem_type_is_derived) ? 1 : 0;
 
-        /* Override the write buffer to point to the address of the first
-         * chunk data buffer
-         */
-        if (chunk_list_num_entries)
+        /* Setup contig storage info for I/O operation */
+        if (chunk_list_num_entries) {
+            /*
+             * Override the write buffer to point to the first
+             * chunk's data buffer
+             */
             io_info->u.wbuf = chunk_list[0].buf;
 
-        /* Set up the base storage address for this operation */
-        ctg_store.contig.dset_addr = 0; /* Write address must be set to address 0 */
-        io_info->store             = &ctg_store;
+            /*
+             * Setup the base storage address for this operation
+             * to be the first chunk's file address
+             */
+            ctg_store.contig.dset_addr = chunk_list[0].fspace_info.chunk_new.offset;
+        }
+        else
+            ctg_store.contig.dset_addr = 0;
 
         /* Perform I/O */
+        io_info->store = &ctg_store;
         if (H5D__final_collective_io(io_info, type_info, mpi_buf_count, file_type, mem_type) < 0)
             HGOTO_ERROR(H5E_IO, H5E_CANTGET, FAIL, "couldn't finish MPI-IO")
 
@@ -2057,7 +2065,6 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                                         H5D_chunk_map_t *fm, int mpi_rank, int mpi_size)
 {
     H5D_filtered_collective_io_info_t *chunk_list = NULL; /* The list of chunks being read/written */
-    H5D_storage_t                      store;             /* union of EFL and chunk pointer in file space */
     H5D_io_info_t                      ctg_io_info;       /* Contiguous I/O info object */
     H5D_storage_t                      ctg_store; /* Chunk storage information as contiguous dataset */
     MPI_Datatype                       mem_type             = MPI_BYTE;
@@ -2120,10 +2127,6 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
 
     /* Initialize temporary contiguous storage info */
     ctg_store.contig.dset_size = (hsize_t)io_info->dset->shared->layout.u.chunk.size;
-    ctg_store.contig.dset_addr = 0;
-
-    /* Set dataset storage for I/O info */
-    io_info->store = &store;
 
     if (io_info->op_type == H5D_IO_OP_READ) { /* Filtered collective read */
         for (i = 0; i < max_num_chunks; i++) {
@@ -2208,11 +2211,24 @@ H5D__multi_chunk_filtered_collective_io(H5D_io_info_t *io_info, const H5D_type_i
                 HGOTO_ERROR(H5E_DATASET, H5E_CANTGET, FAIL,
                             "couldn't create MPI type for writing filtered chunks")
 
-            mpi_buf_count = (file_type_is_derived && mem_type_is_derived) ? 1 : 0;
+            mpi_buf_count = (file_type_is_derived || mem_type_is_derived) ? 1 : 0;
 
             /* Override the write buffer to point to the chunk data buffer */
-            if (have_chunk_to_process)
+            if (have_chunk_to_process) {
+                /*
+                 * Override the write buffer to point to the
+                 * chunk's data buffer
+                 */
                 ctg_io_info.u.wbuf = chunk_list[i].buf;
+
+                /*
+                 * Setup the base storage address for this
+                 * operation to be the chunk's file address
+                 */
+                ctg_store.contig.dset_addr = chunk_list[i].fspace_info.chunk_new.offset;
+            }
+            else
+                ctg_store.contig.dset_addr = 0;
 
             /* Perform the I/O */
             if (H5D__final_collective_io(&ctg_io_info, type_info, mpi_buf_count, file_type, mem_type) < 0)
@@ -3574,6 +3590,7 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
     hbool_t       mem_type_is_derived  = FALSE;
     hbool_t       file_type_is_derived = FALSE;
     hsize_t       mpi_buf_count;
+    haddr_t       base_read_offset = HADDR_UNDEF;
     size_t        num_chunks;
     size_t        i;
     char          fake_buf; /* Used as a fake buffer for ranks with no chunks, thus a NULL buf pointer */
@@ -3607,8 +3624,12 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
         for (i = 0, num_chunks = 0; i < chunk_list_num_entries; i++) {
             HDassert(chunk_list[i].buf);
 
-            if (chunk_list[i].need_read)
+            if (chunk_list[i].need_read) {
+                if (!H5F_addr_defined(base_read_offset))
+                    base_read_offset = chunk_list[i].fspace_info.chunk_current.offset;
+
                 num_chunks++;
+            }
         }
     }
     else
@@ -3632,8 +3653,20 @@ H5D__mpio_collective_filtered_chunk_common_io(H5D_filtered_collective_io_info_t 
 
     mpi_buf_count = (num_chunks) ? 1 : 0;
 
+    if (num_chunks) {
+        /*
+         * Setup the base storage address for this operation
+         * to be the first chunk's file address
+         */
+        if (io_info->op_type == H5D_IO_OP_WRITE)
+            ctg_store.contig.dset_addr = chunk_list[0].fspace_info.chunk_new.offset;
+        else
+            ctg_store.contig.dset_addr = base_read_offset;
+    }
+    else
+        ctg_store.contig.dset_addr = 0;
+
     ctg_store.contig.dset_size = (hsize_t)io_info->dset->shared->layout.u.chunk.size;
-    ctg_store.contig.dset_addr = 0;
     coll_io_info.store         = &ctg_store;
 
     /* Perform I/O */
@@ -4714,7 +4747,8 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
     MPI_Aint *io_buf_array      = NULL; /* Relative displacements of filtered chunk data buffers */
     MPI_Aint *file_offset_array = NULL; /* Chunk offsets in the file */
     int *     length_array      = NULL; /* Filtered Chunk lengths */
-    herr_t    ret_value         = SUCCEED;
+    int       mpi_code;
+    herr_t    ret_value = SUCCEED;
 
     FUNC_ENTER_STATIC
 
@@ -4726,132 +4760,196 @@ H5D__mpio_collective_filtered_io_type(H5D_filtered_collective_io_info_t *chunk_l
 
     *mem_type_derived  = FALSE;
     *file_type_derived = FALSE;
+    *new_mem_type      = MPI_BYTE;
+    *new_file_type     = MPI_BYTE;
 
     if (num_entries > 0) {
-        MPI_Aint base_buf;
-        MPI_Aint chunk_buf;
-        size_t   i;
-        hbool_t  base_read_buf_set = FALSE;
-        int      chunk_count;
-        int      mpi_code;
-
-        H5_CHECK_OVERFLOW(num_entries, size_t, int);
-
-        /* Allocate arrays */
-        if (NULL == (length_array = H5MM_malloc((size_t)num_entries * sizeof(int))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "memory allocation failed for filtered collective I/O length array")
-        if (NULL == (io_buf_array = H5MM_malloc((size_t)num_entries * sizeof(MPI_Aint))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "memory allocation failed for filtered collective I/O buf length array")
-        if (NULL == (file_offset_array = H5MM_malloc((size_t)num_entries * sizeof(MPI_Aint))))
-            HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
-                        "memory allocation failed for filtered collective I/O offset array")
+        size_t i;
+        int    chunk_count;
 
         /*
-         * If doing a write, we can set the base chunk data buffer right away
+         * Determine number of chunks for I/O operation and
+         * setup for derived datatype creation if I/O operation
+         * includes multiple chunks
          */
-        if (op_type == H5D_IO_OP_WRITE) {
-#if MPI_VERSION >= 3
-            if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[0].buf, &base_buf)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
-#else
-            base_buf = (MPI_Aint)chunk_list[0].buf;
-#endif
+        if (num_entries == 1) {
+            /* Set chunk index to 0 for contiguous datatype creation */
+            i = 0;
+
+            if (op_type == H5D_IO_OP_WRITE)
+                chunk_count = 1;
+            else
+                chunk_count = chunk_list[0].need_read ? 1 : 0;
         }
+        else {
+            MPI_Aint chunk_buf;
+            MPI_Aint base_buf;
+            haddr_t  base_offset        = HADDR_UNDEF;
+            hbool_t  base_read_vars_set = FALSE;
 
-        for (i = 0, chunk_count = 0; i < num_entries; i++) {
-            if (op_type == H5D_IO_OP_READ) {
-                /* If chunk is being fully overwritten, don't add it to the
-                 * list of addresses being read
-                 */
-                if (!chunk_list[i].need_read)
-                    continue;
-                else {
-                    /* Otherwise, set our base chunk data read buffer if
-                     * we haven't already
-                     */
-                    if (!base_read_buf_set) {
+            H5_CHECK_OVERFLOW(num_entries, size_t, int);
+
+            /* Allocate arrays */
+            if (NULL == (length_array = H5MM_malloc((size_t)num_entries * sizeof(int))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for filtered collective I/O length array")
+            if (NULL == (io_buf_array = H5MM_malloc((size_t)num_entries * sizeof(MPI_Aint))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for filtered collective I/O buf length array")
+            if (NULL == (file_offset_array = H5MM_malloc((size_t)num_entries * sizeof(MPI_Aint))))
+                HGOTO_ERROR(H5E_RESOURCE, H5E_CANTALLOC, FAIL,
+                            "memory allocation failed for filtered collective I/O offset array")
+
+            /*
+             * If doing a write, we can set the base chunk offset
+             * and base chunk data buffer right away
+             */
+            if (op_type == H5D_IO_OP_WRITE) {
 #if MPI_VERSION >= 3
-                        if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[i].buf, &base_buf)))
-                            HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
+                if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[0].buf, &base_buf)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
 #else
-                        base_buf = (MPI_Aint)chunk_list[i].buf;
+                base_buf = (MPI_Aint)chunk_list[0].buf;
 #endif
 
-                        base_read_buf_set = TRUE;
+                base_offset = chunk_list[0].fspace_info.chunk_new.offset;
+            }
+
+            for (i = 0, chunk_count = 0; i < num_entries; i++) {
+                if (op_type == H5D_IO_OP_READ) {
+                    /* If chunk is being fully overwritten, don't add it to the
+                     * list of addresses being read
+                     */
+                    if (!chunk_list[i].need_read)
+                        continue;
+                    else {
+                        /* Otherwise, set our base chunk offset and base chunk
+                         * data read buffer if we haven't already
+                         */
+                        if (!base_read_vars_set) {
+#if MPI_VERSION >= 3
+                            if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[i].buf, &base_buf)))
+                                HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
+#else
+                            base_buf = (MPI_Aint)chunk_list[i].buf;
+#endif
+
+                            base_offset = chunk_list[i].fspace_info.chunk_current.offset;
+
+                            base_read_vars_set = TRUE;
+                        }
                     }
                 }
-            }
 
-            /* Set up the offset in the file, the length of the chunk data, and the relative
-             * displacement of the chunk data buffer
-             */
-            if (op_type == H5D_IO_OP_READ) {
-                H5_CHECK_OVERFLOW(chunk_list[i].fspace_info.chunk_current.offset, haddr_t, MPI_Aint);
-                file_offset_array[chunk_count] = (MPI_Aint)chunk_list[i].fspace_info.chunk_current.offset;
-            }
-            else {
-                H5_CHECK_OVERFLOW(chunk_list[i].fspace_info.chunk_new.offset, haddr_t, MPI_Aint);
-                file_offset_array[chunk_count] = (MPI_Aint)chunk_list[i].fspace_info.chunk_new.offset;
-            }
+                /*
+                 * Set the current chunk entry's offset in the file, relative to
+                 * the first chunk entry
+                 */
+                if (op_type == H5D_IO_OP_READ) {
+                    file_offset_array[chunk_count] =
+                        (MPI_Aint)(chunk_list[i].fspace_info.chunk_current.offset - base_offset);
+                }
+                else {
+                    file_offset_array[chunk_count] =
+                        (MPI_Aint)(chunk_list[i].fspace_info.chunk_new.offset - base_offset);
+                }
 
-            /* Ensure the chunk list is sorted in ascending ordering of
-             * offset in the file
-             */
-            if (chunk_count)
-                HDassert(file_offset_array[chunk_count] > file_offset_array[chunk_count - 1]);
+                /*
+                 * Ensure the chunk list is sorted in ascending ordering of
+                 * offset in the file
+                 */
+                if (chunk_count)
+                    HDassert(file_offset_array[chunk_count] > file_offset_array[chunk_count - 1]);
 
-            if (op_type == H5D_IO_OP_READ) {
-                H5_CHECK_OVERFLOW(chunk_list[i].fspace_info.chunk_current.length, hsize_t, int);
-                length_array[chunk_count] = (int)chunk_list[i].fspace_info.chunk_current.length;
-            }
-            else {
-                H5_CHECK_OVERFLOW(chunk_list[i].fspace_info.chunk_new.length, hsize_t, int);
-                length_array[chunk_count] = (int)chunk_list[i].fspace_info.chunk_new.length;
-            }
+                /* Set the current chunk entry's size for the I/O operation */
+                if (op_type == H5D_IO_OP_READ) {
+                    H5_CHECK_OVERFLOW(chunk_list[i].fspace_info.chunk_current.length, hsize_t, int);
+                    length_array[chunk_count] = (int)chunk_list[i].fspace_info.chunk_current.length;
+                }
+                else {
+                    H5_CHECK_OVERFLOW(chunk_list[i].fspace_info.chunk_new.length, hsize_t, int);
+                    length_array[chunk_count] = (int)chunk_list[i].fspace_info.chunk_new.length;
+                }
 
+                /*
+                 * Set the displacement of the chunk entry's chunk data buffer,
+                 * relative to the first entry's data buffer
+                 */
 #if MPI_VERSION >= 3 && MPI_SUBVERSION >= 1
-            if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[i].buf, &chunk_buf)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
+                if (MPI_SUCCESS != (mpi_code = MPI_Get_address(chunk_list[i].buf, &chunk_buf)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Get_address failed", mpi_code)
 
-            io_buf_array[chunk_count] = MPI_Aint_diff(chunk_buf, base_buf);
+                io_buf_array[chunk_count] = MPI_Aint_diff(chunk_buf, base_buf);
 #else
-            chunk_buf                 = (MPI_Aint)chunk_list[i].buf;
-            io_buf_array[chunk_count] = chunk_buf - base_buf;
+                chunk_buf                 = (MPI_Aint)chunk_list[i].buf;
+                io_buf_array[chunk_count] = chunk_buf - base_buf;
 #endif
 
-            chunk_count++;
-        } /* end for */
+                chunk_count++;
+            } /* end for */
+        }
 
-        /* Create MPI types if we have chunks to work on */
+        /*
+         * Create derived datatypes for the chunk list if this
+         * rank has any chunks to work on
+         */
         if (chunk_count > 0) {
-            /* Multiple chunks - use an hindexed type for both memory and file */
+            if (chunk_count == 1) {
+                int chunk_len;
 
-            /* Create memory MPI type */
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed(chunk_count, length_array, io_buf_array,
-                                                                    MPI_BYTE, new_mem_type)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-            *mem_type_derived = TRUE;
+                /* Single chunk - use a contiguous type for both memory and file */
 
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_mem_type)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+                if (op_type == H5D_IO_OP_READ) {
+                    H5_CHECKED_ASSIGN(chunk_len, int, chunk_list[i].fspace_info.chunk_current.length,
+                                      hsize_t);
+                }
+                else {
+                    H5_CHECKED_ASSIGN(chunk_len, int, chunk_list[i].fspace_info.chunk_new.length, hsize_t);
+                }
 
-            /* Create file MPI type */
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed(
-                                    chunk_count, length_array, file_offset_array, MPI_BYTE, new_file_type)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
-            *file_type_derived = TRUE;
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_contiguous(chunk_len, MPI_BYTE, new_file_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_contiguous failed", mpi_code)
+                *new_mem_type = *new_file_type;
 
-            if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_file_type)))
-                HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+                /*
+                 * Since we use the same datatype for both memory and file, only
+                 * mark the file type as derived so the caller doesn't try to
+                 * free the same type twice
+                 */
+                *mem_type_derived  = FALSE;
+                *file_type_derived = TRUE;
+
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_file_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+            }
+            else {
+                HDassert(file_offset_array);
+                HDassert(length_array);
+                HDassert(io_buf_array);
+
+                /* Multiple chunks - use an hindexed type for both memory and file */
+
+                /* Create memory MPI type */
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_create_hindexed(
+                                        chunk_count, length_array, io_buf_array, MPI_BYTE, new_mem_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+                *mem_type_derived = TRUE;
+
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_mem_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+
+                /* Create file MPI type */
+                if (MPI_SUCCESS !=
+                    (mpi_code = MPI_Type_create_hindexed(chunk_count, length_array, file_offset_array,
+                                                         MPI_BYTE, new_file_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_create_hindexed failed", mpi_code)
+                *file_type_derived = TRUE;
+
+                if (MPI_SUCCESS != (mpi_code = MPI_Type_commit(new_file_type)))
+                    HMPI_GOTO_ERROR(FAIL, "MPI_Type_commit failed", mpi_code)
+            }
         }
     } /* end if */
-
-    if (*mem_type_derived == FALSE)
-        *new_mem_type = MPI_BYTE;
-    if (*file_type_derived == FALSE)
-        *new_file_type = MPI_BYTE;
 
 done:
     if (file_offset_array)
@@ -4860,6 +4958,19 @@ done:
         H5MM_free(io_buf_array);
     if (length_array)
         H5MM_free(length_array);
+
+    if (ret_value < 0) {
+        if (*file_type_derived) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(new_file_type)))
+                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+            *file_type_derived = FALSE;
+        }
+        if (*mem_type_derived) {
+            if (MPI_SUCCESS != (mpi_code = MPI_Type_free(new_mem_type)))
+                HMPI_DONE_ERROR(FAIL, "MPI_Type_free failed", mpi_code)
+            *mem_type_derived = FALSE;
+        }
+    }
 
     FUNC_LEAVE_NOAPI(ret_value)
 } /* end H5D__mpio_collective_filtered_io_type() */
