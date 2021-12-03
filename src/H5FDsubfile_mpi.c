@@ -31,7 +31,6 @@ static double sf_queue_delay_time = 0.0;
  * intend to use the user defined HDF5 filename for a
  * zeroth subfile as well as for all metadata.
  */
-//#define SF_FILENAME_TEMP_TEMPLATE ".subfile_%%ld_%%0%dd_of_%%d"
 #define SF_FILENAME_TEMPLATE ".subfile_%ld_%0*d_of_%d"
 static int *request_count_per_rank = NULL;
 
@@ -2451,8 +2450,8 @@ get__subfile_name(subfiling_context_t *sf_context, int64_t h5_file_id, int subfi
     /* The subfile naming should produce files of the following form:
      * If we assume the HDF5 file is named ABC.h5, then subfiles
      * will have names:
-     *   ABC.h5.subfile_<file-number>_0_of_2,
-     *   ABC.h5.subfile_<file-number>_1_of_2, and
+     *   ABC.h5.subfile_<file-number>_00_of_20,
+     *   ABC.h5.subfile_<file-number>_01_of_20, and
      *   ABC.h5.subfile_<file-number>.config
      */
     int numD = numDigits(n_io_concentrators);
