@@ -1305,6 +1305,102 @@ error:
 } /* end test_path_api_calls() */
 
 /*-------------------------------------------------------------------------
+ * Function:  test_filter_numbers
+ *
+ * Purpose:   Tests the filter numbers are handled correctly
+ *
+ * Return:    SUCCEED/FAIL
+ *
+ *-------------------------------------------------------------------------
+ */
+static herr_t
+test_filter_numbers(void)
+{
+    hid_t        dcpl_id = H5I_INVALID_HID;
+    H5Z_filter_t id;
+    herr_t       status = SUCCEED;
+    size_t       nelmts = 0;
+    unsigned int flags;
+    unsigned int filter_config;
+
+    HDputs("Testing filter number handling");
+
+    /* Check that out-of-range filter numbers are handled correctly */
+    TESTING("    Filter # out of range");
+
+    /* Create property list */
+    if ((dcpl_id = H5Pcreate(H5P_DATASET_CREATE)) < 0)
+        TEST_ERROR;
+
+    nelmts = 0;
+
+    /* Test id > H5Z_FILTER_MAX and < 0, current version */
+
+    H5E_BEGIN_TRY
+    {
+        id     = H5Z_FILTER_MAX + 1;
+        status = H5Pget_filter_by_id2(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL, &filter_config);
+    }
+    H5E_END_TRY;
+
+    /* Should fail */
+    if (status != FAIL)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        id     = -1;
+        status = H5Pget_filter_by_id2(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL, &filter_config);
+    }
+    H5E_END_TRY;
+
+    /* Should fail */
+    if (status != FAIL)
+        TEST_ERROR;
+
+        /* Test id > H5Z_FILTER_MAX and < 0, deprecated version */
+
+#ifndef H5_NO_DEPRECATED_SYMBOLS
+    H5E_BEGIN_TRY
+    {
+        id     = H5Z_FILTER_MAX + 1;
+        status = H5Pget_filter_by_id1(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL);
+    }
+    H5E_END_TRY;
+
+    /* Should fail */
+    if (status != FAIL)
+        TEST_ERROR;
+
+    H5E_BEGIN_TRY
+    {
+        id     = -1;
+        status = H5Pget_filter_by_id1(dcpl_id, id, &flags, &nelmts, NULL, 0, NULL);
+    }
+    H5E_END_TRY;
+
+    /* Should fail */
+    if (status != FAIL)
+        TEST_ERROR;
+#endif
+
+    if (H5Pclose(dcpl_id) < 0)
+        TEST_ERROR;
+
+    PASSED();
+
+    return SUCCEED;
+
+error:
+    H5E_BEGIN_TRY
+    {
+        H5Pclose(dcpl_id);
+    }
+    H5E_END_TRY;
+    return FAIL;
+} /* end test_filter_numbers() */
+
+/*-------------------------------------------------------------------------
  * Function:  disable_chunk_cache
  *
  * Purpose:   Turns the chunk cache off
@@ -1522,6 +1618,9 @@ main(void)
 
     /* Test the APIs for access to the filter plugin path table */
     nerrors += (test_path_api_calls() < 0 ? 1 : 0);
+
+    /* Test filter numbers */
+    nerrors += (test_filter_numbers() < 0 ? 1 : 0);
 
     if (nerrors)
         TEST_ERROR;
