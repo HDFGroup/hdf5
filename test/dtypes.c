@@ -2359,7 +2359,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
@@ -2410,7 +2410,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
@@ -2451,7 +2451,7 @@ test_compound_11(void)
             TEST_ERROR
         } /* end if */
         if (((big_t *)buf_orig)[u].s1 == NULL || ((little_t *)buf)[u].s1 == NULL) {
-            HDprintf("Error, line #%d: buf_orig[%u].s1=%p, buf[%u].s1=%p\n", __LINE__, (unsigned)u,
+            HDprintf("Error, line #%d: buf_orig[%u].s1=%s, buf[%u].s1=%s\n", __LINE__, (unsigned)u,
                      ((big_t *)buf_orig)[u].s1, (unsigned)u, ((little_t *)buf)[u].s1);
             TEST_ERROR
         } /* end if */
