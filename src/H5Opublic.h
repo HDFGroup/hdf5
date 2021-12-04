@@ -1516,9 +1516,9 @@ H5_DLL herr_t H5Ovisit_by_name(hid_t loc_id, const char *obj_name, H5_index_t id
  *          retrieves the metadata describing that object in \p oinfo ,
  *          defined as a \c struct of type H5O_info1_t :
  *
- *          \snippet this H5O_info1_t_snip
+ *          \snippet this H5O_info_t_snip
  *
- *          Note the following about H5O_info1_t :
+ *          Note the following about H5O_info_t :
  *          - Of the four time fields (\c atime, \c mtime, \c ctime, and \c btime)
  *            only \c ctime has been implemented.
  *          - The \c atime value is the last time the object was read or written.
@@ -1642,7 +1642,7 @@ H5_DLL herr_t H5Oget_info_by_name1(hid_t loc_id, const char *name, H5O_info_t *o
  *
  *          \p oinfo, in which the object information is returned, is a \c struct of
  *          type H5O_info1_t .
- *          \snippet this H5O_info1_t_snip
+ *          \snippet this H5O_info_t_snip
  *
  *          The link access property list, \c lapl_id, is not currently used;
  *          it should be passed in as #H5P_DEFAULT.

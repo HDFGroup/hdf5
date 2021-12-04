@@ -15,7 +15,6 @@ The functions provided by the HDF5 C-API are grouped into the following
 \li \ref H5S "Dataspaces (H5S)"
 \li \ref H5T "Datatypes (H5T)"
 \li \ref H5E "Error Handling (H5E)"
-\li \ref H5ES "Event Sets (H5ES)"
 \li \ref H5F "Files (H5F)"
 \li \ref H5Z "Filters (H5Z)"
 \li \ref H5G "Groups (H5G)"
@@ -23,14 +22,11 @@ The functions provided by the HDF5 C-API are grouped into the following
 \li \ref H5I "Identifiers (H5I)"
 \li \ref H5 "Library General (H5)"
 \li \ref H5L "Links (H5L)"
-\li \ref H5M "Maps (H5M)"
 \li \ref H5O "Objects (H5O)"
 \li \ref H5P "Property Lists (H5P)"
 \li \ref H5PL "Dynamically-loaded Plugins (H5PL)"
 \li \ref H5R "References (H5R)"
-\li \ref H5VL "Virtual Object Layer (H5VL)"
 </td><td style="border: none;vertical-align: top;">
-\li Functions with \ref ASYNC "asynchronous variants"
 \li \ref api-compat-macros
 \li <a href="./deprecated.html">Deprecated functions</a>
 \li High-level Extensions
@@ -43,8 +39,8 @@ The functions provided by the HDF5 C-API are grouped into the following
     </ul>
 </td></tr>
 <tr><td colspan="3" style="border: none;">
-\ref H5 \ref H5A \ref H5D \ref H5E \ref H5ES \ref H5F \ref H5G \ref H5I \ref H5L
-\ref H5M \ref H5O \ref H5P \ref H5PL \ref H5R \ref H5S \ref H5T \ref H5VL \ref H5Z
+\ref H5 \ref H5A \ref H5D \ref H5E \ref H5F \ref H5G \ref H5I \ref H5L
+\ref H5O \ref H5P \ref H5PL \ref H5R \ref H5S \ref H5T \ref H5Z
 </td></tr>
 </table>
 

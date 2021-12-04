@@ -1248,7 +1248,7 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t 
  *          Remaining \c struct members are optional and may be passed as NULL.
  *
  *          The link class passed in \c class_id must be in the user-definable
- *          range between #H5L_TYPE_UD_MIN and #H5L_TYPE_UD_MAX
+ *          range between #H5L_TYPE_UD_MIN and #H5L_TYPE_MAX
  *          (see the table below) and will override
  *          any existing link class with that identifier.
  *
@@ -1294,7 +1294,7 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t 
  *            <tr>
  *              <td>255</td>
  *              <td>Maximum user-defined value</td>
- *              <td>#H5L_TYPE_UD_MAX</td>
+ *              <td>#H5L_TYPE_MAX</td>
  *            </tr>
  *            <tr>
  *              <td>255</td>
@@ -1349,7 +1349,6 @@ H5_DLL herr_t H5Lcreate_ud(hid_t link_loc_id, const char *link_name, H5L_type_t 
  *            \li #H5L_TYPE_MAX is the maximum allowed value for a link type
  *                identifier.
  *            \li #H5L_TYPE_UD_MIN equals #H5L_TYPE_EXTERNAL.
- *            \li #H5L_TYPE_UD_MAX equals #H5L_TYPE_MAX.
  *            \li #H5L_TYPE_ERROR indicates that an error has occurred.
  *
  * \note \Bold{Registration with The HDF Group:}\n
